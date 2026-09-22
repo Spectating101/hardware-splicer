@@ -45,8 +45,9 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByText(/POWER\s*CLOSED/)).toBeVisible();
   await expect(page.getByText(/RELEASE\s*CLOSED/)).toBeVisible();
 
-  await expect(page.getByRole('link', { name: /Compare/ })).toHaveAttribute('href', /mode=decide/);
-  await expect(page.getByRole('link', { name: /Bring-up/ })).toHaveAttribute('href', /mode=bringup/);
+  await expect(page.locator('a[href^="/engineering/evidence/compare"]')).toHaveCount(1);
+  await expect(page.locator('a[href^="/engineering/evidence/verify"]')).toHaveCount(1);
+  await expect(page.locator('a[href^="/engineering/evidence/bringup"]')).toHaveCount(1);
 
   await expect(page.getByRole('button', { name: /Accept|Authorize|Fabricate|Power on/i })).toHaveCount(0);
 });
