@@ -189,6 +189,28 @@ revision / evidence / physical-validation timeline
 
 Modes such as Review, Compare, Verify and Bring-up should increasingly change the center viewport and inspector rather than create unrelated dashboard pages.
 
+## Current vNext competitive delta
+
+This is an execution snapshot, not a permanent claim. Refresh it whenever Refinery identifies a meaningful competitor change.
+
+| Benchmark | Current vNext response | Remaining gap / decision |
+|---|---|---|
+| **Flux** | Review and Verify are artifact-first with real read-only KiCad schematic/PCB rendering, compact state and contextual inspection. | Full ECAD editing is intentionally out of scope. Add source-tool/deep-link adapters rather than reproduce Flux. |
+| **AllSpice / DRCY** | Findings are reachable from project objects, shown over the artifact, and paired with evidence and authority consequence. | Current overlay is contextual but not yet spatially pinned to exact schematic/PCB coordinates. Only add coordinate anchoring when a trustworthy object-to-render mapping exists. |
+| **Circuitly** | Compare exposes semantic deltas, opened/resolved/persistent blockers, evidence references, candidate artifact and authority regressions without automatic merge. | Historical base-artifact side-by-side rendering is not claimed because the current snapshot contract does not guarantee the old artifact bytes. Do not fake it. |
+| **Schematik** | The project opens directly into the engineering artifact with compact state rather than an ontology/dashboard introduction. | Keep reducing terminology and first-screen chrome. The ten-second comprehension test remains mandatory. |
+| **Cadence-class EDA** | Neutral dense workspace, actual artifact central, compact object/findings/evidence rails, no decorative AI dashboard theme. | Preserve density without turning the product into another full authoring environment. |
+| **Groundrun / HIL** | Bring-up now defaults to the PCB and keeps `identity -> cold -> power -> functional -> release` visible beside real-vs-unresolved physical evidence and authority. | Measurement capture remains an evidence-workflow problem, not a decorative UI feature. Use existing physical-evidence contracts before adding new backend semantics. |
+| **MHS / MCP** | Connectivity is absent from the primary operator story; evidence validity and physical authority are the visible layer. | Keep transport/instrument access as integration infrastructure. Do not compete on generic agent-to-device plumbing. |
+
+### Next interface priorities from the delta
+
+1. **Evidence-to-artifact locality** — improve exact object/finding focus only when the renderer can identify the affected engineering object reliably.
+2. **Physical measurement workflow** — surface existing revision-bound measurement capture/records in Bring-up; do not invent authorization shortcuts.
+3. **External-tool adapters** — make `open/edit in source tool` the growth path for mature ECAD capability rather than rebuilding editing.
+4. **Revision continuity** — progressively make evidence invalidation and re-check requirements visible on the timeline, not buried in prose.
+5. **First-use simplification** — continue removing internal HS vocabulary until the artifact, problem, evidence state and next defensible action are obvious without documentation.
+
 ## Strategic test
 
 A competitive UI change is worthwhile only when it does at least one of the following:
