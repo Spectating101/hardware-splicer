@@ -41,8 +41,8 @@ function rows(value: unknown): JsonRecord[] {
     : [];
 }
 
-function text(value: unknown, fallback = '—') {
-  return value === undefined || value === null || value === '' ? fallback : String(value);
+function text(value: unknown, fallback: string | number = '—') {
+  return value === undefined || value === null || value === '' ? String(fallback) : String(value);
 }
 
 function projectLabel(project: ProjectSummary) {
