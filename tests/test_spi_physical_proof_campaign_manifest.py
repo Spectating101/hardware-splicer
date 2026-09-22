@@ -5,7 +5,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1" / "physical_proof_campaign_v1.json"
+REFERENCE = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1"
+MANIFEST = REFERENCE / "physical_proof_campaign_v1.json"
+PROVIDER_TEMPLATE = REFERENCE / "provider_review_record_template_v1.json"
 
 
 def load_manifest():
@@ -77,3 +79,16 @@ def test_campaign_cannot_be_used_for_generic_feature_expansion():
     assert guards["evidence_semantics_change"] is False
     assert guards["frontend_reopen_without_concrete_gap"] is False
     assert guards["engineering_change_requires_concrete_artifact_or_evaluator_or_measurement_defect"] is True
+
+
+def test_provider_review_template_is_quote_only_and_has_zero_authority_effect():
+    record = json.loads(PROVIDER_TEMPLATE.read_text(encoding="utf-8"))
+    assert record["campaign_id"] == "hs-spi-physical-proof-v1"
+    assert record["subject"]["revision"] == load_manifest()["canonical_source"]["revision"]
+    assert record["human_disposition"]["status"] == "needs_followup"
+    assert record["authority_effect"] == {
+        "fabrication_authorized": False,
+        "power_on_authorized": False,
+        "functional_test_authorized": False,
+        "release_authorized": False,
+    }
