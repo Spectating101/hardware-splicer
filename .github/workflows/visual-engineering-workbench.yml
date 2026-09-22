@@ -19,6 +19,7 @@ on:
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-evidence-workspace-competitive.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
@@ -41,6 +42,7 @@ on:
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-evidence-workspace-competitive.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
@@ -90,10 +92,11 @@ jobs:
           ln -s /tmp/hs-playwright/node_modules/@playwright/test node_modules/@playwright/test
           ln -s /tmp/hs-playwright/node_modules/playwright node_modules/playwright
           ln -s /tmp/hs-playwright/node_modules/playwright-core node_modules/playwright-core
-      - name: Validate moat contracts and production build
+      - name: Validate competitive contracts and production build
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
           node scripts/test-visual-engineering-workbench.cjs
+          node scripts/test-evidence-workspace-competitive.cjs
           npm run typecheck
           npm run build
       - name: Run visual and project-review browser paths
