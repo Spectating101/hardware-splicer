@@ -33,7 +33,7 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page).toHaveURL(/object=level-translation/);
 
   await page.getByRole('button', { name: /Findings/ }).last().click();
-  await expect(page.getByText(/1.8 V DUT interface is not protected from 3.3 V controller/)).toBeVisible();
+  await expect(page.getByText(/1.8 V DUT interface is not protected from 3.3 V controller/).last()).toBeVisible();
 
   await page.screenshot({ path: testInfo.outputPath('evidence-workspace.png'), fullPage: true });
 
