@@ -60,6 +60,10 @@ function text(value: unknown, fallback = '—') {
   return value === undefined || value === null || value === '' ? fallback : String(value);
 }
 
+function uniqueStrings(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
 function projectLabel(project: ProjectSummary) {
   return text(project.name || project.project_name, text(project.project_id));
 }
@@ -107,7 +111,7 @@ export default function EvidenceVerifyPage() {
   }, [projectId, projects, snapshot]);
 
   const checks = useMemo<VerificationCheck[]>(() => {
-    const structuralEvidence = graph.objects.flatMap((object) => object.evidenceIds);
+    const structuralEvidence = uniqueStrings(graph.objects.flatMap((object) => object.evidenceIds));
     const actionChecks = actions.map((action, index) => {
       const status = actionStatus(action);
       const state: CheckState = status === 'failed'
@@ -150,7 +154,7 @@ export default function EvidenceVerifyPage() {
         detail: blockedObjects.length ? `${blockedObjects.length} object${blockedObjects.length === 1 ? '' : 's'} remain blocked.` : 'No canonical object currently carries a blocker.',
         state: blockedObjects.length ? 'failed' : 'passed',
         kind: 'blocker',
-        evidenceIds: blockedObjects.flatMap((object) => object.evidenceIds),
+        evidenceIds: uniqueStrings(blockedObjects.flatMap((object) => object.evidenceIds)),
       },
       {
         id: 'physical-proof',
