@@ -7,7 +7,7 @@ test('semantic revision compare keeps candidate artifact and authority boundary 
   await page.goto(`${APP_URL}/engineering/evidence/compare`);
 
   await expect(page.getByText('Hardware Splicer', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('Compare', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Compare', exact: true })).toBeVisible();
   await expect(page.getByLabel('Base revision')).toHaveValue('5');
   await expect(page.getByLabel('Candidate revision')).toHaveValue('6');
   await expect(page.getByText('No automatic merge', { exact: true })).toBeVisible();
