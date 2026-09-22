@@ -27,6 +27,8 @@ function forbidText(name, source, needle) {
 requireText('review', files.review, 'kicanvas-embed');
 requireText('viewport', files.viewport, 'EvidenceArtifactViewport');
 requireText('viewport', files.viewport, "preferredKind?: PreferredArtifactKind");
+requireText('viewport', files.viewport, 'Read-only review');
+requireText('viewport', files.viewport, "controlslist', 'nodownload nooverlay'");
 requireText('compare', files.compare, 'Candidate artifact');
 requireText('verify', files.verify, 'Verification ladder');
 requireText('verify', files.verify, 'Physical correctness');
@@ -50,6 +52,17 @@ requireText('bringup', files.bringup, 'RELEASE<br />');
 requireText('compare', files.compare, 'No automatic merge');
 requireText('compare', files.compare, 'review evidence, not merge authority');
 requireText('bringup', files.bringup, 'Measurements update evidence state; authority changes only through the explicit review boundary.');
+
+// Strategic restraint: HS is a review / evidence / release-assurance surface, not a replacement ECAD editor.
+// Keep the central artifact visible and inspectable while source-of-truth editing remains outside this viewport.
+for (const forbidden of [
+  'Edit schematic',
+  'Edit PCB',
+  'Save schematic',
+  'Save PCB',
+  'Route trace',
+  'Place component',
+]) forbidText('artifact viewport', files.viewport, forbidden);
 
 // Prevent regression to the prior AI-control-room aesthetic and internal strategy language.
 const vnext = [files.review, files.compare, files.verify, files.bringup, files.nav].join('\n');
