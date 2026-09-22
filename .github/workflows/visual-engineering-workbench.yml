@@ -16,10 +16,12 @@ on:
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
+      - "docs/COMPETITIVE_INTERFACE_ACCEPTANCE.md"
       - ".github/workflows/visual-engineering-workbench.yml"
   pull_request:
     paths:
@@ -35,10 +37,12 @@ on:
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
+      - "docs/COMPETITIVE_INTERFACE_ACCEPTANCE.md"
       - ".github/workflows/visual-engineering-workbench.yml"
 
 jobs:
@@ -107,7 +111,9 @@ jobs:
             if curl --fail --silent http://127.0.0.1:8090/healthz >/dev/null \
               && curl --fail --silent http://127.0.0.1:3000/engineering/visual >/dev/null \
               && curl --fail --silent http://127.0.0.1:3000/engineering/evidence >/dev/null \
-              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/compare >/dev/null; then
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/compare >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/verify >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/bringup >/dev/null; then
               break
             fi
             if [ "$attempt" -eq 60 ]; then
@@ -122,6 +128,7 @@ jobs:
             e2e/visual-engineering-workbench.spec.js \
             e2e/evidence-workspace.spec.js \
             e2e/evidence-compare.spec.js \
+            e2e/evidence-verify-bringup.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
