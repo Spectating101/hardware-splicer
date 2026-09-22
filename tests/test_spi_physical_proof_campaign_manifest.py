@@ -1,0 +1,79 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MANIFEST = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1" / "physical_proof_campaign_v1.json"
+
+
+def load_manifest():
+    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+
+def test_campaign_binds_exact_frozen_subject():
+    manifest = load_manifest()
+    source = manifest["canonical_source"]
+    assert manifest["schema_version"] == 1
+    assert manifest["tracking_issue"] == "Spectating101/hardware-splicer#105"
+    assert source["revision"] == "f892facd67c5124e2362860ebc999625afedc5d5"
+    assert source["starting_state"] == "PACKAGED_NOT_PHYSICAL"
+    assert source["physical_correctness"] == "UNPROVEN"
+    assert source["successor_substitution_allowed"] is False
+
+
+def test_all_physical_authority_starts_closed():
+    authority = load_manifest()["authority"]
+    assert authority == {
+        "provider_selected": False,
+        "fabrication_authorized": False,
+        "assembly_accepted": False,
+        "power_on_authorized": False,
+        "functional_test_authorized": False,
+        "release_authorized": False,
+    }
+
+
+def test_gate_order_is_explicit_and_only_review_is_active():
+    gates = load_manifest()["gates"]
+    assert [gate["id"] for gate in gates] == [
+        "P0_independent_review",
+        "P1_fabrication_decision",
+        "P2_assembly_identity",
+        "P3_cold_checks",
+        "P4_controlled_power",
+        "P5_bounded_functional_transaction",
+        "P6_evidence_closure",
+    ]
+    assert gates[0]["status"] == "ACTIVE"
+    assert all(gate["status"] == "BLOCKED" for gate in gates[1:])
+
+
+def test_first_functional_transaction_is_read_only_and_bounded():
+    gate = next(gate for gate in load_manifest()["gates"] if gate["id"] == "P5_bounded_functional_transaction")
+    transaction = gate["transaction"]
+    assert transaction["command"] == "0x9F"
+    assert transaction["mode"] == 0
+    assert transaction["frequency_hz"] == 5_000_000
+    assert transaction["write_operations_allowed"] is False
+    assert transaction["expected_jedec_id"] == "EF6018"
+
+
+def test_real_physical_evidence_and_stale_invalidation_are_mandatory():
+    evidence = load_manifest()["evidence_requirements"]
+    assert evidence["physical_evidence_requires_simulated_false"] is True
+    assert evidence["exact_revision_required"] is True
+    assert evidence["failed_results_must_be_preserved"] is True
+    assert evidence["repair_creates_successor_revision"] is True
+    assert evidence["stale_evidence_must_be_invalidated_after_relevant_change"] is True
+
+
+def test_campaign_cannot_be_used_for_generic_feature_expansion():
+    guards = load_manifest()["scope_guards"]
+    assert guards["generic_ai_feature_expansion"] is False
+    assert guards["generic_eda_rebuild"] is False
+    assert guards["routing_engine_work"] is False
+    assert guards["evidence_semantics_change"] is False
+    assert guards["frontend_reopen_without_concrete_gap"] is False
+    assert guards["engineering_change_requires_concrete_artifact_or_evaluator_or_measurement_defect"] is True
