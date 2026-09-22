@@ -46,10 +46,119 @@ def list_projects() -> dict[str, Any]:
                 "name": current.get("name"),
                 "project_name": current.get("name"),
                 "revision": state["revision"],
+                "latest_revision": state["revision"],
                 "archived": False,
                 "saved_at": "2026-08-05T09:00:00+00:00",
             }
         ],
+    }
+
+
+@app.get("/v1/projects/{project_id}/revisions")
+def list_project_revisions(project_id: str) -> dict[str, Any]:
+    if project_id != PROJECT_ID:
+        raise HTTPException(status_code=404, detail="project not found")
+    return {
+        "ok": True,
+        "project_id": PROJECT_ID,
+        "revisions": [
+            {
+                "revision": 6,
+                "saved_at": "2026-08-05T09:00:00+00:00",
+                "name": "Outsider DUT fixture",
+                "current_stage": "review",
+            },
+            {
+                "revision": 5,
+                "saved_at": "2026-08-05T08:30:00+00:00",
+                "name": "Outsider DUT fixture",
+                "current_stage": "design",
+            },
+        ],
+    }
+
+
+@app.post("/v1/engineering/revisions/diff")
+async def diff_project_revisions(request: Request) -> dict[str, Any]:
+    payload = await request.json()
+    if payload.get("project_id") != PROJECT_ID:
+        raise HTTPException(status_code=404, detail="project not found")
+    base_revision = int(payload.get("base_revision") or 5)
+    candidate_revision = int(payload.get("candidate_revision") or 6)
+    if (base_revision, candidate_revision) != (5, 6):
+        raise HTTPException(status_code=422, detail="fixture supports revision 5 -> 6")
+    return {
+        "ok": True,
+        "project_id": PROJECT_ID,
+        "base_revision": base_revision,
+        "candidate_revision": candidate_revision,
+        "automatic_merge": False,
+        "release_authorized": False,
+        "engineering_revision_diff": {
+            "opened_blockers": [
+                {
+                    "blocker_id": "analysis-current",
+                    "category": "analysis",
+                    "severity": "error",
+                    "message": "1.8 V DUT interface is not protected from 3.3 V controller",
+                    "target_ids": ["level-translation"],
+                    "required_evidence": ["dut-datasheet-r1", "fixture-controller-manual-r1"],
+                }
+            ],
+            "resolved_blockers": [
+                {
+                    "blocker_id": "identity-controller",
+                    "category": "source",
+                    "severity": "warning",
+                    "message": "Controller identity and source manual are now bound to the project.",
+                    "target_ids": ["controller"],
+                }
+            ],
+            "persistent_blockers": [
+                {
+                    "blocker_id": "physical-evidence",
+                    "category": "release",
+                    "severity": "warning",
+                    "message": "No physical measurement closes the DUT power-on path.",
+                    "target_ids": ["dut-socket"],
+                }
+            ],
+            "changed_blockers": [],
+            "identity_changes": [
+                {
+                    "category": "components",
+                    "added_ids": ["level-translation"],
+                    "removed_ids": [],
+                    "retained_ids": ["controller", "dut-socket"],
+                }
+            ],
+            "artifact_changes": [
+                {
+                    "artifact_id": "spi_flash_adapter_v1.kicad_sch",
+                    "change": "schematic_updated",
+                    "summary": "Candidate adds the translated DUT interface boundary for review.",
+                }
+            ],
+            "execution_changes": [
+                {
+                    "action_id": "action-prepare-verification",
+                    "change": "verification_required",
+                    "summary": "Fresh deterministic verification is required for the successor revision.",
+                }
+            ],
+            "mechanical_changes": [],
+            "physical_authorization_changes": [],
+            "authority_regressions": [],
+            "summary": {
+                "opened_blocker_count": 1,
+                "resolved_blocker_count": 1,
+                "persistent_blocker_count": 1,
+                "artifact_change_count": 1,
+                "execution_change_count": 1,
+                "identity_change_category_count": 1,
+                "authority_regression_count": 0,
+            },
+        },
     }
 
 
