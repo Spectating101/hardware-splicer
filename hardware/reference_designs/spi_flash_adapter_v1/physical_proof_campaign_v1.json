@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "campaign_id": "hs-spi-physical-proof-v1",
+  "tracking_issue": "Spectating101/hardware-splicer#105",
+  "purpose": "Bind one exact SPI reference artifact through independent review, fabrication, board identity, cold evidence, controlled power, bounded functional evidence, and explicit human authority without reopening generic product development.",
+  "canonical_source": {
+    "release_tag": "gauntlet-spi-flash-adapter-v1-20260916",
+    "revision": "f892facd67c5124e2362860ebc999625afedc5d5",
+    "package": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
+    "starting_state": "PACKAGED_NOT_PHYSICAL",
+    "physical_correctness": "UNPROVEN",
+    "successor_substitution_allowed": false
+  },
+  "authority": {
+    "provider_selected": false,
+    "fabrication_authorized": false,
+    "assembly_accepted": false,
+    "power_on_authorized": false,
+    "functional_test_authorized": false,
+    "release_authorized": false
+  },
+  "provider_recon": {
+    "mode": "QUOTE_AND_REVIEW_ONLY",
+    "candidate_names": ["JLCPCB", "PCBWay"],
+    "provider_selected": null,
+    "quotation_received": false,
+    "independent_dfm_or_ee_review_received": false,
+    "rule": "Provider contact, quotation, DFM feedback, or test-procedure discussion is evidence input only and grants no fabrication or power authority."
+  },
+  "gates": [
+    {
+      "id": "P0_independent_review",
+      "status": "ACTIVE",
+      "requires": ["immutable_package_verified", "checksum_verified", "independent_review_or_provider_dfm_received"],
+      "forbids": ["fabrication_authority", "power_on_authority"],
+      "completion_effect": "makes fabrication decision reviewable; does not authorize fabrication"
+    },
+    {
+      "id": "P1_fabrication_decision",
+      "status": "BLOCKED",
+      "requires": ["P0_independent_review_complete", "human_provider_cost_terms_review", "exact_package_revision_confirmed"],
+      "forbids": ["implicit_authorization_from_quote_or_payment_page"],
+      "completion_effect": "may record explicit fabrication_authorized=true only for the exact package/revision/provider"
+    },
+    {
+      "id": "P2_assembly_identity",
+      "status": "BLOCKED",
+      "requires": ["fabrication_authorized", "physical_board_received_or_assembled"],
+      "record": ["board_id", "board_revision", "assembly_variant", "R1_DNP", "R4_DNP", "JP1_open", "component_identity", "orientation_records"],
+      "completion_effect": "establishes physical subject identity only; does not establish electrical correctness"
+    },
+    {
+      "id": "P3_cold_checks",
+      "status": "BLOCKED",
+      "requires": ["P2_assembly_identity_complete", "simulated_false", "instrument_and_operator_recorded"],
+      "record": ["short_checks", "resistance", "continuity", "isolation", "polarity", "OE_pulldown", "CS_domain_pullups"],
+      "completion_effect": "may make controlled power reviewable; does not itself authorize power"
+    },
+    {
+      "id": "P4_controlled_power",
+      "status": "BLOCKED",
+      "requires": ["P3_cold_checks_pass", "explicit_power_on_authority", "current_limit_and_setup_recorded"],
+      "record": ["3V3", "1V8", "DUT_1V8", "current", "limit_activation", "rail_ramp", "overshoot", "timing"],
+      "completion_effect": "may make bounded functional transaction reviewable"
+    },
+    {
+      "id": "P5_bounded_functional_transaction",
+      "status": "BLOCKED",
+      "requires": ["P4_controlled_power_pass", "explicit_functional_test_authority", "JP1_control_sequence_satisfied"],
+      "transaction": {
+        "command": "0x9F",
+        "mode": 0,
+        "frequency_hz": 5000000,
+        "write_operations_allowed": false,
+        "expected_jedec_id": "EF6018"
+      },
+      "record": ["raw_spi_capture", "observed_jedec_id", "current", "temperature", "supply_waveforms"],
+      "completion_effect": "produces bounded functional evidence only"
+    },
+    {
+      "id": "P6_evidence_closure",
+      "status": "BLOCKED",
+      "requires": ["physical_subject_bound", "cold_evidence_bound", "power_evidence_bound", "functional_evidence_bound_or_failure_preserved"],
+      "chain": ["source_revision", "fabrication_artifact", "board_identity", "cold_evidence", "power_evidence", "functional_evidence", "human_authority_decision"],
+      "completion_effect": "permits updating external-proof and paper claims only to the extent supported by captured evidence"
+    }
+  ],
+  "evidence_requirements": {
+    "physical_evidence_requires_simulated_false": true,
+    "exact_revision_required": true,
+    "operator_required": true,
+    "raw_capture_required_where_applicable": true,
+    "instrument_identity_required_where_available": true,
+    "failed_results_must_be_preserved": true,
+    "repair_creates_successor_revision": true,
+    "stale_evidence_must_be_invalidated_after_relevant_change": true
+  },
+  "scope_guards": {
+    "generic_ai_feature_expansion": false,
+    "generic_eda_rebuild": false,
+    "routing_engine_work": false,
+    "evidence_semantics_change": false,
+    "frontend_reopen_without_concrete_gap": false,
+    "engineering_change_requires_concrete_artifact_or_evaluator_or_measurement_defect": true
+  },
+  "exit_conditions": [
+    "one exact SPI board has a complete independently inspectable physical evidence and authority chain",
+    "a real external or physical failure blocks progression and is preserved with enough evidence to define the next successor revision"
+  ]
+}
