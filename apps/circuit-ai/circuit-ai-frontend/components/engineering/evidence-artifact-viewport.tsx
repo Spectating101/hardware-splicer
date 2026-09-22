@@ -218,7 +218,10 @@ export function EvidenceArtifactViewport({
           })}
           {!visibleFiles.length ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
         </div>
-        <span className="max-w-[45%] truncate font-mono text-[10px] text-stone-400">{activeRelative || 'no KiCad artifact attached'}</span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0 rounded border border-stone-200 bg-stone-50 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-stone-500">Read-only review</span>
+          <span className="max-w-[20rem] truncate font-mono text-[10px] text-stone-400">{activeRelative || 'no KiCad artifact attached'}</span>
+        </div>
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
