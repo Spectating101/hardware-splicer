@@ -49,13 +49,14 @@ requireText('bringup', files.bringup, 'Power-on');
 requireText('bringup', files.bringup, 'RELEASE<br />');
 requireText('compare', files.compare, 'No automatic merge');
 requireText('compare', files.compare, 'review evidence, not merge authority');
-requireText('bringup', files.bringup, 'test execution does not automatically change physical authority');
+requireText('bringup', files.bringup, 'Measurements update evidence state; authority changes only through the explicit review boundary.');
 
 // Prevent regression to the prior AI-control-room aesthetic and internal strategy language.
 const vnext = [files.review, files.compare, files.verify, files.bringup, files.nav].join('\n');
 for (const forbidden of [
   'Hardware Splicer moat layer',
   'Contextual JARVIS inspector',
+  'Unlike generic HIL dashboards',
   'bg-[#020711]',
   'text-cyan-300',
   'text-violet-300',
