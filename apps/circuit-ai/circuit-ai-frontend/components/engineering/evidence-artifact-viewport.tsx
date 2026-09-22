@@ -112,6 +112,7 @@ export function EvidenceArtifactViewport({
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
 
   useEffect(() => {
     if (!buildDir) {
@@ -190,11 +191,14 @@ export function EvidenceArtifactViewport({
     const embed = document.createElement('kicanvas-embed');
     embed.setAttribute('controls', 'basic');
     embed.setAttribute('controlslist', 'nodownload nooverlay');
+    // A board drawn inside its worksheet is otherwise tiny in a full-height bring-up view.
+    // KiCanvas' object-fit mode keeps the physical artifact itself as the visual subject.
+    if (activeKind === 'pcb') embed.setAttribute('zoom', 'objects');
     const source = document.createElement('kicanvas-source');
     source.textContent = content;
     embed.appendChild(source);
     host.appendChild(embed);
-  }, [content, ready]);
+  }, [activeKind, content, ready]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
   const minHeight = compact ? 'min-h-[520px]' : 'min-h-[650px]';
