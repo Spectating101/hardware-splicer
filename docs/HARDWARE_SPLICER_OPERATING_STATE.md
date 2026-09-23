@@ -33,13 +33,13 @@ The frozen SPI reference design is already packaged and digitally verified but r
 
 Until that chain exists, fabrication, power-on, functional-test, and release authority remain closed.
 
-### P1 — complete the competitive product shell
+### P1 — competitive product shell closed
 
-Tracking: PR `#104`
+Tracking: merged PR `#104`
 
-The Review / Compare / Verify / Bring-up workspace is the current frontend closure candidate. It exists to bring HS to competitive usability while preserving the evidence/authority model.
+The artifact-first Review / Compare / Verify / Bring-up workspace is now merged and **closed by default**. It brought HS to competitive artifact-first usability while preserving the evidence/authority model.
 
-After closure, frontend work reopens only when:
+Frontend work reopens only when:
 
 - rendered use exposes a concrete deficiency;
 - an evaluator/user cannot complete an HS-native workflow;
@@ -74,7 +74,7 @@ Use four response classes:
 | Truth-model implication | Require an exact HS defect, evaluator finding, or physical failure before investigating the core. |
 
 Current watch/decision producer: Refinery PR `Spectating101/refinery#24`.  
-Current consumer/routing policy: Gauntlet PR `Spectating101/gauntlet-blowback#60`.
+Current consumer/routing policy: Gauntlet main after merged PR `Spectating101/gauntlet-blowback#60`; Anthropic ERAP manual-submit handling from merged PR `#61`.
 
 The current external comparison set includes Flux, AllSpice DRCY, Circuitly, Schematik, Cadence, Groundrun, Anthropic MHS, JITX, Quilter, DeepPCB, Circuit Mind, CELUS, and Boardera.
 
@@ -84,7 +84,7 @@ The current external comparison set includes Flux, AllSpice DRCY, Circuitly, Sch
 |---|---|---|
 | Evidence / authority core | **Frozen by default** | Reopen only from an exact artifact/evaluator/physical defect. |
 | SPI physical proof | **Active / P0** | Highest-leverage engineering campaign. |
-| Competitive frontend | **Closure candidate / P1** | Finish coherent shell; reopen only from concrete gap. |
+| Competitive frontend | **Closed / reopen-on-trigger** | PR #104 is merged; reopen only from concrete gap. |
 | Route-specific integrations | **Allowed / P1-P2** | Build only when native, source-bound, and useful to a real workflow/route. |
 | Generic feature expansion | **Off by default** | No generic AI/EDA feature race. |
 | Competitor-driven improvement | **Allowed and expected** | Improve HS where the gap is native and evidence-backed. |
@@ -147,12 +147,11 @@ update claims, paper, roadmap, and next investment decision
 
 ## Near-term closure sequence
 
-1. Finish and review PR `#104` as the competitive frontend closure candidate.
-2. Land PR `#106` as the physical-proof execution contract.
-3. Execute `#105` through provider/reviewer contact and explicit fabrication decision.
-4. Preserve every physical result—success or failure—against the exact board/revision.
-5. Update the paper only after evidence exists.
-6. Fire the strongest HS-native Gauntlet routes with the improved artifact/evidence package.
-7. Reassess HS from external outcomes and physical evidence, not from generalized pessimism.
+1. Land PR `#106` as the physical-proof execution contract.
+2. Execute `#105` through the parallel JLCPCB / PCBWay provider review and explicit fabrication decision.
+3. Preserve every physical result—success or failure—against the exact board/revision.
+4. Update the paper only after new physical evidence exists.
+5. Fire the strongest HS-native Gauntlet routes; Anthropic ERAP is already human-submit-ready in Gauntlet main.
+6. Reassess HS from external outcomes and physical evidence, not from generalized pessimism.
 
 The intended state is **not smaller HS**. It is a stronger HS with a narrower definition of what deserves engineering time.
