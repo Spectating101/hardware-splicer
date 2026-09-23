@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -54,7 +55,11 @@ def fail(message: str) -> None:
 
 
 def run(*args: str, allowed: tuple[int, ...] = (0,)) -> str:
-    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+    environment = dict(os.environ)
+    environment.setdefault("KICAD_ENABLE_WXTRACE", "1")
+    environment.setdefault("WXTRACE", "KICAD_SCH_PLUGIN")
+    environment.setdefault("KICAD_TRACE", "all")
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, env=environment)
     if result.returncode not in allowed:
         fail(f"command exit {result.returncode}: {' '.join(args)}\n{result.stdout}")
     return result.stdout
