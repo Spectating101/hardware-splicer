@@ -9,6 +9,8 @@ REFERENCE = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1"
 MANIFEST = REFERENCE / "physical_proof_campaign_v1.json"
 PROVIDER_TEMPLATE = REFERENCE / "provider_review_record_template_v1.json"
 PROVIDER_SCORECARD = REFERENCE / "PROVIDER_SELECTION_SCORECARD.json"
+PROVIDER_QUOTE_REQUEST = REFERENCE / "PROVIDER_QUOTE_REQUEST.md"
+PACKAGE_SHA256 = "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd"
 
 
 def load_manifest():
@@ -124,3 +126,13 @@ def test_both_provider_candidates_keep_exact_evidence_questions_open():
     for provider in providers.values():
         assert provider["status"] == "CONTACT_READY_EVIDENCE_UNCONFIRMED"
         assert required.issubset(set(provider["must_confirm_in_writing"]))
+
+
+def test_campaign_and_provider_records_bind_release_digest():
+    manifest = load_manifest()
+    record = json.loads(PROVIDER_TEMPLATE.read_text(encoding="utf-8"))
+    quote = PROVIDER_QUOTE_REQUEST.read_text(encoding="utf-8")
+    assert manifest["canonical_source"]["package_sha256"] == PACKAGE_SHA256
+    assert record["subject"]["package_sha256"] == PACKAGE_SHA256
+    assert PACKAGE_SHA256 in quote
+    assert manifest["canonical_source"]["revision"] == record["subject"]["revision"]
