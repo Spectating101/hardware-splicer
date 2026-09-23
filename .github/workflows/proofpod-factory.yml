@@ -53,6 +53,9 @@ jobs:
       - name: Generate ProofPod schematic
         run: python hardware/reference_designs/proofpod_v0/generate_schematic.py
 
+      - name: Diagnose native KiCad loadability
+        run: python hardware/reference_designs/proofpod_v0/diagnose_schematic_load.py
+
       - name: Run native KiCad + topology gate
         run: python hardware/reference_designs/proofpod_v0/verify_schematic.py
 
