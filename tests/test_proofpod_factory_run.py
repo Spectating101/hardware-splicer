@@ -55,4 +55,6 @@ def test_safety_critical_symbols_are_local_and_reviewable() -> None:
     symbols = (PILOT / "HardwareSplicer.kicad_sym").read_text()
     assert 'symbol "TXU0304PW"' in symbols
     assert 'symbol "TPS2553DBV"' in symbols
+    assert 'symbol "INA219DCN"' in symbols
     assert "tps2553.pdf" in symbols
+    assert "ina219.pdf" in symbols
