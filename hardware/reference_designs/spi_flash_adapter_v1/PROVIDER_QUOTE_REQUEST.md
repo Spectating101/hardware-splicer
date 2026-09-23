@@ -12,6 +12,15 @@ We have a small two-layer SPI flash adapter PCB that is ready for quotation and 
 
 The supplied package contains the fabrication files, BOM, placement data, schematic/assembly references, deterministic package identity, and a bounded physical-validation procedure.
 
+### Frozen package identity
+
+- Release: `gauntlet-spi-flash-adapter-v1-20260916`
+- Source revision: `f892facd67c5124e2362860ebc999625afedc5d5`
+- Package: `spi-flash-adapter-v1-remote-fct-main-f892fac.zip`
+- SHA-256: `6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd`
+
+Please confirm the package digest before engineering review. If your intake system regenerates, modifies, or normalizes any design/manufacturing file, identify that change explicitly before the result is treated as campaign evidence.
+
 ### Initial assembly state
 
 Please confirm that the initial assembly can preserve these states exactly:
