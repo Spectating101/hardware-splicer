@@ -1,14 +1,14 @@
 Category,Candidate,Qty,100-unit unit-cost budget USD,Notes
-MCU,Raspberry Pi RP2040,1,0.80,Public LCSC 100-unit price observed around $0.764
-MCU flash,QSPI NOR >=2MB,1,1.50,Conservative budget pending exact part
-SPI translation,TXU0304-class,1,0.80,Fixed 3+1 direction fits SPI
-I2C translation,PCA9306-class,1,0.50,Bidirectional open-drain translation
-Current monitor,INA219-class,1,0.75,Public LCSC 100-unit INA219 price observed around $0.696
-Target load switch,TPS22918-class,2,0.55,Two rails / hard target-power disable
-1.8V + 3.3V regulation,low-current LDO pair,2,0.80,Exact parts pending thermal/dropout review
-USB-C + ESD,USB-C sink and protection,1,1.50,No PD in v0
-Target ESD + series protection,arrays/resistors,1,1.50,Budget bucket
-Connectors + physical ARM control,keyed connector/button/switch,1,2.00,Budget bucket
-Passives + oscillator + testpoints,mixed,1,2.50,Budget bucket
+MCU,Raspberry Pi RP2040,1,0.80,Public LCSC 100-unit price previously observed around $0.764
+MCU flash,W25Q32JVSSIQ QSPI NOR,1,1.50,Exact MPN selected; supplier quote still required
+SPI translation,TXU0304PWR,1,0.80,Fixed 3+1 direction fits SPI and explicit OE
+I2C translation,PCA9306DCTR,1,0.50,Bidirectional open-drain translation
+Current monitor,INA219AIDCNR,1,0.75,High-side target-current and bus-voltage monitor
+Target current-limit switch,TPS2553DBVR,1,1.00,133k ILIM target keeps datasheet max below 250mA before resistor tolerance
+1.8V + 3.3V regulation,TLV75518PDBVR + TLV75533PDBVR,2,0.80,Exact regulator family selected
+USB-C + ESD,USB-C sink and protection,1,1.50,Connector and ESD MPNs still unresolved
+Target ESD + series protection,arrays/resistors,1,1.50,Exact protection parts still unresolved
+Connectors + physical ARM control,keyed connector/switches,1,2.00,Exact MPNs pending
+Passives + 12MHz oscillator + testpoints,mixed,1,2.50,Crystal MPN/load still pending
 PCB + SMT assembly,2-layer compact board,1,5.00,Target only; must be replaced by quote
-TOTAL BOARD TARGET,,1,18.20,Must remain <=20 USD landed board-only COGS target after quote/yield review
+TOTAL BOARD TARGET,,1,18.65,Must remain <=20 USD landed board-only COGS target after quote/yield review
