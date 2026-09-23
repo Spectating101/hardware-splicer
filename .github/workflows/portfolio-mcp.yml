@@ -1,0 +1,27 @@
+name: Portfolio MCP native launch
+on:
+  pull_request:
+    paths: ['integrations/mcp/**', '.github/workflows/portfolio-mcp.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Spectating101/cite-refinery
+          ref: c9559e4e217f9f266aa451008cda32c96eee544e
+          path: .mcp-runner
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[backend-mcp]' -e .mcp-runner/integrations/portfolio-mcp
+      - run: portfolio-mcp probe --manifest integrations/mcp/manifest.json --root .
+      - run: portfolio-mcp call --manifest integrations/mcp/manifest.json --root . --tool hs_backend_status
