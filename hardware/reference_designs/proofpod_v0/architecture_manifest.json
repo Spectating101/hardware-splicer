@@ -6,16 +6,56 @@
   "result_status": "schematic_candidate_only",
   "product_hypothesis": "A protected USB-C SPI/I2C validation pod can occupy the gap between low-cost bare bridges and $275-$375 professional host/programmer tools by selling protection, deterministic power control, and evidence receipts rather than raw protocol access.",
   "selected_components": {
-    "controller": {"symbol": "MCU_RaspberryPi:RP2040", "mpn": "RP2040", "status": "selected"},
-    "controller_flash": {"symbol": "Memory_Flash:W25Q32JVSS", "mpn": "W25Q32JVSSIQ", "status": "selected"},
-    "spi_translator": {"symbol": "HardwareSplicer:TXU0304PW", "mpn": "TXU0304PWR", "status": "selected"},
-    "i2c_translator": {"symbol": "Interface:PCA9306DC", "mpn": "PCA9306DCTR", "status": "selected"},
-    "current_monitor": {"symbol": "Analog_ADC:INA219AxDCN", "mpn": "INA219AIDCNR", "status": "selected"},
-    "usb_3v3_regulator": {"symbol": "Regulator_Linear:TLV75533PDBV", "mpn": "TLV75533PDBVR", "status": "selected"},
-    "target_1v8_regulator": {"symbol": "Regulator_Linear:TLV75518PDBV", "mpn": "TLV75518PDBVR", "status": "selected"},
-    "target_current_limit_switch": {"symbol": "HardwareSplicer:TPS2553DBV", "mpn": "TPS2553DBVR", "status": "selected"},
-    "usb_connector": {"symbol": "Connector:USB_C_Receptacle_USB2.0_16P", "mpn": null, "status": "footprint_and_mpn_pending"},
-    "crystal_12mhz": {"symbol": "Device:Crystal", "mpn": null, "status": "load_capacitance_and_mpn_pending"}
+    "controller": {
+      "symbol": "MCU_RaspberryPi:RP2040",
+      "mpn": "RP2040",
+      "status": "selected"
+    },
+    "controller_flash": {
+      "symbol": "Memory_Flash:W25Q32JVSS",
+      "mpn": "W25Q32JVSSIQ",
+      "status": "selected"
+    },
+    "spi_translator": {
+      "symbol": "HardwareSplicer:TXU0304PW",
+      "mpn": "TXU0304PWR",
+      "status": "selected"
+    },
+    "i2c_translator": {
+      "symbol": "Interface:PCA9306DC",
+      "mpn": "PCA9306DCTR",
+      "status": "selected"
+    },
+    "current_monitor": {
+      "symbol": "HardwareSplicer:INA219DCN",
+      "mpn": "INA219AIDCNR",
+      "status": "selected"
+    },
+    "usb_3v3_regulator": {
+      "symbol": "Regulator_Linear:TLV75533PDBV",
+      "mpn": "TLV75533PDBVR",
+      "status": "selected"
+    },
+    "target_1v8_regulator": {
+      "symbol": "Regulator_Linear:TLV75518PDBV",
+      "mpn": "TLV75518PDBVR",
+      "status": "selected"
+    },
+    "target_current_limit_switch": {
+      "symbol": "HardwareSplicer:TPS2553DBV",
+      "mpn": "TPS2553DBVR",
+      "status": "selected"
+    },
+    "usb_connector": {
+      "symbol": "Connector:USB_C_Receptacle_USB2.0_16P",
+      "mpn": null,
+      "status": "footprint_and_mpn_pending"
+    },
+    "crystal_12mhz": {
+      "symbol": "Device:Crystal",
+      "mpn": null,
+      "status": "load_capacitance_and_mpn_pending"
+    }
   },
   "control_mapping": {
     "RP2040_GPIO0": "SPI_SCLK_HOST",
@@ -30,7 +70,10 @@
     "RP2040_GPIO9": "WRITE_ARM"
   },
   "target_power_contract": {
-    "selectable_nominal_rails_v": [1.8, 3.3],
+    "selectable_nominal_rails_v": [
+      1.8,
+      3.3
+    ],
     "selection": "physical SPDT before electronic enable",
     "electronic_switch": "TPS2553DBVR",
     "ilim_resistor_ohm": 133000,
@@ -64,12 +107,41 @@
     "physical_authority_granted": false
   },
   "source_basis": [
-    {"authority": "manufacturer", "document": "RP2040 datasheet", "status": "live_reference_not_frozen"},
-    {"authority": "manufacturer", "document": "TPS2553 datasheet SLVS841F", "status": "live_reference_not_frozen"},
-    {"authority": "manufacturer", "document": "INA219 datasheet SBOS448G", "status": "live_reference_not_frozen"},
-    {"authority": "manufacturer", "document": "PCA9306 datasheet", "status": "live_reference_not_frozen"},
-    {"authority": "manufacturer", "document": "TXU0304 datasheet SCES935A", "status": "existing_HS_source_lineage"},
-    {"authority": "KiCad", "document": "KiCad 9 symbol libraries", "status": "symbol_identity_reference"}
+    {
+      "authority": "manufacturer",
+      "document": "RP2040 datasheet",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "TPS2553 datasheet SLVS841F",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "INA219 datasheet SBOS448G",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "PCA9306 datasheet",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "TXU0304 datasheet SCES935A",
+      "status": "existing_HS_source_lineage"
+    },
+    {
+      "authority": "KiCad",
+      "document": "KiCad 9 symbol libraries",
+      "status": "symbol_identity_reference"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "INA219 DCN pinout pinned into project-local symbol library",
+      "status": "project_local_identity"
+    }
   ],
   "remaining_blockers_before_pcb": [
     "generate editable KiCad schematic",
