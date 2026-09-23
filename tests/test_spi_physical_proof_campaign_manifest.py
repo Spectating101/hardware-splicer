@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1"
 MANIFEST = REFERENCE / "physical_proof_campaign_v1.json"
 PROVIDER_TEMPLATE = REFERENCE / "provider_review_record_template_v1.json"
+PROVIDER_SCORECARD = REFERENCE / "PROVIDER_SELECTION_SCORECARD.json"
 
 
 def load_manifest():
@@ -92,3 +93,34 @@ def test_provider_review_template_is_quote_only_and_has_zero_authority_effect():
         "functional_test_authorized": False,
         "release_authorized": False,
     }
+
+
+def test_provider_selection_scorecard_cannot_trade_evidence_for_price():
+    scorecard = json.loads(PROVIDER_SCORECARD.read_text(encoding="utf-8"))
+    assert scorecard["campaign"] == "hs-spi-physical-proof-v1"
+    assert scorecard["decision"] == "parallel_dual_quote"
+    assert scorecard["authority_effect"] == "NONE"
+    assert "pass_fail_only_without_required_raw_evidence" in scorecard["disqualifiers"]
+    assert "cannot_bind_result_to_exact_board_and_revision" in scorecard["disqualifiers"]
+    assert "silent_component_substitution" in scorecard["disqualifiers"]
+    assert "evidence fidelity outranks headline price" in scorecard["selection_rule"].lower()
+
+
+def test_both_provider_candidates_keep_exact_evidence_questions_open():
+    scorecard = json.loads(PROVIDER_SCORECARD.read_text(encoding="utf-8"))
+    providers = {provider["id"]: provider for provider in scorecard["providers"]}
+    assert set(providers) == {"jlcpcb", "pcbway"}
+    required = {
+        "exact_revision_fidelity",
+        "dnp_open_state_fidelity",
+        "raw_cold_measurements",
+        "staged_current_limited_power",
+        "raw_rail_current_values",
+        "bounded_0x9f_only_transaction",
+        "raw_spi_or_jedec_result",
+        "board_revision_traceability",
+        "no_silent_rework_or_substitution",
+    }
+    for provider in providers.values():
+        assert provider["status"] == "CONTACT_READY_EVIDENCE_UNCONFIRMED"
+        assert required.issubset(set(provider["must_confirm_in_writing"]))
