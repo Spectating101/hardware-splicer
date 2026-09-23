@@ -129,7 +129,11 @@ def evaluate_supply_route(route: Mapping[str, Any]) -> dict[str, Any]:
     identity_ok = exact_model and revision_capture and variant_test
 
     yield_basis = str(donor.get("yield_evidence_basis") or "").strip()
-    yield_ok = bool(yield_basis)
+    yield_basis_upper = yield_basis.upper()
+    yield_ok = bool(yield_basis) and not any(
+        marker in yield_basis_upper
+        for marker in ("HYPOTHESIS", "ASSUMED", "UNKNOWN", "UNVERIFIED")
+    )
 
     supply_multiple = donor_pool / expected_donors if expected_donors > 0 else 0.0
     supply_ok = donor_pool > 0 and supply_multiple >= required_supply_multiple
