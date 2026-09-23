@@ -1,0 +1,107 @@
+{
+  "schema": "hardware_splicer.product_factory_run.v1",
+  "run_id": "PF-002",
+  "product_id": "benchhmi-v0",
+  "working_name": "BenchHMI v0",
+  "opened_at": "2026-09-24",
+  "purpose": "Test whether Hardware Splicer can transform a standardized Taiwan-market retired POS terminal into a higher-value bench/lab automation console using donor retention, bounded refurbishment, an external low-voltage sidecar and revision-bound QA.",
+  "market": "Taiwan",
+  "stages": [
+    {
+      "id": "DISCOVER",
+      "state": "PASS",
+      "evidence": [
+        "experiments/product_factory/regional_scans/taiwan_china_2026-09-24.json",
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8Bpos%E6%A9%9F/?cateid=0011",
+        "Flytech POS460 Series service/user manual"
+      ],
+      "decision": "EXACT_DONOR_CLASS_IDENTIFIED"
+    },
+    {
+      "id": "SELECT",
+      "state": "HOLD_ON_DONOR_SUPPLY_AND_YIELD",
+      "evidence": [
+        "experiments/product_factory/donor_probes/benchhmi_pos462_supply_route.json"
+      ],
+      "decision": "ECONOMICS_SCREEN_POSITIVE_SUPPLY_UNPROVEN"
+    },
+    {
+      "id": "SPECIFY",
+      "state": "DRAFT_PRODUCT_CONTRACT_FROZEN_FOR_REVIEW",
+      "evidence": [
+        "hardware/reference_designs/benchhmi_v0/product_contract.json",
+        "hardware/reference_designs/benchhmi_v0/splice_plan.json"
+      ]
+    },
+    {
+      "id": "DESIGN_SCHEMATIC",
+      "state": "BLOCKED_ON_DONOR_ACCEPTANCE",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_SCHEMATIC",
+      "state": "BLOCKED_ON_DESIGN",
+      "evidence": []
+    },
+    {
+      "id": "DESIGN_PCB",
+      "state": "BLOCKED_ON_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_PCB",
+      "state": "BLOCKED_ON_PCB",
+      "evidence": []
+    },
+    {
+      "id": "SOURCE",
+      "state": "ACTIVE_DONOR_EVIDENCE_REQUIRED",
+      "evidence": []
+    },
+    {
+      "id": "BUILD",
+      "state": "BLOCKED_ON_SUPPLY_AND_HUMAN_AUTHORITY",
+      "evidence": []
+    },
+    {
+      "id": "PROVE",
+      "state": "BLOCKED_ON_PHYSICAL_ARTIFACT",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK",
+      "state": "BLOCKED_ON_PHYSICAL_PROOF",
+      "evidence": []
+    },
+    {
+      "id": "SELL",
+      "state": "BLOCKED_ON_GAUNTLET_AND_HUMAN_DECISION",
+      "evidence": []
+    },
+    {
+      "id": "LEARN",
+      "state": "ACTIVE_CONTINUOUS",
+      "evidence": []
+    }
+  ],
+  "metrics": {
+    "target_msrp_twd": 8990,
+    "target_effective_cogs_ceiling_twd": 4050,
+    "target_min_gross_margin_fraction": 0.55,
+    "modeled_effective_cogs_twd": 3641.67,
+    "modeled_gross_margin_fraction": 0.59492,
+    "intended_first_lot_units": 20,
+    "donor_acquisition_target_twd": 1000,
+    "all_new_reference_cogs_twd": 7500,
+    "modeled_savings_vs_all_new_fraction": 0.51444
+  },
+  "authority": {
+    "donor_purchase_authorized": false,
+    "donor_disassembly_authorized": false,
+    "sidecar_design_authorized": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_superiority": "UNPROVEN"
+  },
+  "claim_boundary": "PF-002 currently establishes only that a documented Taiwan-market donor class and a potentially attractive transformation economics hypothesis exist. It is not evidence of qualified lot supply, measured yield, Linux/touch compatibility on the selected B91 revision, sidecar correctness, industrial certification, demand, physical correctness, or sale readiness."
+}
