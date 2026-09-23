@@ -1,0 +1,62 @@
+{
+  "schema": "hardware_splicer.splice_plan.v1",
+  "product_id": "benchhmi-v0",
+  "donor": "Flytech POS462 / B91 only",
+  "strategy": "RETAIN_HIGH_INTEGRATION_REPLACE_FAILURE_PRONE_ADD_EXTERNAL_CAPABILITY",
+  "retain": [
+    {
+      "subsystem": "display_touch_enclosure",
+      "reason": "High integrated mechanical/UI value; expensive to recreate."
+    },
+    {
+      "subsystem": "B91_compute_board",
+      "reason": "Adequate for lightweight terminal/gateway role if exact acceptance tests pass."
+    },
+    {
+      "subsystem": "ethernet_usb_serial_io",
+      "reason": "Documented mature I/O is the principal donor value."
+    },
+    {
+      "subsystem": "internal_power_system",
+      "reason": "Retain intact and unmodified to avoid creating a new mains design boundary."
+    }
+  ],
+  "replace": [
+    {
+      "subsystem": "storage",
+      "replacement": "known-good SATA SSD",
+      "reason": "Old HDD/SSD condition is a high-variance failure source."
+    },
+    {
+      "subsystem": "cmos_battery",
+      "replacement": "new approved battery when required",
+      "reason": "Cheap deterministic maintenance item."
+    }
+  ],
+  "add": [
+    {
+      "subsystem": "BenchIO_sidecar_v0",
+      "interface": "USB",
+      "reason": "Adds modern protected field/test I/O without modifying donor mains or motherboard."
+    },
+    {
+      "subsystem": "HS_software_image",
+      "reason": "Turns commodity/retired POS hardware into a repeatable test-console workflow."
+    },
+    {
+      "subsystem": "finished_unit_QA_receipt",
+      "reason": "Binds donor identity, sidecar identity, software image and functional checks."
+    }
+  ],
+  "reject_if": [
+    "motherboard is not B91 approved revision",
+    "touch panel fails calibration or repeated cold-boot recognition",
+    "LCD has unacceptable defects for operator use",
+    "Ethernet or required USB ports fail",
+    "any required COM port fails",
+    "internal PSU shows physical damage, abnormal noise, odor, overheating or unstable output",
+    "unit requires mains-side repair",
+    "donor identity/revision cannot be recorded"
+  ],
+  "physical_authority": false
+}
