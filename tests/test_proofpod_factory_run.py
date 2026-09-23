@@ -59,3 +59,15 @@ def test_safety_critical_symbols_are_local_and_reviewable() -> None:
     assert 'symbol "RP2040QFN56"' in symbols
     assert "tps2553.pdf" in symbols
     assert "ina219.pdf" in symbols
+
+
+def test_pf001_preserves_pre_pcb_learning_history() -> None:
+    run = json.loads(RUN.read_text())
+    learn = next(stage for stage in run["stages"] if stage["id"] == "LEARN")
+    assert run["metrics"]["engineering_defects_caught_before_pcb"] == 2
+    assert run["metrics"]["toolchain_reproducibility_defects_caught"] == 2
+    evidence = " ".join(learn["evidence"]).lower()
+    assert "250 ma" in evidence
+    assert "gnd with 1v1" in evidence
+    assert "rp2040" in evidence
+    assert "ina219" in evidence
