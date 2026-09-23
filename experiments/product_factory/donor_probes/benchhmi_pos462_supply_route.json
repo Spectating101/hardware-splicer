@@ -32,7 +32,7 @@
     "required_supply_depth_multiple": 2,
     "rework_minutes_per_sellable": 15,
     "rework_materials_usd_per_sellable": 4.6154,
-    "new_parts_usd_per_sellable": 40,
+    "new_parts_usd_per_sellable": 50.7692,
     "final_qa_minutes_per_sellable": 15,
     "warranty_reserve_usd_per_sellable": 10.7692,
     "reject_disposal_usd_per_reject": 0,
