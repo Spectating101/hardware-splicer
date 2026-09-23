@@ -1,0 +1,121 @@
+{
+  "schema": "hardware_splicer.product_factory_price_validation.v1",
+  "product_id": "benchhmi-v0",
+  "observed_at": "2026-09-24",
+  "currency": "TWD",
+  "current_target_price": 8990,
+  "conclusion": "PLAUSIBLE_BUT_UNVALIDATED",
+  "conclusion_detail": "NT$8,990 is not supported for a refurbished POS or generic HMI alone. It is commercially plausible only if BenchHMI is delivered as a complete bench-automation appliance: qualified touchscreen computer + protected multi-protocol BenchIO + reproducible software/workflows + unit QA/warranty.",
+  "market_examples": [
+    {
+      "category": "mainstream_HMI",
+      "product": "Delta DOP-107WV",
+      "observed_price_twd_range": [
+        7676,
+        8022
+      ],
+      "marketplace_sales": 6,
+      "source": "https://www.ruten.com.tw/search/%E5%8F%B0%E9%81%94%E4%BA%BA%E6%A9%9F/?cateid=00110016",
+      "interpretation": "Demonstrates actual Taiwan transactions near NT$8k for a recognized 7-inch HMI."
+    },
+    {
+      "category": "mainstream_HMI",
+      "product": "Delta DOP-107EG",
+      "observed_price_twd_range": [
+        9030,
+        9377
+      ],
+      "marketplace_sales": 3,
+      "source": "https://www.ruten.com.tw/search/%E5%8F%B0%E9%81%94%E4%BA%BA%E6%A9%9F/?cateid=00110016",
+      "interpretation": "Demonstrates actual Taiwan transactions around the proposed NT$8,990 BenchHMI price."
+    },
+    {
+      "category": "mainstream_HMI_family",
+      "product": "Delta DOP-100 series listing",
+      "observed_price_twd_range": [
+        5665,
+        12826
+      ],
+      "marketplace_sales": 87,
+      "source": "https://www.ruten.com.tw/search/%E5%8F%B0%E9%81%94%E4%BA%BA%E6%A9%9F/?cateid=00110016",
+      "interpretation": "Shows a liquid HMI price band spanning and exceeding BenchHMI's target."
+    },
+    {
+      "category": "training_test_system",
+      "product": "PLC 485 Modbus training/control kit",
+      "observed_price_twd_range": [
+        6655,
+        26532
+      ],
+      "marketplace_sales": 46,
+      "source": "https://www.ruten.com.tw/item/22126461918338/",
+      "interpretation": "Closer use-case evidence: customers buy integrated automation/training systems rather than only bare HMI panels."
+    },
+    {
+      "category": "new_generic_panel_pc",
+      "product": "generic industrial touch PC",
+      "observed_price_twd_range": [
+        7513,
+        12364
+      ],
+      "marketplace_sales": 0,
+      "source": "https://www.ruten.com.tw/item/22635470822865/",
+      "interpretation": "Strong warning: BenchHMI cannot justify NT$8,990 merely by providing a touchscreen PC."
+    },
+    {
+      "category": "industrial_touch_pc",
+      "product": "Advantech UTC-307GP-IOT0E",
+      "observed_price_twd": 18890,
+      "source": "https://iotmart.advantech.com.tw/Widget.aspx?WidgetID=3035",
+      "interpretation": "Upper professional anchor only; not a claim of industrial equivalence."
+    },
+    {
+      "category": "remote_io",
+      "product": "Advantech ADAM-4055-C 8DI/8DO",
+      "observed_price_twd": 3690,
+      "source": "https://iotmart.advantech.com.tw/Data-Acquisition-Control/Remote-IO-Module-RS-485-I-O-Module/AITW_22299.products.htm",
+      "interpretation": "Demonstrates that protected I/O itself carries meaningful value in the professional market."
+    },
+    {
+      "category": "can_adapter",
+      "product": "industrial isolated dual-channel USB-CAN",
+      "observed_price_twd": 1550,
+      "marketplace_sales": 159,
+      "source": "https://www.ruten.com.tw/search/usbcan/?sort=ords%2Fdc",
+      "interpretation": "Shows active local demand for CAN tooling, while also proving CAN hardware alone is too cheap to justify BenchHMI pricing."
+    }
+  ],
+  "target_product_bundle": {
+    "required_at_8990": [
+      "qualified touchscreen donor with known-good SSD and unit QA",
+      "external BenchIO sidecar",
+      "at least two isolated RS-485 channels",
+      "CAN interface",
+      "protected low-voltage DI/DO",
+      "preconfigured local device/test console",
+      "repeatable device profiles/test workflows",
+      "finished-unit evidence receipt",
+      "explicit remanufactured-product disclosure",
+      "bounded warranty/support policy"
+    ],
+    "insufficient_for_8990": [
+      "refurbished POS only",
+      "touchscreen Linux PC only",
+      "generic Modbus HMI only",
+      "USB adapters loosely bundled without integrated software/workflow"
+    ]
+  },
+  "commercial_validation_gate": {
+    "scale_lot_authorized": false,
+    "target_price_validated": false,
+    "required_before_scale": [
+      "at least one paid pilot or equivalent purchase commitment at or near NT$8,990",
+      "or multiple independent serious buyer interviews showing the complete bundle solves a real bench/test workflow at the target price",
+      "record which capability drove willingness to pay",
+      "record whether remanufactured donor hardware materially reduces willingness to pay",
+      "do not infer demand from competitor listings alone"
+    ],
+    "first_offer_strategy": "Test the complete BenchHMI/BenchIO appliance as one SKU. Do not test a bare refurbished-POS SKU because the market already has cheap used POS and new generic HMI/panel-PC alternatives."
+  },
+  "boundary": "Comparable product prices and marketplace sales establish price-band plausibility, not demand for BenchHMI. The NT$8,990 target remains commercially unvalidated until direct buyer evidence exists."
+}
