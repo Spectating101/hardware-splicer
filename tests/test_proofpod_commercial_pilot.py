@@ -9,9 +9,9 @@ PILOT = ROOT / "hardware" / "reference_designs" / "proofpod_v0"
 SCAN = ROOT / "experiments" / "commercial_arbitrage" / "market_scan_2026-09-23.json"
 
 
-def test_proofpod_remains_pre_schematic_and_unproven() -> None:
+def test_proofpod_remains_pre_pcb_and_unproven() -> None:
     contract = json.loads((PILOT / "product_contract.json").read_text())
-    assert contract["status"] == "CONCEPT_CONTRACT"
+    assert contract["status"] == "SCHEMATIC_GATE_PENDING_CI"
     assert contract["authority"] == {
         "schematic_complete": False,
         "pcb_complete": False,
