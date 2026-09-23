@@ -5,19 +5,83 @@
   "opened_at": "2026-09-23",
   "purpose": "Use Hardware Splicer on itself to discover, specify, design, verify, manufacture, benchmark, and potentially sell a hardware product.",
   "stages": [
-    {"id":"DISCOVER","state":"PASS","evidence":["experiments/commercial_arbitrage/market_scan_2026-09-23.json"]},
-    {"id":"SELECT","state":"PASS","evidence":["experiments/commercial_arbitrage/evaluate.py"],"decision":"ADVANCE_TO_SCHEMATIC"},
-    {"id":"SPECIFY","state":"PASS","evidence":["hardware/reference_designs/proofpod_v0/product_contract.json","hardware/reference_designs/proofpod_v0/architecture_manifest.json"]},
-    {"id":"DESIGN_SCHEMATIC","state":"ACTIVE","evidence":[]},
-    {"id":"VERIFY_SCHEMATIC","state":"BLOCKED_ON_DESIGN","evidence":[]},
-    {"id":"DESIGN_PCB","state":"BLOCKED_ON_SCHEMATIC","evidence":[]},
-    {"id":"VERIFY_PCB","state":"BLOCKED_ON_PCB","evidence":[]},
-    {"id":"SOURCE","state":"BLOCKED_ON_VERIFIED_PCB","evidence":[]},
-    {"id":"BUILD","state":"BLOCKED_ON_SOURCE_AND_HUMAN_AUTHORITY","evidence":[]},
-    {"id":"PROVE","state":"BLOCKED_ON_PHYSICAL_ARTIFACT","evidence":[]},
-    {"id":"BENCHMARK","state":"BLOCKED_ON_PHYSICAL_PROOF","evidence":[]},
-    {"id":"SELL","state":"BLOCKED_ON_BENCHMARK_AND_HUMAN_DECISION","evidence":[]},
-    {"id":"LEARN","state":"ACTIVE_CONTINUOUS","evidence":["architecture correction: generic load switch replaced by explicit current-limited reverse-protected TPS2553 path"]}
+    {
+      "id": "DISCOVER",
+      "state": "PASS",
+      "evidence": [
+        "experiments/commercial_arbitrage/market_scan_2026-09-23.json"
+      ]
+    },
+    {
+      "id": "SELECT",
+      "state": "PASS",
+      "evidence": [
+        "experiments/commercial_arbitrage/evaluate.py"
+      ],
+      "decision": "ADVANCE_TO_SCHEMATIC"
+    },
+    {
+      "id": "SPECIFY",
+      "state": "PASS",
+      "evidence": [
+        "hardware/reference_designs/proofpod_v0/product_contract.json",
+        "hardware/reference_designs/proofpod_v0/architecture_manifest.json"
+      ]
+    },
+    {
+      "id": "DESIGN_SCHEMATIC",
+      "state": "ACTIVE",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_SCHEMATIC",
+      "state": "BLOCKED_ON_DESIGN",
+      "evidence": []
+    },
+    {
+      "id": "DESIGN_PCB",
+      "state": "BLOCKED_ON_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_PCB",
+      "state": "BLOCKED_ON_PCB",
+      "evidence": []
+    },
+    {
+      "id": "SOURCE",
+      "state": "BLOCKED_ON_VERIFIED_PCB",
+      "evidence": []
+    },
+    {
+      "id": "BUILD",
+      "state": "BLOCKED_ON_SOURCE_AND_HUMAN_AUTHORITY",
+      "evidence": []
+    },
+    {
+      "id": "PROVE",
+      "state": "BLOCKED_ON_PHYSICAL_ARTIFACT",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK",
+      "state": "BLOCKED_ON_PHYSICAL_PROOF",
+      "evidence": []
+    },
+    {
+      "id": "SELL",
+      "state": "BLOCKED_ON_BENCHMARK_AND_HUMAN_DECISION",
+      "evidence": []
+    },
+    {
+      "id": "LEARN",
+      "state": "ACTIVE_CONTINUOUS",
+      "evidence": [
+        "architecture correction: generic load switch replaced by explicit current-limited reverse-protected TPS2553 path because the original concept did not enforce the <=250 mA contract",
+        "schematic-generator correction: 5.08 mm label stubs on compact vertical passives overlapped and merged GND with 1V1; passive stubs reduced and complete pin/net contract verification added",
+        "toolchain reproducibility correction: safety-critical INA219 and RP2040 symbol identities pinned project-locally after distro KiCad library drift/load failures"
+      ]
+    }
   ],
   "metrics": {
     "target_board_msrp_usd": 79,
@@ -26,7 +90,8 @@
     "target_kit_cogs_ceiling_usd_at_100": 30,
     "target_min_gross_margin_fraction": 0.65,
     "preliminary_board_budget_usd": 18.65,
-    "engineering_defects_caught_before_pcb": 1
+    "engineering_defects_caught_before_pcb": 2,
+    "toolchain_reproducibility_defects_caught": 2
   },
   "claim_boundary": "A PASS through SELECT/SPECIFY means only that the concept warrants engineering time. It is not evidence of physical correctness, demand, incumbent replacement, revenue, or commercial superiority."
 }
