@@ -18,7 +18,7 @@ PARTS = [
     ("Memory_Flash:W25Q32JVSS", "U2", "W25Q32JVSSIQ", (165, 45), "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", {"Manufacturer": "Winbond Electronics", "MPN": "W25Q32JVSSIQ"}),
     ("HardwareSplicer:TXU0304PW", "U3", "TXU0304PWR", (185, 95), "Package_SO:TSSOP-14_4.4x5mm_P0.65mm", {"Manufacturer": "Texas Instruments", "MPN": "TXU0304PWR"}),
     ("Interface:PCA9306DC", "U4", "PCA9306DCTR", (185, 145), "Package_SO:VSSOP-8_3x3mm_P0.65mm", {"Manufacturer": "Texas Instruments", "MPN": "PCA9306DCTR"}),
-    ("Analog_ADC:INA219AxDCN", "U5", "INA219AIDCNR", (120, 155), "Package_TO_SOT_SMD:SOT-23-8", {"Manufacturer": "Texas Instruments", "MPN": "INA219AIDCNR"}),
+    ("HardwareSplicer:INA219DCN", "U5", "INA219AIDCNR", (120, 155), "Package_TO_SOT_SMD:SOT-23-8", {"Manufacturer": "Texas Instruments", "MPN": "INA219AIDCNR"}),
     ("Regulator_Linear:TLV75533PDBV", "U6", "TLV75533PDBVR", (55, 35), "Package_TO_SOT_SMD:SOT-23-5", {"Manufacturer": "Texas Instruments", "MPN": "TLV75533PDBVR"}),
     ("Regulator_Linear:TLV75518PDBV", "U7", "TLV75518PDBVR", (80, 35), "Package_TO_SOT_SMD:SOT-23-5", {"Manufacturer": "Texas Instruments", "MPN": "TLV75518PDBVR"}),
     ("HardwareSplicer:TPS2553DBV", "U8", "TPS2553DBVR", (120, 125), "Package_TO_SOT_SMD:SOT-23-6", {"Manufacturer": "Texas Instruments", "MPN": "TPS2553DBVR"}),
