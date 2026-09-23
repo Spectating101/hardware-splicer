@@ -2,32 +2,59 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BrainCircuit, ArrowRight, Waypoints } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileCheck2, Waypoints } from 'lucide-react';
 
 export function ProjectStudioLauncher() {
   const pathname = usePathname();
-  if (pathname.startsWith('/engineering/visual')) return null;
+  if (pathname.startsWith('/engineering/visual') || pathname.startsWith('/engineering/evidence')) return null;
 
   const insideStudio = pathname.startsWith('/engineering/studio');
   const href = insideStudio ? '/engineering/visual' : '/engineering/studio';
-  const eyebrow = insideStudio ? 'Open the artifact' : 'Start here';
-  const label = insideStudio ? 'Visual Workbench' : 'Project Studio';
-  const Icon = insideStudio ? Waypoints : BrainCircuit;
+
+  if (insideStudio) {
+    return (
+      <div className="fixed bottom-4 left-4 z-[80] flex items-stretch gap-2">
+        <Link
+          href="/engineering/evidence"
+          className="inline-flex items-center gap-3 rounded-lg border border-stone-300 bg-white/95 px-4 py-3 text-sm font-semibold text-stone-900 shadow-lg shadow-stone-950/10 backdrop-blur transition hover:border-stone-400 hover:bg-stone-50"
+          aria-label="Open Hardware Splicer Project Review"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-stone-100 text-stone-700">
+            <FileCheck2 className="h-4 w-4" />
+          </span>
+          <span>
+            <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-stone-500">Review current state</span>
+            <span className="block">Project Review</span>
+          </span>
+          <ArrowRight className="h-4 w-4 text-stone-400" />
+        </Link>
+
+        <Link
+          href={href}
+          className="inline-flex items-center gap-2 rounded-lg border border-stone-300 bg-white/95 px-3 py-3 text-xs font-medium text-stone-600 shadow-lg shadow-stone-950/10 backdrop-blur transition hover:border-stone-400 hover:text-stone-900"
+          aria-label="Open Hardware Splicer Visual Workbench"
+        >
+          <Waypoints className="h-4 w-4" />
+          Visual Workbench
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <Link
       href={href}
-      className="fixed bottom-4 left-4 z-[80] inline-flex items-center gap-3 rounded-2xl border border-cyan-300/25 bg-[#07111f]/95 px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(2,6,23,0.55)] backdrop-blur transition hover:border-cyan-200/45 hover:bg-[#0a1a2d]"
-      aria-label={`Open Hardware Splicer ${label}`}
+      className="fixed bottom-4 left-4 z-[80] inline-flex items-center gap-3 rounded-lg border border-stone-300 bg-white/95 px-4 py-3 text-sm font-semibold text-stone-900 shadow-lg shadow-stone-950/10 backdrop-blur transition hover:border-stone-400 hover:bg-stone-50"
+      aria-label="Open Hardware Splicer Project Studio"
     >
-      <span className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-2 text-cyan-100">
-        <Icon className="h-4 w-4" />
+      <span className="flex h-8 w-8 items-center justify-center rounded-md bg-stone-100 text-stone-700">
+        <BrainCircuit className="h-4 w-4" />
       </span>
       <span>
-        <span className="block text-[10px] uppercase tracking-[0.18em] text-cyan-300">{eyebrow}</span>
-        <span className="block">{label}</span>
+        <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-stone-500">Start here</span>
+        <span className="block">Project Studio</span>
       </span>
-      <ArrowRight className="h-4 w-4 text-slate-400" />
+      <ArrowRight className="h-4 w-4 text-stone-400" />
     </Link>
   );
 }

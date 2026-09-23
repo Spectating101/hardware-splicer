@@ -5,28 +5,48 @@ on:
   push:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/evidence/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/hardware-splicer/build-files/**"
+      - "apps/circuit-ai/circuit-ai-frontend/public/kicanvas/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/evidence-artifact-viewport.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/evidence-workspace-nav.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-evidence-workspace-competitive.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
+      - "docs/COMPETITIVE_INTERFACE_ACCEPTANCE.md"
       - ".github/workflows/visual-engineering-workbench.yml"
   pull_request:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/evidence/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/hardware-splicer/build-files/**"
+      - "apps/circuit-ai/circuit-ai-frontend/public/kicanvas/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/evidence-artifact-viewport.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/evidence-workspace-nav.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-compare.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-verify-bringup.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-evidence-workspace-competitive.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
       - "docs/PUBLIC_VISUAL_STACK_DECISION.md"
+      - "docs/COMPETITIVE_INTERFACE_ACCEPTANCE.md"
       - ".github/workflows/visual-engineering-workbench.yml"
 
 jobs:
@@ -72,13 +92,14 @@ jobs:
           ln -s /tmp/hs-playwright/node_modules/@playwright/test node_modules/@playwright/test
           ln -s /tmp/hs-playwright/node_modules/playwright node_modules/playwright
           ln -s /tmp/hs-playwright/node_modules/playwright-core node_modules/playwright-core
-      - name: Validate moat contracts and production build
+      - name: Validate competitive contracts and production build
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
           node scripts/test-visual-engineering-workbench.cjs
+          node scripts/test-evidence-workspace-competitive.cjs
           npm run typecheck
           npm run build
-      - name: Run visual workbench browser path
+      - name: Run visual and project-review browser paths
         run: |
           set -euo pipefail
           python scripts/mock_canonical_project_studio_backend.py > /tmp/visual-workbench-backend.log 2>&1 &
@@ -93,7 +114,11 @@ jobs:
           trap cleanup EXIT
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8090/healthz >/dev/null \
-              && curl --fail --silent http://127.0.0.1:3000/engineering/visual >/dev/null; then
+              && curl --fail --silent http://127.0.0.1:3000/engineering/visual >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/compare >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/verify >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence/bringup >/dev/null; then
               break
             fi
             if [ "$attempt" -eq 60 ]; then
@@ -104,7 +129,11 @@ jobs:
             sleep 2
           done
           pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
-          /tmp/hs-playwright/node_modules/.bin/playwright test e2e/visual-engineering-workbench.spec.js \
+          /tmp/hs-playwright/node_modules/.bin/playwright test \
+            e2e/visual-engineering-workbench.spec.js \
+            e2e/evidence-workspace.spec.js \
+            e2e/evidence-compare.spec.js \
+            e2e/evidence-verify-bringup.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
