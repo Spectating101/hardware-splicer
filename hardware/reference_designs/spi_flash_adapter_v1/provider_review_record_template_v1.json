@@ -7,7 +7,8 @@
     "release_tag": "gauntlet-spi-flash-adapter-v1-20260916",
     "revision": "f892facd67c5124e2362860ebc999625afedc5d5",
     "package": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
-    "package_sha256": null
+    "package_sha256": "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd",
+    "release_url": "https://github.com/Spectating101/hardware-splicer/releases/tag/gauntlet-spi-flash-adapter-v1-20260916"
   },
   "provider": {
     "name": null,
