@@ -124,7 +124,10 @@ def add_pin_label(schematic: ksa.Schematic, reference: str, pin: str, net: str) 
         raise RuntimeError(f"missing {reference}")
     dx = position.x - component.position.x
     dy = position.y - component.position.y
-    stub = 5.08
+    # Two-pin vertical passives can have pins only 3.81 mm apart. A 5.08 mm
+    # label stub from each side overlaps through the symbol and electrically
+    # shorts the nets. Keep their stubs below half that separation.
+    stub = 1.27 if reference.startswith(("R", "C", "Y")) else 5.08
     if abs(dx) >= abs(dy):
         direction = -1 if dx < 0 else 1
         end = (position.x + direction * stub, position.y)
