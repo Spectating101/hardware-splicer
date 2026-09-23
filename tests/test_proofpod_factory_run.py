@@ -56,5 +56,6 @@ def test_safety_critical_symbols_are_local_and_reviewable() -> None:
     assert 'symbol "TXU0304PW"' in symbols
     assert 'symbol "TPS2553DBV"' in symbols
     assert 'symbol "INA219DCN"' in symbols
+    assert 'symbol "RP2040QFN56"' in symbols
     assert "tps2553.pdf" in symbols
     assert "ina219.pdf" in symbols
