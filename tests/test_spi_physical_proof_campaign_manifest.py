@@ -11,6 +11,10 @@ PROVIDER_TEMPLATE = REFERENCE / "provider_review_record_template_v1.json"
 PROVIDER_SCORECARD = REFERENCE / "PROVIDER_SELECTION_SCORECARD.json"
 PROVIDER_QUOTE_REQUEST = REFERENCE / "PROVIDER_QUOTE_REQUEST.md"
 PACKAGE_SHA256 = "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd"
+PENDING_PROVIDER_RECORDS = [
+    REFERENCE / "provider_review_jlcpcb_pending_v1.json",
+    REFERENCE / "provider_review_pcbway_pending_v1.json",
+]
 
 
 def load_manifest():
@@ -136,3 +140,14 @@ def test_campaign_and_provider_records_bind_release_digest():
     assert record["subject"]["package_sha256"] == PACKAGE_SHA256
     assert PACKAGE_SHA256 in quote
     assert manifest["canonical_source"]["revision"] == record["subject"]["revision"]
+
+
+def test_pending_provider_records_are_contact_ready_but_authority_empty():
+    for path in PENDING_PROVIDER_RECORDS:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        assert record["contact_state"] == "PENDING_SEND"
+        assert record["outbound_inquiry"]["state"] == "READY_NOT_SENT"
+        assert record["received_at"] is None
+        assert record["human_disposition"]["status"] == "needs_followup"
+        assert all(value is False for value in record["authority_effect"].values())
+        assert record["subject"]["package_sha256"] == PACKAGE_SHA256
