@@ -8,13 +8,10 @@ on:
       - "experiments/product_factory/**"
       - "tests/test_proofpod_*.py"
       - ".github/workflows/proofpod-factory.yml"
-  push:
-    paths:
-      - "hardware/reference_designs/proofpod_v0/**"
-      - "experiments/commercial_arbitrage/**"
-      - "experiments/product_factory/**"
-      - "tests/test_proofpod_*.py"
-      - ".github/workflows/proofpod-factory.yml"
+
+concurrency:
+  group: proofpod-pf001-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   schematic-gate:
