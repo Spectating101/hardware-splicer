@@ -22,7 +22,9 @@ def test_benchnode_probe_has_attractive_hypothetical_economics_but_holds_on_supp
     assert result["savings_vs_all_new_fraction"] >= ROUTE["minimum_donor_savings_fraction"]
     assert result["decision"] == "HOLD_SUPPLY_ROUTE"
     assert result["checks"]["supply_depth"] is False
+    assert result["checks"]["yield_evidence"] is False
     assert "supply_depth" in result["blockers"]
+    assert "yield_evidence" in result["blockers"]
 
 
 def test_benchnode_does_not_get_physical_authority_from_good_paper_economics() -> None:
