@@ -127,7 +127,7 @@ def add_pin_label(schematic: ksa.Schematic, reference: str, pin: str, net: str) 
     # Two-pin vertical passives can have pins only 3.81 mm apart. A 5.08 mm
     # label stub from each side overlaps through the symbol and electrically
     # shorts the nets. Keep their stubs below half that separation.
-    stub = 1.27 if reference.startswith(("R", "C", "Y")) else 5.08
+    # The USB-C symbol has densely packed and stacked pins. Long label stubs can\n    # cross neighboring symbol geometry and merge nets in the serialized KiCad\n    # schematic even when the logical PIN_NETS map is correct. Keep J1 short too.\n    stub = 1.27 if reference == "J1" or reference.startswith(("R", "C", "Y")) else 5.08
     if abs(dx) >= abs(dy):
         direction = -1 if dx < 0 else 1
         end = (position.x + direction * stub, position.y)
