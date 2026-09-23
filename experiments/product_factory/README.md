@@ -54,3 +54,17 @@ This chain is itself a Hardware Splicer benchmark.
 It tests a protected SPI/I2C validation pod positioned between cheap bare protocol bridges and professional embedded host/programmer tools.
 
 The run is intentionally allowed to fail. A useful failure that exposes a design, sourcing or market flaw before production is positive evidence about the Product Factory workflow.
+
+## Refinery intake
+
+Refinery can now hand a screened market hypothesis to Product Factory through `hardware_splicer.product_factory_seed.v1`.
+
+The importer is:
+
+`experiments/product_factory/import_refinery_seed.py`
+
+A valid seed may open **design work only**. The importer rechecks economics and refuses any seed that attempts to grant fabrication or physical authority. The generated run starts at `READY_FOR_HS_PRODUCT_CONTRACT`; Hardware Splicer must still establish its own specification, schematic, PCB, sourcing, physical proof and benchmark.
+
+This keeps the cross-system contract explicit:
+
+`Refinery reviewed market -> Spectator commercial enrichment -> Refinery gate -> HS Product Factory -> Gauntlet conversion -> Refinery learning`
