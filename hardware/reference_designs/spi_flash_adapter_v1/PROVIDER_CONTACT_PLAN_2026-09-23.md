@@ -14,10 +14,14 @@ Public contact route:
 - support email listed on the official FCT page: `support@jlcpcb.com`
 - live support: Mon-Fri 24h, Sat 09:00-18:00 GMT+8
 
-Current public commercial baseline:
-- FCT engineering fee: approximately USD 16
-- operator labor: approximately USD 8/hour
-- first-board test video is typically returned for confirmation
+Current public commercial baseline (official JLCPCB FCT page, updated 2026-09-09):
+- FCT is available for Standard PCBA orders;
+- customer provides the detailed power-on test procedure / acceptance method;
+- engineering fee: approximately USD 16;
+- operator labor: approximately USD 8/hour;
+- first-board test video is typically returned for customer confirmation;
+- fixture support may be available after engineering evaluation;
+- special requirements can be raised through the Standard PCBA quote/order flow and Advanced Options -> Function Test
 
 What the public page does **not** establish:
 - raw cold-measurement return;
@@ -34,14 +38,16 @@ Public contact route:
 - contact/sales form and online PCBA quote are available on the official site
 - published email service hours: 09:00-23:00 daily GMT+8
 
-Current public capability baseline:
+Current public capability baseline (official PCBWay functional-testing/contact surfaces checked 2026-09-23):
 - custom electrical + functional test;
+- AOI / X-ray / ICT are available around the assembly flow;
 - power-on testing;
 - communication testing;
 - power-consumption measurement;
 - customer-supplied test plan, procedure and acceptance criteria;
 - fixture/jig review;
-- engineering support for workflow/report preparation.
+- engineering support for workflow/report preparation;
+- quote/contact path supports free-form testing criteria and special requirements.
 
 What the public pages do **not** establish:
 - exact NRE/labor cost for this campaign;
