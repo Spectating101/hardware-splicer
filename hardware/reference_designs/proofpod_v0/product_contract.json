@@ -1,0 +1,67 @@
+{
+  "schema": "hardware_splicer.commercial_product_contract.v1",
+  "product_id": "proofpod-v0",
+  "working_name": "ProofPod v0",
+  "status": "CONCEPT_CONTRACT",
+  "authority": {
+    "schematic_complete": false,
+    "pcb_complete": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_claims_validated": false
+  },
+  "customer": "Embedded developers, validation engineers and small NPI/test teams that need repeatable low-speed SPI/I2C interaction without paying several hundred dollars for a professional host adapter/programmer.",
+  "positioning": "A protected, scriptable USB-C SPI/I2C validation pod between bare hobby bridges and professional $275-$375 tools.",
+  "economics": {
+    "board_only_msrp_usd": 79,
+    "kit_msrp_usd": 99,
+    "board_only_landed_cogs_ceiling_usd_at_100": 20,
+    "kit_landed_cogs_ceiling_usd_at_100": 30,
+    "minimum_target_gross_margin_fraction": 0.65,
+    "note": "These are design targets, not supplier quotes."
+  },
+  "v0_scope": {
+    "host": "USB-C 5V sink, no USB-PD negotiation",
+    "controller_candidate": "Raspberry Pi RP2040",
+    "protocols": ["SPI master", "I2C master"],
+    "spi_max_hz": 8000000,
+    "i2c_max_hz": 400000,
+    "target_logic_range_v": [1.8, 5.0],
+    "pod_supplied_target_rails_v": [1.8, 3.3],
+    "target_current_limit_ma_max": 250,
+    "target_power_current_telemetry": true,
+    "external_target_vref_mode": true,
+    "signal_outputs_default_disabled": true,
+    "target_power_default_off": true,
+    "writes_default_disabled": true,
+    "physical_write_arm_required": true,
+    "transaction_receipt_required": true
+  },
+  "candidate_architecture": {
+    "mcu": "RP2040",
+    "mcu_flash": "external QSPI NOR",
+    "spi_level_translation": "TXU0304-class fixed-direction translator",
+    "i2c_level_translation": "PCA9306-class bidirectional translator",
+    "target_power_switch": "slew-controlled load switch",
+    "target_current_monitor": "INA219-class high-side monitor",
+    "target_supply": "separate 1.8V and 3.3V low-current rails selected before enable",
+    "protection": ["USB ESD", "target-line series resistance", "target connector ESD", "explicit signal OE", "current-limited target power"],
+    "connector_strategy": "keyed primary target connector plus simple breakout adapter"
+  },
+  "evidence_receipt": {
+    "minimum_fields": ["hardware_revision","firmware_hash","host_tool_version","requested_target_voltage","measured_target_voltage","measured_target_current","protocol","clock_hz","operation_class","request_bytes","response_bytes","result","timestamp_source"],
+    "rule": "A successful protocol call is not sufficient by itself; the receipt must bind the transaction to the exact pod revision, firmware and target-power state."
+  },
+  "explicit_non_goals_v0": [
+    "logic analyzer",
+    "oscilloscope",
+    "JTAG/SWD debugger",
+    "galvanic isolation",
+    "USB protocol analyzer",
+    "high-voltage target support",
+    "more than 250mA target power",
+    "autonomous write/erase without physical user arm",
+    "production programmer throughput claims"
+  ],
+  "next_gate": "Resolve exact parts/symbols and generate an editable KiCad schematic; then require ERC and topology checks before any PCB routing."
+}
