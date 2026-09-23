@@ -14,7 +14,7 @@ OUTPUT = HERE / "proofpod_v0.kicad_sch"
 
 PARTS = [
     ("Connector:USB_C_Receptacle_USB2.0_16P", "J1", "USB_C", (25, 55), "", {"Purpose": "USB-C 5V + USB2 device"}),
-    ("MCU_RaspberryPi:RP2040", "U1", "RP2040", (105, 85), "Package_DFN_QFN:QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm", {"Manufacturer": "Raspberry Pi", "MPN": "RP2040"}),
+    ("HardwareSplicer:RP2040QFN56", "U1", "RP2040", (105, 85), "Package_DFN_QFN:QFN-56-1EP_7x7mm_P0.4mm_EP3.2x3.2mm", {"Manufacturer": "Raspberry Pi", "MPN": "RP2040"}),
     ("Memory_Flash:W25Q32JVSS", "U2", "W25Q32JVSSIQ", (165, 45), "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", {"Manufacturer": "Winbond Electronics", "MPN": "W25Q32JVSSIQ"}),
     ("HardwareSplicer:TXU0304PW", "U3", "TXU0304PWR", (185, 95), "Package_SO:TSSOP-14_4.4x5mm_P0.65mm", {"Manufacturer": "Texas Instruments", "MPN": "TXU0304PWR"}),
     ("Interface:PCA9306DC", "U4", "PCA9306DCTR", (185, 145), "Package_SO:VSSOP-8_3x3mm_P0.65mm", {"Manufacturer": "Texas Instruments", "MPN": "PCA9306DCTR"}),
