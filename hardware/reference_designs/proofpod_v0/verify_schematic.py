@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import os
 import subprocess
@@ -16,6 +17,10 @@ HERE = Path(__file__).resolve().parent
 SCHEMATIC = HERE / "proofpod_v0.kicad_sch"
 MANIFEST = HERE / "architecture_manifest.json"
 OUTPUT = HERE / "schematic_verification.json"
+
+GEN_SPEC = importlib.util.spec_from_file_location("proofpod_generator_contract", HERE / "generate_schematic.py")
+GEN = importlib.util.module_from_spec(GEN_SPEC)
+GEN_SPEC.loader.exec_module(GEN)
 
 REQUIRED = {
     ("U8", "1"): "TARGET_SOURCE",
@@ -110,6 +115,18 @@ def main() -> None:
         components = component_map(root)
         actual = actual_pin_nets(root)
 
+        # Verify the complete generator pin/net contract, not only a safety subset.
+        # This catches geometric wire/label accidents that can silently merge rails.
+        expected_pin_nets = {
+            (reference, pin): net
+            for reference, pins in GEN.PIN_NETS.items()
+            if not reference.startswith("#FLG")
+            for pin, net in pins.items()
+        }
+        for key, expected in expected_pin_nets.items():
+            if actual.get(key) != expected:
+                fail(f"pin/net contract violated: {key[0]}.{key[1]} expected {expected}, got {actual.get(key)}")
+
         for key, expected in REQUIRED.items():
             if actual.get(key) != expected:
                 fail(f"required topology violated: {key[0]}.{key[1]} expected {expected}, got {actual.get(key)}")
@@ -154,6 +171,7 @@ def main() -> None:
             "product_id": "proofpod-v0",
             "result": "PASS",
             "checks": {
+                "complete_pin_net_contract_issues": 0,
                 "required_topology_issues": 0,
                 "component_identity_issues": 0,
                 "erc_violations": 0,
