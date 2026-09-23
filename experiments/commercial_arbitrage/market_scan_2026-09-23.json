@@ -1,0 +1,24 @@
+{
+  "schema": "hardware_splicer.commercial_arbitrage_scan.v1",
+  "observed_at": "2026-09-23",
+  "currency_note": "Prices are public observed list/retail prices, not normalized landed prices.",
+  "benchmarks": [
+    {"id":"adafruit-ft232h","category":"bare_usb_protocol_bridge","price":14.95,"currency":"USD","url":"https://www.adafruit.com/product/2264","notes":"USB-C FT232H breakout; SPI/I2C/UART/GPIO."},
+    {"id":"bus-pirate-5","category":"multi_protocol_hacker_tool","price_low":59,"price_high":89,"currency":"EUR","url":"https://lab401.com/products/bus-pirate-v5","notes":"Standalone to complete kit."},
+    {"id":"dediprog-sf100","category":"spi_flash_programmer","price":275,"currency":"USD","url":"https://dediprog.com/product/SF100","notes":"Professional SPI NOR ISP programmer with power/control protections."},
+    {"id":"total-phase-aardvark","category":"professional_i2c_spi_host","price":375,"currency":"USD","url":"https://www.totalphase.com/products/aardvark-i2cspi/","notes":"USB I2C/SPI host adapter; up to 800 kHz I2C and 8 MHz SPI master."},
+    {"id":"lascar-el-usb-4","category":"industrial_current_logger","price":115.91,"currency":"USD","url":"https://lascarelectronics.com/product/data-loggers/voltage-current/el-usb-4/","notes":"Standalone 4-20mA logger."},
+    {"id":"segger-jlink-base","category":"professional_debug_probe","price":598,"currency":"USD","url":"https://shop-us.segger.com/product/j%E2%80%91link-base-classic-8-08-00/","notes":"Commercial debug probe; software/support moat is substantial."},
+    {"id":"saleae-logic-8","category":"logic_analyzer","price":499,"currency":"USD","url":"https://www.saleae.com/support/specifications-hardware/datasheets-and-compliance/saleae-part-numbers","notes":"8-channel Logic 8 list price."},
+    {"id":"saleae-logic-pro-8","category":"logic_analyzer","price":999,"currency":"USD","url":"https://store.saleae.com/products/logic-pro-8","notes":"8-channel 500 MS/s mixed-signal analyzer."},
+    {"id":"joulescope-js320","category":"precision_power_analyzer","price":999,"currency":"USD","url":"https://www.joulescope.com/products/js320","notes":"Precision calibrated power/energy analyzer."}
+  ],
+  "candidate_products": [
+    {"id":"proofpod-v0","concept":"Protected SPI/I2C validation and programming pod with target-power telemetry and evidence receipts.","market_gap":4,"build_difficulty":2,"hardware_splicer_leverage":5,"calibration_regulatory_burden":2,"priority":1},
+    {"id":"looppod-v0","concept":"USB 4-20mA current-loop logger with modern export/API and explicit calibration state.","market_gap":4,"build_difficulty":2,"hardware_splicer_leverage":3,"calibration_regulatory_burden":3,"priority":2},
+    {"id":"debugpod-v0","concept":"Open SWD/JTAG debug probe with target protection and reproducible session receipts.","market_gap":5,"build_difficulty":4,"hardware_splicer_leverage":3,"calibration_regulatory_burden":3,"priority":3},
+    {"id":"logicpod-v0","concept":"Modern USB logic analyzer positioned below Saleae professional pricing.","market_gap":5,"build_difficulty":5,"hardware_splicer_leverage":3,"calibration_regulatory_burden":3,"priority":4},
+    {"id":"powerpod-v0","concept":"Low-current power profiler positioned below Joulescope.","market_gap":5,"build_difficulty":5,"hardware_splicer_leverage":4,"calibration_regulatory_burden":5,"priority":5}
+  ],
+  "selection_rule": "Prefer categories where current professional pricing is high, v0 can be built from ordinary low-voltage components, and Hardware Splicer can add a native evidence/authority advantage without requiring precision analog calibration or proprietary protocol software."
+}
