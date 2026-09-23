@@ -34,13 +34,14 @@
       "priority": "P1",
       "lane": "competitive_frontend_closure",
       "tracking": "Spectating101/hardware-splicer#104",
-      "state": "CLOSURE_CANDIDATE",
-      "goal": "Reach competitive artifact-first usability without reopening evidence or authority semantics."
+      "state": "CLOSED_REOPEN_ON_TRIGGER",
+      "goal": "Keep the merged artifact-first Review/Compare/Verify/Bring-up shell closed unless a concrete usability, evaluator, or source-bound competitor gap reopens it.",
+      "merged_pr": "Spectating101/hardware-splicer#104"
     },
     {
       "priority": "P1",
       "lane": "external_conversion",
-      "tracking": "Spectating101/gauntlet-blowback#60",
+      "tracking": "Spectating101/gauntlet-blowback#60 (merged) + #61 (merged Anthropic manual-submit route)",
       "state": "ACTIVE",
       "goal": "Use HS where hardware physical-agent release-assurance or consequential-authority fit is intrinsic."
     }
@@ -55,7 +56,7 @@
       "priority": "P0"
     },
     "competitive_frontend": {
-      "state": "CLOSURE_CANDIDATE",
+      "state": "CLOSED_REOPEN_ON_TRIGGER",
       "priority": "P1",
       "reopen_requires_any": [
         "rendered usability deficiency",
@@ -80,7 +81,7 @@
   },
   "competitive_feedback": {
     "producer": "Spectating101/refinery#24",
-    "consumer": "Spectating101/gauntlet-blowback#60",
+    "consumer": "Spectating101/gauntlet-blowback main (PR #60 merged)",
     "policy": "competition_is_input_to_improvement_not_automatic_scope_reduction",
     "response_classes": {
       "presentation": "IMPROVE_HS_SHELL",
@@ -129,12 +130,11 @@
     "temporary_pessimism_changes_program_scope": false
   },
   "near_term_sequence": [
-    "close competitive frontend PR 104",
     "land physical-proof contract PR 106",
-    "execute issue 105 through provider review and explicit fabrication decision",
+    "execute issue 105 through parallel provider review and explicit fabrication decision",
     "preserve success or failure against exact board and revision",
     "update paper only after new evidence exists",
-    "fire strongest HS-native Gauntlet routes",
+    "fire strongest HS-native Gauntlet routes including the human-submit-ready Anthropic ERAP route",
     "reassess investment from physical and external outcomes"
   ],
   "authority_guards": {
