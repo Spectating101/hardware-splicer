@@ -2,7 +2,8 @@
   "schema": "hardware_splicer.commercial_product_contract.v1",
   "product_id": "proofpod-v0",
   "working_name": "ProofPod v0",
-  "status": "CONCEPT_CONTRACT",
+  "status": "SCHEMATIC_GATE_PENDING_CI",
+  "factory_run": "PF-001",
   "authority": {
     "schematic_complete": false,
     "pcb_complete": false,
@@ -39,14 +40,15 @@
   },
   "candidate_architecture": {
     "mcu": "RP2040",
-    "mcu_flash": "external QSPI NOR",
-    "spi_level_translation": "TXU0304-class fixed-direction translator",
-    "i2c_level_translation": "PCA9306-class bidirectional translator",
-    "target_power_switch": "slew-controlled load switch",
-    "target_current_monitor": "INA219-class high-side monitor",
-    "target_supply": "separate 1.8V and 3.3V low-current rails selected before enable",
-    "protection": ["USB ESD", "target-line series resistance", "target connector ESD", "explicit signal OE", "current-limited target power"],
-    "connector_strategy": "keyed primary target connector plus simple breakout adapter"
+    "mcu_flash": "W25Q32JVSSIQ external QSPI NOR",
+    "spi_level_translation": "TXU0304PWR fixed 3+1 direction",
+    "i2c_level_translation": "PCA9306DCTR bidirectional open-drain",
+    "target_power_switch": "TPS2553DBVR active-high adjustable current-limited switch with reverse-voltage protection",
+    "target_current_limit_programming": "133k 1% RILIM; ~201.5mA nominal and ~233.9mA datasheet maximum before resistor tolerance",
+    "target_current_monitor": "INA219AIDCNR high-side monitor across 0.1-ohm shunt",
+    "target_supply": "physical 1.8V/3.3V selection before electronically disabled target-power switch",
+    "protection": ["USB ESD pending exact part", "target-line series resistance pending exact values", "target connector ESD pending exact part", "explicit SPI signal OE", "current-limited target power", "reverse-voltage backfeed protection"],
+    "connector_strategy": "keyed primary target connector plus simple breakout adapter; exact MPN pending"
   },
   "evidence_receipt": {
     "minimum_fields": ["hardware_revision","firmware_hash","host_tool_version","requested_target_voltage","measured_target_voltage","measured_target_current","protocol","clock_hz","operation_class","request_bytes","response_bytes","result","timestamp_source"],
@@ -60,8 +62,9 @@
     "USB protocol analyzer",
     "high-voltage target support",
     "more than 250mA target power",
+    "hardware SPI opcode firewall",
     "autonomous write/erase without physical user arm",
     "production programmer throughput claims"
   ],
-  "next_gate": "Resolve exact parts/symbols and generate an editable KiCad schematic; then require ERC and topology checks before any PCB routing."
+  "next_gate": "GitHub Actions must generate the editable KiCad schematic, export the netlist, pass the explicit safety-topology checks, and return zero ERC violations before PCB work can open."
 }
