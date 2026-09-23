@@ -9,7 +9,9 @@
     "package": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
     "starting_state": "PACKAGED_NOT_PHYSICAL",
     "physical_correctness": "UNPROVEN",
-    "successor_substitution_allowed": false
+    "successor_substitution_allowed": false,
+    "package_sha256": "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd",
+    "release_url": "https://github.com/Spectating101/hardware-splicer/releases/tag/gauntlet-spi-flash-adapter-v1-20260916"
   },
   "authority": {
     "provider_selected": false,
@@ -21,7 +23,10 @@
   },
   "provider_recon": {
     "mode": "QUOTE_AND_REVIEW_ONLY",
-    "candidate_names": ["JLCPCB", "PCBWay"],
+    "candidate_names": [
+      "JLCPCB",
+      "PCBWay"
+    ],
     "provider_selected": null,
     "quotation_received": false,
     "independent_dfm_or_ee_review_received": false,
@@ -31,42 +36,96 @@
     {
       "id": "P0_independent_review",
       "status": "ACTIVE",
-      "requires": ["immutable_package_verified", "checksum_verified", "independent_review_or_provider_dfm_received"],
-      "forbids": ["fabrication_authority", "power_on_authority"],
+      "requires": [
+        "immutable_package_verified",
+        "checksum_verified",
+        "independent_review_or_provider_dfm_received"
+      ],
+      "forbids": [
+        "fabrication_authority",
+        "power_on_authority"
+      ],
       "completion_effect": "makes fabrication decision reviewable; does not authorize fabrication"
     },
     {
       "id": "P1_fabrication_decision",
       "status": "BLOCKED",
-      "requires": ["P0_independent_review_complete", "human_provider_cost_terms_review", "exact_package_revision_confirmed"],
-      "forbids": ["implicit_authorization_from_quote_or_payment_page"],
+      "requires": [
+        "P0_independent_review_complete",
+        "human_provider_cost_terms_review",
+        "exact_package_revision_confirmed"
+      ],
+      "forbids": [
+        "implicit_authorization_from_quote_or_payment_page"
+      ],
       "completion_effect": "may record explicit fabrication_authorized=true only for the exact package/revision/provider"
     },
     {
       "id": "P2_assembly_identity",
       "status": "BLOCKED",
-      "requires": ["fabrication_authorized", "physical_board_received_or_assembled"],
-      "record": ["board_id", "board_revision", "assembly_variant", "R1_DNP", "R4_DNP", "JP1_open", "component_identity", "orientation_records"],
+      "requires": [
+        "fabrication_authorized",
+        "physical_board_received_or_assembled"
+      ],
+      "record": [
+        "board_id",
+        "board_revision",
+        "assembly_variant",
+        "R1_DNP",
+        "R4_DNP",
+        "JP1_open",
+        "component_identity",
+        "orientation_records"
+      ],
       "completion_effect": "establishes physical subject identity only; does not establish electrical correctness"
     },
     {
       "id": "P3_cold_checks",
       "status": "BLOCKED",
-      "requires": ["P2_assembly_identity_complete", "simulated_false", "instrument_and_operator_recorded"],
-      "record": ["short_checks", "resistance", "continuity", "isolation", "polarity", "OE_pulldown", "CS_domain_pullups"],
+      "requires": [
+        "P2_assembly_identity_complete",
+        "simulated_false",
+        "instrument_and_operator_recorded"
+      ],
+      "record": [
+        "short_checks",
+        "resistance",
+        "continuity",
+        "isolation",
+        "polarity",
+        "OE_pulldown",
+        "CS_domain_pullups"
+      ],
       "completion_effect": "may make controlled power reviewable; does not itself authorize power"
     },
     {
       "id": "P4_controlled_power",
       "status": "BLOCKED",
-      "requires": ["P3_cold_checks_pass", "explicit_power_on_authority", "current_limit_and_setup_recorded"],
-      "record": ["3V3", "1V8", "DUT_1V8", "current", "limit_activation", "rail_ramp", "overshoot", "timing"],
+      "requires": [
+        "P3_cold_checks_pass",
+        "explicit_power_on_authority",
+        "current_limit_and_setup_recorded"
+      ],
+      "record": [
+        "3V3",
+        "1V8",
+        "DUT_1V8",
+        "current",
+        "limit_activation",
+        "rail_ramp",
+        "overshoot",
+        "timing"
+      ],
       "completion_effect": "may make bounded functional transaction reviewable"
     },
     {
       "id": "P5_bounded_functional_transaction",
       "status": "BLOCKED",
-      "requires": ["P4_controlled_power_pass", "explicit_functional_test_authority", "JP1_control_sequence_satisfied"],
+      "requires": [
+        "P4_controlled_power_pass",
+        "explicit_functional_test_authority",
+        "JP1_control_sequence_satisfied"
+      ],
       "transaction": {
         "command": "0x9F",
         "mode": 0,
@@ -74,14 +133,33 @@
         "write_operations_allowed": false,
         "expected_jedec_id": "EF6018"
       },
-      "record": ["raw_spi_capture", "observed_jedec_id", "current", "temperature", "supply_waveforms"],
+      "record": [
+        "raw_spi_capture",
+        "observed_jedec_id",
+        "current",
+        "temperature",
+        "supply_waveforms"
+      ],
       "completion_effect": "produces bounded functional evidence only"
     },
     {
       "id": "P6_evidence_closure",
       "status": "BLOCKED",
-      "requires": ["physical_subject_bound", "cold_evidence_bound", "power_evidence_bound", "functional_evidence_bound_or_failure_preserved"],
-      "chain": ["source_revision", "fabrication_artifact", "board_identity", "cold_evidence", "power_evidence", "functional_evidence", "human_authority_decision"],
+      "requires": [
+        "physical_subject_bound",
+        "cold_evidence_bound",
+        "power_evidence_bound",
+        "functional_evidence_bound_or_failure_preserved"
+      ],
+      "chain": [
+        "source_revision",
+        "fabrication_artifact",
+        "board_identity",
+        "cold_evidence",
+        "power_evidence",
+        "functional_evidence",
+        "human_authority_decision"
+      ],
       "completion_effect": "permits updating external-proof and paper claims only to the extent supported by captured evidence"
     }
   ],
