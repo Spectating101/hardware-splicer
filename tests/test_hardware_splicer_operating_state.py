@@ -66,3 +66,17 @@ def test_physical_authority_stays_fail_closed():
         )
     )
     assert guards["physical_evidence_requires_explicit_real_state"] is True
+
+
+def test_frontend_closure_is_merged_and_reopen_on_trigger():
+    state = load_state()
+    priorities = {row["lane"]: row for row in state["priority_stack"]}
+    assert priorities["competitive_frontend_closure"]["state"] == "CLOSED_REOPEN_ON_TRIGGER"
+    assert priorities["competitive_frontend_closure"]["merged_pr"] == "Spectating101/hardware-splicer#104"
+    frontend = state["surface_state"]["competitive_frontend"]
+    assert frontend["state"] == "CLOSED_REOPEN_ON_TRIGGER"
+    assert set(frontend["reopen_requires_any"]) == {
+        "rendered usability deficiency",
+        "user or evaluator workflow failure",
+        "source-bound native competitor gap",
+    }
