@@ -68,3 +68,22 @@ A valid seed may open **design work only**. The importer rechecks economics and 
 This keeps the cross-system contract explicit:
 
 `Refinery reviewed market -> Spectator commercial enrichment -> Refinery gate -> HS Product Factory -> Gauntlet conversion -> Refinery learning`
+
+
+## Supply substrates
+
+Product Factory is not restricted to clean-sheet assembly from newly purchased parts.
+
+Supported supply modes now include:
+
+- `NEW_BUILD`
+- `DONOR_RETROFIT`
+- `MODULE_REUSE`
+- `COMPONENT_HARVEST`
+- `HYBRID`
+
+The economics gate prices donor acquisition, shipping, inspection labor, usable yield, reject disposal/recovery, rework, new material, final QA and warranty reserve into **effective COGS per sellable unit**. Donor identity, revision capture, variant-specific acceptance, observed supply depth and hazard boundaries fail closed.
+
+The preferred reuse pattern is normally whole-device/module transformation before individual component harvesting because splicing can preserve working compute, enclosure, interfaces, mechanics and certified external subsystems without paying desolder/test labor on every component.
+
+The first real-market probe is `donor_probes/benchnode_v0_market_probe.json`: an off-lease thin-client donor plus a new HS-designed low-voltage I/O/protection sidecar. Its paper economics are attractive, but its supply route remains HOLD until exact-model bulk depth and measured donor yield exist.
