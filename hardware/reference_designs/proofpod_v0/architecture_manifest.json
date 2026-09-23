@@ -7,7 +7,7 @@
   "product_hypothesis": "A protected USB-C SPI/I2C validation pod can occupy the gap between low-cost bare bridges and $275-$375 professional host/programmer tools by selling protection, deterministic power control, and evidence receipts rather than raw protocol access.",
   "selected_components": {
     "controller": {
-      "symbol": "MCU_RaspberryPi:RP2040",
+      "symbol": "HardwareSplicer:RP2040QFN56",
       "mpn": "RP2040",
       "status": "selected"
     },
@@ -141,6 +141,11 @@
       "authority": "manufacturer",
       "document": "INA219 DCN pinout pinned into project-local symbol library",
       "status": "project_local_identity"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "Raspberry Pi RP2040 datasheet Figure 3 QFN-56 pinout",
+      "status": "project_local_symbol_identity"
     }
   ],
   "remaining_blockers_before_pcb": [
