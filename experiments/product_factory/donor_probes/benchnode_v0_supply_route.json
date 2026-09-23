@@ -1,0 +1,39 @@
+{
+  "schema": "hardware_splicer.supply_route.v1",
+  "route_id": "PF-DONOR-001-BENCHNODE-HYBRID",
+  "mode": "HYBRID",
+  "target_msrp_usd": 229,
+  "minimum_target_gross_margin_fraction": 0.65,
+  "all_new_reference_cogs_usd": 145,
+  "intended_build_units": 100,
+  "minimum_donor_savings_fraction": 0.20,
+  "donor": {
+    "description": "Dell Wyse 3040 exact-model donor module plus new HS-designed low-voltage I/O/protection sidecar.",
+    "acquisition_cost_usd_per_donor": 30,
+    "inbound_shipping_usd_per_donor": 6,
+    "inspection_minutes_per_donor": 7,
+    "labor_rate_usd_per_hour": 12,
+    "usable_yield_fraction": 0.90,
+    "yield_evidence_basis": "HYPOTHESIS_ONLY; bounded donor sample not yet inspected",
+    "observed_available_units": 0,
+    "required_supply_depth_multiple": 2.0,
+    "rework_minutes_per_sellable": 10,
+    "rework_materials_usd_per_sellable": 3,
+    "new_parts_usd_per_sellable": 25,
+    "final_qa_minutes_per_sellable": 10,
+    "warranty_reserve_usd_per_sellable": 5,
+    "reject_disposal_usd_per_reject": 0,
+    "reject_recovery_credit_usd_per_reject": 5,
+    "identity_control": {
+      "exact_model_or_approved_variant": true,
+      "revision_or_board_id_captured": true,
+      "variant_specific_acceptance_test": true
+    },
+    "hazards": {
+      "opens_mains_voltage": false,
+      "modifies_lithium_battery": false,
+      "unknown_contamination": false,
+      "intact_certified_external_power_only": true
+    }
+  }
+}
