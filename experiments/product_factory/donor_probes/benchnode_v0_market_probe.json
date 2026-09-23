@@ -1,0 +1,95 @@
+{
+  "schema": "hardware_splicer.donor_market_probe.v1",
+  "probe_id": "PF-DONOR-001",
+  "product_id": "benchnode-v0",
+  "working_name": "BenchNode v0",
+  "observed_at": "2026-09-24",
+  "hypothesis": "Reuse a standardized off-lease thin-client compute/enclosure subsystem as a tested donor module, then add a new Hardware-Splicer-designed protection/I-O sidecar and variant-specific acceptance workflow for a low-cost lab/bench automation node.",
+  "positioning_boundary": "Bench/lab automation only. This probe does not claim industrial temperature range, safety certification, hazardous-location suitability, long-term industrial supply, or feature equivalence to certified industrial controllers.",
+  "donor_population": {
+    "model": "Dell Wyse 3040 N10D",
+    "identity_requirement": "Exact approved model/revision only; unit identity and board/revision evidence must be captured before reuse.",
+    "observations": [
+      {
+        "source": "eBay sold listing",
+        "url": "https://www.ebay.com/itm/365329142472",
+        "observed_price_usd": 25.63,
+        "shipping_included": false,
+        "notes": "Used unit only; listing reported 205 sold. Historical sold quantity is demand/supply context, not current available inventory."
+      },
+      {
+        "source": "eBay sold listing",
+        "url": "https://www.ebay.com/itm/336803036775",
+        "observed_price_usd": 28.90,
+        "observed_shipping_usd": 9.22,
+        "notes": "Used unit; sold 2026-09-20."
+      },
+      {
+        "source": "eBay search result",
+        "url": "https://www.ebay.com/shop/dell-wyse-3040?_nkw=dell+wyse+3040",
+        "observed_price_usd": 35.00,
+        "notes": "Example pre-owned listing with power adapter; search surface reported 105 results. Result count is not exact eligible-unit inventory."
+      }
+    ],
+    "current_qualified_supply_units": null,
+    "supply_state": "UNVERIFIED_BULK_DEPTH"
+  },
+  "reference_price_umbrella": [
+    {
+      "name": "Revolution Pi Connect 5",
+      "url": "https://revolutionpi.com/de/produkte/revpi-connect",
+      "observed_price": 536.00,
+      "currency": "EUR",
+      "notes": "Official starting price. Certified industrial product; not an equivalence claim."
+    },
+    {
+      "name": "Revolution Pi Connect 4",
+      "url": "https://revolutionpi.com/de/produkte/revpi-connect",
+      "observed_price": 418.00,
+      "currency": "EUR",
+      "notes": "Official starting price. Certified industrial product; not an equivalence claim."
+    }
+  ],
+  "candidate_product": {
+    "target_msrp_usd": 229,
+    "intended_first_lot_units": 100,
+    "scope": [
+      "retain donor compute board, enclosure and existing commodity interfaces when they pass incoming inspection",
+      "add a new HS-designed low-voltage I/O/protection sidecar",
+      "add variant-specific electrical and functional acceptance tests",
+      "reuse an intact compatible external power adapter only when condition/identity passes inspection",
+      "bind every finished unit to donor identity, new sidecar revision, firmware/software image and QA receipt"
+    ],
+    "non_goals": [
+      "industrial safety certification",
+      "wide-temperature operation",
+      "hazardous-location use",
+      "mains-voltage modification",
+      "lithium battery modification",
+      "claiming equivalence to RevPi/Advantech industrial controllers"
+    ]
+  },
+  "economics_assumptions": {
+    "all_new_reference_cogs_usd": 145,
+    "donor_acquisition_usd": 30,
+    "donor_inbound_shipping_usd": 6,
+    "inspection_minutes_per_donor": 7,
+    "labor_rate_usd_per_hour": 12,
+    "usable_yield_fraction": 0.90,
+    "rework_minutes_per_sellable": 10,
+    "rework_materials_usd_per_sellable": 3,
+    "new_parts_usd_per_sellable": 25,
+    "final_qa_minutes_per_sellable": 10,
+    "warranty_reserve_usd_per_sellable": 5,
+    "reject_disposal_usd_per_reject": 0,
+    "reject_recovery_credit_usd_per_reject": 5,
+    "note": "These are engineering hypotheses, not supplier quotes or measured yield."
+  },
+  "current_decision": "ECONOMICS_PROMISING_SUPPLY_UNPROVEN",
+  "next_evidence": [
+    "obtain one exact-model lot quote or local institutional e-waste/off-lease source with >=2x intended-lot depth",
+    "inspect a bounded donor sample and measure usable yield",
+    "freeze exact donor revision/variant acceptance criteria",
+    "design the sidecar only after donor interface and supply evidence survive review"
+  ]
+}
