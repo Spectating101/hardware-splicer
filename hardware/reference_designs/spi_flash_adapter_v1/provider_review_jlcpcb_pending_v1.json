@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "record_type": "hs_spi_provider_review",
+  "campaign_id": "hs-spi-physical-proof-v1",
+  "campaign_issue": "Spectating101/hardware-splicer#105",
+  "subject": {
+    "release_tag": "gauntlet-spi-flash-adapter-v1-20260916",
+    "revision": "f892facd67c5124e2362860ebc999625afedc5d5",
+    "package": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
+    "package_sha256": "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd",
+    "release_url": "https://github.com/Spectating101/hardware-splicer/releases/tag/gauntlet-spi-flash-adapter-v1-20260916"
+  },
+  "provider": {
+    "name": "JLCPCB",
+    "service": "Standard PCBA + Functional Test",
+    "contact_or_quote_reference": "support@jlcpcb.com / Standard PCBA -> Advanced Options -> Function Test"
+  },
+  "received_at": null,
+  "review_scope": [],
+  "findings": [
+    {
+      "finding_id": null,
+      "category": null,
+      "provider_wording": null,
+      "artifact_or_net_reference": null,
+      "severity_as_reported": null,
+      "design_change_requested": false,
+      "manufacturing_change_requested": false,
+      "assembly_change_requested": false,
+      "test_change_requested": false,
+      "successor_revision_required": null,
+      "evidence_refs": []
+    }
+  ],
+  "capabilities_confirmed": {
+    "preserve_DNP_and_open_states": null,
+    "cold_measurements": null,
+    "staged_current_limited_power": null,
+    "raw_measurement_return": null,
+    "waveform_or_capture_return": null,
+    "bounded_spi_0x9f": null,
+    "board_or_lot_traceability": null
+  },
+  "commercial": {
+    "quotation_reference": null,
+    "quantity": null,
+    "nre_or_fixture_cost": null,
+    "unit_or_batch_cost": null,
+    "lead_time": null,
+    "assumptions": []
+  },
+  "human_disposition": {
+    "status": "needs_followup",
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": null
+  },
+  "authority_effect": {
+    "fabrication_authorized": false,
+    "power_on_authorized": false,
+    "functional_test_authorized": false,
+    "release_authorized": false
+  },
+  "contact_state": "PENDING_SEND",
+  "public_source_refs": [
+    "https://jlcpcb.com/help/article/functional-test-service",
+    "https://jlcpcb.com/help/article/how-do-i-get-support"
+  ],
+  "outbound_inquiry": {
+    "request_file": "PROVIDER_QUOTE_REQUEST.md",
+    "state": "READY_NOT_SENT",
+    "sent_at": null,
+    "sender": null,
+    "reply_reference": null
+  }
+}
