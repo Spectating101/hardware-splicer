@@ -11,7 +11,9 @@
     "effective_cogs_ceiling_twd": 4050,
     "minimum_target_gross_margin_fraction": 0.55,
     "intended_first_lot_units": 20,
-    "note": "Screening targets only. Donor price, measured yield, sidecar BOM and warranty cost are not yet supplier/production evidence."
+    "note": "Screening targets only. Donor price, measured yield, sidecar BOM and warranty cost are not yet supplier/production evidence.",
+    "price_validation_state": "PLAUSIBLE_BUT_UNVALIDATED",
+    "price_validation_evidence": "hardware/reference_designs/benchhmi_v0/price_validation_2026-09-24.json"
   },
   "approved_donor": {
     "manufacturer": "Flytech",
@@ -82,7 +84,7 @@
     "replacement/equivalence claim for Advantech industrial panel PCs",
     "opening or modifying the donor ATX power supply"
   ],
-  "next_gate": "Acquire or inspect a bounded POS462 sample, confirm B91 identity, measure donor acceptance yield and prove Linux/touch/COM behavior before authorizing BenchIO schematic work.",
+  "next_gate": "First close donor identity/yield on a bounded POS462/B91 sample. Before scaling beyond a prototype/micro-pilot, obtain direct buyer evidence at or near NT$8,990 for the complete BenchHMI + BenchIO appliance; competitor listings alone do not validate the price.",
   "authority": {
     "product_hypothesis_recorded": true,
     "donor_acceptance_complete": false,
