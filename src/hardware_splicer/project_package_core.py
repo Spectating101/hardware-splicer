@@ -402,6 +402,12 @@ def build_project_package(
             or _string_list(splice_plan.get("resolved_modules")),
             "selected_parts": list(candidate.get("selected_parts") or []),
         },
+        "transformation": {
+            "capability_source_decision": _mapping(payload.get("capability_source_decision")),
+            "operator_jobs": _rows(payload.get("engineering_operator_jobs")),
+            "operator_receipts": _rows(payload.get("engineering_operator_receipts")),
+            "automatic_physical_authority": False,
+        },
         "gates": gates,
         "artifacts": dict(payload.get("artifacts") or {}),
     }
