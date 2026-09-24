@@ -87,3 +87,26 @@ The economics gate prices donor acquisition, shipping, inspection labor, usable 
 The preferred reuse pattern is normally whole-device/module transformation before individual component harvesting because splicing can preserve working compute, enclosure, interfaces, mechanics and certified external subsystems without paying desolder/test labor on every component.
 
 The first real-market probe is `donor_probes/benchnode_v0_market_probe.json`: an off-lease thin-client donor plus a new HS-designed low-voltage I/O/protection sidecar. Its paper economics are attractive, but its supply route remains HOLD until exact-model bulk depth and measured donor yield exist.
+
+
+## Competitive role
+
+Product Factory is also an empirical test of whether Hardware Splicer belongs at a higher layer than individual EDA operations.
+
+The hypothesis is:
+
+```text
+requirement
+  -> choose NEW_BUILD / MODIFY / MODULE_REUSE / DONOR_RETROFIT / HYBRID
+  -> execute engineering with HS and/or specialist tools
+  -> preserve exact artifact/revision identity
+  -> verify
+  -> obtain physical evidence
+  -> bind economic outcome
+```
+
+The strategic consequence, if physically demonstrated, is that schematic generation, PCB layout, simulation and design review can become **operators underneath HS** rather than capabilities HS must win independently against every specialist vendor.
+
+See `docs/COMPETITIVE_CATEGORY_SHIFT_2026Q3.md`.
+
+This is not yet a proven moat. The current Product Factory code and CI establish workflow/gate existence only. Generality requires multiple materially different physical transformations, and commercial defensibility requires real cost/yield/customer outcomes.
