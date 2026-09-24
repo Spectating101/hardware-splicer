@@ -24,6 +24,10 @@ def test_refinery_seed_opens_engineering_not_physical_authority() -> None:
     assert run["authority"]["fabrication_ready"] is False
     assert run["authority"]["physical_authority_granted"] is False
     assert run["authority"]["commercial_superiority"] == "UNPROVEN"
+    assert run["source_strategy"]["state"] == "PENDING_HS_COMPARISON"
+    assert run["source_strategy"]["selected_mode"] is None
+    assert run["source_strategy"]["policy"]["required_comparison"] is True
+    assert "HYBRID" in run["source_strategy"]["policy"]["allowed_modes"]
 
 
 def test_refinery_seed_cannot_smuggle_fabrication_authority() -> None:
