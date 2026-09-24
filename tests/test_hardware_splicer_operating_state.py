@@ -80,3 +80,23 @@ def test_frontend_closure_is_merged_and_reopen_on_trigger():
         "user or evaluator workflow failure",
         "source-bound native competitor gap",
     }
+
+
+def test_product_factory_category_is_bounded_not_claimed_as_proven():
+    state = load_state()
+    priorities = {row["lane"]: row for row in state["priority_stack"]}
+    assert priorities["product_factory_empirical_differentiation"]["state"] == "ACTIVE_BOUNDED_EXPERIMENT"
+    surface = state["surface_state"]["product_factory_transformation"]
+    assert surface["state"] == "ACTIVE_BOUNDED_EXPERIMENT"
+
+    posture = state["competitive_feedback"]["category_posture"]
+    assert posture["specialist_tools_may_execute_under_hs"] is True
+    assert posture["rebuild_every_external_eda_primitive"] is False
+    assert posture["general_transformation_capability_proven"] is False
+    assert posture["commercial_moat_proven"] is False
+
+
+def test_product_factory_paper_economics_cannot_open_physical_or_moat_claims():
+    guards = load_state()["authority_guards"]
+    assert guards["paper_economics_can_authorize_build"] is False
+    assert guards["competitor_gap_can_prove_category_moat"] is False
