@@ -41,8 +41,12 @@ def import_seed(seed: Mapping[str, Any], *, run_id: str, opened_at: str) -> dict
 
     economics = seed.get("economics")
     engineering = seed.get("engineering_assessment")
+    source_policy = seed.get("source_strategy_policy")
     if not isinstance(economics, Mapping) or not isinstance(engineering, Mapping):
         raise ValueError("seed economics and engineering assessment are required")
+
+    if source_policy is not None and not isinstance(source_policy, Mapping):
+        raise ValueError("source_strategy_policy must be a mapping when present")
 
     target = float(economics.get("target_msrp_usd") or 0)
     cogs = float(economics.get("landed_cogs_ceiling_usd") or 0)
@@ -85,6 +89,16 @@ def import_seed(seed: Mapping[str, Any], *, run_id: str, opened_at: str) -> dict
             "type": "refinery_product_factory_seed",
             "candidate_id": seed.get("source_candidate_id"),
             "job": seed.get("source_job"),
+        },
+        "source_strategy": {
+            "state": "PENDING_HS_COMPARISON",
+            "selected_mode": None,
+            "decision_schema": (
+                source_policy.get("decision_schema")
+                if isinstance(source_policy, Mapping)
+                else "hardware_splicer.capability_source_decision.v1"
+            ),
+            "policy": dict(source_policy or {}),
         },
         "stages": stage_rows,
         "metrics": {
