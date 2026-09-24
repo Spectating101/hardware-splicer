@@ -13,6 +13,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from .capability_manifest import project_capability_manifest
+from .capability_source import (
+    OperatorJobRequest,
+    OperatorReceiptRequest,
+    SourceDecisionRequest,
+    evaluate_source_routes,
+    prepare_operator_job,
+    validate_operator_receipt,
+)
 from .derivative_economics import evaluate_derivative_economics
 from .derivative_reuse import adjudicate_derivative_reuse, predict_derivative_reuse
 from .machine_project import MachineProject
@@ -145,5 +153,26 @@ def create_capability_reuse_router() -> APIRouter:
         """Evaluate the cleanroom blank-slate vs reuse development comparator."""
 
         return evaluate_derivative_economics(request.record)
+
+    @router.post("/source-route/evaluate")
+    def evaluate_capability_source_route(request: SourceDecisionRequest) -> Dict[str, Any]:
+        """Rank build/modify/reuse/splice routes for engineering investigation only."""
+
+        return evaluate_source_routes(request)
+
+    @router.post("/operator-job/prepare")
+    def prepare_capability_operator_job(request: OperatorJobRequest) -> Dict[str, Any]:
+        """Freeze a revision-bound bounded job for an external engineering operator."""
+
+        return prepare_operator_job(request)
+
+    @router.post("/operator-receipt/validate")
+    def validate_capability_operator_receipt(request: OperatorReceiptRequest) -> Dict[str, Any]:
+        """Validate an operator receipt without upgrading engineering or physical truth."""
+
+        try:
+            return validate_operator_receipt(request)
+        except (ValueError, TypeError) as exc:
+            raise _unprocessable("invalid_operator_receipt", exc) from exc
 
     return router
