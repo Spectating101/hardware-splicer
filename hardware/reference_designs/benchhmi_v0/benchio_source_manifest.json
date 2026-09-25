@@ -90,16 +90,16 @@
       "sha256": null
     },
     {
-      "component": "B0505S-2WR3",
-      "publisher": "MORNSUN",
-      "title": "A_S-2WR3 & B_S-2WR3 2W isolated DC/DC converter",
-      "url": "https://www.mornsun-power.com/public/uploads/pdf/B_S-2WR3.pdf",
-      "observed_revision": "2024.09.10-A family document observed 2026-09-26",
+      "component": "LMR36510",
+      "publisher": "Texas Instruments",
+      "title": "LMR36510 SIMPLE SWITCHER 4.2V to 65V, 1A Synchronous Step-Down Converter",
+      "url": "https://www.ti.com/lit/ds/symlink/lmr36510.pdf",
+      "observed_revision": "Rev. B / current product page observed 2026-09-26",
       "facts_used": [
-        "5 V input / 5 V output option",
-        "2 W rating",
-        "1500 VDC input-output isolation",
-        "continuous short-circuit protection"
+        "4.2V to 65V input",
+        "1A output",
+        "synchronous buck",
+        "industrial power-stage candidate for 5V_FIELD"
       ],
       "sha256": null
     }
@@ -110,5 +110,12 @@
     "sufficient_for_verified_schematic": false,
     "fabrication_authorized": false
   },
-  "next_gate": "Materialize immutable manufacturer PDFs into the evidence bundle and bind SHA-256 before VERIFY_SCHEMATIC can PASS."
+  "next_gate": "Materialize immutable manufacturer PDFs into the evidence bundle and bind SHA-256 before VERIFY_SCHEMATIC can PASS.",
+  "rejected_sources": [
+    {
+      "component": "B0505S-2WR3",
+      "reason": "400mA maximum output is below the conservative 411.2mA simultaneous field-side stress budget before design margin.",
+      "source": "https://www.mornsun-power.com/public/uploads/pdf/A05_S-2WR3.pdf"
+    }
+  ]
 }
