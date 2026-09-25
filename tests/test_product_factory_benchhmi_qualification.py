@@ -39,15 +39,16 @@ def _unit_test_real_pass() -> dict:
 def test_perfect_simulation_still_cannot_qualify_real_donor() -> None:
     result = Q.evaluate(SIM)
     assert result["physical_checks_pass"] is True
-    assert result["decision"] == "SIMULATION_ONLY_NOT_ACCEPTED"
+    assert result["decision"] == "SIMULATION_REHEARSAL_COMPLETE_REAL_EVIDENCE_PENDING"
     assert result["real_donor_accepted"] is False
-    assert "real_physical_state_not_explicit" in result["blockers"]
+    assert "real_physical_evidence_required" in result["pending_requirements"]
+    assert result["blockers"] == []
     assert result["authority"]["benchio_design_gate_may_open"] is False
 
 
 def test_empty_real_template_holds_fail_closed() -> None:
     result = Q.evaluate(TEMPLATE)
-    assert result["decision"] == "HOLD_OR_REJECT_DONOR"
+    assert result["decision"] == "DONOR_REQUIRES_CORRECTION_OR_REJECTION"
     assert result["real_donor_accepted"] is False
     assert "motherboard_not_b91" in result["blockers"]
     assert "donor_identity_missing" in result["blockers"]
