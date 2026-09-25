@@ -110,3 +110,23 @@ The strategic consequence, if physically demonstrated, is that schematic generat
 See `docs/COMPETITIVE_CATEGORY_SHIFT_2026Q3.md`.
 
 This is not yet a proven moat. The current Product Factory code and CI establish workflow/gate existence only. Generality requires multiple materially different physical transformations, and commercial defensibility requires real cost/yield/customer outcomes.
+
+
+## Lifecycle status vocabulary
+
+Product Factory distinguishes an unmet prerequisite from an actual failure.
+
+Use these families for normal lifecycle progress:
+
+- `ACTIVE_*` — work is currently in progress;
+- `READY_*` — the stage is eligible to start;
+- `AWAITING_*` — a required external/input dependency is not present yet;
+- `EVIDENCE_PENDING_*` — the hypothesis remains live while evidence is gathered;
+- `QUEUED_AFTER_*` — the stage is intentionally downstream of another gate;
+- `PASS_*` — the stage's declared gate has been satisfied.
+
+Reserve `BLOCKED_*` for an **actual blocking condition** such as contradictory evidence, a safety stop, a failed deterministic verification, or an unresolved defect that prevents otherwise-eligible work.
+
+Reserve `FAILED_*` for a completed attempt whose acceptance criteria were not met.
+
+A downstream stage is not "blocked" merely because the project has not reached it yet. This keeps dashboards truthful without making healthy fail-closed sequencing look like project failure.
