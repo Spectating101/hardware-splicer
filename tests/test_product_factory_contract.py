@@ -25,7 +25,8 @@ def test_factory_does_not_confuse_selection_with_commercial_proof() -> None:
     assert by_id["SELECT"]["decision"] == "ADVANCE_TO_SCHEMATIC"
     assert by_id["BUILD"]["state"] == "QUEUED_AFTER_SOURCE_AND_HUMAN_AUTHORITY"
     assert not by_id["BUILD"]["state"].startswith("PASS")
-    assert by_id["PROVE"]["state"].startswith("BLOCKED")
+    assert by_id["PROVE"]["state"] == "QUEUED_AFTER_PHYSICAL_ARTIFACT"
+    assert not by_id["PROVE"]["state"].startswith("PASS")
     assert by_id["SELL"]["state"].startswith("BLOCKED")
     assert "not evidence of physical correctness" in RUN["claim_boundary"]
 
