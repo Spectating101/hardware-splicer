@@ -91,8 +91,8 @@
     },
     {
       "ref": "U8",
-      "preferred_part": "ISO6741",
-      "role": "isolated control/diagnostic path for high-side outputs"
+      "preferred_part": "ISO6740",
+      "role": "four forward isolated control lines for TPS4H160 IN0-IN3; no isolated diagnostic return in v0"
     },
     {
       "ref": "U9",
@@ -177,7 +177,7 @@
     "CAN crosses an ISO1042 isolation barrier before reaching CAN_H/CAN_L.",
     "The shared field-side logic ground must not be copper-connected to GND_HOST.",
     "ISO1212 field inputs must not depend on FIELD_9_30V to sense an external input.",
-    "TPS4H160 control/diagnostic paths cross digital isolation; output power comes from FIELD_9_30V.",
+    "TPS4H160 IN0-IN3 controls cross an ISO6740 four-forward-channel barrier; TPS4H160 diagnostic/current-sense return is intentionally out of scope for v0.",
     "Each bus gets connector-side transient protection and switchable termination where applicable.",
     "Isolation moat contains no copper, stitching vias, test pads or mounting-hole copper that bridges GND_HOST and GND_FIELD.",
     "Fabrication/power-on authority remains false even after ERC passes."
@@ -198,7 +198,8 @@
     "termination and TVS values frozen",
     "KiCad ERC: zero unresolved errors/warnings",
     "machine topology checker: zero invariant violations",
-    "independent review still pending unless separately recorded"
+    "independent review still pending unless separately recorded",
+    "ISO6740 directionality verified as 4-forward/0-reverse for DO0-DO3"
   ],
   "authority": {
     "schematic_design_authorized": true,
