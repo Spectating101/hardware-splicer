@@ -47,9 +47,10 @@
       "status": "selected"
     },
     "usb_connector": {
-      "symbol": "Connector:USB_C_Receptacle_USB2.0_16P",
+      "symbol": "HardwareSplicer:USBC_USB2_PF001",
       "mpn": null,
-      "status": "footprint_and_mpn_pending"
+      "status": "logical_symbol_fixed_exact_mpn_and_footprint_pending",
+      "note": "Project-local schematic symbol preserves all USB-C physical pin numbers but intentionally un-stacks duplicate GND/VBUS/data pins for deterministic generated connectivity."
     },
     "crystal_12mhz": {
       "symbol": "Device:Crystal",
