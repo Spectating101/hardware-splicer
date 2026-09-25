@@ -36,8 +36,8 @@
     "channel_to_channel_isolation_claim": false,
     "pcb_barrier_keepout_target_mm": 6,
     "field_logic_power": {
-      "source": "FIELD_9_30V external input",
-      "regulator_candidate": "LMR36510",
+      "source": "FIELD_9_28V external input",
+      "regulator_candidate": "LMR36510 + Würth 744770122 22uH",
       "output": "5V_FIELD",
       "current_capacity_a": 1,
       "regulator_input_range_v": [
@@ -109,7 +109,7 @@
       "implementation": "TPS4H160-Q1 high-side switch behind ISO6740 four-forward-channel digital isolation",
       "field_supply_v": [
         9,
-        30
+        28
       ],
       "target_current_limit_ma_per_channel": 250,
       "isolated_control": "ISO6740 4-forward barrier into shared field domain",
@@ -149,7 +149,9 @@
       "CAN_TX",
       "CAN_RX",
       "FIELD_SUPPLY"
-    ]
+    ],
+    "field_input_continuous_path_target_a": 3,
+    "primary_field_connector_family": "Würth WR-TBL 7011B/3041, 3.5mm"
   },
   "economics": {
     "prior_sidecar_parts_budget_twd": 1300,
@@ -223,6 +225,13 @@
       "issue": "USB-powered B0505S-2WR3 field converter cannot meet conservative simultaneous field-side worst-case current: 2*160mA ISO1410 + 73.4mA ISO1042 + 17.8mA ISO6740 = 411.2mA > 400mA.",
       "correction": "Power the shared field-side 5V domain from FIELD_9_30V using a 65V-class 1A buck (LMR36510 candidate). Keep USB power exclusively on the host side.",
       "effect": "Removes field-load current from the USB budget and increases field-side power margin while preserving host/field galvanic isolation in the signal barriers."
+    },
+    {
+      "observed_at": "2026-09-26",
+      "issue": "30V declared field maximum leaves no clean clamp margin with SMBJ30A (48.4V max clamp) versus TPS4H160-Q1 48V transient absolute maximum.",
+      "correction": "Declare 9-28V field input and use SMBJ28A (45.4V max clamp) after MF-R250 + B360A.",
+      "effect": "Creates an explicit protected input envelope below the high-side switch transient ceiling; no surge certification is claimed."
     }
-  ]
+  ],
+  "exact_parts_freeze": "hardware/reference_designs/benchhmi_v0/benchio_exact_parts_v0.json"
 }
