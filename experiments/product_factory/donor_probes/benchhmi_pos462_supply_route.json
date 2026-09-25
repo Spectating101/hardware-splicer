@@ -1,0 +1,54 @@
+{
+  "schema": "hardware_splicer.supply_route.v1",
+  "route_id": "PF-002-BENCHHMI-POS462-HYBRID",
+  "mode": "HYBRID",
+  "currency": "TWD",
+  "target_msrp_usd": 276.62,
+  "minimum_target_gross_margin_fraction": 0.55,
+  "all_new_reference_cogs_usd": 230.77,
+  "intended_build_units": 20,
+  "minimum_donor_savings_fraction": 0.2,
+  "display_economics_twd": {
+    "target_msrp_twd": 8990,
+    "all_new_reference_cogs_twd": 7500,
+    "donor_acquisition_twd": 1000,
+    "local_inbound_shipping_twd": 150,
+    "labor_rate_twd_per_hour": 250,
+    "new_sidecar_parts_twd_per_sellable": 1500,
+    "storage_replacement_twd_per_sellable": 350,
+    "warranty_reserve_twd_per_sellable": 350,
+    "modeled_effective_cogs_twd": 3841.67
+  },
+  "conversion_basis": "USD-equivalent fields use 32.5 TWD/USD solely so the existing v1 evaluator can compare ratios; the commercial decision is denominated in TWD.",
+  "donor": {
+    "description": "Flytech POS462 exact model, B91-approved revision only; retain whole POS subsystem and add external BenchIO sidecar.",
+    "acquisition_cost_usd_per_donor": 30.7692,
+    "inbound_shipping_usd_per_donor": 4.6154,
+    "inspection_minutes_per_donor": 10,
+    "labor_rate_usd_per_hour": 7.6923,
+    "usable_yield_fraction": 0.85,
+    "yield_evidence_basis": "HYPOTHESIS_ONLY; no bounded B91 donor sample has been inspected",
+    "observed_available_units": 1,
+    "required_supply_depth_multiple": 2,
+    "rework_minutes_per_sellable": 15,
+    "rework_materials_usd_per_sellable": 4.6154,
+    "new_parts_usd_per_sellable": 56.9231,
+    "final_qa_minutes_per_sellable": 15,
+    "warranty_reserve_usd_per_sellable": 10.7692,
+    "reject_disposal_usd_per_reject": 0,
+    "reject_recovery_credit_usd_per_reject": 6.1538,
+    "identity_control": {
+      "exact_model_or_approved_variant": true,
+      "revision_or_board_id_captured": true,
+      "variant_specific_acceptance_test": true
+    },
+    "hazards": {
+      "opens_mains_voltage": false,
+      "modifies_lithium_battery": false,
+      "unknown_contamination": false,
+      "intact_certified_external_power_only": false,
+      "note": "Internal ATX power system is retained intact; any unit requiring mains-side repair is rejected."
+    }
+  },
+  "economics_revision_note": "BenchIO pre-schematic architecture increases sidecar screening budget from NT$1,300 to NT$1,500 for explicit isolation and 24 V I/O. Route remains a screening model."
+}

@@ -1,0 +1,121 @@
+{
+  "schema": "hardware_splicer.product_factory_run.v1",
+  "run_id": "PF-002",
+  "product_id": "benchhmi-v0",
+  "working_name": "BenchHMI v0",
+  "opened_at": "2026-09-24",
+  "purpose": "Test whether Hardware Splicer can transform a standardized Taiwan-market retired POS terminal into a higher-value bench/lab automation console using donor retention, bounded refurbishment, an external low-voltage sidecar and revision-bound QA.",
+  "market": "Taiwan",
+  "stages": [
+    {
+      "id": "DISCOVER",
+      "state": "PASS",
+      "evidence": [
+        "experiments/product_factory/regional_scans/taiwan_china_2026-09-24.json",
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8Bpos%E6%A9%9F/?cateid=0011",
+        "Flytech POS460 Series service/user manual"
+      ],
+      "decision": "EXACT_DONOR_CLASS_IDENTIFIED"
+    },
+    {
+      "id": "SELECT",
+      "state": "EVIDENCE_PENDING_SUPPLY_AND_YIELD",
+      "evidence": [
+        "experiments/product_factory/donor_probes/benchhmi_pos462_supply_route.json"
+      ],
+      "decision": "ECONOMICS_SCREEN_POSITIVE_SUPPLY_UNPROVEN"
+    },
+    {
+      "id": "SPECIFY",
+      "state": "PASS_BENCHIO_ARCHITECTURE_FROZEN_DONOR_INTEGRATION_PENDING",
+      "evidence": [
+        "hardware/reference_designs/benchhmi_v0/product_contract.json",
+        "hardware/reference_designs/benchhmi_v0/splice_plan.json"
+      ]
+    },
+    {
+      "id": "DESIGN_SCHEMATIC",
+      "state": "READY_BENCHIO_STANDALONE_SCHEMATIC",
+      "evidence": [
+        "hardware/reference_designs/benchhmi_v0/benchio_architecture_v0.json",
+        "hardware/reference_designs/benchhmi_v0/benchio_contract.json"
+      ]
+    },
+    {
+      "id": "VERIFY_SCHEMATIC",
+      "state": "QUEUED_AFTER_BENCHIO_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "DESIGN_PCB",
+      "state": "QUEUED_AFTER_VERIFIED_BENCHIO_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_PCB",
+      "state": "QUEUED_AFTER_PCB",
+      "evidence": []
+    },
+    {
+      "id": "SOURCE",
+      "state": "DONOR_EVIDENCE_ACTIVE",
+      "evidence": []
+    },
+    {
+      "id": "BUILD",
+      "state": "QUEUED_AFTER_VERIFIED_PCB_AND_HUMAN_AUTHORITY",
+      "evidence": []
+    },
+    {
+      "id": "PROVE",
+      "state": "QUEUED_AFTER_PHYSICAL_ARTIFACT",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK",
+      "state": "QUEUED_AFTER_PHYSICAL_PROOF",
+      "evidence": []
+    },
+    {
+      "id": "SELL",
+      "state": "QUEUED_AFTER_BENCHMARK_AND_HUMAN_DECISION",
+      "evidence": []
+    },
+    {
+      "id": "LEARN",
+      "state": "ACTIVE_CONTINUOUS",
+      "evidence": []
+    }
+  ],
+  "metrics": {
+    "target_msrp_twd": 8990,
+    "target_effective_cogs_ceiling_twd": 4050,
+    "target_min_gross_margin_fraction": 0.55,
+    "modeled_effective_cogs_twd": 3841.67,
+    "modeled_gross_margin_fraction": 0.57267,
+    "intended_first_lot_units": 20,
+    "donor_acquisition_target_twd": 1000,
+    "all_new_reference_cogs_twd": 7500,
+    "modeled_savings_vs_all_new_fraction": 0.48778,
+    "benchio_pre_schematic_parts_budget_twd": 1500
+  },
+  "authority": {
+    "donor_purchase_authorized": false,
+    "donor_disassembly_authorized": false,
+    "sidecar_design_authorized": true,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_superiority": "UNPROVEN",
+    "system_integration_authorized": false
+  },
+  "claim_boundary": "PF-002 now has a standalone BenchIO architecture whose schematic may proceed because its donor interface is standard external USB. This does not qualify any POS462 donor, prove system integration, authorize PCB fabrication/power-on, establish batch yield/supply, validate NT$8,990 demand, or prove finished-product correctness.",
+  "status_vocabulary": {
+    "convention": "progressive_gate_states_v1",
+    "rule": "BLOCKED is reserved for an actual failed gate, defect, or contradiction. Normal unmet dependencies use AWAITING_*, EVIDENCE_PENDING_*, QUEUED_AFTER_*, READY_*, or ACTIVE_*.",
+    "failure_examples": [
+      "FAILED_VERIFICATION",
+      "BLOCKED_BY_CONTRADICTION",
+      "BLOCKED_BY_SAFETY_DEFECT"
+    ]
+  }
+}

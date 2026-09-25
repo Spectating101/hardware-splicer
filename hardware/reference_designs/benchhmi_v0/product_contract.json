@@ -1,0 +1,96 @@
+{
+  "schema": "hardware_splicer.commercial_product_contract.v1",
+  "product_id": "benchhmi-v0",
+  "working_name": "BenchHMI v0",
+  "status": "DONOR_ACCEPTANCE_PENDING",
+  "market": "Taiwan",
+  "customer": "University labs, electronics/repair benches, small NPI/test teams and workshop operators needing a dedicated touchscreen console with abundant legacy serial/USB connectivity and a reproducible hardware-test workflow.",
+  "position": "A remanufactured lab/bench console built from an exact-qualified retired POS terminal plus a new low-voltage Hardware-Splicer sidecar; positioned below new industrial panel PCs without claiming industrial certification or equivalent environmental ratings.",
+  "economics": {
+    "target_msrp_twd": 8990,
+    "effective_cogs_ceiling_twd": 4050,
+    "minimum_target_gross_margin_fraction": 0.55,
+    "intended_first_lot_units": 20,
+    "note": "Screening targets only. Donor price, measured yield, sidecar BOM and warranty cost are not yet supplier/production evidence.",
+    "price_validation_state": "PLAUSIBLE_BUT_UNVALIDATED",
+    "price_validation_evidence": "hardware/reference_designs/benchhmi_v0/price_validation_2026-09-24.json"
+  },
+  "approved_donor": {
+    "manufacturer": "Flytech",
+    "model": "POS462",
+    "required_motherboard": "B91 V2.0 family",
+    "reason": "The B91 manual documents SATA storage, 10/100/1000 LAN, up to 4 GB DDR2, four rear powered COM ports, six external USB ports and Linux OS support. B81 is not interchangeable for PF-002.",
+    "current_market_observation": {
+      "source": "Ruten Taiwan",
+      "observed_price_twd": 1000,
+      "condition_text": "Power-on response; local inspection invited",
+      "qualified_inventory_units": 0,
+      "note": "One public listing is not lot-depth evidence."
+    }
+  },
+  "retained_capabilities": [
+    "12.1-inch resistive touchscreen and tilting operator enclosure",
+    "B91 compute board and memory if acceptance tests pass",
+    "Gigabit Ethernet",
+    "four documented rear powered COM ports",
+    "six external USB ports",
+    "existing low-voltage motherboard/display integration",
+    "intact internal power architecture with no PSU modification"
+  ],
+  "replaced_or_serviced": [
+    "storage replaced by known-good SATA SSD",
+    "CMOS battery replaced when measured below acceptance threshold",
+    "external power cord replaced if condition is uncertain",
+    "cooling/thermal interface serviced only under documented donor procedure"
+  ],
+  "new_hardware": {
+    "working_name": "BenchIO sidecar v0",
+    "connection": "external USB only",
+    "candidate_functions": [
+      "two isolated RS-485 channels",
+      "one CAN channel",
+      "four protected low-voltage digital inputs",
+      "four protected low-voltage digital outputs",
+      "device-presence and sidecar-revision identity",
+      "bounded target-power/field-power telemetry where implemented"
+    ],
+    "safety_boundary": [
+      "SELV/low-voltage sidecar only",
+      "no internal ATX PSU modification",
+      "no mains wiring modification",
+      "no lithium battery modification"
+    ]
+  },
+  "software": {
+    "role": "lightweight operator terminal and device gateway, not local heavy AI compute",
+    "candidate_image": "Debian-class lightweight Linux image with kiosk/web console, local serial/USB proxy and HS evidence agent",
+    "remote_compute_allowed": true,
+    "requirements_before_release": [
+      "touch input works after cold boot",
+      "Ethernet works",
+      "required USB ports work",
+      "all retained COM ports pass loopback/known-device tests",
+      "exact OS image hash is recorded",
+      "finished-unit donor serial/revision + sidecar revision + image hash are bound in QA receipt"
+    ]
+  },
+  "explicit_non_goals": [
+    "industrial safety certification",
+    "IP-rated enclosure claims",
+    "wide-temperature operation",
+    "24/7 industrial availability claims",
+    "hazardous-location use",
+    "medical use",
+    "replacement/equivalence claim for Advantech industrial panel PCs",
+    "opening or modifying the donor ATX power supply"
+  ],
+  "next_gate": "First close donor identity/yield on a bounded POS462/B91 sample. Before scaling beyond a prototype/micro-pilot, obtain direct buyer evidence at or near NT$8,990 for the complete BenchHMI + BenchIO appliance; competitor listings alone do not validate the price.",
+  "authority": {
+    "product_hypothesis_recorded": true,
+    "donor_acceptance_complete": false,
+    "sidecar_design_authorized": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_claims_validated": false
+  }
+}

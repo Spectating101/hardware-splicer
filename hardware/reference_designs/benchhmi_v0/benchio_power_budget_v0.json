@@ -1,0 +1,151 @@
+{
+  "schema": "hardware_splicer.benchio_power_budget.v1",
+  "design_id": "benchio-v0",
+  "revision": "0.1-pre-schematic",
+  "observed_at": "2026-09-26",
+  "host_usb": {
+    "budget_state": "PASS_DESIGN_ALLOCATION",
+    "usb_pre_configuration_limit_ma": 100,
+    "allocations_ma": [
+      {
+        "load": "STM32G0B1 host controller",
+        "ma": 35,
+        "basis": "conservative design allocation pending exact clock/firmware power model"
+      },
+      {
+        "load": "ISO1410 x2 logic-side",
+        "ma": 6.2,
+        "basis": "2 x 3.1mA datasheet maximum at VCC1=3.3V"
+      },
+      {
+        "load": "ISO1042 logic-side",
+        "ma": 3.5,
+        "basis": "datasheet maximum dominant-state ICC1"
+      },
+      {
+        "load": "ISO6740 host-side",
+        "ma": 5.7,
+        "basis": "datasheet maximum ICC1 at 3.3V / 50Mbps stress case"
+      },
+      {
+        "load": "ISO1212 x2 host-side",
+        "ma": 3.8,
+        "basis": "2 x 1.9mA datasheet maximum quiescent VCC1"
+      },
+      {
+        "load": "status/debug indicators",
+        "ma": 10,
+        "basis": "design allocation"
+      },
+      {
+        "load": "3V3 regulator quiescent, USB ESD and miscellaneous host logic",
+        "ma": 10,
+        "basis": "design allocation"
+      }
+    ],
+    "total_design_allocation_ma": 74.2,
+    "headroom_ma": 25.8,
+    "rule": "USB supplies host logic only. No FIELD_9_30V, 5V_FIELD, bus termination load, or digital-output load may be sourced from USB."
+  },
+  "field_logic_5v": {
+    "budget_state": "PASS_WITH_25_PERCENT_MARGIN",
+    "regulator_candidate": "LMR36510",
+    "regulator_capacity_ma": 1000,
+    "loads_ma": [
+      {
+        "load": "ISO1410 RS485_A field side",
+        "ma": 160,
+        "basis": "datasheet maximum, 5V, 500kbps square wave, 54ohm load"
+      },
+      {
+        "load": "ISO1410 RS485_B field side",
+        "ma": 160,
+        "basis": "datasheet maximum, 5V, 500kbps square wave, 54ohm load"
+      },
+      {
+        "load": "ISO1042 CAN field side",
+        "ma": 73.4,
+        "basis": "datasheet maximum ICC2, dominant bus, 60ohm load"
+      },
+      {
+        "load": "ISO6740 output-control field side",
+        "ma": 17.8,
+        "basis": "datasheet maximum ICC2, 5V, 50Mbps stress case; intentionally much harsher than PF-002 GPIO use"
+      }
+    ],
+    "raw_worst_case_ma": 411.2,
+    "design_margin_fraction": 0.25,
+    "required_with_margin_ma": 514,
+    "regulator_headroom_ma": 486,
+    "capacity_utilization_fraction": 0.514,
+    "rejected_previous_candidate": {
+      "part": "B0505S-2WR3",
+      "capacity_ma": 400,
+      "raw_budget_excess_ma": 11.2,
+      "decision": "REJECT"
+    }
+  },
+  "switched_field_loads": {
+    "source": "FIELD_9_28V direct through TPS4H160-Q1",
+    "channels": 4,
+    "nominal_current_limit_ma_per_channel": 250,
+    "nominal_all_channels_ma": 1000,
+    "included_in_5v_field_logic_budget": false,
+    "included_in_usb_budget": false,
+    "input_power_design_rule": "FIELD_9_28V connector/copper path is targeted for >=3A and uses MF-R250 2.5A-hold resettable protection; four 250mA output limits plus field-logic buck input remain below the intended operating envelope.",
+    "preliminary_field_input_continuous_rating_a": 3,
+    "note": "2A is a pre-schematic board/input-path target, not a certified product rating."
+  },
+  "field_buck_input_envelope": {
+    "output_voltage_v": 5,
+    "output_current_design_ma": 514,
+    "output_power_w": 2.57,
+    "assumed_efficiency_floor_fraction": 0.8,
+    "estimated_input_current_ma": {
+      "at_9v": 357,
+      "at_12v": 268,
+      "at_24v": 134,
+      "at_28v": 114.7
+    },
+    "note": "Efficiency floor is a conservative design assumption for protection sizing, not a datasheet guarantee.",
+    "declared_input_range_v": [
+      9,
+      28
+    ],
+    "protection_contract": "MF-R250 -> B360A -> FIELD_PROTECTED; SMBJ28A from FIELD_PROTECTED to GND_FIELD"
+  },
+  "evidence": [
+    {
+      "component": "ISO1410",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1410.pdf",
+      "fact": "ICC2 max 160mA at 5V, ISO141x 500kbps square wave, 54ohm load"
+    },
+    {
+      "component": "ISO1042",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1042.pdf",
+      "fact": "ICC2 max 73.4mA dominant, RL=60ohm"
+    },
+    {
+      "component": "ISO6740",
+      "url": "https://www.ti.com/lit/ds/symlink/iso6740.pdf",
+      "fact": "ICC2 max 17.8mA at 5V, all channels switching, 50Mbps stress case"
+    },
+    {
+      "component": "ISO1212",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1212.pdf",
+      "fact": "ISO1212 VCC1 quiescent max 1.9mA; field inputs do not require field-side supply"
+    },
+    {
+      "component": "LMR36510",
+      "url": "https://www.ti.com/product/LMR36510",
+      "fact": "4.2V to 65V, 1A synchronous buck"
+    }
+  ],
+  "authority": {
+    "power_architecture_budget_closed_for_schematic": true,
+    "exact_regulator_design_verified": false,
+    "pcb_power_integrity_verified": false,
+    "fabrication_authorized": false,
+    "power_on_authorized": false
+  }
+}

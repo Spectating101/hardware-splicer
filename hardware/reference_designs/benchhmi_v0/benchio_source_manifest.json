@@ -1,0 +1,121 @@
+{
+  "schema": "hardware_splicer.design_source_manifest.v1",
+  "design_id": "benchio-v0",
+  "observed_at": "2026-09-26",
+  "freeze_state": "REVISION_AND_URL_LOCKED_LOCAL_FILE_HASH_PENDING",
+  "note": "Current manufacturer revisions/URLs are locked for schematic work. Local immutable PDF copies and SHA-256 hashes are still required before schematic verification may PASS.",
+  "documents": [
+    {
+      "component": "STM32G0B1",
+      "publisher": "STMicroelectronics",
+      "title": "STM32G0B1xB/xC/xE datasheet",
+      "url": "https://www.st.com/resource/en/datasheet/stm32g0b1kc.pdf",
+      "observed_revision": "production data; current resource observed 2026-09-26",
+      "facts_used": [
+        "USB 2.0 FS device/host",
+        "two FDCAN controllers",
+        "six USARTs",
+        "64 MHz core"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "ISO1410",
+      "publisher": "Texas Instruments",
+      "title": "ISO14xx 5-kVRMS Isolated RS-485/RS-422 Transceiver With Robust EMC",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1410.pdf",
+      "observed_revision": "Rev. I product page; current resource observed 2026-09-26",
+      "facts_used": [
+        "half-duplex RS-485/RS-422",
+        "500 kbps ISO1410",
+        "separate logic/bus supplies",
+        "5-kVRMS device isolation"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "ISO1042",
+      "publisher": "Texas Instruments",
+      "title": "ISO1042 Isolated CAN Transceiver",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1042.pdf",
+      "observed_revision": "Rev. F product page; current resource observed 2026-09-26",
+      "facts_used": [
+        "CAN/CAN FD",
+        "5 Mbps maximum family data rate",
+        "70 V bus fault protection",
+        "isolated logic/bus domains"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "ISO1212",
+      "publisher": "Texas Instruments",
+      "title": "ISO1211/ISO1212 Isolated Digital Input Receivers",
+      "url": "https://www.ti.com/lit/ds/symlink/iso1212.pdf",
+      "observed_revision": "Rev. G / February 2025 family datasheet",
+      "facts_used": [
+        "dual-channel receiver",
+        "24 V to 60 V design class",
+        "input tolerance and configurable threshold network",
+        "no field-side power required"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "TPS4H160-Q1",
+      "publisher": "Texas Instruments",
+      "title": "TPS4H160-Q1 40-V Quad-Channel Smart High-Side Switch",
+      "url": "https://www.ti.com/lit/ds/symlink/tps4h160-q1.pdf",
+      "observed_revision": "Rev. E / current product page observed 2026-09-26",
+      "facts_used": [
+        "4 to 40 V supply",
+        "four high-side channels",
+        "adjustable current limit",
+        "thermal/short-circuit protection",
+        "current sense"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "ISO6740",
+      "publisher": "Texas Instruments",
+      "title": "ISO674x General-Purpose Reinforced Quad-Channel Digital Isolators",
+      "url": "https://www.ti.com/lit/ds/symlink/iso6740.pdf",
+      "observed_revision": "Rev. G product page",
+      "facts_used": [
+        "ISO6740 has four forward / zero reverse channels",
+        "four isolated GPIO/PWM-class output controls",
+        "reinforced isolation family"
+      ],
+      "sha256": null
+    },
+    {
+      "component": "LMR36510",
+      "publisher": "Texas Instruments",
+      "title": "LMR36510 SIMPLE SWITCHER 4.2V to 65V, 1A Synchronous Step-Down Converter",
+      "url": "https://www.ti.com/lit/ds/symlink/lmr36510.pdf",
+      "observed_revision": "Rev. B / current product page observed 2026-09-26",
+      "facts_used": [
+        "4.2V to 65V input",
+        "1A output",
+        "synchronous buck",
+        "industrial power-stage candidate for 5V_FIELD"
+      ],
+      "sha256": null
+    }
+  ],
+  "authority": {
+    "sufficient_for_architecture": true,
+    "sufficient_for_pin_level_draft": true,
+    "sufficient_for_verified_schematic": false,
+    "fabrication_authorized": false
+  },
+  "next_gate": "Materialize immutable manufacturer PDFs into the evidence bundle and bind SHA-256 before VERIFY_SCHEMATIC can PASS.",
+  "rejected_sources": [
+    {
+      "component": "B0505S-2WR3",
+      "reason": "400mA maximum output is below the conservative 411.2mA simultaneous field-side stress budget before design margin.",
+      "source": "https://www.mornsun-power.com/public/uploads/pdf/A05_S-2WR3.pdf"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+name: PF-002 BenchHMI
+
+on:
+  pull_request:
+    paths:
+      - "hardware/reference_designs/benchhmi_v0/**"
+      - "experiments/product_factory/run-002-benchhmi.json"
+      - "experiments/product_factory/donor_probes/benchhmi_pos462_supply_route.json"
+      - "experiments/product_factory/evaluate_supply_route.py"
+      - "tests/test_product_factory_benchhmi.py"
+      - ".github/workflows/pf002-benchhmi.yml"
+
+jobs:
+  donor-gate:
+    name: PF-002 donor economics + authority gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS test environment
+        run: python -m pip install -e ".[dev]"
+      - name: Evaluate Taiwan donor route
+        run: |
+          python experiments/product_factory/evaluate_supply_route.py \
+            experiments/product_factory/donor_probes/benchhmi_pos462_supply_route.json \
+            --output /tmp/pf002_supply.json
+          cat /tmp/pf002_supply.json
+          grep -q '"decision": "HOLD_SUPPLY_ROUTE"' /tmp/pf002_supply.json
+          grep -q '"supply_depth": false' /tmp/pf002_supply.json
+          grep -q '"yield_evidence": false' /tmp/pf002_supply.json
+      - name: Run PF-002 contract tests
+        run: python -m pytest -q tests/test_product_factory_benchhmi.py
+      - name: Upload donor gate receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pf002-benchhmi-donor-gate
+          path: /tmp/pf002_supply.json
+          if-no-files-found: warn

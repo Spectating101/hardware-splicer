@@ -1,0 +1,48 @@
+{
+  "schema": "hardware_splicer.market_evidence_packet.v1",
+  "product_id": "benchhmi-v0",
+  "observed_at": "2026-09-24",
+  "sources": [
+    {
+      "role": "donor_price_observation",
+      "market": "Taiwan",
+      "name": "Ruten Taiwan used POS search",
+      "url": "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8Bpos%E6%A9%9F/?cateid=0011",
+      "observation": "Used Flytech POS462 touchscreen POS listed at NT$1,000 with power-on response and local inspection invited.",
+      "limitations": "Search/listing observation only; exact B91 motherboard revision, available quantity, functional yield and seller continuity are unverified."
+    },
+    {
+      "role": "donor_technical_identity",
+      "name": "Flytech POS460 Series user manual — B91 specification",
+      "url": "https://www.songphat.com/images/stories/songphat/flytech/manual/pos_460_manual.pdf",
+      "observation": "B91-family POS462 documentation specifies 12.1-inch resistive touch, SATA storage, up to 4 GB DDR2, 10/100/1000 LAN, four powered COM ports, six external USB ports and Linux OS support.",
+      "limitations": "Model-family documentation; the exact physical donor must be inspected to establish B91 identity and installed options."
+    },
+    {
+      "role": "manual_revision_crosscheck",
+      "name": "Flytech POS460 Series user manual mirror",
+      "url": "https://www.jarltech.com/ger_new/new/support/cd/K400_manual%202.4.pdf",
+      "observation": "Revision history documents B91 addition and storage changes; also documents multiple POS462 panel variants and service details.",
+      "limitations": "Historical service documentation does not prove condition or compatibility of a particular used unit."
+    },
+    {
+      "role": "finished_product_price_anchor",
+      "market": "Taiwan",
+      "name": "Advantech UTC-307GP-IOT0E",
+      "url": "https://iotmart.advantech.com.tw/Widget.aspx?WidgetID=3035",
+      "price_twd": 18890,
+      "observation": "Official Taiwan IoTMart price for a new 7-inch industrial touch computer.",
+      "limitations": "Certified new industrial product; benchmark is price/context only, not feature or certification equivalence."
+    },
+    {
+      "role": "finished_product_price_anchor",
+      "market": "Taiwan",
+      "name": "Advantech UTC-115GP-IOT0E",
+      "url": "https://iotmart.advantech.com.tw/Widget.aspx?WidgetID=3035",
+      "price_twd": 21305,
+      "observation": "Official Taiwan IoTMart price for a new 15.6-inch industrial touch computer.",
+      "limitations": "Certified new industrial product; benchmark is price/context only, not feature or certification equivalence."
+    }
+  ],
+  "boundary": "These observations justify investigating a Taiwan donor-remanufacture product. They do not establish demand, lot supply, measured donor yield, industrial equivalence, certification, physical correctness or sale authority."
+}

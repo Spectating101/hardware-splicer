@@ -1,0 +1,423 @@
+{
+  "schema": "hardware_splicer.benchio_connectivity.v1",
+  "design_id": "benchio-v0",
+  "revision": "0.1-net-contract",
+  "state": "PIN_LEVEL_CONNECTIVITY_FROZEN_ACTIVE_PARTS",
+  "source_contracts": [
+    "hardware/reference_designs/benchhmi_v0/benchio_pinmap_v0.json",
+    "hardware/reference_designs/benchhmi_v0/benchio_power_budget_v0.json",
+    "hardware/reference_designs/benchhmi_v0/benchio_schematic_contract.json",
+    "hardware/reference_designs/benchhmi_v0/benchio_source_manifest.json"
+  ],
+  "domains": {
+    "host": [
+      "USB_VBUS_5V",
+      "3V3_HOST",
+      "GND_HOST"
+    ],
+    "field_logic": [
+      "FIELD_PROTECTED",
+      "5V_FIELD",
+      "GND_FIELD"
+    ],
+    "isolated_signal_barrier": "No copper connection between GND_HOST and GND_FIELD."
+  },
+  "parts": {
+    "U1": {
+      "part": "STM32G0B1CBT6",
+      "package": "LQFP48",
+      "pins": {
+        "4": "3V3_HOST",
+        "5": "3V3_HOST",
+        "6": "3V3_HOST",
+        "7": "GND_HOST",
+        "10": "MCU_NRST",
+        "11": "SPARE_GPIO0",
+        "12": "RS485_A_DE",
+        "13": "RS485_A_TX",
+        "14": "RS485_A_RX",
+        "15": "DI0_LOGIC",
+        "16": "DI1_LOGIC",
+        "17": "DI2_LOGIC",
+        "18": "DI3_LOGIC",
+        "20": "RS485_B_DE",
+        "21": "DO0_LOGIC",
+        "22": "RS485_B_TX",
+        "23": "RS485_B_RX",
+        "33": "USB_DM",
+        "34": "USB_DP",
+        "35": "SWDIO",
+        "36": "SWCLK",
+        "42": "DO1_LOGIC",
+        "43": "DO2_LOGIC",
+        "44": "CAN_RX",
+        "45": "CAN_TX",
+        "46": "DO3_LOGIC",
+        "47": "STATUS_LED",
+        "48": "FAULT_LED"
+      },
+      "notes": [
+        "VBAT pin 4, VREF+ pin 5, and VDD/VDDA pin 6 are tied to 3V3_HOST for v0.",
+        "Pins not listed as functional nets remain unused or are handled by the MCU power/reset/debug support network."
+      ]
+    },
+    "U2": {
+      "part": "ISO1410DWR",
+      "role": "RS485_A",
+      "pins": {
+        "1": "3V3_HOST",
+        "2": "GND_HOST",
+        "3": "RS485_A_RX",
+        "4": "RS485_A_DE",
+        "5": "RS485_A_DE",
+        "6": "RS485_A_TX",
+        "7": "NC",
+        "8": "GND_HOST",
+        "9": "GND_FIELD",
+        "10": "NC",
+        "11": "NC",
+        "12": "RS485_A_A",
+        "13": "RS485_A_B",
+        "14": "NC",
+        "15": "GND_FIELD",
+        "16": "5V_FIELD"
+      },
+      "note": "DE and active-low /RE intentionally share RS485_A_DE: low=receive, high=transmit."
+    },
+    "U3": {
+      "part": "ISO1410DWR",
+      "role": "RS485_B",
+      "pins": {
+        "1": "3V3_HOST",
+        "2": "GND_HOST",
+        "3": "RS485_B_RX",
+        "4": "RS485_B_DE",
+        "5": "RS485_B_DE",
+        "6": "RS485_B_TX",
+        "7": "NC",
+        "8": "GND_HOST",
+        "9": "GND_FIELD",
+        "10": "NC",
+        "11": "NC",
+        "12": "RS485_B_A",
+        "13": "RS485_B_B",
+        "14": "NC",
+        "15": "GND_FIELD",
+        "16": "5V_FIELD"
+      },
+      "note": "DE and active-low /RE intentionally share RS485_B_DE: low=receive, high=transmit."
+    },
+    "U4": {
+      "part": "ISO1042DWVR",
+      "package": "DWV-8",
+      "role": "CAN",
+      "pins": {
+        "1": "3V3_HOST",
+        "2": "CAN_TX",
+        "3": "CAN_RX",
+        "4": "GND_HOST",
+        "5": "GND_FIELD",
+        "6": "CAN_L",
+        "7": "CAN_H",
+        "8": "5V_FIELD"
+      }
+    },
+    "U5": {
+      "part": "ISO1212SDBQR",
+      "role": "DI0_DI1",
+      "pins": {
+        "1": "GND_HOST",
+        "2": "3V3_HOST",
+        "3": "3V3_HOST",
+        "4": "DI0_LOGIC",
+        "5": "DI1_LOGIC",
+        "6": "NC",
+        "7": "NC",
+        "8": "GND_HOST",
+        "9": "DI1_RETURN",
+        "10": "DI1_IN_DEVICE",
+        "11": "DI1_SENSE",
+        "12": "DI1_SUB_FLOAT",
+        "13": "DI0_SUB_FLOAT",
+        "14": "DI0_RETURN",
+        "15": "DI0_IN_DEVICE",
+        "16": "DI0_SENSE"
+      }
+    },
+    "U6": {
+      "part": "ISO1212SDBQR",
+      "role": "DI2_DI3",
+      "pins": {
+        "1": "GND_HOST",
+        "2": "3V3_HOST",
+        "3": "3V3_HOST",
+        "4": "DI2_LOGIC",
+        "5": "DI3_LOGIC",
+        "6": "NC",
+        "7": "NC",
+        "8": "GND_HOST",
+        "9": "DI3_RETURN",
+        "10": "DI3_IN_DEVICE",
+        "11": "DI3_SENSE",
+        "12": "DI3_SUB_FLOAT",
+        "13": "DI2_SUB_FLOAT",
+        "14": "DI2_RETURN",
+        "15": "DI2_IN_DEVICE",
+        "16": "DI2_SENSE"
+      }
+    },
+    "U7": {
+      "part": "TPS4H160-Q1_VERSION_A",
+      "role": "4CH_HIGH_SIDE_OUTPUT",
+      "pins": {
+        "1": "GND_FIELD",
+        "2": "NC",
+        "3": "DO0_FIELD_CTL",
+        "4": "DO1_FIELD_CTL",
+        "5": "DO2_FIELD_CTL",
+        "6": "DO3_FIELD_CTL",
+        "7": "NC",
+        "8": "NC",
+        "9": "NC",
+        "10": "NC",
+        "11": "TPS_CL",
+        "12": "GND_FIELD",
+        "13": "5V_FIELD",
+        "14": "GND_FIELD",
+        "15": "DO3",
+        "16": "DO3",
+        "17": "DO2",
+        "18": "DO2",
+        "19": "NC",
+        "20": "FIELD_PROTECTED",
+        "21": "FIELD_PROTECTED",
+        "22": "FIELD_PROTECTED",
+        "23": "FIELD_PROTECTED",
+        "24": "NC",
+        "25": "DO1",
+        "26": "DO1",
+        "27": "DO0",
+        "28": "DO0",
+        "PAD": "GND_FIELD"
+      },
+      "notes": [
+        "THER pin 13 is held high for latch-off thermal behavior.",
+        "DIAG_EN pin 14 is held low; ST1-ST4 diagnostics are intentionally not used in v0.",
+        "CL pin 11 uses an 8.06k 1% resistor to GND_FIELD for approximately 0.25A nominal current-limit target."
+      ]
+    },
+    "U8": {
+      "part": "ISO6740DWR",
+      "role": "DO_CONTROL_ISOLATOR_4FWD",
+      "pins": {
+        "1": "3V3_HOST",
+        "2": "GND_HOST",
+        "3": "DO0_LOGIC",
+        "4": "DO1_LOGIC",
+        "5": "DO2_LOGIC",
+        "6": "DO3_LOGIC",
+        "7": "NC",
+        "8": "GND_HOST",
+        "9": "GND_FIELD",
+        "10": "5V_FIELD",
+        "11": "DO3_FIELD_CTL",
+        "12": "DO2_FIELD_CTL",
+        "13": "DO1_FIELD_CTL",
+        "14": "DO0_FIELD_CTL",
+        "15": "GND_FIELD",
+        "16": "5V_FIELD"
+      },
+      "note": "ISO6740 4-forward variant is required. EN2 pin 10 is held high from 5V_FIELD."
+    },
+    "U9": {
+      "part": "LMR36510",
+      "package": "DDA-8",
+      "role": "FIELD_9_28V_TO_5V_FIELD",
+      "pins": {
+        "1": "GND_FIELD",
+        "2": "FIELD_PROTECTED",
+        "3": "FIELD_PROTECTED",
+        "4": "NC",
+        "5": "FIELD_FB",
+        "6": "LMR_VCC",
+        "7": "LMR_BOOT",
+        "8": "LMR_SW",
+        "PAD": "GND_FIELD"
+      },
+      "support_network": {
+        "L1": "22uH from LMR_SW to 5V_FIELD; saturation current target >=2.4A",
+        "R_FB_TOP": "100k 1% from 5V_FIELD to FIELD_FB",
+        "R_FB_BOTTOM": "24.9k 1% from FIELD_FB to GND_FIELD",
+        "C_BOOT": "100nF from LMR_BOOT to LMR_SW",
+        "C_VCC": "1uF from LMR_VCC to GND_FIELD",
+        "C_IN": "2.2uF + 220nF from FIELD_PROTECTED to GND_FIELD, voltage rating >=50V",
+        "C_OUT": "2 x 22uF from 5V_FIELD to GND_FIELD, voltage rating >=10V"
+      }
+    },
+    "U10": {
+      "part": "TLV75533PDBVR",
+      "package": "SOT-23-5 DBV",
+      "role": "USB_5V_TO_3V3_HOST",
+      "pins": {
+        "1": "USB_VBUS_5V",
+        "2": "GND_HOST",
+        "3": "USB_VBUS_5V",
+        "4": "NC",
+        "5": "3V3_HOST"
+      },
+      "support_network": {
+        "C_IN": "1uF minimum from USB_VBUS_5V to GND_HOST",
+        "C_OUT": "1uF minimum from 3V3_HOST to GND_HOST"
+      }
+    },
+    "U11": {
+      "part": "TPD2EUSB30A",
+      "package": "DRT-3",
+      "role": "USB_DATA_ESD",
+      "pins": {
+        "1": "USB_DP",
+        "2": "USB_DM",
+        "3": "GND_HOST"
+      }
+    }
+  },
+  "passive_and_connector_contract": {
+    "USB_C": {
+      "ref": "J1",
+      "symbol_contract": "USB_C_Receptacle_USB2.0_16P",
+      "nets": {
+        "A4/A9/B4/B9": "USB_VBUS_5V",
+        "A6/B6": "USB_DP",
+        "A7/B7": "USB_DM",
+        "A5": "CC1",
+        "B5": "CC2",
+        "A1/A12/B1/B12": "GND_HOST"
+      },
+      "CC1": "5.1k Rd to GND_HOST",
+      "CC2": "5.1k Rd to GND_HOST",
+      "shield": "connector shell strategy remains mechanical/EMC review item; must not bridge isolation moat"
+    },
+    "RS485_A": {
+      "ref": "J2",
+      "pins": [
+        "RS485_A_A",
+        "RS485_A_B",
+        "GND_FIELD"
+      ],
+      "termination": "120ohm switchable across RS485_A_A/B"
+    },
+    "RS485_B": {
+      "ref": "J3",
+      "pins": [
+        "RS485_B_A",
+        "RS485_B_B",
+        "GND_FIELD"
+      ],
+      "termination": "120ohm switchable across RS485_B_A/B"
+    },
+    "CAN": {
+      "ref": "J4",
+      "pins": [
+        "CAN_H",
+        "CAN_L",
+        "GND_FIELD"
+      ],
+      "termination": "120ohm switchable across CAN_H/CAN_L"
+    },
+    "DIGITAL_INPUTS": {
+      "ref": "J5",
+      "channel_contract": {
+        "DI0": [
+          "DI0",
+          "DI0_RETURN"
+        ],
+        "DI1": [
+          "DI1",
+          "DI1_RETURN"
+        ],
+        "DI2": [
+          "DI2",
+          "DI2_RETURN"
+        ],
+        "DI3": [
+          "DI3",
+          "DI3_RETURN"
+        ]
+      },
+      "each_channel": [
+        "DIx -> RTHR 2.49k 1% -> DIx_SENSE",
+        "DIx_SENSE -> RSENSE 562ohm 1% -> DIx_IN_DEVICE",
+        "10nF CIN from DIx_SENSE to DIx_RETURN",
+        "DIx_RETURN -> corresponding ISO1212 FGNDx",
+        "SUBx connects only to its dedicated floating copper island and to no named power/ground net"
+      ]
+    },
+    "FIELD_OUTPUTS": {
+      "ref": "J6",
+      "pins": [
+        "FIELD_IN_9_28V",
+        "GND_FIELD",
+        "DO0",
+        "DO1",
+        "DO2",
+        "DO3"
+      ],
+      "input_path": [
+        "FIELD_IN_9_28V -> F1 2A protection target",
+        "F1 -> reverse-polarity protection -> FIELD_PROTECTED",
+        "FIELD_PROTECTED -> TPS4H160 VS pins and LMR36510 VIN",
+        "TVS/protection device selection must guarantee the TPS4H160-Q1 48V transient absolute limit is not exceeded under the declared surge case"
+      ],
+      "note": "Exact fuse/reverse-polarity/TVS MPNs remain pending; until frozen, schematic may be DRAFT but cannot PASS verification."
+    },
+    "TPS_CURRENT_LIMIT": {
+      "ref": "R_CL",
+      "value": "8.06k 1%",
+      "net_a": "TPS_CL",
+      "net_b": "GND_FIELD",
+      "basis": "Rcl = 0.8V * 2500 / 0.25A = 8.0k; 8.06k E96 draft"
+    },
+    "DEBUG": {
+      "ref": "J7",
+      "pins": [
+        "3V3_HOST",
+        "GND_HOST",
+        "SWDIO",
+        "SWCLK",
+        "MCU_NRST"
+      ]
+    }
+  },
+  "pending_exact_parts": [
+    "USB-C receptacle exact MPN/footprint",
+    "field input 2A fuse/PTC exact MPN",
+    "field reverse-polarity element exact MPN",
+    "field TVS exact MPN and surge case",
+    "RS485 optional connector-side TVS footprints/MPNs",
+    "CAN optional connector-side TVS footprint/MPN",
+    "22uH field-buck inductor exact MPN and saturation-current verification",
+    "host/status LEDs and resistor exact values",
+    "mechanical connector family"
+  ],
+  "topology_invariants": [
+    "GND_HOST and GND_FIELD have no conductive connection.",
+    "USB_VBUS_5V and 3V3_HOST never connect to FIELD_PROTECTED or 5V_FIELD.",
+    "U2/U3 pins 4 and 5 share exactly one DE/RE control net per channel.",
+    "U2/U3 field-side A/B nets never appear on the host side.",
+    "U4 is the DWV-8 ISO1042 pinout and not the 16-pin variant.",
+    "U8 must be ISO6740 4-forward and not ISO6741 3-forward/1-reverse.",
+    "ISO1212 SUB1/SUB2 nets never connect to GND_HOST, GND_FIELD, or connector returns.",
+    "TPS4H160 output power comes only from FIELD_PROTECTED.",
+    "LMR36510 output powers only 5V_FIELD logic and never the switched external loads.",
+    "No pending exact protection part may be silently treated as verified."
+  ],
+  "authority": {
+    "active_part_connectivity_frozen": true,
+    "protection_and_mechanical_bom_complete": false,
+    "schematic_generation_authorized": true,
+    "schematic_verification_authorized": false,
+    "pcb_design_authorized": false,
+    "fabrication_authorized": false,
+    "power_on_authorized": false
+  }
+}

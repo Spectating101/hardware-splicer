@@ -1,0 +1,78 @@
+{
+  "schema": "hardware_splicer.product_factory_procurement_evidence.v1",
+  "product_id": "benchhmi-v0",
+  "observed_at": "2026-09-26",
+  "market": "Taiwan",
+  "target_donor": {
+    "manufacturer": "Flytech",
+    "model": "POS462",
+    "required_motherboard": "B91 family",
+    "required_before_purchase": [
+      "seller confirms exact model is POS462",
+      "seller provides motherboard/revision photo or permits in-person inspection to verify B91",
+      "unit powers on",
+      "LCD and touch can be exercised",
+      "no obvious mains-side damage or PSU repair requirement"
+    ]
+  },
+  "live_observation": {
+    "source": "Ruten Taiwan search",
+    "query": "二手pos機",
+    "listing_text": "二手FLYTECH POS462觸控POS機單機無錢箱(上電有反應歡迎面交測試)",
+    "observed_price_twd": 1000,
+    "listing_state": "PUBLICLY_VISIBLE",
+    "exact_listing_url_resolved": true,
+    "b91_verified": false,
+    "quantity_verified": false,
+    "functional_yield_verified": false,
+    "interpretation": "Good one-unit qualification candidate because the seller explicitly invites face-to-face testing. It is not yet an approved donor because B91 identity and functional checks remain unverified.",
+    "exact_listing_url": "https://www.ruten.com.tw/item/21834521436740/",
+    "observed_at": "2026-09-26",
+    "note": "Exact public listing URL resolved from the live Ruten result. Listing page itself requires login for full details, so B91 identity still requires seller photo or in-person inspection."
+  },
+  "procurement_decision": "INSPECT_OR_CONTACT_FOR_ONE_UNIT_QUALIFICATION",
+  "purchase_authority": false,
+  "batch_procurement_authority": false,
+  "seller_questions": [
+    "請問這台確定是 Flytech POS462 嗎？",
+    "可以拍一下主機板型號/版本標示嗎？我們需要確認是否為 B91 系列。",
+    "觸控螢幕可以正常使用嗎？",
+    "網路孔、USB、COM/RS232 目前有測試過嗎？",
+    "可以面交現場開機與測試嗎？"
+  ],
+  "in_person_acceptance_focus": [
+    "exact POS462 identity",
+    "B91 motherboard identity",
+    "serial/asset identity",
+    "cold boot",
+    "LCD",
+    "touch",
+    "Ethernet",
+    "USB",
+    "COM ports",
+    "storage",
+    "thermal behavior",
+    "external power-system condition"
+  ],
+  "alternatives_observed": [
+    {
+      "model": "Datavan W-615",
+      "observed_price_twd": 2000,
+      "state": "ALTERNATE_DONOR_CLASS_NOT_APPROVED",
+      "reason": "Potential fallback donor family only; requires its own identity/interface qualification profile."
+    },
+    {
+      "model": "generic J1800 touchscreen POS",
+      "observed_price_twd": 1500,
+      "state": "ALTERNATE_DONOR_CLASS_NOT_APPROVED",
+      "reason": "Cheap fallback pool, but heterogeneous identity makes it unsuitable for PF-002 until profiled separately."
+    },
+    {
+      "model": "Advantech UTC-310",
+      "observed_price_twd": 4999,
+      "state": "ALTERNATE_DONOR_CLASS_NOT_APPROVED",
+      "reason": "More expensive but potentially stronger industrial donor; separate economics and interface profile required."
+    }
+  ],
+  "boundary": "This packet establishes that a current Taiwan one-unit POS462 candidate exists at the target acquisition price. It does not verify B91 identity, seller inventory, functional yield, condition, purchase authority, or production supply."
+}

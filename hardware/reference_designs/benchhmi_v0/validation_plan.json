@@ -1,0 +1,78 @@
+{
+  "schema": "hardware_splicer.benchio_validation_plan.v1",
+  "product_id": "benchhmi-v0",
+  "subsystem_id": "benchio-v0",
+  "status": "PRE_DESIGN_VALIDATION_PLAN",
+  "principle": "Every claimed BenchIO capability must have a deterministic bench acceptance test before schematic authority opens.",
+  "tests": [
+    {
+      "id": "USB_ENUM",
+      "claim": "host sees exact BenchIO identity/revision",
+      "method": "cold-plug/replug enumeration on accepted POS donor",
+      "pass": "stable enumeration and revision identity across repeated cycles"
+    },
+    {
+      "id": "RS485_A",
+      "claim": "isolated RS-485 A works",
+      "method": "loopback plus known Modbus/RS-485 device transaction",
+      "pass": "repeatable bidirectional transaction with bounded error count"
+    },
+    {
+      "id": "RS485_B",
+      "claim": "isolated RS-485 B works",
+      "method": "loopback plus known device transaction",
+      "pass": "repeatable bidirectional transaction with bounded error count"
+    },
+    {
+      "id": "CAN",
+      "claim": "CAN interface works",
+      "method": "known CAN node transaction at frozen bitrate",
+      "pass": "valid frames transmitted/received without protocol error escalation"
+    },
+    {
+      "id": "DI",
+      "claim": "four protected digital inputs work",
+      "method": "apply frozen low/high voltages through known source",
+      "pass": "all channels switch only inside documented thresholds"
+    },
+    {
+      "id": "DO",
+      "claim": "four protected digital outputs work",
+      "method": "switch bounded resistive loads and measure output",
+      "pass": "all channels meet frozen voltage/current/thermal limits"
+    },
+    {
+      "id": "POWER_TELEMETRY",
+      "claim": "implemented supply telemetry is meaningful",
+      "method": "compare against calibrated reference meter",
+      "pass": "error inside frozen tolerance"
+    },
+    {
+      "id": "FAULT_DEFAULTS",
+      "claim": "unsafe outputs are not active by default",
+      "method": "cold boot, reconnect, firmware reset",
+      "pass": "field outputs remain inactive until explicit command"
+    },
+    {
+      "id": "ENDURANCE",
+      "claim": "sidecar is stable for intended bench use",
+      "method": "representative I/O/network workload for frozen duration",
+      "pass": "no reset, overheating, latch-up, communication collapse or unsafe output"
+    }
+  ],
+  "evidence_receipt_requires": [
+    "accepted donor serial/revision",
+    "BenchIO PCB revision",
+    "BenchIO firmware hash",
+    "host software image hash",
+    "test equipment identity where measurement is material",
+    "timestamped raw/summary results",
+    "simulated=false for physical proof"
+  ],
+  "authority": {
+    "validation_plan_frozen": true,
+    "schematic_design_authorized": false,
+    "fabrication_authorized": false,
+    "physical_correctness_proven": false
+  }
+}
