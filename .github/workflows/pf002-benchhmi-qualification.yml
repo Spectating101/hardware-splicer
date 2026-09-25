@@ -29,6 +29,8 @@ jobs:
           python experiments/product_factory/advance_pf002.py             experiments/product_factory/fixtures/benchhmi_pos462_simulated_pass.json             --output /tmp/pf002_campaign.json
           cat /tmp/pf002_donor.json
           cat /tmp/pf002_campaign.json
-          grep -q '"decision": "SIMULATION_ONLY_NOT_ACCEPTED"' /tmp/pf002_donor.json
+          grep -q '"decision": "SIMULATION_REHEARSAL_COMPLETE_REAL_EVIDENCE_PENDING"' /tmp/pf002_donor.json
           grep -q '"benchio_schematic_design_authorized": false' /tmp/pf002_campaign.json
           grep -q '"fabrication_authorized": false' /tmp/pf002_campaign.json
+          grep -q '"blockers": \[\]' /tmp/pf002_donor.json
+          grep -q '"real_physical_evidence_required"' /tmp/pf002_donor.json
