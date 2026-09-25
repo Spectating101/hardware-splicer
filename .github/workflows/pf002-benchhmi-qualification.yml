@@ -22,9 +22,11 @@ jobs:
       - name: Install HS test environment
         run: python -m pip install -e ".[dev]"
       - name: Run qualification and pre-schematic tests
-        run: python -m pytest -q tests/test_product_factory_benchhmi_qualification.py tests/test_benchio_pre_schematic.py tests/test_benchio_pinmap.py
+        run: python -m pytest -q tests/test_product_factory_benchhmi_qualification.py tests/test_benchio_pre_schematic.py tests/test_benchio_pinmap.py tests/test_benchio_power_budget.py
       - name: Validate frozen BenchIO MCU pin map
         run: python hardware/reference_designs/benchhmi_v0/validate_benchio_pinmap.py hardware/reference_designs/benchhmi_v0/benchio_pinmap_v0.json
+      - name: Validate BenchIO power-domain budget
+        run: python hardware/reference_designs/benchhmi_v0/validate_benchio_power_budget.py hardware/reference_designs/benchhmi_v0/benchio_power_budget_v0.json
       - name: Rehearse perfect simulated donor
         run: |
           python experiments/product_factory/qualify_pf002_donor.py             experiments/product_factory/fixtures/benchhmi_pos462_simulated_pass.json             --output /tmp/pf002_donor.json
