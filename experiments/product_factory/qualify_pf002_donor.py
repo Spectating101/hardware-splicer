@@ -47,6 +47,7 @@ def evaluate(record: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("checks mapping is required")
 
     blockers: list[str] = []
+    pending_requirements: list[str] = []
     warnings: list[str] = []
 
     if str(donor.get("manufacturer") or "").strip().casefold() != "flytech":
@@ -79,15 +80,15 @@ def evaluate(record: Mapping[str, Any]) -> dict[str, Any]:
 
     simulated = record.get("simulated")
     if simulated is not False:
-        blockers.append("real_physical_state_not_explicit")
+        pending_requirements.append("real_physical_evidence_required")
 
     inspection_minutes = record.get("inspection_minutes")
     if not isinstance(inspection_minutes, (int, float)) or inspection_minutes <= 0:
-        blockers.append("inspection_time_missing")
+        pending_requirements.append("inspection_time_required")
 
     purchase_price_twd = record.get("purchase_price_twd")
     if not isinstance(purchase_price_twd, (int, float)) or purchase_price_twd <= 0:
-        blockers.append("purchase_price_missing")
+        pending_requirements.append("purchase_price_required")
 
     if record.get("storage_replacement_required") is True:
         warnings.append("storage_replacement_required")
@@ -106,18 +107,20 @@ def evaluate(record: Mapping[str, Any]) -> dict[str, Any]:
         }
         for blocker in blockers
     )
-    real_acceptance = physical_checks_pass and "real_physical_state_not_explicit" not in blockers
+    real_acceptance = physical_checks_pass and "real_physical_evidence_required" not in pending_requirements
     economics_observed = (
-        "purchase_price_missing" not in blockers
-        and "inspection_time_missing" not in blockers
+        "purchase_price_required" not in pending_requirements
+        and "inspection_time_required" not in pending_requirements
     )
 
     if real_acceptance and economics_observed:
-        decision = "ACCEPT_ONE_DONOR_FOR_PF002_ENGINEERING"
+        decision = "READY_ONE_DONOR_FOR_PF002_ENGINEERING"
     elif physical_checks_pass and simulated is not False:
-        decision = "SIMULATION_ONLY_NOT_ACCEPTED"
+        decision = "SIMULATION_REHEARSAL_COMPLETE_REAL_EVIDENCE_PENDING"
+    elif blockers:
+        decision = "DONOR_REQUIRES_CORRECTION_OR_REJECTION"
     else:
-        decision = "HOLD_OR_REJECT_DONOR"
+        decision = "EVIDENCE_PENDING_DONOR_QUALIFICATION"
 
     source_hash = "sha256:" + hashlib.sha256(_canonical(record)).hexdigest()
     return {
@@ -126,7 +129,8 @@ def evaluate(record: Mapping[str, Any]) -> dict[str, Any]:
         "donor_record_sha256": source_hash,
         "decision": decision,
         "physical_checks_pass": physical_checks_pass,
-        "real_donor_accepted": decision == "ACCEPT_ONE_DONOR_FOR_PF002_ENGINEERING",
+        "real_donor_accepted": decision == "READY_ONE_DONOR_FOR_PF002_ENGINEERING",
+        "pending_requirements": pending_requirements,
         "blockers": blockers,
         "warnings": warnings,
         "observed": {
@@ -136,8 +140,8 @@ def evaluate(record: Mapping[str, Any]) -> dict[str, Any]:
             "cmos_battery_replacement_required": bool(record.get("cmos_battery_replacement_required")),
         },
         "authority": {
-            "donor_qualified_for_this_run": decision == "ACCEPT_ONE_DONOR_FOR_PF002_ENGINEERING",
-            "benchio_design_gate_may_open": decision == "ACCEPT_ONE_DONOR_FOR_PF002_ENGINEERING",
+            "donor_qualified_for_this_run": decision == "READY_ONE_DONOR_FOR_PF002_ENGINEERING",
+            "benchio_design_gate_may_open": decision == "READY_ONE_DONOR_FOR_PF002_ENGINEERING",
             "donor_disassembly_authorized": False,
             "fabrication_authorized": False,
             "power_on_new_hardware_authorized": False,
