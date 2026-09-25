@@ -1,0 +1,158 @@
+{
+  "schema": "hardware_splicer.benchio_exact_parts_freeze.v1",
+  "design_id": "benchio-v0",
+  "revision": "0.1-parts-freeze",
+  "observed_at": "2026-09-26",
+  "field_input_contract": {
+    "declared_input_range_v": [
+      9,
+      28
+    ],
+    "path_continuous_design_target_a": 3,
+    "protection": [
+      {
+        "ref": "F1",
+        "part": "MF-R250",
+        "manufacturer": "Bourns",
+        "role": "resettable overcurrent protection",
+        "hold_current_a": 2.5,
+        "trip_current_a": 5,
+        "max_voltage_v": 30,
+        "source": "https://www.bourns.com/docs/product-datasheets/mfr.pdf"
+      },
+      {
+        "ref": "D1",
+        "part": "B360A",
+        "manufacturer": "Diodes Incorporated",
+        "role": "series reverse-polarity protection",
+        "average_current_a": 3,
+        "reverse_voltage_v": 60,
+        "package": "SMA",
+        "source": "https://www.diodes.com/part/view/B360A"
+      },
+      {
+        "ref": "D2",
+        "part": "SMBJ28A",
+        "manufacturer": "Littelfuse",
+        "role": "unidirectional field-supply TVS after reverse-polarity diode",
+        "reverse_standoff_v": 28,
+        "breakdown_min_v": 31.1,
+        "breakdown_max_v": 34.4,
+        "max_clamp_v": 45.4,
+        "package": "SMB",
+        "source": "https://m.littelfuse.com/~/media/electronics/datasheets/tvs_diodes/littelfuse_tvs_diode_smbj_datasheet.pdf.pdf",
+        "rationale": "45.4V max clamp remains below TPS4H160-Q1 48V transient absolute-maximum ceiling. The 30V SMBJ30A 48.4V clamp is intentionally not used."
+      }
+    ]
+  },
+  "usb": {
+    "ref": "J1",
+    "part": "USB4105-GF-A",
+    "manufacturer": "GCT",
+    "role": "USB-C USB 2.0 receptacle",
+    "contacts": 16,
+    "orientation": "horizontal top-mount",
+    "current_rating_vbus_collective_a": 5,
+    "mating_cycles": 20000,
+    "source": "https://gct.co/connector/usb4105"
+  },
+  "can_protection": {
+    "ref": "D_CAN1",
+    "part": "PESD2CANFD24V-U",
+    "manufacturer": "Nexperia",
+    "package": "SOT323",
+    "reverse_standoff_v": 24,
+    "clamp_v_at_1a": 33,
+    "capacitance_pf": 6,
+    "role": "CAN_H/CAN_L ESD/transient protection",
+    "source": "https://www.nexperia.com/product/PESD2CANFD24V-U"
+  },
+  "rs485_protection": [
+    {
+      "ref": "D_485A",
+      "part": "SM712",
+      "manufacturer": "Littelfuse",
+      "role": "RS485_A asymmetric TVS array",
+      "working_voltage_v": [
+        -7,
+        12
+      ],
+      "package": "SOT23-3 class",
+      "source": "https://www.littelfuse.com/assetdocs/tvs-diode-array-spa-sm712-datasheet?assetguid=8313a28c-8802-4d47-a2a7-e30b5b1f67d8"
+    },
+    {
+      "ref": "D_485B",
+      "part": "SM712",
+      "manufacturer": "Littelfuse",
+      "role": "RS485_B asymmetric TVS array",
+      "working_voltage_v": [
+        -7,
+        12
+      ],
+      "package": "SOT23-3 class",
+      "source": "https://www.littelfuse.com/assetdocs/tvs-diode-array-spa-sm712-datasheet?assetguid=8313a28c-8802-4d47-a2a7-e30b5b1f67d8"
+    }
+  ],
+  "buck_inductor": {
+    "ref": "L1",
+    "part": "744770122",
+    "manufacturer": "Würth Elektronik",
+    "family": "WE-PD",
+    "inductance_uh": 22,
+    "rated_current_a": 3.5,
+    "saturation_current_a": 3.7,
+    "role": "LMR36510 5V_FIELD buck inductor",
+    "source": "https://www.we-online.com/en/components/products/DESIGNKIT_744770"
+  },
+  "field_connectors": {
+    "series": "Würth WR-TBL 7011B 3.50mm PCB headers + 3041 screwless cable plugs",
+    "pitch_mm": 3.5,
+    "header_rating_a": 10,
+    "header_source": "https://www.we-online.com/en/components/products/WR_TBL_SERIES_7011B_PCB_HEADER_3_5_MM_PITCH_THR",
+    "plug_source": "https://www.we-online.com/en/components/products/TBL_3_5_3041_6913041000XX",
+    "mappings": [
+      {
+        "refs": [
+          "J2",
+          "J3",
+          "J4"
+        ],
+        "positions": 3,
+        "header": "691701100003B",
+        "plug": "691304100003"
+      },
+      {
+        "refs": [
+          "J5"
+        ],
+        "positions": 8,
+        "header": "691701100008B",
+        "plug": "691304100008"
+      },
+      {
+        "refs": [
+          "J6"
+        ],
+        "positions": 6,
+        "header": "691701100006B",
+        "plug": "691304100006"
+      }
+    ]
+  },
+  "remaining_generic": [
+    "J7 SWD/debug header exact MPN",
+    "status/fault LED exact MPNs and resistor values",
+    "RS485/CAN switchable-termination jumper/switch exact MPNs",
+    "mounting hardware and enclosure mechanical interface"
+  ],
+  "authority": {
+    "field_protection_parts_frozen": true,
+    "communication_protection_parts_frozen": true,
+    "primary_external_connectors_frozen": true,
+    "buck_inductor_frozen": true,
+    "full_bom_complete": false,
+    "schematic_generation_authorized": true,
+    "schematic_verification_authorized": false,
+    "fabrication_authorized": false
+  }
+}
