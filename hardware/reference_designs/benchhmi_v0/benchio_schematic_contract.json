@@ -15,42 +15,45 @@
       "rail": "USB_VBUS_5V",
       "source": "USB-C VBUS",
       "consumers": [
-        "3V3 regulator",
-        "isolated 5V converter enable path"
+        "3V3 host regulator only"
       ],
-      "rule": "isolated field domain disabled until allowed by USB power state"
+      "rule": "USB never sources 5V_FIELD or external field loads"
     },
     {
       "rail": "3V3_HOST",
-      "source": "5V to 3.3V regulator",
+      "source": "USB_VBUS_5V through host regulator",
       "consumers": [
         "STM32G0B1",
-        "host sides of isolation devices",
-        "USB logic"
+        "host sides of ISO1410 x2",
+        "host side of ISO1042",
+        "host side of ISO6740",
+        "host sides of ISO1212 x2",
+        "status indicators"
       ]
-    },
-    {
-      "rail": "5V_FIELD_ISO",
-      "source": "B0505S-2WR3 or verified equivalent 2W isolated converter",
-      "consumers": [
-        "field sides of ISO1410 x2",
-        "field side ISO1042",
-        "field side ISO6741"
-      ],
-      "isolation_vdc_min": 1500
     },
     {
       "rail": "FIELD_9_30V",
       "source": "external pluggable terminal",
       "consumers": [
-        "TPS4H160-Q1 output power stage"
+        "TPS4H160-Q1 VS",
+        "LMR36510 field buck input"
       ],
       "required_protection": [
-        "reverse-polarity strategy",
+        "reverse-polarity protection",
         "fuse/PTC strategy",
         "TVS",
         "bulk decoupling"
       ]
+    },
+    {
+      "rail": "5V_FIELD",
+      "source": "LMR36510-class 65V 1A buck from FIELD_9_30V",
+      "consumers": [
+        "field sides of ISO1410 x2",
+        "field side of ISO1042",
+        "field side of ISO6740"
+      ],
+      "rule": "shares GND_FIELD and remains galvanically separate from GND_HOST through the signal isolation barriers"
     }
   ],
   "component_roles": [
@@ -96,8 +99,8 @@
     },
     {
       "ref": "U9",
-      "preferred_part": "B0505S-2WR3",
-      "role": "shared isolated 5V field-logic power"
+      "preferred_part": "LMR36510",
+      "role": "FIELD_9_30V to 5V_FIELD synchronous buck, 1A class"
     },
     {
       "ref": "U10",
@@ -175,7 +178,7 @@
     "No donor-internal rail or motherboard signal may appear in the BenchIO schematic.",
     "RS485_A and RS485_B each cross an ISO1410 isolation barrier before reaching the field connector.",
     "CAN crosses an ISO1042 isolation barrier before reaching CAN_H/CAN_L.",
-    "The shared field-side logic ground must not be copper-connected to GND_HOST.",
+    "GND_FIELD and 5V_FIELD are powered from the external field supply and must not be copper-connected to GND_HOST/3V3_HOST.",
     "ISO1212 field inputs must not depend on FIELD_9_30V to sense an external input.",
     "TPS4H160 IN0-IN3 controls cross an ISO6740 four-forward-channel barrier; TPS4H160 diagnostic/current-sense return is intentionally out of scope for v0.",
     "Each bus gets connector-side transient protection and switchable termination where applicable.",
@@ -186,13 +189,13 @@
     "RS485 transmit drivers disabled until firmware configuration.",
     "CAN transmitter disabled/standby where supported until firmware configuration.",
     "All digital outputs commanded OFF by hardware/firmware default.",
-    "isolated field logic power disabled until USB power state permits it.",
+    "field-side transceivers/output logic remain inactive when FIELD_9_30V is absent; USB must not back-power 5V_FIELD.",
     "no external field supply is sourced from USB."
   ],
   "acceptance_before_pcb": [
+    "power budget proves host-side USB load <=100mA pre-configuration design allocation and field-side worst-case load fits 5V_FIELD regulator with margin",
     "manufacturer datasheets frozen with hashes for every active component",
     "exact package and pin mapping frozen",
-    "power budget proves USB current envelope",
     "ISO1212 resistor network proves 18-30V input window",
     "TPS4H160 current limit network frozen near 250mA/channel target",
     "termination and TVS values frozen",
