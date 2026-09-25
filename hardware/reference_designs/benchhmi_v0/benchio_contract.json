@@ -1,0 +1,73 @@
+{
+  "schema": "hardware_splicer.benchio_design_contract.v1",
+  "product_id": "benchhmi-v0",
+  "subsystem_id": "benchio-v0",
+  "status": "LOCKED_UNTIL_REAL_DONOR_ACCEPTANCE",
+  "interface_to_donor": {
+    "transport": "USB 2.0 or better",
+    "donor_internal_modification": false,
+    "donor_mains_modification": false,
+    "donor_power_dependency": "Do not draw field power from undocumented donor rails."
+  },
+  "required_functions": [
+    {
+      "id": "rs485-a",
+      "requirement": "isolated half-duplex RS-485 channel",
+      "verification": "known-device transaction + loopback"
+    },
+    {
+      "id": "rs485-b",
+      "requirement": "second isolated half-duplex RS-485 channel",
+      "verification": "known-device transaction + loopback"
+    },
+    {
+      "id": "can",
+      "requirement": "CAN 2.0 field interface",
+      "verification": "known-device transaction"
+    },
+    {
+      "id": "di",
+      "requirement": "4 protected low-voltage digital inputs",
+      "verification": "threshold sweep / state capture"
+    },
+    {
+      "id": "do",
+      "requirement": "4 protected low-voltage digital outputs",
+      "verification": "bounded load switching test"
+    },
+    {
+      "id": "identity",
+      "requirement": "firmware-readable board/revision identity",
+      "verification": "receipt binds hardware revision"
+    },
+    {
+      "id": "telemetry",
+      "requirement": "sidecar supply and field-power telemetry where implemented",
+      "verification": "known-source comparison"
+    }
+  ],
+  "candidate_architecture": {
+    "usb_controller": "USB-capable MCU with deterministic open toolchain support; exact part not frozen yet",
+    "rs485": "2 isolated transceiver channels",
+    "can": "1 isolated or appropriately protected CAN transceiver channel",
+    "digital_io": "protected 24V-tolerant or explicitly lower-voltage bounded interface; final voltage class must be frozen before schematic",
+    "host_power": "USB powers logic only unless a later verified budget says otherwise",
+    "field_power": "external low-voltage input if required; separately protected/fused/current-limited"
+  },
+  "unresolved_before_schematic": [
+    "freeze digital-I/O field voltage class",
+    "freeze target isolation rating and creepage/clearance policy",
+    "freeze USB MCU and firmware/toolchain",
+    "freeze connector family and mechanical envelope",
+    "decide whether CAN isolation is mandatory for v0",
+    "confirm one real POS462/B91 donor acceptance result"
+  ],
+  "authority": {
+    "requirements_frozen_for_investigation": true,
+    "schematic_design_authorized": false,
+    "pcb_design_authorized": false,
+    "fabrication_authorized": false,
+    "power_on_authorized": false
+  },
+  "gate_rule": "schematic_design_authorized may become true only from a real donor acceptance result with simulated=false and decision=ACCEPT_ONE_DONOR_FOR_PF002_ENGINEERING; this contract alone never opens physical authority."
+}
