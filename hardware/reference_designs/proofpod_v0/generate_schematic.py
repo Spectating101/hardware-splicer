@@ -124,8 +124,26 @@ def add_pin_label(schematic: ksa.Schematic, reference: str, pin: str, net: str) 
         raise RuntimeError(f"missing {reference}")
     dx = position.x - component.position.x
     dy = position.y - component.position.y
-    # The project-local USB-C symbol intentionally un-stacks every physical
-    # connector pin, so ordinary outward wire stubs are deterministic.
+
+    # J1 is a project-local connector symbol with intentionally unstacked pins.
+    # Do not infer pin direction from whichever coordinate offset is larger:
+    # corner pins can have |dy| > |dx| even though the pin is horizontal.
+    # Every J1 pin is horizontal except B12, which is explicitly vertical at
+    # the bottom of the symbol.
+    if reference == "J1":
+        stub = 5.08
+        if pin == "B12":
+            direction = 1 if dy > 0 else -1
+            end = (position.x, position.y + direction * stub)
+            justification = "left"
+        else:
+            direction = -1 if dx < 0 else 1
+            end = (position.x + direction * stub, position.y)
+            justification = "right" if direction < 0 else "left"
+        schematic.add_wire((position.x, position.y), end)
+        schematic.labels.add(net, end, rotation=0, size=1.0, justify_h=justification)
+        return
+
     # Two-pin vertical passives can have pins only 3.81 mm apart. A 5.08 mm
     # label stub from each side overlaps through the symbol and electrically
     # shorts the nets. Keep their stubs below half that separation.
