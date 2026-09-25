@@ -1,0 +1,60 @@
+{
+  "schema": "hardware_splicer.donor_acceptance_record.v1",
+  "product_id": "benchhmi-v0",
+  "record_id": "PF002-SIM-POS462-001",
+  "simulated": true,
+  "donor": {
+    "manufacturer": "Flytech",
+    "model": "POS462",
+    "motherboard": "B91 V2.0",
+    "serial_or_asset_id": "SIM-POS462-B91-001"
+  },
+  "purchase_price_twd": 1000,
+  "inspection_minutes": 18,
+  "storage_replacement_required": true,
+  "cmos_battery_replacement_required": true,
+  "requires_mains_side_repair": false,
+  "internal_psu_opened_or_modified": false,
+  "checks": {
+    "identity": {
+      "state": "PASS",
+      "evidence": "SIMULATED exact-model/B91 identity"
+    },
+    "cold_boot": {
+      "state": "PASS",
+      "evidence": "SIMULATED 5/5 cold boots"
+    },
+    "lcd": {
+      "state": "PASS",
+      "evidence": "SIMULATED panel acceptable"
+    },
+    "touch": {
+      "state": "PASS",
+      "evidence": "SIMULATED calibration and repeated recognition"
+    },
+    "ethernet": {
+      "state": "PASS",
+      "evidence": "SIMULATED link and transfer"
+    },
+    "usb": {
+      "state": "PASS",
+      "evidence": "SIMULATED required ports enumerated devices"
+    },
+    "com_ports": {
+      "state": "PASS",
+      "evidence": "SIMULATED loopback on required COM ports"
+    },
+    "storage": {
+      "state": "PASS",
+      "evidence": "SIMULATED replacement SSD detected"
+    },
+    "thermal": {
+      "state": "PASS",
+      "evidence": "SIMULATED 30-minute terminal workload stable"
+    },
+    "power_system": {
+      "state": "PASS",
+      "evidence": "SIMULATED no abnormal noise/odor/heat/output instability"
+    }
+  }
+}
