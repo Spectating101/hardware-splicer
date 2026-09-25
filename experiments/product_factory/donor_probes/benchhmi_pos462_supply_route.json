@@ -14,10 +14,10 @@
     "donor_acquisition_twd": 1000,
     "local_inbound_shipping_twd": 150,
     "labor_rate_twd_per_hour": 250,
-    "new_sidecar_parts_twd_per_sellable": 1300,
+    "new_sidecar_parts_twd_per_sellable": 1500,
     "storage_replacement_twd_per_sellable": 350,
     "warranty_reserve_twd_per_sellable": 350,
-    "modeled_effective_cogs_twd": 3641.67
+    "modeled_effective_cogs_twd": 3841.67
   },
   "conversion_basis": "USD-equivalent fields use 32.5 TWD/USD solely so the existing v1 evaluator can compare ratios; the commercial decision is denominated in TWD.",
   "donor": {
@@ -32,7 +32,7 @@
     "required_supply_depth_multiple": 2,
     "rework_minutes_per_sellable": 15,
     "rework_materials_usd_per_sellable": 4.6154,
-    "new_parts_usd_per_sellable": 50.7692,
+    "new_parts_usd_per_sellable": 56.9231,
     "final_qa_minutes_per_sellable": 15,
     "warranty_reserve_usd_per_sellable": 10.7692,
     "reject_disposal_usd_per_reject": 0,
@@ -49,5 +49,6 @@
       "intact_certified_external_power_only": false,
       "note": "Internal ATX power system is retained intact; any unit requiring mains-side repair is rejected."
     }
-  }
+  },
+  "economics_revision_note": "BenchIO pre-schematic architecture increases sidecar screening budget from NT$1,300 to NT$1,500 for explicit isolation and 24 V I/O. Route remains a screening model."
 }
