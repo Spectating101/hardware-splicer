@@ -1,0 +1,234 @@
+{
+  "schema": "hardware_splicer.benchio_mcu_pinmap.v1",
+  "design_id": "benchio-v0",
+  "mcu": {
+    "part": "STM32G0B1CBT6",
+    "package": "LQFP48",
+    "source": "ST DS13560 Rev 6",
+    "source_url": "https://www.st.com/resource/en/datasheet/stm32g0b1kc.pdf"
+  },
+  "assignments": [
+    {
+      "signal": "USB_DM",
+      "pin_number": 33,
+      "gpio": "PA11",
+      "function": "USB_DM",
+      "af": null,
+      "role": "USB device data minus"
+    },
+    {
+      "signal": "USB_DP",
+      "pin_number": 34,
+      "gpio": "PA12",
+      "function": "USB_DP",
+      "af": null,
+      "role": "USB device data plus"
+    },
+    {
+      "signal": "SWDIO",
+      "pin_number": 35,
+      "gpio": "PA13",
+      "function": "SWDIO",
+      "af": 0,
+      "role": "debug/programming"
+    },
+    {
+      "signal": "SWCLK",
+      "pin_number": 36,
+      "gpio": "PA14",
+      "function": "SWCLK",
+      "af": 0,
+      "role": "debug/programming"
+    },
+    {
+      "signal": "RS485_A_DE",
+      "pin_number": 12,
+      "gpio": "PA1",
+      "function": "USART2_RTS_DE_CK",
+      "af": 1,
+      "role": "RS485 A driver enable / receiver disable"
+    },
+    {
+      "signal": "RS485_A_TX",
+      "pin_number": 13,
+      "gpio": "PA2",
+      "function": "USART2_TX",
+      "af": 1,
+      "role": "RS485 A UART transmit"
+    },
+    {
+      "signal": "RS485_A_RX",
+      "pin_number": 14,
+      "gpio": "PA3",
+      "function": "USART2_RX",
+      "af": 1,
+      "role": "RS485 A UART receive"
+    },
+    {
+      "signal": "RS485_B_DE",
+      "pin_number": 20,
+      "gpio": "PB1",
+      "function": "USART3_RTS_DE_CK",
+      "af": 4,
+      "role": "RS485 B driver enable / receiver disable"
+    },
+    {
+      "signal": "RS485_B_TX",
+      "pin_number": 22,
+      "gpio": "PB10",
+      "function": "USART3_TX",
+      "af": 4,
+      "role": "RS485 B UART transmit"
+    },
+    {
+      "signal": "RS485_B_RX",
+      "pin_number": 23,
+      "gpio": "PB11",
+      "function": "USART3_RX",
+      "af": 4,
+      "role": "RS485 B UART receive"
+    },
+    {
+      "signal": "CAN_RX",
+      "pin_number": 44,
+      "gpio": "PB5",
+      "function": "FDCAN2_RX",
+      "af": 3,
+      "role": "CAN receive"
+    },
+    {
+      "signal": "CAN_TX",
+      "pin_number": 45,
+      "gpio": "PB6",
+      "function": "FDCAN2_TX",
+      "af": 3,
+      "role": "CAN transmit"
+    },
+    {
+      "signal": "DI0_LOGIC",
+      "pin_number": 15,
+      "gpio": "PA4",
+      "function": "GPIO_INPUT",
+      "af": null,
+      "role": "isolated digital input 0"
+    },
+    {
+      "signal": "DI1_LOGIC",
+      "pin_number": 16,
+      "gpio": "PA5",
+      "function": "GPIO_INPUT",
+      "af": null,
+      "role": "isolated digital input 1"
+    },
+    {
+      "signal": "DI2_LOGIC",
+      "pin_number": 17,
+      "gpio": "PA6",
+      "function": "GPIO_INPUT",
+      "af": null,
+      "role": "isolated digital input 2"
+    },
+    {
+      "signal": "DI3_LOGIC",
+      "pin_number": 18,
+      "gpio": "PA7",
+      "function": "GPIO_INPUT",
+      "af": null,
+      "role": "isolated digital input 3"
+    },
+    {
+      "signal": "DO0_LOGIC",
+      "pin_number": 21,
+      "gpio": "PB2",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "isolated digital output control 0"
+    },
+    {
+      "signal": "DO1_LOGIC",
+      "pin_number": 42,
+      "gpio": "PB3",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "isolated digital output control 1"
+    },
+    {
+      "signal": "DO2_LOGIC",
+      "pin_number": 43,
+      "gpio": "PB4",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "isolated digital output control 2"
+    },
+    {
+      "signal": "DO3_LOGIC",
+      "pin_number": 46,
+      "gpio": "PB7",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "isolated digital output control 3"
+    },
+    {
+      "signal": "FIELD_LOGIC_EN",
+      "pin_number": 11,
+      "gpio": "PA0",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "host-side isolated-power load-switch enable"
+    },
+    {
+      "signal": "STATUS_LED",
+      "pin_number": 47,
+      "gpio": "PB8",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "status indicator"
+    },
+    {
+      "signal": "FAULT_LED",
+      "pin_number": 48,
+      "gpio": "PB9",
+      "function": "GPIO_OUTPUT",
+      "af": null,
+      "role": "fault indicator"
+    }
+  ],
+  "reserved": [
+    {
+      "pin_number": 10,
+      "gpio": "PF2-NRST",
+      "role": "reset"
+    },
+    {
+      "gpio": "VDD/VDDA",
+      "role": "3V3 host power"
+    },
+    {
+      "gpio": "VSS/VSSA",
+      "role": "host ground"
+    },
+    {
+      "gpio": "VREF+",
+      "role": "analog reference/power per datasheet"
+    }
+  ],
+  "clock_policy": {
+    "external_crystal_required": false,
+    "initial_plan": "internal clocking; USB clock configuration must be verified against STM32G0B1 USB requirements before firmware release"
+  },
+  "invariants": [
+    "PA11/PA12 are reserved for USB and may not be reused for FDCAN1.",
+    "PA13/PA14 remain SWDIO/SWCLK and may not be consumed by UARTs.",
+    "FDCAN2 uses PB5/PB6, not PA11/PA12.",
+    "USART2 uses PA1/PA2/PA3 for DE/TX/RX.",
+    "USART3 uses PB1/PB10/PB11 for DE/TX/RX.",
+    "all signal assignments use unique LQFP48 physical pins",
+    "DO0-DO3 are four independent host GPIO outputs feeding ISO6740 inputs"
+  ],
+  "authority": {
+    "pinmap_frozen_for_schematic": true,
+    "schematic_verified": false,
+    "pcb_design_authorized": false,
+    "fabrication_authorized": false
+  }
+}
