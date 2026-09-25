@@ -32,7 +32,7 @@
       ]
     },
     {
-      "rail": "FIELD_9_30V",
+      "rail": "FIELD_9_28V",
       "source": "external pluggable terminal",
       "consumers": [
         "TPS4H160-Q1 VS",
@@ -47,7 +47,7 @@
     },
     {
       "rail": "5V_FIELD",
-      "source": "LMR36510-class 65V 1A buck from FIELD_9_30V",
+      "source": "LMR36510-class 65V 1A buck from FIELD_9_28V",
       "consumers": [
         "field sides of ISO1410 x2",
         "field side of ISO1042",
@@ -100,7 +100,7 @@
     {
       "ref": "U9",
       "preferred_part": "LMR36510",
-      "role": "FIELD_9_30V to 5V_FIELD synchronous buck, 1A class"
+      "role": "FIELD_9_28V to 5V_FIELD synchronous buck, 1A class"
     },
     {
       "ref": "U10",
@@ -164,7 +164,7 @@
       "ref": "J6",
       "function": "field power + digital outputs",
       "required_nets": [
-        "FIELD_9_30V",
+        "FIELD_9_28V",
         "GND_FIELD",
         "DO0",
         "DO1",
@@ -179,7 +179,7 @@
     "RS485_A and RS485_B each cross an ISO1410 isolation barrier before reaching the field connector.",
     "CAN crosses an ISO1042 isolation barrier before reaching CAN_H/CAN_L.",
     "GND_FIELD and 5V_FIELD are powered from the external field supply and must not be copper-connected to GND_HOST/3V3_HOST.",
-    "ISO1212 field inputs must not depend on FIELD_9_30V to sense an external input.",
+    "ISO1212 field inputs must not depend on FIELD_9_28V to sense an external input.",
     "TPS4H160 IN0-IN3 controls cross an ISO6740 four-forward-channel barrier; TPS4H160 diagnostic/current-sense return is intentionally out of scope for v0.",
     "Each bus gets connector-side transient protection and switchable termination where applicable.",
     "Isolation moat contains no copper, stitching vias, test pads or mounting-hole copper that bridges GND_HOST and GND_FIELD.",
@@ -189,7 +189,7 @@
     "RS485 transmit drivers disabled until firmware configuration.",
     "CAN transmitter disabled/standby where supported until firmware configuration.",
     "All digital outputs commanded OFF by hardware/firmware default.",
-    "field-side transceivers/output logic remain inactive when FIELD_9_30V is absent; USB must not back-power 5V_FIELD.",
+    "field-side transceivers/output logic remain inactive when FIELD_9_28V is absent; USB must not back-power 5V_FIELD.",
     "no external field supply is sourced from USB."
   ],
   "acceptance_before_pcb": [
@@ -198,11 +198,13 @@
     "exact package and pin mapping frozen",
     "ISO1212 resistor network proves 18-30V input window",
     "TPS4H160 current limit network frozen near 250mA/channel target",
-    "termination and TVS values frozen",
     "KiCad ERC: zero unresolved errors/warnings",
     "machine topology checker: zero invariant violations",
     "independent review still pending unless separately recorded",
-    "ISO6740 directionality verified as 4-forward/0-reverse for DO0-DO3"
+    "ISO6740 directionality verified as 4-forward/0-reverse for DO0-DO3",
+    "exact field input MF-R250/B360A/SMBJ28A path and exact WR-TBL connector footprints are present in schematic",
+    "CAN PESD2CANFD24V-U and RS485 SM712 port-protection devices are present on connector side",
+    "LMR36510 uses exact Würth 744770122 22uH inductor or a separately re-verified substitute"
   ],
   "authority": {
     "schematic_design_authorized": true,
@@ -211,5 +213,6 @@
     "fabrication_authorized": false,
     "power_on_authorized": false,
     "physical_correctness": "UNPROVEN"
-  }
+  },
+  "exact_parts_freeze": "hardware/reference_designs/benchhmi_v0/benchio_exact_parts_v0.json"
 }
