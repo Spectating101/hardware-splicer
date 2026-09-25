@@ -90,24 +90,24 @@
     },
     "digital_outputs": {
       "channels": 4,
-      "implementation": "TPS4H160-Q1 high-side switch behind digital isolation",
+      "implementation": "TPS4H160-Q1 high-side switch behind ISO6740 four-forward-channel digital isolation",
       "field_supply_v": [
         9,
         30
       ],
       "target_current_limit_ma_per_channel": 250,
-      "isolated_control": "ISO6741-class barrier into shared field domain",
+      "isolated_control": "ISO6740 4-forward barrier into shared field domain",
       "protection": [
         "adjustable current limit",
         "thermal shutdown",
-        "short-circuit protection",
-        "current monitoring"
+        "short-circuit protection"
       ],
       "certification_claim": false,
       "sources": [
         "https://www.ti.com/product/TPS4H160-Q1",
-        "https://www.ti.com/product/ISO6741"
-      ]
+        "https://www.ti.com/product/ISO6740"
+      ],
+      "baseline_diagnostics": "hardware protection only; isolated current-sense/fault telemetry deferred from v0"
     }
   },
   "board_constraints": {
@@ -195,5 +195,13 @@
     "USB enumeration on that exact donor",
     "cold-boot and reconnect stability",
     "finished-unit receipt binding donor serial + BenchIO hardware revision + firmware hash + OS image hash"
+  ],
+  "design_corrections": [
+    {
+      "observed_at": "2026-09-26",
+      "issue": "ISO6741 provides only 3 forward + 1 reverse channel, insufficient for four independent high-side output controls.",
+      "correction": "Use ISO6740 4-forward variant for DO0-DO3. Defer isolated TPS4H160 current-sense/fault telemetry from v0.",
+      "evidence": "TI ISO674x product data"
+    }
   ]
 }
