@@ -124,14 +124,8 @@ def add_pin_label(schematic: ksa.Schematic, reference: str, pin: str, net: str) 
         raise RuntimeError(f"missing {reference}")
     dx = position.x - component.position.x
     dy = position.y - component.position.y
-    # USB-C has densely packed/stacked pins. Do not synthesize any wire stub
-    # for J1: attach the local label directly to the native pin coordinate.
-    # This avoids geometric crossings that can merge unrelated nets when KiCad
-    # serializes/exports the schematic.
-    if reference == "J1":
-        schematic.labels.add(net, (position.x, position.y), rotation=0, size=1.0)
-        return
-
+    # The project-local USB-C symbol intentionally un-stacks every physical
+    # connector pin, so ordinary outward wire stubs are deterministic.
     # Two-pin vertical passives can have pins only 3.81 mm apart. A 5.08 mm
     # label stub from each side overlaps through the symbol and electrically
     # shorts the nets. Keep their stubs below half that separation.
