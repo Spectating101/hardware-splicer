@@ -1,0 +1,60 @@
+{
+  "schema": "hardware_splicer.donor_acceptance_record.v1",
+  "product_id": "benchhmi-v0",
+  "record_id": "PF002-REAL-TEMPLATE",
+  "simulated": false,
+  "donor": {
+    "manufacturer": "Flytech",
+    "model": "POS462",
+    "motherboard": "",
+    "serial_or_asset_id": ""
+  },
+  "purchase_price_twd": null,
+  "inspection_minutes": null,
+  "storage_replacement_required": false,
+  "cmos_battery_replacement_required": false,
+  "requires_mains_side_repair": false,
+  "internal_psu_opened_or_modified": false,
+  "checks": {
+    "identity": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "cold_boot": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "lcd": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "touch": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "ethernet": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "usb": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "com_ports": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "storage": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "thermal": {
+      "state": "PENDING",
+      "evidence": ""
+    },
+    "power_system": {
+      "state": "PENDING",
+      "evidence": ""
+    }
+  }
+}
