@@ -41,7 +41,7 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
         "SELL": "QUEUED_AFTER_BENCHMARK_AND_HUMAN_DECISION",
     }
 
-    if qualification["decision"] == "SIMULATION_ONLY_NOT_ACCEPTED":
+    if qualification["decision"] == "SIMULATION_REHEARSAL_COMPLETE_REAL_EVIDENCE_PENDING":
         state = "SIMULATION_REHEARSAL_COMPLETE_REAL_DONOR_REQUIRED"
     elif accepted:
         state = "REAL_DONOR_ACCEPTED_BENCHIO_DESIGN_MAY_START"
