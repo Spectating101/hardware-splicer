@@ -1,0 +1,34 @@
+name: PF-002 BenchHMI qualification
+
+on:
+  pull_request:
+    paths:
+      - "hardware/reference_designs/benchhmi_v0/**"
+      - "experiments/product_factory/qualify_pf002_donor.py"
+      - "experiments/product_factory/advance_pf002.py"
+      - "experiments/product_factory/fixtures/benchhmi_pos462_*.json"
+      - "tests/test_product_factory_benchhmi_qualification.py"
+      - ".github/workflows/pf002-benchhmi-qualification.yml"
+
+jobs:
+  donor-rehearsal:
+    name: PF-002 fail-closed donor rehearsal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS test environment
+        run: python -m pip install -e ".[dev]"
+      - name: Run qualification tests
+        run: python -m pytest -q tests/test_product_factory_benchhmi_qualification.py
+      - name: Rehearse perfect simulated donor
+        run: |
+          python experiments/product_factory/qualify_pf002_donor.py             experiments/product_factory/fixtures/benchhmi_pos462_simulated_pass.json             --output /tmp/pf002_donor.json
+          python experiments/product_factory/advance_pf002.py             experiments/product_factory/fixtures/benchhmi_pos462_simulated_pass.json             --output /tmp/pf002_campaign.json
+          cat /tmp/pf002_donor.json
+          cat /tmp/pf002_campaign.json
+          grep -q '"decision": "SIMULATION_ONLY_NOT_ACCEPTED"' /tmp/pf002_donor.json
+          grep -q '"benchio_schematic_design_authorized": false' /tmp/pf002_campaign.json
+          grep -q '"fabrication_authorized": false' /tmp/pf002_campaign.json
