@@ -1,0 +1,49 @@
+{
+  "schema": "hardware_splicer.splice_plan.v1",
+  "product_id": "fielddeck-v0",
+  "donor": "Advantech AIM8I exact approved Windows/Intel variant",
+  "strategy": "PRESERVE_RUGGED_TABLET_ADD_KEYBOARD_AND_FIELD_IO",
+  "retain": [
+    {
+      "subsystem": "display_touch_enclosure",
+      "reason": "The rugged 8-inch display/enclosure is mechanically expensive to recreate."
+    },
+    {
+      "subsystem": "battery_charging",
+      "reason": "Retain only after health/safety checks; no cell repacking."
+    },
+    {
+      "subsystem": "compute_wireless",
+      "reason": "Sufficient for field console, browser, SSH and serial/network workflows."
+    },
+    {
+      "subsystem": "dock_extension_connectors",
+      "reason": "Documented interfaces create a clean splice boundary."
+    }
+  ],
+  "add": [
+    {
+      "subsystem": "FieldDock_v0",
+      "reason": "Physical keyboard, pointing device, mechanical protection and USB/Ethernet breakout."
+    },
+    {
+      "subsystem": "FieldIO_v0",
+      "reason": "Adds isolated RS-485, CAN and protected low-voltage digital I/O."
+    },
+    {
+      "subsystem": "HS_field_console",
+      "reason": "Preconfigured device/service workflows and evidence capture."
+    }
+  ],
+  "reject_if": [
+    "device identity is not AIM8I Intel/Windows variant",
+    "display or touch has unacceptable defects",
+    "battery is swollen, unstable or below frozen health threshold",
+    "charging behavior is abnormal",
+    "USB 3.0 dock connector cannot be electrically verified",
+    "extension connector identity/pinout cannot be verified",
+    "required OS cannot boot and expose touch/wireless/USB reliably",
+    "unit requires battery-cell repacking or mains-side repair"
+  ],
+  "physical_authority": false
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "hardware_splicer.market_evidence_packet.v1",
+  "product_id": "fielddeck-v0",
+  "observed_at": "2026-09-24",
+  "sources": [
+    {
+      "role": "donor_price",
+      "market": "Taiwan",
+      "name": "Used Advantech AIM8I listings",
+      "url": "https://www.ruten.com.tw/category/001100130008/list?isnew=0&location=tw&prc_now=2000-12000&sort=rnk%2Fdc",
+      "observation": "Multiple AIM8I units are publicly listed around NT$2,000-2,500.",
+      "limitations": "Apparent listings are not qualified lot inventory and condition/yield are unmeasured."
+    },
+    {
+      "role": "donor_technical_identity",
+      "name": "Advantech AIM8I manual",
+      "url": "https://advdownload.advantech.com/productfile/Downloadfile4/1-1O4ZF0E/AIM65-User%20Manual_v8.pdf",
+      "observation": "AIM8I uses Intel Atom x5-Z8350, 2GB LPDDR3, Windows 10 IoT Enterprise, 8-inch 1920x1200 400-nit touch display, micro HDMI, 16-pin USB3 dock and 14-pin USB2/UART/power extension connector; manual reports IP65 compliance.",
+      "limitations": "Installed options and physical condition vary by donor."
+    },
+    {
+      "role": "portable_terminal_price_anchor",
+      "name": "ClockworkPi uConsole CM4 Lite",
+      "url": "https://www.clockworkpi.com/shop",
+      "observed_price_usd": 249,
+      "observation": "Official current kit price; demonstrates a market for compact keyboard-equipped Linux terminals.",
+      "limitations": "Different product, new kit, no industrial/rugged or FieldIO equivalence."
+    },
+    {
+      "role": "portable_terminal_price_anchor",
+      "name": "ClockworkPi DevTerm A04/A06",
+      "url": "https://www.clockworkpi.com/product-page/devterm-kit-a06-series",
+      "observed_price_usd_range": [
+        265,
+        345
+      ],
+      "observation": "Portable terminal kits occupy roughly the US$265-345 band, though current models are often out of stock.",
+      "limitations": "Different product category and supply situation."
+    },
+    {
+      "role": "taiwan_used_compact_pc_anchor",
+      "name": "Used GPD Pocket 3 N6000",
+      "url": "https://shopee.tw/GPD-pocket-3-n6000-512GB-8%E5%90%8B-%E5%8F%A3%E8%A2%8B%E8%BC%95%E4%BE%BF%E5%B0%8F%E7%AD%86%E9%9B%BB-%E5%95%86%E5%8B%99%E8%BE%A6%E5%85%AC%E7%AD%86%E8%A8%98%E6%9C%AC-i.40369006.24616661820",
+      "observed_price_twd": 12000,
+      "observation": "A used Pocket 3 listing at NT$12,000 is sold out.",
+      "limitations": "One listing; significantly faster general-purpose computer but without PF-003's proposed protected field I/O/rugged donor positioning."
+    },
+    {
+      "role": "taiwan_new_compact_pc_anchor",
+      "name": "GPD MicroPC 2",
+      "url": "https://shopee.tw/list/GPD",
+      "observed_price_twd": 24900,
+      "observation": "Taiwan marketplace lists the current MicroPC 2 around NT$24,900.",
+      "limitations": "New current-generation machine with much higher compute performance."
+    }
+  ],
+  "boundary": "The compact-terminal market demonstrates willingness to pay for specialized portable computers, but no source validates demand for FieldDeck itself or its NT$12,900 target."
+}

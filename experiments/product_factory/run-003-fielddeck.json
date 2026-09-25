@@ -1,0 +1,106 @@
+{
+  "schema": "hardware_splicer.product_factory_run.v1",
+  "run_id": "PF-003",
+  "product_id": "fielddeck-v0",
+  "working_name": "FieldDeck v0",
+  "opened_at": "2026-09-24",
+  "purpose": "Test whether Hardware Splicer can turn a retired Advantech AIM8I industrial tablet into a compact cyberdeck/field-service terminal by preserving the rugged display/battery/compute subsystem and adding a documented keyboard/dock plus protected field I/O.",
+  "market": "Taiwan",
+  "stages": [
+    {
+      "id": "DISCOVER",
+      "state": "PASS",
+      "evidence": [
+        "https://www.ruten.com.tw/category/001100130008/list?isnew=0&location=tw&prc_now=2000-12000&sort=rnk%2Fdc",
+        "https://advdownload.advantech.com/productfile/Downloadfile4/1-1O4ZF0E/AIM65-User%20Manual_v8.pdf",
+        "hardware/reference_designs/fielddeck_v0/market_evidence.json"
+      ],
+      "decision": "EXACT_DONOR_CLASS_IDENTIFIED"
+    },
+    {
+      "id": "SELECT",
+      "state": "HOLD_ON_DONOR_SUPPLY_YIELD_AND_PLATFORM_ACCEPTANCE",
+      "evidence": [
+        "experiments/product_factory/donor_probes/fielddeck_aim8i_supply_route.json"
+      ],
+      "decision": "ECONOMICS_SCREEN_POSITIVE_PLATFORM_UNPROVEN"
+    },
+    {
+      "id": "SPECIFY",
+      "state": "DRAFT_PRODUCT_CONTRACT_FROZEN_FOR_REVIEW",
+      "evidence": [
+        "hardware/reference_designs/fielddeck_v0/product_contract.json",
+        "hardware/reference_designs/fielddeck_v0/splice_plan.json"
+      ]
+    },
+    {
+      "id": "DESIGN_SCHEMATIC",
+      "state": "BLOCKED_ON_DONOR_PLATFORM_ACCEPTANCE",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_SCHEMATIC",
+      "state": "BLOCKED_ON_DESIGN",
+      "evidence": []
+    },
+    {
+      "id": "DESIGN_PCB",
+      "state": "BLOCKED_ON_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_PCB",
+      "state": "BLOCKED_ON_PCB",
+      "evidence": []
+    },
+    {
+      "id": "SOURCE",
+      "state": "ACTIVE_DONOR_AND_KEYBOARD_DOCK_EVIDENCE_REQUIRED",
+      "evidence": []
+    },
+    {
+      "id": "BUILD",
+      "state": "BLOCKED_ON_SOURCE_AND_HUMAN_AUTHORITY",
+      "evidence": []
+    },
+    {
+      "id": "PROVE",
+      "state": "BLOCKED_ON_PHYSICAL_ARTIFACT",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK",
+      "state": "BLOCKED_ON_PHYSICAL_PROOF",
+      "evidence": []
+    },
+    {
+      "id": "SELL",
+      "state": "BLOCKED_ON_GAUNTLET_AND_HUMAN_DECISION",
+      "evidence": []
+    },
+    {
+      "id": "LEARN",
+      "state": "ACTIVE_CONTINUOUS",
+      "evidence": []
+    }
+  ],
+  "metrics": {
+    "target_msrp_twd": 12900,
+    "modeled_effective_cogs_twd": 6633,
+    "modeled_gross_margin_fraction": 0.4858,
+    "intended_first_lot_units": 10,
+    "donor_target_twd": 2000,
+    "all_new_reference_cogs_twd": 14000,
+    "target_min_gross_margin_fraction": 0.45
+  },
+  "authority": {
+    "donor_purchase_authorized": false,
+    "donor_disassembly_authorized": false,
+    "dock_design_authorized": false,
+    "fieldio_design_authorized": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "target_price_validated": false
+  },
+  "claim_boundary": "PF-003 is a cyberdeck/field-terminal hypothesis, not a proven product. The donor price and architecture justify investigation only; bulk supply, measured yield, battery health, OS/driver viability, dock pinout behavior, keyboard ergonomics, physical correctness and willingness to pay at NT$12,900 are all unproven."
+}

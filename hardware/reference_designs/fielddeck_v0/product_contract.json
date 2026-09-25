@@ -1,0 +1,106 @@
+{
+  "schema": "hardware_splicer.commercial_product_contract.v1",
+  "product_id": "fielddeck-v0",
+  "working_name": "FieldDeck v0",
+  "status": "DONOR_PLATFORM_ACCEPTANCE_PENDING",
+  "market": "Taiwan",
+  "customer": "Embedded developers, network/automation service engineers, lab technicians and field operators who need a compact serial/network/CAN service terminal rather than a general-purpose mini laptop.",
+  "position": "A remanufactured IP65-class industrial-tablet cyberdeck with integrated keyboard/pointing dock and protected service I/O, priced below new GPD-style engineering mini PCs while offering more native field connectivity.",
+  "economics": {
+    "target_msrp_twd": 12900,
+    "modeled_effective_cogs_twd": 6633,
+    "minimum_target_gross_margin_fraction": 0.45,
+    "intended_first_lot_units": 10,
+    "price_validation_state": "PLAUSIBLE_BUT_UNVALIDATED",
+    "note": "Screening economics only. Exact donor lot price, battery replacement rate, dock mechanics, FieldIO BOM and buyer willingness to pay remain unverified."
+  },
+  "approved_donor": {
+    "manufacturer": "Advantech",
+    "model": "AIM8I",
+    "required_identity": "AIM8I / Intel Atom x5-Z8350 Windows 10 IoT variant",
+    "retained_value": [
+      "8-inch 1920x1200 400-nit multi-touch display",
+      "IP65-rated tablet enclosure",
+      "battery subsystem if health/condition passes",
+      "Intel Atom x5-Z8350 compute with 2 GB RAM",
+      "32/64 GB eMMC plus microSD",
+      "micro HDMI",
+      "16-pin dock connector carrying USB 3.0",
+      "14-pin extension connector carrying USB 2.0 + UART + power",
+      "Wi-Fi/Bluetooth/NFC and optional WWAN capabilities where present"
+    ],
+    "current_market_observation": {
+      "source": "Ruten Taiwan",
+      "observed_price_twd": 2000,
+      "apparent_multiple_listings": true,
+      "qualified_inventory_units": 0,
+      "note": "Multiple public listings exist around NT$2,000-2,500, but exact qualified lot depth and battery/functional yield are not established."
+    }
+  },
+  "retained_capabilities": [
+    "industrial tablet enclosure and touch display",
+    "battery and charging subsystem only when condition tests pass",
+    "existing compute platform for terminal/browser/SSH/serial tooling",
+    "documented dock and extension interfaces",
+    "camera/NFC/wireless features when independently verified"
+  ],
+  "new_hardware": {
+    "working_name": "FieldDock + FieldIO v0",
+    "mechanical_form": "clamshell/hinged keyboard dock without opening the donor tablet",
+    "interface_strategy": "use documented dock/extension interfaces or external USB only; no battery pack modification",
+    "baseline_functions": [
+      "compact physical keyboard",
+      "trackpoint/trackball or compact pointing device",
+      "Gigabit Ethernet via verified USB 3.0 path",
+      "two isolated RS-485 channels",
+      "one CAN channel",
+      "two additional USB host ports",
+      "protected low-voltage DI/DO",
+      "dock/FieldIO revision identity"
+    ],
+    "optional_not_baseline": [
+      "SDR",
+      "LoRa",
+      "GPS enhancement",
+      "cellular modem"
+    ]
+  },
+  "software": {
+    "role": "field-service terminal, serial/network console, offline documentation and HS remote-agent front end",
+    "local_ai_heavy_compute": false,
+    "candidate_platforms": [
+      "existing licensed Windows 10 IoT image when transfer/use rights and security posture are acceptable",
+      "independently validated lightweight Linux image only after touch/suspend/wireless/dock compatibility passes"
+    ],
+    "release_checks": [
+      "cold boot repeatability",
+      "touch accuracy",
+      "battery condition and charge/discharge behavior",
+      "dock attach/detach behavior",
+      "Ethernet throughput/link stability",
+      "RS-485 loopback/known-device transaction",
+      "CAN known-device transaction",
+      "keyboard and pointing-device full key/input test",
+      "exact donor serial/revision + dock revision + FieldIO revision + software image hash in QA receipt"
+    ]
+  },
+  "explicit_non_goals": [
+    "high-performance local AI workstation",
+    "gaming handheld",
+    "certified replacement for current rugged field computers",
+    "retaining IP65 after adding an unqualified dock",
+    "battery-cell repacking",
+    "mains modification",
+    "heavy local EDA/CAD workloads"
+  ],
+  "next_gate": "Qualify one AIM8I donor, measure battery/functional condition, verify the documented pogo interfaces electrically and prove a minimum usable terminal OS before authorizing FieldDock/FieldIO schematic and mechanical design.",
+  "authority": {
+    "product_hypothesis_recorded": true,
+    "donor_acceptance_complete": false,
+    "dock_design_authorized": false,
+    "fieldio_design_authorized": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_claims_validated": false
+  }
+}
