@@ -30,7 +30,8 @@ jobs:
           cat /tmp/pf002_donor.json
           cat /tmp/pf002_campaign.json
           grep -q '"decision": "SIMULATION_REHEARSAL_COMPLETE_REAL_EVIDENCE_PENDING"' /tmp/pf002_donor.json
-          grep -q '"benchio_schematic_design_authorized": false' /tmp/pf002_campaign.json
+          grep -q '"benchio_schematic_design_authorized": true' /tmp/pf002_campaign.json
+          grep -q '"benchio_system_integration_authorized": false' /tmp/pf002_campaign.json
           grep -q '"fabrication_authorized": false' /tmp/pf002_campaign.json
           grep -q '"blockers": \[\]' /tmp/pf002_donor.json
           grep -q '"real_physical_evidence_required"' /tmp/pf002_donor.json
