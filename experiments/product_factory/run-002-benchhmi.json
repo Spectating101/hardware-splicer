@@ -27,7 +27,7 @@
     },
     {
       "id": "SPECIFY",
-      "state": "READY_FOR_REAL_DONOR_CONFIRMATION",
+      "state": "PASS_BENCHIO_ARCHITECTURE_FROZEN_DONOR_INTEGRATION_PENDING",
       "evidence": [
         "hardware/reference_designs/benchhmi_v0/product_contract.json",
         "hardware/reference_designs/benchhmi_v0/splice_plan.json"
@@ -35,17 +35,20 @@
     },
     {
       "id": "DESIGN_SCHEMATIC",
-      "state": "AWAITING_REAL_DONOR_ACCEPTANCE",
-      "evidence": []
+      "state": "READY_BENCHIO_STANDALONE_SCHEMATIC",
+      "evidence": [
+        "hardware/reference_designs/benchhmi_v0/benchio_architecture_v0.json",
+        "hardware/reference_designs/benchhmi_v0/benchio_contract.json"
+      ]
     },
     {
       "id": "VERIFY_SCHEMATIC",
-      "state": "QUEUED_AFTER_SCHEMATIC",
+      "state": "QUEUED_AFTER_BENCHIO_SCHEMATIC",
       "evidence": []
     },
     {
       "id": "DESIGN_PCB",
-      "state": "QUEUED_AFTER_VERIFIED_SCHEMATIC",
+      "state": "QUEUED_AFTER_VERIFIED_BENCHIO_SCHEMATIC",
       "evidence": []
     },
     {
@@ -88,22 +91,24 @@
     "target_msrp_twd": 8990,
     "target_effective_cogs_ceiling_twd": 4050,
     "target_min_gross_margin_fraction": 0.55,
-    "modeled_effective_cogs_twd": 3641.67,
-    "modeled_gross_margin_fraction": 0.59492,
+    "modeled_effective_cogs_twd": 3841.67,
+    "modeled_gross_margin_fraction": 0.57267,
     "intended_first_lot_units": 20,
     "donor_acquisition_target_twd": 1000,
     "all_new_reference_cogs_twd": 7500,
-    "modeled_savings_vs_all_new_fraction": 0.51444
+    "modeled_savings_vs_all_new_fraction": 0.48778,
+    "benchio_pre_schematic_parts_budget_twd": 1500
   },
   "authority": {
     "donor_purchase_authorized": false,
     "donor_disassembly_authorized": false,
-    "sidecar_design_authorized": false,
+    "sidecar_design_authorized": true,
     "fabrication_ready": false,
     "physical_correctness": "UNPROVEN",
-    "commercial_superiority": "UNPROVEN"
+    "commercial_superiority": "UNPROVEN",
+    "system_integration_authorized": false
   },
-  "claim_boundary": "PF-002 currently establishes only that a documented Taiwan-market donor class and a potentially attractive transformation economics hypothesis exist. It is not evidence of qualified lot supply, measured yield, Linux/touch compatibility on the selected B91 revision, sidecar correctness, industrial certification, demand, physical correctness, or sale readiness.",
+  "claim_boundary": "PF-002 now has a standalone BenchIO architecture whose schematic may proceed because its donor interface is standard external USB. This does not qualify any POS462 donor, prove system integration, authorize PCB fabrication/power-on, establish batch yield/supply, validate NT$8,990 demand, or prove finished-product correctness.",
   "status_vocabulary": {
     "convention": "progressive_gate_states_v1",
     "rule": "BLOCKED is reserved for an actual failed gate, defect, or contradiction. Normal unmet dependencies use AWAITING_*, EVIDENCE_PENDING_*, QUEUED_AFTER_*, READY_*, or ACTIVE_*.",
