@@ -49,3 +49,13 @@ def test_pf002_revised_benchio_budget_still_clears_margin_floor() -> None:
     assert ROUTE["display_economics_twd"]["new_sidecar_parts_twd_per_sellable"] == 1500
     assert result["gross_margin_fraction"] >= ROUTE["minimum_target_gross_margin_fraction"]
     assert RUN["metrics"]["modeled_gross_margin_fraction"] >= RUN["metrics"]["target_min_gross_margin_fraction"]
+
+
+def test_pf002_validation_plan_preexists_the_design() -> None:
+    plan = json.loads((ROOT / "hardware" / "reference_designs" / "benchhmi_v0" / "validation_plan.json").read_text())
+    ids = {row["id"] for row in plan["tests"]}
+    assert {"USB_ENUM", "RS485_A", "RS485_B", "CAN", "DI", "DO", "FAULT_DEFAULTS", "ENDURANCE"} <= ids
+    assert plan["authority"]["schematic_design_authorized"] is False
+    assert plan["authority"]["fabrication_authorized"] is False
+    assert plan["authority"]["physical_correctness_proven"] is False
+    assert "simulated=false for physical proof" in plan["evidence_receipt_requires"]
