@@ -29,7 +29,7 @@ EXPECTED = {
     "DO1_LOGIC": (42, "PB3", "GPIO_OUTPUT", None),
     "DO2_LOGIC": (43, "PB4", "GPIO_OUTPUT", None),
     "DO3_LOGIC": (46, "PB7", "GPIO_OUTPUT", None),
-    "FIELD_LOGIC_EN": (11, "PA0", "GPIO_OUTPUT", None),
+    "SPARE_GPIO0": (11, "PA0", "GPIO_OUTPUT", None),
     "STATUS_LED": (47, "PB8", "GPIO_OUTPUT", None),
     "FAULT_LED": (48, "PB9", "GPIO_OUTPUT", None),
 }
