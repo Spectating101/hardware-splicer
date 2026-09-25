@@ -58,6 +58,7 @@ def test_unit_level_real_shape_can_open_only_schematic_engineering() -> None:
     status = A.project_status(_unit_test_real_pass())
     assert status["state"] == "REAL_DONOR_ACCEPTED_BENCHIO_DESIGN_MAY_START"
     assert status["authority"]["benchio_schematic_design_authorized"] is True
+    assert status["authority"]["benchio_system_integration_authorized"] is True
     assert status["authority"]["pcb_design_authorized"] is False
     assert status["authority"]["fabrication_authorized"] is False
     assert status["authority"]["power_on_authorized"] is False
@@ -67,8 +68,9 @@ def test_unit_level_real_shape_can_open_only_schematic_engineering() -> None:
 def test_simulation_rehearses_pipeline_without_opening_design() -> None:
     status = A.project_status(SIM)
     assert status["state"] == "SIMULATION_REHEARSAL_COMPLETE_REAL_DONOR_REQUIRED"
-    assert status["projected_stages"]["DESIGN_SCHEMATIC"] == "AWAITING_REAL_DONOR_ACCEPTANCE"
-    assert status["authority"]["benchio_schematic_design_authorized"] is False
+    assert status["projected_stages"]["DESIGN_SCHEMATIC"] == "READY_BENCHIO_STANDALONE_SCHEMATIC"
+    assert status["authority"]["benchio_schematic_design_authorized"] is True
+    assert status["authority"]["benchio_system_integration_authorized"] is False
 
 
 def test_mains_repair_rejects_even_otherwise_passing_record() -> None:
@@ -83,5 +85,6 @@ def test_normal_pf002_dependencies_do_not_present_as_blocked() -> None:
     status = A.project_status(SIM)
     normal_states = list(status["projected_stages"].values())
     assert all(not state.startswith("BLOCKED") for state in normal_states)
-    assert status["projected_stages"]["VERIFY_SCHEMATIC"] == "QUEUED_AFTER_SCHEMATIC"
+    assert status["projected_stages"]["DESIGN_SCHEMATIC"] == "READY_BENCHIO_STANDALONE_SCHEMATIC"
+    assert status["projected_stages"]["VERIFY_SCHEMATIC"] == "QUEUED_AFTER_BENCHIO_SCHEMATIC"
     assert status["projected_stages"]["PROVE"] == "QUEUED_AFTER_PHYSICAL_ARTIFACT"
