@@ -28,17 +28,17 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
     accepted = qualification["real_donor_accepted"]
 
     stages = {
-        "SELECT": "PASS_ONE_DONOR_QUALIFIED_FOR_ENGINEERING" if accepted else "HOLD_ON_REAL_DONOR_ACCEPTANCE",
+        "SELECT": "PASS_ONE_DONOR_QUALIFIED_FOR_ENGINEERING" if accepted else "AWAITING_REAL_DONOR_ACCEPTANCE",
         "SPECIFY": "PASS_PRODUCT_AND_BENCHIO_REQUIREMENTS_FROZEN" if accepted else "DRAFT_PRODUCT_CONTRACT_FROZEN_FOR_REVIEW",
-        "DESIGN_SCHEMATIC": "READY_BENCHIO_SCHEMATIC" if accepted else "BLOCKED_ON_REAL_DONOR_ACCEPTANCE",
-        "VERIFY_SCHEMATIC": "BLOCKED_ON_DESIGN",
-        "DESIGN_PCB": "BLOCKED_ON_VERIFIED_SCHEMATIC",
-        "VERIFY_PCB": "BLOCKED_ON_PCB",
+        "DESIGN_SCHEMATIC": "READY_BENCHIO_SCHEMATIC" if accepted else "AWAITING_REAL_DONOR_ACCEPTANCE",
+        "VERIFY_SCHEMATIC": "QUEUED_AFTER_SCHEMATIC",
+        "DESIGN_PCB": "QUEUED_AFTER_VERIFIED_SCHEMATIC",
+        "VERIFY_PCB": "QUEUED_AFTER_PCB",
         "SOURCE": "DONOR_ACCEPTED_SIDE_CAR_NOT_SOURCED" if accepted else "ACTIVE_DONOR_EVIDENCE_REQUIRED",
-        "BUILD": "BLOCKED_ON_VERIFIED_PCB_AND_HUMAN_AUTHORITY",
-        "PROVE": "BLOCKED_ON_PHYSICAL_ARTIFACT",
-        "BENCHMARK": "BLOCKED_ON_PHYSICAL_PROOF",
-        "SELL": "BLOCKED_ON_BENCHMARK_AND_HUMAN_DECISION",
+        "BUILD": "QUEUED_AFTER_VERIFIED_PCB_AND_HUMAN_AUTHORITY",
+        "PROVE": "QUEUED_AFTER_PHYSICAL_ARTIFACT",
+        "BENCHMARK": "QUEUED_AFTER_PHYSICAL_PROOF",
+        "SELL": "QUEUED_AFTER_BENCHMARK_AND_HUMAN_DECISION",
     }
 
     if qualification["decision"] == "SIMULATION_ONLY_NOT_ACCEPTED":
@@ -46,7 +46,7 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
     elif accepted:
         state = "REAL_DONOR_ACCEPTED_BENCHIO_DESIGN_MAY_START"
     else:
-        state = "HOLD_REAL_DONOR_NOT_ACCEPTED"
+        state = "AWAITING_REAL_DONOR_ACCEPTANCE"
 
     return {
         "schema": SCHEMA,
@@ -75,6 +75,10 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
             if accepted
             else "Obtain and qualify one real POS462/B91 donor using the real record template."
         ),
+        "status_vocabulary": {
+            "normal_dependency": ["AWAITING_*", "QUEUED_AFTER_*", "READY_*", "EVIDENCE_PENDING_*"],
+            "blocked_reserved_for": "actual defect, contradiction, failed verification, or safety stop",
+        },
         "boundary": (
             "A real donor acceptance may open bounded BenchIO schematic engineering only. "
             "It cannot authorize PCB fabrication, assembly, power-on, finished-product proof, "
