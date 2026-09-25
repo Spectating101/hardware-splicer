@@ -86,14 +86,14 @@
     }
   },
   "switched_field_loads": {
-    "source": "FIELD_9_30V direct through TPS4H160-Q1",
+    "source": "FIELD_9_28V direct through TPS4H160-Q1",
     "channels": 4,
     "nominal_current_limit_ma_per_channel": 250,
     "nominal_all_channels_ma": 1000,
     "included_in_5v_field_logic_budget": false,
     "included_in_usb_budget": false,
-    "input_power_design_rule": "FIELD_9_30V connector, reverse-polarity protection, fuse/PTC strategy, copper and TVS network must be sized for four simultaneous 250mA channel limits plus the field-logic buck input and margin.",
-    "preliminary_field_input_continuous_rating_a": 2,
+    "input_power_design_rule": "FIELD_9_28V connector/copper path is targeted for >=3A and uses MF-R250 2.5A-hold resettable protection; four 250mA output limits plus field-logic buck input remain below the intended operating envelope.",
+    "preliminary_field_input_continuous_rating_a": 3,
     "note": "2A is a pre-schematic board/input-path target, not a certified product rating."
   },
   "field_buck_input_envelope": {
@@ -105,9 +105,14 @@
       "at_9v": 357,
       "at_12v": 268,
       "at_24v": 134,
-      "at_30v": 107
+      "at_28v": 114.7
     },
-    "note": "Efficiency floor is a conservative design assumption for protection sizing, not a datasheet guarantee."
+    "note": "Efficiency floor is a conservative design assumption for protection sizing, not a datasheet guarantee.",
+    "declared_input_range_v": [
+      9,
+      28
+    ],
+    "protection_contract": "MF-R250 -> B360A -> FIELD_PROTECTED; SMBJ28A from FIELD_PROTECTED to GND_FIELD"
   },
   "evidence": [
     {
