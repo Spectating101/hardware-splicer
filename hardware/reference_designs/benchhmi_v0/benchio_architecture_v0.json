@@ -1,0 +1,199 @@
+{
+  "schema": "hardware_splicer.benchio_architecture.v1",
+  "product_id": "benchhmi-v0",
+  "subsystem_id": "benchio-v0",
+  "revision": "0.1-pre-schematic",
+  "observed_at": "2026-09-26",
+  "architecture_decision": "STANDALONE_SIDECAR_DECOUPLED_FROM_DONOR_INTERNALS",
+  "rationale": [
+    "BenchIO connects to the donor only through external USB 2.0; it does not consume undocumented POS462 internal rails or motherboard signals.",
+    "Therefore exact donor acceptance is required for finished-system integration evidence, not for standalone BenchIO schematic design and bench verification.",
+    "This removes an unnecessary serial dependency while preserving the physical-evidence boundary."
+  ],
+  "host_interface": {
+    "connector": "USB-C receptacle, USB 2.0 data only",
+    "power": "5 V USB bus power",
+    "pd_required": false,
+    "donor_dependency": "standard external USB only",
+    "pre_enumeration_rule": "high-current isolated field domain remains disabled until firmware configuration permits the declared USB current budget"
+  },
+  "controller": {
+    "selected_family": "STM32G0B1",
+    "preferred_part": "STM32G0B1CBT6",
+    "selection_basis": [
+      "USB 2.0 full-speed device/host support",
+      "two FDCAN controllers",
+      "six USART-class interfaces in the family",
+      "64 MHz Cortex-M0+",
+      "active/volume-production family"
+    ],
+    "source": "https://www.st.com/en/microcontrollers-microprocessors/stm32g0b1cb.html",
+    "exact_pin_assignment": "PENDING_SCHEMATIC"
+  },
+  "field_isolation": {
+    "topology": "shared isolated field-logic domain for RS-485, CAN and protected outputs; digital inputs retain their own ISO1212 barriers",
+    "host_to_field_isolation_target_vdc": 1500,
+    "channel_to_channel_isolation_claim": false,
+    "pcb_barrier_keepout_target_mm": 6,
+    "isolated_power_candidate": {
+      "preferred_part": "B0505S-2WR3",
+      "input_v": 5,
+      "output_v": 5,
+      "power_w": 2,
+      "isolation_vdc": 1500,
+      "source": "https://www.mornsun-power.com/index/sitesearch/index/keyword/B0505.html"
+    }
+  },
+  "interfaces": {
+    "rs485": [
+      {
+        "id": "RS485_A",
+        "transceiver": "ISO1410",
+        "mode": "half-duplex",
+        "max_data_rate_kbps": 500,
+        "host_isolated": true,
+        "termination": "120 ohm switchable",
+        "protection": "TVS + connector-side surge/ESD network frozen during schematic",
+        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148"
+      },
+      {
+        "id": "RS485_B",
+        "transceiver": "ISO1410",
+        "mode": "half-duplex",
+        "max_data_rate_kbps": 500,
+        "host_isolated": true,
+        "termination": "120 ohm switchable",
+        "protection": "TVS + connector-side surge/ESD network frozen during schematic",
+        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148"
+      }
+    ],
+    "can": {
+      "transceiver": "ISO1042",
+      "host_isolated": true,
+      "data_rate_max_mbps": 5,
+      "termination": "120 ohm switchable",
+      "bus_fault_protection_v": "-70 to +70",
+      "source": "https://www.ti.com/product/ISO1042"
+    },
+    "digital_inputs": {
+      "channels": 4,
+      "implementation": "2 x ISO1212",
+      "target_field_voltage": "24 V nominal",
+      "accepted_design_window_v": [
+        18,
+        30
+      ],
+      "isolated": true,
+      "certification_claim": false,
+      "note": "Use ISO1212 as a design basis for 24 V industrial-style inputs; PF-002 does not claim IEC certification.",
+      "source": "https://www.ti.com/product/ISO1212"
+    },
+    "digital_outputs": {
+      "channels": 4,
+      "implementation": "TPS4H160-Q1 high-side switch behind digital isolation",
+      "field_supply_v": [
+        9,
+        30
+      ],
+      "target_current_limit_ma_per_channel": 250,
+      "isolated_control": "ISO6741-class barrier into shared field domain",
+      "protection": [
+        "adjustable current limit",
+        "thermal shutdown",
+        "short-circuit protection",
+        "current monitoring"
+      ],
+      "certification_claim": false,
+      "sources": [
+        "https://www.ti.com/product/TPS4H160-Q1",
+        "https://www.ti.com/product/ISO6741"
+      ]
+    }
+  },
+  "board_constraints": {
+    "target_outline_max_mm": [
+      100,
+      80
+    ],
+    "layer_count_target": 4,
+    "copper_oz": 1,
+    "isolation_moat_required": true,
+    "field_connectors_on_board_edge": true,
+    "usb_and_debug_on_host_side": true,
+    "testpoints_required": [
+      "VBUS_5V",
+      "3V3",
+      "ISO_5V",
+      "GND_HOST",
+      "GND_FIELD",
+      "RS485_A_TX",
+      "RS485_A_RX",
+      "RS485_B_TX",
+      "RS485_B_RX",
+      "CAN_TX",
+      "CAN_RX",
+      "FIELD_SUPPLY"
+    ]
+  },
+  "economics": {
+    "prior_sidecar_parts_budget_twd": 1300,
+    "revised_pre_schematic_sidecar_parts_budget_twd": 1500,
+    "reason": "Adds explicit host/field isolation architecture and robust 24 V digital I/O while retaining the PF-002 gross-margin floor.",
+    "price_observations": [
+      {
+        "part": "STM32G0B1 family",
+        "observed_twd_1up": 156.45,
+        "source": "RS Taiwan search result"
+      },
+      {
+        "part": "ISO1410BDWR",
+        "observed_twd_1up": 174,
+        "observed_twd_10up": 132,
+        "source": "DigiKey Taiwan"
+      },
+      {
+        "part": "ISO1212SDBQR",
+        "observed_twd_1up": 55.93,
+        "observed_twd_10up": 40.87,
+        "source": "Mouser Taiwan"
+      },
+      {
+        "part": "TCAN/ISO CAN class reference",
+        "note": "ISO1042 selected for isolation; current exact distributor price must be refreshed at sourcing."
+      },
+      {
+        "part": "TPS4H160BQPWPRQ1",
+        "observed_twd_1up": 113.64,
+        "observed_twd_10up": 85.32,
+        "source": "Mouser Taiwan"
+      }
+    ],
+    "boundary": "Distributor observations are screening prices, not production quotes. Exact assembly BOM and landed cost must be recomputed after schematic/PCB freeze."
+  },
+  "authority": {
+    "standalone_architecture_frozen": true,
+    "standalone_schematic_design_authorized": true,
+    "standalone_pcb_design_authorized": false,
+    "donor_system_integration_authorized": false,
+    "fabrication_authorized": false,
+    "power_on_authorized": false,
+    "physical_correctness": "UNPROVEN",
+    "sale_authorized": false
+  },
+  "remaining_before_schematic_freeze": [
+    "exact STM32G0B1 package/pin map",
+    "exact USB-C receptacle and USB ESD device",
+    "isolated-domain current budget against B0505S-2WR3",
+    "exact ISO1410/ISO1042 package variants",
+    "ISO1212 threshold resistor network for the 18-30 V product window",
+    "TPS4H160 current-limit resistor and field-power protection network",
+    "connector family and TVS selections",
+    "testpoint/reference designators"
+  ],
+  "system_integration_gate": [
+    "one real POS462/B91 donor record with simulated=false",
+    "USB enumeration on that exact donor",
+    "cold-boot and reconnect stability",
+    "finished-unit receipt binding donor serial + BenchIO hardware revision + firmware hash + OS image hash"
+  ]
+}
