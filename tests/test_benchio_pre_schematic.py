@@ -34,7 +34,8 @@ def test_benchio_keeps_field_and_host_domains_explicit() -> None:
 def test_benchio_default_state_is_safe_and_physical_authority_stays_closed() -> None:
     safe = "\n".join(CONTRACT["default_safe_state"])
     assert "digital outputs commanded OFF" in safe
-    assert "field logic power disabled" in safe
+    assert "field-side transceivers/output logic remain inactive when FIELD_9_28V is absent" in safe
+    assert "USB must not back-power 5V_FIELD" in safe
     assert CONTRACT["authority"]["fabrication_authorized"] is False
     assert CONTRACT["authority"]["power_on_authorized"] is False
     assert CONTRACT["authority"]["physical_correctness"] == "UNPROVEN"
