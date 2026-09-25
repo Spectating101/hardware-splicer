@@ -1,0 +1,39 @@
+{
+  "schema": "hardware_splicer.supply_route.v1",
+  "route_id": "PF-SUPPLY-ACCEPTANCE-HYBRID",
+  "mode": "HYBRID",
+  "target_msrp_usd": 99,
+  "minimum_target_gross_margin_fraction": 0.65,
+  "all_new_reference_cogs_usd": 45,
+  "intended_build_units": 100,
+  "minimum_donor_savings_fraction": 0.15,
+  "donor": {
+    "description": "Acceptance fixture: reuse a tested donor subassembly as a whole module and add a new HS-designed carrier/protection layer.",
+    "acquisition_cost_usd_per_donor": 8,
+    "inbound_shipping_usd_per_donor": 1.5,
+    "inspection_minutes_per_donor": 5,
+    "labor_rate_usd_per_hour": 12,
+    "usable_yield_fraction": 0.85,
+    "yield_evidence_basis": "bounded incoming-lot inspection fixture; not a market claim",
+    "observed_available_units": 300,
+    "required_supply_depth_multiple": 2.0,
+    "rework_minutes_per_sellable": 6,
+    "rework_materials_usd_per_sellable": 2,
+    "new_parts_usd_per_sellable": 12,
+    "final_qa_minutes_per_sellable": 6,
+    "warranty_reserve_usd_per_sellable": 3,
+    "reject_disposal_usd_per_reject": 0.5,
+    "reject_recovery_credit_usd_per_reject": 0.2,
+    "identity_control": {
+      "exact_model_or_approved_variant": true,
+      "revision_or_board_id_captured": true,
+      "variant_specific_acceptance_test": true
+    },
+    "hazards": {
+      "opens_mains_voltage": false,
+      "modifies_lithium_battery": false,
+      "unknown_contamination": false,
+      "intact_certified_external_power_only": true
+    }
+  }
+}

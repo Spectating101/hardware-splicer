@@ -1,0 +1,87 @@
+name: ProofPod Product Factory
+
+on:
+  pull_request:
+    paths:
+      - "hardware/reference_designs/proofpod_v0/**"
+      - "experiments/commercial_arbitrage/**"
+      - "experiments/product_factory/**"
+      - "tests/test_proofpod_*.py"
+      - "tests/test_product_factory_*.py"
+      - ".github/workflows/proofpod-factory.yml"
+
+concurrency:
+  group: proofpod-pf001-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  factory-contracts:
+    name: Product Factory economics + intake contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS test environment
+        run: python -m pip install -e ".[dev]"
+      - name: Run Product Factory contract tests
+        run: python -m pytest -q tests/test_product_factory_*.py
+
+  schematic-gate:
+    name: PF-001 schematic gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install KiCad 9 CLI
+        run: |
+          retry() {
+            local attempt=1
+            local max_attempts=4
+            local delay=5
+            until "$@"; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Command failed after $max_attempts attempts: $*" >&2
+                return 1
+              fi
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+          retry sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          retry sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          retry sudo apt-get update
+          retry sudo apt-get install --install-recommends -y kicad
+          kicad-cli --version | grep '^9\.'
+
+      - name: Install schematic generator dependency
+        run: python -m pip install --upgrade pip pytest kicad-sch-api==0.5.6
+
+      - name: Generate ProofPod schematic
+        run: python hardware/reference_designs/proofpod_v0/generate_schematic.py
+
+      - name: Diagnose native KiCad loadability
+        run: python hardware/reference_designs/proofpod_v0/diagnose_schematic_load.py
+
+      - name: Run native KiCad + topology gate
+        run: python hardware/reference_designs/proofpod_v0/verify_schematic.py
+
+      - name: Run Product Factory contract tests
+        run: python -m pytest -q tests/test_proofpod_commercial_pilot.py tests/test_proofpod_factory_run.py tests/test_product_factory_*.py
+
+      - name: Upload PF-001 schematic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofpod-pf001-schematic-gate
+          path: |
+            hardware/reference_designs/proofpod_v0/proofpod_v0.kicad_sch
+            hardware/reference_designs/proofpod_v0/schematic_verification.json
+          if-no-files-found: warn

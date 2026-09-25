@@ -144,6 +144,27 @@ A generic AI assistant can propose an answer. Hardware-Splicer additionally pres
 
 The system therefore evaluates not only **whether the AI is right**, but also **what happens when it is wrong**.
 
+
+## Experimental physical-capability transformation
+
+Product Factory is testing a broader use of the same evidence/authority core:
+
+```text
+requirement
+  -> compare NEW_BUILD / MODIFY_EXISTING / MODULE_REUSE / DONOR_RETROFIT / HYBRID
+  -> execute bounded engineering operations
+  -> ingest exact revision-bound artifacts
+  -> verify
+  -> collect physical evidence
+  -> require explicit human authority
+```
+
+The canonical API now exposes source-route evaluation and revision-bound external-operator job/receipt contracts. Specialist EDA/design systems can therefore act as bounded operators without becoming alternate engineering truth stores.
+
+This is **not yet claimed as a demonstrated general transformation capability or commercial moat**. PF-001/PF-002/PF-003 are empirical probes; stronger claims require heterogeneous physical results and real economic/customer outcomes.
+
+See [`docs/COMPETITIVE_CATEGORY_SHIFT_2026Q3.md`](docs/COMPETITIVE_CATEGORY_SHIFT_2026Q3.md).
+
 ## Adversarial external proof
 
 The frozen unseen SPI-flash corpus contains ten cases:

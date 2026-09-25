@@ -34,6 +34,16 @@ def _string_list(value: Any) -> List[str]:
     return [str(item).strip() for item in value if str(item).strip()]
 
 
+def _mapping(value: Any) -> Dict[str, Any]:
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _rows(value: Any) -> List[Dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [dict(row) for row in value if isinstance(row, Mapping)]
+
+
 def _bom_lines_from_sources(
     *,
     salvage_bom: Mapping[str, Any],
@@ -401,6 +411,12 @@ def build_project_package(
             "selected_modules": _string_list(candidate.get("selected_modules"))
             or _string_list(splice_plan.get("resolved_modules")),
             "selected_parts": list(candidate.get("selected_parts") or []),
+        },
+        "transformation": {
+            "capability_source_decision": _mapping(payload.get("capability_source_decision")),
+            "operator_jobs": _rows(payload.get("engineering_operator_jobs")),
+            "operator_receipts": _rows(payload.get("engineering_operator_receipts")),
+            "automatic_physical_authority": False,
         },
         "gates": gates,
         "artifacts": dict(payload.get("artifacts") or {}),

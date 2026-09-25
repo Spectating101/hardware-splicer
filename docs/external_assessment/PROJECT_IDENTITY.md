@@ -48,6 +48,25 @@ A generic AI engineering assistant can propose an answer. Hardware-Splicer addit
 
 The project therefore optimizes not only for “getting the answer right,” but for preventing an uncertain or wrong answer from silently acquiring physical authority.
 
+
+## Experimental category expansion
+
+The current Product Factory program is testing whether the same truth model can govern a broader physical-engineering decision:
+
+> **Given a required capability, should the artifact be built new, modified, assembled from a reusable module, derived from a qualified donor, or produced as a hybrid splice?**
+
+Hardware-Splicer now contains software contracts for this comparison and for revision-bound delegation to external engineering operators.
+
+The evaluator-facing claim remains bounded:
+
+- the workflow exists in software;
+- source strategies can be compared without automatically preferring new build or reuse;
+- external operator outputs can be bound to one project/revision and returned for HS ingestion;
+- none of this establishes a general physical-transformation capability until heterogeneous physical runs exist;
+- none of this establishes a commercial moat until repeatable real cost/yield/customer outcomes exist.
+
+The primary formal competition identity above remains unchanged unless the external evidence ceiling changes.
+
 ## Core doctrine
 
 > **Model for semantic judgment. Deterministic systems for identity, evidence, constraints and consequences. Unknown remains unknown. Physical authority requires physical evidence.**

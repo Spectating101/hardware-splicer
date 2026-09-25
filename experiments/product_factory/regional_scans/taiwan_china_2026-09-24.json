@@ -1,0 +1,136 @@
+{
+  "schema": "hardware_splicer.regional_product_factory_scan.v1",
+  "scan_id": "PF-REGION-TW-CN-2026-09-24",
+  "observed_at": "2026-09-24",
+  "regions": ["Taiwan", "Mainland China"],
+  "thesis": "Taiwan is currently more attractive as a finished-product/bench-industrial market while Mainland China is more attractive as a donor/substrate market. Commodity protocol converters are too cheap in China to justify simple clone arbitrage.",
+  "taiwan": {
+    "observed_donors": [
+      {
+        "category": "thin_client",
+        "examples": [
+          {"name": "HP t610 Plus", "observed_price_twd": 980, "source": "Shopee Taiwan"},
+          {"name": "HP T620", "observed_price_twd": 1500, "source": "Shopee Taiwan"},
+          {"name": "HP T630", "observed_price_twd": 1500, "source": "Shopee Taiwan"},
+          {"name": "Dell Wyse 3040", "observed_price_twd_range": [1109, 1500], "source": "Ruten Taiwan", "supply_note": "listings include 30-40 unit and 40-unit claims; exact qualified lot depth remains unverified"}
+        ]
+      },
+      {
+        "category": "retired_industrial_pc",
+        "examples": [
+          {"name": "Advantech ARK-1122", "observed_price_twd": 1199, "source": "Shopee Taiwan"},
+          {"name": "Advantech ARK-1123", "observed_price_twd": 2499, "source": "Shopee Taiwan"},
+          {"name": "Advantech ARK-2120L", "observed_price_twd_range": [2900, 3000], "source": "Ruten/Shopee Taiwan"},
+          {"name": "Advantech ARK-2120L faulty", "observed_price_twd": 300, "source": "Ruten Taiwan", "supply_note": "fault state makes this salvage-only until exact defect/yield is measured"}
+        ]
+      },
+      {
+        "category": "retired_pos_touch_terminal",
+        "examples": [
+          {"name": "Flytech POS462", "observed_price_twd": 1000, "source": "Ruten Taiwan"},
+          {"name": "ViViPOS VP-2535", "observed_price_twd": 1000, "source": "Ruten Taiwan"},
+          {"name": "J1800 POS terminal", "observed_price_twd": 1500, "source": "Ruten Taiwan"},
+          {"name": "Datavan W-615 POS", "observed_price_twd": 2000, "source": "Ruten Taiwan"}
+        ]
+      }
+    ],
+    "finished_product_anchors": [
+      {"name": "Advantech ECU-1051TL IoT gateway", "price_twd_range": [7390, 8290]},
+      {"name": "Advantech ADAM-6750 intelligent I/O gateway", "price_twd": 11890},
+      {"name": "Advantech ADAM-6717 intelligent I/O gateway", "price_twd": 13390},
+      {"name": "Advantech EKI-1211 Modbus gateway", "price_twd": 6490},
+      {"name": "Advantech EKI-1224CI isolated 4-port Modbus gateway", "price_twd": 24690},
+      {"name": "Advantech J1900 15-inch industrial touch all-in-one", "price_twd": 28151},
+      {"name": "generic China-origin Android industrial touch panel listed in Taiwan", "price_twd_range": [5973, 13588]}
+    ],
+    "candidate_routes": [
+      {
+        "id": "TW-PF-HMI-001",
+        "working_name": "BenchHMI",
+        "donor": "Flytech/ViViPOS exact-model touch POS",
+        "transformation": "retain display, touch, compute, stand/enclosure and PSU; add HS low-voltage isolated I/O sidecar plus a reproducible Linux/test-console image",
+        "illustrative_effective_cogs_twd": 4000,
+        "illustrative_target_price_twd": 8990,
+        "illustrative_gross_margin_fraction": 0.5551,
+        "market_fit": "lab/shopfloor test console; explicitly not certified industrial HMI",
+        "current_state": "INVESTIGATE_SUPPLY_AND_INTERFACE"
+      },
+      {
+        "id": "TW-PF-EDGE-001",
+        "working_name": "BenchGateway",
+        "donor": "HP t610 Plus / Dell Wyse 3040",
+        "transformation": "retain compute/enclosure/networking; add isolated RS-485/CAN/digital I/O sidecar, target-power protection and HS evidence agent",
+        "illustrative_effective_cogs_twd_range": [3200, 4200],
+        "illustrative_target_price_twd_range": [5990, 7990],
+        "illustrative_margin_note": "roughly 30-60% depending donor lot and sidecar; requires richer workflow value than commodity Modbus gateways",
+        "current_state": "INVESTIGATE_BULK_DONOR_PRICE"
+      },
+      {
+        "id": "TW-PF-ARK-001",
+        "working_name": "Refurbished Lab Controller",
+        "donor": "Advantech ARK-1122/1123/2120 exact approved models",
+        "transformation": "retain industrial enclosure/serial/network/power architecture; refurbish storage and add bounded HS software/optional I/O adapter",
+        "illustrative_effective_cogs_twd_range": [3000, 5000],
+        "illustrative_target_price_twd_range": [6990, 9990],
+        "current_state": "INVESTIGATE_MODEL_VARIANTS_AND_WARRANTY"
+      }
+    ]
+  },
+  "mainland_china": {
+    "observed_donors": [
+      {"name": "J1900-class used soft-router/board hardware", "observed_price_rmb_range": [50, 70], "source": "2026 V2EX community check of Xianyu"},
+      {"name": "HP T620 4G+32G+PSU thin client", "observed_price_rmb": 110, "source": "2026 secondary-market report citing Xianyu"},
+      {"name": "Dell N03D configured thin client", "observed_price_rmb": 100, "source": "2026 secondary-market report citing Xianyu"},
+      {"name": "Lenovo M720q barebone", "observed_price_rmb_range": [210, 350], "source": "2025-2026 secondary-market reporting"},
+      {"name": "Lenovo M720q complete low-end build", "observed_price_rmb": 500, "source": "secondary-market build estimate"},
+      {"name": "NEC N8910 J1900 15-inch touch POS", "observed_price_rmb": 249, "source": "2026 Xianyu market report"},
+      {"name": "HP i3-7100U touch POS", "observed_price_rmb": 650, "source": "2026 secondary-market report"}
+    ],
+    "commodity_price_floor": [
+      {"category": "RS232 Ethernet server", "observed_price_rmb": 56, "source": "1688 aggregation"},
+      {"category": "RS485 Ethernet server", "observed_price_rmb_range": [75, 77], "source": "1688 aggregation"},
+      {"category": "4-port RS485/Modbus/MQTT gateway", "observed_price_rmb": 235, "source": "Taobao deal surface"}
+    ],
+    "candidate_routes": [
+      {
+        "id": "CN-PF-HMI-001",
+        "working_name": "TouchLab",
+        "donor": "NEC J1900 15-inch touch POS exact-model lots",
+        "transformation": "retain touch/display/compute/enclosure/interfaces; add compact isolated I/O sidecar and preconfigured instrumentation/test workflow",
+        "illustrative_effective_cogs_rmb_range": [500, 650],
+        "illustrative_target_price_rmb_range": [999, 1299],
+        "current_state": "PROMISING_IF_LOT_DEPTH_AND_TOUCH_YIELD_HOLD"
+      },
+      {
+        "id": "CN-PF-EDGE-001",
+        "working_name": "ThinEdge",
+        "donor": "HP T620 / Dell N03D exact approved models",
+        "transformation": "retain low-power x86 platform; add HS sidecar only where the finished workflow cannot be bought as a RMB 50-235 commodity module",
+        "illustrative_effective_cogs_rmb_range": [280, 380],
+        "illustrative_target_price_rmb_range": [699, 899],
+        "current_state": "PROMISING_BUT_COMMODITY_PRESSURE_HIGH"
+      },
+      {
+        "id": "CN-PF-NODE-001",
+        "working_name": "M720q Instrument Node",
+        "donor": "Lenovo M720q",
+        "transformation": "use PCIe/storage expandability for a higher-performance multi-instrument/DAQ/NAS edge node rather than a simple gateway",
+        "illustrative_effective_cogs_rmb_range": [850, 1100],
+        "illustrative_target_price_rmb_range": [1699, 2199],
+        "current_state": "INVESTIGATE_SPECIALIZED_WORKFLOW_VALUE"
+      }
+    ],
+    "avoid": [
+      "simple RS485/RS232-to-Ethernet clone",
+      "generic soft router",
+      "generic low-end mini PC resale",
+      "component harvesting where intact module reuse is available"
+    ]
+  },
+  "cross_border_boundary": {
+    "default": "SOURCE_AND_TRANSFORM_WITHIN_THE_SAME_MARKET",
+    "taiwan_note": "Do not treat Mainland China e-waste/scrap as ordinary import inventory. Taiwan waste import/export rules require permits for regulated waste. Cross-border sourcing should use clearly functional used equipment with documentation and category-specific customs/environment review.",
+    "authority": "UNVERIFIED_FOR_ANY_SPECIFIC_IMPORT_LOT"
+  },
+  "claim_boundary": "All candidate COGS and target prices are screening assumptions, not quotes, measured yield, demand evidence, certification equivalence, or sale authorization."
+}

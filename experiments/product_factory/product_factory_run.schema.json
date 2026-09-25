@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hardware_splicer.product_factory_run.v1",
+  "title": "Hardware Splicer Product Factory run",
+  "type": "object",
+  "required": ["schema", "run_id", "product_id", "purpose", "stages", "metrics", "claim_boundary"],
+  "properties": {
+    "schema": {"const": "hardware_splicer.product_factory_run.v1"},
+    "run_id": {"type": "string", "pattern": "^PF-[0-9]{3,}$"},
+    "product_id": {"type": "string", "minLength": 1},
+    "opened_at": {"type": "string"},
+    "purpose": {"type": "string", "minLength": 1},
+    "stages": {
+      "type": "array",
+      "minItems": 13,
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "evidence"],
+        "properties": {
+          "id": {"enum": ["DISCOVER","SELECT","SPECIFY","DESIGN_SCHEMATIC","VERIFY_SCHEMATIC","DESIGN_PCB","VERIFY_PCB","SOURCE","BUILD","PROVE","BENCHMARK","SELL","LEARN"]},
+          "state": {"type": "string", "minLength": 1},
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "decision": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "metrics": {"type": "object"},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
+}

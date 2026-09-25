@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "snapshot": "2026-09-23",
+  "snapshot": "2026-09-24",
   "project": "hardware-splicer",
   "portfolio_role": "flagship_selectively_active",
   "identity": {
-    "category": "evidence_and_release_assurance_for_ai_assisted_hardware",
+    "category": "evidence_release_assurance_and_bounded_physical_capability_transformation_for_ai_assisted_hardware",
     "north_star": "Bind one exact hardware artifact and revision through engineering evidence, deterministic verification, physical evidence, and explicit human authority without conflating those evidence classes.",
     "native_lane": [
       "physical-agent safety and consequential authority",
@@ -12,13 +12,18 @@
       "EDA-adjacent verification and release assurance",
       "physical bring-up and measurement provenance",
       "MHS and programmable-device evaluation",
-      "embodied robotics electronics research-engineering evidence"
+      "embodied robotics electronics research-engineering evidence",
+      "build-vs-modify-vs-reuse-vs-splice engineering decisions",
+      "donor/module identity, transformation and revision-bound QA",
+      "product-factory empirical benchmarking of engineering and economic outcomes"
     ],
     "not_trying_to_be": [
       "universal browser EDA suite",
       "autonomous PCB generator",
       "generic MCP or device-control framework",
-      "replacement for KiCad Altium Cadence or Flux"
+      "replacement for KiCad Altium Cadence or Flux",
+      "generic e-waste marketplace",
+      "vertical replacement for every specialist EDA or CAE engine"
     ]
   },
   "priority_stack": [
@@ -37,6 +42,13 @@
       "state": "CLOSED_REOPEN_ON_TRIGGER",
       "goal": "Keep the merged artifact-first Review/Compare/Verify/Bring-up shell closed unless a concrete usability, evaluator, or source-bound competitor gap reopens it.",
       "merged_pr": "Spectating101/hardware-splicer#104"
+    },
+    {
+      "priority": "P1",
+      "lane": "product_factory_empirical_differentiation",
+      "tracking": "Spectating101/hardware-splicer#109 plus stacked PF experiments",
+      "state": "ACTIVE_BOUNDED_EXPERIMENT",
+      "goal": "Test whether the HS evidence/authority core generalizes across clean-sheet creation, modification, donor/module reuse and hybrid splicing without claiming generality before physical proof."
     },
     {
       "priority": "P1",
@@ -77,6 +89,10 @@
     },
     "gauntlet_conversion": {
       "state": "ACTIVE"
+    },
+    "product_factory_transformation": {
+      "state": "ACTIVE_BOUNDED_EXPERIMENT",
+      "guard": "may expand engineering only through explicit PF runs with economics, evidence and authority gates; physical and commercial claims remain closed until real outcomes exist"
     }
   },
   "competitive_feedback": {
@@ -90,7 +106,15 @@
       "truth_model": "REQUIRE_EXACT_HS_DEFECT_BEFORE_CORE_INVESTIGATION"
     },
     "automatic_core_change_authorized": false,
-    "automatic_physical_authority_authorized": false
+    "automatic_physical_authority_authorized": false,
+    "category_posture": {
+      "strategy_doc": "docs/COMPETITIVE_CATEGORY_SHIFT_2026Q3.md",
+      "higher_order_role_hypothesis": "requirement_to_source_or_build_or_reuse_or_splice_to_verified_artifact",
+      "specialist_tools_may_execute_under_hs": true,
+      "rebuild_every_external_eda_primitive": false,
+      "general_transformation_capability_proven": false,
+      "commercial_moat_proven": false
+    }
   },
   "route_posture": {
     "hs_primary_or_conditional": [
@@ -119,7 +143,10 @@
       "external design or evaluator board processed end to end",
       "meaningful MHS or external-research engagement",
       "paper acceptance or serious reviewer interest",
-      "pilot or design partner asks to use the evidence release layer"
+      "pilot or design partner asks to use the evidence release layer",
+      "one revision-bound Product Factory physical transformation with measured effective COGS",
+      "heterogeneous Product Factory physical transformations through the same core workflow",
+      "paid Product Factory outcome with bound acquisition yield rework and customer evidence"
     ],
     "negative_requires_evidence": [
       "repeated external non-interest after serious conversion attempts",
@@ -142,6 +169,8 @@
     "provider_quote_can_authorize_fabrication": false,
     "software_check_can_authorize_power_on": false,
     "model_result_can_authorize_release": false,
-    "physical_evidence_requires_explicit_real_state": true
+    "physical_evidence_requires_explicit_real_state": true,
+    "paper_economics_can_authorize_build": false,
+    "competitor_gap_can_prove_category_moat": false
   }
 }

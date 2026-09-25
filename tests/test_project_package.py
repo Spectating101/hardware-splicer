@@ -106,3 +106,41 @@ def test_render_project_page_from_package() -> None:
 def test_sdk_clarify_wrapper() -> None:
     report = clarify_hardware_intent({"goal": "LED thing"})
     assert "questions" in report
+
+
+def test_project_package_preserves_transformation_source_and_operator_provenance() -> None:
+    package = build_project_package(
+        ".",
+        result={
+            "ok": False,
+            "goal": "field console",
+            "project_name": "transform-demo",
+            "candidate": {"result": "blocked"},
+            "capability_source_decision": {
+                "schema": "hardware_splicer.capability_source_decision.v1",
+                "selected_candidate_id": "hybrid-donor",
+                "selected_mode": "HYBRID",
+            },
+            "engineering_operator_jobs": [
+                {
+                    "schema": "hardware_splicer.engineering_operator_job.v1",
+                    "job_id": "sha256:" + "a" * 64,
+                    "project_revision": "rev-7",
+                }
+            ],
+            "engineering_operator_receipts": [
+                {
+                    "schema": "hardware_splicer.engineering_operator_receipt.v1",
+                    "job_id": "sha256:" + "a" * 64,
+                    "status": "ACCEPTED_FOR_HS_INGESTION",
+                }
+            ],
+        },
+        source="unit",
+    )
+
+    transformation = package["transformation"]
+    assert transformation["capability_source_decision"]["selected_mode"] == "HYBRID"
+    assert transformation["operator_jobs"][0]["project_revision"] == "rev-7"
+    assert transformation["operator_receipts"][0]["status"] == "ACCEPTED_FOR_HS_INGESTION"
+    assert transformation["automatic_physical_authority"] is False

@@ -1,14 +1,14 @@
 # Hardware-Splicer Operating State
 
 Status: **flagship / selectively active**  
-Snapshot: **2026-09-23**  
+Snapshot: **2026-09-24**  
 Canonical machine state: `docs/HARDWARE_SPLICER_OPERATING_STATE.json`
 
 Hardware-Splicer is not being wound down. It is being run as a **selectively invested flagship**: continue improving the parts that are native to physical-agent engineering, hardware evidence, revision-bound verification, physical bring-up, and release authority; integrate commodity/source-tool capability rather than rebuilding it; and force external proof before opening broad new product scope.
 
 ## Product identity
 
-Hardware-Splicer is an **evidence and release-assurance system for AI-assisted hardware**.
+Hardware-Splicer is an **evidence and release-assurance system for AI-assisted hardware**, with a bounded Product Factory experiment testing a broader **physical-capability transformation** role.
 
 Its strongest question is:
 
@@ -19,6 +19,23 @@ The system is strongest when it binds:
 `artifact/revision -> engineering evidence -> deterministic verification -> physical evidence -> explicit human authority`
 
 The system is **not** trying to become a universal browser EDA suite, autonomous PCB generator, generic MCP/device-control framework, or substitute for KiCad/Altium/Cadence/Flux.
+
+### Competitive category expansion hypothesis
+
+Product Factory has opened a deliberately bounded question:
+
+> Can HS choose among **new build, modification, module reuse, donor retrofit and hybrid splicing** and then carry the selected route through the same artifact/revision/evidence/authority discipline?
+
+If demonstrated physically across heterogeneous cases, this would move HS above the narrow "AI generates a PCB" comparison and toward:
+
+`requirement -> source/build/reuse decision -> transformation -> verification -> physical evidence -> authority`
+
+This is currently a **hypothesis under empirical test**, not a proven general capability or commercial moat.
+
+Canonical strategy note: [`COMPETITIVE_CATEGORY_SHIFT_2026Q3.md`](COMPETITIVE_CATEGORY_SHIFT_2026Q3.md).
+
+External EDA/AI tools are allowed to become operators underneath HS. A superior schematic, layout, simulation or review engine should normally be integrated rather than rebuilt when HS can preserve exact artifact identity, evidence provenance and authority boundaries.
+
 
 ## Current priority stack
 
@@ -44,6 +61,20 @@ Frontend work reopens only when:
 - rendered use exposes a concrete deficiency;
 - an evaluator/user cannot complete an HS-native workflow;
 - a source-bound competitor change exposes a specific native gap.
+
+### P1 — Product Factory empirical differentiation
+
+Tracking: PR `#109` and stacked PF experiments.
+
+State: **ACTIVE / BOUNDED EXPERIMENT**
+
+The goal is not to open a generic product-development sprint. It is to test whether HS's existing evidence/authority model generalizes across:
+- clean-sheet creation;
+- modification;
+- donor/module reuse;
+- hybrid splicing.
+
+PF-001/PF-002/PF-003 may improve the competitive category only after real physical outcomes. Paper economics and CI contracts alone do not establish transformation success.
 
 ### P1 — external conversion
 

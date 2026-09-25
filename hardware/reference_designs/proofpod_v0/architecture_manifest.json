@@ -1,0 +1,162 @@
+{
+  "schema_version": "hardware_splicer.product_factory.reference_design.v1",
+  "design_id": "proofpod-v0",
+  "factory_run": "PF-001",
+  "revision": "0.1-schematic-candidate",
+  "result_status": "schematic_candidate_only",
+  "product_hypothesis": "A protected USB-C SPI/I2C validation pod can occupy the gap between low-cost bare bridges and $275-$375 professional host/programmer tools by selling protection, deterministic power control, and evidence receipts rather than raw protocol access.",
+  "selected_components": {
+    "controller": {
+      "symbol": "HardwareSplicer:RP2040QFN56",
+      "mpn": "RP2040",
+      "status": "selected"
+    },
+    "controller_flash": {
+      "symbol": "Memory_Flash:W25Q32JVSS",
+      "mpn": "W25Q32JVSSIQ",
+      "status": "selected"
+    },
+    "spi_translator": {
+      "symbol": "HardwareSplicer:TXU0304PW",
+      "mpn": "TXU0304PWR",
+      "status": "selected"
+    },
+    "i2c_translator": {
+      "symbol": "Interface:PCA9306DC",
+      "mpn": "PCA9306DCTR",
+      "status": "selected"
+    },
+    "current_monitor": {
+      "symbol": "HardwareSplicer:INA219DCN",
+      "mpn": "INA219AIDCNR",
+      "status": "selected"
+    },
+    "usb_3v3_regulator": {
+      "symbol": "Regulator_Linear:TLV75533PDBV",
+      "mpn": "TLV75533PDBVR",
+      "status": "selected"
+    },
+    "target_1v8_regulator": {
+      "symbol": "Regulator_Linear:TLV75518PDBV",
+      "mpn": "TLV75518PDBVR",
+      "status": "selected"
+    },
+    "target_current_limit_switch": {
+      "symbol": "HardwareSplicer:TPS2553DBV",
+      "mpn": "TPS2553DBVR",
+      "status": "selected"
+    },
+    "usb_connector": {
+      "symbol": "HardwareSplicer:USBC_USB2_PF001",
+      "mpn": null,
+      "status": "logical_symbol_fixed_exact_mpn_and_footprint_pending",
+      "note": "Project-local schematic symbol preserves all USB-C physical pin numbers but intentionally un-stacks duplicate GND/VBUS/data pins for deterministic generated connectivity."
+    },
+    "crystal_12mhz": {
+      "symbol": "Device:Crystal",
+      "mpn": null,
+      "status": "load_capacitance_and_mpn_pending"
+    }
+  },
+  "control_mapping": {
+    "RP2040_GPIO0": "SPI_SCLK_HOST",
+    "RP2040_GPIO1": "SPI_MOSI_HOST",
+    "RP2040_GPIO2": "SPI_CS_HOST",
+    "RP2040_GPIO3": "SPI_MISO_HOST",
+    "RP2040_GPIO4": "I2C_SDA_HOST",
+    "RP2040_GPIO5": "I2C_SCL_HOST",
+    "RP2040_GPIO6": "SPI_OE",
+    "RP2040_GPIO7": "TARGET_POWER_EN",
+    "RP2040_GPIO8": "TARGET_FAULT_N",
+    "RP2040_GPIO9": "WRITE_ARM"
+  },
+  "target_power_contract": {
+    "selectable_nominal_rails_v": [
+      1.8,
+      3.3
+    ],
+    "selection": "physical SPDT before electronic enable",
+    "electronic_switch": "TPS2553DBVR",
+    "ilim_resistor_ohm": 133000,
+    "nominal_current_limit_ma": 201.5,
+    "datasheet_max_current_limit_ma_at_1pct_resistor_approx": 233.9,
+    "contract_max_current_limit_ma": 250,
+    "reverse_voltage_protection_required": true,
+    "default_power_state": "OFF",
+    "external_target_mode": "TARGET_POWER_EN low; external target may drive VTARGET while TPS2553 reverse-voltage protection blocks backfeed"
+  },
+  "protocol_contract": {
+    "spi_max_hz_v0": 8000000,
+    "i2c_max_hz_v0": 400000,
+    "spi_outputs_default_disabled": true,
+    "write_operations_default_disabled": true,
+    "write_arm_is_physical_input": true,
+    "write_arm_nonclaim": "The physical WRITE_ARM input is a firmware authorization input; v0 does not implement a hardware SPI opcode firewall."
+  },
+  "authority": {
+    "market_screen_passed": true,
+    "product_contract_complete": true,
+    "schematic_generated": false,
+    "erc_clean": false,
+    "topology_verified": false,
+    "pcb_complete": false,
+    "drc_clean": false,
+    "fabrication_ready": false,
+    "power_on_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_superiority": "UNPROVEN",
+    "physical_authority_granted": false
+  },
+  "source_basis": [
+    {
+      "authority": "manufacturer",
+      "document": "RP2040 datasheet",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "TPS2553 datasheet SLVS841F",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "INA219 datasheet SBOS448G",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "PCA9306 datasheet",
+      "status": "live_reference_not_frozen"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "TXU0304 datasheet SCES935A",
+      "status": "existing_HS_source_lineage"
+    },
+    {
+      "authority": "KiCad",
+      "document": "KiCad 9 symbol libraries",
+      "status": "symbol_identity_reference"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "INA219 DCN pinout pinned into project-local symbol library",
+      "status": "project_local_identity"
+    },
+    {
+      "authority": "manufacturer",
+      "document": "Raspberry Pi RP2040 datasheet Figure 3 QFN-56 pinout",
+      "status": "project_local_symbol_identity"
+    }
+  ],
+  "remaining_blockers_before_pcb": [
+    "generate editable KiCad schematic",
+    "zero-error zero-warning KiCad ERC",
+    "exported-netlist topology verification",
+    "resolve exact USB-C receptacle MPN and footprint",
+    "resolve exact 12 MHz crystal MPN and load capacitors against RP2040 reference design",
+    "bind frozen manufacturer documents by digest",
+    "add USB and target-connector ESD protection exact parts",
+    "independent EE review of power selection, external-target mode, and translator rail behavior"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "hardware_splicer.product_factory_seed.v1",
+  "source_candidate_id": "factory-candidate:acceptance-fixture",
+  "source_job": "spi validation",
+  "product_id": "fixture-proofpod",
+  "working_name": "Fixture ProofPod",
+  "economics": {
+    "target_msrp_usd": 99,
+    "landed_cogs_ceiling_usd": 30,
+    "minimum_target_gross_margin_fraction": 0.65,
+    "quantity_basis": 100,
+    "cogs_basis": "acceptance fixture component budget"
+  },
+  "engineering_assessment": {
+    "build_difficulty": 2,
+    "calibration_regulatory_burden": 2,
+    "hardware_splicer_leverage": 5
+  },
+  "market_evidence": {
+    "professional_price_anchors": [
+      {
+        "price_usd": 275,
+        "url": "https://example.invalid/pro-a"
+      },
+      {
+        "price_usd": 375,
+        "url": "https://example.invalid/pro-b"
+      }
+    ],
+    "low_cost_floor": [
+      {
+        "price_usd": 15,
+        "url": "https://example.invalid/budget"
+      }
+    ]
+  },
+  "authority": {
+    "design_work_authorized": true,
+    "fabrication_authorized": false,
+    "physical_authority_granted": false
+  },
+  "source_strategy_policy": {
+    "decision_schema": "hardware_splicer.capability_source_decision.v1",
+    "allowed_modes": [
+      "NEW_BUILD",
+      "MODIFY_EXISTING",
+      "MODULE_REUSE",
+      "DONOR_RETROFIT",
+      "HYBRID"
+    ],
+    "required_comparison": true,
+    "preferred_mode": null,
+    "reuse_requires_exact_identity": true,
+    "reuse_requires_supply_and_yield_evidence": true,
+    "external_engineering_operators_allowed": true,
+    "operator_outputs_require_hs_ingestion_and_verification": true
+  }
+}

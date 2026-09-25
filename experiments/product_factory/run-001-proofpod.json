@@ -1,0 +1,102 @@
+{
+  "schema": "hardware_splicer.product_factory_run.v1",
+  "run_id": "PF-001",
+  "product_id": "proofpod-v0",
+  "opened_at": "2026-09-23",
+  "purpose": "Use Hardware Splicer on itself to discover, specify, design, verify, manufacture, benchmark, and potentially sell a hardware product.",
+  "stages": [
+    {
+      "id": "DISCOVER",
+      "state": "PASS",
+      "evidence": [
+        "experiments/commercial_arbitrage/market_scan_2026-09-23.json"
+      ]
+    },
+    {
+      "id": "SELECT",
+      "state": "PASS",
+      "evidence": [
+        "experiments/commercial_arbitrage/evaluate.py"
+      ],
+      "decision": "ADVANCE_TO_SCHEMATIC"
+    },
+    {
+      "id": "SPECIFY",
+      "state": "PASS",
+      "evidence": [
+        "hardware/reference_designs/proofpod_v0/product_contract.json",
+        "hardware/reference_designs/proofpod_v0/architecture_manifest.json"
+      ]
+    },
+    {
+      "id": "DESIGN_SCHEMATIC",
+      "state": "ACTIVE",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_SCHEMATIC",
+      "state": "READY_FOR_NATIVE_SCHEMATIC_GATE",
+      "evidence": []
+    },
+    {
+      "id": "DESIGN_PCB",
+      "state": "QUEUED_AFTER_VERIFIED_SCHEMATIC",
+      "evidence": []
+    },
+    {
+      "id": "VERIFY_PCB",
+      "state": "QUEUED_AFTER_PCB",
+      "evidence": []
+    },
+    {
+      "id": "SOURCE",
+      "state": "QUEUED_AFTER_VERIFIED_PCB",
+      "evidence": []
+    },
+    {
+      "id": "BUILD",
+      "state": "QUEUED_AFTER_SOURCE_AND_HUMAN_AUTHORITY",
+      "evidence": []
+    },
+    {
+      "id": "PROVE",
+      "state": "QUEUED_AFTER_PHYSICAL_ARTIFACT",
+      "evidence": []
+    },
+    {
+      "id": "BENCHMARK",
+      "state": "QUEUED_AFTER_PHYSICAL_PROOF",
+      "evidence": []
+    },
+    {
+      "id": "SELL",
+      "state": "QUEUED_AFTER_BENCHMARK_AND_HUMAN_DECISION",
+      "evidence": []
+    },
+    {
+      "id": "LEARN",
+      "state": "ACTIVE_CONTINUOUS",
+      "evidence": [
+        "architecture correction: generic load switch replaced by explicit current-limited reverse-protected TPS2553 path because the original concept did not enforce the <=250 mA contract",
+        "schematic-generator correction: 5.08 mm label stubs on compact vertical passives overlapped and merged GND with 1V1; passive stubs reduced and complete pin/net contract verification added",
+        "toolchain reproducibility correction: safety-critical INA219 and RP2040 symbol identities pinned project-locally after distro KiCad library drift/load failures",
+        "USB-C generator correction: stock stacked-pin symbol produced ambiguous native KiCad connectivity; PF-001 now uses a project-local unstacked logical USB-C symbol preserving every physical pin number while exact production MPN/footprint remain pending."
+      ]
+    }
+  ],
+  "metrics": {
+    "target_board_msrp_usd": 79,
+    "target_kit_msrp_usd": 99,
+    "target_board_cogs_ceiling_usd_at_100": 20,
+    "target_kit_cogs_ceiling_usd_at_100": 30,
+    "target_min_gross_margin_fraction": 0.65,
+    "preliminary_board_budget_usd": 18.65,
+    "engineering_defects_caught_before_pcb": 2,
+    "toolchain_reproducibility_defects_caught": 2
+  },
+  "claim_boundary": "A PASS through SELECT/SPECIFY means only that the concept warrants engineering time. It is not evidence of physical correctness, demand, incumbent replacement, revenue, or commercial superiority.",
+  "status_vocabulary": {
+    "convention": "progressive_gate_states_v1",
+    "rule": "BLOCKED is reserved for an actual defect, contradiction, safety stop, or failed verification. Healthy downstream sequencing uses READY_*, QUEUED_AFTER_*, AWAITING_*, EVIDENCE_PENDING_*, ACTIVE_*, or PASS_*."
+  }
+}

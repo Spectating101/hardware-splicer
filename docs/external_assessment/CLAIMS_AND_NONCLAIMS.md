@@ -100,6 +100,24 @@ A fresh claim requires exact component/package identity, candidate hashes, preas
 
 A technically competent outsider who did not author the candidate/evaluator has not yet completed the canonical independent-operator protocol.
 
+### General physical-capability transformation
+
+**PENDING.**
+
+The repository now contains Product Factory contracts and gates for clean-sheet creation, donor remanufacture and hybrid splicing. This establishes that the **workflow and authority model exist in software**.
+
+It does **not** yet establish that Hardware-Splicer can repeatedly transform heterogeneous existing physical artifacts into verified higher-value products.
+
+A stronger claim requires multiple materially different runs with:
+- exact donor/new-build identity;
+- real acquisition/source evidence;
+- measured usable yield where donors are involved;
+- exact transformation revision;
+- physical verification;
+- measured effective COGS;
+- preserved failures/rework;
+- and, for commercial claims, real buyer/outcome evidence.
+
 ### Demonstrated industrial economics or partner value
 
 **PENDING.**
@@ -122,7 +140,11 @@ Hardware-Splicer does not currently claim:
 - that a skipped or unrun provider step proves live-model competence;
 - that MCP transport safety proves engineering correctness;
 - that the ten-case corpus has been passed by a live model;
-- that a prior golden-real bench path proves the fresh SPI case physically correct.
+- that a prior golden-real bench path proves the fresh SPI case physically correct;
+- a general hardware-transformation capability from the existence of PF-001/PF-002/PF-003 contracts alone;
+- a defensible commercial moat from Product Factory or donor transformation;
+- that competitor scope automatically proves HS has a unique category;
+- that attractive donor economics, listed inventory, or CI gates prove a sellable product.
 
 ## Preferred evaluator language
 

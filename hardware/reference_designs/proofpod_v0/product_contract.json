@@ -1,0 +1,70 @@
+{
+  "schema": "hardware_splicer.commercial_product_contract.v1",
+  "product_id": "proofpod-v0",
+  "working_name": "ProofPod v0",
+  "status": "SCHEMATIC_GATE_PENDING_CI",
+  "factory_run": "PF-001",
+  "authority": {
+    "schematic_complete": false,
+    "pcb_complete": false,
+    "fabrication_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "commercial_claims_validated": false
+  },
+  "customer": "Embedded developers, validation engineers and small NPI/test teams that need repeatable low-speed SPI/I2C interaction without paying several hundred dollars for a professional host adapter/programmer.",
+  "positioning": "A protected, scriptable USB-C SPI/I2C validation pod between bare hobby bridges and professional $275-$375 tools.",
+  "economics": {
+    "board_only_msrp_usd": 79,
+    "kit_msrp_usd": 99,
+    "board_only_landed_cogs_ceiling_usd_at_100": 20,
+    "kit_landed_cogs_ceiling_usd_at_100": 30,
+    "minimum_target_gross_margin_fraction": 0.65,
+    "note": "These are design targets, not supplier quotes."
+  },
+  "v0_scope": {
+    "host": "USB-C 5V sink, no USB-PD negotiation",
+    "controller_candidate": "Raspberry Pi RP2040",
+    "protocols": ["SPI master", "I2C master"],
+    "spi_max_hz": 8000000,
+    "i2c_max_hz": 400000,
+    "target_logic_range_v": [1.8, 5.0],
+    "pod_supplied_target_rails_v": [1.8, 3.3],
+    "target_current_limit_ma_max": 250,
+    "target_power_current_telemetry": true,
+    "external_target_vref_mode": true,
+    "signal_outputs_default_disabled": true,
+    "target_power_default_off": true,
+    "writes_default_disabled": true,
+    "physical_write_arm_required": true,
+    "transaction_receipt_required": true
+  },
+  "candidate_architecture": {
+    "mcu": "RP2040",
+    "mcu_flash": "W25Q32JVSSIQ external QSPI NOR",
+    "spi_level_translation": "TXU0304PWR fixed 3+1 direction",
+    "i2c_level_translation": "PCA9306DCTR bidirectional open-drain",
+    "target_power_switch": "TPS2553DBVR active-high adjustable current-limited switch with reverse-voltage protection",
+    "target_current_limit_programming": "133k 1% RILIM; ~201.5mA nominal and ~233.9mA datasheet maximum before resistor tolerance",
+    "target_current_monitor": "INA219AIDCNR high-side monitor across 0.1-ohm shunt",
+    "target_supply": "physical 1.8V/3.3V selection before electronically disabled target-power switch",
+    "protection": ["USB ESD pending exact part", "target-line series resistance pending exact values", "target connector ESD pending exact part", "explicit SPI signal OE", "current-limited target power", "reverse-voltage backfeed protection"],
+    "connector_strategy": "keyed primary target connector plus simple breakout adapter; exact MPN pending"
+  },
+  "evidence_receipt": {
+    "minimum_fields": ["hardware_revision","firmware_hash","host_tool_version","requested_target_voltage","measured_target_voltage","measured_target_current","protocol","clock_hz","operation_class","request_bytes","response_bytes","result","timestamp_source"],
+    "rule": "A successful protocol call is not sufficient by itself; the receipt must bind the transaction to the exact pod revision, firmware and target-power state."
+  },
+  "explicit_non_goals_v0": [
+    "logic analyzer",
+    "oscilloscope",
+    "JTAG/SWD debugger",
+    "galvanic isolation",
+    "USB protocol analyzer",
+    "high-voltage target support",
+    "more than 250mA target power",
+    "hardware SPI opcode firewall",
+    "autonomous write/erase without physical user arm",
+    "production programmer throughput claims"
+  ],
+  "next_gate": "GitHub Actions must generate the editable KiCad schematic, export the netlist, pass the explicit safety-topology checks, and return zero ERC violations before PCB work can open."
+}
