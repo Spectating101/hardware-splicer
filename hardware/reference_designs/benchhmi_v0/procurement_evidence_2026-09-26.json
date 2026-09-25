@@ -21,11 +21,14 @@
     "listing_text": "二手FLYTECH POS462觸控POS機單機無錢箱(上電有反應歡迎面交測試)",
     "observed_price_twd": 1000,
     "listing_state": "PUBLICLY_VISIBLE",
-    "exact_listing_url_resolved": false,
+    "exact_listing_url_resolved": true,
     "b91_verified": false,
     "quantity_verified": false,
     "functional_yield_verified": false,
-    "interpretation": "Good one-unit qualification candidate because the seller explicitly invites face-to-face testing. It is not yet an approved donor because B91 identity and functional checks remain unverified."
+    "interpretation": "Good one-unit qualification candidate because the seller explicitly invites face-to-face testing. It is not yet an approved donor because B91 identity and functional checks remain unverified.",
+    "exact_listing_url": "https://www.ruten.com.tw/item/21834521436740/",
+    "observed_at": "2026-09-26",
+    "note": "Exact public listing URL resolved from the live Ruten result. Listing page itself requires login for full details, so B91 identity still requires seller photo or in-person inspection."
   },
   "procurement_decision": "INSPECT_OR_CONTACT_FOR_ONE_UNIT_QUALIFICATION",
   "purchase_authority": false,
