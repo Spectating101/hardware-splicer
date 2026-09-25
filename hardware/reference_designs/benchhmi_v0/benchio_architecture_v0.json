@@ -12,10 +12,10 @@
   ],
   "host_interface": {
     "connector": "USB-C receptacle, USB 2.0 data only",
-    "power": "5 V USB bus power",
+    "power": "USB 5 V powers host-side MCU/logic only; it does not power the active RS-485/CAN/output field domain",
     "pd_required": false,
     "donor_dependency": "standard external USB only",
-    "pre_enumeration_rule": "high-current isolated field domain remains disabled until firmware configuration permits the declared USB current budget"
+    "pre_enumeration_rule": "host-side design allocation must remain below the USB 2.0 pre-configuration 100 mA budget; field-side power is independent"
   },
   "controller": {
     "selected_family": "STM32G0B1",
@@ -31,17 +31,30 @@
     "exact_pin_assignment": "PENDING_SCHEMATIC"
   },
   "field_isolation": {
-    "topology": "shared isolated field-logic domain for RS-485, CAN and protected outputs; digital inputs retain their own ISO1212 barriers",
+    "topology": "galvanic isolation is provided by ISO1410 x2, ISO1042, ISO6740, and ISO1212 barriers; the shared field-side logic domain is powered from the external 9-30 V field supply rather than from USB",
     "host_to_field_isolation_target_vdc": 1500,
     "channel_to_channel_isolation_claim": false,
     "pcb_barrier_keepout_target_mm": 6,
-    "isolated_power_candidate": {
-      "preferred_part": "B0505S-2WR3",
-      "input_v": 5,
-      "output_v": 5,
-      "power_w": 2,
-      "isolation_vdc": 1500,
-      "source": "https://www.mornsun-power.com/index/sitesearch/index/keyword/B0505.html"
+    "field_logic_power": {
+      "source": "FIELD_9_30V external input",
+      "regulator_candidate": "LMR36510",
+      "output": "5V_FIELD",
+      "current_capacity_a": 1,
+      "regulator_input_range_v": [
+        4.2,
+        65
+      ],
+      "source_url": "https://www.ti.com/product/LMR36510"
+    },
+    "rejected_power_route": {
+      "part": "B0505S-2WR3",
+      "reason": "2 W / 5 V / 400 mA output does not close the conservative simultaneous field-side load budget (411.2 mA before margin). A larger USB-powered isolated converter would also make the USB power budget unnecessarily tight.",
+      "evidence": [
+        "ISO1410 max 160 mA bus-side at 5 V, 500 kbps, 54 ohm load",
+        "ISO1042 max 73.4 mA side-2 in dominant state at 60 ohm load",
+        "ISO6740 max 17.8 mA side-2 at 5 V / 50 Mbps stress case",
+        "B0505S-2WR3 output max 400 mA"
+      ]
     }
   },
   "interfaces": {
@@ -54,7 +67,8 @@
         "host_isolated": true,
         "termination": "120 ohm switchable",
         "protection": "TVS + connector-side surge/ESD network frozen during schematic",
-        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148"
+        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148",
+        "field_power": "5V_FIELD derived from FIELD_9_30V"
       },
       {
         "id": "RS485_B",
@@ -64,7 +78,8 @@
         "host_isolated": true,
         "termination": "120 ohm switchable",
         "protection": "TVS + connector-side surge/ESD network frozen during schematic",
-        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148"
+        "source": "https://www.digikey.tw/en/products/detail/texas-instruments/ISO1410BDWR/9860148",
+        "field_power": "5V_FIELD derived from FIELD_9_30V"
       }
     ],
     "can": {
@@ -73,7 +88,8 @@
       "data_rate_max_mbps": 5,
       "termination": "120 ohm switchable",
       "bus_fault_protection_v": "-70 to +70",
-      "source": "https://www.ti.com/product/ISO1042"
+      "source": "https://www.ti.com/product/ISO1042",
+      "field_power": "5V_FIELD derived from FIELD_9_30V"
     },
     "digital_inputs": {
       "channels": 4,
@@ -183,7 +199,6 @@
   "remaining_before_schematic_freeze": [
     "exact STM32G0B1 package/pin map",
     "exact USB-C receptacle and USB ESD device",
-    "isolated-domain current budget against B0505S-2WR3",
     "exact ISO1410/ISO1042 package variants",
     "ISO1212 threshold resistor network for the 18-30 V product window",
     "TPS4H160 current-limit resistor and field-power protection network",
@@ -202,6 +217,12 @@
       "issue": "ISO6741 provides only 3 forward + 1 reverse channel, insufficient for four independent high-side output controls.",
       "correction": "Use ISO6740 4-forward variant for DO0-DO3. Defer isolated TPS4H160 current-sense/fault telemetry from v0.",
       "evidence": "TI ISO674x product data"
+    },
+    {
+      "observed_at": "2026-09-26",
+      "issue": "USB-powered B0505S-2WR3 field converter cannot meet conservative simultaneous field-side worst-case current: 2*160mA ISO1410 + 73.4mA ISO1042 + 17.8mA ISO6740 = 411.2mA > 400mA.",
+      "correction": "Power the shared field-side 5V domain from FIELD_9_30V using a 65V-class 1A buck (LMR36510 candidate). Keep USB power exclusively on the host side.",
+      "effect": "Removes field-load current from the USB budget and increases field-side power margin while preserving host/field galvanic isolation in the signal barriers."
     }
   ]
 }
