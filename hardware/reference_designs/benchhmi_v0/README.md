@@ -35,7 +35,7 @@ Screening model, not production evidence:
 - all-new reference COGS hypothesis: NT$7,500;
 - first lot: 20 units.
 
-The donor economics gate still returns HOLD because current qualified lot depth is one observed public listing and the 85% usable-yield assumption is unmeasured.
+The donor economics evaluator still fails closed on scale because qualified lot depth and measured yield are not established. The product-facing state is **EVIDENCE_PENDING_SUPPLY_AND_YIELD**, not a failure state.
 
 ## Next evidence
 
@@ -48,3 +48,16 @@ The donor economics gate still returns HOLD because current qualified lot depth 
 7. Only then open BenchIO sidecar schematic work.
 
 A successful PF-002 should demonstrate more than cheap assembly: it should show Hardware Splicer can identify, preserve and verify valuable subsystems in existing hardware while adding a new custom capability layer.
+
+
+## Status language
+
+PF-002 uses progressive states for ordinary sequencing:
+
+- `AWAITING_*` — an external/input dependency is not present yet;
+- `EVIDENCE_PENDING_*` — the hypothesis remains active while evidence is gathered;
+- `READY_*` — the next engineering action may start;
+- `QUEUED_AFTER_*` — a later lifecycle stage is intentionally downstream;
+- `ACTIVE_*` — work is currently open.
+
+`BLOCKED_*` is reserved for a real defect, contradictory evidence, failed verification, or safety stop. A healthy future stage is not presented as broken merely because its prerequisite has not happened yet.
