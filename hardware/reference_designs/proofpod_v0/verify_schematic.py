@@ -125,6 +125,15 @@ def main() -> None:
         }
         for key, expected in expected_pin_nets.items():
             if actual.get(key) != expected:
+                if key[0] == "J1":
+                    j1_actual = {
+                        pin: actual.get(("J1", pin))
+                        for pin in sorted(GEN.PIN_NETS["J1"])
+                    }
+                    fail(
+                        f"pin/net contract violated: {key[0]}.{key[1]} expected {expected}, "
+                        f"got {actual.get(key)}; resolved J1 nets={j1_actual}"
+                    )
                 fail(f"pin/net contract violated: {key[0]}.{key[1]} expected {expected}, got {actual.get(key)}")
 
         for key, expected in REQUIRED.items():
