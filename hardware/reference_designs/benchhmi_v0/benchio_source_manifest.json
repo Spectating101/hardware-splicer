@@ -77,15 +77,14 @@
       "sha256": null
     },
     {
-      "component": "ISO6741",
+      "component": "ISO6740",
       "publisher": "Texas Instruments",
       "title": "ISO674x General-Purpose Reinforced Quad-Channel Digital Isolators",
-      "url": "https://www.ti.com/lit/ds/symlink/iso6741.pdf",
+      "url": "https://www.ti.com/lit/ds/symlink/iso6740.pdf",
       "observed_revision": "Rev. G product page",
       "facts_used": [
-        "four isolation channels",
-        "3 forward / 1 reverse",
-        "50 Mbps class",
+        "ISO6740 has four forward / zero reverse channels",
+        "four isolated GPIO/PWM-class output controls",
         "reinforced isolation family"
       ],
       "sha256": null
