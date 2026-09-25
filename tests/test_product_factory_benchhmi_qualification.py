@@ -66,7 +66,7 @@ def test_unit_level_real_shape_can_open_only_schematic_engineering() -> None:
 def test_simulation_rehearses_pipeline_without_opening_design() -> None:
     status = A.project_status(SIM)
     assert status["state"] == "SIMULATION_REHEARSAL_COMPLETE_REAL_DONOR_REQUIRED"
-    assert status["projected_stages"]["DESIGN_SCHEMATIC"] == "BLOCKED_ON_REAL_DONOR_ACCEPTANCE"
+    assert status["projected_stages"]["DESIGN_SCHEMATIC"] == "AWAITING_REAL_DONOR_ACCEPTANCE"
     assert status["authority"]["benchio_schematic_design_authorized"] is False
 
 
@@ -76,3 +76,11 @@ def test_mains_repair_rejects_even_otherwise_passing_record() -> None:
     result = Q.evaluate(record)
     assert result["real_donor_accepted"] is False
     assert "mains_side_repair_required" in result["blockers"]
+
+
+def test_normal_pf002_dependencies_do_not_present_as_blocked() -> None:
+    status = A.project_status(SIM)
+    normal_states = list(status["projected_stages"].values())
+    assert all(not state.startswith("BLOCKED") for state in normal_states)
+    assert status["projected_stages"]["VERIFY_SCHEMATIC"] == "QUEUED_AFTER_SCHEMATIC"
+    assert status["projected_stages"]["PROVE"] == "QUEUED_AFTER_PHYSICAL_ARTIFACT"
