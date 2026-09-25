@@ -169,12 +169,12 @@
       "role": "isolated digital output control 3"
     },
     {
-      "signal": "FIELD_LOGIC_EN",
+      "signal": "SPARE_GPIO0",
       "pin_number": 11,
       "gpio": "PA0",
       "function": "GPIO_OUTPUT",
       "af": null,
-      "role": "host-side isolated-power load-switch enable"
+      "role": "reserved host-side GPIO; no cross-isolation power-control role in v0"
     },
     {
       "signal": "STATUS_LED",
@@ -223,7 +223,8 @@
     "USART2 uses PA1/PA2/PA3 for DE/TX/RX.",
     "USART3 uses PB1/PB10/PB11 for DE/TX/RX.",
     "all signal assignments use unique LQFP48 physical pins",
-    "DO0-DO3 are four independent host GPIO outputs feeding ISO6740 inputs"
+    "DO0-DO3 are four independent host GPIO outputs feeding ISO6740 inputs",
+    "SPARE_GPIO0 PA0 does not cross the host/field isolation boundary in v0."
   ],
   "authority": {
     "pinmap_frozen_for_schematic": true,
