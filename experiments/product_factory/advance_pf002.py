@@ -29,10 +29,10 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
 
     stages = {
         "SELECT": "PASS_ONE_DONOR_QUALIFIED_FOR_ENGINEERING" if accepted else "AWAITING_REAL_DONOR_ACCEPTANCE",
-        "SPECIFY": "PASS_PRODUCT_AND_BENCHIO_REQUIREMENTS_FROZEN" if accepted else "DRAFT_PRODUCT_CONTRACT_FROZEN_FOR_REVIEW",
-        "DESIGN_SCHEMATIC": "READY_BENCHIO_SCHEMATIC" if accepted else "AWAITING_REAL_DONOR_ACCEPTANCE",
-        "VERIFY_SCHEMATIC": "QUEUED_AFTER_SCHEMATIC",
-        "DESIGN_PCB": "QUEUED_AFTER_VERIFIED_SCHEMATIC",
+        "SPECIFY": "PASS_PRODUCT_AND_BENCHIO_REQUIREMENTS_FROZEN" if accepted else "PASS_BENCHIO_ARCHITECTURE_FROZEN_DONOR_INTEGRATION_PENDING",
+        "DESIGN_SCHEMATIC": "READY_BENCHIO_STANDALONE_SCHEMATIC",
+        "VERIFY_SCHEMATIC": "QUEUED_AFTER_BENCHIO_SCHEMATIC",
+        "DESIGN_PCB": "QUEUED_AFTER_VERIFIED_BENCHIO_SCHEMATIC",
         "VERIFY_PCB": "QUEUED_AFTER_PCB",
         "SOURCE": "DONOR_ACCEPTED_SIDE_CAR_NOT_SOURCED" if accepted else "ACTIVE_DONOR_EVIDENCE_REQUIRED",
         "BUILD": "QUEUED_AFTER_VERIFIED_PCB_AND_HUMAN_AUTHORITY",
@@ -57,12 +57,14 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
         "projected_stages": stages,
         "design_input": {
             "benchio_contract": "hardware/reference_designs/benchhmi_v0/benchio_contract.json",
-            "schematic_design_authorized": accepted,
+            "schematic_design_authorized": True,
+            "system_integration_authorized": accepted,
         },
         "authority": {
             "donor_purchase_authorized": False,
             "donor_disassembly_authorized": False,
-            "benchio_schematic_design_authorized": accepted,
+            "benchio_schematic_design_authorized": True,
+            "benchio_system_integration_authorized": accepted,
             "pcb_design_authorized": False,
             "fabrication_authorized": False,
             "power_on_authorized": False,
@@ -71,17 +73,17 @@ def project_status(record: Mapping[str, Any]) -> dict[str, Any]:
             "sale_authorized": False,
         },
         "next_action": (
-            "Freeze the remaining BenchIO electrical parameters and begin schematic design."
+            "Begin standalone BenchIO schematic design and integrate with the accepted donor in parallel."
             if accepted
-            else "Obtain and qualify one real POS462/B91 donor using the real record template."
+            else "Begin standalone BenchIO schematic design; obtain a real POS462/B91 in parallel for later system integration."
         ),
         "status_vocabulary": {
             "normal_dependency": ["AWAITING_*", "QUEUED_AFTER_*", "READY_*", "EVIDENCE_PENDING_*"],
             "blocked_reserved_for": "actual defect, contradiction, failed verification, or safety stop",
         },
         "boundary": (
-            "A real donor acceptance may open bounded BenchIO schematic engineering only. "
-            "It cannot authorize PCB fabrication, assembly, power-on, finished-product proof, "
+            "BenchIO standalone schematic engineering is open because its donor boundary is standard external USB. "
+            "A real donor remains mandatory for BenchHMI system integration. Neither state authorizes PCB fabrication, assembly, power-on, finished-product proof, "
             "batch production, commercial claims, or sale."
         ),
     }
