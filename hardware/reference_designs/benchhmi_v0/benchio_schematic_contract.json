@@ -1,0 +1,211 @@
+{
+  "schema": "hardware_splicer.benchio_schematic_contract.v1",
+  "design_id": "benchio-v0",
+  "revision": "0.1-contract",
+  "state": "READY_FOR_PIN_LEVEL_SCHEMATIC",
+  "design_boundary": {
+    "standalone": true,
+    "donor_interface": "USB 2.0 external only",
+    "donor_internal_signals_used": false,
+    "donor_internal_power_used": false,
+    "system_integration_requires_real_donor": true
+  },
+  "power_tree": [
+    {
+      "rail": "USB_VBUS_5V",
+      "source": "USB-C VBUS",
+      "consumers": [
+        "3V3 regulator",
+        "isolated 5V converter enable path"
+      ],
+      "rule": "isolated field domain disabled until allowed by USB power state"
+    },
+    {
+      "rail": "3V3_HOST",
+      "source": "5V to 3.3V regulator",
+      "consumers": [
+        "STM32G0B1",
+        "host sides of isolation devices",
+        "USB logic"
+      ]
+    },
+    {
+      "rail": "5V_FIELD_ISO",
+      "source": "B0505S-2WR3 or verified equivalent 2W isolated converter",
+      "consumers": [
+        "field sides of ISO1410 x2",
+        "field side ISO1042",
+        "field side ISO6741"
+      ],
+      "isolation_vdc_min": 1500
+    },
+    {
+      "rail": "FIELD_9_30V",
+      "source": "external pluggable terminal",
+      "consumers": [
+        "TPS4H160-Q1 output power stage"
+      ],
+      "required_protection": [
+        "reverse-polarity strategy",
+        "fuse/PTC strategy",
+        "TVS",
+        "bulk decoupling"
+      ]
+    }
+  ],
+  "component_roles": [
+    {
+      "ref": "U1",
+      "preferred_part": "STM32G0B1CBT6",
+      "role": "USB device controller + two UART/RS485 control paths + FDCAN + GPIO/ADC"
+    },
+    {
+      "ref": "U2",
+      "preferred_part": "ISO1410BDWR",
+      "role": "RS485_A isolated half-duplex transceiver"
+    },
+    {
+      "ref": "U3",
+      "preferred_part": "ISO1410BDWR",
+      "role": "RS485_B isolated half-duplex transceiver"
+    },
+    {
+      "ref": "U4",
+      "preferred_part": "ISO1042",
+      "role": "isolated CAN/CAN-FD transceiver"
+    },
+    {
+      "ref": "U5",
+      "preferred_part": "ISO1212",
+      "role": "DI0/DI1 isolated 24V receiver"
+    },
+    {
+      "ref": "U6",
+      "preferred_part": "ISO1212",
+      "role": "DI2/DI3 isolated 24V receiver"
+    },
+    {
+      "ref": "U7",
+      "preferred_part": "TPS4H160-Q1",
+      "role": "four protected high-side outputs"
+    },
+    {
+      "ref": "U8",
+      "preferred_part": "ISO6741",
+      "role": "isolated control/diagnostic path for high-side outputs"
+    },
+    {
+      "ref": "U9",
+      "preferred_part": "B0505S-2WR3",
+      "role": "shared isolated 5V field-logic power"
+    },
+    {
+      "ref": "U10",
+      "preferred_part": "3.3V LDO or buck, exact part pending",
+      "role": "host-side 3.3V rail"
+    }
+  ],
+  "external_connectors": [
+    {
+      "ref": "J1",
+      "function": "USB-C USB2 device + 5V input",
+      "required_nets": [
+        "VBUS",
+        "USB_DP",
+        "USB_DM",
+        "GND_HOST"
+      ]
+    },
+    {
+      "ref": "J2",
+      "function": "RS485_A",
+      "required_nets": [
+        "RS485_A_P",
+        "RS485_A_N",
+        "GND_FIELD"
+      ]
+    },
+    {
+      "ref": "J3",
+      "function": "RS485_B",
+      "required_nets": [
+        "RS485_B_P",
+        "RS485_B_N",
+        "GND_FIELD"
+      ]
+    },
+    {
+      "ref": "J4",
+      "function": "CAN",
+      "required_nets": [
+        "CAN_H",
+        "CAN_L",
+        "GND_FIELD"
+      ]
+    },
+    {
+      "ref": "J5",
+      "function": "digital inputs",
+      "required_nets": [
+        "DI0",
+        "DI0_RETURN",
+        "DI1",
+        "DI1_RETURN",
+        "DI2",
+        "DI2_RETURN",
+        "DI3",
+        "DI3_RETURN"
+      ]
+    },
+    {
+      "ref": "J6",
+      "function": "field power + digital outputs",
+      "required_nets": [
+        "FIELD_9_30V",
+        "GND_FIELD",
+        "DO0",
+        "DO1",
+        "DO2",
+        "DO3"
+      ]
+    }
+  ],
+  "topology_invariants": [
+    "USB D+/D- terminate only at the USB-capable MCU path and required ESD/protection network.",
+    "No donor-internal rail or motherboard signal may appear in the BenchIO schematic.",
+    "RS485_A and RS485_B each cross an ISO1410 isolation barrier before reaching the field connector.",
+    "CAN crosses an ISO1042 isolation barrier before reaching CAN_H/CAN_L.",
+    "The shared field-side logic ground must not be copper-connected to GND_HOST.",
+    "ISO1212 field inputs must not depend on FIELD_9_30V to sense an external input.",
+    "TPS4H160 control/diagnostic paths cross digital isolation; output power comes from FIELD_9_30V.",
+    "Each bus gets connector-side transient protection and switchable termination where applicable.",
+    "Isolation moat contains no copper, stitching vias, test pads or mounting-hole copper that bridges GND_HOST and GND_FIELD.",
+    "Fabrication/power-on authority remains false even after ERC passes."
+  ],
+  "default_safe_state": [
+    "RS485 transmit drivers disabled until firmware configuration.",
+    "CAN transmitter disabled/standby where supported until firmware configuration.",
+    "All digital outputs commanded OFF by hardware/firmware default.",
+    "isolated field logic power disabled until USB power state permits it.",
+    "no external field supply is sourced from USB."
+  ],
+  "acceptance_before_pcb": [
+    "manufacturer datasheets frozen with hashes for every active component",
+    "exact package and pin mapping frozen",
+    "power budget proves USB current envelope",
+    "ISO1212 resistor network proves 18-30V input window",
+    "TPS4H160 current limit network frozen near 250mA/channel target",
+    "termination and TVS values frozen",
+    "KiCad ERC: zero unresolved errors/warnings",
+    "machine topology checker: zero invariant violations",
+    "independent review still pending unless separately recorded"
+  ],
+  "authority": {
+    "schematic_design_authorized": true,
+    "schematic_verified": false,
+    "pcb_design_authorized": false,
+    "fabrication_authorized": false,
+    "power_on_authorized": false,
+    "physical_correctness": "UNPROVEN"
+  }
+}
