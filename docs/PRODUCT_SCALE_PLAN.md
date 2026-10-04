@@ -1,8 +1,10 @@
 # Product scale plan — Splice Agent (2026–2027)
 
-**Purpose:** Define what we are building, at what depth, in what order — for founder, agents, and future contributors.
+> **Historical execution plan.** This July 2026 scale plan remains useful for architecture history and previously completed work, but it is no longer the canonical source for current investment priority, competitor response, or next-action ordering. Use [`HARDWARE_SPLICER_OPERATING_STATE.md`](HARDWARE_SPLICER_OPERATING_STATE.md) and [`HARDWARE_SPLICER_OPERATING_STATE.json`](HARDWARE_SPLICER_OPERATING_STATE.json) for the current 2026-09-23 operating state. Where this plan conflicts with that state, the canonical operating state wins.
 
-**Status:** Active · July 2026  
+**Purpose:** Preserve what we were building, at what depth, and in what order during the alpha/beta scale phase — for founder, agents, and future contributors.
+
+**Status:** Historical plan · superseded for current prioritization on 2026-09-23  
 **Anchor tag:** `v1.1.0-alpha.16`  
 **Cold-internal exit:** ✅ declared — see [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)  
 **Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
@@ -130,6 +132,8 @@ Autoroute:  maintainer-owned; headless only if automated
 Phase 3:    when café case + copper story are honest
 ```
 
+Historical note: current work allocation is now governed by `HARDWARE_SPLICER_OPERATING_STATE.*`; in particular, SPI physical proof is P0, competitive frontend closure is P1, and generic feature growth is off by default.
+
 ---
 
 ## 8. Architecture (frozen)
@@ -156,13 +160,17 @@ flowchart LR
 
 ---
 
-## 9. Next actions (after cold exit)
+## 9. Historical next actions (after cold exit)
+
+These were the July plan's next actions. They are retained for provenance, not as the current priority queue.
 
 1. ~~Phase 0 + Phase 1 cold-internal exit.~~ ✅ alpha.16 — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
 2. On-board café DMM when hardware is available ([`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)).
 3. Autoroute / `fab_ready` — **maintainer track**; keep default `AUTOROUTE=0`.
 4. Design Studio pin-edit / live DRC hints (Phase 2 UX).
 5. Optional: stranger dry-run when someone appears.
+
+Current next actions are defined by `HARDWARE_SPLICER_OPERATING_STATE.*` and the SPI physical-proof campaign.
 
 ---
 
@@ -173,3 +181,4 @@ flowchart LR
 | 2026-07-08 | Initial product scale plan; Phase 0 doc + studio wiring for alpha.5 |
 | 2026-07-10 | Maturity through alpha.12–16; cold-internal bar; live VL; public-web DMM |
 | 2026-07-10 | Declare Phase 0 / Phase 1 **cold exit** at alpha.16; autoroute left to maintainer |
+| 2026-09-23 | Mark plan historical for current prioritization; canonical operating state moved to `HARDWARE_SPLICER_OPERATING_STATE.*` |
