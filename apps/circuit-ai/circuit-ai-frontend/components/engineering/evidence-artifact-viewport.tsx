@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircuitBoard, LoaderCircle } from 'lucide-react';
+import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
+
+export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/engineering/viewer-overlay';
+export type ActiveArtifact = { relative: string; kind: string };
 
 type JsonRecord = Record<string, unknown>;
 export type EvidenceBuildFile = { name?: string; relative?: string; kind?: string };
@@ -135,11 +139,25 @@ export function EvidenceArtifactViewport({
   overlayFinding = '',
   compact = false,
   preferredKind = 'schematic',
+  pins,
+  highlights,
+  placing,
+  onPlace,
+  onCancelPlace,
+  onActiveArtifact,
+  focusHighlightId,
 }: {
   buildDir: string;
   overlayFinding?: string;
   compact?: boolean;
   preferredKind?: PreferredArtifactKind;
+  pins?: ViewerPin[];
+  highlights?: ViewerHighlight[];
+  placing?: boolean;
+  onPlace?: (pin: PlacedPin) => void;
+  onCancelPlace?: () => void;
+  onActiveArtifact?: (artifact: ActiveArtifact | null) => void;
+  focusHighlightId?: string | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
@@ -149,6 +167,12 @@ export function EvidenceArtifactViewport({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
+
+  useEffect(() => {
+    onActiveArtifact?.(activeRelative && activeKind ? { relative: activeRelative, kind: activeKind } : null);
+    // Report only when the artifact actually changes, not when the caller re-creates its callback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeRelative, activeKind]);
 
   useEffect(() => {
     if (!buildDir) {
@@ -282,6 +306,19 @@ export function EvidenceArtifactViewport({
         ) : (
           <div ref={hostRef} className={`${compact ? 'min-h-[470px]' : 'min-h-[600px]'} h-full w-full [&>kicanvas-embed]:block [&>kicanvas-embed]:h-full [&>kicanvas-embed]:w-full`} />
         )}
+        {content ? (
+          <ViewerOverlay
+            hostRef={hostRef}
+            activeRelative={activeRelative}
+            activeKind={activeKind || ''}
+            pins={pins}
+            highlights={highlights}
+            placing={placing}
+            onPlace={onPlace}
+            onCancelPlace={onCancelPlace}
+            focusId={focusHighlightId}
+          />
+        ) : null}
         {overlayFinding ? (
           <div className="absolute left-4 top-4 z-10 max-w-[17rem] rounded-md border border-red-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
             <div className="flex gap-2">
