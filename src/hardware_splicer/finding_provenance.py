@@ -24,11 +24,19 @@ _CATEGORY_ORDER = (
     "failed_check",
     "object_blocker",
     "release_blocker",
+    "measured_finding",
     "traceability_issue",
 )
 _MALFORMED_PERSISTED_BASIS = "malformed persisted finding entry ignored"
 _MALFORMED_PERSISTED_SOURCE = "engineeringFindings"
 _MALFORMED_PERSISTED_TEXT = "Malformed persisted finding entry ignored."
+_MALFORMED_PHYSICAL_BASIS = "malformed or non-qualifying measurement record ignored"
+_MALFORMED_PHYSICAL_SOURCE = "physicalValidation"
+_MALFORMED_PHYSICAL_TEXT = "Malformed or non-qualifying measurement record ignored."
+_PHYSICAL_ESTABLISH_BASIS = (
+    "non-simulated measurement record states that it establishes this finding"
+)
+_MEASURED_AUTHORITIES = frozenset({"measured", "verified", "authorized"})
 _MACHINE_PROJECT_INVALID_PREFIX = "Stored machine project fails validation: "
 _MACHINE_PROJECT_INVALID_SOURCE = "machine_project_invalid"
 _MACHINE_PROJECT_INVALID_BASIS = (
@@ -36,8 +44,8 @@ _MACHINE_PROJECT_INVALID_BASIS = (
 )
 _VALIDATION_TEXT_LIMIT = 500
 _PYDANTIC_URL_RE = re.compile(r"https?://\S+")
-# ``physical`` is reserved: no persisted field yet links a blocker or failed
-# check to a specific bench measurement.
+# ``physical`` is reachable only when a non-simulated failed measurement
+# record carries an ``establishes`` finding_link.
 _PROVENANCE_KINDS = frozenset(
     {"deterministic", "model_derived", "physical", "human", "unknown"}
 )
@@ -450,6 +458,212 @@ def _collect_persisted_findings(snapshot: Mapping[str, Any]) -> list[dict[str, A
     return findings
 
 
+def _malformed_physical_finding(*, count: int = 1) -> dict[str, Any]:
+    text = _MALFORMED_PHYSICAL_TEXT
+    if count > 1:
+        text = f"{_MALFORMED_PHYSICAL_TEXT} ({count} entries)"
+    return _finding(
+        "traceability_issue",
+        None,
+        text,
+        _provenance(
+            "unknown",
+            _MALFORMED_PHYSICAL_BASIS,
+            _MALFORMED_PHYSICAL_SOURCE,
+        ),
+    )
+
+
+def _physical_envelope_rows(snapshot: Mapping[str, Any]) -> tuple[list[Any], int]:
+    if "physicalValidation" not in snapshot:
+        return [], 0
+    validation = snapshot.get("physicalValidation")
+    if not isinstance(validation, Mapping):
+        return [], 1
+    audited = validation.get("audited_physical_evidence")
+    raw: Any = None
+    if isinstance(audited, Mapping) and "envelopes" in audited:
+        raw = audited.get("envelopes")
+    elif "envelopes" in validation:
+        raw = validation.get("envelopes")
+    else:
+        return [], 0
+    if not isinstance(raw, list):
+        return [], 1
+    return list(raw), 0
+
+
+def _authority_value(record: Any) -> str:
+    authority = getattr(record, "authority", None)
+    value = getattr(authority, "value", authority)
+    return _text(value)
+
+
+def _merge_established_findings(
+    events: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for event in events:
+        key = (_text(event.get("object_id")), _text(event.get("text")))
+        grouped.setdefault(key, []).append(dict(event))
+    findings: list[dict[str, Any]] = []
+    for rows in grouped.values():
+        rows.sort(key=lambda row: _text(row.get("evidence_id")))
+        first = rows[0]
+        object_id = _text(first.get("object_id")) or None
+        text = _text(first.get("text"))
+        finding = _finding(
+            "measured_finding",
+            object_id,
+            text,
+            _provenance(
+                "physical",
+                _PHYSICAL_ESTABLISH_BASIS,
+                _text(first.get("evidence_id")) or None,
+            ),
+        )
+        extras = [
+            {
+                "evidence_id": _text(row.get("evidence_id")),
+                "relation": "establishes",
+                "passed": False,
+                "authority": _text(row.get("authority")),
+            }
+            for row in rows[1:]
+        ]
+        if extras:
+            finding["physical_evidence"] = extras
+        findings.append(finding)
+    return findings
+
+
+def _collect_physical_measurements(
+    snapshot: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, str]], int]:
+    from .physical_evidence import FindingLinkRelation, PhysicalEvidenceRecord
+
+    rows, malformed = _physical_envelope_rows(snapshot)
+    established: list[dict[str, Any]] = []
+    pending_clears: list[dict[str, str]] = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            malformed += 1
+            continue
+        raw_record = row.get("record")
+        if not isinstance(raw_record, Mapping):
+            malformed += 1
+            continue
+        try:
+            record = PhysicalEvidenceRecord.model_validate(raw_record)
+        except (TypeError, ValueError):
+            malformed += 1
+            continue
+        links = record.finding_links or []
+        if not links:
+            continue
+        simulated = (
+            record.metadata.get("simulated")
+            if isinstance(record.metadata, Mapping)
+            else None
+        )
+        authority = _authority_value(record)
+        qualifying = (
+            simulated is False
+            and authority in _MEASURED_AUTHORITIES
+        )
+        if not qualifying:
+            malformed += 1
+            continue
+        for link in links:
+            relation = getattr(link.relation, "value", link.relation)
+            if relation == FindingLinkRelation.ESTABLISHES.value:
+                if record.passed is not False:
+                    malformed += 1
+                    continue
+                text = _text(link.text)
+                if not text:
+                    malformed += 1
+                    continue
+                established.append(
+                    {
+                        "object_id": _text(link.object_id) or None,
+                        "text": text,
+                        "evidence_id": _text(record.evidence_id),
+                        "authority": authority,
+                    }
+                )
+            elif relation == FindingLinkRelation.CLEARS.value:
+                if record.passed is not True:
+                    malformed += 1
+                    continue
+                pending_clears.append(
+                    {
+                        "evidence_id": _text(record.evidence_id),
+                        "finding_id": _text(link.finding_id),
+                        "authority": authority,
+                    }
+                )
+            else:
+                malformed += 1
+    return _merge_established_findings(established), pending_clears, malformed
+
+
+def _annotate_clears(
+    findings: list[dict[str, Any]],
+    pending_clears: Sequence[Mapping[str, str]],
+) -> list[dict[str, str]]:
+    by_id = {_text(row.get("finding_id")): row for row in findings}
+    unmatched: list[dict[str, str]] = []
+    for link in pending_clears:
+        finding_id_value = _text(link.get("finding_id"))
+        target = by_id.get(finding_id_value)
+        if target is None:
+            unmatched.append(
+                {
+                    "evidence_id": _text(link.get("evidence_id")),
+                    "finding_id": finding_id_value,
+                }
+            )
+            continue
+        annotation = {
+            "evidence_id": _text(link.get("evidence_id")),
+            "relation": "clears",
+            "passed": True,
+            "authority": _text(link.get("authority")),
+        }
+        existing = target.setdefault("physical_evidence", [])
+        if isinstance(existing, list):
+            existing.append(annotation)
+    return unmatched
+
+
+def project_findings_payload(
+    snapshot: Mapping[str, Any], revision: int
+) -> dict[str, Any]:
+    """Project findings plus unmatched physical ``clears`` links.
+
+    ``revision`` is accepted so callers can bind the projection to a loaded
+    revision. It is not an authority signal and is not written back.
+    """
+
+    del revision
+    body = _mapping(snapshot)
+    measured, pending_clears, malformed_physical = _collect_physical_measurements(body)
+    collected = [
+        *_collect_persisted_findings(body),
+        *_collect_failed_checks(body),
+        *_collect_object_blockers(body),
+        *measured,
+        *_collect_traceability_issues(body),
+    ]
+    if malformed_physical:
+        collected.append(_malformed_physical_finding(count=malformed_physical))
+    unique = _dedupe(collected)
+    unmatched = _annotate_clears(unique, pending_clears)
+    unique.sort(key=_sort_key)
+    return {"findings": unique, "unmatched_links": unmatched}
+
+
 def project_findings(snapshot: Mapping[str, Any], revision: int) -> list[dict[str, Any]]:
     """Project findings and their stored establishment provenance.
 
@@ -459,14 +673,4 @@ def project_findings(snapshot: Mapping[str, Any], revision: int) -> list[dict[st
     record wins a ``(category, object_id, text)`` collision.
     """
 
-    del revision
-    body = _mapping(snapshot)
-    collected = [
-        *_collect_persisted_findings(body),
-        *_collect_failed_checks(body),
-        *_collect_object_blockers(body),
-        *_collect_traceability_issues(body),
-    ]
-    unique = _dedupe(collected)
-    unique.sort(key=_sort_key)
-    return unique
+    return project_findings_payload(snapshot, revision)["findings"]
