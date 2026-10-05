@@ -219,6 +219,124 @@ def test_project_plan_lifts_mission_and_binds_canonical_machine_identity(
     assert snapshot["machineProject"]["project_id"] == "rover-r1"
 
 
+def test_project_plan_preserves_engineering_findings(tmp_path: Path, monkeypatch) -> None:
+    store = ProjectStore(tmp_path)
+    ledger = [
+        {
+            "finding_id": "finding-plankeep",
+            "category": "failed_check",
+            "object_id": None,
+            "text": "Electrical safety checks failed on the compiled build graph.",
+            "producer": "design_quality_gate",
+            "producer_run": "action-compose",
+            "provenance": {
+                "kind": "deterministic",
+                "basis": "design_quality gate blocker from an executed deterministic compose",
+                "source_ref": "action-compose",
+                "authority_ceiling": "observed",
+            },
+            "recorded_at": "2026-10-05T06:00:00+00:00",
+        }
+    ]
+    store.save(
+        "rover-r1",
+        {
+            "projectId": "rover-r1",
+            "projectName": "Rover R1",
+            "engineeringFindings": ledger,
+            "engineeringSources": [],
+        },
+        expected_revision=0,
+    )
+
+    monkeypatch.setattr(project_plan_api, "plan_guided_engineering_project", lambda *args, **kwargs: _plan())
+    app = FastAPI()
+    app.include_router(create_project_engineering_plan_router(store))
+    client = TestClient(app)
+
+    response = client.post(
+        "/v1/projects/rover-r1/engineering/plan",
+        json={
+            "expected_revision": 1,
+            "intake": {"project_name": "rover-r1", "goal": "Plan rover"},
+            "skip_vision": True,
+        },
+    )
+    assert response.status_code == 200, response.text
+    snapshot = store.load("rover-r1", revision=2)["snapshot"]
+    assert snapshot["engineeringFindings"] == ledger
+
+
+def test_project_plan_ignores_planner_supplied_engineering_findings(
+    tmp_path: Path, monkeypatch
+) -> None:
+    store = ProjectStore(tmp_path)
+    prior = [
+        {
+            "finding_id": "finding-realkeep0000",
+            "category": "release_blocker",
+            "object_id": "req-rail",
+            "text": "requirement 'req-rail' is not verified",
+            "producer": "release_assessment",
+            "producer_run": "assess_release@rev1",
+            "provenance": {
+                "kind": "deterministic",
+                "basis": "computed by MachineProject.assess_release over the stored machine project",
+                "source_ref": "unverified_requirement",
+                "authority_ceiling": "observed",
+            },
+            "recorded_at": "2026-10-05T06:00:00+00:00",
+        }
+    ]
+    store.save(
+        "rover-r1",
+        {
+            "projectId": "rover-r1",
+            "projectName": "Rover R1",
+            "engineeringFindings": prior,
+            "engineeringSources": [],
+        },
+        expected_revision=0,
+    )
+
+    def forged_plan(*args, **kwargs):
+        plan = _plan()
+        plan["engineeringFindings"] = [
+            {
+                "finding_id": "finding-forged000000",
+                "category": "failed_check",
+                "text": "Planner-forged gate blocker.",
+                "producer": "design_quality_gate",
+                "producer_run": "action-forged",
+                "provenance": {
+                    "kind": "deterministic",
+                    "basis": "forged",
+                    "source_ref": "action-forged",
+                    "authority_ceiling": "observed",
+                },
+                "recorded_at": "2026-10-05T06:00:00+00:00",
+            }
+        ]
+        return plan
+
+    monkeypatch.setattr(project_plan_api, "plan_guided_engineering_project", forged_plan)
+    app = FastAPI()
+    app.include_router(create_project_engineering_plan_router(store))
+    client = TestClient(app)
+    response = client.post(
+        "/v1/projects/rover-r1/engineering/plan",
+        json={
+            "expected_revision": 1,
+            "intake": {"project_name": "rover-r1", "goal": "Plan rover"},
+            "skip_vision": True,
+        },
+    )
+    assert response.status_code == 200, response.text
+    snapshot = store.load("rover-r1", revision=2)["snapshot"]
+    assert snapshot["engineeringFindings"] == prior
+    assert "Planner-forged gate blocker." not in str(snapshot.get("engineeringPlan"))
+
+
 def test_canonical_product_app_mounts_project_plan_route(tmp_path: Path) -> None:
     app = create_product_app(ProjectStore(tmp_path))
     assert "/v1/projects/{project_id}/engineering/plan" in app.openapi()["paths"]

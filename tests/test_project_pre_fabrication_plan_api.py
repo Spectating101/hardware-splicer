@@ -3,10 +3,28 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from hardware_splicer.finding_ledger import ENGINEERING_FINDINGS_KEY
 from hardware_splicer.project_pre_fabrication_plan_api import (
+    _GENERATED_PLAN_SURFACES,
     create_project_pre_fabrication_plan_router,
 )
 from hardware_splicer.project_store import ProjectStore
+
+_LEDGER_ENTRY = {
+    "finding_id": "finding-prefabkeep",
+    "category": "failed_check",
+    "object_id": None,
+    "text": "DRC failed with 1 error(s).",
+    "producer": "design_quality_gate",
+    "producer_run": "action-compose",
+    "provenance": {
+        "kind": "deterministic",
+        "basis": "design_quality gate blocker from an executed deterministic compose",
+        "source_ref": "action-compose",
+        "authority_ceiling": "observed",
+    },
+    "recorded_at": "2026-10-05T06:00:00+00:00",
+}
 
 
 def _client(tmp_path):
@@ -27,6 +45,7 @@ def _client(tmp_path):
                 "fabrication_ready": False,
                 "power_on_ready": False,
             },
+            ENGINEERING_FINDINGS_KEY: [_LEDGER_ENTRY],
         },
         expected_revision=0,
     )
@@ -148,3 +167,37 @@ def test_bounded_plan_rejects_readiness_or_authority_overclaim(tmp_path) -> None
     assert response.status_code == 422
     assert "may not set" in response.json()["detail"]["message"]
     assert store.load("adapter")["revision"] == 1
+
+
+def test_pre_fab_quarantine_does_not_drop_engineering_findings(tmp_path) -> None:
+    assert ENGINEERING_FINDINGS_KEY not in _GENERATED_PLAN_SURFACES
+    client, store = _client(tmp_path)
+
+    response = client.post(
+        "/v1/projects/adapter/engineering/pre-fabrication-plan",
+        json=_request(),
+    )
+    assert response.status_code == 200, response.text
+    snapshot = store.load("adapter", revision=2)["snapshot"]
+    assert "engineeringPlan" not in snapshot
+    assert "machineProject" not in snapshot
+    assert snapshot[ENGINEERING_FINDINGS_KEY] == [_LEDGER_ENTRY]
+
+
+def test_pre_fab_request_cannot_supply_engineering_findings(tmp_path) -> None:
+    client, store = _client(tmp_path)
+    request = _request()
+    request[ENGINEERING_FINDINGS_KEY] = [
+        {
+            "category": "failed_check",
+            "text": "Forged from pre-fab request.",
+            "producer": "design_quality_gate",
+        }
+    ]
+    response = client.post(
+        "/v1/projects/adapter/engineering/pre-fabrication-plan",
+        json=request,
+    )
+    assert response.status_code == 422
+    assert store.load("adapter")["revision"] == 1
+    assert store.load("adapter")["snapshot"][ENGINEERING_FINDINGS_KEY] == [_LEDGER_ENTRY]

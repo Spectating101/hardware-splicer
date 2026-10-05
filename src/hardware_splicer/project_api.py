@@ -99,6 +99,8 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
 
     @router.put("/{project_id}/snapshot")
     def save_project_snapshot(project_id: str, request: ProjectSnapshotRequest) -> Dict[str, Any]:
+        # Full-snapshot write: client-supplied engineeringFindings are stored
+        # as given. The findings projection validates ledger rows on read.
         try:
             envelope = project_store.save(
                 project_id,

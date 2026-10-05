@@ -60,6 +60,7 @@ shared by API, UI and CI.
 | `machine_release.py` | Release-state ordering and the permission rule |
 | `project_store.py` | Durable revisions (`hardware_splicer.project_snapshot.v1`) |
 | `project_review_store.py` | Staged review workflow (`hardware_splicer.project_review.v1`) |
+| `project_thread_store.py` | Append-only review threads (`hardware_splicer.review_thread.v1`) |
 | `project_api.py` | `/v1/projects` — persistence and review |
 | `machine_project_api.py` | `/v1/machine-projects` — model, seed, diff, release |
 
@@ -120,6 +121,10 @@ API error contract — clients may rely on the shape.
 | `POST` | `/{project_id}/reviews` | Open a review for a candidate |
 | `GET` | `/{project_id}/reviews/{review_id}` | Load a review + diff |
 | `POST` | `/{project_id}/reviews/{review_id}/decision` | Accept or reject |
+| `GET` | `/{project_id}/threads` | List review threads |
+| `POST` | `/{project_id}/threads` | Open a review thread |
+| `GET` | `/{project_id}/threads/{thread_id}` | Load a review thread + events |
+| `POST` | `/{project_id}/threads/{thread_id}/events` | Append a comment, resolve, or reopen |
 
 `/v1/machine-projects`
 
@@ -144,6 +149,17 @@ client), and `projectSession.js`. `ProjectWorkspace.jsx` mounts
 Review traffic is suppressed until a durable revision actually exists, so a fresh
 project does not emit review calls against nothing.
 
+## Review threads
+
+Review threads are append-only discussion records anchored to a project object,
+finding, or artifact at a specific revision. They sit beside the project tree
+(`threads/`) and are separate from staged reviews: a comment, resolve, or reopen
+never changes a snapshot, a revision, a review decision, or authority state.
+
+Author identity is self-declared and unverified in v1. The API does not
+authenticate, so every event stores `author_verified: false`. Mentions are plain
+text.
+
 ## Verification
 
 ```bash
@@ -152,6 +168,8 @@ pytest -q \
   tests/test_project_review_store.py \
   tests/test_project_api.py \
   tests/test_project_review_api.py \
+  tests/test_project_thread_store.py \
+  tests/test_project_thread_api.py \
   tests/test_machine_project.py \
   tests/test_machine_project_diff.py \
   tests/test_machine_project_diff_review_flags.py \
@@ -172,3 +190,5 @@ Frontend: `make splice-ui-build`.
    resumes rather than silently dropping or double-applying.
 7. The review event log is append-only.
 8. Revision and review conflicts raise a stable, documented error contract.
+9. Review threads are discussion only; they never alter a snapshot, revision, review decision, or authority state.
+10. The thread event log is append-only; resolve/reopen are events, not edits.
