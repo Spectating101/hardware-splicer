@@ -3,13 +3,14 @@
 Threads are discussion only. They never alter a project snapshot, revision,
 staged review, or any authority or release field.
 
-Author identity is self-declared. The API does not authenticate, so
-``author_verified`` is always the literal ``false`` in v1.
+Author identity is self-declared unless a pre-verified operator identity is
+supplied. A verified comment is still only a comment.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import tempfile
@@ -19,16 +20,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .operator_identity import OperatorIdentity
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 PROJECT_THREAD_SCHEMA = "hardware_splicer.review_thread.v1"
 _AUTHORITY_KEYS = frozenset(
     {"authority", "release", "fabrication", "power_on", "status", "revision_override"}
 )
-_ANCHOR_KEYS = frozenset({"revision", "object_id", "finding_ref", "artifact"})
+_ANCHOR_KEYS = frozenset({"revision", "object_id", "finding_ref", "artifact", "position"})
 _AUTHOR_KEYS = frozenset({"kind", "id"})
 _ARTIFACT_KEYS = frozenset({"relative", "kind"})
+_POSITION_KEYS = frozenset({"x_mm", "y_mm"})
 _ARTIFACT_KINDS = frozenset({"schematic", "pcb"})
+_POSITION_ABS_MAX = 1e5
+_VERIFIED_BY_OPERATOR_TOKEN = "operator-token"
 _AUTHOR_KINDS = frozenset({"human", "agent", "system"})
 _EVENT_TYPES = frozenset({"comment", "resolve", "reopen"})
 _MAX_LABEL = 200
@@ -206,7 +211,42 @@ def _normalize_artifact(value: Any) -> Dict[str, str] | None:
     return {"relative": relative, "kind": kind.strip()}
 
 
-def _normalize_anchor(anchor: Any, *, latest_revision: int) -> Dict[str, Any]:
+def _finite_millimetre(value: Any, *, field: str) -> float:
+    range_message = f"{field} must be a finite number within +-100000 mm"
+    if type(value) is bool:
+        raise ThreadValidationError(f"{field} must be a finite number")
+    if type(value) is int:
+        if abs(value) > _POSITION_ABS_MAX:
+            raise ThreadValidationError(range_message)
+        return round(float(value), 3)
+    if type(value) is not float:
+        raise ThreadValidationError(f"{field} must be a finite number")
+    try:
+        number = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ThreadValidationError(range_message) from exc
+    if not math.isfinite(number) or abs(number) > _POSITION_ABS_MAX:
+        raise ThreadValidationError(range_message)
+    return round(number, 3)
+
+
+def _normalize_position(value: Any) -> Dict[str, float] | None:
+    if value is None:
+        return None
+    position = _require_mapping(value, label="anchor.position")
+    reject_authority_keys(position, label="anchor.position")
+    extra = set(position) - _POSITION_KEYS
+    if extra:
+        raise ThreadValidationError(f"anchor.position contains unknown fields: {sorted(extra)}")
+    if "x_mm" not in position or "y_mm" not in position:
+        raise ThreadValidationError("anchor.position requires x_mm and y_mm")
+    return {
+        "x_mm": _finite_millimetre(position.get("x_mm"), field="position.x_mm"),
+        "y_mm": _finite_millimetre(position.get("y_mm"), field="position.y_mm"),
+    }
+
+
+def _normalize_anchor(anchor: Any, *, latest_revision: int | None = None) -> Dict[str, Any]:
     raw = _require_mapping(anchor, label="anchor")
     reject_authority_keys(raw, label="anchor")
     extra = set(raw) - _ANCHOR_KEYS
@@ -217,13 +257,16 @@ def _normalize_anchor(anchor: Any, *, latest_revision: int) -> Dict[str, Any]:
         raise ThreadValidationError("anchor.revision must be an integer")
     if revision < 1:
         raise ThreadValidationError("anchor.revision must be at least 1")
-    if revision > latest_revision:
+    if latest_revision is not None and revision > latest_revision:
         raise ThreadValidationError(
             f"anchor.revision {revision} is above latest revision {latest_revision}"
         )
     object_id = _clean_label(raw.get("object_id"), field="object_id")
     finding_ref = _clean_label(raw.get("finding_ref"), field="finding_ref")
     artifact = _normalize_artifact(raw.get("artifact"))
+    position = _normalize_position(raw.get("position"))
+    if position is not None and artifact is None:
+        raise ThreadValidationError("position requires artifact")
     if object_id is None and finding_ref is None and artifact is None:
         raise ThreadValidationError("anchor must include object_id, finding_ref, or artifact")
     return {
@@ -231,6 +274,7 @@ def _normalize_anchor(anchor: Any, *, latest_revision: int) -> Dict[str, Any]:
         "object_id": object_id,
         "finding_ref": finding_ref,
         "artifact": artifact,
+        "position": position,
     }
 
 
@@ -255,6 +299,15 @@ def _normalize_author(author: Any) -> Dict[str, str]:
     if len(author_id) > _MAX_AUTHOR_ID:
         raise ThreadValidationError(f"author.id must be at most {_MAX_AUTHOR_ID} characters")
     return {"kind": kind, "id": author_id}
+
+
+def _resolve_event_author(
+    author: Mapping[str, Any] | None,
+    verified_operator: OperatorIdentity | None,
+) -> tuple[Dict[str, str], bool]:
+    if verified_operator is None:
+        return _normalize_author(author), False
+    return _normalize_author({"kind": verified_operator.kind, "id": verified_operator.id}), True
 
 
 def _normalize_body(body: Any, *, event_type: str) -> str:
@@ -291,6 +344,13 @@ def _comment_count(events: list[Mapping[str, Any]]) -> int:
     return sum(1 for event in events if event.get("type") == "comment")
 
 
+def _validate_stored_anchor(anchor: Any) -> None:
+    try:
+        _normalize_anchor(anchor)
+    except ThreadValidationError as exc:
+        raise ProjectThreadError("thread anchor is structurally corrupt") from exc
+
+
 def _validate_thread_record(
     value: Mapping[str, Any],
     *,
@@ -309,9 +369,7 @@ def _validate_thread_record(
         anchor = value.get("anchor")
         if not isinstance(anchor, Mapping):
             raise ProjectThreadError("thread anchor must be an object")
-        revision = anchor.get("revision")
-        if revision.__class__ is not int or revision < 1:
-            raise ProjectThreadError("thread anchor.revision must be an integer >= 1")
+        _validate_stored_anchor(anchor)
         if not isinstance(value.get("created_at"), str):
             raise ProjectThreadError("thread created_at must be a string")
     except ProjectThreadError:
@@ -336,8 +394,17 @@ def _validate_event_record(value: Mapping[str, Any], *, sequence: int) -> Dict[s
         author_id = author.get("id")
         if not isinstance(author_id, str) or not author_id:
             raise ProjectThreadError("event author.id must be a non-empty string")
-        if value.get("author_verified") is not False:
-            raise ProjectThreadError("event author_verified must be exactly false")
+        author_verified = value.get("author_verified")
+        if author_verified is True:
+            if value.get("verified_by") != _VERIFIED_BY_OPERATOR_TOKEN:
+                raise ProjectThreadError(
+                    "event author_verified true requires verified_by 'operator-token'"
+                )
+        elif author_verified is False:
+            if "verified_by" in value:
+                raise ProjectThreadError("event author_verified false must omit verified_by")
+        else:
+            raise ProjectThreadError("event author_verified must be exactly true or false")
         if not isinstance(value.get("body"), str):
             raise ProjectThreadError("event body must be a string")
         if not isinstance(value.get("created_at"), str):
@@ -443,15 +510,19 @@ class ProjectThreadStore:
         event_type: str,
         author: Mapping[str, str],
         body: str,
+        *,
+        verified: bool = False,
     ) -> Dict[str, Any]:
-        record = {
+        record: Dict[str, Any] = {
             "seq": int(sequence),
             "type": event_type,
             "author": dict(author),
-            "author_verified": False,
+            "author_verified": bool(verified),
             "body": body,
             "created_at": _utc_now(),
         }
+        if verified:
+            record["verified_by"] = _VERIFIED_BY_OPERATOR_TOKEN
         _atomic_create_json(self._event_path(project_id, thread_id, sequence), record)
         return record
 
@@ -494,8 +565,9 @@ class ProjectThreadStore:
         self,
         project_id: str,
         anchor: Mapping[str, Any],
-        author: Mapping[str, Any],
+        author: Mapping[str, Any] | None,
         body: str,
+        verified_operator: OperatorIdentity | None = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         if kwargs:
@@ -503,7 +575,7 @@ class ProjectThreadStore:
         safe_id = validate_project_id(project_id)
         latest_revision = self._latest_revision(safe_id)
         normalized_anchor = _normalize_anchor(anchor, latest_revision=latest_revision)
-        normalized_author = _normalize_author(author)
+        normalized_author, verified = _resolve_event_author(author, verified_operator)
         comment_body = _normalize_body(body, event_type="comment")
 
         thread_id = f"thread-{uuid.uuid4().hex[:16]}"
@@ -517,7 +589,15 @@ class ProjectThreadStore:
             "anchor": normalized_anchor,
             "created_at": _utc_now(),
         }
-        self._write_event(safe_id, thread_id, 1, "comment", normalized_author, comment_body)
+        self._write_event(
+            safe_id,
+            thread_id,
+            1,
+            "comment",
+            normalized_author,
+            comment_body,
+            verified=verified,
+        )
         _atomic_write_json(thread_dir / "thread.json", record)
         return self.get_thread(safe_id, thread_id)
 
@@ -562,9 +642,10 @@ class ProjectThreadStore:
         project_id: str,
         thread_id: str,
         type: str,
-        author: Mapping[str, Any],
+        author: Mapping[str, Any] | None,
         body: str = "",
         expected_event_seq: int | None = None,
+        verified_operator: OperatorIdentity | None = None,
         **kwargs: Any,
     ) -> Dict[str, Any]:
         if kwargs:
@@ -587,7 +668,7 @@ class ProjectThreadStore:
             raise ThreadStateError(f"thread {thread_id!r} is {status} and cannot be resolved")
         if event_type == "reopen" and status != "resolved":
             raise ThreadStateError(f"thread {thread_id!r} is {status} and cannot be reopened")
-        normalized_author = _normalize_author(author)
+        normalized_author, verified = _resolve_event_author(author, verified_operator)
         note = _normalize_body(body, event_type=event_type)
         return self._write_event(
             project_id,
@@ -596,4 +677,5 @@ class ProjectThreadStore:
             event_type,
             normalized_author,
             note,
+            verified=verified,
         )

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from hardware_splicer.operator_identity import hash_operator_token
 from hardware_splicer.project_api import create_project_router
 from hardware_splicer.project_review_store import ProjectReviewStore
 from hardware_splicer.project_store import ProjectStore
@@ -329,3 +332,342 @@ def test_thread_api_structurally_corrupt_records_are_project_thread_error(tmp_pa
     listed = api.get("/v1/projects/robot/threads")
     assert listed.status_code == 500
     assert listed.json()["detail"]["type"] == "project_thread_error"
+
+
+def _operator_env(monkeypatch, token: str = "operator-secret", *, operator_id: str = "alice", kind: str = "human") -> str:
+    monkeypatch.setenv(
+        "HARDWARE_SPLICER_OPERATOR_TOKENS",
+        json.dumps({hash_operator_token(token): {"id": operator_id, "kind": kind}}),
+    )
+    return token
+
+
+def test_thread_api_no_token_stays_unverified(tmp_path: Path) -> None:
+    api = client(tmp_path)
+    _seed(api)
+    thread = _create(api)
+    assert thread["events"][0]["author"] == {"kind": "human", "id": "owner"}
+    assert thread["events"][0]["author_verified"] is False
+    assert "verified_by" not in thread["events"][0]
+
+
+def test_thread_api_valid_token_verifies_author_from_registry(tmp_path: Path, monkeypatch) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    created = api.post(
+        "/v1/projects/robot/threads",
+        json={"anchor": {"revision": 1, "object_id": "mcu"}, "body": "Verified note"},
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert created.status_code == 201, created.text
+    event = created.json()["thread"]["events"][0]
+    assert event["author"] == {"kind": "human", "id": "alice"}
+    assert event["author_verified"] is True
+    assert event["verified_by"] == "operator-token"
+    assert token not in created.text
+
+    matching = api.post(
+        f"/v1/projects/robot/threads/{created.json()['thread']['thread_id']}/events",
+        json={
+            "type": "comment",
+            "author": {"kind": "human", "id": "alice"},
+            "body": "same author",
+        },
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert matching.status_code == 201, matching.text
+    assert matching.json()["event"]["author"] == {"kind": "human", "id": "alice"}
+    assert matching.json()["event"]["author_verified"] is True
+    assert matching.json()["event"]["verified_by"] == "operator-token"
+
+
+def test_thread_api_client_author_conflict_is_422(tmp_path: Path, monkeypatch) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    conflict = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "bob"},
+            "body": "wrong name",
+        },
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert conflict.status_code == 422
+    assert conflict.json()["detail"]["type"] == "invalid_request"
+    assert conflict.json()["detail"]["message"] == "author does not match the verified operator"
+    assert api.get("/v1/projects/robot/threads").json()["threads"] == []
+
+
+def test_thread_api_invalid_token_is_401_and_writes_nothing(tmp_path: Path, monkeypatch) -> None:
+    _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "should not land",
+        },
+        headers={"X-HS-Operator-Token": "not-the-token"},
+    )
+    assert rejected.status_code == 401
+    assert rejected.json()["detail"]["type"] == "operator_token_invalid"
+    assert "not-the-token" not in rejected.text
+    assert api.get("/v1/projects/robot/threads").json()["threads"] == []
+    threads_root = tmp_path / "robot" / "threads"
+    assert not threads_root.exists() or list(threads_root.iterdir()) == []
+
+
+def test_thread_api_invalid_token_on_append_writes_nothing(tmp_path: Path, monkeypatch) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    thread = _create(api)
+    before = api.get(f"/v1/projects/robot/threads/{thread['thread_id']}").json()["thread"]
+    rejected = api.post(
+        f"/v1/projects/robot/threads/{thread['thread_id']}/events",
+        json={"type": "comment", "author": {"kind": "human", "id": "owner"}, "body": "nope"},
+        headers={"X-HS-Operator-Token": "wrong-token"},
+    )
+    assert rejected.status_code == 401
+    assert rejected.json()["detail"]["type"] == "operator_token_invalid"
+    after = api.get(f"/v1/projects/robot/threads/{thread['thread_id']}").json()["thread"]
+    assert after["comment_count"] == before["comment_count"]
+    assert len(after["events"]) == len(before["events"])
+
+
+@pytest.mark.parametrize(
+    "author",
+    ["bob", [], True, 5, {"kind": "human", "id": "x", "authorized": True}],
+)
+def test_thread_api_verified_token_rejects_invalid_author_shapes(
+    tmp_path: Path, monkeypatch, author: object
+) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": author,
+            "body": "should not land",
+        },
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert rejected.status_code == 422, rejected.text
+    assert rejected.json()["detail"]["type"] == "invalid_request"
+    assert rejected.json()["detail"]["message"] == "author does not match the verified operator"
+    assert api.get("/v1/projects/robot/threads").json()["threads"] == []
+    threads_root = tmp_path / "robot" / "threads"
+    assert not threads_root.exists() or list(threads_root.iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    "author",
+    ["bob", [], True, 5, {"kind": "human", "id": "x", "authorized": True}],
+)
+def test_thread_api_verified_event_rejects_invalid_author_shapes(
+    tmp_path: Path, monkeypatch, author: object
+) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    thread = _create(api)
+    rejected = api.post(
+        f"/v1/projects/robot/threads/{thread['thread_id']}/events",
+        json={"type": "comment", "author": author, "body": "should not land"},
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert rejected.status_code == 422, rejected.text
+    assert rejected.json()["detail"]["type"] == "invalid_request"
+    assert rejected.json()["detail"]["message"] == "author does not match the verified operator"
+    loaded = api.get(f"/v1/projects/robot/threads/{thread['thread_id']}").json()["thread"]
+    assert loaded["comment_count"] == 1
+    assert len(loaded["events"]) == 1
+
+
+def test_thread_api_authorization_header_is_not_an_operator_token(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("HARDWARE_SPLICER_OPERATOR_TOKENS", raising=False)
+    monkeypatch.delenv("HARDWARE_SPLICER_OPERATOR_TOKENS_FILE", raising=False)
+    api = client(tmp_path)
+    _seed(api)
+    created = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "proxied app auth",
+        },
+        headers={"Authorization": "Bearer app-api-key"},
+    )
+    assert created.status_code == 201, created.text
+    event = created.json()["thread"]["events"][0]
+    assert event["author"] == {"kind": "human", "id": "owner"}
+    assert event["author_verified"] is False
+    assert "verified_by" not in event
+
+
+def test_thread_api_authorization_bearer_ignored_with_live_registry(tmp_path: Path, monkeypatch) -> None:
+    token = _operator_env(monkeypatch, operator_id="alice", kind="human")
+    api = client(tmp_path)
+    _seed(api)
+    created = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "app bearer must stay unverified",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert created.status_code == 201, created.text
+    event = created.json()["thread"]["events"][0]
+    assert event["author"] == {"kind": "human", "id": "owner"}
+    assert event["author_verified"] is False
+    assert "verified_by" not in event
+
+
+def test_thread_api_invalid_operator_header_not_rescued_by_authorization(
+    tmp_path: Path, monkeypatch
+) -> None:
+    token = _operator_env(monkeypatch)
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "header wins",
+        },
+        headers={
+            "X-HS-Operator-Token": "not-the-token",
+            "Authorization": f"Bearer {token}",
+        },
+    )
+    assert rejected.status_code == 401
+    assert rejected.json()["detail"]["type"] == "operator_token_invalid"
+    assert api.get("/v1/projects/robot/threads").json()["threads"] == []
+
+
+def test_thread_api_operator_header_without_registry_is_503(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("HARDWARE_SPLICER_OPERATOR_TOKENS", raising=False)
+    monkeypatch.delenv("HARDWARE_SPLICER_OPERATOR_TOKENS_FILE", raising=False)
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "missing registry",
+        },
+        headers={"X-HS-Operator-Token": "any-token"},
+    )
+    assert rejected.status_code == 503
+    assert rejected.json()["detail"]["type"] == "operator_registry_error"
+
+
+@pytest.mark.parametrize("blank", ["", "  "])
+def test_thread_api_blank_tokens_env_does_not_use_file(
+    tmp_path: Path, monkeypatch, blank: str
+) -> None:
+    token = "operator-secret"
+    registry_path = tmp_path / "operator-tokens.json"
+    registry_path.write_text(
+        json.dumps({hash_operator_token(token): {"id": "file-user", "kind": "agent"}}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("HARDWARE_SPLICER_OPERATOR_TOKENS", blank)
+    monkeypatch.setenv("HARDWARE_SPLICER_OPERATOR_TOKENS_FILE", str(registry_path))
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "blank env must not use file",
+        },
+        headers={"X-HS-Operator-Token": token},
+    )
+    assert rejected.status_code == 503
+    assert rejected.json()["detail"]["type"] == "operator_registry_error"
+    assert rejected.json()["detail"]["message"] == "operator token registry is not configured"
+    assert api.get("/v1/projects/robot/threads").json()["threads"] == []
+
+
+def test_thread_api_registry_error_is_503(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OPERATOR_TOKENS", "{not-json")
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu"},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "broken registry",
+        },
+        headers={"X-HS-Operator-Token": "any-token"},
+    )
+    assert rejected.status_code == 503
+    assert rejected.json()["detail"]["type"] == "operator_registry_error"
+
+
+def test_thread_api_position_anchor_round_trip(tmp_path: Path) -> None:
+    api = client(tmp_path)
+    _seed(api)
+    created = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {
+                "revision": 1,
+                "artifact": {"relative": "board.kicad_pcb", "kind": "pcb"},
+                "position": {"x_mm": 1.23456, "y_mm": -2.0},
+            },
+            "author": {"kind": "human", "id": "owner"},
+            "body": "here",
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["thread"]["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+    listed = api.get("/v1/projects/robot/threads")
+    assert listed.json()["threads"][0]["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+    loaded = api.get(f"/v1/projects/robot/threads/{created.json()['thread']['thread_id']}")
+    assert loaded.json()["thread"]["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+
+    missing_artifact = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {"revision": 1, "object_id": "mcu", "position": {"x_mm": 1.0, "y_mm": 2.0}},
+            "author": {"kind": "human", "id": "owner"},
+            "body": "no artifact",
+        },
+    )
+    assert missing_artifact.status_code == 422
+    assert missing_artifact.json()["detail"]["type"] == "invalid_request"
+
+
+@pytest.mark.parametrize("x_mm", [10**1000, -(10**1000)])
+def test_thread_api_huge_int_position_is_422(tmp_path: Path, x_mm: int) -> None:
+    api = client(tmp_path)
+    _seed(api)
+    rejected = api.post(
+        "/v1/projects/robot/threads",
+        json={
+            "anchor": {
+                "revision": 1,
+                "artifact": {"relative": "board.kicad_pcb", "kind": "pcb"},
+                "position": {"x_mm": x_mm, "y_mm": 0},
+            },
+            "author": {"kind": "human", "id": "owner"},
+            "body": "huge int",
+        },
+    )
+    assert rejected.status_code == 422
+    assert rejected.json()["detail"]["type"] == "invalid_request"

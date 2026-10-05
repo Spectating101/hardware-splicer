@@ -1,16 +1,22 @@
 """HTTP surface for append-only review threads.
 
-Author identity is self-declared. This API does not authenticate, so stored
-events always set ``author_verified`` to false in v1.
+Author identity is self-declared unless the caller presents a server-issued
+operator token. A verified comment is still only a comment.
 """
 
 from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException, Query
 from fastapi import status as http_status
 
+from .operator_identity import (
+    OperatorIdentity,
+    OperatorRegistryError,
+    OperatorTokenInvalid,
+    resolve_operator,
+)
 from .project_store import InvalidProjectId, ProjectNotFound
 from .project_thread_store import (
     ProjectThreadStore,
@@ -23,6 +29,16 @@ from .project_thread_store import (
 
 
 def _thread_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, OperatorTokenInvalid):
+        return HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED,
+            detail={"type": "operator_token_invalid", "message": str(exc)},
+        )
+    if isinstance(exc, OperatorRegistryError):
+        return HTTPException(
+            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"type": "operator_registry_error", "message": str(exc)},
+        )
     if isinstance(exc, InvalidProjectId):
         return HTTPException(
             status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -67,6 +83,25 @@ def _as_request_object(payload: Any, *, label: str) -> Dict[str, Any]:
     return request
 
 
+def _operator_token(x_hs_operator_token: str | None) -> str | None:
+    if x_hs_operator_token is not None and x_hs_operator_token != "":
+        return x_hs_operator_token
+    return None
+
+
+def _reject_author_conflict(author: Any, identity: OperatorIdentity) -> None:
+    if author is None:
+        return
+    if not isinstance(author, Mapping) or set(author) - {"kind", "id"}:
+        raise ThreadValidationError("author does not match the verified operator")
+    supplied_id = author.get("id")
+    supplied_kind = author.get("kind")
+    if "id" in author and (not isinstance(supplied_id, str) or supplied_id.strip() != identity.id):
+        raise ThreadValidationError("author does not match the verified operator")
+    if "kind" in author and (not isinstance(supplied_kind, str) or supplied_kind.strip() != identity.kind):
+        raise ThreadValidationError("author does not match the verified operator")
+
+
 def create_project_thread_router(thread_store: ProjectThreadStore) -> APIRouter:
     router = APIRouter(prefix="/v1/projects/{project_id}/threads", tags=["project-threads"])
 
@@ -83,14 +118,24 @@ def create_project_thread_router(thread_store: ProjectThreadStore) -> APIRouter:
         return {"ok": True, "threads": threads}
 
     @router.post("", status_code=http_status.HTTP_201_CREATED)
-    def create_project_thread(project_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    def create_project_thread(
+        project_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
         try:
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is not None:
+                raw_author = request.get("author") if isinstance(request, Mapping) else None
+                _reject_author_conflict(raw_author, identity)
             payload = _as_request_object(request, label="request")
+            author = payload.get("author")
             thread = thread_store.create_thread(
                 project_id,
                 payload.get("anchor"),
-                payload.get("author"),
+                author,
                 payload.get("body"),
+                verified_operator=identity,
             )
         except Exception as exc:
             raise _thread_error(exc) from exc
@@ -109,16 +154,23 @@ def create_project_thread_router(thread_store: ProjectThreadStore) -> APIRouter:
         project_id: str,
         thread_id: str,
         request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
     ) -> Dict[str, Any]:
         try:
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is not None:
+                raw_author = request.get("author") if isinstance(request, Mapping) else None
+                _reject_author_conflict(raw_author, identity)
             payload = _as_request_object(request, label="request")
+            author = payload.get("author")
             event = thread_store.append_event(
                 project_id,
                 thread_id,
                 payload.get("type"),
-                payload.get("author"),
+                author,
                 body=payload.get("body", ""),
                 expected_event_seq=payload.get("expected_event_seq"),
+                verified_operator=identity,
             )
         except Exception as exc:
             raise _thread_error(exc) from exc
