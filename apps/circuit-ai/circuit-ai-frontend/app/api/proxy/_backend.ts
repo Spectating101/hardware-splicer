@@ -86,9 +86,18 @@ export function getProxyAuthHeaders(request?: Request): Record<string, string> {
 
 function extractErrorMessage(text: string, fallback: string) {
   try {
-    const payload = JSON.parse(text) as { detail?: string; error?: string; message?: string };
+    const payload = JSON.parse(text) as {
+      detail?: string | { message?: string };
+      error?: string;
+      message?: string;
+    };
     const detail = payload.error || payload.detail || payload.message;
-    return typeof detail === "string" && detail.trim() ? detail : fallback;
+    if (typeof detail === "string" && detail.trim()) return detail;
+    // The project routes answer with {detail: {type, message}}; keep the message instead of a generic fallback.
+    if (detail && typeof detail === "object" && typeof detail.message === "string" && detail.message.trim()) {
+      return detail.message;
+    }
+    return fallback;
   } catch {
     return text.trim() ? text.trim() : fallback;
   }
