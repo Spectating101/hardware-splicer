@@ -11,11 +11,12 @@ If stored fields do not record how a finding was produced, the kind is
 
 This endpoint labels only findings derivable from persisted data:
 `engineeringSystemGraph` node blockers, failed session actions,
-traceability issues computed from the stored machine project, and
-write-time ledger rows in `engineeringFindings`. A finding a client
-derives some other way (for example a UI fallback graph) has no entry
-here. Clients must treat that as provenance-not-recorded, never as
-deterministic.
+traceability issues computed from the stored machine project,
+write-time ledger rows in `engineeringFindings`, and measured findings
+declared by `finding_links` on non-simulated physical measurement
+records in `physicalValidation`. A finding a client derives some other
+way (for example a UI fallback graph) has no entry here. Clients must
+treat that as provenance-not-recorded, never as deterministic.
 
 ## Endpoint
 
@@ -47,7 +48,8 @@ Success body:
         "authority_ceiling": "observed"
       }
     }
-  ]
+  ],
+  "unmatched_links": []
 }
 ```
 
@@ -65,13 +67,14 @@ non-positive `revision` query is `422 invalid_request`.
 | `failed_check` | `engineeringAiSessions[].actions[]` with `status` equal to `failed`, and write-time `design_quality_gate` ledger rows |
 | `object_blocker` | `engineeringSystemGraph.nodes[].blockers` (the persisted field the UI reads onto a canonical object) |
 | `release_blocker` | Write-time `release_assessment` ledger rows recorded from `MachineProject.assess_release` blockers |
-| `traceability_issue` | `MachineProject.traceability_issues()` from `machineProject` / `machine_project`, or one validation finding when that stored object fails `MachineProject` validation, or one finding when a persisted ledger row is malformed |
+| `measured_finding` | `physicalValidation` envelopes whose record carries an `establishes` finding link (see `physical` below) |
+| `traceability_issue` | `MachineProject.traceability_issues()` from `machineProject` / `machine_project`, or one validation finding when that stored object fails `MachineProject` validation, or one finding when a persisted ledger row or measurement record is malformed |
 
 Identical `(category, object_id, text)` rows are collapsed. A persisted
 ledger row wins the collision and keeps its write-time `provenance` and
 `source_ref`. Order is `failed_check`, then `object_blocker`, then
-`release_blocker`, then `traceability_issue`, then `object_id`, then
-`text`.
+`release_blocker`, then `measured_finding`, then `traceability_issue`,
+then `object_id`, then `text`.
 
 ## Derivation table
 
@@ -138,14 +141,55 @@ traceability findings. Codes such as `duplicate_id` and `invalid_ref` raise
 inside `validate_graph_references`, so they appear only through this
 validation finding — not as silent omissions.
 
-### Reserved: `physical`
+### `physical`
 
-`physical` remains an allowed provenance kind, but no current persisted
-field links a blocker or failed check to a specific bench measurement.
-An object that cites non-simulated evidence can still carry an
-analysis-derived blocker. Until bench capture records which finding a
-measurement establishes, `physical` is unreachable. That is a known gap,
-not a feature.
+`physical` is reachable only through `finding_links` on a persisted
+`PhysicalEvidenceRecord` inside `physicalValidation` envelopes
+(`physicalValidation.audited_physical_evidence.envelopes[].record`).
+Citing non-simulated evidence on an object does not establish a
+physical finding.
+
+A record qualifies only when all of the following hold:
+
+- it validates as `PhysicalEvidenceRecord` (same write-time validators)
+- `metadata.simulated` is exactly `false` (missing or `true` never qualifies)
+- `authority` is `measured`, `verified`, or `authorized`
+- for each `establishes` link: `passed` is `false` and `text` is present
+  (at most 1000 characters)
+
+Each qualifying `establishes` link emits category `measured_finding`
+with `object_id` and `text` from the link,
+`source_ref` equal to `evidence_id`, `kind` `physical`,
+`authority_ceiling` `observed`, and `basis`
+`non-simulated measurement record states that it establishes this finding`.
+`finding_id` is the shared id over
+`(category, object_id, text, source_ref)`.
+When two or more qualifying records establish the same `(object_id, text)`,
+one finding is kept: `source_ref` is the first `evidence_id` in sorted
+order, and each remaining id is appended to `physical_evidence` as
+`{evidence_id, relation: "establishes", passed: false, authority}`.
+
+`physical` means only that a non-simulated measurement record states
+that it establishes this finding. It does not close a gate, upgrade
+authority, or change release, fabrication, or power-on state. Simulated
+evidence can never produce a physical finding.
+
+A qualifying passing record (`passed` true, same validators,
+non-simulated, measured/verified/authorized) may carry `clears` links.
+Those links **annotate** a matching existing finding
+(`physical_evidence: [{evidence_id, relation: "clears", passed: true, authority}]`).
+The finding stays in the list. Its provenance kind is unchanged.
+A `clears` annotation is a measurement claim, not closure: it never
+removes the finding, never closes a gate, and never changes
+release/fabrication/power-on state.
+
+Unmatched `clears` links are not dropped. The API payload includes
+`unmatched_links: [{evidence_id, finding_id}]`.
+
+Invalid, simulated, or malformed measurement records are ignored for
+emission and surfaced as one `traceability_issue` with kind `unknown`,
+basis `malformed or non-qualifying measurement record ignored`, and
+`source_ref` `physicalValidation`.
 
 ## Persisted ledger
 

@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from .finding_provenance import project_findings
+from .finding_provenance import project_findings_payload
 from .project_api import _project_error
 from .project_store import ProjectStore
 
@@ -46,11 +46,13 @@ def create_project_findings_router(project_store: ProjectStore) -> APIRouter:
                 },
             )
         loaded_revision = int(envelope["revision"])
+        projected = project_findings_payload(snapshot, loaded_revision)
         return {
             "ok": True,
             "project_id": project_id,
             "revision": loaded_revision,
-            "findings": project_findings(snapshot, loaded_revision),
+            "findings": projected["findings"],
+            "unmatched_links": projected["unmatched_links"],
         }
 
     return router

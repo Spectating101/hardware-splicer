@@ -13,17 +13,36 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Iterable, Mapping
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
+from .finding_ledger import MAX_FINDING_TEXT
 from .machine_project import AuthorityState, EvidenceRef, MachineProject
 
 
 PHYSICAL_EVIDENCE_SCHEMA = "hardware_splicer.physical_evidence.v1"
 PHYSICAL_AUTHORIZATION_SCHEMA = "hardware_splicer.physical_authorization.v1"
+MAX_FINDING_LINKS = 20
+_MEASURED_AUTHORITIES = {
+    AuthorityState.MEASURED,
+    AuthorityState.VERIFIED,
+    AuthorityState.AUTHORIZED,
+}
 
 
 class PhysicalBase(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+
+class FindingLinkRelation(str, Enum):
+    ESTABLISHES = "establishes"
+    CLEARS = "clears"
+
+
+class FindingLink(PhysicalBase):
+    finding_id: str = Field(min_length=1)
+    relation: FindingLinkRelation
+    text: str | None = Field(default=None, max_length=MAX_FINDING_TEXT)
+    object_id: str | None = None
 
 
 class PhysicalEvidenceKind(str, Enum):
@@ -97,18 +116,62 @@ class PhysicalEvidenceRecord(PhysicalBase):
     raw_refs: list[str] = Field(default_factory=list)
     authority: AuthorityState = AuthorityState.MEASURED
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    finding_links: list[FindingLink] | None = Field(default=None, max_length=MAX_FINDING_LINKS)
+
+    @model_serializer(mode="wrap")
+    def _omit_absent_finding_links(self, serializer):
+        data = serializer(self)
+        if isinstance(data, dict) and data.get("finding_links") is None:
+            data.pop("finding_links", None)
+        return data
 
     @model_validator(mode="after")
     def physical_evidence_cannot_be_proposed_or_simulated(self) -> "PhysicalEvidenceRecord":
-        if self.authority not in {
-            AuthorityState.MEASURED,
-            AuthorityState.VERIFIED,
-            AuthorityState.AUTHORIZED,
-        }:
+        if self.authority not in _MEASURED_AUTHORITIES:
             raise ValueError("physical evidence authority must be measured, verified, or authorized")
         if self.instrument_ids and not self.calibration_ids:
             raise ValueError("instrumented evidence must reference calibration records")
+        self._validate_finding_links()
         return self
+
+    def _validate_finding_links(self) -> None:
+        links = self.finding_links
+        if not links:
+            return
+        if len(links) > MAX_FINDING_LINKS:
+            raise ValueError(f"finding_links must contain at most {MAX_FINDING_LINKS} entries")
+        simulated = self.metadata.get("simulated") if isinstance(self.metadata, Mapping) else None
+        for link in links:
+            if link.relation == FindingLinkRelation.ESTABLISHES:
+                if self.passed:
+                    raise ValueError("a passing measurement cannot establish a finding")
+                if self.authority not in _MEASURED_AUTHORITIES:
+                    raise ValueError(
+                        "establishes finding_links require measured, verified, or authorized authority"
+                    )
+                if simulated is not False:
+                    raise ValueError(
+                        "establishes finding_links require metadata.simulated=false"
+                    )
+                text = "" if link.text is None else str(link.text)
+                if not text.strip():
+                    raise ValueError("establishes finding_links require text")
+                if len(text) > MAX_FINDING_TEXT:
+                    raise ValueError(
+                        f"finding link text must be at most {MAX_FINDING_TEXT} characters"
+                    )
+                from .finding_provenance import finding_id
+
+                expected = finding_id(
+                    "measured_finding", link.object_id, text, self.evidence_id
+                )
+                if link.finding_id != expected:
+                    raise ValueError("finding_id does not match the recomputed id")
+            elif link.relation == FindingLinkRelation.CLEARS:
+                if not self.passed:
+                    raise ValueError("clears finding_links require a passing measurement")
+            else:
+                raise ValueError("finding_links relation must be establishes or clears")
 
 
 class AuthorizationScope(PhysicalBase):
