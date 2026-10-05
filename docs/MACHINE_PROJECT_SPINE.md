@@ -158,14 +158,23 @@ finding, or artifact at a specific revision. They sit beside the project tree
 (`threads/`) and are separate from staged reviews: a comment, resolve, or reopen
 never changes a snapshot, a revision, a review decision, or authority state.
 
-Author identity is self-declared and unverified in v1. The API does not
-authenticate, so every event stores `author_verified: false`. Mentions are plain
-text.
+An optional `position` (`x_mm`, `y_mm`) may accompany an artifact. Position is a
+LOCATION, never an object identity.
+
+Author identity is self-declared unless the caller presents a server-issued
+operator token in `X-HS-Operator-Token` only. `Authorization` is ordinary app
+auth (the Next.js UI proxy forwards `Authorization: Bearer <app API key>`), so
+it is never treated as an operator token. A valid token stores the registry
+`id`/`kind`, `author_verified: true`, and `verified_by: "operator-token"`. A
+verified comment is still only a comment: it does not authenticate the operator
+beyond possession of that token, and it never upgrades authority. See
+[`OPERATOR_IDENTITY.md`](OPERATOR_IDENTITY.md). Mentions are plain text.
 
 ## Verification
 
 ```bash
 pytest -q \
+  tests/test_operator_identity.py \
   tests/test_project_store.py \
   tests/test_project_review_store.py \
   tests/test_project_api.py \

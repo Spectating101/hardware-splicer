@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from hardware_splicer.operator_identity import OperatorIdentity
 from hardware_splicer.project_review_store import ProjectReviewStore
 from hardware_splicer.project_store import InvalidProjectId, ProjectStore
 from hardware_splicer.project_thread_store import (
@@ -468,6 +469,21 @@ def test_structurally_corrupt_thread_and_event_records_raise(tmp_path: Path) -> 
     with pytest.raises(ProjectThreadError):
         threads.list_threads("robot")
 
+    _write_json(event_one, {**valid_event, "author_verified": False, "verified_by": "operator-token"})
+    with pytest.raises(ProjectThreadError):
+        threads.get_thread("robot", created["thread_id"])
+    with pytest.raises(ProjectThreadError):
+        threads.list_threads("robot")
+
+    _write_json(event_one, {**valid_event, "author_verified": True, "verified_by": "hmac"})
+    with pytest.raises(ProjectThreadError):
+        threads.get_thread("robot", created["thread_id"])
+
+    _write_json(event_one, {**valid_event, "author_verified": True, "verified_by": "operator-token"})
+    loaded = threads.get_thread("robot", created["thread_id"])
+    assert loaded["events"][0]["author_verified"] is True
+    assert loaded["events"][0]["verified_by"] == "operator-token"
+
 
 def test_committed_thread_without_event_1_is_corrupt(tmp_path: Path) -> None:
     _store, threads = _threads(tmp_path)
@@ -542,3 +558,253 @@ def test_symlink_boundaries_reject_all_operations_and_do_not_write_targets(tmp_p
     outside_event.write_text("untouched-event\n", encoding="utf-8")
     event_one.symlink_to(outside_event)
     assert_ops_raise(threads, created["thread_id"], outside_event)
+
+
+def test_verified_operator_records_author_from_identity(tmp_path: Path) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread(
+        "robot",
+        _anchor(),
+        _author("human", "owner"),
+        "Verified opening comment",
+        verified_operator=OperatorIdentity(id="alice", kind="agent"),
+    )
+    event = created["events"][0]
+    assert event["author"] == {"kind": "agent", "id": "alice"}
+    assert event["author_verified"] is True
+    assert event["verified_by"] == "operator-token"
+    assert "alice-token" not in json.dumps(event)
+
+    reply = threads.append_event(
+        "robot",
+        created["thread_id"],
+        "comment",
+        _author(),
+        "Verified reply",
+        verified_operator=OperatorIdentity(id="alice", kind="agent"),
+    )
+    assert reply["author"] == {"kind": "agent", "id": "alice"}
+    assert reply["author_verified"] is True
+    assert reply["verified_by"] == "operator-token"
+
+    unverified = threads.append_event(
+        "robot",
+        created["thread_id"],
+        "comment",
+        _author("human", "owner"),
+        "Still client-declared",
+    )
+    assert unverified["author"] == {"kind": "human", "id": "owner"}
+    assert unverified["author_verified"] is False
+    assert "verified_by" not in unverified
+
+
+def test_position_anchor_validation_and_round_trip(tmp_path: Path) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread(
+        "robot",
+        _anchor(
+            object_id=None,
+            artifact={"relative": "board.kicad_pcb", "kind": "pcb"},
+            position={"x_mm": 1.23456, "y_mm": -2.0},
+        ),
+        _author(),
+        "Look here",
+    )
+    assert created["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+    listed = threads.list_threads("robot")
+    assert listed[0]["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+    loaded = threads.get_thread("robot", created["thread_id"])
+    assert loaded["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+
+    with pytest.raises(ThreadValidationError, match="artifact"):
+        threads.create_thread(
+            "robot",
+            _anchor(position={"x_mm": 1.0, "y_mm": 2.0}),
+            _author(),
+            "position without artifact",
+        )
+    with pytest.raises(ThreadValidationError):
+        threads.create_thread(
+            "robot",
+            _anchor(
+                object_id=None,
+                artifact={"relative": "board.kicad_pcb", "kind": "pcb"},
+                position={"x_mm": float("nan"), "y_mm": 0.0},
+            ),
+            _author(),
+            "nan",
+        )
+    with pytest.raises(ThreadValidationError):
+        threads.create_thread(
+            "robot",
+            _anchor(
+                object_id=None,
+                artifact={"relative": "board.kicad_pcb", "kind": "pcb"},
+                position={"x_mm": float("inf"), "y_mm": 0.0},
+            ),
+            _author(),
+            "inf",
+        )
+    with pytest.raises(ThreadValidationError):
+        threads.create_thread(
+            "robot",
+            _anchor(
+                object_id=None,
+                artifact={"relative": "board.kicad_pcb", "kind": "pcb"},
+                position={"x_mm": True, "y_mm": 0.0},
+            ),
+            _author(),
+            "bool",
+        )
+    with pytest.raises(ThreadValidationError):
+        threads.create_thread(
+            "robot",
+            _anchor(
+                object_id=None,
+                artifact={"relative": "board.kicad_pcb", "kind": "pcb"},
+                position={"x_mm": 100000.001, "y_mm": 0.0},
+            ),
+            _author(),
+            "too far",
+        )
+
+
+def _pcb_artifact() -> dict:
+    return {"relative": "board.kicad_pcb", "kind": "pcb"}
+
+
+@pytest.mark.parametrize(
+    "corrupt_anchor",
+    [
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": _pcb_artifact(),
+            "position": {"x_mm": "a", "y_mm": float("nan")},
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": _pcb_artifact(),
+            "position": {"x_mm": 1e300, "y_mm": 0.0},
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": _pcb_artifact(),
+            "position": "1,2",
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": _pcb_artifact(),
+            "position": {"x_mm": 1.0, "y_mm": 2.0, "z_mm": 0.0},
+        },
+        {
+            "revision": 1,
+            "object_id": "mcu",
+            "finding_ref": None,
+            "artifact": None,
+            "position": {"x_mm": 1.0, "y_mm": 2.0},
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": {"relative": "../secret.kicad_pcb", "kind": "pcb"},
+            "position": None,
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": {"relative": "/abs/board.kicad_pcb", "kind": "pcb"},
+            "position": None,
+        },
+        {
+            "revision": 1,
+            "object_id": None,
+            "finding_ref": None,
+            "artifact": {"relative": "board.kicad_pcb", "kind": "layout"},
+            "position": None,
+        },
+        {
+            "revision": 1,
+            "object_id": "mcu",
+            "finding_ref": None,
+            "artifact": None,
+            "position": None,
+            "extra": True,
+        },
+    ],
+)
+def test_corrupt_stored_anchor_is_project_thread_error(tmp_path: Path, corrupt_anchor: dict) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread("robot", _anchor(), _author(), "Valid start")
+    thread_path = tmp_path / "robot" / "threads" / created["thread_id"] / "thread.json"
+    record = json.loads(thread_path.read_text(encoding="utf-8"))
+    record["anchor"] = corrupt_anchor
+    _write_json(thread_path, record)
+
+    with pytest.raises(ProjectThreadError) as loaded:
+        threads.get_thread("robot", created["thread_id"])
+    assert type(loaded.value) is ProjectThreadError
+    with pytest.raises(ProjectThreadError) as listed:
+        threads.list_threads("robot")
+    assert type(listed.value) is ProjectThreadError
+
+
+def test_valid_position_anchor_still_reads(tmp_path: Path) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread(
+        "robot",
+        _anchor(
+            object_id=None,
+            artifact=_pcb_artifact(),
+            position={"x_mm": 1.235, "y_mm": -2.0},
+        ),
+        _author(),
+        "Look here",
+    )
+    loaded = threads.get_thread("robot", created["thread_id"])
+    assert loaded["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+    listed = threads.list_threads("robot")
+    assert listed[0]["anchor"]["position"] == {"x_mm": 1.235, "y_mm": -2.0}
+
+
+def test_stored_anchor_revision_above_latest_still_reads(tmp_path: Path) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread("robot", _anchor(), _author(), "Pinned")
+    thread_path = tmp_path / "robot" / "threads" / created["thread_id"] / "thread.json"
+    record = json.loads(thread_path.read_text(encoding="utf-8"))
+    record["anchor"]["revision"] = 99
+    _write_json(thread_path, record)
+    loaded = threads.get_thread("robot", created["thread_id"])
+    assert loaded["anchor"]["revision"] == 99
+    assert threads.list_threads("robot")[0]["anchor"]["revision"] == 99
+
+
+def test_stored_huge_int_position_is_project_thread_error(tmp_path: Path) -> None:
+    _store, threads = _threads(tmp_path)
+    created = threads.create_thread("robot", _anchor(), _author(), "Valid start")
+    thread_path = tmp_path / "robot" / "threads" / created["thread_id"] / "thread.json"
+    record = json.loads(thread_path.read_text(encoding="utf-8"))
+    record["anchor"] = {
+        "revision": 1,
+        "object_id": None,
+        "finding_ref": None,
+        "artifact": _pcb_artifact(),
+        "position": {"x_mm": 10**1000, "y_mm": 0},
+    }
+    _write_json(thread_path, record)
+    with pytest.raises(ProjectThreadError) as loaded:
+        threads.get_thread("robot", created["thread_id"])
+    assert type(loaded.value) is ProjectThreadError
+    with pytest.raises(ProjectThreadError) as listed:
+        threads.list_threads("robot")
+    assert type(listed.value) is ProjectThreadError
