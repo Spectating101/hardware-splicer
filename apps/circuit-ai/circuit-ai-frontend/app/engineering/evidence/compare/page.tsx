@@ -21,8 +21,11 @@ import { Button } from '@/components/ui/button';
 import { usePageTitle } from '@/components/use-page-title';
 import {
   EvidenceArtifactViewport,
+  type ActiveArtifact,
   deriveEvidenceBuildDir,
 } from '@/components/engineering/evidence-artifact-viewport';
+import { ArtifactChangesPanel } from '@/components/engineering/artifact-changes-panel';
+import { changesToHighlights, useArtifactDiffs } from '@/lib/artifact-diff';
 import {
   summarizeRevisionDiff,
   type ProjectRevision,
@@ -134,6 +137,8 @@ export default function EvidenceComparePage() {
   const [candidateRevision, setCandidateRevision] = useState<number | null>(null);
   const [diff, setDiff] = useState<RevisionDiffResponse | null>(null);
   const [selectedDeltaId, setSelectedDeltaId] = useState('');
+  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
+  const [focusedChange, setFocusedChange] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -145,6 +150,9 @@ export default function EvidenceComparePage() {
   const buildDir = deriveEvidenceBuildDir(snapshot, session);
   const semantic = diff?.engineering_revision_diff;
   const summary = useMemo(() => summarizeRevisionDiff(diff), [diff]);
+  const artifactDiffs = useArtifactDiffs(projectId, baseRevision, candidateRevision);
+  const activeDiff = activeArtifact?.kind === 'pcb' ? artifactDiffs.pcb : artifactDiffs.schematic;
+  const artifactHighlights = useMemo(() => changesToHighlights(activeDiff, activeArtifact?.relative || ''), [activeDiff, activeArtifact?.relative]);
 
   const deltaItems = useMemo<DeltaItem[]>(() => {
     if (!semantic) return [];
@@ -346,6 +354,7 @@ export default function EvidenceComparePage() {
                 </div>
               </section>
             ))}
+            <ArtifactChangesPanel kind={activeArtifact?.kind || 'schematic'} diff={activeDiff} loading={artifactDiffs.loading} selectedKey={focusedChange} onSelect={setFocusedChange} />
           </aside>
 
           <section className="order-first flex min-h-0 min-w-0 flex-col bg-white xl:order-none">
@@ -361,7 +370,7 @@ export default function EvidenceComparePage() {
               </div>
             </div>
             <div className="min-h-0 flex-1">
-              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact />
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact highlights={artifactHighlights} onActiveArtifact={setActiveArtifact} focusHighlightId={focusedChange} />
             </div>
           </section>
 
