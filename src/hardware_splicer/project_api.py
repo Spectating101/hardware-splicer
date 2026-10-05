@@ -5,6 +5,11 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
+from .artifact_retention import (
+    ArtifactIntegrityError,
+    ArtifactPinConflict,
+    retention_after_save,
+)
 from .project_review_store import (
     InvalidReviewId,
     ProjectReviewStore,
@@ -69,6 +74,16 @@ def _project_error(exc: Exception) -> HTTPException:
             status_code=status.HTTP_409_CONFLICT,
             detail={"type": "review_conflict", "message": str(exc)},
         )
+    if isinstance(exc, ArtifactPinConflict):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"type": "artifact_pin_conflict", "message": str(exc)},
+        )
+    if isinstance(exc, ArtifactIntegrityError):
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"type": "artifact_integrity_error", "message": str(exc)},
+        )
     if isinstance(exc, CorruptProject):
         return HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -110,7 +125,13 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
             )
         except Exception as exc:
             raise _project_error(exc) from exc
-        return {"ok": True, "project": envelope}
+        retention = retention_after_save(
+            project_store,
+            envelope["project_id"],
+            int(envelope["revision"]),
+            basis="at_save",
+        )
+        return {"ok": True, "project": envelope, "artifact_retention": retention}
 
     @router.get("/{project_id}/revisions")
     def list_project_revisions(project_id: str) -> Dict[str, Any]:
@@ -190,7 +211,13 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
             envelope = project_store.duplicate(project_id, request.target_project_id)
         except Exception as exc:
             raise _project_error(exc) from exc
-        return {"ok": True, "project": envelope}
+        retention = retention_after_save(
+            project_store,
+            envelope["project_id"],
+            int(envelope["revision"]),
+            basis="at_save",
+        )
+        return {"ok": True, "project": envelope, "artifact_retention": retention}
 
     @router.patch("/{project_id}/archive")
     def archive_project(project_id: str, request: ProjectArchiveRequest) -> Dict[str, Any]:

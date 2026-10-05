@@ -152,6 +152,9 @@ def test_duplicate_archive_and_delete(tmp_path: Path) -> None:
     )
     assert duplicated.status_code == 201
     assert duplicated.json()["project"]["snapshot"]["projectId"] == "robot-copy"
+    assert duplicated.json()["ok"] is True
+    assert duplicated.json()["artifact_retention"]["status"] == "skipped"
+    assert "reason" in duplicated.json()["artifact_retention"]
 
     archived = api.patch("/v1/projects/robot/archive", json={"archived": True})
     assert archived.status_code == 200
