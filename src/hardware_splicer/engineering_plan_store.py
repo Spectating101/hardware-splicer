@@ -5,7 +5,20 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, Mapping, Sequence
 
+from pydantic import ValidationError
+
+from .engineering_review_identity import AUTHORITY_CEILING
+from .finding_ledger import (
+    ENGINEERING_FINDINGS_KEY,
+    bound_finding_text,
+    replace_producer_findings,
+)
+from .machine_project import MachineProject
 from .project_store import ProjectNotFound, ProjectStore, RevisionConflict
+
+_RELEASE_ASSESSMENT_BASIS = (
+    "computed by MachineProject.assess_release over the stored machine project"
+)
 
 
 def resolve_engineering_project_id(
@@ -42,16 +55,44 @@ def resolve_engineering_project_id(
     return "engineering-project"
 
 
-def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
+def _copy_previous_engineering_findings(
+    snapshot: Dict[str, Any],
+    previous_snapshot: Mapping[str, Any] | None,
+) -> None:
+    """Carry the persisted ledger only. Plan input is never a source of rows.
+
+    The key is copied whenever it is present on the previous snapshot, including
+    ``None``, strings, and dicts. Those malformed values must remain visible so
+    the read projection can surface them. Omit the key only when it is absent.
+    """
+
+    if not isinstance(previous_snapshot, Mapping):
+        return
+    if ENGINEERING_FINDINGS_KEY not in previous_snapshot:
+        return
+    snapshot[ENGINEERING_FINDINGS_KEY] = deepcopy(
+        previous_snapshot[ENGINEERING_FINDINGS_KEY]
+    )
+
+
+def engineering_snapshot(
+    plan: Mapping[str, Any],
+    *,
+    previous_snapshot: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
     machine_project = plan.get("machine_project") if isinstance(plan.get("machine_project"), Mapping) else {}
     project_id = resolve_engineering_project_id(plan)
-    return {
+    # A plan is untrusted request input. Never take or echo engineeringFindings
+    # from it; only the previously persisted snapshot may carry the ledger.
+    plan_body = dict(plan)
+    plan_body.pop(ENGINEERING_FINDINGS_KEY, None)
+    snapshot = {
         "snapshot_schema_version": "hardware_splicer.engineering_project_snapshot.v1",
         "projectId": project_id,
         "projectName": str(machine_project.get("name") or plan.get("project_name") or project_id),
         "mode": str((plan.get("engineering_context") or {}).get("normalized_mode") or "greenfield"),
         "currentStage": "guided_engineering_plan",
-        "engineeringPlan": dict(plan),
+        "engineeringPlan": plan_body,
         "machineProject": dict(machine_project),
         "engineeringSourceGraph": dict(plan.get("engineering_source_graph") or {}),
         "robotTopology": dict(plan.get("robot_topology") or {}),
@@ -70,20 +111,83 @@ def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
         "engineeringStatus": dict(plan.get("engineering_status") or {}),
         "missingInfo": list(plan.get("missing_info") or []),
     }
+    _copy_previous_engineering_findings(snapshot, previous_snapshot)
+    return snapshot
 
 
 def _rows(value: Any) -> list[Dict[str, Any]]:
     return [deepcopy(dict(row)) for row in value if isinstance(row, Mapping)] if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)) else []
 
 
-def _prior_engineering_plan(store: ProjectStore, project_id: str) -> tuple[int, Dict[str, Any]] | None:
+def _prior_engineering_plan(
+    store: ProjectStore, project_id: str
+) -> tuple[int, Dict[str, Any], Dict[str, Any]] | None:
     try:
         envelope = store.load(project_id)
     except ProjectNotFound:
         return None
     snapshot = envelope.get("snapshot") if isinstance(envelope.get("snapshot"), Mapping) else {}
     plan = snapshot.get("engineeringPlan") if isinstance(snapshot.get("engineeringPlan"), Mapping) else {}
-    return int(envelope.get("revision") or 0), deepcopy(dict(plan))
+    return (
+        int(envelope.get("revision") or 0),
+        deepcopy(dict(plan)),
+        deepcopy(dict(snapshot)),
+    )
+
+
+def _persisted_machine_project(snapshot: Mapping[str, Any]) -> MachineProject | None:
+    raw = snapshot.get("machineProject")
+    if not isinstance(raw, Mapping) or not raw:
+        return None
+    try:
+        return MachineProject.model_validate(raw)
+    except (ValidationError, TypeError, ValueError):
+        return None
+
+
+def _release_assessment_findings(project: MachineProject) -> list[Dict[str, Any]]:
+    # Recompute from the persisted machine project. Never read a caller-supplied
+    # scoped_release_assessment — that is untrusted request input.
+    assessment = project.assess_release()
+    entries: list[Dict[str, Any]] = []
+    for blocker in assessment.blockers:
+        text, truncated = bound_finding_text(str(blocker.message or "").strip())
+        if not text:
+            continue
+        basis = _RELEASE_ASSESSMENT_BASIS
+        if truncated:
+            basis = f"{basis} (message truncated)"
+        object_id = str(blocker.object_id or "").strip() or None
+        source_ref = str(blocker.code or "").strip() or None
+        entries.append(
+            {
+                "category": "release_blocker",
+                "object_id": object_id,
+                "text": text,
+                "provenance": {
+                    "kind": "deterministic",
+                    "basis": basis,
+                    "source_ref": source_ref,
+                    "authority_ceiling": AUTHORITY_CEILING,
+                },
+            }
+        )
+    return entries
+
+
+def _record_release_assessment_findings(
+    snapshot: Mapping[str, Any],
+    revision: int,
+) -> Dict[str, Any]:
+    project = _persisted_machine_project(snapshot)
+    if project is None:
+        return dict(snapshot)
+    return replace_producer_findings(
+        snapshot,
+        "release_assessment",
+        f"assess_release@rev{revision}",
+        _release_assessment_findings(project),
+    )
 
 
 def _assert_audit_history_not_rewritten(
@@ -205,8 +309,11 @@ def save_engineering_plan(
     resolved_project_id = resolve_engineering_project_id(plan, project_id=project_id)
     prior = _prior_engineering_plan(store, resolved_project_id)
     persisted_plan: Dict[str, Any] = deepcopy(dict(plan))
+    previous_snapshot: Dict[str, Any] | None = None
+    next_revision = 1
     if prior is not None:
-        prior_revision, prior_plan = prior
+        prior_revision, prior_plan, previous_snapshot = prior
+        next_revision = prior_revision + 1
         prior_audit = prior_plan.get("audited_physical_evidence")
         if isinstance(prior_audit, Mapping):
             if expected_revision is None:
@@ -219,11 +326,12 @@ def save_engineering_plan(
                 )
             persisted_plan = _reapply_persisted_audit_history(persisted_plan, prior_plan)
 
-    snapshot = engineering_snapshot(persisted_plan)
+    snapshot = engineering_snapshot(persisted_plan, previous_snapshot=previous_snapshot)
     snapshot["projectId"] = resolved_project_id
     machine_project = snapshot.get("machineProject")
     if isinstance(machine_project, dict):
         machine_project["project_id"] = resolved_project_id
+    snapshot = _record_release_assessment_findings(snapshot, next_revision)
     readiness = persisted_plan.get("engineering_readiness") if isinstance(persisted_plan.get("engineering_readiness"), Mapping) else {}
     return store.save(
         resolved_project_id,

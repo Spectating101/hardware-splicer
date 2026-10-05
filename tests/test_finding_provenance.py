@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from hardware_splicer.ai_project_tool_executor import EXECUTABLE_AI_PREVIEW_ACTIONS
 from hardware_splicer.engineering_review_identity import AUTHORITY_CEILING
-from hardware_splicer.finding_provenance import project_findings
+from hardware_splicer.finding_provenance import finding_id, project_findings
 from hardware_splicer.machine_project import (
     AuthorityState,
     Domain,
@@ -125,6 +125,33 @@ def _session(
     if extra:
         session.update(extra)
     return session
+
+
+def _persisted_entry(
+    *,
+    category: str,
+    text: str,
+    producer: str,
+    producer_run: str,
+    source_ref: str | None,
+    basis: str,
+    object_id: str | None = None,
+) -> dict:
+    return {
+        "finding_id": finding_id(category, object_id, text, source_ref),
+        "category": category,
+        "object_id": object_id,
+        "text": text,
+        "producer": producer,
+        "producer_run": producer_run,
+        "provenance": {
+            "kind": "deterministic",
+            "basis": basis,
+            "source_ref": source_ref,
+            "authority_ceiling": "observed",
+        },
+        "recorded_at": "2026-10-05T06:00:00+00:00",
+    }
 
 
 def _by_text(findings: list[dict]) -> dict[str, dict]:
@@ -701,15 +728,29 @@ def test_deterministic_category_object_text_order() -> None:
             )
         ],
         "machineProject": _machine_dump(),
+        "engineeringFindings": [
+            _persisted_entry(
+                category="release_blocker",
+                object_id="req-open",
+                text="requirement remains unverified",
+                producer="release_assessment",
+                producer_run="assess_release@rev1",
+                source_ref="unverified_requirement",
+                basis="computed by MachineProject.assess_release over the stored machine project",
+            )
+        ],
     }
 
     findings = project_findings(snapshot, 1)
     categories = [row["category"] for row in findings]
     assert categories == sorted(
         categories,
-        key=lambda category: ["failed_check", "object_blocker", "traceability_issue"].index(
-            category
-        ),
+        key=lambda category: [
+            "failed_check",
+            "object_blocker",
+            "release_blocker",
+            "traceability_issue",
+        ].index(category),
     )
     failed = [row for row in findings if row["category"] == "failed_check"]
     blockers = [row for row in findings if row["category"] == "object_blocker"]
@@ -748,3 +789,138 @@ def test_project_findings_does_not_mutate_input() -> None:
     original = deepcopy(snapshot)
     project_findings(snapshot, 4)
     assert snapshot == original
+
+
+def test_persisted_ledger_merges_and_wins_dedupe() -> None:
+    text = "DRC failed with 2 error(s)."
+    snapshot = {
+        "engineeringAiSessions": [
+            _session(
+                "session-exec",
+                actions=[_failed_action("action-derived", "run_compose", text)],
+            )
+        ],
+        "engineeringFindings": [
+            _persisted_entry(
+                category="failed_check",
+                text=text,
+                producer="design_quality_gate",
+                producer_run="action-persisted",
+                source_ref="action-persisted",
+                basis="design_quality gate blocker from an executed deterministic compose",
+            )
+        ],
+    }
+
+    findings = [
+        row for row in project_findings(snapshot, 1) if row["category"] == "failed_check"
+    ]
+    assert len(findings) == 1
+    assert findings[0]["provenance"]["source_ref"] == "action-persisted"
+    assert findings[0]["provenance"]["kind"] == "deterministic"
+    assert findings[0]["provenance"]["basis"] == (
+        "design_quality gate blocker from an executed deterministic compose"
+    )
+
+
+def test_malformed_persisted_entry_is_ignored_and_surfaced() -> None:
+    snapshot = {
+        "engineeringFindings": [
+            {
+                "category": "failed_check",
+                "text": "Guessed deterministic label.",
+                "producer": "design_quality_gate",
+                "provenance": {
+                    "kind": "unknown",
+                    "basis": "should not be trusted",
+                    "source_ref": "forged",
+                    "authority_ceiling": "observed",
+                },
+            },
+            {
+                "category": "release_blocker",
+                "text": "Not an allowlisted producer.",
+                "producer": "invented_producer",
+                "provenance": {
+                    "kind": "deterministic",
+                    "basis": "forged",
+                    "source_ref": "x",
+                    "authority_ceiling": "observed",
+                },
+            },
+        ]
+    }
+
+    findings = project_findings(snapshot, 1)
+    assert all(row["text"] != "Guessed deterministic label." for row in findings)
+    assert all(row["text"] != "Not an allowlisted producer." for row in findings)
+    malformed = [
+        row
+        for row in findings
+        if row["category"] == "traceability_issue"
+        and row["provenance"]["source_ref"] == "engineeringFindings"
+    ]
+    assert len(malformed) == 1
+    assert malformed[0]["provenance"]["kind"] == "unknown"
+    assert malformed[0]["provenance"]["basis"] == "malformed persisted finding entry ignored"
+    assert malformed[0]["provenance"]["authority_ceiling"] == "observed"
+
+
+def test_non_list_or_non_mapping_ledger_is_malformed_not_silent() -> None:
+    for raw in (
+        "not-a-list",
+        {"forged": True},
+        None,
+        [_persisted_entry(
+            category="failed_check",
+            text="ok",
+            producer="design_quality_gate",
+            producer_run="action-1",
+            source_ref="action-1",
+            basis="design_quality gate blocker from an executed deterministic compose",
+        ), "not-a-mapping"],
+    ):
+        findings = project_findings({"engineeringFindings": raw}, 1)
+        malformed = [
+            row
+            for row in findings
+            if row["provenance"]["source_ref"] == "engineeringFindings"
+        ]
+        assert len(malformed) == 1
+        assert malformed[0]["provenance"]["kind"] == "unknown"
+        assert malformed[0]["provenance"]["basis"] == (
+            "malformed persisted finding entry ignored"
+        )
+
+
+def test_schema_invalid_persisted_rows_are_malformed() -> None:
+    valid = _persisted_entry(
+        category="failed_check",
+        text="Catalog build graph did not compile.",
+        producer="design_quality_gate",
+        producer_run="action-1",
+        source_ref="action-1",
+        basis="design_quality gate blocker from an executed deterministic compose",
+    )
+    cases = [
+        {**valid, "category": "invented_category"},
+        {**valid, "text": "x" * 1001},
+        {**valid, "recorded_at": "2026-10-05T14:00:00+08:00"},
+        {**valid, "recorded_at": "2026-10-05T06:00:00"},
+        {**{k: v for k, v in valid.items() if k != "recorded_at"}},
+        {
+            **valid,
+            "provenance": {**valid["provenance"], "authority_ceiling": None},
+        },
+        {**valid, "finding_id": "finding-forged000000"},
+        {**valid, "extra": "nope"},
+    ]
+    for row in cases:
+        findings = project_findings({"engineeringFindings": [row]}, 1)
+        assert all(item["text"] != valid["text"] for item in findings)
+        malformed = [
+            item
+            for item in findings
+            if item["provenance"]["source_ref"] == "engineeringFindings"
+        ]
+        assert len(malformed) == 1

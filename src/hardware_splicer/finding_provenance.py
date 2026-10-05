@@ -20,7 +20,15 @@ from .ai_project_tool_executor import EXECUTABLE_AI_PREVIEW_ACTIONS
 from .engineering_review_identity import AUTHORITY_CEILING
 from .machine_project import MachineProject, TraceabilityIssue, traceability_issues
 
-_CATEGORY_ORDER = ("failed_check", "object_blocker", "traceability_issue")
+_CATEGORY_ORDER = (
+    "failed_check",
+    "object_blocker",
+    "release_blocker",
+    "traceability_issue",
+)
+_MALFORMED_PERSISTED_BASIS = "malformed persisted finding entry ignored"
+_MALFORMED_PERSISTED_SOURCE = "engineeringFindings"
+_MALFORMED_PERSISTED_TEXT = "Malformed persisted finding entry ignored."
 _MACHINE_PROJECT_INVALID_PREFIX = "Stored machine project fails validation: "
 _MACHINE_PROJECT_INVALID_SOURCE = "machine_project_invalid"
 _MACHINE_PROJECT_INVALID_BASIS = (
@@ -59,12 +67,17 @@ def _canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-def _finding_id(
+def finding_id(
     category: str, object_id: str | None, text: str, source_ref: str | None
 ) -> str:
+    """Stable id shared by the read-only projection and the write-time ledger."""
+
     payload = [category, object_id or "", text, source_ref or ""]
     digest = hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
     return "finding-" + digest[:16]
+
+
+_finding_id = finding_id
 
 
 def _provenance(
@@ -382,16 +395,74 @@ def _sort_key(row: Mapping[str, Any]) -> tuple[int, str, str]:
     return (category_index, _text(row.get("object_id")), _text(row.get("text")))
 
 
+def _project_persisted_entry(row: Mapping[str, Any]) -> dict[str, Any]:
+    provenance = _mapping(row.get("provenance"))
+    source_ref = _text(provenance.get("source_ref")) or None
+    return _finding(
+        _text(row.get("category")),
+        _text(row.get("object_id")) or None,
+        str(row.get("text") or ""),
+        _provenance(
+            "deterministic",
+            _text(provenance.get("basis"))
+            or "deterministic finding recorded at write time",
+            source_ref,
+        ),
+    )
+
+
+def _malformed_persisted_finding(*, count: int = 1) -> dict[str, Any]:
+    text = _MALFORMED_PERSISTED_TEXT
+    if count > 1:
+        text = f"{_MALFORMED_PERSISTED_TEXT} ({count} entries)"
+    return _finding(
+        "traceability_issue",
+        None,
+        text,
+        _provenance(
+            "unknown",
+            _MALFORMED_PERSISTED_BASIS,
+            _MALFORMED_PERSISTED_SOURCE,
+        ),
+    )
+
+
+def _collect_persisted_findings(snapshot: Mapping[str, Any]) -> list[dict[str, Any]]:
+    # Imported here to keep finding_ledger free of a module-level cycle: the
+    # ledger reuses finding_id from this module.
+    from .finding_ledger import ENGINEERING_FINDINGS_KEY, validate_ledger_entry
+
+    if ENGINEERING_FINDINGS_KEY not in snapshot:
+        return []
+    raw = snapshot.get(ENGINEERING_FINDINGS_KEY)
+    if not isinstance(raw, list):
+        return [_malformed_persisted_finding()]
+
+    findings: list[dict[str, Any]] = []
+    malformed_count = 0
+    for row in raw:
+        try:
+            findings.append(_project_persisted_entry(validate_ledger_entry(row)))
+        except (TypeError, ValueError):
+            malformed_count += 1
+    if malformed_count:
+        findings.append(_malformed_persisted_finding(count=malformed_count))
+    return findings
+
+
 def project_findings(snapshot: Mapping[str, Any], revision: int) -> list[dict[str, Any]]:
     """Project findings and their stored establishment provenance.
 
     ``revision`` is accepted so callers can bind the projection to a loaded
     revision. It is not an authority signal and is not written back.
+    Persisted ledger entries are merged first so a write-time deterministic
+    record wins a ``(category, object_id, text)`` collision.
     """
 
     del revision
     body = _mapping(snapshot)
     collected = [
+        *_collect_persisted_findings(body),
         *_collect_failed_checks(body),
         *_collect_object_blockers(body),
         *_collect_traceability_issues(body),

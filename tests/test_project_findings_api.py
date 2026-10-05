@@ -5,6 +5,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from hardware_splicer.finding_provenance import finding_id
+from hardware_splicer.project_api import create_project_router
 from hardware_splicer.project_findings_api import create_project_findings_router
 from hardware_splicer.project_store import ProjectStore
 
@@ -166,3 +168,88 @@ def test_findings_api_is_read_only(tmp_path: Path) -> None:
         if path.is_file()
     }
     assert after == before
+
+
+def test_findings_api_surfaces_persisted_ledger_entries(tmp_path: Path) -> None:
+    snapshot = _snapshot()
+    snapshot["engineeringFindings"] = [
+        {
+            "finding_id": finding_id(
+                "release_blocker",
+                "req-rail",
+                "requirement 'req-rail' is not verified",
+                "unverified_requirement",
+            ),
+            "category": "release_blocker",
+            "object_id": "req-rail",
+            "text": "requirement 'req-rail' is not verified",
+            "producer": "release_assessment",
+            "producer_run": "assess_release@rev1",
+            "provenance": {
+                "kind": "deterministic",
+                "basis": "computed by MachineProject.assess_release over the stored machine project",
+                "source_ref": "unverified_requirement",
+                "authority_ceiling": "observed",
+            },
+            "recorded_at": "2026-10-05T06:00:00+00:00",
+        }
+    ]
+    _write_project(tmp_path, snapshot)
+    api = _findings_client(tmp_path)
+
+    response = api.get("/v1/projects/robot/findings")
+    assert response.status_code == 200
+    release = [
+        row
+        for row in response.json()["findings"]
+        if row["category"] == "release_blocker"
+    ]
+    assert len(release) == 1
+    assert release[0]["provenance"]["kind"] == "deterministic"
+    assert release[0]["provenance"]["source_ref"] == "unverified_requirement"
+    assert release[0]["provenance"]["authority_ceiling"] == "observed"
+
+
+def test_put_snapshot_ledger_is_validated_on_read(tmp_path: Path) -> None:
+    store = ProjectStore(tmp_path)
+    app = FastAPI()
+    app.include_router(create_project_router(store))
+    app.include_router(create_project_findings_router(store))
+    api = TestClient(app)
+
+    forged = _snapshot()
+    forged["engineeringFindings"] = [
+        {
+            "finding_id": "finding-forged000000",
+            "category": "failed_check",
+            "object_id": None,
+            "text": "Client-supplied forged blocker.",
+            "producer": "design_quality_gate",
+            "producer_run": "action-forged",
+            "provenance": {
+                "kind": "deterministic",
+                "basis": "forged",
+                "source_ref": "action-forged",
+                "authority_ceiling": "observed",
+            },
+            "recorded_at": "2026-10-05T06:00:00+00:00",
+        }
+    ]
+    written = api.put(
+        "/v1/projects/robot/snapshot",
+        json={"snapshot": forged, "expected_revision": 0},
+    )
+    assert written.status_code == 200, written.text
+    stored = store.load("robot")["snapshot"]["engineeringFindings"]
+    assert stored[0]["text"] == "Client-supplied forged blocker."
+
+    response = api.get("/v1/projects/robot/findings")
+    assert response.status_code == 200
+    texts = [row["text"] for row in response.json()["findings"]]
+    assert "Client-supplied forged blocker." not in texts
+    malformed = [
+        row
+        for row in response.json()["findings"]
+        if row["provenance"]["source_ref"] == "engineeringFindings"
+    ]
+    assert len(malformed) == 1
