@@ -96,8 +96,12 @@ export default function EvidenceBringupPage() {
       id: 'identity',
       label: 'Identity & assembly',
       detail: 'Exact board revision, component identity, DNP state, orientation and assembly condition.',
-      state: sources.length ? 'complete' : 'active',
-      evidence: sources.length ? `${sources.length} engineering source${sources.length === 1 ? '' : 's'} registered` : 'source identity incomplete',
+      state: sources.length && realPhysicalEvidence.length ? 'complete' : 'active',
+      evidence: !sources.length
+        ? 'source identity incomplete'
+        : realPhysicalEvidence.length
+          ? `${sources.length} engineering source${sources.length === 1 ? '' : 's'} registered · ${realPhysicalEvidence.length} explicitly real record${realPhysicalEvidence.length === 1 ? '' : 's'}`
+          : `${sources.length} engineering source${sources.length === 1 ? '' : 's'} registered · physical board identity not captured`,
     },
     {
       id: 'cold',
@@ -175,8 +179,8 @@ export default function EvidenceBringupPage() {
   useEffect(() => { void loadProjects(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
-      <div className="flex min-h-screen flex-col">
+    <main className="h-full bg-stone-100 text-stone-950">
+      <div className="flex min-h-full flex-col">
         <header className="border-b border-stone-200 bg-white">
           <div className="flex min-h-14 flex-wrap items-center gap-3 px-4 lg:px-5">
             <Link href={`/engineering/evidence?project=${encodeURIComponent(projectId)}`} className="inline-flex items-center gap-2 text-sm font-semibold text-stone-950"><ArrowLeft className="h-4 w-4" />Hardware Splicer</Link>
@@ -197,7 +201,7 @@ export default function EvidenceBringupPage() {
         {error ? <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800">{error}</div> : null}
 
         <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[285px_minmax(0,1fr)_340px]">
-          <aside className="min-h-[720px] overflow-y-auto bg-white p-3">
+          <aside className="min-h-[720px] xl:min-h-0 overflow-y-auto bg-white p-3">
             <div className="px-2 pb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400">Validation sequence</div>
             <div className="space-y-1">
               {gates.map((gate, index) => (
@@ -213,18 +217,20 @@ export default function EvidenceBringupPage() {
             <div className="mt-4 border-t border-stone-200 px-2 pt-4 text-[10px] leading-4 text-stone-400">Measurements update evidence state; authority changes only through the explicit review boundary.</div>
           </aside>
 
-          <section className="min-w-0 bg-white">
-            <div className="flex min-h-11 items-center justify-between border-b border-stone-200 px-4">
+          <section className="order-first flex min-h-0 min-w-0 flex-col bg-white xl:order-none">
+            <div className="flex min-h-11 shrink-0 items-center justify-between border-b border-stone-200 px-4">
               <div>
                 <span className="text-xs font-medium text-stone-700">{selected.label}</span>
                 <span className="ml-2 text-[10px] text-stone-400">{selected.detail}</span>
               </div>
               <span className={`rounded-md border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${selected.state === 'complete' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : selected.state === 'blocked' ? 'border-red-200 bg-red-50 text-red-700' : selected.state === 'active' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-stone-200 bg-stone-50 text-stone-500'}`}>{selected.state}</span>
             </div>
-            <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="pcb" compact />
+            <div className="min-h-0 flex-1">
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="pcb" compact />
+            </div>
           </section>
 
-          <aside className="flex min-h-[720px] flex-col bg-white">
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
             <div className="border-b border-stone-200 px-4 py-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Physical evidence</div>
               <div className="mt-1 text-xs text-stone-500">{projectName} · Rev {revision ?? '—'}</div>

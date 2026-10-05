@@ -273,8 +273,8 @@ export default function EvidenceComparePage() {
   };
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
-      <div className="flex min-h-screen flex-col">
+    <main className="h-full bg-stone-100 text-stone-950">
+      <div className="flex h-full min-h-[760px] flex-col">
         <header className="border-b border-stone-200 bg-white">
           <div className="flex min-h-14 flex-wrap items-center gap-3 px-4 lg:px-5">
             <Link href={`/engineering/evidence?project=${encodeURIComponent(projectId)}`} className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-stone-950">
@@ -314,8 +314,8 @@ export default function EvidenceComparePage() {
 
         {error ? <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800">{error}</div> : null}
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
-          <aside className="min-h-[720px] overflow-y-auto bg-white p-3">
+        <div className="grid min-h-0 flex-1 xl:grid-rows-[minmax(0,1fr)] grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
+          <aside className="min-h-[720px] xl:min-h-0 overflow-y-auto bg-white p-3">
             <div className="flex items-center gap-2 px-1 pb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400"><GitCompareArrows className="h-3.5 w-3.5" />Semantic delta</div>
             {([
               ['risk', 'Needs review'],
@@ -348,8 +348,8 @@ export default function EvidenceComparePage() {
             ))}
           </aside>
 
-          <section className="min-w-0 bg-white">
-            <div className="flex min-h-11 items-center justify-between border-b border-stone-200 px-4">
+          <section className="order-first flex min-h-0 min-w-0 flex-col bg-white xl:order-none">
+            <div className="flex min-h-11 shrink-0 items-center justify-between border-b border-stone-200 px-4">
               <div>
                 <span className="text-xs font-medium text-stone-500">Candidate artifact</span>
                 <span className="ml-2 font-mono text-[10px] text-stone-400">Rev {candidateRevision ?? '—'}</span>
@@ -360,10 +360,12 @@ export default function EvidenceComparePage() {
                 <span>{summary.artifacts} artifact change</span>
               </div>
             </div>
-            <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact />
+            <div className="min-h-0 flex-1">
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact />
+            </div>
           </section>
 
-          <aside className="flex min-h-[720px] flex-col bg-white">
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
             <div className="border-b border-stone-200 px-4 py-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Selected delta</div>
               <div className="mt-1 text-xs text-stone-500">Rev {baseRevision ?? '—'} → Rev {candidateRevision ?? '—'}</div>

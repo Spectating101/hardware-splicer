@@ -217,8 +217,8 @@ export default function EvidenceVerifyPage() {
   useEffect(() => { void loadProjects(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
-      <div className="flex min-h-screen flex-col">
+    <main className="h-full bg-stone-100 text-stone-950">
+      <div className="flex min-h-full flex-col">
         <header className="border-b border-stone-200 bg-white">
           <div className="flex min-h-14 flex-wrap items-center gap-3 px-4 lg:px-5">
             <Link href={`/engineering/evidence?project=${encodeURIComponent(projectId)}`} className="inline-flex items-center gap-2 text-sm font-semibold text-stone-950"><ArrowLeft className="h-4 w-4" />Hardware Splicer</Link>
@@ -240,7 +240,7 @@ export default function EvidenceVerifyPage() {
         {error ? <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800">{error}</div> : null}
 
         <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
-          <aside className="min-h-[720px] overflow-y-auto bg-white p-3">
+          <aside className="min-h-[720px] xl:min-h-0 overflow-y-auto bg-white p-3">
             <div className="flex items-center gap-2 px-2 pb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400"><FileCheck2 className="h-3.5 w-3.5" />Verification ladder</div>
             <div className="space-y-1">
               {checks.map((check) => (
@@ -255,11 +255,11 @@ export default function EvidenceVerifyPage() {
             </div>
           </aside>
 
-          <section className="min-w-0 bg-white">
+          <section className="order-first min-w-0 bg-white xl:order-none">
             <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="schematic" />
           </section>
 
-          <aside className="flex min-h-[720px] flex-col bg-white">
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
             <div className="border-b border-stone-200 px-4 py-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Selected check</div>
               <div className="mt-1 text-xs text-stone-500">{projectName} · Rev {revision ?? '—'}</div>
