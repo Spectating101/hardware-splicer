@@ -364,7 +364,7 @@ function CanonicalNode({ data: rawData }: NodeProps) {
   const data = rawData as unknown as VisualNodeData;
   const Icon = iconFor(data.kind);
   return (
-    <div className={`min-w-[220px] rounded-2xl border px-4 py-3 shadow-[0_18px_50px_rgba(2,6,23,0.35)] backdrop-blur ${statusClasses(data.status)} ${data.selected ? 'ring-2 ring-cyan-200/80' : ''}`}>
+    <div className={`w-[280px] rounded-2xl border px-4 py-3 shadow-[0_18px_50px_rgba(2,6,23,0.35)] backdrop-blur ${statusClasses(data.status)} ${data.selected ? 'ring-2 ring-cyan-200/80' : ''}`}>
       <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !border-2 !border-slate-950 !bg-cyan-300" />
       <div className="flex items-start gap-3">
         <div className="rounded-xl border border-white/10 bg-black/20 p-2"><Icon className="h-4 w-4" /></div>
@@ -389,14 +389,14 @@ const nodeTypes: NodeTypes = { canonical: CanonicalNode };
 
 const fixturePositions: Record<string, { x: number; y: number }> = {
   'fixture-controller': { x: 20, y: 80 },
-  'level-translation': { x: 350, y: 80 },
-  'dut-socket': { x: 680, y: 80 },
-  'dut-rail': { x: 20, y: 330 },
-  'current-monitor': { x: 350, y: 330 },
-  'test-equipment': { x: 680, y: 330 },
+  'level-translation': { x: 400, y: 80 },
+  'dut-socket': { x: 780, y: 80 },
+  'dut-rail': { x: 20, y: 350 },
+  'current-monitor': { x: 400, y: 350 },
+  'test-equipment': { x: 780, y: 350 },
   'evidence-boundary': { x: 20, y: 180 },
-  'project-system': { x: 350, y: 180 },
-  'candidate-boundary': { x: 680, y: 180 },
+  'project-system': { x: 400, y: 180 },
+  'candidate-boundary': { x: 780, y: 180 },
 };
 
 export function CanonicalSystemCanvas({
@@ -430,7 +430,7 @@ export function CanonicalSystemCanvas({
   }
 
   return (
-    <div className="relative h-full min-h-[600px] overflow-hidden rounded-3xl border border-white/10 bg-[#050b14]">
+    <div className="relative h-[clamp(560px,calc(100vh-14rem),820px)] overflow-hidden rounded-3xl border border-white/10 bg-[#050b14]">
       <div className="pointer-events-none absolute left-4 top-4 z-20 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em]">
         <span className="rounded-full border border-cyan-300/20 bg-[#07111f]/90 px-3 py-1.5 text-cyan-100">System canvas</span>
         <span className="rounded-full border border-white/10 bg-[#07111f]/90 px-3 py-1.5 text-slate-300">Revision {revision ?? '—'}</span>
@@ -440,8 +440,18 @@ export function CanonicalSystemCanvas({
         nodes={nodes}
         edges={graph.edges}
         nodeTypes={nodeTypes}
+        defaultEdgeOptions={{
+          labelBgStyle: { fill: '#07111f', fillOpacity: 0.96, stroke: 'rgba(148,163,184,0.3)', strokeWidth: 1 },
+          labelBgPadding: [8, 4],
+          labelBgBorderRadius: 6,
+        }}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.1 }}
+        onInit={(instance) => {
+          // The first fit can run before the panel has its final height, which leaves the graph small and
+          // pushed to one edge. Fit again once layout has settled.
+          window.setTimeout(() => instance.fitView({ padding: 0.1, duration: 0 }), 150);
+        }}
         nodesConnectable={false}
         elementsSelectable
         deleteKeyCode={null}

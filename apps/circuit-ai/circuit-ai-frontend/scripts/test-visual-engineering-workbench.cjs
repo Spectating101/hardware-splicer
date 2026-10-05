@@ -117,8 +117,16 @@ for (const forbidden of forbiddenMutations) {
   }
 }
 
-if (!launcher.includes("href = insideStudio ? '/engineering/visual' : '/engineering/studio'")) {
-  throw new Error('Project Studio launcher does not expose the visual workbench.');
+// The floating launcher stays out of /engineering pages; those carry the shared engineering navigation,
+// which must keep exposing the visual workbench and the project review workspace.
+const engineeringNav = fs.readFileSync(path.join(root, 'app/engineering/layout.tsx'), 'utf8');
+for (const href of ['/engineering/visual', '/engineering/evidence']) {
+  if (!engineeringNav.includes(`href="${href}"`)) {
+    throw new Error(`Engineering navigation does not expose ${href}.`);
+  }
+}
+if (!launcher.includes("href=\"/engineering/studio\"")) {
+  throw new Error('Project Studio launcher does not expose the canonical studio route.');
 }
 
 console.log('Visual engineering workbench contract is intact.');
