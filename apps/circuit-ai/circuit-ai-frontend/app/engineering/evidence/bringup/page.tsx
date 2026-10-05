@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { ProvenanceChip } from '@/components/engineering/provenance-chip';
+import { useProjectFindings } from '@/lib/project-findings';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -71,6 +73,7 @@ export default function EvidenceBringupPage() {
   usePageTitle('Physical Bring-up | Hardware Splicer');
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [projectId, setProjectId] = useState('');
+  const { findings: projectFindings } = useProjectFindings(projectId);
   const [revision, setRevision] = useState<number | null>(null);
   const [snapshot, setSnapshot] = useState<JsonRecord | null>(null);
   const [session, setSession] = useState<JsonRecord | null>(null);
@@ -84,6 +87,9 @@ export default function EvidenceBringupPage() {
   const releaseAuthorized = snapshot?.release_authorized === true;
   const physicalEvidence = rows(snapshot?.physicalEvidence || snapshot?.physical_evidence || snapshot?.benchEvidence || snapshot?.bench_evidence);
   const realPhysicalEvidence = physicalEvidence.filter(isRealEvidence);
+  // Findings a non-simulated measurement record states it establishes, and findings it reports cleared.
+  const measuredFindings = projectFindings.filter((item) => item.category === 'measured_finding');
+  const reportedCleared = projectFindings.filter((item) => item.physical_evidence?.some((link) => link.relation === 'clears'));
   const buildDir = deriveEvidenceBuildDir(snapshot, session);
 
   const projectName = useMemo(() => {
@@ -251,6 +257,30 @@ export default function EvidenceBringupPage() {
                   </div>
                 ))}
                 {!physicalEvidence.length ? <div className="rounded-md border border-dashed border-stone-300 p-4 text-xs leading-5 text-stone-500">No physical measurement record is attached to this project snapshot yet.</div> : null}
+
+                {measuredFindings.length ? (
+                  <div className="mt-3" data-testid="measured-findings">
+                    <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Established by measurement</div>
+                    {measuredFindings.map((item) => (
+                      <div key={item.finding_id} className="mb-2 rounded-md border border-red-200 bg-red-50 p-3">
+                        <div className="text-xs leading-5 text-red-800">{item.text}</div>
+                        <div className="mt-2 flex flex-wrap items-center gap-2"><ProvenanceChip provenance={item.provenance} />{item.provenance.source_ref ? <span className="font-mono text-[10px] text-red-700/80">{item.provenance.source_ref}</span> : null}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {reportedCleared.length ? (
+                  <div className="mt-3" data-testid="reported-cleared">
+                    <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Reported cleared by measurement</div>
+                    <p className="mb-2 text-[11px] leading-4 text-stone-500">A measurement record says so. The finding stays open until a person reviews it, and no gate changes.</p>
+                    {reportedCleared.map((item) => (
+                      <div key={item.finding_id} className="mb-2 rounded-md border border-stone-200 p-3 text-xs leading-5 text-stone-700">
+                        {item.text}
+                        <div className="mt-1 font-mono text-[10px] text-stone-500">{item.physical_evidence?.filter((link) => link.relation === 'clears').map((link) => link.evidence_id).join(', ')}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
 
