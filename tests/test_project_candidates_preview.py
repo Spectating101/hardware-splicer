@@ -75,6 +75,8 @@ def test_a_preview_equals_what_a_proposal_of_the_same_edits_would_hold(world) ->
     assert preview["diff"]["summary"] == proposed["diff"]["summary"]
     assert preview["applied"] == proposed["applied"]
     assert preview["base_revision"] == 1 and preview["kind"] == "schematic"
+    # It names the retained file it edited, so a viewer showing another file of the same kind can tell.
+    assert preview["relative"].endswith("spi_flash_adapter_v1.kicad_sch")
 
 
 def test_a_preview_writes_nothing_at_all(world) -> None:

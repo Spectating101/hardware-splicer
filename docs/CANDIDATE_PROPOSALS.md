@@ -156,7 +156,8 @@ per component and no filesystem paths.
 ## Previewing a draft
 
 `POST /v1/projects/{id}/candidates/preview` takes the same `{base_revision, kind, ops}` as a proposal and returns
-`{base_revision, kind, text, applied, warnings, diff}`: the edited file and its structural diff, computed by the same
+`{base_revision, kind, relative, text, applied, warnings, diff}`: the edited file (`relative` names the retained file the
+edits were applied to) and its structural diff, computed by the same
 read, edit and diff a proposal uses, so the answer matches what a proposal would hold.
 
 It keeps nothing. No directory, record or review is created, no design-rule check runs, the proposal cap is untouched

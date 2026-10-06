@@ -1201,6 +1201,9 @@ def preview_edit(
     return {
         "base_revision": result.revision,
         "kind": kind,
+        # The retained file the edits were applied to. A revision keeps one file per kind, which need not be the one a
+        # viewer is showing when a project has several, so the caller must check before drawing this over another file.
+        "relative": str(result.pin_entry.get("relative") or ""),
         "text": result.edited_text,
         "applied": list(result.edited.get("applied") or []),
         "warnings": list(result.edited.get("warnings") or []),
