@@ -143,4 +143,30 @@ for (const forbidden of [
   'rounded-[1.6rem]',
 ]) forbidText('evidence workspace', vnext, forbidden);
 
+// Proposal-producing capabilities: every one reports or proposes; none applies or accepts anything.
+const capabilityFiles = {
+  dock: read('components/engineering/edit-dock.tsx'),
+  proposals: read('components/engineering/proposals-panel.tsx'),
+  parts: read('components/engineering/parts-panel.tsx'),
+  model3d: read('components/engineering/model3d-viewer.tsx'),
+  candidatesLib: read('lib/project-candidates.ts'),
+  live: read('lib/project-live.ts'),
+};
+requireText('edit dock', capabilityFiles.dock, 'Nothing is applied until it is accepted');
+requireText('edit dock', capabilityFiles.dock, 'confirm: true');
+requireText('proposals', capabilityFiles.proposals, 'Not applied');
+requireText('proposals', capabilityFiles.proposals, 'does not accept or reject anything');
+requireText('viewport', files.viewport, 'Proposal preview');
+requireText('candidates', capabilityFiles.candidatesLib, "'x-hs-operator-token'");
+forbidText('candidates', capabilityFiles.candidatesLib, 'authorization');
+requireText('parts', capabilityFiles.parts, 'Availability not checked');
+requireText('parts', capabilityFiles.parts, 'No MPN in the design');
+requireText('live', capabilityFiles.live, 'x-hs-operator-token');
+forbidText('live', capabilityFiles.live, 'authorization');
+requireText('3d', capabilityFiles.model3d, 'dispose');
+// Nothing in the proposal surface may offer to accept, approve, release or fabricate.
+for (const [name, source] of Object.entries({ dock: capabilityFiles.dock, proposals: capabilityFiles.proposals })) {
+  for (const word of ['>Accept<', '>Approve<', '>Authorize<', '>Fabricate<', 'Release now']) forbidText(name, source, word);
+}
+
 console.log('competitive evidence workspace acceptance: PASS');
