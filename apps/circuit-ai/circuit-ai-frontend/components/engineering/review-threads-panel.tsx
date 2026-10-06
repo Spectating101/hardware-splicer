@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BadgeCheck, Bot, CheckCircle2, CircleDot, LoaderCircle, MapPin, MessageSquare, RotateCcw, User, X } from 'lucide-react';
 import type { PlacedPin, ViewerPin } from '@/components/engineering/viewer-overlay';
+import { PROJECT_CHANGE_EVENT, type LiveChange } from '@/lib/project-live';
 
 type AuthorKind = 'human' | 'agent' | 'system';
 
@@ -158,6 +159,16 @@ export function ReviewThreadsPanel({
   }, [base, objectId, projectId, token]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Another reviewer commented or resolved: refresh without a reload. The panel works the same without the stream.
+  useEffect(() => {
+    function onChange(event: Event) {
+      const changes = ((event as CustomEvent).detail || []) as LiveChange[];
+      if (changes.some((change) => change.type.startsWith('thread.'))) void load();
+    }
+    window.addEventListener(PROJECT_CHANGE_EVENT, onChange);
+    return () => window.removeEventListener(PROJECT_CHANGE_EVENT, onChange);
+  }, [load]);
 
   useEffect(() => {
     const pins: ViewerPin[] = threads

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Check, FileCheck2, GitCompareArrows, Keyboard, Link2, Microscope, ScanLine, Waypoints } from 'lucide-react';
+import { Check, FileCheck2, GitCompareArrows, Keyboard, Link2, Microscope, RefreshCw, ScanLine, Waypoints } from 'lucide-react';
+import { PROJECT_CHANGE_EVENT, useProjectLive, type LiveChange, type Participant } from '@/lib/project-live';
 
 const modes = [
   { id: 'review', label: 'Review', href: '/engineering/evidence', icon: ScanLine },
@@ -24,6 +25,30 @@ function isTypingTarget(target: EventTarget | null) {
   return target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName);
 }
 
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || '?') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
+/** Who else has this project open. Names are self-declared unless verified, and nothing here gates anything. */
+function PresenceStack({ participants }: { participants: Participant[] }) {
+  if (!participants.length) return null;
+  const shown = participants.slice(0, 4);
+  const label = participants.map((item) => `${item.name}${item.verified ? ' (verified)' : ''} · ${item.mode || 'viewing'}${item.object_id ? ` · ${item.object_id}` : ''}`).join('\n');
+  return (
+    <div className="mr-1 flex items-center gap-1.5" data-testid="presence" title={label} aria-label={`${participants.length} other ${participants.length === 1 ? 'person' : 'people'} viewing`}>
+      <div className="flex -space-x-1.5">
+        {shown.map((item) => (
+          <span key={item.client_id} className={`flex h-5 w-5 items-center justify-center rounded-full border border-white text-[9px] font-semibold ${item.verified ? 'bg-emerald-100 text-emerald-900' : 'bg-stone-200 text-stone-700'}`}>
+            {initials(item.name)}
+          </span>
+        ))}
+      </div>
+      <span className="text-[10px] text-stone-500">{participants.length} viewing</span>
+    </div>
+  );
+}
+
 export function EvidenceWorkspaceNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -31,6 +56,18 @@ export function EvidenceWorkspaceNav() {
   const project = search.get('project') || '';
   const suffix = project ? `?project=${encodeURIComponent(project)}` : '';
   const [helpOpen, setHelpOpen] = useState(false);
+  const [newRevision, setNewRevision] = useState(false);
+  const mode = pathname.includes('/compare') ? 'compare' : pathname.includes('/verify') ? 'verify' : pathname.includes('/bringup') ? 'bringup' : 'review';
+  const { participants } = useProjectLive(project, mode);
+
+  useEffect(() => {
+    function onChange(event: Event) {
+      const changes = ((event as CustomEvent).detail || []) as LiveChange[];
+      if (changes.some((change) => change.type === 'revision.saved')) setNewRevision(true);
+    }
+    window.addEventListener(PROJECT_CHANGE_EVENT, onChange);
+    return () => window.removeEventListener(PROJECT_CHANGE_EVENT, onChange);
+  }, []);
   const [copied, setCopied] = useState(false);
   const copiedTimer = useRef<number | null>(null);
 
@@ -90,6 +127,17 @@ export function EvidenceWorkspaceNav() {
         })}
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-1 pl-2">
+        {newRevision ? (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-2.5 font-medium text-amber-900 hover:bg-amber-100"
+            title="Someone saved a newer revision. Reload to see it; nothing changes until you do."
+          >
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />New revision saved
+          </button>
+        ) : null}
+        <PresenceStack participants={participants} />
         <button type="button" onClick={copyLink} className={iconButton} aria-label="Copy a link to this exact view" title="Copy a link to this exact view">
           {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Link2 className="h-3.5 w-3.5" />}
           <span aria-live="polite">{copied ? 'Link copied' : 'Copy link'}</span>
