@@ -274,13 +274,25 @@ export function EvidenceArtifactViewport({
     embed.appendChild(source);
     host.appendChild(embed);
 
+    let stopFocus: (() => void) | undefined;
     if (activeKind === 'pcb') {
       // The vendored KiCanvas declares an embed `zoom` attribute but does not currently
       // forward it into kc-board-app. Its BoardViewer does expose zoom_to_board(), which
       // fits the camera to Edge.Cuts. Use that real viewer API after initialization.
       embed.setAttribute('zoom', 'objects');
-      return focusKiCanvasBoard(embed);
+      stopFocus = focusKiCanvasBoard(embed);
     }
+    return () => {
+      stopFocus?.();
+      // KiCanvas queues a draw on the next animation frame. If this embed is replaced first, that queued draw runs
+      // against a disposed renderer and throws. Silence this viewer's draws before it goes away.
+      try {
+        const app = embed.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { on_draw?: () => void } }) | null;
+        if (app?.viewer) app.viewer.on_draw = () => undefined;
+      } catch {
+        // The viewer may not have initialised yet; there is then nothing queued.
+      }
+    };
   }, [activeKind, shownContent, ready]);
 
   // Previewing a proposal shows the file it changed.
