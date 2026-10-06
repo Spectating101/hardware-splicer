@@ -497,7 +497,8 @@ export default function EvidenceOverviewPage() {
               model3d={{ projectId, revision }}
               preview={preview}
               proposing={revision ? {
-                onPropose: (kind, ops, note) => candidates.propose({ baseRevision: revision, kind, ops, note }),
+                projectId,
+                onPropose: (kind, input, note) => candidates.propose({ baseRevision: revision, kind, note, ...input }),
                 onProposed: () => setRailTab('proposals'),
               } : undefined}
             />

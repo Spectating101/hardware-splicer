@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircuitBoard, LoaderCircle, Pencil } from 'lucide-react';
 import { EditDock } from '@/components/engineering/edit-dock';
-import type { Candidate, EditOp } from '@/lib/project-candidates';
+import { useRoutingCapability, type Candidate, type ProposalInput } from '@/lib/project-candidates';
 import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
@@ -169,7 +169,7 @@ export function EvidenceArtifactViewport({
   /** When set, a 3D tab is offered for this project revision. */
   model3d?: { projectId: string; revision: number | null };
   /** When set, the viewer offers Edit, which drafts changes and sends them as a proposal for review. */
-  proposing?: { onPropose: (kind: 'schematic' | 'pcb', ops: EditOp[], note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
+  proposing?: { projectId: string; onPropose: (kind: 'schematic' | 'pcb', input: ProposalInput, note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
   preview?: ProposalPreview | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -183,6 +183,7 @@ export function EvidenceArtifactViewport({
   const [editing, setEditing] = useState(false);
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
   const previewing = Boolean(preview && preview.kind === activeKind);
+  const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
   const shownContent = previewing && preview ? preview.text : content;
 
   useEffect(() => {
@@ -388,7 +389,8 @@ export function EvidenceArtifactViewport({
           <EditDock
             hostRef={hostRef}
             kind={activeKind}
-            onPropose={(ops, note) => proposing.onPropose(activeKind, ops, note)}
+            routing={routing}
+            onPropose={(input, note) => proposing.onPropose(activeKind, input, note)}
             onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
             onClose={() => setEditing(false)}
           />

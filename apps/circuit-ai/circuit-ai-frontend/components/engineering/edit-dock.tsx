@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { LoaderCircle, RotateCcw, RotateCw, X } from 'lucide-react';
-import type { Candidate, EditOp } from '@/lib/project-candidates';
+import type { Candidate, EditOp, ProposalInput, RoutingCapability } from '@/lib/project-candidates';
 
 type Selected = {
   uuid: string;
@@ -61,10 +61,12 @@ export function EditDock({
   onPropose,
   onProposed,
   onClose,
+  routing,
 }: {
   hostRef: RefObject<HTMLDivElement | null>;
   kind: string;
-  onPropose: (ops: EditOp[], note: string) => Promise<Candidate>;
+  routing?: RoutingCapability | null;
+  onPropose: (input: ProposalInput, note: string) => Promise<Candidate>;
   onProposed: (candidate: Candidate) => void;
   onClose: () => void;
 }) {
@@ -143,8 +145,23 @@ export function EditDock({
     setBusy(true);
     setError('');
     try {
-      const candidate = await onPropose(drafts.map((draft) => draft.op), note.trim());
+      const candidate = await onPropose({ ops: drafts.map((draft) => draft.op) }, note.trim());
       setDrafts([]);
+      setNote('');
+      onProposed(candidate);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'The proposal could not be created.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function autoroute() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const candidate = await onPropose({ autoroute: {} }, note.trim());
       setNote('');
       onProposed(candidate);
     } catch (caught) {
@@ -183,6 +200,18 @@ export function EditDock({
             <input className={`${field} flex-1`} value={value} onChange={(event) => setValue(event.target.value)} aria-label="Value" placeholder="Value" maxLength={120} />
             <button type="button" className={small} onClick={addValue} disabled={value === selected.value}>Set value</button>
           </div>
+        </div>
+      ) : null}
+
+      {kind === 'pcb' && !drafts.length ? (
+        <div className="mt-2.5 border-t border-stone-200 pt-2">
+          <div className="flex items-center justify-between gap-2">
+            <button type="button" onClick={() => void autoroute()} disabled={busy || !routing?.available} title={routing?.available ? 'Routes the unrouted nets and proposes the result for review' : (routing?.reason || 'Checking whether routing is available')} className={small}>
+              {busy ? <LoaderCircle className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}Autoroute the board
+            </button>
+            <span className="min-w-0 truncate text-[10px] text-stone-500">{routing === null || routing === undefined ? 'Checking router…' : routing.available ? 'Existing tracks are kept' : 'Not available on this server'}</span>
+          </div>
+          {routing && !routing.available && routing.reason ? <p className="mt-1.5 text-[10px] leading-4 text-stone-500">{routing.reason}</p> : null}
         </div>
       ) : null}
 
