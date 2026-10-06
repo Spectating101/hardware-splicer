@@ -83,6 +83,7 @@ Schema `hardware_splicer.candidate.v1`:
 | `created_by`, `verified` | Operator identity flag only |
 | `note` | The proposer's stated reason, at most 500 characters; empty when none was given |
 | `applied`, `warnings` | From `apply_edit_ops` |
+| `files` | Per kind: `relative` (the safe name inside the candidate folder), `retained_relative` (where that file lives in the retained revision, which tells apart files that share a name), `sha256`, `role` |
 | `edited_sha256`, `base_sha256` | Content hashes of the edited kind |
 | `diff` | Structural `kicad_diff` of base vs edited |
 | `checks` | Optional kicad-cli DRC/ERC counts |

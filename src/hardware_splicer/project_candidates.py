@@ -1095,6 +1095,9 @@ def propose_candidate(
             _write_named_create_only(candidate_dir, filenames[kind], edited_bytes)
             files[kind] = {
                 "relative": filenames[kind],
+                # Where the file lives in the retained revision. `relative` is only a safe name inside the candidate's own
+                # folder, so it cannot tell two retained files with the same name apart; this can.
+                "retained_relative": str(pin_entry.get("relative") or ""),
                 "sha256": _sha256_bytes(edited_bytes),
                 "role": "edited",
             }
@@ -1103,6 +1106,7 @@ def propose_candidate(
                 _write_named_create_only(candidate_dir, filenames[other_kind], other_bytes)
                 files[other_kind] = {
                     "relative": filenames[other_kind],
+                    "retained_relative": str((other_entry or {}).get("relative") or ""),
                     "sha256": _sha256_bytes(other_bytes),
                     "role": "copied",
                 }

@@ -84,6 +84,15 @@ def test_a_proposal_keeps_the_reason_its_author_gave(world) -> None:
     assert _propose(api, note="")["note"] == ""
 
 
+def test_a_proposal_records_which_retained_file_it_came_from(world) -> None:
+    api, _store, _root = world
+    candidate = _propose(api)
+    entry = candidate["files"]["schematic"]
+    assert entry["retained_relative"].endswith("spi_flash_adapter_v1.kicad_sch")
+    assert entry["relative"] == "spi_flash_adapter_v1.kicad_sch"
+    assert candidate["files"]["pcb"]["retained_relative"].endswith("spi_flash_adapter_v1.kicad_pcb")
+
+
 def test_a_new_proposal_reports_a_pending_review_that_is_not_stale(world) -> None:
     api, _store, _root = world
     candidate = _propose(api)
