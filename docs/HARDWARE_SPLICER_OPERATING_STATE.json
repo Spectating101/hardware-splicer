@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "snapshot": "2026-09-23",
+  "snapshot": "2026-10-06",
   "project": "hardware-splicer",
   "portfolio_role": "flagship_selectively_active",
   "identity": {
@@ -44,6 +44,14 @@
       "tracking": "Spectating101/gauntlet-blowback#60 (merged) + #61 (merged Anthropic manual-submit route)",
       "state": "ACTIVE",
       "goal": "Use HS where hardware physical-agent release-assurance or consequential-authority fit is intrinsic."
+    },
+    {
+      "priority": "P1",
+      "lane": "proposal_producing_capabilities",
+      "state": "ACTIVE",
+      "decided": "2026-10-06",
+      "goal": "Add authoring, routing, parts intelligence, 3D and real-time collaboration as layers that PRODUCE REVIEWABLE CANDIDATES. Every change flows through diff, retention and staged review; none grants authority.",
+      "does_not_displace": "physical_proof"
     }
   ],
   "surface_state": {
@@ -77,6 +85,28 @@
     },
     "gauntlet_conversion": {
       "state": "ACTIVE"
+    },
+    "proposal_capability_expansion": {
+      "state": "ACTIVE",
+      "decided": "2026-10-06",
+      "decision_basis": "source-bound competitor gap review: authoring, routing, parts, 3D and live collaboration are table stakes in Flux, AllSpice, Altium 365 and Quilter-class products",
+      "satisfies_reopen_trigger": "source-bound native competitor gap",
+      "scope": [
+        "kicad_edit_operations",
+        "candidate_proposals",
+        "routing_candidates",
+        "parts_intelligence",
+        "model3d_viewer",
+        "live_events_and_presence"
+      ],
+      "rules": [
+        "every capability emits a candidate that is reviewed through the existing staged review before it can become a revision",
+        "no capability can change an authority, release, fabrication or power-on state",
+        "integrate mature engines (KiCad, kicad-cli, FreeRouting, distributor APIs) instead of rebuilding them",
+        "never invent data: parts, availability and provenance are filled only from the design or a named provider with as_of",
+        "a generic AI/EDA feature race stays off; each addition must be native to the evidence and review model"
+      ],
+      "does_not_displace": "spi_physical_proof"
     }
   },
   "competitive_feedback": {
@@ -135,7 +165,8 @@
     "preserve success or failure against exact board and revision",
     "update paper only after new evidence exists",
     "fire strongest HS-native Gauntlet routes including the human-submit-ready Anthropic ERAP route",
-    "reassess investment from physical and external outcomes"
+    "reassess investment from physical and external outcomes",
+    "build the proposal-producing capability layers in parallel with, and never ahead of, the physical-proof campaign"
   ],
   "authority_guards": {
     "competitor_signal_can_authorize_fabrication": false,

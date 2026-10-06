@@ -80,3 +80,27 @@ def test_frontend_closure_is_merged_and_reopen_on_trigger():
         "user or evaluator workflow failure",
         "source-bound native competitor gap",
     }
+
+
+def test_capability_expansion_is_active_but_guarded():
+    state = load_state()
+    expansion = state["surface_state"]["proposal_capability_expansion"]
+    assert expansion["state"] == "ACTIVE"
+    assert expansion["does_not_displace"] == "spi_physical_proof"
+    assert expansion["satisfies_reopen_trigger"] == "source-bound native competitor gap"
+    assert set(expansion["scope"]) == {
+        "kicad_edit_operations",
+        "candidate_proposals",
+        "routing_candidates",
+        "parts_intelligence",
+        "model3d_viewer",
+        "live_events_and_presence",
+    }
+    rules = " ".join(expansion["rules"]).lower()
+    for required in ("candidate", "authority", "integrate mature engines", "never invent data"):
+        assert required in rules
+    # The generic AI/EDA feature race is still off, and physical proof is still the top priority.
+    assert state["surface_state"]["generic_feature_expansion"]["state"] == "OFF_BY_DEFAULT"
+    priorities = {row["lane"]: row for row in state["priority_stack"]}
+    assert priorities["physical_proof"]["priority"] == "P0"
+    assert priorities["proposal_producing_capabilities"]["does_not_displace"] == "physical_proof"
