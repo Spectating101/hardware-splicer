@@ -38,7 +38,7 @@ type Camera = {
 type ViewerLike = { viewport?: { camera?: Camera }; canvas?: HTMLCanvasElement };
 
 function readViewer(host: HTMLElement | null): ViewerLike | null {
-  const embed = host?.querySelector('kicanvas-embed') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
+  const embed = host?.querySelector('kicanvas-embed:not([data-retired])') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
   const app = embed?.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: ViewerLike }) | null;
   return app?.viewer || null;
 }
@@ -180,7 +180,16 @@ export function ViewerOverlay({
             title={box.label}
             className={`absolute rounded-sm border-2 ${toneClass[box.tone]} ${box.id === focusId ? 'ring-4 ring-white/70' : ''}`}
             style={{ left: left - 3, top: top - 3, width: width + 6, height: height + 6 }}
-          />
+          >
+            {box.id === focusId ? (
+              <span
+                data-testid="diff-highlight-label"
+                className="absolute bottom-full left-0 mb-1.5 max-w-[16rem] truncate whitespace-nowrap rounded bg-stone-900/95 px-1.5 py-0.5 text-[10px] font-medium text-white shadow"
+              >
+                {box.label}
+              </span>
+            ) : null}
+          </div>
         );
       }) : null}
 

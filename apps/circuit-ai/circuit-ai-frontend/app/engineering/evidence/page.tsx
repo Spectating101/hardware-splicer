@@ -30,6 +30,7 @@ import { PartsPanel } from '@/components/engineering/parts-panel';
 import { EvidenceArtifactViewport, type ActiveArtifact, type PlacedPin, type ProposalPreview, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
 import { ProposalsPanel } from '@/components/engineering/proposals-panel';
 import { fetchCandidateFile, useCandidates, type Candidate } from '@/lib/project-candidates';
+import { changesToHighlights } from '@/lib/artifact-diff';
 import {
   deriveCanonicalSystemGraph,
   type CanonicalVisualObject,
@@ -148,13 +149,15 @@ export default function EvidenceOverviewPage() {
   const [query, setQuery] = useState('');
   const { findings } = useProjectFindings(projectId);
   const parts = useProjectParts(projectId, revision, railTab === 'parts');
+  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const candidates = useCandidates(projectId);
   const [preview, setPreview] = useState<ProposalPreview | null>(null);
   const [previewError, setPreviewError] = useState('');
+  const [focusChange, setFocusChange] = useState<string | null>(null);
 
   async function previewCandidate(candidate: Candidate | null) {
     setPreviewError('');
-    if (!candidate) { setPreview(null); return; }
+    if (!candidate) { setPreview(null); setFocusChange(null); return; }
     try {
       const text = await fetchCandidateFile(projectId, candidate.candidate_id, candidate.kind);
       setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text });
@@ -165,8 +168,18 @@ export default function EvidenceOverviewPage() {
   }
 
   // A preview belongs to one project; leaving it must not leave another project's file on screen.
-  useEffect(() => { setPreview(null); setPreviewError(''); }, [projectId]);
-  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
+  useEffect(() => { setPreview(null); setPreviewError(''); setFocusChange(null); }, [projectId]);
+
+  // The previewed proposal's changes, boxed on the file they belong to. Shown only while that file is the one on screen.
+  const previewedCandidate = preview ? candidates.candidates.find((item) => item.candidate_id === preview.candidateId) || null : null;
+  const previewHighlights = previewedCandidate && activeArtifact && activeArtifact.kind === previewedCandidate.kind
+    ? changesToHighlights({
+        available: true,
+        kind: previewedCandidate.kind,
+        summary: previewedCandidate.diff?.summary || { added: 0, removed: 0, changed: 0, unchanged: 0 },
+        changes: previewedCandidate.diff?.changes || [],
+      }, activeArtifact.relative)
+    : [];
   const [placing, setPlacing] = useState(false);
   const [pendingPin, setPendingPin] = useState<PlacedPin | null>(null);
   const [threadPins, setThreadPins] = useState<ViewerPin[]>([]);
@@ -438,7 +451,7 @@ export default function EvidenceOverviewPage() {
             ) : railTab === 'proposals' ? (
               <>
                 {previewError ? <div role="alert" className="m-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{previewError}</div> : null}
-                <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} />
+                <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} projectId={projectId} nextRevision={revision ? revision + 1 : null} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} onFocusChange={setFocusChange} decide={candidates.decide} />
               </>
             ) : railTab === 'parts' ? (
               <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} />
@@ -496,6 +509,8 @@ export default function EvidenceOverviewPage() {
               onActiveArtifact={setActiveArtifact}
               model3d={{ projectId, revision }}
               preview={preview}
+              highlights={previewHighlights}
+              focusHighlightId={focusChange}
               proposing={revision ? {
                 projectId,
                 onPropose: (kind, input, note) => candidates.propose({ baseRevision: revision, kind, note, ...input }),

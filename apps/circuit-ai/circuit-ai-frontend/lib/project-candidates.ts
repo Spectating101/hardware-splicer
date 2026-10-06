@@ -20,6 +20,16 @@ export type CandidateChecks = {
   new_violations?: number | null;
 };
 
+export type ReviewState = {
+  status: 'pending' | 'accepted' | 'rejected' | 'accepting' | 'missing';
+  decided_by: string | null;
+  decided_at: string | null;
+  note: string | null;
+  accepted_revision: number | null;
+  /** A pending proposal whose base revision is no longer the latest cannot be accepted. */
+  stale: boolean;
+};
+
 export type Candidate = {
   candidate_id: string;
   project_id: string;
@@ -28,11 +38,13 @@ export type Candidate = {
   review_id: string;
   created_by: string;
   verified: boolean;
+  note?: string;
   created_at: string;
   applied?: { op?: string; target?: { ref?: string | null; uuid?: string | null }; detail?: string }[];
   warnings?: string[];
   diff?: { summary?: { added: number; removed: number; changed: number; unchanged: number }; changes?: KicadChange[] };
   checks?: CandidateChecks | null;
+  review_state?: ReviewState;
   authority?: { state: string; note: string };
 };
 
@@ -78,7 +90,8 @@ export function useCandidates(projectId: string) {
   useEffect(() => {
     function onChange(event: Event) {
       const changes = ((event as CustomEvent).detail || []) as LiveChange[];
-      if (changes.some((change) => change.type === 'review.opened')) void load();
+      // A proposal was opened, or someone decided one: both change what the list should say.
+      if (changes.some((change) => change.type === 'review.opened' || change.type === 'review.event')) void load();
     }
     window.addEventListener(PROJECT_CHANGE_EVENT, onChange);
     return () => window.removeEventListener(PROJECT_CHANGE_EVENT, onChange);
@@ -99,7 +112,21 @@ export function useCandidates(projectId: string) {
     return body.candidate as Candidate;
   }, [base, load]);
 
-  return { candidates, loading, reload: load, propose };
+  const decide = useCallback(async (candidateId: string, decision: 'accepted' | 'rejected', note: string) => {
+    const token = stored('session', TOKEN_KEY);
+    const response = await fetch(`${base}/${encodeURIComponent(candidateId)}/decision`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(token ? { 'x-hs-operator-token': token } : {}) },
+      body: JSON.stringify({ decision, note }),
+      cache: 'no-store',
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok || body?.ok === false) throw new Error(errorText(body, 'The decision could not be recorded.'));
+    await load();
+    return body.review_state as ReviewState;
+  }, [base, load]);
+
+  return { candidates, loading, reload: load, propose, decide };
 }
 
 /** Whether this server can autoroute. Asked once per project; a failure reads as unavailable, never as available. */
