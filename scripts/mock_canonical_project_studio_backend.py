@@ -199,13 +199,16 @@ async def read_build_file(request: Request) -> dict[str, Any]:
     if kind is None:
         raise HTTPException(status_code=422, detail="fixture preview file is not allowed")
     path = REFERENCE_DIR / relative
+    raw = path.read_bytes()
     return {
         "ok": True,
         "relative": relative,
         "name": path.name,
         "kind": kind,
-        "size_bytes": path.stat().st_size,
-        "content": path.read_text(encoding="utf-8", errors="replace"),
+        "size_bytes": len(raw),
+        # Of the exact bytes, like the real endpoint, so the viewer can compare it with a retained file's hash.
+        "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
+        "content": raw.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n"),
     }
 
 

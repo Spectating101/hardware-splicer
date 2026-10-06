@@ -598,12 +598,26 @@ test('the viewer says when the file on disk is not the copy saved with the revis
   await page.waitForTimeout(1500);
   await expect(page.getByTestId('drift-notice')).toHaveCount(0);
 
-  // The build folder was rewritten after the revision was saved.
+  // The text on screen is decoded and has its line endings normalised, so what counts is the hash of the file's bytes. The
+  // same bytes shown with different text (a CRLF file, say) are not a change...
+  const sameBytes = await page.context().newPage();
+  await sameBytes.route('**/api/proxy/hardware-splicer/build-files/content', async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({ response, json: { ...body, content: body.content.replace(/\n/g, '\r\n') } });
+  });
+  await sameBytes.setViewportSize({ width: 1600, height: 1000 });
+  await sameBytes.goto(EVIDENCE);
+  await expect(sameBytes.locator('kicanvas-embed:not([data-retired])')).toHaveCount(1);
+  await sameBytes.waitForTimeout(1500);
+  await expect(sameBytes.getByTestId('drift-notice')).toHaveCount(0);
+
+  // ...and different bytes are, even when the text on screen looks the same.
   const drifted = await page.context().newPage();
   await drifted.route('**/api/proxy/hardware-splicer/build-files/content', async (route) => {
     const response = await route.fetch();
     const body = await response.json();
-    await route.fulfill({ response, json: { ...body, content: `${body.content}\n` } });
+    await route.fulfill({ response, json: { ...body, sha256: `sha256:${'0'.repeat(64)}` } });
   });
   await drifted.setViewportSize({ width: 1600, height: 1000 });
   await drifted.goto(EVIDENCE);
