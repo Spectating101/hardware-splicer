@@ -59,13 +59,12 @@ test('two reviewers see each other and a new thread arrives without a reload', a
   await expect(alice.getByTestId('presence')).toHaveAttribute('title', /Bob/, { timeout: 20000 });
   await alice.getByRole('button', { name: 'Threads', exact: true }).click();
   await bob.getByRole('button', { name: 'Threads', exact: true }).click();
-  const before = await alice.locator('[data-testid="review-threads"] section').count();
 
   const body = `Live comment ${Date.now()}`;
   await bob.locator('#new-thread-body').fill(body);
   await bob.getByRole('button', { name: 'Start thread' }).click();
-  await expect(alice.getByText(body)).toBeVisible({ timeout: 10000 });
-  expect(await alice.locator('[data-testid="review-threads"] section').count()).toBe(before + 1);
+  // Alice never reloads: the comment reaches her through the change stream, once.
+  await expect(alice.getByText(body)).toHaveCount(1, { timeout: 10000 });
 });
 
 test('a drafted edit becomes a proposal that is previewed but never applied', async ({ page }) => {
