@@ -75,6 +75,15 @@ def _revision_count(store: ProjectStore) -> int:
     return int(store.load("robot")["revision"])
 
 
+def test_a_proposal_keeps_the_reason_its_author_gave(world) -> None:
+    api, _store, _root = world
+    candidate = _propose(api, note="Pin 3 is wired to the wrong rail")
+    assert candidate["note"] == "Pin 3 is wired to the wrong rail"
+    listed = api.get("/v1/projects/robot/candidates").json()["candidates"]
+    assert listed[0]["note"] == "Pin 3 is wired to the wrong rail"
+    assert _propose(api, note="")["note"] == ""
+
+
 def test_a_new_proposal_reports_a_pending_review_that_is_not_stale(world) -> None:
     api, _store, _root = world
     candidate = _propose(api)

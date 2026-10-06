@@ -1084,6 +1084,7 @@ def propose_candidate(
                     "review_id": review_id,
                     "created_by": actor,
                     "verified": bool(verified),
+                    "note": note,
                     "created_at": _utc_now(),
                     "applied": list(edited.get("applied") or []),
                     "warnings": list(edited.get("warnings") or []),
