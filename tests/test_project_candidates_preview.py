@@ -129,3 +129,27 @@ def test_a_preview_needs_a_retained_file_like_a_proposal(tmp_path: Path, monkeyp
     response = _preview(api)
     assert response.status_code == 409
     assert response.json()["detail"]["type"] == "artifact_not_retained"
+
+
+def test_a_preview_or_a_list_never_repairs_a_damaged_store(world) -> None:
+    """Recovery renames damaged revisions and rewrites the manifest. A read route must not do that for anyone."""
+
+    api, store, tmp_path = world
+    second = tmp_path / "build2"
+    (second / "build_compilation").mkdir(parents=True)
+    for source in REF.glob("spi_flash_adapter_v1.kicad_*"):
+        shutil.copy(source, second / "build_compilation" / source.name)
+    saved = api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(second), "expected_revision": 1})
+    assert saved.status_code == 200, saved.text
+    store._revision_path("robot", 2).write_text("{ this revision is damaged", encoding="utf-8")
+    before = _tree(store.root), _tree(tmp_path)
+
+    # No base revision given: the latest one is damaged, so the newest valid one is used, and nothing is repaired.
+    previewed = _preview(api, base_revision=None)
+    assert previewed.status_code == 200, previewed.text
+    assert previewed.json()["preview"]["base_revision"] == 1
+    assert api.get("/v1/projects/robot/candidates").status_code == 200
+    assert api.get("/v1/projects/robot/candidates/cand-0123456789ab").status_code == 404
+
+    assert (_tree(store.root), _tree(tmp_path)) == before
+    assert not list(store.root.rglob("*.corrupt"))

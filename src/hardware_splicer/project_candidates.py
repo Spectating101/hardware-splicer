@@ -926,7 +926,9 @@ def _edit_retained(
     """Read the pinned file of a revision, apply the edits (or the router), and diff the result. Writes nothing."""
 
     if base_revision is None:
-        envelope = store.load_latest_with_recovery(safe_id)
+        # Not the recovering loader: that renames damaged revisions and rewrites the manifest, and a dry run or a read must
+        # never repair anything. This one falls back to the newest valid revision and writes nothing.
+        envelope = store.load(safe_id)
     else:
         envelope = store.load(safe_id, revision=base_revision)
     resolved_revision = int(envelope["revision"])
@@ -1159,7 +1161,7 @@ def propose_candidate(
 
 def list_candidates(store: ProjectStore, project_id: str) -> list[dict[str, Any]]:
     safe_id = validate_project_id(project_id)
-    store.load_latest_with_recovery(safe_id)
+    store.load(safe_id)  # read-only: confirms the project exists without repairing anything
     folder = _record_dir(store, safe_id)
     if not folder.is_dir() or _is_symlink(folder):
         return []
@@ -1224,8 +1226,8 @@ def review_state(store: ProjectStore, reviews: ProjectReviewStore, project_id: s
     stale = False
     if status == "pending":
         try:
-            stale = int(store.load_latest_with_recovery(project_id)["revision"]) != int(review.get("base_revision"))
-        except (ValueError, TypeError, OSError, KeyError):
+            stale = int(store.load(project_id)["revision"]) != int(review.get("base_revision"))
+        except Exception:  # a damaged or missing project reads as "not stale"; this is only a hint
             stale = False
     return {
         "status": status,
@@ -1265,7 +1267,7 @@ def decide_candidate(
 def load_candidate(store: ProjectStore, project_id: str, candidate_id: str) -> dict[str, Any]:
     safe_candidate = _require_candidate_id(candidate_id)
     safe_id = validate_project_id(project_id)
-    store.load_latest_with_recovery(safe_id)
+    store.load(safe_id)  # read-only: confirms the project exists without repairing anything
     return _read_record(store, safe_id, safe_candidate)
 
 
