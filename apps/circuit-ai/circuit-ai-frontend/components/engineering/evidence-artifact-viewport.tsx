@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircuitBoard, LoaderCircle } from 'lucide-react';
+import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
 export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/engineering/viewer-overlay';
@@ -146,6 +147,7 @@ export function EvidenceArtifactViewport({
   onCancelPlace,
   onActiveArtifact,
   focusHighlightId,
+  model3d,
 }: {
   buildDir: string;
   overlayFinding?: string;
@@ -158,6 +160,8 @@ export function EvidenceArtifactViewport({
   onCancelPlace?: () => void;
   onActiveArtifact?: (artifact: ActiveArtifact | null) => void;
   focusHighlightId?: string | null;
+  /** When set, a 3D tab is offered for this project revision. */
+  model3d?: { projectId: string; revision: number | null };
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
@@ -166,6 +170,7 @@ export function EvidenceArtifactViewport({
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [show3d, setShow3d] = useState(false);
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
 
   useEffect(() => {
@@ -278,23 +283,35 @@ export function EvidenceArtifactViewport({
               <button
                 key={file.relative || file.name}
                 type="button"
-                onClick={() => setActiveRelative(file.relative || '')}
-                className={`border-b-2 px-3 py-2.5 text-xs font-medium ${active ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
+                onClick={() => { setShow3d(false); setActiveRelative(file.relative || ''); }}
+                className={`border-b-2 px-3 py-2.5 text-xs font-medium ${active && !show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
               >
                 {file.kind === 'schematic' ? 'Schematic' : file.kind === 'pcb' ? 'PCB' : file.name}
               </button>
             );
           })}
-          {!visibleFiles.length ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
+          {model3d && model3d.revision ? (
+            <button
+              type="button"
+              onClick={() => setShow3d(true)}
+              aria-pressed={show3d}
+              className={`border-b-2 px-3 py-2.5 text-xs font-medium ${show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
+            >
+              3D
+            </button>
+          ) : null}
+          {!visibleFiles.length && !model3d ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
         </div>
         <div className="flex min-w-0 items-center gap-2">
           <span className="shrink-0 rounded border border-stone-200 bg-stone-50 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-stone-500">Read-only review</span>
-          <span className="max-w-[20rem] truncate font-mono text-[10px] text-stone-400">{activeRelative || 'no KiCad artifact attached'}</span>
+          <span className="max-w-[20rem] truncate font-mono text-[10px] text-stone-400">{show3d ? 'rendered from the retained PCB' : activeRelative || 'no KiCad artifact attached'}</span>
         </div>
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
-        {loading ? <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70"><LoaderCircle className="h-5 w-5 animate-spin text-stone-500" /></div> : null}
+        {show3d && model3d && model3d.revision ? <Model3DViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
+        {show3d ? null : loading ? <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70"><LoaderCircle className="h-5 w-5 animate-spin text-stone-500" /></div> : null}
+        <div className={show3d ? 'hidden' : 'contents'}>
         {!buildDir || error || viewerFailed || (!content && !loading) ? (
           <div className={`flex h-full ${compact ? 'min-h-[470px]' : 'min-h-[600px]'} items-center justify-center p-8`}>
             <div className="max-w-sm text-center">
@@ -330,6 +347,7 @@ export function EvidenceArtifactViewport({
             </div>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   );

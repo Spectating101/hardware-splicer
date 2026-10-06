@@ -370,7 +370,7 @@ export default function EvidenceComparePage() {
               </div>
             </div>
             <div className="min-h-0 flex-1">
-              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact highlights={artifactHighlights} onActiveArtifact={setActiveArtifact} focusHighlightId={focusedChange} />
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact highlights={artifactHighlights} onActiveArtifact={setActiveArtifact} focusHighlightId={focusedChange} model3d={{ projectId, revision: candidateRevision }} />
             </div>
           </section>
 

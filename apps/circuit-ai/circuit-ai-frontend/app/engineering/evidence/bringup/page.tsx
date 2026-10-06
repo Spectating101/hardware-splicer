@@ -232,7 +232,7 @@ export default function EvidenceBringupPage() {
               <span className={`rounded-md border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${selected.state === 'complete' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : selected.state === 'blocked' ? 'border-red-200 bg-red-50 text-red-700' : selected.state === 'active' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-stone-200 bg-stone-50 text-stone-500'}`}>{selected.state}</span>
             </div>
             <div className="min-h-0 flex-1">
-              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="pcb" compact />
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="pcb" compact model3d={{ projectId, revision }} />
             </div>
           </section>
 

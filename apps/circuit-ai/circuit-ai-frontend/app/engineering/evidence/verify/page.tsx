@@ -256,7 +256,7 @@ export default function EvidenceVerifyPage() {
           </aside>
 
           <section className="order-first min-w-0 bg-white xl:order-none">
-            <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="schematic" />
+            <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} preferredKind="schematic" model3d={{ projectId, revision }} />
           </section>
 
           <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
