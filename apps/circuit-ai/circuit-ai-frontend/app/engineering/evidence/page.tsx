@@ -513,6 +513,7 @@ export default function EvidenceOverviewPage() {
               focusHighlightId={focusChange}
               proposing={revision ? {
                 projectId,
+                baseRevision: revision,
                 onPropose: (kind, input, note) => candidates.propose({ baseRevision: revision, kind, note, ...input }),
                 onProposed: () => setRailTab('proposals'),
               } : undefined}

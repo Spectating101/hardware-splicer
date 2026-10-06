@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, CircuitBoard, LoaderCircle, Pencil } from 'lucide-react';
 import { EditDock } from '@/components/engineering/edit-dock';
-import { useRoutingCapability, type Candidate, type ProposalInput } from '@/lib/project-candidates';
+import { previewDraft, useRoutingCapability, type Candidate, type DraftPreview, type EditOp, type ProposalInput } from '@/lib/project-candidates';
+import { changesToHighlights } from '@/lib/artifact-diff';
 import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
@@ -145,6 +146,42 @@ const RETIRE_AFTER_LOAD_MS = 300;
 const RETIRE_GIVE_UP_MS = 15000;
 const SWITCH_SETTLE_MS = 120;
 
+type KeptCamera = { relative: string; x: number; y: number; zoom: number };
+type LooseCamera = { zoom: number; center: { x: number; y: number; constructor: unknown } };
+
+function cameraOf(embed: HTMLElement) {
+  const app = embed.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { viewport?: { camera?: LooseCamera; callback?: () => void }; draw?: () => void } }) | null;
+  return { app, viewer: app?.viewer, camera: app?.viewer?.viewport?.camera };
+}
+
+function readCamera(embed: HTMLElement, relative: string): KeptCamera | null {
+  try {
+    const { camera } = cameraOf(embed);
+    if (!camera || !Number.isFinite(camera.zoom) || !Number.isFinite(camera.center?.x)) return null;
+    return { relative, x: camera.center.x, y: camera.center.y, zoom: camera.zoom };
+  } catch {
+    return null;
+  }
+}
+
+/** KiCanvas fits its own view as it finishes loading; put the person's view back after that. */
+function restoreCamera(embed: HTMLElement, kept: KeptCamera) {
+  const apply = () => {
+    try {
+      const { viewer, camera } = cameraOf(embed);
+      if (!viewer || !camera) return;
+      const Vector = camera.center.constructor as new (x: number, y: number) => { x: number; y: number };
+      camera.center = new Vector(kept.x, kept.y);
+      camera.zoom = kept.zoom;
+      viewer.viewport?.callback?.();
+      viewer.draw?.();
+    } catch {
+      // A viewer that is not ready keeps its own fit.
+    }
+  };
+  [80, 250, 600].forEach((delay) => window.setTimeout(apply, delay));
+}
+
 function retireEmbed(embed: HTMLElement) {
   embed.setAttribute('data-retired', '');
   embed.style.display = 'none';
@@ -187,7 +224,7 @@ export function EvidenceArtifactViewport({
   /** When set, a 3D tab is offered for this project revision. */
   model3d?: { projectId: string; revision: number | null };
   /** When set, the viewer offers Edit, which drafts changes and sends them as a proposal for review. */
-  proposing?: { projectId: string; onPropose: (kind: 'schematic' | 'pcb', input: ProposalInput, note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
+  proposing?: { projectId: string; baseRevision: number | null; onPropose: (kind: 'schematic' | 'pcb', input: ProposalInput, note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
   preview?: ProposalPreview | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -199,10 +236,20 @@ export function EvidenceArtifactViewport({
   const [error, setError] = useState('');
   const [show3d, setShow3d] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [draftOps, setDraftOps] = useState<EditOp[]>([]);
+  const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string }>({ status: 'idle' });
+  const cameraRef = useRef<{ relative: string; x: number; y: number; zoom: number } | null>(null);
+  const relativeRef = useRef('');
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
   const previewing = Boolean(preview && preview.kind === activeKind);
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
-  const shownContent = previewing && preview ? preview.text : content;
+  relativeRef.current = activeRelative;
+  const draftShown = !previewing && draft.status === 'ready' && draft.preview?.kind === activeKind;
+  const shownContent = previewing && preview ? preview.text : draftShown && draft.preview ? draft.preview.text : content;
+  // Where the draft differs from the retained file, marked the same way a previewed proposal is.
+  const draftHighlights = draftShown && draft.preview
+    ? changesToHighlights({ available: true, kind: draft.preview.kind, summary: draft.preview.diff.summary || { added: 0, removed: 0, changed: 0, unchanged: 0 }, changes: draft.preview.diff.changes || [] }, activeRelative)
+    : [];
 
   useEffect(() => {
     onActiveArtifact?.(activeRelative && activeKind ? { relative: activeRelative, kind: activeKind } : null);
@@ -285,6 +332,8 @@ export function EvidenceArtifactViewport({
     if (!host || !ready || !shownContent) return;
     let embed: HTMLElement | null = null;
     let stopFocus: (() => void) | undefined;
+    const relativeAtMount = relativeRef.current;
+    const keptCamera = cameraRef.current && cameraRef.current.relative === relativeAtMount ? cameraRef.current : null;
 
     const mount = () => {
       host.querySelectorAll('kicanvas-embed:not([data-retired])').forEach((stray) => retireEmbed(stray as HTMLElement));
@@ -298,7 +347,10 @@ export function EvidenceArtifactViewport({
       created.appendChild(source);
       host.appendChild(created);
 
-      if (activeKind === 'pcb') {
+      if (keptCamera) {
+        // The same file reloaded with other content (a draft or a previewed proposal): keep the view the person had.
+        created.addEventListener('kicanvas:load', () => restoreCamera(created, keptCamera), { once: true });
+      } else if (activeKind === 'pcb') {
         // The vendored KiCanvas declares an embed `zoom` attribute but does not currently
         // forward it into kc-board-app. Its BoardViewer does expose zoom_to_board(), which
         // fits the camera to Edge.Cuts. Use that real viewer API after initialization.
@@ -316,6 +368,7 @@ export function EvidenceArtifactViewport({
       window.clearTimeout(timer);
       stopFocus?.();
       if (!embed) return;
+      cameraRef.current = readCamera(embed, relativeAtMount) || cameraRef.current;
       // KiCanvas queues a draw on the next animation frame. If this embed is replaced first, that queued draw runs
       // against a disposed renderer and throws. Silence this viewer's draws before it goes away.
       try {
@@ -340,6 +393,31 @@ export function EvidenceArtifactViewport({
   useEffect(() => {
     if (show3d || preview) setEditing(false);
   }, [show3d, preview]);
+
+  // Leaving edit mode, or changing file, drops the draft with it.
+  useEffect(() => {
+    if (!editing) { setDraftOps([]); setDraft({ status: 'idle' }); }
+  }, [editing]);
+  useEffect(() => { setDraftOps([]); setDraft({ status: 'idle' }); }, [activeKind]);
+
+  // A dry run of the draft, a beat after the last change, so the viewer can show the result and a refused edit is reported
+  // while the person is still editing. Nothing is saved.
+  useEffect(() => {
+    if (!editing || !proposing || !draftOps.length || (activeKind !== 'schematic' && activeKind !== 'pcb')) {
+      setDraft((current) => (current.status === 'idle' ? current : { status: 'idle' }));
+      return;
+    }
+    const controller = new AbortController();
+    setDraft((current) => ({ ...current, status: 'loading' }));
+    const timer = window.setTimeout(() => {
+      previewDraft(proposing.projectId, { baseRevision: proposing.baseRevision, kind: activeKind, ops: draftOps }, controller.signal)
+        .then((result) => setDraft(result.ok ? { status: 'ready', preview: result.preview } : { status: 'error', message: result.message }))
+        .catch(() => undefined);
+    }, 350);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+    // The callback identity is not a trigger; the ops, file and revision are.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftOps, editing, activeKind, proposing?.projectId, proposing?.baseRevision]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
   const minHeight = compact ? 'min-h-[520px]' : 'min-h-[650px]';
@@ -385,11 +463,23 @@ export function EvidenceArtifactViewport({
               <Pencil className="h-3 w-3" aria-hidden="true" />Edit
             </button>
           ) : null}
-          <span className={`shrink-0 rounded border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] ${previewing ? 'border-amber-300 bg-amber-50 text-amber-900' : editing ? 'border-stone-900 text-stone-900' : 'border-stone-200 bg-stone-50 text-stone-500'}`}>{previewing ? 'Proposal preview · not applied' : editing ? 'Drafting a proposal' : 'Read-only review'}</span>
+          <span className={`shrink-0 rounded border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] ${previewing || draftShown ? 'border-amber-300 bg-amber-50 text-amber-900' : editing ? 'border-stone-900 text-stone-900' : 'border-stone-200 bg-stone-50 text-stone-500'}`}>{previewing ? 'Proposal preview · not applied' : draftShown ? 'Draft preview · not saved' : editing ? 'Drafting a proposal' : 'Read-only review'}</span>
           <span className="max-w-[20rem] truncate font-mono text-[10px] text-stone-400">{show3d ? 'rendered from the retained PCB' : activeRelative || 'no KiCad artifact attached'}</span>
         </div>
       </div>
 
+      {editing && proposing && (activeKind === 'schematic' || activeKind === 'pcb') ? (
+        <EditDock
+          hostRef={hostRef}
+          kind={activeKind}
+          routing={routing}
+          draftStatus={draft.status === 'idle' ? null : { status: draft.status, message: draft.message }}
+          onDraftChange={setDraftOps}
+          onPropose={(input, note) => proposing.onPropose(activeKind, input, note)}
+          onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
+          onClose={() => setEditing(false)}
+        />
+      ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
         {show3d && model3d && model3d.revision ? <Model3DViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
         {show3d ? null : loading ? <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70"><LoaderCircle className="h-5 w-5 animate-spin text-stone-500" /></div> : null}
@@ -411,7 +501,7 @@ export function EvidenceArtifactViewport({
             activeRelative={activeRelative}
             activeKind={activeKind || ''}
             pins={pins}
-            highlights={highlights}
+            highlights={[...(highlights || []), ...draftHighlights]}
             placing={placing}
             onPlace={onPlace}
             onCancelPlace={onCancelPlace}
@@ -430,16 +520,6 @@ export function EvidenceArtifactViewport({
           </div>
         ) : null}
         </div>
-        {editing && proposing && (activeKind === 'schematic' || activeKind === 'pcb') ? (
-          <EditDock
-            hostRef={hostRef}
-            kind={activeKind}
-            routing={routing}
-            onPropose={(input, note) => proposing.onPropose(activeKind, input, note)}
-            onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
-            onClose={() => setEditing(false)}
-          />
-        ) : null}
       </div>
     </div>
   );
