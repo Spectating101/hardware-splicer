@@ -668,7 +668,7 @@ async def candidates_create(project_id: str, request: Request) -> dict[str, Any]
         "schema_version": "hardware_splicer.candidate.v1", "candidate_id": cid, "project_id": project_id,
         "base_revision": base_rev, "kind": kind, "review_id": "review-" + uuid4().hex[:8],
         "created_by": operator["id"] if operator else author, "verified": operator is not None, "note": str(payload.get("note") or "")[:500],
-        "files": {kind: {"relative": name, "sha256": None}},
+        "files": {kind: {"relative": name, "retained_relative": name, "sha256": None}},
         "created_at": datetime.now(timezone.utc).isoformat(), "applied": edited.get("applied", []),
         "warnings": edited.get("warnings", []), "diff": diff,
         "checks": {"engine": "kicad-cli", "available": False, "ran": False, "reason": "kicad-cli is not available"},

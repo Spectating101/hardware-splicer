@@ -437,6 +437,38 @@ test('a proposal is drawn over the retained file it changed, found by its retain
   await expect(page.getByText('Proposal preview · not applied')).toBeVisible();
 });
 
+test('a proposal recorded without the path of its file is not drawn over a file by guesswork', async ({ page }) => {
+  await page.route('**/api/proxy/engineering/projects/outsider-fixture/candidates', async (route) => {
+    if (route.request().method() !== 'GET') { await route.continue(); return; }
+    const response = await route.fetch();
+    const body = await response.json();
+    // An older record: it names a stored file but not where that file was retained from.
+    const candidates = (body.candidates || []).map((candidate) => ({ ...candidate, files: { [candidate.kind]: { relative: 'spi_flash_adapter_v1.kicad_sch', sha256: null } } }));
+    await route.fulfill({ response, json: { ...body, candidates } });
+  });
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.addInitScript(() => localStorage.setItem('hs-review-author', 'Alice'));
+  await page.goto(EVIDENCE);
+  await expect(page.locator('kicanvas-embed:not([data-retired])')).toHaveCount(1);
+
+  const reason = `Older record ${Date.now()}`;
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await viewerReady(page);
+  const point = await symbolScreenPoint(page, 'U1');
+  await page.mouse.click(point.x, point.y);
+  await expect(page.getByTestId('edit-dock')).toContainText('U1', { timeout: 8000 });
+  await page.getByRole('button', { name: 'Rotate 90 degrees clockwise' }).click();
+  await page.getByLabel('Reason for the proposal').fill(reason);
+  await page.getByRole('button', { name: /^Propose 1 change/ }).click();
+
+  const card = page.getByTestId('proposal-card').filter({ hasText: reason });
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByRole('button', { name: 'Preview with changes marked' }).click();
+
+  await expect(page.getByRole('alert').filter({ hasText: 'without the path of the file it changed' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText('Proposal preview · not applied')).toHaveCount(0);
+});
+
 test('a file that is slow or fails to load never shows, or lends its selection to, the previous file', async ({ page }) => {
   await offerSecondSchematic(page, 'sheets/sheet_two.kicad_sch');
   let mode = 'slow';
@@ -473,6 +505,11 @@ test('a file that is slow or fails to load never shows, or lends its selection t
   await page.getByRole('button', { name: 'sheet_two', exact: true }).click();
   await expect(page.getByText('Artifact content is unavailable.')).toBeVisible({ timeout: 10000 });
   await expect(page.locator('kicanvas-embed:not([data-retired])')).toHaveCount(0);
+
+  // Going back to the file that did load puts its viewer back, even though its text is identical to what was shown before.
+  await page.getByRole('button', { name: 'spi_flash_adapter_v1', exact: true }).click();
+  await expect(page.locator('kicanvas-embed:not([data-retired])')).toHaveCount(1, { timeout: 10000 });
+  await viewerReady(page);
 });
 
 test('switching to another project with a file of the same path ends editing and discards the draft', async ({ page }) => {
