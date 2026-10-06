@@ -169,6 +169,14 @@ const RETIRE_AFTER_LOAD_MS = 300;
 const RETIRE_GIVE_UP_MS = 15000;
 const SWITCH_SETTLE_MS = 120;
 
+async function sha256Of(text: string) {
+  // Only available in a secure context (https or localhost); without it the comparison is simply skipped.
+  if (typeof crypto === 'undefined' || !crypto.subtle) return null;
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return `sha256:${Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
+
+type PinEntry = { relative?: string; sha256?: string };
 type KeptCamera = { relative: string; x: number; y: number; zoom: number };
 type LooseCamera = { zoom: number; center: { x: number; y: number; constructor: unknown } };
 
@@ -355,6 +363,11 @@ export function EvidenceArtifactViewport({
   const artifactKey = `${contextKey}|${activeRelative}`;
   const artifactRef = useRef('');
   artifactRef.current = artifactKey;
+
+  // What the revision retained, so the file on screen can be checked against it. Edits and previews always use the
+  // retained copy; the build folder can have been rewritten since.
+  const [pin, setPin] = useState<{ key: string; artifacts: Partial<Record<'schematic' | 'pcb', PinEntry>> } | null>(null);
+  const [drift, setDrift] = useState<{ key: string; differs: boolean } | null>(null);
   const previewing = Boolean(preview && preview.relative && preview.kind === activeKind && sameFile(preview.relative, activeRelative));
   // A proposal for a file that is not among those shown, or that does not say which file it changed, cannot be drawn anywhere honest.
   const previewMissing = Boolean(preview && (!preview.relative || (files.length && !resolveFile(files, preview.kind, preview.relative))));
@@ -546,6 +559,30 @@ export function EvidenceArtifactViewport({
     if (show3d || preview) setEditing(false);
   }, [show3d, preview]);
 
+  useEffect(() => {
+    if (!proposing?.projectId || !proposing.baseRevision) { setPin(null); return; }
+    const requestContext = contextKey;
+    const controller = new AbortController();
+    fetch(`/api/proxy/engineering/projects/${encodeURIComponent(proposing.projectId)}/revisions/${proposing.baseRevision}/artifacts`, { cache: 'no-store', signal: controller.signal })
+      .then((response) => response.json())
+      .then((body) => setPin(body?.ok !== false && body?.pin?.artifacts ? { key: requestContext, artifacts: body.pin.artifacts } : null))
+      .catch(() => undefined);
+    return () => controller.abort();
+    // The pin belongs to a project and revision; the viewer's other state is not a trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextKey]);
+
+  // Does the file on screen match the copy saved with the revision? Compared only for the retained file itself.
+  useEffect(() => {
+    const entry = activeKind === 'schematic' || activeKind === 'pcb' ? pin?.artifacts?.[activeKind] : undefined;
+    if (!pin || pin.key !== contextKey || !entry?.sha256 || !sameFile(entry.relative, activeRelative) || !content) { setDrift(null); return; }
+    let cancelled = false;
+    sha256Of(content).then((digest) => { if (!cancelled && digest) setDrift({ key: artifactKey, differs: digest !== entry.sha256 }); });
+    return () => { cancelled = true; };
+    // The content, the pin and the file are what is compared.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin, content, activeKind, artifactKey]);
+
   // Leaving edit mode, or changing file, drops the draft with it.
   useEffect(() => {
     if (!editing) { setDraftOps([]); setDraft({ status: 'idle' }); }
@@ -666,6 +703,11 @@ export function EvidenceArtifactViewport({
           onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
           onClose={() => setEditing(false)}
         />
+      ) : null}
+      {drift && drift.key === artifactKey && drift.differs && proposing ? (
+        <div role="status" className="shrink-0 border-b border-stone-300 bg-stone-100 px-3 py-1.5 text-[11px] leading-4 text-stone-700" data-testid="drift-notice">
+          The file on disk is not the copy saved with revision {proposing.baseRevision}. Previews and proposals use the saved copy.
+        </div>
       ) : null}
       {previewMissing && preview ? (
         <div role="alert" className="shrink-0 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] leading-4 text-amber-900">
