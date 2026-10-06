@@ -132,6 +132,31 @@ is never stored. A fixed violation cannot mask a new one. If `kicad-cli` is
 missing or fails, `ran` is false with a reason and nothing is raised. Checks
 never block, pass, or fail a candidate.
 
+## Autoroute as a proposal
+
+`POST /v1/projects/{id}/candidates` also accepts `{"kind": "pcb", "autoroute": {...}}` **instead of** `ops`
+(the two cannot be combined, and autoroute applies to the PCB only). Options:
+
+| Field | Default | Rule |
+|-------|---------|------|
+| `max_passes` | 20 | integer 1 to 50 |
+| `keep_existing_tracks` | `true` | boolean; `false` lets the router remove existing tracks |
+
+The router is [`routing_engine.py`](ROUTING_ENGINE.md). Its output goes through the same path as an edit: structural
+diff, optional DRC counts, a new candidate directory and a pending review. The routing engine's own guards refuse a
+result that changes anything but copper (placement, board setup, zone settings), and that refusal is HTTP 422
+`routing_failed`. A server without FreeRouting answers HTTP 409 `routing_unavailable` with the text that says what to
+install; nothing is created. A routed board is a proposal: it is not DRC-clean, verified or fabrication-ready until a
+reviewer says so.
+
+`GET /v1/projects/{id}/routing` reports whether routing can run here: `{available, reason, components}` with a version
+per component and no filesystem paths.
+
+## Request handling
+
+Applying edits, routing and the design-rule checks take seconds. The create handler runs them on a worker thread so
+the server keeps answering other requests and live event streams while a proposal is being built.
+
 ## What this service does not do
 
 - write a revision, pin, thread, or review decision
