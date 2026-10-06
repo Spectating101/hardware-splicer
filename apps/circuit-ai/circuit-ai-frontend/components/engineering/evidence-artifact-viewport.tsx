@@ -39,7 +39,7 @@ function resolveFile(files: EvidenceBuildFile[], kind: string, relative: string 
 type JsonRecord = Record<string, unknown>;
 export type EvidenceBuildFile = { name?: string; relative?: string; kind?: string };
 type BuildFilesResponse = { ok?: boolean; files?: EvidenceBuildFile[] };
-type BuildContentResponse = { ok?: boolean; content?: string };
+type BuildContentResponse = { ok?: boolean; content?: string; sha256?: string };
 type PreferredArtifactKind = 'schematic' | 'pcb';
 type KiCanvasBoardViewer = { zoom_to_board?: () => void; draw?: () => void };
 type KiCanvasBoardApp = HTMLElement & { viewer?: KiCanvasBoardViewer };
@@ -168,13 +168,6 @@ function focusKiCanvasBoard(embed: HTMLElement) {
 const RETIRE_AFTER_LOAD_MS = 300;
 const RETIRE_GIVE_UP_MS = 15000;
 const SWITCH_SETTLE_MS = 120;
-
-async function sha256Of(text: string) {
-  // Only available in a secure context (https or localhost); without it the comparison is simply skipped.
-  if (typeof crypto === 'undefined' || !crypto.subtle) return null;
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return `sha256:${Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
-}
 
 type PinEntry = { relative?: string; sha256?: string };
 type KeptCamera = { relative: string; x: number; y: number; zoom: number };
@@ -340,7 +333,7 @@ export function EvidenceArtifactViewport({
   const [listed, setListed] = useState<{ key: string; files: EvidenceBuildFile[] } | null>(null);
   const files = useMemo(() => (listed && listed.key === contextKey ? listed.files : []), [listed, contextKey]);
   const [activeRelative, setActiveRelative] = useState('');
-  const [loaded, setLoaded] = useState<{ key: string; text: string } | null>(null);
+  const [loaded, setLoaded] = useState<{ key: string; text: string; sha256?: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [show3d, setShow3d] = useState(false);
@@ -448,7 +441,7 @@ export function EvidenceArtifactViewport({
         return payload;
       })
       .then((payload) => {
-        if (!cancelled) setLoaded({ key: requestKey, text: payload.content || '' });
+        if (!cancelled) setLoaded({ key: requestKey, text: payload.content || '', sha256: payload.sha256 });
       })
       .catch((caught) => {
         if (!cancelled) setError(caught instanceof Error ? caught.message : 'Artifact content is unavailable.');
@@ -572,16 +565,16 @@ export function EvidenceArtifactViewport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextKey]);
 
-  // Does the file on screen match the copy saved with the revision? Compared only for the retained file itself.
+  // Does the file on screen match the copy saved with the revision? Compared only for the retained file itself, and by the
+  // hash of its exact bytes: the text shown is decoded and has its line endings normalised, so it cannot be hashed instead.
+  const shownHash = loaded && loaded.key === contentKey ? loaded.sha256 : undefined;
   useEffect(() => {
     const entry = activeKind === 'schematic' || activeKind === 'pcb' ? pin?.artifacts?.[activeKind] : undefined;
-    if (!pin || pin.key !== contextKey || !entry?.sha256 || !sameFile(entry.relative, activeRelative) || !content) { setDrift(null); return; }
-    let cancelled = false;
-    sha256Of(content).then((digest) => { if (!cancelled && digest) setDrift({ key: artifactKey, differs: digest !== entry.sha256 }); });
-    return () => { cancelled = true; };
-    // The content, the pin and the file are what is compared.
+    if (!pin || pin.key !== contextKey || !entry?.sha256 || !sameFile(entry.relative, activeRelative) || !shownHash) { setDrift(null); return; }
+    setDrift({ key: artifactKey, differs: shownHash !== entry.sha256 });
+    // The hash, the pin and the file are what is compared.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pin, content, activeKind, artifactKey]);
+  }, [pin, shownHash, activeKind, artifactKey]);
 
   // Leaving edit mode, or changing file, drops the draft with it.
   useEffect(() => {
