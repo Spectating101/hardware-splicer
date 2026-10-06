@@ -153,6 +153,16 @@ reviewer says so.
 `GET /v1/projects/{id}/routing` reports whether routing can run here: `{available, reason, components}` with a version
 per component and no filesystem paths.
 
+## Previewing a draft
+
+`POST /v1/projects/{id}/candidates/preview` takes the same `{base_revision, kind, ops}` as a proposal and returns
+`{base_revision, kind, text, applied, warnings, diff}`: the edited file and its structural diff, computed by the same
+read, edit and diff a proposal uses, so the answer matches what a proposal would hold.
+
+It keeps nothing. No directory, record or review is created, no design-rule check runs, the proposal cap is untouched
+and no token is needed. It refuses what a proposal would refuse (unknown reference, no effective change, no retained
+file). Autoroute is not previewed, because routing is slow and a draft preview is meant to follow typing.
+
 ## Deciding a proposal
 
 `POST /v1/projects/{id}/candidates/{candidate_id}/decision` with `{"decision": "accepted" | "rejected", "note": "..."}`
