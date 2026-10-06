@@ -667,11 +667,12 @@ async def candidates_create(project_id: str, request: Request) -> dict[str, Any]
     record = {
         "schema_version": "hardware_splicer.candidate.v1", "candidate_id": cid, "project_id": project_id,
         "base_revision": base_rev, "kind": kind, "review_id": "review-" + uuid4().hex[:8],
-        "created_by": operator["id"] if operator else author, "verified": operator is not None,
+        "created_by": operator["id"] if operator else author, "verified": operator is not None, "note": str(payload.get("note") or "")[:500],
         "created_at": datetime.now(timezone.utc).isoformat(), "applied": edited.get("applied", []),
         "warnings": edited.get("warnings", []), "diff": diff,
         "checks": {"engine": "kicad-cli", "available": False, "ran": False, "reason": "kicad-cli is not available"},
         "authority": {"state": "proposal", "note": "A candidate is a proposal. Accepting its review does not mark anything verified, fabrication-ready or release-ready."},
+        "review_state": {"status": "pending", "decided_by": None, "decided_at": None, "note": None, "accepted_revision": None, "stale": False},
     }
     _candidates[cid] = record
     _candidate_files[cid] = edited["text"]
@@ -685,6 +686,31 @@ def candidates_get(project_id: str, candidate_id: str) -> dict[str, Any]:
     if candidate_id not in _candidates:
         raise _thread_error(404, "not_found", "Candidate not found")
     return {"ok": True, "candidate": _candidates[candidate_id]}
+
+
+@app.post("/v1/projects/{project_id}/candidates/{candidate_id}/decision")
+async def candidates_decide(project_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
+    _require_project(project_id)
+    payload = await request.json()
+    operator = _operator_from_request(request)
+    if operator is None:
+        raise _thread_error(401, "operator_token_required", "an operator token is required to accept or reject a proposal")
+    record = _candidates.get(candidate_id)
+    if record is None:
+        raise _thread_error(404, "not_found", "Candidate not found")
+    decision = str(payload.get("decision") or "").strip().lower()
+    if decision not in {"accepted", "rejected"}:
+        raise _thread_error(422, "invalid_request", "decision must be accepted or rejected")
+    if record["review_state"]["status"] != "pending":
+        raise _thread_error(409, "review_conflict", "this proposal has already been decided")
+    # Fixture limitation: accepting does not add a revision here, so the other specs keep seeing Rev 6.
+    record["review_state"] = {
+        "status": decision, "decided_by": operator["id"], "decided_at": datetime.now(timezone.utc).isoformat(),
+        "note": str(payload.get("note") or "")[:500] or None,
+        "accepted_revision": record["base_revision"] + 1 if decision == "accepted" else None, "stale": False,
+    }
+    _publish("review.event", record["review_id"], 1)
+    return {"ok": True, "candidate": record, "review_state": record["review_state"]}
 
 
 @app.get("/v1/projects/{project_id}/candidates/{candidate_id}/files/{kind}")

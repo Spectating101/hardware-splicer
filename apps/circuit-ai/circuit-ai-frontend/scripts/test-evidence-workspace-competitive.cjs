@@ -164,9 +164,17 @@ requireText('parts', capabilityFiles.parts, 'No MPN in the design');
 requireText('live', capabilityFiles.live, 'x-hs-operator-token');
 forbidText('live', capabilityFiles.live, 'authorization');
 requireText('3d', capabilityFiles.model3d, 'dispose');
-// Nothing in the proposal surface may offer to accept, approve, release or fabricate.
+// A proposal can be accepted only by an operator the server has verified, and accepting only makes a revision.
+requireText('proposals', capabilityFiles.proposals, 'Deciding needs an operator token');
+requireText('proposals', capabilityFiles.proposals, '{!token ? (');
+requireText('proposals', capabilityFiles.proposals, 'It does not verify the design or open fabrication');
+requireText('proposals', capabilityFiles.proposals, 'Applied as revision');
+forbidText('proposals', capabilityFiles.proposals, 'authorization');
+requireText('candidates', capabilityFiles.candidatesLib, "'x-hs-operator-token'");
+// Nothing in the proposal surface may offer to approve, authorize, release or fabricate; accepting is not any of those.
 for (const [name, source] of Object.entries({ dock: capabilityFiles.dock, proposals: capabilityFiles.proposals })) {
-  for (const word of ['>Accept<', '>Approve<', '>Authorize<', '>Fabricate<', 'Release now']) forbidText(name, source, word);
+  for (const word of ['>Approve<', '>Authorize<', '>Fabricate<', 'Release now', 'Mark verified', 'Fabrication-ready']) forbidText(name, source, word);
 }
+forbidText('edit dock', capabilityFiles.dock, '>Accept');
 
 console.log('competitive evidence workspace acceptance: PASS');
