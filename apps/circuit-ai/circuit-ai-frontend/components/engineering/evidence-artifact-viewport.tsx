@@ -139,6 +139,24 @@ function focusKiCanvasBoard(embed: HTMLElement) {
   };
 }
 
+// KiCanvas initialises asynchronously and adds resources to itself as it goes. An embed removed before it finishes throws
+// an uncaught error from inside the library, so a replaced embed is hidden and removed only once it has loaded.
+const RETIRE_AFTER_LOAD_MS = 300;
+const RETIRE_GIVE_UP_MS = 15000;
+const SWITCH_SETTLE_MS = 120;
+
+function retireEmbed(embed: HTMLElement) {
+  embed.setAttribute('data-retired', '');
+  embed.style.display = 'none';
+  const remove = () => embed.remove();
+  if (embed.dataset.loaded === '1') {
+    window.setTimeout(remove, RETIRE_AFTER_LOAD_MS);
+    return;
+  }
+  embed.addEventListener('kicanvas:load', () => window.setTimeout(remove, RETIRE_AFTER_LOAD_MS), { once: true });
+  window.setTimeout(remove, RETIRE_GIVE_UP_MS);
+}
+
 export function EvidenceArtifactViewport({
   buildDir,
   overlayFinding = '',
@@ -265,25 +283,39 @@ export function EvidenceArtifactViewport({
   useEffect(() => {
     const host = hostRef.current;
     if (!host || !ready || !shownContent) return;
-    host.replaceChildren();
-    const embed = document.createElement('kicanvas-embed');
-    embed.setAttribute('controls', 'basic');
-    embed.setAttribute('controlslist', 'nodownload nooverlay');
-    const source = document.createElement('kicanvas-source');
-    source.textContent = shownContent;
-    embed.appendChild(source);
-    host.appendChild(embed);
-
+    let embed: HTMLElement | null = null;
     let stopFocus: (() => void) | undefined;
-    if (activeKind === 'pcb') {
-      // The vendored KiCanvas declares an embed `zoom` attribute but does not currently
-      // forward it into kc-board-app. Its BoardViewer does expose zoom_to_board(), which
-      // fits the camera to Edge.Cuts. Use that real viewer API after initialization.
-      embed.setAttribute('zoom', 'objects');
-      stopFocus = focusKiCanvasBoard(embed);
-    }
+
+    const mount = () => {
+      host.querySelectorAll('kicanvas-embed:not([data-retired])').forEach((stray) => retireEmbed(stray as HTMLElement));
+      const created = document.createElement('kicanvas-embed');
+      embed = created;
+      created.addEventListener('kicanvas:load', () => { created.dataset.loaded = '1'; });
+      created.setAttribute('controls', 'basic');
+      created.setAttribute('controlslist', 'nodownload nooverlay');
+      const source = document.createElement('kicanvas-source');
+      source.textContent = shownContent;
+      created.appendChild(source);
+      host.appendChild(created);
+
+      if (activeKind === 'pcb') {
+        // The vendored KiCanvas declares an embed `zoom` attribute but does not currently
+        // forward it into kc-board-app. Its BoardViewer does expose zoom_to_board(), which
+        // fits the camera to Edge.Cuts. Use that real viewer API after initialization.
+        created.setAttribute('zoom', 'objects');
+        stopFocus = focusKiCanvasBoard(created);
+      }
+    };
+
+    // Opening the first file mounts at once. Switching waits a beat, so flipping between files faster than KiCanvas can
+    // load them only ever loads the last one instead of stacking up a heavy viewer for each click.
+    const switching = Boolean(host.querySelector('kicanvas-embed'));
+    const timer = window.setTimeout(mount, switching ? SWITCH_SETTLE_MS : 0);
+
     return () => {
+      window.clearTimeout(timer);
       stopFocus?.();
+      if (!embed) return;
       // KiCanvas queues a draw on the next animation frame. If this embed is replaced first, that queued draw runs
       // against a disposed renderer and throws. Silence this viewer's draws before it goes away.
       try {
@@ -292,6 +324,7 @@ export function EvidenceArtifactViewport({
       } catch {
         // The viewer may not have initialised yet; there is then nothing queued.
       }
+      retireEmbed(embed);
     };
   }, [activeKind, shownContent, ready]);
 
