@@ -335,3 +335,27 @@ test('a draft and a selection belong to one file: another schematic never shows 
   await expect(page.getByText('Draft preview · not saved')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^Propose 1 change/ })).toBeDisabled();
 });
+
+test('copper fills are faint by default so tracks and pads stay readable, and can be shown in full', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await expect(page.getByRole('button', { name: /^Copper fills/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  const toggle = page.getByRole('button', { name: 'Copper fills: faint' });
+  await expect(toggle).toBeVisible();
+
+  const zoneOpacity = () => page.evaluate(() => {
+    const viewer = document.querySelector('kicanvas-embed:not([data-retired])')?.shadowRoot?.querySelector('kc-board-app')?.viewer;
+    const zones = Array.from(viewer?.layers?.in_display_order?.() || []).filter((layer) => /Zones$/.test(layer.name));
+    return zones.length ? zones.map((layer) => layer.opacity) : null;
+  });
+  await expect.poll(zoneOpacity, { timeout: 15000 }).toEqual(expect.arrayContaining([0.22]));
+
+  await toggle.click();
+  await expect(page.getByRole('button', { name: 'Copper fills: full' })).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(zoneOpacity, { timeout: 5000 }).toEqual(expect.arrayContaining([1]));
+
+  // The choice survives a reload of the same board (a draft or a previewed proposal replaces the viewer).
+  await page.getByRole('button', { name: 'Schematic', exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Copper fills/ })).toHaveCount(0);
+});

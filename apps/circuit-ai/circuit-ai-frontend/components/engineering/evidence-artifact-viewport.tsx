@@ -189,6 +189,32 @@ function restoreCamera(embed: HTMLElement, kept: KeptCamera) {
   [80, 250, 600].forEach((delay) => window.setTimeout(apply, delay));
 }
 
+type FillMode = 'faint' | 'full';
+const FAINT_FILL_OPACITY = 0.22;
+
+/**
+ * Copper pours are drawn opaque by default, which buries the tracks, pads and labels under a flat slab of colour. Faint
+ * keeps them visible as context; full shows them as KiCad would. KiCanvas reads a per-layer opacity at draw time.
+ */
+function applyFillMode(embed: HTMLElement, mode: FillMode) {
+  try {
+    const app = embed.shadowRoot?.querySelector('kc-board-app') as (HTMLElement & { viewer?: { layers?: { in_display_order?: () => Iterable<{ name: string; opacity?: number }> }; draw?: () => void } }) | null;
+    const viewer = app?.viewer;
+    if (!viewer?.layers?.in_display_order) return;
+    for (const layer of viewer.layers.in_display_order()) {
+      if (/:(F|B|In\d+)\.Cu:Zones$/.test(layer.name)) layer.opacity = mode === 'faint' ? FAINT_FILL_OPACITY : 1;
+    }
+    viewer.draw?.();
+  } catch {
+    // A viewer that is not ready keeps its own look.
+  }
+}
+
+function applyFillModeAfterLoad(embed: HTMLElement, mode: () => FillMode) {
+  // The pours are painted after the load event; apply again as they appear.
+  embed.addEventListener('kicanvas:load', () => [60, 250, 700].forEach((delay) => window.setTimeout(() => applyFillMode(embed, mode()), delay)), { once: true });
+}
+
 function retireEmbed(embed: HTMLElement) {
   embed.setAttribute('data-retired', '');
   embed.style.display = 'none';
@@ -255,6 +281,9 @@ export function EvidenceArtifactViewport({
   const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string; forRelative?: string }>({ status: 'idle' });
   const cameraRef = useRef<{ relative: string; x: number; y: number; zoom: number } | null>(null);
   const relativeRef = useRef('');
+  const [fills, setFills] = useState<FillMode>('faint');
+  const fillsRef = useRef<FillMode>('faint');
+  fillsRef.current = fills;
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
   const previewing = Boolean(preview && preview.kind === activeKind && (!preview.relative || sameFile(preview.relative, activeRelative)));
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
@@ -356,13 +385,7 @@ export function EvidenceArtifactViewport({
       const created = document.createElement('kicanvas-embed');
       embed = created;
       created.addEventListener('kicanvas:load', () => { created.dataset.loaded = '1'; });
-      created.setAttribute('controls', 'basic');
-      created.setAttribute('controlslist', 'nodownload nooverlay');
-      const source = document.createElement('kicanvas-source');
-      source.textContent = shownContent;
-      created.appendChild(source);
-      host.appendChild(created);
-
+      if (activeKind === 'pcb') applyFillModeAfterLoad(created, () => fillsRef.current);
       if (keptCamera) {
         // The same file reloaded with other content (a draft or a previewed proposal): keep the view the person had.
         created.addEventListener('kicanvas:load', () => restoreCamera(created, keptCamera), { once: true });
@@ -480,6 +503,22 @@ export function EvidenceArtifactViewport({
           {!visibleFiles.length && !model3d ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
         </div>
         <div className="flex min-w-0 items-center gap-2">
+          {activeKind === 'pcb' && !show3d ? (
+            <button
+              type="button"
+              onClick={() => {
+                const next: FillMode = fills === 'faint' ? 'full' : 'faint';
+                setFills(next);
+                const embed = hostRef.current?.querySelector('kicanvas-embed:not([data-retired])') as HTMLElement | null;
+                if (embed) applyFillMode(embed, next);
+              }}
+              aria-pressed={fills === 'full'}
+              title="Copper pours cover most of a board. Faint keeps tracks, pads and labels readable; full shows the pours as KiCad draws them."
+              className="inline-flex h-7 shrink-0 items-center rounded-md border border-stone-300 px-2.5 text-[11px] font-medium text-stone-700 hover:bg-stone-50"
+            >
+              Copper fills: {fills}
+            </button>
+          ) : null}
           {proposing && !show3d && !preview && (activeKind === 'schematic' || activeKind === 'pcb') ? (
             <button
               type="button"
