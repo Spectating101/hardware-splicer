@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+from hardware_splicer.bounded_process import BoundedProcessError, BoundedProcessResult
+
 from hardware_splicer.model3d import (
     DEFAULT_MAX_BYTES,
     ERROR_OUTPUT_LIMIT,
@@ -68,49 +70,25 @@ def _cache_files(store: ProjectStore, project_id: str = "robot") -> list[Path]:
     return [path for path in root.rglob("*") if path.is_file()]
 
 
-class _FakePopen:
-    def __init__(self, cmd, *, handler, **_kwargs) -> None:
-        self.args = list(cmd)
-        self.pid = 2_000_000_013
-        self.returncode: int | None = None
-        self._handler = handler
-        self._done = False
-        self._stdout = b""
-        self._stderr = b""
+def _runner_from(handler):
+    """Fake for model3d's bounded runner. ``handler(cmd, timeout)`` behaves as the tests always wrote it."""
 
-    def communicate(self, timeout=None):
-        if self._done:
-            return self._stdout, self._stderr
-        if "--version" in self.args:
-            self._done = True
-            self.returncode = 0
-            self._stdout, self._stderr = b"9.0.2\n", b""
-            return self._stdout, self._stderr
+    def fake_run_bounded(cmd, *, timeout_s, cwd=None, env=None, tail_bytes=8192):
+        if "--version" in cmd:
+            return BoundedProcessResult(0, b"9.0.2\n", b"", False)
         try:
-            result = self._handler(self.args, timeout)
+            result = handler(list(cmd), timeout_s)
         except subprocess.TimeoutExpired:
-            self._done = True
-            self.returncode = None
-            raise
+            raise BoundedProcessError(f"timed out after {timeout_s}s", timed_out=True) from None
         if result is None:
-            result = subprocess.CompletedProcess(self.args, 0, b"", b"")
-        self._done = True
-        self.returncode = result.returncode
-        self._stdout = result.stdout or b""
-        self._stderr = result.stderr or b""
-        return self._stdout, self._stderr
+            result = subprocess.CompletedProcess(list(cmd), 0, b"", b"")
+        return BoundedProcessResult(int(result.returncode), result.stdout or b"", result.stderr or b"", False)
 
-    def wait(self, timeout=None):
-        if self.returncode is None:
-            self.returncode = -1
-        return self.returncode
+    return fake_run_bounded
 
 
 def _install_popen(monkeypatch: pytest.MonkeyPatch, handler):
-    def factory(cmd, *args, **kwargs):
-        return _FakePopen(cmd, handler=handler, **kwargs)
-
-    monkeypatch.setattr("hardware_splicer.model3d.subprocess.Popen", factory)
+    monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
 
 
 def _write_output(cmd: list[str], data: bytes) -> None:

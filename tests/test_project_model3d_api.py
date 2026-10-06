@@ -9,6 +9,8 @@ import threading
 from pathlib import Path
 
 import pytest
+
+from hardware_splicer.bounded_process import BoundedProcessError, BoundedProcessResult
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -184,32 +186,21 @@ def test_missing_project_and_revision_are_404(tmp_path: Path) -> None:
     assert missing_proj.json()["detail"]["type"] == "not_found"
 
 
-class _FakePopen:
-    def __init__(self, cmd, *, handler, **_kwargs) -> None:
-        self.args = list(cmd)
-        self.pid = 2_000_000_017
-        self.returncode: int | None = None
-        self._handler = handler
-        self._done = False
-        self._stdout = b""
-        self._stderr = b""
+def _runner_from(handler):
+    """Fake for model3d's bounded runner. ``handler(cmd, timeout)`` behaves as the tests always wrote it."""
 
-    def communicate(self, timeout=None):
-        if self._done:
-            return self._stdout, self._stderr
-        if "--version" in self.args:
-            self._done = True
-            self.returncode = 0
-            self._stdout, self._stderr = b"9.0.2\n", b""
-            return self._stdout, self._stderr
-        result = self._handler(self.args, timeout)
+    def fake_run_bounded(cmd, *, timeout_s, cwd=None, env=None, tail_bytes=8192):
+        if "--version" in cmd:
+            return BoundedProcessResult(0, b"9.0.2\n", b"", False)
+        try:
+            result = handler(list(cmd), timeout_s)
+        except subprocess.TimeoutExpired:
+            raise BoundedProcessError(f"timed out after {timeout_s}s", timed_out=True) from None
         if result is None:
-            result = subprocess.CompletedProcess(self.args, 0, b"", b"")
-        self._done = True
-        self.returncode = result.returncode
-        self._stdout = result.stdout or b""
-        self._stderr = result.stderr or b""
-        return self._stdout, self._stderr
+            result = subprocess.CompletedProcess(list(cmd), 0, b"", b"")
+        return BoundedProcessResult(int(result.returncode), result.stdout or b"", result.stderr or b"", False)
+
+    return fake_run_bounded
 
 
 def test_concurrent_requests_spawn_kicad_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -228,10 +219,7 @@ def test_concurrent_requests_spawn_kicad_once(tmp_path: Path, monkeypatch: pytes
             output.write_bytes(_minimal_glb())
         return subprocess.CompletedProcess(list(cmd), 0, stdout=b"", stderr=b"")
 
-    monkeypatch.setattr(
-        "hardware_splicer.model3d.subprocess.Popen",
-        lambda cmd, *args, **kwargs: _FakePopen(cmd, handler=handler, **kwargs),
-    )
+    monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
     results: list[int] = []
     errors: list[BaseException] = []
 
@@ -266,10 +254,7 @@ def test_sidecar_install_failure_does_not_break_api(
         output.write_bytes(_minimal_glb(size=20 + writes["n"]))
         return subprocess.CompletedProcess(list(cmd), 0, stdout=b"", stderr=b"")
 
-    monkeypatch.setattr(
-        "hardware_splicer.model3d.subprocess.Popen",
-        lambda cmd, *args, **kwargs: _FakePopen(cmd, handler=handler, **kwargs),
-    )
+    monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
     first = api.get("/v1/projects/robot/revisions/1/model3d")
     assert first.status_code == 200
     assert first.json()["available"] is True

@@ -27,6 +27,7 @@ from .artifact_retention import (
     _lexical_absolute,
     _read_regular_file,
 )
+from .bounded_process import BoundedProcessError, run_bounded
 from .project_store import ProjectStore, validate_project_id
 
 DEFAULT_TIMEOUT_S = 60.0
@@ -139,33 +140,15 @@ def _run_kicad_cli(
     cwd: Path | None,
     env: Mapping[str, str] | None,
 ) -> subprocess.CompletedProcess[bytes]:
+    """Run kicad-cli on the shared bounded runner: capped output, and the whole process group is killed afterwards."""
+
     try:
-        proc = subprocess.Popen(
-            cmd,
-            cwd=str(cwd) if cwd is not None else None,
-            env=dict(env) if env is not None else None,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            start_new_session=True,
-        )
-    except FileNotFoundError as exc:
+        result = run_bounded(cmd, timeout_s=timeout_s, cwd=cwd, env=env, tail_bytes=ERROR_OUTPUT_LIMIT)
+    except BoundedProcessError as exc:
+        if exc.timed_out:
+            raise Model3DError(f"kicad-cli timed out after {timeout_s}s") from None
         raise Model3DUnavailable(INSTALL_HINT) from exc
-    stdout = b""
-    stderr = b""
-    try:
-        stdout, stderr = proc.communicate(timeout=timeout_s)
-    except subprocess.TimeoutExpired:
-        _kill_process_group(proc.pid)
-        stdout, stderr = _reap_process(proc)
-        raise Model3DError(
-            f"kicad-cli timed out after {timeout_s}s: {_clip_output(stderr)} {_clip_output(stdout)}".strip()
-        ) from None
-    except Exception:
-        _kill_process_group(proc.pid)
-        _reap_process(proc)
-        raise
-    return subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+    return subprocess.CompletedProcess(cmd, result.returncode, result.stdout_tail, result.stderr_tail)
 
 
 def capability_probe() -> dict[str, Any]:

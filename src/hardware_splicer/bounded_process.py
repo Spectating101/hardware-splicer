@@ -11,6 +11,7 @@ import os
 import signal
 import subprocess
 import threading
+import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -42,6 +43,32 @@ def _kill_process_group(pid: int) -> None:
         os.killpg(pid, signal.SIGKILL)
     except (ProcessLookupError, PermissionError, OSError):
         pass
+
+
+def wait_leader_and_kill_group(proc: subprocess.Popen[bytes], timeout_s: float) -> bool:
+    """Wait for the group leader, then kill whatever is left in its process group. Returns True on timeout.
+
+    The leader is observed with ``WNOWAIT`` so it stays an unreaped zombie while the group is killed. That keeps its pid,
+    which is the group id, reserved: a descendant that outlived the leader (and still holds the output pipes) is killed,
+    and the id cannot have been handed to an unrelated process in between. Only then is the leader reaped.
+    """
+
+    deadline = time.monotonic() + max(0.0, float(timeout_s))
+    timed_out = False
+    while True:
+        try:
+            state = os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        except ChildProcessError:
+            break
+        if state is not None:
+            break
+        if time.monotonic() >= deadline:
+            timed_out = True
+            break
+        time.sleep(0.005)
+    _kill_process_group(proc.pid)
+    _reap(proc)
+    return timed_out
 
 
 def _tail_reader(stream: Any, limit: int, sink: list[bytes], done: threading.Event) -> None:
@@ -89,6 +116,8 @@ def run_bounded(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             start_new_session=True,
+            # Unbuffered, so closing a pipe never waits on a lock held by a reader thread that is blocked in read().
+            bufsize=0,
         )
     except FileNotFoundError as exc:
         raise BoundedProcessError("executable not found", returncode=None) from exc
@@ -112,12 +141,10 @@ def run_bounded(
     timed_out = False
     try:
         try:
-            proc.wait(timeout=timeout_s)
-        except subprocess.TimeoutExpired:
-            timed_out = True
-            _kill_process_group(proc.pid)
-            _reap(proc)
-        except Exception:
+            # Always kills the group afterwards, not only on timeout: a leader that exits while a descendant keeps the
+            # pipes open must not leave that descendant running or make the readers wait for it.
+            timed_out = wait_leader_and_kill_group(proc, timeout_s)
+        except BaseException:
             _kill_process_group(proc.pid)
             _reap(proc)
             raise

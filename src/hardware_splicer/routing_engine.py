@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+from .bounded_process import wait_leader_and_kill_group
 from .build_files_security import max_kicad_content_bytes
 from .kicad_diff import _tokenize_sexp, diff_kicad_text, parse_kicad_sexp
 
@@ -739,16 +740,9 @@ def _run_process(
         )
         reader_out.start()
         reader_err.start()
-        try:
-            process.wait(timeout=max(0.1, float(timeout_s)))
-        except subprocess.TimeoutExpired:
-            timed_out = True
-            _kill_group(process)
-            try:
-                process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=2)
+        # Kills the whole group once the leader is gone or out of time, so a descendant that outlives the leader is not
+        # left running and does not keep the readers waiting.
+        timed_out = wait_leader_and_kill_group(process, max(0.1, float(timeout_s)))
         reader_out.join(timeout=2)
         reader_err.join(timeout=2)
         return _ProcResult(
