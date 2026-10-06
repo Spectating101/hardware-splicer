@@ -571,6 +571,29 @@ def model3d_glb(project_id: str, revision: int) -> Response:
     return Response(content=data, media_type="model/gltf-binary", headers={"ETag": f'"sha256:{hashlib.sha256(data).hexdigest()}"', "Cache-Control": "private, max-age=3600"})
 
 
+# --- Parts: the real extraction code over the fixture schematic (revisions 5 and 6 only) -----------------------
+_extract_components = _load_hs_attr("parts_intel", "extract_components")
+_build_bom = _load_hs_attr("parts_intel", "build_bom")
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/parts")
+def revision_parts(project_id: str, revision: int, enrich: bool = False) -> dict[str, Any]:
+    _require_project(project_id)
+    enrichment: dict[str, Any] = {"requested": bool(enrich), "providers": [], "performed": False}
+    if revision not in (5, 6) or _extract_components is None or _build_bom is None:
+        return {"ok": True, "project_id": PROJECT_ID, "revision": revision, "available": False,
+                "reason": f"Revision {revision} has no retained schematic artifact.", "enrichment": enrichment}
+    text = (REFERENCE_DIR / "spi_flash_adapter_v1.kicad_sch").read_text(encoding="utf-8", errors="replace")
+    if revision == 5:
+        text = _fixture_base_text("schematic", text)
+    bom = _build_bom(_extract_components(text))
+    if enrich:
+        enrichment["reason"] = "no providers enabled"
+    return {"ok": True, "project_id": PROJECT_ID, "revision": revision, "available": True,
+            "source": {"relative": "spi_flash_adapter_v1.kicad_sch", "sha256": None, "retention_basis": "at_save"},
+            "summary": bom["summary"], "components": [], "bom_groups": bom["groups"], "enrichment": enrichment}
+
+
 # --- Live events + presence: in-memory mirror of the /events and /presence contract ----------------------
 # Real implementation: src/hardware_splicer/project_events*.py (filesystem-derived, multi-process safe).
 import asyncio
