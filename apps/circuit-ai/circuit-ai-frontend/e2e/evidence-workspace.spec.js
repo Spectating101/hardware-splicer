@@ -21,9 +21,11 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByRole('button', { name: 'Schematic', exact: true })).toBeVisible();
   await expect(page.locator('kicanvas-embed')).toHaveCount(1);
 
-  const controllerObject = page.getByRole('button', { name: /USB fixture controller/ });
-  const translationObject = page.getByRole('button', { name: /Unresolved translation/ });
-  const socketObject = page.getByRole('button', { name: /32-pin DUT socket/ });
+  // Target the object rail, not the separate "review first" shortcut whose
+  // accessible name contains the same object label.
+  const controllerObject = page.getByRole('button', { name: 'USB fixture controller controller · 3.3 V control', exact: true });
+  const translationObject = page.getByRole('button', { name: 'Unresolved translation interface · 3.3 V ↔ 1.8 V', exact: true });
+  const socketObject = page.getByRole('button', { name: '32-pin DUT socket socket · 1.8 V DUT', exact: true });
   await expect(controllerObject).toBeVisible();
   await expect(translationObject).toBeVisible();
   await expect(socketObject).toBeVisible();
