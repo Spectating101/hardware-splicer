@@ -44,6 +44,7 @@ export type Candidate = {
   warnings?: string[];
   diff?: { summary?: { added: number; removed: number; changed: number; unchanged: number }; changes?: KicadChange[] };
   checks?: CandidateChecks | null;
+  files?: Partial<Record<'schematic' | 'pcb', { relative?: string; sha256?: string }>>;
   review_state?: ReviewState;
   authority?: { state: string; note: string };
 };
@@ -132,6 +133,8 @@ export function useCandidates(projectId: string) {
 export type DraftPreview = {
   base_revision: number;
   kind: 'schematic' | 'pcb';
+  /** The retained file the edits were applied to. */
+  relative?: string;
   text: string;
   applied: NonNullable<Candidate['applied']>;
   warnings: string[];

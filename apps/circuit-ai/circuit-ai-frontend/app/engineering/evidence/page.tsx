@@ -160,7 +160,7 @@ export default function EvidenceOverviewPage() {
     if (!candidate) { setPreview(null); setFocusChange(null); return; }
     try {
       const text = await fetchCandidateFile(projectId, candidate.candidate_id, candidate.kind);
-      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text });
+      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text, relative: candidate.files?.[candidate.kind]?.relative });
     } catch (caught) {
       setPreview(null);
       setPreviewError(caught instanceof Error ? caught.message : 'The proposed file could not be loaded.');

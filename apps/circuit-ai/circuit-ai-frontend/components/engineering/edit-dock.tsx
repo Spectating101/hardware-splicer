@@ -60,6 +60,7 @@ function readSelection(host: HTMLElement | null, kind: string): Selected | null 
 export function EditDock({
   hostRef,
   kind,
+  fileKey,
   onPropose,
   onProposed,
   onClose,
@@ -69,6 +70,8 @@ export function EditDock({
 }: {
   hostRef: RefObject<HTMLDivElement | null>;
   kind: string;
+  /** Which file is open. A draft and a selection belong to one file, so they reset when it changes. */
+  fileKey: string;
   routing?: RoutingCapability | null;
   /** How the dry run of the current draft is going; null when there is nothing to preview. */
   draftStatus?: { status: 'loading' | 'ready' | 'error'; message?: string } | null;
@@ -116,7 +119,7 @@ export function EditDock({
     setError('');
     setSelected(null);
     lastUuid.current = '';
-  }, [kind]);
+  }, [kind, fileKey]);
 
   // Tell the viewer what the draft is, so it can show the result.
   useEffect(() => {

@@ -11,7 +11,14 @@ import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } f
 export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/engineering/viewer-overlay';
 export type ActiveArtifact = { relative: string; kind: string };
 /** A proposal's file shown in place of the retained one. It is a preview only and never replaces what is stored. */
-export type ProposalPreview = { candidateId: string; kind: 'schematic' | 'pcb'; text: string };
+export type ProposalPreview = { candidateId: string; kind: 'schematic' | 'pcb'; text: string; relative?: string };
+
+/** Two paths name the same retained file when their file names match; the folder a build keeps it in can differ. */
+function sameFile(a: string | undefined, b: string | undefined) {
+  if (!a || !b) return false;
+  const name = (path: string) => path.split('/').filter(Boolean).pop() || path;
+  return name(a) === name(b);
+}
 
 type JsonRecord = Record<string, unknown>;
 export type EvidenceBuildFile = { name?: string; relative?: string; kind?: string };
@@ -194,6 +201,14 @@ function retireEmbed(embed: HTMLElement) {
   window.setTimeout(remove, RETIRE_GIVE_UP_MS);
 }
 
+/** "Schematic" or "PCB", or the file's own name when a project has several files of one kind so the tabs can be told apart. */
+function tabLabel(file: EvidenceBuildFile, all: EvidenceBuildFile[]) {
+  const base = file.kind === 'schematic' ? 'Schematic' : file.kind === 'pcb' ? 'PCB' : file.name || 'Artifact';
+  if (all.filter((other) => other.kind === file.kind).length < 2) return base;
+  const name = (file.relative || file.name || '').split('/').pop() || base;
+  return name.replace(/\.kicad_(sch|pcb)$/, '');
+}
+
 export function EvidenceArtifactViewport({
   buildDir,
   overlayFinding = '',
@@ -237,14 +252,15 @@ export function EvidenceArtifactViewport({
   const [show3d, setShow3d] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draftOps, setDraftOps] = useState<EditOp[]>([]);
-  const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string }>({ status: 'idle' });
+  const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string; forRelative?: string }>({ status: 'idle' });
   const cameraRef = useRef<{ relative: string; x: number; y: number; zoom: number } | null>(null);
   const relativeRef = useRef('');
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
-  const previewing = Boolean(preview && preview.kind === activeKind);
+  const previewing = Boolean(preview && preview.kind === activeKind && (!preview.relative || sameFile(preview.relative, activeRelative)));
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
   relativeRef.current = activeRelative;
-  const draftShown = !previewing && draft.status === 'ready' && draft.preview?.kind === activeKind;
+  // Only over the file the edits were made to: another file of the same kind must not show this file's result.
+  const draftShown = !previewing && draft.status === 'ready' && draft.preview?.kind === activeKind && draft.forRelative === activeRelative && sameFile(draft.preview?.relative, activeRelative);
   const shownContent = previewing && preview ? preview.text : draftShown && draft.preview ? draft.preview.text : content;
   // Where the draft differs from the retained file, marked the same way a previewed proposal is.
   const draftHighlights = draftShown && draft.preview
@@ -384,7 +400,8 @@ export function EvidenceArtifactViewport({
   // Previewing a proposal shows the file it changed.
   useEffect(() => {
     if (!preview) return;
-    const target = files.find((file) => file.kind === preview.kind);
+    // The file the proposal changed, not just the first file of that kind.
+    const target = files.find((file) => file.kind === preview.kind && sameFile(file.relative, preview.relative)) || files.find((file) => file.kind === preview.kind);
     if (target?.relative) { setShow3d(false); setActiveRelative(target.relative); }
     // Only when a different proposal is chosen, not on every file-list refresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -398,7 +415,7 @@ export function EvidenceArtifactViewport({
   useEffect(() => {
     if (!editing) { setDraftOps([]); setDraft({ status: 'idle' }); }
   }, [editing]);
-  useEffect(() => { setDraftOps([]); setDraft({ status: 'idle' }); }, [activeKind]);
+  useEffect(() => { setDraftOps([]); setDraft({ status: 'idle' }); }, [activeRelative]);
 
   // A dry run of the draft, a beat after the last change, so the viewer can show the result and a refused edit is reported
   // while the person is still editing. Nothing is saved.
@@ -408,16 +425,27 @@ export function EvidenceArtifactViewport({
       return;
     }
     const controller = new AbortController();
+    const requestedFor = activeRelative;
     setDraft((current) => ({ ...current, status: 'loading' }));
     const timer = window.setTimeout(() => {
       previewDraft(proposing.projectId, { baseRevision: proposing.baseRevision, kind: activeKind, ops: draftOps }, controller.signal)
-        .then((result) => setDraft(result.ok ? { status: 'ready', preview: result.preview } : { status: 'error', message: result.message }))
+        .then((result) => {
+          if (!result.ok) { setDraft({ status: 'error', message: result.message }); return; }
+          // Edits always apply to the one file a revision retains for this kind. If another file is on screen, say so
+          // rather than drawing that file's result under this file's name.
+          if (!sameFile(result.preview.relative, requestedFor)) {
+            const kept = (result.preview.relative || '').split('/').pop() || 'another file';
+            setDraft({ status: 'error', message: `This revision keeps ${kept} as its editable ${activeKind === 'pcb' ? 'PCB' : 'schematic'}, not the file on screen. Open that file to edit it.` });
+            return;
+          }
+          setDraft({ status: 'ready', preview: result.preview, forRelative: requestedFor });
+        })
         .catch(() => undefined);
     }, 350);
     return () => { window.clearTimeout(timer); controller.abort(); };
     // The callback identity is not a trigger; the ops, file and revision are.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftOps, editing, activeKind, proposing?.projectId, proposing?.baseRevision]);
+  }, [draftOps, editing, activeKind, activeRelative, proposing?.projectId, proposing?.baseRevision]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
   const minHeight = compact ? 'min-h-[520px]' : 'min-h-[650px]';
@@ -435,7 +463,7 @@ export function EvidenceArtifactViewport({
                 onClick={() => { setShow3d(false); setActiveRelative(file.relative || ''); }}
                 className={`border-b-2 px-3 py-2.5 text-xs font-medium ${active && !show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
               >
-                {file.kind === 'schematic' ? 'Schematic' : file.kind === 'pcb' ? 'PCB' : file.name}
+                {tabLabel(file, visibleFiles)}
               </button>
             );
           })}
@@ -472,6 +500,7 @@ export function EvidenceArtifactViewport({
         <EditDock
           hostRef={hostRef}
           kind={activeKind}
+          fileKey={activeRelative}
           routing={routing}
           draftStatus={draft.status === 'idle' ? null : { status: draft.status, message: draft.message }}
           onDraftChange={setDraftOps}
