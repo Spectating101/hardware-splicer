@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -602,6 +603,19 @@ _candidates: dict[str, dict[str, Any]] = {}
 _candidate_files: dict[str, str] = {}
 
 
+_ROUTING_REASON = "set HARDWARE_SPLICER_FREEROUTING_JAR to a FreeRouting jar"
+# HS_MOCK_ROUTING=available makes the fixture behave as a server where FreeRouting is installed.
+_ROUTING_AVAILABLE = os.environ.get("HS_MOCK_ROUTING") == "available"
+
+
+@app.get("/v1/projects/{project_id}/routing")
+def routing_capability(project_id: str) -> dict[str, Any]:
+    _require_project(project_id)
+    return {"ok": True, "project_id": project_id, "routing": {
+        "available": _ROUTING_AVAILABLE, "reason": None if _ROUTING_AVAILABLE else _ROUTING_REASON,
+        "components": {"kicad_python": {"ok": True, "version": "9.0.2"}, "java": {"ok": _ROUTING_AVAILABLE, "version": None}, "freerouting_jar": {"ok": _ROUTING_AVAILABLE, "version": None}}}}
+
+
 @app.get("/v1/projects/{project_id}/candidates")
 def candidates_list(project_id: str) -> dict[str, Any]:
     _require_project(project_id)
@@ -616,7 +630,16 @@ async def candidates_create(project_id: str, request: Request) -> dict[str, Any]
     kind = payload.get("kind")
     ops = payload.get("ops")
     author = str(payload.get("author") or "").strip()
-    if kind not in {"schematic", "pcb"} or not isinstance(ops, list) or not ops or not author or len(author) > 80:
+    autoroute = payload.get("autoroute")
+    if autoroute is not None:
+        if kind != "pcb" or ops:
+            raise _thread_error(422, "invalid_request", "autoroute applies to the PCB and cannot be combined with ops")
+        if not _ROUTING_AVAILABLE:
+            raise _thread_error(409, "routing_unavailable", _ROUTING_REASON)
+        ops = []
+    elif kind not in {"schematic", "pcb"} or not isinstance(ops, list) or not ops:
+        raise _thread_error(422, "invalid_request", "kind, ops and author are required")
+    if not author or len(author) > 80:
         raise _thread_error(422, "invalid_request", "kind, ops and author are required")
     if _apply_edit_ops is None or _diff_kicad_text is None:
         raise _thread_error(409, "artifact_not_retained", "This mock was started without the edit engine.")
@@ -627,10 +650,16 @@ async def candidates_create(project_id: str, request: Request) -> dict[str, Any]
     reference = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
     base_text = reference if base_rev == 6 else _fixture_base_text(kind, reference)
     operator = _operator_from_request(request)
-    try:
-        edited = _apply_edit_ops(kind, base_text, ops)
-    except Exception as exc:  # KicadEditError: message never echoes file content
-        raise _thread_error(422, "invalid_edit", str(exc)[:300])
+    if autoroute is not None:
+        track = '\t(segment\n\t\t(start 150 70)\n\t\t(end 165 70)\n\t\t(width 0.2)\n\t\t(layer "F.Cu")\n\t\t(net 1)\n\t\t(uuid "00000000-0000-4000-8000-0000000000aa")\n\t)\n'
+        cut = base_text.rstrip().rfind(")")
+        edited = {"text": base_text[:cut] + track + base_text[cut:], "warnings": ["A routed board is a candidate: not DRC-clean, verified or fabrication-ready."],
+                  "applied": [{"index": 0, "op": "autoroute", "target": {"engine": "fixture-router"}, "detail": "1 segments and 0 vias added; fixture only"}]}
+    else:
+        try:
+            edited = _apply_edit_ops(kind, base_text, ops)
+        except Exception as exc:  # KicadEditError: message never echoes file content
+            raise _thread_error(422, "invalid_edit", str(exc)[:300])
     diff = _diff_kicad_text(kind, base_text, edited["text"])
     if not (diff.get("changes")):
         raise _thread_error(422, "no_effective_change", "The edits leave the file unchanged.")
