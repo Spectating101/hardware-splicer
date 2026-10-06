@@ -24,6 +24,9 @@ import { usePageTitle } from '@/components/use-page-title';
 import { ProvenanceChip, findProvenance, type FindingProvenance } from '@/components/engineering/provenance-chip';
 import { ReviewThreadsPanel } from '@/components/engineering/review-threads-panel';
 import { useProjectFindings } from '@/lib/project-findings';
+import { setPresenceFocus } from '@/lib/project-live';
+import { useProjectParts } from '@/lib/project-parts';
+import { PartsPanel } from '@/components/engineering/parts-panel';
 import { EvidenceArtifactViewport, type ActiveArtifact, type PlacedPin, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
 import {
   deriveCanonicalSystemGraph,
@@ -46,7 +49,7 @@ type ProjectSummary = {
 type ProjectsResponse = { ok?: boolean; projects?: ProjectSummary[] };
 type ProjectEnvelope = { project_id?: string; revision?: number; snapshot?: JsonRecord };
 type ProjectResponse = { ok?: boolean; project?: ProjectEnvelope };
-type RailTab = 'project' | 'findings' | 'history';
+type RailTab = 'project' | 'findings' | 'parts' | 'history';
 type InspectorTab = 'object' | 'findings' | 'evidence' | 'threads';
 
 function record(value: unknown): JsonRecord {
@@ -142,6 +145,7 @@ export default function EvidenceOverviewPage() {
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>('object');
   const [query, setQuery] = useState('');
   const { findings } = useProjectFindings(projectId);
+  const parts = useProjectParts(projectId, revision, railTab === 'parts');
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [placing, setPlacing] = useState(false);
   const [pendingPin, setPendingPin] = useState<PlacedPin | null>(null);
@@ -203,6 +207,10 @@ export default function EvidenceOverviewPage() {
 
   const firstBlocked = blockedObjects[0] || null;
   const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPresenceFocus(selected?.id || '');
+  }, [selected?.id]);
 
   useEffect(() => {
     // A pin placed for one object must not leak into a thread started on another.
@@ -301,6 +309,7 @@ export default function EvidenceOverviewPage() {
   const railTabs: Array<[RailTab, string, number | null]> = [
     ['project', 'Project', null],
     ['findings', 'Findings', blockedObjects.length + failedActions.length],
+    ['parts', 'Parts', null],
     ['history', 'History', actions.length],
   ];
 
@@ -374,7 +383,7 @@ export default function EvidenceOverviewPage() {
 
         <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px] xl:grid-rows-[minmax(0,1fr)]">
           <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
-            <div className="grid grid-cols-3 border-b border-stone-200 p-2">
+            <div className="grid grid-cols-4 border-b border-stone-200 p-2">
               {railTabs.map(([id, label, count]) => (
                 <button key={id} type="button" onClick={() => setRailTab(id)} className={`rounded-md px-2 py-2 text-xs font-medium ${railTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>
                   {label}{count ? <span className="ml-1 text-stone-400">{count}</span> : null}
@@ -405,6 +414,8 @@ export default function EvidenceOverviewPage() {
                 </div>
                 <div className="border-t border-stone-200 p-3 text-[10px] text-stone-400">{sources.length} sources · {graph.objects.length} objects · {sessions.length} AI sessions</div>
               </>
+            ) : railTab === 'parts' ? (
+              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} />
             ) : railTab === 'findings' ? (
               <div className="min-h-0 flex-1 overflow-y-auto p-3">
                 {!blockedObjects.length && !failedActions.length && !recordedFindings.length ? <div className="text-xs text-stone-500">No recorded blocker or failed check.</div> : null}
@@ -457,6 +468,7 @@ export default function EvidenceOverviewPage() {
               onPlace={(pin) => { setPendingPin(pin); setPlacing(false); }}
               onCancelPlace={() => setPlacing(false)}
               onActiveArtifact={setActiveArtifact}
+              model3d={{ projectId, revision }}
             />
           </section>
 
