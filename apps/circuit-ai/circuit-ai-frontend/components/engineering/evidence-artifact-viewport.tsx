@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, CircuitBoard, LoaderCircle } from 'lucide-react';
+import { AlertTriangle, CircuitBoard, LoaderCircle, Pencil } from 'lucide-react';
+import { EditDock } from '@/components/engineering/edit-dock';
+import type { Candidate, EditOp } from '@/lib/project-candidates';
 import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
 export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/engineering/viewer-overlay';
 export type ActiveArtifact = { relative: string; kind: string };
+/** A proposal's file shown in place of the retained one. It is a preview only and never replaces what is stored. */
+export type ProposalPreview = { candidateId: string; kind: 'schematic' | 'pcb'; text: string };
 
 type JsonRecord = Record<string, unknown>;
 export type EvidenceBuildFile = { name?: string; relative?: string; kind?: string };
@@ -148,6 +152,8 @@ export function EvidenceArtifactViewport({
   onActiveArtifact,
   focusHighlightId,
   model3d,
+  proposing,
+  preview,
 }: {
   buildDir: string;
   overlayFinding?: string;
@@ -162,6 +168,9 @@ export function EvidenceArtifactViewport({
   focusHighlightId?: string | null;
   /** When set, a 3D tab is offered for this project revision. */
   model3d?: { projectId: string; revision: number | null };
+  /** When set, the viewer offers Edit, which drafts changes and sends them as a proposal for review. */
+  proposing?: { onPropose: (kind: 'schematic' | 'pcb', ops: EditOp[], note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
+  preview?: ProposalPreview | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
@@ -171,7 +180,10 @@ export function EvidenceArtifactViewport({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [show3d, setShow3d] = useState(false);
+  const [editing, setEditing] = useState(false);
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
+  const previewing = Boolean(preview && preview.kind === activeKind);
+  const shownContent = previewing && preview ? preview.text : content;
 
   useEffect(() => {
     onActiveArtifact?.(activeRelative && activeKind ? { relative: activeRelative, kind: activeKind } : null);
@@ -251,13 +263,13 @@ export function EvidenceArtifactViewport({
 
   useEffect(() => {
     const host = hostRef.current;
-    if (!host || !ready || !content) return;
+    if (!host || !ready || !shownContent) return;
     host.replaceChildren();
     const embed = document.createElement('kicanvas-embed');
     embed.setAttribute('controls', 'basic');
     embed.setAttribute('controlslist', 'nodownload nooverlay');
     const source = document.createElement('kicanvas-source');
-    source.textContent = content;
+    source.textContent = shownContent;
     embed.appendChild(source);
     host.appendChild(embed);
 
@@ -268,7 +280,20 @@ export function EvidenceArtifactViewport({
       embed.setAttribute('zoom', 'objects');
       return focusKiCanvasBoard(embed);
     }
-  }, [activeKind, content, ready]);
+  }, [activeKind, shownContent, ready]);
+
+  // Previewing a proposal shows the file it changed.
+  useEffect(() => {
+    if (!preview) return;
+    const target = files.find((file) => file.kind === preview.kind);
+    if (target?.relative) { setShow3d(false); setActiveRelative(target.relative); }
+    // Only when a different proposal is chosen, not on every file-list refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview?.candidateId]);
+
+  useEffect(() => {
+    if (show3d || preview) setEditing(false);
+  }, [show3d, preview]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
   const minHeight = compact ? 'min-h-[520px]' : 'min-h-[650px]';
@@ -303,7 +328,18 @@ export function EvidenceArtifactViewport({
           {!visibleFiles.length && !model3d ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
         </div>
         <div className="flex min-w-0 items-center gap-2">
-          <span className="shrink-0 rounded border border-stone-200 bg-stone-50 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-stone-500">Read-only review</span>
+          {proposing && !show3d && !preview && (activeKind === 'schematic' || activeKind === 'pcb') ? (
+            <button
+              type="button"
+              onClick={() => setEditing((value) => !value)}
+              aria-pressed={editing}
+              className={`inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-[11px] font-medium ${editing ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-300 text-stone-700 hover:bg-stone-50'}`}
+              title="Select a part and propose a change. The proposal is held for review."
+            >
+              <Pencil className="h-3 w-3" aria-hidden="true" />Edit
+            </button>
+          ) : null}
+          <span className={`shrink-0 rounded border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] ${previewing ? 'border-amber-300 bg-amber-50 text-amber-900' : editing ? 'border-stone-900 text-stone-900' : 'border-stone-200 bg-stone-50 text-stone-500'}`}>{previewing ? 'Proposal preview · not applied' : editing ? 'Drafting a proposal' : 'Read-only review'}</span>
           <span className="max-w-[20rem] truncate font-mono text-[10px] text-stone-400">{show3d ? 'rendered from the retained PCB' : activeRelative || 'no KiCad artifact attached'}</span>
         </div>
       </div>
@@ -323,7 +359,7 @@ export function EvidenceArtifactViewport({
         ) : (
           <div ref={hostRef} className={`${compact ? 'min-h-[470px]' : 'min-h-[600px]'} h-full w-full [&>kicanvas-embed]:block [&>kicanvas-embed]:h-full [&>kicanvas-embed]:w-full`} />
         )}
-        {content ? (
+        {shownContent ? (
           <ViewerOverlay
             hostRef={hostRef}
             activeRelative={activeRelative}
@@ -348,6 +384,15 @@ export function EvidenceArtifactViewport({
           </div>
         ) : null}
         </div>
+        {editing && proposing && (activeKind === 'schematic' || activeKind === 'pcb') ? (
+          <EditDock
+            hostRef={hostRef}
+            kind={activeKind}
+            onPropose={(ops, note) => proposing.onPropose(activeKind, ops, note)}
+            onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
+            onClose={() => setEditing(false)}
+          />
+        ) : null}
       </div>
     </div>
   );
