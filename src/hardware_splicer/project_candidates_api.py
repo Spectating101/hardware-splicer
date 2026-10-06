@@ -7,6 +7,7 @@ the existing review store.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any, Dict, Mapping
 
@@ -26,11 +27,14 @@ from .project_candidates import (
     InvalidEdit,
     NoEffectiveChange,
     RequestTooLarge,
+    RoutingFailed,
+    RoutingNotAvailable,
     TooManyCandidates,
     list_candidates,
     load_candidate,
     propose_candidate,
     read_candidate_file,
+    routing_capability,
 )
 from .project_review_store import ProjectReviewStore
 from .project_store import ProjectStore
@@ -72,6 +76,16 @@ def _candidate_error(exc: Exception) -> HTTPException:
         return HTTPException(
             status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"type": "invalid_edit", "message": str(exc)},
+        )
+    if isinstance(exc, RoutingNotAvailable):
+        return HTTPException(
+            status_code=http_status.HTTP_409_CONFLICT,
+            detail={"type": "routing_unavailable", "message": str(exc)},
+        )
+    if isinstance(exc, RoutingFailed):
+        return HTTPException(
+            status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"type": "routing_failed", "message": str(exc)},
         )
     if isinstance(exc, NoEffectiveChange):
         return HTTPException(
@@ -148,7 +162,10 @@ def create_project_candidates_router(
             else:
                 created_by = payload.get("author")
                 verified = False
-            result = propose_candidate(
+            # Applying edits, running the router and the design-rule checks all block for seconds. They run on a worker
+            # thread so the live event streams and every other request keep being served meanwhile.
+            result = await asyncio.to_thread(
+                propose_candidate,
                 store,
                 project_id,
                 kind=payload.get("kind"),
@@ -159,10 +176,15 @@ def create_project_candidates_router(
                 created_by=created_by,
                 verified=verified,
                 review_store=reviews,
+                autoroute=payload.get("autoroute"),
             )
         except Exception as exc:
             raise _candidate_error(exc) from exc
         return {"ok": True, "candidate": result["candidate"], "review": result["review"]}
+
+    @router.get("/{project_id}/routing")
+    def load_project_routing_capability(project_id: str) -> Dict[str, Any]:
+        return {"ok": True, "project_id": project_id, "routing": routing_capability()}
 
     @router.get("/{project_id}/candidates")
     def list_project_candidates(project_id: str) -> Dict[str, Any]:

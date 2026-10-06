@@ -38,6 +38,7 @@ from .kicad_diff import KicadDiffError, diff_kicad_text
 from .kicad_edit import KicadEditError, apply_edit_ops
 from .model3d import capability_probe, resolve_kicad_cli
 from .project_review_store import ProjectReviewStore
+from .routing_engine import RoutingError, RoutingUnavailable, capability_probe as routing_capability_probe, route_pcb
 from .project_store import ProjectStore, validate_project_id
 
 CANDIDATE_SCHEMA = "hardware_splicer.candidate.v1"
@@ -98,6 +99,14 @@ class ArtifactNotRetained(CandidateError):
 
 class InvalidEdit(CandidateError):
     """KiCad edit operations were rejected. Message never includes file bytes."""
+
+
+class RoutingNotAvailable(CandidateError):
+    """Autorouting was asked for but the router's tools are missing. The message says what to install."""
+
+
+class RoutingFailed(CandidateError):
+    """The router ran and its result was refused or failed. The message never includes board text."""
 
 
 class NoEffectiveChange(CandidateError):
@@ -518,6 +527,36 @@ def _require_ops(ops: Any) -> Sequence[Mapping[str, Any]]:
     return ops
 
 
+MAX_AUTOROUTE_PASSES = 50
+
+
+def _require_autoroute(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise CandidateValidationError("autoroute must be an object")
+    unknown = set(value) - {"max_passes", "keep_existing_tracks"}
+    if unknown:
+        raise CandidateValidationError("autoroute has an unknown field")
+    passes = value.get("max_passes", 20)
+    if isinstance(passes, bool) or not isinstance(passes, int) or not 1 <= passes <= MAX_AUTOROUTE_PASSES:
+        raise CandidateValidationError("autoroute max_passes must be an integer from 1 to 50")
+    keep = value.get("keep_existing_tracks", True)
+    if not isinstance(keep, bool):
+        raise CandidateValidationError("autoroute keep_existing_tracks must be true or false")
+    return {"max_passes": passes, "keep_existing_tracks": keep}
+
+
+def routing_capability() -> dict[str, Any]:
+    """What the router can do on this server, without paths. A missing tool says what to set up."""
+
+    probe = routing_capability_probe()
+    components = probe.get("components") if isinstance(probe.get("components"), Mapping) else {}
+    safe: dict[str, Any] = {}
+    for name, item in components.items():
+        if isinstance(item, Mapping):
+            safe[str(name)] = {"ok": bool(item.get("ok")), "version": item.get("version") if isinstance(item.get("version"), str) else None}
+    return {"available": bool(probe.get("available")), "reason": probe.get("reason") if isinstance(probe.get("reason"), str) else None, "components": safe}
+
+
 def _require_base_revision(value: Any) -> int | None:
     if value is None:
         return None
@@ -859,19 +898,28 @@ def propose_candidate(
     project_id: str,
     *,
     kind: str,
-    ops: Sequence[Mapping[str, Any]],
+    ops: Sequence[Mapping[str, Any]] | None = None,
     author: str,
     note: str = "",
     base_revision: int | None = None,
     created_by: str | None = None,
     verified: bool = False,
     review_store: ProjectReviewStore | None = None,
+    autoroute: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Apply edit ops to a retained revision and open a staged review."""
+    """Apply edit ops (or an autoroute) to a retained revision and open a staged review."""
 
     safe_id = validate_project_id(project_id)
     kind = _require_kind(kind)
-    ops = _require_ops(ops)
+    route_options: dict[str, Any] | None = None
+    if autoroute is not None:
+        if ops:
+            raise CandidateValidationError("autoroute and ops cannot be combined")
+        if kind != "pcb":
+            raise CandidateValidationError("autoroute applies to the PCB")
+        route_options = _require_autoroute(autoroute)
+    else:
+        ops = _require_ops(ops)
     note = _require_note(note)
     base_revision = _require_base_revision(base_revision)
     declared_author = _require_author(author)
@@ -898,10 +946,31 @@ def propose_candidate(
     base_text, pin_entry = pinned
     base_bytes = base_text.encode("utf-8")
 
-    try:
-        edited = apply_edit_ops(kind, base_text, ops)
-    except KicadEditError as exc:
-        raise InvalidEdit(str(exc)) from None
+    if route_options is not None:
+        try:
+            routed = route_pcb(base_text, **route_options)
+        except RoutingUnavailable as exc:
+            raise RoutingNotAvailable(str(exc)) from None
+        except RoutingError as exc:
+            raise RoutingFailed(str(exc)) from None
+        stats = routed.stats
+        added_segments = max(0, int(stats.get("segments_after", 0)) - int(stats.get("segments_before", 0)))
+        added_vias = max(0, int(stats.get("vias_after", 0)) - int(stats.get("vias_before", 0)))
+        edited = {
+            "text": routed.text,
+            "applied": [{
+                "index": 0,
+                "op": "autoroute",
+                "target": {"engine": routed.engine},
+                "detail": f"{added_segments} segments and {added_vias} vias added; {stats.get('nets_routed_after', 0)} of {stats.get('nets_total', 0)} nets routed",
+            }],
+            "warnings": list(routed.warnings),
+        }
+    else:
+        try:
+            edited = apply_edit_ops(kind, base_text, ops)
+        except KicadEditError as exc:
+            raise InvalidEdit(str(exc)) from None
     edited_text = str(edited.get("text") or "")
     edited_bytes = edited_text.encode("utf-8")
     _assert_write_size(edited_bytes, label="edited")
