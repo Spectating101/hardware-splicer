@@ -106,7 +106,24 @@
         "never invent data: parts, availability and provenance are filled only from the design or a named provider with as_of",
         "a generic AI/EDA feature race stays off; each addition must be native to the evidence and review model"
       ],
-      "does_not_displace": "spi_physical_proof"
+      "does_not_displace": "spi_physical_proof",
+      "delivered": {
+        "as_of": "2026-10-06",
+        "backend": {
+          "kicad_edit_operations": "kicad_edit.py: deterministic move, rotate, set_property, set_flag, add_label, set_track_width and delete over retained bytes",
+          "candidate_proposals": "project_candidates.py: edits or an autoroute become a pending staged review with a structural diff and optional DRC/ERC counts",
+          "routing_candidates": "routing_engine.py: FreeRouting through KiCad's pcbnew, behind a capability probe and a copper-only result guard",
+          "parts_intelligence": "parts_intel.py: BOM from the design's own properties, enrichment opt-in with source and as_of",
+          "model3d_viewer": "model3d.py: GLB from retained PCB bytes via kicad-cli, cached by hash",
+          "live_events_and_presence": "project_events.py and project_presence.py: change stream and ephemeral presence, information only"
+        },
+        "frontend": "evidence workspace: Parts tab, 3D tab, presence and live threads, Edit dock, Proposals tab with preview",
+        "not_yet_verified": [
+          "live FreeRouting run: no jar was installed where this was built; the guard was exercised with fake engines and a real pcbnew round-trip only",
+          "an independent Codex review of the integrated branch",
+          "parts availability from a real distributor provider: only the offline catalog and an opt-in jlcsearch provider exist"
+        ]
+      }
     }
   },
   "competitive_feedback": {
