@@ -161,7 +161,10 @@ export function ReviewThreadsPanel({
 
   useEffect(() => {
     const pins: ViewerPin[] = threads
-      .filter((thread) => thread.anchor.position && thread.anchor.artifact)
+      // A coordinate is meaningful only against the artifact revision on which
+      // it was placed. Keep older threads in the discussion, but never draw
+      // their coordinates over the current revision's artifact.
+      .filter((thread) => revision !== null && thread.anchor.revision === revision && thread.anchor.position && thread.anchor.artifact)
       .map((thread) => ({
         id: thread.thread_id,
         relative: thread.anchor.artifact!.relative,
@@ -172,12 +175,12 @@ export function ReviewThreadsPanel({
       }));
     onPinsChange?.(pins);
     return () => onPinsChange?.([]);
-  }, [threads, onPinsChange]);
+  }, [threads, revision, onPinsChange]);
 
   function pinNumber(thread: Thread) {
-    if (!thread.anchor.position || !thread.anchor.artifact) return null;
+    if (revision === null || thread.anchor.revision !== revision || !thread.anchor.position || !thread.anchor.artifact) return null;
     const relative = thread.anchor.artifact.relative;
-    const same = threads.filter((item) => item.anchor.position && item.anchor.artifact?.relative === relative);
+    const same = threads.filter((item) => item.anchor.revision === revision && item.anchor.position && item.anchor.artifact?.relative === relative);
     return same.findIndex((item) => item.thread_id === thread.thread_id) + 1;
   }
 

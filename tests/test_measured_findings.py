@@ -34,7 +34,7 @@ _GOLDEN_LEGACY_ENVELOPE_HASH = (
     "sha256:db222b6a2f3242383f6e34289545f730b38de05fddbdefb3bbdab0dd06b5eaaf"
 )
 _PHYSICAL_BASIS = (
-    "non-simulated measurement record states that it establishes this finding"
+    "hash-verified non-simulated measurement envelope states that it establishes this finding"
 )
 _MALFORMED_BASIS = "malformed or non-qualifying measurement record ignored"
 _ESTABLISH_TEXT = "Rail current exceeded the declared limit."
@@ -121,12 +121,27 @@ def _physical_snapshot(
     envelopes = []
     for index, record in enumerate(records, start=1):
         dumped = _envelope_record_dump(record)
-        envelopes.append(
-            {
-                "envelope_id": f"envelope-{dumped.get('evidence_id', index)}",
-                "record": dumped,
-            }
-        )
+        envelope_id = f"envelope-{dumped.get('evidence_id', index)}"
+        try:
+            envelope = build_physical_evidence_envelope(
+                envelope_id=envelope_id,
+                record=dumped,
+                raw_files=[
+                    {
+                        "ref": f"lab://{dumped.get('evidence_id', index)}.json",
+                        "content_hash": "sha256:" + f"{index:064x}"[-64:],
+                        "media_type": "application/json",
+                    }
+                ],
+                created_at="2026-10-06T00:00:00+00:00",
+                created_by="test-bench",
+            )
+            envelopes.append(envelope.model_dump(mode="json"))
+        except (TypeError, ValueError, ValidationError):
+            # Malformed-record cases deliberately exercise the projection's
+            # fail-closed behavior and therefore cannot be wrapped in a valid
+            # envelope by the canonical builder.
+            envelopes.append({"envelope_id": envelope_id, "record": dumped})
     snapshot = {
         "physicalValidation": {
             "audited_physical_evidence": {"envelopes": envelopes}
@@ -498,7 +513,35 @@ def test_projection_emits_physical_finding_for_qualifying_failed_record() -> Non
         "basis": _PHYSICAL_BASIS,
         "source_ref": "rail-test",
         "authority_ceiling": "observed",
+        "integrity_verified": True,
     }
+
+
+def test_projection_rejects_incomplete_or_hash_mismatched_physical_envelope() -> None:
+    record = _record(
+        finding_links=[_link(evidence_id="rail-test", relation="establishes")],
+    )
+    valid = _physical_snapshot([record])
+    envelope = valid["physicalValidation"]["audited_physical_evidence"]["envelopes"][0]
+
+    incomplete = {"envelope_id": envelope["envelope_id"], "record": envelope["record"]}
+    tampered = deepcopy(envelope)
+    tampered["record"]["operator"] = "forged-operator"
+
+    for candidate in (incomplete, tampered):
+        snapshot = {
+            "physicalValidation": {
+                "audited_physical_evidence": {"envelopes": [candidate]}
+            }
+        }
+        findings = project_findings(snapshot, 1)
+        assert all(row["provenance"]["kind"] != "physical" for row in findings)
+        malformed = [
+            row
+            for row in findings
+            if row["provenance"]["source_ref"] == "physicalValidation"
+        ]
+        assert len(malformed) == 1
 
 
 @pytest.mark.parametrize(

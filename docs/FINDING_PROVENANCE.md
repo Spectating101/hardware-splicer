@@ -143,8 +143,12 @@ validation finding — not as silent omissions.
 
 ### `physical`
 
-`physical` is reachable only through `finding_links` on a persisted
-`PhysicalEvidenceRecord` inside `physicalValidation` envelopes
+`physical` is reachable only through `finding_links` on a persisted,
+structurally valid, hash-verified `PhysicalEvidenceEnvelope` inside `physicalValidation`
+envelopes. A bare `{envelope_id, record}` object, a malformed envelope, or an
+envelope whose declared hash does not match its canonical content is ignored
+and surfaced as a traceability issue rather than physical provenance.
+The qualifying envelope contains a `PhysicalEvidenceRecord`
 (`physicalValidation.audited_physical_evidence.envelopes[].record`).
 Citing non-simulated evidence on an object does not establish a
 physical finding.
@@ -169,7 +173,7 @@ one finding is kept: `source_ref` is the first `evidence_id` in sorted
 order, and each remaining id is appended to `physical_evidence` as
 `{evidence_id, relation: "establishes", passed: false, authority}`.
 
-`physical` means only that a non-simulated measurement record states
+`physical` means only that a hash-verified, non-simulated measurement record states
 that it establishes this finding. It does not close a gate, upgrade
 authority, or change release, fabrication, or power-on state. Simulated
 evidence can never produce a physical finding.
@@ -195,13 +199,15 @@ basis `malformed or non-qualifying measurement record ignored`, and
 
 Deterministic producers write `snapshot["engineeringFindings"]` at persist
 time. The projection never invents a `deterministic` kind for these rows.
-A persisted row is trusted only when `validate_ledger_entry` accepts it
-(same function used at write time).
+A persisted row is accepted only when `validate_ledger_entry` accepts it
+(same function used at write time). Its projected provenance additionally
+contains `attested: false`; structural validity is not server attestation.
 
 **Trust limit.** The ledger is trusted exactly as far as whoever can write
 snapshots is trusted. `PUT /v1/projects/{id}/snapshot` is a legitimate
 full-snapshot write and may store client-supplied `engineeringFindings`;
-those rows are not rewritten on PUT. They are validated on read. A plan
+those rows are not rewritten on PUT. They are validated on read and shown as
+**Unattested stored check** in the UI. A plan
 or other request-built snapshot constructor must never copy ledger rows
 from untrusted plan input — only from the previously persisted snapshot.
 

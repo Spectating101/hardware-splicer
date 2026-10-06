@@ -86,3 +86,6 @@ a replacement. Overlapping hashes are allowed during a hand-off.
 - The registry is local configuration, not a directory service.
 - Position anchors (`x_mm`, `y_mm`) are a LOCATION, never an object identity,
   and may only accompany an artifact.
+- A pin is drawn only while the viewer is showing the exact revision recorded
+  by its anchor. Threads from other revisions remain visible in the discussion
+  history, but their coordinates are not projected onto the current artifact.

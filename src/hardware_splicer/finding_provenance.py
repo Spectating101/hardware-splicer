@@ -34,7 +34,7 @@ _MALFORMED_PHYSICAL_BASIS = "malformed or non-qualifying measurement record igno
 _MALFORMED_PHYSICAL_SOURCE = "physicalValidation"
 _MALFORMED_PHYSICAL_TEXT = "Malformed or non-qualifying measurement record ignored."
 _PHYSICAL_ESTABLISH_BASIS = (
-    "non-simulated measurement record states that it establishes this finding"
+    "hash-verified non-simulated measurement envelope states that it establishes this finding"
 )
 _MEASURED_AUTHORITIES = frozenset({"measured", "verified", "authorized"})
 _MACHINE_PROJECT_INVALID_PREFIX = "Stored machine project fails validation: "
@@ -92,15 +92,23 @@ def _provenance(
     kind: str,
     basis: str,
     source_ref: str | None,
+    *,
+    attested: bool | None = None,
+    integrity_verified: bool | None = None,
 ) -> dict[str, Any]:
     if kind not in _PROVENANCE_KINDS:
         kind = "unknown"
-    return {
+    result: dict[str, Any] = {
         "kind": kind,
         "basis": basis,
         "source_ref": source_ref,
         "authority_ceiling": AUTHORITY_CEILING,
     }
+    if attested is not None:
+        result["attested"] = attested
+    if integrity_verified is not None:
+        result["integrity_verified"] = integrity_verified
+    return result
 
 
 def _finding(
@@ -415,6 +423,7 @@ def _project_persisted_entry(row: Mapping[str, Any]) -> dict[str, Any]:
             _text(provenance.get("basis"))
             or "deterministic finding recorded at write time",
             source_ref,
+            attested=False,
         ),
     )
 
@@ -520,6 +529,7 @@ def _merge_established_findings(
                 "physical",
                 _PHYSICAL_ESTABLISH_BASIS,
                 _text(first.get("evidence_id")) or None,
+                integrity_verified=True,
             ),
         )
         extras = [
@@ -540,7 +550,11 @@ def _merge_established_findings(
 def _collect_physical_measurements(
     snapshot: Mapping[str, Any],
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], int]:
-    from .physical_evidence import FindingLinkRelation, PhysicalEvidenceRecord
+    from .physical_evidence import FindingLinkRelation
+    from .physical_evidence_ledger import (
+        PhysicalEvidenceEnvelope,
+        validate_physical_evidence_envelope,
+    )
 
     rows, malformed = _physical_envelope_rows(snapshot)
     established: list[dict[str, Any]] = []
@@ -549,15 +563,15 @@ def _collect_physical_measurements(
         if not isinstance(row, Mapping):
             malformed += 1
             continue
-        raw_record = row.get("record")
-        if not isinstance(raw_record, Mapping):
-            malformed += 1
-            continue
         try:
-            record = PhysicalEvidenceRecord.model_validate(raw_record)
+            envelope = PhysicalEvidenceEnvelope.model_validate(row)
+            if validate_physical_evidence_envelope(envelope):
+                malformed += 1
+                continue
         except (TypeError, ValueError):
             malformed += 1
             continue
+        record = envelope.record
         links = record.finding_links or []
         if not links:
             continue

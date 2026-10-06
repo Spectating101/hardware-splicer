@@ -206,6 +206,7 @@ def test_findings_api_surfaces_persisted_ledger_entries(tmp_path: Path) -> None:
     ]
     assert len(release) == 1
     assert release[0]["provenance"]["kind"] == "deterministic"
+    assert release[0]["provenance"]["attested"] is False
     assert release[0]["provenance"]["source_ref"] == "unverified_requirement"
     assert release[0]["provenance"]["authority_ceiling"] == "observed"
 

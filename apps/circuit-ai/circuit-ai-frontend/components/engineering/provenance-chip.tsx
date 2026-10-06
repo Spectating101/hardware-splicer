@@ -5,6 +5,8 @@ export type FindingProvenance = {
   basis?: string;
   source_ref?: string | null;
   authority_ceiling?: string;
+  attested?: boolean;
+  integrity_verified?: boolean;
 };
 
 export type ProjectFinding = {
@@ -31,7 +33,13 @@ const kinds = {
  */
 export function ProvenanceChip({ provenance }: { provenance: FindingProvenance | null | undefined }) {
   const kind = provenance && provenance.kind in kinds ? provenance.kind : 'unknown';
-  const { label, Icon } = kinds[kind];
+  const base = kinds[kind];
+  const label = kind === 'deterministic' && provenance?.attested === false
+    ? 'Unattested stored check'
+    : kind === 'physical' && provenance?.integrity_verified === true
+      ? 'Integrity-checked physical record'
+      : base.label;
+  const Icon = base.Icon;
   const detail = [provenance?.basis, provenance?.source_ref ? `Source: ${provenance.source_ref}` : ''].filter(Boolean).join(' · ');
   return (
     <span

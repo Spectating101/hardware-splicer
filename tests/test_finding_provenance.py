@@ -818,6 +818,7 @@ def test_persisted_ledger_merges_and_wins_dedupe() -> None:
     assert len(findings) == 1
     assert findings[0]["provenance"]["source_ref"] == "action-persisted"
     assert findings[0]["provenance"]["kind"] == "deterministic"
+    assert findings[0]["provenance"]["attested"] is False
     assert findings[0]["provenance"]["basis"] == (
         "design_quality gate blocker from an executed deterministic compose"
     )
