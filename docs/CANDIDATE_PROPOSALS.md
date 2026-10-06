@@ -152,6 +152,26 @@ reviewer says so.
 `GET /v1/projects/{id}/routing` reports whether routing can run here: `{available, reason, components}` with a version
 per component and no filesystem paths.
 
+## Deciding a proposal
+
+`POST /v1/projects/{id}/candidates/{candidate_id}/decision` with `{"decision": "accepted" | "rejected", "note": "..."}`
+accepts or rejects the proposal's review through the existing review store.
+
+- **A server-verified identity is required.** The `X-HS-Operator-Token` header must resolve to an operator. A missing
+  token is HTTP 401 `operator_token_required`, an unknown one `operator_token_invalid`. A typed name is not enough, and
+  an `actor` in the body is ignored: the decision is recorded under the operator's id. (The older
+  `/reviews/{id}/decision` route still takes a self-declared actor; use the candidate route for proposals.)
+- **Accepting is not approval of anything else.** It promotes the proposal's snapshot to the next revision exactly as
+  any accepted review does, and the product API pins the proposed bytes to that revision. It marks nothing verified,
+  fabrication-ready or release-ready. The candidate record is never rewritten by a decision.
+- **A stale proposal cannot be accepted.** If a newer revision has landed since the proposal's base, the review is
+  refused with HTTP 409 `revision_conflict`; propose again from the newer revision. A decision can be made only once
+  (`review_conflict`).
+
+`GET /v1/projects/{id}/candidates` and `.../candidates/{candidate_id}` also return `review_state`, read live from the
+review store: `{status, decided_by, decided_at, note, accepted_revision, stale}`. `stale` is true for a pending proposal
+whose base revision is no longer the latest.
+
 ## Request handling
 
 Applying edits, routing and the design-rule checks take seconds. The create handler runs them on a worker thread so
@@ -160,7 +180,7 @@ the server keeps answering other requests and live event streams while a proposa
 ## What this service does not do
 
 - write a revision, pin, thread, or review decision
-- accept a review
+- accept a review on its own: only a verified operator's explicit decision does
 - talk to the network
 - add a dependency
 - use the words passed / approved about the candidate; `verified` is only the
@@ -177,7 +197,7 @@ the server keeps answering other requests and live event streams while a proposa
 
 1. A candidate is a proposal, not a revision.
 2. Edits read retained pins only; they never fall back to a mutable build dir.
-3. Opening a review does not accept it and does not upgrade a claim.
+3. Opening a review does not accept it and does not upgrade a claim. Deciding it needs a verified operator.
 4. Accepting that review later is the existing review-store decision; the
    candidate record is left unchanged.
 5. Optional DRC/ERC counts are evidence for a reviewer, never a gate.
