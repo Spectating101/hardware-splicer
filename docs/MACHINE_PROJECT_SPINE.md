@@ -125,6 +125,8 @@ API error contract — clients may rely on the shape.
 | `POST` | `/{project_id}/threads` | Open a review thread |
 | `GET` | `/{project_id}/threads/{thread_id}` | Load a review thread + events |
 | `POST` | `/{project_id}/threads/{thread_id}/events` | Append a comment, resolve, or reopen |
+| `GET` | `/{project_id}/events` | Live change stream (SSE); information only — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
+| `GET`/`POST`/`DELETE` | `/{project_id}/presence` | Ephemeral presence; not an audit log — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
 
 Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md).
 
