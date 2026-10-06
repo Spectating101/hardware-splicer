@@ -31,6 +31,7 @@ from .project_candidates import (
     RoutingNotAvailable,
     TooManyCandidates,
     decide_candidate,
+    preview_edit,
     review_state,
     list_candidates,
     load_candidate,
@@ -192,6 +193,22 @@ def create_project_candidates_router(
         except Exception as exc:
             raise _candidate_error(exc) from exc
         return {"ok": True, "candidate": result["candidate"], "review": result["review"]}
+
+    @router.post("/{project_id}/candidates/preview")
+    async def preview_project_candidate(project_id: str, http_request: Request) -> Dict[str, Any]:
+        try:
+            payload = await _read_capped_json(http_request)
+            result = await asyncio.to_thread(
+                preview_edit,
+                store,
+                project_id,
+                kind=payload.get("kind"),
+                ops=payload.get("ops"),
+                base_revision=payload.get("base_revision"),
+            )
+        except Exception as exc:
+            raise _candidate_error(exc) from exc
+        return {"ok": True, "preview": result}
 
     @router.get("/{project_id}/routing")
     def load_project_routing_capability(project_id: str) -> Dict[str, Any]:

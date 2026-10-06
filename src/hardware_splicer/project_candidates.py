@@ -21,6 +21,7 @@ import time
 from collections import OrderedDict
 from contextlib import contextmanager
 from datetime import datetime, timezone
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping, Sequence
 
@@ -898,43 +899,31 @@ def _assert_write_size(payload: bytes, *, label: str) -> None:
         raise ArtifactTooLarge("artifact exceeds size limit")
 
 
-def propose_candidate(
-    store: ProjectStore,
-    project_id: str,
-    *,
-    kind: str,
-    ops: Sequence[Mapping[str, Any]] | None = None,
-    author: str,
-    note: str = "",
-    base_revision: int | None = None,
-    created_by: str | None = None,
-    verified: bool = False,
-    review_store: ProjectReviewStore | None = None,
-    autoroute: Mapping[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Apply edit ops (or an autoroute) to a retained revision and open a staged review."""
+@dataclass(frozen=True)
+class _Edited:
+    """A retained revision's file with the requested edits applied, and what changed."""
 
-    safe_id = validate_project_id(project_id)
-    kind = _require_kind(kind)
-    route_options: dict[str, Any] | None = None
-    if autoroute is not None:
-        if ops:
-            raise CandidateValidationError("autoroute and ops cannot be combined")
-        if kind != "pcb":
-            raise CandidateValidationError("autoroute applies to the PCB")
-        route_options = _require_autoroute(autoroute)
-    else:
-        ops = _require_ops(ops)
-    note = _require_note(note)
-    base_revision = _require_base_revision(base_revision)
-    declared_author = _require_author(author)
-    if verified:
-        actor = str(created_by or "").strip()
-        if not actor:
-            raise CandidateValidationError("created_by is required")
-    else:
-        actor = declared_author
-    reviews = review_store or ProjectReviewStore(store)
+    revision: int
+    snapshot: Mapping[str, Any]
+    base_text: str
+    base_bytes: bytes
+    pin_entry: Mapping[str, Any]
+    edited: Mapping[str, Any]
+    edited_text: str
+    edited_bytes: bytes
+    diff: Mapping[str, Any]
+
+
+def _edit_retained(
+    store: ProjectStore,
+    safe_id: str,
+    kind: str,
+    *,
+    ops: Sequence[Mapping[str, Any]] | None,
+    route_options: Mapping[str, Any] | None,
+    base_revision: int | None,
+) -> _Edited:
+    """Read the pinned file of a revision, apply the edits (or the router), and diff the result. Writes nothing."""
 
     if base_revision is None:
         envelope = store.load_latest_with_recovery(safe_id)
@@ -986,6 +975,60 @@ def propose_candidate(
         raise InvalidEdit(str(exc)) from None
     if _diff_empty(diff):
         raise NoEffectiveChange("edit produced no structural change")
+    return _Edited(
+        revision=resolved_revision,
+        snapshot=snapshot,
+        base_text=base_text,
+        base_bytes=base_bytes,
+        pin_entry=pin_entry,
+        edited=edited,
+        edited_text=edited_text,
+        edited_bytes=edited_bytes,
+        diff=diff,
+    )
+
+
+def propose_candidate(
+    store: ProjectStore,
+    project_id: str,
+    *,
+    kind: str,
+    ops: Sequence[Mapping[str, Any]] | None = None,
+    author: str,
+    note: str = "",
+    base_revision: int | None = None,
+    created_by: str | None = None,
+    verified: bool = False,
+    review_store: ProjectReviewStore | None = None,
+    autoroute: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Apply edit ops (or an autoroute) to a retained revision and open a staged review."""
+
+    safe_id = validate_project_id(project_id)
+    kind = _require_kind(kind)
+    route_options: dict[str, Any] | None = None
+    if autoroute is not None:
+        if ops:
+            raise CandidateValidationError("autoroute and ops cannot be combined")
+        if kind != "pcb":
+            raise CandidateValidationError("autoroute applies to the PCB")
+        route_options = _require_autoroute(autoroute)
+    else:
+        ops = _require_ops(ops)
+    note = _require_note(note)
+    base_revision = _require_base_revision(base_revision)
+    declared_author = _require_author(author)
+    if verified:
+        actor = str(created_by or "").strip()
+        if not actor:
+            raise CandidateValidationError("created_by is required")
+    else:
+        actor = declared_author
+    reviews = review_store or ProjectReviewStore(store)
+
+    result = _edit_retained(store, safe_id, kind, ops=ops, route_options=route_options, base_revision=base_revision)
+    resolved_revision, snapshot, base_text, base_bytes = result.revision, result.snapshot, result.base_text, result.base_bytes
+    pin_entry, edited, edited_text, edited_bytes, diff = result.pin_entry, result.edited, result.edited_text, result.edited_bytes, result.diff
 
     other_kind = "pcb" if kind == "schematic" else "schematic"
     other_bytes: bytes | None = None
@@ -1132,6 +1175,35 @@ def list_candidates(store: ProjectStore, project_id: str) -> list[dict[str, Any]
             continue
     rows.sort(key=lambda row: (str(row.get("created_at") or ""), str(row.get("candidate_id") or "")), reverse=True)
     return rows[:MAX_LISTED_CANDIDATES]
+
+
+def preview_edit(
+    store: ProjectStore,
+    project_id: str,
+    *,
+    kind: str,
+    ops: Sequence[Mapping[str, Any]] | None,
+    base_revision: int | None = None,
+) -> dict[str, Any]:
+    """What a set of edits would produce, without keeping anything.
+
+    The same read, edit and diff as a proposal, so the answer matches what a proposal would hold. Nothing is written: no
+    directory, no record, no review, no design-rule run. It is how the editor shows a draft before anyone proposes it.
+    """
+
+    safe_id = validate_project_id(project_id)
+    kind = _require_kind(kind)
+    ops = _require_ops(ops)
+    base_revision = _require_base_revision(base_revision)
+    result = _edit_retained(store, safe_id, kind, ops=ops, route_options=None, base_revision=base_revision)
+    return {
+        "base_revision": result.revision,
+        "kind": kind,
+        "text": result.edited_text,
+        "applied": list(result.edited.get("applied") or []),
+        "warnings": list(result.edited.get("warnings") or []),
+        "diff": result.diff,
+    }
 
 
 def review_state(store: ProjectStore, reviews: ProjectReviewStore, project_id: str, record: Mapping[str, Any]) -> dict[str, Any]:
