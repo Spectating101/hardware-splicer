@@ -578,6 +578,24 @@ _extract_components = _load_hs_attr("parts_intel", "extract_components")
 _build_bom = _load_hs_attr("parts_intel", "build_bom")
 
 
+@app.get("/v1/projects/{project_id}/revisions/{revision}/artifacts")
+def revision_artifacts(project_id: str, revision: int) -> dict[str, Any]:
+    """The retained files of a revision with their hashes, as the real artifact pin reports them (revisions 5 and 6)."""
+
+    _require_project(project_id)
+    if revision not in (5, 6):
+        raise _thread_error(404, "not_found", f"Revision {revision} was not found.")
+    artifacts: dict[str, Any] = {}
+    for kind, name in (("schematic", "spi_flash_adapter_v1.kicad_sch"), ("pcb", "spi_flash_adapter_v1.kicad_pcb")):
+        text = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
+        if revision == 5:
+            text = _fixture_base_text(kind, text)
+        data = text.encode("utf-8")
+        artifacts[kind] = {"relative": name, "sha256": "sha256:" + hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+    return {"ok": True, "revision": revision, "pin": {"schema_version": "hardware_splicer.artifact_pins.v1", "project_id": project_id,
+                                                      "revision": revision, "retention_basis": "at_save", "artifacts": artifacts}}
+
+
 @app.get("/v1/projects/{project_id}/revisions/{revision}/parts")
 def revision_parts(project_id: str, revision: int, enrich: bool = False) -> dict[str, Any]:
     _require_project(project_id)

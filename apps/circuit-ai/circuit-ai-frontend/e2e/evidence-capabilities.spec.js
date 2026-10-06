@@ -589,3 +589,24 @@ test('a part in the Parts tab can be found on the drawing, from any tab', async 
     return viewer?.selected?.context?.reference || null;
   }), { timeout: 15000 }).toBe('U2');
 });
+
+test('the viewer says when the file on disk is not the copy saved with the revision, and only then', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await expect(page.locator('kicanvas-embed:not([data-retired])')).toHaveCount(1);
+  // Untouched: the file on screen is the saved copy, so there is nothing to say.
+  await page.waitForTimeout(1500);
+  await expect(page.getByTestId('drift-notice')).toHaveCount(0);
+
+  // The build folder was rewritten after the revision was saved.
+  const drifted = await page.context().newPage();
+  await drifted.route('**/api/proxy/hardware-splicer/build-files/content', async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({ response, json: { ...body, content: `${body.content}\n` } });
+  });
+  await drifted.setViewportSize({ width: 1600, height: 1000 });
+  await drifted.goto(EVIDENCE);
+  await expect(drifted.getByTestId('drift-notice')).toContainText('not the copy saved with revision 6', { timeout: 10000 });
+  await expect(drifted.getByTestId('drift-notice')).toContainText('use the saved copy');
+});
