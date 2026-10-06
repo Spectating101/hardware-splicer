@@ -229,3 +229,60 @@ test('switching artifacts rapidly while they are still loading raises no uncaugh
   await page.waitForTimeout(500);
   expect(errors, `uncaught browser errors: ${errors.join(' | ')}`).toEqual([]);
 });
+
+test('a draft is previewed live with the changes marked, keeps the view, reports a refused edit and saves nothing', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.addInitScript(() => localStorage.setItem('hs-review-author', 'Alice'));
+  await page.goto(EVIDENCE);
+  await expect(page.getByText('Rev 6', { exact: true })).toBeVisible();
+  const proposalsBefore = async () => (await (await page.request.get(`${APP_URL}/api/proxy/engineering/projects/outsider-fixture/candidates`)).json()).candidates.length;
+  const before = await proposalsBefore();
+
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await page.waitForFunction(() => Boolean(document.querySelector('kicanvas-embed:not([data-retired])')?.shadowRoot?.querySelector('kc-schematic-app')?.viewer?.canvas));
+  const point = await symbolScreenPoint(page, 'U1');
+  await page.mouse.click(point.x, point.y);
+  await expect(page.getByTestId('edit-dock')).toContainText('U1', { timeout: 8000 });
+
+  // A distinctive view, so keeping it is observable.
+  const camera = () => page.evaluate(() => {
+    const c = document.querySelector('kicanvas-embed:not([data-retired])').shadowRoot.querySelector('kc-schematic-app').viewer.viewport.camera;
+    return { x: c.center.x, y: c.center.y, zoom: c.zoom };
+  });
+  await page.evaluate(() => {
+    const viewer = document.querySelector('kicanvas-embed:not([data-retired])').shadowRoot.querySelector('kc-schematic-app').viewer;
+    viewer.viewport.camera.zoom = viewer.viewport.camera.zoom * 2.2;
+    viewer.draw();
+  });
+  const view = await camera();
+
+  await page.getByRole('button', { name: 'Rotate 90 degrees clockwise' }).click();
+  await expect(page.getByText('Draft preview · not saved')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('diff-highlight').first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('edit-dock')).toContainText('Nothing is saved until you propose');
+
+  // The reload put the person's zoom and pan back.
+  await expect.poll(async () => {
+    const now = await camera();
+    return Math.abs(now.zoom - view.zoom) / view.zoom < 0.02 && Math.abs(now.x - view.x) < 1 && Math.abs(now.y - view.y) < 1;
+  }, { timeout: 10000 }).toBe(true);
+
+  // The part is still chosen after the reload, so editing can continue.
+  await expect(page.getByTestId('edit-dock')).toContainText('U1');
+  await page.getByLabel('X position in millimetres').fill('999999999');
+  await page.getByLabel('Y position in millimetres').fill('10');
+  await page.getByRole('button', { name: 'Move', exact: true }).click();
+  await expect(page.getByTestId('edit-dock').getByRole('alert')).toContainText("can't be applied", { timeout: 10000 });
+  await expect(page.getByRole('button', { name: /^Propose 2 changes/ })).toBeDisabled();
+
+  // Removing the offending change brings the preview back.
+  await page.getByRole('button', { name: /^Remove: Move U1/ }).click();
+  await expect(page.getByTestId('edit-dock').getByRole('alert')).toHaveCount(0);
+  await expect(page.getByText('Draft preview · not saved')).toBeVisible({ timeout: 10000 });
+
+  // Closing the dock discards the draft: the retained file is back, and nothing was ever created.
+  await page.getByRole('button', { name: 'Close editing' }).click();
+  await expect(page.getByText('Read-only review')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText('Draft preview · not saved')).toHaveCount(0);
+  expect(await proposalsBefore()).toBe(before);
+});

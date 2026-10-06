@@ -688,6 +688,35 @@ def candidates_get(project_id: str, candidate_id: str) -> dict[str, Any]:
     return {"ok": True, "candidate": _candidates[candidate_id]}
 
 
+@app.post("/v1/projects/{project_id}/candidates/preview")
+async def candidates_preview(project_id: str, request: Request) -> dict[str, Any]:
+    """Dry run: the edited file and its diff, nothing stored (like the real service)."""
+
+    _require_project(project_id)
+    payload = await request.json()
+    kind = payload.get("kind")
+    ops = payload.get("ops")
+    if kind not in {"schematic", "pcb"} or not isinstance(ops, list) or not ops:
+        raise _thread_error(422, "invalid_request", "kind and ops are required")
+    if _apply_edit_ops is None or _diff_kicad_text is None:
+        raise _thread_error(409, "artifact_not_retained", "This mock was started without the edit engine.")
+    base_rev = payload.get("base_revision") or state["revision"]
+    if base_rev not in (5, 6):
+        raise _thread_error(404, "not_found", f"Revision {base_rev} was not found.")
+    name = "spi_flash_adapter_v1.kicad_sch" if kind == "schematic" else "spi_flash_adapter_v1.kicad_pcb"
+    reference = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
+    base_text = reference if base_rev == 6 else _fixture_base_text(kind, reference)
+    try:
+        edited = _apply_edit_ops(kind, base_text, ops)
+    except Exception as exc:
+        raise _thread_error(422, "invalid_edit", str(exc)[:300])
+    diff = _diff_kicad_text(kind, base_text, edited["text"])
+    if not diff.get("changes"):
+        raise _thread_error(422, "no_effective_change", "The edits leave the file unchanged.")
+    return {"ok": True, "preview": {"base_revision": base_rev, "kind": kind, "text": edited["text"],
+                                    "applied": edited.get("applied", []), "warnings": edited.get("warnings", []), "diff": diff}}
+
+
 @app.post("/v1/projects/{project_id}/candidates/{candidate_id}/decision")
 async def candidates_decide(project_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
     _require_project(project_id)
