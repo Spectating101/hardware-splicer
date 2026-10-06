@@ -107,3 +107,39 @@ test('a drafted edit becomes a proposal that is previewed but never applied', as
   await newest.getByRole('button', { name: 'Stop previewing' }).click();
   await expect(page.getByText(/Read-only review/i)).toBeVisible();
 });
+
+test('autoroute says plainly when the server cannot route and never offers it on a schematic', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await expect(page.locator('kicanvas-embed')).toHaveCount(1);
+
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await expect(page.getByTestId('edit-dock')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Autoroute the board' })).toHaveCount(0);
+
+  // Editing stays on when the artifact changes; its drafts do not.
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  const dock = page.getByTestId('edit-dock');
+  await expect(dock.getByText('Not available on this server')).toBeVisible({ timeout: 15000 });
+  await expect(dock.getByText(/FREEROUTING_JAR/)).toBeVisible();
+  await expect(dock.getByRole('button', { name: 'Autoroute the board' })).toBeDisabled();
+});
+
+test('switching between schematic, PCB and 3D raises no uncaught browser errors', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(String(error)));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await expect(page.locator('kicanvas-embed')).toHaveCount(1);
+
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Schematic', exact: true }).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: '3D', exact: true }).click();
+  await expect(page.getByTestId('model3d').locator('canvas')).toBeVisible({ timeout: 30000 });
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  await page.waitForTimeout(1500);
+
+  expect(errors).toEqual([]);
+});
