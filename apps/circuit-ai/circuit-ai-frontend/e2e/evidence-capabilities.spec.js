@@ -286,3 +286,52 @@ test('a draft is previewed live with the changes marked, keeps the view, reports
   await expect(page.getByText('Draft preview · not saved')).toHaveCount(0);
   expect(await proposalsBefore()).toBe(before);
 });
+
+test('a draft and a selection belong to one file: another schematic never shows or inherits them', async ({ page }) => {
+  // A project with a second sheet: the same schematic content offered under another name, which the revision does not
+  // retain as its editable schematic.
+  let firstSchematic = '';
+  await page.route('**/api/proxy/hardware-splicer/build-files/list', async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    const first = (body.files || []).find((file) => file.kind === 'schematic');
+    firstSchematic = first.relative;
+    await route.fulfill({ response, json: { ...body, files: [...body.files, { ...first, name: 'sheet_two.kicad_sch', relative: 'sheets/sheet_two.kicad_sch' }] } });
+  });
+  await page.route('**/api/proxy/hardware-splicer/build-files/content', async (route) => {
+    const request = route.request().postDataJSON();
+    if (request.relative !== 'sheets/sheet_two.kicad_sch') { await route.continue(); return; }
+    const original = await route.fetch({ postData: JSON.stringify({ ...request, relative: firstSchematic }) });
+    await route.fulfill({ response: original });
+  });
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.addInitScript(() => localStorage.setItem('hs-review-author', 'Alice'));
+  await page.goto(EVIDENCE);
+  await expect(page.getByRole('button', { name: 'sheet_two', exact: true })).toBeVisible({ timeout: 15000 });
+  const firstTab = page.getByRole('button', { name: 'spi_flash_adapter_v1', exact: true });
+  await expect(firstTab).toBeVisible();
+
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await page.waitForFunction(() => Boolean(document.querySelector('kicanvas-embed:not([data-retired])')?.shadowRoot?.querySelector('kc-schematic-app')?.viewer?.canvas));
+  const point = await symbolScreenPoint(page, 'U1');
+  await page.mouse.click(point.x, point.y);
+  await expect(page.getByTestId('edit-dock')).toContainText('U1', { timeout: 8000 });
+  await page.getByRole('button', { name: 'Rotate 90 degrees clockwise' }).click();
+  await expect(page.getByText('Draft preview · not saved')).toBeVisible({ timeout: 10000 });
+
+  // Another file of the same kind: the draft and the selection do not come along.
+  await page.getByRole('button', { name: 'sheet_two', exact: true }).click();
+  await expect(page.getByText('Draft preview · not saved')).toHaveCount(0, { timeout: 10000 });
+  await expect(page.getByTestId('edit-dock')).toContainText('Select a part to change it');
+  await expect(page.getByRole('button', { name: /^Propose/ })).toHaveCount(0);
+
+  // Editing a file the revision does not retain as its schematic is refused in words, not drawn under the wrong name.
+  await page.waitForFunction(() => Boolean(document.querySelector('kicanvas-embed:not([data-retired])')?.shadowRoot?.querySelector('kc-schematic-app')?.viewer?.canvas));
+  const second = await symbolScreenPoint(page, 'U1');
+  await page.mouse.click(second.x, second.y);
+  await expect(page.getByTestId('edit-dock')).toContainText('U1', { timeout: 8000 });
+  await page.getByRole('button', { name: 'Rotate 90 degrees clockwise' }).click();
+  await expect(page.getByTestId('edit-dock').getByRole('alert')).toContainText('keeps spi_flash_adapter_v1.kicad_sch as its editable schematic', { timeout: 10000 });
+  await expect(page.getByText('Draft preview · not saved')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Propose 1 change/ })).toBeDisabled();
+});
