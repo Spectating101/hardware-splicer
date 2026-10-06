@@ -450,8 +450,13 @@ def _record_ids(store: ProjectStore, project_id: str) -> set[str]:
 
 def _orphan_dirs(project_id: str, referenced: set[str]) -> list[Path]:
     try:
-        root = _output_root() / "candidates" / validate_project_id(project_id)
-    except CandidateValidationError:
+        safe_id = validate_project_id(project_id)
+        output_root = _output_root()
+        # Every component down to the project folder must be a real directory. Checking only the last one let a symlinked
+        # `candidates` folder point this sweep, and its deletions, at a directory the service does not own.
+        _assert_existing_components_not_symlinks(output_root, ("candidates", safe_id))
+        root = output_root / "candidates" / safe_id
+    except (CandidateError, ValueError):
         return []
     if _is_symlink(root) or not root.is_dir():
         return []
