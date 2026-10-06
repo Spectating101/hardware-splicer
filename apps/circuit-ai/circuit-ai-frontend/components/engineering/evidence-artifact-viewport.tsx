@@ -29,11 +29,11 @@ function sameFile(a: string | undefined, b: string | undefined) {
   return normalizePath(a) === normalizePath(b);
 }
 
-/** The file a result belongs to, among those on offer: an exact match, or the only file of that kind, never a guess. */
+/** The file a result belongs to, among those on offer: an exact match on the whole path, never a guess. */
 function resolveFile(files: EvidenceBuildFile[], kind: string, relative: string | undefined) {
-  const ofKind = files.filter((file) => file.kind === kind);
-  if (relative) return ofKind.find((file) => sameFile(file.relative, relative)) || null;
-  return ofKind.length === 1 ? ofKind[0] : null;
+  // No path, no match: a result that cannot say which file it belongs to is not drawn over whichever file is lying around.
+  if (!relative) return null;
+  return files.find((file) => file.kind === kind && sameFile(file.relative, relative)) || null;
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -321,12 +321,16 @@ export function EvidenceArtifactViewport({
   preview?: ProposalPreview | null;
   focusPart?: FocusPart | null;
 }) {
-  const hostRef = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  // The host is not always on screen (an error or an empty state replaces it), so its arrival is what mounts a viewer.
+  const [hostEl, setHostEl] = useState<HTMLDivElement | null>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
-  // What was fetched is kept with the build it came from, so a slow or failed fetch for a new build never leaves the
-  // previous one's files or text standing in for it.
-  const [listed, setListed] = useState<{ buildDir: string; files: EvidenceBuildFile[] } | null>(null);
-  const files = useMemo(() => (listed && listed.buildDir === buildDir ? listed.files : []), [listed, buildDir]);
+  // One identity for what is open: project, revision, build and file. Drafts, selections, cameras and searches belong to it.
+  const contextKey = [proposing?.projectId || '', proposing?.baseRevision ?? '', buildDir].join('|');
+  // What was fetched is kept with the project, revision and build it came from, so a slow or failed fetch for another one
+  // never leaves the previous one's files or text standing in for it.
+  const [listed, setListed] = useState<{ key: string; files: EvidenceBuildFile[] } | null>(null);
+  const files = useMemo(() => (listed && listed.key === contextKey ? listed.files : []), [listed, contextKey]);
   const [activeRelative, setActiveRelative] = useState('');
   const [loaded, setLoaded] = useState<{ key: string; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -345,16 +349,15 @@ export function EvidenceArtifactViewport({
   const cancelFocus = () => { focusGeneration.current += 1; pendingFocus.current = null; };
   fillsRef.current = fills;
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
-  const contentKey = `${buildDir}|${activeRelative}`;
+  const contentKey = `${contextKey}|${activeRelative}`;
   const content = loaded && loaded.key === contentKey ? loaded.text : '';
-  // One identity for what is open: project, revision, build and file. Drafts, selections, cameras and searches belong to it.
-  const contextKey = [proposing?.projectId || '', proposing?.baseRevision ?? '', buildDir].join('|');
+  // The file identity: the context above and the path.
   const artifactKey = `${contextKey}|${activeRelative}`;
   const artifactRef = useRef('');
   artifactRef.current = artifactKey;
-  const previewing = Boolean(preview && preview.kind === activeKind && (preview.relative ? sameFile(preview.relative, activeRelative) : files.filter((file) => file.kind === activeKind).length === 1));
-  // A proposal for a file that is not among those shown cannot be drawn anywhere honest, so say so.
-  const previewMissing = Boolean(preview && files.length && !resolveFile(files, preview.kind, preview.relative));
+  const previewing = Boolean(preview && preview.relative && preview.kind === activeKind && sameFile(preview.relative, activeRelative));
+  // A proposal for a file that is not among those shown, or that does not say which file it changed, cannot be drawn anywhere honest.
+  const previewMissing = Boolean(preview && (!preview.relative || (files.length && !resolveFile(files, preview.kind, preview.relative))));
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
   relativeRef.current = activeRelative;
   // Only over the file the edits were made to: another file of the same kind must not show this file's result.
@@ -379,6 +382,7 @@ export function EvidenceArtifactViewport({
       return;
     }
     let cancelled = false;
+    const requestContext = contextKey;
     setLoading(true);
     setError('');
     fetch('/api/proxy/hardware-splicer/build-files/list', {
@@ -395,7 +399,7 @@ export function EvidenceArtifactViewport({
       .then((payload) => {
         if (cancelled) return;
         const nextFiles = payload.files || [];
-        setListed({ buildDir, files: nextFiles });
+        setListed({ key: requestContext, files: nextFiles });
         const preferred = nextFiles.find((file) => file.kind === preferredKind)
           || nextFiles.find((file) => file.kind === (preferredKind === 'schematic' ? 'pcb' : 'schematic'))
           || nextFiles[0];
@@ -408,14 +412,14 @@ export function EvidenceArtifactViewport({
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [buildDir, preferredKind]);
+  }, [buildDir, preferredKind, contextKey]);
 
   useEffect(() => {
     if (!buildDir || !activeRelative) {
       setLoaded(null);
       return;
     }
-    const requestKey = `${buildDir}|${activeRelative}`;
+    const requestKey = `${contextKey}|${activeRelative}`;
     let cancelled = false;
     setLoading(true);
     setError('');
@@ -440,10 +444,10 @@ export function EvidenceArtifactViewport({
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [activeRelative, buildDir]);
+  }, [activeRelative, buildDir, contextKey]);
 
   useEffect(() => {
-    const host = hostRef.current;
+    const host = hostEl;
     if (!host || !ready || !shownContent) return;
     let embed: HTMLElement | null = null;
     let stopFocus: (() => void) | undefined;
@@ -508,7 +512,7 @@ export function EvidenceArtifactViewport({
       }
       retireEmbed(embed);
     };
-  }, [activeKind, artifactKey, shownContent, ready]);
+  }, [activeKind, artifactKey, shownContent, ready, hostEl]);
 
   // Finding a part: open the right kind of file if needed, then select it and bring it into view.
   useEffect(() => {
@@ -552,8 +556,6 @@ export function EvidenceArtifactViewport({
   useEffect(() => {
     setEditing(false);
     cancelFocus();
-    // cancelFocus is recreated every render; the context is the trigger.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextKey]);
 
   // A dry run of the draft, a beat after the last change, so the viewer can show the result and a refused edit is reported
@@ -583,7 +585,7 @@ export function EvidenceArtifactViewport({
         .catch(() => undefined);
     }, 350);
     return () => { window.clearTimeout(timer); controller.abort(); };
-    // The callback identity is not a trigger; the ops, file and revision are.
+    // The ops, the file (artifactKey) and the revision are the triggers; the callback identity is not.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftOps, editing, activeKind, artifactKey, proposing?.projectId, proposing?.baseRevision]);
 
@@ -667,7 +669,9 @@ export function EvidenceArtifactViewport({
       ) : null}
       {previewMissing && preview ? (
         <div role="alert" className="shrink-0 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] leading-4 text-amber-900">
-          This proposal changed {preview.relative || `a ${preview.kind}`}, which is not among the files shown, so it can&apos;t be drawn here.
+          {preview.relative
+            ? `This proposal changed ${preview.relative}, which is not among the files shown, so it can't be drawn here.`
+            : "This proposal was recorded without the path of the file it changed, so it can't be drawn over a file with certainty."}
         </div>
       ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
@@ -683,7 +687,7 @@ export function EvidenceArtifactViewport({
             </div>
           </div>
         ) : (
-          <div ref={hostRef} className={`${compact ? 'min-h-[470px]' : 'min-h-[600px]'} h-full w-full [&>kicanvas-embed]:block [&>kicanvas-embed]:h-full [&>kicanvas-embed]:w-full`} />
+          <div ref={(element) => { hostRef.current = element; setHostEl(element); }} className={`${compact ? 'min-h-[470px]' : 'min-h-[600px]'} h-full w-full [&>kicanvas-embed]:block [&>kicanvas-embed]:h-full [&>kicanvas-embed]:w-full`} />
         )}
         {shownContent ? (
           <ViewerOverlay
