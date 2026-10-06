@@ -5,6 +5,8 @@ import type { KicadChange } from '@/lib/artifact-diff';
 import { PROJECT_CHANGE_EVENT, type LiveChange } from '@/lib/project-live';
 
 export type EditOp = Record<string, string | number | boolean>;
+export type ProposalInput = { ops: EditOp[] } | { autoroute: { max_passes?: number; keep_existing_tracks?: boolean } };
+export type RoutingCapability = { available: boolean; reason: string | null; components?: Record<string, { ok: boolean; version: string | null }> };
 
 export type CheckSide = { errors: number; warnings: number; total: number; by_type?: Record<string, number> };
 export type CandidateChecks = {
@@ -82,13 +84,13 @@ export function useCandidates(projectId: string) {
     return () => window.removeEventListener(PROJECT_CHANGE_EVENT, onChange);
   }, [load]);
 
-  const propose = useCallback(async (input: { baseRevision: number | null; kind: 'schematic' | 'pcb'; ops: EditOp[]; note: string }) => {
+  const propose = useCallback(async (input: { baseRevision: number | null; kind: 'schematic' | 'pcb'; note: string } & ProposalInput) => {
     const token = stored('session', TOKEN_KEY);
     const name = stored('local', AUTHOR_KEY).trim();
     const response = await fetch(base, {
       method: 'POST',
       headers: { 'content-type': 'application/json', ...(token ? { 'x-hs-operator-token': token } : {}) },
-      body: JSON.stringify({ base_revision: input.baseRevision, kind: input.kind, ops: input.ops, author: name || 'Reviewer', note: input.note }),
+      body: JSON.stringify({ base_revision: input.baseRevision, kind: input.kind, ...('ops' in input ? { ops: input.ops } : { autoroute: input.autoroute }), author: name || 'Reviewer', note: input.note }),
       cache: 'no-store',
     });
     const body = await response.json().catch(() => null);
@@ -98,6 +100,29 @@ export function useCandidates(projectId: string) {
   }, [base, load]);
 
   return { candidates, loading, reload: load, propose };
+}
+
+/** Whether this server can autoroute. Asked once per project; a failure reads as unavailable, never as available. */
+export function useRoutingCapability(projectId: string, enabled: boolean) {
+  const [capability, setCapability] = useState<RoutingCapability | null>(null);
+
+  useEffect(() => {
+    if (!projectId || !enabled) return;
+    let cancelled = false;
+    fetch(`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/routing`, { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((body) => {
+        if (cancelled) return;
+        const routing = body?.routing;
+        setCapability(body?.ok !== false && routing && typeof routing === 'object'
+          ? { available: Boolean(routing.available), reason: typeof routing.reason === 'string' ? routing.reason : null, components: routing.components }
+          : { available: false, reason: 'The routing service could not be reached.' });
+      })
+      .catch(() => { if (!cancelled) setCapability({ available: false, reason: 'The routing service could not be reached.' }); });
+    return () => { cancelled = true; };
+  }, [projectId, enabled]);
+
+  return capability;
 }
 
 /** The proposed file as text, for previewing in the viewer. Nothing here writes. */
