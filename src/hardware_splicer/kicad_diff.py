@@ -71,6 +71,31 @@ def parse_kicad_sexp(text: str) -> list[Any]:
     return _parse_sexp(text)
 
 
+def extract_schematic_symbols(text: str) -> list[dict[str, Any]]:
+    """Return placed schematic symbols using the same parser as the structural diff.
+
+    Diff behaviour is unchanged. Each row is the symbol item plus ``properties``
+    as written on the instance and ``lib_properties`` from the matching
+    ``lib_symbols`` definition in this file (if any).
+    """
+
+    tree = _parse_document("schematic", text)
+    lib_props = _lib_symbol_properties(tree)
+    symbols: list[dict[str, Any]] = []
+    for node in tree[1:]:
+        if _atom(node) != "symbol":
+            continue
+        item = _schematic_symbol(node)
+        if item is None:
+            continue
+        row = dict(item)
+        row["properties"] = _properties(node)
+        lib_id = (row.get("fields") or {}).get("lib_id")
+        row["lib_properties"] = dict(lib_props.get(str(lib_id or ""), {}))
+        symbols.append(row)
+    return symbols
+
+
 def diff_kicad_text(kind: str, base_text: str, candidate_text: str) -> dict[str, Any]:
     """Structurally diff two KiCad documents. Pure: no I/O, no input mutation."""
 
@@ -571,6 +596,18 @@ def _extract_items(kind: str, tree: list[Any]) -> list[dict[str, Any]]:
     if kind == "schematic":
         return _extract_schematic(tree)
     return _extract_pcb(tree)
+
+
+def _lib_symbol_properties(tree: list[Any]) -> dict[str, dict[str, str]]:
+    lib = _child(tree, "lib_symbols")
+    out: dict[str, dict[str, str]] = {}
+    if lib is None:
+        return out
+    for node in lib[1:]:
+        if _atom(node) != "symbol" or len(node) < 2 or isinstance(node[1], list):
+            continue
+        out[str(node[1])] = _properties(node)
+    return out
 
 
 def _extract_schematic(tree: list[Any]) -> list[dict[str, Any]]:
