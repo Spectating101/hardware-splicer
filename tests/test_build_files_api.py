@@ -93,3 +93,42 @@ def test_netlist_fixture_example() -> None:
     assert fixture["ok"] is True
     assert isinstance(fixture["circuit_json"], list)
     assert len(fixture["circuit_json"]) >= 1
+
+
+def _write_board(root: Path, data: bytes) -> str:
+    folder = root / "build_compilation"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "board.kicad_pcb").write_bytes(data)
+    return "build_compilation/board.kicad_pcb"
+
+
+def test_content_hash_is_of_the_exact_bytes_not_the_display_text(tmp_path: Path, monkeypatch) -> None:
+    import hashlib
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    lf = b"(kicad_pcb\n  (version 20240108)\n)\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+
+    relative = _write_board(tmp_path, lf)
+    as_lf = read_build_file(tmp_path, relative)
+    relative = _write_board(tmp_path, crlf)
+    as_crlf = read_build_file(tmp_path, relative)
+
+    # The text shown is the same either way, as it always was.
+    assert as_lf["content"] == as_crlf["content"] == lf.decode("utf-8")
+    # But the files are not the same file, and the hash says so: it is what a retained copy's hash is compared with.
+    assert as_lf["sha256"] == "sha256:" + hashlib.sha256(lf).hexdigest()
+    assert as_crlf["sha256"] == "sha256:" + hashlib.sha256(crlf).hexdigest()
+    assert as_lf["sha256"] != as_crlf["sha256"]
+    assert as_crlf["size_bytes"] == len(crlf)
+
+
+def test_content_hash_covers_bytes_that_are_not_valid_utf8(tmp_path: Path, monkeypatch) -> None:
+    import hashlib
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    raw = b"(kicad_pcb\n  (generator \"caf\xe9\")\n)\n"
+    relative = _write_board(tmp_path, raw)
+    payload = read_build_file(tmp_path, relative)
+    assert "�" in payload["content"]
+    assert payload["sha256"] == "sha256:" + hashlib.sha256(raw).hexdigest()
