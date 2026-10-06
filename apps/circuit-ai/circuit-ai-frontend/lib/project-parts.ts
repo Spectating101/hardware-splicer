@@ -10,6 +10,7 @@ export type ProviderRecord = {
   datasheet_url?: string | null;
   alternates?: { mpn: string; manufacturer?: string | null; reason?: string }[];
   package?: string | null;
+  lcsc?: string | null;
 };
 
 export type BomGroup = {
@@ -21,7 +22,8 @@ export type BomGroup = {
   dnp?: boolean;
   quantity: number;
   refs: string[];
-  flags?: { missing_mpn?: boolean; dnp?: boolean; not_in_bom?: boolean };
+  missing_mpn?: boolean;
+  not_in_bom?: boolean;
   datasheet?: string | null;
   availability?: { status: 'not_checked' | 'checked' | 'lookup_failed' | 'no_data'; records?: ProviderRecord[]; note?: string };
 };
@@ -32,6 +34,7 @@ export type PartsResult = {
   summary?: { components: number; groups: number; unique_mpns: number; missing_mpn_groups: number; dnp_components: number; excluded_components: number };
   bom_groups: BomGroup[];
   enrichment?: { requested?: boolean; providers?: string[]; performed?: boolean; reason?: string };
+  source?: { relative?: string | null; sha256?: string | null; retention_basis?: string | null };
 };
 
 /** Parts of a retained schematic revision. Enrichment is a separate, explicit request so nothing leaves the host unasked. */
@@ -48,7 +51,7 @@ export function useProjectParts(projectId: string, revision: number | null, acti
       const response = await fetch(`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/revisions/${revision}/parts?enrich=${enrich}`, { cache: 'no-store' });
       const body = await response.json();
       if (!response.ok || body?.ok === false) throw new Error(body?.error || body?.detail?.message || 'The parts list could not be loaded.');
-      setResult({ available: body.available !== false, reason: body.reason, summary: body.summary, bom_groups: body.bom_groups || [], enrichment: body.enrichment });
+      setResult({ available: body.available !== false, reason: body.reason, summary: body.summary, bom_groups: body.bom_groups || [], enrichment: body.enrichment, source: body.source });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The parts list could not be loaded.');
     } finally {

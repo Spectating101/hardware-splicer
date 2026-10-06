@@ -28,7 +28,8 @@ export function PartsPanel({
   error: string;
   onCheckAvailability: () => void;
 }) {
-  const canCheck = Boolean(result?.available && result.enrichment?.providers?.length);
+  const checked = Boolean(result?.enrichment?.performed);
+  const checkNote = result?.enrichment?.requested && !checked ? (result.enrichment.reason || 'No parts provider answered.') : '';
   return (
     <div className="min-h-0 flex-1 overflow-y-auto p-3" data-testid="parts-panel">
       {loading && !result ? <div className="flex items-center gap-2 text-xs text-stone-500"><LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />Reading the schematic</div> : null}
@@ -47,12 +48,13 @@ export function PartsPanel({
           <button
             type="button"
             onClick={onCheckAvailability}
-            disabled={!canCheck || loading}
-            title={canCheck ? 'Sends part numbers to the configured provider' : (result.enrichment?.reason || 'No parts provider is configured on this server')}
+            disabled={loading}
+            title="Looks each part number up in the providers this server has enabled. Nothing is sent until you click."
             className="mb-3 inline-flex h-7 items-center gap-1.5 rounded-md border border-stone-300 px-2.5 text-[11px] font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:text-stone-400"
           >
-            {loading ? <LoaderCircle className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}Check availability
+            {loading ? <LoaderCircle className="h-3 w-3 animate-spin" aria-hidden="true" /> : null}{checked ? 'Check again' : 'Check availability'}
           </button>
+          {checkNote ? <p className="mb-3 text-[11px] leading-4 text-stone-500">{checkNote}</p> : null}
           <ul className="m-0 list-none space-y-2 p-0">
             {result.bom_groups.map((group) => (
               <li key={`${group.value}|${group.footprint}|${group.mpn}|${group.refs.join(',')}`} className="rounded-md border border-stone-200 bg-white p-2.5">
@@ -65,7 +67,7 @@ export function PartsPanel({
                 </div>
                 <div className="mt-1.5 truncate font-mono text-[10px] text-stone-500" title={group.refs.join(', ')}>{group.refs.join(' ')}</div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]">
-                  {group.mpn ? <span className="font-mono text-stone-700">{group.mpn}</span> : (
+                  {group.mpn ? <span className="font-mono text-stone-700">{group.mpn}</span> : group.not_in_bom ? null : (
                     <span className="inline-flex items-center gap-1 text-amber-700"><TriangleAlert className="h-3 w-3" aria-hidden="true" />No MPN in the design</span>
                   )}
                   {group.dnp ? <span className="rounded border border-stone-300 px-1 text-stone-500">not fitted</span> : null}
