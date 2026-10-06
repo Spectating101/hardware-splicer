@@ -396,6 +396,7 @@ async def create_thread(project_id: str, request: Request) -> dict[str, Any]:
     }
     thread["events"].append(_new_event(thread, "comment", payload.get("author"), payload.get("body"), operator))
     _threads[thread["thread_id"]] = thread
+    _publish("thread.created", thread["thread_id"], 1)
     return {"ok": True, "thread": _thread_full(thread)}
 
 
@@ -421,6 +422,7 @@ async def append_thread_event(project_id: str, thread_id: str, request: Request)
         raise _thread_error(409, "thread_conflict", "thread changed since it was loaded")
     event = _new_event(thread, str(payload.get("type") or ""), payload.get("author"), payload.get("body"), operator)
     thread["events"].append(event)
+    _publish("thread.event", thread_id, event["seq"])
     return {"ok": True, "event": event}
 
 
@@ -499,6 +501,166 @@ def artifact_diff(project_id: str, base: int, candidate: int, kind: str = "schem
         "artifact": {"base": {"relative": name}, "candidate": {"relative": name}},
         "diff": diff,
     }
+
+
+# --- 3D model: fixture over kicad-cli ---------------------------------------------------------------
+# The real implementation (src/hardware_splicer/model3d.py) works from retained, hash-verified revision artifacts.
+# This fixture renders the reference board for revisions 5 and 6 and reports unavailable when kicad-cli is absent.
+import hashlib
+import shutil
+import subprocess
+import tempfile
+
+from fastapi.responses import Response
+
+_GLB_CACHE: dict[int, bytes] = {}
+
+
+def _fixture_glb(revision: int) -> bytes | None:
+    if revision in _GLB_CACHE:
+        return _GLB_CACHE[revision]
+    binary = shutil.which("kicad-cli")
+    if binary is None:
+        return None
+    reference = (REFERENCE_DIR / "spi_flash_adapter_v1.kicad_pcb").read_text(encoding="utf-8", errors="replace")
+    text = reference if revision == 6 else _fixture_base_text("pcb", reference)
+    with tempfile.TemporaryDirectory() as tmp:
+        board = Path(tmp) / "board.kicad_pcb"
+        board.write_text(text, encoding="utf-8")
+        out = Path(tmp) / "board.glb"
+        completed = subprocess.run(
+            [binary, "pcb", "export", "glb", "--force", "--subst-models", "--include-tracks", "--include-pads",
+             "--include-zones", "--output", str(out), str(board)],
+            capture_output=True, timeout=90, env={"PATH": "/usr/bin:/bin", "HOME": tmp}, check=False,
+        )
+        if completed.returncode != 0 or not out.is_file():
+            return None
+        _GLB_CACHE[revision] = out.read_bytes()
+    return _GLB_CACHE[revision]
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/model3d")
+def model3d_meta(project_id: str, revision: int) -> dict[str, Any]:
+    _require_project(project_id)
+    if revision not in (5, 6):
+        return {"ok": True, "revision": revision, "available": False, "reason": f"Revision {revision} has no retained pcb."}
+    data = _fixture_glb(revision)
+    if data is None:
+        return {"ok": True, "revision": revision, "available": False, "reason": "kicad-cli is not installed on this host, so no 3D model can be generated."}
+    digest = hashlib.sha256(data).hexdigest()
+    return {
+        "ok": True,
+        "revision": revision,
+        "available": True,
+        "model": {
+            "format": "glb",
+            "sha256": digest,
+            "size_bytes": len(data),
+            "generated_with": "kicad-cli (fixture)",
+            "url": f"/v1/projects/{project_id}/revisions/{revision}/model3d/glb",
+        },
+    }
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/model3d/glb")
+def model3d_glb(project_id: str, revision: int) -> Response:
+    _require_project(project_id)
+    data = _fixture_glb(revision) if revision in (5, 6) else None
+    if data is None:
+        raise _thread_error(404, "not_found", "no 3D model for this revision")
+    return Response(content=data, media_type="model/gltf-binary", headers={"ETag": f'"sha256:{hashlib.sha256(data).hexdigest()}"', "Cache-Control": "private, max-age=3600"})
+
+
+# --- Live events + presence: in-memory mirror of the /events and /presence contract ----------------------
+# Real implementation: src/hardware_splicer/project_events*.py (filesystem-derived, multi-process safe).
+import asyncio
+import json as _json
+import re
+import time
+
+from fastapi.responses import StreamingResponse
+
+_event_log: list[dict[str, Any]] = []
+_presence: dict[str, dict[str, Any]] = {}
+_PRESENCE_TTL = 45.0
+_CLIENT_ID = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
+
+
+def _publish(kind: str, ident: str, seq: int | None = None) -> None:
+    _event_log.append({"type": kind, "id": ident, "seq": seq})
+
+
+# Thread writes above call _publish so the stream mirrors them (the real service derives them from the thread files).
+
+
+@app.get("/v1/projects/{project_id}/events")
+async def project_events(project_id: str, request: Request) -> StreamingResponse:
+    _require_project(project_id)
+
+    async def frames():
+        cursor = len(_event_log)
+        yield "event: hello\ndata: " + _json.dumps({"project_id": project_id, "revision": state["revision"], "threads": len(_threads), "poll_seconds": 0.25}) + "\n\n"
+        idle = 0.0
+        deadline = time.monotonic() + 1800
+        while time.monotonic() < deadline:
+            if await request.is_disconnected():
+                return
+            if len(_event_log) > cursor:
+                changes, cursor = _event_log[cursor:], len(_event_log)
+                yield "event: change\ndata: " + _json.dumps({"changes": changes, "server_time": time.time()}) + "\n\n"
+                idle = 0.0
+            else:
+                await asyncio.sleep(0.25)
+                idle += 0.25
+                if idle >= 15:
+                    yield ": keepalive\n\n"
+                    idle = 0.0
+
+    return StreamingResponse(frames(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.post("/v1/projects/{project_id}/presence")
+async def presence_heartbeat(project_id: str, request: Request) -> dict[str, Any]:
+    _require_project(project_id)
+    payload = await request.json()
+    if set(payload) - {"client_id", "name", "object_id", "mode"}:
+        raise _thread_error(422, "invalid_request", "unknown presence field")
+    client_id = str(payload.get("client_id") or "")
+    if not _CLIENT_ID.match(client_id):
+        raise _thread_error(422, "invalid_request", "client_id must be 8 to 64 URL-safe characters")
+    operator = _operator_from_request(request)
+    name = operator["id"] if operator else str(payload.get("name") or "").strip()[:80]
+    _presence[client_id] = {
+        "client_id": client_id,
+        "name": name or "Someone",
+        "object_id": str(payload.get("object_id") or "")[:200] or None,
+        "mode": payload.get("mode") if payload.get("mode") in {"review", "compare", "verify", "bringup", "other"} else "other",
+        "verified": operator is not None,
+        "operator": operator,
+        "seen_at": time.time(),
+    }
+    return {"ok": True, "ttl_seconds": int(_PRESENCE_TTL)}
+
+
+@app.get("/v1/projects/{project_id}/presence")
+def presence_list(project_id: str) -> dict[str, Any]:
+    _require_project(project_id)
+    now = time.time()
+    rows = []
+    for entry in list(_presence.values()):
+        age = now - entry["seen_at"]
+        if age > _PRESENCE_TTL:
+            continue
+        rows.append({**{k: v for k, v in entry.items() if k != "seen_at"}, "seen_seconds_ago": round(age, 1)})
+    rows.sort(key=lambda row: (row["name"], row["client_id"]))
+    return {"ok": True, "participants": rows[:100]}
+
+
+@app.delete("/v1/projects/{project_id}/presence/{client_id}")
+def presence_leave(project_id: str, client_id: str) -> dict[str, Any]:
+    _require_project(project_id)
+    _presence.pop(client_id, None)
+    return {"ok": True}
 
 
 if __name__ == "__main__":
