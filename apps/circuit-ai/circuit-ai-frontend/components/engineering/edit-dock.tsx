@@ -25,8 +25,11 @@ function num(value: unknown) {
  * footprints are offered for editing; anything else reads as "not editable here" rather than guessing an operation.
  */
 /** `undefined` when nothing is selected, `null` when something is selected that cannot be edited here. */
-function readSelection(host: HTMLElement | null, kind: string): Selected | null | undefined {
+function readSelection(host: HTMLElement | null, kind: string, fileKey: string): Selected | null | undefined {
   const embed = host?.querySelector('kicanvas-embed:not([data-retired])') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
+  // Only what is selected in the viewer for the file that is open. Another file's viewer, even one still on its way out or
+  // showing identical content, is not this file's selection.
+  if (!embed || embed.dataset.relative !== fileKey) return undefined;
   const app = embed?.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { selected?: { context?: Loose } | null } }) | null;
   const ctx = app?.viewer?.selected?.context;
   if (!ctx) return undefined;
@@ -94,7 +97,7 @@ export function EditDock({
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      const next = readSelection(hostRef.current, kind);
+      const next = readSelection(hostRef.current, kind, fileKey);
       // Reloading the viewer to show a draft clears KiCanvas's own selection. The part stays chosen here until another
       // one is picked, so the person can keep editing it.
       if (next === undefined) return;
@@ -111,7 +114,7 @@ export function EditDock({
       setValue(next.value || '');
     }, 150);
     return () => window.clearInterval(timer);
-  }, [hostRef, kind]);
+  }, [hostRef, kind, fileKey]);
 
   // A draft belongs to one file; switching between schematic and PCB must not carry edits across.
   useEffect(() => {

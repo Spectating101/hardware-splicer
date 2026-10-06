@@ -455,7 +455,7 @@ export default function EvidenceOverviewPage() {
                 <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} projectId={projectId} nextRevision={revision ? revision + 1 : null} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} onFocusChange={setFocusChange} decide={candidates.decide} />
               </>
             ) : railTab === 'parts' ? (
-              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} onLocate={(ref) => setFocusPart({ ref, kind: 'schematic', nonce: Date.now() })} />
+              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} onLocate={(ref) => setFocusPart({ ref, kind: 'schematic', nonce: Date.now(), relative: parts.result?.source?.relative || undefined })} />
             ) : railTab === 'findings' ? (
               <div className="min-h-0 flex-1 overflow-y-auto p-3">
                 {!blockedObjects.length && !failedActions.length && !recordedFindings.length ? <div className="text-xs text-stone-500">No recorded blocker or failed check.</div> : null}

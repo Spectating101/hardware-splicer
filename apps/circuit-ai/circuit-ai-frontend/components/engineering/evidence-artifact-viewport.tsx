@@ -12,15 +12,28 @@ export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/enginee
 export type ActiveArtifact = { relative: string; kind: string };
 /** A proposal's file shown in place of the retained one. It is a preview only and never replaces what is stored. */
 /** Ask the viewer to find a part by its reference designator. `nonce` makes asking for the same part twice work. */
-export type FocusPart = { ref: string; kind: 'schematic' | 'pcb'; nonce: number };
+export type FocusPart = { ref: string; kind: 'schematic' | 'pcb'; nonce: number; /** The file the reference was read from. */ relative?: string };
 
 export type ProposalPreview = { candidateId: string; kind: 'schematic' | 'pcb'; text: string; relative?: string };
 
-/** Two paths name the same retained file when their file names match; the folder a build keeps it in can differ. */
+function normalizePath(path: string) {
+  return path.replace(/\\/g, '/').split('/').filter((part) => part && part !== '.').join('/');
+}
+
+/**
+ * Two paths are the same retained file only when the whole path matches. A file name alone is not enough: a project can
+ * keep `a/control.kicad_sch` and `b/control.kicad_sch`, and drawing one's result over the other would be a lie.
+ */
 function sameFile(a: string | undefined, b: string | undefined) {
   if (!a || !b) return false;
-  const name = (path: string) => path.split('/').filter(Boolean).pop() || path;
-  return name(a) === name(b);
+  return normalizePath(a) === normalizePath(b);
+}
+
+/** The file a result belongs to, among those on offer: an exact match, or the only file of that kind, never a guess. */
+function resolveFile(files: EvidenceBuildFile[], kind: string, relative: string | undefined) {
+  const ofKind = files.filter((file) => file.kind === kind);
+  if (relative) return ofKind.find((file) => sameFile(file.relative, relative)) || null;
+  return ofKind.length === 1 ? ofKind[0] : null;
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -193,6 +206,8 @@ function restoreCamera(embed: HTMLElement, kept: KeptCamera) {
 }
 
 const FOCUS_REQUEST_LIFETIME_MS = 8000;
+// After a part has been found, a later KiCanvas load may still clear the selection; reapply only for this long.
+const FOCUS_REAPPLY_WINDOW_MS = 2000;
 
 /** Selects a part and brings it into view. KiCanvas looks a footprint or symbol up by its reference. True once it took. */
 function tryFocusOnPart(embed: HTMLElement, ref: string) {
@@ -214,9 +229,11 @@ function tryFocusOnPart(embed: HTMLElement, ref: string) {
  * KiCanvas reports `load` more than once, and the first can come before the viewer is able to select anything, so one
  * attempt can be wasted. Keep trying briefly; a reference the file does not have simply leaves the view as it was.
  */
-function focusOnPart(embed: HTMLElement, ref: string, attempt = 0) {
-  if (tryFocusOnPart(embed, ref) || attempt >= 12) return;
-  window.setTimeout(() => { if (embed.isConnected) focusOnPart(embed, ref, attempt + 1); }, 250);
+function focusOnPart(embed: HTMLElement, ref: string, isCurrent: () => boolean, onDone?: () => void, attempt = 0) {
+  if (!isCurrent()) return;
+  if (tryFocusOnPart(embed, ref)) { onDone?.(); return; }
+  if (attempt >= 12) return;
+  window.setTimeout(() => { if (embed.isConnected) focusOnPart(embed, ref, isCurrent, onDone, attempt + 1); }, 250);
 }
 
 type FillMode = 'faint' | 'full';
@@ -260,9 +277,13 @@ function retireEmbed(embed: HTMLElement) {
 /** "Schematic" or "PCB", or the file's own name when a project has several files of one kind so the tabs can be told apart. */
 function tabLabel(file: EvidenceBuildFile, all: EvidenceBuildFile[]) {
   const base = file.kind === 'schematic' ? 'Schematic' : file.kind === 'pcb' ? 'PCB' : file.name || 'Artifact';
-  if (all.filter((other) => other.kind === file.kind).length < 2) return base;
-  const name = (file.relative || file.name || '').split('/').pop() || base;
-  return name.replace(/\.kicad_(sch|pcb)$/, '');
+  const sameKind = all.filter((other) => other.kind === file.kind);
+  if (sameKind.length < 2) return base;
+  const path = normalizePath(file.relative || file.name || base);
+  const leaf = path.split('/').pop() || base;
+  // Files that share a name are told apart by their folder, so two tabs never read the same.
+  const clash = sameKind.some((other) => other !== file && (normalizePath(other.relative || other.name || '').split('/').pop() === leaf));
+  return (clash ? path : leaf).replace(/\.kicad_(sch|pcb)$/, '');
 }
 
 export function EvidenceArtifactViewport({
@@ -315,10 +336,15 @@ export function EvidenceArtifactViewport({
   const relativeRef = useRef('');
   const [fills, setFills] = useState<FillMode>('faint');
   const fillsRef = useRef<FillMode>('faint');
-  const pendingFocus = useRef<FocusPart | null>(null);
+  const pendingFocus = useRef<(FocusPart & { appliedAt?: number }) | null>(null);
+  // Each request for a part gets a generation. Moving to another file or tab ends it, and so does a newer request.
+  const focusGeneration = useRef(0);
+  const cancelFocus = () => { focusGeneration.current += 1; pendingFocus.current = null; };
   fillsRef.current = fills;
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
-  const previewing = Boolean(preview && preview.kind === activeKind && (!preview.relative || sameFile(preview.relative, activeRelative)));
+  const previewing = Boolean(preview && preview.kind === activeKind && (preview.relative ? sameFile(preview.relative, activeRelative) : files.filter((file) => file.kind === activeKind).length === 1));
+  // A proposal for a file that is not among those shown cannot be drawn anywhere honest, so say so.
+  const previewMissing = Boolean(preview && files.length && !resolveFile(files, preview.kind, preview.relative));
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
   relativeRef.current = activeRelative;
   // Only over the file the edits were made to: another file of the same kind must not show this file's result.
@@ -421,9 +447,15 @@ export function EvidenceArtifactViewport({
       if (activeKind === 'pcb') applyFillModeAfterLoad(created, () => fillsRef.current);
       // A part asked for while this file was opening is found once it has loaded. KiCanvas can load more than once and a
       // later load clears the selection, so the request is reapplied after each load until it goes stale.
+      created.dataset.relative = relativeAtMount;
       created.addEventListener('kicanvas:load', () => window.setTimeout(() => {
         const wanted = pendingFocus.current;
-        if (wanted && wanted.kind === activeKind && Date.now() - wanted.nonce < FOCUS_REQUEST_LIFETIME_MS) focusOnPart(created, wanted.ref);
+        if (!wanted || wanted.kind !== activeKind || Date.now() - wanted.nonce >= FOCUS_REQUEST_LIFETIME_MS) return;
+        // Only for the file the reference was read from, and only while the person has not moved on.
+        if (wanted.relative && !sameFile(wanted.relative, relativeAtMount)) return;
+        if (wanted.appliedAt && Date.now() - wanted.appliedAt > FOCUS_REAPPLY_WINDOW_MS) { pendingFocus.current = null; return; }
+        const generation = focusGeneration.current;
+        focusOnPart(created, wanted.ref, () => generation === focusGeneration.current && pendingFocus.current === wanted, () => { wanted.appliedAt = wanted.appliedAt || Date.now(); });
       }, 200));
       created.setAttribute('controls', 'basic');
       created.setAttribute('controlslist', 'nodownload nooverlay');
@@ -464,20 +496,22 @@ export function EvidenceArtifactViewport({
       }
       retireEmbed(embed);
     };
-  }, [activeKind, shownContent, ready]);
+  }, [activeKind, activeRelative, shownContent, ready]);
 
   // Finding a part: open the right kind of file if needed, then select it and bring it into view.
   useEffect(() => {
     if (!focusPart) return;
-    pendingFocus.current = focusPart;
+    focusGeneration.current += 1;
+    const generation = focusGeneration.current;
+    const request: FocusPart & { appliedAt?: number } = { ...focusPart };
+    pendingFocus.current = request;
     setShow3d(false);
-    if (activeKind !== focusPart.kind) {
-      const target = files.find((file) => file.kind === focusPart.kind);
-      if (target?.relative) setActiveRelative(target.relative);
-      return;
-    }
+    // The file the reference was read from; never merely the first file of that kind.
+    const target = resolveFile(files, focusPart.kind, focusPart.relative);
+    if (!target?.relative) { pendingFocus.current = null; return; }
+    if (!sameFile(target.relative, activeRelative)) { setActiveRelative(target.relative); return; }
     const embed = hostRef.current?.querySelector('kicanvas-embed:not([data-retired])') as HTMLElement | null;
-    if (embed && embed.dataset.loaded === '1') { pendingFocus.current = null; focusOnPart(embed, focusPart.ref); }
+    if (embed && embed.dataset.loaded === '1') focusOnPart(embed, request.ref, () => generation === focusGeneration.current && pendingFocus.current === request, () => { request.appliedAt = Date.now(); });
     // Only when a new request is made, not when the file list or the active file changes underneath it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusPart?.nonce]);
@@ -485,9 +519,9 @@ export function EvidenceArtifactViewport({
   // Previewing a proposal shows the file it changed.
   useEffect(() => {
     if (!preview) return;
-    // The file the proposal changed, not just the first file of that kind.
-    const target = files.find((file) => file.kind === preview.kind && sameFile(file.relative, preview.relative)) || files.find((file) => file.kind === preview.kind);
-    if (target?.relative) { setShow3d(false); setActiveRelative(target.relative); }
+    // The file the proposal changed, never merely the first file of that kind.
+    const target = resolveFile(files, preview.kind, preview.relative);
+    if (target?.relative) { cancelFocus(); setShow3d(false); setActiveRelative(target.relative); }
     // Only when a different proposal is chosen, not on every file-list refresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preview?.candidateId]);
@@ -519,7 +553,7 @@ export function EvidenceArtifactViewport({
           // Edits always apply to the one file a revision retains for this kind. If another file is on screen, say so
           // rather than drawing that file's result under this file's name.
           if (!sameFile(result.preview.relative, requestedFor)) {
-            const kept = (result.preview.relative || '').split('/').pop() || 'another file';
+            const kept = result.preview.relative || 'another file';
             setDraft({ status: 'error', message: `This revision keeps ${kept} as its editable ${activeKind === 'pcb' ? 'PCB' : 'schematic'}, not the file on screen. Open that file to edit it.` });
             return;
           }
@@ -545,7 +579,7 @@ export function EvidenceArtifactViewport({
               <button
                 key={file.relative || file.name}
                 type="button"
-                onClick={() => { setShow3d(false); setActiveRelative(file.relative || ''); }}
+                onClick={() => { cancelFocus(); setShow3d(false); setActiveRelative(file.relative || ''); }}
                 className={`border-b-2 px-3 py-2.5 text-xs font-medium ${active && !show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
               >
                 {tabLabel(file, visibleFiles)}
@@ -555,7 +589,7 @@ export function EvidenceArtifactViewport({
           {model3d && model3d.revision ? (
             <button
               type="button"
-              onClick={() => setShow3d(true)}
+              onClick={() => { cancelFocus(); setShow3d(true); }}
               aria-pressed={show3d}
               className={`border-b-2 px-3 py-2.5 text-xs font-medium ${show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
             >
@@ -609,6 +643,11 @@ export function EvidenceArtifactViewport({
           onProposed={(candidate) => { setEditing(false); proposing.onProposed(candidate); }}
           onClose={() => setEditing(false)}
         />
+      ) : null}
+      {previewMissing && preview ? (
+        <div role="alert" className="shrink-0 border-b border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] leading-4 text-amber-900">
+          This proposal changed {preview.relative || `a ${preview.kind}`}, which is not among the files shown, so it can&apos;t be drawn here.
+        </div>
       ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
         {show3d && model3d && model3d.revision ? <Model3DViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
