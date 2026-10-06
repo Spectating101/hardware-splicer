@@ -77,7 +77,11 @@ def test_findings_api_200_shape(tmp_path: Path) -> None:
         "basis",
         "source_ref",
         "authority_ceiling",
+        "attested",
     }
+    # The action record is stored in the snapshot, so the server has not attested it.
+    assert row["provenance"]["kind"] == "deterministic"
+    assert row["provenance"]["attested"] is False
 
 
 def test_findings_api_revision_selects_that_snapshot(tmp_path: Path) -> None:

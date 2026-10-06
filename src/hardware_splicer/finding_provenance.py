@@ -190,10 +190,12 @@ def _failed_check_provenance(action: Mapping[str, Any]) -> dict[str, Any]:
         )
     action_type = recorded[0] if recorded else ""
     if action_type in EXECUTABLE_AI_PREVIEW_ACTIONS and not _action_never_executed(action):
+        # The action record lives in the snapshot, so this is a stored claim, not something the server attested.
         return _provenance(
             "deterministic",
             "failed action executed by the deterministic tool executor",
             source_ref,
+            attested=False,
         )
     if action_type in ALLOWED_AI_ACTION_TYPES and _action_never_executed(action):
         return _provenance(
