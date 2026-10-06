@@ -126,7 +126,7 @@ API error contract — clients may rely on the shape.
 | `GET` | `/{project_id}/threads/{thread_id}` | Load a review thread + events |
 | `POST` | `/{project_id}/threads/{thread_id}/events` | Append a comment, resolve, or reopen |
 
-Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md).
+Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md). Parts intelligence for a retained schematic revision: [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md).
 
 `/v1/machine-projects`
 

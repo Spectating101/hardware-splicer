@@ -50,6 +50,7 @@ from .physical_evidence_persistence_api import create_physical_evidence_persiste
 from .artifact_retention import install_at_save_retention
 from .project_api import create_project_router
 from .project_artifact_api import create_project_artifact_router
+from .project_parts_api import create_project_parts_router
 from .project_findings_api import create_project_findings_router
 from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
@@ -104,6 +105,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.state.project_store = resolved_store
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
+    app.include_router(create_project_parts_router(resolved_store))
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())
