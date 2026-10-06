@@ -213,6 +213,7 @@ async def read_build_file(request: Request) -> dict[str, Any]:
 # error contract ({detail:{type,message}}) so the browser paths can be exercised without a project root.
 import itertools
 from datetime import datetime, timezone
+from uuid import uuid4
 
 _THREAD_AUTHOR_KINDS = {"human", "agent", "system"}
 # Mock operator registry. The real one is hashed tokens in HARDWARE_SPLICER_OPERATOR_TOKENS (operator_identity.py).
@@ -592,6 +593,78 @@ def revision_parts(project_id: str, revision: int, enrich: bool = False) -> dict
     return {"ok": True, "project_id": PROJECT_ID, "revision": revision, "available": True,
             "source": {"relative": "spi_flash_adapter_v1.kicad_sch", "sha256": None, "retention_basis": "at_save"},
             "summary": bom["summary"], "components": [], "bom_groups": bom["groups"], "enrichment": enrichment}
+
+
+# --- Candidate proposals: the real edit engine and diff over the fixture revisions (in memory) -----------------
+# Real implementation: src/hardware_splicer/project_candidates*.py (writes a candidate dir and opens a staged review).
+_apply_edit_ops = _load_hs_attr("kicad_edit", "apply_edit_ops")
+_candidates: dict[str, dict[str, Any]] = {}
+_candidate_files: dict[str, str] = {}
+
+
+@app.get("/v1/projects/{project_id}/candidates")
+def candidates_list(project_id: str) -> dict[str, Any]:
+    _require_project(project_id)
+    rows = sorted(_candidates.values(), key=lambda row: row["created_at"], reverse=True)
+    return {"ok": True, "project_id": project_id, "candidates": rows[:100]}
+
+
+@app.post("/v1/projects/{project_id}/candidates", status_code=201)
+async def candidates_create(project_id: str, request: Request) -> dict[str, Any]:
+    _require_project(project_id)
+    payload = await request.json()
+    kind = payload.get("kind")
+    ops = payload.get("ops")
+    author = str(payload.get("author") or "").strip()
+    if kind not in {"schematic", "pcb"} or not isinstance(ops, list) or not ops or not author or len(author) > 80:
+        raise _thread_error(422, "invalid_request", "kind, ops and author are required")
+    if _apply_edit_ops is None or _diff_kicad_text is None:
+        raise _thread_error(409, "artifact_not_retained", "This mock was started without the edit engine.")
+    base_rev = payload.get("base_revision") or state["revision"]
+    if base_rev not in (5, 6):
+        raise _thread_error(409, "artifact_not_retained", f"Revision {base_rev} has no retained artifact.")
+    name = "spi_flash_adapter_v1.kicad_sch" if kind == "schematic" else "spi_flash_adapter_v1.kicad_pcb"
+    reference = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
+    base_text = reference if base_rev == 6 else _fixture_base_text(kind, reference)
+    operator = _operator_from_request(request)
+    try:
+        edited = _apply_edit_ops(kind, base_text, ops)
+    except Exception as exc:  # KicadEditError: message never echoes file content
+        raise _thread_error(422, "invalid_edit", str(exc)[:300])
+    diff = _diff_kicad_text(kind, base_text, edited["text"])
+    if not (diff.get("changes")):
+        raise _thread_error(422, "no_effective_change", "The edits leave the file unchanged.")
+    cid = "cand-" + uuid4().hex[:12]
+    record = {
+        "schema_version": "hardware_splicer.candidate.v1", "candidate_id": cid, "project_id": project_id,
+        "base_revision": base_rev, "kind": kind, "review_id": "review-" + uuid4().hex[:8],
+        "created_by": operator["id"] if operator else author, "verified": operator is not None,
+        "created_at": datetime.now(timezone.utc).isoformat(), "applied": edited.get("applied", []),
+        "warnings": edited.get("warnings", []), "diff": diff,
+        "checks": {"engine": "kicad-cli", "available": False, "ran": False, "reason": "kicad-cli is not available"},
+        "authority": {"state": "proposal", "note": "A candidate is a proposal. Accepting its review does not mark anything verified, fabrication-ready or release-ready."},
+    }
+    _candidates[cid] = record
+    _candidate_files[cid] = edited["text"]
+    _publish("review.opened", record["review_id"])
+    return {"ok": True, "candidate": record, "review": {"review_id": record["review_id"], "status": "pending"}}
+
+
+@app.get("/v1/projects/{project_id}/candidates/{candidate_id}")
+def candidates_get(project_id: str, candidate_id: str) -> dict[str, Any]:
+    _require_project(project_id)
+    if candidate_id not in _candidates:
+        raise _thread_error(404, "not_found", "Candidate not found")
+    return {"ok": True, "candidate": _candidates[candidate_id]}
+
+
+@app.get("/v1/projects/{project_id}/candidates/{candidate_id}/files/{kind}")
+def candidates_file(project_id: str, candidate_id: str, kind: str) -> Response:
+    _require_project(project_id)
+    record = _candidates.get(candidate_id)
+    if record is None or record["kind"] != kind:
+        raise _thread_error(404, "not_found", "Candidate file not found")
+    return Response(_candidate_files[candidate_id], media_type="text/plain; charset=utf-8")
 
 
 # --- Live events + presence: in-memory mirror of the /events and /presence contract ----------------------
