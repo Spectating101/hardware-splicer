@@ -129,6 +129,41 @@ export function useCandidates(projectId: string) {
   return { candidates, loading, reload: load, propose, decide };
 }
 
+export type DraftPreview = {
+  base_revision: number;
+  kind: 'schematic' | 'pcb';
+  text: string;
+  applied: NonNullable<Candidate['applied']>;
+  warnings: string[];
+  diff: NonNullable<Candidate['diff']>;
+};
+
+/**
+ * What a set of draft edits would produce, from a dry run that keeps nothing. Resolves with the reason on a refused edit
+ * so the editor can say so while the person is still typing.
+ */
+export async function previewDraft(
+  projectId: string,
+  input: { baseRevision: number | null; kind: 'schematic' | 'pcb'; ops: EditOp[] },
+  signal?: AbortSignal,
+): Promise<{ ok: true; preview: DraftPreview } | { ok: false; message: string }> {
+  try {
+    const response = await fetch(`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/candidates/preview`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ base_revision: input.baseRevision, kind: input.kind, ops: input.ops }),
+      cache: 'no-store',
+      signal,
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok || body?.ok === false || !body?.preview) return { ok: false, message: errorText(body, 'The draft could not be previewed.') };
+    return { ok: true, preview: body.preview as DraftPreview };
+  } catch (caught) {
+    if (caught instanceof DOMException && caught.name === 'AbortError') throw caught;
+    return { ok: false, message: 'The draft could not be previewed.' };
+  }
+}
+
 /** Whether this server can autoroute. Asked once per project; a failure reads as unavailable, never as available. */
 export function useRoutingCapability(projectId: string, enabled: boolean) {
   const [capability, setCapability] = useState<RoutingCapability | null>(null);
