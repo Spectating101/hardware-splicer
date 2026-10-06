@@ -29,7 +29,7 @@ function readSelection(host: HTMLElement | null, kind: string, fileKey: string):
   const embed = host?.querySelector('kicanvas-embed:not([data-retired])') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
   // Only what is selected in the viewer for the file that is open. Another file's viewer, even one still on its way out or
   // showing identical content, is not this file's selection.
-  if (!embed || embed.dataset.relative !== fileKey) return undefined;
+  if (!embed || embed.dataset.artifact !== fileKey) return undefined;
   const app = embed?.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { selected?: { context?: Loose } | null } }) | null;
   const ctx = app?.viewer?.selected?.context;
   if (!ctx) return undefined;

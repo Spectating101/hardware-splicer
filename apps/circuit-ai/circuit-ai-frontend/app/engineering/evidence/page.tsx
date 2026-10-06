@@ -161,7 +161,7 @@ export default function EvidenceOverviewPage() {
     if (!candidate) { setPreview(null); setFocusChange(null); return; }
     try {
       const text = await fetchCandidateFile(projectId, candidate.candidate_id, candidate.kind);
-      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text, relative: candidate.files?.[candidate.kind]?.relative });
+      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text, relative: candidate.files?.[candidate.kind]?.retained_relative || undefined });
     } catch (caught) {
       setPreview(null);
       setPreviewError(caught instanceof Error ? caught.message : 'The proposed file could not be loaded.');
@@ -169,7 +169,7 @@ export default function EvidenceOverviewPage() {
   }
 
   // A preview belongs to one project; leaving it must not leave another project's file on screen.
-  useEffect(() => { setPreview(null); setPreviewError(''); setFocusChange(null); }, [projectId]);
+  useEffect(() => { setPreview(null); setPreviewError(''); setFocusChange(null); setFocusPart(null); }, [projectId]);
 
   // The previewed proposal's changes, boxed on the file they belong to. Shown only while that file is the one on screen.
   const previewedCandidate = preview ? candidates.candidates.find((item) => item.candidate_id === preview.candidateId) || null : null;

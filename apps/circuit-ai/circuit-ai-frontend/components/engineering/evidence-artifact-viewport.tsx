@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, CircuitBoard, LoaderCircle, Pencil } from 'lucide-react';
 import { EditDock } from '@/components/engineering/edit-dock';
 import { previewDraft, useRoutingCapability, type Candidate, type DraftPreview, type EditOp, type ProposalInput } from '@/lib/project-candidates';
@@ -323,15 +323,18 @@ export function EvidenceArtifactViewport({
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
-  const [files, setFiles] = useState<EvidenceBuildFile[]>([]);
+  // What was fetched is kept with the build it came from, so a slow or failed fetch for a new build never leaves the
+  // previous one's files or text standing in for it.
+  const [listed, setListed] = useState<{ buildDir: string; files: EvidenceBuildFile[] } | null>(null);
+  const files = useMemo(() => (listed && listed.buildDir === buildDir ? listed.files : []), [listed, buildDir]);
   const [activeRelative, setActiveRelative] = useState('');
-  const [content, setContent] = useState('');
+  const [loaded, setLoaded] = useState<{ key: string; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [show3d, setShow3d] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draftOps, setDraftOps] = useState<EditOp[]>([]);
-  const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string; forRelative?: string }>({ status: 'idle' });
+  const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string; forKey?: string }>({ status: 'idle' });
   const cameraRef = useRef<{ relative: string; x: number; y: number; zoom: number } | null>(null);
   const relativeRef = useRef('');
   const [fills, setFills] = useState<FillMode>('faint');
@@ -342,13 +345,20 @@ export function EvidenceArtifactViewport({
   const cancelFocus = () => { focusGeneration.current += 1; pendingFocus.current = null; };
   fillsRef.current = fills;
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
+  const contentKey = `${buildDir}|${activeRelative}`;
+  const content = loaded && loaded.key === contentKey ? loaded.text : '';
+  // One identity for what is open: project, revision, build and file. Drafts, selections, cameras and searches belong to it.
+  const contextKey = [proposing?.projectId || '', proposing?.baseRevision ?? '', buildDir].join('|');
+  const artifactKey = `${contextKey}|${activeRelative}`;
+  const artifactRef = useRef('');
+  artifactRef.current = artifactKey;
   const previewing = Boolean(preview && preview.kind === activeKind && (preview.relative ? sameFile(preview.relative, activeRelative) : files.filter((file) => file.kind === activeKind).length === 1));
   // A proposal for a file that is not among those shown cannot be drawn anywhere honest, so say so.
   const previewMissing = Boolean(preview && files.length && !resolveFile(files, preview.kind, preview.relative));
   const routing = useRoutingCapability(proposing?.projectId || '', Boolean(proposing) && editing && activeKind === 'pcb');
   relativeRef.current = activeRelative;
   // Only over the file the edits were made to: another file of the same kind must not show this file's result.
-  const draftShown = !previewing && draft.status === 'ready' && draft.preview?.kind === activeKind && draft.forRelative === activeRelative && sameFile(draft.preview?.relative, activeRelative);
+  const draftShown = !previewing && draft.status === 'ready' && draft.preview?.kind === activeKind && draft.forKey === artifactKey && sameFile(draft.preview?.relative, activeRelative);
   const shownContent = previewing && preview ? preview.text : draftShown && draft.preview ? draft.preview.text : content;
   // Where the draft differs from the retained file, marked the same way a previewed proposal is.
   const draftHighlights = draftShown && draft.preview
@@ -363,9 +373,9 @@ export function EvidenceArtifactViewport({
 
   useEffect(() => {
     if (!buildDir) {
-      setFiles([]);
+      setListed(null);
       setActiveRelative('');
-      setContent('');
+      setLoaded(null);
       return;
     }
     let cancelled = false;
@@ -385,7 +395,7 @@ export function EvidenceArtifactViewport({
       .then((payload) => {
         if (cancelled) return;
         const nextFiles = payload.files || [];
-        setFiles(nextFiles);
+        setListed({ buildDir, files: nextFiles });
         const preferred = nextFiles.find((file) => file.kind === preferredKind)
           || nextFiles.find((file) => file.kind === (preferredKind === 'schematic' ? 'pcb' : 'schematic'))
           || nextFiles[0];
@@ -402,9 +412,10 @@ export function EvidenceArtifactViewport({
 
   useEffect(() => {
     if (!buildDir || !activeRelative) {
-      setContent('');
+      setLoaded(null);
       return;
     }
+    const requestKey = `${buildDir}|${activeRelative}`;
     let cancelled = false;
     setLoading(true);
     setError('');
@@ -420,7 +431,7 @@ export function EvidenceArtifactViewport({
         return payload;
       })
       .then((payload) => {
-        if (!cancelled) setContent(payload.content || '');
+        if (!cancelled) setLoaded({ key: requestKey, text: payload.content || '' });
       })
       .catch((caught) => {
         if (!cancelled) setError(caught instanceof Error ? caught.message : 'Artifact content is unavailable.');
@@ -437,7 +448,8 @@ export function EvidenceArtifactViewport({
     let embed: HTMLElement | null = null;
     let stopFocus: (() => void) | undefined;
     const relativeAtMount = relativeRef.current;
-    const keptCamera = cameraRef.current && cameraRef.current.relative === relativeAtMount ? cameraRef.current : null;
+    const artifactAtMount = artifactRef.current;
+    const keptCamera = cameraRef.current && cameraRef.current.relative === artifactAtMount ? cameraRef.current : null;
 
     const mount = () => {
       host.querySelectorAll('kicanvas-embed:not([data-retired])').forEach((stray) => retireEmbed(stray as HTMLElement));
@@ -447,7 +459,7 @@ export function EvidenceArtifactViewport({
       if (activeKind === 'pcb') applyFillModeAfterLoad(created, () => fillsRef.current);
       // A part asked for while this file was opening is found once it has loaded. KiCanvas can load more than once and a
       // later load clears the selection, so the request is reapplied after each load until it goes stale.
-      created.dataset.relative = relativeAtMount;
+      created.dataset.artifact = artifactAtMount;
       created.addEventListener('kicanvas:load', () => window.setTimeout(() => {
         const wanted = pendingFocus.current;
         if (!wanted || wanted.kind !== activeKind || Date.now() - wanted.nonce >= FOCUS_REQUEST_LIFETIME_MS) return;
@@ -485,7 +497,7 @@ export function EvidenceArtifactViewport({
       window.clearTimeout(timer);
       stopFocus?.();
       if (!embed) return;
-      cameraRef.current = readCamera(embed, relativeAtMount) || cameraRef.current;
+      cameraRef.current = readCamera(embed, artifactAtMount) || cameraRef.current;
       // KiCanvas queues a draw on the next animation frame. If this embed is replaced first, that queued draw runs
       // against a disposed renderer and throws. Silence this viewer's draws before it goes away.
       try {
@@ -496,7 +508,7 @@ export function EvidenceArtifactViewport({
       }
       retireEmbed(embed);
     };
-  }, [activeKind, activeRelative, shownContent, ready]);
+  }, [activeKind, artifactKey, shownContent, ready]);
 
   // Finding a part: open the right kind of file if needed, then select it and bring it into view.
   useEffect(() => {
@@ -534,7 +546,15 @@ export function EvidenceArtifactViewport({
   useEffect(() => {
     if (!editing) { setDraftOps([]); setDraft({ status: 'idle' }); }
   }, [editing]);
-  useEffect(() => { setDraftOps([]); setDraft({ status: 'idle' }); }, [activeRelative]);
+  useEffect(() => { setDraftOps([]); setDraft({ status: 'idle' }); }, [artifactKey]);
+
+  // Another project, revision or build ends editing and any search for a part.
+  useEffect(() => {
+    setEditing(false);
+    cancelFocus();
+    // cancelFocus is recreated every render; the context is the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextKey]);
 
   // A dry run of the draft, a beat after the last change, so the viewer can show the result and a refused edit is reported
   // while the person is still editing. Nothing is saved.
@@ -545,6 +565,7 @@ export function EvidenceArtifactViewport({
     }
     const controller = new AbortController();
     const requestedFor = activeRelative;
+    const requestedKey = artifactKey;
     setDraft((current) => ({ ...current, status: 'loading' }));
     const timer = window.setTimeout(() => {
       previewDraft(proposing.projectId, { baseRevision: proposing.baseRevision, kind: activeKind, ops: draftOps }, controller.signal)
@@ -557,14 +578,14 @@ export function EvidenceArtifactViewport({
             setDraft({ status: 'error', message: `This revision keeps ${kept} as its editable ${activeKind === 'pcb' ? 'PCB' : 'schematic'}, not the file on screen. Open that file to edit it.` });
             return;
           }
-          setDraft({ status: 'ready', preview: result.preview, forRelative: requestedFor });
+          setDraft({ status: 'ready', preview: result.preview, forKey: requestedKey });
         })
         .catch(() => undefined);
     }, 350);
     return () => { window.clearTimeout(timer); controller.abort(); };
     // The callback identity is not a trigger; the ops, file and revision are.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftOps, editing, activeKind, activeRelative, proposing?.projectId, proposing?.baseRevision]);
+  }, [draftOps, editing, activeKind, artifactKey, proposing?.projectId, proposing?.baseRevision]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
   const minHeight = compact ? 'min-h-[520px]' : 'min-h-[650px]';
@@ -635,7 +656,7 @@ export function EvidenceArtifactViewport({
         <EditDock
           hostRef={hostRef}
           kind={activeKind}
-          fileKey={activeRelative}
+          fileKey={artifactKey}
           routing={routing}
           draftStatus={draft.status === 'idle' ? null : { status: draft.status, message: draft.message }}
           onDraftChange={setDraftOps}
