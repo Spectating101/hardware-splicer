@@ -37,7 +37,7 @@ from .build_files_security import assert_build_dir_allowed, max_kicad_content_by
 from .kicad_diff import KicadDiffError, diff_kicad_text
 from .kicad_edit import KicadEditError, apply_edit_ops
 from .model3d import capability_probe, resolve_kicad_cli
-from .project_review_store import ProjectReviewStore
+from .project_review_store import ProjectReviewError, ProjectReviewStore
 from .routing_engine import RoutingError, RoutingUnavailable, capability_probe as routing_capability_probe, route_pcb
 from .project_store import ProjectStore, validate_project_id
 
@@ -1131,6 +1131,62 @@ def list_candidates(store: ProjectStore, project_id: str) -> list[dict[str, Any]
             continue
     rows.sort(key=lambda row: (str(row.get("created_at") or ""), str(row.get("candidate_id") or "")), reverse=True)
     return rows[:MAX_LISTED_CANDIDATES]
+
+
+def review_state(store: ProjectStore, reviews: ProjectReviewStore, project_id: str, record: Mapping[str, Any]) -> dict[str, Any]:
+    """Where a candidate's review stands now. Read live from the review store; the candidate record is never rewritten.
+
+    ``stale`` is true for a pending review whose base revision is no longer the latest one: accepting it would be
+    refused, so a reviewer should propose again from the newer revision.
+    """
+
+    review_id = str(record.get("review_id") or "")
+    try:
+        review = reviews.get(project_id, review_id)
+    except (ProjectReviewError, OSError, ValueError):
+        return {"status": "missing", "decided_by": None, "decided_at": None, "note": None, "accepted_revision": None, "stale": False}
+    status = str(review.get("status") or "pending")
+    decision = review.get("decision") if isinstance(review.get("decision"), Mapping) else {}
+    decided = status in {"accepted", "rejected"}
+    stale = False
+    if status == "pending":
+        try:
+            stale = int(store.load_latest_with_recovery(project_id)["revision"]) != int(review.get("base_revision"))
+        except (ValueError, TypeError, OSError, KeyError):
+            stale = False
+    return {
+        "status": status,
+        "decided_by": str(decision.get("actor")) if decided and decision.get("actor") else None,
+        "decided_at": str(decision.get("decided_at")) if decided and decision.get("decided_at") else None,
+        "note": str(decision.get("note"))[:500] if decided and decision.get("note") else None,
+        "accepted_revision": decision.get("accepted_revision") if status == "accepted" else None,
+        "stale": stale,
+    }
+
+
+def decide_candidate(
+    store: ProjectStore,
+    reviews: ProjectReviewStore,
+    project_id: str,
+    candidate_id: str,
+    *,
+    decision: str,
+    actor: str,
+    note: str = "",
+) -> dict[str, Any]:
+    """Accept or reject a candidate's review as a verified operator. The existing review store does the work.
+
+    Accepting promotes the candidate snapshot to the next revision exactly as any accepted review does. It marks nothing
+    verified, fabrication-ready or release-ready.
+    """
+
+    record = load_candidate(store, project_id, candidate_id)
+    normalized = str(decision or "").strip().lower()
+    if normalized not in {"accepted", "rejected"}:
+        raise CandidateValidationError("decision must be accepted or rejected")
+    note = _require_note(note)
+    reviews.decide(validate_project_id(project_id), str(record["review_id"]), decision=normalized, actor=actor, note=note)
+    return {"candidate": record, "review_state": review_state(store, reviews, project_id, record)}
 
 
 def load_candidate(store: ProjectStore, project_id: str, candidate_id: str) -> dict[str, Any]:

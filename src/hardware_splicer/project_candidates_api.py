@@ -30,6 +30,8 @@ from .project_candidates import (
     RoutingFailed,
     RoutingNotAvailable,
     TooManyCandidates,
+    decide_candidate,
+    review_state,
     list_candidates,
     load_candidate,
     propose_candidate,
@@ -46,7 +48,16 @@ def _operator_token(x_hs_operator_token: str | None) -> str | None:
     return None
 
 
+class OperatorTokenRequired(Exception):
+    """No operator token was presented for an action that needs a verified identity."""
+
+
 def _candidate_error(exc: Exception) -> HTTPException:
+    if isinstance(exc, OperatorTokenRequired):
+        return HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED,
+            detail={"type": "operator_token_required", "message": str(exc)},
+        )
     if isinstance(exc, OperatorTokenInvalid):
         return HTTPException(
             status_code=http_status.HTTP_401_UNAUTHORIZED,
@@ -189,7 +200,10 @@ def create_project_candidates_router(
     @router.get("/{project_id}/candidates")
     def list_project_candidates(project_id: str) -> Dict[str, Any]:
         try:
-            candidates = list_candidates(store, project_id)
+            candidates = [
+                {**row, "review_state": review_state(store, reviews, project_id, row)}
+                for row in list_candidates(store, project_id)
+            ]
         except Exception as exc:
             raise _candidate_error(exc) from exc
         return {"ok": True, "project_id": project_id, "candidates": candidates}
@@ -198,9 +212,38 @@ def create_project_candidates_router(
     def load_project_candidate(project_id: str, candidate_id: str) -> Dict[str, Any]:
         try:
             candidate = load_candidate(store, project_id, candidate_id)
+            state = review_state(store, reviews, project_id, candidate)
         except Exception as exc:
             raise _candidate_error(exc) from exc
-        return {"ok": True, "candidate": candidate}
+        return {"ok": True, "candidate": candidate, "review_state": state}
+
+    @router.post("/{project_id}/candidates/{candidate_id}/decision")
+    async def decide_project_candidate(
+        project_id: str,
+        candidate_id: str,
+        http_request: Request,
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
+        try:
+            payload = await _read_capped_json(http_request)
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is None:
+                # A decision creates or refuses a revision, so it needs a server-verified identity. A typed name is not
+                # enough here, unlike a comment or a proposal.
+                raise OperatorTokenRequired("an operator token is required to accept or reject a proposal")
+            result = await asyncio.to_thread(
+                decide_candidate,
+                store,
+                reviews,
+                project_id,
+                candidate_id,
+                decision=payload.get("decision"),
+                actor=identity.id,
+                note=payload.get("note", ""),
+            )
+        except Exception as exc:
+            raise _candidate_error(exc) from exc
+        return {"ok": True, "candidate": result["candidate"], "review_state": result["review_state"]}
 
     @router.get("/{project_id}/candidates/{candidate_id}/files/{kind}")
     def load_project_candidate_file(project_id: str, candidate_id: str, kind: str) -> Response:
