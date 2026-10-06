@@ -108,7 +108,7 @@
       ],
       "does_not_displace": "spi_physical_proof",
       "delivered": {
-        "as_of": "2026-10-06",
+        "as_of": "2026-10-07",
         "backend": {
           "kicad_edit_operations": "kicad_edit.py: deterministic move, rotate, set_property, set_flag, add_label, set_track_width and delete over retained bytes",
           "candidate_proposals": "project_candidates.py: edits or an autoroute become a pending staged review with a structural diff and optional DRC/ERC counts",
@@ -117,12 +117,12 @@
           "model3d_viewer": "model3d.py: GLB from retained PCB bytes via kicad-cli, cached by hash",
           "live_events_and_presence": "project_events.py and project_presence.py: change stream and ephemeral presence, information only"
         },
-        "frontend": "evidence workspace: Parts tab, 3D tab, presence and live threads, Edit dock, Proposals tab with preview",
+        "frontend": "evidence workspace: Parts tab (find a part on the drawing), 3D tab, presence and live threads, a docked Edit toolbar with a live draft preview, Proposals tab with preview, marked changes and operator-gated accept/reject, faint copper fills",
         "not_yet_verified": [
           "live FreeRouting run: no jar was installed where this was built; the guard was exercised with fake engines and a real pcbnew round-trip only",
-          "an independent Codex review of the integrated branch",
           "parts availability from a real distributor provider: only the offline catalog and an opt-in jlcsearch provider exist"
-        ]
+        ],
+        "independent_review": "Codex adversarial reviews on 2026-10-06 and 2026-10-07 found and drove fixes for: orphan cleanup through a symlinked ancestor, subprocess groups surviving an exited leader, a read-only preview that could repair a damaged store, and drafts, selections and previews matched by file kind or name instead of full path. Each fix has a regression test shown to fail on the old behaviour."
       }
     }
   },

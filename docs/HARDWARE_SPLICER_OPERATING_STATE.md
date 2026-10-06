@@ -112,9 +112,11 @@ This satisfies the frontend-closure reopen trigger "source-bound native competit
 - **Parts** (`parts_intel.py`, [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md)): the BOM from the design's own properties; enrichment is opt-in and carries source and as-of.
 - **3D** (`model3d.py`, [`MODEL3D.md`](MODEL3D.md)): a GLB of the retained PCB, cached by hash.
 - **Live collaboration** (`project_events.py`, `project_presence.py`, [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md)): a change stream and ephemeral presence; information only.
-- **Workspace**: Parts and Proposals tabs, a 3D tab, presence and live thread refresh, and an Edit dock.
+- **Workspace**: Parts and Proposals tabs, a 3D tab, presence and live thread refresh, and a docked Edit toolbar with a live draft preview. A verified operator can accept or reject a proposal; accepting makes a revision and nothing more.
 
-Not yet verified: a live FreeRouting run (no jar was available, so the guard was exercised with fake engines and a real pcbnew round-trip), an independent Codex review of the integrated branch, and parts availability from a real distributor provider.
+Independent review: Codex adversarial reviews (2026-10-06 and 07) found real defects, among them orphan cleanup through a symlinked ancestor, subprocess groups surviving an exited leader, a read-only preview that could repair a damaged store, and drafts matched to files by kind or name instead of full path. Each has a regression test that fails on the old behaviour.
+
+Not yet verified: a live FreeRouting run (no jar was available, so the guard was exercised with fake engines and a real pcbnew round-trip), and parts availability from a real distributor provider.
 
 ## What counts as useful HS progress now
 
