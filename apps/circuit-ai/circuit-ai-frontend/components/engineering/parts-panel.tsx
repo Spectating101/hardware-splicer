@@ -22,11 +22,14 @@ export function PartsPanel({
   loading,
   error,
   onCheckAvailability,
+  onLocate,
 }: {
   result: PartsResult | null;
   loading: boolean;
   error: string;
   onCheckAvailability: () => void;
+  /** Find a part on the schematic by its reference designator. */
+  onLocate?: (ref: string) => void;
 }) {
   const checked = Boolean(result?.enrichment?.performed);
   const checkNote = result?.enrichment?.requested && !checked ? (result.enrichment.reason || 'No parts provider answered.') : '';
@@ -65,7 +68,21 @@ export function PartsPanel({
                   </div>
                   <span className="shrink-0 rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700">×{group.quantity}</span>
                 </div>
-                <div className="mt-1.5 truncate font-mono text-[10px] text-stone-500" title={group.refs.join(', ')}>{group.refs.join(' ')}</div>
+                <div className="mt-1.5 flex flex-wrap gap-1" aria-label="Where this part is used">
+                  {group.refs.slice(0, 10).map((ref) => (
+                    <button
+                      key={ref}
+                      type="button"
+                      onClick={() => onLocate?.(ref)}
+                      disabled={!onLocate}
+                      title={`Show ${ref} on the schematic`}
+                      className="rounded border border-stone-200 bg-stone-50 px-1.5 py-0.5 font-mono text-[10px] text-stone-700 hover:border-stone-400 hover:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-500 disabled:cursor-default disabled:hover:border-stone-200 disabled:hover:bg-stone-50"
+                    >
+                      {ref}
+                    </button>
+                  ))}
+                  {group.refs.length > 10 ? <span className="px-1 text-[10px] text-stone-400">+{group.refs.length - 10}</span> : null}
+                </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]">
                   {group.mpn ? <span className="font-mono text-stone-700">{group.mpn}</span> : group.not_in_bom ? null : (
                     <span className="inline-flex items-center gap-1 text-amber-700"><TriangleAlert className="h-3 w-3" aria-hidden="true" />No MPN in the design</span>

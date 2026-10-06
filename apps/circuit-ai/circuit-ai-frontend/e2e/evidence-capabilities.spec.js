@@ -359,3 +359,20 @@ test('copper fills are faint by default so tracks and pads stay readable, and ca
   await page.getByRole('button', { name: 'Schematic', exact: true }).click();
   await expect(page.getByRole('button', { name: /^Copper fills/ })).toHaveCount(0);
 });
+
+test('a part in the Parts tab can be found on the drawing, from any tab', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Copper fills/ })).toBeVisible();
+
+  await page.getByRole('button', { name: /^Parts/ }).click();
+  await page.getByTestId('parts-panel').getByRole('button', { name: 'U2', exact: true }).first().click();
+
+  // It switched to the schematic and selected the part there.
+  await expect(page.getByRole('button', { name: /^Copper fills/ })).toHaveCount(0, { timeout: 10000 });
+  await expect.poll(() => page.evaluate(() => {
+    const viewer = document.querySelector('kicanvas-embed:not([data-retired])')?.shadowRoot?.querySelector('kc-schematic-app')?.viewer;
+    return viewer?.selected?.context?.reference || null;
+  }), { timeout: 15000 }).toBe('U2');
+});

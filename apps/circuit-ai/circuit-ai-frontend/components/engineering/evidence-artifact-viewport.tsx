@@ -11,6 +11,9 @@ import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } f
 export type { PlacedPin, ViewerHighlight, ViewerPin } from '@/components/engineering/viewer-overlay';
 export type ActiveArtifact = { relative: string; kind: string };
 /** A proposal's file shown in place of the retained one. It is a preview only and never replaces what is stored. */
+/** Ask the viewer to find a part by its reference designator. `nonce` makes asking for the same part twice work. */
+export type FocusPart = { ref: string; kind: 'schematic' | 'pcb'; nonce: number };
+
 export type ProposalPreview = { candidateId: string; kind: 'schematic' | 'pcb'; text: string; relative?: string };
 
 /** Two paths name the same retained file when their file names match; the folder a build keeps it in can differ. */
@@ -189,6 +192,33 @@ function restoreCamera(embed: HTMLElement, kept: KeptCamera) {
   [80, 250, 600].forEach((delay) => window.setTimeout(apply, delay));
 }
 
+const FOCUS_REQUEST_LIFETIME_MS = 8000;
+
+/** Selects a part and brings it into view. KiCanvas looks a footprint or symbol up by its reference. True once it took. */
+function tryFocusOnPart(embed: HTMLElement, ref: string) {
+  try {
+    const app = embed.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { select?: (item: string) => void; selected?: { context?: { reference?: string } } | null; zoom_to_selection?: () => void; draw?: () => void } }) | null;
+    const viewer = app?.viewer;
+    if (!viewer?.select) return false;
+    viewer.select(ref);
+    if (viewer.selected?.context?.reference !== ref) return false;
+    viewer.zoom_to_selection?.();
+    viewer.draw?.();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * KiCanvas reports `load` more than once, and the first can come before the viewer is able to select anything, so one
+ * attempt can be wasted. Keep trying briefly; a reference the file does not have simply leaves the view as it was.
+ */
+function focusOnPart(embed: HTMLElement, ref: string, attempt = 0) {
+  if (tryFocusOnPart(embed, ref) || attempt >= 12) return;
+  window.setTimeout(() => { if (embed.isConnected) focusOnPart(embed, ref, attempt + 1); }, 250);
+}
+
 type FillMode = 'faint' | 'full';
 const FAINT_FILL_OPACITY = 0.22;
 
@@ -250,6 +280,7 @@ export function EvidenceArtifactViewport({
   model3d,
   proposing,
   preview,
+  focusPart,
 }: {
   buildDir: string;
   overlayFinding?: string;
@@ -267,6 +298,7 @@ export function EvidenceArtifactViewport({
   /** When set, the viewer offers Edit, which drafts changes and sends them as a proposal for review. */
   proposing?: { projectId: string; baseRevision: number | null; onPropose: (kind: 'schematic' | 'pcb', input: ProposalInput, note: string) => Promise<Candidate>; onProposed: (candidate: Candidate) => void };
   preview?: ProposalPreview | null;
+  focusPart?: FocusPart | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
@@ -283,6 +315,7 @@ export function EvidenceArtifactViewport({
   const relativeRef = useRef('');
   const [fills, setFills] = useState<FillMode>('faint');
   const fillsRef = useRef<FillMode>('faint');
+  const pendingFocus = useRef<FocusPart | null>(null);
   fillsRef.current = fills;
   const activeKind = files.find((file) => file.relative === activeRelative)?.kind;
   const previewing = Boolean(preview && preview.kind === activeKind && (!preview.relative || sameFile(preview.relative, activeRelative)));
@@ -386,6 +419,19 @@ export function EvidenceArtifactViewport({
       embed = created;
       created.addEventListener('kicanvas:load', () => { created.dataset.loaded = '1'; });
       if (activeKind === 'pcb') applyFillModeAfterLoad(created, () => fillsRef.current);
+      // A part asked for while this file was opening is found once it has loaded. KiCanvas can load more than once and a
+      // later load clears the selection, so the request is reapplied after each load until it goes stale.
+      created.addEventListener('kicanvas:load', () => window.setTimeout(() => {
+        const wanted = pendingFocus.current;
+        if (wanted && wanted.kind === activeKind && Date.now() - wanted.nonce < FOCUS_REQUEST_LIFETIME_MS) focusOnPart(created, wanted.ref);
+      }, 200));
+      created.setAttribute('controls', 'basic');
+      created.setAttribute('controlslist', 'nodownload nooverlay');
+      const source = document.createElement('kicanvas-source');
+      source.textContent = shownContent;
+      created.appendChild(source);
+      host.appendChild(created);
+
       if (keptCamera) {
         // The same file reloaded with other content (a draft or a previewed proposal): keep the view the person had.
         created.addEventListener('kicanvas:load', () => restoreCamera(created, keptCamera), { once: true });
@@ -419,6 +465,22 @@ export function EvidenceArtifactViewport({
       retireEmbed(embed);
     };
   }, [activeKind, shownContent, ready]);
+
+  // Finding a part: open the right kind of file if needed, then select it and bring it into view.
+  useEffect(() => {
+    if (!focusPart) return;
+    pendingFocus.current = focusPart;
+    setShow3d(false);
+    if (activeKind !== focusPart.kind) {
+      const target = files.find((file) => file.kind === focusPart.kind);
+      if (target?.relative) setActiveRelative(target.relative);
+      return;
+    }
+    const embed = hostRef.current?.querySelector('kicanvas-embed:not([data-retired])') as HTMLElement | null;
+    if (embed && embed.dataset.loaded === '1') { pendingFocus.current = null; focusOnPart(embed, focusPart.ref); }
+    // Only when a new request is made, not when the file list or the active file changes underneath it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusPart?.nonce]);
 
   // Previewing a proposal shows the file it changed.
   useEffect(() => {

@@ -27,7 +27,7 @@ import { useProjectFindings } from '@/lib/project-findings';
 import { setPresenceFocus } from '@/lib/project-live';
 import { useProjectParts } from '@/lib/project-parts';
 import { PartsPanel } from '@/components/engineering/parts-panel';
-import { EvidenceArtifactViewport, type ActiveArtifact, type PlacedPin, type ProposalPreview, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
+import { EvidenceArtifactViewport, type ActiveArtifact, type FocusPart, type PlacedPin, type ProposalPreview, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
 import { ProposalsPanel } from '@/components/engineering/proposals-panel';
 import { fetchCandidateFile, useCandidates, type Candidate } from '@/lib/project-candidates';
 import { changesToHighlights } from '@/lib/artifact-diff';
@@ -154,6 +154,7 @@ export default function EvidenceOverviewPage() {
   const [preview, setPreview] = useState<ProposalPreview | null>(null);
   const [previewError, setPreviewError] = useState('');
   const [focusChange, setFocusChange] = useState<string | null>(null);
+  const [focusPart, setFocusPart] = useState<FocusPart | null>(null);
 
   async function previewCandidate(candidate: Candidate | null) {
     setPreviewError('');
@@ -454,7 +455,7 @@ export default function EvidenceOverviewPage() {
                 <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} projectId={projectId} nextRevision={revision ? revision + 1 : null} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} onFocusChange={setFocusChange} decide={candidates.decide} />
               </>
             ) : railTab === 'parts' ? (
-              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} />
+              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} onLocate={(ref) => setFocusPart({ ref, kind: 'schematic', nonce: Date.now() })} />
             ) : railTab === 'findings' ? (
               <div className="min-h-0 flex-1 overflow-y-auto p-3">
                 {!blockedObjects.length && !failedActions.length && !recordedFindings.length ? <div className="text-xs text-stone-500">No recorded blocker or failed check.</div> : null}
@@ -509,6 +510,7 @@ export default function EvidenceOverviewPage() {
               onActiveArtifact={setActiveArtifact}
               model3d={{ projectId, revision }}
               preview={preview}
+              focusPart={focusPart}
               highlights={previewHighlights}
               focusHighlightId={focusChange}
               proposing={revision ? {
