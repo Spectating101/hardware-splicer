@@ -27,7 +27,9 @@ import { useProjectFindings } from '@/lib/project-findings';
 import { setPresenceFocus } from '@/lib/project-live';
 import { useProjectParts } from '@/lib/project-parts';
 import { PartsPanel } from '@/components/engineering/parts-panel';
-import { EvidenceArtifactViewport, type ActiveArtifact, type PlacedPin, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
+import { EvidenceArtifactViewport, type ActiveArtifact, type PlacedPin, type ProposalPreview, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
+import { ProposalsPanel } from '@/components/engineering/proposals-panel';
+import { fetchCandidateFile, useCandidates, type Candidate } from '@/lib/project-candidates';
 import {
   deriveCanonicalSystemGraph,
   type CanonicalVisualObject,
@@ -49,7 +51,7 @@ type ProjectSummary = {
 type ProjectsResponse = { ok?: boolean; projects?: ProjectSummary[] };
 type ProjectEnvelope = { project_id?: string; revision?: number; snapshot?: JsonRecord };
 type ProjectResponse = { ok?: boolean; project?: ProjectEnvelope };
-type RailTab = 'project' | 'findings' | 'parts' | 'history';
+type RailTab = 'project' | 'findings' | 'parts' | 'proposals' | 'history';
 type InspectorTab = 'object' | 'findings' | 'evidence' | 'threads';
 
 function record(value: unknown): JsonRecord {
@@ -146,6 +148,24 @@ export default function EvidenceOverviewPage() {
   const [query, setQuery] = useState('');
   const { findings } = useProjectFindings(projectId);
   const parts = useProjectParts(projectId, revision, railTab === 'parts');
+  const candidates = useCandidates(projectId);
+  const [preview, setPreview] = useState<ProposalPreview | null>(null);
+  const [previewError, setPreviewError] = useState('');
+
+  async function previewCandidate(candidate: Candidate | null) {
+    setPreviewError('');
+    if (!candidate) { setPreview(null); return; }
+    try {
+      const text = await fetchCandidateFile(projectId, candidate.candidate_id, candidate.kind);
+      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text });
+    } catch (caught) {
+      setPreview(null);
+      setPreviewError(caught instanceof Error ? caught.message : 'The proposed file could not be loaded.');
+    }
+  }
+
+  // A preview belongs to one project; leaving it must not leave another project's file on screen.
+  useEffect(() => { setPreview(null); setPreviewError(''); }, [projectId]);
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [placing, setPlacing] = useState(false);
   const [pendingPin, setPendingPin] = useState<PlacedPin | null>(null);
@@ -310,7 +330,8 @@ export default function EvidenceOverviewPage() {
     ['project', 'Project', null],
     ['findings', 'Findings', blockedObjects.length + failedActions.length],
     ['parts', 'Parts', null],
-    ['history', 'History', actions.length],
+    ['proposals', 'Proposals', candidates.candidates.length],
+    ['history', 'History', null],
   ];
 
   return (
@@ -381,12 +402,12 @@ export default function EvidenceOverviewPage() {
           <div className="flex items-start gap-2 border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800"><XCircle className="mt-0.5 h-3.5 w-3.5" />{error}</div>
         ) : null}
 
-        <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px] xl:grid-rows-[minmax(0,1fr)]">
+        <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[320px_minmax(0,1fr)_340px] xl:grid-rows-[minmax(0,1fr)]">
           <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
-            <div className="grid grid-cols-4 border-b border-stone-200 p-2">
+            <div className="flex overflow-x-auto border-b border-stone-200 p-2">
               {railTabs.map(([id, label, count]) => (
-                <button key={id} type="button" onClick={() => setRailTab(id)} className={`rounded-md px-2 py-2 text-xs font-medium ${railTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>
-                  {label}{count ? <span className="ml-1 text-stone-400">{count}</span> : null}
+                <button key={id} type="button" onClick={() => setRailTab(id)} className={`shrink-0 rounded-md px-1 py-2 text-[11.5px] font-medium ${railTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>
+                  {label}{count ? <span className="ml-0.5 text-stone-400">{count}</span> : null}
                 </button>
               ))}
             </div>
@@ -413,6 +434,11 @@ export default function EvidenceOverviewPage() {
                   })}
                 </div>
                 <div className="border-t border-stone-200 p-3 text-[10px] text-stone-400">{sources.length} sources · {graph.objects.length} objects · {sessions.length} AI sessions</div>
+              </>
+            ) : railTab === 'proposals' ? (
+              <>
+                {previewError ? <div role="alert" className="m-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{previewError}</div> : null}
+                <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} />
               </>
             ) : railTab === 'parts' ? (
               <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} />
@@ -469,6 +495,11 @@ export default function EvidenceOverviewPage() {
               onCancelPlace={() => setPlacing(false)}
               onActiveArtifact={setActiveArtifact}
               model3d={{ projectId, revision }}
+              preview={preview}
+              proposing={revision ? {
+                onPropose: (kind, ops, note) => candidates.propose({ baseRevision: revision, kind, ops, note }),
+                onProposed: () => setRailTab('proposals'),
+              } : undefined}
             />
           </section>
 
