@@ -25,7 +25,7 @@ function num(value: unknown) {
  * footprints are offered for editing; anything else reads as "not editable here" rather than guessing an operation.
  */
 function readSelection(host: HTMLElement | null, kind: string): Selected | null {
-  const embed = host?.querySelector('kicanvas-embed') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
+  const embed = host?.querySelector('kicanvas-embed:not([data-retired])') as (HTMLElement & { shadowRoot: ShadowRoot | null }) | null;
   const app = embed?.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { selected?: { context?: Loose } | null } }) | null;
   const ctx = app?.viewer?.selected?.context;
   if (!ctx || typeof ctx.uuid !== 'string') return null;
@@ -111,7 +111,9 @@ export function EditDock({
 
   function addRotate(degrees: number) {
     if (!selected) return;
-    add({ op: 'rotate', uuid: selected.uuid, degrees }, `Rotate ${selected.ref || 'item'} ${degrees > 0 ? '+' : ''}${degrees}°`);
+    // Schematic rotation takes 0, 90, 180 or 270, so a turn the other way is sent as its positive equivalent.
+    const normalized = ((degrees % 360) + 360) % 360;
+    add({ op: 'rotate', uuid: selected.uuid, degrees: normalized }, `Rotate ${selected.ref || 'item'} ${degrees > 0 ? '+' : '−'}${Math.abs(degrees)}°`);
   }
 
   function addMove() {
