@@ -163,8 +163,15 @@ def _read_kicad_path(path: str | Path) -> str:
     return b"".join(chunks).decode("utf-8", errors="replace")
 
 
-def _tokenize_sexp(text: str) -> list[str]:
-    tokens: list[str] = []
+def tokenize_kicad_sexp_spans(text: str) -> list[tuple[str, int, int]]:
+    """Tokenize KiCad s-expression text into ``(token, start, end)`` spans.
+
+    String token values are unescaped; ``start``/``end`` cover the original
+    quoted source including the quotes. The token sequence is identical to the
+    historical tokenizer used by ``parse_kicad_sexp``.
+    """
+
+    tokens: list[tuple[str, int, int]] = []
     index = 0
     length = len(text)
     depth = 0
@@ -180,10 +187,11 @@ def _tokenize_sexp(text: str) -> list[str]:
                     raise KicadDiffError("input nested too deeply")
             else:
                 depth -= 1
-            tokens.append(char)
+            tokens.append((char, index, index + 1))
             index += 1
             continue
         if char == '"':
+            start = index
             index += 1
             chars: list[str] = []
             closed = False
@@ -197,8 +205,8 @@ def _tokenize_sexp(text: str) -> list[str]:
                     index += 2
                     continue
                 if current == '"':
-                    tokens.append("".join(chars))
                     index += 1
+                    tokens.append(("".join(chars), start, index))
                     closed = True
                     break
                 chars.append(current)
@@ -209,8 +217,12 @@ def _tokenize_sexp(text: str) -> list[str]:
         start = index
         while index < length and not text[index].isspace() and text[index] not in "()\"":
             index += 1
-        tokens.append(text[start:index])
+        tokens.append((text[start:index], start, index))
     return tokens
+
+
+def _tokenize_sexp(text: str) -> list[str]:
+    return [token for token, _start, _end in tokenize_kicad_sexp_spans(text)]
 
 
 def _parse_sexp(text: str) -> list[Any]:
