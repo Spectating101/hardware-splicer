@@ -599,6 +599,22 @@ def revision_artifacts(project_id: str, revision: int) -> dict[str, Any]:
                                                       "revision": revision, "retention_basis": "at_save", "artifacts": artifacts}}
 
 
+@app.get("/v1/projects/{project_id}/revisions/{revision}/artifacts/{kind}/file")
+def revision_artifact_file(project_id: str, revision: int, kind: str) -> Response:
+    """A revision's retained file as text (revisions 5 and 6), like the real endpoint."""
+
+    _require_project(project_id)
+    if kind not in {"schematic", "pcb"}:
+        raise _thread_error(422, "invalid_request", "kind must be schematic or pcb")
+    if revision not in (5, 6):
+        raise _thread_error(404, "artifact_not_retained", f"Revision {revision} has no retained {kind}.")
+    name = "spi_flash_adapter_v1.kicad_sch" if kind == "schematic" else "spi_flash_adapter_v1.kicad_pcb"
+    text = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
+    if revision == 5:
+        text = _fixture_base_text(kind, text)
+    return Response(text.encode("utf-8"), media_type="text/plain; charset=utf-8")
+
+
 @app.get("/v1/projects/{project_id}/revisions/{revision}/parts")
 def revision_parts(project_id: str, revision: int, enrich: bool = False) -> dict[str, Any]:
     _require_project(project_id)
