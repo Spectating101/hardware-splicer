@@ -943,3 +943,13 @@ def test_what_follows_a_yaml_secret_keeps_its_own_line_ending() -> None:
     assert _Scrub().text("password: |\r  a-secret-1\rnext: ok\r") == "password: [redacted credential]\rnext: ok\r"
     assert _Scrub().text("password: | # prod\r\n  a-secret-1\r\nnext: ok") == "password: [redacted credential]\r\nnext: ok"
     assert _Scrub().text("password: # note a-secret-1\nnext: ok") == "password: [redacted credential]\nnext: ok"
+
+
+@pytest.mark.parametrize("brk", ["\n", "\r\n", "\r"])
+def test_a_secret_inside_a_yaml_list_item_does_not_take_its_siblings_with_it(brk) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    written = brk.join(["- password: | # production", "    violet-harbor-93", "  next: ok", "- name: keep"])
+    out = _Scrub().text(written)
+    assert "violet-harbor-93" not in out
+    assert out == brk.join(["- password: [redacted credential]", "  next: ok", "- name: keep"])

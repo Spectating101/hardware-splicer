@@ -104,7 +104,8 @@ def _yaml_value_end(text: str, start: int, name_start: int) -> int | None:
         return None
     line_start = max(text.rfind("\n", 0, name_start), text.rfind("\r", 0, name_start)) + 1
     before = text[line_start:name_start]
-    key_indent = len(before) - len(before.lstrip(" \t"))
+    # "- password:" inside a list: the key starts after the "- ", so its siblings are indented to that column.
+    key_indent = len(re.match(r"[ \t]*(?:-[ \t]+)*", before).group(0))
     end = intro.end()
     position = intro.end()
     while position < len(text):
