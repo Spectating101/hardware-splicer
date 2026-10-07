@@ -24,13 +24,24 @@ power-on or release, and it says so in the packet itself.
 
 - **Deterministic.** The same project state gives the same bytes. There is no clock reading in it, so two people holding
   the same packet can tell they hold the same thing. A change to the project changes the hash.
-- **Self-checking.** `verify_review_packet` recomputes the hash; a packet that was edited does not verify.
+- **Self-checking.** `verify_review_packet` recomputes the hash. The hash covers every field, including the statement of
+  how it was computed; only the digest itself is left out. The `integrity` block must hold exactly an `algorithm` and a
+  `packet_sha256`, and the algorithm must be the one this module states, so nothing in that block can be used to carry text.
 - **Read-only.** It uses the plain project loader, so asking for a packet never repairs, renames or rewrites anything,
   even for a damaged store. It falls back to the newest valid revision.
-- **No credentials.** Operator tokens are not stored in the project and never appear. Identities appear only as the ids
-  the server confirmed, or the names people typed, labelled as such.
-- **Bounded.** At most 1000 findings, 100 threads with 50 events each, and 100 proposals are listed; the packet says when
-  it has truncated.
+- **Text people wrote is untrusted.** Names, notes, comments and finding text are escaped in the document so they read only
+  as the words they are. A project name or comment cannot start a heading, forge an "Accepted" decision, add a link, inject
+  HTML or pose as the document's hash. The JSON carries the text as written (after redaction).
+- **Credentials and absolute paths are removed, best effort.** Bearer tokens, `sk-` and `ghp_` style keys, AWS and Slack key
+  ids, JWTs, private key blocks, `key=value` secrets, and absolute paths (`/home/…`, `/tmp/…`, `C:\…`) in free text are
+  replaced with `[redacted credential]` or `[redacted path]` **before** the hash is taken. `redactions` says how many were
+  removed and of what kind. A pattern list cannot catch everything: do not write secrets in comments and rely on this.
+  Operator tokens are not stored in the project and never appear.
+- **Nothing is cut silently.** Every list that can be cut short says so in both forms, with how many there were and how
+  many are shown: findings (1000), threads (100), entries per thread (50), operations per proposal (20) and proposals (100).
+- **Bounded reads.** The discussion store re-checks every event file on every read, so a very large discussion is not
+  read. Threads and events are counted by name first, and if there are more than 100 threads or 2000 events the packet
+  says the discussion was left out, how large it was, and why.
 
 ## API
 
