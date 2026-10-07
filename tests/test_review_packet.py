@@ -953,3 +953,11 @@ def test_a_secret_inside_a_yaml_list_item_does_not_take_its_siblings_with_it(brk
     out = _Scrub().text(written)
     assert "violet-harbor-93" not in out
     assert out == brk.join(["- password: [redacted credential]", "  next: ok", "- name: keep"])
+
+
+@pytest.mark.parametrize("written", ["- foo: bar password: |\n  violet-harbor-93\nnext: ok", "- - foo: bar password: |\n    violet-harbor-93\nnext: ok"])
+def test_a_secret_after_other_text_on_a_list_line_still_loses_its_continuation(written) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    out = _Scrub().text(written)
+    assert "violet-harbor-93" not in out and "next: ok" in out

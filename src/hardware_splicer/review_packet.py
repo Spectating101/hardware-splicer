@@ -105,7 +105,8 @@ def _yaml_value_end(text: str, start: int, name_start: int) -> int | None:
     line_start = max(text.rfind("\n", 0, name_start), text.rfind("\r", 0, name_start)) + 1
     before = text[line_start:name_start]
     # "- password:" inside a list: the key starts after the "- ", so its siblings are indented to that column.
-    key_indent = len(re.match(r"[ \t]*(?:-[ \t]+)*", before).group(0))
+    # Only when nothing but indentation and list markers precedes the key; any other text means it is not a YAML key line.
+    key_indent = len(before) if re.fullmatch(r"[ \t]*(?:-[ \t]+)*", before) else len(before) - len(before.lstrip(" \t"))
     end = intro.end()
     position = intro.end()
     while position < len(text):
