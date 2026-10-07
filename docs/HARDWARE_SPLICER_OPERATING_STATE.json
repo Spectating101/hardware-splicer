@@ -115,14 +115,18 @@
           "routing_candidates": "routing_engine.py: FreeRouting through KiCad's pcbnew, behind a capability probe and a copper-only result guard",
           "parts_intelligence": "parts_intel.py: BOM from the design's own properties, enrichment opt-in with source and as_of",
           "model3d_viewer": "model3d.py: GLB from retained PCB bytes via kicad-cli, cached by hash",
-          "live_events_and_presence": "project_events.py and project_presence.py: change stream and ephemeral presence, information only"
+          "live_events_and_presence": "project_events.py and project_presence.py: change stream and ephemeral presence, information only",
+          "review_packet": "review_packet.py and GET /v1/projects/{id}/review-packet: a hash-bound, read-only, deterministic JSON/Markdown packet of one revision (retained file hashes, findings, proposals with decisions, discussion) with an explicit not-established section and best-effort credential and path redaction; include_text=false builds the version for sharing with every user-written field left out",
+          "retained_file_bytes": "GET /revisions/{rev}/artifacts/{kind}/file: exact retained bytes with ETag and revalidation, so a viewer shows the file that was hashed"
         },
         "frontend": "evidence workspace: Parts tab (find a part on the drawing), 3D tab, presence and live threads, a docked Edit toolbar with a live draft preview, Proposals tab with preview, marked changes and operator-gated accept/reject, faint copper fills",
         "not_yet_verified": [
           "live FreeRouting run: no jar was installed where this was built; the guard was exercised with fake engines and a real pcbnew round-trip only",
           "parts availability from a real distributor provider: only the offline catalog and an opt-in jlcsearch provider exist"
         ],
-        "independent_review": "Codex adversarial reviews on 2026-10-06 and 2026-10-07 found and drove fixes for: orphan cleanup through a symlinked ancestor, subprocess groups surviving an exited leader, a read-only preview that could repair a damaged store, and drafts, selections and previews matched by file kind or name instead of full path. Each fix has a regression test shown to fail on the old behaviour."
+        "independent_review": "Codex adversarial reviews on 2026-10-06 and 2026-10-07 found and drove fixes for: orphan cleanup through a symlinked ancestor, subprocess groups surviving an exited leader, a read-only preview that could repair a damaged store, and drafts, selections and previews matched by file kind or name instead of full path. Each fix has a regression test shown to fail on the old behaviour.",
+        "frontend_comparison": "Compare: Before, Swipe and Difference views of two retained revisions, with a shared camera, drawn from the hash-verified files; measured so identical files show under 0.3% differing pixels",
+        "independent_review_review_packet": "Codex adversarial review ran 21 further rounds on 2026-10-07 on the packet and comparison viewer; each real finding was reproduced, fixed and covered by a regression test (credential-name detection by component words, order-independent size limits, YAML secret blocks across line endings, list markers, anchors, project id and every user-written field omitted from the shared version). One finding was declined: error responses echo the caller's own project id to the caller."
       }
     }
   },

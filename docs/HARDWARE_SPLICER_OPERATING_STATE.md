@@ -118,6 +118,9 @@ Independent review: Codex adversarial reviews (2026-10-06 and 07) found real def
 
 Not yet verified: a live FreeRouting run (no jar was available, so the guard was exercised with fake engines and a real pcbnew round-trip), and parts availability from a real distributor provider.
 
+- **Visual comparison (2026-10-07).** Compare shows Before, Swipe and Difference views of two retained revisions with a shared camera, from the hash-verified files, via `GET /revisions/{rev}/artifacts/{kind}/file` (exact bytes, ETag).
+- **Review packet (2026-10-07).** `GET /v1/projects/{id}/review-packet` returns a hash-bound, read-only packet of one revision with an explicit "not established" section. Credentials and absolute paths are removed on a best-effort basis; `include_text=false` builds the version to share, with every user-written field left out. See `docs/REVIEW_PACKET.md`.
+
 ## What counts as useful HS progress now
 
 A change is worth doing when at least one is true:
