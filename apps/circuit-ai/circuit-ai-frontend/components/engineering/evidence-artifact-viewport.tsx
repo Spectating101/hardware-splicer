@@ -5,7 +5,7 @@ import { AlertTriangle, CircuitBoard, LoaderCircle, Pencil } from 'lucide-react'
 import { EditDock } from '@/components/engineering/edit-dock';
 import { previewDraft, useRoutingCapability, type Candidate, type DraftPreview, type EditOp, type ProposalInput } from '@/lib/project-candidates';
 import { changesToHighlights } from '@/lib/artifact-diff';
-import { applyFillMode, applyFillModeAfterLoad, focusKiCanvasBoard, readCamera, restoreCamera, retireEmbed, useKiCanvasScript, type FillMode } from '@/lib/kicanvas';
+import { SWITCH_SETTLE_MS, applyFillMode, applyFillModeAfterLoad, focusKiCanvasBoard, readCamera, restoreCamera, retireEmbed, useKiCanvasScript, type FillMode } from '@/lib/kicanvas';
 import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
@@ -96,7 +96,6 @@ export function deriveEvidenceBuildDir(snapshot: JsonRecord | null, session: Jso
   return '';
 }
 
-const SWITCH_SETTLE_MS = 120;
 
 type PinEntry = { relative?: string; sha256?: string };
 const FOCUS_REQUEST_LIFETIME_MS = 8000;

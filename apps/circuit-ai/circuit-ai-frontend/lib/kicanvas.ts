@@ -78,6 +78,8 @@ export function focusKiCanvasBoard(embed: HTMLElement) {
 // an uncaught error from inside the library, so a replaced embed is hidden and removed only once it has loaded.
 export const RETIRE_AFTER_LOAD_MS = 300;
 export const RETIRE_GIVE_UP_MS = 15000;
+// Switching files waits this long before mounting, so flipping faster than KiCanvas can load only loads the last one.
+export const SWITCH_SETTLE_MS = 120;
 
 export type KeptCamera = { relative: string; x: number; y: number; zoom: number };
 export type LooseCamera = { zoom: number; center: { x: number; y: number; constructor: unknown } };
@@ -154,3 +156,83 @@ export function retireEmbed(embed: HTMLElement) {
   window.setTimeout(remove, RETIRE_GIVE_UP_MS);
 }
 
+
+/** Point `to` at the same place as `from`. Returns true when something changed, so a caller can keep two viewers in step. */
+export function copyCamera(from: HTMLElement, to: HTMLElement) {
+  try {
+    const source = cameraOf(from).camera;
+    const target = cameraOf(to);
+    if (!source || !target.camera) return false;
+    const unchanged = Math.abs(target.camera.zoom - source.zoom) < 1e-9
+      && Math.abs(target.camera.center.x - source.center.x) < 1e-9
+      && Math.abs(target.camera.center.y - source.center.y) < 1e-9;
+    if (unchanged) return false;
+    const Vector = target.camera.center.constructor as new (x: number, y: number) => { x: number; y: number };
+    target.camera.center = new Vector(source.center.x, source.center.y);
+    target.camera.zoom = source.zoom;
+    target.viewer?.viewport?.callback?.();
+    target.viewer?.draw?.();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Keeps one KiCanvas viewer in a host element showing `text`. A replaced viewer is retired only after it has loaded, a
+ * switch waits a beat so rapid changes load only the last one, and `identity` is stamped on the viewer so a reader can tell
+ * which artifact it belongs to. Returns the live viewer once it has loaded.
+ */
+export function useKiCanvasEmbed(
+  host: HTMLElement | null,
+  ready: boolean,
+  text: string | null,
+  identity: string,
+  kind: 'schematic' | 'pcb',
+  options: { controls: 'basic' | 'none'; faintFills?: boolean },
+) {
+  const [live, setLive] = useState<{ identity: string; embed: HTMLElement } | null>(null);
+  const { controls, faintFills } = options;
+
+  useEffect(() => {
+    if (!host || !ready || !text) { setLive(null); return; }
+    let embed: HTMLElement | null = null;
+    let stopFit: (() => void) | undefined;
+    const mount = () => {
+      const created = document.createElement('kicanvas-embed');
+      embed = created;
+      created.dataset.artifact = identity;
+      created.addEventListener('kicanvas:load', () => { created.dataset.loaded = '1'; });
+      if (kind === 'pcb' && faintFills) applyFillModeAfterLoad(created, () => 'faint');
+      // KiCanvas reports `load` more than once; the viewer counts as live after the first, with a short settle.
+      created.addEventListener('kicanvas:load', () => window.setTimeout(() => { if (created.isConnected) setLive({ identity, embed: created }); }, 250), { once: true });
+      created.setAttribute('controls', controls);
+      created.setAttribute('controlslist', 'nodownload nooverlay');
+      const source = document.createElement('kicanvas-source');
+      source.textContent = text;
+      created.appendChild(source);
+      host.appendChild(created);
+      if (kind === 'pcb') {
+        created.setAttribute('zoom', 'objects');
+        stopFit = focusKiCanvasBoard(created);
+      }
+    };
+    const switching = Boolean(host.querySelector('kicanvas-embed'));
+    const timer = window.setTimeout(mount, switching ? SWITCH_SETTLE_MS : 0);
+    return () => {
+      window.clearTimeout(timer);
+      stopFit?.();
+      setLive(null);
+      if (!embed) return;
+      try {
+        const app = embed.shadowRoot?.querySelector('kc-schematic-app, kc-board-app') as (HTMLElement & { viewer?: { on_draw?: () => void } }) | null;
+        if (app?.viewer) app.viewer.on_draw = () => undefined;
+      } catch {
+        // Nothing queued if the viewer never initialised.
+      }
+      retireEmbed(embed);
+    };
+  }, [host, ready, text, identity, kind, controls, faintFills]);
+
+  return live && live.identity === identity ? live.embed : null;
+}
