@@ -26,6 +26,7 @@ import {
 } from '@/components/engineering/evidence-artifact-viewport';
 import { ArtifactChangesPanel } from '@/components/engineering/artifact-changes-panel';
 import { changesToHighlights, useArtifactDiffs } from '@/lib/artifact-diff';
+import { ComparisonViewer, type CompareMode } from '@/components/engineering/comparison-viewer';
 import {
   summarizeRevisionDiff,
   type ProjectRevision,
@@ -139,6 +140,7 @@ export default function EvidenceComparePage() {
   const [selectedDeltaId, setSelectedDeltaId] = useState('');
   const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
   const [focusedChange, setFocusedChange] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'candidate' | CompareMode>('candidate');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -369,8 +371,27 @@ export default function EvidenceComparePage() {
                 <span>{summary.artifacts} artifact change</span>
               </div>
             </div>
+            <div className="flex shrink-0 items-center gap-1 border-b border-stone-200 bg-stone-50 px-3 py-1.5" role="group" aria-label="How to compare the two revisions">
+              {([['candidate', 'Candidate'], ['before', 'Before'], ['swipe', 'Swipe'], ['difference', 'Difference']] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setViewMode(value)}
+                  aria-pressed={viewMode === value}
+                  disabled={value !== 'candidate' && !(projectId && baseRevision && candidateRevision && baseRevision !== candidateRevision)}
+                  title={value === 'candidate' ? 'The candidate revision with its changes marked' : value === 'before' ? 'The earlier revision as it was saved' : value === 'swipe' ? 'Drag a divider between the two revisions' : 'Only what changed: identical parts cancel out'}
+                  className={`h-7 rounded-md px-3 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-40 ${viewMode === value ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-200'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="min-h-0 flex-1">
+              {viewMode !== 'candidate' && projectId && baseRevision && candidateRevision ? (
+                <ComparisonViewer projectId={projectId} baseRevision={baseRevision} candidateRevision={candidateRevision} mode={viewMode} highlights={artifactHighlights} focusHighlightId={focusedChange} onActiveArtifact={setActiveArtifact} />
+              ) : (
               <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact highlights={artifactHighlights} onActiveArtifact={setActiveArtifact} focusHighlightId={focusedChange} model3d={{ projectId, revision: candidateRevision }} />
+              )}
             </div>
           </section>
 
