@@ -590,3 +590,44 @@ def test_a_retained_file_whose_bytes_were_tampered_with_is_never_served(tmp_path
     refused = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
     assert refused.status_code == 500
     assert refused.json()["detail"]["type"] == "artifact_integrity_error"
+
+
+def test_a_retained_file_is_served_byte_for_byte_even_when_it_is_not_valid_utf8(tmp_path: Path) -> None:
+    build = tmp_path / "build"
+    comp = _copy_reference(build)
+    raw = SCH.read_bytes().replace(b'"10k"', b'"caf\xe910k"', 1)
+    (comp / SCH.name).write_bytes(raw)
+    api, _store = _client(tmp_path / "store")
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(build), "expected_revision": 0}).status_code == 200
+
+    served = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
+    assert served.status_code == 200
+    # Exactly the retained bytes, so the hash in the ETag is the hash of what was served.
+    assert served.content == raw
+    assert served.headers["etag"] == '"sha256:' + hashlib.sha256(raw).hexdigest() + '"'
+
+
+def test_a_retained_file_is_revalidated_so_a_reused_project_id_never_serves_stale_bytes(tmp_path: Path) -> None:
+    build = tmp_path / "build"
+    comp = _copy_reference(build)
+    api, _store = _client(tmp_path / "store")
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(build), "expected_revision": 0}).status_code == 200
+
+    first = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
+    assert "immutable" not in first.headers["cache-control"]
+    assert "no-cache" in first.headers["cache-control"]
+    etag = first.headers["etag"]
+
+    # Same file, asked again with the ETag: nothing to send.
+    unchanged = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file", headers={"If-None-Match": etag})
+    assert unchanged.status_code == 304
+    assert unchanged.content == b""
+
+    # The project is deleted and saved again under the same id: revision 1 now names different bytes.
+    assert api.delete("/v1/projects/robot").status_code == 200
+    (comp / SCH.name).write_bytes(SCH.read_bytes().replace(b'"10k"', b'"99k"', 1))
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(build), "expected_revision": 0}).status_code == 200
+    again = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file", headers={"If-None-Match": etag})
+    assert again.status_code == 200
+    assert b'"99k"' in again.content
+    assert again.headers["etag"] != etag

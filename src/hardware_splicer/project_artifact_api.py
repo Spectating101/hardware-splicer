@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Query, Response, status
+from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 
 from .artifact_retention import (
     ARTIFACT_KINDS,
@@ -16,6 +16,7 @@ from .artifact_retention import (
     ArtifactPinConflict,
     load_artifact_pin,
     read_pinned_artifact,
+    read_pinned_artifact_bytes,
     retain_revision_artifacts,
 )
 from .kicad_diff import KicadDiffError, diff_kicad_text
@@ -105,17 +106,18 @@ def create_project_artifact_router(store: ProjectStore) -> APIRouter:
         return {"ok": True, "revision": int(revision), "pin": pin}
 
     @router.get("/{project_id}/revisions/{revision}/artifacts/{kind}/file")
-    def load_project_revision_artifact_file(project_id: str, revision: int, kind: str) -> Response:
-        """The retained KiCad file of a revision, as text, verified against its recorded hash.
+    def load_project_revision_artifact_file(project_id: str, revision: int, kind: str, request: Request) -> Response:
+        """The retained KiCad file of a revision: its exact bytes, verified against the recorded hash.
 
-        This is what the revision kept, not what the build folder holds now, so two revisions can be compared exactly.
+        This is what the revision kept, not what the build folder holds now, so two revisions can be compared exactly. The
+        bytes are never decoded and re-encoded: what is served is what the ETag names.
         """
 
         try:
             if kind not in ARTIFACT_KINDS:
                 raise ValueError("kind must be schematic or pcb")
             store.load(project_id, revision=int(revision))
-            pinned = read_pinned_artifact(store, project_id, int(revision), kind)
+            pinned = read_pinned_artifact_bytes(store, project_id, int(revision), kind)
         except Exception as exc:
             raise _artifact_error(exc) from exc
         if pinned is None:
@@ -123,13 +125,15 @@ def create_project_artifact_router(store: ProjectStore) -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={"type": "artifact_not_retained", "message": f"Revision {int(revision)} has no retained {kind}."},
             )
-        text, entry = pinned
+        data, entry = pinned
         digest = str(entry.get("sha256") or "")
-        return Response(
-            content=text.encode("utf-8"),
-            media_type="text/plain; charset=utf-8",
-            headers={"ETag": f'"{digest}"', "Cache-Control": "private, max-age=31536000, immutable"},
-        )
+        etag = f'"{digest}"'
+        # Revalidated on every use. A project id and revision number can be reused after a project is deleted and saved
+        # again, so the URL alone never identifies the bytes; the ETag does.
+        headers = {"ETag": etag, "Cache-Control": "private, no-cache"}
+        if request.headers.get("if-none-match") == etag:
+            return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers=headers)
+        return Response(content=data, media_type="text/plain; charset=utf-8", headers=headers)
 
     @router.get("/{project_id}/artifact-diff")
     def diff_project_revision_artifacts(

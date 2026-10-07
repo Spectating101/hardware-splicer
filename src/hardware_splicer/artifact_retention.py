@@ -449,13 +449,13 @@ def retain_revision_artifacts(
     )
 
 
-def read_pinned_artifact(
+def read_pinned_artifact_bytes(
     store: ProjectStore,
     project_id: str,
     revision: int,
     kind: str,
-) -> tuple[str, dict[str, Any]] | None:
-    """Return ``(text, pin_entry)`` or None when the pin/entry is absent."""
+) -> tuple[bytes, dict[str, Any]] | None:
+    """Return ``(exact_bytes, pin_entry)``, hash-verified, or None when the pin/entry is absent."""
 
     if kind not in ARTIFACT_KINDS:
         raise ValueError("kind must be schematic or pcb")
@@ -470,10 +470,25 @@ def read_pinned_artifact(
     digest = entry.get("sha256")
     if not isinstance(digest, str) or not _PIN_SHA256_RE.fullmatch(digest):
         raise ArtifactIntegrityError("artifact pin is corrupt")
-    text = _read_blob(store, project_id, digest.split(":", 1)[1]).decode("utf-8", errors="replace")
+    data = _read_blob(store, project_id, digest.split(":", 1)[1])
     public = dict(entry)
     public["retention_basis"] = pin.get("retention_basis")
-    return text, public
+    return data, public
+
+
+def read_pinned_artifact(
+    store: ProjectStore,
+    project_id: str,
+    revision: int,
+    kind: str,
+) -> tuple[str, dict[str, Any]] | None:
+    """Return ``(text, pin_entry)`` or None when the pin/entry is absent. The text is decoded leniently."""
+
+    pinned = read_pinned_artifact_bytes(store, project_id, revision, kind)
+    if pinned is None:
+        return None
+    data, public = pinned
+    return data.decode("utf-8", errors="replace"), public
 
 
 def _safe_reason(exc: BaseException) -> str:

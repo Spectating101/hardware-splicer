@@ -79,7 +79,10 @@ bytes cannot be overwritten.
 ## Reading a retained file
 
 `GET /v1/projects/{id}/revisions/{revision}/artifacts/{kind}/file` returns the retained KiCad file as `text/plain`, read
-from the content-addressed store and checked against its recorded hash. It is the revision's copy, not the build
+from the content-addressed store and checked against its recorded hash. The response is the retained bytes themselves,
+not a decoded and re-encoded copy, so the `ETag` is the hash of exactly what was served. It is revalidated on every use
+(`Cache-Control: private, no-cache`, with `If-None-Match` answered by 304), because a project id and revision number can
+be reused after a project is deleted and saved again. It is the revision's copy, not the build
 folder's, so it does not change when the build folder is rewritten, and two revisions can be compared exactly. The
 `ETag` is the file's `sha256`. A revision with no retained file of that kind is HTTP 404 `artifact_not_retained`; a blob
 that no longer matches its hash is HTTP 500 `artifact_integrity_error` and is never served. It writes nothing.
