@@ -61,13 +61,24 @@ _REDACTIONS: tuple[tuple[str, re.Pattern[str], str], ...] = (
     ("credential", re.compile(r"(?i)\b(?:bearer|basic)\s+[A-Za-z0-9._~+/=-]{8,}"), "[redacted credential]"),
     ("credential", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}"), "[redacted credential]"),
     ("credential", re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{8,}|\bgh[pousr]_[A-Za-z0-9]{16,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{10,}"), "[redacted credential]"),
-    # A secret-like name (quoted or not, including client_secret, access_token, private_key...) and its value, whether the value is
-    # quoted (and may then hold spaces and escaped quotes) or a bare word.
+    # A credential name and its value. The name is a whole word, optionally with delimited prefixes (access_token, db_password,
+    # client-secret) and a few delimited suffixes (secret_key); it is not any word that merely contains one, so token_count,
+    # tokenizer and secret_sauce are left alone. The value is quoted (and may then hold spaces and escaped quotes) or a bare
+    # word. A quote that is never closed runs to the end of the text rather than falling back to a bare word, because the
+    # rest of the text is then still the secret.
     ("credential", re.compile(r"""(?ix)
-        (?P<name>["']?\b[\w-]*(?:api[_-]?key|secret|token|passw(?:or)?d|passphrase|credential|authorization|private[_-]?key)[\w-]*\b["']?
-                 \s*[:=]\s*)
+        (?P<name>["']?(?<![A-Za-z0-9])(?:[A-Za-z0-9]+[_-])*
+                 (?:api[_-]?key|secret|token|passw(?:or)?d|passphrase|credentials?|authorization|private[_-]?key)
+                 (?:[_-](?:key|value|string|data))?
+                 (?![A-Za-z0-9])["']?\s*[:=]\s*)
         (?!\[redacted)
-        (?P<value>"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+)
+        (?P<value>"(?:[^"\\]|\\.)*(?:"|\Z)|'(?:[^'\\]|\\.)*(?:'|\Z)|\S+)
+    """), r"\g<name>[redacted credential]"),
+    # The same names written in camelCase (accessToken, clientSecret, apiKey).
+    ("credential", re.compile(r"""(?x)
+        (?P<name>["']?\b[a-z][a-z0-9]*(?:Api[Kk]ey|Secret|Token|Passw(?:or)?d|Passphrase|Credentials?|Authorization|PrivateKey)(?![A-Za-z0-9])["']?\s*[:=]\s*)
+        (?!\[redacted)
+        (?P<value>"(?:[^"\\]|\\.)*(?:"|\Z)|'(?:[^'\\]|\\.)*(?:'|\Z)|\S+)
     """), r"\g<name>[redacted credential]"),
     ("path", re.compile(r"(?<![\w.:/-])(?:/(?:home|Users|root|tmp|var|etc|opt|mnt|srv|private|media)/[^\s\"'<>)]+|[A-Za-z]:\\[^\s\"'<>)]+)"), "[redacted path]"),
 )
@@ -168,43 +179,54 @@ THREAD_COUNT_CEILING = 1000
 EVENT_COUNT_CEILING = 20000
 
 
-def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | None:
-    """How many threads and event files the project has, counted by name only and never read. Each figure is exact or, past a
-    ceiling, absent with a `*_over` bound that does not depend on listing order. None if it cannot be counted safely (a
-    symbolic link where there should not be one), in which case the discussion is not read."""
+def _scan(path: str, ceiling: int) -> tuple[list[tuple[str, bool, bool]], bool]:
+    """The entries of a directory as (name, is_symlink, is_dir), and whether there were more than `ceiling`."""
 
-    root = store.root / project_id / "threads"
+    entries: list[tuple[str, bool, bool]] = []
+    with os.scandir(path) as listing:
+        for entry in listing:
+            entries.append((entry.name, entry.is_symlink(), entry.is_dir(follow_symlinks=False)))
+            if len(entries) > ceiling:
+                return entries, True
+    return entries, False
+
+
+def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | None:
+    """How many threads and event files the project has, counted by name only and never read.
+
+    Each figure is exact or, past a ceiling, absent with an `*_over` bound. The answer does not depend on the order the
+    filesystem lists names: anything over a ceiling is "too large" whatever else was seen in that directory, every directory
+    is scanned whole, and directories are taken in sorted order. None means a symbolic link was found where there should not
+    be one, and the discussion is not read.
+    """
+
+    root = str(store.root / project_id / "threads")
     if os.path.islink(root):
         return None
     if not os.path.isdir(root):
         return {"threads": 0, "threads_over": None, "events": 0, "events_over": None}
-    names: list[str] = []
     try:
-        with os.scandir(root) as entries:
-            for entry in entries:
-                if entry.is_symlink():
-                    return None
-                if entry.is_dir(follow_symlinks=False):
-                    names.append(entry.name)
-                    if len(names) > THREAD_COUNT_CEILING:
-                        # Past the ceiling the exact number is not needed, and which names were seen first is arbitrary.
-                        return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
+        top, over = _scan(root, THREAD_COUNT_CEILING)
+        if over:
+            return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
+        if any(is_link for _name, is_link, _is_dir in top):
+            return None
+        names = sorted(name for name, _link, is_dir in top if is_dir)
         if len(names) > READ_BUDGET_THREADS:
             return {"threads": len(names), "threads_over": None, "events": None, "events_over": None}
         events = 0
-        for name in sorted(names):
+        for name in names:
             folder = os.path.join(root, name, "events")
             if os.path.islink(folder):
                 return None
             if not os.path.isdir(folder):
                 continue
-            with os.scandir(folder) as files:
-                for event in files:
-                    if event.is_symlink():
-                        return None
-                    events += 1
-                    if events > EVENT_COUNT_CEILING:
-                        return {"threads": len(names), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
+            entries, over = _scan(folder, EVENT_COUNT_CEILING - events)
+            if over:
+                return {"threads": len(names), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
+            if any(is_link for _name, is_link, _is_dir in entries):
+                return None
+            events += len(entries)
     except OSError:
         return None
     return {"threads": len(names), "threads_over": None, "events": events, "events_over": None}

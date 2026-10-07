@@ -521,3 +521,115 @@ def test_redaction_cost_does_not_grow_with_the_size_of_hostile_input() -> None:
         out = scrub.text(hostile)
         assert len(out) <= 500
     assert time.perf_counter() - started < 2.0
+
+
+def test_a_secret_cut_off_by_the_scan_window_is_removed_not_half_shown() -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    # The closing quote lies beyond the window the scrubber reads. An unclosed quote means the rest is still the secret.
+    out = scrub.text('password="' + "A" * 1800 + " LEAKME" + "B" * 300 + '"')
+    assert "LEAKME" not in out and "AAAA" not in out
+    assert out.startswith("password=[redacted credential]")
+    assert scrub.text("api_key='never closed and then LEAKTOO") == "api_key=[redacted credential]"
+
+
+@pytest.mark.parametrize(
+    "legitimate",
+    [
+        "token_count=128; impedance=50ohm",
+        'tokenizer="use BPE for log parsing"',
+        "secret_sauce=yes and password_policy=strict",
+        "The token ring network and the password policy are in section 4.",
+        "keyboard=us; keyboard_layout=dvorak",
+        "authorized=true",
+    ],
+)
+def test_engineering_text_that_only_resembles_a_credential_is_left_alone(legitimate) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    assert scrub.text(legitimate) == legitimate
+    assert scrub.summary()["count"] == 0
+
+
+@pytest.mark.parametrize(
+    "secret",
+    ["access_token: abcd1234efgh", "db-password = hunter2", 'clientSecret="two words"', "x_api_key=AKIA0000000000000", "secret_key: 'a b c'", "PRIVATE-KEY=abc123"],
+)
+def test_names_that_really_are_credentials_still_lose_their_values(secret) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    out = scrub.text(secret)
+    assert "[redacted credential]" in out
+    assert "hunter2" not in out and "abcd1234efgh" not in out and "two words" not in out and "a b c" not in out
+
+
+def test_an_unsafe_entry_never_changes_what_the_packet_says_about_size_whatever_the_listing_order(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import contextlib
+    import os as real_os
+
+    import hardware_splicer.review_packet as rp
+
+    api, store, _root = world
+    for name in ("a", "b", "c"):
+        assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": name}, "author": {"kind": "human", "id": "Bob"}, "body": name}).status_code == 201
+    threads_dir = store.root / "robot" / "threads"
+    real_os.symlink(str(threads_dir / "a"), str(threads_dir / "zz-link"))
+    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 3)   # 3 real directories and 1 symbolic link: over the ceiling
+
+    real = real_os.scandir
+
+    def packet_with(order):
+        @contextlib.contextmanager
+        def scandir(path):
+            with real(path) as entries:
+                listed = sorted(entries, key=lambda e: e.name)
+            yield iter(listed if order == "forward" else list(reversed(listed)))
+
+        monkeypatch.setattr(rp.os, "scandir", scandir)
+        return api.get("/v1/projects/robot/review-packet").json()["packet"]
+
+    forward, backward = packet_with("forward"), packet_with("backward")
+    assert forward["discussion"] == backward["discussion"]
+    assert forward["integrity"]["packet_sha256"] == backward["integrity"]["packet_sha256"]
+    # Over the ceiling is "too large", whatever else was in the listing.
+    assert forward["discussion"]["reason"] == "too large to include"
+
+    # Within the ceiling, a symbolic link is what it is: the discussion is not read, in either order.
+    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 1000)
+    forward, backward = packet_with("forward"), packet_with("backward")
+    assert forward["discussion"] == backward["discussion"]
+    assert forward["discussion"]["reason"] == "unreadable"
+
+
+def test_an_over_large_events_directory_is_too_large_even_if_it_also_holds_a_symlink(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import contextlib
+    import os as real_os
+
+    import hardware_splicer.review_packet as rp
+
+    api, store, _root = world
+    thread = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "a"}, "author": {"kind": "human", "id": "Bob"}, "body": "x"}).json()["thread"]["thread_id"]
+    for index in range(4):
+        api.post(f"/v1/projects/robot/threads/{thread}/events", json={"type": "comment", "body": f"c{index}", "author": {"kind": "human", "id": "Bob"}})
+    events_dir = store.root / "robot" / "threads" / thread / "events"
+    real_os.symlink(str(events_dir / "00000001.json"), str(events_dir / "zz-link.json"))
+    monkeypatch.setattr(rp, "EVENT_COUNT_CEILING", 3)
+    real = real_os.scandir
+
+    def packet_with(order):
+        @contextlib.contextmanager
+        def scandir(path):
+            with real(path) as entries:
+                listed = sorted(entries, key=lambda e: e.name)
+            yield iter(listed if order == "forward" else list(reversed(listed)))
+
+        monkeypatch.setattr(rp.os, "scandir", scandir)
+        return api.get("/v1/projects/robot/review-packet").json()["packet"]
+
+    forward, backward = packet_with("forward"), packet_with("backward")
+    assert forward["discussion"] == backward["discussion"]
+    assert forward["discussion"]["reason"] == "too large to include"
+    assert forward["discussion"]["total_events_over"] == 3
