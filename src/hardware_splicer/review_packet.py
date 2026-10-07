@@ -71,7 +71,7 @@ _REDACTIONS: tuple[tuple[str, re.Pattern[str], str], ...] = (
 # password_policy). Names are split into words at delimiters and at lower-to-upper and acronym boundaries.
 _SECRET_WORDS = frozenset({"secret", "secrets", "token", "tokens", "password", "passwords", "passwd", "passphrase", "credential", "credentials", "authorization", "apikey", "apikeys"})
 _SECRET_PAIRS = frozenset({("api", "key"), ("api", "keys"), ("private", "key"), ("private", "keys"), ("access", "key"), ("secret", "key")})
-_ABOUT_A_SECRET = frozenset({"count", "counts", "length", "len", "size", "limit", "limits", "max", "min", "ttl", "expiry", "expires", "lifetime", "policy", "policies", "type", "kind", "format", "enabled", "required", "interval", "timeout", "rate", "budget", "usage", "cost", "header", "headers", "field", "fields", "name", "names"})
+_ABOUT_A_SECRET = frozenset({"count", "counts", "length", "len", "size", "limit", "limits", "max", "min", "ttl", "expiry", "expires", "lifetime", "policy", "policies", "enabled", "required", "interval", "timeout", "rate", "budget", "usage", "cost"})
 _WORD = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|[0-9]+")
 _ASSIGNMENT = re.compile(
     r"""(?x)
@@ -110,15 +110,25 @@ class _Scrub:
             if hits:
                 self.counts[kind] = self.counts.get(kind, 0) + hits
         hidden = 0
-
-        def hide(match: re.Match[str]) -> str:
-            nonlocal hidden
-            if not _looks_like_a_credential_name(match.group("name").split(":")[0].split("=")[0].strip()):
-                return match.group(0)
-            hidden += 1
-            return match.group("name") + "[redacted credential]"
-
-        text = _ASSIGNMENT.sub(hide, text)
+        pieces: list[str] = []
+        position = 0
+        while True:
+            match = _ASSIGNMENT.search(text, position)
+            if match is None:
+                break
+            name = match.group("name").split(":")[0].split("=")[0].strip()
+            if _looks_like_a_credential_name(name):
+                pieces.append(text[position : match.start()])
+                pieces.append(match.group("name") + "[redacted credential]")
+                position = match.end()
+                hidden += 1
+            else:
+                # Not a credential. Move on from the end of the *name*, so an assignment that sits inside this one's value
+                # (mode=ok;password=x, url=https://h/?token=x) is still looked at.
+                pieces.append(text[position : match.end("name")])
+                position = match.end("name")
+        pieces.append(text[position:])
+        text = "".join(pieces)
         if hidden:
             self.counts["credential"] = self.counts.get("credential", 0) + hidden
         return text if len(text) <= limit else text[: limit - 1] + "…"
@@ -204,31 +214,27 @@ EVENT_COUNT_CEILING = 20000
 ENTRY_SCAN_CEILING = 20000
 
 
-def _scan(path: str, dir_ceiling: int) -> tuple[list[tuple[str, bool, bool]], str | None]:
-    """The entries of a directory as (name, is_symlink, is_dir), and why scanning stopped early, if it did: "dirs" when there
-    were more than `dir_ceiling` subdirectories, "entries" when there were simply too many entries of any kind to list."""
+def _scan(path: str, ceiling: int) -> tuple[list[tuple[str, bool, bool]], bool]:
+    """The entries of a directory as (name, is_symlink, is_dir), and whether there were more than `ceiling` of them. The
+    listing is complete unless that is true, so what is concluded from it does not depend on the order names came in."""
 
     entries: list[tuple[str, bool, bool]] = []
-    dirs = 0
     with os.scandir(path) as listing:
         for entry in listing:
-            is_dir = entry.is_dir(follow_symlinks=False)
-            entries.append((entry.name, entry.is_symlink(), is_dir))
-            dirs += 1 if is_dir else 0
-            if dirs > dir_ceiling:
-                return entries, "dirs"
-            if len(entries) > ENTRY_SCAN_CEILING:
-                return entries, "entries"
-    return entries, None
+            entries.append((entry.name, entry.is_symlink(), entry.is_dir(follow_symlinks=False)))
+            if len(entries) > ceiling:
+                return entries, True
+    return entries, False
 
 
 def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | None:
     """How many threads and event files the project has, counted by name only and never read.
 
     Each figure is exact or, past a ceiling, absent with an `*_over` bound. The answer does not depend on the order the
-    filesystem lists names: anything over a ceiling is "too large" whatever else was seen in that directory, every directory
-    is scanned whole, and directories are taken in sorted order. None means a symbolic link was found where there should not
-    be one, and the discussion is not read.
+    filesystem lists names. One ceiling applies to the whole listing of a directory, and conclusions (directories over a
+    limit, a symbolic link) are drawn only from a complete listing; a listing too long to complete is simply "uncounted".
+    Directories are taken in sorted order. None means a symbolic link was found where there should not be one, and the
+    discussion is not read.
     """
 
     root = str(store.root / project_id / "threads")
@@ -237,34 +243,32 @@ def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | N
     if not os.path.isdir(root):
         return {"threads": 0, "threads_over": None, "events": 0, "events_over": None}
     try:
-        top, over = _scan(root, THREAD_COUNT_CEILING)
-        if over == "dirs":
-            return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
-        if over == "entries":
+        top, incomplete = _scan(root, ENTRY_SCAN_CEILING)
+        if incomplete:
             return {"threads": None, "threads_over": None, "events": None, "events_over": None, "uncounted": True}
+        dirs = sorted(name for name, _link, is_dir in top if is_dir)
+        if len(dirs) > THREAD_COUNT_CEILING:
+            return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
         if any(is_link for _name, is_link, _is_dir in top):
             return None
-        names = sorted(name for name, _link, is_dir in top if is_dir)
-        if len(names) > READ_BUDGET_THREADS:
-            return {"threads": len(names), "threads_over": None, "events": None, "events_over": None}
+        if len(dirs) > READ_BUDGET_THREADS:
+            return {"threads": len(dirs), "threads_over": None, "events": None, "events_over": None}
         events = 0
-        for name in names:
+        for name in dirs:
             folder = os.path.join(root, name, "events")
             if os.path.islink(folder):
                 return None
             if not os.path.isdir(folder):
                 continue
-            entries, over = _scan(folder, 0)
-            if over == "dirs":
-                return None  # a directory inside an events folder is not something this store writes
-            if over == "entries" or events + len(entries) > EVENT_COUNT_CEILING:
-                return {"threads": len(names), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
+            entries, incomplete = _scan(folder, EVENT_COUNT_CEILING - events)
+            if incomplete:
+                return {"threads": len(dirs), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
             if any(is_link for _name, is_link, _is_dir in entries):
                 return None
             events += len(entries)
     except OSError:
         return None
-    return {"threads": len(names), "threads_over": None, "events": events, "events_over": None}
+    return {"threads": len(dirs), "threads_over": None, "events": events, "events_over": None}
 
 
 def _discussion(store: ProjectStore, threads: ProjectThreadStore, project_id: str, revision: int, scrub: _Scrub) -> dict[str, Any]:

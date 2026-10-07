@@ -540,7 +540,7 @@ def test_a_secret_cut_off_by_the_scan_window_is_removed_not_half_shown() -> None
         "token_count=128; impedance=50ohm",
         'tokenizer="use BPE for log parsing"',
         "password_policy=strict and token_limit=50",
-        "authorization_header=present; secret_count=3",
+        "secret_count=3; token_limit=50; password_timeout=30",
         "The token ring network and the password policy are in section 4.",
         "keyboard=us; keyboard_layout=dvorak",
         "authorized=true",
@@ -568,6 +568,11 @@ def test_engineering_text_that_only_resembles_a_credential_is_left_alone(legitim
         "X-Api-Key: abc123SECRET",
         "AWS_SECRET_ACCESS_KEY=abc123SECRET",
         "refreshToken=abc123SECRET",
+        "mode=ok;password=abc123SECRET",
+        "url=https://host/?token=abc123SECRET",
+        "a=1,b=2,secret=abc123SECRET",
+        "secret_name=abc123SECRET",
+        "x=y z=w api_key=abc123SECRET q=1",
     ],
 )
 def test_names_that_really_are_credentials_still_lose_their_values(secret) -> None:
@@ -702,3 +707,37 @@ def test_a_folder_with_far_too_many_entries_of_any_kind_is_left_out_without_clai
     text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
     assert "Not included: the discussion is too large to include" in text
     assert "more than" not in text.split("## Discussion")[1].split("## Removed")[0]
+
+
+def test_when_both_ceilings_are_exceeded_the_answer_is_the_same_in_every_listing_order(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import contextlib
+    import os as real_os
+
+    import hardware_splicer.review_packet as rp
+
+    api, store, _root = world
+    folder = store.root / "robot" / "threads"
+    folder.mkdir(parents=True, exist_ok=True)
+    for index in range(4):
+        (folder / f"d{index}").mkdir()
+    for index in range(30):
+        (folder / f"f{index}.txt").write_text("x", encoding="utf-8")
+    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 2)     # four directories: over
+    monkeypatch.setattr(rp, "ENTRY_SCAN_CEILING", 20)      # thirty-four entries: over as well
+    real = real_os.scandir
+
+    def packet_with(order):
+        @contextlib.contextmanager
+        def scandir(path):
+            with real(path) as entries:
+                listed = sorted(entries, key=lambda e: e.name)
+            yield iter(listed if order == "dirs-first" else list(reversed(listed)))
+
+        monkeypatch.setattr(rp.os, "scandir", scandir)
+        return api.get("/v1/projects/robot/review-packet").json()["packet"]
+
+    one, two = packet_with("dirs-first"), packet_with("files-first")
+    assert one["discussion"] == two["discussion"]
+    assert one["integrity"]["packet_sha256"] == two["integrity"]["packet_sha256"]
+    # Too many entries to list at all is "uncounted": no thread figure is claimed.
+    assert one["discussion"]["total"] is None and one["discussion"]["total_over"] is None
