@@ -545,3 +545,48 @@ def test_tampered_existing_blob_explicit_retain_is_500_and_save_does_not_raise(
     wrapped = install_at_save_retention(store)
     envelope = wrapped.save("robot", _snapshot(build, "verify"), expected_revision=1)
     assert envelope["revision"] == 2
+
+
+def test_a_retained_file_is_served_as_the_revision_kept_it(tmp_path: Path) -> None:
+    build = tmp_path / "build"
+    comp = _copy_reference(build)
+    api, store = _client(tmp_path / "store")
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(build), "expected_revision": 0}).status_code == 200
+
+    # The build folder is rewritten after the revision was saved; the retained copy must not follow it.
+    original = (comp / SCH.name).read_bytes()
+    (comp / SCH.name).write_bytes(original.replace(b'"10k"', b'"99k"', 1))
+
+    served = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
+    assert served.status_code == 200
+    assert served.headers["content-type"].startswith("text/plain")
+    assert served.content == original
+    digest = "sha256:" + hashlib.sha256(original).hexdigest()
+    assert served.headers["etag"] == f'"{digest}"'
+    assert api.get("/v1/projects/robot/revisions/1/artifacts/pcb/file").content == PCB.read_bytes()
+
+
+def test_a_retained_file_that_is_not_there_is_refused_plainly(tmp_path: Path) -> None:
+    api, _store = _client(tmp_path)
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(), "expected_revision": 0}).status_code == 200
+
+    unretained = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
+    assert unretained.status_code == 404
+    assert unretained.json()["detail"]["type"] == "artifact_not_retained"
+    assert api.get("/v1/projects/robot/revisions/9/artifacts/schematic/file").status_code == 404
+    assert api.get("/v1/projects/robot/revisions/1/artifacts/plan/file").status_code == 422
+    assert api.get("/v1/projects/nope/revisions/1/artifacts/schematic/file").status_code == 404
+
+
+def test_a_retained_file_whose_bytes_were_tampered_with_is_never_served(tmp_path: Path) -> None:
+    build = tmp_path / "build"
+    _copy_reference(build)
+    api, store = _client(tmp_path / "store")
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": _snapshot(build), "expected_revision": 0}).status_code == 200
+    for candidate in (store.root / "robot" / "artifacts" / "sha256").rglob("*"):
+        if candidate.is_file():
+            candidate.write_bytes(b"(kicad_sch (tampered))")
+
+    refused = api.get("/v1/projects/robot/revisions/1/artifacts/schematic/file")
+    assert refused.status_code == 500
+    assert refused.json()["detail"]["type"] == "artifact_integrity_error"

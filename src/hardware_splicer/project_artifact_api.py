@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from .artifact_retention import (
     ARTIFACT_KINDS,
@@ -103,6 +103,33 @@ def create_project_artifact_router(store: ProjectStore) -> APIRouter:
         except Exception as exc:
             raise _artifact_error(exc) from exc
         return {"ok": True, "revision": int(revision), "pin": pin}
+
+    @router.get("/{project_id}/revisions/{revision}/artifacts/{kind}/file")
+    def load_project_revision_artifact_file(project_id: str, revision: int, kind: str) -> Response:
+        """The retained KiCad file of a revision, as text, verified against its recorded hash.
+
+        This is what the revision kept, not what the build folder holds now, so two revisions can be compared exactly.
+        """
+
+        try:
+            if kind not in ARTIFACT_KINDS:
+                raise ValueError("kind must be schematic or pcb")
+            store.load(project_id, revision=int(revision))
+            pinned = read_pinned_artifact(store, project_id, int(revision), kind)
+        except Exception as exc:
+            raise _artifact_error(exc) from exc
+        if pinned is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"type": "artifact_not_retained", "message": f"Revision {int(revision)} has no retained {kind}."},
+            )
+        text, entry = pinned
+        digest = str(entry.get("sha256") or "")
+        return Response(
+            content=text.encode("utf-8"),
+            media_type="text/plain; charset=utf-8",
+            headers={"ETag": f'"{digest}"', "Cache-Control": "private, max-age=31536000, immutable"},
+        )
 
     @router.get("/{project_id}/artifact-diff")
     def diff_project_revision_artifacts(
