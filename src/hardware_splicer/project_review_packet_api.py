@@ -27,6 +27,7 @@ def create_project_review_packet_router(
         project_id: str,
         revision: int | None = Query(default=None, ge=1),
         format: str = Query(default="json"),
+        include_text: bool = Query(default=True),
     ) -> Any:
         if format not in {"json", "markdown"}:
             raise HTTPException(
@@ -34,11 +35,11 @@ def create_project_review_packet_router(
                 detail={"type": "invalid_request", "message": "format must be json or markdown"},
             )
         try:
-            packet = build_review_packet(store, project_id, revision=revision, reviews=reviews, threads=threads)
+            packet = build_review_packet(store, project_id, revision=revision, reviews=reviews, threads=threads, include_free_text=include_text)
         except Exception as exc:
             raise _project_error(exc) from exc
         if format == "markdown":
-            name = f"{packet['project']['project_id']}-r{packet['project']['revision']}-review-packet.md"
+            name = f"{packet['project']['project_id']}-r{packet['project']['revision']}-review-packet{'' if include_text else '-no-text'}.md"
             return Response(
                 content=render_review_packet_markdown(packet).encode("utf-8"),
                 media_type="text/markdown; charset=utf-8",

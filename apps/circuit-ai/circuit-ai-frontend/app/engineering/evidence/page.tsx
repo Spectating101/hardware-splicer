@@ -384,6 +384,17 @@ export default function EvidenceOverviewPage() {
                   <FileDown className="h-3.5 w-3.5" aria-hidden="true" />Review packet
                 </a>
               ) : null}
+              {projectId && revision ? (
+                <a
+                  href={`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/review-packet?revision=${revision}&format=markdown&include_text=false`}
+                  download
+                  title="The same packet with no comments, notes or finding text: only who did what and when, the file hashes and the counts. The one to share outside the team."
+                  className="inline-flex h-8 items-center rounded-md px-2 text-[11px] font-medium text-stone-500 underline-offset-2 hover:text-stone-900 hover:underline"
+                  data-testid="review-packet-share-link"
+                >
+                  Without comments
+                </a>
+              ) : null}
               <Link href={`/engineering/visual?project=${encodeURIComponent(projectId)}&mode=decide`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-stone-900 px-3 text-xs font-medium text-white hover:bg-stone-800">
                 Compare <ArrowRight className="h-3.5 w-3.5" />
               </Link>

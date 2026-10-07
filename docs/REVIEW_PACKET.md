@@ -52,12 +52,17 @@ power-on or release, and it says so in the packet itself.
 
 ## API
 
-`GET /v1/projects/{id}/review-packet?revision=N&format=json|markdown`
+`GET /v1/projects/{id}/review-packet?revision=N&format=json|markdown&include_text=true|false`
 
 - `revision` defaults to the latest valid revision; an unknown one is HTTP 404.
 - `format=json` returns `{ok, packet}`. `format=markdown` returns the same content as a document to read, with a
   download file name `<project>-r<revision>-review-packet.md`.
 - Any other `format` is HTTP 422 `invalid_request`.
+- `include_text=false` builds the version to share outside the team: no comment, note or finding text at all, only who did
+  what and when, the file hashes and the counts. Each omitted piece of text is replaced by `[text omitted]`, the packet
+  says it was built that way (`free_text`), and its hash differs from the full packet's. Redaction of prose can only ever be
+  best effort; leaving it out is the only version that does not depend on a pattern list. The download is named
+  `…-review-packet-no-text.md`.
 
 ## What a packet is not
 

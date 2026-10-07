@@ -741,3 +741,71 @@ def test_when_both_ceilings_are_exceeded_the_answer_is_the_same_in_every_listing
     assert one["integrity"]["packet_sha256"] == two["integrity"]["packet_sha256"]
     # Too many entries to list at all is "uncounted": no thread figure is claimed.
     assert one["discussion"]["total"] is None and one["discussion"]["total_over"] is None
+
+
+def test_the_version_for_sharing_carries_no_free_text_at_all(world) -> None:
+    api, _store, _root = world
+    secretish = "the vendor login is hunter2-violet-harbor and it is in /home/me/notes"
+    created = api.post(
+        "/v1/projects/robot/candidates",
+        json={"base_revision": 1, "kind": "schematic", "ops": [{"op": "rotate", "ref": "U1", "degrees": 90}], "author": "Bob", "note": secretish},
+    )
+    assert created.status_code == 201, created.text
+    cid = created.json()["candidate"]["candidate_id"]
+    api.post(f"/v1/projects/robot/candidates/{cid}/decision", json={"decision": "rejected", "note": secretish}, headers={"X-HS-Operator-Token": TOKEN})
+    assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "mcu"}, "author": {"kind": "human", "id": "Bob"}, "body": secretish}).status_code == 201
+
+    plain = api.get("/v1/projects/robot/review-packet", params={"include_text": "false"})
+    assert plain.status_code == 200
+    body = plain.text + api.get("/v1/projects/robot/review-packet", params={"include_text": "false", "format": "markdown"}).text
+    for word in ("hunter2", "violet-harbor", "/home/me", "Compose failed", "vendor login"):
+        assert word not in body, word
+    packet = plain.json()["packet"]
+    assert packet["free_text"]["included"] is False and packet["free_text"]["omitted"] >= 4
+    # What is not prose is all still there: who, what, when, the hashes and the counts.
+    assert packet["retained_files"]["files"]["schematic"]["sha256"].startswith("sha256:")
+    assert packet["proposals"]["items"][0]["decision"]["decided_by"] == "alice"
+    assert packet["proposals"]["items"][0]["created_by"] == "Bob"
+    assert packet["discussion"]["threads"][0]["events"][0]["author"]["id"] == "Bob"
+    assert packet["discussion"]["threads"][0]["events"][0]["body"] == "[text omitted]"
+    assert packet["findings"]["total"] > 0 and packet["findings"]["items"][0]["text"] == "[text omitted]"
+    assert verify_review_packet(packet)
+    # It is a different packet from the full one, and says so in the document and in the file name.
+    full = api.get("/v1/projects/robot/review-packet").json()["packet"]
+    assert full["integrity"]["packet_sha256"] != packet["integrity"]["packet_sha256"]
+    assert full["free_text"]["included"] is True
+    response = api.get("/v1/projects/robot/review-packet", params={"include_text": "false", "format": "markdown"})
+    assert "-no-text.md" in response.headers["content-disposition"]
+    assert "are left out" in response.text
+
+
+@pytest.mark.parametrize(
+    ("written", "gone"),
+    [
+        ("password: # production login\n  violet-harbor-93", ["violet-harbor-93"]),
+        ("password: |\n  violet-harbor-93\n  more-secret\nnext: ok", ["violet-harbor-93", "more-secret"]),
+        ("password:\n  violet-harbor-93\nuser: bob", ["violet-harbor-93"]),
+        ("password violet-harbor-93", ["violet-harbor-93"]),
+        ("clone https://alice:violet-harbor-93@example.com/a", ["violet-harbor-93"]),
+    ],
+)
+def test_yaml_blocks_space_separated_passwords_and_url_userinfo_are_removed(written, gone) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    out = scrub.text(written)
+    for word in gone:
+        assert word not in out, (written, out)
+    assert scrub.summary()["count"] >= 1
+
+
+def test_what_is_kept_around_a_removed_secret_still_reads_properly() -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    assert scrub.text("password: |\n  a-secret-1\n  more\nnext: ok") == "password: [redacted credential]\nnext: ok"
+    assert scrub.text("clone https://alice:pw12345@example.com/repo.git now") == "clone https://alice:[redacted credential]@example.com/repo.git now"
+    assert scrub.text("the password policy is strict") == "the password policy is strict"
+    # Bare values are removed up to the next space, so a secret that contains punctuation is not left half visible. The cost is
+    # that fields glued to it by ; , or & go with it, and the packet's count says something was removed.
+    assert scrub.text("api_key=abc123;clearance=0.1mm") == "api_key=[redacted credential]"

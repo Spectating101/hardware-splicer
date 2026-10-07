@@ -62,6 +62,11 @@ _REDACTIONS: tuple[tuple[str, re.Pattern[str], str], ...] = (
     ("credential", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}"), "[redacted credential]"),
     ("credential", re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{8,}|\bgh[pousr]_[A-Za-z0-9]{16,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{10,}"), "[redacted credential]"),
     # Credential names and their values are handled by _redact_assignments below, which decides by the words a name is made of.
+    # https://user:secret@host/... : keep the scheme, the user and the host, which are what a reviewer needs.
+    ("credential", re.compile(r"(?P<scheme>\b[A-Za-z][A-Za-z0-9+.-]{0,19}://)(?P<user>[^\s/@:]*):(?P<secret>[^\s/@]+)@"), r"\g<scheme>\g<user>:[redacted credential]@"),
+    # "password violet-harbor-93": a password word followed by something that looks like a value (it holds a digit or a symbol).
+    # Prose such as "the password policy" is left alone.
+    ("credential", re.compile(r"(?i)\b(?P<word>password|passwd|passphrase)(?P<gap>\s+)(?P<secret>(?=\S*[0-9_@#$%^&*!-])\S{6,})"), r"\g<word>\g<gap>[redacted credential]"),
     ("path", re.compile(r"(?<![\w.:/-])(?:/(?:home|Users|root|tmp|var|etc|opt|mnt|srv|private|media)/[^\s\"'<>)]+|[A-Za-z]:\\[^\s\"'<>)]+)"), "[redacted path]"),
 )
 
@@ -82,6 +87,9 @@ _ASSIGNMENT = re.compile(
 )
 
 
+_YAML_VALUE = re.compile(r"(?:[|>][-+0-9]*|#[^\n]*)?[ \t]*\n(?:[ \t]+\S[^\n]*(?:\n|\Z))+")
+
+
 def _looks_like_a_credential_name(name: str) -> bool:
     words = [word.lower() for word in _WORD.findall(name.strip("\"'"))]
     if not words:
@@ -94,11 +102,30 @@ def _looks_like_a_credential_name(name: str) -> bool:
 
 
 
-class _Scrub:
-    """Removes credentials and absolute paths from free text and counts what it removed. Best effort, and said to be."""
+OMITTED = "[text omitted]"
 
-    def __init__(self) -> None:
+
+class _Scrub:
+    """Removes credentials and absolute paths from free text and counts what it removed. Best effort, and said to be.
+
+    With `include_free_text` off, text people wrote (comments, notes, finding text) is left out altogether and replaced by a
+    marker. No pattern list can make arbitrary prose safe to publish; leaving it out can.
+    """
+
+    def __init__(self, include_free_text: bool = True) -> None:
         self.counts: dict[str, int] = {}
+        self.include_free_text = include_free_text
+        self.omitted = 0
+
+    def free(self, value: Any, limit: int = MAX_TEXT) -> str | None:
+        """Prose written by a person. Omitted entirely when the packet is built without free text."""
+
+        if value is None or str(value) == "":
+            return None
+        if not self.include_free_text:
+            self.omitted += 1
+            return OMITTED
+        return self.text(value, limit)
 
     def text(self, value: Any, limit: int = MAX_TEXT) -> str:
         # Only the part that can survive the final clip is scanned, so the work does not grow with the size of the input. A
@@ -122,6 +149,13 @@ class _Scrub:
                 pieces.append(match.group("name") + "[redacted credential]")
                 position = match.end()
                 hidden += 1
+                continue_from = match.end("name")
+                block = _YAML_VALUE.match(text, continue_from)
+                if block:
+                    # YAML: the value is a comment, a | or > block, or sits on the indented lines that follow.
+                    position = block.end()
+                    if text[block.end() - 1 : block.end()] == "\n":
+                        pieces.append("\n")
             else:
                 # Not a credential. Move on from the end of the *name*, so an assignment that sits inside this one's value
                 # (mode=ok;password=x, url=https://h/?token=x) is still looked at.
@@ -184,10 +218,10 @@ def _findings(snapshot: Mapping[str, Any], revision: int, scrub: _Scrub) -> dict
                 "finding_id": row.get("finding_id"),
                 "category": scrub.text(row.get("category"), 80),
                 "object_id": scrub.optional(row.get("object_id"), 200),
-                "text": scrub.text(row.get("text")),
+                "text": scrub.free(row.get("text")) or "",
                 "provenance": {
                     "kind": provenance.get("kind"),
-                    "basis": scrub.text(provenance.get("basis")),
+                    "basis": scrub.free(provenance.get("basis")) or "",
                     "source_ref": scrub.optional(provenance.get("source_ref"), 200),
                     "authority_ceiling": provenance.get("authority_ceiling"),
                     "attested": bool(provenance.get("attested")),
@@ -302,7 +336,7 @@ def _discussion(store: ProjectStore, threads: ProjectThreadStore, project_id: st
                     "author": {"kind": author.get("kind"), "id": scrub.text(author.get("id"), 120)},
                     # Whether the server confirmed who this was, as against a name someone typed.
                     "author_verified": bool(event.get("author_verified")),
-                    "body": scrub.optional(event.get("body")),
+                    "body": scrub.free(event.get("body")),
                 }
             )
         anchor = full.get("anchor") if isinstance(full.get("anchor"), Mapping) else {}
@@ -350,7 +384,7 @@ def _proposals(store: ProjectStore, reviews: ProjectReviewStore, project_id: str
                 "kind": row.get("kind"),
                 "created_by": scrub.text(row.get("created_by"), 120),
                 "created_by_verified": bool(row.get("verified")),
-                "note": scrub.optional(row.get("note")),
+                "note": scrub.free(row.get("note")),
                 "changes": diff.get("summary"),
                 "operations_total": len(applied),
                 "operations_truncated": len(applied) > MAX_OPERATIONS,
@@ -367,7 +401,7 @@ def _proposals(store: ProjectStore, reviews: ProjectReviewStore, project_id: str
                 "decision": {
                     "status": state.get("status"),
                     "decided_by": scrub.optional(state.get("decided_by"), 120),
-                    "note": scrub.optional(state.get("note")),
+                    "note": scrub.free(state.get("note")),
                     "accepted_revision": state.get("accepted_revision"),
                     "out_of_date": bool(state.get("stale")),
                 },
@@ -399,8 +433,12 @@ def build_review_packet(
     revision: int | None = None,
     reviews: ProjectReviewStore | None = None,
     threads: ProjectThreadStore | None = None,
+    include_free_text: bool = True,
 ) -> dict[str, Any]:
-    """The packet for one revision (the latest when none is given). Reads only; never repairs a damaged store."""
+    """The packet for one revision (the latest when none is given). Reads only; never repairs a damaged store.
+
+    With ``include_free_text=False`` the packet carries no comment, note or finding text, only who did what and when, the
+    hashes and the counts. It is the version to share outside the team."""
 
     safe_id = validate_project_id(project_id)
     # The plain loader: a packet must not rename a damaged revision or rewrite a manifest just to be read.
@@ -409,7 +447,7 @@ def build_review_packet(
     snapshot = envelope.get("snapshot") if isinstance(envelope.get("snapshot"), Mapping) else {}
     reviews = reviews or ProjectReviewStore(store)
     threads = threads or ProjectThreadStore(store)
-    scrub = _Scrub()
+    scrub = _Scrub(include_free_text)
 
     packet: dict[str, Any] = {
         "schema_version": PACKET_SCHEMA,
@@ -426,6 +464,13 @@ def build_review_packet(
         "discussion": _discussion(store, threads, safe_id, resolved, scrub),
         "not_established": list(NOT_ESTABLISHED),
         "authority": AUTHORITY_STATEMENT,
+        "free_text": {
+            "included": include_free_text,
+            "omitted": scrub.omitted,
+            "note": "Comments, notes and finding text are included (credential-like strings and absolute paths removed on a best-effort basis)."
+            if include_free_text
+            else "Comments, notes and finding text are left out. Who did what and when, the file hashes and the counts are all here.",
+        },
     }
     packet["redactions"] = scrub.summary()
     packet["integrity"] = _integrity(packet)
@@ -508,6 +553,8 @@ def render_review_packet_markdown(packet: Mapping[str, Any]) -> str:
         *[f"- {_md(item)}" for item in packet["not_established"]],
         "",
         _md(packet["authority"]),
+        "",
+        _md((packet.get("free_text") or {}).get("note") or ""),
         "",
         "## Files kept with this revision",
         "",

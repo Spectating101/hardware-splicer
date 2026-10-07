@@ -43,3 +43,12 @@ test('the packet link is not offered until there is a revision to report on', as
   await page.waitForTimeout(1500);
   await expect(page.getByTestId('review-packet-link')).toHaveCount(0);
 });
+
+test('the shareable version of the packet is offered next to it and carries no comments', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  const link = page.getByTestId('review-packet-share-link');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('title', /no comments, notes or finding text/);
+  expect(await link.getAttribute('href')).toContain('include_text=false');
+});

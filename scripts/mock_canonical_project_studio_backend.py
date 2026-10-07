@@ -619,7 +619,7 @@ _render_packet = _load_hs_attr("review_packet", "render_review_packet_markdown")
 
 
 @app.get("/v1/projects/{project_id}/review-packet")
-def review_packet(project_id: str, revision: int | None = None, format: str = "json") -> Response:
+def review_packet(project_id: str, revision: int | None = None, format: str = "json", include_text: bool = True) -> Response:
     """A packet in the real shape, built from this fixture's data and rendered by the real Markdown renderer."""
 
     _require_project(project_id)
@@ -656,7 +656,7 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
     }
     if format == "markdown" and _render_packet is not None:
         return Response(_render_packet(packet).encode("utf-8"), media_type="text/markdown; charset=utf-8",
-                        headers={"Content-Disposition": f'attachment; filename="{project_id}-r{rev}-review-packet.md"'})
+                        headers={"Content-Disposition": f'attachment; filename="{project_id}-r{rev}-review-packet{"" if include_text else "-no-text"}.md"'})
     return Response(_json.dumps({"ok": True, "packet": packet}), media_type="application/json")
 
 
