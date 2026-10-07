@@ -128,7 +128,7 @@ API error contract — clients may rely on the shape.
 | `GET` | `/{project_id}/events` | Live change stream (SSE); information only — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
 | `GET`/`POST`/`DELETE` | `/{project_id}/presence` | Ephemeral presence; not an audit log — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
 
-Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md). Rendered 3D GLB views of retained PCB bytes: [`MODEL3D.md`](MODEL3D.md). Parts intelligence for a retained schematic revision: [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md). Candidate edit proposals (never a write to a revision): [`CANDIDATE_PROPOSALS.md`](CANDIDATE_PROPOSALS.md).
+Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md). Rendered 3D GLB views of retained PCB bytes: [`MODEL3D.md`](MODEL3D.md). Parts intelligence for a retained schematic revision: [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md). Candidate edit proposals (never a write to a revision): [`CANDIDATE_PROPOSALS.md`](CANDIDATE_PROPOSALS.md). Review packet of a revision, hash-bound and read-only: [`REVIEW_PACKET.md`](REVIEW_PACKET.md).
 
 `/v1/machine-projects`
 
