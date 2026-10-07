@@ -961,3 +961,12 @@ def test_a_secret_after_other_text_on_a_list_line_still_loses_its_continuation(w
 
     out = _Scrub().text(written)
     assert "violet-harbor-93" not in out and "next: ok" in out
+
+
+@pytest.mark.parametrize("prefix", ["- &key ", "- !!str ", "- &a !!str "])
+def test_an_anchored_or_tagged_key_in_a_list_keeps_its_siblings(prefix) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    out = _Scrub().text(prefix + "password: |\n    violet-harbor-93\n  clearance: 0.1mm\n  release: blocked\n- name: keep")
+    assert "violet-harbor-93" not in out
+    assert "  clearance: 0.1mm\n  release: blocked\n- name: keep" in out
