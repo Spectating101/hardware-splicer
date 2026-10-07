@@ -93,8 +93,15 @@ export function ComparisonViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [relative, kind]);
 
-  const baseEmbed = useKiCanvasEmbed(baseHost, ready, base?.status === 'ready' ? base.text || null : null, `${identity}|base`, kind, { controls: 'basic', faintFills: true });
-  const topEmbed = useKiCanvasEmbed(topHost, ready, candidate?.status === 'ready' ? candidate.text || null : null, `${identity}|candidate`, kind, { controls: 'basic', faintFills: true });
+  // If either revision cannot be shown, neither is: half a comparison would read as the whole of it.
+  const problem = useMemo(() => {
+    const parts = [base, candidate].filter((side): side is Side => Boolean(side && (side.status === 'missing' || side.status === 'error')));
+    return parts.length ? parts.map((side) => side.message).join(' ') : failed ? 'The bundled KiCanvas viewer failed to load.' : '';
+  }, [base, candidate, failed]);
+  const baseText = !problem && base?.status === 'ready' ? base.text || null : null;
+  const candidateText = !problem && candidate?.status === 'ready' ? candidate.text || null : null;
+  const baseEmbed = useKiCanvasEmbed(baseHost, ready, baseText, `${identity}|base`, kind, { controls: 'basic', faintFills: true });
+  const topEmbed = useKiCanvasEmbed(topHost, ready, candidateText, `${identity}|candidate`, kind, { controls: 'basic', faintFills: true });
 
   // Whichever viewer is the one the person can touch leads; the other follows it every frame.
   const leader = mode === 'before' ? baseEmbed : topEmbed;
@@ -129,10 +136,6 @@ export function ComparisonViewer({
     if (event.key === 'ArrowRight') { event.preventDefault(); setPosition((value) => Math.min(98, value + 3)); }
   };
 
-  const problem = useMemo(() => {
-    const parts = [base, candidate].filter((side): side is Side => Boolean(side && (side.status === 'missing' || side.status === 'error')));
-    return parts.length ? parts.map((side) => side.message).join(' ') : failed ? 'The bundled KiCanvas viewer failed to load.' : '';
-  }, [base, candidate, failed]);
   const waiting = !problem && (!base || !candidate || base.status === 'loading' || candidate.status === 'loading' || !baseEmbed || !topEmbed);
 
   const kindButton = (value: Kind, label: string) => (

@@ -198,14 +198,22 @@ export function useKiCanvasEmbed(
     if (!host || !ready || !text) { setLive(null); return; }
     let embed: HTMLElement | null = null;
     let stopFit: (() => void) | undefined;
+    // This run of the effect is over once it is cleaned up; nothing it started may report afterwards. A viewer that was
+    // replaced before it finished loading still fires `load` later, and must not mark itself live in place of the new one.
+    let cancelled = false;
+    let settle: number | undefined;
     const mount = () => {
+      if (cancelled) return;
       const created = document.createElement('kicanvas-embed');
       embed = created;
       created.dataset.artifact = identity;
       created.addEventListener('kicanvas:load', () => { created.dataset.loaded = '1'; });
       if (kind === 'pcb' && faintFills) applyFillModeAfterLoad(created, () => 'faint');
       // KiCanvas reports `load` more than once; the viewer counts as live after the first, with a short settle.
-      created.addEventListener('kicanvas:load', () => window.setTimeout(() => { if (created.isConnected) setLive({ identity, embed: created }); }, 250), { once: true });
+      created.addEventListener('kicanvas:load', () => {
+        if (cancelled) return;
+        settle = window.setTimeout(() => { if (!cancelled && created.isConnected && !created.hasAttribute('data-retired')) setLive({ identity, embed: created }); }, 250);
+      }, { once: true });
       created.setAttribute('controls', controls);
       created.setAttribute('controlslist', 'nodownload nooverlay');
       const source = document.createElement('kicanvas-source');
@@ -220,7 +228,9 @@ export function useKiCanvasEmbed(
     const switching = Boolean(host.querySelector('kicanvas-embed'));
     const timer = window.setTimeout(mount, switching ? SWITCH_SETTLE_MS : 0);
     return () => {
+      cancelled = true;
       window.clearTimeout(timer);
+      window.clearTimeout(settle);
       stopFit?.();
       setLive(null);
       if (!embed) return;
