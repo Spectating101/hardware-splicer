@@ -120,3 +120,41 @@ test('a revision with no retained file says so instead of showing something else
   await expect(page.getByRole('alert').filter({ hasText: "Revision 5's schematic was not retained" })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-testid="comparison-viewer"] kicanvas-embed:not([data-retired])')).toHaveCount(0);
 });
+
+test('a viewer that was replaced before it finished loading never takes the place of the one that replaced it', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(String(error)));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(COMPARE);
+  await openMode(page, 'Swipe');
+
+  // Ask for the board, then change your mind while it is still loading. Its load event arrives after the schematic is
+  // already on screen, and must not mark itself live in the schematic's place. A slow CPU stretches the board's load
+  // enough that this happens every time rather than only on a slow machine.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();
+  await page.waitForTimeout(260);
+  await page.getByRole('button', { name: 'Schematic', exact: true }).click();
+  await page.waitForTimeout(6000);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  await page.waitForTimeout(2500);
+
+  await expect(page.getByLabel('Loading the saved copies')).toHaveCount(0);
+  await expect(page.locator('[data-testid="comparison-viewer"] kicanvas-embed:not([data-retired])')).toHaveCount(2);
+  await expect(page.locator('[data-testid="comparison-viewer"] kicanvas-embed[data-retired]')).toHaveCount(0, { timeout: 15000 });
+
+  // And the two are still one view.
+  await page.evaluate(() => {
+    const top = Array.from(document.querySelectorAll('[data-testid="comparison-viewer"] kicanvas-embed:not([data-retired])'))[1];
+    const viewer = top.shadowRoot.querySelector('kc-schematic-app').viewer;
+    viewer.viewport.camera.zoom = viewer.viewport.camera.zoom * 2;
+    viewer.draw();
+  });
+  await expect.poll(() => page.evaluate(() => {
+    const [bottom, top] = Array.from(document.querySelectorAll('[data-testid="comparison-viewer"] kicanvas-embed:not([data-retired])'));
+    const zoom = (embed) => embed.shadowRoot.querySelector('kc-schematic-app').viewer.viewport.camera.zoom;
+    return Math.abs(zoom(bottom) - zoom(top)) / zoom(top) < 0.01;
+  }), { timeout: 8000 }).toBe(true);
+  expect(errors, `uncaught browser errors: ${errors.join(' | ')}`).toEqual([]);
+});
