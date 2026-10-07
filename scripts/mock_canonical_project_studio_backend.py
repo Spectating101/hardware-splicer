@@ -636,6 +636,7 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
     proposals = [{
         "candidate_id": c["candidate_id"], "kind": c["kind"], "created_by": c["created_by"], "created_by_verified": c["verified"],
         "note": c.get("note") or None, "changes": c["diff"].get("summary"),
+        "operations_total": len(c.get("applied", [])), "operations_truncated": False,
         "operations": [{"op": a.get("op"), "target": (a.get("target") or {}).get("ref"), "detail": a.get("detail")} for a in c.get("applied", [])],
         "checks": {"ran": False, "engine": "kicad-cli", "new_violations": None, "reason": "kicad-cli is not available"},
         "decision": {"status": c["review_state"]["status"], "decided_by": c["review_state"]["decided_by"], "note": c["review_state"]["note"],
@@ -645,11 +646,12 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
         "schema_version": "hardware_splicer.review_packet.v1",
         "project": {"project_id": project_id, "name": "Outsider DUT fixture", "revision": rev, "saved_at": None, "snapshot_sha256": "sha256:" + "0" * 64},
         "retained_files": {"status": "retained", "retention_basis": "at_save", "files": files},
-        "findings": {"total": 0, "truncated": False, "by_category": {}, "by_provenance": {}, "attested": 0, "items": []},
-        "proposals": {"total": len(proposals), "truncated": False, "pending": 0, "accepted": 0, "rejected": 0, "items": proposals},
-        "discussion": {"total": 0, "truncated": False, "open": 0, "resolved": 0, "threads": []},
+        "findings": {"total": 0, "listed": 0, "truncated": False, "by_category": {}, "by_provenance": {}, "attested": 0, "items": []},
+        "proposals": {"total": len(proposals), "listed": len(proposals), "truncated": False, "pending": 0, "accepted": 0, "rejected": 0, "items": proposals},
+        "discussion": {"status": "listed", "total": 0, "listed": 0, "truncated": False, "open": 0, "resolved": 0, "threads": []},
         "not_established": ["That the design has been fabricated, assembled, powered or physically measured."],
         "authority": "This packet does not open, record or imply fabrication, power-on or release authority.",
+        "redactions": {"count": 0, "by_kind": {}, "note": "fixture"},
         "integrity": {"algorithm": "fixture", "packet_sha256": "sha256:" + "1" * 64},
     }
     if format == "markdown" and _render_packet is not None:
