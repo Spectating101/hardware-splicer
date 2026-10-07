@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   AlertTriangle,
   ArrowRight,
+  FileDown,
   Check,
   ChevronRight,
   FileCheck2,
@@ -372,6 +373,17 @@ export default function EvidenceOverviewPage() {
               <Button size="sm" variant="outline" onClick={loadProjects} disabled={busy !== null} className="h-8 border-stone-300 bg-white text-stone-700">
                 {busy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
               </Button>
+              {projectId && revision ? (
+                <a
+                  href={`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/review-packet?revision=${revision}&format=markdown`}
+                  download
+                  title="Download what this revision holds, with its file hashes and how each finding was established. It reports only; it approves nothing."
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-stone-300 bg-white px-3 text-xs font-medium text-stone-700 hover:bg-stone-50"
+                  data-testid="review-packet-link"
+                >
+                  <FileDown className="h-3.5 w-3.5" aria-hidden="true" />Review packet
+                </a>
+              ) : null}
               <Link href={`/engineering/visual?project=${encodeURIComponent(projectId)}&mode=decide`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-stone-900 px-3 text-xs font-medium text-white hover:bg-stone-800">
                 Compare <ArrowRight className="h-3.5 w-3.5" />
               </Link>
