@@ -298,7 +298,7 @@ def render_review_packet_markdown(packet: Mapping[str, Any]) -> str:
         ]
         for item in findings["items"]:
             prov = item["provenance"]
-            lines.append(f"| {_cell(item['category'])} | {_cell(item['object_id'])} | {_cell(item['text'])} | {_cell(prov['kind'])}: {_cell(prov['basis'])} | {'yes' if prov['attested'] else 'no'} |")
+            lines.append(f"| {_cell(item['category'])} | {_cell(item['object_id']) or 'the design as a whole'} | {_cell(item['text'])} | {_cell(prov['kind'])}: {_cell(prov['basis'])} | {'yes' if prov['attested'] else 'no'} |")
         if findings["truncated"]:
             lines.append(f"\nOnly the first {MAX_FINDINGS} of {findings['total']} findings are listed.")
         lines.append("")
@@ -309,15 +309,18 @@ def render_review_packet_markdown(packet: Mapping[str, Any]) -> str:
         decision = item["decision"]
         who = f"{item['created_by']}{' (identity confirmed)' if item['created_by_verified'] else ' (name as typed)'}"
         status = decision["status"] + (" and out of date" if decision["out_of_date"] else "")
-        lines += [f"### {item['candidate_id']} · {item['kind']} · {status}", "", f"Proposed by {who}." + (f" Reason: {item['note']}" if item["note"] else "")]
+        lines += [f"### {item['candidate_id']} · {item['kind']} · {status}", "", f"Proposed by {who}." + (f" Reason: {item['note']}" if item["note"] else ""), ""]
         for op in item["operations"]:
             lines.append(f"- {op['op']} {op['target'] or ''} {('· ' + op['detail']) if op['detail'] else ''}".rstrip())
         checks = item["checks"]
+        lines.append("")
         lines.append(f"Design-rule check: {'ran, ' + str(checks['new_violations']) + ' new violations' if checks['ran'] else 'did not run' + (' (' + str(checks['reason']) + ')' if checks['reason'] else '')}. Reported for the reviewer; it is not a decision.")
         if decision["status"] in {"accepted", "rejected"}:
+            lines.append("")
             lines.append(f"{decision['status'].capitalize()} by {decision['decided_by']}" + (f" as revision {decision['accepted_revision']}" if decision["accepted_revision"] else "") + (f". “{decision['note']}”" if decision["note"] else "."))
         lines.append("")
-    lines += [f"## Discussion ({discussion['total']} threads: {discussion['open']} open, {discussion['resolved']} resolved)", ""]
+    noun = "thread" if discussion["total"] == 1 else "threads"
+    lines += [f"## Discussion ({discussion['total']} {noun}: {discussion['open']} open, {discussion['resolved']} resolved)", ""]
     if not discussion["threads"]:
         lines += ["None.", ""]
     for thread in discussion["threads"]:
