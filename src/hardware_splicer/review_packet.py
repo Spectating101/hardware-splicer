@@ -87,7 +87,31 @@ _ASSIGNMENT = re.compile(
 )
 
 
-_YAML_VALUE = re.compile(r"(?:[|>][-+0-9]*|#[^\n]*)?[ \t]*\n(?:[ \t]+\S[^\n]*(?:\n|\Z))+")
+_YAML_INTRO = re.compile(r"(?:[|>][-+0-9]*|#[^\n]*)?[ \t]*(?:\n|\Z)")
+
+
+def _yaml_value_end(text: str, start: int, name_start: int) -> int | None:
+    """Where a YAML value that is a comment, a | or > block, or empty with indented lines after it, ends; None if it is not
+    one of those. The value is the lines indented deeper than the key: the first line at the key's indentation or less is a
+    sibling or a parent, and is left alone."""
+
+    intro = _YAML_INTRO.match(text, start)
+    if not intro:
+        return None
+    line_start = text.rfind("\n", 0, name_start) + 1
+    key_indent = len(text[line_start:name_start]) - len(text[line_start:name_start].lstrip(" \t"))
+    position = intro.end()
+    end: int | None = None
+    while position < len(text):
+        newline = text.find("\n", position)
+        line_end = len(text) if newline == -1 else newline + 1
+        line = text[position:line_end]
+        if line.strip():
+            if len(line) - len(line.lstrip(" \t")) <= key_indent:
+                break
+            end = line_end
+        position = line_end
+    return end
 
 
 def _looks_like_a_credential_name(name: str) -> bool:
@@ -149,12 +173,11 @@ class _Scrub:
                 pieces.append(match.group("name") + "[redacted credential]")
                 position = match.end()
                 hidden += 1
-                continue_from = match.end("name")
-                block = _YAML_VALUE.match(text, continue_from)
-                if block:
-                    # YAML: the value is a comment, a | or > block, or sits on the indented lines that follow.
-                    position = block.end()
-                    if text[block.end() - 1 : block.end()] == "\n":
+                block_end = _yaml_value_end(text, match.end("name"), match.start("name"))
+                if block_end is not None:
+                    # YAML: the value is a comment, a | or > block, or sits on the lines indented under the key.
+                    position = max(position, block_end)
+                    if text[block_end - 1 : block_end] == "\n":
                         pieces.append("\n")
             else:
                 # Not a credential. Move on from the end of the *name*, so an assignment that sits inside this one's value
@@ -166,6 +189,28 @@ class _Scrub:
         if hidden:
             self.counts["credential"] = self.counts.get("credential", 0) + hidden
         return text if len(text) <= limit else text[: limit - 1] + "…"
+
+    def label(self, value: Any, limit: int = 200) -> str | None:
+        """A name, identifier or path someone chose (a project name, a design object id, a file name). In the version for
+        sharing these are left out too: a name is as free to hold a secret as a comment is."""
+
+        if value is None or str(value) == "":
+            return None
+        if not self.include_free_text:
+            self.omitted += 1
+            return OMITTED
+        return self.text(value, limit)
+
+    def person(self, value: Any, confirmed: bool, limit: int = 120) -> str | None:
+        """Who someone was. A name the server confirmed (an operator from its own list) is kept in every version; a name that
+        was only typed is left out of the version for sharing."""
+
+        if value is None or str(value) == "":
+            return None
+        if not self.include_free_text and not confirmed:
+            self.omitted += 1
+            return OMITTED
+        return self.text(value, limit)
 
     def optional(self, value: Any, limit: int = MAX_TEXT) -> str | None:
         return self.text(value, limit) or None
@@ -201,7 +246,7 @@ def _artifacts(store: ProjectStore, project_id: str, revision: int, scrub: _Scru
     for kind in ARTIFACT_KINDS:
         entry = pin.get("artifacts", {}).get(kind) if isinstance(pin.get("artifacts"), Mapping) else None
         files[kind] = (
-            {"relative": scrub.text(entry.get("relative"), 300), "sha256": entry.get("sha256"), "size_bytes": entry.get("size_bytes")}
+            {"relative": scrub.label(entry.get("relative"), 300), "sha256": entry.get("sha256"), "size_bytes": entry.get("size_bytes")}
             if isinstance(entry, Mapping)
             else None
         )
@@ -217,12 +262,12 @@ def _findings(snapshot: Mapping[str, Any], revision: int, scrub: _Scrub) -> dict
             {
                 "finding_id": row.get("finding_id"),
                 "category": scrub.text(row.get("category"), 80),
-                "object_id": scrub.optional(row.get("object_id"), 200),
+                "object_id": scrub.label(row.get("object_id")),
                 "text": scrub.free(row.get("text")) or "",
                 "provenance": {
                     "kind": provenance.get("kind"),
                     "basis": scrub.free(provenance.get("basis")) or "",
-                    "source_ref": scrub.optional(provenance.get("source_ref"), 200),
+                    "source_ref": scrub.label(provenance.get("source_ref")),
                     "authority_ceiling": provenance.get("authority_ceiling"),
                     "attested": bool(provenance.get("attested")),
                 },
@@ -333,7 +378,7 @@ def _discussion(store: ProjectStore, threads: ProjectThreadStore, project_id: st
                     "seq": event.get("seq"),
                     "type": event.get("type"),
                     "created_at": event.get("created_at"),
-                    "author": {"kind": author.get("kind"), "id": scrub.text(author.get("id"), 120)},
+                    "author": {"kind": author.get("kind"), "id": scrub.person(author.get("id"), bool(event.get("author_verified")))},
                     # Whether the server confirmed who this was, as against a name someone typed.
                     "author_verified": bool(event.get("author_verified")),
                     "body": scrub.free(event.get("body")),
@@ -347,8 +392,8 @@ def _discussion(store: ProjectStore, threads: ProjectThreadStore, project_id: st
                 "status": full.get("status"),
                 "anchor": {
                     "revision": anchor.get("revision"),
-                    "object_id": scrub.optional(anchor.get("object_id"), 200),
-                    "artifact": {"relative": scrub.text(artifact.get("relative"), 300), "kind": artifact.get("kind")} if artifact else None,
+                    "object_id": scrub.label(anchor.get("object_id")),
+                    "artifact": {"relative": scrub.label(artifact.get("relative"), 300), "kind": artifact.get("kind")} if artifact else None,
                     "position": anchor.get("position"),
                 },
                 "about_this_revision": anchor.get("revision") == revision,
@@ -382,14 +427,14 @@ def _proposals(store: ProjectStore, reviews: ProjectReviewStore, project_id: str
             {
                 "candidate_id": row.get("candidate_id"),
                 "kind": row.get("kind"),
-                "created_by": scrub.text(row.get("created_by"), 120),
+                "created_by": scrub.person(row.get("created_by"), bool(row.get("verified"))),
                 "created_by_verified": bool(row.get("verified")),
                 "note": scrub.free(row.get("note")),
                 "changes": diff.get("summary"),
                 "operations_total": len(applied),
                 "operations_truncated": len(applied) > MAX_OPERATIONS,
                 "operations": [
-                    {"op": scrub.text(item.get("op"), 60), "target": scrub.optional((item.get("target") or {}).get("ref") or (item.get("target") or {}).get("uuid"), 120), "detail": scrub.optional(item.get("detail"), 200)}
+                    {"op": scrub.text(item.get("op"), 60), "target": scrub.label((item.get("target") or {}).get("ref") or (item.get("target") or {}).get("uuid"), 120), "detail": scrub.free(item.get("detail"), 200)}
                     for item in applied[:MAX_OPERATIONS]
                 ],
                 "checks": {
@@ -453,7 +498,7 @@ def build_review_packet(
         "schema_version": PACKET_SCHEMA,
         "project": {
             "project_id": safe_id,
-            "name": scrub.text(snapshot.get("projectName") or snapshot.get("name") or safe_id, 200),
+            "name": scrub.label(snapshot.get("projectName") or snapshot.get("name") or safe_id, 200) or safe_id,
             "revision": resolved,
             "saved_at": envelope.get("saved_at"),
             "snapshot_sha256": _sha256(_canonical(snapshot)),

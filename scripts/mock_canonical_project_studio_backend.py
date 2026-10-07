@@ -616,6 +616,8 @@ def revision_artifact_file(project_id: str, revision: int, kind: str) -> Respons
 
 
 _render_packet = _load_hs_attr("review_packet", "render_review_packet_markdown")
+_packet_integrity = _load_hs_attr("review_packet", "_integrity")
+_OMITTED = "[text omitted]"
 
 
 @app.get("/v1/projects/{project_id}/review-packet")
@@ -654,6 +656,29 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
         "redactions": {"count": 0, "by_kind": {}, "note": "fixture"},
         "integrity": {"algorithm": "fixture", "packet_sha256": "sha256:" + "1" * 64},
     }
+    packet["free_text"] = {"included": include_text, "omitted": 0, "note": "Comments, notes and finding text are included (credential-like strings and absolute paths removed on a best-effort basis)." if include_text else "Comments, notes and finding text are left out. Who did what and when, the file hashes and the counts are all here."}
+    if not include_text:
+        # The same policy as the real packet: names, notes, paths and values are left out; so is any name only typed.
+        omitted = 0
+        packet["project"]["name"] = _OMITTED
+        for kind in ("schematic", "pcb"):
+            packet["retained_files"]["files"][kind]["relative"] = _OMITTED
+            omitted += 1
+        for item in packet["proposals"]["items"]:
+            for key in ("note",):
+                if item[key]:
+                    item[key] = _OMITTED; omitted += 1
+            if not item["created_by_verified"]:
+                item["created_by"] = _OMITTED; omitted += 1
+            if item["decision"]["note"]:
+                item["decision"]["note"] = _OMITTED; omitted += 1
+            for op in item["operations"]:
+                op["target"] = _OMITTED if op["target"] else None
+                op["detail"] = _OMITTED if op["detail"] else None
+                omitted += 2
+        packet["free_text"]["omitted"] = omitted
+    if _packet_integrity is not None:
+        packet["integrity"] = _packet_integrity(packet)
     if format == "markdown" and _render_packet is not None:
         return Response(_render_packet(packet).encode("utf-8"), media_type="text/markdown; charset=utf-8",
                         headers={"Content-Disposition": f'attachment; filename="{project_id}-r{rev}-review-packet{"" if include_text else "-no-text"}.md"'})

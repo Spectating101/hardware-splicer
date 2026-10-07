@@ -765,8 +765,9 @@ def test_the_version_for_sharing_carries_no_free_text_at_all(world) -> None:
     # What is not prose is all still there: who, what, when, the hashes and the counts.
     assert packet["retained_files"]["files"]["schematic"]["sha256"].startswith("sha256:")
     assert packet["proposals"]["items"][0]["decision"]["decided_by"] == "alice"
-    assert packet["proposals"]["items"][0]["created_by"] == "Bob"
-    assert packet["discussion"]["threads"][0]["events"][0]["author"]["id"] == "Bob"
+    # A name that was only typed could hold anything, so the version for sharing leaves it out; confirmed operators stay.
+    assert packet["proposals"]["items"][0]["created_by"] == "[text omitted]"
+    assert packet["discussion"]["threads"][0]["events"][0]["author"]["id"] == "[text omitted]"
     assert packet["discussion"]["threads"][0]["events"][0]["body"] == "[text omitted]"
     assert packet["findings"]["total"] > 0 and packet["findings"]["items"][0]["text"] == "[text omitted]"
     assert verify_review_packet(packet)
@@ -809,3 +810,76 @@ def test_what_is_kept_around_a_removed_secret_still_reads_properly() -> None:
     # Bare values are removed up to the next space, so a secret that contains punctuation is not left half visible. The cost is
     # that fields glued to it by ; , or & go with it, and the packet's count says something was removed.
     assert scrub.text("api_key=abc123;clearance=0.1mm") == "api_key=[redacted credential]"
+
+
+MARK = "violet-harbor-93"
+
+
+def _marked_world(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A project in which every field a person can write holds a marker that must never reach a shared packet."""
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    monkeypatch.delenv("HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR", raising=False)
+    monkeypatch.delenv("HARDWARE_SPLICER_BUILD_FILE_ROOTS", raising=False)
+    monkeypatch.delenv("HARDWARE_SPLICER_KICAD_CLI", raising=False)
+    monkeypatch.setenv("PATH", "/var/empty-hs-packet-path")
+    monkeypatch.setenv("HARDWARE_SPLICER_OPERATOR_TOKENS", json.dumps({hash_operator_token(TOKEN): {"id": "alice", "kind": "human"}}))
+    build = tmp_path / "build"
+    (build / "build_compilation").mkdir(parents=True)
+    shutil.copy(REF / "spi_flash_adapter_v1.kicad_sch", build / "build_compilation" / f"{MARK}.kicad_sch")
+    shutil.copy(REF / "spi_flash_adapter_v1.kicad_pcb", build / "build_compilation" / f"{MARK}.kicad_pcb")
+    snapshot = _snapshot(build)
+    snapshot["projectName"] = f"Name {MARK}"
+    snapshot["engineeringAiSessions"][0]["actions"][0]["tool_result"]["error"]["message"] = f"Failed because {MARK}"
+    api = TestClient(create_product_app(ProjectStore(tmp_path / "store")))
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": snapshot, "expected_revision": 0}).status_code == 200
+    created = api.post(
+        "/v1/projects/robot/candidates",
+        json={"base_revision": 1, "kind": "schematic", "author": f"Typed {MARK}", "note": f"Note {MARK}",
+              "ops": [{"op": "set_property", "ref": "U1", "name": "Value", "value": f"Value {MARK}"}]},
+    )
+    assert created.status_code == 201, created.text
+    cid = created.json()["candidate"]["candidate_id"]
+    assert api.post(f"/v1/projects/robot/candidates/{cid}/decision", json={"decision": "rejected", "note": f"Why {MARK}"}, headers={"X-HS-Operator-Token": TOKEN}).status_code == 200
+    opened = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": f"obj-{MARK}", "artifact": {"relative": f"build_compilation/{MARK}.kicad_sch", "kind": "schematic"}}, "author": {"kind": "human", "id": f"typed-{MARK}"}, "body": f"Body {MARK}"})
+    assert opened.status_code == 201, opened.text
+    assert api.post(f"/v1/projects/robot/threads/{opened.json()['thread']['thread_id']}/events", json={"type": "comment", "body": f"Reply {MARK}", "author": {"kind": "human", "id": "alice"}}, headers={"X-HS-Operator-Token": TOKEN}).status_code in (200, 201)
+    return api
+
+
+def test_the_shared_version_holds_no_user_written_text_in_any_field(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    api = _marked_world(tmp_path, monkeypatch)
+
+    # Sanity: the marker really is in the project, and the full packet shows it. Otherwise this proves nothing.
+    full = api.get("/v1/projects/robot/review-packet").text + api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert full.count(MARK) >= 6
+
+    shared_json = api.get("/v1/projects/robot/review-packet", params={"include_text": "false"})
+    shared_md = api.get("/v1/projects/robot/review-packet", params={"include_text": "false", "format": "markdown"})
+    for response in (shared_json, shared_md):
+        assert MARK not in response.text
+        assert MARK not in response.headers.get("content-disposition", "")
+    packet = shared_json.json()["packet"]
+    assert packet["free_text"]["included"] is False and packet["free_text"]["omitted"] >= 10
+    assert verify_review_packet(packet)
+
+    # What a reviewer can still rely on: the hashes, the counts, the system's own words, and identities the server confirmed.
+    assert packet["retained_files"]["files"]["schematic"]["sha256"].startswith("sha256:")
+    assert packet["findings"]["total"] > 0 and packet["findings"]["items"][0]["provenance"]["kind"] == "deterministic"
+    proposal = packet["proposals"]["items"][0]
+    assert proposal["decision"]["decided_by"] == "alice" and proposal["decision"]["status"] == "rejected"
+    assert proposal["created_by"] == "[text omitted]" and proposal["created_by_verified"] is False
+    assert proposal["operations"][0]["op"] == "set_property"
+    events = packet["discussion"]["threads"][0]["events"]
+    assert events[0]["author"]["id"] == "[text omitted]" and events[0]["author_verified"] is False
+    assert events[1]["author"]["id"] == "alice" and events[1]["author_verified"] is True
+
+
+def test_yaml_siblings_of_a_removed_secret_are_kept() -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    nested = "config:\n  password: |\n    violet-harbor-93\n  clearance: 0.1mm\n  release: blocked\nnext: ok"
+    assert scrub.text(nested) == "config:\n  password: [redacted credential]\n  clearance: 0.1mm\n  release: blocked\nnext: ok"
+    assert scrub.text("db:\n  password:\n    violet-harbor-93\n  host: example\n") == "db:\n  password:\n    [redacted credential]\n  host: example\n"
+    assert scrub.text("password: # production login\n  violet-harbor-93\nuser: bob") == "password: [redacted credential]\nuser: bob"

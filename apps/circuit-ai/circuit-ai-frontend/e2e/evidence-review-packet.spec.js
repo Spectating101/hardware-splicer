@@ -52,3 +52,32 @@ test('the shareable version of the packet is offered next to it and carries no c
   await expect(link).toHaveAttribute('title', /no comments, notes or finding text/);
   expect(await link.getAttribute('href')).toContain('include_text=false');
 });
+
+test('the version without comments leaves out what people wrote, in both forms, and the full version still has it', async ({ page }) => {
+  const secret = `vendor login is violet-harbor-${Date.now()}`;
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await expect(page.getByText('Rev 6', { exact: true })).toBeVisible();
+  // A proposal whose reason holds something that should not be shared.
+  const created = await page.request.post(`${APP_URL}/api/proxy/engineering/projects/outsider-fixture/candidates`, {
+    data: { base_revision: 6, kind: 'schematic', author: 'Bob', note: secret, ops: [{ op: 'set_property', ref: 'U1', name: 'Value', value: 'violet-harbor-value' }] },
+  });
+  expect(created.ok()).toBe(true);
+
+  const url = (extra) => `${APP_URL}/api/proxy/engineering/projects/outsider-fixture/review-packet?revision=6${extra}`;
+  const full = await (await page.request.get(url('&format=markdown'))).text();
+  expect(full).toContain(secret);
+
+  const shared = await page.request.get(url('&format=markdown&include_text=false'));
+  expect(shared.headers()['content-disposition']).toContain('-no-text.md');
+  const sharedText = await shared.text();
+  const sharedJson = JSON.stringify(await (await page.request.get(url('&include_text=false'))).json());
+  for (const body of [sharedText, sharedJson]) {
+    expect(body).not.toContain('violet-harbor');
+    expect(body).not.toContain('vendor login');
+  }
+  expect(sharedText).toContain('are left out');
+  // What is not prose is still there: the proposal exists and the files are named by hash.
+  expect(sharedText).toMatch(/sha256:[0-9a-f]{64}/);
+  expect(sharedText).toContain('Proposals based on this revision (');
+});
