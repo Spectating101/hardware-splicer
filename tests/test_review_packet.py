@@ -921,6 +921,10 @@ def test_the_shared_version_does_not_carry_the_project_id_either(tmp_path: Path,
         "password:\r\n  violet-harbor-93\r\nnext: ok",
         "password: |\n  violet-harbor-93",
         "password: |\r\n  violet-harbor-93",
+        "password: |\r  violet-harbor-93\rnext: ok\r",
+        "password: # production violet-harbor-93\nnext: ok",
+        "password: | # prod\r\n  violet-harbor-93\r\nnext: ok",
+        "password: |\n  violet-harbor-93\r\n  more\nnext: ok",
     ],
 )
 def test_yaml_secrets_are_removed_whatever_the_line_endings(written) -> None:
@@ -931,3 +935,11 @@ def test_yaml_secrets_are_removed_whatever_the_line_endings(written) -> None:
     if "next: ok" in written:
         assert "next: ok" in out
         assert "password: [redacted credential]" in out or "password:\r\n" in out or "password:\n" in out
+
+
+def test_what_follows_a_yaml_secret_keeps_its_own_line_ending() -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    assert _Scrub().text("password: |\r  a-secret-1\rnext: ok\r") == "password: [redacted credential]\rnext: ok\r"
+    assert _Scrub().text("password: | # prod\r\n  a-secret-1\r\nnext: ok") == "password: [redacted credential]\r\nnext: ok"
+    assert _Scrub().text("password: # note a-secret-1\nnext: ok") == "password: [redacted credential]\nnext: ok"

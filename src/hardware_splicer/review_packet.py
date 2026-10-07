@@ -87,30 +87,36 @@ _ASSIGNMENT = re.compile(
 )
 
 
-_YAML_INTRO = re.compile(r"(?:[|>][-+0-9]*|#[^\r\n]*)?[ \t]*(?:\r?\n|\Z)")
+_BREAK = r"(?:\r\n|\r|\n)"
+# What can follow a credential key in YAML before its value: a | or > block indicator, a trailing comment, then the line end.
+_YAML_INTRO = re.compile(r"(?:[|>][-+0-9]*)?[ \t]*(?:#[^\r\n]*)?(?:" + _BREAK + r"|\Z)")
+_LINE = re.compile(r"[^\r\n]*(?:" + _BREAK + r"|\Z)")
 
 
 def _yaml_value_end(text: str, start: int, name_start: int) -> int | None:
-    """Where a YAML value that is a comment, a | or > block, or empty with indented lines after it, ends; None if it is not
-    one of those. The value is the lines indented deeper than the key: the first line at the key's indentation or less is a
-    sibling or a parent, and is left alone."""
+    """Where a YAML value that is a comment, a | or > block (with or without a comment), or empty with indented lines after
+    it, ends; None if the key is followed by an ordinary value. The value is the rest of the key's line and the lines
+    indented deeper than the key: the first line at the key's indentation or less is a sibling or a parent and is left alone.
+    Line ends may be LF, CRLF or a lone CR."""
 
     intro = _YAML_INTRO.match(text, start)
     if not intro:
         return None
-    line_start = text.rfind("\n", 0, name_start) + 1
-    key_indent = len(text[line_start:name_start]) - len(text[line_start:name_start].lstrip(" \t"))
+    line_start = max(text.rfind("\n", 0, name_start), text.rfind("\r", 0, name_start)) + 1
+    before = text[line_start:name_start]
+    key_indent = len(before) - len(before.lstrip(" \t"))
+    end = intro.end()
     position = intro.end()
-    end: int | None = None
     while position < len(text):
-        newline = text.find("\n", position)
-        line_end = len(text) if newline == -1 else newline + 1
-        line = text[position:line_end]
-        if line.strip():
-            if len(line) - len(line.lstrip(" \t")) <= key_indent:
+        line = _LINE.match(text, position)
+        if line is None or line.end() == position:
+            break
+        content = line.group(0)
+        if content.strip():
+            if len(content) - len(content.lstrip(" \t")) <= key_indent:
                 break
-            end = line_end
-        position = line_end
+            end = line.end()
+        position = line.end()
     return end
 
 
@@ -174,11 +180,13 @@ class _Scrub:
                 position = match.end()
                 hidden += 1
                 block_end = _yaml_value_end(text, match.end("name"), match.start("name"))
-                if block_end is not None:
-                    # YAML: the value is a comment, a | or > block, or sits on the lines indented under the key.
-                    position = max(position, block_end)
-                    if text[block_end - 1 : block_end] == "\n":
-                        pieces.append("\r\n" if text[block_end - 2 : block_end] == "\r\n" else "\n")
+                if block_end is not None and block_end > position:
+                    # YAML: the value is a comment, a | or > block, or sits on the lines indented under the key. Its final
+                    # line break is kept, so what follows stays on its own line.
+                    position = block_end
+                    ending = re.search(_BREAK + r"\Z", text[:block_end])
+                    if ending:
+                        pieces.append(ending.group(0))
             else:
                 # Not a credential. Move on from the end of the *name*, so an assignment that sits inside this one's value
                 # (mode=ok;password=x, url=https://h/?token=x) is still looked at.
