@@ -61,7 +61,14 @@ _REDACTIONS: tuple[tuple[str, re.Pattern[str], str], ...] = (
     ("credential", re.compile(r"(?i)\b(?:bearer|basic)\s+[A-Za-z0-9._~+/=-]{8,}"), "[redacted credential]"),
     ("credential", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}"), "[redacted credential]"),
     ("credential", re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{8,}|\bgh[pousr]_[A-Za-z0-9]{16,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{10,}"), "[redacted credential]"),
-    ("credential", re.compile(r"(?i)\b(api[_-]?key|secret|token|passw(?:or)?d|credential|authorization)\b(\s*[:=]\s*)(?!\[redacted)\S+"), r"\1\2[redacted credential]"),
+    # A secret-like name (quoted or not, including client_secret, access_token, private_key...) and its value, whether the value is
+    # quoted (and may then hold spaces and escaped quotes) or a bare word.
+    ("credential", re.compile(r"""(?ix)
+        (?P<name>["']?\b[\w-]*(?:api[_-]?key|secret|token|passw(?:or)?d|passphrase|credential|authorization|private[_-]?key)[\w-]*\b["']?
+                 \s*[:=]\s*)
+        (?!\[redacted)
+        (?P<value>"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\S+)
+    """), r"\g<name>[redacted credential]"),
     ("path", re.compile(r"(?<![\w.:/-])(?:/(?:home|Users|root|tmp|var|etc|opt|mnt|srv|private|media)/[^\s\"'<>)]+|[A-Za-z]:\\[^\s\"'<>)]+)"), "[redacted path]"),
 )
 
@@ -73,7 +80,10 @@ class _Scrub:
         self.counts: dict[str, int] = {}
 
     def text(self, value: Any, limit: int = MAX_TEXT) -> str:
-        text = str(value if value is not None else "")
+        # Only the part that can survive the final clip is scanned, so the work does not grow with the size of the input. A
+        # secret that starts inside the kept part and runs past this window is still caught up to the window's end, and what
+        # lies beyond the final limit is never shown.
+        text = str(value if value is not None else "")[: limit * 4]
         for kind, pattern, replacement in _REDACTIONS:
             text, hits = pattern.subn(replacement, text)
             if hits:
@@ -153,50 +163,63 @@ def _findings(snapshot: Mapping[str, Any], revision: int, scrub: _Scrub) -> dict
     }
 
 
-def _discussion_size(store: ProjectStore, project_id: str) -> tuple[int, int] | None:
-    """How many threads and event files the project has, counted by name only and never read. None if it cannot be counted
-    safely (a symbolic link where there should not be one), in which case the discussion is not read."""
+# Counting stops here and says "more than", so the answer is the same however the filesystem happens to list names.
+THREAD_COUNT_CEILING = 1000
+EVENT_COUNT_CEILING = 20000
+
+
+def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | None:
+    """How many threads and event files the project has, counted by name only and never read. Each figure is exact or, past a
+    ceiling, absent with a `*_over` bound that does not depend on listing order. None if it cannot be counted safely (a
+    symbolic link where there should not be one), in which case the discussion is not read."""
 
     root = store.root / project_id / "threads"
-    if not os.path.isdir(root):
-        return 0, 0
     if os.path.islink(root):
         return None
-    threads = events = 0
+    if not os.path.isdir(root):
+        return {"threads": 0, "threads_over": None, "events": 0, "events_over": None}
+    names: list[str] = []
     try:
         with os.scandir(root) as entries:
             for entry in entries:
                 if entry.is_symlink():
                     return None
-                if not entry.is_dir(follow_symlinks=False):
-                    continue
-                threads += 1
-                folder = os.path.join(entry.path, "events")
-                if os.path.islink(folder):
-                    return None
-                if os.path.isdir(folder):
-                    with os.scandir(folder) as files:
-                        for event in files:
-                            if event.is_symlink():
-                                return None
-                            events += 1
-                            if events > READ_BUDGET_EVENTS * 10:
-                                return threads, events
-                if threads > READ_BUDGET_THREADS * 10:
-                    return threads, events
+                if entry.is_dir(follow_symlinks=False):
+                    names.append(entry.name)
+                    if len(names) > THREAD_COUNT_CEILING:
+                        # Past the ceiling the exact number is not needed, and which names were seen first is arbitrary.
+                        return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
+        if len(names) > READ_BUDGET_THREADS:
+            return {"threads": len(names), "threads_over": None, "events": None, "events_over": None}
+        events = 0
+        for name in sorted(names):
+            folder = os.path.join(root, name, "events")
+            if os.path.islink(folder):
+                return None
+            if not os.path.isdir(folder):
+                continue
+            with os.scandir(folder) as files:
+                for event in files:
+                    if event.is_symlink():
+                        return None
+                    events += 1
+                    if events > EVENT_COUNT_CEILING:
+                        return {"threads": len(names), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
     except OSError:
         return None
-    return threads, events
+    return {"threads": len(names), "threads_over": None, "events": events, "events_over": None}
 
 
 def _discussion(store: ProjectStore, threads: ProjectThreadStore, project_id: str, revision: int, scrub: _Scrub) -> dict[str, Any]:
     size = _discussion_size(store, project_id)
-    if size is None or size[0] > READ_BUDGET_THREADS or size[1] > READ_BUDGET_EVENTS:
+    if size is None or (size["threads"] or 0) > READ_BUDGET_THREADS or size["threads"] is None or size["events"] is None or size["events"] > READ_BUDGET_EVENTS:
         return {
             "status": "not_read",
             "reason": "unreadable" if size is None else "too large to include",
-            "total": size[0] if size else None,
-            "total_events": size[1] if size else None,
+            "total": size["threads"] if size else None,
+            "total_over": size["threads_over"] if size else None,
+            "total_events": size["events"] if size else None,
+            "total_events_over": size["events_over"] if size else None,
             "limits": {"threads": READ_BUDGET_THREADS, "events": READ_BUDGET_EVENTS},
             "open": None,
             "resolved": None,
@@ -382,6 +405,25 @@ def _shown(noun: str, listed: int, total: int) -> str:
     return "" if listed >= total else f" Showing {listed} of {total} {noun}; the rest are not in this packet."
 
 
+def _size_words(discussion: Mapping[str, Any]) -> str:
+    """How big the left-out discussion is, as exactly as it was counted, without implying more than was."""
+
+    if discussion.get("reason") == "unreadable":
+        return ""
+    limits = discussion["limits"]
+    if discussion["total"] is not None:
+        threads = f"{int(discussion['total'])} thread" + ("" if discussion["total"] == 1 else "s")
+    else:
+        threads = f"more than {int(discussion['total_over'])} threads"
+    if discussion["total_events"] is not None:
+        events = f"{int(discussion['total_events'])} events"
+    elif discussion["total_events_over"] is not None:
+        events = f"more than {int(discussion['total_events_over'])} events"
+    else:
+        events = "events not counted"
+    return f" ({threads}, {events}; this packet reads at most {int(limits['threads'])} threads and {int(limits['events'])} events)"
+
+
 def render_review_packet_markdown(packet: Mapping[str, Any]) -> str:
     """The same packet for a person to read. Everything in it is also in the JSON. All text people wrote is escaped, so
     nothing in a name, note or comment can pass for a section, a decision or a hash of this document."""
@@ -457,8 +499,7 @@ def render_review_packet_markdown(packet: Mapping[str, Any]) -> str:
         lines += [
             "## Discussion",
             "",
-            f"Not included: the discussion is {_md(discussion['reason'])}"
-            + (f" ({int(discussion['total'])} threads, {int(discussion['total_events'])} events; this packet reads at most {int(discussion['limits']['threads'])} threads and {int(discussion['limits']['events'])} events)." if discussion["total"] is not None else "."),
+            f"Not included: the discussion is {_md(discussion['reason'])}" + _size_words(discussion) + ".",
             "",
         ]
     else:

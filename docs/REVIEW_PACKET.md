@@ -33,7 +33,8 @@ power-on or release, and it says so in the packet itself.
   as the words they are. A project name or comment cannot start a heading, forge an "Accepted" decision, add a link, inject
   HTML or pose as the document's hash. The JSON carries the text as written (after redaction).
 - **Credentials and absolute paths are removed, best effort.** Bearer tokens, `sk-` and `ghp_` style keys, AWS and Slack key
-  ids, JWTs, private key blocks, `key=value` secrets, and absolute paths (`/home/…`, `/tmp/…`, `C:\…`) in free text are
+  ids, JWTs, private key blocks, secret-like names with their values (quoted or not, including JSON such as
+  `{"password": "…"}` and quoted passphrases with spaces), and absolute paths (`/home/…`, `/tmp/…`, `C:\…`) in free text are
   replaced with `[redacted credential]` or `[redacted path]` **before** the hash is taken. `redactions` says how many were
   removed and of what kind. A pattern list cannot catch everything: do not write secrets in comments and rely on this.
   Operator tokens are not stored in the project and never appear.
@@ -41,7 +42,8 @@ power-on or release, and it says so in the packet itself.
   many are shown: findings (1000), threads (100), entries per thread (50), operations per proposal (20) and proposals (100).
 - **Bounded reads.** The discussion store re-checks every event file on every read, so a very large discussion is not
   read. Threads and events are counted by name first, and if there are more than 100 threads or 2000 events the packet
-  says the discussion was left out, how large it was, and why.
+  says the discussion was left out, how large it was, and why. A count is exact, or it is a stated "more than N" that does
+  not depend on the order the filesystem lists names, so the same project always gives the same packet.
 
 ## API
 

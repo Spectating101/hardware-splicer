@@ -432,5 +432,92 @@ def test_a_discussion_too_large_to_read_is_counted_by_name_and_left_out_unread(w
     assert discussion["total"] == 1 and discussion["total_events"] == 7
     assert discussion["threads"] == []
     text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
-    assert "Not included: the discussion is too large to include" in text and "1 threads, 7 events" in text
+    assert "Not included: the discussion is too large to include (1 thread, 7 events;" in text
     assert verify_review_packet(packet)
+
+
+@pytest.mark.parametrize(
+    ("written", "gone"),
+    [
+        ('{"password": "hunter2", "api_key": "abcdefgh12345678"}', ["hunter2", "abcdefgh12345678"]),
+        ('password="correct horse battery staple"', ["correct horse", "battery staple"]),
+        ("passphrase: 'two words here'", ["two words here"]),
+        ('{"client_secret":"s3cr3t-value-123","access_token":"tok-abcdef0123456789"}', ["s3cr3t-value-123", "tok-abcdef0123456789"]),
+        ('db_password = "has \\"escaped\\" quotes and spaces"', ["escaped\\", "quotes and spaces"]),
+        ("PRIVATE_KEY=MIIEvgIBADANBgkq", ["MIIEvgIBADANBgkq"]),
+        ("Authorization: Bearer abcdefghijklmnop", ["abcdefghijklmnop"]),
+    ],
+)
+def test_common_ways_of_pasting_a_secret_are_all_removed(world, written, gone) -> None:
+    api, _store, _root = world
+    assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "a"}, "author": {"kind": "human", "id": "Bob"}, "body": written}).status_code == 201
+    both = api.get("/v1/projects/robot/review-packet").text + api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    for word in gone:
+        assert word not in both, word
+    assert api.get("/v1/projects/robot/review-packet").json()["packet"]["redactions"]["count"] >= 1
+
+
+def test_ordinary_words_that_merely_mention_secrets_are_left_alone(world) -> None:
+    api, _store, _root = world
+    sentence = "The token ring network and the password policy are described in section 4; the secret sauce is the key idea."
+    assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "a"}, "author": {"kind": "human", "id": "Bob"}, "body": sentence}).status_code == 201
+    packet = api.get("/v1/projects/robot/review-packet").json()["packet"]
+    assert packet["discussion"]["threads"][0]["events"][0]["body"] == sentence
+    assert packet["redactions"]["count"] == 0
+
+
+def test_the_size_of_a_left_out_discussion_does_not_depend_on_the_order_the_filesystem_lists_it(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import contextlib
+    import os as real_os
+
+    import hardware_splicer.review_packet as rp
+
+    api, _store, _root = world
+    # One big thread listed first or last, and a small one: the answer must be the same either way.
+    big = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "big"}, "author": {"kind": "human", "id": "Bob"}, "body": "x"}).json()["thread"]["thread_id"]
+    for index in range(5):
+        api.post(f"/v1/projects/robot/threads/{big}/events", json={"type": "comment", "body": f"c{index}", "author": {"kind": "human", "id": "Bob"}})
+    assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "small"}, "author": {"kind": "human", "id": "Bob"}, "body": "y"}).status_code == 201
+    monkeypatch.setattr(rp, "READ_BUDGET_EVENTS", 3)
+    monkeypatch.setattr(rp, "EVENT_COUNT_CEILING", 4)
+
+    forward = api.get("/v1/projects/robot/review-packet").json()["packet"]
+
+    real = real_os.scandir
+
+    @contextlib.contextmanager
+    def reversed_scandir(path):
+        with real(path) as entries:
+            listed = list(entries)
+        yield iter(reversed(listed))
+
+    monkeypatch.setattr(rp.os, "scandir", reversed_scandir)
+    backward = api.get("/v1/projects/robot/review-packet").json()["packet"]
+
+    assert forward["discussion"] == backward["discussion"]
+    assert forward["integrity"]["packet_sha256"] == backward["integrity"]["packet_sha256"]
+    # Past the ceiling the packet says "more than", not a number that happened to be reached.
+    assert forward["discussion"]["total_events"] is None and forward["discussion"]["total_events_over"] == 4
+    assert forward["discussion"]["total"] == 2
+    text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert "more than 4 events" in text and "2 threads" in text
+
+
+def test_redaction_cost_does_not_grow_with_the_size_of_hostile_input() -> None:
+    import time
+
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    started = time.perf_counter()
+    for hostile in (
+        'password="' * 200_000,
+        "token=" * 400_000,
+        "Bearer " + "A" * 2_000_000,
+        "\\" * 2_000_000,
+        "/home/" + "a/" * 1_000_000,
+        'secret: "' + 'x\\"' * 500_000,
+    ):
+        out = scrub.text(hostile)
+        assert len(out) <= 500
+    assert time.perf_counter() - started < 2.0
