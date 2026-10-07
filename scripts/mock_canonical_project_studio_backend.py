@@ -615,6 +615,49 @@ def revision_artifact_file(project_id: str, revision: int, kind: str) -> Respons
     return Response(text.encode("utf-8"), media_type="text/plain; charset=utf-8")
 
 
+_render_packet = _load_hs_attr("review_packet", "render_review_packet_markdown")
+
+
+@app.get("/v1/projects/{project_id}/review-packet")
+def review_packet(project_id: str, revision: int | None = None, format: str = "json") -> Response:
+    """A packet in the real shape, built from this fixture's data and rendered by the real Markdown renderer."""
+
+    _require_project(project_id)
+    if format not in {"json", "markdown"}:
+        raise _thread_error(422, "invalid_request", "format must be json or markdown")
+    rev = revision or state["revision"]
+    if rev not in (5, 6):
+        raise _thread_error(404, "not_found", f"Revision {rev} was not found.")
+    files = {}
+    for kind, name in (("schematic", "spi_flash_adapter_v1.kicad_sch"), ("pcb", "spi_flash_adapter_v1.kicad_pcb")):
+        text = (REFERENCE_DIR / name).read_text(encoding="utf-8", errors="replace")
+        data = (_fixture_base_text(kind, text) if rev == 5 else text).encode("utf-8")
+        files[kind] = {"relative": name, "sha256": "sha256:" + hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+    proposals = [{
+        "candidate_id": c["candidate_id"], "kind": c["kind"], "created_by": c["created_by"], "created_by_verified": c["verified"],
+        "note": c.get("note") or None, "changes": c["diff"].get("summary"),
+        "operations": [{"op": a.get("op"), "target": (a.get("target") or {}).get("ref"), "detail": a.get("detail")} for a in c.get("applied", [])],
+        "checks": {"ran": False, "engine": "kicad-cli", "new_violations": None, "reason": "kicad-cli is not available"},
+        "decision": {"status": c["review_state"]["status"], "decided_by": c["review_state"]["decided_by"], "note": c["review_state"]["note"],
+                     "accepted_revision": c["review_state"]["accepted_revision"], "out_of_date": False},
+    } for c in _candidates.values() if c["base_revision"] == rev]
+    packet = {
+        "schema_version": "hardware_splicer.review_packet.v1",
+        "project": {"project_id": project_id, "name": "Outsider DUT fixture", "revision": rev, "saved_at": None, "snapshot_sha256": "sha256:" + "0" * 64},
+        "retained_files": {"status": "retained", "retention_basis": "at_save", "files": files},
+        "findings": {"total": 0, "truncated": False, "by_category": {}, "by_provenance": {}, "attested": 0, "items": []},
+        "proposals": {"total": len(proposals), "truncated": False, "pending": 0, "accepted": 0, "rejected": 0, "items": proposals},
+        "discussion": {"total": 0, "truncated": False, "open": 0, "resolved": 0, "threads": []},
+        "not_established": ["That the design has been fabricated, assembled, powered or physically measured."],
+        "authority": "This packet does not open, record or imply fabrication, power-on or release authority.",
+        "integrity": {"algorithm": "fixture", "packet_sha256": "sha256:" + "1" * 64},
+    }
+    if format == "markdown" and _render_packet is not None:
+        return Response(_render_packet(packet).encode("utf-8"), media_type="text/markdown; charset=utf-8",
+                        headers={"Content-Disposition": f'attachment; filename="{project_id}-r{rev}-review-packet.md"'})
+    return Response(_json.dumps({"ok": True, "packet": packet}), media_type="application/json")
+
+
 @app.get("/v1/projects/{project_id}/revisions/{revision}/parts")
 def revision_parts(project_id: str, revision: int, enrich: bool = False) -> dict[str, Any]:
     _require_project(project_id)
