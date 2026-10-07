@@ -75,7 +75,9 @@ test('the version without comments leaves out what people wrote, in both forms, 
   for (const body of [sharedText, sharedJson]) {
     expect(body).not.toContain('violet-harbor');
     expect(body).not.toContain('vendor login');
+    expect(body).not.toContain('outsider-fixture');
   }
+  expect(shared.headers()['content-disposition']).toMatch(/filename="project-[0-9a-f]{12}-r6-/);
   expect(sharedText).toContain('are left out');
   // What is not prose is still there: the proposal exists and the files are named by hash.
   expect(sharedText).toMatch(/sha256:[0-9a-f]{64}/);

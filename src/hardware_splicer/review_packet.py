@@ -87,7 +87,7 @@ _ASSIGNMENT = re.compile(
 )
 
 
-_YAML_INTRO = re.compile(r"(?:[|>][-+0-9]*|#[^\n]*)?[ \t]*(?:\n|\Z)")
+_YAML_INTRO = re.compile(r"(?:[|>][-+0-9]*|#[^\r\n]*)?[ \t]*(?:\r?\n|\Z)")
 
 
 def _yaml_value_end(text: str, start: int, name_start: int) -> int | None:
@@ -178,7 +178,7 @@ class _Scrub:
                     # YAML: the value is a comment, a | or > block, or sits on the lines indented under the key.
                     position = max(position, block_end)
                     if text[block_end - 1 : block_end] == "\n":
-                        pieces.append("\n")
+                        pieces.append("\r\n" if text[block_end - 2 : block_end] == "\r\n" else "\n")
             else:
                 # Not a credential. Move on from the end of the *name*, so an assignment that sits inside this one's value
                 # (mode=ok;password=x, url=https://h/?token=x) is still looked at.
@@ -200,6 +200,16 @@ class _Scrub:
             self.omitted += 1
             return OMITTED
         return self.text(value, limit)
+
+    def identifier(self, value: str) -> str:
+        """The id someone chose for a project. The version for sharing carries a derived id instead: the same project always
+        gives the same one, it is safe in a file name, and it says nothing a reader can use (though a short, guessable id
+        could be confirmed by someone who already suspects it)."""
+
+        if self.include_free_text:
+            return value
+        self.omitted += 1
+        return "project-" + hashlib.sha256(value.encode("utf-8")).hexdigest()[:12]
 
     def person(self, value: Any, confirmed: bool, limit: int = 120) -> str | None:
         """Who someone was. A name the server confirmed (an operator from its own list) is kept in every version; a name that
@@ -497,7 +507,7 @@ def build_review_packet(
     packet: dict[str, Any] = {
         "schema_version": PACKET_SCHEMA,
         "project": {
-            "project_id": safe_id,
+            "project_id": scrub.identifier(safe_id),
             "name": scrub.label(snapshot.get("projectName") or snapshot.get("name") or safe_id, 200) or safe_id,
             "revision": resolved,
             "saved_at": envelope.get("saved_at"),

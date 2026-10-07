@@ -659,8 +659,9 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
     packet["free_text"] = {"included": include_text, "omitted": 0, "note": "Comments, notes and finding text are included (credential-like strings and absolute paths removed on a best-effort basis)." if include_text else "Comments, notes and finding text are left out. Who did what and when, the file hashes and the counts are all here."}
     if not include_text:
         # The same policy as the real packet: names, notes, paths and values are left out; so is any name only typed.
-        omitted = 0
+        omitted = 1
         packet["project"]["name"] = _OMITTED
+        packet["project"]["project_id"] = "project-" + hashlib.sha256(project_id.encode("utf-8")).hexdigest()[:12]
         for kind in ("schematic", "pcb"):
             packet["retained_files"]["files"][kind]["relative"] = _OMITTED
             omitted += 1
@@ -681,7 +682,7 @@ def review_packet(project_id: str, revision: int | None = None, format: str = "j
         packet["integrity"] = _packet_integrity(packet)
     if format == "markdown" and _render_packet is not None:
         return Response(_render_packet(packet).encode("utf-8"), media_type="text/markdown; charset=utf-8",
-                        headers={"Content-Disposition": f'attachment; filename="{project_id}-r{rev}-review-packet{"" if include_text else "-no-text"}.md"'})
+                        headers={"Content-Disposition": f'attachment; filename="{packet["project"]["project_id"]}-r{rev}-review-packet{"" if include_text else "-no-text"}.md"'})
     return Response(_json.dumps({"ok": True, "packet": packet}), media_type="application/json")
 
 

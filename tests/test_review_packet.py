@@ -883,3 +883,51 @@ def test_yaml_siblings_of_a_removed_secret_are_kept() -> None:
     assert scrub.text(nested) == "config:\n  password: [redacted credential]\n  clearance: 0.1mm\n  release: blocked\nnext: ok"
     assert scrub.text("db:\n  password:\n    violet-harbor-93\n  host: example\n") == "db:\n  password:\n    [redacted credential]\n  host: example\n"
     assert scrub.text("password: # production login\n  violet-harbor-93\nuser: bob") == "password: [redacted credential]\nuser: bob"
+
+
+def test_the_shared_version_does_not_carry_the_project_id_either(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    api = _marked_world(tmp_path, monkeypatch)
+    # The marked world's project id is "robot". Use an id that is itself the marker, as a person could.
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    store = ProjectStore(tmp_path / "store")
+    api = TestClient(create_product_app(store))
+    build = tmp_path / "build"
+    snapshot = _snapshot(build)
+    snapshot["projectId"] = "LEAKMARKER"
+    snapshot["machineProject"] = {**snapshot.get("machineProject", {}), "project_id": "LEAKMARKER"} if snapshot.get("machineProject") else snapshot.get("machineProject")
+    assert api.put("/v1/projects/LEAKMARKER/snapshot", json={"snapshot": snapshot, "expected_revision": 0}).status_code == 200
+
+    full = api.get("/v1/projects/LEAKMARKER/review-packet", params={"format": "markdown"})
+    assert "LEAKMARKER" in full.text and "LEAKMARKER" in full.headers["content-disposition"]
+    shared_json = api.get("/v1/projects/LEAKMARKER/review-packet", params={"include_text": "false"})
+    shared_md = api.get("/v1/projects/LEAKMARKER/review-packet", params={"include_text": "false", "format": "markdown"})
+    for response in (shared_json, shared_md):
+        assert "LEAKMARKER" not in response.text
+        assert "LEAKMARKER" not in response.headers.get("content-disposition", "")
+    derived = shared_json.json()["packet"]["project"]["project_id"]
+    assert derived.startswith("project-") and len(derived) == len("project-") + 12
+    assert derived in shared_md.headers["content-disposition"]
+    # Stable: the same project always gives the same derived id.
+    assert api.get("/v1/projects/LEAKMARKER/review-packet", params={"include_text": "false"}).json()["packet"]["project"]["project_id"] == derived
+
+
+@pytest.mark.parametrize(
+    "written",
+    [
+        "password: |\r\n  violet-harbor-93\r\nnext: ok\r\n",
+        "password: |2\r\n    violet-harbor-93\r\nnext: ok\r\n",
+        "password: >-\r\n  violet-harbor-93\r\n  more\r\nnext: ok",
+        "password: # prod\r\n  violet-harbor-93\r\nnext: ok",
+        "password:\r\n  violet-harbor-93\r\nnext: ok",
+        "password: |\n  violet-harbor-93",
+        "password: |\r\n  violet-harbor-93",
+    ],
+)
+def test_yaml_secrets_are_removed_whatever_the_line_endings(written) -> None:
+    from hardware_splicer.review_packet import _Scrub
+
+    out = _Scrub().text(written)
+    assert "violet-harbor-93" not in out and "more" not in out, out
+    if "next: ok" in written:
+        assert "next: ok" in out
+        assert "password: [redacted credential]" in out or "password:\r\n" in out or "password:\n" in out

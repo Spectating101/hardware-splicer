@@ -59,7 +59,7 @@ power-on or release, and it says so in the packet itself.
   download file name `<project>-r<revision>-review-packet.md`.
 - Any other `format` is HTTP 422 `invalid_request`.
 - `include_text=false` builds the version to share outside the team: no comment, note or finding text at all, only who did
-  what and when, the file hashes and the counts. It leaves out every field a person can write, not only comments: the project name, design object ids, source references, retained file names, operation targets and values, and the names of people who were only typed in. A name the server itself confirmed (an operator from its own list) is kept, as are the system's own words, hashes, counts, times and decisions. Each omitted piece of text is replaced by `[text omitted]`, the packet
+  what and when, the file hashes and the counts. It leaves out every field a person can write, not only comments: the project name, the project id (replaced by a stable derived `project-<12 hex>`, also in the file name; a short, guessable id could still be confirmed by someone who suspects it), design object ids, source references, retained file names, operation targets and values, and the names of people who were only typed in. A name the server itself confirmed (an operator from its own list) is kept, as are the system's own words, hashes, counts, times and decisions. Each omitted piece of text is replaced by `[text omitted]`, the packet
   says it was built that way (`free_text`), and its hash differs from the full packet's. Redaction of prose can only ever be
   best effort; leaving it out is the only version that does not depend on a pattern list. The download is named
   `…-review-packet-no-text.md`.
