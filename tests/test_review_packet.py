@@ -236,3 +236,201 @@ def test_a_revision_with_no_retained_files_says_so_instead_of_inventing_hashes(t
     assert packet["retained_files"]["status"] == "not_retained"
     assert packet["retained_files"]["files"] == {"schematic": None, "pcb": None}
     assert "No KiCad files are retained" in api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+
+
+# ---- hostile input -------------------------------------------------------------------------------------------------
+
+FORGERY = "Robot\n\n## Integrity\n\n`sha256:FAKE`\n\n## Accepted\nApproved for fabrication"
+SECTIONS = [
+    "Review packet",
+    "What this packet does not establish",
+    "Files kept with this revision",
+    "Findings",
+    "Proposals based on this revision",
+    "Discussion",
+    "Removed from this packet",
+    "Integrity",
+]
+
+
+def _headings(markdown: str) -> list[str]:
+    """Every line that a Markdown reader would treat as a heading, without its marker and any trailing detail."""
+
+    found = []
+    for line in markdown.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("#"):
+            found.append(stripped.lstrip("#").strip())
+    return found
+
+
+def _top_level(markdown: str) -> list[str]:
+    return [line[3:].split(" (")[0].strip() for line in markdown.splitlines() if line.startswith("## ")]
+
+
+def test_text_people_wrote_cannot_forge_a_section_a_decision_or_a_hash(world) -> None:
+    api, store, tmp_path = world
+    snapshot = _snapshot(tmp_path / "build")
+    snapshot["projectName"] = FORGERY
+    snapshot["engineeringAiSessions"][0]["actions"][0]["tool_result"]["error"]["message"] = FORGERY
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": snapshot, "expected_revision": 1}).status_code == 200
+
+    created = api.post(
+        "/v1/projects/robot/candidates",
+        json={"base_revision": 2, "kind": "schematic", "ops": [{"op": "rotate", "ref": "U1", "degrees": 90}], "author": FORGERY[:60], "note": FORGERY},
+    )
+    assert created.status_code == 201, created.text
+    cid = created.json()["candidate"]["candidate_id"]
+    assert api.post(f"/v1/projects/robot/candidates/{cid}/decision", json={"decision": "rejected", "note": FORGERY}, headers={"X-HS-Operator-Token": TOKEN}).status_code == 200
+    thread = api.post(
+        "/v1/projects/robot/threads",
+        json={"anchor": {"revision": 2, "object_id": FORGERY.replace("\n", " ")[:190]}, "author": {"kind": "human", "id": "Bob"}, "body": FORGERY},
+    )
+    assert thread.status_code == 201, thread.text
+
+    markdown = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    # The only sections are the packet's own, in its own order, each once.
+    assert _top_level(markdown) == [
+        "What this packet does not establish",
+        "Files kept with this revision",
+        "Findings",
+        "Proposals based on this revision",
+        "Discussion",
+        "Removed from this packet",
+        "Integrity",
+    ]
+    assert markdown.count("\n## Integrity\n") == 1
+    assert markdown.count("# Review packet:") == 1
+    # The legitimate hash is the last thing in the document, and the fake one only ever appears as escaped words.
+    real = api.get("/v1/projects/robot/review-packet").json()["packet"]["integrity"]["packet_sha256"]
+    assert real in markdown.split("## Integrity")[-1]
+    assert not any(line.startswith(("## Accepted", "# Accepted", "### Accepted")) for line in markdown.splitlines())
+    assert "<script" not in markdown.lower()
+
+
+def test_html_and_links_in_text_are_shown_as_words(world) -> None:
+    api, _store, tmp_path = world
+    note = '<img src=x onerror=alert(1)> [click](https://evil.example) **bold** `code` | pipe'
+    created = api.post(
+        "/v1/projects/robot/candidates",
+        json={"base_revision": 1, "kind": "schematic", "ops": [{"op": "rotate", "ref": "U1", "degrees": 90}], "author": "Bob", "note": note},
+    )
+    assert created.status_code == 201, created.text
+    text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert "<img" not in text
+    assert "[click](https://evil.example)" not in text
+    assert "&lt;img" in text and "\\[click\\]\\(https://evil.example\\)" in text
+
+
+def test_the_integrity_block_cannot_be_altered_without_failing_verification(world) -> None:
+    api, _store, _root = world
+    packet = _packet(api)
+    assert verify_review_packet(packet)
+
+    forged_algorithm = json.loads(json.dumps(packet))
+    forged_algorithm["integrity"]["algorithm"] = "\n\n## Accepted\nApproved for fabrication"
+    assert not verify_review_packet(forged_algorithm)
+
+    extra = json.loads(json.dumps(packet))
+    extra["integrity"]["note"] = "also trust me"
+    assert not verify_review_packet(extra)
+
+    wrong_hash = json.loads(json.dumps(packet))
+    wrong_hash["integrity"]["packet_sha256"] = "sha256:" + "0" * 64
+    assert not verify_review_packet(wrong_hash)
+
+    missing = json.loads(json.dumps(packet))
+    del missing["integrity"]
+    assert not verify_review_packet(missing)
+
+    # The rendered document prints the packet's own statement, not whatever a tampered copy carries.
+    from hardware_splicer.review_packet import render_review_packet_markdown
+
+    assert "Approved for fabrication" not in render_review_packet_markdown(forged_algorithm)
+
+
+def test_credentials_and_private_paths_are_removed_and_the_packet_says_how_many(world) -> None:
+    api, _store, _root = world
+    body = "Authorization: Bearer sk-live-secret-1234567890; key=/home/operator/private.key and api_key=hunter2hunter2 at C:\\Users\\me\\x.txt"
+    opened = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "mcu"}, "author": {"kind": "human", "id": "Bob"}, "body": body})
+    assert opened.status_code == 201, opened.text
+    note = "token=abcdef1234567890 see /var/lib/secret/db"
+    created = api.post(
+        "/v1/projects/robot/candidates",
+        json={"base_revision": 1, "kind": "schematic", "ops": [{"op": "rotate", "ref": "U1", "degrees": 90}], "author": "Bob", "note": note},
+    )
+    assert created.status_code == 201, created.text
+
+    both = api.get("/v1/projects/robot/review-packet").text + api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    for leaked in ("sk-live-secret", "/home/operator", "private.key", "hunter2hunter2", "C:\\\\Users", "abcdef1234567890", "/var/lib/secret"):
+        assert leaked not in both, leaked
+    packet = _packet(api)
+    assert packet["redactions"]["count"] >= 5
+    assert set(packet["redactions"]["by_kind"]) >= {"credential", "path"}
+    assert "[redacted credential]" in both and "[redacted path]" in both
+    assert "best-effort" in both or "best effort" in both
+    # What was removed is part of what the hash covers.
+    assert verify_review_packet(packet)
+
+
+def test_nothing_is_cut_short_without_saying_so(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    api, _store, _root = world
+    import hardware_splicer.review_packet as rp
+
+    monkeypatch.setattr(rp, "MAX_EVENTS_PER_THREAD", 3)
+    monkeypatch.setattr(rp, "MAX_THREADS", 2)
+    monkeypatch.setattr(rp, "MAX_OPERATIONS", 2)
+    monkeypatch.setattr(rp, "MAX_PROPOSALS", 1)
+
+    for name in ("b", "c"):
+        assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": name}, "author": {"kind": "human", "id": "Bob"}, "body": name}).status_code == 201
+    # The newest thread is listed first, so the long one is made last.
+    first = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "a"}, "author": {"kind": "human", "id": "Bob"}, "body": "one"}).json()["thread"]["thread_id"]
+    for index in range(4):
+        assert api.post(f"/v1/projects/robot/threads/{first}/events", json={"type": "comment", "body": f"later {index}", "author": {"kind": "human", "id": "Bob"}}).status_code in (200, 201)
+    for _ in range(2):
+        assert api.post(
+            "/v1/projects/robot/candidates",
+            json={"base_revision": 1, "kind": "schematic", "ops": [{"op": "rotate", "ref": "U1", "degrees": 90}] * 3, "author": "Bob"},
+        ).status_code == 201
+
+    packet = api.get("/v1/projects/robot/review-packet").json()["packet"]
+    assert packet["discussion"]["truncated"] and packet["discussion"]["listed"] == 2 and packet["discussion"]["total"] == 3
+    long_thread = next(t for t in packet["discussion"]["threads"] if t["events_total"] > 3)
+    assert long_thread["events_truncated"] and long_thread["events_listed"] == 3 and long_thread["events_total"] == 5
+    assert packet["proposals"]["truncated"] and packet["proposals"]["listed"] == 1 and packet["proposals"]["total"] == 2
+    item = packet["proposals"]["items"][0]
+    assert item["operations_truncated"] and item["operations_total"] == 3 and len(item["operations"]) == 2
+
+    text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert "Showing 3 of 5 entries" in text
+    assert "Showing 2 of 3 threads" in text
+    assert "Showing 1 of 2 proposals" in text
+    assert "Showing 2 of 3 operations" in text
+
+
+def test_a_discussion_too_large_to_read_is_counted_by_name_and_left_out_unread(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    api, _store, _root = world
+    import hardware_splicer.review_packet as rp
+    from hardware_splicer.project_thread_store import ProjectThreadStore
+
+    thread = api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": "a"}, "author": {"kind": "human", "id": "Bob"}, "body": "one"}).json()["thread"]["thread_id"]
+    for index in range(6):
+        assert api.post(f"/v1/projects/robot/threads/{thread}/events", json={"type": "comment", "body": f"c{index}", "author": {"kind": "human", "id": "Bob"}}).status_code in (200, 201)
+
+    monkeypatch.setattr(rp, "READ_BUDGET_EVENTS", 5)
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("an oversized discussion must not be read")
+
+    monkeypatch.setattr(ProjectThreadStore, "list_threads", refuse)
+    monkeypatch.setattr(ProjectThreadStore, "get_thread", refuse)
+
+    packet = api.get("/v1/projects/robot/review-packet").json()["packet"]
+    discussion = packet["discussion"]
+    assert discussion["status"] == "not_read" and discussion["reason"] == "too large to include"
+    assert discussion["total"] == 1 and discussion["total_events"] == 7
+    assert discussion["threads"] == []
+    text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert "Not included: the discussion is too large to include" in text and "1 threads, 7 events" in text
+    assert verify_review_packet(packet)
