@@ -33,11 +33,14 @@ power-on or release, and it says so in the packet itself.
   as the words they are. A project name or comment cannot start a heading, forge an "Accepted" decision, add a link, inject
   HTML or pose as the document's hash. The JSON carries the text as written (after redaction).
 - **Credentials and absolute paths are removed, best effort.** Bearer tokens, `sk-` and `ghp_` style keys, AWS and Slack key
-  ids, JWTs, private key blocks, secret-like names with their values (quoted or not, including JSON such as
-  `{"password": "…"}` and quoted passphrases with spaces), and absolute paths (`/home/…`, `/tmp/…`, `C:\…`) in free text are
-  replaced with `[redacted credential]` or `[redacted path]` **before** the hash is taken. `redactions` says how many were
-  removed and of what kind. A pattern list cannot catch everything: do not write secrets in comments and rely on this.
-  Operator tokens are not stored in the project and never appear.
+  ids, JWTs, private key blocks and absolute paths (`/home/…`, `/tmp/…`, `C:\…`) in free text are replaced with
+  `[redacted credential]` or `[redacted path]` **before** the hash is taken. A `name = value` pair is treated as a
+  credential by the words its name is made of, not by a fixed list: `API_TOKEN_V2`, `clientAPIKey`, `db-password`,
+  `X-Api-Key` and `AWS_SECRET_ACCESS_KEY` all qualify, and the whole value is removed whether it is bare, quoted (spaces and
+  escaped quotes included) or an unclosed quote that runs to the end. A name whose last word says it is *about* a secret
+  (`token_count`, `password_policy`, `authorization_header`) is left alone, as is a word that merely contains one
+  (`tokenizer`). `redactions` says how many were removed and of what kind. No pattern list catches everything, so do not
+  write secrets in comments and rely on this. Operator tokens are not stored in the project and never appear.
 - **Nothing is cut silently.** Every list that can be cut short says so in both forms, with how many there were and how
   many are shown: findings (1000), threads (100), entries per thread (50), operations per proposal (20) and proposals (100).
 - **Bounded reads.** The discussion store re-checks every event file on every read, so a very large discussion is not

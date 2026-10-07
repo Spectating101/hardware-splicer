@@ -539,7 +539,8 @@ def test_a_secret_cut_off_by_the_scan_window_is_removed_not_half_shown() -> None
     [
         "token_count=128; impedance=50ohm",
         'tokenizer="use BPE for log parsing"',
-        "secret_sauce=yes and password_policy=strict",
+        "password_policy=strict and token_limit=50",
+        "authorization_header=present; secret_count=3",
         "The token ring network and the password policy are in section 4.",
         "keyboard=us; keyboard_layout=dvorak",
         "authorized=true",
@@ -555,7 +556,19 @@ def test_engineering_text_that_only_resembles_a_credential_is_left_alone(legitim
 
 @pytest.mark.parametrize(
     "secret",
-    ["access_token: abcd1234efgh", "db-password = hunter2", 'clientSecret="two words"', "x_api_key=AKIA0000000000000", "secret_key: 'a b c'", "PRIVATE-KEY=abc123"],
+    [
+        "access_token: abcd1234efgh",
+        "db-password = hunter2",
+        'clientSecret="two words"',
+        "x_api_key=AKIA0000000000000",
+        "secret_key: 'a b c'",
+        "PRIVATE-KEY=abc123",
+        "API_TOKEN_V2=abc123SECRET",
+        "clientAPIKey=abc123SECRET",
+        "X-Api-Key: abc123SECRET",
+        "AWS_SECRET_ACCESS_KEY=abc123SECRET",
+        "refreshToken=abc123SECRET",
+    ],
 )
 def test_names_that_really_are_credentials_still_lose_their_values(secret) -> None:
     from hardware_splicer.review_packet import _Scrub
@@ -563,7 +576,7 @@ def test_names_that_really_are_credentials_still_lose_their_values(secret) -> No
     scrub = _Scrub()
     out = scrub.text(secret)
     assert "[redacted credential]" in out
-    assert "hunter2" not in out and "abcd1234efgh" not in out and "two words" not in out and "a b c" not in out
+    assert "hunter2" not in out and "abcd1234efgh" not in out and "two words" not in out and "a b c" not in out and "abc123SECRET" not in out
 
 
 def test_an_unsafe_entry_never_changes_what_the_packet_says_about_size_whatever_the_listing_order(world, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -577,7 +590,7 @@ def test_an_unsafe_entry_never_changes_what_the_packet_says_about_size_whatever_
         assert api.post("/v1/projects/robot/threads", json={"anchor": {"revision": 1, "object_id": name}, "author": {"kind": "human", "id": "Bob"}, "body": name}).status_code == 201
     threads_dir = store.root / "robot" / "threads"
     real_os.symlink(str(threads_dir / "a"), str(threads_dir / "zz-link"))
-    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 3)   # 3 real directories and 1 symbolic link: over the ceiling
+    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 2)   # 3 real directories and 1 symbolic link: over the ceiling
 
     real = real_os.scandir
 
@@ -633,3 +646,59 @@ def test_an_over_large_events_directory_is_too_large_even_if_it_also_holds_a_sym
     assert forward["discussion"] == backward["discussion"]
     assert forward["discussion"]["reason"] == "too large to include"
     assert forward["discussion"]["total_events_over"] == 3
+
+
+def test_a_long_delimited_chain_in_hostile_text_costs_next_to_nothing() -> None:
+    """The optional prefix group once made this quadratic: a thousand such fields took about a minute."""
+
+    import time
+
+    from hardware_splicer.review_packet import _Scrub
+
+    scrub = _Scrub()
+    started = time.perf_counter()
+    for _ in range(1000):
+        scrub.text("a-" * 1000)
+        scrub.text("ab_" * 650 + "token")
+    assert time.perf_counter() - started < 5.0
+
+
+def test_ordinary_files_in_the_threads_folder_are_not_counted_as_threads(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import hardware_splicer.review_packet as rp
+
+    api, store, _root = world
+    folder = store.root / "robot" / "threads"
+    folder.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(rp, "THREAD_COUNT_CEILING", 5)
+    for index in range(12):
+        (folder / f"notes-{index}.txt").write_text("not a thread", encoding="utf-8")
+
+    discussion = api.get("/v1/projects/robot/review-packet").json()["packet"]["discussion"]
+    # Twelve files and no thread: there is nothing to claim "more than five threads" about.
+    assert discussion.get("total_over") is None
+    assert discussion["status"] in {"listed", "not_read"}
+    if discussion["status"] == "not_read":
+        assert discussion["total"] == 0 or discussion["total"] is None
+
+    # Only when there really are more directories than the ceiling is it "too large", and it says "more than".
+    for index in range(7):
+        (folder / f"thread-dir-{index}").mkdir()
+    over = api.get("/v1/projects/robot/review-packet").json()["packet"]["discussion"]
+    assert over["status"] == "not_read" and over["total"] is None and over["total_over"] == 5
+
+
+def test_a_folder_with_far_too_many_entries_of_any_kind_is_left_out_without_claiming_a_thread_count(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    import hardware_splicer.review_packet as rp
+
+    api, store, _root = world
+    folder = store.root / "robot" / "threads"
+    folder.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(rp, "ENTRY_SCAN_CEILING", 10)
+    for index in range(15):
+        (folder / f"junk-{index}.txt").write_text("x", encoding="utf-8")
+    discussion = api.get("/v1/projects/robot/review-packet").json()["packet"]["discussion"]
+    assert discussion["status"] == "not_read"
+    assert discussion["total"] is None and discussion["total_over"] is None
+    text = api.get("/v1/projects/robot/review-packet", params={"format": "markdown"}).text
+    assert "Not included: the discussion is too large to include" in text
+    assert "more than" not in text.split("## Discussion")[1].split("## Removed")[0]

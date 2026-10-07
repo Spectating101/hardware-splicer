@@ -61,27 +61,37 @@ _REDACTIONS: tuple[tuple[str, re.Pattern[str], str], ...] = (
     ("credential", re.compile(r"(?i)\b(?:bearer|basic)\s+[A-Za-z0-9._~+/=-]{8,}"), "[redacted credential]"),
     ("credential", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}"), "[redacted credential]"),
     ("credential", re.compile(r"\b(?:sk|pk|rk)-[A-Za-z0-9_-]{8,}|\bgh[pousr]_[A-Za-z0-9]{16,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{10,}"), "[redacted credential]"),
-    # A credential name and its value. The name is a whole word, optionally with delimited prefixes (access_token, db_password,
-    # client-secret) and a few delimited suffixes (secret_key); it is not any word that merely contains one, so token_count,
-    # tokenizer and secret_sauce are left alone. The value is quoted (and may then hold spaces and escaped quotes) or a bare
-    # word. A quote that is never closed runs to the end of the text rather than falling back to a bare word, because the
-    # rest of the text is then still the secret.
-    ("credential", re.compile(r"""(?ix)
-        (?P<name>["']?(?<![A-Za-z0-9])(?:[A-Za-z0-9]+[_-])*
-                 (?:api[_-]?key|secret|token|passw(?:or)?d|passphrase|credentials?|authorization|private[_-]?key)
-                 (?:[_-](?:key|value|string|data))?
-                 (?![A-Za-z0-9])["']?\s*[:=]\s*)
-        (?!\[redacted)
-        (?P<value>"(?:[^"\\]|\\.)*(?:"|\Z)|'(?:[^'\\]|\\.)*(?:'|\Z)|\S+)
-    """), r"\g<name>[redacted credential]"),
-    # The same names written in camelCase (accessToken, clientSecret, apiKey).
-    ("credential", re.compile(r"""(?x)
-        (?P<name>["']?\b[a-z][a-z0-9]*(?:Api[Kk]ey|Secret|Token|Passw(?:or)?d|Passphrase|Credentials?|Authorization|PrivateKey)(?![A-Za-z0-9])["']?\s*[:=]\s*)
-        (?!\[redacted)
-        (?P<value>"(?:[^"\\]|\\.)*(?:"|\Z)|'(?:[^'\\]|\\.)*(?:'|\Z)|\S+)
-    """), r"\g<name>[redacted credential]"),
+    # Credential names and their values are handled by _redact_assignments below, which decides by the words a name is made of.
     ("path", re.compile(r"(?<![\w.:/-])(?:/(?:home|Users|root|tmp|var|etc|opt|mnt|srv|private|media)/[^\s\"'<>)]+|[A-Za-z]:\\[^\s\"'<>)]+)"), "[redacted path]"),
 )
+
+
+# A name is credential-like when it is made of words that include a secret word, however it is written (API_TOKEN_V2,
+# clientAPIKey, db-password), unless its last word says it is about the secret rather than being one (token_count,
+# password_policy). Names are split into words at delimiters and at lower-to-upper and acronym boundaries.
+_SECRET_WORDS = frozenset({"secret", "secrets", "token", "tokens", "password", "passwords", "passwd", "passphrase", "credential", "credentials", "authorization", "apikey", "apikeys"})
+_SECRET_PAIRS = frozenset({("api", "key"), ("api", "keys"), ("private", "key"), ("private", "keys"), ("access", "key"), ("secret", "key")})
+_ABOUT_A_SECRET = frozenset({"count", "counts", "length", "len", "size", "limit", "limits", "max", "min", "ttl", "expiry", "expires", "lifetime", "policy", "policies", "type", "kind", "format", "enabled", "required", "interval", "timeout", "rate", "budget", "usage", "cost", "header", "headers", "field", "fields", "name", "names"})
+_WORD = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|[0-9]+")
+_ASSIGNMENT = re.compile(
+    r"""(?x)
+    (?P<name>["']?(?<![A-Za-z0-9])[A-Za-z][A-Za-z0-9_-]{0,63}(?![A-Za-z0-9_-])["']?\s*[:=]\s*)
+    (?!\[redacted)
+    (?P<value>"(?:[^"\\]|\\.)*(?:"|\Z)|'(?:[^'\\]|\\.)*(?:'|\Z)|\S+)
+    """
+)
+
+
+def _looks_like_a_credential_name(name: str) -> bool:
+    words = [word.lower() for word in _WORD.findall(name.strip("\"'"))]
+    if not words:
+        return False
+    if words[-1] in _ABOUT_A_SECRET:
+        return False
+    if any(word in _SECRET_WORDS for word in words):
+        return True
+    return any(pair in _SECRET_PAIRS for pair in zip(words, words[1:]))
+
 
 
 class _Scrub:
@@ -99,6 +109,18 @@ class _Scrub:
             text, hits = pattern.subn(replacement, text)
             if hits:
                 self.counts[kind] = self.counts.get(kind, 0) + hits
+        hidden = 0
+
+        def hide(match: re.Match[str]) -> str:
+            nonlocal hidden
+            if not _looks_like_a_credential_name(match.group("name").split(":")[0].split("=")[0].strip()):
+                return match.group(0)
+            hidden += 1
+            return match.group("name") + "[redacted credential]"
+
+        text = _ASSIGNMENT.sub(hide, text)
+        if hidden:
+            self.counts["credential"] = self.counts.get("credential", 0) + hidden
         return text if len(text) <= limit else text[: limit - 1] + "…"
 
     def optional(self, value: Any, limit: int = MAX_TEXT) -> str | None:
@@ -179,16 +201,25 @@ THREAD_COUNT_CEILING = 1000
 EVENT_COUNT_CEILING = 20000
 
 
-def _scan(path: str, ceiling: int) -> tuple[list[tuple[str, bool, bool]], bool]:
-    """The entries of a directory as (name, is_symlink, is_dir), and whether there were more than `ceiling`."""
+ENTRY_SCAN_CEILING = 20000
+
+
+def _scan(path: str, dir_ceiling: int) -> tuple[list[tuple[str, bool, bool]], str | None]:
+    """The entries of a directory as (name, is_symlink, is_dir), and why scanning stopped early, if it did: "dirs" when there
+    were more than `dir_ceiling` subdirectories, "entries" when there were simply too many entries of any kind to list."""
 
     entries: list[tuple[str, bool, bool]] = []
+    dirs = 0
     with os.scandir(path) as listing:
         for entry in listing:
-            entries.append((entry.name, entry.is_symlink(), entry.is_dir(follow_symlinks=False)))
-            if len(entries) > ceiling:
-                return entries, True
-    return entries, False
+            is_dir = entry.is_dir(follow_symlinks=False)
+            entries.append((entry.name, entry.is_symlink(), is_dir))
+            dirs += 1 if is_dir else 0
+            if dirs > dir_ceiling:
+                return entries, "dirs"
+            if len(entries) > ENTRY_SCAN_CEILING:
+                return entries, "entries"
+    return entries, None
 
 
 def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | None:
@@ -207,8 +238,10 @@ def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | N
         return {"threads": 0, "threads_over": None, "events": 0, "events_over": None}
     try:
         top, over = _scan(root, THREAD_COUNT_CEILING)
-        if over:
+        if over == "dirs":
             return {"threads": None, "threads_over": THREAD_COUNT_CEILING, "events": None, "events_over": None}
+        if over == "entries":
+            return {"threads": None, "threads_over": None, "events": None, "events_over": None, "uncounted": True}
         if any(is_link for _name, is_link, _is_dir in top):
             return None
         names = sorted(name for name, _link, is_dir in top if is_dir)
@@ -221,8 +254,10 @@ def _discussion_size(store: ProjectStore, project_id: str) -> dict[str, Any] | N
                 return None
             if not os.path.isdir(folder):
                 continue
-            entries, over = _scan(folder, EVENT_COUNT_CEILING - events)
-            if over:
+            entries, over = _scan(folder, 0)
+            if over == "dirs":
+                return None  # a directory inside an events folder is not something this store writes
+            if over == "entries" or events + len(entries) > EVENT_COUNT_CEILING:
                 return {"threads": len(names), "threads_over": None, "events": None, "events_over": EVENT_COUNT_CEILING}
             if any(is_link for _name, is_link, _is_dir in entries):
                 return None
@@ -435,8 +470,10 @@ def _size_words(discussion: Mapping[str, Any]) -> str:
     limits = discussion["limits"]
     if discussion["total"] is not None:
         threads = f"{int(discussion['total'])} thread" + ("" if discussion["total"] == 1 else "s")
-    else:
+    elif discussion.get("total_over") is not None:
         threads = f"more than {int(discussion['total_over'])} threads"
+    else:
+        threads = "threads not counted"
     if discussion["total_events"] is not None:
         events = f"{int(discussion['total_events'])} events"
     elif discussion["total_events_over"] is not None:
