@@ -6,6 +6,7 @@ import { EditDock } from '@/components/engineering/edit-dock';
 import { previewDraft, useRoutingCapability, type Candidate, type DraftPreview, type EditOp, type ProposalInput } from '@/lib/project-candidates';
 import { changesToHighlights } from '@/lib/artifact-diff';
 import { SWITCH_SETTLE_MS, applyFillMode, applyFillModeAfterLoad, focusKiCanvasBoard, readCamera, restoreCamera, retireEmbed, useKiCanvasScript, type FillMode } from '@/lib/kicanvas';
+import { AssemblyViewer } from '@/components/engineering/assembly-viewer';
 import { Model3DViewer } from '@/components/engineering/model3d-viewer';
 import { ViewerOverlay, type PlacedPin, type ViewerHighlight, type ViewerPin } from '@/components/engineering/viewer-overlay';
 
@@ -191,6 +192,8 @@ export function EvidenceArtifactViewport({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [show3d, setShow3d] = useState(false);
+  // Which of the two 3D views is open: the model, or the animated build sequence.
+  const [threeView, setThreeView] = useState<'model' | 'assemble'>('model');
   const [editing, setEditing] = useState(false);
   const [draftOps, setDraftOps] = useState<EditOp[]>([]);
   const [draft, setDraft] = useState<{ status: 'idle' | 'loading' | 'ready' | 'error'; preview?: DraftPreview; message?: string; forKey?: string }>({ status: 'idle' });
@@ -496,11 +499,23 @@ export function EvidenceArtifactViewport({
           {model3d && model3d.revision ? (
             <button
               type="button"
-              onClick={() => { cancelFocus(); setShow3d(true); }}
-              aria-pressed={show3d}
-              className={`border-b-2 px-3 py-2.5 text-xs font-medium ${show3d ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
+              onClick={() => { cancelFocus(); setThreeView('model'); setShow3d(true); }}
+              aria-pressed={show3d && threeView === 'model'}
+              className={`border-b-2 px-3 py-2.5 text-xs font-medium ${show3d && threeView === 'model' ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
             >
               3D
+            </button>
+          ) : null}
+          {model3d && model3d.revision ? (
+            <button
+              type="button"
+              onClick={() => { cancelFocus(); setThreeView('assemble'); setShow3d(true); }}
+              aria-pressed={show3d && threeView === 'assemble'}
+              data-testid="assemble-tab"
+              title="Watch the board go together, part by part, in order"
+              className={`border-b-2 px-3 py-2.5 text-xs font-medium ${show3d && threeView === 'assemble' ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
+            >
+              Assemble
             </button>
           ) : null}
           {!visibleFiles.length && !model3d ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
@@ -564,7 +579,8 @@ export function EvidenceArtifactViewport({
         </div>
       ) : null}
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
-        {show3d && model3d && model3d.revision ? <Model3DViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
+        {show3d && threeView === 'model' && model3d && model3d.revision ? <Model3DViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
+        {show3d && threeView === 'assemble' && model3d && model3d.revision ? <AssemblyViewer projectId={model3d.projectId} revision={model3d.revision} /> : null}
         {show3d ? null : loading ? <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70"><LoaderCircle className="h-5 w-5 animate-spin text-stone-500" /></div> : null}
         <div className={show3d ? 'hidden' : 'contents'}>
         {!buildDir || error || viewerFailed || (!content && !loading) ? (

@@ -577,6 +577,40 @@ def model3d_glb(project_id: str, revision: int) -> Response:
 
 
 # --- Parts: the real extraction code over the fixture schematic (revisions 5 and 6 only) -----------------------
+_build_assembly_plan = _load_hs_attr("assembly_plan", "build_assembly_plan")
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/assembly-plan")
+def assembly_plan(project_id: str, revision: int) -> dict[str, Any]:
+    """The real plan builder run on the reference board, as the real API would run it on a retained one."""
+
+    _require_project(project_id)
+    if _build_assembly_plan is None or revision not in (5, 6):
+        return {"ok": True, "revision": revision, "available": False, "reason": "no retained pcb"}
+    text = (REFERENCE_DIR / "spi_flash_adapter_v1.kicad_pcb").read_text(encoding="utf-8")
+    return {"ok": True, "revision": revision, "available": True, "plan": _build_assembly_plan(text, pcb_sha256="sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest())}
+
+
+_generate_glb = _load_hs_attr("model3d", "generate_glb")
+_BOARD_ONLY_FLAGS = _load_hs_attr("model3d", "BOARD_ONLY_GLB_FLAGS")
+_board_glb_cache: dict[str, bytes] = {}
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/assembly-plan/board.glb")
+def assembly_board_glb(project_id: str, revision: int) -> Response:
+    """The real bare-board export (kicad-cli) of the reference board, when kicad-cli is present."""
+
+    _require_project(project_id)
+    if _generate_glb is None or _BOARD_ONLY_FLAGS is None or revision not in (5, 6):
+        raise _thread_error(404, "not_found", "revision has no board model")
+    if "board" not in _board_glb_cache:
+        try:
+            _board_glb_cache["board"] = _generate_glb((REFERENCE_DIR / "spi_flash_adapter_v1.kicad_pcb").read_text(encoding="utf-8"), flags=_BOARD_ONLY_FLAGS)
+        except Exception:
+            raise _thread_error(404, "not_found", "revision has no board model") from None
+    return Response(content=_board_glb_cache["board"], media_type="model/gltf-binary", headers={"Cache-Control": "private, max-age=60"})
+
+
 _extract_components = _load_hs_attr("parts_intel", "extract_components")
 _build_bom = _load_hs_attr("parts_intel", "build_bom")
 
