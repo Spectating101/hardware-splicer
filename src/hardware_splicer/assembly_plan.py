@@ -512,11 +512,21 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
     parts.sort(key=lambda p: (p["side"] != "front", _PHASE.get(p["kind"], 2), p["height_mm"], p["footprint"], p["value"], p["ref"], p["x"], p["y"]))
 
     # Every footprint gets its own identity, so two parts that share a reference are two parts, not one.
-    seen: dict[str, int] = {}
+    # The first footprint with a reference is known by it, so every literal reference is reserved before any suffix is made up;
+    # a repeat takes the first "ref~n" nobody else has, even when another footprint is really named that.
+    taken = {part["ref"] for part in parts}
+    holders: dict[str, int] = {}
     for part in parts:
-        seen[part["ref"]] = seen.get(part["ref"], 0) + 1
-        part["id"] = part["ref"] if seen[part["ref"]] == 1 else f"{part['ref']}~{seen[part['ref']]}"
-    for ref, count in sorted(seen.items()):
+        holders[part["ref"]] = holders.get(part["ref"], 0) + 1
+        if holders[part["ref"]] == 1:
+            part["id"] = part["ref"]
+            continue
+        n = holders[part["ref"]]
+        while f"{part['ref']}~{n}" in taken:
+            n += 1
+        part["id"] = f"{part['ref']}~{n}"
+        taken.add(part["id"])
+    for ref, count in sorted(holders.items()):
         if count > 1:
             warnings.append(f"The reference {ref} is used by {count} footprints; each is shown separately.")
 
@@ -556,14 +566,19 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
             }
         )
         current_side = side
-    if steps:
+    if steps or not_fitted:
         left_off = f" Not fitted on this board (marked do-not-populate): {', '.join(not_fitted)}." if not_fitted else ""
+        nothing_to_fit = not steps
         steps.append(
             {
                 "step_id": f"step-{len(steps) + 1:02d}",
                 "order": len(steps) + 1,
-                "title": "Check the board before first power",
-                "instruction": "Before connecting power, look for shorts between the supply and ground with a meter. These are suggestions to try, not results." + left_off,
+                "title": "Nothing to fit on this board" if nothing_to_fit else "Check the board before first power",
+                "instruction": (
+                    "Every part on this board is marked do-not-populate, so there is nothing to place." + left_off
+                    if nothing_to_fit
+                    else "Before connecting power, look for shorts between the supply and ground with a meter. These are suggestions to try, not results." + left_off
+                ),
                 "kind": "verify",
                 "side": current_side,
                 "turn_board_over": False,

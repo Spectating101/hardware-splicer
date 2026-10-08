@@ -363,3 +363,28 @@ def test_a_board_with_many_pads_and_nets_is_planned_in_linear_time_and_an_enormo
     assert elapsed < 4.0, elapsed
     with pytest.raises(AssemblyPlanError, match="too many pads"):
         build_assembly_plan(board(700, 100))
+
+
+def test_generated_identities_never_collide_with_a_reference_that_is_really_named_that() -> None:
+    parts = "".join(_fp(ref, "Resistor_SMD:R_0603_1608Metric", f"{5 + i * 4} 5") for i, ref in enumerate(["R1", "R1", "R1~2"]))
+    plan = build_assembly_plan(_tiny_board(parts))
+    ids = [p["id"] for p in plan["parts"]]
+    assert len(ids) == len(set(ids)) == 3, ids
+    assert "R1~2" in ids and "R1~3" in ids and ids.count("R1") == 1
+    in_steps = [i for step in plan["steps"] for i in step["part_ids"]]
+    assert sorted(in_steps) == sorted(ids)
+    # The same holds when the colliding footprint is the one left off.
+    dnp = _fp("R1~2", "Resistor_SMD:R_0603_1608Metric", "25 5").replace('(layer "F.Cu")', '(layer "F.Cu") (attr smd dnp)')
+    again = build_assembly_plan(_tiny_board(_fp("R1", "Resistor_SMD:R_0603_1608Metric", "5 5") + _fp("R1", "Resistor_SMD:R_0603_1608Metric", "9 5") + dnp))
+    assert len({p["id"] for p in again["parts"]}) == 3
+
+
+def test_a_board_where_every_part_is_left_off_still_says_so_in_a_step() -> None:
+    dnp = _fp("R1", "Resistor_SMD:R_0603_1608Metric", "5 5").replace('(layer "F.Cu")', '(layer "F.Cu") (attr smd dnp)')
+    plan = build_assembly_plan(_tiny_board(dnp))
+    assert plan["not_fitted"] == ["R1"] and plan["counts"]["fitted"] == 0
+    assert [s["kind"] for s in plan["steps"]] == ["verify"]
+    assert plan["steps"][0]["title"] == "Nothing to fit on this board"
+    assert "R1" in plan["steps"][0]["instruction"] and plan["steps"][0]["checks"] == [] and plan["steps"][0]["part_ids"] == []
+    # A board with no parts at all has nothing to say, and says nothing.
+    assert build_assembly_plan(_tiny_board(""))["steps"] == []

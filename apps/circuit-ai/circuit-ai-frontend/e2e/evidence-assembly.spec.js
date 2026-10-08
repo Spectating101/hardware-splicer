@@ -177,3 +177,32 @@ test('leaving the tab while the board is still loading releases the graphics con
   expect(lost.every(Boolean)).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test('a board where every part is left off says so in the view instead of claiming there is nothing to show', async ({ page }) => {
+  const plan = {
+    authority: 'This is a view of the retained board file. Nothing here approves building, powering or releasing the board.',
+    not_fitted: ['R1', 'R2'],
+    board: { thickness_mm: 1.6, size_mm: [20, 10], outline: { kind: 'rectangle', bbox: { x0: 0, y0: 0, x1: 20, y1: 10 } } },
+    parts: [],
+    warnings: [],
+    steps: [{
+      step_id: 'step-01', order: 1, title: 'Nothing to fit on this board',
+      instruction: 'Every part on this board is marked do-not-populate, so there is nothing to place. Not fitted on this board (marked do-not-populate): R1, R2.',
+      kind: 'verify', side: 'front', turn_board_over: false, refs: [], part_ids: [], checks: [],
+    }],
+  };
+  await page.route('**/assembly-plan', (route) => route.fulfill({ json: { ok: true, revision: 6, available: true, plan } }));
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByTestId('assemble-tab').click();
+  const viewer = page.getByTestId('assembly-viewer');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  await expect(page.getByTestId('assembly-title')).toHaveText('Nothing to fit on this board');
+  await expect(page.getByTestId('assembly-not-fitted')).toContainText('R1, R2');
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 1/);
+  await expect(page.getByTestId('assembly-next')).toBeDisabled();
+  await expect(viewer).toHaveAttribute('data-placed', '0');
+  expect(errors).toEqual([]);
+});
