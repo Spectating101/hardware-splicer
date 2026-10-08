@@ -50,10 +50,13 @@ test('the build plays as an animation: parts arrive on the board in order and ev
   const viewer = await open(page);
   const stage = viewer.locator('canvas');
 
-  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 13/);
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 12/);
   await expect(page.getByTestId('assembly-title')).toContainText('resistors');
-  await expect(viewer).toHaveAttribute('data-placed', '2');   // R1 and R4
-  await expect(page.getByTestId('assembly-label')).toHaveCount(2);
+  await expect(viewer).toHaveAttribute('data-placed', '5');   // R2, R3, R5, R6, R7: R1 and R4 are marked do-not-populate
+  await expect(page.getByTestId('assembly-label')).toHaveCount(5);
+  // The two parts the design leaves off are said to be left off, and are never part of a step.
+  await expect(page.getByTestId('assembly-not-fitted')).toContainText('R1, R4');
+  await expect(page.getByTestId('assembly-instruction')).not.toContainText('R1');
   await expect(page.getByTestId('assembly-prev')).toBeDisabled();
 
   const first = await pixels(page, stage);
@@ -63,8 +66,8 @@ test('the build plays as an animation: parts arrive on the board in order and ev
   await page.getByTestId('assembly-next').click();
   await expect.poll(async () => Number(await viewer.getAttribute('data-flying')), { timeout: 4000 }).toBeGreaterThan(0);
   await settle(viewer);
-  await expect(viewer).toHaveAttribute('data-placed', '7');   // R1, R4 and the five 10k resistors
-  await expect(page.getByTestId('assembly-instruction')).toContainText('R2');
+  await expect(viewer).toHaveAttribute('data-placed', '8');   // the five resistors and C3-C5
+  await expect(page.getByTestId('assembly-instruction')).toContainText('C3');
 
   // Parts really appear on screen.
   const second = await pixels(page, stage);
@@ -73,9 +76,9 @@ test('the build plays as an animation: parts arrive on the board in order and ev
   // The last step has every part in place and the checks to try before power.
   await page.getByTestId('assembly-slider').focus();
   await page.keyboard.press('End');
-  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 13 of 13/);
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 12 of 12/);
   await settle(viewer);
-  await expect(viewer).toHaveAttribute('data-placed', '40');
+  await expect(viewer).toHaveAttribute('data-placed', '38');
   await expect(page.getByTestId('assembly-checks')).toContainText('meter between');
   await expect(page.getByTestId('assembly-checks')).toContainText('NOT connected');
   await expect(page.getByTestId('assembly-next')).toBeDisabled();
@@ -86,10 +89,10 @@ test('the build plays as an animation: parts arrive on the board in order and ev
 
 test('a big group is named in the panel instead of crowding the board with labels, and nothing authoritative is claimed', async ({ page }) => {
   const viewer = await open(page);
-  // Step 9 is the 18 test points.
+  // Step 8 is the 18 test points.
   await page.getByTestId('assembly-slider').focus();
-  for (let i = 0; i < 8; i += 1) await page.keyboard.press('ArrowRight');
-  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 9 of 13/);
+  for (let i = 0; i < 7; i += 1) await page.keyboard.press('ArrowRight');
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 8 of 12/);
   await settle(viewer);
   await expect(page.getByTestId('assembly-title')).toContainText('18 test points');
   await expect(page.getByTestId('assembly-label')).toHaveCount(0);
@@ -118,7 +121,7 @@ test('play runs the steps by itself and pauses, and the arrow keys and the slide
   await page.getByRole('button', { name: 'Start again' }).click();
   await expect(viewer).toHaveAttribute('data-step', '0');
   await settle(viewer);
-  await expect(viewer).toHaveAttribute('data-placed', '2');
+  await expect(viewer).toHaveAttribute('data-placed', '5');
 });
 
 test('stepping backwards takes parts off the board again and leaving the tab leaves no errors behind', async ({ page }) => {
@@ -132,11 +135,45 @@ test('stepping backwards takes parts off the board again and leaving the tab lea
   expect(Number(far)).toBeGreaterThan(10);
   for (let i = 0; i < 5; i += 1) await page.keyboard.press('ArrowLeft');
   await settle(viewer);
-  await expect(viewer).toHaveAttribute('data-placed', '2');
+  await expect(viewer).toHaveAttribute('data-placed', '5');
 
   await page.getByRole('button', { name: 'PCB', exact: true }).click();
   await expect(page.getByTestId('assembly-viewer')).toHaveCount(0);
   await page.getByTestId('assemble-tab').click();
   await expect(page.getByTestId('assembly-viewer')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  expect(errors).toEqual([]);
+});
+
+
+test('leaving the tab while the board is still loading releases the graphics context instead of leaking it', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    window.__contexts = [];
+    HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+      const context = original.call(this, kind, ...rest);
+      // Only contexts made while the build view is on screen: the PCB tab's own viewer legitimately keeps one of its own.
+      if (context && String(kind).startsWith('webgl') && document.querySelector('[data-testid="assembly-viewer"]')) window.__contexts.push(context);
+      return context;
+    };
+  });
+  let release;
+  const held = new Promise((resolve) => { release = resolve; });
+  await page.route('**/assembly-plan/board.glb', async (route) => {
+    await held;
+    await route.continue();
+  });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByTestId('assemble-tab').click();
+  await expect.poll(() => page.evaluate(() => window.__contexts.length)).toBeGreaterThan(0);   // the scene started and is waiting for the board
+  await page.getByRole('button', { name: 'PCB', exact: true }).click();                          // leave before it arrives
+  await expect(page.getByTestId('assembly-viewer')).toHaveCount(0);
+  release();
+  await page.waitForTimeout(1200);
+  const lost = await page.evaluate(() => window.__contexts.map((context) => context.isContextLost()));
+  expect(lost.length).toBeGreaterThan(0);
+  expect(lost.every(Boolean)).toBe(true);
   expect(errors).toEqual([]);
 });

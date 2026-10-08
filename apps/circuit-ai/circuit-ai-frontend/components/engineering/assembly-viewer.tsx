@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, ChevronLeft, ChevronRight, LoaderCircle, Pause, Play, RotateCcw } from 'lucide-react';
 import type * as ThreeNS from 'three';
+import type { OrbitControls as OrbitControlsType } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export type AssemblyPart = {
+  id: string;
   ref: string;
+  do_not_populate: boolean;
   value: string;
   footprint: string;
   kind: string;
@@ -27,10 +30,12 @@ export type AssemblyStep = {
   side: 'front' | 'back';
   turn_board_over: boolean;
   refs: string[];
+  part_ids: string[];
   checks: AssemblyCheck[];
 };
 export type AssemblyPlan = {
   authority: string;
+  not_fitted: string[];
   board: { thickness_mm: number; size_mm: number[]; outline: { kind: string; bbox: { x0: number; y0: number; x1: number; y1: number } } };
   parts: AssemblyPart[];
   steps: AssemblyStep[];
@@ -111,7 +116,36 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
     const host = hostRef.current;
     const labels = labelsRef.current;
     let disposed = false;
-    let cleanup = () => {};
+    // Everything allocated is tracked here the moment it exists, so cancelling at any point (mid-load, mid-parse, on an
+    // error) releases the renderer and its GPU resources instead of waiting for a step that may never run.
+    let frame = 0;
+    let observer: ResizeObserver | null = null;
+    let controls: OrbitControlsType | null = null;
+    let renderer: ThreeNS.WebGLRenderer | null = null;
+    let scene: ThreeNS.Scene | null = null;
+    const labelNodes = new Map<string, HTMLDivElement>();
+    const abort = new AbortController();
+    const cleanup = () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+      controls?.dispose();
+      labelNodes.forEach((node) => node.remove());
+      labelNodes.clear();
+      scene?.traverse((object) => {
+        const mesh = object as ThreeNS.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const material = mesh.material as ThreeNS.Material | ThreeNS.Material[] | undefined;
+        if (Array.isArray(material)) material.forEach((item) => item.dispose());
+        else material?.dispose();
+      });
+      renderer?.dispose();
+      // Release the GPU context now rather than whenever the garbage collector gets to it: tabs are switched often.
+      renderer?.forceContextLoss();
+      renderer?.domElement.remove();
+      scene = null;
+      renderer = null;
+      sceneRef.current = null;
+    };
 
     (async () => {
       try {
@@ -121,17 +155,19 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         if (disposed) return;
         const reduced = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color('#0b0d12');
+        const world = new THREE.Scene();
+        scene = world;
+        world.background = new THREE.Color('#0b0d12');
         const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 5000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        host.appendChild(renderer.domElement);
-        renderer.domElement.style.display = 'block';
-        scene.add(new THREE.HemisphereLight('#ffffff', '#1c2230', 1.5));
+        const gl = new THREE.WebGLRenderer({ antialias: true });
+        renderer = gl;
+        gl.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        host.appendChild(gl.domElement);
+        gl.domElement.style.display = 'block';
+        world.add(new THREE.HemisphereLight('#ffffff', '#1c2230', 1.5));
         const key = new THREE.DirectionalLight('#ffffff', 2.4);
         key.position.set(60, 120, 80);
-        scene.add(key);
+        world.add(key);
 
         const { x0, y0, x1, y1 } = plan.board.outline.bbox;
         const cx = (x0 + x1) / 2;
@@ -143,17 +179,18 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         const explode = span * 0.32;
 
         const turnTable = new THREE.Group();
-        scene.add(turnTable);
+        world.add(turnTable);
         // The real bare board (outline, copper, pads, silkscreen) when KiCad can draw it; a plain slab of the right size when not.
         let realBoard = false;
         try {
-          const response = await fetch(`${url}/board.glb`, { cache: 'no-store' });
+          const response = await fetch(`${url}/board.glb`, { cache: 'no-store', signal: abort.signal });
           if (response.ok) {
             const buffer = await response.arrayBuffer();
             if (disposed) return;
             const gltf = await new Promise<{ scene: ThreeNS.Group }>((resolve, reject) => {
               new GLTFLoader().parse(buffer, '', (result) => resolve(result as never), reject);
             });
+            if (disposed) return;
             // KiCad writes metres, with the front face up and the board's y running along z.
             gltf.scene.scale.setScalar(1000);
             gltf.scene.updateMatrixWorld(true);
@@ -163,8 +200,10 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             realBoard = true;
           }
         } catch {
+          if (disposed) return;
           realBoard = false;
         }
+        if (disposed) return;
         if (!realBoard) {
           const board = new THREE.Mesh(
             new THREE.BoxGeometry(width, thickness, depth),
@@ -178,7 +217,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         }
 
         type Entry = {
-          ref: string;
+          id: string;
           step: number;
           mesh: ThreeNS.Mesh;
           ghost: ThreeNS.LineSegments;
@@ -192,11 +231,13 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         };
         const entries = new Map<string, Entry>();
         const stepOf = new Map<string, number>();
-        plan.steps.forEach((s, index) => s.refs.forEach((ref) => stepOf.set(ref, index)));
+        plan.steps.forEach((s, index) => s.part_ids.forEach((id) => stepOf.set(id, index)));
+        const refOf = new Map(plan.parts.map((part) => [part.id, part.ref]));
 
         for (const part of plan.parts) {
           const corners = part.corners;
-          if (corners.length !== 4) continue;
+          // A part the board leaves off (do-not-populate) is in no step and is not drawn.
+          if (corners.length !== 4 || !stepOf.has(part.id)) continue;
           const [c0, c1, , c3] = corners;
           const sizeX = Math.max(Math.hypot(c1[0] - c0[0], c1[1] - c0[1]), 0.2);
           const sizeZ = Math.max(Math.hypot(c3[0] - c0[0], c3[1] - c0[1]), 0.2);
@@ -256,35 +297,35 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             marker.position.set(at.x, sign * (hasPins ? height / 2 + 0.02 : height / 2 + 0.02), at.z);
             mesh.add(marker);
           }
-          entries.set(part.ref, { ref: part.ref, step: stepOf.get(part.ref) ?? 0, mesh, ghost, fade, rest, start, sign, state: 'hidden', t0: 0, delay: 0 });
+          entries.set(part.id, { id: part.id, step: stepOf.get(part.id) ?? 0, mesh, ghost, fade, rest, start, sign, state: 'hidden', t0: 0, delay: 0 });
         }
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
+        const orbit = new OrbitControls(camera, gl.domElement);
+        controls = orbit;
+        orbit.enableDamping = true;
         camera.position.set(0, span * 0.8, span * 0.8);
         camera.near = span / 200;
         camera.far = span * 40;
         camera.updateProjectionMatrix();
-        controls.target.set(0, 0, 0);
-        controls.update();
+        orbit.target.set(0, 0, 0);
+        orbit.update();
 
         const resize = () => {
           const w = Math.max(host.clientWidth, 1);
           const h = Math.max(host.clientHeight, 1);
-          renderer.setSize(w, h, false);
-          renderer.domElement.style.width = '100%';
-          renderer.domElement.style.height = '100%';
+          gl.setSize(w, h, false);
+          gl.domElement.style.width = '100%';
+          gl.domElement.style.height = '100%';
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
         };
-        const observer = new ResizeObserver(resize);
+        observer = new ResizeObserver(resize);
         observer.observe(host);
         resize();
 
         let current = 0;
         let turnTarget = 0;
         let lastReport = '';
-        const labelNodes = new Map<string, HTMLDivElement>();
 
         const report = () => {
           let placed = 0;
@@ -303,20 +344,19 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
 
         const syncLabels = () => {
           if (!labels) return;
-          const wanted = plan.steps[current]?.refs ?? [];
+          const wanted = plan.steps[current]?.part_ids ?? [];
           const show = wanted.length > 0 && wanted.length <= MAX_LABELS ? wanted : [];
-          labelNodes.forEach((node, ref) => {
-            if (!show.includes(ref)) { node.remove(); labelNodes.delete(ref); }
+          labelNodes.forEach((node, id) => {
+            if (!show.includes(id)) { node.remove(); labelNodes.delete(id); }
           });
-          for (const ref of show) {
-            if (labelNodes.has(ref)) continue;
+          for (const id of show) {
+            if (labelNodes.has(id)) continue;
             const node = document.createElement('div');
-            node.textContent = ref;
-            node.dataset.testid = 'assembly-label';
+            node.textContent = refOf.get(id) ?? id;
             node.setAttribute('data-testid', 'assembly-label');
             node.className = 'pointer-events-none absolute left-0 top-0 rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-semibold text-stone-950 shadow';
             labels.appendChild(node);
-            labelNodes.set(ref, node);
+            labelNodes.set(id, node);
           }
         };
 
@@ -340,7 +380,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
               entry.ghost.visible = false;
             } else if (entry.step === current) {
               if (animate && !reduced) {
-                const order = active.refs.indexOf(entry.ref);
+                const order = active.part_ids.indexOf(entry.id);
                 entry.state = 'flying';
                 entry.t0 = now;
                 entry.delay = Math.min(Math.max(order, 0) * STAGGER_MS, MAX_STAGGER_MS);
@@ -366,7 +406,6 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         };
 
         const project = new THREE.Vector3();
-        let frame = 0;
         const tick = () => {
           const now = performance.now();
           entries.forEach((entry) => {
@@ -391,8 +430,8 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
           report();
           if (labels && labelNodes.size) {
             const rect = host.getBoundingClientRect();
-            labelNodes.forEach((node, ref) => {
-              const entry = entries.get(ref);
+            labelNodes.forEach((node, id) => {
+              const entry = entries.get(id);
               if (!entry) return;
               entry.mesh.getWorldPosition(project);
               project.y += entry.sign * 1.5;
@@ -402,35 +441,21 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
               node.style.transform = `translate(${((project.x + 1) / 2) * rect.width + 6}px, ${((1 - project.y) / 2) * rect.height - 8}px)`;
             });
           }
-          controls.update();
-          renderer.render(scene, camera);
+          orbit.update();
+          gl.render(world, camera);
           frame = window.requestAnimationFrame(tick);
         };
         tick();
 
-        sceneRef.current = { goTo, dispose: () => {} };
-        cleanup = () => {
-          window.cancelAnimationFrame(frame);
-          observer.disconnect();
-          controls.dispose();
-          labelNodes.forEach((node) => node.remove());
-          scene.traverse((object) => {
-            const mesh = object as ThreeNS.Mesh;
-            if (mesh.geometry) mesh.geometry.dispose();
-            const material = mesh.material as ThreeNS.Material | ThreeNS.Material[] | undefined;
-            if (Array.isArray(material)) material.forEach((item) => item.dispose());
-            else material?.dispose();
-          });
-          renderer.dispose();
-          renderer.domElement.remove();
-          sceneRef.current = null;
-        };
+        sceneRef.current = { goTo, dispose: cleanup };
         if (disposed) {
           cleanup();
           return;
         }
         setSceneReady(true);
       } catch (caught) {
+        // Whatever was built before the failure is released, not left holding a WebGL context.
+        cleanup();
         if (!disposed) {
           setState('error');
           setMessage(caught instanceof Error ? caught.message : 'The 3D view could not start.');
@@ -440,9 +465,10 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
 
     return () => {
       disposed = true;
+      abort.abort();
       cleanup();
     };
-  }, [plan]);
+  }, [plan, url]);
 
   // Whatever step is chosen, the scene shows it: earlier steps in place, this one arriving, later ones not yet.
   const previous = useRef(-1);
@@ -572,6 +598,11 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             {active.turn_board_over ? <strong className="text-amber-300">Turn the board over. </strong> : null}
             {active.instruction}
           </p>
+          {plan.not_fitted.length ? (
+            <p className="mt-1.5 text-[11px] leading-4 text-amber-200/90" data-testid="assembly-not-fitted">
+              Not fitted on this board (the design marks {plan.not_fitted.length === 1 ? 'it' : 'them'} do-not-populate): {plan.not_fitted.join(', ')}
+            </p>
+          ) : null}
           {active.checks.length ? (
             <ul className="mt-2 space-y-0.5 text-[11px] leading-4 text-stone-400" data-testid="assembly-checks">
               {active.checks.map((check, index) => (

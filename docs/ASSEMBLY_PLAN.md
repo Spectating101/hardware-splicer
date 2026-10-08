@@ -19,6 +19,10 @@ thread, and approves nothing: a part drawn in place is not a part that works, an
   thickness came from.
 - **Parts:** reference, value, footprint, kind, side, position, rotation and the four corners of the outline in board
   coordinates; a pin 1 point for chips and connectors; pad positions and nets for connectors.
+- **Parts left off:** a footprint the design marks `dnp` (do-not-populate) is listed in `not_fitted` and is never in a step,
+  a check or a connection table; the closing step names it. The reference board marks R1 and R4 this way.
+- **Identity:** every footprint has its own `id`. Two footprints that share a reference are two parts (`R1`, `R1~2`) and the
+  plan warns about it; steps list `part_ids` as well as the references to display.
 - **Steps:** conventional order, low parts before tall, front before back, test points and connectors late, mounting
   hardware last, then a closing "check before first power" step. Parts with the same footprint and value share a step.
 - **Suggested checks:** continuity between two pads on the same net, offered only once both ends are in the board, and
@@ -33,6 +37,12 @@ thread, and approves nothing: a part drawn in place is not a part that works, an
 - The **order** is conventional, not the manufacturer's.
 - The viewer draws **stand-in shapes** (boxes, discs, a header body with pins) and labels them as such. Real component
   models are not needed and not pretended.
+
+## Limits
+
+Boards are bounded: at most 2000 parts and 60000 pads (more is refused with 422). Suggested checks use a net index, so the
+cost grows linearly with the board; a 200-part, 20000-pad board plans in under a second. Arcs in an outline or courtyard are
+bounded by their true extremes, not just their end points.
 
 ## Checked against KiCad
 
