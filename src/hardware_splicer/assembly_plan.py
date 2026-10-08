@@ -313,6 +313,13 @@ def _part(footprint: list[Any]) -> dict[str, Any] | None:
         "height_basis": height_basis,
         "pin1": pin1,
         "pad_count": len(pads),
+        # Where a connector's pins are, so each can be shown standing where it will be connected.
+        "pads": [
+            {"number": pad["number"], "x": _rounded(wx), "y": _rounded(wy), "net": pad["net"] or None}
+            for (wx, wy), pad in ((_to_board(p["x"], p["y"], (x, y), degrees, mirrored), p) for p in pads)
+        ]
+        if kind == "connector"
+        else [],
         "_pads": pads,
         "_pad_world": [(_to_board(p["x"], p["y"], (x, y), degrees, mirrored), p) for p in pads],
     }

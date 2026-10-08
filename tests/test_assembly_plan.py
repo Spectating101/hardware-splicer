@@ -250,3 +250,49 @@ def test_outlines_agree_with_kicads_own_geometry_for_turned_and_flipped_parts(tm
     assert result["back"] == 3, result                # three parts really are on the back
     # KiCad's courtyard includes half the line width, about 0.05 mm. A wrong turn or mirror would be off by millimetres.
     assert result["worst_mm"] < 0.1, result
+
+
+def test_the_bare_board_is_served_as_a_glb_cached_apart_from_the_full_model(world) -> None:
+    from hardware_splicer.model3d import BOARD_ONLY_GLB_FLAGS, DEFAULT_GLB_FLAGS, capability_probe, model_cache_paths, options_fingerprint
+
+    api, store, _root = world
+    assert "--board-only" in BOARD_ONLY_GLB_FLAGS and "--board-only" not in DEFAULT_GLB_FLAGS
+    assert options_fingerprint(BOARD_ONLY_GLB_FLAGS) != options_fingerprint()
+    if not capability_probe().get("available"):
+        pytest.skip("kicad-cli is not available")
+
+    first = api.get("/v1/projects/robot/revisions/1/assembly-plan/board.glb")
+    assert first.status_code == 200, first.text
+    assert first.headers["content-type"] == "model/gltf-binary"
+    assert first.content[:4] == b"glTF" and len(first.content) > 1000
+    etag = first.headers["etag"]
+    again = api.get("/v1/projects/robot/revisions/1/assembly-plan/board.glb", headers={"If-None-Match": etag})
+    assert again.status_code == 304
+    # It is cached under its own key, so asking for the full model afterwards is not served the bare board.
+    digest = store.load("robot", revision=1)  # the revision exists
+    assert digest is not None
+    cached = sorted(p.name for p in (store.root / "robot" / "models").rglob("*.glb"))
+    assert len(cached) == 1 and options_fingerprint(BOARD_ONLY_GLB_FLAGS) in cached[0]
+    full = api.get("/v1/projects/robot/revisions/1/model3d/glb")
+    assert full.status_code == 200
+    assert len(sorted(p.name for p in (store.root / "robot" / "models").rglob("*.glb"))) == 2
+
+
+def test_a_revision_without_a_retained_board_has_no_board_model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    api = TestClient(create_product_app(ProjectStore(tmp_path / "store")))
+    snapshot = {"projectId": "robot", "projectName": "Robot", "buildDir": str(tmp_path / "missing"),
+                "machineProject": {"project_id": "robot", "name": "Robot", "purpose": "plan"}}
+    assert api.put("/v1/projects/robot/snapshot", json={"snapshot": snapshot, "expected_revision": 0}).status_code == 200
+    assert api.get("/v1/projects/robot/revisions/1/assembly-plan/board.glb").status_code == 404
+
+
+def test_a_connectors_pins_are_placed_where_they_will_be_connected() -> None:
+    plan = build_assembly_plan(PCB)
+    j1 = next(p for p in plan["parts"] if p["ref"] == "J1")
+    assert [pad["number"] for pad in j1["pads"]] == ["1", "2", "3", "4", "5", "6"]
+    ys = [pad["y"] for pad in j1["pads"]]
+    assert all(b - a == pytest.approx(2.54, abs=0.01) for a, b in zip(ys, ys[1:]))  # a 2.54 mm header, in a column
+    assert j1["pads"][0]["x"] == j1["pin1"]["x"] and j1["pads"][0]["y"] == j1["pin1"]["y"]
+    assert j1["pads"][0]["net"].endswith("3V3")
+    assert next(p for p in plan["parts"] if p["ref"] == "R1")["pads"] == []

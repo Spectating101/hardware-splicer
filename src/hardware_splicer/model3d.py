@@ -78,10 +78,15 @@ class Model3DUnavailable(RuntimeError):
     """kicad-cli is missing or not executable."""
 
 
-def options_fingerprint() -> str:
-    """Eight-hex fingerprint of the documented export defaults."""
+# The bare board: outline, copper, pads, silkscreen and solder mask, with no component models. The build sequence draws its
+# own stand-in parts on this, so a part's real model is never needed and never pretended.
+BOARD_ONLY_GLB_FLAGS: tuple[str, ...] = ("--board-only",) + DEFAULT_GLB_FLAGS
 
-    payload = "\0".join(DEFAULT_GLB_FLAGS).encode("utf-8")
+
+def options_fingerprint(flags: tuple[str, ...] | None = None) -> str:
+    """Eight-hex fingerprint of the export options (the documented defaults when none are given)."""
+
+    payload = "\0".join(flags or DEFAULT_GLB_FLAGS).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()[:8]
 
 
@@ -214,6 +219,7 @@ def generate_glb(
     *,
     timeout_s: float = DEFAULT_TIMEOUT_S,
     max_bytes: int = DEFAULT_MAX_BYTES,
+    flags: tuple[str, ...] | None = None,
 ) -> bytes:
     """Export a GLB from PCB text via ``kicad-cli pcb export glb``.
 
@@ -243,7 +249,7 @@ def generate_glb(
                 "glb",
                 "--output",
                 str(glb_path),
-                *DEFAULT_GLB_FLAGS,
+                *(flags or DEFAULT_GLB_FLAGS),
                 "board.kicad_pcb",
             ],
             timeout_s=timeout_s,
@@ -271,9 +277,9 @@ def _project_dir(store: ProjectStore, project_id: str) -> Path:
     return store._project_dir(validate_project_id(project_id))
 
 
-def model_cache_paths(store: ProjectStore, project_id: str, pcb_hex: str) -> tuple[Path, Path]:
+def model_cache_paths(store: ProjectStore, project_id: str, pcb_hex: str, flags: tuple[str, ...] | None = None) -> tuple[Path, Path]:
     safe_hex = pcb_hex.lower()
-    optfp = options_fingerprint()
+    optfp = options_fingerprint(flags)
     target = _project_dir(store, project_id) / "models" / safe_hex[:2] / f"{safe_hex}-{optfp}.glb"
     return target, target.with_suffix(".json")
 
@@ -460,20 +466,21 @@ def load_or_build_cached_glb(
     *,
     timeout_s: float = DEFAULT_TIMEOUT_S,
     max_bytes: int = DEFAULT_MAX_BYTES,
+    flags: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Return a cached GLB, generating once per PCB digest + options fingerprint."""
 
     safe_id = validate_project_id(project_id)
     safe_hex = pcb_hex.lower()
-    glb_path, sidecar_path = model_cache_paths(store, safe_id, safe_hex)
-    key = f"{safe_id}:{safe_hex}:{options_fingerprint()}"
+    glb_path, sidecar_path = model_cache_paths(store, safe_id, safe_hex, flags)
+    key = f"{safe_id}:{safe_hex}:{options_fingerprint(flags)}"
     with _generation_lock(key):
         _assert_cache_not_symlinked(glb_path, sidecar_path, glb_path.parent)
         cached = _try_read_cache(glb_path, sidecar_path, max_bytes=max_bytes)
         if cached is not None:
             cached["pcb_sha256"] = f"sha256:{safe_hex}"
             return cached
-        data = generate_glb(pcb_text, timeout_s=timeout_s, max_bytes=max_bytes)
+        data = generate_glb(pcb_text, timeout_s=timeout_s, max_bytes=max_bytes, flags=flags)
         probe = capability_probe()
         version = probe.get("version") if isinstance(probe.get("version"), str) else None
         generated_with = f"kicad-cli {version}" if version else "kicad-cli"
