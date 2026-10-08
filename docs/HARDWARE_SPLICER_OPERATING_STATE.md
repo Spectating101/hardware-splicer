@@ -186,3 +186,4 @@ update claims, paper, roadmap, and next investment decision
 6. Reassess HS from external outcomes and physical evidence, not from generalized pessimism.
 
 The intended state is **not smaller HS**. It is a stronger HS with a narrower definition of what deserves engineering time.
+- **Build sequence (2026-10-09).** The Assemble tab animates the board going together part by part on the real KiCad-exported board, from `GET /revisions/{rev}/assembly-plan`. Heights are typical values and the order is conventional, both labelled; parts the design marks do-not-populate are reported, never instructed. Off-board parts (screen, battery, case) are not yet drawn. See `docs/ASSEMBLY_PLAN.md`.
