@@ -21,6 +21,7 @@ ASSEMBLY_PLAN_SCHEMA = "hardware_splicer.assembly_plan.v1"
 
 MAX_PARTS = 2000
 MAX_PADS_PER_PART = 400
+MAX_TOTAL_PADS = 60000
 MAX_CHECKS_PER_STEP = 3
 MAX_CONNECTION_PEERS = 6
 DEFAULT_THICKNESS_MM = 1.6
@@ -154,16 +155,49 @@ def _points_of(item: list[Any]) -> list[tuple[float, float]]:
             radius = math.hypot(_num(end[1]) - cx, _num(end[2]) - cy)
             points += [(cx - radius, cy - radius), (cx + radius, cy + radius)]
     elif head in {"gr_arc", "fp_arc"}:
+        ends = []
         for key in ("start", "mid", "end"):
             node = _first(item, key)
             if node and len(node) > 2:
-                points.append((_num(node[1]), _num(node[2])))
+                ends.append((_num(node[1]), _num(node[2])))
+        points += _arc_bounds(ends) if len(ends) == 3 else ends
     elif head in {"fp_poly", "gr_poly"}:
         pts = _first(item, "pts")
         for xy in _children(pts or [], "xy"):
             if len(xy) > 2:
                 points.append((_num(xy[1]), _num(xy[2])))
     return points
+
+
+def _arc_bounds(ends: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """The points that bound an arc given by start, mid and end: the ends, and any extreme of the circle the arc passes through."""
+
+    (x1, y1), (x2, y2), (x3, y3) = ends
+    determinant = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2))
+    if abs(determinant) < 1e-9:
+        return list(ends)  # the three points are in a line: it is a straight stroke
+    ux = ((x1**2 + y1**2) * (y2 - y3) + (x2**2 + y2**2) * (y3 - y1) + (x3**2 + y3**2) * (y1 - y2)) / determinant
+    uy = ((x1**2 + y1**2) * (x3 - x2) + (x2**2 + y2**2) * (x1 - x3) + (x3**2 + y3**2) * (x2 - x1)) / determinant
+    radius = math.hypot(x1 - ux, y1 - uy)
+    if not math.isfinite(radius) or radius > 1e6:
+        return list(ends)
+
+    def angle(x: float, y: float) -> float:
+        return math.atan2(y - uy, x - ux)
+
+    def sweep(a: float, b: float) -> float:
+        return (b - a) % (2 * math.pi)
+
+    start, mid, end = angle(x1, y1), angle(x2, y2), angle(x3, y3)
+    if sweep(start, mid) > sweep(start, end):  # the arc runs the other way round
+        start, end = end, start
+    span = sweep(start, end)
+    found = list(ends)
+    for quarter in range(4):
+        theta = quarter * math.pi / 2
+        if sweep(start, theta) <= span:
+            found.append((ux + radius * math.cos(theta), uy + radius * math.sin(theta)))
+    return found
 
 
 def _bbox(points: list[tuple[float, float]]) -> tuple[float, float, float, float] | None:
@@ -289,6 +323,8 @@ def _part(footprint: list[Any]) -> dict[str, Any] | None:
     lx0, ly0, lx1, ly1 = box
     corners = [_to_board(cx, cy, (x, y), degrees, mirrored) for cx, cy in ((lx0, ly0), (lx1, ly0), (lx1, ly1), (lx0, ly1))]
 
+    attr = _first(footprint, "attr")
+    flags = {str(a) for a in (attr[1:] if attr else []) if isinstance(a, str)}
     kind = _classify(ref, name)
     height, height_basis = _height(name, kind)
     pin1 = None
@@ -313,6 +349,7 @@ def _part(footprint: list[Any]) -> dict[str, Any] | None:
         "height_basis": height_basis,
         "pin1": pin1,
         "pad_count": len(pads),
+        "do_not_populate": "dnp" in flags,
         # Where a connector's pins are, so each can be shown standing where it will be connected.
         "pads": [
             {"number": pad["number"], "x": _rounded(wx), "y": _rounded(wy), "net": pad["net"] or None}
@@ -376,34 +413,31 @@ def _step_text(kind: str, side: str, parts: list[dict[str, Any]]) -> tuple[str, 
     return title, text
 
 
-def _checks(step_parts: list[dict[str, Any]], placed: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Continuity checks that become possible once this step's parts are in: same net, one end here, the other already placed."""
+def _checks(step_parts: list[dict[str, Any]], index: dict[str, tuple[str, str]]) -> list[dict[str, Any]]:
+    """Continuity checks that become possible once this step's parts are in: same net, one end here, the other already placed.
+
+    ``index`` maps a net to one pad already in the board (before this step), so each lookup is constant time.
+    """
 
     suggestions: list[dict[str, Any]] = []
-    placed_refs = {p["ref"] for p in placed}
     for part in sorted(step_parts, key=lambda p: p["ref"]):
         for _, pad in part["_pad_world"]:
-            if not pad["net"] or pad["net"].startswith("unconnected"):
+            net = pad["net"]
+            if not net or net.startswith("unconnected"):
                 continue
-            for other in placed:
-                if other["ref"] == part["ref"] or other["ref"] not in placed_refs:
-                    continue
-                for _, other_pad in other["_pad_world"]:
-                    if other_pad["net"] == pad["net"]:
-                        suggestions.append(
-                            {
-                                "kind": "suggested_check",
-                                "check": "continuity",
-                                "from": f"{part['ref']} pin {pad['number']}",
-                                "to": f"{other['ref']} pin {other_pad['number']}",
-                                "net": pad["net"],
-                                "expect": "the two points are connected",
-                            }
-                        )
-                        break
-                else:
-                    continue
-                break
+            other = index.get(net)
+            if other is None or other[0] == part["ref"]:
+                continue
+            suggestions.append(
+                {
+                    "kind": "suggested_check",
+                    "check": "continuity",
+                    "from": f"{part['ref']} pin {pad['number']}",
+                    "to": f"{other[0]} pin {other[1]}",
+                    "net": net,
+                    "expect": "the two points are connected",
+                }
+            )
             if len(suggestions) >= MAX_CHECKS_PER_STEP:
                 return suggestions
     return suggestions
@@ -437,13 +471,18 @@ def _connections(parts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for part in sorted((p for p in parts if p["kind"] == "connector"), key=lambda p: p["ref"]):
         pins = []
         for _, pad in sorted(part["_pad_world"], key=lambda row: (len(row[1]["number"]), row[1]["number"])):
-            peers = [f"{ref} pin {number}" for ref, number in by_net.get(pad["net"], []) if ref != part["ref"]]
+            members = by_net.get(pad["net"], [])
+            own = sum(1 for ref, _number in members if ref == part["ref"])
+            peers: list[str] = []
+            for ref, number in members:
+                if ref != part["ref"] and len(peers) < MAX_CONNECTION_PEERS:
+                    peers.append(f"{ref} pin {number}")
             pins.append(
                 {
                     "pin": pad["number"],
                     "net": pad["net"] or None,
-                    "also_on": peers[:MAX_CONNECTION_PEERS],
-                    "also_on_total": len(peers),
+                    "also_on": peers,
+                    "also_on_total": len(members) - own,
                 }
             )
         rows.append({"ref": part["ref"], "value": part["value"], "footprint": part["footprint"], "pins": pins})
@@ -468,21 +507,40 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
         warnings.append(f"Only the first {MAX_PARTS} of {len(footprints)} parts are included.")
         footprints = footprints[:MAX_PARTS]
     parts = [part for part in (_part(fp) for fp in footprints) if part is not None]
-    parts.sort(key=lambda p: (p["side"] != "front", _PHASE.get(p["kind"], 2), p["height_mm"], p["footprint"], p["value"], p["ref"]))
+    if sum(len(part["_pads"]) for part in parts) > MAX_TOTAL_PADS:
+        raise AssemblyPlanError(f"the board has too many pads to plan (more than {MAX_TOTAL_PADS})")
+    parts.sort(key=lambda p: (p["side"] != "front", _PHASE.get(p["kind"], 2), p["height_mm"], p["footprint"], p["value"], p["ref"], p["x"], p["y"]))
+
+    # Every footprint gets its own identity, so two parts that share a reference are two parts, not one.
+    seen: dict[str, int] = {}
+    for part in parts:
+        seen[part["ref"]] = seen.get(part["ref"], 0) + 1
+        part["id"] = part["ref"] if seen[part["ref"]] == 1 else f"{part['ref']}~{seen[part['ref']]}"
+    for ref, count in sorted(seen.items()):
+        if count > 1:
+            warnings.append(f"The reference {ref} is used by {count} footprints; each is shown separately.")
+
+    # A part marked do-not-populate is deliberately left off the board: it is reported, never instructed.
+    fitted = [part for part in parts if not part["do_not_populate"]]
+    not_fitted = [part["ref"] for part in parts if part["do_not_populate"]]
 
     groups: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
-    for part in parts:
+    for part in fitted:
         value = "" if part["kind"] in {"testpoint", "mounting_hole"} else part["value"]
         groups.setdefault((part["side"], _PHASE.get(part["kind"], 2), part["kind"], part["footprint"], value), []).append(part)
 
     steps: list[dict[str, Any]] = []
-    placed: list[dict[str, Any]] = []
+    net_index: dict[str, tuple[str, str]] = {}
     current_side = "front"
     for key in sorted(groups, key=lambda k: (k[0] != "front", k[1], groups[k][0]["height_mm"], k[3], k[4])):
         side, _phase, kind, _footprint, _value = key
-        members = sorted(groups[key], key=lambda p: p["ref"])
+        members = sorted(groups[key], key=lambda p: (p["ref"], p["x"], p["y"]))
         title, text = _step_text(kind, side, members)
-        placed.extend(members)
+        checks = _checks(members, net_index) if kind != "mounting_hole" else []
+        for part in members:
+            for _, pad in part["_pad_world"]:
+                if pad["net"] and not pad["net"].startswith("unconnected"):
+                    net_index.setdefault(pad["net"], (part["ref"], pad["number"]))
         steps.append(
             {
                 "step_id": f"step-{len(steps) + 1:02d}",
@@ -493,22 +551,25 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
                 "side": side,
                 "turn_board_over": side != current_side,
                 "refs": [p["ref"] for p in members],
-                "checks": _checks(members, placed) if kind != "mounting_hole" else [],
+                "part_ids": [p["id"] for p in members],
+                "checks": checks,
             }
         )
         current_side = side
     if steps:
+        left_off = f" Not fitted on this board (marked do-not-populate): {', '.join(not_fitted)}." if not_fitted else ""
         steps.append(
             {
                 "step_id": f"step-{len(steps) + 1:02d}",
                 "order": len(steps) + 1,
                 "title": "Check the board before first power",
-                "instruction": "Before connecting power, look for shorts between the supply and ground with a meter. These are suggestions to try, not results.",
+                "instruction": "Before connecting power, look for shorts between the supply and ground with a meter. These are suggestions to try, not results." + left_off,
                 "kind": "verify",
                 "side": current_side,
                 "turn_board_over": False,
                 "refs": [],
-                "checks": _isolation_checks(parts),
+                "part_ids": [],
+                "checks": _isolation_checks(fitted),
             }
         )
 
@@ -523,7 +584,8 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
         "board": _board(tree),
         "parts": public,
         "steps": steps,
-        "connections": _connections(parts),
-        "counts": {"parts": len(public), "steps": len(steps)},
+        "not_fitted": not_fitted,
+        "connections": _connections(fitted),
+        "counts": {"parts": len(public), "fitted": len(fitted), "steps": len(steps)},
         "warnings": warnings,
     }

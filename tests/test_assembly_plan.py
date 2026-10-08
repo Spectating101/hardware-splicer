@@ -42,6 +42,7 @@ def test_the_reference_board_gets_a_plan_that_matches_the_file() -> None:
     assert plan["board"]["size_mm"] == [90.0, 50.0] and plan["board"]["outline"]["kind"] == "rectangle"
     assert plan["board"]["thickness_mm"] == 1.6 and plan["board"]["thickness_basis"] == "stated in the board file"
     assert plan["counts"]["parts"] == PCB.count("(footprint ") == len(plan["parts"])
+    assert plan["counts"]["fitted"] == 38 and plan["not_fitted"] == ["R1", "R4"]
     u2 = next(p for p in plan["parts"] if p["ref"] == "U2")
     assert (u2["x"], u2["y"], u2["rotation_deg"], u2["side"], u2["kind"]) == (170.0, 88.0, 0.0, "front", "ic")
     assert u2["height_basis"] == "typical SOIC package" and u2["outline_basis"] == "courtyard outline"
@@ -53,7 +54,8 @@ def test_the_reference_board_gets_a_plan_that_matches_the_file() -> None:
 def test_every_part_is_in_exactly_one_step_and_the_order_is_low_before_tall() -> None:
     plan = build_assembly_plan(PCB)
     in_steps = [ref for step in plan["steps"] for ref in step["refs"]]
-    assert sorted(in_steps) == sorted(p["ref"] for p in plan["parts"])
+    assert sorted(in_steps) == sorted(p["ref"] for p in plan["parts"] if not p["do_not_populate"])
+    assert len(in_steps) == len(set(in_steps)) == plan["counts"]["fitted"]
     heights = {p["ref"]: p["height_mm"] for p in plan["parts"]}
     smd = [s for s in plan["steps"] if s["kind"] in {"passive", "ic"}]
     through = [s for s in plan["steps"] if s["kind"] == "connector"]
@@ -296,3 +298,68 @@ def test_a_connectors_pins_are_placed_where_they_will_be_connected() -> None:
     assert j1["pads"][0]["x"] == j1["pin1"]["x"] and j1["pads"][0]["y"] == j1["pin1"]["y"]
     assert j1["pads"][0]["net"].endswith("3V3")
     assert next(p for p in plan["parts"] if p["ref"] == "R1")["pads"] == []
+
+
+def test_parts_the_design_marks_do_not_populate_are_reported_and_never_instructed() -> None:
+    plan = build_assembly_plan(PCB)
+    assert plan["not_fitted"] == ["R1", "R4"]
+    for ref in plan["not_fitted"]:
+        part = next(p for p in plan["parts"] if p["ref"] == ref)
+        assert part["do_not_populate"] is True
+        assert all(ref not in step["refs"] for step in plan["steps"])
+        assert all(ref not in text for step in plan["steps"] for text in (step["title"],) )
+    verify = plan["steps"][-1]
+    assert "do-not-populate" in verify["instruction"] and "R1, R4" in verify["instruction"]
+    # A check never relies on a part that is not fitted.
+    assert not any(c["from"].startswith(("R1 ", "R4 ")) or c["to"].startswith(("R1 ", "R4 ")) for step in plan["steps"] for c in step["checks"])
+    assert not any(row["ref"] in {"R1", "R4"} for row in plan["connections"])
+
+    one = _tiny_board(_fp("R9", "Resistor_SMD:R_0603_1608Metric", "5 5").replace('(layer "F.Cu")', '(layer "F.Cu") (attr smd dnp)'))
+    only = build_assembly_plan(one)
+    assert only["steps"] == [] or all("R9" not in step["refs"] for step in only["steps"])
+    assert only["not_fitted"] == ["R9"] and only["counts"]["fitted"] == 0
+
+
+def test_two_footprints_with_one_reference_are_two_parts_with_their_own_identities() -> None:
+    a = _fp("R1", "Resistor_SMD:R_0603_1608Metric", "5 5")
+    b = _fp("R1", "Resistor_SMD:R_0603_1608Metric", "15 5")
+    plan = build_assembly_plan(_tiny_board(a + b))
+    ids = [p["id"] for p in plan["parts"]]
+    assert ids == ["R1", "R1~2"] and len({p["id"] for p in plan["parts"]}) == 2
+    assert sorted(i for step in plan["steps"] for i in step["part_ids"]) == ["R1", "R1~2"]
+    assert any("R1 is used by 2 footprints" in w for w in plan["warnings"])
+
+
+def test_an_arc_in_the_outline_is_bounded_by_its_extremes_not_just_its_ends() -> None:
+    # A radius-5 arc through (3,4), (-5,0), (3,-4) reaches y=+5 and y=-5 although its ends only reach y=+-4.
+    edge = '(gr_arc (start 3 4) (mid -5 0) (end 3 -4) (layer "Edge.Cuts")) (gr_line (start 3 -4) (end 3 4) (layer "Edge.Cuts"))'
+    plan = build_assembly_plan(_tiny_board("", edge))
+    bbox = plan["board"]["outline"]["bbox"]
+    assert (bbox["x0"], bbox["x1"]) == (-5.0, 3.0)
+    assert (bbox["y0"], bbox["y1"]) == (-5.0, 5.0)
+    assert plan["board"]["size_mm"] == [8.0, 10.0]
+    # The arc run the other way round, and a quarter arc, are bounded correctly too.
+    other = '(gr_arc (start 3 -4) (mid -5 0) (end 3 4) (layer "Edge.Cuts")) (gr_line (start 3 -4) (end 3 4) (layer "Edge.Cuts"))'
+    assert build_assembly_plan(_tiny_board("", other))["board"]["size_mm"] == [8.0, 10.0]
+    quarter = '(gr_arc (start 5 0) (mid 3.5355 3.5355) (end 0 5) (layer "Edge.Cuts"))'
+    box = build_assembly_plan(_tiny_board("", quarter))["board"]["outline"]["bbox"]
+    assert (box["x0"], box["x1"], box["y0"], box["y1"]) == (0.0, 5.0, 0.0, 5.0)
+
+
+def test_a_board_with_many_pads_and_nets_is_planned_in_linear_time_and_an_enormous_one_is_refused() -> None:
+    import time
+
+    def board(parts: int, pads: int) -> str:
+        body = ""
+        for i in range(parts):
+            pad_text = "".join(f'(pad "{n}" smd rect (at {n * 0.5} 0) (size 0.4 0.4) (layers "F.Cu") (net {i * pads + n} "/N{i}_{n}"))' for n in range(1, pads + 1))
+            body += _fp(f"U{i}", f"X:Unique{i}", f"{5 + (i % 15)} {5 + (i // 15)}", pads=pad_text)
+        return _tiny_board(body)
+
+    start = time.perf_counter()
+    plan = build_assembly_plan(board(200, 100))      # the input Codex timed at 13 s
+    elapsed = time.perf_counter() - start
+    assert plan["counts"]["parts"] == 200
+    assert elapsed < 4.0, elapsed
+    with pytest.raises(AssemblyPlanError, match="too many pads"):
+        build_assembly_plan(board(700, 100))
