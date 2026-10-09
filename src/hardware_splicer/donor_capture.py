@@ -151,6 +151,25 @@ def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
     return value
 
 
+MAX_READINGS = 8
+MAX_READING = 40
+
+
+def _readings(value: Any, label: str) -> dict[str, str]:
+    """What the person wrote down against each measurement: text keyed by the measurement it answers. It is kept, never interpreted."""
+
+    if value is None:
+        return {}
+    if not isinstance(value, dict) or len(value) > MAX_READINGS:
+        raise DonorCaptureError(f"{label} must be an object with at most {MAX_READINGS} entries")
+    clean: dict[str, str] = {}
+    for key, text in value.items():
+        if not isinstance(key, str) or len(key) > 120 or has_hidden_characters(key):
+            raise DonorCaptureError(f"{label} has a measurement name that cannot be used")
+        clean[key] = _text(text, f"{label}[{key[:20]!r}]", MAX_READING)
+    return clean
+
+
 def validate_capture(spec: Any) -> dict[str, Any]:
     if not isinstance(spec, dict):
         raise DonorCaptureError("the capture must be an object")
@@ -205,9 +224,10 @@ def validate_capture(spec: Any) -> dict[str, Any]:
         if not isinstance(side, str) or side not in ("front", "back"):
             raise DonorCaptureError(f"{label}.side must be front or back")
         marking = _text(row.get("marking"), f"{label}.marking", MAX_MARKING)
+        readings = _readings(row.get("readings"), f"{label}.readings")
         clean.append(
             {"ref": ref, "kind": kind, "package": package, "footprint": name_fp, "mounting": mounting, "x": x, "y": y, "w": part_w, "l": part_l,
-             "sized_by_you": row.get("width_mm") is not None or row.get("length_mm") is not None, "size_source": info["size_source"], "size_is_typical": info["size_is_typical"], "rotation": int(rotation), "side": side, "marking": marking}
+             "sized_by_you": row.get("width_mm") is not None or row.get("length_mm") is not None, "size_source": info["size_source"], "size_is_typical": info["size_is_typical"], "rotation": int(rotation), "side": side, "marking": marking, "readings": readings}
         )
     return {"name": name, "width": width, "length": length, "thickness": thickness, "parts": clean}
 
@@ -239,6 +259,7 @@ def capture_to_assembly(spec: Any) -> dict[str, Any]:
                 "height_mm": _r(height), "height_basis": basis, "pin1": None, "pad_count": 0, "do_not_populate": False,
                 "mounting": row["mounting"], "component": row["kind"],
                 "identity": {"mpn": None, "manufacturer": None, "typed": row["marking"] or None, "source": "typed"},
+                "readings": row["readings"],
                 "pads": [],
             }
         )

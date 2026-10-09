@@ -291,6 +291,7 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
     for s in supply[:3]:
         gates.append(
             {
+                "key": f"voltage|pin {s['number']} ({s['name']})|pin {g['number']} ({g['name']})",
                 "kind": "voltage",
                 "from": f"pin {s['number']} ({s['name']})",
                 "to": f"pin {g['number']} ({g['name']})",
@@ -300,6 +301,7 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         )
     gates.append(
         {
+            "key": f"isolation|pin {supply[0]['number']} ({supply[0]['name']})|pin {g['number']} ({g['name']})",
             "kind": "isolation",
             "from": f"pin {supply[0]['number']} ({supply[0]['name']})",
             "to": f"pin {g['number']} ({g['name']})",

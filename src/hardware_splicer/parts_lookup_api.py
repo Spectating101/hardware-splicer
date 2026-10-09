@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from .part_lookup import PartLookupError, libraries_available, lookup_part
+from .part_lookup import PartLookupError, libraries_available, lookup_part, power_gates
 from .parts_intel import enrich_bom, parts_providers_from_env
 from .teardown_search import TeardownSearchError, search_teardowns
 
@@ -25,6 +25,10 @@ def create_parts_lookup_router() -> APIRouter:
         except PartLookupError as exc:
             raise _unprocessable("invalid_marking", str(exc)) from None
         found["libraries_available"] = libraries_available()
+        best = next((m for m in found["matches"] if m["tier"] in {"exact", "variant"}), None)
+        # Only a name or variant match has pins we may speak of; a family match is another chip.
+        found["gates"] = power_gates(best["library"], best["name"], best["footprint"]) if best else []
+        found["gates_from"] = best["name"] if best else None
         found["search_links"] = {}
         text = found["query"]
         if not found["matches"] and 3 <= len(text) <= 8 and text.isalnum():

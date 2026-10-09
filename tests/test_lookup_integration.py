@@ -173,3 +173,54 @@ def test_live_ifixit_still_answers_in_the_shape_we_read() -> None:
     teardown_search.clear_cache()
     result = teardown_search.search_teardowns("roku remote teardown")
     assert result["available"] is True and result["results"] and all(r["url"].startswith("https://www.ifixit.com/") for r in result["results"])
+
+
+# --- readings: what a person wrote down against each measurement ----------------------------------------------------------------
+
+
+@needs_libraries
+def test_the_lookup_api_offers_the_measurements_for_a_matched_chip_and_none_for_a_family_or_a_miss(api: TestClient) -> None:
+    matched = api.get("/v1/parts/lookup", params={"marking": "NE555P"}).json()
+    assert matched["gates_from"] == "NE555P" and [g["kind"] for g in matched["gates"]] == ["voltage", "isolation"]
+    assert all(g["key"].startswith(g["kind"] + "|pin ") for g in matched["gates"])
+    family = api.get("/v1/parts/lookup", params={"marking": "W25Q128JWSIQ"}).json()
+    assert family["matches"] and family["gates"] == [] and family["gates_from"] is None
+    assert api.get("/v1/parts/lookup", params={"marking": "L9110S"}).json()["gates"] == []
+
+
+@needs_libraries
+def test_recorded_readings_are_counted_shown_and_never_called_a_pass() -> None:
+    gate_keys = [g["key"] for g in part_lookup.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")]
+    spec = _spec(("NE555P", ""))
+    none = build_donor_salvage_plan(spec)
+    assert none["parts"][0]["lookup"]["evidence"] == {"total": 2, "recorded": 0, "ignored": 0}
+    assert none["summary"]["evidence"] == {"chips_with_measurements": 1, "readings_recorded": 0, "readings_open": 2}
+    assert "Measurements still to record before you trust them: U1" in none["steps"][-1]["instruction"]
+
+    spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", "voltage|pin 99 (NOPE)|pin 1 (GND)": "1 V"}
+    some = build_donor_salvage_plan(spec)
+    lookup = some["parts"][0]["lookup"]
+    assert lookup["evidence"] == {"total": 2, "recorded": 1, "ignored": 1}                      # a reading for a measurement that no longer exists is reported, not applied
+    assert [g["reading"] for g in lookup["gates"]] == ["5.02 V", None]
+    step = _step(some, "U1")
+    assert "Readings recorded: 1 of 2" in step["instruction"] and "not a pass" in step["instruction"]
+    assert [c["reading"] for c in step["checks"] if c["check"] == "measure"] == ["5.02 V", None]
+    assert "pass" not in json.dumps(some["summary"]).lower().replace("compass", "")
+
+    spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", gate_keys[1]: "open circuit"}
+    full = build_donor_salvage_plan(spec)
+    assert full["parts"][0]["lookup"]["evidence"]["recorded"] == 2 and full["summary"]["evidence"]["readings_open"] == 0
+    assert "Measurements still to record" not in full["steps"][-1]["instruction"]
+
+
+@pytest.mark.parametrize(
+    "readings",
+    ["text", ["a"], {"k" * 121: "x"}, {"k": "x" * 41}, {"k": 5}, {"k": ["x"]}, {"k‮": "x"}, {"k": "5​V"}, {f"k{i}": "x" for i in range(9)}],
+)
+def test_readings_that_are_not_short_plain_text_are_refused(readings) -> None:
+    from hardware_splicer.donor_capture import DonorCaptureError
+
+    spec = _spec(("NE555P", ""))
+    spec["parts"][0]["readings"] = readings
+    with pytest.raises(DonorCaptureError):
+        build_donor_salvage_plan(spec)

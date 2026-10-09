@@ -282,11 +282,16 @@ def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
         done += 1
         matches = found["matches"]
         best = next((m for m in matches if m["tier"] in {"exact", "variant"}), None)
+        readings = part.get("readings") or {}
+        gates = part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else []
+        for gate in gates:
+            gate["reading"] = readings.get(gate["key"]) or None
         part["lookup"] = {
             "query": found["query"], "tier": best["tier"] if best else ("family" if matches else "none"),
             "match": {k: best[k] for k in ("name", "library", "description", "datasheet", "footprint", "tier_text")} if best else None,
             "family": [m["name"] for m in matches if m["tier"] == "family"][:4],
-            "gates": part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else [],
+            "gates": gates,
+            "evidence": {"total": len(gates), "recorded": sum(1 for g in gates if g["reading"]), "ignored": max(0, len(readings) - sum(1 for g in gates if g["reading"]))},
         }
     return part_lookup.source() if done else None
 
@@ -340,7 +345,9 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         if first["kind"] == "ic" and first.get("lookup") and first["lookup"]["gates"]:
             library_name = first["lookup"]["match"]["name"]
             for gate in first["lookup"]["gates"]:
-                checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"]})
+                checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"], "reading": gate.get("reading")})
+            evidence = first["lookup"]["evidence"]
+            text += f" Readings recorded: {evidence['recorded']} of {evidence['total']}. A recorded reading is a number you wrote down, not a pass: only the datasheet says what it should be."
             text += f" The pin names in the measurements come from KiCad's entry for {library_name}, not from your chip: confirm them in its datasheet before you touch a probe to it."
         if first["kind"] == "connector":
             checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
@@ -353,11 +360,13 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         )
         current_side = first["side"]
     skipped = [p["ref"] for p in fitted if p["salvage"]["verdict"] == "skip"]
+    open_gates = [p["ref"] for p in fitted if p.get("lookup") and p["lookup"]["evidence"]["total"] > p["lookup"]["evidence"]["recorded"]]
     steps.append(
         {
             "step_id": f"step-{len(steps) + 1:02d}", "order": len(steps) + 1, "kind": "finish", "title": "Sort, label and test what you kept",
             "instruction": "Put each kind of part in its own labelled bag with where it came from. Nothing you took is known to work until it has been tested."
-            + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else ""),
+            + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else "")
+            + (f" Measurements still to record before you trust them: {', '.join(open_gates[:12])}{' and more' if len(open_gates) > 12 else ''}." if open_gates else ""),
             "side": current_side, "turn_board_over": False, "refs": [], "part_ids": [],
             "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "behaves as its type should; otherwise discard"}],
         }
@@ -386,6 +395,11 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             "counts": counts,
             "keep": [{"ref": p["ref"], "what": (p["identity"].get("mpn") or p["identity"].get("typed") or p["value"]), "manufacturer": p["identity"]["manufacturer"]} for p in fitted if p["salvage"]["verdict"] == "keep"],
             "steps": len(steps),
+            "evidence": {
+                "chips_with_measurements": sum(1 for p in fitted if p.get("lookup") and p["lookup"]["evidence"]["total"]),
+                "readings_recorded": sum(p["lookup"]["evidence"]["recorded"] for p in fitted if p.get("lookup")),
+                "readings_open": sum(p["lookup"]["evidence"]["total"] - p["lookup"]["evidence"]["recorded"] for p in fitted if p.get("lookup")),
+            },
         },
         "warnings": base["warnings"],
     }
