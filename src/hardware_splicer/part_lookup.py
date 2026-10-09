@@ -1,0 +1,342 @@
+"""Look a marking up in KiCad's own libraries, offline.
+
+KiCad ships about twenty thousand symbols with a description, a datasheet link, a default footprint and every pin's name and type,
+and thousands of footprints with exact courtyard sizes. They are a real, free, versioned dataset that is already on the machine,
+so this reads them instead of keeping a table of our own.
+
+What a hit means, and does not: a library holds a part that has that name. It is not proof that the chip in front of you is that part
+(a marking can be a house code, worn or fake), and a family match is the same family, not the same part. Every answer carries the
+library's name and version so it can be checked.
+"""
+
+from __future__ import annotations
+
+import bisect
+import os
+import re
+import threading
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+from .assembly_plan import _bbox, _children, _layer_of, _points_of
+from .kicad_diff import KicadDiffError, parse_kicad_sexp
+from .text_safety import has_hidden_characters
+
+MAX_QUERY = 40
+MIN_QUERY = 3
+MAX_MATCHES = 8
+MAX_PINS = 128
+_SYMBOL = re.compile(r'^\t\(symbol "([^"]+)"\n', re.MULTILINE)
+_PROPERTY = re.compile(r'\(property "(Value|Description|Datasheet|Footprint|ki_keywords)" "((?:[^"\\]|\\.)*)"')
+_EXTENDS = re.compile(r'\(extends "([^"]+)"\)')
+_GENERATOR = re.compile(r'\(generator_version "([^"]+)"\)')
+_FOOTPRINT_NAME = re.compile(r"^[A-Za-z0-9_.+\-]+:[A-Za-z0-9_.,+\- ]+$")
+_GROUND_NAME = re.compile(r"^(GND|VSS|AGND|DGND|PGND|GNDA|GNDD|VSSA|VEE)$", re.IGNORECASE)
+_PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):")
+
+
+class PartLookupError(ValueError):
+    """The query cannot be looked up."""
+
+
+def kicad_root() -> Path:
+    return Path(os.environ.get("HARDWARE_SPLICER_KICAD_DIR", "/usr/share/kicad"))
+
+
+def libraries_available() -> bool:
+    root = kicad_root()
+    return (root / "symbols").is_dir() and any((root / "symbols").glob("*.kicad_sym"))
+
+
+@dataclass(frozen=True)
+class _Row:
+    library: str
+    name: str
+    description: str
+    datasheet: str
+    footprint: str
+    keywords: str
+    extends: str | None
+    path: str
+    start: int
+    end: int
+
+
+@dataclass
+class _Index:
+    rows: list[_Row]
+    by_name: dict[str, list[_Row]]
+    sorted_names: list[str]
+    version: str
+
+
+_LOCK = threading.Lock()
+
+
+def _clean(value: str, limit: int) -> str:
+    text = value.replace('\\"', '"').strip()
+    return "" if has_hidden_characters(text) else text[:limit]
+
+
+@lru_cache(maxsize=1)
+def _build_index(root: str) -> _Index:
+    symbols = Path(root) / "symbols"
+    rows: list[_Row] = []
+    version = ""
+    for path in sorted(symbols.glob("*.kicad_sym")):
+        text = path.read_text(encoding="utf-8")
+        if not version:
+            found = _GENERATOR.search(text[:400])
+            version = found.group(1) if found else ""
+        starts = list(_SYMBOL.finditer(text))
+        for i, match in enumerate(starts):
+            end = starts[i + 1].start() if i + 1 < len(starts) else len(text)
+            own = text[match.start() : end]       # this symbol only: scanning past its end would read the next symbol's properties
+            props: dict[str, str] = {}
+            for key, value in _PROPERTY.findall(own[:4000]):
+                props.setdefault(key, value)
+            extends = _EXTENDS.search(own[:600])
+            rows.append(
+                _Row(
+                    library=path.stem, name=match.group(1), description=_clean(props.get("Description", ""), 200),
+                    datasheet=_clean(props.get("Datasheet", ""), 300), footprint=_clean(props.get("Footprint", ""), 120),
+                    keywords=_clean(props.get("ki_keywords", ""), 120), extends=extends.group(1) if extends else None,
+                    path=str(path), start=match.start(), end=end,
+                )
+            )
+    by_name: dict[str, list[_Row]] = {}
+    for row in rows:
+        by_name.setdefault(row.name.lower(), []).append(row)
+    return _Index(rows=rows, by_name=by_name, sorted_names=sorted(by_name), version=version)
+
+
+def _index() -> _Index:
+    with _LOCK:
+        return _build_index(str(kicad_root()))
+
+
+def clear_cache() -> None:
+    with _LOCK:
+        _build_index.cache_clear()
+        _footprint_size.cache_clear()
+
+
+def source() -> dict[str, Any]:
+    """Which library an answer came from, so it can be checked."""
+
+    index = _index()
+    return {
+        "name": "KiCad symbol library",
+        "version": index.version or "unknown",
+        "symbols": len(index.rows),
+        "path": "symbols/*.kicad_sym of the KiCad install on the server",
+        "note": "A library entry is a part with that name. It is not proof that the chip you hold is that part.",
+    }
+
+
+def normalise(marking: Any) -> str:
+    if not isinstance(marking, str):
+        raise PartLookupError("the marking must be text")
+    text = marking.strip()
+    if has_hidden_characters(text):
+        raise PartLookupError("the marking may not contain control or invisible characters")
+    if len(text) > MAX_QUERY:
+        raise PartLookupError(f"the marking may be at most {MAX_QUERY} characters")
+    return text
+
+
+def _safe_url(url: str) -> str | None:
+    return url if re.fullmatch(r"https?://[^\s\"'<>]{4,290}", url) else None
+
+
+def _prefix_rows(index: _Index, prefix: str) -> list[str]:
+    start = bisect.bisect_left(index.sorted_names, prefix)
+    names: list[str] = []
+    for name in index.sorted_names[start:]:
+        if not name.startswith(prefix):
+            break
+        names.append(name)
+        if len(names) >= 50:
+            break
+    return names
+
+
+def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
+    """Parts in KiCad's library that the marking names, in three honest tiers: the same name, a variant (one name starts the other),
+    and the same family (a long shared start). Nothing is returned for a marking too short to mean anything."""
+
+    query = normalise(marking)
+    result: dict[str, Any] = {"query": query, "source": None, "matches": [], "reason": None}
+    if len(query) < MIN_QUERY:
+        result["reason"] = f"a marking needs at least {MIN_QUERY} characters to look up"
+        return result
+    if not libraries_available():
+        result["reason"] = "KiCad's libraries are not installed on the server, so there is nothing to look up in"
+        return result
+    index = _index()
+    result["source"] = source()
+    q = query.lower()
+    chosen: list[tuple[str, str]] = []
+    seen: set[str] = set()
+
+    def take(names: list[str], tier: str) -> None:
+        for name in names:
+            if name not in seen and len(chosen) < limit:
+                seen.add(name)
+                chosen.append((name, tier))
+
+    if q in index.by_name:
+        take([q], "exact")
+    if len(q) >= 4:
+        take(sorted(_prefix_rows(index, q), key=len), "variant")
+    # A library name that is the start of the marking (the marking carries a package or grade suffix the library leaves off).
+    for k in range(len(q) - 1, 4, -1):
+        if q[:k] in index.by_name:
+            take([q[:k]], "variant")
+            break
+    if len(chosen) < limit:
+        floor = max(6, int(len(q) * 0.6))
+        for k in range(len(q) - 1, floor - 1, -1):
+            names = [n for n in _prefix_rows(index, q[:k]) if n not in seen]
+            if names:
+                take(sorted(names, key=lambda n: (abs(len(n) - len(q)), n)), "family")
+                break
+    texts = {
+        "exact": "the library has a part with exactly this name",
+        "variant": "the library has a part whose name starts or ends the same way: likely the same chip with a different package or grade",
+        "family": "the library has parts from the same family, not this one: use them to learn what kind of chip it probably is, no more",
+    }
+    for name, tier in chosen:
+        for row in index.by_name[name][:2]:
+            result["matches"].append(
+                {
+                    "name": row.name, "library": row.library, "tier": tier, "tier_text": texts[tier], "description": row.description,
+                    "datasheet": _safe_url(row.datasheet), "footprint": row.footprint or None, "keywords": row.keywords,
+                }
+            )
+    result["matches"] = result["matches"][:limit]
+    return result
+
+
+def _find_row(index: _Index, library: str, name: str) -> _Row | None:
+    for row in index.by_name.get(name.lower(), []):
+        if row.library == library and row.name == name:
+            return row
+    return None
+
+
+def symbol_pins(library: str, name: str) -> dict[str, Any]:
+    """Every pin of a library symbol: number, name and electrical type. A derived symbol takes its pins from the symbol it extends."""
+
+    index = _index()
+    row = _find_row(index, library, name)
+    if row is None:
+        raise PartLookupError("no such library symbol")
+    seen_extends = 0
+    while row.extends and seen_extends < 4:
+        base = _find_row(index, row.library, row.extends)
+        if base is None:
+            break
+        row, seen_extends = base, seen_extends + 1
+    text = Path(row.path).read_text(encoding="utf-8")[row.start : row.end]
+    tree = None
+    for candidate in (text, text.rstrip()[:-1]):
+        try:
+            tree = parse_kicad_sexp(candidate)
+            break
+        except KicadDiffError:
+            continue
+    if tree is None:
+        raise PartLookupError("the library symbol could not be read")
+    pins: list[dict[str, str]] = []
+
+    def walk(node: list[Any]) -> None:
+        for child in node:
+            if not isinstance(child, list) or not child:
+                continue
+            if child[0] == "pin" and len(child) > 2 and isinstance(child[1], str):
+                name_node = next((c for c in _children(child, "name")), None)
+                number_node = next((c for c in _children(child, "number")), None)
+                pins.append({"type": child[1], "name": str(name_node[1]) if name_node and len(name_node) > 1 else "", "number": str(number_node[1]) if number_node and len(number_node) > 1 else ""})
+            else:
+                walk(child)
+
+    walk(tree)
+    unique: dict[str, dict[str, str]] = {}
+    for pin in pins:
+        unique.setdefault(pin["number"], pin)
+    ordered = sorted(unique.values(), key=lambda p: (len(p["number"]), p["number"]))
+    return {"library": library, "name": name, "pins_total": len(ordered), "pins": ordered[:MAX_PINS]}
+
+
+def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str, Any]]:
+    """Things to measure before trusting a chip, read from its pin names and types: supply against ground, and whether they are shorted.
+
+    They say what to measure and where, never what the reading should be: the range is the datasheet's to give.
+    """
+
+    try:
+        pins = symbol_pins(library, name)["pins"]
+    except PartLookupError:
+        return []
+    ground = [p for p in pins if _GROUND_NAME.match(p["name"])]
+    supply = [p for p in pins if p["type"] in {"power_in", "power_out"} and not _GROUND_NAME.match(p["name"]) and p["name"] not in {"NC", "~"}]
+    if not ground or not supply:
+        return []
+    g = ground[0]
+    where = " Pin 1 is the corner with the dot or notch; count anticlockwise from it, seen from above." if footprint and _PIN_ONE_PACKAGES.match(footprint) else ""
+    gates: list[dict[str, Any]] = []
+    for s in supply[:3]:
+        gates.append(
+            {
+                "kind": "voltage",
+                "from": f"pin {s['number']} ({s['name']})",
+                "to": f"pin {g['number']} ({g['name']})",
+                "instruction": f"With the board powered the way it was originally, measure between pin {s['number']} ({s['name']}) and pin {g['number']} ({g['name']}), and write the reading down.{where}",
+                "expect": "a steady voltage: compare it with the datasheet's supply range before you connect anything of yours",
+            }
+        )
+    gates.append(
+        {
+            "kind": "isolation",
+            "from": f"pin {supply[0]['number']} ({supply[0]['name']})",
+            "to": f"pin {g['number']} ({g['name']})",
+            "instruction": f"With the power off, check that pin {supply[0]['number']} ({supply[0]['name']}) and pin {g['number']} ({g['name']}) are not shorted together.{where}",
+            "expect": "not near 0 ohms",
+        }
+    )
+    return gates
+
+
+@lru_cache(maxsize=512)
+def _footprint_size(name: str) -> tuple[float, float] | None:
+    if not _FOOTPRINT_NAME.match(name):
+        return None
+    library, _, item = name.partition(":")
+    root = (kicad_root() / "footprints").resolve()
+    path = (root / f"{library}.pretty" / f"{item}.kicad_mod").resolve()
+    if root not in path.parents or not path.is_file():
+        return None
+    try:
+        tree = parse_kicad_sexp(path.read_text(encoding="utf-8"))
+    except (KicadDiffError, OSError):
+        return None
+    points: list[tuple[float, float]] = []
+    for item_node in tree:
+        if isinstance(item_node, list) and item_node and item_node[0] in {"fp_line", "fp_rect", "fp_circle", "fp_poly", "fp_arc"} and _layer_of(item_node) == "F.CrtYd":
+            points += _points_of(item_node)
+    box = _bbox(points)
+    if box is None:
+        return None
+    return (round(box[2] - box[0], 3), round(box[3] - box[1], 3))
+
+
+def footprint_size(name: str) -> dict[str, Any] | None:
+    """The courtyard of a KiCad footprint, in mm: a little larger than the part itself, and exact for that footprint."""
+
+    size = _footprint_size(name)
+    if size is None:
+        return None
+    return {"width_mm": size[0], "length_mm": size[1], "source": f"KiCad footprint library {name}, courtyard"}

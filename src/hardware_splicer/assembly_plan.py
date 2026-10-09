@@ -34,6 +34,12 @@ AUTHORITY_STATEMENT = (
 
 # (pattern on the footprint name, height in mm, basis). First match wins. Heights are typical seated heights above the board.
 _HEIGHTS: tuple[tuple[str, float, str], ...] = (
+    (r"USB_A", 6.5, "typical USB-A receptacle"),
+    (r"BarrelJack", 11.0, "typical barrel jack"),
+    (r"RJ45", 13.5, "typical RJ45 jack"),
+    (r"Jack_3\.5mm", 5.5, "typical 3.5 mm audio jack"),
+    (r"Fuseholder", 10.0, "typical 5x20 fuse holder"),
+    (r"TerminalBlock", 10.0, "typical terminal block"),
     (r"LED_D\d", 8.6, "typical 5 mm LED"),
     (r"CP_Radial|Capacitor_THT:CP", 12.0, "typical radial electrolytic"),
     (r"C_Disc", 6.0, "typical ceramic disc"),

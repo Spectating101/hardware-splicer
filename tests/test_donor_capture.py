@@ -74,8 +74,8 @@ def test_geometry_is_what_was_typed_and_sizes_say_whether_they_were_measured() -
     base = capture_to_assembly(SPEC)
     assert base["board"]["size_mm"] == [60.0, 40.0] and base["board"]["outline"]["bbox"] == {"x0": 0.0, "y0": 0.0, "x1": 60.0, "y1": 40.0}
     u3 = next(p for p in base["parts"] if p["ref"] == "U3")
-    assert u3["corners"] == [[17.0, 7.5], [23.0, 7.5], [23.0, 12.5], [17.0, 12.5]]      # a typical 6.0 x 5.0 SOIC centred on (20, 10)
-    assert u3["outline_basis"].startswith("typical size for a SOIC") and "did not measure" in u3["outline_basis"]
+    assert u3["corners"] == [[16.3, 7.3], [23.7, 7.3], [23.7, 12.7], [16.3, 12.7]]      # KiCad's 7.4 x 5.4 SOIC-8 courtyard centred on (20, 10)
+    assert u3["outline_basis"].startswith("KiCad library courtyard for a SOIC") and "did not measure" in u3["outline_basis"] and "larger than the part" in u3["outline_basis"]
     assert u3["identity"] == {"mpn": None, "manufacturer": None, "typed": "L9110S", "source": "typed"}
     measured = copy.deepcopy(SPEC)
     measured["parts"][0].update(width_mm=7.2, length_mm=5.1, rotation_deg=90)
@@ -169,7 +169,8 @@ def test_the_options_list_every_kind_with_a_typical_size_and_says_it_is_typical(
     assert "Measure the real part" in options["size_basis"]
     assert set(options["kinds"]) >= {"connector", "ic", "capacitor", "resistor", "battery", "mains or power part"}
     soic = options["kinds"]["ic"]["packages"]["SOIC"]
-    assert soic == {"width_mm": 6.0, "length_mm": 5.0, "mounting": "smd"}
+    assert (soic["width_mm"], soic["length_mm"], soic["mounting"], soic["size_is_typical"]) == (7.4, 5.4, "smd", False)
+    assert "courtyard" in soic["size_source"] and "Package_SO:SOIC-8" in soic["size_source"]
     assert options["kinds"]["capacitor"]["prefix"] == "C"
 
 
@@ -267,3 +268,29 @@ def test_a_typed_board_never_talks_about_a_file_and_does_not_upgrade_a_reading_t
     assert any("sizes are typical for each package unless you typed them" in limit for limit in plan["limits"])
     # A file's chip keeps the plain label: it was named by the file, not by a reading.
     assert _verdict(build_donor_salvage_plan({**SPEC, "parts": [p for p in SPEC["parts"] if p["ref"] == "J1"]}), "J1")["label"] == "Worth taking"
+
+
+def test_every_size_comes_from_a_real_library_footprint_or_says_it_is_typical() -> None:
+    from hardware_splicer.donor_capture import _TABLE
+    from hardware_splicer.part_lookup import footprint_size, libraries_available
+
+    if not libraries_available():
+        pytest.skip("KiCad's libraries are not installed")
+    typical_only = []
+    for kind, packages in _TABLE.items():
+        for package, (rule_name, real, _w, _l, _mounting) in packages.items():
+            if real is not None:
+                assert footprint_size(real) is not None, f"{kind}/{package}: {real} is not a footprint in KiCad's library"
+            else:
+                typical_only.append((kind, package))
+            info = capture_options()["kinds"][kind]["packages"][package]
+            assert info["size_is_typical"] is (real is None), (kind, package)
+            assert ("courtyard" in info["size_source"]) is (real is not None)
+    assert sorted(typical_only) == [("battery", "cell (18650 or similar)"), ("battery", "lithium pouch"), ("connector", "other connector"), ("other", "something else")]
+
+
+def test_a_part_with_no_library_footprint_is_drawn_at_a_typical_size_and_says_so() -> None:
+    spec = copy.deepcopy(SPEC)
+    spec["parts"] = [{"ref": "BT1", "kind": "battery", "package": "lithium pouch", "x_mm": 30, "y_mm": 20}]
+    part = capture_to_assembly(spec)["parts"][0]
+    assert part["outline_basis"].startswith("typical size for a lithium pouch")
