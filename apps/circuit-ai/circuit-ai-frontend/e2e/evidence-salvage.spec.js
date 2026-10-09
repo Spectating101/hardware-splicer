@@ -112,3 +112,63 @@ test('switching between putting the board together and taking it apart changes t
   await expect(viewer).toHaveAttribute('data-placed', '38');
   expect(errors).toEqual([]);
 });
+
+test('each switch between the two modes builds exactly one new scene, releases the old one and starts from zero', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    window.__contexts = [];
+    HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+      const context = original.call(this, kind, ...rest);
+      if (context && String(kind).startsWith('webgl') && document.querySelector('[data-testid="assembly-viewer"]')) window.__contexts.push(context);
+      return context;
+    };
+  });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByTestId('assemble-tab').click();
+  const viewer = page.getByTestId('assembly-viewer');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  await expect(viewer.locator('canvas')).toBeVisible({ timeout: 30000 });
+  await settle(viewer);
+  const made = () => page.evaluate(() => window.__contexts.length);
+  expect(await made()).toBe(1);
+
+  await page.getByTestId('assembly-mode-salvage').click();
+  // Straight after the click nothing from the old mode is still showing.
+  await expect(viewer).toHaveAttribute('data-placed', '0');
+  await expect(viewer).toHaveAttribute('data-removed', '0');
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 7/, { timeout: 30000 });
+  await settle(viewer);
+  await page.waitForTimeout(500);
+  expect(await made()).toBe(2);                       // one new scene, not one for the stale plan and another for the new one
+
+  await page.getByTestId('assembly-slider').focus();
+  await page.keyboard.press('End');
+  await settle(viewer);
+  await expect(viewer).toHaveAttribute('data-removed', '5');
+  await page.getByTestId('assembly-mode-build').click();
+  await expect(viewer).toHaveAttribute('data-removed', '0');
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 12/, { timeout: 30000 });
+  await settle(viewer);
+  await page.waitForTimeout(500);
+  expect(await made()).toBe(3);
+  const lost = await page.evaluate(() => window.__contexts.map((context) => context.isContextLost()));
+  expect(lost).toEqual([true, true, false]);          // only the scene on screen holds a context
+  expect(errors).toEqual([]);
+});
+
+test('take-apart mode says take-apart, not build, when something goes wrong', async ({ page }) => {
+  await page.route('**/salvage-plan', (route) => route.fulfill({ json: { ok: true, revision: 6, available: false, reason: 'no retained pcb' } }));
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByTestId('assemble-tab').click();
+  const viewer = page.getByTestId('assembly-viewer');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  await page.getByTestId('assembly-mode-salvage').click();
+  await expect(viewer).toHaveAttribute('data-state', 'unavailable', { timeout: 30000 });
+  await expect(viewer).toContainText('No take-apart plan');
+  await expect(viewer).toContainText('nothing to take apart from');
+  await expect(viewer).not.toContainText('build');
+});

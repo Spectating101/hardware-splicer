@@ -105,6 +105,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
   const [stats, setStats] = useState<Stats>({ placed: 0, flying: 0, removed: 0 });
   const [mode, setMode] = useState<'build' | 'salvage'>(initialMode);
   const salvageMode = mode === 'salvage';
+  const what = salvageMode ? 'take-apart plan' : 'build sequence';
   const base = `/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/revisions/${revision}`;
   const url = `${base}/${salvageMode ? 'salvage-plan' : 'assembly-plan'}`;
   const boardUrl = `${base}/assembly-plan/board.glb`;
@@ -121,10 +122,10 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
       .then((response) => response.json())
       .then((body: Fetched) => {
         if (cancelled) return;
-        if (body.ok === false) throw new Error(body.error || 'The build sequence could not be requested.');
+        if (body.ok === false) throw new Error(body.error || `The ${what} could not be requested.`);
         if (!body.available || !body.plan) {
           setState('unavailable');
-          setMessage(body.reason === 'no retained pcb' ? 'This revision has no retained board file, so there is nothing to build from.' : body.reason || 'No build sequence is available for this revision.');
+          setMessage(body.reason === 'no retained pcb' ? `This revision has no retained board file, so there is nothing to ${salvageMode ? 'take apart' : 'build'} from.` : body.reason || `No ${what} is available for this revision.`);
           return;
         }
         if (!body.plan.steps.length) {
@@ -138,7 +139,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
       .catch((caught) => {
         if (cancelled) return;
         setState('error');
-        setMessage(caught instanceof Error ? caught.message : 'The build sequence could not be requested.');
+        setMessage(caught instanceof Error ? caught.message : `The ${what} could not be requested.`);
       });
     return () => { cancelled = true; };
   }, [url]);
@@ -556,10 +557,9 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
   const active = plan?.steps[step];
   const estimateNote = useMemo(() => {
     if (!plan) return '';
-    const basis = new Set(plan.parts.map((part) => part.outline_basis));
-    return basis.size > 1 || [...basis].some((value) => !value.startsWith('courtyard'))
-      ? 'Some outlines come from pad positions because those footprints have no courtyard.'
-      : '';
+    const bases = plan.parts.map((part) => part.outline_basis);
+    if (bases.some((value) => value.startsWith('no outline'))) return 'Some parts have no outline or pads in the file and are drawn as a small box.';
+    return bases.some((value) => !value.startsWith('courtyard')) ? 'Some outlines come from pad positions because those footprints have no courtyard.' : '';
   }, [plan]);
 
   return (
@@ -583,7 +583,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
       }}
     >
       <div className="relative min-h-[300px] flex-1">
-        <div ref={hostRef} className="absolute inset-0" role="img" aria-label={`Animated build sequence for revision ${revision}. Drag to orbit, scroll to zoom.`} />
+        <div ref={hostRef} className="absolute inset-0" role="img" aria-label={`Animated ${what} for revision ${revision}. Drag to orbit, scroll to zoom.`} />
         <div ref={labelsRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />
         {state === 'loading' || (state === 'ready' && !sceneReady) ? (
           <div className="absolute inset-0 flex items-center justify-center text-stone-400"><LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" /></div>
@@ -592,7 +592,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
           <div className="absolute inset-0 flex items-center justify-center p-8">
             <div className="max-w-sm text-center">
               <Box className="mx-auto h-9 w-9 text-stone-600" aria-hidden="true" />
-              <div className="mt-3 text-sm font-medium text-stone-200">{state === 'error' ? 'Build sequence failed' : 'No build sequence'}</div>
+              <div className="mt-3 text-sm font-medium text-stone-200">{state === 'error' ? `The ${what} failed` : `No ${what}`}</div>
               <div className="mt-1 text-xs leading-5 text-stone-400">{message}</div>
             </div>
           </div>
@@ -600,7 +600,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
         {state === 'ready' && sceneReady ? (
           <div
             className="pointer-events-none absolute left-3 top-3 max-w-[16rem] rounded bg-stone-950/75 px-2 py-1 text-[10px] leading-4 text-stone-300"
-            title="Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is conventional, not the manufacturer's."
+            title={salvageMode ? "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is a rule of thumb for taking parts off, not a procedure from the manufacturer." : "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is conventional, not the manufacturer's."}
           >
             Stand-in shapes · typical heights{estimateNote ? ` · ${estimateNote}` : ''}
           </div>
@@ -613,7 +613,17 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
                 type="button"
                 data-testid={`assembly-mode-${value}`}
                 aria-pressed={mode === value}
-                onClick={() => { if (mode !== value) { setPlaying(false); setMode(value); } }}
+                onClick={() => {
+                  if (mode === value) return;
+                  // Drop the old plan and scene in the same update, so nothing is rebuilt from one mode's plan under the other's rules.
+                  setPlaying(false);
+                  setPlan(null);
+                  setSceneReady(false);
+                  setState('loading');
+                  setStep(0);
+                  setStats({ placed: 0, flying: 0, removed: 0 });
+                  setMode(value);
+                }}
                 className={`px-2.5 py-1 ${mode === value ? 'bg-amber-300 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
               >
                 {value === 'build' ? 'Put together' : 'Take apart'}
@@ -660,7 +670,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
               <button
                 type="button"
                 onClick={() => { if (!playing && step >= last) setStep(0); setPlaying((value) => !value); }}
-                aria-label={playing ? 'Pause' : 'Play the build'}
+                aria-label={playing ? 'Pause' : salvageMode ? 'Play the take-apart' : 'Play the build'}
                 aria-pressed={playing}
                 data-testid="assembly-play"
                 className="inline-flex h-8 items-center gap-1.5 rounded-md bg-amber-300 px-3 text-xs font-semibold text-stone-950 hover:bg-amber-200"
