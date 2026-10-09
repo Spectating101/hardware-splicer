@@ -80,7 +80,7 @@ def test_geometry_is_what_was_typed_and_sizes_say_whether_they_were_measured() -
     measured = copy.deepcopy(SPEC)
     measured["parts"][0].update(width_mm=7.2, length_mm=5.1, rotation_deg=90)
     got = next(p for p in capture_to_assembly(measured)["parts"] if p["ref"] == "U3")
-    assert got["outline_basis"] == "the size you typed"
+    assert got["outline_basis"] == "the size you gave it (typed, or drawn over your photo)"
     xs, ys = [c[0] for c in got["corners"]], [c[1] for c in got["corners"]]
     assert (round(max(xs) - min(xs), 3), round(max(ys) - min(ys), 3)) == (5.1, 7.2)        # turned a quarter: width and length swap
 
@@ -265,7 +265,7 @@ def test_a_typed_board_never_talks_about_a_file_and_does_not_upgrade_a_reading_t
     assert chip["verdict"] == "keep" and chip["label"] == "Worth taking, if the marking checks out"
     step = next(s for s in plan["steps"] if "U3" in s["refs"])
     assert step["verdict_label"] == chip["label"] and any("agrees with a datasheet" in c["expect"] for c in step["checks"])
-    assert any("sizes are typical for each package unless you typed them" in limit for limit in plan["limits"])
+    assert any("sizes are KiCad's library courtyards or typical for the package unless you gave them" in limit for limit in plan["limits"])
     # A file's chip keeps the plain label: it was named by the file, not by a reading.
     assert _verdict(build_donor_salvage_plan({**SPEC, "parts": [p for p in SPEC["parts"] if p["ref"] == "J1"]}), "J1")["label"] == "Worth taking"
 

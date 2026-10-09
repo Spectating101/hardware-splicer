@@ -20,10 +20,11 @@ export type AssemblyPart = {
   pin1: { x: number; y: number } | null;
   pads: { number: string; x: number; y: number; net: string | null }[];
   mounting?: string | null;
-  identity?: { mpn: string | null; manufacturer: string | null };
+  identity?: { mpn: string | null; manufacturer: string | null; typed?: string | null; source?: string };
+  lookup?: { tier: string; match: { name: string; library: string; description: string; datasheet: string | null; footprint: string | null } | null; family: string[]; evidence: { total: number; recorded: number; ignored: number } };
   salvage?: { verdict: string; label: string; effort: string; tool: string; reasons: string[]; hazards: string[]; basis: string };
 };
-export type AssemblyCheck = { kind: string; check: string; from: string; to: string; net: string; expect: string };
+export type AssemblyCheck = { kind: string; check: string; from: string; to: string; net: string; expect: string; detail?: string; reading?: string | null; gate_kind?: string };
 export type AssemblyStep = {
   step_id: string;
   order: number;
@@ -69,13 +70,14 @@ const VERDICT_CHIP: Record<string, string> = {
   skip: 'bg-stone-700/40 text-stone-300',
 };
 
-function checkText(check: { check: string; from: string; to: string }): string {
+function checkText(check: { check: string; from: string; to: string; detail?: string }): string {
   switch (check.check) {
     case 'isolation': return `meter between ${check.from} and ${check.to}`;
     case 'continuity': return `beep ${check.from} to ${check.to}`;
     case 'test': return `test ${check.from} with ${check.to}`;
     case 'read_marking': return `read ${check.to} on ${check.from}`;
     case 'inspect': return `inspect the ${check.to} of ${check.from}`;
+    case 'measure': return check.detail ?? `measure ${check.from} against ${check.to}`;
     default: return `check ${check.from} against ${check.to}`;
   }
 }
@@ -580,7 +582,7 @@ export function AssemblyViewer({
     if (!plan) return '';
     const bases = plan.parts.map((part) => part.outline_basis);
     // A board a person described has no courtyards: its sizes are what they typed, or typical for the package.
-    if (bases.some((value) => value.startsWith('typical size') || value === 'the size you typed')) return 'Sizes are typical for each package unless you typed them.';
+    if (bases.some((value) => value.startsWith('typical size') || value.startsWith('the size you gave it') || value.startsWith('KiCad library courtyard'))) return "Sizes are KiCad's library courtyards or typical for the package, unless you gave them.";
     if (bases.some((value) => value.startsWith('no outline'))) return 'Some parts have no outline or pads in the file and are drawn as a small box.';
     return bases.some((value) => !value.startsWith('courtyard')) ? 'Some outlines come from pad positions because those footprints have no courtyard.' : '';
   }, [plan]);
@@ -728,6 +730,7 @@ export function AssemblyViewer({
               {active.checks.map((check, index) => (
                 <li key={`${check.from}-${check.to}-${index}`}>
                   <span className="text-stone-500">Try:</span> {checkText(check)} — {check.expect}
+                  {check.check === 'measure' ? <span className="ml-1 text-stone-300" data-testid="assembly-reading">{check.reading ? `Recorded: ${check.reading}` : 'Not recorded yet'}</span> : null}
                 </li>
               ))}
             </ul>

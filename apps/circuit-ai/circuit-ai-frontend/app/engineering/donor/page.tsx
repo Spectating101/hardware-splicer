@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Download, LoaderCircle, Plus, RotateCcw, Trash2, Upload } from 'lucide-react';
+import { Download, LoaderCircle, Plus, RotateCcw, Ruler, Trash2, Upload } from 'lucide-react';
 import { AssemblyViewer, type AssemblyPlan } from '@/components/engineering/assembly-viewer';
+import { PartLookupPanel } from '@/components/engineering/part-lookup-panel';
+import { TeardownSearch } from '@/components/engineering/teardown-search';
 import { usePageTitle } from '@/components/use-page-title';
+import { reclaimRows, toCsv } from '@/lib/reclaim';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/proxy-client';
 
 type Part = {
@@ -19,6 +22,7 @@ type Part = {
   length_mm: number | null;
   rotation_deg: number;
   side: 'front' | 'back';
+  readings: Record<string, string>;
 };
 type Capture = { name: string; width_mm: number; length_mm: number; parts: Part[] };
 type Options = {
@@ -39,15 +43,15 @@ const EXAMPLE: Capture = {
   width_mm: 60,
   length_mm: 40,
   parts: [
-    { key: 'e1', ref: 'U3', kind: 'ic', package: 'SOIC', marking: '', x_mm: 22, y_mm: 12, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e2', ref: 'U4', kind: 'ic', package: 'SOIC', marking: 'L9110S', x_mm: 34, y_mm: 12, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e3', ref: 'J_MOTOR_L', kind: 'connector', package: 'JST', marking: '', x_mm: 6, y_mm: 8, width_mm: null, length_mm: null, rotation_deg: 90, side: 'front' },
-    { key: 'e4', ref: 'J_MOTOR_R', kind: 'connector', package: 'JST', marking: '', x_mm: 6, y_mm: 20, width_mm: null, length_mm: null, rotation_deg: 90, side: 'front' },
-    { key: 'e5', ref: 'J_BATT', kind: 'connector', package: 'terminal block', marking: '', x_mm: 52, y_mm: 32, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e6', ref: 'C1', kind: 'capacitor', package: 'electrolytic can', marking: '470uF 16V', x_mm: 44, y_mm: 18, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e7', ref: 'F1', kind: 'mains or power part', package: 'fuse', marking: '', x_mm: 30, y_mm: 32, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e8', ref: 'D1', kind: 'diode or LED', package: 'diode SMD', marking: '', x_mm: 22, y_mm: 28, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
-    { key: 'e9', ref: 'R1', kind: 'resistor', package: '0603', marking: '103', x_mm: 14, y_mm: 30, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' },
+    { key: 'e1', ref: 'U3', kind: 'ic', package: 'SOIC', marking: '', x_mm: 22, y_mm: 12, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e2', ref: 'U4', kind: 'ic', package: 'SOIC', marking: 'L9110S', x_mm: 34, y_mm: 12, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e3', ref: 'J_MOTOR_L', kind: 'connector', package: 'JST', marking: '', x_mm: 6, y_mm: 8, width_mm: null, length_mm: null, rotation_deg: 90, side: 'front', readings: {} },
+    { key: 'e4', ref: 'J_MOTOR_R', kind: 'connector', package: 'JST', marking: '', x_mm: 6, y_mm: 20, width_mm: null, length_mm: null, rotation_deg: 90, side: 'front', readings: {} },
+    { key: 'e5', ref: 'J_BATT', kind: 'connector', package: 'terminal block', marking: '', x_mm: 52, y_mm: 32, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e6', ref: 'C1', kind: 'capacitor', package: 'electrolytic can', marking: '470uF 16V', x_mm: 44, y_mm: 18, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e7', ref: 'F1', kind: 'mains or power part', package: 'fuse (5x20 mm, with its holder)', marking: '', x_mm: 30, y_mm: 32, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e8', ref: 'D1', kind: 'diode or LED', package: 'diode SMD', marking: '', x_mm: 22, y_mm: 28, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
+    { key: 'e9', ref: 'R1', kind: 'resistor', package: '0603', marking: '103', x_mm: 14, y_mm: 30, width_mm: null, length_mm: null, rotation_deg: 0, side: 'front', readings: {} },
   ],
 };
 
@@ -78,6 +82,16 @@ function finiteIn(value: unknown, low: number, high: number): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high ? value : null;
 }
 
+function cleanReadings(raw: unknown, text: (value: unknown, limit: number) => string): Record<string, string> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>).slice(0, 8)) {
+    const cleaned = text(value, 40);
+    if (key.length <= 120 && cleaned) out[text(key, 120)] = cleaned;
+  }
+  return out;
+}
+
 /** Turns anything read back (a saved file, this browser's storage) into a board this page can draw, or null. It never trusts a type. */
 function sanitizeCapture(raw: unknown, newKey: () => string): { capture: Capture; dropped: number } | null {
   if (!raw || typeof raw !== 'object') return null;
@@ -106,6 +120,7 @@ function sanitizeCapture(raw: unknown, newKey: () => string): { capture: Capture
       length_mm: finiteIn(p.length_mm, 0.5, 120),
       rotation_deg: [0, 90, 180, 270].includes(p.rotation_deg as number) ? (p.rotation_deg as number) : 0,
       side: p.side === 'back' ? 'back' : 'front',
+      readings: cleanReadings(p.readings, text),
     });
   }
   dropped += Math.max(0, v.parts.length - MAX_PARTS);
@@ -130,6 +145,10 @@ export default function DonorPage() {
   const drag = useRef<{ key: string; dx: number; dy: number } | null>(null);
   const counter = useRef(1);
   const request = useRef(0);
+  const [mode, setMode] = useState<'place' | 'measure'>('place');
+  const [band, setBand] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
+  const bandStart = useRef<{ x: number; y: number } | null>(null);
+  const bandNow = useRef<{ x: number; y: number } | null>(null);   // where the pointer is now; a ref, because a click can end before React redraws
 
   const newKey = () => `p${Date.now().toString(36)}${counter.current++}`;
 
@@ -165,13 +184,14 @@ export default function DonorPage() {
   const spec = useMemo(() => JSON.stringify(toPayload(capture)), [capture]);
   const stale = Boolean(plan) && plannedFor !== spec;
   const verdictOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.verdict ?? ''])), [plan]);
+  const evidenceOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.lookup?.evidence ?? null])), [plan]);
   const labelOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.label ?? ''])), [plan]);
 
   const update = useCallback((key: string, patch: Partial<Part>) => {
     setCapture((c) => ({ ...c, parts: c.parts.map((p) => (p.key === key ? { ...p, ...patch } : p)) }));
   }, []);
 
-  const addPart = useCallback((x: number, y: number) => {
+  const addPart = useCallback((x: number, y: number, size?: { w: number; l: number }) => {
     setCapture((c) => {
       const prefix = options?.kinds[tool.kind]?.prefix ?? 'Z';
       const used = new Set(c.parts.map((p) => p.ref.toLowerCase()));
@@ -179,7 +199,7 @@ export default function DonorPage() {
       while (used.has(`${prefix}${n}`.toLowerCase())) n += 1;
       const key = newKey();
       setSelected(key);
-      return { ...c, parts: [...c.parts, { key, ref: `${prefix}${n}`, kind: tool.kind, package: tool.package, marking: '', x_mm: clamp(snap(x), 0, c.width_mm), y_mm: clamp(snap(y), 0, c.length_mm), width_mm: null, length_mm: null, rotation_deg: 0, side: 'front' }] };
+      return { ...c, parts: [...c.parts, { key, ref: `${prefix}${n}`, kind: tool.kind, package: tool.package, marking: '', x_mm: clamp(snap(x), 0, c.width_mm), y_mm: clamp(snap(y), 0, c.length_mm), width_mm: size?.w ?? null, length_mm: size?.l ?? null, rotation_deg: 0, side: 'front', readings: {} }] };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, tool]);
@@ -196,6 +216,14 @@ export default function DonorPage() {
   const onBackgroundDown = (event: ReactPointerEvent<SVGElement>) => {
     const { x, y } = point(event);
     if (x < 0 || y < 0 || x > capture.width_mm || y > capture.length_mm) { setSelected(null); return; }
+    if (mode === 'measure') {
+      // Draw a box over a part on the photo: its size and place are then measured from the photo, not typical.
+      bandStart.current = { x, y };
+      bandNow.current = { x, y };
+      setBand({ x0: x, y0: y, x1: x, y1: y });
+      svgRef.current?.setPointerCapture?.(event.pointerId);
+      return;
+    }
     addPart(x, y);
   };
   const onPartDown = (event: ReactPointerEvent<SVGElement>, part: Part) => {
@@ -206,12 +234,31 @@ export default function DonorPage() {
     (event.currentTarget.ownerSVGElement ?? svgRef.current)?.setPointerCapture?.(event.pointerId);
   };
   const onMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (bandStart.current) {
+      const { x, y } = point(event);
+      const start = bandStart.current;
+      bandNow.current = { x: clamp(x, 0, capture.width_mm), y: clamp(y, 0, capture.length_mm) };
+      setBand({ x0: start.x, y0: start.y, x1: bandNow.current.x, y1: bandNow.current.y });
+      return;
+    }
     const d = drag.current;
     if (!d) return;
     const { x, y } = point(event);
     setCapture((c) => ({ ...c, parts: c.parts.map((p) => (p.key === d.key ? { ...p, x_mm: clamp(snap(x + d.dx), 0, c.width_mm), y_mm: clamp(snap(y + d.dy), 0, c.length_mm) } : p)) }));
   };
-  const onUp = () => { drag.current = null; };
+  const onUp = () => {
+    drag.current = null;
+    const start = bandStart.current;
+    const end = bandNow.current;
+    bandStart.current = null;
+    bandNow.current = null;
+    setBand(null);
+    if (!start) return;
+    const w = end ? Math.abs(end.x - start.x) : 0;
+    const l = end ? Math.abs(end.y - start.y) : 0;
+    if (end && w >= 0.8 && l >= 0.8) addPart((start.x + end.x) / 2, (start.y + end.y) / 2, { w: Math.round(w * 10) / 10, l: Math.round(l * 10) / 10 });
+    else addPart(start.x, start.y);       // a click, or a box too small to mean anything: a part of the typical size
+  };
 
   const remove = (key: string) => {
     setCapture((c) => ({ ...c, parts: c.parts.filter((p) => p.key !== key) }));
@@ -274,6 +321,15 @@ export default function DonorPage() {
     image.src = url;
     setPhoto(url);
   };
+  const downloadReclaim = () => {
+    if (!plan) return;
+    const blob = new Blob([toCsv(reclaimRows(plan))], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${capture.name.replace(/[^A-Za-z0-9._-]+/g, '-').slice(0, 40) || 'donor-board'}-reclaim.csv`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+  };
   const download = () => {
     const blob = new Blob([JSON.stringify(toPayload(capture), null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
@@ -327,7 +383,11 @@ export default function DonorPage() {
                   {Object.keys(packages).map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
                 <button type="button" data-testid="donor-add-centre" onClick={() => addPart(capture.width_mm / 2, capture.length_mm / 2)} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><Plus className="h-3.5 w-3.5" aria-hidden="true" />Add at the centre</button>
-                <span className="text-stone-500">or click on the board</span>
+                <span className="inline-flex overflow-hidden rounded border border-stone-700" role="group" aria-label="What a click on the board does">
+                  <button type="button" data-testid="donor-mode-place" aria-pressed={mode === 'place'} onClick={() => setMode('place')} className={`px-2 py-1 ${mode === 'place' ? 'bg-amber-300 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}>Click to place</button>
+                  <button type="button" data-testid="donor-mode-measure" aria-pressed={mode === 'measure'} onClick={() => setMode('measure')} className={`inline-flex items-center gap-1 px-2 py-1 ${mode === 'measure' ? 'bg-amber-300 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}><Ruler className="h-3 w-3" aria-hidden="true" />Draw a box</button>
+                </span>
+                <span className="text-stone-500">{mode === 'measure' ? 'drag a box over a part: its size comes from your photo' : 'or click on the board'}</span>
                 <span className="ml-auto flex items-center gap-1.5">
                   <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><Upload className="h-3.5 w-3.5" aria-hidden="true" />Photo underlay
                     <input data-testid="donor-photo" type="file" accept="image/*" className="sr-only" onChange={(e) => onPhoto(e.target.files?.[0] ?? null)} />
@@ -358,6 +418,7 @@ export default function DonorPage() {
                   <rect x={0} y={0} width={capture.width_mm} height={capture.length_mm} fill="#17624a" fillOpacity={photo ? 0.15 : 0.55} stroke="#6fb89f" strokeWidth={0.3} />
                   {photo ? <image href={photo} x={0} y={0} width={capture.width_mm} height={capture.length_mm} preserveAspectRatio="none" opacity={photoOpacity} /> : null}
                   <rect x={0} y={0} width={capture.width_mm} height={capture.length_mm} fill="url(#donor-grid)" pointerEvents="none" />
+                  {band ? <rect data-testid="donor-band" x={Math.min(band.x0, band.x1)} y={Math.min(band.y0, band.y1)} width={Math.abs(band.x1 - band.x0)} height={Math.abs(band.y1 - band.y0)} fill="#ffcf5a" fillOpacity={0.15} stroke="#ffcf5a" strokeWidth={0.3} strokeDasharray="1 0.6" pointerEvents="none" /> : null}
                   {capture.parts.map((part) => {
                     const { w, l } = sizeOf(part, options);
                     const verdict = stale ? undefined : verdictOf.get(part.ref);
@@ -387,6 +448,25 @@ export default function DonorPage() {
             {plan ? (
               <section aria-label="Take-apart plan" className="overflow-hidden rounded-xl border border-stone-800" style={{ height: 'min(80vh, 760px)', minHeight: 560 }} data-testid="donor-viewer-frame">
                 <AssemblyViewer plan={plan} />
+              </section>
+            ) : null}
+            {plan ? (
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="reclaim" aria-label="What you could reclaim">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold text-stone-100">What you could reclaim{stale ? ' (from the plan before your last change)' : ''}</h2>
+                  <button type="button" data-testid="reclaim-csv" onClick={downloadReclaim} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-xs text-stone-200 hover:bg-stone-800"><Download className="h-3 w-3" aria-hidden="true" />Download as a spreadsheet</button>
+                </div>
+                <p className="mt-1 text-[11px] leading-4 text-stone-500">Advice, not clearance: nothing here has been tested. A part is only as good as its readings.</p>
+                <div className="mt-2 overflow-x-auto">
+                  <table className="w-full min-w-[34rem] text-left text-xs" data-testid="reclaim-table">
+                    <thead className="text-stone-500"><tr><th className="py-1 pr-2 font-medium">Label</th><th className="pr-2 font-medium">What (as you read it)</th><th className="pr-2 font-medium">Advice</th><th className="pr-2 font-medium">Measurements</th><th className="font-medium">Datasheet</th></tr></thead>
+                    <tbody className="text-stone-300">
+                      {reclaimRows(plan).map((row) => (
+                        <tr key={row.ref} className="border-t border-stone-800 align-top"><td className="py-1 pr-2 font-medium text-stone-100">{row.ref}</td><td className="pr-2">{row.what || <span className="text-stone-600">no marking</span>}</td><td className="pr-2">{row.verdict}</td><td className="pr-2">{row.evidence || <span className="text-stone-600">none to make</span>}</td><td>{/^https?:\/\//.test(row.datasheet) ? <a href={row.datasheet} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline-offset-2 hover:underline">link</a> : <span className="text-stone-600">none</span>}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </section>
             ) : null}
           </section>
@@ -436,6 +516,14 @@ export default function DonorPage() {
                   <label className="col-span-2 text-stone-400">Marking printed on it
                     <input data-testid="donor-marking" value={current.marking} maxLength={40} placeholder="what you can read, or leave empty" onChange={(e) => update(current.key, { marking: e.target.value })} className="mt-0.5 w-full rounded border border-stone-700 bg-stone-950 px-2 py-1 text-stone-100" />
                   </label>
+                  {current.kind === 'ic' ? (
+                    <PartLookupPanel
+                      marking={current.marking}
+                      readings={current.readings}
+                      onReading={(key, value) => update(current.key, { readings: Object.fromEntries(Object.entries({ ...current.readings, [key]: value }).filter(([, v]) => v !== '')) })}
+                      onUsePackage={(pkg) => update(current.key, { package: pkg, width_mm: null, length_mm: null })}
+                    />
+                  ) : null}
                   <label className="text-stone-400">Width, mm
                     <input type="number" min={0.5} max={120} step={0.1} value={current.width_mm ?? ''} placeholder={String(options?.kinds[current.kind]?.packages[current.package]?.width_mm ?? '')} onChange={(e) => update(current.key, { width_mm: e.target.value === '' ? null : Number(e.target.value) })} className="mt-0.5 w-full rounded border border-stone-700 bg-stone-950 px-2 py-1 text-stone-100" />
                   </label>
@@ -460,6 +548,8 @@ export default function DonorPage() {
               ) : <p className="mt-2 text-xs leading-5 text-stone-500">Click a part on the board to edit it, drag it to move it.</p>}
             </section>
 
+            <TeardownSearch />
+
             <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="donor-parts-list">
               <h2 className="text-sm font-semibold text-stone-100">Parts ({capture.parts.length})</h2>
               {capture.parts.length === 0 ? <p className="mt-2 text-xs text-stone-500">None yet.</p> : (
@@ -469,7 +559,7 @@ export default function DonorPage() {
                     return (
                       <li key={part.key}>
                         <button type="button" onClick={() => setSelected(part.key)} className={`flex w-full items-center justify-between gap-2 rounded px-2 py-1 text-left hover:bg-stone-800 ${part.key === selected ? 'bg-stone-800' : ''}`}>
-                          <span className="truncate"><span className="font-medium text-stone-100">{part.ref}</span> <span className="text-stone-500">{part.package}{part.marking ? ` · ${part.marking}` : ''}</span></span>
+                          <span className="truncate"><span className="font-medium text-stone-100">{part.ref}</span> <span className="text-stone-500">{part.package}{part.marking ? ` · ${part.marking}` : ''}{!stale && evidenceOf.get(part.ref)?.total ? ` · ${evidenceOf.get(part.ref)?.recorded}/${evidenceOf.get(part.ref)?.total} measured` : ''}</span></span>
                           {verdict && !stale ? <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px]" style={{ background: `${VERDICT_FILL[verdict] ?? '#555'}33`, color: VERDICT_FILL[verdict] ?? '#ccc' }}>{labelOf.get(part.ref) || VERDICT_TEXT[verdict] || verdict}</span> : null}
                         </button>
                       </li>

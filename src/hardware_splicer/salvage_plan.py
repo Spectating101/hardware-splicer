@@ -255,7 +255,7 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
 
 
 TYPED_LIMITS = [
-    "Everything here is what you typed or placed: nothing was read from a file. Places are only as good as your measuring, and sizes are typical for each package unless you typed them.",
+    "Everything here is what you typed or placed: nothing was read from a file. Places are only as good as your measuring, and sizes are KiCad's library courtyards or typical for the package unless you gave them.",
     "A marking you read off a chip is a marking, not an identification: it can be a house code, rubbed, or fake. Check it against a datasheet.",
     "Whether a part still works is unknown until it is tested.",
 ]

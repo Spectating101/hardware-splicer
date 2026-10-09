@@ -630,6 +630,41 @@ async def device_plan_post(request: Request) -> dict[str, Any]:
 
 
 # --- Boards a person describes: the real capture code, stateless, as the real API serves it ----------------------------
+# --- Marking lookup (the real KiCad-library code) and a fixed teardown answer, so tests never depend on the internet --------
+_lookup_part = _load_hs_attr("part_lookup", "lookup_part")
+_power_gates = _load_hs_attr("part_lookup", "power_gates")
+_libraries_available = _load_hs_attr("part_lookup", "libraries_available")
+_PartLookupError = _load_hs_attr("part_lookup", "PartLookupError")
+
+
+@app.get("/v1/parts/lookup")
+def parts_lookup(marking: str = "", online: bool = False) -> dict[str, Any]:
+    try:
+        found = _lookup_part(marking)
+    except _PartLookupError as exc:
+        raise _thread_error(422, "invalid_marking", str(exc)) from None
+    found["libraries_available"] = _libraries_available()
+    found["search_links"] = {}
+    text = found["query"]
+    if not found["matches"] and 3 <= len(text) <= 8 and text.isalnum():
+        found["search_links"]["smd_code"] = f"https://www.s-manuals.com/smd/{text.lower()}"
+    best = next((m for m in found["matches"] if m["tier"] in {"exact", "variant"}), None)
+    found["gates"] = _power_gates(best["library"], best["name"], best["footprint"]) if best else []
+    found["gates_from"] = best["name"] if best else None
+    return {"ok": True, **found}
+
+
+@app.get("/v1/teardowns/search")
+def teardowns_search(q: str = "") -> dict[str, Any]:
+    text = " ".join(q.split())
+    if len(text) < 3:
+        raise _thread_error(422, "invalid_search", "type at least 3 characters")
+    if text.lower().startswith("nothing"):
+        return {"ok": True, "query": text, "available": True, "results": [], "note": "No guides found. Try the device's model name.", "attribution": "From iFixit, licensed CC BY-NC-SA for non-commercial use. These are links to their pages: read the teardown there."}
+    return {"ok": True, "query": text, "available": True, "note": None, "attribution": "From iFixit, licensed CC BY-NC-SA for non-commercial use. These are links to their pages: read the teardown there.",
+            "results": [{"title": f"{text.title()} Teardown", "url": "https://www.ifixit.com/Teardown/Example+Teardown/1", "type": "teardown", "summary": "A fixture result: the real service is not called from tests."}]}
+
+
 _build_donor_plan = _load_hs_attr("donor_capture", "build_donor_salvage_plan")
 _DonorCaptureError = _load_hs_attr("donor_capture", "DonorCaptureError")
 _donor_options = _load_hs_attr("donor_capture", "capture_options")

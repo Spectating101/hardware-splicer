@@ -255,7 +255,7 @@ def capture_to_assembly(spec: Any) -> dict[str, Any]:
                 "id": row["ref"], "ref": row["ref"], "value": row["marking"], "footprint": row["footprint"], "kind": kind, "side": row["side"],
                 "x": _r(row["x"]), "y": _r(row["y"]), "rotation_deg": float(row["rotation"]),
                 "corners": _corners(row["x"], row["y"], row["w"], row["l"], row["rotation"]),
-                "outline_basis": "the size you typed" if row["sized_by_you"] else (f"typical size for a {row['package']} (you did not measure it)" if row["size_is_typical"] else f"KiCad library courtyard for a {row['package']} (you did not measure it): a little larger than the part"),
+                "outline_basis": "the size you gave it (typed, or drawn over your photo)" if row["sized_by_you"] else (f"typical size for a {row['package']} (you did not measure it)" if row["size_is_typical"] else f"KiCad library courtyard for a {row['package']} (you did not measure it): a little larger than the part"),
                 "height_mm": _r(height), "height_basis": basis, "pin1": None, "pad_count": 0, "do_not_populate": False,
                 "mounting": row["mounting"], "component": row["kind"],
                 "identity": {"mpn": None, "manufacturer": None, "typed": row["marking"] or None, "source": "typed"},

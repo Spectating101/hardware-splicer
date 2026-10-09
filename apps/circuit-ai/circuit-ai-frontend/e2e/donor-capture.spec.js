@@ -49,7 +49,7 @@ test('describe one chip, read its marking, and watch the advice change when the 
   // A board described by a person is never described as read from a file, and its sizes are called typical.
   await expect(page.getByTestId('assembly-panel')).toContainText('from what you described');
   await expect(page.getByTestId('assembly-panel')).not.toContainText('read from its file');
-  await expect(viewer).toContainText('Sizes are typical for each package unless you typed them');
+  await expect(viewer).toContainText('Sizes are KiCad\'s library courtyards or typical for the package, unless you gave them');
   await expect(viewer).not.toContainText('pad positions');
   await expect(page.getByTestId('donor-parts-list')).toContainText('Worth taking');
 
