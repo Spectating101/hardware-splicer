@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Bot, BrainCircuit, ClipboardCheck, Cpu, Database, FileArchive, FileCheck2, FileSearch, Network, PauseCircle, Route, UploadCloud, Waypoints } from 'lucide-react';
+import { Bot, BrainCircuit, Wrench, ClipboardCheck, Cpu, Database, FileArchive, FileCheck2, FileSearch, Network, PauseCircle, Route, UploadCloud, Waypoints } from 'lucide-react';
 import { EngineeringExecutionCapabilityPanel } from '@/components/engineering-execution-capability-panel';
 
 export default function EngineeringLayout({ children }: { children: ReactNode }) {
@@ -9,6 +9,9 @@ export default function EngineeringLayout({ children }: { children: ReactNode })
       <nav aria-label="Engineering tools" className="fixed left-1/2 top-3 z-[95] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-[#07111f]/95 p-1 shadow-xl shadow-black/30 backdrop-blur-xl [scrollbar-width:none]">
         <Link href="/engineering/evidence" className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-stone-900 hover:bg-stone-200">
           <FileCheck2 className="h-3.5 w-3.5" /> Project review
+        </Link>
+        <Link href="/engineering/device" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-amber-100 hover:bg-amber-300/10 hover:text-white">
+          <Wrench className="h-3.5 w-3.5" /> Build a device
         </Link>
         <Link href="/engineering/visual" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-200 hover:bg-white/5 hover:text-white">
           <Waypoints className="h-3.5 w-3.5" /> Visual workbench

@@ -591,6 +591,44 @@ def assembly_plan(project_id: str, revision: int) -> dict[str, Any]:
     return {"ok": True, "revision": revision, "available": True, "plan": _build_assembly_plan(text, pcb_sha256="sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest())}
 
 
+# --- Whole-device plans: the real planner, stateless, exactly as the real API serves it -------------------------------
+_build_device_plan = _load_hs_attr("device_plan", "build_device_plan")
+_DevicePlanError = _load_hs_attr("device_plan", "DevicePlanError")
+_example_device_specs = _load_hs_attr("device_plan", "example_specs")
+_device_module_library = _load_hs_attr("device_plan", "module_library")
+
+
+@app.get("/v1/devices/modules")
+def device_modules() -> dict[str, Any]:
+    return {"ok": True, "library": _device_module_library()}
+
+
+@app.get("/v1/devices/examples")
+def device_examples() -> dict[str, Any]:
+    return {"ok": True, "examples": _example_device_specs()}
+
+
+@app.get("/v1/devices/examples/{example_id}/plan")
+def device_example_plan(example_id: str) -> dict[str, Any]:
+    examples = _example_device_specs()
+    if example_id not in examples:
+        raise _thread_error(404, "not_found", "no such example")
+    return {"ok": True, "spec": examples[example_id], "plan": _build_device_plan(examples[example_id])}
+
+
+@app.post("/v1/devices/plan")
+async def device_plan_post(request: Request) -> dict[str, Any]:
+    try:
+        body = await request.json()
+    except ValueError:
+        raise _thread_error(422, "invalid_device_spec", "the body is not JSON") from None
+    spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+    try:
+        return {"ok": True, "plan": _build_device_plan(spec)}
+    except _DevicePlanError as exc:
+        raise _thread_error(422, "invalid_device_spec", str(exc)) from None
+
+
 _generate_glb = _load_hs_attr("model3d", "generate_glb")
 _BOARD_ONLY_FLAGS = _load_hs_attr("model3d", "BOARD_ONLY_GLB_FLAGS")
 _board_glb_cache: dict[str, bytes] = {}
