@@ -1,0 +1,739 @@
+{
+  "schema_version": "hardware_splicer.device_modules.v1",
+  "rule": "Every figure names where it came from. A figure that is typical rather than published says so, and the plan tells you to measure it. Nothing here is guessed silently.",
+  "modules": [
+    {
+      "id": "esp32-devkitc-v4",
+      "name": "ESP32-DevKitC V4 (ESP32-WROOM-32E)",
+      "kind": "mcu_board",
+      "summary": "Espressif's ESP32 development board with two 19-pin headers and a Micro-USB port.",
+      "frame": "Top view, origin at the board's top-left corner (the antenna end), x across the width, y along the length towards the USB end.",
+      "pcb_mm": {
+        "x": 27.94,
+        "y": 48.26,
+        "z": 1.6
+      },
+      "overhang_mm": {
+        "antenna_end": 6.04
+      },
+      "above_board_mm": 3.1,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "connectors": [
+        {
+          "id": "usb",
+          "kind": "micro_usb",
+          "edge": "bottom",
+          "x": 13.97,
+          "width_mm": 8.5,
+          "height_mm": 2.6,
+          "overhang_mm": 0.9
+        }
+      ],
+      "pins": [
+        {
+          "id": "J2-1",
+          "header": "J2",
+          "number": 1,
+          "name": "3V3",
+          "type": "P",
+          "function": "3.3 V power supply",
+          "roles": [
+            "power_3v3"
+          ],
+          "x": 1.27,
+          "y": 1.27,
+          "side": "top"
+        },
+        {
+          "id": "J2-2",
+          "header": "J2",
+          "number": 2,
+          "name": "EN",
+          "type": "I",
+          "function": "CHIP_PU, Reset",
+          "roles": [
+            "reset"
+          ],
+          "x": 1.27,
+          "y": 3.81,
+          "side": "top"
+        },
+        {
+          "id": "J2-3",
+          "header": "J2",
+          "number": 3,
+          "name": "VP",
+          "type": "I",
+          "function": "GPIO36, ADC1_CH0, S_VP",
+          "roles": [
+            "gpio_input_only"
+          ],
+          "x": 1.27,
+          "y": 6.35,
+          "side": "top"
+        },
+        {
+          "id": "J2-4",
+          "header": "J2",
+          "number": 4,
+          "name": "VN",
+          "type": "I",
+          "function": "GPIO39, ADC1_CH3, S_VN",
+          "roles": [
+            "gpio_input_only"
+          ],
+          "x": 1.27,
+          "y": 8.89,
+          "side": "top"
+        },
+        {
+          "id": "J2-5",
+          "header": "J2",
+          "number": 5,
+          "name": "IO34",
+          "type": "I",
+          "function": "GPIO34, ADC1_CH6, VDET_1",
+          "roles": [
+            "gpio_input_only"
+          ],
+          "x": 1.27,
+          "y": 11.43,
+          "side": "top"
+        },
+        {
+          "id": "J2-6",
+          "header": "J2",
+          "number": 6,
+          "name": "IO35",
+          "type": "I",
+          "function": "GPIO35, ADC1_CH7, VDET_2",
+          "roles": [
+            "gpio_input_only"
+          ],
+          "x": 1.27,
+          "y": 13.97,
+          "side": "top"
+        },
+        {
+          "id": "J2-7",
+          "header": "J2",
+          "number": 7,
+          "name": "IO32",
+          "type": "I/O",
+          "function": "GPIO32, ADC1_CH4, TOUCH_CH9, XTAL_32K_P",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 16.51,
+          "side": "top"
+        },
+        {
+          "id": "J2-8",
+          "header": "J2",
+          "number": 8,
+          "name": "IO33",
+          "type": "I/O",
+          "function": "GPIO33, ADC1_CH5, TOUCH_CH8, XTAL_32K_N",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 19.05,
+          "side": "top"
+        },
+        {
+          "id": "J2-9",
+          "header": "J2",
+          "number": 9,
+          "name": "IO25",
+          "type": "I/O",
+          "function": "GPIO25, ADC2_CH8, DAC_1",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 21.59,
+          "side": "top"
+        },
+        {
+          "id": "J2-10",
+          "header": "J2",
+          "number": 10,
+          "name": "IO26",
+          "type": "I/O",
+          "function": "GPIO26, ADC2_CH9, DAC_2",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 24.13,
+          "side": "top"
+        },
+        {
+          "id": "J2-11",
+          "header": "J2",
+          "number": 11,
+          "name": "IO27",
+          "type": "I/O",
+          "function": "GPIO27, ADC2_CH7, TOUCH_CH7",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 26.67,
+          "side": "top"
+        },
+        {
+          "id": "J2-12",
+          "header": "J2",
+          "number": 12,
+          "name": "IO14",
+          "type": "I/O",
+          "function": "GPIO14, ADC2_CH6, TOUCH_CH6, MTMS",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 29.21,
+          "side": "top"
+        },
+        {
+          "id": "J2-13",
+          "header": "J2",
+          "number": 13,
+          "name": "IO12",
+          "type": "I/O",
+          "function": "GPIO12, ADC2_CH5, TOUCH_CH5, MTDI",
+          "roles": [
+            "gpio",
+            "strapping"
+          ],
+          "x": 1.27,
+          "y": 31.75,
+          "side": "top"
+        },
+        {
+          "id": "J2-14",
+          "header": "J2",
+          "number": 14,
+          "name": "GND",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ],
+          "x": 1.27,
+          "y": 34.29,
+          "side": "top"
+        },
+        {
+          "id": "J2-15",
+          "header": "J2",
+          "number": 15,
+          "name": "IO13",
+          "type": "I/O",
+          "function": "GPIO13, ADC2_CH4, TOUCH_CH4, MTCK",
+          "roles": [
+            "gpio"
+          ],
+          "x": 1.27,
+          "y": 36.83,
+          "side": "top"
+        },
+        {
+          "id": "J2-16",
+          "header": "J2",
+          "number": 16,
+          "name": "D2",
+          "type": "I/O",
+          "function": "GPIO9, D2",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 1.27,
+          "y": 39.37,
+          "side": "top"
+        },
+        {
+          "id": "J2-17",
+          "header": "J2",
+          "number": 17,
+          "name": "D3",
+          "type": "I/O",
+          "function": "GPIO10, D3",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 1.27,
+          "y": 41.91,
+          "side": "top"
+        },
+        {
+          "id": "J2-18",
+          "header": "J2",
+          "number": 18,
+          "name": "CMD",
+          "type": "I/O",
+          "function": "GPIO11, CMD",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 1.27,
+          "y": 44.45,
+          "side": "top"
+        },
+        {
+          "id": "J2-19",
+          "header": "J2",
+          "number": 19,
+          "name": "5V",
+          "type": "P",
+          "function": "5 V power supply",
+          "roles": [
+            "power_5v"
+          ],
+          "x": 1.27,
+          "y": 46.99,
+          "side": "top"
+        },
+        {
+          "id": "J3-1",
+          "header": "J3",
+          "number": 1,
+          "name": "GND",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ],
+          "x": 26.67,
+          "y": 1.27,
+          "side": "top"
+        },
+        {
+          "id": "J3-2",
+          "header": "J3",
+          "number": 2,
+          "name": "IO23",
+          "type": "I/O",
+          "function": "GPIO23",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 3.81,
+          "side": "top"
+        },
+        {
+          "id": "J3-3",
+          "header": "J3",
+          "number": 3,
+          "name": "IO22",
+          "type": "I/O",
+          "function": "GPIO22",
+          "roles": [
+            "gpio",
+            "i2c_scl_default"
+          ],
+          "x": 26.67,
+          "y": 6.35,
+          "side": "top"
+        },
+        {
+          "id": "J3-4",
+          "header": "J3",
+          "number": 4,
+          "name": "TX",
+          "type": "I/O",
+          "function": "GPIO1, U0TXD",
+          "roles": [
+            "gpio",
+            "usb_serial"
+          ],
+          "x": 26.67,
+          "y": 8.89,
+          "side": "top"
+        },
+        {
+          "id": "J3-5",
+          "header": "J3",
+          "number": 5,
+          "name": "RX",
+          "type": "I/O",
+          "function": "GPIO3, U0RXD",
+          "roles": [
+            "gpio",
+            "usb_serial"
+          ],
+          "x": 26.67,
+          "y": 11.43,
+          "side": "top"
+        },
+        {
+          "id": "J3-6",
+          "header": "J3",
+          "number": 6,
+          "name": "IO21",
+          "type": "I/O",
+          "function": "GPIO21",
+          "roles": [
+            "gpio",
+            "i2c_sda_default"
+          ],
+          "x": 26.67,
+          "y": 13.97,
+          "side": "top"
+        },
+        {
+          "id": "J3-7",
+          "header": "J3",
+          "number": 7,
+          "name": "GND",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ],
+          "x": 26.67,
+          "y": 16.51,
+          "side": "top"
+        },
+        {
+          "id": "J3-8",
+          "header": "J3",
+          "number": 8,
+          "name": "IO19",
+          "type": "I/O",
+          "function": "GPIO19",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 19.05,
+          "side": "top"
+        },
+        {
+          "id": "J3-9",
+          "header": "J3",
+          "number": 9,
+          "name": "IO18",
+          "type": "I/O",
+          "function": "GPIO18",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 21.59,
+          "side": "top"
+        },
+        {
+          "id": "J3-10",
+          "header": "J3",
+          "number": 10,
+          "name": "IO5",
+          "type": "I/O",
+          "function": "GPIO5",
+          "roles": [
+            "gpio",
+            "strapping"
+          ],
+          "x": 26.67,
+          "y": 24.13,
+          "side": "top"
+        },
+        {
+          "id": "J3-11",
+          "header": "J3",
+          "number": 11,
+          "name": "IO17",
+          "type": "I/O",
+          "function": "GPIO17",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 26.67,
+          "side": "top"
+        },
+        {
+          "id": "J3-12",
+          "header": "J3",
+          "number": 12,
+          "name": "IO16",
+          "type": "I/O",
+          "function": "GPIO16",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 29.21,
+          "side": "top"
+        },
+        {
+          "id": "J3-13",
+          "header": "J3",
+          "number": 13,
+          "name": "IO4",
+          "type": "I/O",
+          "function": "GPIO4, ADC2_CH0, TOUCH_CH0",
+          "roles": [
+            "gpio"
+          ],
+          "x": 26.67,
+          "y": 31.75,
+          "side": "top"
+        },
+        {
+          "id": "J3-14",
+          "header": "J3",
+          "number": 14,
+          "name": "IO0",
+          "type": "I/O",
+          "function": "GPIO0, ADC2_CH1, TOUCH_CH1, Boot",
+          "roles": [
+            "gpio",
+            "strapping"
+          ],
+          "x": 26.67,
+          "y": 34.29,
+          "side": "top"
+        },
+        {
+          "id": "J3-15",
+          "header": "J3",
+          "number": 15,
+          "name": "IO2",
+          "type": "I/O",
+          "function": "GPIO2, ADC2_CH2, TOUCH_CH2",
+          "roles": [
+            "gpio",
+            "strapping"
+          ],
+          "x": 26.67,
+          "y": 36.83,
+          "side": "top"
+        },
+        {
+          "id": "J3-16",
+          "header": "J3",
+          "number": 16,
+          "name": "IO15",
+          "type": "I/O",
+          "function": "GPIO15, ADC2_CH3, TOUCH_CH3, MTDO",
+          "roles": [
+            "gpio",
+            "strapping"
+          ],
+          "x": 26.67,
+          "y": 39.37,
+          "side": "top"
+        },
+        {
+          "id": "J3-17",
+          "header": "J3",
+          "number": 17,
+          "name": "D1",
+          "type": "I/O",
+          "function": "GPIO8, D1",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 26.67,
+          "y": 41.91,
+          "side": "top"
+        },
+        {
+          "id": "J3-18",
+          "header": "J3",
+          "number": 18,
+          "name": "D0",
+          "type": "I/O",
+          "function": "GPIO7, D0",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 26.67,
+          "y": 44.45,
+          "side": "top"
+        },
+        {
+          "id": "J3-19",
+          "header": "J3",
+          "number": 19,
+          "name": "CLK",
+          "type": "I/O",
+          "function": "GPIO6, CLK",
+          "roles": [
+            "do_not_use"
+          ],
+          "x": 26.67,
+          "y": 46.99,
+          "side": "top"
+        }
+      ],
+      "keep_clear": [
+        {
+          "id": "antenna",
+          "what": "Keep metal and the case wall away from the antenna end.",
+          "edge": "top"
+        }
+      ],
+      "electrical": {
+        "supply_v": [
+          3.0,
+          3.6
+        ],
+        "io_v": 3.3,
+        "io_5v_tolerant": false,
+        "usb_supply_v": 5.0
+      },
+      "dimension_basis": {
+        "pcb": "Espressif drawing, unit mm: 27.94 x 48.26, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang (exact)",
+        "usb": "measured off the same drawing, plus or minus 0.3 mm; height is typical for a Micro-USB receptacle (not on the drawing)",
+        "heights": "module height 3.1 mm is from the module datasheet; PCB thickness 1.6 mm and the 8.5 mm of header below the board are typical, not on the drawing: measure yours"
+      },
+      "sources": [
+        {
+          "label": "ESP32-DevKitC V4 user guide (pin tables J2, J3)",
+          "url": "https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html",
+          "as_of": "2026-10-09"
+        },
+        {
+          "label": "ESP32-DevKitC V4 dimensions drawing",
+          "url": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.pdf",
+          "as_of": "2026-10-09"
+        },
+        {
+          "label": "ESP32-WROOM-32E datasheet (module size 18.0 x 25.5 x 3.1 mm; supply 3.0-3.6 V; GPIO6-11 on the flash; strapping pins GPIO0, GPIO2, MTDI, MTDO, GPIO5; VIH max VDD+0.3 V)",
+          "url": "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+          "as_of": "2026-10-09"
+        },
+        {
+          "label": "arduino-esp32 pins_arduino.h (SDA = 21, SCL = 22)",
+          "url": "https://raw.githubusercontent.com/espressif/arduino-esp32/master/variants/esp32/pins_arduino.h",
+          "as_of": "2026-10-09"
+        }
+      ],
+      "notes": [
+        "Other boards sold as an 'ESP32 dev board' have different sizes and pin orders. This entry is only the Espressif DevKitC V4.",
+        "GPIO6 to GPIO11 (D0 to D3, CMD, CLK) belong to the module's flash. Do not connect anything to them.",
+        "IO34, IO35, VP (36) and VN (39) are inputs only."
+      ]
+    },
+    {
+      "id": "ssd1306-096-i2c",
+      "name": "0.96 inch SSD1306 OLED, 4-pin I2C module",
+      "kind": "display",
+      "summary": "The very common 128 x 64 monochrome OLED on a small board with four pins.",
+      "frame": "Top view (looking at the screen), origin at the module's top-left corner, header along the top edge.",
+      "pcb_mm": {
+        "x": 27.5,
+        "y": 27.5,
+        "z": 1.2
+      },
+      "above_board_mm": 2.8,
+      "below_board_mm": 0.0,
+      "pin_pitch_mm": 2.54,
+      "panel": {
+        "active_mm": {
+          "x": 21.74,
+          "y": 10.86
+        },
+        "glass_mm": {
+          "x": 26.7,
+          "y": 19.3
+        },
+        "center_offset_mm": {
+          "x": 0.0,
+          "y": 3.0
+        },
+        "center_offset_basis": "unknown: sellers place the glass differently. Measure it."
+      },
+      "pins": [
+        {
+          "id": "P1",
+          "number": 1,
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 9.65,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "P2",
+          "number": 2,
+          "name": "VCC",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.19,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "P3",
+          "number": 3,
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 14.73,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "P4",
+          "number": 4,
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 17.27,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x3C",
+          "0x3D"
+        ],
+        "address_basis": "SSD1306 datasheet: slave address 0 1 1 1 1 0 SA0, so 0111100 or 0111101"
+      },
+      "electrical": {
+        "supply_note": "Set by the module's own regulator, which sellers do not standardise. Many list 3 V to 5 V. The SSD1306 chip itself runs its logic at 1.65 V to 3.3 V.",
+        "pullups_note": "Many modules pull SDA and SCL up to VCC, so powering one from 5 V puts 5 V on those lines."
+      },
+      "dimension_basis": {
+        "pcb": "typical; sellers list 27.0 to 27.8 mm and 3.8 to 4.1 mm overall height. Measure yours.",
+        "active_area": "21.74 x 10.86 mm, as listed by several sellers",
+        "pins": "order GND, VCC, SCL, SDA is the usual one; some modules use VCC, GND, SCL, SDA. Follow the printed labels, not the position."
+      },
+      "sources": [
+        {
+          "label": "SSD1306 datasheet (I2C slave address, logic supply)",
+          "url": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf",
+          "as_of": "2026-10-09"
+        },
+        {
+          "label": "Seller listing, 0.96 inch OLED (size, active area, I2C 0x3C)",
+          "url": "https://www.az-delivery.de/en/products/0-96zolldisplay",
+          "as_of": "2026-10-09"
+        },
+        {
+          "label": "Seller listing, 0.96 inch OLED (module size, active area)",
+          "url": "https://www.displaymodule.com/products/0-96-inch-oled-graphic-display-128x64-with-spi-i2c",
+          "as_of": "2026-10-09"
+        }
+      ],
+      "notes": [
+        "Figures other than the I2C address and the active area are typical and vary by seller. The plan's first step is to measure yours."
+      ]
+    }
+  ]
+}
