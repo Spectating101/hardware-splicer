@@ -45,7 +45,10 @@ _ELECTROLYTIC = re.compile(r"CP_Elec|C_Elec|Capacitor_THT:CP", re.IGNORECASE)
 _THROUGH_HOLE_IC = re.compile(r"DIP|THT|TO-220|TO-92|TO-247|Socket", re.IGNORECASE)
 _FINE_PACKAGE = re.compile(r"QFN|DFN|LGA|BGA|QFP|WSON|USON|UDFN|WLCSP|CSP", re.IGNORECASE)
 _MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", re.IGNORECASE)
-_PART_NUMBER = re.compile(r"[A-Za-z]{1,8}[-_]?\d{2,}")
+# A part number is one token: letters and digits, with hyphens, dots or plus signs, and no spaces or underscores. A label that describes
+# a function ("FLASH_128M", "SPI_1x06") is not one, and neither is a bare number.
+_PART_NUMBER = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+/-]{2,39}")
+_BATTERY = re.compile(r"Battery|BatteryHolder|CR\d{4}|LiPo|18650|Coin", re.IGNORECASE)
 _SMALL_CHIP = re.compile(r"_(0201|0402|0603)_|[RCLD]_(0201|0402|0603)|LED_(0402|0603)", re.IGNORECASE)
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
 
@@ -58,7 +61,8 @@ def _identified(part: dict[str, Any]) -> bool:
     identity = part.get("identity") or {}
     if identity.get("mpn"):
         return True
-    return bool(_PART_NUMBER.search(str(part.get("value") or "")))
+    value = str(part.get("value") or "").strip()
+    return bool(_PART_NUMBER.fullmatch(value)) and sum(c.isdigit() for c in value) >= 2 and any(c.isalpha() for c in value)
 
 
 def _effort(part: dict[str, Any]) -> tuple[str, str]:
@@ -86,6 +90,10 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         verdict = "skip"
         reasons.append("a test pad or a hole: there is nothing to take")
         effort, tool = "none", ""
+    elif _BATTERY.search(name) or part["ref"].upper().startswith("BT"):
+        verdict = "optional"
+        reasons.append("a battery or its holder: take the holder if you need it, and never the cell")
+        hazards.append("take any battery out before heating anything, and never heat a lithium cell")
     elif _ELECTROLYTIC.search(name):
         verdict = "test_first"
         reasons.append("electrolytic capacitors age and lose capacity; its condition is unknown")
@@ -105,7 +113,7 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
             identity = part.get("identity") or {}
             named = identity.get("mpn") or part.get("value")
             who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
-            reasons.append(f"the board file names it: {named}{who}, so it can be identified without guessing")
+            reasons.append(f"the board file names it: \"{named}\"{who}, so it can be identified without guessing")
             reasons.append("read the marking on the chip itself before trusting that")
         else:
             verdict = "identify"

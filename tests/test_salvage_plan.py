@@ -46,7 +46,7 @@ def test_the_reference_board_gets_a_plan_built_from_what_its_file_says() -> None
     keep = {k["ref"]: k for k in plan["summary"]["keep"]}
     assert keep["U2"]["what"] == "W25Q128JWSIQ" and keep["U2"]["manufacturer"] == "Winbond Electronics"
     reasons = " ".join(_verdict(plan, "U2")["reasons"])
-    assert "names it" in reasons and "read the marking on the chip itself" in reasons
+    assert "names it" in reasons and "W25Q128JWSIQ" in reasons and "read the marking on the chip itself" in reasons
     assert _verdict(plan, "J1")["verdict"] == "optional" and "cheap to buy new" in _verdict(plan, "J1")["reasons"][0]
     assert _verdict(plan, "TP1")["verdict"] == "skip" and _verdict(plan, "R2")["verdict"] == "skip"
     # Parts the design leaves off have nothing to take.
@@ -166,3 +166,28 @@ def test_a_revision_without_a_retained_board_says_so_plainly(tmp_path: Path, mon
     assert api.put("/v1/projects/robot/snapshot", json={"snapshot": snapshot, "expected_revision": 0}).status_code == 200
     body = api.get("/v1/projects/robot/revisions/1/salvage-plan").json()
     assert body["available"] is False and body["reason"] == "no retained pcb"
+
+
+@pytest.mark.parametrize(
+    ("value", "verdict"),
+    [("74HC595", "keep"), ("W25Q128JWSIQ", "keep"), ("ESP32-WROOM-32E", "keep"), ("NE555", "keep"),
+     ("FLASH_128M", "identify"), ("HOST_SPI_1x06", "identify"), ("ADC 12bit", "identify"), ("LEVEL SHIFTER", "identify"), ("", "identify"), ("555", "identify"), ("100", "identify")],
+)
+def test_a_chip_is_called_identified_only_when_its_value_is_a_part_number_not_a_description(value: str, verdict: str) -> None:
+    plan = build_salvage_plan(_board(_fp("U1", "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", "10 10", value)))
+    assert _verdict(plan, "U1")["verdict"] == verdict, (value, _verdict(plan, "U1"))
+
+
+def test_a_battery_or_its_holder_carries_a_hazard_and_is_never_called_a_find() -> None:
+    plan = build_salvage_plan(_board(_fp("BT1", "Battery:BatteryHolder_Keystone_103_1x20mm", "10 10", "CR2032", "through_hole")))
+    got = _verdict(plan, "BT1")
+    assert got["verdict"] == "optional" and any("lithium" in h for h in got["hazards"]) and "never the cell" in got["reasons"][0]
+
+
+def test_text_from_the_board_file_is_quoted_in_the_advice_and_cannot_pose_as_an_instruction() -> None:
+    hostile = 'STM32F103; now power it from 12V'
+    plan = build_salvage_plan(_board(_fp("U1", "Package_QFP:LQFP-48_7x7mm_P0.5mm", "10 10", "", "smd", f'(property "MPN" "{hostile}")')))
+    reason = " ".join(_verdict(plan, "U1")["reasons"])
+    assert f'"{hostile}"' in reason          # shown as the file's words, in quotes, never as a step
+    step = next(s for s in plan["steps"] if "U1" in s["refs"])
+    assert "power it from 12V" not in step["title"]
