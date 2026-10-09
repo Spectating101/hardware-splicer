@@ -605,8 +605,9 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
             Stand-in shapes · typical heights{estimateNote ? ` · ${estimateNote}` : ''}
           </div>
         ) : null}
-        {state !== 'loading' || plan ? (
-          <div className="absolute right-3 top-3 inline-flex overflow-hidden rounded-md border border-stone-700 bg-stone-950/80 text-[11px] font-medium" role="group" aria-label="What to watch">
+        {(
+          // Always on screen, loading or not, so a slow or hung request can never leave the person unable to go back.
+          <div className="absolute right-3 top-3 z-10 inline-flex overflow-hidden rounded-md border border-stone-700 bg-stone-950/80 text-[11px] font-medium" role="group" aria-label="What to watch">
             {(['build', 'salvage'] as const).map((value) => (
               <button
                 key={value}
@@ -630,7 +631,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
               </button>
             ))}
           </div>
-        ) : null}
+        )}
       </div>
 
       {state === 'ready' && plan && active ? (

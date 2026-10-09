@@ -172,3 +172,25 @@ test('take-apart mode says take-apart, not build, when something goes wrong', as
   await expect(viewer).toContainText('nothing to take apart from');
   await expect(viewer).not.toContainText('build');
 });
+
+test('a slow take-apart request never traps you: the mode buttons stay on screen and Put together still works', async ({ page }) => {
+  let release;
+  const held = new Promise((resolve) => { release = resolve; });
+  await page.route('**/salvage-plan', async (route) => { await held; await route.continue(); });
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(EVIDENCE);
+  await page.getByTestId('assemble-tab').click();
+  const viewer = page.getByTestId('assembly-viewer');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  await page.getByTestId('assembly-mode-salvage').click();
+  await expect(viewer).toHaveAttribute('data-state', 'loading');
+  await expect(page.getByTestId('assembly-mode-build')).toBeVisible();              // still there while it waits
+  await page.getByTestId('assembly-mode-build').click();
+  await expect(viewer).toHaveAttribute('data-mode', 'build');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 12/);
+  release();                                                                           // the late answer must not replace what is on screen
+  await page.waitForTimeout(800);
+  await expect(viewer).toHaveAttribute('data-mode', 'build');
+  await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 12/);
+});
