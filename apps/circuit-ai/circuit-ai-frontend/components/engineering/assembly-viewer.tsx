@@ -92,7 +92,18 @@ const COLORS: Record<string, string> = {
  * plan gives. Parts are stand-in boxes sized from the footprint outline with a typical height; the viewer says so. It is a
  * view of retained bytes and carries no authority.
  */
-export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build' }: { projectId: string; revision: number; mode?: 'build' | 'salvage' }) {
+export function AssemblyViewer({
+  projectId = '',
+  revision = 0,
+  mode: initialMode = 'build',
+  plan: givenPlan,
+}: {
+  projectId?: string;
+  revision?: number;
+  mode?: 'build' | 'salvage';
+  /** A plan handed in (a board described by a person) instead of one fetched for a project revision. It has no board model and one mode. */
+  plan?: AssemblyPlan;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneApi | null>(null);
@@ -103,7 +114,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
   const [playing, setPlaying] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const [stats, setStats] = useState<Stats>({ placed: 0, flying: 0, removed: 0 });
-  const [mode, setMode] = useState<'build' | 'salvage'>(initialMode);
+  const [mode, setMode] = useState<'build' | 'salvage'>(givenPlan ? (givenPlan.mode === 'salvage' ? 'salvage' : 'build') : initialMode);
   const salvageMode = mode === 'salvage';
   const what = salvageMode ? 'take-apart plan' : 'build sequence';
   const base = `/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/revisions/${revision}`;
@@ -112,12 +123,19 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
 
   useEffect(() => {
     let cancelled = false;
-    setState('loading');
     setMessage('');
-    setPlan(null);
     setStep(0);
     setPlaying(false);
     setSceneReady(false);
+    if (givenPlan) {
+      setStats({ placed: 0, flying: 0, removed: 0 });
+      setMode(givenPlan.mode === 'salvage' ? 'salvage' : 'build');
+      setPlan(givenPlan);
+      setState('ready');
+      return () => { cancelled = true; };
+    }
+    setState('loading');
+    setPlan(null);
     fetch(url, { cache: 'no-store' })
       .then((response) => response.json())
       .then((body: Fetched) => {
@@ -142,7 +160,8 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
         setMessage(caught instanceof Error ? caught.message : `The ${what} could not be requested.`);
       });
     return () => { cancelled = true; };
-  }, [url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, givenPlan]);
 
   useEffect(() => {
     if (!plan || !hostRef.current) return;
@@ -216,8 +235,9 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
         // The real bare board (outline, copper, pads, silkscreen) when KiCad can draw it; a plain slab of the right size when not.
         let realBoard = false;
         try {
-          const response = await fetch(boardUrl, { cache: 'no-store', signal: abort.signal });
-          if (response.ok) {
+          // A board a person described has no model from KiCad: a plain slab of the right size stands in.
+          const response = givenPlan ? null : await fetch(boardUrl, { cache: 'no-store', signal: abort.signal });
+          if (response?.ok) {
             const buffer = await response.arrayBuffer();
             if (disposed) return;
             const gltf = await new Promise<{ scene: ThreeNS.Group }>((resolve, reject) => {
@@ -530,7 +550,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
       abort.abort();
       cleanup();
     };
-  }, [plan, url, boardUrl, salvageMode]);
+  }, [plan, url, boardUrl, salvageMode, givenPlan]);
 
   // Whatever step is chosen, the scene shows it: earlier steps in place, this one arriving, later ones not yet.
   const previous = useRef(-1);
@@ -605,7 +625,7 @@ export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build
             Stand-in shapes · typical heights{estimateNote ? ` · ${estimateNote}` : ''}
           </div>
         ) : null}
-        {(
+        {!givenPlan && (
           // Always on screen, loading or not, so a slow or hung request can never leave the person unable to go back.
           <div className="absolute right-3 top-3 z-10 inline-flex overflow-hidden rounded-md border border-stone-700 bg-stone-950/80 text-[11px] font-medium" role="group" aria-label="What to watch">
             {(['build', 'salvage'] as const).map((value) => (
