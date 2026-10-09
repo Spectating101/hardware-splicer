@@ -264,7 +264,7 @@ def test_a_typed_board_never_talks_about_a_file_and_does_not_upgrade_a_reading_t
     chip = _verdict(plan, "U3")
     assert chip["verdict"] == "keep" and chip["label"] == "Worth taking, if the marking checks out"
     step = next(s for s in plan["steps"] if "U3" in s["refs"])
-    assert step["verdict_label"] == chip["label"] and any("agrees with a datasheet" in c["expect"] for c in step["checks"])
+    assert step["verdict_label"] == chip["label"] and any("compare it with a datasheet" in c["expect"] for c in step["checks"]) and not any("you now know" in c["expect"] for c in step["checks"])
     assert any("sizes are KiCad's library courtyards or typical for the package unless you gave them" in limit for limit in plan["limits"])
     # A file's chip keeps the plain label: it was named by the file, not by a reading.
     assert _verdict(build_donor_salvage_plan({**SPEC, "parts": [p for p in SPEC["parts"] if p["ref"] == "J1"]}), "J1")["label"] == "Worth taking"

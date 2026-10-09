@@ -46,9 +46,10 @@ def test_a_board_files_chips_are_looked_up_and_each_answer_says_how_close_it_is(
 def test_the_measurements_come_from_the_library_pins_and_say_where_the_pin_names_came_from() -> None:
     step = _step(build_salvage_plan(REF.read_text(encoding="utf-8")), "U3")
     measures = [c for c in step["checks"] if c["check"] == "measure"]
-    assert [c["gate_kind"] for c in measures] == ["voltage", "voltage", "isolation"]
+    assert [c["gate_kind"] for c in measures] == ["voltage", "isolation"]            # the regulator's output pin is not what it is supplied by
     assert "(IN)" in measures[0]["detail"] and "(GND)" in measures[0]["to"]
     assert all("datasheet" in c["expect"] or "ohms" in c["expect"] for c in measures)
+    assert all(c["expect"].startswith("write down what you see") for c in measures)
     assert not any(ch.isdigit() for c in measures[:2] for ch in c["expect"])                         # it never says what a reading should be
     assert "not from your chip" in step["instruction"] and "TLV75518PDBV" in step["instruction"]
     # A family match is not this chip, so it gets no measurements built from another chip's pins.
@@ -182,7 +183,7 @@ def test_live_ifixit_still_answers_in_the_shape_we_read() -> None:
 def test_the_lookup_api_offers_the_measurements_for_a_matched_chip_and_none_for_a_family_or_a_miss(api: TestClient) -> None:
     matched = api.get("/v1/parts/lookup", params={"marking": "NE555P"}).json()
     assert matched["gates_from"] == "NE555P" and [g["kind"] for g in matched["gates"]] == ["voltage", "isolation"]
-    assert all(g["key"].startswith(g["kind"] + "|pin ") for g in matched["gates"])
+    assert all(g["key"].startswith("Timer:NE555P|" + g["kind"] + "|pin ") for g in matched["gates"])   # the key names the chip: a reading cannot follow a new marking
     family = api.get("/v1/parts/lookup", params={"marking": "W25Q128JWSIQ"}).json()
     assert family["matches"] and family["gates"] == [] and family["gates_from"] is None
     assert api.get("/v1/parts/lookup", params={"marking": "L9110S"}).json()["gates"] == []
@@ -191,13 +192,14 @@ def test_the_lookup_api_offers_the_measurements_for_a_matched_chip_and_none_for_
 @needs_libraries
 def test_recorded_readings_are_counted_shown_and_never_called_a_pass() -> None:
     gate_keys = [g["key"] for g in part_lookup.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")]
+    assert gate_keys[0].startswith("Timer:NE555P|voltage|")
     spec = _spec(("NE555P", ""))
     none = build_donor_salvage_plan(spec)
     assert none["parts"][0]["lookup"]["evidence"] == {"total": 2, "recorded": 0, "ignored": 0}
     assert none["summary"]["evidence"] == {"chips_with_measurements": 1, "readings_recorded": 0, "readings_open": 2}
     assert "Measurements still to record before you trust them: U1" in none["steps"][-1]["instruction"]
 
-    spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", "voltage|pin 99 (NOPE)|pin 1 (GND)": "1 V"}
+    spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", "Timer:NE555P|voltage|pin 99 (NOPE)|pin 1 (GND)": "1 V"}
     some = build_donor_salvage_plan(spec)
     lookup = some["parts"][0]["lookup"]
     assert lookup["evidence"] == {"total": 2, "recorded": 1, "ignored": 1}                      # a reading for a measurement that no longer exists is reported, not applied
@@ -238,3 +240,35 @@ def test_ordinary_ifixit_links_still_pass_the_stricter_filter() -> None:
     urls = ["https://www.ifixit.com/Teardown/Roku+RC-MC1+remote+Teardown/148825", "https://www.ifixit.com/Guide/Some%20Thing/2?x=1&y=2#top".replace("#top", ""), "https://www.ifixit.com/"]
     rows = [{"title": f"T{i}", "url": u, "type": "guide"} for i, u in enumerate(urls)]
     assert {r["url"] for r in teardown_search.search_teardowns("anything here", fetch=_fake(rows))["results"]} == set(urls)
+
+
+@needs_libraries
+def test_a_reading_does_not_follow_a_new_marking_to_a_different_chip_with_the_same_pins() -> None:
+    first = part_lookup.power_gates("Timer", "NE555P", None)
+    second = part_lookup.power_gates("Timer", "NE555D", None)
+    assert [g["from"] for g in first] == [g["from"] for g in second]                              # the same pin numbers and names...
+    assert not {g["key"] for g in first} & {g["key"] for g in second}                              # ...but a reading belongs to the chip it was taken from
+    spec = _spec(("NE555D", ""))
+    spec["parts"][0]["readings"] = {first[0]["key"]: "5.02 V"}
+    plan = build_donor_salvage_plan(spec)
+    assert plan["parts"][0]["lookup"]["evidence"] == {"total": 2, "recorded": 0, "ignored": 1}
+
+
+def test_the_teardown_fetch_follows_no_redirect_and_speaks_only_https() -> None:
+    opener = teardown_search._opener()
+    names = {type(h).__name__ for h in opener.handlers}
+    assert "HTTPSHandler" in names and not names & {"FileHandler", "FTPHandler", "DataHandler", "HTTPHandler"}
+    assert any(isinstance(h, teardown_search._NoRedirect) for h in opener.handlers)
+    assert teardown_search._NoRedirect().redirect_request(None, None, 302, "Found", {}, "http://169.254.169.254/") is None
+    with pytest.raises(ValueError):
+        teardown_search._fetch("http://127.0.0.1/", 1.0)
+    with pytest.raises(ValueError):
+        teardown_search._fetch("https://evil.example/api", 1.0)
+
+
+def test_the_teardown_cache_is_bounded() -> None:
+    teardown_search.clear_cache()
+    for i in range(teardown_search.MAX_CACHE + 60):
+        teardown_search.search_teardowns(f"device number {i:04d}", fetch=_fake([GOOD]))
+    assert len(teardown_search._CACHE) <= teardown_search.MAX_CACHE
+    assert "device number 0000" not in teardown_search._CACHE and f"device number {teardown_search.MAX_CACHE + 59:04d}" in teardown_search._CACHE

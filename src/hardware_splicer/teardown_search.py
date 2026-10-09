@@ -20,6 +20,7 @@ SEARCH_URL = "https://www.ifixit.com/api/2.0/search/{query}?filter=guide&limit=1
 MAX_QUERY = 60
 MAX_BYTES = 512 * 1024
 CACHE_TTL_S = 900.0
+MAX_CACHE = 256
 ATTRIBUTION = "From iFixit, licensed CC BY-NC-SA for non-commercial use. These are links to their pages: read the teardown there."
 _ALLOWED_URL = re.compile(r"^https://www\.ifixit\.com/[A-Za-z0-9\-._~%/+?=&:@!$,;()*]{0,300}$")   # printable ASCII only: no control bytes, spaces or quotes
 _CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
@@ -29,9 +30,26 @@ class TeardownSearchError(ValueError):
     """The query cannot be searched."""
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect would send the request somewhere this module never chose, so none is followed: it counts as an outage."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        return None
+
+
+def _opener() -> urllib.request.OpenerDirector:
+    # HTTPS only: no file, ftp or data handlers, and no redirects.
+    opener = urllib.request.OpenerDirector()          # built by hand: build_opener() would add the file, ftp, data and plain http handlers
+    for handler in (urllib.request.HTTPSHandler(), _NoRedirect(), urllib.request.HTTPDefaultErrorHandler(), urllib.request.HTTPErrorProcessor()):
+        opener.add_handler(handler)
+    return opener
+
+
 def _fetch(url: str, timeout_s: float) -> bytes:
+    if not url.startswith("https://www.ifixit.com/"):
+        raise ValueError("only iFixit is searched")
     request = urllib.request.Request(url, headers={"User-Agent": "hardware-splicer/1 (teardown link search)", "Accept": "application/json"})
-    with urllib.request.urlopen(request, timeout=timeout_s) as response:  # noqa: S310 - the host is fixed by SEARCH_URL
+    with _opener().open(request, timeout=timeout_s) as response:
         return response.read(MAX_BYTES + 1)
 
 
@@ -74,7 +92,12 @@ def search_teardowns(query: Any, *, fetch: Callable[[str, float], bytes] | None 
     result["results"].sort(key=lambda r: (r["type"] != "teardown", r["title"].lower()))
     if not result["results"]:
         result["note"] = "No guides found. Try the device's model name."
-    _CACHE[key] = (now(), result)
+    stamp = now()
+    for stale in [k for k, (t, _) in _CACHE.items() if stamp - t >= CACHE_TTL_S]:
+        del _CACHE[stale]
+    while len(_CACHE) >= MAX_CACHE:
+        del _CACHE[min(_CACHE, key=lambda k: _CACHE[k][0])]      # the oldest goes first
+    _CACHE[key] = (stamp, result)
     return result
 
 

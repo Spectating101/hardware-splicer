@@ -107,6 +107,8 @@ def test_the_measurements_to_make_come_from_the_pins_and_never_claim_what_the_re
     assert "pin 8 (VCC)" in gates[0]["instruction"] and "pin 1 (GND)" in gates[0]["instruction"]
     assert "Pin 1 is the corner with the dot or notch" in gates[0]["instruction"]
     assert "datasheet" in gates[0]["expect"] and not any(ch.isdigit() for ch in gates[0]["expect"])     # no invented range
+    assert "write down what you see" in gates[0]["expect"] and "write down what you see" in gates[-1]["expect"]
+    assert "not near" not in gates[-1]["expect"] and "pass" not in (gates[0]["expect"] + gates[-1]["expect"]).lower()
     assert "Pin 1 is the corner" not in pl.power_gates("Timer", "NE555P", None)[0]["instruction"]        # only said where it is true
     assert pl.power_gates("Timer", "NOT_A_PART", None) == []
 
@@ -158,3 +160,78 @@ def test_an_exposed_pad_is_never_measured_as_a_supply() -> None:
 def test_a_part_with_several_supply_pins_of_one_name_is_measured_once_per_name() -> None:
     names = [g["from"] for g in pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm") if g["kind"] == "voltage"]
     assert len(names) == len(set(names)) and len(names) <= 3
+
+
+# --- the second review (Grok): tiers, supplies, big parts, hostile libraries ------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("marking", "expected"),
+    [
+        ("74HC", []), ("NE55", []), ("74HC0", []),                                  # the start of many parts: nothing is offered
+        ("LM35", ["LM35-D", "LM35-LP", "LM35-NEB"]),                                 # real grade codes after a separator; LM358 and LM3578 are other chips
+        ("NE555", ["NE555D", "NE555P"]),
+        ("SN74LVC1G00", ["SN74LVC1G00DBV", "SN74LVC1G00DCK", "SN74LVC1G00DRL"]),    # not G14 or G125: a different function
+        ("STM32F103C8T6", ["STM32F103C8Tx"]),                                        # KiCad's trailing x stands for any character
+    ],
+)
+def test_a_variant_differs_only_by_a_package_or_grade_code_never_by_a_function(marking: str, expected: list[str]) -> None:
+    result = pl.lookup_part(marking)
+    assert [m["name"] for m in result["matches"] if m["tier"] in {"exact", "variant"}][: len(expected)] == expected
+    assert not [m for m in result["matches"] if m["tier"] == "variant" and m["name"] not in expected] or not expected
+    if not expected:
+        assert result["matches"] == [] and "start of many different parts" in (result["reason"] or "")
+
+
+def test_a_family_member_never_differs_in_a_digit_from_the_marking() -> None:
+    for marking in ("SN74LVC1G00", "74HC595", "LM358", "NE555"):
+        for match in pl.lookup_part(marking)["matches"]:
+            if match["tier"] == "family":
+                common = next((i for i in range(min(len(match["name"]), len(marking))) if match["name"].lower()[i] != marking.lower()[i]), 0)
+                assert not any(ch.isdigit() for ch in marking[common:] + match["name"][common:]), (marking, match["name"])
+
+
+def test_only_the_supply_pins_are_measured_and_the_main_one_comes_first() -> None:
+    reg = pl.power_gates("Regulator_Linear", "uA7805", "Package_TO_SOT_THT:TO-220-3_Vertical")
+    assert [g["from"] for g in reg if g["kind"] == "voltage"] == ["pin 1 (IN)"]                    # the output pin is not what the chip is supplied by
+    assert all("OUT" not in g["from"] and "VO)" not in g["from"] for g in pl.power_gates("Regulator_Linear", "AP1117-33", None))
+    stm = pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+    assert stm[0]["from"] == "pin 24 (VDD)" and stm[-1]["from"] == "pin 24 (VDD)"                  # not the battery-backup pin that happens to come first
+
+
+def test_a_part_with_hundreds_of_pins_gets_no_guessed_measurements() -> None:
+    assert pl.symbol_pins("FPGA_Lattice", "LFE5U-85F-8BG756x", limit=None)["pins_total"] == 756
+    assert pl.power_gates("FPGA_Lattice", "LFE5U-85F-8BG756x", None) == []
+    assert len(pl.symbol_pins("FPGA_Lattice", "LFE5U-85F-8BG756x")["pins"]) == pl.MAX_PINS        # the displayed list is still capped
+
+
+def test_a_negative_supply_and_a_pad_check_use_the_ranked_ground() -> None:
+    assert [g["to"] for g in pl.power_gates("Timer", "NE555P", None)] == ["pin 1 (GND)"] * 2
+
+
+def test_one_unreadable_library_file_does_not_stop_the_others(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    symbols = tmp_path / "symbols"
+    symbols.mkdir()
+    (symbols / "aa.kicad_sym").write_bytes(b"\xff\xfe not utf-8 \xff")
+    (symbols / "bb.kicad_sym").write_text('(kicad_symbol_lib (generator_version "9.0")\n\t(symbol "FOO123"\n\t\t(property "Value" "FOO123"\n\t\t)\n\t\t(property "Description" "A test part"\n\t\t)\n\t)\n)\n', encoding="utf-8")
+    monkeypatch.setenv("HARDWARE_SPLICER_KICAD_DIR", str(tmp_path))
+    pl.clear_cache()
+    try:
+        result = pl.lookup_part("FOO123")
+        assert [m["name"] for m in result["matches"]] == ["FOO123"] and result["source"]["skipped_files"] == 1
+    finally:
+        monkeypatch.undo()
+        pl.clear_cache()
+
+
+def test_a_symbol_name_with_an_escaped_quote_is_still_indexed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    symbols = tmp_path / "symbols"
+    symbols.mkdir()
+    (symbols / "q.kicad_sym").write_text('(kicad_symbol_lib (generator_version "9.0")\n\t(symbol "FOO\\"BAR1"\n\t\t(property "Description" "Quoted"\n\t\t)\n\t)\n)\n', encoding="utf-8")
+    monkeypatch.setenv("HARDWARE_SPLICER_KICAD_DIR", str(tmp_path))
+    pl.clear_cache()
+    try:
+        assert [m["name"] for m in pl.lookup_part('FOO"BAR1')["matches"]] == ['FOO"BAR1']
+    finally:
+        monkeypatch.undo()
+        pl.clear_cache()

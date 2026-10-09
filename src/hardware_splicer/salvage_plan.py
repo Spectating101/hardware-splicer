@@ -338,7 +338,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         if salvage["verdict"] == "test_first":
             checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "close to the printed value; otherwise discard"})
         if salvage["verdict"] in {"keep", "identify"} and first["kind"] == "ic":
-            checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "agrees with a datasheet for what you read, or you now know what it is" if typed else "matches what the file says, or you now know what it is"})
+            checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "write down what is printed, then compare it with a datasheet" if typed else "write down what is printed and whether it agrees with what the file says"})
         if first["kind"] == "ic":
             for note in _lookup_reasons(first):
                 text += " " + note[0].upper() + note[1:] + ("" if note.endswith(".") else ".")

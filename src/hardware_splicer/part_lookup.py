@@ -28,7 +28,13 @@ MAX_QUERY = 40
 MIN_QUERY = 3
 MAX_MATCHES = 8
 MAX_PINS = 128
-_SYMBOL = re.compile(r'^\t\(symbol "([^"]+)"\n', re.MULTILINE)
+MAX_PINS_FOR_GATES = 64         # a part with more pins than this has many supplies and grounds: picking one honestly takes its datasheet
+MAX_LIBRARY_FILE = 80 * 1024 * 1024
+# A package or grade code after a part number: a few letters (D, DBV, Tx), or something that starts with a separator (-D, _DFN, -LP). Digits
+# without a separator mean a different function: 74HC00 is not 74HC04, and LM35 is not LM358.
+_SUFFIX = re.compile(r"^(?:[A-Za-z]{1,5}|[-_][A-Za-z0-9_\-./]{1,8})$")
+_LETTERS_ONLY = re.compile(r"^[A-Za-z_\-]*$")
+_SYMBOL = re.compile(r'^\t\(symbol "((?:[^"\\]|\\.)+)"\n', re.MULTILINE)
 _PROPERTY = re.compile(r'\(property "(Value|Description|Datasheet|Footprint|ki_keywords)" "((?:[^"\\]|\\.)*)"')
 _EXTENDS = re.compile(r'\(extends "([^"]+)"\)')
 _GENERATOR = re.compile(r'\(generator_version "([^"]+)"\)')
@@ -37,6 +43,7 @@ _FOOTPRINT_NAME = re.compile(r"^[A-Za-z0-9_.+\-]+:[A-Za-z0-9_.,+\- ]+$")
 _GROUND_RANK = ("GND", "VSS", "DGND", "AGND", "GNDD", "GNDA", "VSSA", "PGND")
 _GROUND_NAME = re.compile(r"^(" + "|".join(_GROUND_RANK) + r")$", re.IGNORECASE)
 # Pins that carry no supply: the exposed pad, a tab or shield, and pins marked not connected.
+_MAIN_SUPPLY = ("VDD", "VCC", "VDDIO", "VCCIO", "VIN", "VI", "IN", "V+", "VS", "VSUP", "AVDD", "AVCC", "VDDA")   # measured first; a backup or reference pin is not the main supply
 _NOT_A_SUPPLY = re.compile(r"^(EP|EPAD|PAD|TAB|SHIELD|SHLD|NC|DNC|N/C|~)\d*$", re.IGNORECASE)
 _PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):")
 
@@ -74,6 +81,7 @@ class _Index:
     by_name: dict[str, list[_Row]]
     sorted_names: list[str]
     version: str
+    skipped_files: int = 0
 
 
 _LOCK = threading.Lock()
@@ -89,8 +97,16 @@ def _build_index(root: str) -> _Index:
     symbols = Path(root) / "symbols"
     rows: list[_Row] = []
     version = ""
+    skipped = 0
     for path in sorted(symbols.glob("*.kicad_sym")):
-        text = path.read_text(encoding="utf-8")
+        try:
+            if path.stat().st_size > MAX_LIBRARY_FILE:
+                skipped += 1
+                continue
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            skipped += 1                   # one unreadable library does not stop the others being used
+            continue
         if not version:
             found = _GENERATOR.search(text[:400])
             version = found.group(1) if found else ""
@@ -104,7 +120,7 @@ def _build_index(root: str) -> _Index:
             extends = _EXTENDS.search(own[:600])
             rows.append(
                 _Row(
-                    library=path.stem, name=match.group(1), description=_clean(props.get("Description", ""), 200),
+                    library=path.stem, name=match.group(1).replace('\\"', '"'), description=_clean(props.get("Description", ""), 200),
                     datasheet=_clean(props.get("Datasheet", ""), 300), footprint=_clean(props.get("Footprint", ""), 120),
                     keywords=_clean(props.get("ki_keywords", ""), 120), extends=extends.group(1) if extends else None,
                     path=str(path), start=match.start(), end=end,
@@ -113,7 +129,7 @@ def _build_index(root: str) -> _Index:
     by_name: dict[str, list[_Row]] = {}
     for row in rows:
         by_name.setdefault(row.name.lower(), []).append(row)
-    return _Index(rows=rows, by_name=by_name, sorted_names=sorted(by_name), version=version)
+    return _Index(rows=rows, by_name=by_name, sorted_names=sorted(by_name), version=version, skipped_files=skipped)
 
 
 def _index() -> _Index:
@@ -135,6 +151,7 @@ def source() -> dict[str, Any]:
         "name": "KiCad symbol library",
         "version": index.version or "unknown",
         "symbols": len(index.rows),
+        "skipped_files": index.skipped_files,
         "path": "symbols/*.kicad_sym of the KiCad install on the server",
         "note": "A library entry is a part with that name. It is not proof that the chip you hold is that part.",
     }
@@ -191,25 +208,46 @@ def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
                 seen.add(name)
                 chosen.append((name, tier))
 
+    def is_variant(a: str, b: str) -> bool:
+        """a is the start of b (or b of a) and what is left over is a short package or grade code, not another function."""
+
+        short, long = (a, b) if len(a) <= len(b) else (b, a)
+        return len(short) >= 4 and long.startswith(short) and bool(_SUFFIX.match(long[len(short):]))
+
     if q in index.by_name:
         take([q], "exact")
-    if len(q) >= 4:
-        take(sorted(_prefix_rows(index, q), key=len), "variant")
+    prefixed = _prefix_rows(index, q) if len(q) >= 4 else []
+    take(sorted((n for n in prefixed if n != q and is_variant(q, n)), key=lambda n: (len(n), n)), "variant")
     # A library name that is the start of the marking (the marking carries a package or grade suffix the library leaves off).
-    for k in range(len(q) - 1, 4, -1):
-        if q[:k] in index.by_name:
+    for k in range(len(q) - 1, 3, -1):
+        if q[:k] in index.by_name and is_variant(q, q[:k]):
             take([q[:k]], "variant")
             break
+    # KiCad writes a trailing x for "any character here" (STM32F103C8Tx covers STM32F103C8T6): the marking fits it if only those places differ.
+    for tail in (1, 2, 3):
+        if len(q) - tail >= 6:
+            wildcard = q[: len(q) - tail] + "x" * tail
+            if wildcard in index.by_name and wildcard != q:
+                take([wildcard], "variant")
+    if not chosen and len(prefixed) >= 3:
+        result["reason"] = "that is the start of many different parts: type more of the marking"
     if len(chosen) < limit:
         floor = max(6, int(len(q) * 0.6))
         for k in range(len(q) - 1, floor - 1, -1):
-            names = [n for n in _prefix_rows(index, q[:k]) if n not in seen]
+            names = []
+            for n in _prefix_rows(index, q[:k]):
+                if n in seen:
+                    continue
+                common = next((i for i in range(min(len(n), len(q))) if n[i] != q[i]), min(len(n), len(q)))
+                # They may differ only in letters (a package, a grade): a digit where they part means a different function.
+                if _LETTERS_ONLY.match(q[common:]) and _LETTERS_ONLY.match(n[common:]):
+                    names.append(n)
             if names:
                 take(sorted(names, key=lambda n: (abs(len(n) - len(q)), n)), "family")
                 break
     texts = {
         "exact": "the library has a part with exactly this name",
-        "variant": "the library has a part whose name starts or ends the same way: likely the same chip with a different package or grade",
+        "variant": "the library has a part with this name plus or minus a short package or grade code: likely the same chip with a different package or grade",
         "family": "the library has parts from the same family, not this one: use them to learn what kind of chip it probably is, no more",
     }
     for name, tier in chosen:
@@ -231,7 +269,7 @@ def _find_row(index: _Index, library: str, name: str) -> _Row | None:
     return None
 
 
-def symbol_pins(library: str, name: str) -> dict[str, Any]:
+def symbol_pins(library: str, name: str, limit: int | None = MAX_PINS) -> dict[str, Any]:
     """Every pin of a library symbol: number, name and electrical type. A derived symbol takes its pins from the symbol it extends."""
 
     index = _index()
@@ -272,7 +310,12 @@ def symbol_pins(library: str, name: str) -> dict[str, Any]:
     for pin in pins:
         unique.setdefault(pin["number"], pin)
     ordered = sorted(unique.values(), key=lambda p: (len(p["number"]), p["number"]))
-    return {"library": library, "name": name, "pins_total": len(ordered), "pins": ordered[:MAX_PINS]}
+    return {"library": library, "name": name, "pins_total": len(ordered), "pins": ordered if limit is None else ordered[:limit]}
+
+
+def _all_pins(library: str, name: str) -> list[dict[str, str]]:
+    found = symbol_pins(library, name, limit=None)
+    return found["pins"]
 
 
 def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str, Any]]:
@@ -282,38 +325,41 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
     """
 
     try:
-        pins = symbol_pins(library, name)["pins"]
+        pins = _all_pins(library, name)
     except PartLookupError:
+        return []
+    if len(pins) > MAX_PINS_FOR_GATES:
         return []
     ground = sorted((p for p in pins if _GROUND_NAME.match(p["name"])), key=lambda p: (_GROUND_RANK.index(p["name"].upper()), len(p["number"]), p["number"]))
     supply: list[dict[str, str]] = []
     for p in pins:
-        if p["type"] in {"power_in", "power_out"} and not _GROUND_NAME.match(p["name"]) and not _NOT_A_SUPPLY.match(p["name"]) and all(q["name"] != p["name"] for q in supply):
+        if p["type"] == "power_in" and not _GROUND_NAME.match(p["name"]) and not _NOT_A_SUPPLY.match(p["name"]) and all(q["name"] != p["name"] for q in supply):
             supply.append(p)          # one measurement per supply name: a part with four VDD pins is measured at one
     if not ground or not supply:
         return []
+    supply.sort(key=lambda p: _MAIN_SUPPLY.index(p["name"].upper()) if p["name"].upper() in _MAIN_SUPPLY else len(_MAIN_SUPPLY))
     g = ground[0]
     where = " Pin 1 is the corner with the dot or notch; count anticlockwise from it, seen from above." if footprint and _PIN_ONE_PACKAGES.match(footprint) else ""
     gates: list[dict[str, Any]] = []
     for s in supply[:3]:
         gates.append(
             {
-                "key": f"voltage|pin {s['number']} ({s['name']})|pin {g['number']} ({g['name']})",
+                "key": f"{library}:{name}|voltage|pin {s['number']} ({s['name']})|pin {g['number']} ({g['name']})",
                 "kind": "voltage",
                 "from": f"pin {s['number']} ({s['name']})",
                 "to": f"pin {g['number']} ({g['name']})",
                 "instruction": f"With the board powered the way it was originally, measure between pin {s['number']} ({s['name']}) and pin {g['number']} ({g['name']}), and write the reading down.{where}",
-                "expect": "a steady voltage: compare it with the datasheet's supply range before you connect anything of yours",
+                "expect": "write down what you see, then compare it with the datasheet's supply range before you connect anything of yours",
             }
         )
     gates.append(
         {
-            "key": f"isolation|pin {supply[0]['number']} ({supply[0]['name']})|pin {g['number']} ({g['name']})",
+            "key": f"{library}:{name}|isolation|pin {supply[0]['number']} ({supply[0]['name']})|pin {g['number']} ({g['name']})",
             "kind": "isolation",
             "from": f"pin {supply[0]['number']} ({supply[0]['name']})",
             "to": f"pin {g['number']} ({g['name']})",
             "instruction": f"With the power off, check that pin {supply[0]['number']} ({supply[0]['name']}) and pin {g['number']} ({g['name']}) are not shorted together.{where}",
-            "expect": "not near 0 ohms",
+            "expect": "write down what you see: a reading near zero ohms means something is shorted, which needs understanding before you apply power",
         }
     )
     return gates
