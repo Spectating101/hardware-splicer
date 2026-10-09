@@ -33,6 +33,7 @@ AUTHORITY_STATEMENT = (
 # Conventional jumper-wire sizes and housings; typical, not measured. They size the case and the shopping list.
 WIRE_LENGTHS_MM = (100, 150, 200, 300)
 WIRE_CONNECTOR_HEIGHT_MM = 14.0
+WIRE_BEND_ALLOWANCE_MM = 10.0   # room above the tallest connector for a jumper to curve
 PIN_TIP_ABOVE_BOARD_MM = 3.0
 PLUG_CUTOUT_MM = (14.0, 8.0)   # a Micro-USB plug's moulded body is much bigger than the socket
 WINDOW_MARGIN_MM = 1.5
@@ -244,6 +245,30 @@ def _pin_tip(module: _Placed) -> float:
     return module.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM
 
 
+def _end(module: _Placed, point: dict[str, float]) -> dict[str, Any]:
+    """One end of a jumper: its female housing and where the wire leaves it. A board with headers has its pins pointing up, so the
+    housing stands on the pin tip; a display's pins hang down from its back, so the housing hangs below it."""
+
+    up = module.entry["kind"] != "display"
+    y0, y1 = (point["y"], point["y"] + WIRE_CONNECTOR_HEIGHT_MM) if up else (point["y"] - WIRE_CONNECTOR_HEIGHT_MM, point["y"])
+    exit_point = {"x": point["x"], "y": _r(y1 if up else y0), "z": point["z"]}
+    lead = {"x": point["x"], "y": _r(exit_point["y"] + (6.0 if up else -6.0)), "z": point["z"]}
+    return {"housing": {"x": point["x"], "z": point["z"], "y0": _r(y0), "y1": _r(y1), "size_mm": 2.54}, "exit": exit_point, "lead": lead}
+
+
+def _bezier(p0: dict[str, float], p1: dict[str, float], p2: dict[str, float], p3: dict[str, float]) -> list[dict[str, float]]:
+    return [p0, p1, p2, p3]
+
+
+def _curve_length(path: list[dict[str, float]], samples: int = 24) -> float:
+    def at(t: float) -> tuple[float, float, float]:
+        u = 1 - t
+        return tuple(u**3 * path[0][k] + 3 * u * u * t * path[1][k] + 3 * u * t * t * path[2][k] + t**3 * path[3][k] for k in ("x", "y", "z"))  # type: ignore[return-value]
+
+    points = [at(i / samples) for i in range(samples + 1)]
+    return sum(math.dist(points[i], points[i + 1]) for i in range(samples))
+
+
 def _wire_color(roles_a: set[str], roles_b: set[str], chosen: str | None) -> str:
     if chosen:
         return chosen
@@ -365,7 +390,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     pin_tips = board_top + PIN_TIP_ABOVE_BOARD_MM
 
     if display:
-        display.base_y = pin_tips + WIRE_CONNECTOR_HEIGHT_MM + c
+        display.base_y = pin_tips + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM + c
         # Towards the USB end, so the display is clear of the antenna and its keep-out.
         display.origin = (-inner_x / 2 + c + usb_over + 4.0, -display.pcb["y"] / 2)
         display_top = display.base_y + display.pcb["z"] + display.above
@@ -392,22 +417,24 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             errors.append(f"{row['from']} to {row['to']}: both ends are on the same module")
             continue
         wire_id = f"wire-{index:02d}"
-        length_mm = math.dist((point_a["x"], point_a["y"], point_a["z"]), (point_b["x"], point_b["y"], point_b["z"]))
-        # A jumper bows out between its ends; allow for the bow and some slack.
-        needed = length_mm * 1.35 + 2 * WIRE_CONNECTOR_HEIGHT_MM * 0.5
+        end_a, end_b = _end(ma, point_a), _end(mb, point_b)
+        path = _bezier(end_a["exit"], end_a["lead"], end_b["lead"], end_b["exit"])
+        curve_mm = _curve_length(path)
+        # A jumper is as long as its curve plus a little slack at each housing.
+        needed = curve_mm * 1.15 + 10.0
         stock = next((size for size in WIRE_LENGTHS_MM if size >= needed), None)
         if stock is None:
             findings.append(_finding("warning", "wire_too_long", f"{row['from']} to {row['to']} needs about {needed:.0f} mm of wire; that is longer than the usual jumper sizes.", "typical jumper wire lengths", wire_id))
-        mid_y = max(point_a["y"], point_b["y"]) - 1.0
         wires.append(
             {
                 "id": wire_id,
-                "from": {"module": ma.ref, "pin_id": pa["id"], "pin": pa["name"], "label": _label(ma, pa), "point": point_a, "chosen_among_several": multi_a},
-                "to": {"module": mb.ref, "pin_id": pb["id"], "pin": pb["name"], "label": _label(mb, pb), "point": point_b, "chosen_among_several": multi_b},
+                "from": {"module": ma.ref, "pin_id": pa["id"], "pin": pa["name"], "label": _label(ma, pa), "point": point_a, "housing": end_a["housing"], "exit": end_a["exit"], "chosen_among_several": multi_a},
+                "to": {"module": mb.ref, "pin_id": pb["id"], "pin": pb["name"], "label": _label(mb, pb), "point": point_b, "housing": end_b["housing"], "exit": end_b["exit"], "chosen_among_several": multi_b},
                 "color": _wire_color(set(pa["roles"]), set(pb["roles"]), row["wire"]),
-                "straight_mm": _r(length_mm),
+                "straight_mm": _r(math.dist((point_a["x"], point_a["y"], point_a["z"]), (point_b["x"], point_b["y"], point_b["z"]))),
+                "curve_mm": _r(curve_mm),
                 "stock_length_mm": stock,
-                "bezier": [point_a, {"x": point_a["x"], "y": _r(mid_y), "z": point_a["z"]}, {"x": point_b["x"], "y": _r(mid_y), "z": point_b["z"]}, point_b],
+                "bezier": path,
             }
         )
         resolved_pairs.append((wire_id, (ma, pa), (mb, pb)))
@@ -545,7 +572,7 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
         add(
             "wire", f"Connect {a['module']}.{a['pin']} to {b['module']}.{b['pin']}",
             f"Plug one end of a {wire['color']} jumper wire onto {a['label']} on the {a['module']}, and the other end onto {b['label']} on the {b['module']}. "
-            f"You need about {wire['straight_mm']:.0f} mm between the pins; a {wire['stock_length_mm'] / 10:g} cm wire gives slack." if wire["stock_length_mm"] else
+            f"The wire runs about {wire['curve_mm']:.0f} mm; a {wire['stock_length_mm'] / 10:g} cm wire gives slack." if wire["stock_length_mm"] else
             f"Plug a {wire['color']} jumper wire from {a['label']} to {b['label']}.",
             wire=wire["id"], parts=[a["module"], b["module"]], color=wire["color"],
             checks=[{"kind": "suggested_check", "check": "continuity", "from": f"{a['module']}.{a['pin']}", "to": f"{b['module']}.{b['pin']}", "net": None, "expect": "the two points are connected (beep)"}],

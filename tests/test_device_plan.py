@@ -82,7 +82,11 @@ def test_wire_endpoints_are_the_real_pin_positions_and_ground_takes_the_nearest_
     pins = {p["id"]: p["point"] for p in esp["pins"]}
     for wire in plan["wires"]:
         assert wire["to"]["point"] == pins[wire["to"]["pin_id"]]
-        assert wire["bezier"][0] == wire["from"]["point"] and wire["bezier"][-1] == wire["to"]["point"]
+        # The wire leaves the far end of each female housing; the housing stands on (or hangs from) the pin.
+        assert wire["bezier"][0] == wire["from"]["exit"] and wire["bezier"][-1] == wire["to"]["exit"]
+        assert wire["to"]["housing"]["y0"] == wire["to"]["point"]["y"] and wire["to"]["exit"]["y"] == wire["to"]["housing"]["y1"]
+        assert wire["from"]["housing"]["y1"] == wire["from"]["point"]["y"] and wire["from"]["exit"]["y"] == wire["from"]["housing"]["y0"]
+        assert wire["curve_mm"] >= wire["straight_mm"] - 14.0 * 2 and wire["stock_length_mm"] * 1.0 >= wire["curve_mm"] * 1.15
     ground = next(w for w in plan["wires"] if w["from"]["pin"] == "GND")
     assert ground["to"]["chosen_among_several"] is True
     chosen = math.dist(*[(p["x"], p["y"], p["z"]) for p in (ground["from"]["point"], ground["to"]["point"])])
@@ -102,7 +106,7 @@ def test_the_board_sits_inside_the_case_and_the_display_clears_the_wires_and_the
     assert esp["box"]["x1"] + esp["overhang_mm"]["antenna_end"] <= half_x
     # The display is above the tallest wire housing, and the lid is above the display.
     display = mods["display"]
-    assert display["base_y"] > esp["base_y"] + esp["pcb_mm"]["z"] + 3.0 + 14.0
+    assert display["base_y"] >= esp["base_y"] + esp["pcb_mm"]["z"] + 3.0 + 14.0 + 10.0   # housings plus room for the wires to bend
     assert case["lid_underside_y"] > display["base_y"] + display["pcb_mm"]["z"] + display["above_board_mm"]
     # The display is not over the antenna end.
     assert display["box"]["x1"] < esp["box"]["x1"] - 6.0
