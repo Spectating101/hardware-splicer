@@ -102,3 +102,9 @@ I found no tool that takes a donor board and tells a maker which block of it can
 ### What this says about direction
 
 The 3D layer makes the evidence-first idea visible, and it is worth having for that. It does not make Hardware Splicer a better generator or simulator than the tools above, and trying to would be the wrong race. The strongest position is the one nobody else is building: take a real piece of hardware, including a donor board from e-waste, say exactly what is known and what must be measured, and show the way through it. The next step on that path is a capture route for boards that have no file.
+
+### Reused rather than built (2026-10-10)
+
+KiCad's installed symbol and footprint libraries give offline marking lookup, pin names and real package sizes; the repo's parts providers
+(with jlcsearch, free and keyless) give optional online lookup; iFixit's public search gives teardown links. See `docs/PART_LOOKUP.md`,
+which also lists what was looked at and left alone, and why.

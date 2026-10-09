@@ -21,6 +21,18 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
 - What you chose for a part (its kind) decides how it is treated, not its label: a part you call `J9` but mark as a chip is a chip.
 - The hazard rules are the same as for a file (batteries, stored charge, mains parts). They are a rule list, not a guarantee.
 
+## Looking things up, measuring, reclaiming
+
+- **Marking lookup.** Type a chip's marking and the page shows what KiCad's library holds under it, with its datasheet, and offers the
+  library's package in one click. See `docs/PART_LOOKUP.md` for what a hit does and does not mean.
+- **Measure first.** A recognised chip comes with the measurements to make, a box for each reading, and a count of how many are
+  recorded. A recorded reading is a number you wrote down, not a pass.
+- **Draw a box.** With a photo under the board, *Draw a box* sets a part's size and place from the photo instead of from the typical
+  size.
+- **Where did it come from?** A teardown search finds iFixit pages for the device, with their credit.
+- **What you could reclaim.** After planning, a table and a spreadsheet list the parts worth taking, the advice, the readings and the
+  datasheet. Spreadsheet cells that a program would run as a formula get a leading apostrophe.
+
 ## What is cleaned and refused
 
 Names, labels and markings may not contain control or invisible characters (zero-width spaces, right-to-left overrides): they can make
@@ -38,5 +50,5 @@ At most 300 parts, markings of at most 40 printable characters, parts whose cent
 
 ## Not yet
 
-Recognising parts from the photo, looking a marking up for you (the page only offers a datasheet search), the repo's donor blocks with
-evidence gates ("measure VMOTOR at J_LOGIC") as steps, and a way to move from a described board to a build that uses its blocks.
+Recognising parts from the photo, the repo's donor *blocks* with their own evidence gates ("measure VMOTOR at J_LOGIC") as steps, and a
+way to move from a described board to a build that uses what you reclaimed.
