@@ -415,3 +415,15 @@ def test_the_board_can_be_wired_correctly_to_any_of_its_three_ground_pins() -> N
     for pin in ("mcu.J2-14", "mcu.J3-1", "mcu.J3-7", "mcu.GND"):
         plan = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": pin}, GOOD[2], GOOD[3]]))
         assert plan["findings"] == [], (pin, plan["findings"])
+
+
+def test_a_rejected_wire_does_not_hide_a_separate_supply_bridge() -> None:
+    plan = build_device_plan(_with([*GOOD, {"from": "display.VCC", "to": "mcu.5V"}, {"from": "display.VCC", "to": "mcu.EN"}]))
+    rules = [f["rule"] for f in plan["findings"]]
+    assert "reset_pin" in rules and rules.count("nets_bridged") == 1, plan["findings"]
+    # Removing the reset wire does not make the bridge go away, and the plan said so from the start.
+    without = build_device_plan(_with([*GOOD, {"from": "display.VCC", "to": "mcu.5V"}]))
+    assert [f["rule"] for f in without["findings"]].count("nets_bridged") == 1
+    # A wire that is itself rejected is reported once, by its own rule, and not again as part of a net.
+    shorted = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": "mcu.3V3"}, GOOD[2], GOOD[3]]))
+    assert [f["rule"] for f in shorted["findings"]].count("nets_bridged") == 0 and "ground_to_other" in _rules(shorted, "error")

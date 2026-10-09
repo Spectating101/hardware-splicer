@@ -359,10 +359,11 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     return out
 
 
-def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]], rejected: set[str | None]) -> list[dict[str, Any]]:
+def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]]) -> list[dict[str, Any]]:
     """Wires that are each fine but together join two supplies, or a supply and ground, through the pins they share.
 
-    A module's own ground pins are one net, and so are its 3V3 pins and its 5V pins, whether or not they are all wired.
+    A module's own ground pins are one net, and so are its 3V3 pins and its 5V pins, whether or not they are all wired. The caller
+    passes only wires the per-wire rules accepted, so a wire already reported is not reported again and cannot hide another problem.
     """
 
     parent: dict[tuple[str, str], tuple[str, str]] = {}
@@ -397,7 +398,7 @@ def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Plac
     out: list[dict[str, Any]] = []
     for members in nets.values():
         wires = sorted({w for node in members for w in wires_in.get(node, [])})
-        if not wires or any(w in rejected for w in wires):
+        if not wires:
             continue
         kinds = {role for node in members for role in roles[node][1]}
         names = sorted({roles[node][0] for node in members if roles[node][1] & {"power_3v3", "power_5v", "ground"}})
@@ -522,7 +523,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(set(others)))}.", "a signal pin carries one signal"))
 
     rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
-    findings.extend(_net_findings(placed, resolved_pairs, rejected))
+    findings.extend(_net_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
     # Everything a module needs to work is wired, by a wire that the checks did not reject.
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
