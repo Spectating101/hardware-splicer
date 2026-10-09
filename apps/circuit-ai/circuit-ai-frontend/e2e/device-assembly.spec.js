@@ -133,7 +133,9 @@ test('wiring that is wrong is caught and explained, and the example comes back',
   await expect(finding).toHaveAttribute('data-severity', 'error');
   await expect(finding).toContainText('flash memory');
   await expect(finding).toContainText('Basis:');
-  await expect(page.getByTestId('device-problems')).toContainText('1 wiring problem');
+  // The flash pin is wrong, and the SDA wire that was rejected leaves the display without a working SDA: two problems.
+  await expect(page.getByTestId('device-problems')).toContainText('2 wiring problems');
+  await expect(page.locator('[data-rule="missing_connection"]')).toContainText('SDA');
 
   // 5 V onto the display's supply is a warning, not a stop.
   await editor.fill(good.replace('"mcu.3V3"', '"mcu.5V"'));
@@ -206,4 +208,37 @@ test('leaving the page releases the graphics context', async ({ page }) => {
   const lost = await page.evaluate(() => window.__contexts.map((context) => context.isContextLost()));
   expect(lost.every(Boolean)).toBe(true);
   expect(errors).toEqual([]);
+});
+
+
+test('an oversized spec is refused by the page with a plain message, and the example still works afterwards', async ({ page }) => {
+  const viewer = await open(page);
+  const editor = page.getByTestId('device-spec-editor');
+  const good = await editor.inputValue();
+  await editor.fill(JSON.stringify({ ...JSON.parse(good), name: 'x'.repeat(70000) }));
+  await page.getByTestId('device-spec-apply').click();
+  await expect(page.getByTestId('device-error')).toContainText('at most 65536 bytes');
+  await editor.fill(good);
+  await page.getByTestId('device-spec-apply').click();
+  await expect(page.getByTestId('device-findings')).toContainText('nothing wrong');
+  await expect(viewer).toHaveAttribute('data-ready', '1');
+});
+
+test('while the display descends to be wired, each wire stays attached to it', async ({ page }) => {
+  const viewer = await open(page);
+  await next(page, viewer, 2);                          // the board is in; the display is still hovering above
+  await expect(viewer).toHaveAttribute('data-display', 'away');
+  await page.getByTestId('device-next').click();        // wire 1: the display comes down while the wire grows
+  await expect(viewer).toHaveAttribute('data-display', 'home');
+  await expect(viewer).toHaveAttribute('data-moving', '1');
+  // Sampled mid-flight: the wire is being redrawn from where the display is now, so it never lags behind it.
+  const lags = [];
+  for (let i = 0; i < 12; i += 1) {
+    lags.push(Number(await viewer.getAttribute('data-wire-lag')));
+    await page.waitForTimeout(60);
+  }
+  expect(Math.max(...lags)).toBeLessThan(0.3);       // millimetres between the wire's ends and its housings, while everything moves
+  await settle(viewer);
+  await expect(viewer).toHaveAttribute('data-wires', '1');
+  expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
 });

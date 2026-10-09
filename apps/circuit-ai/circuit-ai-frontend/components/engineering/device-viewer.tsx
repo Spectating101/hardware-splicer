@@ -69,7 +69,7 @@ export type DevicePlan = {
   counts: { modules: number; wires: number; steps: number; errors: number; warnings: number };
 };
 
-type Stats = { moving: boolean; wires: number; lid: string; mcu: string; display: string; usb: string };
+type Stats = { moving: boolean; wires: number; lid: string; mcu: string; display: string; usb: string; lag: number };
 type Label = { id: string; text: string; point: Point; part: 'mcu' | 'display' | 'lid' | 'case' | null; tone: 'part' | 'pin' };
 type SceneApi = { goTo: (index: number, instant: boolean) => void };
 
@@ -125,13 +125,13 @@ function labelsFor(plan: DevicePlan, index: number): Label[] {
       for (const end of [wire.from, wire.to]) {
         const owner = plan.modules.find((m) => m.id === end.module);
         const text = owner?.kind === 'mcu_board' ? `${end.pin} · ${end.pin_id}` : end.pin;
-        labels.push({ id: `${wire.id}-${end.module}`, text: `${end.module}: ${text}`, point: { x: end.exit.x, y: end.exit.y + (owner?.kind === 'mcu_board' ? 4 : -4), z: end.exit.z }, part: null, tone: 'pin' });
+        labels.push({ id: `${wire.id}-${end.module}`, text: `${end.module}: ${text}`, point: { x: end.exit.x, y: end.exit.y + (owner?.kind === 'mcu_board' ? 4 : -4), z: end.exit.z }, part: owner?.kind === 'display' ? 'display' : 'mcu', tone: 'pin' });
       }
     }
   }
   if (step.kind === 'check' || step.kind === 'power') {
     if (mcu) {
-      for (const pin of mcu.pins) if (pin.name === '3V3' || (pin.roles.includes('ground') && plan.wires.some((w) => w.to.pin_id === pin.id))) labels.push({ id: pin.id, text: `${pin.name} · ${pin.id}`, point: { x: pin.point.x, y: pin.point.y + 4, z: pin.point.z }, part: null, tone: 'pin' });
+      for (const pin of mcu.pins) if (pin.name === '3V3' || (pin.roles.includes('ground') && plan.wires.some((w) => w.to.pin_id === pin.id))) labels.push({ id: pin.id, text: `${pin.name} · ${pin.id}`, point: { x: pin.point.x, y: pin.point.y + 4, z: pin.point.z }, part: 'mcu', tone: 'pin' });
     }
   }
   return labels;
@@ -150,7 +150,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState('');
-  const [stats, setStats] = useState<Stats>({ moving: false, wires: 0, lid: 'open', mcu: 'away', display: 'away', usb: 'out' });
+  const [stats, setStats] = useState<Stats>({ moving: false, wires: 0, lid: 'open', mcu: 'away', display: 'away', usb: 'out', lag: 0 });
   const last = plan.steps.length - 1;
 
   useEffect(() => {
@@ -314,30 +314,36 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           for (const pin of display.pins) slab(displayGroup, pin.point.x - 0.32, pin.point.x + 0.32, y0 - 6, y0, pin.point.z - 0.32, pin.point.z + 0.32, goldDisplay);
         }
 
-        // --- wires: a tube that grows from end to end, with a female housing on each pin ---
-        type WireEntry = { id: string; mesh: ThreeNS.Mesh; geometry: ThreeNS.TubeGeometry; total: number; housings: ThreeNS.Mesh[]; progress: number; target: number; rings: ThreeNS.Mesh[] };
+        // --- wires: a tube that grows from end to end, with a female housing on each pin. The housings ride with their module and
+        // the tube is rebuilt from where the two modules are now, so a wire stays attached at both ends while a part moves. ---
+        type Part = 'mcu' | 'display';
+        type WireEntry = {
+          id: string; mesh: ThreeNS.Mesh; total: number; housings: ThreeNS.Mesh[]; progress: number; target: number; rings: ThreeNS.Mesh[];
+          ends: [Part, Part]; builtKey: string; path: Point[]; exits: { up: boolean; height: number }[];
+        };
         const wires = new Map<string, WireEntry>();
         const housingMaterial = mat('#15161a');
+        const partOf = (moduleId: string): Part => (plan.modules.find((m) => m.id === moduleId)?.kind === 'display' ? 'display' : 'mcu');
+        const groupOf = (part: Part) => (part === 'display' ? displayGroup : mcuGroup);
         for (const wire of plan.wires) {
-          const p = wire.bezier.map((point) => new THREE.Vector3(point.x, point.y, point.z));
-          const curve = new THREE.CubicBezierCurve3(p[0], p[1], p[2], p[3]);
-          const geometry = new THREE.TubeGeometry(curve, 48, 0.9, 8, false);
-          const mesh = new THREE.Mesh(geometry, mat(WIRE_COLORS[wire.color] ?? '#e8eaed', { roughness: 0.45 }));
+          const ends: [Part, Part] = [partOf(wire.from.module), partOf(wire.to.module)];
+          const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat(WIRE_COLORS[wire.color] ?? '#e8eaed', { roughness: 0.45 }));
           mesh.visible = false;
           world.add(mesh);
-          const housings = [wire.from, wire.to].map((end) => {
-            const h = slab(world, end.housing.x - 1.27, end.housing.x + 1.27, end.housing.y0, end.housing.y1, end.housing.z - 1.27, end.housing.z + 1.27, housingMaterial);
+          const housings = [wire.from, wire.to].map((end, i) => {
+            const h = slab(groupOf(ends[i]), end.housing.x - 1.27, end.housing.x + 1.27, end.housing.y0, end.housing.y1, end.housing.z - 1.27, end.housing.z + 1.27, housingMaterial);
             h.visible = false;
             return h;
           });
-          const rings = [wire.from, wire.to].map((end) => {
+          const rings = [wire.from, wire.to].map((end, i) => {
             const ring = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 12), new THREE.MeshBasicMaterial({ color: '#ffcf5a', transparent: true, opacity: 0.85 }));
             ring.position.set(end.point.x, end.point.y, end.point.z);
             ring.visible = false;
-            world.add(ring);
+            groupOf(ends[i]).add(ring);
             return ring;
           });
-          wires.set(wire.id, { id: wire.id, mesh, geometry, total: geometry.index ? geometry.index.count : 0, housings, progress: 0, target: 0, rings });
+          const exits = [wire.from, wire.to].map((end) => ({ up: end.exit.y > end.point.y, height: end.housing.y1 - end.housing.y0 }));
+          wires.set(wire.id, { id: wire.id, mesh, total: 0, housings, progress: 0, target: 0, rings, ends, builtKey: '', path: wire.bezier, exits });
         }
 
         // --- the USB cable ---
@@ -453,7 +459,11 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           cable.position.x = pose.usb;
           cable.visible = pose.usb > -45.9;
           let finished = 0;
+          let lag = 0;
+          mcuGroup.updateMatrixWorld(true);
+          displayGroup.updateMatrixWorld(true);
           const pulse = 1 + Math.sin(now / 160) * 0.18;
+          const offsetOf = (part: Part) => (part === 'mcu' ? pose.mcu : pose.display);
           wires.forEach((entry) => {
             const next = entry.progress + (entry.target - entry.progress) * k * 0.8;
             entry.progress = Math.abs(entry.target - next) < 0.004 ? entry.target : next;
@@ -462,16 +472,43 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
             const shown = entry.progress > 0.002;
             entry.mesh.visible = shown;
             entry.housings.forEach((h) => { h.visible = shown; });
-            entry.geometry.setDrawRange(0, Math.floor((entry.total * entry.progress) / 6) * 6);
+            if (shown) {
+              // Rebuild the tube only when one of its two modules has moved since it was last drawn.
+              const key = `${offsetOf(entry.ends[0]).toFixed(2)}|${offsetOf(entry.ends[1]).toFixed(2)}`;
+              if (key !== entry.builtKey) {
+                const shift = [offsetOf(entry.ends[0]), offsetOf(entry.ends[0]), offsetOf(entry.ends[1]), offsetOf(entry.ends[1])];
+                const p = entry.path.map((point, i) => new THREE.Vector3(point.x, point.y + shift[i], point.z));
+                const geometry = new THREE.TubeGeometry(new THREE.CubicBezierCurve3(p[0], p[1], p[2], p[3]), 48, 0.9, 8, false);
+                entry.mesh.geometry.dispose();
+                entry.mesh.geometry = geometry;
+                entry.total = geometry.index ? geometry.index.count : 0;
+                entry.builtKey = key;
+              }
+              entry.mesh.geometry.setDrawRange(0, Math.floor((entry.total * entry.progress) / 6) * 6);
+              // How far is each end of the wire from where its connector housing really is right now? It is 0 when it follows.
+              const position = entry.mesh.geometry.getAttribute('position');
+              const ring = 9;
+              const ringCentre = (first: number) => {
+                const centre = new THREE.Vector3();
+                for (let i = first; i < first + ring; i += 1) centre.add(new THREE.Vector3(position.getX(i), position.getY(i), position.getZ(i)));
+                return centre.multiplyScalar(1 / ring);
+              };
+              [ringCentre(0), ringCentre(48 * ring)].forEach((end, i) => {
+                const housing = entry.housings[i].getWorldPosition(new THREE.Vector3());
+                housing.y += (entry.exits[i].up ? 1 : -1) * (entry.exits[i].height / 2);
+                lag = Math.max(lag, end.distanceTo(housing));
+              });
+            }
             entry.rings.forEach((ring) => ring.scale.setScalar(pulse));
           });
-          const signature = `${moving}|${finished}|${want.lid}|${want.mcu}|${want.display}|${want.usb}`;
+          const lagRounded = Math.round(lag * 10) / 10;
+          const signature = `${moving}|${finished}|${want.lid}|${want.mcu}|${want.display}|${want.usb}|${lagRounded}`;
           if (signature !== lastSignature) {
             lastSignature = signature;
             setStats({
               moving, wires: finished,
               lid: want.lid === 0 ? 'closed' : want.lid === LID_HOVER ? 'hover' : 'open',
-              mcu: want.mcu === 0 ? 'home' : 'away', display: want.display === 0 ? 'home' : 'away', usb: want.usb === 0 ? 'in' : 'out',
+              mcu: want.mcu === 0 ? 'home' : 'away', display: want.display === 0 ? 'home' : 'away', usb: want.usb === 0 ? 'in' : 'out', lag: lagRounded,
             });
           }
           if (labelHost && labelNodes.size) {
@@ -546,6 +583,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
       data-mcu={stats.mcu}
       data-display={stats.display}
       data-usb={stats.usb}
+      data-wire-lag={stats.lag}
       data-playing={playing ? '1' : '0'}
       tabIndex={0}
       onKeyDown={(event) => {
