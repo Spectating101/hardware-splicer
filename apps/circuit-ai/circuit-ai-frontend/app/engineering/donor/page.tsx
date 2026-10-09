@@ -70,11 +70,46 @@ function toPayload(capture: Capture) {
   };
 }
 
-function looksLikeCapture(value: unknown): value is Capture {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.name === 'string' && typeof v.width_mm === 'number' && typeof v.length_mm === 'number' && Array.isArray(v.parts)
-    && v.parts.every((p) => p && typeof p === 'object' && typeof (p as Part).kind === 'string' && typeof (p as Part).package === 'string' && typeof (p as Part).x_mm === 'number' && typeof (p as Part).y_mm === 'number');
+const MAX_PARTS = 300;
+// eslint-disable-next-line no-control-regex
+const HIDDEN = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff]/g;
+
+function finiteIn(value: unknown, low: number, high: number): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high ? value : null;
+}
+
+/** Turns anything read back (a saved file, this browser's storage) into a board this page can draw, or null. It never trusts a type. */
+function sanitizeCapture(raw: unknown, newKey: () => string): { capture: Capture; dropped: number } | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const v = raw as Record<string, unknown>;
+  const board = (v.board && typeof v.board === 'object' ? v.board : v) as Record<string, unknown>;
+  const width = finiteIn(board.width_mm, 5, 500);
+  const length = finiteIn(board.length_mm, 5, 500);
+  if (width === null || length === null || !Array.isArray(v.parts)) return null;
+  const text = (value: unknown, limit: number) => (typeof value === 'string' ? value.replace(HIDDEN, '').slice(0, limit) : '');
+  const parts: Part[] = [];
+  let dropped = 0;
+  for (const item of v.parts.slice(0, MAX_PARTS)) {
+    const p = (item && typeof item === 'object' ? item : null) as Record<string, unknown> | null;
+    const x = p ? finiteIn(p.x_mm, 0, width) : null;
+    const y = p ? finiteIn(p.y_mm, 0, length) : null;
+    if (!p || typeof p.kind !== 'string' || typeof p.package !== 'string' || x === null || y === null) { dropped += 1; continue; }
+    parts.push({
+      key: newKey(),
+      ref: text(p.ref, 16),
+      kind: p.kind.slice(0, 40),
+      package: p.package.slice(0, 40),
+      marking: text(p.marking, 40),
+      x_mm: x,
+      y_mm: y,
+      width_mm: finiteIn(p.width_mm, 0.5, 120),
+      length_mm: finiteIn(p.length_mm, 0.5, 120),
+      rotation_deg: [0, 90, 180, 270].includes(p.rotation_deg as number) ? (p.rotation_deg as number) : 0,
+      side: p.side === 'back' ? 'back' : 'front',
+    });
+  }
+  dropped += Math.max(0, v.parts.length - MAX_PARTS);
+  return { capture: { name: text(v.name, 80) || 'Donor board', width_mm: width, length_mm: length, parts }, dropped };
 }
 
 export default function DonorPage() {
@@ -94,6 +129,7 @@ export default function DonorPage() {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ key: string; dx: number; dy: number } | null>(null);
   const counter = useRef(1);
+  const request = useRef(0);
 
   const newKey = () => `p${Date.now().toString(36)}${counter.current++}`;
 
@@ -108,8 +144,8 @@ export default function DonorPage() {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const saved = JSON.parse(raw);
-        if (looksLikeCapture(saved)) setCapture(saved);
+        const saved = sanitizeCapture(JSON.parse(raw), newKey);
+        if (saved) setCapture(saved.capture);
       }
     } catch { /* private window or blocked storage: start empty */ }
     setLoaded(true);
@@ -129,6 +165,7 @@ export default function DonorPage() {
   const spec = useMemo(() => JSON.stringify(toPayload(capture)), [capture]);
   const stale = Boolean(plan) && plannedFor !== spec;
   const verdictOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.verdict ?? ''])), [plan]);
+  const labelOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.label ?? ''])), [plan]);
 
   const update = useCallback((key: string, patch: Partial<Part>) => {
     setCapture((c) => ({ ...c, parts: c.parts.map((p) => (p.key === key ? { ...p, ...patch } : p)) }));
@@ -195,7 +232,19 @@ export default function DonorPage() {
     }
   };
 
+  const startOver = (next: Capture, message: string) => {
+    request.current += 1;              // an answer still on its way belongs to the board you had
+    setBusy(false);
+    setCapture(next);
+    setSelected(null);
+    setPlan(null);
+    setPhoto(null);
+    setError('');
+    setNotice(message);
+  };
+
   const planIt = async () => {
+    const mine = ++request.current;
     setBusy(true);
     setError('');
     try {
@@ -204,12 +253,13 @@ export default function DonorPage() {
       if (!body || isProxyFailure(body)) throw new Error(getProxyErrorMessage(body, 'The plan could not be made.'));
       const made = (body as { plan?: AssemblyPlan }).plan;
       if (!made) throw new Error('The plan could not be made.');
+      if (mine !== request.current) return;
       setPlan(made);
       setPlannedFor(spec);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'The plan could not be made.');
+      if (mine === request.current) setError(caught instanceof Error ? caught.message : 'The plan could not be made.');
     } finally {
-      setBusy(false);
+      if (mine === request.current) setBusy(false);
     }
   };
 
@@ -235,16 +285,16 @@ export default function DonorPage() {
   const upload = async (file: File | null) => {
     if (!file) return;
     try {
-      const text = await file.text();
-      if (text.length > 400_000) throw new Error('too large');
-      const data = JSON.parse(text);
-      const parts = Array.isArray(data?.parts) ? data.parts.map((p: Part) => ({ ...p, key: newKey(), width_mm: p.width_mm ?? null, length_mm: p.length_mm ?? null, rotation_deg: p.rotation_deg ?? 0, side: p.side ?? 'front', marking: p.marking ?? '', ref: p.ref ?? '' })) : [];
-      const next = { name: String(data?.name ?? 'Donor board'), width_mm: Number(data?.board?.width_mm ?? data?.width_mm), length_mm: Number(data?.board?.length_mm ?? data?.length_mm), parts };
-      if (!looksLikeCapture(next) || !Number.isFinite(next.width_mm) || !Number.isFinite(next.length_mm)) throw new Error('bad shape');
-      setCapture(next);
+      if (file.size > 400_000) throw new Error('too large');
+      const loadedBoard = sanitizeCapture(JSON.parse(await file.text()), newKey);
+      if (!loadedBoard) throw new Error('bad shape');
+      request.current += 1;            // an answer still on its way belongs to the board you had
+      setBusy(false);
+      setCapture(loadedBoard.capture);
       setSelected(null);
       setPlan(null);
-      setNotice(`Loaded ${parts.length} parts.`);
+      setPhoto(null);
+      setNotice(`Loaded ${loadedBoard.capture.parts.length} parts.${loadedBoard.dropped ? ` ${loadedBoard.dropped} could not be read or were over the limit of ${MAX_PARTS}, and were left out.` : ''}`);
     } catch {
       setNotice('That file is not a board description this page can read.');
     }
@@ -254,7 +304,7 @@ export default function DonorPage() {
   const pad = 4;
 
   return (
-    <main className="min-h-screen bg-[#0b0d12] px-4 pb-24 pt-6 text-stone-200" data-testid="donor-page" onKeyDown={onKey}>
+    <main className="min-h-screen bg-[#0b0d12] px-4 pb-24 pt-6 text-stone-200" data-testid="donor-page">
       <div className="mx-auto max-w-7xl">
         <header className="mb-3">
           <h1 className="text-lg font-semibold text-stone-50">Salvage a board</h1>
@@ -289,6 +339,7 @@ export default function DonorPage() {
               <div
                 className="mt-2 overflow-hidden rounded-lg border border-stone-800 bg-[#10141b] outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
                 tabIndex={0}
+                onKeyDown={onKey}
                 aria-label="Board, seen from above. Arrow keys move the selected part, Delete removes it."
               >
                 <svg
@@ -309,7 +360,7 @@ export default function DonorPage() {
                   <rect x={0} y={0} width={capture.width_mm} height={capture.length_mm} fill="url(#donor-grid)" pointerEvents="none" />
                   {capture.parts.map((part) => {
                     const { w, l } = sizeOf(part, options);
-                    const verdict = verdictOf.get(part.ref);
+                    const verdict = stale ? undefined : verdictOf.get(part.ref);
                     const fill = verdict ? VERDICT_FILL[verdict] ?? '#7b8aa0' : '#7b8aa0';
                     const isSelected = part.key === selected;
                     return (
@@ -355,8 +406,8 @@ export default function DonorPage() {
                 </label>
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
-                <button type="button" data-testid="donor-example" onClick={() => { setCapture(structuredClone(EXAMPLE)); setSelected(null); setPlan(null); setNotice('Example loaded: the places and packages are made up.'); }} className="rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800">Load the example</button>
-                <button type="button" data-testid="donor-reset" onClick={() => { setCapture(structuredClone(EMPTY)); setSelected(null); setPlan(null); setNotice(''); }} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><RotateCcw className="h-3 w-3" aria-hidden="true" />Start again</button>
+                <button type="button" data-testid="donor-example" onClick={() => startOver(structuredClone(EXAMPLE), 'Example loaded: the places and packages are made up.')} className="rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800">Load the example</button>
+                <button type="button" data-testid="donor-reset" onClick={() => startOver(structuredClone(EMPTY), '')} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><RotateCcw className="h-3 w-3" aria-hidden="true" />Start again</button>
                 <button type="button" onClick={download} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><Download className="h-3 w-3" aria-hidden="true" />Save</button>
                 <label className="inline-flex cursor-pointer items-center gap-1 rounded border border-stone-700 px-2 py-1 text-stone-200 hover:bg-stone-800"><Upload className="h-3 w-3" aria-hidden="true" />Open
                   <input type="file" accept="application/json,.json" className="sr-only" onChange={(e) => { void upload(e.target.files?.[0] ?? null); e.target.value = ''; }} />
@@ -419,7 +470,7 @@ export default function DonorPage() {
                       <li key={part.key}>
                         <button type="button" onClick={() => setSelected(part.key)} className={`flex w-full items-center justify-between gap-2 rounded px-2 py-1 text-left hover:bg-stone-800 ${part.key === selected ? 'bg-stone-800' : ''}`}>
                           <span className="truncate"><span className="font-medium text-stone-100">{part.ref}</span> <span className="text-stone-500">{part.package}{part.marking ? ` · ${part.marking}` : ''}</span></span>
-                          {verdict && !stale ? <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px]" style={{ background: `${VERDICT_FILL[verdict] ?? '#555'}33`, color: VERDICT_FILL[verdict] ?? '#ccc' }}>{VERDICT_TEXT[verdict] ?? verdict}</span> : null}
+                          {verdict && !stale ? <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px]" style={{ background: `${VERDICT_FILL[verdict] ?? '#555'}33`, color: VERDICT_FILL[verdict] ?? '#ccc' }}>{labelOf.get(part.ref) || VERDICT_TEXT[verdict] || verdict}</span> : null}
                         </button>
                       </li>
                     );

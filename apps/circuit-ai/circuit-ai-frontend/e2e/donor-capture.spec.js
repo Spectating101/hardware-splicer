@@ -189,3 +189,102 @@ test('a phone-sized screen has no sideways scrolling', async ({ page }) => {
   await expect(page.getByTestId('donor-canvas')).toBeVisible({ timeout: 20000 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 });
+
+// --- review findings (Grok), each reproduced before it was fixed -------------------------------------------------------------
+
+test('a plan still on its way when you start again does not appear on the new board', async ({ page }) => {
+  let release;
+  const held = new Promise((resolve) => { release = resolve; });
+  await page.route('**/donors/salvage-plan', async (route) => { await held; await route.continue(); });
+  await open(page);
+  await page.getByTestId('donor-example').click();
+  await page.getByTestId('donor-plan').click();
+  await expect(page.getByTestId('donor-plan')).toBeDisabled();                        // asked, not answered
+  await page.getByTestId('donor-reset').click();
+  await expect(page.getByTestId('donor-plan')).toBeEnabled();                         // starting again frees the button
+  release();
+  await page.waitForTimeout(1200);
+  await expect(page.getByTestId('assembly-viewer')).toHaveCount(0);                    // the example's plan never reached the empty board
+  await expect(page.getByTestId('donor-parts-list')).toContainText('None yet');
+});
+
+test('the colours on the board and the labels in the list say what the plan said, and go neutral the moment the board changes', async ({ page }) => {
+  await open(page);
+  await page.getByTestId('donor-add-centre').click();
+  await page.getByTestId('donor-marking').fill('NE555');
+  await page.getByTestId('donor-plan').click();
+  await viewerReady(page);
+  const fill = () => page.getByTestId('donor-part-U1').locator('rect').getAttribute('fill');
+  expect(await fill()).toBe('#3fb950');
+  // A reading is not an identification: the label says so.
+  await expect(page.getByTestId('donor-parts-list')).toContainText('Worth taking, if the marking checks out');
+  await page.getByTestId('assembly-next').click();
+  await expect(page.getByTestId('assembly-verdict')).toHaveText('Worth taking, if the marking checks out');
+  await expect(page.getByTestId('assembly-checks')).toContainText('agrees with a datasheet');
+  await expect(page.getByTestId('assembly-viewer')).not.toContainText('revision');
+  await page.getByTestId('donor-marking').fill('');
+  await expect(page.getByTestId('donor-stale')).toBeVisible();
+  expect(await fill()).toBe('#7b8aa0');                                                  // not green any more: that was for the old marking
+});
+
+test('a file or stored board with hostile contents is cleaned or refused and never breaks the page', async ({ page }, testInfo) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    try {
+      if (!sessionStorage.getItem('__seeded')) {
+        sessionStorage.setItem('__seeded', '1');
+        // An old, partial and odd shape of saved board: no refs, a number where text belongs, a size that is an object.
+        localStorage.setItem('hs-donor-capture-v1', JSON.stringify({ name: 'x', width_mm: 60, length_mm: 40, parts: [{ kind: 'ic', package: 'SOIC', x_mm: 10, y_mm: 10, ref: 123, width_mm: {}, marking: ['no'] }, { kind: 5, package: 'x', x_mm: 1, y_mm: 1 }] }));
+      }
+    } catch { /* ignore */ }
+  });
+  await page.setViewportSize({ width: 1500, height: 1000 });
+  await page.goto(DONOR);
+  await expect(page.getByTestId('donor-kind').locator('option')).not.toHaveCount(0, { timeout: 20000 });
+  await expect(page.getByTestId('donor-parts-list').locator('li')).toHaveCount(1);       // the usable part is kept, the other is not
+  await page.getByTestId('donor-add-centre').click();                                    // and adding to it still works
+  await expect(page.getByTestId('donor-parts-list').locator('li')).toHaveCount(2);
+
+  const huge = testInfo.outputPath('huge.json');
+  fs.writeFileSync(huge, JSON.stringify({ name: 'x', board: { width_mm: 60, length_mm: 40 }, parts: Array.from({ length: 2000 }, () => ({ kind: 'ic', package: 'SOIC', x_mm: 10, y_mm: 10 })) }));
+  await page.locator('input[type=file][accept*="json"]').setInputFiles(huge);
+  await expect(page.getByTestId('donor-notice')).toContainText('Loaded 300 parts');
+  await expect(page.getByTestId('donor-notice')).toContainText('1700 could not be read or were over the limit of 300');
+  const wide = testInfo.outputPath('wide.json');
+  fs.writeFileSync(wide, JSON.stringify({ name: 'x', board: { width_mm: 1e308, length_mm: 40 }, parts: [] }));
+  await page.locator('input[type=file][accept*="json"]').setInputFiles(wide);
+  await expect(page.getByTestId('donor-notice')).toContainText('not a board description');
+  const hidden = testInfo.outputPath('hidden.json');
+  fs.writeFileSync(hidden, JSON.stringify({ name: 'Router‮', board: { width_mm: 60, length_mm: 40 }, parts: [{ kind: 'ic', package: 'SOIC', x_mm: 10, y_mm: 10, ref: 'U1', marking: 'NE​555' }] }));
+  await page.locator('input[type=file][accept*="json"]').setInputFiles(hidden);
+  await expect(page.getByTestId('donor-name')).toHaveValue('Router');
+  await page.getByTestId('donor-part-U1').click({ force: true });
+  await expect(page.getByTestId('donor-marking')).toHaveValue('NE555');                  // the hidden characters are gone before they are shown
+  expect(errors).toEqual([]);
+});
+
+test('arrow keys in the 3D view step the plan and never move or delete the part selected on the board', async ({ page }) => {
+  await open(page);
+  await page.getByTestId('donor-example').click();
+  await page.getByTestId('donor-part-U3').click();
+  const place = async () => { const rect = page.getByTestId('donor-part-U3').locator('rect'); return [await rect.getAttribute('x'), await rect.getAttribute('y')]; };   // board units, so scrolling cannot fool it
+  const before = await place();
+  await page.getByTestId('donor-plan').click();
+  const viewer = await viewerReady(page);
+  await viewer.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(viewer).toHaveAttribute('data-step', '2');
+  await page.keyboard.press('Delete');
+  await expect(page.getByTestId('donor-part-U3')).toHaveCount(1);
+  expect(await place()).toEqual(before);
+});
+
+test('starting again also clears the photo under the board', async ({ page }) => {
+  await open(page);
+  await page.getByTestId('donor-photo').setInputFiles({ name: 'board.png', mimeType: 'image/png', buffer: PNG });
+  await expect(page.getByTestId('donor-canvas').locator('image')).toHaveCount(1);
+  await page.getByTestId('donor-reset').click();
+  await expect(page.getByTestId('donor-canvas').locator('image')).toHaveCount(0);
+});

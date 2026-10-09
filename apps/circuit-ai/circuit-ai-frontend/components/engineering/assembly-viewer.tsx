@@ -36,6 +36,7 @@ export type AssemblyStep = {
   part_ids: string[];
   checks: AssemblyCheck[];
   verdict?: string;
+  verdict_label?: string;
   effort?: string;
 };
 export type AssemblyPlan = {
@@ -605,7 +606,7 @@ export function AssemblyViewer({
       }}
     >
       <div className="relative min-h-[300px] flex-1">
-        <div ref={hostRef} className="absolute inset-0" role="img" aria-label={`Animated ${what} for revision ${revision}. Drag to orbit, scroll to zoom.`} />
+        <div ref={hostRef} className="absolute inset-0" role="img" aria-label={givenPlan ? `Animated ${what}. Drag to orbit, scroll to zoom.` : `Animated ${what} for revision ${revision}. Drag to orbit, scroll to zoom.`} />
         <div ref={labelsRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />
         {state === 'loading' || (state === 'ready' && !sceneReady) ? (
           <div className="absolute inset-0 flex items-center justify-center text-stone-400"><LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" /></div>
@@ -622,7 +623,7 @@ export function AssemblyViewer({
         {state === 'ready' && sceneReady ? (
           <div
             className="pointer-events-none absolute left-3 top-3 max-w-[16rem] rounded bg-stone-950/75 px-2 py-1 text-[10px] leading-4 text-stone-300"
-            title={salvageMode ? "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is a rule of thumb for taking parts off, not a procedure from the manufacturer." : "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is conventional, not the manufacturer's."}
+            title={givenPlan ? "Parts are boxes sized from what you typed, or typical for the package. Heights are typical, not measured. The order is a rule of thumb for taking parts off, not a procedure from the manufacturer." : salvageMode ? "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is a rule of thumb for taking parts off, not a procedure from the manufacturer." : "Parts are boxes sized from each footprint's outline. Heights are typical for the package, not measured. The order is conventional, not the manufacturer's."}
           >
             Stand-in shapes · typical heights{estimateNote ? ` · ${estimateNote}` : ''}
           </div>
@@ -664,7 +665,7 @@ export function AssemblyViewer({
               <div className="flex items-center gap-2 text-sm font-semibold">
                 {salvageMode && active.verdict ? (
                   <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${VERDICT_CHIP[active.verdict] ?? ''}`} data-testid="assembly-verdict" data-verdict={active.verdict}>
-                    {VERDICT_LABELS[active.verdict] ?? active.verdict}
+                    {active.verdict_label || VERDICT_LABELS[active.verdict] || active.verdict}
                   </span>
                 ) : null}
                 <span className="truncate" data-testid="assembly-title">{active.title}</span>
