@@ -136,3 +136,25 @@ def test_without_libraries_it_says_so_instead_of_pretending(tmp_path: Path, monk
     finally:
         monkeypatch.undo()
         pl.clear_cache()
+
+
+# --- review findings (Grok), each reproduced before it was fixed -----------------------------------------------------------------
+
+
+def test_a_negative_supply_is_a_supply_not_the_ground() -> None:
+    gates = pl.power_gates("Audio", "AS3310", None)
+    assert gates and "pin 14 (GND)" in gates[0]["to"] and "VEE" not in gates[0]["to"]            # GND is the reference, though VEE was listed first
+    assert any("VEE" in g["from"] for g in gates), gates                                          # and VEE is measured as a supply of its own
+    assert all("PGND" not in g["to"] for g in gates)
+
+
+def test_an_exposed_pad_is_never_measured_as_a_supply() -> None:
+    gates = pl.power_gates("MCU_Microchip_PIC16", "PIC16F15356-xML", "Package_DFN_QFN:QFN-28-1EP_6x6mm_P0.65mm_EP4.25x4.25mm")
+    assert gates and not any("PAD" in g["from"] or "PAD" in g["to"] for g in gates)
+    assert [g["from"] for g in gates if g["kind"] == "voltage"] == ["pin 17 (VDD)"]
+    assert "pin 5 (VSS)" in gates[0]["to"]
+
+
+def test_a_part_with_several_supply_pins_of_one_name_is_measured_once_per_name() -> None:
+    names = [g["from"] for g in pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm") if g["kind"] == "voltage"]
+    assert len(names) == len(set(names)) and len(names) <= 3

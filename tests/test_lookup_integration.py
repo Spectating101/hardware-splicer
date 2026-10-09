@@ -224,3 +224,17 @@ def test_readings_that_are_not_short_plain_text_are_refused(readings) -> None:
     spec["parts"][0]["readings"] = readings
     with pytest.raises(DonorCaptureError):
         build_donor_salvage_plan(spec)
+
+
+@pytest.mark.parametrize("tail", ["\u0000https://evil.example/", "ok\u001b[31m", "a\u0008b", "a\u0001b", "a b", "x\"onmouseover=\"", "<script>", "‮", "é"])
+def test_a_teardown_link_with_a_control_byte_or_anything_outside_plain_ascii_is_dropped(tail: str) -> None:
+    teardown_search.clear_cache()
+    row = {"title": "T", "url": "https://www.ifixit.com/" + tail, "type": "teardown"}
+    assert teardown_search.search_teardowns("some device", fetch=_fake([row, GOOD]))["results"] == [{"title": "Roku Teardown", "url": GOOD["url"], "type": "teardown", "summary": "Inside the box"}]
+
+
+def test_ordinary_ifixit_links_still_pass_the_stricter_filter() -> None:
+    teardown_search.clear_cache()
+    urls = ["https://www.ifixit.com/Teardown/Roku+RC-MC1+remote+Teardown/148825", "https://www.ifixit.com/Guide/Some%20Thing/2?x=1&y=2#top".replace("#top", ""), "https://www.ifixit.com/"]
+    rows = [{"title": f"T{i}", "url": u, "type": "guide"} for i, u in enumerate(urls)]
+    assert {r["url"] for r in teardown_search.search_teardowns("anything here", fetch=_fake(rows))["results"]} == set(urls)

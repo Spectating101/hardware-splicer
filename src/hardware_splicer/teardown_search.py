@@ -21,7 +21,7 @@ MAX_QUERY = 60
 MAX_BYTES = 512 * 1024
 CACHE_TTL_S = 900.0
 ATTRIBUTION = "From iFixit, licensed CC BY-NC-SA for non-commercial use. These are links to their pages: read the teardown there."
-_ALLOWED_URL = re.compile(r"^https://www\.ifixit\.com/[^\s\"'<>]{1,300}$")
+_ALLOWED_URL = re.compile(r"^https://www\.ifixit\.com/[A-Za-z0-9\-._~%/+?=&:@!$,;()*]{0,300}$")   # printable ASCII only: no control bytes, spaces or quotes
 _CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
 
 

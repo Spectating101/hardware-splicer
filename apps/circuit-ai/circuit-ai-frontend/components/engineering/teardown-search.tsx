@@ -7,7 +7,7 @@ import { getProxyErrorMessage, isProxyFailure } from '@/lib/proxy-client';
 type Result = { title: string; url: string; type: string; summary: string };
 type Answer = { available: boolean; results: Result[]; note: string | null; attribution: string };
 
-const IFIXIT = /^https:\/\/www\.ifixit\.com\//;
+const IFIXIT = /^https:\/\/www\.ifixit\.com\/[A-Za-z0-9\-._~%/+?=&:@!$,;()*]{0,300}$/;
 
 /** Looks for iFixit teardowns of the device a board came from. Only links come back: the content stays on iFixit, with their credit. */
 export function TeardownSearch() {

@@ -33,7 +33,11 @@ _PROPERTY = re.compile(r'\(property "(Value|Description|Datasheet|Footprint|ki_k
 _EXTENDS = re.compile(r'\(extends "([^"]+)"\)')
 _GENERATOR = re.compile(r'\(generator_version "([^"]+)"\)')
 _FOOTPRINT_NAME = re.compile(r"^[A-Za-z0-9_.+\-]+:[A-Za-z0-9_.,+\- ]+$")
-_GROUND_NAME = re.compile(r"^(GND|VSS|AGND|DGND|PGND|GNDA|GNDD|VSSA|VEE)$", re.IGNORECASE)
+# A negative supply (VEE) is a supply, not a ground. Several grounds are ranked: the plain one first.
+_GROUND_RANK = ("GND", "VSS", "DGND", "AGND", "GNDD", "GNDA", "VSSA", "PGND")
+_GROUND_NAME = re.compile(r"^(" + "|".join(_GROUND_RANK) + r")$", re.IGNORECASE)
+# Pins that carry no supply: the exposed pad, a tab or shield, and pins marked not connected.
+_NOT_A_SUPPLY = re.compile(r"^(EP|EPAD|PAD|TAB|SHIELD|SHLD|NC|DNC|N/C|~)\d*$", re.IGNORECASE)
 _PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):")
 
 
@@ -281,8 +285,11 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         pins = symbol_pins(library, name)["pins"]
     except PartLookupError:
         return []
-    ground = [p for p in pins if _GROUND_NAME.match(p["name"])]
-    supply = [p for p in pins if p["type"] in {"power_in", "power_out"} and not _GROUND_NAME.match(p["name"]) and p["name"] not in {"NC", "~"}]
+    ground = sorted((p for p in pins if _GROUND_NAME.match(p["name"])), key=lambda p: (_GROUND_RANK.index(p["name"].upper()), len(p["number"]), p["number"]))
+    supply: list[dict[str, str]] = []
+    for p in pins:
+        if p["type"] in {"power_in", "power_out"} and not _GROUND_NAME.match(p["name"]) and not _NOT_A_SUPPLY.match(p["name"]) and all(q["name"] != p["name"] for q in supply):
+            supply.append(p)          # one measurement per supply name: a part with four VDD pins is measured at one
     if not ground or not supply:
         return []
     g = ground[0]
