@@ -27,7 +27,7 @@ BASIS = "rule of thumb on the part's kind, package and mounting, plus what the b
 VERDICTS = ("keep", "test_first", "identify", "optional", "skip")
 VERDICT_TEXT = {
     "keep": "Worth taking",
-    "test_first": "Take it, test before trusting",
+    "test_first": "Take it, test first",
     "identify": "Read the marking to decide",
     "optional": "Cheap to buy new",
     "skip": "Leave it",
@@ -41,7 +41,12 @@ GENERAL_SAFETY = (
 
 _SPECIAL_CONNECTOR = re.compile(r"USB|JST|Molex|Micro|Mini|RJ45|Barrel|Audio|FPC|FFC|Terminal|Screw|SMA|HDMI|SD_|Card", re.IGNORECASE)
 _PLAIN_HEADER = re.compile(r"PinHeader|PinSocket|Pin_Header", re.IGNORECASE)
-_ELECTROLYTIC = re.compile(r"CP_Elec|C_Elec|Capacitor_THT:CP", re.IGNORECASE)
+_ELECTROLYTIC = re.compile(r"(^|:)CP_|CP_Elec|C_Elec|Elec|Tantalum|TantalC", re.IGNORECASE)
+_VOLTS = re.compile(r"(\d+(?:\.\d+)?)\s*V\b", re.IGNORECASE)
+_SOLDER_JUMPER = re.compile(r"SolderJumper|SolderBridge|Jumper:", re.IGNORECASE)
+_MAINS_PART = re.compile(r"Varistor|(^|[:_])RV_|MOV|IEC|Mains|AC_Inlet|Fuseholder", re.IGNORECASE)
+_BATTERY_HOLDER = re.compile(r"Holder|Clip|Keystone", re.IGNORECASE)
+_BATTERY_REF = re.compile(r"^BT\d", re.IGNORECASE)
 _THROUGH_HOLE_IC = re.compile(r"DIP|THT|TO-220|TO-92|TO-247|Socket", re.IGNORECASE)
 _FINE_PACKAGE = re.compile(r"QFN|DFN|LGA|BGA|QFP|WSON|USON|UDFN|WLCSP|CSP", re.IGNORECASE)
 _MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", re.IGNORECASE)
@@ -49,7 +54,7 @@ _MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", 
 # a function ("FLASH_128M", "SPI_1x06") is not one, and neither is a bare number.
 _PART_NUMBER = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+/-]{2,39}")
 _BATTERY = re.compile(r"Battery|BatteryHolder|CR\d{4}|LiPo|18650|Coin", re.IGNORECASE)
-_SMALL_CHIP = re.compile(r"_(0201|0402|0603)_|[RCLD]_(0201|0402|0603)|LED_(0402|0603)", re.IGNORECASE)
+_SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603)|LED_(01005|0201|0402|0603)", re.IGNORECASE)
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
 
 
@@ -67,7 +72,8 @@ def _identified(part: dict[str, Any]) -> bool:
 
 def _effort(part: dict[str, Any]) -> tuple[str, str]:
     name = part["footprint"]
-    through = part.get("mounting") == "through_hole" or bool(_THROUGH_HOLE_IC.search(name))
+    mounting = part.get("mounting")
+    through = mounting == "through_hole" or (mounting is None and bool(_THROUGH_HOLE_IC.search(name)))
     if through:
         return "easy", "a soldering iron with solder wick or a desoldering pump"
     if _FINE_PACKAGE.search(name):
@@ -75,6 +81,12 @@ def _effort(part: dict[str, Any]) -> tuple[str, str]:
     if _MEDIUM_PACKAGE.search(name):
         return "medium", "hot air or an iron with plenty of flux, and tweezers"
     return "medium", "an iron or hot air, flux and tweezers"
+
+
+def _high_voltage(part: dict[str, Any]) -> bool:
+    if part.get("kind") != "passive" or not str(part.get("ref", "")).upper().startswith("C"):
+        return False
+    return any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(str(part.get("value") or "")))
 
 
 def _assess(part: dict[str, Any]) -> dict[str, Any]:
@@ -90,14 +102,32 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         verdict = "skip"
         reasons.append("a test pad or a hole: there is nothing to take")
         effort, tool = "none", ""
-    elif _BATTERY.search(name) or part["ref"].upper().startswith("BT"):
-        verdict = "optional"
-        reasons.append("a battery or its holder: take the holder if you need it, and never the cell")
+    elif _SOLDER_JUMPER.search(name):
+        verdict = "skip"
+        reasons.append("a solder jumper is a bridge on the board itself: there is no part to take")
+        effort, tool = "none", ""
+    elif _BATTERY.search(name) or _BATTERY_REF.match(part["ref"]):
         hazards.append("take any battery out before heating anything, and never heat a lithium cell")
-    elif _ELECTROLYTIC.search(name):
+        if _BATTERY_HOLDER.search(name):
+            verdict = "optional"
+            reasons.append("a battery holder: take it if you need it; the cell is never part of this")
+        else:
+            verdict = "skip"
+            reasons.append("a battery cell: take it out by hand before you start, never with heat, and do not reuse a swollen or damaged one")
+            effort, tool = "none", ""
+    elif _MAINS_PART.search(name):
+        verdict = "optional"
+        reasons.append("a part from mains wiring: it can wear out or carry mains voltage in its original use")
+        hazards.append("only reuse it if you know how to work safely with mains voltage; a varistor wears out and is not worth keeping")
+    elif _ELECTROLYTIC.search(name) or _high_voltage(part):
         verdict = "test_first"
-        reasons.append("electrolytic capacitors age and lose capacity; its condition is unknown")
+        reasons.append("a polarised or high-voltage capacitor ages and can fail; its condition is unknown")
         hazards.append("may still hold a charge: discharge it through a resistor first")
+        if _high_voltage(part):
+            verdict = "skip"
+            reasons.append("rated for 100 V or more: not worth the risk of a stored charge")
+            hazards.append("a high-voltage capacitor can hold a dangerous charge for a long time")
+            effort, tool = "none", ""
     elif kind == "connector" and _SPECIAL_CONNECTOR.search(name):
         verdict = "keep"
         reasons.append("a specialised connector: harder to find and cheap to keep")
@@ -133,9 +163,19 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
     else:
         verdict = "optional"
         reasons.append("a common part of an uncommon kind: take it if you need that function")
+    if str(part.get("outline_basis", "")).startswith("no outline"):
+        reasons.append("the footprint names no package and has no outline, so its size and effort are guesses")
     if verdict in {"keep", "test_first", "identify", "optional"} and kind == "ic":
         hazards.append("heat and moisture can damage a chip: do not stay on one spot, and keep it dry")
     return {"verdict": verdict, "label": VERDICT_TEXT[verdict], "effort": effort, "tool": tool, "reasons": reasons, "hazards": hazards, "basis": BASIS}
+
+
+def _what(part: dict[str, Any]) -> str:
+    """What a chip is called by the file, so two different chips are never one step."""
+
+    if part["kind"] != "ic":
+        return ""
+    return str((part.get("identity") or {}).get("mpn") or part.get("value") or "")
 
 
 def _order_key(part: dict[str, Any]) -> tuple[Any, ...]:
@@ -144,7 +184,7 @@ def _order_key(part: dict[str, Any]) -> tuple[Any, ...]:
     # Tall and easy first so they are out of the way: connectors, electrolytics, then chips from easy to hard, then the rest.
     phase = 0 if kind == "connector" else 1 if _ELECTROLYTIC.search(part["footprint"]) else 2 if kind == "ic" else 3
     effort = {"easy": 0, "medium": 1, "hard": 2, "none": 3}[salvage["effort"]]
-    return (part["side"] != "front", phase, effort if phase == 2 else 0, -part["height_mm"], part["footprint"], part["ref"])
+    return (part["side"] != "front", phase, effort if phase == 2 else 0, -part["height_mm"], part["footprint"], salvage["verdict"], _what(part), part["ref"])
 
 
 def _title(group: list[dict[str, Any]], verdict: str) -> str:
@@ -174,7 +214,7 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
     to_take = sorted([p for p in fitted if p["salvage"]["verdict"] != "skip"], key=_order_key)
     groups: list[list[dict[str, Any]]] = []
     for part in to_take:
-        key = (part["side"], part["kind"], part["footprint"], part["salvage"]["verdict"], part["salvage"]["effort"])
+        key = (part["side"], part["kind"], part["footprint"], part["salvage"]["verdict"], part["salvage"]["effort"], _what(part))
         if groups and groups[-1][0].get("_key") == key:
             groups[-1].append(part)
         else:

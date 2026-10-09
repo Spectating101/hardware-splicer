@@ -181,7 +181,7 @@ def test_a_chip_is_called_identified_only_when_its_value_is_a_part_number_not_a_
 def test_a_battery_or_its_holder_carries_a_hazard_and_is_never_called_a_find() -> None:
     plan = build_salvage_plan(_board(_fp("BT1", "Battery:BatteryHolder_Keystone_103_1x20mm", "10 10", "CR2032", "through_hole")))
     got = _verdict(plan, "BT1")
-    assert got["verdict"] == "optional" and any("lithium" in h for h in got["hazards"]) and "never the cell" in got["reasons"][0]
+    assert got["verdict"] == "optional" and any("lithium" in h for h in got["hazards"]) and "the cell is never part of this" in got["reasons"][0]
 
 
 def test_text_from_the_board_file_is_quoted_in_the_advice_and_cannot_pose_as_an_instruction() -> None:
@@ -191,3 +191,73 @@ def test_text_from_the_board_file_is_quoted_in_the_advice_and_cannot_pose_as_an_
     assert f'"{hostile}"' in reason          # shown as the file's words, in quotes, never as a step
     step = next(s for s in plan["steps"] if "U1" in s["refs"])
     assert "power it from 12V" not in step["title"]
+
+
+# --- found by an independent review (Grok) and reproduced before being fixed -------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("ref", "footprint", "attr", "value", "verdict", "hazard"),
+    [
+        ("BT1", "Battery:Battery_18650", "through_hole", "", "skip", "lithium"),             # a cell is never heated or planned for removal
+        ("BT1", "Battery:BatteryHolder_Keystone_103_1x20mm", "through_hole", "CR2032", "optional", "lithium"),
+        ("C1", "Device:CP_Radial_D10.0mm_P5.00mm", "through_hole", "1000uF 25V", "test_first", "discharge"),
+        ("C1", "Capacitor_SMD:CP_Tantalum_EIA-3216-18_Kemet-A", "smd", "47uF", "test_first", "discharge"),
+        ("C1", "Capacitor_THT:C_Rect_L18.0mm_W5.0mm_P15.00mm", "through_hole", "1uF 400V", "skip", "dangerous charge"),
+        ("RV1", "Varistor:RV_Disc_D7.00mm_W5.50mm_P5.00mm", "through_hole", "", "optional", "mains"),
+        ("J1", "Connector_IEC:IEC_C14", "through_hole", "", "optional", "mains"),
+    ],
+)
+def test_parts_that_can_hurt_you_carry_a_hazard_and_are_never_called_a_find(ref, footprint, attr, value, verdict, hazard) -> None:
+    got = _verdict(build_salvage_plan(_board(_fp(ref, footprint, "10 10", value, attr))), ref)
+    assert got["verdict"] == verdict, got
+    assert any(hazard in h for h in got["hazards"]), got
+    assert got["verdict"] != "keep"
+
+
+def test_a_battery_cell_is_not_a_step_that_tells_you_to_use_a_soldering_iron() -> None:
+    plan = build_salvage_plan(_board(_fp("BT1", "Battery:Battery_18650", "10 10", "", "through_hole") + _fp("U1", "Package_DIP:DIP-8_W7.62mm", "30 10", "NE555", "through_hole")))
+    assert all("BT1" not in step["refs"] for step in plan["steps"])
+    assert not any("soldering iron" in step["instruction"] and "cell" in step["instruction"] for step in plan["steps"])
+
+
+@pytest.mark.parametrize("ref", ["BTN1", "BTN2", "BT"])
+def test_a_button_or_a_reference_that_merely_starts_with_bt_is_not_a_battery(ref: str) -> None:
+    got = _verdict(build_salvage_plan(_board(_fp(ref, "Button_Switch_SMD:SW_SPST_CK_RS282G05A3", "10 10", "SW"))), ref)
+    assert not any("lithium" in h for h in got["hazards"]) and "battery" not in " ".join(got["reasons"]).lower()
+
+
+@pytest.mark.parametrize(("footprint", "verdict"), [("Resistor_SMD:R_01005_0402Metric", "skip"), ("Resistor_SMD:R_0402_1005Metric", "skip"), ("Capacitor_SMD:C_01005_0402Metric", "skip"), ("Resistor_SMD:R_1206_3216Metric", "optional")])
+def test_the_smallest_chip_parts_are_left_alone_by_every_naming_of_their_size(footprint: str, verdict: str) -> None:
+    assert _verdict(build_salvage_plan(_board(_fp("R1", footprint, "10 10", "10k"))), "R1")["verdict"] == verdict
+
+
+def test_a_solder_jumper_is_a_bridge_on_the_board_not_a_part_to_take() -> None:
+    plan = build_salvage_plan(_board(_fp("JP1", "Jumper:SolderJumper_2_Open_SilkScreen", "10 10")))
+    assert _verdict(plan, "JP1")["verdict"] == "skip" and [s["kind"] for s in plan["steps"]] == ["prepare", "finish"]
+
+
+def test_the_file_saying_a_part_is_surface_mount_beats_a_word_in_its_name() -> None:
+    smd = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_USB:USB_Mini-B_Lumberg_2486_04_Socket", "10 10", "", "smd"))), "J1")
+    tht = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_USB:USB_B_Socket", "10 10", "", "through_hole"))), "J1")
+    assert smd["effort"] == "medium" and "wick" not in smd["tool"] and tht["effort"] == "easy"
+    # With no mounting stated, the name is all there is to go on.
+    unstated = _verdict(build_salvage_plan(_board(_fp("U1", "Package_DIP:DIP-8_W7.62mm", "10 10", "NE555", attr="exclude_from_bom"))), "U1")
+    assert unstated["effort"] == "easy"
+
+
+def test_chips_with_one_footprint_are_one_step_per_kind_of_job_and_never_two_different_chips_in_one() -> None:
+    lq = "Package_QFP:LQFP-48_7x7mm_P0.5mm"
+    split = build_salvage_plan(_board(_fp("U1", lq, "10 10") + _fp("U2", lq, "20 10", props='(property "MPN" "STM32F103C8T6")') + _fp("U3", lq, "30 10")))
+    titles = [(s["title"], s["verdict"]) for s in split["steps"] if s["kind"] == "salvage"]
+    assert len(titles) == 2 and {t[1] for t in titles} == {"identify", "keep"}          # U1 and U3 are one job
+    assert any("U1" in t and "U3" in t for t, _ in titles)
+    two = build_salvage_plan(_board(_fp("U1", lq, "10 10", props='(property "MPN" "STM32F103C8T6")') + _fp("U2", lq, "20 10", props='(property "MPN" "STM32F103CBT6")')))
+    steps = [s for s in two["steps"] if s["kind"] == "salvage"]
+    assert len(steps) == 2 and "STM32F103C8T6" in steps[0]["instruction"] + steps[1]["instruction"] and "STM32F103CBT6" in steps[0]["instruction"] + steps[1]["instruction"]
+    assert all(len(s["refs"]) == 1 for s in steps)       # a sentence about one chip is never said of another
+
+
+def test_a_footprint_that_names_no_package_is_said_to_be_a_guess() -> None:
+    got = _verdict(build_salvage_plan(_board('(footprint "MyLib:Thing" (layer "F.Cu") (at 10 10) (attr smd) (property "Reference" "R1") (property "Value" "x"))')), "R1")
+    assert any("guesses" in r for r in got["reasons"])
