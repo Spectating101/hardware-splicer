@@ -214,6 +214,7 @@ export default function DonorPage() {
   };
 
   const onBackgroundDown = (event: ReactPointerEvent<SVGElement>) => {
+    if (event.button !== 0) return;       // only the primary button places or draws: a right-click opens the browser's menu
     const { x, y } = point(event);
     if (x < 0 || y < 0 || x > capture.width_mm || y > capture.length_mm) { setSelected(null); return; }
     if (mode === 'measure') {
@@ -323,7 +324,7 @@ export default function DonorPage() {
   };
   const downloadReclaim = () => {
     if (!plan) return;
-    const blob = new Blob([toCsv(reclaimRows(plan))], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob(['\uFEFF', toCsv(reclaimRows(plan))], { type: 'text/csv;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `${capture.name.replace(/[^A-Za-z0-9._-]+/g, '-').slice(0, 40) || 'donor-board'}-reclaim.csv`;

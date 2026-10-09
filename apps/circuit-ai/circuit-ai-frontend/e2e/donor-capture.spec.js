@@ -220,7 +220,7 @@ test('the colours on the board and the labels in the list say what the plan said
   await expect(page.getByTestId('donor-parts-list')).toContainText('Worth taking, if the marking checks out');
   await page.getByTestId('assembly-next').click();
   await expect(page.getByTestId('assembly-verdict')).toHaveText('Worth taking, if the marking checks out');
-  await expect(page.getByTestId('assembly-checks')).toContainText('agrees with a datasheet');
+  await expect(page.getByTestId('assembly-checks')).toContainText('compare it with a datasheet');
   await expect(page.getByTestId('assembly-viewer')).not.toContainText('revision');
   await page.getByTestId('donor-marking').fill('');
   await expect(page.getByTestId('donor-stale')).toBeVisible();

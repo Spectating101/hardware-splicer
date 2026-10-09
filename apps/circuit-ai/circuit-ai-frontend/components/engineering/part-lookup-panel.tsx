@@ -29,7 +29,7 @@ export function packageFromFootprint(footprint: string | null): string | null {
   if (!footprint) return null;
   const f = footprint.toLowerCase();
   if (f.startsWith('package_dip:')) return 'DIP';
-  if (f.startsWith('package_so:')) return /tssop|msop|ssop/.test(f) ? 'TSSOP' : 'SOIC';
+  if (f.startsWith('package_so:')) return f.startsWith('package_so:tssop-') ? 'TSSOP' : /msop|ssop|vssop|qsop|sc-70/.test(f) ? null : 'SOIC';   // no capture package matches those, so none is offered
   if (f.startsWith('package_to_sot_smd:sot-23')) return 'SOT-23';
   if (f.startsWith('package_qfp:')) return 'QFP';
   if (f.startsWith('package_dfn_qfn:')) return 'QFN';
@@ -59,20 +59,21 @@ export function PartLookupPanel({
     const text = marking.trim();
     if (text.length < 3) { setState({ status: 'idle' }); return; }
     const controller = new AbortController();
-    setState((previous) => ({ status: 'loading', data: previous.data }));
+    let current = true;                 // false once this marking has been replaced: a late answer must not be shown under a newer one
+    setState({ status: 'loading' });
     const timer = window.setTimeout(() => {
       fetch(`/api/proxy/engineering/parts/lookup?marking=${encodeURIComponent(text)}`, { cache: 'no-store', signal: controller.signal })
         .then((response) => response.json())
         .then((body: unknown) => {
           if (!body || isProxyFailure(body)) throw new Error(getProxyErrorMessage(body, 'The lookup failed.'));
-          setState({ status: 'ready', data: body as LookupData });
+          if (current) setState({ status: 'ready', data: body as LookupData });
         })
         .catch((caught: unknown) => {
-          if (caught instanceof DOMException && caught.name === 'AbortError') return;
+          if (!current || (caught instanceof DOMException && caught.name === 'AbortError')) return;
           setState({ status: 'error', message: caught instanceof Error ? caught.message : 'The lookup failed.' });
         });
     }, 400);
-    return () => { window.clearTimeout(timer); controller.abort(); };
+    return () => { current = false; window.clearTimeout(timer); controller.abort(); };
   }, [marking]);
 
   const { status, data } = state;

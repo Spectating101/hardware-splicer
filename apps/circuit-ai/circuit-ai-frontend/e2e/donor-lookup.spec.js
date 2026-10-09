@@ -64,7 +64,9 @@ test('what you measure is written down, counted, carried into the plan and the s
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('reclaim-csv').click()]);
   const saved = testInfo.outputPath('reclaim.csv');
   await download.saveAs(saved);
-  const csv = fs.readFileSync(saved, 'utf8');
+  const raw = fs.readFileSync(saved, 'utf8');
+  expect(raw.charCodeAt(0)).toBe(0xFEFF);                                                   // a spreadsheet then reads it as UTF-8
+  const csv = raw.slice(1);
   expect(csv.split('\r\n')[0]).toBe('Label,What it is (as you read it),Package,Advice,Measurements,Datasheet,Why');
   expect(csv).toContain('U1,NE555P,');
   expect(csv).toContain('1 of 2 readings recorded');
@@ -151,9 +153,34 @@ test('the spreadsheet never carries a formula a spreadsheet program would run', 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('reclaim-csv').click()]);
   const saved = testInfo.outputPath('inject.csv');
   await download.saveAs(saved);
-  const lines = fs.readFileSync(saved, 'utf8').split('\r\n');
+  const lines = fs.readFileSync(saved, 'utf8').slice(1).split('\r\n');
   expect(lines[1]).toContain("\"'=HYPERLINK(\"\"http://x.example\"\",\"\"go\"\")\"");     // quoted, doubled quotes, and an apostrophe in front
   expect(lines.some((line) => /(^|,)[=+@-]/.test(line.replace(/"(?:[^"]|"")*"/g, '')))).toBe(false);
+});
+
+test('a new marking never shows the old chip\'s answer, and a right-click places nothing', async ({ page }) => {
+  await open(page);
+  await chip(page, 'LM358');
+  await expect(panel(page)).toHaveAttribute('data-status', 'ready', { timeout: 15000 });
+  await expect(page.getByTestId('lookup-matches')).toContainText('LM358');
+  await page.getByTestId('donor-marking').fill('NE555P');
+  await expect(page.getByTestId('lookup-matches')).not.toContainText('LM358');            // not even dimmed, while the new answer loads
+  await expect(page.getByTestId('lookup-matches')).toContainText('NE555P', { timeout: 15000 });
+  const count = await page.getByTestId('donor-parts-list').locator('li').count();
+  const at = await page.getByTestId('donor-canvas').evaluate((svg) => { const m = svg.getScreenCTM(); return { x: m.a * 5 + m.e, y: m.d * 5 + m.f }; });
+  await page.mouse.click(at.x, at.y, { button: 'right' });
+  await expect(page.getByTestId('donor-parts-list').locator('li')).toHaveCount(count);
+});
+
+test('a reading belongs to the chip it was taken from', async ({ page }) => {
+  await open(page);
+  await chip(page, 'NE555P');
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(2, { timeout: 15000 });
+  await page.getByTestId('lookup-reading').first().fill('5.02 V');
+  await page.getByTestId('donor-marking').fill('NE555D');
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(2, { timeout: 15000 });
+  await expect(page.getByTestId('lookup-reading').first()).toHaveValue('');
+  await expect(page.getByTestId('lookup-recorded')).toHaveText('0 of 2 readings recorded');
 });
 
 test('the capture page with the lookup open has no sideways scrolling on a phone', async ({ page }) => {
