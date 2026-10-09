@@ -47,7 +47,7 @@ def test_a_typed_board_gets_the_same_advice_and_says_it_came_from_the_person() -
     assert _verdict(plan, "BT1")["verdict"] == "skip" and any("lithium" in h for h in _verdict(plan, "BT1")["hazards"])
     assert _verdict(plan, "C1")["verdict"] == "test_first" and _verdict(plan, "R1")["verdict"] == "skip"
     assert plan["steps"][0]["kind"] == "prepare" and plan["steps"][-1]["kind"] == "finish"
-    assert "measures nothing" in plan["authority"]
+    assert "measures nothing" in plan["authority"] and "from what you described" in plan["authority"] and "read from its file" not in plan["authority"]
 
 
 def test_the_kind_the_person_chose_decides_how_a_part_is_treated_not_its_label() -> None:

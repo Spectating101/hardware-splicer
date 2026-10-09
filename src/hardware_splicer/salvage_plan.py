@@ -33,6 +33,12 @@ VERDICT_TEXT = {
     "skip": "Leave it",
 }
 
+TYPED_AUTHORITY = (
+    "This is a rule-of-thumb plan for taking a board apart, from what you described. It measures nothing: every size, place and marking is what "
+    "you told it, the condition of every part is unknown until you test it, a verdict is advice about effort and reuse, and nothing here "
+    "approves putting a salvaged part into a device."
+)
+
 GENERAL_SAFETY = (
     "Unplug the board and take out any battery before you start. Large capacitors can hold a charge: discharge them through a "
     "resistor, not a screwdriver. Work with ventilation and eye protection, and wash your hands afterwards: older boards can "
@@ -301,7 +307,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
     return {
         "schema_version": SALVAGE_PLAN_SCHEMA,
         "mode": "salvage",
-        "authority": AUTHORITY_STATEMENT,
+        "authority": TYPED_AUTHORITY if typed else AUTHORITY_STATEMENT,
         "origin": "typed" if typed else "file",
         "limits": TYPED_LIMITS if typed else [
             "Needs the board's file. A physical board with no file cannot be planned from.",

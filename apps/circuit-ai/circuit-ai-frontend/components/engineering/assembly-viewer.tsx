@@ -578,6 +578,8 @@ export function AssemblyViewer({
   const estimateNote = useMemo(() => {
     if (!plan) return '';
     const bases = plan.parts.map((part) => part.outline_basis);
+    // A board a person described has no courtyards: its sizes are what they typed, or typical for the package.
+    if (bases.some((value) => value.startsWith('typical size') || value === 'the size you typed')) return 'Sizes are typical for each package unless you typed them.';
     if (bases.some((value) => value.startsWith('no outline'))) return 'Some parts have no outline or pads in the file and are drawn as a small box.';
     return bases.some((value) => !value.startsWith('courtyard')) ? 'Some outlines come from pad positions because those footprints have no courtyard.' : '';
   }, [plan]);

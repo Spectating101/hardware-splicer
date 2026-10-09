@@ -629,6 +629,29 @@ async def device_plan_post(request: Request) -> dict[str, Any]:
         raise _thread_error(422, "invalid_device_spec", str(exc)) from None
 
 
+# --- Boards a person describes: the real capture code, stateless, as the real API serves it ----------------------------
+_build_donor_plan = _load_hs_attr("donor_capture", "build_donor_salvage_plan")
+_DonorCaptureError = _load_hs_attr("donor_capture", "DonorCaptureError")
+_donor_options = _load_hs_attr("donor_capture", "capture_options")
+
+
+@app.get("/v1/donors/options")
+def donor_options() -> dict[str, Any]:
+    return {"ok": True, "options": _donor_options()}
+
+
+@app.post("/v1/donors/salvage-plan")
+async def donor_salvage_plan(request: Request) -> dict[str, Any]:
+    try:
+        body = await request.json()
+    except ValueError:
+        raise _thread_error(422, "invalid_donor_capture", "the body is not JSON") from None
+    try:
+        return {"ok": True, "plan": _build_donor_plan(body)}
+    except _DonorCaptureError as exc:
+        raise _thread_error(422, "invalid_donor_capture", str(exc)) from None
+
+
 _build_salvage_plan = _load_hs_attr("salvage_plan", "build_salvage_plan")
 
 
