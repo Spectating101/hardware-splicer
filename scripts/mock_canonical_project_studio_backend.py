@@ -629,6 +629,20 @@ async def device_plan_post(request: Request) -> dict[str, Any]:
         raise _thread_error(422, "invalid_device_spec", str(exc)) from None
 
 
+_build_salvage_plan = _load_hs_attr("salvage_plan", "build_salvage_plan")
+
+
+@app.get("/v1/projects/{project_id}/revisions/{revision}/salvage-plan")
+def salvage_plan(project_id: str, revision: int) -> dict[str, Any]:
+    """The real take-apart planner run on the reference board, as the real API would run it on a retained one."""
+
+    _require_project(project_id)
+    if _build_salvage_plan is None or revision not in (5, 6):
+        return {"ok": True, "revision": revision, "available": False, "reason": "no retained pcb"}
+    text = (REFERENCE_DIR / "spi_flash_adapter_v1.kicad_pcb").read_text(encoding="utf-8")
+    return {"ok": True, "revision": revision, "available": True, "plan": _build_salvage_plan(text, pcb_sha256="sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest())}
+
+
 _generate_glb = _load_hs_attr("model3d", "generate_glb")
 _BOARD_ONLY_FLAGS = _load_hs_attr("model3d", "BOARD_ONLY_GLB_FLAGS")
 _board_glb_cache: dict[str, bytes] = {}

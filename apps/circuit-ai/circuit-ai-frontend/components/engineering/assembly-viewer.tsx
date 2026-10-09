@@ -19,6 +19,9 @@ export type AssemblyPart = {
   outline_basis: string;
   pin1: { x: number; y: number } | null;
   pads: { number: string; x: number; y: number; net: string | null }[];
+  mounting?: string | null;
+  identity?: { mpn: string | null; manufacturer: string | null };
+  salvage?: { verdict: string; label: string; effort: string; tool: string; reasons: string[]; hazards: string[]; basis: string };
 };
 export type AssemblyCheck = { kind: string; check: string; from: string; to: string; net: string; expect: string };
 export type AssemblyStep = {
@@ -32,8 +35,13 @@ export type AssemblyStep = {
   refs: string[];
   part_ids: string[];
   checks: AssemblyCheck[];
+  verdict?: string;
+  effort?: string;
 };
 export type AssemblyPlan = {
+  mode?: string;
+  limits?: string[];
+  summary?: { counts: Record<string, number>; keep: { ref: string; what: string; manufacturer: string | null }[] };
   authority: string;
   not_fitted: string[];
   board: { thickness_mm: number; size_mm: number[]; outline: { kind: string; bbox: { x0: number; y0: number; x1: number; y1: number } } };
@@ -43,13 +51,33 @@ export type AssemblyPlan = {
 };
 
 type Fetched = { ok?: boolean; available?: boolean; reason?: string; error?: string; plan?: AssemblyPlan };
-type Stats = { placed: number; flying: number };
+type Stats = { placed: number; flying: number; removed: number };
 type SceneApi = { goTo: (index: number, animate: boolean) => void; dispose: () => void };
 
 const FLY_MS = 950;
 const STAGGER_MS = 110;
 const MAX_STAGGER_MS = 700;
 const MAX_LABELS = 8;
+const VERDICT_COLORS: Record<string, string> = { keep: '#3fb950', test_first: '#f5c542', identify: '#4c8dff', optional: '#a0a7b4', skip: '#454a54' };
+const VERDICT_LABELS: Record<string, string> = { keep: 'Worth taking', test_first: 'Take it, test first', identify: 'Read the marking', optional: 'Cheap to buy new', skip: 'Leave it' };
+const VERDICT_CHIP: Record<string, string> = {
+  keep: 'bg-emerald-500/20 text-emerald-200',
+  test_first: 'bg-amber-400/20 text-amber-200',
+  identify: 'bg-sky-500/20 text-sky-200',
+  optional: 'bg-stone-500/25 text-stone-200',
+  skip: 'bg-stone-700/40 text-stone-300',
+};
+
+function checkText(check: { check: string; from: string; to: string }): string {
+  switch (check.check) {
+    case 'isolation': return `meter between ${check.from} and ${check.to}`;
+    case 'continuity': return `beep ${check.from} to ${check.to}`;
+    case 'test': return `test ${check.from} with ${check.to}`;
+    case 'read_marking': return `read ${check.to} on ${check.from}`;
+    case 'inspect': return `inspect the ${check.to} of ${check.from}`;
+    default: return `check ${check.from} against ${check.to}`;
+  }
+}
 const COLORS: Record<string, string> = {
   passive: '#d8c79a',
   ic: '#2f3441',
@@ -64,7 +92,7 @@ const COLORS: Record<string, string> = {
  * plan gives. Parts are stand-in boxes sized from the footprint outline with a typical height; the viewer says so. It is a
  * view of retained bytes and carries no authority.
  */
-export function AssemblyViewer({ projectId, revision }: { projectId: string; revision: number }) {
+export function AssemblyViewer({ projectId, revision, mode: initialMode = 'build' }: { projectId: string; revision: number; mode?: 'build' | 'salvage' }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneApi | null>(null);
@@ -74,8 +102,12 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
-  const [stats, setStats] = useState<Stats>({ placed: 0, flying: 0 });
-  const url = `/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/revisions/${revision}/assembly-plan`;
+  const [stats, setStats] = useState<Stats>({ placed: 0, flying: 0, removed: 0 });
+  const [mode, setMode] = useState<'build' | 'salvage'>(initialMode);
+  const salvageMode = mode === 'salvage';
+  const base = `/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/revisions/${revision}`;
+  const url = `${base}/${salvageMode ? 'salvage-plan' : 'assembly-plan'}`;
+  const boardUrl = `${base}/assembly-plan/board.glb`;
 
   useEffect(() => {
     let cancelled = false;
@@ -97,7 +129,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         }
         if (!body.plan.steps.length) {
           setState('unavailable');
-          setMessage('The board has no parts to place.');
+          setMessage(salvageMode ? 'The board has nothing to take.' : 'The board has no parts to place.');
           return;
         }
         setPlan(body.plan);
@@ -183,7 +215,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         // The real bare board (outline, copper, pads, silkscreen) when KiCad can draw it; a plain slab of the right size when not.
         let realBoard = false;
         try {
-          const response = await fetch(`${url}/board.glb`, { cache: 'no-store', signal: abort.signal });
+          const response = await fetch(boardUrl, { cache: 'no-store', signal: abort.signal });
           if (response.ok) {
             const buffer = await response.arrayBuffer();
             if (disposed) return;
@@ -225,7 +257,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
           rest: number;
           start: number;
           sign: number;
-          state: 'hidden' | 'flying' | 'placed';
+          state: 'hidden' | 'flying' | 'placed' | 'leaving';
           t0: number;
           delay: number;
         };
@@ -236,8 +268,9 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
 
         for (const part of plan.parts) {
           const corners = part.corners;
-          // A part the board leaves off (do-not-populate) is in no step and is not drawn.
-          if (corners.length !== 4 || !stepOf.has(part.id)) continue;
+          // A part the board leaves off (do-not-populate) is not drawn. In the build, a part in no step is not drawn; when taking
+          // a board apart, the parts left on it are drawn and stay.
+          if (corners.length !== 4 || part.do_not_populate || (!stepOf.has(part.id) && !salvageMode)) continue;
           const [c0, c1, , c3] = corners;
           const sizeX = Math.max(Math.hypot(c1[0] - c0[0], c1[1] - c0[1]), 0.2);
           const sizeZ = Math.max(Math.hypot(c3[0] - c0[0], c3[1] - c0[1]), 0.2);
@@ -252,7 +285,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
           const radius = (Math.min(sizeX, sizeZ) / 2) * (part.kind === 'mounting_hole' ? 0.6 : 1);
           const geometry = round ? new THREE.CylinderGeometry(radius, radius, height, 24) : new THREE.BoxGeometry(sizeX, height, sizeZ);
           const material = new THREE.MeshStandardMaterial({
-            color: COLORS[part.kind] ?? COLORS.other,
+            color: salvageMode ? (VERDICT_COLORS[part.salvage?.verdict ?? 'optional'] ?? COLORS.other) : (COLORS[part.kind] ?? COLORS.other),
             roughness: 0.55,
             metalness: part.kind === 'testpoint' ? 0.7 : 0.1,
             transparent: true,
@@ -268,7 +301,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
           mesh.visible = false;
           turnTable.add(mesh);
 
-          const ghost = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), new THREE.LineBasicMaterial({ color: '#ffcf5a', transparent: true, opacity: 0.9 }));
+          const ghost = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), new THREE.LineBasicMaterial({ color: salvageMode ? '#8b95a3' : '#ffcf5a', transparent: true, opacity: salvageMode ? 0.55 : 0.9 }));
           ghost.rotation.copy(mesh.rotation);
           ghost.position.set(centreX, rest, centreZ);
           ghost.visible = false;
@@ -297,7 +330,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             marker.position.set(at.x, sign * (hasPins ? height / 2 + 0.02 : height / 2 + 0.02), at.z);
             mesh.add(marker);
           }
-          entries.set(part.id, { id: part.id, step: stepOf.get(part.id) ?? 0, mesh, ghost, fade, rest, start, sign, state: 'hidden', t0: 0, delay: 0 });
+          entries.set(part.id, { id: part.id, step: stepOf.get(part.id) ?? -1, mesh, ghost, fade, rest, start, sign, state: 'hidden', t0: 0, delay: 0 });
         }
 
         const orbit = new OrbitControls(camera, gl.domElement);
@@ -330,15 +363,17 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         const report = () => {
           let placed = 0;
           let flying = 0;
+          let removed = 0;
           entries.forEach((entry) => {
             if (entry.state === 'placed') placed += 1;
-            if (entry.state === 'flying') flying += 1;
+            if (entry.state === 'flying' || entry.state === 'leaving') flying += 1;
+            if (entry.state === 'hidden' && entry.step >= 0 && salvageMode) removed += 1;
           });
           const moving = Math.abs(turnTable.rotation.x - turnTarget) > 0.01 ? 1 : 0;
-          const signature = `${placed}/${flying + moving}`;
+          const signature = `${placed}/${flying + moving}/${removed}`;
           if (signature !== lastReport) {
             lastReport = signature;
-            setStats({ placed, flying: flying + moving });
+            setStats({ placed, flying: flying + moving, removed });
           }
         };
 
@@ -372,6 +407,22 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             const isCurrent = entry.step === current && active.kind !== 'verify';
             material.emissive.set(isCurrent ? '#ffb43a' : '#000000');
             material.emissiveIntensity = isCurrent ? 0.32 : 0;
+            if (salvageMode) {
+              // Taking apart: parts in later steps, and parts that stay, are on the board; this step's parts lift off; earlier ones are gone.
+              if (entry.step < 0 || entry.step > current) {
+                entry.state = 'placed'; entry.mesh.visible = true; entry.mesh.position.y = entry.rest; setOpacity(1); entry.ghost.visible = false;
+              } else if (entry.step < current) {
+                entry.state = 'hidden'; entry.mesh.visible = false; entry.ghost.visible = true;
+              } else if (animate && !reduced) {
+                entry.state = 'leaving';
+                entry.t0 = now;
+                entry.delay = Math.min(Math.max(active.part_ids.indexOf(entry.id), 0) * STAGGER_MS, MAX_STAGGER_MS);
+                entry.mesh.visible = true; entry.mesh.position.y = entry.rest; setOpacity(1); entry.ghost.visible = true;
+              } else {
+                entry.state = 'hidden'; entry.mesh.visible = false; entry.ghost.visible = true;
+              }
+              return;
+            }
             if (entry.step < current || (entry.step === current && active.kind === 'verify')) {
               entry.state = 'placed';
               entry.mesh.visible = true;
@@ -409,6 +460,16 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
         const tick = () => {
           const now = performance.now();
           entries.forEach((entry) => {
+            if (entry.state === 'leaving') {
+              const t = Math.min(Math.max((now - entry.t0 - entry.delay) / FLY_MS, 0), 1);
+              const eased = t * t * (3 - 2 * t);
+              entry.mesh.position.y = entry.rest + (entry.start - entry.rest) * eased;
+              const opacity = 1 - eased;
+              (entry.mesh.material as ThreeNS.MeshStandardMaterial).opacity = opacity;
+              entry.fade.forEach((item) => { item.opacity = opacity; });
+              if (t >= 1) { entry.state = 'hidden'; entry.mesh.visible = false; }
+              return;
+            }
             if (entry.state !== 'flying') return;
             const raw = (now - entry.t0 - entry.delay) / FLY_MS;
             const t = Math.min(Math.max(raw, 0), 1);
@@ -468,7 +529,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
       abort.abort();
       cleanup();
     };
-  }, [plan, url]);
+  }, [plan, url, boardUrl, salvageMode]);
 
   // Whatever step is chosen, the scene shows it: earlier steps in place, this one arriving, later ones not yet.
   const previous = useRef(-1);
@@ -506,6 +567,8 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
       className="relative flex h-full min-h-[470px] w-full flex-col bg-[#0b0d12] outline-none"
       data-testid="assembly-viewer"
       data-state={state}
+      data-mode={mode}
+      data-removed={stats.removed}
       data-step={step}
       data-step-count={plan?.steps.length ?? 0}
       data-placed={stats.placed}
@@ -542,6 +605,22 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             Stand-in shapes · typical heights{estimateNote ? ` · ${estimateNote}` : ''}
           </div>
         ) : null}
+        {state !== 'loading' || plan ? (
+          <div className="absolute right-3 top-3 inline-flex overflow-hidden rounded-md border border-stone-700 bg-stone-950/80 text-[11px] font-medium" role="group" aria-label="What to watch">
+            {(['build', 'salvage'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                data-testid={`assembly-mode-${value}`}
+                aria-pressed={mode === value}
+                onClick={() => { if (mode !== value) { setPlaying(false); setMode(value); } }}
+                className={`px-2.5 py-1 ${mode === value ? 'bg-amber-300 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+              >
+                {value === 'build' ? 'Put together' : 'Take apart'}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {state === 'ready' && plan && active ? (
@@ -549,7 +628,14 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
           <div className="flex items-baseline justify-between gap-3">
             <div className="min-w-0">
               <div className="text-[11px] text-stone-400" data-testid="assembly-counter">Step {step + 1} of {plan.steps.length}</div>
-              <div className="truncate text-sm font-semibold" data-testid="assembly-title">{active.title}</div>
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                {salvageMode && active.verdict ? (
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${VERDICT_CHIP[active.verdict] ?? ''}`} data-testid="assembly-verdict" data-verdict={active.verdict}>
+                    {VERDICT_LABELS[active.verdict] ?? active.verdict}
+                  </span>
+                ) : null}
+                <span className="truncate" data-testid="assembly-title">{active.title}</span>
+              </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <button
@@ -607,7 +693,7 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             <ul className="mt-2 space-y-0.5 text-[11px] leading-4 text-stone-400" data-testid="assembly-checks">
               {active.checks.map((check, index) => (
                 <li key={`${check.from}-${check.to}-${index}`}>
-                  <span className="text-stone-500">Try:</span> {check.check === 'isolation' ? `meter between ${check.from} and ${check.to}` : `beep ${check.from} to ${check.to}`} — {check.expect}
+                  <span className="text-stone-500">Try:</span> {checkText(check)} — {check.expect}
                 </li>
               ))}
             </ul>
@@ -618,10 +704,20 @@ export function AssemblyViewer({ projectId, revision }: { projectId: string; rev
             max={last}
             value={step}
             onChange={(event) => { setPlaying(false); go(Number(event.target.value)); }}
-            aria-label="Build step"
+            aria-label={salvageMode ? 'Take-apart step' : 'Build step'}
             data-testid="assembly-slider"
             className="mt-2.5 h-1 w-full cursor-pointer accent-amber-300"
           />
+          {salvageMode && plan.summary ? (
+            <p className="mt-2 text-[11px] leading-4 text-stone-300" data-testid="salvage-summary">
+              {(['keep', 'test_first', 'identify', 'optional', 'skip'] as const).map((v) => `${plan.summary?.counts[v] ?? 0} ${VERDICT_LABELS[v].toLowerCase()}`).join(' · ')}
+            </p>
+          ) : null}
+          {salvageMode && plan.limits?.length ? (
+            <ul className="mt-1 list-disc pl-4 text-[10px] leading-4 text-stone-400" data-testid="salvage-limits">
+              {plan.limits.map((limit) => <li key={limit}>{limit}</li>)}
+            </ul>
+          ) : null}
           <p className="mt-1.5 text-[10px] leading-4 text-stone-500">{plan.authority}</p>
         </div>
       ) : null}
