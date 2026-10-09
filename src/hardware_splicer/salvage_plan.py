@@ -73,6 +73,9 @@ def _identified(part: dict[str, Any]) -> bool:
     identity = part.get("identity") or {}
     if identity.get("mpn"):
         return True
+    typed = str(identity.get("typed") or "").strip()
+    if typed:
+        return bool(_PART_NUMBER.fullmatch(typed)) and sum(c.isdigit() for c in typed) >= 2 and any(c.isalpha() for c in typed)
     value = str(part.get("value") or "").strip()
     return bool(_PART_NUMBER.fullmatch(value)) and sum(c.isdigit() for c in value) >= 2 and any(c.isalpha() for c in value)
 
@@ -91,7 +94,8 @@ def _effort(part: dict[str, Any]) -> tuple[str, str]:
 
 
 def _high_voltage(part: dict[str, Any]) -> bool:
-    if part.get("kind") != "passive" or not str(part.get("ref", "")).upper().startswith("C"):
+    is_capacitor = str(part.get("ref", "")).upper().startswith("C") or part.get("component") == "capacitor"
+    if part.get("kind") != "passive" or not is_capacitor:
         return False
     value = str(part.get("value") or "")
     return bool(_MAINS_RATED_CAP.search(value)) or any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(value))
@@ -151,13 +155,17 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         if _identified(part):
             verdict = "keep"
             identity = part.get("identity") or {}
-            named = identity.get("mpn") or part.get("value")
-            who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
-            reasons.append(f"the board file names it: \"{named}\"{who}, so it can be identified without guessing")
-            reasons.append("read the marking on the chip itself before trusting that")
+            if identity.get("typed"):
+                reasons.append(f"you read its marking as \"{identity['typed']}\", which looks like a part number")
+                reasons.append("a marking can be a house code, worn, or fake: check it against a datasheet before trusting it")
+            else:
+                named = identity.get("mpn") or part.get("value")
+                who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
+                reasons.append(f"the board file names it: \"{named}\"{who}, so it can be identified without guessing")
+                reasons.append("read the marking on the chip itself before trusting that")
         else:
             verdict = "identify"
-            reasons.append("the board file does not name it: read its marking, then decide")
+            reasons.append("you have not given a marking that looks like a part number: read it off the chip, then decide" if (part.get("identity") or {}).get("source") == "typed" else "the board file does not name it: read its marking, then decide")
     elif kind == "passive":
         if _SMALL_CHIP.search(name):
             verdict = "skip"
@@ -185,7 +193,8 @@ def _what(part: dict[str, Any]) -> str:
 
     if part["kind"] != "ic" or not _identified(part):
         return ""   # chips nobody can name are one job whatever their labels say
-    return str((part.get("identity") or {}).get("mpn") or part.get("value") or "")
+    identity = part.get("identity") or {}
+    return str(identity.get("mpn") or identity.get("typed") or part.get("value") or "")
 
 
 def _order_key(part: dict[str, Any]) -> tuple[Any, ...]:
@@ -213,6 +222,18 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
         base = build_assembly_plan(pcb_text, pcb_sha256=pcb_sha256)
     except AssemblyPlanError as exc:
         raise SalvagePlanError(str(exc)) from exc
+    return plan_from_assembly(base)
+
+
+TYPED_LIMITS = [
+    "Everything here is what you typed or placed: nothing was read from a file, so the shapes and positions are only as good as your measuring.",
+    "A marking you read off a chip is a marking, not an identification: it can be a house code, rubbed, or fake. Check it against a datasheet.",
+    "Whether a part still works is unknown until it is tested.",
+]
+
+
+def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str, Any]:
+    """The take-apart plan for parts already described as an assembly plan's parts (from a board file, or typed in by a person)."""
 
     parts = [dict(p) for p in base["parts"]]
     fitted = [p for p in parts if not p["do_not_populate"]]
@@ -281,7 +302,8 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
         "schema_version": SALVAGE_PLAN_SCHEMA,
         "mode": "salvage",
         "authority": AUTHORITY_STATEMENT,
-        "limits": [
+        "origin": "typed" if typed else "file",
+        "limits": TYPED_LIMITS if typed else [
             "Needs the board's file. A physical board with no file cannot be planned from.",
             "A part is named only as far as the file names it. Anything else is 'read the marking', never a guess.",
             "Whether a part still works is unknown until it is tested.",
@@ -293,7 +315,7 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
         "not_fitted": base["not_fitted"],
         "summary": {
             "counts": counts,
-            "keep": [{"ref": p["ref"], "what": (p["identity"]["mpn"] or p["value"]), "manufacturer": p["identity"]["manufacturer"]} for p in fitted if p["salvage"]["verdict"] == "keep"],
+            "keep": [{"ref": p["ref"], "what": (p["identity"].get("mpn") or p["identity"].get("typed") or p["value"]), "manufacturer": p["identity"]["manufacturer"]} for p in fitted if p["salvage"]["verdict"] == "keep"],
             "steps": len(steps),
         },
         "warnings": base["warnings"],

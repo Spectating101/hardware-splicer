@@ -34,6 +34,20 @@ AUTHORITY_STATEMENT = (
 
 # (pattern on the footprint name, height in mm, basis). First match wins. Heights are typical seated heights above the board.
 _HEIGHTS: tuple[tuple[str, float, str], ...] = (
+    (r"LED_D\d", 8.6, "typical 5 mm LED"),
+    (r"CP_Radial|Capacitor_THT:CP", 12.0, "typical radial electrolytic"),
+    (r"C_Disc", 6.0, "typical ceramic disc"),
+    (r"C_Rect", 12.0, "typical film box capacitor"),
+    (r"R_Axial|D_DO-", 2.7, "typical axial part"),
+    (r"Crystal_HC49", 13.0, "typical metal-can crystal"),
+    (r"BatteryHolder", 5.0, "typical coin-cell holder"),
+    (r"Battery_18650", 18.0, "typical 18650 cell"),
+    (r"Transformer", 20.0, "typical small mains transformer"),
+    (r"Relay_", 15.5, "typical PCB relay"),
+    (r"Fuse_\d+x\d+", 6.0, "typical cartridge fuse"),
+    (r"Varistor|RV_Disc", 9.0, "typical disc varistor"),
+    (r"TO-220", 4.5, "typical TO-220 body"),
+    (r"DIP-?\d|SW_PUSH_6mm", 4.5, "typical DIP package or tactile switch"),
     (r"R_0402|C_0402|L_0402|LED_0402", 0.5, "typical 0402 chip"),
     (r"R_0603|L_0603|FB_0603", 0.55, "typical 0603 chip"),
     (r"C_0603", 0.8, "typical 0603 capacitor"),
