@@ -350,6 +350,9 @@ def _part(footprint: list[Any]) -> dict[str, Any] | None:
         "pin1": pin1,
         "pad_count": len(pads),
         "do_not_populate": "dnp" in flags,
+        "mounting": "through_hole" if "through_hole" in flags else "smd" if "smd" in flags else None,
+        # What the board file says the part is, if it says. Text from the file, bounded; never a link.
+        "identity": {"mpn": _property(footprint, "MPN")[:80] or None, "manufacturer": _property(footprint, "Manufacturer")[:80] or None},
         # Where a connector's pins are, so each can be shown standing where it will be connected.
         "pads": [
             {"number": pad["number"], "x": _rounded(wx), "y": _rounded(wy), "net": pad["net"] or None}

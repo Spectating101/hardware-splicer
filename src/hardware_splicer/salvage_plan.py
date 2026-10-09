@@ -1,0 +1,242 @@
+"""A take-apart plan for a board: which parts are worth removing, in what order, and what to do before trusting any of them.
+
+It is the build sequence run the other way, over the same retained board. It is a view of retained bytes and a rule-of-thumb
+assessment. It carries no engineering authority and measures nothing: a part's condition is unknown until it is tested, a
+verdict is advice about effort and reuse, and nothing here approves using a salvaged part in a device.
+
+Two limits are stated, not hidden. It needs the board file: a physical board with no file cannot be planned from. And it names a
+part only as far as the file does: a part with no part number is "identify first", never guessed.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any
+
+from .assembly_plan import AssemblyPlanError, build_assembly_plan
+
+SALVAGE_PLAN_SCHEMA = "hardware_splicer.salvage_plan.v1"
+
+AUTHORITY_STATEMENT = (
+    "This is a rule-of-thumb plan for taking a board apart, read from its file. It measures nothing: the condition of every part "
+    "is unknown until you test it, a verdict is advice about effort and reuse, and nothing here approves putting a salvaged part "
+    "into a device."
+)
+BASIS = "rule of thumb on the part's kind, package and mounting, plus what the board file says it is"
+
+VERDICTS = ("keep", "test_first", "identify", "optional", "skip")
+VERDICT_TEXT = {
+    "keep": "Worth taking",
+    "test_first": "Take it, test before trusting",
+    "identify": "Read the marking to decide",
+    "optional": "Cheap to buy new",
+    "skip": "Leave it",
+}
+
+GENERAL_SAFETY = (
+    "Unplug the board and take out any battery before you start. Large capacitors can hold a charge: discharge them through a "
+    "resistor, not a screwdriver. Work with ventilation and eye protection, and wash your hands afterwards: older boards can "
+    "contain leaded solder. Use an anti-static strap if you can."
+)
+
+_SPECIAL_CONNECTOR = re.compile(r"USB|JST|Molex|Micro|Mini|RJ45|Barrel|Audio|FPC|FFC|Terminal|Screw|SMA|HDMI|SD_|Card", re.IGNORECASE)
+_PLAIN_HEADER = re.compile(r"PinHeader|PinSocket|Pin_Header", re.IGNORECASE)
+_ELECTROLYTIC = re.compile(r"CP_Elec|C_Elec|Capacitor_THT:CP", re.IGNORECASE)
+_THROUGH_HOLE_IC = re.compile(r"DIP|THT|TO-220|TO-92|TO-247|Socket", re.IGNORECASE)
+_FINE_PACKAGE = re.compile(r"QFN|DFN|LGA|BGA|QFP|WSON|USON|UDFN|WLCSP|CSP", re.IGNORECASE)
+_MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", re.IGNORECASE)
+_PART_NUMBER = re.compile(r"[A-Za-z]{1,8}[-_]?\d{2,}")
+_SMALL_CHIP = re.compile(r"_(0201|0402|0603)_|[RCLD]_(0201|0402|0603)|LED_(0402|0603)", re.IGNORECASE)
+_BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
+
+
+class SalvagePlanError(ValueError):
+    """The bytes are not a board a take-apart plan can be made from."""
+
+
+def _identified(part: dict[str, Any]) -> bool:
+    identity = part.get("identity") or {}
+    if identity.get("mpn"):
+        return True
+    return bool(_PART_NUMBER.search(str(part.get("value") or "")))
+
+
+def _effort(part: dict[str, Any]) -> tuple[str, str]:
+    name = part["footprint"]
+    through = part.get("mounting") == "through_hole" or bool(_THROUGH_HOLE_IC.search(name))
+    if through:
+        return "easy", "a soldering iron with solder wick or a desoldering pump"
+    if _FINE_PACKAGE.search(name):
+        return "hard", "hot air, flux and tweezers; the pads under it are easy to lift"
+    if _MEDIUM_PACKAGE.search(name):
+        return "medium", "hot air or an iron with plenty of flux, and tweezers"
+    return "medium", "an iron or hot air, flux and tweezers"
+
+
+def _assess(part: dict[str, Any]) -> dict[str, Any]:
+    """The verdict for one part, with the reasons for it. Never a statement about the part's condition."""
+
+    kind, name = part["kind"], part["footprint"]
+    effort, tool = _effort(part)
+    reasons: list[str] = []
+    hazards: list[str] = []
+    verdict = "optional"
+
+    if kind in {"testpoint", "mounting_hole"}:
+        verdict = "skip"
+        reasons.append("a test pad or a hole: there is nothing to take")
+        effort, tool = "none", ""
+    elif _ELECTROLYTIC.search(name):
+        verdict = "test_first"
+        reasons.append("electrolytic capacitors age and lose capacity; its condition is unknown")
+        hazards.append("may still hold a charge: discharge it through a resistor first")
+    elif kind == "connector" and _SPECIAL_CONNECTOR.search(name):
+        verdict = "keep"
+        reasons.append("a specialised connector: harder to find and cheap to keep")
+    elif kind == "connector" and _PLAIN_HEADER.search(name):
+        verdict = "optional"
+        reasons.append("a plain 2.54 mm header is cheap to buy new")
+    elif kind == "connector":
+        verdict = "keep"
+        reasons.append("a connector that is not a plain header")
+    elif kind == "ic":
+        if _identified(part):
+            verdict = "keep"
+            identity = part.get("identity") or {}
+            named = identity.get("mpn") or part.get("value")
+            who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
+            reasons.append(f"the board file names it: {named}{who}, so it can be identified without guessing")
+            reasons.append("read the marking on the chip itself before trusting that")
+        else:
+            verdict = "identify"
+            reasons.append("the board file does not name it: read its marking, then decide")
+    elif kind == "passive":
+        if _SMALL_CHIP.search(name):
+            verdict = "skip"
+            reasons.append("a tiny chip part: cheaper and safer to buy new than to heat for")
+            effort = "hard"
+            tool = "tweezers and hot air; easy to lose or overheat"
+        elif _BIG_CHIP.search(name):
+            verdict = "optional"
+            reasons.append("a larger chip part: easy enough to lift, but cheap to buy")
+        else:
+            verdict = "optional"
+            reasons.append("a common part: cheap to buy new")
+    else:
+        verdict = "optional"
+        reasons.append("a common part of an uncommon kind: take it if you need that function")
+    if verdict in {"keep", "test_first", "identify", "optional"} and kind == "ic":
+        hazards.append("heat and moisture can damage a chip: do not stay on one spot, and keep it dry")
+    return {"verdict": verdict, "label": VERDICT_TEXT[verdict], "effort": effort, "tool": tool, "reasons": reasons, "hazards": hazards, "basis": BASIS}
+
+
+def _order_key(part: dict[str, Any]) -> tuple[Any, ...]:
+    kind = part["kind"]
+    salvage = part["salvage"]
+    # Tall and easy first so they are out of the way: connectors, electrolytics, then chips from easy to hard, then the rest.
+    phase = 0 if kind == "connector" else 1 if _ELECTROLYTIC.search(part["footprint"]) else 2 if kind == "ic" else 3
+    effort = {"easy": 0, "medium": 1, "hard": 2, "none": 3}[salvage["effort"]]
+    return (part["side"] != "front", phase, effort if phase == 2 else 0, -part["height_mm"], part["footprint"], part["ref"])
+
+
+def _title(group: list[dict[str, Any]], verdict: str) -> str:
+    refs = ", ".join(p["ref"] for p in group[:6]) + (f" and {len(group) - 6} more" if len(group) > 6 else "")
+    noun = {"connector": "connector", "ic": "chip", "passive": "part", "other": "part"}.get(group[0]["kind"], "part")
+    if _ELECTROLYTIC.search(group[0]["footprint"]):
+        noun = "capacitor"
+    plural = noun + ("s" if len(group) != 1 else "")
+    return f"Remove the {plural} {refs}" if len(group) == 1 else f"Remove {len(group)} {plural}: {refs}"
+
+
+def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[str, Any]:
+    """The take-apart plan for the board in ``pcb_text``. Pure: no I/O, deterministic for the same bytes."""
+
+    try:
+        base = build_assembly_plan(pcb_text, pcb_sha256=pcb_sha256)
+    except AssemblyPlanError as exc:
+        raise SalvagePlanError(str(exc)) from exc
+
+    parts = [dict(p) for p in base["parts"]]
+    fitted = [p for p in parts if not p["do_not_populate"]]
+    for part in parts:
+        part["salvage"] = _assess(part) if not part["do_not_populate"] else {
+            "verdict": "skip", "label": "Not fitted", "effort": "none", "tool": "", "reasons": ["the design marks it do-not-populate, so there is no part on the board"], "hazards": [], "basis": BASIS,
+        }
+
+    to_take = sorted([p for p in fitted if p["salvage"]["verdict"] != "skip"], key=_order_key)
+    groups: list[list[dict[str, Any]]] = []
+    for part in to_take:
+        key = (part["side"], part["kind"], part["footprint"], part["salvage"]["verdict"], part["salvage"]["effort"])
+        if groups and groups[-1][0].get("_key") == key:
+            groups[-1].append(part)
+        else:
+            part["_key"] = key
+            groups.append([part])
+
+    steps: list[dict[str, Any]] = [
+        {
+            "step_id": "step-01", "order": 1, "kind": "prepare", "title": "Make the board safe to work on",
+            "instruction": GENERAL_SAFETY, "side": "front", "turn_board_over": False, "refs": [], "part_ids": [], "checks": [],
+        }
+    ]
+    current_side = "front"
+    for group in groups:
+        first = group[0]
+        salvage = first["salvage"]
+        refs = [p["ref"] for p in group]
+        reason = salvage["reasons"][0] if salvage["reasons"] else ""
+        text = f"{salvage['label']}: {reason}."
+        if salvage["tool"]:
+            text += f" Use {salvage['tool']}."
+        if salvage["hazards"]:
+            text += " " + " ".join(h[0].upper() + h[1:] + ("" if h.endswith(".") else ".") for h in salvage["hazards"])
+        checks: list[dict[str, Any]] = []
+        if salvage["verdict"] == "test_first":
+            checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "close to the printed value; otherwise discard"})
+        if salvage["verdict"] in {"keep", "identify"} and first["kind"] == "ic":
+            checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "matches what the file says, or you now know what it is"})
+        if first["kind"] == "connector":
+            checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
+        steps.append(
+            {
+                "step_id": f"step-{len(steps) + 1:02d}", "order": len(steps) + 1, "kind": "salvage", "title": _title(group, salvage["verdict"]),
+                "instruction": text, "side": first["side"], "turn_board_over": first["side"] != current_side, "verdict": salvage["verdict"], "effort": salvage["effort"],
+                "refs": refs, "part_ids": [p["id"] for p in group], "checks": checks,
+            }
+        )
+        current_side = first["side"]
+    skipped = [p["ref"] for p in fitted if p["salvage"]["verdict"] == "skip"]
+    steps.append(
+        {
+            "step_id": f"step-{len(steps) + 1:02d}", "order": len(steps) + 1, "kind": "finish", "title": "Sort, label and test what you kept",
+            "instruction": "Put each kind of part in its own labelled bag with where it came from. Nothing you took is known to work until it has been tested."
+            + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else ""),
+            "side": current_side, "turn_board_over": False, "refs": [], "part_ids": [],
+            "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "behaves as its type should; otherwise discard"}],
+        }
+    )
+
+    for part in parts:
+        part.pop("_key", None)
+    counts = {verdict: sum(1 for p in parts if p["salvage"]["verdict"] == verdict and not p["do_not_populate"]) for verdict in VERDICTS}
+    return {
+        "schema_version": SALVAGE_PLAN_SCHEMA,
+        "mode": "salvage",
+        "authority": AUTHORITY_STATEMENT,
+        "limits": [
+            "Needs the board's file. A physical board with no file cannot be planned from.",
+            "A part is named only as far as the file names it. Anything else is 'read the marking', never a guess.",
+            "Whether a part still works is unknown until it is tested.",
+        ],
+        "source": base["source"],
+        "board": base["board"],
+        "parts": parts,
+        "steps": steps,
+        "not_fitted": base["not_fitted"],
+        "summary": {
+            "counts": counts,
+            "keep": [{"ref": p["ref"], "what": (p["identity"]["mpn"] or p["value"]), "manufacturer": p["identity"]["manufacturer"]} for p in fitted if p["salvage"]["verdict"] == "keep"],
+            "steps": len(steps),
+        },
+        "warnings": base["warnings"],
+    }

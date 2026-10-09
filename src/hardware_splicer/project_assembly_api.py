@@ -22,6 +22,7 @@ from .model3d import (
 )
 from .project_api import _project_error
 from .project_store import ProjectStore
+from .salvage_plan import SalvagePlanError, build_salvage_plan
 
 
 def _etag(digest: str) -> str:
@@ -52,6 +53,27 @@ def create_project_assembly_router(store: ProjectStore) -> APIRouter:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={"type": "assembly_plan_unreadable", "message": str(exc)},
+            ) from exc
+        return {"ok": True, "revision": int(revision), "available": True, "plan": plan}
+
+    @router.get("/{project_id}/revisions/{revision}/salvage-plan")
+    def get_project_revision_salvage_plan(project_id: str, revision: int) -> Dict[str, Any]:
+        """The take-apart plan: which parts are worth removing, in what order, and what to do before trusting them."""
+
+        try:
+            store.load(project_id, revision=int(revision))
+            artifact = read_pinned_artifact(store, project_id, int(revision), "pcb")
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        if artifact is None:
+            return {"ok": True, "revision": int(revision), "available": False, "reason": "no retained pcb"}
+        text, entry = artifact
+        try:
+            plan = build_salvage_plan(text, pcb_sha256=entry.get("sha256"))
+        except SalvagePlanError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "salvage_plan_unreadable", "message": str(exc)},
             ) from exc
         return {"ok": True, "revision": int(revision), "available": True, "plan": plan}
 
