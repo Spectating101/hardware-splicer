@@ -54,6 +54,7 @@ from .project_candidates_api import create_project_candidates_router
 from .project_review_packet_api import create_project_review_packet_router
 from .device_api import create_device_router
 from .donor_api import create_donor_router
+from .parts_lookup_api import create_parts_lookup_router
 from .project_assembly_api import create_project_assembly_router
 from .project_model3d_api import create_project_model3d_router
 from .project_parts_api import create_project_parts_router
@@ -116,6 +117,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_project_assembly_router(resolved_store))
     app.include_router(create_device_router())
     app.include_router(create_donor_router())
+    app.include_router(create_parts_lookup_router())
     app.include_router(create_project_parts_router(resolved_store))
     app.include_router(create_project_candidates_router(resolved_store))
     app.include_router(create_project_review_packet_router(resolved_store))

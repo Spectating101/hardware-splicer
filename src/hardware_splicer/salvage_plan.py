@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from . import part_lookup
 from .assembly_plan import AssemblyPlanError, build_assembly_plan
 
 SALVAGE_PLAN_SCHEMA = "hardware_splicer.salvage_plan.v1"
@@ -72,6 +73,9 @@ _SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
 
 
+MAX_LOOKUPS = 40
+
+
 class SalvagePlanError(ValueError):
     """The bytes are not a board a take-apart plan can be made from."""
 
@@ -106,6 +110,19 @@ def _high_voltage(part: dict[str, Any]) -> bool:
         return False
     value = str(part.get("value") or "")
     return bool(_MAINS_RATED_CAP.search(value)) or any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(value))
+
+
+def _lookup_reasons(part: dict[str, Any]) -> list[str]:
+    found = part.get("lookup")
+    if not found:
+        return []
+    if found["match"]:
+        m = found["match"]
+        text = f"KiCad's library has a part called \"{m['name']}\": {m['description'] or 'no description'}"
+        return [text + ("" if found["tier"] == "exact" else " (a variant: the same chip with another package or grade, probably)")]
+    if found["family"]:
+        return [f"KiCad's library has parts from the same family ({', '.join(found['family'][:3])}) but not this one: use them to learn what kind of chip it probably is, no more"]
+    return ["KiCad's library does not list it: search its datasheet by the marking"]
 
 
 def _assess(part: dict[str, Any]) -> dict[str, Any]:
@@ -170,6 +187,7 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
                 who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
                 reasons.append(f"the board file names it: \"{named}\"{who}, so it can be identified without guessing")
                 reasons.append("read the marking on the chip itself before trusting that")
+            reasons.extend(_lookup_reasons(part))
         else:
             verdict = "identify"
             reasons.append("you have not given a marking that looks like a part number: read it off the chip, then decide" if (part.get("identity") or {}).get("source") == "typed" else "the board file does not name it: read its marking, then decide")
@@ -243,10 +261,41 @@ TYPED_LIMITS = [
 ]
 
 
+def _name_of(part: dict[str, Any]) -> str:
+    identity = part.get("identity") or {}
+    return str(identity.get("mpn") or identity.get("typed") or part.get("value") or "").strip()
+
+
+def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Ask KiCad's library about each chip that has a name. A hit is what the library holds under that name: it is never proof."""
+
+    if not part_lookup.libraries_available():
+        return None
+    done = 0
+    for part in parts:
+        if part["kind"] != "ic" or part.get("do_not_populate") or not _identified(part) or done >= MAX_LOOKUPS:
+            continue
+        try:
+            found = part_lookup.lookup_part(_name_of(part), limit=4)
+        except part_lookup.PartLookupError:
+            continue
+        done += 1
+        matches = found["matches"]
+        best = next((m for m in matches if m["tier"] in {"exact", "variant"}), None)
+        part["lookup"] = {
+            "query": found["query"], "tier": best["tier"] if best else ("family" if matches else "none"),
+            "match": {k: best[k] for k in ("name", "library", "description", "datasheet", "footprint", "tier_text")} if best else None,
+            "family": [m["name"] for m in matches if m["tier"] == "family"][:4],
+            "gates": part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else [],
+        }
+    return part_lookup.source() if done else None
+
+
 def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str, Any]:
     """The take-apart plan for parts already described as an assembly plan's parts (from a board file, or typed in by a person)."""
 
     parts = [dict(p) for p in base["parts"]]
+    lookup_source = _attach_lookups(parts)
     fitted = [p for p in parts if not p["do_not_populate"]]
     for part in parts:
         part["salvage"] = _assess(part) if not part["do_not_populate"] else {
@@ -285,6 +334,14 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "close to the printed value; otherwise discard"})
         if salvage["verdict"] in {"keep", "identify"} and first["kind"] == "ic":
             checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "agrees with a datasheet for what you read, or you now know what it is" if typed else "matches what the file says, or you now know what it is"})
+        if first["kind"] == "ic":
+            for note in _lookup_reasons(first):
+                text += " " + note[0].upper() + note[1:] + ("" if note.endswith(".") else ".")
+        if first["kind"] == "ic" and first.get("lookup") and first["lookup"]["gates"]:
+            library_name = first["lookup"]["match"]["name"]
+            for gate in first["lookup"]["gates"]:
+                checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"]})
+            text += f" The pin names in the measurements come from KiCad's entry for {library_name}, not from your chip: confirm them in its datasheet before you touch a probe to it."
         if first["kind"] == "connector":
             checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
         steps.append(
@@ -314,6 +371,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         "mode": "salvage",
         "authority": TYPED_AUTHORITY if typed else AUTHORITY_STATEMENT,
         "origin": "typed" if typed else "file",
+        "lookup_source": lookup_source,
         "limits": TYPED_LIMITS if typed else [
             "Needs the board's file. A physical board with no file cannot be planned from.",
             "A part is named only as far as the file names it. Anything else is 'read the marking', never a guess.",
