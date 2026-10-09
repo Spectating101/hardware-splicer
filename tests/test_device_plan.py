@@ -427,3 +427,25 @@ def test_a_rejected_wire_does_not_hide_a_separate_supply_bridge() -> None:
     # A wire that is itself rejected is reported once, by its own rule, and not again as part of a net.
     shorted = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": "mcu.3V3"}, GOOD[2], GOOD[3]]))
     assert [f["rule"] for f in shorted["findings"]].count("nets_bridged") == 0 and "ground_to_other" in _rules(shorted, "error")
+
+
+def test_an_integer_too_big_to_be_a_number_is_a_clear_refusal_in_a_device_spec_too(api: TestClient) -> None:
+    huge = 10 ** 400
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"][0]["overrides"] = {"above_board_mm": huge}
+    with pytest.raises(DevicePlanError, match="must be a number"):
+        build_device_plan(spec)
+    spec = copy.deepcopy(EXAMPLE)
+    spec["case"]["wall_mm"] = huge
+    with pytest.raises(DevicePlanError, match="must be a number"):
+        build_device_plan(spec)
+    response = api.post("/v1/devices/plan", content=json.dumps(spec).encode(), headers={"content-type": "application/json"})
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("hidden", ["\u202eKit", "Kit\u200b", "\u2028Kit"])
+def test_a_device_name_cannot_hide_direction_changes(hidden: str) -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["name"] = hidden
+    with pytest.raises(DevicePlanError, match="control or invisible characters"):
+        build_device_plan(spec)

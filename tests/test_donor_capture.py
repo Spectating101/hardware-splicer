@@ -112,7 +112,7 @@ def test_references_are_made_up_when_blank_and_never_repeat() -> None:
         (lambda s: s["parts"][0].update(rotation_deg=True), "0, 90, 180 or 270"),
         (lambda s: s["parts"][0].update(side="top"), "front or back"),
         (lambda s: s["parts"][0].update(marking="x" * 41), "at most 40"),
-        (lambda s: s["parts"][0].update(marking="a\u0000b"), "control characters"),
+        (lambda s: s["parts"][0].update(marking="a\u0000b"), "control or invisible characters"),
         (lambda s: s["parts"][0].update(marking=["list"]), "must be text"),
         (lambda s: s["parts"][0].update(width_mm=0), "between 0.5 and 120"),
         (lambda s: s.update(parts="nope"), "list of at most"),
@@ -211,3 +211,59 @@ def test_a_marking_that_looks_like_a_part_number_is_taken_as_read_not_as_proved(
     got = _verdict(build_donor_salvage_plan(spec), "U1")
     # The rule cannot tell a house code from a part number, and says so instead of trusting it.
     assert got["verdict"] == "keep" and any("house code" in r and "check it against a datasheet" in r for r in got["reasons"])
+
+
+# --- review findings (Grok), each reproduced before it was fixed -----------------------------------------------------------------
+
+
+@pytest.mark.parametrize("hidden", ["\u202eNE555", "\u200bNE555", "NE\u200d555", "NE\u2028555", "\ufeffNE555", "NE555\u202c", "NE\u0085555"])
+def test_invisible_and_direction_changing_characters_are_refused_in_every_text_field(hidden: str) -> None:
+    for field in ("marking", "ref"):
+        spec = copy.deepcopy(SPEC)
+        spec["parts"][0][field] = hidden if field == "marking" else "U" + hidden
+        with pytest.raises(DonorCaptureError, match="control or invisible characters|letters, digits"):
+            build_donor_salvage_plan(spec)
+    spec = copy.deepcopy(SPEC)
+    spec["name"] = "Router " + hidden
+    with pytest.raises(DonorCaptureError, match="control or invisible characters"):
+        build_donor_salvage_plan(spec)
+
+
+def test_ordinary_non_english_text_is_still_welcome() -> None:
+    spec = copy.deepcopy(SPEC)
+    spec["name"] = "Placa de coche de juguete — ñ マザー"
+    spec["parts"][0]["marking"] = "ΩµC 1kΩ"
+    assert build_donor_salvage_plan(spec)["name"].startswith("Placa")
+
+
+@pytest.mark.parametrize("where", ["board.width_mm", "board.length_mm", "board.thickness_mm", "x_mm", "y_mm", "width_mm", "length_mm"])
+def test_an_integer_too_big_to_be_a_number_is_a_clear_refusal_not_a_server_error(where: str) -> None:
+    spec = copy.deepcopy(SPEC)
+    huge = 10 ** 400
+    if where.startswith("board."):
+        spec["board"][where.split(".")[1]] = huge
+    else:
+        spec["parts"][0][where] = huge
+    with pytest.raises(DonorCaptureError, match="must be a number"):
+        build_donor_salvage_plan(spec)
+
+
+def test_the_api_answers_a_huge_integer_with_422_not_500(api) -> None:
+    client, _ = api
+    body = ('{"name":"x","board":{"width_mm":1' + "0" * 400 + ',"length_mm":40},"parts":[]}').encode()
+    response = client.post("/v1/donors/salvage-plan", content=body, headers={"content-type": "application/json"})
+    assert response.status_code == 422 and "must be a number" in response.json()["detail"]["message"]
+
+
+def test_a_typed_board_never_talks_about_a_file_and_does_not_upgrade_a_reading_to_a_decision() -> None:
+    plan = build_donor_salvage_plan(SPEC)
+    text = json.dumps([[s["instruction"], s["checks"]] for s in plan["steps"]]) + json.dumps([p["salvage"]["basis"] for p in plan["parts"]])
+    assert "file" not in text.replace("typed or placed: nothing was read from a file", "")
+    assert all(p["salvage"]["basis"].startswith("rule of thumb on the part's kind and package, plus the marking you read") for p in plan["parts"])
+    chip = _verdict(plan, "U3")
+    assert chip["verdict"] == "keep" and chip["label"] == "Worth taking, if the marking checks out"
+    step = next(s for s in plan["steps"] if "U3" in s["refs"])
+    assert step["verdict_label"] == chip["label"] and any("agrees with a datasheet" in c["expect"] for c in step["checks"])
+    assert any("sizes are typical for each package unless you typed them" in limit for limit in plan["limits"])
+    # A file's chip keeps the plain label: it was named by the file, not by a reading.
+    assert _verdict(build_donor_salvage_plan({**SPEC, "parts": [p for p in SPEC["parts"] if p["ref"] == "J1"]}), "J1")["label"] == "Worth taking"

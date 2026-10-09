@@ -7,12 +7,12 @@ overwrite any of them with what they measured. A marking is what was read off th
 
 from __future__ import annotations
 
-import math
 import re
 from typing import Any
 
 from .assembly_plan import _height
 from .salvage_plan import SalvagePlanError, plan_from_assembly
+from .text_safety import finite_number, has_hidden_characters
 
 DONOR_SPEC_SCHEMA = "hardware_splicer.donor_capture.v1"
 MAX_PARTS = 300
@@ -116,11 +116,12 @@ def capture_options() -> dict[str, Any]:
 
 
 def _number(value: Any, label: str, low: float, high: float) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
+    number = finite_number(value)
+    if number is None:
         raise DonorCaptureError(f"{label} must be a number")
-    if not low <= float(value) <= high:
+    if not low <= number <= high:
         raise DonorCaptureError(f"{label} must be between {low:g} and {high:g}")
-    return float(value)
+    return number
 
 
 def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
@@ -133,8 +134,8 @@ def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
         raise DonorCaptureError(f"{label} is required")
     if len(value) > limit:
         raise DonorCaptureError(f"{label} may be at most {limit} characters")
-    if any(ord(ch) < 32 or ord(ch) == 127 for ch in value):
-        raise DonorCaptureError(f"{label} may not contain control characters")
+    if has_hidden_characters(value) or "\x7f" in value:
+        raise DonorCaptureError(f"{label} may not contain control or invisible characters")
     return value
 
 

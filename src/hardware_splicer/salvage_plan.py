@@ -23,6 +23,7 @@ AUTHORITY_STATEMENT = (
     "into a device."
 )
 BASIS = "rule of thumb on the part's kind, package and mounting, plus what the board file says it is"
+TYPED_BASIS = "rule of thumb on the part's kind and package, plus the marking you read off it"
 
 VERDICTS = ("keep", "test_first", "identify", "optional", "skip")
 VERDICT_TEXT = {
@@ -191,7 +192,11 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         reasons.append("the footprint names no package and has no outline, so its size and effort are guesses")
     if verdict in {"keep", "test_first", "identify", "optional"} and kind == "ic":
         hazards.append("heat and moisture can damage a chip: do not stay on one spot, and keep it dry")
-    return {"verdict": verdict, "label": VERDICT_TEXT[verdict], "effort": effort, "tool": tool, "reasons": reasons, "hazards": hazards, "basis": BASIS}
+    typed = (part.get("identity") or {}).get("source") == "typed"
+    label = VERDICT_TEXT[verdict]
+    if typed and verdict == "keep" and kind == "ic":
+        label = "Worth taking, if the marking checks out"   # a reading is not an identification
+    return {"verdict": verdict, "label": label, "effort": effort, "tool": tool, "reasons": reasons, "hazards": hazards, "basis": TYPED_BASIS if typed else BASIS}
 
 
 def _what(part: dict[str, Any]) -> str:
@@ -232,7 +237,7 @@ def build_salvage_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict[
 
 
 TYPED_LIMITS = [
-    "Everything here is what you typed or placed: nothing was read from a file, so the shapes and positions are only as good as your measuring.",
+    "Everything here is what you typed or placed: nothing was read from a file. Places are only as good as your measuring, and sizes are typical for each package unless you typed them.",
     "A marking you read off a chip is a marking, not an identification: it can be a house code, rubbed, or fake. Check it against a datasheet.",
     "Whether a part still works is unknown until it is tested.",
 ]
@@ -279,13 +284,13 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         if salvage["verdict"] == "test_first":
             checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "close to the printed value; otherwise discard"})
         if salvage["verdict"] in {"keep", "identify"} and first["kind"] == "ic":
-            checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "matches what the file says, or you now know what it is"})
+            checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "agrees with a datasheet for what you read, or you now know what it is" if typed else "matches what the file says, or you now know what it is"})
         if first["kind"] == "connector":
             checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
         steps.append(
             {
                 "step_id": f"step-{len(steps) + 1:02d}", "order": len(steps) + 1, "kind": "salvage", "title": _title(group, salvage["verdict"]),
-                "instruction": text, "side": first["side"], "turn_board_over": first["side"] != current_side, "verdict": salvage["verdict"], "effort": salvage["effort"],
+                "instruction": text, "side": first["side"], "turn_board_over": first["side"] != current_side, "verdict": salvage["verdict"], "verdict_label": salvage["label"], "effort": salvage["effort"],
                 "refs": refs, "part_ids": [p["id"] for p in group], "checks": checks,
             }
         )

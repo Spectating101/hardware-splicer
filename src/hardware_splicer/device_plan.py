@@ -15,6 +15,8 @@ import math
 import re
 from functools import lru_cache
 from pathlib import Path
+
+from .text_safety import finite_number, has_hidden_characters
 from typing import Any
 
 DEVICE_PLAN_SCHEMA = "hardware_splicer.device_plan.v1"
@@ -108,11 +110,12 @@ def example_specs() -> dict[str, Any]:
 
 
 def _number(value: Any, label: str, low: float, high: float) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
+    number = finite_number(value)
+    if number is None:
         raise DevicePlanError(f"{label} must be a number")
-    if not low <= float(value) <= high:
+    if not low <= number <= high:
         raise DevicePlanError(f"{label} must be between {low} and {high}")
-    return float(value)
+    return number
 
 
 def _validate_spec(spec: Any) -> dict[str, Any]:
@@ -123,6 +126,8 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
     name = spec.get("name", "Untitled device")
     if not isinstance(name, str) or not name.strip() or len(name) > MAX_NAME:
         raise DevicePlanError(f"name must be 1 to {MAX_NAME} characters")
+    if has_hidden_characters(name):
+        raise DevicePlanError("name may not contain control or invisible characters")
     power = spec.get("power", {"source": "usb"})
     if not isinstance(power, dict) or not isinstance(power.get("source", "usb"), str):
         raise DevicePlanError("power must be an object with a source")
