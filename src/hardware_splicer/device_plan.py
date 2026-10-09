@@ -163,7 +163,7 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
         if not isinstance(row, dict) or not isinstance(row.get("from"), str) or not isinstance(row.get("to"), str):
             raise DevicePlanError(f"connections[{index}] needs from and to, like \"display.SDA\"")
         wire = row.get("wire")
-        if wire is not None and wire not in WIRE_COLORS:
+        if wire is not None and (not isinstance(wire, str) or wire not in WIRE_COLORS):
             raise DevicePlanError(f"connections[{index}].wire must be one of {', '.join(sorted(WIRE_COLORS))}")
         clean_connections.append({"from": row["from"], "to": row["to"], "wire": wire})
     case = spec.get("case", {})
@@ -301,8 +301,22 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     def has(roles: set[str], *wanted: str) -> bool:
         return bool(roles & set(wanted))
 
+    # Some pins are wrong to wire to anything at all, whichever end they are on.
+    for pin, owner in ((pa, ma), (pb, mb)):
+        pin_roles = set(pin["roles"])
+        if "do_not_use" in pin_roles:
+            out.append(_finding("error", "flash_pin", f"{name} uses {owner.ref}.{pin['name']}, which belongs to the module's flash memory. Anything connected there can stop the board from running.", datasheet, wire_id))
+        elif "reset" in pin_roles:
+            out.append(_finding("error", "reset_pin", f"{name} uses the reset pin ({owner.ref}.{pin['name']}). Holding it low stops the board; nothing belongs on it here.", datasheet, wire_id))
+    if out:
+        return out
+
     ground_a, ground_b = has(ra, "ground"), has(rb, "ground")
     powers = {"power_3v3", "power_5v", "power_in"}
+    sources = {"power_3v3", "power_5v"}
+    if has(ra, *sources) and has(rb, *sources):
+        out.append(_finding("error", "supplies_joined", f"{name} joins two supply pins together.", "pin roles from the module library", wire_id))
+        return out
     if ground_a != ground_b and (has(ra, *powers) or has(rb, *powers) or has(ra, "gpio", "i2c_sda", "i2c_scl") or has(rb, "gpio", "i2c_sda", "i2c_scl")):
         kind = "a power pin" if has(ra | rb, *powers) else "a signal pin"
         out.append(_finding("error", "ground_to_other", f"{name} joins ground to {kind}. That is a short or a stuck signal.", "pin roles from the module library", wire_id))
@@ -327,12 +341,8 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     if mcu_pin is not None:
         mroles = set(mcu_pin["roles"])
         wants_sda = sda_a or sda_b
-        if has(mroles, "do_not_use"):
-            out.append(_finding("error", "flash_pin", f"{name} uses {mcu_pin['name']}, which belongs to the module's flash memory. Anything connected there can stop the board from running.", datasheet, wire_id))
-        elif has(mroles, "gpio_input_only"):
+        if has(mroles, "gpio_input_only"):
             out.append(_finding("error", "input_only_pin", f"{name} uses {mcu_pin['name']}, which can only be an input. I2C needs to drive the line.", datasheet, wire_id))
-        elif has(mroles, "reset"):
-            out.append(_finding("error", "reset_pin", f"{name} uses the reset pin.", datasheet, wire_id))
         elif not has(mroles, "gpio"):
             out.append(_finding("error", "not_a_signal_pin", f"{name} uses {mcu_pin['name']}, which is not a signal pin.", datasheet, wire_id))
         else:
@@ -375,28 +385,37 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     mcu, display = boards[0], (displays[0] if displays else None)
     wall, c = clean["wall"], clean["clearance"]
 
-    # The board lies along the case, USB at the -x end and the antenna at +x.
+    # The board lies along the case, USB at the -x end and the antenna at +x. Positions are first worked out from the inside of the
+    # -x/-z walls, then the whole layout is centred, so the case is sized from every module and not just the board.
     antenna = float(mcu.entry.get("overhang_mm", {}).get("antenna_end", 0.0))
     usb = next((k for k in mcu.entry.get("connectors", []) if k["kind"] == "micro_usb"), None)
     usb_over = float(usb["overhang_mm"]) if usb else 0.0
-    length = mcu.pcb["y"] + antenna + usb_over
-    inner_x = length + 2 * c
-    inner_z = max(mcu.pcb["x"], display.pcb["x"] if display else 0.0) + 2 * c
     mcu.turned = True
-    mcu.origin = (-inner_x / 2 + c + usb_over + mcu.pcb["y"], -mcu.pcb["x"] / 2)
+    mcu.origin = (c + usb_over + mcu.pcb["y"], c)
     board_bottom = wall + mcu.below
     mcu.base_y = board_bottom
     board_top = board_bottom + mcu.pcb["z"]
     pin_tips = board_top + PIN_TIP_ABOVE_BOARD_MM
+    extent_x = c + usb_over + mcu.pcb["y"] + antenna
+    extent_z = c + mcu.pcb["x"]
+    mcu_top = board_top + mcu.above
 
     if display:
         display.base_y = pin_tips + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM + c
         # Towards the USB end, so the display is clear of the antenna and its keep-out.
-        display.origin = (-inner_x / 2 + c + usb_over + 4.0, -display.pcb["y"] / 2)
+        display.origin = (c + usb_over + 4.0, c)
+        extent_x = max(extent_x, display.origin[0] + display.pcb["x"])
+        extent_z = max(extent_z, display.origin[1] + display.pcb["y"])
         display_top = display.base_y + display.pcb["z"] + display.above
-        inner_height = display_top + 0.5 - wall
+        lid_underside = max(display_top + 0.5, mcu_top + c)
     else:
-        inner_height = board_top + mcu.above + c - wall
+        lid_underside = mcu_top + c
+    inner_x = extent_x + c
+    inner_z = extent_z + c
+    inner_height = lid_underside - wall
+    # Centre the layout in the case.
+    for module in placed.values():
+        module.origin = (module.origin[0] - inner_x / 2, module.origin[1] - inner_z / 2)
     outer = {"x": _r(inner_x + 2 * wall), "y": _r(inner_height + 2 * wall), "z": _r(inner_z + 2 * wall)}
 
     # Wires.
@@ -453,12 +472,14 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         if len(set(others)) > 1:
             findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(set(others)))}.", "a signal pin carries one signal"))
 
-    # Everything a module needs to work is wired.
+    # Everything a module needs to work is wired, by a wire that the checks did not reject.
+    rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
             connected = any(
                 role in set(p["roles"]) and m.ref == module.ref
-                for _, a, b in resolved_pairs
+                for wire_id, a, b in resolved_pairs
+                if wire_id not in rejected
                 for m, p in (a, b)
             )
             if not connected:
@@ -481,6 +502,11 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         centre = display.point(display.pcb["x"] / 2 + offset["x"], display.pcb["y"] / 2 + offset["y"], display.pcb["z"] + display.above)
         window = {"x": centre["x"], "z": centre["z"], "width_mm": _r(active["x"] + 2 * WINDOW_MARGIN_MM), "depth_mm": _r(active["y"] + 2 * WINDOW_MARGIN_MM),
                   "basis": "the active area plus a margin all round, centred where this module type usually has its glass; the offset is not published, so measure yours before printing"}
+
+    if window is not None:
+        half_x, half_z = inner_x / 2 + wall, inner_z / 2 + wall
+        if abs(window["x"]) + window["width_mm"] / 2 > half_x or abs(window["z"]) + window["depth_mm"] / 2 > half_z:
+            raise DevicePlanError("the display window would fall outside the lid: the measured display size is too small for its screen")
 
     modules_out = []
     for module in placed.values():
@@ -590,7 +616,7 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             parts=[mcu.ref],
         )
     if display and window:
-        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Press the display into the lid from below, screen towards the window, header pins hanging inside. Wires stay attached.", parts=[display.ref], motion="drop", wires_follow=[w["id"] for w in wires])
+        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Press the display into the lid from below, screen towards the window, header pins hanging inside. Wires stay attached.", parts=[display.ref], motion="drop")
     add("close", "Close the case", "Lower the lid onto the base without trapping a wire. Fasten it the way your print is designed to (screws or snap fit).", parts=["case_lid"], motion="close")
     checks = [{"kind": "suggested_check", "check": "voltage", "from": f"{mcu.ref}.3V3", "to": f"{mcu.ref}.GND", "net": None, "expect": "between 3.0 V and 3.6 V (the module's supply range in its datasheet)"}]
     add("power", "Plug in USB and check the supply", "Connect the Micro-USB data cable. Nothing will show on the display yet: it needs code. If anything gets hot or smells, unplug it.", checks=checks, parts=[mcu.ref])

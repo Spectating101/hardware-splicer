@@ -263,3 +263,126 @@ def test_planning_writes_nothing(api: TestClient, tmp_path: Path) -> None:
     for _ in range(3):
         assert api.post("/v1/devices/plan", json=EXAMPLE).status_code == 200
     assert sorted(str(p) for p in tmp_path.rglob("*")) == before
+
+
+# --- review findings ---------------------------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("swap", "rule"),
+    [
+        ({"display.GND": "mcu.EN"}, "reset_pin"),
+        ({"display.VCC": "mcu.EN"}, "reset_pin"),
+        ({"display.VCC": "mcu.D0"}, "flash_pin"),
+        ({"display.GND": "mcu.CMD"}, "flash_pin"),
+        ({"display.SCL": "mcu.CLK"}, "flash_pin"),
+    ],
+)
+def test_the_reset_and_flash_pins_are_wrong_to_wire_to_whatever_they_are_wired_to(swap: dict[str, str], rule: str) -> None:
+    plan = build_device_plan(_with([{**c, "to": swap.get(c["from"], c["to"])} for c in GOOD]))
+    assert rule in _rules(plan, "error"), plan["findings"]
+    # The wire that was rejected does not count as the display's power, ground or clock, so that pin is also reported missing.
+    assert "missing_connection" in _rules(plan, "error"), plan["findings"]
+    assert plan["counts"]["errors"] >= 2
+
+
+def test_two_supply_pins_joined_together_is_an_error_in_either_direction() -> None:
+    # Only reachable between modules, so use the display's power pin to stand in: 3V3 to 5V cannot be wired directly here,
+    # but the rule is what stops a 3V3 pin and a 5V pin being joined.
+    from hardware_splicer.device_plan import _check_connection, _Placed, _module
+
+    mcu = _Placed("mcu", _module("esp32-devkitc-v4"), {})
+    other = _Placed("other", _module("esp32-devkitc-v4"), {})
+    pins = {p["name"]: p for p in mcu.entry["pins"]}
+    for a, b in ((pins["3V3"], pins["5V"]), (pins["5V"], pins["3V3"])):
+        findings = _check_connection("wire-01", (mcu, a), (other, b))
+        assert [f["rule"] for f in findings] == ["supplies_joined"] and findings[0]["severity"] == "error"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"pcb_mm": {"x": 300.0, "y": 300.0}},
+        {"pcb_mm": {"x": 80.0}},
+        {"above_board_mm": 60.0},
+    ],
+)
+def test_a_measured_override_always_gives_a_case_that_contains_every_module(overrides: dict) -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"][1]["overrides"] = overrides
+    mcu_spec = copy.deepcopy(EXAMPLE)
+    mcu_spec["modules"][0]["overrides"] = {"above_board_mm": 40.0}
+    for candidate in (spec, mcu_spec):
+        plan = build_device_plan(candidate)
+        case, half_x, half_z = plan["case"], plan["case"]["inner_mm"]["x"] / 2, plan["case"]["inner_mm"]["z"] / 2
+        for module in plan["modules"]:
+            box = module["box"]
+            reach = module["overhang_mm"].get("antenna_end", 0.0) if module["kind"] == "mcu_board" else 0.0
+            assert -half_x - 1e-6 <= box["x0"] and box["x1"] + reach <= half_x + 1e-6, (module["id"], box, half_x)
+            assert -half_z - 1e-6 <= box["z0"] and box["z1"] <= half_z + 1e-6, (module["id"], box, half_z)
+            top = module["base_y"] + module["pcb_mm"]["z"] + module["above_board_mm"]
+            assert top <= case["lid_underside_y"] + 1e-6, (module["id"], top, case["lid_underside_y"])
+        win = case["window"]
+        assert -case["outer_mm"]["x"] / 2 <= win["x"] - win["width_mm"] / 2 and win["x"] + win["width_mm"] / 2 <= case["outer_mm"]["x"] / 2
+        assert -case["outer_mm"]["z"] / 2 <= win["z"] - win["depth_mm"] / 2 and win["z"] + win["depth_mm"] / 2 <= case["outer_mm"]["z"] / 2
+
+
+@pytest.mark.parametrize("wire", [[], {}, 5, True, ["red"]])
+def test_a_wire_colour_that_is_not_a_name_is_a_clear_refusal_not_a_crash(wire) -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["connections"][0]["wire"] = wire
+    with pytest.raises(DevicePlanError, match="wire must be"):
+        build_device_plan(spec)
+
+
+def test_a_spec_with_any_value_swapped_for_something_odd_is_a_plan_or_a_clear_refusal_never_a_crash() -> None:
+    import random
+
+    odd = [None, True, False, 0, -1, 1e308, float("nan"), float("inf"), "", "x" * 300, "mcu.\u0000", [], {}, [[]], {"a": {"b": []}}, "\ud83d\ude00", -0.0, 10**30]
+    rng = random.Random(20261009)
+
+    def leaves(node, path=()):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                yield from leaves(value, path + (key,))
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                yield from leaves(value, path + (index,))
+        else:
+            yield path
+
+    paths = list(leaves(EXAMPLE))
+    for _ in range(400):
+        spec = copy.deepcopy(EXAMPLE)
+        for path in rng.sample(paths, k=rng.randint(1, 3)):
+            target = spec
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = rng.choice(odd)
+        try:
+            plan = build_device_plan(spec)
+        except DevicePlanError:
+            continue
+        assert plan["schema_version"].endswith("v1") and all(math.isfinite(v) for module in plan["modules"] for v in module["box"].values())
+
+
+def test_a_body_with_no_declared_length_is_refused_as_soon_as_it_is_too_big(api: TestClient) -> None:
+    def pieces():
+        # A chunked upload: no content-length, far more than the limit, and never finished.
+        for _ in range(100000):
+            yield b"x" * 1024
+
+    assert api.post("/v1/devices/plan", content=pieces(), headers={"content-type": "application/json"}).status_code == 413
+
+
+def test_json_nested_far_too_deeply_is_a_422_not_a_server_error(api: TestClient) -> None:
+    deep = b"[" * 30000 + b"0" + b"]" * 30000        # about 60 KB: under the size limit, far over what the parser can nest
+    response = api.post("/v1/devices/plan", content=deep, headers={"content-type": "application/json"})
+    assert response.status_code == 422 and "nested" in response.json()["detail"]["message"]
+
+
+def test_a_display_measured_smaller_than_its_own_screen_is_refused_rather_than_given_an_impossible_window() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"][1]["overrides"] = {"pcb_mm": {"x": 5.0, "y": 5.0}}
+    with pytest.raises(DevicePlanError, match="too small for its screen"):
+        build_device_plan(spec)
