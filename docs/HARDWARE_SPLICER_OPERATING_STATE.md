@@ -187,3 +187,4 @@ update claims, paper, roadmap, and next investment decision
 
 The intended state is **not smaller HS**. It is a stronger HS with a narrower definition of what deserves engineering time.
 - **Build sequence (2026-10-09).** The Assemble tab animates the board going together part by part on the real KiCad-exported board, from `GET /revisions/{rev}/assembly-plan`. Heights are typical values and the order is conventional, both labelled; parts the design marks do-not-populate are reported, never instructed. Off-board parts (screen, battery, case) are not yet drawn. See `docs/ASSEMBLY_PLAN.md`.
+- **Whole-device assembly (2026-10-09).** Engineering > Build a device animates a gadget going together: board into case, each wire pin to pin, display, lid and USB. Built from a module library whose figures all name a source or say they are typical; wiring is checked against pin roles and as nets. The case is a proposal, not printed. See `docs/DEVICE_PLAN.md`.

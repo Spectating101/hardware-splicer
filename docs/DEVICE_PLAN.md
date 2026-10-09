@@ -14,7 +14,7 @@ passes the checks is not a wire that works, the case has not been printed, and e
 | `GET /v1/devices/modules` | the module library, with each module's sources and dimension basis |
 | `GET /v1/devices/examples` | example device specs |
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
-| `POST /v1/devices/plan` | a plan for a spec (at most 64 KB); 422 with a reason when the spec cannot make one |
+| `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
 
 ## The spec
 
@@ -50,11 +50,14 @@ Shorts (ground to power or signal), power onto a signal pin, SDA joined to SCL, 
 a required pin, the module's flash pins (error), input-only pins and the reset pin (error), strapping pins and the USB serial
 pins (warning), SDA and SCL swapped against Arduino's defaults (warning), a custom I2C pin (note), 5 V on a module whose
 pull-ups would put 5 V on 3.3 V pins (warning), and a battery wired straight to the board (error: it exceeds the 3.6 V maximum).
-Each finding carries the basis it rests on.
+The reset pin and the flash pins are wrong whatever they are wired to, from either end, and a wire the checks reject does not
+count toward a module's required pins. Wires are also checked as nets: a module's ground pins are one net, so are its 3V3 pins
+and its 5V pins, and wires that are each fine but together join 3V3 to 5V, or a supply to ground, are an error. Each finding
+carries the basis it rests on.
 
 ## The case
 
-A two-part box sized from the modules, a typical jumper-wire housing height (14 mm), room for the wires to bend (10 mm), the
+A two-part box sized from every module (so a larger measured display makes a larger case, and a display too small for its own screen is refused), a typical jumper-wire housing height (14 mm), room for the wires to bend (10 mm), the
 board resting on its header pins, a USB cut-out wide enough for the plug's moulded body, and a window around the display's
 active area. It is **a proposal, not printed and not test-fitted**; the page says so and lists what to measure first.
 

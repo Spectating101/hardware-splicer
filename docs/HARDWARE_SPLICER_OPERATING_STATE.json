@@ -118,7 +118,8 @@
           "live_events_and_presence": "project_events.py and project_presence.py: change stream and ephemeral presence, information only",
           "review_packet": "review_packet.py and GET /v1/projects/{id}/review-packet: a hash-bound, read-only, deterministic JSON/Markdown packet of one revision (retained file hashes, findings, proposals with decisions, discussion) with an explicit not-established section and best-effort credential and path redaction; include_text=false builds the version for sharing with every user-written field left out",
           "retained_file_bytes": "GET /revisions/{rev}/artifacts/{kind}/file: exact retained bytes with ETag and revalidation, so a viewer shows the file that was hashed",
-          "assembly_plan": "assembly_plan.py and GET /v1/projects/{id}/revisions/{rev}/assembly-plan (+ /board.glb): an ordered build sequence read from the retained board: real part positions and outlines, typical heights with their basis, pin 1, connector pins and nets, suggested continuity checks, parts the design marks do-not-populate reported as not fitted. A view of retained bytes; heights and order are labelled estimates"
+          "assembly_plan": "assembly_plan.py and GET /v1/projects/{id}/revisions/{rev}/assembly-plan (+ /board.glb): an ordered build sequence read from the retained board: real part positions and outlines, typical heights with their basis, pin 1, connector pins and nets, suggested continuity checks, parts the design marks do-not-populate reported as not fitted. A view of retained bytes; heights and order are labelled estimates",
+          "device_plan": "device_plan.py, device_api.py and data/device_modules.json: a whole-gadget assembly plan (modules, wires pin to pin, a proposed case, ordered steps) from a spec, with a module library whose every figure names its source or is marked typical (ESP32-DevKitC V4 from Espressif's drawing and pin tables and the WROOM-32E datasheet; the common SSD1306 OLED module). Wiring is checked against pin roles and as nets. Stateless, report-only"
         },
         "frontend": "evidence workspace: Parts tab (find a part on the drawing), 3D tab, presence and live threads, a docked Edit toolbar with a live draft preview, Proposals tab with preview, marked changes and operator-gated accept/reject, faint copper fills",
         "not_yet_verified": [
@@ -132,6 +133,13 @@
         "independent_review_assembly": "Codex found and drove fixes for: parts marked dnp being instructed, a 13 s quadratic check generator, arc outlines bounded by their ends, duplicate references collapsing in the viewer, a leaked WebGL context when the tab was left mid-load, generated ids colliding with real references, and all-dnp boards hiding what was left off. The outline maths is compared with KiCad's own geometry after KiCad turns and flips parts.",
         "not_yet_verified_assembly": [
           "off-board parts (screens, batteries, cases) are not drawn: only the retained board's parts; real component models need kicad-packages3d; 'connect A to B' wire animation between modules is not built"
+        ],
+        "frontend_device": "Engineering > Build a device: parts hover apart, the board drops into the case, each wire grows from pin to pin with both pins named, the display, lid and USB follow; wiring findings with their basis, shopping list, what to measure before printing, links to every source, and an editable spec to see what the checks say about wrong wiring",
+        "independent_review_device": "Codex data-truth review found no mismatch with the cited sources; it found and drove fixes for: reset and flash pins passing as harmless when wired to the display's power or ground, a case sized from the board alone, a request limit applied after buffering, malformed JSON values reaching a 500, wires not following a moving display, supply bridges formed by two individually fine wires, and a rejected wire hiding a bridge",
+        "not_yet_verified_device": [
+          "the case has not been printed or test-fitted: its numbers are typical, not measured",
+          "a battery needs a charger and regulator module, not yet in the library",
+          "only two module types exist; other ESP32 boards and displays differ in size and pin order"
         ]
       }
     }
