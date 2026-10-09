@@ -261,3 +261,60 @@ def test_chips_with_one_footprint_are_one_step_per_kind_of_job_and_never_two_dif
 def test_a_footprint_that_names_no_package_is_said_to_be_a_guess() -> None:
     got = _verdict(build_salvage_plan(_board('(footprint "MyLib:Thing" (layer "F.Cu") (at 10 10) (attr smd) (property "Reference" "R1") (property "Value" "x"))')), "R1")
     assert any("guesses" in r for r in got["reasons"])
+
+
+# --- second read-only review (Grok), each reproduced before it was fixed ----------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("ref", "footprint", "value", "verdict"),
+    [
+        ("U1", "RF_Module:Electronic_ESP-12F", "ESP-12F", "keep"),             # "Electronic" contains "Elec" but is not an electrolytic
+        ("SW1", "Switch:SW_SPDT_Select", "SW", "optional"),
+        ("C1", "Capacitor_SMD:C_Dielectric_X7R_0805", "100n", "optional"),
+        ("U1", "Sensor:MOVEMENT_PIR", "", "identify"),                          # "MOVEMENT" contains "MOV" but is not a varistor
+        ("J1", "Connector_USB:USB_C_Receptacle_OnePiece", "", "keep"),          # "OnePiece" contains "IEC" but is not a mains inlet
+        ("JP1", "Jumper:SolderJumper_2_Open_SilkScreen", "", "skip"),
+    ],
+)
+def test_a_word_that_merely_contains_a_hazard_keyword_is_not_that_hazard(ref, footprint, value, verdict) -> None:
+    got = _verdict(build_salvage_plan(_board(_fp(ref, footprint, "10 10", value))), ref)
+    assert got["verdict"] == verdict, got
+    assert not any("mains" in h or "discharge" in h for h in got["hazards"]), got
+
+
+@pytest.mark.parametrize(
+    ("ref", "footprint", "value", "attr", "hazard"),
+    [
+        ("T1", "Transformer_THT:Transformer_EI30", "230V/12V", "through_hole", "mains"),
+        ("F1", "Fuse:Fuse_5x20mm", "2A 250V", "through_hole", "mains"),
+        ("F1", "Fuse:Fuseholder_Cylinder-5x20mm_Schurter", "", "through_hole", "mains"),
+        ("K1", "Relay_THT:Relay_SPDT_Schrack_RT424024", "24V", "through_hole", "mains"),
+        ("L1", "Inductor_THT:L_CommonMode_Wuerth_WE-CMB_XS", "", "through_hole", "mains"),
+        ("J1", "Connector_TerminalBlock:TerminalBlock_Phoenix_PT-1.5-2-5.08-H", "", "through_hole", "mains"),
+        ("C1", "Capacitor_THT:C_Rect_L18.0mm_W5.0mm_P15.00mm", "275VAC", "through_hole", "dangerous charge"),
+        ("C1", "Capacitor_THT:C_Rect_L18.0mm_W5.0mm_P15.00mm", "100nF X2", "through_hole", "dangerous charge"),
+        ("C1", "Capacitor_SMD:C_EDLC_D10mm", "1F 2.7V", "smd", "discharge"),
+        ("BAT1", "Cells:Li-ion_Pouch", "Li-ion 3.7V", "smd", "lithium"),
+    ],
+)
+def test_the_mains_and_stored_energy_parts_the_first_pass_missed_now_carry_a_hazard(ref, footprint, value, attr, hazard) -> None:
+    got = _verdict(build_salvage_plan(_board(_fp(ref, footprint, "10 10", value, attr))), ref)
+    assert any(hazard in h for h in got["hazards"]), got
+    assert got["verdict"] != "keep" or "terminal" in footprint.lower(), got       # a transformer or a relay is never "worth taking"
+
+
+def test_a_wide_pitch_terminal_block_carries_a_mains_warning_and_a_small_connector_does_not() -> None:
+    wide = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_TerminalBlock:TerminalBlock_Phoenix_PT-1.5-2-5.08-H", "10 10", "", "through_hole"))), "J1")
+    narrow = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_TerminalBlock:TerminalBlock_Altech_AK300-2_P5.00mm", "10 10", "", "through_hole"))), "J1")
+    thin = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", "10 10", "", "through_hole"))), "J1")
+    assert wide["verdict"] == "keep" and any("mains" in h for h in wide["hazards"])
+    assert narrow["verdict"] == "keep" and any("mains" in h for h in narrow["hazards"])     # 5.00 mm pitch is a mains-class block too
+    assert thin["verdict"] == "keep" and thin["hazards"] == []
+
+
+def test_unidentified_chips_with_different_junk_labels_are_one_job() -> None:
+    lq = "Package_QFP:LQFP-48_7x7mm_P0.5mm"
+    plan = build_salvage_plan(_board(_fp("U1", lq, "10 10", "FLASH_128M") + _fp("U2", lq, "20 10", "SPI_1x06") + _fp("U3", lq, "30 10", "")))
+    steps = [s for s in plan["steps"] if s["kind"] == "salvage"]
+    assert len(steps) == 1 and steps[0]["refs"] == ["U1", "U2", "U3"] and steps[0]["verdict"] == "identify"

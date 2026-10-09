@@ -10,6 +10,15 @@ A safety step, then removal in a sensible order (connectors and electrolytic cap
 the rest), then sorting and testing. Each part has a verdict with the rule behind it: worth taking, take it and test first, read the
 marking, cheap to buy new, leave it. Parts the design marks do-not-populate have nothing to take.
 
+## Hazards it names
+
+A battery cell is never planned for removal (take it out by hand, never with heat); a holder keeps the warning. Polarised,
+tantalum and supercapacitors, and any capacitor rated 100 V or more (including X2/Y2 and AC ratings), carry a discharge warning,
+and the high-voltage ones are left alone. Mains and switching-supply parts (transformers, relays, varistors, fuses and fuse
+holders, mains inlets, common-mode chokes, terminal blocks of 5 mm pitch or more) carry a mains warning and are never "worth
+taking". Names are matched on whole name parts, so a word that merely contains a keyword (Electronic, MOVEMENT, OnePiece) does not
+match. This is a rule list, not a guarantee: a part it does not recognise gets no warning, so the general safety step still applies.
+
 ## Stated limits
 
 - It needs the board's file. A physical board with no file cannot be planned from; there is no capture path yet.

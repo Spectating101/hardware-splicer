@@ -41,19 +41,26 @@ GENERAL_SAFETY = (
 
 _SPECIAL_CONNECTOR = re.compile(r"USB|JST|Molex|Micro|Mini|RJ45|Barrel|Audio|FPC|FFC|Terminal|Screw|SMA|HDMI|SD_|Card", re.IGNORECASE)
 _PLAIN_HEADER = re.compile(r"PinHeader|PinSocket|Pin_Header", re.IGNORECASE)
-_ELECTROLYTIC = re.compile(r"(^|:)CP_|CP_Elec|C_Elec|Elec|Tantalum|TantalC", re.IGNORECASE)
-_VOLTS = re.compile(r"(\d+(?:\.\d+)?)\s*V\b", re.IGNORECASE)
+# Anchored to whole parts of a name, so a word that merely contains one ("Electronic", "MOVEMENT", "OnePiece") does not match.
+_ELECTROLYTIC = re.compile(r"(^|[:_])CP_|C_Elec|Electrolytic|(^|[:_])Elec_|Tantalum|TantalC|EDLC|Supercap", re.IGNORECASE)
+_VOLTS = re.compile(r"(\d+(?:\.\d+)?)\s*V(?:AC|DC)?\b", re.IGNORECASE)
+_MAINS_RATED_CAP = re.compile(r"\b[XY][12]\b", re.IGNORECASE)
+_PITCH = r"(?<![\d.])(?:5\.0{1,2}|5\.08|7\.50?|7\.62|10\.16|11\.0{1,2})(?!\d)"
+_WIDE_TERMINAL = re.compile(rf"(Terminal|Screw|MKDS|Phoenix).*{_PITCH}|{_PITCH}.*(Terminal|Screw|MKDS|Phoenix)", re.IGNORECASE)
 _SOLDER_JUMPER = re.compile(r"SolderJumper|SolderBridge|Jumper:", re.IGNORECASE)
-_MAINS_PART = re.compile(r"Varistor|(^|[:_])RV_|MOV|IEC|Mains|AC_Inlet|Fuseholder", re.IGNORECASE)
+_MAINS_PART = re.compile(
+    r"Varistor|(^|[:_])RV_|(^|[:_])MOV(_|\d|$)|(^|[:_])IEC(_|\d|$)|Mains|AC_Inlet|Fuse_?holder|Fuse_\d+x\d+|Cartridge|Transformer|Trafo|Common_?Mode|Relay",
+    re.IGNORECASE,
+)
 _BATTERY_HOLDER = re.compile(r"Holder|Clip|Keystone", re.IGNORECASE)
-_BATTERY_REF = re.compile(r"^BT\d", re.IGNORECASE)
+_BATTERY_REF = re.compile(r"^(BT|BAT)\d", re.IGNORECASE)
 _THROUGH_HOLE_IC = re.compile(r"DIP|THT|TO-220|TO-92|TO-247|Socket", re.IGNORECASE)
 _FINE_PACKAGE = re.compile(r"QFN|DFN|LGA|BGA|QFP|WSON|USON|UDFN|WLCSP|CSP", re.IGNORECASE)
 _MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", re.IGNORECASE)
 # A part number is one token: letters and digits, with hyphens, dots or plus signs, and no spaces or underscores. A label that describes
 # a function ("FLASH_128M", "SPI_1x06") is not one, and neither is a bare number.
 _PART_NUMBER = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+/-]{2,39}")
-_BATTERY = re.compile(r"Battery|BatteryHolder|CR\d{4}|LiPo|18650|Coin", re.IGNORECASE)
+_BATTERY = re.compile(r"Battery|CR\d{4}|LiPo|Li-?ion|Lithium|18650|Coin|Pouch", re.IGNORECASE)
 _SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603)|LED_(01005|0201|0402|0603)", re.IGNORECASE)
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
 
@@ -86,7 +93,8 @@ def _effort(part: dict[str, Any]) -> tuple[str, str]:
 def _high_voltage(part: dict[str, Any]) -> bool:
     if part.get("kind") != "passive" or not str(part.get("ref", "")).upper().startswith("C"):
         return False
-    return any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(str(part.get("value") or "")))
+    value = str(part.get("value") or "")
+    return bool(_MAINS_RATED_CAP.search(value)) or any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(value))
 
 
 def _assess(part: dict[str, Any]) -> dict[str, Any]:
@@ -117,8 +125,8 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
             effort, tool = "none", ""
     elif _MAINS_PART.search(name):
         verdict = "optional"
-        reasons.append("a part from mains wiring: it can wear out or carry mains voltage in its original use")
-        hazards.append("only reuse it if you know how to work safely with mains voltage; a varistor wears out and is not worth keeping")
+        reasons.append("a part from mains wiring or a switching supply: it can wear out or have carried mains voltage in its original use")
+        hazards.append("only reuse it if you know how to work safely with mains voltage; varistors and relays wear out, and transformers and filter parts can hold energy")
     elif _ELECTROLYTIC.search(name) or _high_voltage(part):
         verdict = "test_first"
         reasons.append("a polarised or high-voltage capacitor ages and can fail; its condition is unknown")
@@ -131,6 +139,8 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
     elif kind == "connector" and _SPECIAL_CONNECTOR.search(name):
         verdict = "keep"
         reasons.append("a specialised connector: harder to find and cheap to keep")
+        if _WIDE_TERMINAL.search(name):
+            hazards.append("a terminal block this wide often carried mains voltage: check where it was connected before you trust or reuse it")
     elif kind == "connector" and _PLAIN_HEADER.search(name):
         verdict = "optional"
         reasons.append("a plain 2.54 mm header is cheap to buy new")
@@ -173,8 +183,8 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
 def _what(part: dict[str, Any]) -> str:
     """What a chip is called by the file, so two different chips are never one step."""
 
-    if part["kind"] != "ic":
-        return ""
+    if part["kind"] != "ic" or not _identified(part):
+        return ""   # chips nobody can name are one job whatever their labels say
     return str((part.get("identity") or {}).get("mpn") or part.get("value") or "")
 
 
