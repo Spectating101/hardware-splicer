@@ -21,6 +21,13 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
 - What you chose for a part (its kind) decides how it is treated, not its label: a part you call `J9` but mark as a chip is a chip.
 - The hazard rules are the same as for a file (batteries, stored charge, mains parts). They are a rule list, not a guarantee.
 
+## What is cleaned and refused
+
+Names, labels and markings may not contain control or invisible characters (zero-width spaces, right-to-left overrides): they can make
+text on screen read differently from what it is. Ordinary non-English text is welcome. A board opened from a file or read back from this
+browser is cleaned to the same limits the server enforces (sizes finite and in range, at most 300 parts) and what cannot be read is
+reported, not silently dropped. A plan that is still on its way when you start again or open another board never lands on the new one.
+
 ## API (stateless)
 
 `GET /v1/donors/options` lists the kinds and packages with the typical size of each. `POST /v1/donors/salvage-plan` takes the

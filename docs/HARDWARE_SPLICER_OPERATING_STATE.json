@@ -120,7 +120,8 @@
           "retained_file_bytes": "GET /revisions/{rev}/artifacts/{kind}/file: exact retained bytes with ETag and revalidation, so a viewer shows the file that was hashed",
           "assembly_plan": "assembly_plan.py and GET /v1/projects/{id}/revisions/{rev}/assembly-plan (+ /board.glb): an ordered build sequence read from the retained board: real part positions and outlines, typical heights with their basis, pin 1, connector pins and nets, suggested continuity checks, parts the design marks do-not-populate reported as not fitted. A view of retained bytes; heights and order are labelled estimates",
           "device_plan": "device_plan.py, device_api.py and data/device_modules.json: a whole-gadget assembly plan (modules, wires pin to pin, a proposed case, ordered steps) from a spec, with a module library whose every figure names its source or is marked typical (ESP32-DevKitC V4 from Espressif's drawing and pin tables and the WROOM-32E datasheet; the common SSD1306 OLED module). Wiring is checked against pin roles and as nets. Stateless, report-only",
-          "salvage_plan": "salvage_plan.py and GET /revisions/{rev}/salvage-plan: the build sequence run the other way over a retained board: a safety step, removal order, and a verdict with its rule for each part (worth taking, test first, read the marking, cheap to buy new, leave it). Names a chip only as far as the board file does; never calls a part good; states that it needs the board's file. Report-only"
+          "salvage_plan": "salvage_plan.py and GET /revisions/{rev}/salvage-plan: the build sequence run the other way over a retained board: a safety step, removal order, and a verdict with its rule for each part (worth taking, test first, read the marking, cheap to buy new, leave it). Names a chip only as far as the board file does; never calls a part good; states that it needs the board's file. Report-only",
+          "donor_capture": "donor_capture.py and POST /v1/donors/salvage-plan (+ GET /v1/donors/options): a board with no file, described by a person (size, and per part a kind, package, marking, place), gets the same take-apart advice. Everything is marked as typed: a marking is what was read, never an identification, sizes are typical unless typed. Stateless, bounded, report-only"
         },
         "frontend": "evidence workspace: Parts tab (find a part on the drawing), 3D tab, presence and live threads, a docked Edit toolbar with a live draft preview, Proposals tab with preview, marked changes and operator-gated accept/reject, faint copper fills",
         "not_yet_verified": [
@@ -144,9 +145,11 @@
         ],
         "frontend_salvage": "Assemble tab 'Take apart': parts lift off in order, coloured by verdict, removed parts leave their outline, with verdict chip, hazards, counts and the plan's limits",
         "not_yet_verified_salvage": [
-          "boards with no file cannot be planned from: there is no photo or marking capture path into the 3D view",
-          "the take-apart code had no independent Codex review (its quota ran out); it was reviewed by hand and the chip-identification rule tightened"
-        ]
+          "the take-apart code had no independent Codex review (its quota ran out); it was reviewed by hand and the chip-identification rule tightened",
+          "recognising parts from the photo, looking a marking up, and showing the repo's donor evidence gates as steps are not built; the capture page is manual"
+        ],
+        "frontend_donor": "Engineering > Salvage a board: place parts by clicking over an optional photo (kept in the browser), edit kind/package/marking, plan the take-apart in 3D; work kept in the browser, saved and opened as JSON",
+        "independent_review_donor": "Read-only Grok reviews (Codex quota had run out) of the take-apart and capture code each found real defects, every one reproduced before being fixed: unsafe or missing hazard classes, false keyword matches, a mode-switch scene rebuilt twice, an in-flight plan landing on the wrong board, invisible and right-to-left characters, and a 400-digit integer giving a server error in both planners"
       }
     }
   },
