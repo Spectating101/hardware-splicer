@@ -359,6 +359,55 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     return out
 
 
+def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]], rejected: set[str | None]) -> list[dict[str, Any]]:
+    """Wires that are each fine but together join two supplies, or a supply and ground, through the pins they share.
+
+    A module's own ground pins are one net, and so are its 3V3 pins and its 5V pins, whether or not they are all wired.
+    """
+
+    parent: dict[tuple[str, str], tuple[str, str]] = {}
+
+    def find(node: tuple[str, str]) -> tuple[str, str]:
+        parent.setdefault(node, node)
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    def union(a: tuple[str, str], b: tuple[str, str]) -> None:
+        parent[find(a)] = find(b)
+
+    roles: dict[tuple[str, str], tuple[str, set[str]]] = {}
+    for module in placed.values():
+        for kind in ("ground", "power_3v3", "power_5v"):
+            same = [(module.ref, pin["id"]) for pin in module.entry["pins"] if kind in pin["roles"]]
+            for node in same[1:]:
+                union(same[0], node)
+        for pin in module.entry["pins"]:
+            roles[(module.ref, pin["id"])] = (f"{module.ref}.{pin['name']}", set(pin["roles"]))
+    wires_in: dict[tuple[str, str], list[str]] = {}
+    for wire_id, (ma, pa), (mb, pb) in pairs:
+        a, b = (ma.ref, pa["id"]), (mb.ref, pb["id"])
+        union(a, b)
+        wires_in.setdefault(a, []).append(wire_id)
+        wires_in.setdefault(b, []).append(wire_id)
+    nets: dict[tuple[str, str], set[tuple[str, str]]] = {}
+    for node in list(roles):
+        nets.setdefault(find(node), set()).add(node)
+    out: list[dict[str, Any]] = []
+    for members in nets.values():
+        wires = sorted({w for node in members for w in wires_in.get(node, [])})
+        if not wires or any(w in rejected for w in wires):
+            continue
+        kinds = {role for node in members for role in roles[node][1]}
+        names = sorted({roles[node][0] for node in members if roles[node][1] & {"power_3v3", "power_5v", "ground"}})
+        if {"power_3v3", "power_5v"} <= kinds:
+            out.append(_finding("error", "nets_bridged", f"These wires together join the 3.3 V and 5 V supplies ({', '.join(names)}).", "pin roles from the module library", wires[0]))
+        elif kinds & {"power_3v3", "power_5v"} and "ground" in kinds:
+            out.append(_finding("error", "nets_bridged", f"These wires together join a supply to ground ({', '.join(names)}).", "pin roles from the module library", wires[0]))
+    return out
+
+
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
     if module.entry["kind"] == "display":
         return [("ground", "ground"), ("power_in", "power"), ("i2c_sda", "SDA"), ("i2c_scl", "SCL")]
@@ -472,8 +521,9 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         if len(set(others)) > 1:
             findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(set(others)))}.", "a signal pin carries one signal"))
 
-    # Everything a module needs to work is wired, by a wire that the checks did not reject.
     rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
+    findings.extend(_net_findings(placed, resolved_pairs, rejected))
+    # Everything a module needs to work is wired, by a wire that the checks did not reject.
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
             connected = any(

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const MAX_BODY_BYTES = 64 * 1024;
 
 function tooLarge() {
-  return Response.json({ ok: false, error: `The spec may be at most ${MAX_BODY_BYTES} bytes.`, status: 413 });
+  return Response.json({ ok: false, error: `The spec may be at most ${MAX_BODY_BYTES} bytes.`, status: 413 }, { status: 413 });
 }
 
 /** Reads the body a piece at a time and gives up as soon as it is too big, so an oversized upload is never held whole. */

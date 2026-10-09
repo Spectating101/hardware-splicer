@@ -386,3 +386,32 @@ def test_a_display_measured_smaller_than_its_own_screen_is_refused_rather_than_g
     spec["modules"][1]["overrides"] = {"pcb_mm": {"x": 5.0, "y": 5.0}}
     with pytest.raises(DevicePlanError, match="too small for its screen"):
         build_device_plan(spec)
+
+
+def test_wires_that_are_each_fine_but_together_join_two_supplies_are_an_error() -> None:
+    both = _with([*GOOD, {"from": "display.VCC", "to": "mcu.5V"}])
+    plan = build_device_plan(both)
+    bridged = [f for f in plan["findings"] if f["rule"] == "nets_bridged"]
+    assert len(bridged) == 1 and bridged[0]["severity"] == "error" and "3.3 V and 5 V" in bridged[0]["message"]
+    assert "mcu.3V3" in bridged[0]["message"] and "mcu.5V" in bridged[0]["message"]
+    # Each wire on its own was only the 5 V warning; it is the pair that is the problem.
+    assert {f["rule"] for f in build_device_plan(_with([GOOD[0], GOOD[1], GOOD[2], GOOD[3]]))["findings"]} == set()
+    assert "nets_bridged" not in _rules(build_device_plan(_with([{"from": "display.VCC", "to": "mcu.5V"}, *GOOD[1:]])))
+
+
+def test_a_supply_reaching_ground_through_the_modules_own_ground_pins_is_caught() -> None:
+    # display.GND to the board's ground, and display.VCC to the board's 3V3: fine. Add display.VCC to a second GND pin.
+    plan = build_device_plan(_with([*GOOD, {"from": "display.VCC", "to": "mcu.J3-7"}]))
+    rules = _rules(plan, "error")
+    assert "ground_to_other" in rules       # the wire itself
+    # No double report for a net that already has a rejected wire.
+    assert [f["rule"] for f in plan["findings"]].count("nets_bridged") == 0
+    # Three ground pins are one net, so a supply that meets ground through two of them is still one problem.
+    indirect = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": "mcu.J2-14"}, {"from": "display.GND", "to": "mcu.J3-1"}, GOOD[2], GOOD[3]]))
+    assert indirect["findings"] == []       # two ground wires to two ground pins is harmless
+
+
+def test_the_board_can_be_wired_correctly_to_any_of_its_three_ground_pins() -> None:
+    for pin in ("mcu.J2-14", "mcu.J3-1", "mcu.J3-7", "mcu.GND"):
+        plan = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": pin}, GOOD[2], GOOD[3]]))
+        assert plan["findings"] == [], (pin, plan["findings"])

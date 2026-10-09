@@ -218,6 +218,9 @@ test('an oversized spec is refused by the page with a plain message, and the exa
   await editor.fill(JSON.stringify({ ...JSON.parse(good), name: 'x'.repeat(70000) }));
   await page.getByTestId('device-spec-apply').click();
   await expect(page.getByTestId('device-error')).toContainText('at most 65536 bytes');
+  // And it is a real HTTP 413, not a 200 that merely says so.
+  const direct = await page.request.post(`${APP_URL}/api/proxy/engineering/devices/plan`, { data: 'x'.repeat(70000), headers: { 'content-type': 'application/json' } });
+  expect(direct.status()).toBe(413);
   await editor.fill(good);
   await page.getByTestId('device-spec-apply').click();
   await expect(page.getByTestId('device-findings')).toContainText('nothing wrong');
