@@ -11,8 +11,8 @@ and type. A marking is matched in three tiers, and each answer says which:
 | Tier | Means |
 |------|-------|
 | **Same name** | the library has a part with exactly this name |
-| **Variant** | the library has a part whose name starts or ends the same way: probably the same chip in another package or grade |
-| **Same family** | the library has parts from the same family and not this one: it says what kind of chip it probably is, no more |
+| **Variant** | the library has a part with this name plus or minus a short package or grade code (`NE555` and `NE555P`, `STM32F103C8T6` and KiCad's `STM32F103C8Tx`): probably the same chip in another package or grade. A different digit is a different function, so `LM35` is not offered `LM358`, and `74HC` offers nothing and asks for more of the marking |
+| **Same family** | the library has parts that differ from the marking only in letters, and not this one: it says what kind of chip it probably is, no more |
 
 A hit is **a part with that name, not proof that the chip you hold is that part**: a marking can be a house code, worn or fake. A family
 match gets no package and no measurements, because those would be another chip's. A marking the library does not know gets "nothing under
@@ -22,7 +22,7 @@ this marking, which does not mean it is fake", a datasheet search, and, for a sh
 ## Measure first
 
 For a chip that matches by name or variant, the pin names and types give the measurements to make before trusting it: supply against
-ground, and whether they are shorted. They say what and where, **never what the reading should be**: that is the datasheet's to say. The
+ground, and whether they are shorted. Only supply *inputs* count (not a regulator's output, an exposed pad or a not-connected pin), the main supply is measured first, a negative supply such as VEE is a supply and not the ground, and a part with more than 64 pins gets no guessed measurements because choosing among its supplies takes its datasheet. They say what and where, **never what the reading should be**: the line is "write down what you see", and the datasheet says what is right. Each reading is stored against the chip it was taken from, so it cannot follow a new marking to another chip with the same pins. The
 pin names come from the library's entry, not from the chip in hand, and the plan says so. You write each reading down; the plan counts
 how many are recorded and lists the chips still to measure. A recorded reading is **a number written down, not a pass**.
 Pin 1 guidance ("the corner with the dot or notch, counting anticlockwise from above") is given only for DIP, SO, QFP and QFN packages.
@@ -40,7 +40,7 @@ jlcsearch's free community API needs no key; every record carries its source and
 
 ## Teardowns
 
-`GET /v1/teardowns/search?q=roku stick` finds [iFixit](https://www.ifixit.com) guides. iFixit's search is public and free for
+`GET /v1/teardowns/search?q=roku stick` finds [iFixit](https://www.ifixit.com) guides over HTTPS to `www.ifixit.com` only, following no redirect, with a bounded cache. iFixit's search is public and free for
 non-commercial use, and its teardowns are CC BY-NC-SA, so only titles and links are returned, with their credit, and only links on
 `www.ifixit.com`. A teardown often names the chips on a board.
 
