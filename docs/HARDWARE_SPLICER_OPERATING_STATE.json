@@ -119,7 +119,8 @@
           "review_packet": "review_packet.py and GET /v1/projects/{id}/review-packet: a hash-bound, read-only, deterministic JSON/Markdown packet of one revision (retained file hashes, findings, proposals with decisions, discussion) with an explicit not-established section and best-effort credential and path redaction; include_text=false builds the version for sharing with every user-written field left out",
           "retained_file_bytes": "GET /revisions/{rev}/artifacts/{kind}/file: exact retained bytes with ETag and revalidation, so a viewer shows the file that was hashed",
           "assembly_plan": "assembly_plan.py and GET /v1/projects/{id}/revisions/{rev}/assembly-plan (+ /board.glb): an ordered build sequence read from the retained board: real part positions and outlines, typical heights with their basis, pin 1, connector pins and nets, suggested continuity checks, parts the design marks do-not-populate reported as not fitted. A view of retained bytes; heights and order are labelled estimates",
-          "device_plan": "device_plan.py, device_api.py and data/device_modules.json: a whole-gadget assembly plan (modules, wires pin to pin, a proposed case, ordered steps) from a spec, with a module library whose every figure names its source or is marked typical (ESP32-DevKitC V4 from Espressif's drawing and pin tables and the WROOM-32E datasheet; the common SSD1306 OLED module). Wiring is checked against pin roles and as nets. Stateless, report-only"
+          "device_plan": "device_plan.py, device_api.py and data/device_modules.json: a whole-gadget assembly plan (modules, wires pin to pin, a proposed case, ordered steps) from a spec, with a module library whose every figure names its source or is marked typical (ESP32-DevKitC V4 from Espressif's drawing and pin tables and the WROOM-32E datasheet; the common SSD1306 OLED module). Wiring is checked against pin roles and as nets. Stateless, report-only",
+          "salvage_plan": "salvage_plan.py and GET /revisions/{rev}/salvage-plan: the build sequence run the other way over a retained board: a safety step, removal order, and a verdict with its rule for each part (worth taking, test first, read the marking, cheap to buy new, leave it). Names a chip only as far as the board file does; never calls a part good; states that it needs the board's file. Report-only"
         },
         "frontend": "evidence workspace: Parts tab (find a part on the drawing), 3D tab, presence and live threads, a docked Edit toolbar with a live draft preview, Proposals tab with preview, marked changes and operator-gated accept/reject, faint copper fills",
         "not_yet_verified": [
@@ -140,6 +141,11 @@
           "the case has not been printed or test-fitted: its numbers are typical, not measured",
           "a battery needs a charger and regulator module, not yet in the library",
           "only two module types exist; other ESP32 boards and displays differ in size and pin order"
+        ],
+        "frontend_salvage": "Assemble tab 'Take apart': parts lift off in order, coloured by verdict, removed parts leave their outline, with verdict chip, hazards, counts and the plan's limits",
+        "not_yet_verified_salvage": [
+          "boards with no file cannot be planned from: there is no photo or marking capture path into the 3D view",
+          "the take-apart code had no independent Codex review (its quota ran out); it was reviewed by hand and the chip-identification rule tightened"
         ]
       }
     }
