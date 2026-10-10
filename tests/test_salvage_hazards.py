@@ -357,3 +357,84 @@ def test_review_1d_file_flyback_diode_does_not_override_chip_or_connector_kind()
     for ref, footprint in [("U1", "MyLib:Flyback_Diode"), ("J1", "MyLib:Flyback_Diode")]:
         assert advice(board(ref, footprint))["verdict"] != "skip"
         assert not any("CRT" in h or "charge" in h for h in advice(board(ref, footprint))["hazards"])
+
+
+def test_tantalum_overstress_can_ignite_and_unknown_polarity_is_not_reused():
+    got = advice(donor(typed("capacitor", "tantalum", "47uF 16V", "C1")))
+    text = " ".join(got["hazards"]).lower()
+    assert "ignit" in text and "overheat" in text
+    assert "reverse voltage" in text and "polarity" in text
+    assert "unknown" in text and "not reused" in text
+    assert not any(ch.isdigit() and "%" in text for ch in text)
+    assert "%" not in text
+    lookalike = " ".join(advice(donor(typed("capacitor", "electrolytic can", "470uF 16V", "C1")))["hazards"]).lower()
+    assert "ignit" not in lookalike and "reverse voltage" not in lookalike and "tantalum" not in lookalike
+
+
+@pytest.mark.parametrize("marking", [
+    "NTC inrush thermistor disc",
+    "ICL thermistor disc",
+    "SCK-2R5 inrush disc",
+])
+def test_ntc_inrush_thermistor_disc_is_recognised_and_removed_only_when_cold(marking):
+    got = advice(donor(typed("other", "something else", marking)))
+    text = " ".join(got["hazards"])
+    assert "250 °C" in text and "extreme" in text.lower()
+    assert "contact" in text.lower() and "hot" in text.lower()
+    assert "ratings" in text.lower() and "identify" in text.lower()
+    assert "cold" in text.lower()
+
+
+@pytest.mark.parametrize("kind,package,marking", [
+    ("capacitor", "ceramic disc", "222M"),
+    ("other", "something else", "ceramic disc"),
+    ("other", "something else", "NTC thermistor"),
+])
+def test_a_plain_ceramic_disc_or_sensor_ntc_is_not_an_inrush_limiter(kind, package, marking):
+    text = " ".join(advice(donor(typed(kind, package, marking)))["hazards"])
+    assert "250 °C" not in text
+    assert "inrush" not in text.lower() or "limiter" not in text.lower()
+
+
+@pytest.mark.parametrize("marking", [
+    "toaster mica", "mica heater", "hair dryer element", "kettle element", "oven element", "iron sole plate",
+])
+def test_appliance_heating_labels_use_the_existing_heater_branch(marking):
+    expected = " ".join(advice(donor(typed("other", "something else", "heating element")))["hazards"])
+    got = advice(donor(typed("other", "something else", marking)))
+    assert got["verdict"] == "skip"
+    assert got["hazards"] == advice(donor(typed("other", "something else", "heating element")))["hazards"]
+    assert "cool" in expected and "thermal cut-off" in expected
+    mica_cap = advice(donor(typed("capacitor", "film box", "mica 1nF", "C1")))
+    assert mica_cap["verdict"] != "skip" or "heater or fuser" not in " ".join(mica_cap["hazards"])
+    resistor = advice(donor(typed("resistor", "0805", "10k toaster sense", "R1")))
+    assert resistor["verdict"] != "skip"
+    assert not any("heater or fuser" in h for h in resistor["hazards"])
+
+
+@pytest.mark.parametrize("marking", ["PC817", "4N25", "TLP521", "ISO1540", "digital isolator"])
+def test_isolation_barrier_parts_are_unknown_isolation_after_reuse(marking):
+    got = advice(donor(typed("ic", "DIP" if marking in {"PC817", "4N25", "TLP521"} else "SOIC", marking, "U1")))
+    text = " ".join(got["hazards"])
+    if marking in {"PC817", "4N25", "TLP521"}:
+        assert "isolation barrier only within its ratings" in text and "used one is not known" in text
+    else:
+        assert "unknown isolation" in text
+        assert "isolation matters" in text
+        assert "General practice, not from the datasheet." in text
+    ordinary = " ".join(advice(donor(typed("ic", "DIP", "NE555P", "U1")))["hazards"])
+    assert "unknown isolation" not in ordinary and "isolation matters" not in ordinary
+
+
+def test_mains_side_to220_keeps_the_insulating_pad_and_a_logic_to220_does_not():
+    irf = " ".join(advice(donor(typed("ic", "TO-220", "IRF840", "Q1")))["hazards"])
+    on_mains = " ".join(advice(donor(
+        typed("ic", "TO-220", "TIP31", "Q1"), typed("mains or power part", "transformer", "", "T1"),
+    ))["hazards"])
+    lone = " ".join(advice(donor(typed("ic", "TO-220", "TIP31", "Q1")))["hazards"])
+    for text in (irf, on_mains):
+        assert "insulating pad" in text or "bushing" in text
+        assert "tab" in text and "datasheet" in text
+        assert "General practice, not from the datasheet." in text
+    assert "insulating pad" not in lone and "bushing" not in lone
+    assert "insulating pad" not in " ".join(advice(donor(typed("ic", "DIP", "NE555P", "U1")))["hazards"])
