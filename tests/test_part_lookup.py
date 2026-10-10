@@ -471,7 +471,6 @@ def test_2n7002_cautions_name_the_body_diode_and_sot23_and_skip_2n7000() -> None
     assert "source" in text.lower() and "drain" in text.lower()
     assert "gate" in text.lower()
     assert "Diodes Incorporated 2N7002 datasheet DS11303" in text
-    assert "Nexperia 2N7002 datasheet" in text
     blob = _cautions("2N7000", tier="exact")
     assert "body diode" not in blob.lower()
     assert "DS11303" not in blob

@@ -874,7 +874,8 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         ),
     ):
         for pin, reference in kind_pairs[kind]:
-            extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split) + sourced_text
+            # The chip-specific cautions are said once, on the first check, not repeated on every gate.
+            extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split) + ("" if gates else sourced_text)
             pair = f"pin {pin['number']} ({pin['name']})"
             g_from = f"pin {reference['number']} ({reference['name']})"
             if kind == "diode":
