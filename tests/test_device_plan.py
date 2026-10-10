@@ -723,7 +723,7 @@ def test_supply_current_note_is_present_without_wires_or_display():
         finding = next(f for f in plan["findings"] if f["rule"] == "supply_current")
         assert finding["severity"] == "info"
         assert "at least 0.5 A" in finding["message"]
-        assert all(text in finding["message"] for text in ("weak charger", "charge-only or thin cable", "unpowered hub", "resets when Wi-Fi starts", "General practice, not from the datasheet"))
+        assert all(text in finding["message"] for text in ("weak charger", "long or thin cable", "unpowered hub", "resets when Wi-Fi starts", "General practice, not from the datasheet"))
         assert "Table 14" in finding["basis"]
         assert module_library()["modules"][0]["electrical"]["supply_current_source"] in finding["basis"]
     assert build_device_plan(EXAMPLE)["counts"]["errors"] == 0
