@@ -546,6 +546,7 @@ export default function DonorPage() {
                   {current.kind === 'ic' ? (
                     <PartLookupPanel
                       marking={current.marking}
+                      packageName={current.package}
                       readings={current.readings}
                       onReading={(key, value) => update(current.key, { readings: Object.fromEntries(Object.entries({ ...current.readings, [key]: value }).filter(([, v]) => v !== '')) })}
                       onUsePackage={(pkg) => update(current.key, { package: pkg, width_mm: null, length_mm: null })}

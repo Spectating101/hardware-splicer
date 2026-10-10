@@ -38,6 +38,7 @@ def test_a_board_files_chips_are_looked_up_and_each_answer_says_how_close_it_is(
     assert "R2" not in by_ref and "J1" not in by_ref                                                  # only chips are looked up
     text = {ref: _step(plan, ref)["instruction"] for ref in ("U1", "U2", "U3")}
     assert "KiCad's library has a part called \"TLV75518PDBV\"" in text["U3"] and "a variant" in text["U3"]
+    assert "a package, a grade or a different chip" in by_ref["U3"]["match"]["tier_text"]
     assert "same family (W25Q128JVE" in text["U2"] and "but not this one" in text["U2"]
     assert "does not list it" in text["U1"]
 
@@ -280,13 +281,59 @@ def test_a_package_that_does_not_fit_the_library_entry_gets_no_pin_numbers() -> 
 
 
 @needs_libraries
+def test_a_library_entry_without_a_footprint_says_the_pin_numbers_are_unassigned() -> None:
+    spec = _spec(("TL071H", ""))
+    spec["parts"][0]["package"] = "SOT-23"
+    plan = build_donor_salvage_plan(spec)
+    lookup = plan["parts"][0]["lookup"]
+    assert lookup["match"]["name"] == "TL071" and lookup["gates"]
+    assert lookup["package_note"] and "does not say which package" in lookup["package_note"]
+    text = _step(plan, "U1")["instruction"]
+    assert "does not say which package" in text
+    assert any("V+" in c["from"] for c in _step(plan, "U1")["checks"] if c["check"] == "measure")
+
+
+@needs_libraries
 def test_finish_step_calls_readings_notes_and_does_not_make_them_a_trust_gate() -> None:
     plan = build_donor_salvage_plan(_spec(("NE555P", "")))
-    finish = plan["steps"][-1]["instruction"]
-    assert "before you trust them" not in finish
-    assert "Measurements still to record as notes" in finish
-    assert "none of them shows a removed chip works" in finish
-    assert "U1" in finish
+    finish = plan["steps"][-1]
+    assert "before you trust them" not in finish["instruction"]
+    assert "Measurements still to record as notes" in finish["instruction"]
+    assert "none of them shows a removed chip works" in finish["instruction"]
+    assert "U1" in finish["instruction"]
+    expects = [c["expect"] for c in finish["checks"]]
+    assert expects == ["write down what you tried and what you saw"]
+    assert "behaves as its type should" not in json.dumps(finish["checks"])
+    assert "otherwise discard" not in json.dumps(finish["checks"])
+
+
+@needs_libraries
+def test_a_grouped_step_attributes_each_reading_to_the_ref_it_came_from() -> None:
+    spec = _spec(("NE555P", ""), ("NE555P", ""))
+    keys = [g["key"] for g in part_lookup.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")]
+    spec["parts"][0]["readings"] = {key: "5.02 V" for key in keys}
+    plan = build_donor_salvage_plan(spec)
+    step = _step(plan, "U1")
+    assert step["refs"] == ["U1", "U2"]
+    assert f"Readings recorded: {len(keys)} of {2 * len(keys)}" in step["instruction"]
+    measures = [c for c in step["checks"] if c["check"] == "measure"]
+    assert measures
+    assert all(c["reading"] == "U1: 5.02 V; U2: not recorded" for c in measures)
+
+
+@needs_libraries
+def test_the_lookup_api_uses_the_chosen_package(api: TestClient) -> None:
+    dip = api.get("/v1/parts/lookup", params={"marking": "ATMEGA328P", "package": "DIP"}).json()
+    assert dip["gates_from"] == "ATmega328P-P"
+    assert any(g["from"] == "pin 7 (VCC)" for g in dip["gates"])
+    assert dip["package_note"] is None
+    default = api.get("/v1/parts/lookup", params={"marking": "ATMEGA328P"}).json()
+    assert default["gates_from"] == "ATmega328P-A"
+    assert any(g["from"] == "pin 4 (VCC)" for g in default["gates"])
+    none = api.get("/v1/parts/lookup", params={"marking": "TL071H", "package": "SOT-23"}).json()
+    assert none["gates_from"] == "TL071"
+    assert none["package_note"] and "does not say which package" in none["package_note"]
+    assert api.get("/v1/parts/lookup", params={"marking": "NE555P", "package": "NE\u202e555"}).status_code == 422
 
 
 def test_the_teardown_fetch_follows_no_redirect_and_speaks_only_https() -> None:

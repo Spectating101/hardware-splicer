@@ -53,7 +53,9 @@ def test_a_marking_is_matched_in_three_honest_tiers_and_says_what_each_means() -
     exact = pl.lookup_part("LM358")["matches"]
     assert exact[0]["tier"] == "exact" and exact[0]["name"] == "LM358" and "exactly this name" in exact[0]["tier_text"]
     variant = pl.lookup_part("TLV75518PDBVR")["matches"]
-    assert variant[0]["tier"] == "variant" and variant[0]["name"] == "TLV75518PDBV" and "different package or grade" in variant[0]["tier_text"]
+    assert variant[0]["tier"] == "variant" and variant[0]["name"] == "TLV75518PDBV"
+    assert "plus a code" in variant[0]["tier_text"] and "a package, a grade or a different chip" in variant[0]["tier_text"]
+    assert "different package or grade" not in variant[0]["tier_text"]
     family = pl.lookup_part("W25Q128JWSIQ")["matches"]
     assert family and {m["tier"] for m in family} == {"family"} and all(m["name"].startswith("W25Q128J") for m in family)
     assert all("not this one" in m["tier_text"] for m in family)
@@ -255,7 +257,9 @@ def test_power_off_diode_and_ohms_come_before_any_voltage_and_never_power_the_bo
     assert _kinds(gates).index("diode") < _kinds(gates).index("isolation") < _kinds(gates).index("voltage")
     text = _blob(gates)
     assert "powered the way it was originally" not in text
-    assert "board's own supply" in text and "mains-derived" in text and "current-limited bench supply" in text
+    assert "board's own supply" in text and "bench supply with a current limit" in text
+    assert "mains-derived" not in text
+    assert "not anything connected to the mains without isolation" in text
     assert "diode mode" in text.lower() or "in diode mode" in text
     assert "both ways" in text
     volt = next(g for g in gates if g["kind"] == "voltage")
@@ -315,8 +319,11 @@ def test_pin_one_sentence_follows_jedec_and_names_packages_it_does_not_cover() -
     assert "datasheet's package drawing" in to220 and "7805 vs LM317" in to220
     sot = _blob(pl.power_gates("Regulator_Linear", "TLV75518PDBV", "Package_TO_SOT_SMD:SOT-23-5"))
     assert "datasheet's package drawing" in sot
-    bga = _blob(pl.power_gates("RF_Module", "ESP32-WROOM-32", "RF_Module:ESP32-WROOM-32"))
-    assert "row and column" in bga
+    module = _blob(pl.power_gates("RF_Module", "ESP32-WROOM-32", "RF_Module:ESP32-WROOM-32"))
+    assert "numbered contacts" in module.lower() and "pin-1 mark" in module
+    assert "row and column" not in module
+    bga = _blob(pl.power_gates("Logic_LevelTranslator", "TXB0102YZP", "Package_BGA:Texas_DSBGA-8_0.9x1.9mm_Layout2x4_P0.5mm"))
+    assert "row and column" in bga and "numbered contacts" not in bga.lower()
 
 
 def test_courtyard_source_does_not_claim_it_is_a_little_larger_than_the_part() -> None:
@@ -340,18 +347,80 @@ def test_split_rails_get_an_isolation_check_each_and_vref_is_not_a_supply() -> N
     iso = [g for g in txb if g["kind"] == "isolation"]
     assert len(iso) == 2
     assert any("V_{CCA}" in g["from"] for g in iso) and any("V_{CCB}" in g["from"] for g in iso)
-    assert "must not be joined" in _blob(iso)
+    assert "must not be joined" not in _blob(iso)
+    assert "separate pins to check each on its own" in _blob(iso)
+    pca_pins = pl.symbol_pins("Interface", "PCA9306", limit=None)["pins"]
+    assert any(pl._pin_token(p["name"]).startswith("VREF") and p["type"] == "power_in" for p in pca_pins)
     pca = pl.power_gates("Interface", "PCA9306", None)
-    assert all("VREF" not in g["from"] and "VREF" not in g["to"] for g in pca)
+    assert pca == []          # VREF pins are excluded by design: a part whose only supplies are VREF gets no gates
 
 
 def test_cautions_sit_on_the_gates_they_belong_to() -> None:
     stm = _blob(pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm"))
     assert "coin-cell backup" in stm
-    assert all("VCAP" not in g["from"] for g in pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", None))
+    vcap_pins = pl.symbol_pins("MCU_ST_STM32F4", "STM32F401CCFx", limit=None)["pins"]
+    assert any(pl._pin_token(p["name"]) in {"VCAP", "VCAP1", "VCAP2"} for p in vcap_pins)
+    assert all("VCAP" not in g["from"] for g in pl.power_gates("MCU_ST_STM32F4", "STM32F401CCFx", None))
     chg = _blob(pl.power_gates("Battery_Management", "TP4056-42-ESOP8", None))
     assert "Do not charge a cell" in chg
     motor = _blob(pl.power_gates("Driver_Motor", "DRV8833PW", None))
-    assert "body diodes and windings" in motor
+    assert "Motor drivers read low" not in motor
+    assert "Windings attached to the outputs" in motor and "output stage's own diodes" in motor
     volt = next(g for g in pl.power_gates("Timer", "NE555P", None) if g["kind"] == "voltage")
-    assert "Reversing the probes" in volt["instruction"]
+    assert "Reversing the probes" not in volt["instruction"]
+    assert "Connect a supply the right way round" in volt["instruction"]
+    assert "reversing the supply on a chip can destroy it" in volt["instruction"]
+
+
+def test_vregin_is_kept_and_exact_internal_names_are_dropped() -> None:
+    pins = pl.symbol_pins("Interface_USB", "CP2102N-Axx-xQFN20", limit=None)["pins"]
+    assert any(pl._pin_token(p["name"]) == "VREGIN" and p["type"] == "power_in" for p in pins)
+    volts = [g["from"] for g in pl.power_gates("Interface_USB", "CP2102N-Axx-xQFN20", None) if g["kind"] == "voltage"]
+    assert any("VREGIN" in f for f in volts) and any("VDD" in f for f in volts)
+    drv = [g["from"] for g in pl.power_gates("Driver_Motor", "DRV8833PW", None) if g["kind"] == "voltage"]
+    assert all("VINT" not in f for f in drv)
+
+
+def test_isolated_domains_pair_each_supply_with_its_own_ground() -> None:
+    gates = pl.power_gates("Isolator", "ISO1540", None)
+    pairs = {(g["from"], g["to"]) for g in gates}
+    assert ("pin 1 (VCC1)", "pin 4 (GND1)") in pairs
+    assert ("pin 8 (VCC2)", "pin 5 (GND2)") in pairs
+    assert all(g["to"] != "pin 4 (GND1)" or "VCC2" not in g["from"] for g in gates)
+
+
+def test_numbered_duplicate_rails_collapse_and_six_voltage_gates_are_allowed() -> None:
+    tb = [g["from"] for g in pl.power_gates("Driver_Motor", "TB6612FNG", None) if g["kind"] == "voltage"]
+    assert any("VCC" in f for f in tb)
+    vm = [f for f in tb if "VM" in f]
+    assert len(vm) == 1
+    esp = [g["from"] for g in pl.power_gates("MCU_Espressif", "ESP32-C3", None) if g["kind"] == "voltage"]
+    assert any("VDDA" in f for f in esp)
+    assert any("VDD3P3)" in f or f.endswith("VDD3P3)") for f in esp)
+    assert len(esp) <= 6 and len(esp) >= 4
+
+
+def test_a_prefix_match_does_not_claim_the_code_is_a_package_or_grade() -> None:
+    matches = pl.lookup_part("ESP32")["matches"]
+    names = {m["name"] for m in matches if m["tier"] == "variant"}
+    assert {"ESP32-C3", "ESP32-S2"} <= names
+    for match in matches:
+        if match["tier"] == "variant":
+            assert "a package, a grade or a different chip" in match["tier_text"]
+            assert "different package or grade" not in match["tier_text"]
+
+
+def test_resolve_lookup_gates_follows_the_chosen_package_and_warns_without_a_footprint() -> None:
+    atmega = pl.lookup_part("ATMEGA328P")["matches"]
+    dip = pl.resolve_lookup_gates(atmega, "DIP")
+    assert dip["gates_from"] == "ATmega328P-P"
+    assert any(g["from"] == "pin 7 (VCC)" for g in dip["gates"])
+    assert dip["package_note"] is None
+    unaware = pl.resolve_lookup_gates(atmega, None)
+    assert unaware["gates_from"] == "ATmega328P-A"
+    assert any(g["from"] == "pin 4 (VCC)" for g in unaware["gates"])
+    tl = pl.resolve_lookup_gates(pl.lookup_part("TL071H")["matches"], "SOT-23")
+    assert tl["gates_from"] == "TL071" and tl["gates"]
+    assert tl["package_note"] and "does not say which package" in tl["package_note"]
+    assert all("does not say which package" in g["instruction"] for g in tl["gates"])
+    assert any("V+" in g["from"] for g in tl["gates"])
