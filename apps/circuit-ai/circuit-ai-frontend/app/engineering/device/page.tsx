@@ -8,7 +8,7 @@ import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/pro
 import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 
 type Spec = Record<string, unknown>;
-type ModuleInfo = { id: string; name: string; sources: { label: string; url: string; as_of: string }[]; dimension_basis?: Record<string, string>; notes?: string[] };
+type ModuleInfo = { id: string; name: string; sources: { label: string; url: string; as_of: string }[]; dimension_basis?: Record<string, string>; notes?: string[]; pin_orders?: { id: string; label: string; signals: string[]; source: string }[] };
 
 const BASIS_LABELS: Record<string, string> = {
   pcb: 'Board size',
@@ -99,6 +99,22 @@ export default function DevicePage() {
 
   const used = useMemo(() => (plan ? modules.filter((m) => plan.modules.some((p) => p.module === m.id)) : []), [plan, modules]);
   const errors = plan?.findings.filter((f) => f.severity === 'error').length ?? 0;
+  const hasWiringFindings = plan?.findings.some((finding) => finding.severity === 'error' || finding.severity === 'warning') ?? false;
+
+  const choosePinOrder = (moduleRef: string, pinOrder: string) => {
+    try {
+      const spec = JSON.parse(specText);
+      if (!Array.isArray(spec?.modules) || !spec.modules.some((module: { id?: string }) => module?.id === moduleRef)) {
+        throw new Error('The spec needs this module before you can choose its pin order.');
+      }
+      spec.modules = spec.modules.map((module: { id: string }) => module.id === moduleRef ? { ...module, pin_order: pinOrder } : module);
+      const text = JSON.stringify(spec, null, 2);
+      setSpecText(text);
+      void planFrom(text);
+    } catch (caught) {
+      setError(caught instanceof SyntaxError ? 'That is not valid JSON. Check the brackets and quotes.' : caught instanceof Error ? caught.message : 'The pin order could not be changed.');
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0b0d12] px-4 pb-24 pt-6 text-stone-200" data-testid="device-page">
@@ -136,11 +152,23 @@ export default function DevicePage() {
             </section>
 
             <aside className="min-w-0 space-y-4" aria-label="About this device">
+              {plan.modules.map((placed) => {
+                const orders = modules.find((module) => module.id === placed.module)?.pin_orders;
+                if (!orders?.length) return null;
+                return <section key={placed.id} className="rounded-xl border border-stone-800 bg-stone-900/50 p-4">
+                  <label htmlFor={`pin-order-${placed.id}`} className="text-sm font-semibold text-stone-100">Which order is printed on your module?</label>
+                  <p className="mt-1 text-xs leading-5 text-stone-400">{placed.name}. Read left to right looking at the screen, with the header at the top. Connect by the printed labels, not by position in the picture.</p>
+                  <select id={`pin-order-${placed.id}`} data-testid="device-pin-order" value={placed.pin_order ?? ''} disabled={busy} onChange={(event) => choosePinOrder(placed.id, event.target.value)} className="mt-2 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
+                    {orders.map((order) => <option key={order.id} value={order.id}>{order.signals.join(', ')} ({order.label})</option>)}
+                  </select>
+                </section>;
+              })}
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-findings">
                 <h2 className="text-sm font-semibold text-stone-100">Wiring check</h2>
-                {plan.findings.length === 0 ? (
-                  <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-stone-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />These checks found nothing wrong with the wiring. That does not prove it will work.</p>
-                ) : (
+                {!hasWiringFindings ? (
+                  <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-stone-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" /><span>These checks found nothing wrong with the wiring. That does not prove it will work. These are the checks this tool makes; a wire that passes them is not a wire that works.</span></p>
+                ) : null}
+                {plan.findings.length > 0 ? (
                   <ul className="mt-2 space-y-2">
                     {plan.findings.map((finding, index) => {
                       const tone = SEVERITY[finding.severity];
@@ -153,7 +181,7 @@ export default function DevicePage() {
                       );
                     })}
                   </ul>
-                )}
+                ) : null}
               </section>
 
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-shopping">

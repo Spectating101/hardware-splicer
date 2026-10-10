@@ -722,7 +722,7 @@
       "dimension_basis": {
         "pcb": "typical; sellers list 27.0 to 27.8 mm and 3.8 to 4.1 mm overall height. Measure yours.",
         "active_area": "21.74 x 10.86 mm, as listed by several sellers",
-        "pins": "Order varies: seller listings give GND, VCC, SCL, SDA and VCC, GND, SCL, SDA (AZ-Delivery). Follow the labels printed on your module. Logical pin coordinates mark the header centre only; drawing pads have no assigned signals."
+        "pins": "Order varies: the library keeps GND, VCC, SCL, SDA and VCC, GND, SCL, SDA. Choose the order printed on your module. The drawing assigns signals to the chosen header pads; it does not establish your module's pin order."
       },
       "sources": [
         {
@@ -762,19 +762,20 @@
           "y": 1.5
         }
       ],
+      "default_pin_order": "vcc-gnd-scl-sda",
       "pin_orders": [
-        [
-          "GND",
-          "VCC",
-          "SCL",
-          "SDA"
-        ],
-        [
-          "VCC",
-          "GND",
-          "SCL",
-          "SDA"
-        ]
+        {
+          "id": "gnd-vcc-scl-sda",
+          "label": "DisplayModule (existing library order; source detail not rechecked)",
+          "signals": ["GND", "VCC", "SCL", "SDA"],
+          "source": "https://www.displaymodule.com/products/0-96-inch-oled-graphic-display-128x64-with-spi-i2c"
+        },
+        {
+          "id": "vcc-gnd-scl-sda",
+          "label": "AZ-Delivery",
+          "signals": ["VCC", "GND", "SCL", "SDA"],
+          "source": "https://www.az-delivery.de/en/products/0-96zolldisplay"
+        }
       ]
     }
   ]

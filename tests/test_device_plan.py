@@ -28,7 +28,7 @@ def _rules(plan: dict, severity: str | None = None) -> set[str]:
 
 
 GOOD = EXAMPLE["connections"]
-ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply"}
+ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply", "pin_order_assumed"}
 
 
 def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() -> None:
@@ -619,28 +619,78 @@ def test_supply_and_pullup_notes_survive_missing_or_rejected_wires():
         assert any("pull-up resistors" in note for note in display["notes"])
 
 
-def test_oled_pin_order_is_not_encoded_as_numbered_electrical_positions():
+def test_oled_pin_order_is_an_explicit_drawing_choice_with_an_assumed_default():
     oled = module_library()["modules"][1]
     assert oled["pin_order_varies"] is True
-    assert oled["pin_orders"] == [["GND", "VCC", "SCL", "SDA"], ["VCC", "GND", "SCL", "SDA"]]
+    assert [order["signals"] for order in oled["pin_orders"]] == [["GND", "VCC", "SCL", "SDA"], ["VCC", "GND", "SCL", "SDA"]]
+    assert all(order["source"] in {source["url"] for source in oled["sources"]} for order in oled["pin_orders"])
     assert "usual" not in oled["dimension_basis"]["pins"]
     assert all(p["id"] == p["name"] and "number" not in p for p in oled["pins"])
-    assert len({(p["x"], p["y"]) for p in oled["pins"]}) == 1  # logical header centre, not a pin position
     plan = build_device_plan(EXAMPLE)
     display = next(m for m in plan["modules"] if m["id"] == "display")
-    assert all(p["roles"] == [] and "printed" in p["label"] for p in display["pins"])
-    assert len({tuple(p["point"].values()) for p in display["pins"]}) == 4  # unnamed drawing pads
-    assert {p["id"] for p in display["logical_pins"]} == {"GND", "VCC", "SCL", "SDA"}
+    order = next(order for order in oled["pin_orders"] if order["id"] == oled["default_pin_order"])
+    assert display["pin_order"] == order["id"]
+    assert [p["name"] for p in display["pins"]] == order["signals"]
+    assert all(p["roles"] and "printed label" in p["label"] for p in display["pins"])
+    assert len({tuple(p["point"].values()) for p in display["pins"]}) == 4
+    finding = next(f for f in plan["findings"] if f["rule"] == "pin_order_assumed")
+    assert finding["severity"] == "info" and "assumed" in finding["message"]
+    assert order["label"] in finding["message"] and order["source"] in finding["basis"]
+    assert "pin_order_drawn" not in _rules(plan)
+    pins = {p["id"]: p["point"] for p in display["pins"]}
+    assert len(plan["wires"]) == 4
     for wire in plan["wires"]:
-        assert "physical pin position unknown" in wire["from"]["point_basis"]
-        assert wire["from"]["pin_id"] in {p["id"] for p in display["logical_pins"]}
-    for step in plan["steps"]:
-        if step["kind"] in ("measure", "wire"):
-            assert "follow the labels printed on your module" in step["instruction"].lower()
-        if step["kind"] == "wire":
-            assert "wire" not in step  # current viewer draws labelled endpoints only when this key is present
+        assert "point_basis" not in wire["from"]
+        assert wire["from"]["point"] == pins[wire["from"]["pin_id"]]
+    assert [step["wire"] for step in plan["steps"] if step["kind"] == "wire"] == [wire["id"] for wire in plan["wires"]]
     with pytest.raises(DevicePlanError, match="no pin named"):
         build_device_plan(_with([{"from": "display.P1", "to": "mcu.GND"}]))
+
+
+def test_choosing_the_other_pin_order_moves_the_vcc_wire_without_changing_signals():
+    original = copy.deepcopy(EXAMPLE)
+    library_before = module_library()
+    plans = []
+    for order in library_before["modules"][1]["pin_orders"]:
+        spec = copy.deepcopy(EXAMPLE)
+        spec["modules"][1]["pin_order"] = order["id"]
+        plan = build_device_plan(spec)
+        display = next(m for m in plan["modules"] if m["id"] == "display")
+        assert [p["name"] for p in sorted(display["pins"], key=lambda p: p["point"]["x"])] == order["signals"]
+        assert {p["name"]: p["roles"] for p in display["pins"]} == {p["name"]: p["roles"] for p in library_before["modules"][1]["pins"]}
+        assert "pin_order_drawn" in _rules(plan, "info") and "pin_order_assumed" not in _rules(plan)
+        finding = next(f for f in plan["findings"] if f["rule"] == "pin_order_drawn")
+        assert ', '.join(order["signals"]) in finding["message"]
+        assert "connect by the printed labels, not by position in the picture" in finding["message"]
+        vcc = next(wire for wire in plan["wires"] if wire["from"]["pin"] == "VCC")
+        assert vcc["from"]["point"] == next(p["point"] for p in display["pins"] if p["name"] == "VCC")
+        plans.append(vcc)
+        # Also check connections written in the other direction land on those pads.
+        spec["connections"] = [{"from": w["to"], "to": w["from"]} for w in spec["connections"]]
+        reverse = build_device_plan(spec)
+        assert next(w for w in reverse["wires"] if w["to"]["pin"] == "VCC")["to"]["point"] == vcc["from"]["point"]
+    assert plans[0]["from"]["point"] != plans[1]["from"]["point"]
+    assert plans[0]["to"]["point"] == plans[1]["to"]["point"]
+    assert plans[0]["bezier"][0] != plans[1]["bezier"][0]
+    assert module_library() == library_before and EXAMPLE == original
+
+
+@pytest.mark.parametrize("bad", [None, 3, True, [], {}, "", "unknown", "gnd-vcc-scl-sda\n"])
+def test_invalid_pin_order_is_refused_with_the_valid_ids(bad):
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"][1]["pin_order"] = bad
+    with pytest.raises(DevicePlanError) as caught:
+        build_device_plan(spec)
+    assert "pin_order must be text" in str(caught.value)
+    for order in module_library()["modules"][1]["pin_orders"]:
+        assert order["id"] in str(caught.value)
+
+
+def test_pin_order_is_refused_on_a_module_without_orders():
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"][0]["pin_order"] = "gnd-vcc-scl-sda"
+    with pytest.raises(DevicePlanError, match="none for this module"):
+        build_device_plan(spec)
 
 
 def test_wroom_datasheet_redirect_is_used_by_sources_and_chips():

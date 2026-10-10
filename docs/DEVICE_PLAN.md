@@ -1,8 +1,9 @@
 # Device assembly (whole gadget)
 
 The **Build a device** page (`/engineering/device`) shows a whole gadget going together: parts hover apart, the board drops
-into the case and the display and lid come down. Wires are animated only where their physical pin positions are known.
-The generic OLED's header pads are unnamed, so its wires have label-based instructions without a positioned wire animation.
+into the case and the display and lid come down. Each wire grows from pin to pin. For the generic OLED, the drawing uses
+an explicit pin-order choice, shown beside the viewer: **Which order is printed on your module?** Changing it updates the
+spec, makes another plan and redraws the pads and wires. Read the order left to right looking at the screen, header at the top.
 USB stays disconnected in the animation when any warning or error needs review. The page covers modules, wires and a case.
 
 It is a **proposal and a checklist**. It carries no engineering authority, stores nothing, and approves nothing. A wire that
@@ -42,7 +43,7 @@ device spec or wiring, and approves no building, powering or release. A recorded
 {
   "name": "ESP32 with an OLED display, powered over USB",
   "power": {"source": "usb"},
-  "modules": [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "display", "module": "ssd1306-096-i2c"}],
+  "modules": [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "display", "module": "ssd1306-096-i2c", "pin_order": "vcc-gnd-scl-sda"}],
   "connections": [{"from": "display.VCC", "to": "mcu.3V3"}, {"from": "display.SDA", "to": "mcu.IO21"}],
   "case": {"wall_mm": 2.0, "clearance_mm": 1.0}
 }
@@ -54,10 +55,20 @@ library's typical ones with `"overrides": {"pcb_mm": {"x": 28.1}}`.
 
 For the generic OLED, **follow the labels printed on your module**. Its IDs are `GND`, `VCC`, `SCL` and `SDA`, not numbered
 positions. The old `display.P1` through `display.P4` aliases are refused because they implied a pin order. Seller orders
-include `GND VCC SCL SDA` and `VCC GND SCL SDA`; neither is a default. Logical OLED wire coordinates mark the header centre
-only, with a `point_basis` stating that the physical pin position is unknown. Separate library `header_positions` draw
-unnamed pads in the plan's `modules[].pins`; `modules[].logical_pins` retains the electrical names and roles for wire
-endpoints. The pads do not map signals to positions. Wire lengths remain estimates.
+include `GND VCC SCL SDA` and `VCC GND SCL SDA`. Optional `modules[].pin_order` chooses a library order ID:
+`gnd-vcc-scl-sda` or `vcc-gnd-scl-sda`. Non-text values and unknown IDs are refused with the valid IDs;
+a module with no orders refuses this field. Omitting it assumes the library's `default_pin_order`.
+
+The default is `vcc-gnd-scl-sda`, confirmed by AZ-Delivery's already-cited listing. The former drawing used GND first;
+its order remains a choice linked to the existing DisplayModule citation, with the source detail explicitly marked as
+not rechecked. The current DisplayModule page text does not list that order. This source gap is not proof of a pin layout.
+
+The planner assigns names and electrical roles to `header_positions` in the chosen sequence, then uses those pads for
+wire endpoints and `step.wire` for animation. `modules[].pins` and `modules[].logical_pins` now share those named pads;
+`modules[].pin_order` records the drawn ID. Wire lengths remain estimates. There is no header-centre `point_basis`.
+An info finding explains the drawn sequence and source and tells you to connect by the printed labels, not picture position.
+Its code is `pin_order_drawn` when selected, or `pin_order_assumed` when omitted; the latter says it was assumed.
+Selecting an order describes the drawing; it does not verify your module or its supply and pull-ups.
 
 `power.source` is a text label, not a wire or a voltage. Only `usb` is supported by this planner. Other labels report an error
 and show a power-review step without asking you to connect USB. There is no external power-source module in this library,
@@ -67,6 +78,8 @@ exceeds a voltage limit from its name. A display load on 3V3 or 5V is not anothe
 ## The module library (`data/device_modules.json`)
 
 Every figure names where it came from, or says it is typical and tells you to measure.
+Each `pin_orders` entry has an `id`, source-name `label`, exact `signals` sequence and `source` URL from that module's
+existing `sources`. The loader requires each signal once, unique order IDs, a valid default and a header pad per signal.
 Optional `chips` lists hold at most eight entries, each with printable, nonempty `marking` (at most 40 characters), `role` (80)
 and `source` (2048). The source must equal a URL already in that module's `sources`. Only the SSD1306 controller and
 ESP32-WROOM-32E radio module are listed, using their already-cited datasheets; no chip pin or electrical contract is added.
@@ -108,6 +121,9 @@ carries the basis it rests on.
 The example has information findings, not an empty findings list. A DevKit one-supply note appears in every plan. No
 finding or checklist approves building, powering, reuse or release. Meter checks ask you to record what you observe;
 they supply no expected reading. An I2C scan records observations rather than predicting a device or address.
+When only notes are present, the findings panel still says "These checks found nothing wrong with the wiring. That does
+not prove it will work." It adds that these are the checks this tool makes and a wire that passes them is not a wire that
+works, then lists the notes.
 
 ## Source excerpts used for these rules
 

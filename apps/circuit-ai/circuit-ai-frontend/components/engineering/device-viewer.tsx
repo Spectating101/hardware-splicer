@@ -33,6 +33,7 @@ export type DeviceModule = {
   overhang_mm: { antenna_end?: number };
   pins: DevicePin[];
   pin_order_varies: boolean;
+  pin_order: string | null;
 };
 export type DeviceCheck = { kind: string; check: string; from: string; to: string; expect: string };
 export type DeviceStep = {
@@ -582,6 +583,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
       data-lid={stats.lid}
       data-mcu={stats.mcu}
       data-display={stats.display}
+      data-display-vcc-pad={JSON.stringify(plan.modules.find((module) => module.kind === 'display')?.pins.find((pin) => pin.name === 'VCC')?.point)}
       data-usb={stats.usb}
       data-wire-lag={stats.lag}
       data-playing={playing ? '1' : '0'}

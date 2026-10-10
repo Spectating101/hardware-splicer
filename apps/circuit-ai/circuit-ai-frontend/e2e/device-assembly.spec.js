@@ -77,7 +77,7 @@ test('the whole gadget goes together on screen: parts hover apart, the board dro
   await expect(viewer).toHaveAttribute('data-display', 'home');
 
   await next(page, viewer);                                        // the check before power
-  await expect(page.getByTestId('device-checks')).toContainText('NOT connected');
+  await expect(page.getByTestId('device-checks')).toContainText('record what you observe; this plan supplies no reading');
   await next(page, viewer);                                        // display into the lid
   await expect(viewer).toHaveAttribute('data-lid', 'hover');
   await next(page, viewer);                                        // close
@@ -85,7 +85,7 @@ test('the whole gadget goes together on screen: parts hover apart, the board dro
   await expect(viewer).toHaveAttribute('data-usb', 'out');
   await next(page, viewer);                                        // power
   await expect(viewer).toHaveAttribute('data-usb', 'in');
-  await expect(page.getByTestId('device-checks')).toContainText('between 3.0 V and 3.6 V');
+  await expect(page.getByTestId('device-checks')).toContainText('record what you observe; this plan supplies no reading');
   await next(page, viewer);                                        // test
   await expect(page.getByTestId('device-instruction')).toContainText('0x3C');
   await expect(page.getByTestId('device-next')).toBeDisabled();
@@ -117,6 +117,40 @@ test('stepping back takes things out again, and play, keys and the slider move t
   await viewer.focus();
   await page.keyboard.press('ArrowLeft');
   await expect(viewer).toHaveAttribute('data-step', String(Number(stopped) - 1));
+});
+
+test('choosing the other pin order moves the wire', async ({ page }) => {
+  const viewer = await open(page);
+  const findings = page.getByTestId('device-findings');
+  await expect(findings).toContainText('nothing wrong');
+  await expect(findings).toContainText('These are the checks this tool makes');
+  await expect(findings).toContainText('a wire that passes them is not a wire that works');
+  await expect(page.locator('[data-rule="pin_order_assumed"]')).toBeVisible();
+  await next(page, viewer, 3);
+  await expect(viewer).toHaveAttribute('data-wires', '1');
+  const before = await viewer.getAttribute('data-display-vcc-pad');
+  expect(before).toBeTruthy();
+  const control = page.getByTestId('device-pin-order');
+  await expect(control).toHaveAccessibleName('Which order is printed on your module?');
+  const options = await control.locator('option').evaluateAll((elements) => elements.map((element) => ({ id: element.value, label: element.textContent })));
+  expect(options).toHaveLength(2);
+  expect(options.some((option) => option.label.includes('AZ-Delivery'))).toBe(true);
+  expect(options.some((option) => option.label.includes('DisplayModule'))).toBe(true);
+  const selected = await control.inputValue();
+  const other = options.find((option) => option.id !== selected).id;
+  await control.selectOption(other);
+  await expect(viewer).not.toHaveAttribute('data-display-vcc-pad', before, { timeout: 15000 });
+  await expect(page.locator('[data-rule="pin_order_drawn"]')).toBeVisible();
+  await expect(page.locator('[data-rule="pin_order_assumed"]')).toHaveCount(0);
+  const spec = JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
+  expect(spec.modules.find((module) => module.id === 'display').pin_order).toBe(other);
+  await expect(viewer).toHaveAttribute('data-ready', '1');
+  await settle(viewer);
+  await expect(viewer).toHaveAttribute('data-step', '0');
+  await next(page, viewer, 3);
+  await expect(viewer).toHaveAttribute('data-wires', '1');
+  await expect(page.getByTestId('device-label')).toHaveCount(2);
+  expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
 });
 
 test('wiring that is wrong is caught and explained, and the example comes back', async ({ page }) => {

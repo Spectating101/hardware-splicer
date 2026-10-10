@@ -72,6 +72,19 @@ def _library() -> dict[str, Any]:
         if not isinstance(sources, list) or not all(isinstance(s, dict) and isinstance(s.get("url"), str) for s in sources):
             raise RuntimeError(f"module {module['id']} sources must be a list of objects with a url")
         source_urls = [source["url"] for source in sources]
+        orders = module.get("pin_orders", [])
+        order_ids = []
+        for order in orders:
+            if not isinstance(order, dict) or not all(isinstance(order.get(key), str) and order[key].strip() and not has_hidden_characters(order[key]) for key in ("id", "label", "source")):
+                raise RuntimeError(f"module {module['id']} pin_orders need text ids, labels and sources")
+            signals = order.get("signals")
+            if not isinstance(signals, list) or not all(isinstance(signal, str) for signal in signals) or len(signals) != len(names) or set(signals) != {pin["name"] for pin in module["pins"]}:
+                raise RuntimeError(f"module {module['id']} pin_orders must list every pin signal once")
+            if order["source"] not in source_urls:
+                raise RuntimeError(f"module {module['id']} pin_order source must equal one of this module's source urls")
+            order_ids.append(order["id"])
+        if orders and (len(set(order_ids)) != len(order_ids) or module.get("default_pin_order") not in order_ids or len(module.get("header_positions", [])) != len(names)):
+            raise RuntimeError(f"module {module['id']} needs unique pin order ids, a valid default and one header position per pin")
         for index, chip in enumerate(chips):
             if not isinstance(chip, dict):
                 raise RuntimeError(f"{label}[{index}] must be an object")
@@ -167,6 +180,9 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
             raise DevicePlanError(f"module id {mid!r} is used twice")
         seen.add(mid)
         library_entry = _module(str(row.get("module")))
+        order_ids = [order["id"] for order in library_entry.get("pin_orders", [])]
+        if "pin_order" in row and (not isinstance(row["pin_order"], str) or row["pin_order"] not in order_ids):
+            raise DevicePlanError(f"modules[{index}].pin_order must be text naming one of the valid ids: {', '.join(order_ids) or '(none for this module)'}")
         overrides = row.get("overrides", {})
         if not isinstance(overrides, dict):
             raise DevicePlanError(f"modules[{index}].overrides must be an object")
@@ -180,7 +196,10 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
                 clean[key] = {k: _number(v, f"overrides.pcb_mm.{k}", 0.5, 300) for k, v in value.items()}
             else:
                 clean[key] = _number(value, f"overrides.{key}", 0, 100)
-        clean_modules.append({"id": mid, "module": library_entry["id"], "overrides": clean})
+        clean_row = {"id": mid, "module": library_entry["id"], "overrides": clean}
+        if "pin_order" in row:
+            clean_row["pin_order"] = row["pin_order"]
+        clean_modules.append(clean_row)
     connections = spec.get("connections", [])
     if not isinstance(connections, list) or len(connections) > MAX_CONNECTIONS:
         raise DevicePlanError(f"connections must be a list of at most {MAX_CONNECTIONS}")
@@ -210,8 +229,16 @@ def _r(value: float) -> float:
 class _Placed:
     """A module in the case: library entry, effective size and a way to map its own frame into the case."""
 
-    def __init__(self, ref: str, entry: dict[str, Any], overrides: dict[str, Any]) -> None:
+    def __init__(self, ref: str, entry: dict[str, Any], overrides: dict[str, Any], pin_order: str | None = None) -> None:
         self.ref = ref
+        self.pin_order = None
+        self.pin_order_assumed = False
+        if entry.get("pin_orders"):
+            self.pin_order = next(order for order in entry["pin_orders"] if order["id"] == (pin_order or entry["default_pin_order"]))
+            self.pin_order_assumed = pin_order is None
+            by_name = {pin["name"]: pin for pin in entry["pins"]}
+            # Copy the signals onto the selected pads without changing the cached library.
+            entry = {**entry, "pins": [{**by_name[signal], **pad} for signal, pad in zip(self.pin_order["signals"], entry["header_positions"])]}
         self.entry = entry
         pcb = dict(entry["pcb_mm"])
         pcb.update(overrides.get("pcb_mm", {}))
@@ -237,7 +264,7 @@ def _label(placed: _Placed, pin: dict[str, Any]) -> str:
         extra = f", also called {gpio.group(0)}" if gpio and gpio.group(0).replace("GPIO", "IO") != pin["name"] else ""
         return f"{pin['name']} (header {pin['header']}, pin {pin['number']} counting from the antenna end{extra})"
     if placed.entry.get("pin_order_varies"):
-        return f"the pin labelled {pin['name']} (follow the labels printed on your module; position varies)"
+        return f"the pin labelled {pin['name']} (connect by the printed label, not by position in the picture)"
     return f"the pin labelled {pin['name']}"
 
 
@@ -469,7 +496,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         entry = _module(row["module"])
         if entry["kind"] not in _MODULE_KINDS:
             raise DevicePlanError(f"module kind {entry['kind']!r} cannot be placed in a case yet")
-        placed[row["id"]] = _Placed(row["id"], entry, row["overrides"])
+        placed[row["id"]] = _Placed(row["id"], entry, row["overrides"], row.get("pin_order"))
     boards = [m for m in placed.values() if m.entry["kind"] == "mcu_board"]
     displays = [m for m in placed.values() if m.entry["kind"] == "display"]
     if len(boards) != 1 or len(displays) > 1:
@@ -548,9 +575,6 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 "bezier": path,
             }
         )
-        for owner, end in ((ma, wires[-1]["from"]), (mb, wires[-1]["to"])):
-            if owner.entry.get("pin_order_varies"):
-                end["point_basis"] = "header centre only; physical pin position unknown; follow the labels printed on your module"
         resolved_pairs.append((wire_id, (ma, pa), (mb, pb)))
         findings.extend(_check_connection(wire_id, (ma, pa), (mb, pb)))
     if errors:
@@ -588,6 +612,12 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     if clean["power"]["source"] != "usb":
         findings.append(_finding("error", "power_source_not_supported", f"Power source {clean['power']['source']!r} is not supported yet. {supply_note} This source label does not describe a supply wire or its voltage.", supply_basis))
     for module in placed.values():
+        if module.pin_order:
+            order = module.pin_order
+            message = f"The drawing puts the pins in the order {', '.join(order['signals'])} ({order['label']}). Your module may be printed in another order: choose the order printed on your module, and connect by the printed labels, not by position in the picture."
+            if module.pin_order_assumed:
+                message += " This order was assumed because the spec did not choose a pin order."
+            findings.append(_finding("info", "pin_order_assumed" if module.pin_order_assumed else "pin_order_drawn", message, f"{order['label']}: {order['source']}"))
         electrical = module.entry.get("electrical", {})
         for key, rule in (("supply_note", "oled_supply_note"), ("pullups_note", "i2c_pullups_note")):
             if electrical.get(key):
@@ -620,13 +650,6 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         for pin in module.entry["pins"]:
             point = module.point(pin["x"], pin["y"], _pin_tip(module))
             pins.append({"id": pin["id"], "name": pin["name"], "roles": pin["roles"], "point": point, "label": _label(module, pin)})
-        logical_pins = pins
-        if module.entry.get("pin_order_varies"):
-            # Draw unnamed header pads only: the library's logical pins have no physical order.
-            pins = [{"id": f"header-{index}", "name": "unassigned header pad", "roles": [],
-                     "point": module.point(pad["x"], pad["y"], _pin_tip(module)),
-                     "label": "Follow the labels printed on your module; this pad has no assigned signal."}
-                    for index, pad in enumerate(module.entry["header_positions"], 1)]
         corner_a, corner_b = module.point(0, 0), module.point(module.pcb["x"], module.pcb["y"])
         modules_out.append(
             {
@@ -637,7 +660,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 "overhang_mm": module.entry.get("overhang_mm", {}),
                 "overridden": module.overridden,
                 "pins": pins,
-                "logical_pins": logical_pins,
+                "logical_pins": pins,
+                "pin_order": module.pin_order["id"] if module.pin_order else None,
                 "dimension_basis": module.entry.get("dimension_basis", {}),
                 "sources": module.entry["sources"],
                 "notes": [*module.entry.get("notes", []),
@@ -703,22 +727,19 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             "measure", "Measure your display before anything else",
             "Follow the labels printed on your module, never the position in a drawing. Pin order varies between sellers. "
             f"The case proposal uses a display board about {pcb['x']:g} x {pcb['y']:g} mm. Measure yours with calipers and update the spec before printing. "
-            "The drawing's header pads are unnamed; it does not assign signals to positions.",
+            "Choose the order printed on your module before following the drawing.",
             parts=[display.ref],
             checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": "your spec's dimension override", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     add("place", f"Lay the {mcu.entry['name'].split(' (')[0]} in the case", f"Lower the board into the base with the USB socket at the cut-out and the antenna end clear of the wall. {'It rests on its header pins.' if mcu.below else ''}", parts=[mcu.ref], motion="drop")
     for wire in wires:
         a, b = wire["from"], wire["to"]
-        # The current viewer uses step.wire for both animation and positioned signal labels.
-        # Omit it when the physical order is unknown; retain the logical wiring instructions.
-        drawing = {} if any(placed[end["module"]].entry.get("pin_order_varies") for end in (a, b)) else {"wire": wire["id"]}
         add(
             "wire", f"Connect {a['module']}.{a['pin']} to {b['module']}.{b['pin']}",
             f"Plug one end of a {wire['color']} jumper wire onto {a['label']} on the {a['module']}, and the other end onto {b['label']} on the {b['module']}. "
             f"The wire runs about {wire['curve_mm']:.0f} mm; a {wire['stock_length_mm'] / 10:g} cm wire gives slack." if wire["stock_length_mm"] else
             f"Plug a {wire['color']} jumper wire from {a['label']} to {b['label']}.",
-            **drawing, parts=[a["module"], b["module"]], color=wire["color"],
+            wire=wire["id"], parts=[a["module"], b["module"]], color=wire["color"],
             checks=[{"kind": "suggested_check", "check": "continuity", "from": f"{a['module']}.{a['pin']}", "to": f"{b['module']}.{b['pin']}", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     power_wires = [w for w in wires if w["color"] in ("red",) or w["from"]["pin"] in ("3V3", "5V", "VCC") or w["to"]["pin"] in ("3V3", "5V", "VCC")]
