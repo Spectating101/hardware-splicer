@@ -200,7 +200,7 @@ test('wiring that is wrong is caught and explained, and the example comes back',
 test('every number says where it came from, and what is only typical says so', async ({ page }) => {
   await open(page);
   const sources = page.getByTestId('device-sources');
-  await expect(sources.locator('a')).toHaveCount(7);
+  await expect(sources.locator('a')).toHaveCount(8);
   for (const link of await sources.locator('a').all()) expect(await link.getAttribute('href')).toMatch(/^https:\/\//);
   await expect(sources).toContainText('read 2026-10-09');
   await expect(sources).toContainText('ESP32-DevKitC V4 dimensions drawing');
