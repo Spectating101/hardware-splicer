@@ -46,10 +46,10 @@ def test_a_board_files_chips_are_looked_up_and_each_answer_says_how_close_it_is(
 def test_the_measurements_come_from_the_library_pins_and_say_where_the_pin_names_came_from() -> None:
     step = _step(build_salvage_plan(REF.read_text(encoding="utf-8")), "U3")
     measures = [c for c in step["checks"] if c["check"] == "measure"]
-    assert [c["gate_kind"] for c in measures] == ["voltage", "isolation"]            # the regulator's output pin is not what it is supplied by
+    assert [c["gate_kind"] for c in measures] == ["diode", "isolation", "voltage"]   # power-off first; output pin is still not a supply
     assert "(IN)" in measures[0]["detail"] and "(GND)" in measures[0]["to"]
-    assert all("datasheet" in c["expect"] or "ohms" in c["expect"] for c in measures)
-    assert all(c["expect"].startswith("write down what you see") for c in measures)
+    assert all("datasheet" in c["expect"] or "ohms" in c["expect"] or "both readings" in c["expect"] for c in measures)
+    assert all(c["expect"].startswith("write down") for c in measures)
     assert not any(ch.isdigit() for c in measures[:2] for ch in c["expect"])                         # it never says what a reading should be
     assert "not from your chip" in step["instruction"] and "TLV75518PDBV" in step["instruction"]
     # A family match is not this chip, so it gets no measurements built from another chip's pins.
@@ -61,7 +61,7 @@ def test_a_typed_marking_that_the_library_knows_gets_its_gates_and_one_it_does_n
     plan = build_donor_salvage_plan(_spec(("NE555P", ""), ("L9110S", "")))
     chip = _step(plan, "U1")
     assert "\"NE555P\": Precision Timers" in chip["instruction"] and "pin 8 (VCC)" in json.dumps(chip["checks"]) and "pin 1 (GND)" in json.dumps(chip["checks"])
-    assert "Pin 1 is the corner with the dot or notch" in json.dumps(chip["checks"])
+    assert "dot or notch marks the pin-1 end" in json.dumps(chip["checks"])
     unknown = _step(plan, "U2")
     assert "does not list it" in unknown["instruction"] and not [c for c in unknown["checks"] if c["check"] == "measure"]
     assert plan["lookup_source"]["version"] == "9.0"
@@ -182,7 +182,7 @@ def test_live_ifixit_still_answers_in_the_shape_we_read() -> None:
 @needs_libraries
 def test_the_lookup_api_offers_the_measurements_for_a_matched_chip_and_none_for_a_family_or_a_miss(api: TestClient) -> None:
     matched = api.get("/v1/parts/lookup", params={"marking": "NE555P"}).json()
-    assert matched["gates_from"] == "NE555P" and [g["kind"] for g in matched["gates"]] == ["voltage", "isolation"]
+    assert matched["gates_from"] == "NE555P" and [g["kind"] for g in matched["gates"]] == ["diode", "isolation", "voltage"]
     assert all(g["key"].startswith("Timer:NE555P|" + g["kind"] + "|pin ") for g in matched["gates"])   # the key names the chip: a reading cannot follow a new marking
     family = api.get("/v1/parts/lookup", params={"marking": "W25Q128JWSIQ"}).json()
     assert family["matches"] and family["gates"] == [] and family["gates_from"] is None
@@ -192,26 +192,28 @@ def test_the_lookup_api_offers_the_measurements_for_a_matched_chip_and_none_for_
 @needs_libraries
 def test_recorded_readings_are_counted_shown_and_never_called_a_pass() -> None:
     gate_keys = [g["key"] for g in part_lookup.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")]
-    assert gate_keys[0].startswith("Timer:NE555P|voltage|")
+    assert gate_keys[0].startswith("Timer:NE555P|diode|")
+    n = len(gate_keys)
     spec = _spec(("NE555P", ""))
     none = build_donor_salvage_plan(spec)
-    assert none["parts"][0]["lookup"]["evidence"] == {"total": 2, "recorded": 0, "ignored": 0}
-    assert none["summary"]["evidence"] == {"chips_with_measurements": 1, "readings_recorded": 0, "readings_open": 2}
-    assert "Measurements still to record before you trust them: U1" in none["steps"][-1]["instruction"]
+    assert none["parts"][0]["lookup"]["evidence"] == {"total": n, "recorded": 0, "ignored": 0}
+    assert none["summary"]["evidence"] == {"chips_with_measurements": 1, "readings_recorded": 0, "readings_open": n}
+    assert "Measurements still to record as notes" in none["steps"][-1]["instruction"] and "U1" in none["steps"][-1]["instruction"]
+    assert "before you trust them" not in none["steps"][-1]["instruction"]
 
     spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", "Timer:NE555P|voltage|pin 99 (NOPE)|pin 1 (GND)": "1 V"}
     some = build_donor_salvage_plan(spec)
     lookup = some["parts"][0]["lookup"]
-    assert lookup["evidence"] == {"total": 2, "recorded": 1, "ignored": 1}                      # a reading for a measurement that no longer exists is reported, not applied
-    assert [g["reading"] for g in lookup["gates"]] == ["5.02 V", None]
+    assert lookup["evidence"] == {"total": n, "recorded": 1, "ignored": 1}                      # a reading for a measurement that no longer exists is reported, not applied
+    assert [g["reading"] for g in lookup["gates"]] == ["5.02 V"] + [None] * (n - 1)
     step = _step(some, "U1")
-    assert "Readings recorded: 1 of 2" in step["instruction"] and "not a pass" in step["instruction"]
-    assert [c["reading"] for c in step["checks"] if c["check"] == "measure"] == ["5.02 V", None]
+    assert f"Readings recorded: 1 of {n}" in step["instruction"] and "not a pass" in step["instruction"]
+    assert [c["reading"] for c in step["checks"] if c["check"] == "measure"] == ["5.02 V"] + [None] * (n - 1)
     assert "pass" not in json.dumps(some["summary"]).lower().replace("compass", "")
 
-    spec["parts"][0]["readings"] = {gate_keys[0]: "5.02 V", gate_keys[1]: "open circuit"}
+    spec["parts"][0]["readings"] = {key: "noted" for key in gate_keys}
     full = build_donor_salvage_plan(spec)
-    assert full["parts"][0]["lookup"]["evidence"]["recorded"] == 2 and full["summary"]["evidence"]["readings_open"] == 0
+    assert full["parts"][0]["lookup"]["evidence"]["recorded"] == n and full["summary"]["evidence"]["readings_open"] == 0
     assert "Measurements still to record" not in full["steps"][-1]["instruction"]
 
 
@@ -249,9 +251,42 @@ def test_a_reading_does_not_follow_a_new_marking_to_a_different_chip_with_the_sa
     assert [g["from"] for g in first] == [g["from"] for g in second]                              # the same pin numbers and names...
     assert not {g["key"] for g in first} & {g["key"] for g in second}                              # ...but a reading belongs to the chip it was taken from
     spec = _spec(("NE555D", ""))
+    spec["parts"][0]["package"] = "SOIC"          # NE555D is SOIC; a DIP choice would correctly emit no pins
     spec["parts"][0]["readings"] = {first[0]["key"]: "5.02 V"}
     plan = build_donor_salvage_plan(spec)
-    assert plan["parts"][0]["lookup"]["evidence"] == {"total": 2, "recorded": 0, "ignored": 1}
+    assert plan["parts"][0]["lookup"]["evidence"] == {"total": len(second), "recorded": 0, "ignored": 1}
+
+
+@needs_libraries
+def test_a_typed_dip_uses_the_dip_library_entry_not_the_first_variant() -> None:
+    plan = build_donor_salvage_plan(_spec(("ATMEGA328P", "")))
+    lookup = plan["parts"][0]["lookup"]
+    assert lookup["match"]["name"] == "ATmega328P-P"
+    blob = json.dumps(_step(plan, "U1")["checks"])
+    assert "pin 7 (VCC)" in blob and "pin 8 (GND)" in blob
+    assert "pin 4 (VCC)" not in blob
+
+
+@needs_libraries
+def test_a_package_that_does_not_fit_the_library_entry_gets_no_pin_numbers() -> None:
+    spec = _spec(("ATMEGA328P", ""))
+    spec["parts"][0]["package"] = "BGA"
+    plan = build_donor_salvage_plan(spec)
+    lookup = plan["parts"][0]["lookup"]
+    assert lookup["match"] is not None and lookup["gates"] == []
+    text = _step(plan, "U1")["instruction"]
+    assert "pin numbers would not be yours" in text
+    assert lookup["match"]["name"] in text
+
+
+@needs_libraries
+def test_finish_step_calls_readings_notes_and_does_not_make_them_a_trust_gate() -> None:
+    plan = build_donor_salvage_plan(_spec(("NE555P", "")))
+    finish = plan["steps"][-1]["instruction"]
+    assert "before you trust them" not in finish
+    assert "Measurements still to record as notes" in finish
+    assert "none of them shows a removed chip works" in finish
+    assert "U1" in finish
 
 
 def test_the_teardown_fetch_follows_no_redirect_and_speaks_only_https() -> None:

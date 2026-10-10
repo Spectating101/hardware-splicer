@@ -103,13 +103,13 @@ def test_a_symbols_pins_are_read_with_their_names_and_types_including_for_derive
 def test_the_measurements_to_make_come_from_the_pins_and_never_claim_what_the_reading_should_be() -> None:
     gates = pl.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")
     kinds = [g["kind"] for g in gates]
-    assert kinds[0] == "voltage" and kinds[-1] == "isolation"
+    assert kinds == ["diode", "isolation", "voltage"]          # power-off first; the old voltage-then-ohms order told people to power the board
     assert "pin 8 (VCC)" in gates[0]["instruction"] and "pin 1 (GND)" in gates[0]["instruction"]
-    assert "Pin 1 is the corner with the dot or notch" in gates[0]["instruction"]
-    assert "datasheet" in gates[0]["expect"] and not any(ch.isdigit() for ch in gates[0]["expect"])     # no invented range
-    assert "write down what you see" in gates[0]["expect"] and "write down what you see" in gates[-1]["expect"]
-    assert "not near" not in gates[-1]["expect"] and "pass" not in (gates[0]["expect"] + gates[-1]["expect"]).lower()
-    assert "Pin 1 is the corner" not in pl.power_gates("Timer", "NE555P", None)[0]["instruction"]        # only said where it is true
+    assert "dot or notch marks the pin-1 end" in gates[0]["instruction"]
+    assert "datasheet" in gates[-1]["expect"] and not any(ch.isdigit() for g in gates for ch in g["expect"])     # no invented range
+    assert all("write down" in g["expect"] for g in gates)
+    assert "near zero" not in gates[1]["expect"] and "pass" not in "".join(g["expect"] for g in gates).lower()
+    assert "pin-1 end" not in pl.power_gates("Timer", "NE555P", None)[0]["instruction"]        # only said where the package is known
     assert pl.power_gates("Timer", "NOT_A_PART", None) == []
 
 
@@ -196,7 +196,8 @@ def test_only_the_supply_pins_are_measured_and_the_main_one_comes_first() -> Non
     assert [g["from"] for g in reg if g["kind"] == "voltage"] == ["pin 1 (IN)"]                    # the output pin is not what the chip is supplied by
     assert all("OUT" not in g["from"] and "VO)" not in g["from"] for g in pl.power_gates("Regulator_Linear", "AP1117-33", None))
     stm = pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm")
-    assert stm[0]["from"] == "pin 24 (VDD)" and stm[-1]["from"] == "pin 24 (VDD)"                  # not the battery-backup pin that happens to come first
+    volts = [g for g in stm if g["kind"] == "voltage"]
+    assert volts[0]["from"] == "pin 24 (VDD)"                  # not the battery-backup pin that happens to come first
 
 
 def test_a_part_with_hundreds_of_pins_gets_no_guessed_measurements() -> None:
@@ -206,7 +207,7 @@ def test_a_part_with_hundreds_of_pins_gets_no_guessed_measurements() -> None:
 
 
 def test_a_negative_supply_and_a_pad_check_use_the_ranked_ground() -> None:
-    assert [g["to"] for g in pl.power_gates("Timer", "NE555P", None)] == ["pin 1 (GND)"] * 2
+    assert [g["to"] for g in pl.power_gates("Timer", "NE555P", None)] == ["pin 1 (GND)"] * 3
 
 
 def test_one_unreadable_library_file_does_not_stop_the_others(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -235,3 +236,122 @@ def test_a_symbol_name_with_an_escaped_quote_is_still_indexed(tmp_path: Path, mo
     finally:
         monkeypatch.undo()
         pl.clear_cache()
+
+
+# --- the third review (Grok): measurement order, package-aware pins, missing pairs ----------------------------------------------
+
+
+def _kinds(gates: list[dict]) -> list[str]:
+    return [g["kind"] for g in gates]
+
+
+def _blob(gates: list[dict]) -> str:
+    return " ".join(f"{g['instruction']} {g['expect']}" for g in gates)
+
+
+def test_power_off_diode_and_ohms_come_before_any_voltage_and_never_power_the_board() -> None:
+    gates = pl.power_gates("Regulator_Controller", "UC3842_DIP8", "Package_DIP:DIP-8_W7.62mm")
+    assert _kinds(gates)[:2] == ["diode", "isolation"] and "voltage" in _kinds(gates)
+    assert _kinds(gates).index("diode") < _kinds(gates).index("isolation") < _kinds(gates).index("voltage")
+    text = _blob(gates)
+    assert "powered the way it was originally" not in text
+    assert "board's own supply" in text and "mains-derived" in text and "current-limited bench supply" in text
+    assert "diode mode" in text.lower() or "in diode mode" in text
+    assert "both ways" in text
+    volt = next(g for g in gates if g["kind"] == "voltage")
+    assert "Only after writing down the power-off readings" in volt["instruction"]
+    assert not any(ch.isdigit() for ch in volt["expect"])
+
+
+def test_ohms_does_not_call_a_low_reading_a_short() -> None:
+    iso = next(g for g in pl.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm") if g["kind"] == "isolation")
+    text = iso["instruction"] + " " + iso["expect"]
+    assert "near zero" not in text
+    assert "every path in parallel" in text
+    assert "both ways" in text
+    assert "datasheet" in text or "known-good" in text
+
+
+def test_package_aware_pick_uses_the_footprint_family_the_person_chose() -> None:
+    matches = pl.lookup_part("ATMEGA328P")["matches"]
+    picked = pl.pick_named_match(matches, "Package_DIP:DIP-8_W7.62mm")
+    assert picked is not None and picked["name"] == "ATmega328P-P"
+    assert pl.footprint_fits_user(picked["footprint"], "Package_DIP:DIP-8_W7.62mm")
+    gates = pl.power_gates(picked["library"], picked["name"], picked["footprint"])
+    assert any(g["from"] == "pin 7 (VCC)" for g in gates) and all(g["to"] == "pin 8 (GND)" for g in gates)
+    wrong = pl.pick_named_match(matches, "Package_BGA:BGA-64_9.0x9.0mm_Layout10x10_P0.8mm")
+    assert wrong is not None and not pl.footprint_fits_user(wrong["footprint"], "Package_BGA:BGA-64_9.0x9.0mm_Layout10x10_P0.8mm")
+    lm = pl.pick_named_match(pl.lookup_part("LM317")["matches"], "Package_TO_SOT_THT:TO-220-3_Vertical")
+    assert lm is not None and lm["name"] == "LM317_TO-220"
+    mcp = pl.pick_named_match(pl.lookup_part("MCP73831")["matches"], "Package_TO_SOT_SMD:SOT-23")
+    assert mcp is not None and mcp["name"].endswith("-OT")
+
+
+def test_dual_supply_named_grounds_and_internal_pins() -> None:
+    tl = pl.power_gates("Amplifier_Operational", "TL072", None)
+    assert tl and all("V+" in g["from"] and "V-" in g["to"] for g in tl)
+    assert pl.power_gates("Amplifier_Operational", "LM358", None)
+    mcp = pl.power_gates("Battery_Management", "MCP73831-2-OT", "Package_TO_SOT_SMD:SOT-23-5")
+    assert mcp and any("V_{DD}" in g["from"] and "V_{SS}" in g["to"] for g in mcp)
+    lm = pl.power_gates("Regulator_Linear", "LM317_TO-220", "Package_TO_SOT_THT:TO-220-3_Vertical")
+    assert lm and any("VI" in g["from"] and "VO" in g["to"] for g in lm)
+    l298 = [g["from"] for g in pl.power_gates("Driver_Motor", "L298N", None) if g["kind"] == "voltage"]
+    assert any("Vs" in f for f in l298) and any("Vss" in f for f in l298)
+    assert all("SENSE" not in f for f in l298)
+    tb = [g["from"] for g in pl.power_gates("Driver_Motor", "TB6612FNG", None) if g["kind"] == "voltage"]
+    assert any("VCC" in f for f in tb) and any("VM" in f for f in tb)
+    assert all("PGND" not in f for f in tb)
+    drv = [g["from"] for g in pl.power_gates("Driver_Motor", "DRV8833PW", None) if g["kind"] == "voltage"]
+    assert any("VM" in f for f in drv) and all("VINT" not in f for f in drv)
+
+
+def test_pin_one_sentence_follows_jedec_and_names_packages_it_does_not_cover() -> None:
+    dip = pl.power_gates("Timer", "NE555P", "Package_DIP:DIP-8_W7.62mm")[0]["instruction"]
+    assert "dot or notch marks the pin-1 end" in dip
+    assert "counter-clockwise" in dip and "underside" in dip
+    assert "corner with the dot or notch" not in dip
+    assert "pin-1 end" not in pl.power_gates("Timer", "NE555P", None)[0]["instruction"]
+    to220 = _blob(pl.power_gates("Regulator_Linear", "uA7805", "Package_TO_SOT_THT:TO-220-3_Vertical"))
+    assert "datasheet's package drawing" in to220 and "7805 vs LM317" in to220
+    sot = _blob(pl.power_gates("Regulator_Linear", "TLV75518PDBV", "Package_TO_SOT_SMD:SOT-23-5"))
+    assert "datasheet's package drawing" in sot
+    bga = _blob(pl.power_gates("RF_Module", "ESP32-WROOM-32", "RF_Module:ESP32-WROOM-32"))
+    assert "row and column" in bga
+
+
+def test_courtyard_source_does_not_claim_it_is_a_little_larger_than_the_part() -> None:
+    soic = pl.footprint_size("Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+    assert "courtyard" in soic["source"] and "may not be your exact package" in soic["source"]
+    assert "a little larger" not in soic["source"]
+    assert "a little larger" not in (pl.footprint_size.__doc__ or "")
+
+
+def test_regulator_input_is_not_enough_and_enable_and_tab_are_mentioned() -> None:
+    reg = pl.power_gates("Regulator_Linear", "uA7805", "Package_TO_SOT_THT:TO-220-3_Vertical")
+    assert [g["from"] for g in reg if g["kind"] == "voltage"] == ["pin 1 (IN)"]
+    assert "does not show what the output is doing" in _blob(reg)
+    assert "metal tab is a terminal" in _blob(reg)
+    tlv = _blob(pl.power_gates("Regulator_Linear", "TLV75518PDBV", "Package_TO_SOT_SMD:SOT-23-5"))
+    assert "enable pin (EN)" in tlv
+
+
+def test_split_rails_get_an_isolation_check_each_and_vref_is_not_a_supply() -> None:
+    txb = pl.power_gates("Logic_LevelTranslator", "TXB0108PW", "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm")
+    iso = [g for g in txb if g["kind"] == "isolation"]
+    assert len(iso) == 2
+    assert any("V_{CCA}" in g["from"] for g in iso) and any("V_{CCB}" in g["from"] for g in iso)
+    assert "must not be joined" in _blob(iso)
+    pca = pl.power_gates("Interface", "PCA9306", None)
+    assert all("VREF" not in g["from"] and "VREF" not in g["to"] for g in pca)
+
+
+def test_cautions_sit_on_the_gates_they_belong_to() -> None:
+    stm = _blob(pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", "Package_QFP:LQFP-48_7x7mm_P0.5mm"))
+    assert "coin-cell backup" in stm
+    assert all("VCAP" not in g["from"] for g in pl.power_gates("MCU_ST_STM32F1", "STM32F103C8Tx", None))
+    chg = _blob(pl.power_gates("Battery_Management", "TP4056-42-ESOP8", None))
+    assert "Do not charge a cell" in chg
+    motor = _blob(pl.power_gates("Driver_Motor", "DRV8833PW", None))
+    assert "body diodes and windings" in motor
+    volt = next(g for g in pl.power_gates("Timer", "NE555P", None) if g["kind"] == "voltage")
+    assert "Reversing the probes" in volt["instruction"]

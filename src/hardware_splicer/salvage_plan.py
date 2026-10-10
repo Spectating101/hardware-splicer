@@ -116,10 +116,19 @@ def _lookup_reasons(part: dict[str, Any]) -> list[str]:
     found = part.get("lookup")
     if not found:
         return []
+    notes: list[str] = []
     if found["match"]:
         m = found["match"]
         text = f"KiCad's library has a part called \"{m['name']}\": {m['description'] or 'no description'}"
-        return [text + ("" if found["tier"] == "exact" else " (a variant: the same chip with another package or grade, probably)")]
+        if found["tier"] != "exact":
+            extra = " (a variant: a library name with a short package or grade code)"
+            if not found.get("package_note"):
+                extra += "; pin numbers follow that entry's package"
+            text += extra
+        notes.append(text)
+        if found.get("package_note"):
+            notes.append(found["package_note"])
+        return notes
     if found["family"]:
         return [f"KiCad's library has parts from the same family ({', '.join(found['family'][:3])}) but not this one: use them to learn what kind of chip it probably is, no more"]
     return ["KiCad's library does not list it: search its datasheet by the marking"]
@@ -276,14 +285,23 @@ def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
         if part["kind"] != "ic" or part.get("do_not_populate") or not _identified(part) or done >= MAX_LOOKUPS:
             continue
         try:
-            found = part_lookup.lookup_part(_name_of(part), limit=4)
+            found = part_lookup.lookup_part(_name_of(part), limit=8)
         except part_lookup.PartLookupError:
             continue
         done += 1
         matches = found["matches"]
-        best = next((m for m in matches if m["tier"] in {"exact", "variant"}), None)
+        user_fp = part.get("footprint")
+        best = part_lookup.pick_named_match(matches, user_fp)
         readings = part.get("readings") or {}
-        gates = part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else []
+        package_note = None
+        if best and best.get("footprint") and user_fp and not part_lookup.footprint_fits_user(best.get("footprint"), user_fp):
+            family = part_lookup.footprint_family(best["footprint"]) or best["footprint"]
+            package_note = (
+                f"the library's closest entry is {best['name']} in package {family}, so its pin numbers would not be yours"
+            )
+            gates = []
+        else:
+            gates = part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else []
         for gate in gates:
             gate["reading"] = readings.get(gate["key"]) or None
         part["lookup"] = {
@@ -291,6 +309,7 @@ def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
             "match": {k: best[k] for k in ("name", "library", "description", "datasheet", "footprint", "tier_text")} if best else None,
             "family": [m["name"] for m in matches if m["tier"] == "family"][:4],
             "gates": gates,
+            "package_note": package_note,
             "evidence": {"total": len(gates), "recorded": sum(1 for g in gates if g["reading"]), "ignored": max(0, len(readings) - sum(1 for g in gates if g["reading"]))},
         }
     return part_lookup.source() if done else None
@@ -347,7 +366,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             for gate in first["lookup"]["gates"]:
                 checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"], "reading": gate.get("reading")})
             evidence = first["lookup"]["evidence"]
-            text += f" Readings recorded: {evidence['recorded']} of {evidence['total']}. A recorded reading is a number you wrote down, not a pass: only the datasheet says what it should be."
+            text += f" Readings recorded: {evidence['recorded']} of {evidence['total']}. A recorded reading is a number you wrote down, not a pass: only the datasheet says what it should be. None of these readings shows a removed chip works."
             text += f" The pin names in the measurements come from KiCad's entry for {library_name}, not from your chip: confirm them in its datasheet before you touch a probe to it."
         if first["kind"] == "connector":
             checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
@@ -366,7 +385,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             "step_id": f"step-{len(steps) + 1:02d}", "order": len(steps) + 1, "kind": "finish", "title": "Sort, label and test what you kept",
             "instruction": "Put each kind of part in its own labelled bag with where it came from. Nothing you took is known to work until it has been tested."
             + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else "")
-            + (f" Measurements still to record before you trust them: {', '.join(open_gates[:12])}{' and more' if len(open_gates) > 12 else ''}." if open_gates else ""),
+            + (f" Measurements still to record as notes (none of them shows a removed chip works): {', '.join(open_gates[:12])}{' and more' if len(open_gates) > 12 else ''}." if open_gates else ""),
             "side": current_side, "turn_board_over": False, "refs": [], "part_ids": [],
             "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "behaves as its type should; otherwise discard"}],
         }
