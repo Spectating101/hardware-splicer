@@ -34,6 +34,20 @@ def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
     return text
 
 
+def _chip_tier(marking: str, listed: str) -> str | None:
+    """The library lists one part; a marking is that part (exact) or that part plus a package or grade code (variant).
+
+    Never the other way round: ESP32-WROOM-32 is a different module from the listed ESP32-WROOM-32E, not a variant of it.
+    """
+
+    q, n = marking.strip().lower(), listed.strip().lower()
+    if q == n:
+        return "exact"
+    if len(q) > len(n) and q.startswith(n) and name_match_tier(q, n) == "variant":
+        return "variant"
+    return None
+
+
 def match_reclaimed_parts(body: Any) -> dict[str, Any]:
     """Compare reported markings with whole library names, explicit MPNs and sourced chip markings.
 
@@ -71,8 +85,8 @@ def match_reclaimed_parts(body: Any) -> dict[str, Any]:
                 matches.append({"module": entry["id"], "name": entry["name"], "tier": tier,
                                 "relation": "module", "matched_field": field, "matched_name": name})
             for chip in entry.get("chips", []):
-                tier = name_match_tier(row["marking"], chip["marking"])
-                if tier in ("exact", "variant"):
+                tier = _chip_tier(row["marking"], chip["marking"])
+                if tier:
                     note = (
                         f"The library lists {chip['marking']} as the {chip['role']} ({entry['name']}). "
                         "The chip or radio module alone is not that module and does not come with its board, pins, "

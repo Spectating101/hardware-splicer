@@ -68,10 +68,15 @@ def _library() -> dict[str, Any]:
         label = f"module {module['id']} chips"
         if not isinstance(chips, list) or len(chips) > 8:
             raise RuntimeError(f"{label} must be a list of at most 8 entries")
-        source_urls = [source["url"] for source in module["sources"]]
+        sources = module["sources"]
+        if not isinstance(sources, list) or not all(isinstance(s, dict) and isinstance(s.get("url"), str) for s in sources):
+            raise RuntimeError(f"module {module['id']} sources must be a list of objects with a url")
+        source_urls = [source["url"] for source in sources]
         for index, chip in enumerate(chips):
             if not isinstance(chip, dict):
                 raise RuntimeError(f"{label}[{index}] must be an object")
+            if set(chip) != {"marking", "role", "source"}:
+                raise RuntimeError(f"{label}[{index}] must have exactly marking, role and source: a chip carries no pins or electrical claims here")
             for field, limit in (("marking", 40), ("role", 80), ("source", 2048)):
                 value = chip.get(field)
                 if not isinstance(value, str) or not value.strip() or len(value) > limit:

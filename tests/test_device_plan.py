@@ -516,3 +516,30 @@ def test_a_device_name_cannot_hide_direction_changes(hidden: str) -> None:
     spec["name"] = hidden
     with pytest.raises(DevicePlanError, match="control or invisible characters"):
         build_device_plan(spec)
+
+
+def test_a_chip_entry_may_carry_nothing_but_marking_role_and_source(synthetic_library):
+    source = module_library()["modules"][0]["sources"][0]["url"]
+    base = {"marking": "fixture", "role": "fixture role", "source": source}
+    synthetic_library([base])                                                                    # the plain entry loads
+    for extra in ({"verified": True}, {"pins": [{"id": "1"}]}, {"electrical": {"io_v": 3.3}}):
+        with pytest.raises(RuntimeError, match="exactly marking, role and source"):
+            synthetic_library([{**base, **extra}])
+
+
+def test_malformed_module_sources_fail_closed_with_the_loaders_own_error(tmp_path, monkeypatch):
+    from hardware_splicer import device_plan
+
+    original = copy.deepcopy(module_library())
+    path = tmp_path / "device_modules.json"
+    monkeypatch.setattr(device_plan, "LIBRARY_PATH", path)
+    try:
+        for bad in ("https://docs.espressif.com/x", [{"label": "no url"}], [42], [{"url": 7}]):
+            data = copy.deepcopy(original)
+            data["modules"][0]["sources"] = bad
+            path.write_text(json.dumps(data), encoding="utf-8")
+            device_plan._library.cache_clear()
+            with pytest.raises(RuntimeError, match="sources must be a list"):
+                module_library()
+    finally:
+        device_plan._library.cache_clear()

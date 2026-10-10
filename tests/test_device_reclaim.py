@@ -181,3 +181,15 @@ def test_oversized_stream_is_stopped_before_reading_the_next_chunk():
     with pytest.raises(HTTPException) as caught:
         asyncio.run(_read_body(RequestPieces(), error_type="invalid_reclaim_list", label="reclaim list"))
     assert caught.value.status_code == 413
+
+
+@pytest.mark.parametrize("marking", ["ESP32-WROOM-32", "ESP32-WROOM", "ESP32-WROOM-3", "SSD130", "SSD13"])
+def test_a_shorter_marking_is_not_the_listed_part_it_is_the_start_of(marking: str) -> None:
+    row = reclaim.match_reclaimed_parts({"parts": [{"ref": "U1", "kind": "chip", "marking": marking}]})["parts"][0]
+    assert row["matched"] is False and row["matches"] == []
+
+
+@pytest.mark.parametrize(("marking", "tier"), [("SSD1306", "exact"), ("ssd1306", "exact"), ("SSD1306Z", "variant"), ("ESP32-WROOM-32E-N4", "variant")])
+def test_the_listed_part_and_the_same_part_with_a_package_or_grade_code_still_match(marking: str, tier: str) -> None:
+    row = reclaim.match_reclaimed_parts({"parts": [{"ref": "U1", "kind": "chip", "marking": marking}]})["parts"][0]
+    assert [(m["relation"], m["tier"]) for m in row["matches"]] == [("chip_on_module", tier)]
