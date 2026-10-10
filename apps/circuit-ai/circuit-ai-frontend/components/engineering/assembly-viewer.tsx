@@ -12,6 +12,7 @@ export type AssemblyPart = {
   value: string;
   footprint: string;
   kind: string;
+  component?: string;
   side: 'front' | 'back';
   corners: number[][];
   height_mm: number;

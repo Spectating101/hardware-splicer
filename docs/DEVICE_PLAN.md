@@ -15,6 +15,23 @@ passes the checks is not a wire that works, the case has not been printed, and e
 | `GET /v1/devices/examples` | example device specs |
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
 | `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
+| `POST /v1/devices/reclaim-matches` | advisory exact/variant name matches for a reclaim list; 422 for invalid text or shape, 413 over 64 KB in both proxy and backend |
+
+From **Salvage a board**, matching reclaim rows link here to a small **Parts you may have on hand** list. It compares the markings
+and kinds reported in that plan with whole `name` or explicit `mpn` fields in the existing device library, using the exact/variant
+rules from marking lookup; family matches are never offered. It does not extract chip names from module descriptions.
+The current library has two modules with descriptive names and no separate MPN fields, so a chip marking such as `SSD1306`
+does not match the complete OLED module.
+
+The request is `{"parts": [{"ref": "U1", "kind": "ic", "marking": "what you read"}]}` with at most 300 rows and 40 characters
+per text field. Each returned row preserves those fields and has `matched` and `matches` (module id, library name, tier and
+which name field matched). An empty marking is allowed. Hidden/control characters and non-text values are refused;
+dimensions and readings are not consumed. The response names its library source and carries the advisory limit.
+
+The handoff keeps only these input fields in this tab's session storage; the device page validates them through the backend
+and checks the library again. The list is advisory: you may already have this part on the board you took apart, but its marking
+is what you read, not proof. The planner's data is the library's, not your chip's. It makes no compatibility claim, changes no
+device spec or wiring, and approves no building, powering or release. A recorded reading is not a pass.
 
 ## The spec
 

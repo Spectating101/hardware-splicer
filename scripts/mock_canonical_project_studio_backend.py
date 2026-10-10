@@ -596,11 +596,23 @@ _build_device_plan = _load_hs_attr("device_plan", "build_device_plan")
 _DevicePlanError = _load_hs_attr("device_plan", "DevicePlanError")
 _example_device_specs = _load_hs_attr("device_plan", "example_specs")
 _device_module_library = _load_hs_attr("device_plan", "module_library")
+_match_reclaimed_parts = _load_hs_attr("device_reclaim", "match_reclaimed_parts")
+_DeviceReclaimError = _load_hs_attr("device_reclaim", "DeviceReclaimError")
+_read_device_body = _load_hs_attr("device_api", "_read_body")
 
 
 @app.get("/v1/devices/modules")
 def device_modules() -> dict[str, Any]:
     return {"ok": True, "library": _device_module_library()}
+
+
+@app.post("/v1/devices/reclaim-matches")
+async def device_reclaim_matches(request: Request) -> dict[str, Any]:
+    body = await _read_device_body(request, error_type="invalid_reclaim_list", label="reclaim list")
+    try:
+        return {"ok": True, **_match_reclaimed_parts(body)}
+    except _DeviceReclaimError as exc:
+        raise _thread_error(422, "invalid_reclaim_list", str(exc)) from None
 
 
 @app.get("/v1/devices/examples")

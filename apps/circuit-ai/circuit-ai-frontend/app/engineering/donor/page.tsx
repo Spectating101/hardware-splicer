@@ -8,6 +8,7 @@ import { PartLookupPanel } from '@/components/engineering/part-lookup-panel';
 import { TeardownSearch } from '@/components/engineering/teardown-search';
 import { usePageTitle } from '@/components/use-page-title';
 import { reclaimRows, toCsv } from '@/lib/reclaim';
+import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/proxy-client';
 
 type Part = {
@@ -134,6 +135,8 @@ export default function DonorPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [tool, setTool] = useState<{ kind: string; package: string }>({ kind: 'ic', package: 'SOIC' });
   const [plan, setPlan] = useState<(AssemblyPlan & { name?: string }) | null>(null);
+  const [deviceMatches, setDeviceMatches] = useState<{ plan: AssemblyPlan; result: DeviceReclaimResult } | null>(null);
+  const [deviceMatchError, setDeviceMatchError] = useState('');
   const [plannedFor, setPlannedFor] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -183,6 +186,22 @@ export default function DonorPage() {
   const current = capture.parts.find((p) => p.key === selected) ?? null;
   const spec = useMemo(() => JSON.stringify(toPayload(capture)), [capture]);
   const stale = Boolean(plan) && plannedFor !== spec;
+  const reclaimed = useMemo(() => plan ? reclaimRows(plan) : [], [plan]);
+  const reclaimInput = useMemo(() => ({ parts: reclaimed.map(({ ref, marking, kind }) => ({ ref, marking, kind })) }), [reclaimed]);
+  const matchesOf = useMemo(() => new Map(
+    !stale && deviceMatches?.plan === plan ? deviceMatches.result.parts.map((part) => [part.ref, part.matches]) : [],
+  ), [deviceMatches, plan, stale]);
+
+  useEffect(() => {
+    setDeviceMatches(null);
+    setDeviceMatchError('');
+    if (!plan || stale || !reclaimInput.parts.length) return;
+    const controller = new AbortController();
+    fetchDeviceReclaimMatches(reclaimInput, controller.signal)
+      .then((result) => { if (!controller.signal.aborted) setDeviceMatches({ plan, result }); })
+      .catch(() => { if (!controller.signal.aborted) setDeviceMatchError('The device library matches could not be checked.'); });
+    return () => controller.abort();
+  }, [plan, reclaimInput, stale]);
   const verdictOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.verdict ?? ''])), [plan]);
   const evidenceOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.lookup?.evidence ?? null])), [plan]);
   const labelOf = useMemo(() => new Map((plan?.parts ?? []).map((p) => [p.ref, p.salvage?.label ?? ''])), [plan]);
@@ -458,12 +477,19 @@ export default function DonorPage() {
                   <button type="button" data-testid="reclaim-csv" onClick={downloadReclaim} className="inline-flex items-center gap-1 rounded border border-stone-700 px-2 py-1 text-xs text-stone-200 hover:bg-stone-800"><Download className="h-3 w-3" aria-hidden="true" />Download as a spreadsheet</button>
                 </div>
                 <p className="mt-1 text-[11px] leading-4 text-stone-500">Advice, not clearance: nothing here has been tested. A part is only as good as its readings.</p>
+                {!stale && deviceMatches?.plan === plan && deviceMatches.result.parts.some((part) => part.matched) ? <p className="mt-1 text-[11px] leading-4 text-stone-400" data-testid="reclaim-device-note">{deviceMatches.result.note}</p> : null}
+                {deviceMatchError ? <p className="mt-1 text-[11px] text-stone-400" role="status">{deviceMatchError}</p> : null}
                 <div className="mt-2 overflow-x-auto">
                   <table className="w-full min-w-[34rem] text-left text-xs" data-testid="reclaim-table">
                     <thead className="text-stone-500"><tr><th className="py-1 pr-2 font-medium">Label</th><th className="pr-2 font-medium">What (as you read it)</th><th className="pr-2 font-medium">Advice</th><th className="pr-2 font-medium">Measurements</th><th className="font-medium">Datasheet</th></tr></thead>
                     <tbody className="text-stone-300">
-                      {reclaimRows(plan).map((row) => (
-                        <tr key={row.ref} className="border-t border-stone-800 align-top"><td className="py-1 pr-2 font-medium text-stone-100">{row.ref}</td><td className="pr-2">{row.what || <span className="text-stone-600">no marking</span>}</td><td className="pr-2">{row.verdict}</td><td className="pr-2">{row.evidence || <span className="text-stone-600">none to make</span>}</td><td>{/^https?:\/\//.test(row.datasheet) ? <a href={row.datasheet} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline-offset-2 hover:underline">link</a> : <span className="text-stone-600">none</span>}</td></tr>
+                      {reclaimed.map((row) => (
+                        <tr key={row.ref} className="border-t border-stone-800 align-top"><td className="py-1 pr-2 font-medium text-stone-100">{row.ref}</td><td className="pr-2">{row.what || <span className="text-stone-600">no marking</span>}
+                          {matchesOf.get(row.ref)?.length ? <a href="/engineering/device?from=donor" data-testid="reclaim-device-match" className="mt-1 block text-sky-300 underline-offset-2 hover:underline" onClick={(event) => {
+                            try { window.sessionStorage.setItem(RECLAIM_DEVICE_STORAGE, JSON.stringify(reclaimInput)); }
+                            catch { event.preventDefault(); setNotice('Browser storage is unavailable, so these markings could not be passed to the device page.'); }
+                          }}>You may have this on hand · see the device planner ({matchesOf.get(row.ref)?.[0].tier === 'exact' ? 'same name' : 'variant'})</a> : null}
+                        </td><td className="pr-2">{row.verdict}</td><td className="pr-2">{row.evidence || <span className="text-stone-600">none to make</span>}</td><td>{/^https?:\/\//.test(row.datasheet) ? <a href={row.datasheet} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline-offset-2 hover:underline">link</a> : <span className="text-stone-600">none</span>}</td></tr>
                       ))}
                     </tbody>
                   </table>

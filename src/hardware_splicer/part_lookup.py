@@ -184,6 +184,27 @@ def _prefix_rows(index: _Index, prefix: str) -> list[str]:
     return names
 
 
+def name_match_tier(marking: str, name: str) -> str | None:
+    """The exact/variant name rules, without library I/O or family suggestions.
+
+    Callers validate their text first. A returned tier compares names, never identifies a physical part.
+    """
+
+    q, n = marking.strip().lower(), name.strip().lower()
+    if len(q) < MIN_QUERY:
+        return None
+    if q == n:
+        return "exact"
+    short, long = (q, n) if len(q) <= len(n) else (n, q)
+    if len(short) >= 4 and long.startswith(short) and _SUFFIX.fullmatch(long[len(short):]):
+        return "variant"
+    # KiCad's trailing x covers any character at that position, in the library name only.
+    for tail in (1, 2, 3):
+        if len(q) - tail >= 6 and n == q[:-tail] + "x" * tail:
+            return "variant"
+    return None
+
+
 def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
     """Parts in KiCad's library that the marking names, in three honest tiers: the same name, a variant (one name starts the other),
     and the same family (a long shared start). Nothing is returned for a marking too short to mean anything."""
@@ -208,19 +229,13 @@ def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
                 seen.add(name)
                 chosen.append((name, tier))
 
-    def is_variant(a: str, b: str) -> bool:
-        """a is the start of b (or b of a) and what is left over is a short package or grade code, not another function."""
-
-        short, long = (a, b) if len(a) <= len(b) else (b, a)
-        return len(short) >= 4 and long.startswith(short) and bool(_SUFFIX.match(long[len(short):]))
-
     if q in index.by_name:
         take([q], "exact")
     prefixed = _prefix_rows(index, q) if len(q) >= 4 else []
-    take(sorted((n for n in prefixed if n != q and is_variant(q, n)), key=lambda n: (len(n), n)), "variant")
+    take(sorted((n for n in prefixed if n != q and name_match_tier(q, n) == "variant"), key=lambda n: (len(n), n)), "variant")
     # A library name that is the start of the marking (the marking carries a package or grade suffix the library leaves off).
     for k in range(len(q) - 1, 3, -1):
-        if q[:k] in index.by_name and is_variant(q, q[:k]):
+        if q[:k] in index.by_name and name_match_tier(q, q[:k]) == "variant":
             take([q[:k]], "variant")
             break
     # KiCad writes a trailing x for "any character here" (STM32F103C8Tx covers STM32F103C8T6): the marking fits it if only those places differ.

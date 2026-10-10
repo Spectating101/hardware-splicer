@@ -12,12 +12,36 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Request, status
 
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
+from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 
 MAX_BODY_BYTES = 64 * 1024
 
 
 def _unprocessable(message: str) -> HTTPException:
     return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"type": "invalid_device_spec", "message": message})
+
+
+async def _read_body(request: Request, *, error_type: str, label: str) -> Any:
+    """Bound even a request with no declared length before parsing JSON."""
+
+    def invalid(message: str) -> HTTPException:
+        return HTTPException(status_code=422, detail={"type": error_type, "message": message})
+
+    too_large = HTTPException(status_code=413, detail={"type": "too_large", "message": f"the {label} may be at most {MAX_BODY_BYTES} bytes"})
+    declared = request.headers.get("content-length")
+    if declared and declared.isdigit() and int(declared) > MAX_BODY_BYTES:
+        raise too_large
+    received = bytearray()
+    async for chunk in request.stream():
+        received.extend(chunk)
+        if len(received) > MAX_BODY_BYTES:
+            raise too_large
+    try:
+        return json.loads(bytes(received).decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        raise invalid("the body is not JSON") from None
+    except RecursionError:
+        raise invalid("the body is nested too deeply") from None
 
 
 def create_device_router() -> APIRouter:
@@ -40,27 +64,20 @@ def create_device_router() -> APIRouter:
 
     @router.post("/plan")
     async def post_plan(request: Request) -> Dict[str, Any]:
-        too_large = HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail={"type": "too_large", "message": f"the spec may be at most {MAX_BODY_BYTES} bytes"})
-        declared = request.headers.get("content-length")
-        if declared and declared.isdigit() and int(declared) > MAX_BODY_BYTES:
-            raise too_large
-        # Read the stream a piece at a time and stop as soon as it is too big, so a body with no declared length is never held whole.
-        received = bytearray()
-        async for chunk in request.stream():
-            received.extend(chunk)
-            if len(received) > MAX_BODY_BYTES:
-                raise too_large
-        try:
-            body = json.loads(bytes(received).decode("utf-8"))
-        except (UnicodeDecodeError, ValueError):
-            raise _unprocessable("the body is not JSON") from None
-        except RecursionError:
-            raise _unprocessable("the body is nested too deeply") from None
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
         spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
         try:
             plan = build_device_plan(spec)
         except DevicePlanError as exc:
             raise _unprocessable(str(exc)) from None
         return {"ok": True, "plan": plan}
+
+    @router.post("/reclaim-matches")
+    async def post_reclaim_matches(request: Request) -> Dict[str, Any]:
+        body = await _read_body(request, error_type="invalid_reclaim_list", label="reclaim list")
+        try:
+            return {"ok": True, **match_reclaimed_parts(body)}
+        except DeviceReclaimError as exc:
+            raise HTTPException(status_code=422, detail={"type": "invalid_reclaim_list", "message": str(exc)}) from None
 
     return router

@@ -1,0 +1,75 @@
+"""Advisory name matches from a reclaim list to the device planner's existing library.
+
+No chip identification, compatibility assessment, plan changes or evidence promotion takes place here.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from .device_plan import module_library
+from .part_lookup import MAX_QUERY, name_match_tier
+from .text_safety import has_hidden_characters
+
+MAX_PARTS = 300
+ADVISORY_NOTE = (
+    "You may already have this part on the board you took apart; its marking is what you read, not proof, "
+    "and the device planner's data for it is the library's, not your chip's. These are name matches only, "
+    "not a compatibility assessment. A recorded reading is not a pass. Nothing here approves building, powering or release."
+)
+
+
+class DeviceReclaimError(ValueError):
+    """The reclaim list cannot be read safely."""
+
+
+def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
+    if not isinstance(value, str):
+        raise DeviceReclaimError(f"{label} must be text")
+    if has_hidden_characters(value):
+        raise DeviceReclaimError(f"{label} may not contain control or invisible characters")
+    text = value.strip()
+    if len(text) > limit or (required and not text):
+        raise DeviceReclaimError(f"{label} must be {'1' if required else '0'} to {limit} characters")
+    return text
+
+
+def match_reclaimed_parts(body: Any) -> dict[str, Any]:
+    """For each reported marking/kind, compare only whole library names and explicit MPNs.
+
+    Kinds are preserved as reported, not inferred from a name or used as a compatibility claim.
+    The request contains text only: dimensions, readings and numeric values are not consumed.
+    """
+
+    if not isinstance(body, dict) or not isinstance(body.get("parts"), list) or len(body["parts"]) > MAX_PARTS:
+        raise DeviceReclaimError(f"parts must be a list of at most {MAX_PARTS}")
+    rows = []
+    seen = set()
+    for i, part in enumerate(body["parts"]):
+        if not isinstance(part, dict):
+            raise DeviceReclaimError(f"parts[{i}] must be an object")
+        ref = _text(part.get("ref"), f"parts[{i}].ref", 40, required=True)
+        kind = _text(part.get("kind"), f"parts[{i}].kind", 40, required=True)
+        marking = _text(part.get("marking"), f"parts[{i}].marking", MAX_QUERY)
+        if ref.lower() in seen:
+            raise DeviceReclaimError(f"reference {ref!r} is used twice")
+        seen.add(ref.lower())
+        rows.append({"ref": ref, "kind": kind, "marking": marking})
+
+    library = module_library()
+    for row in rows:
+        matches = []
+        for entry in library["modules"]:
+            candidates = []
+            for field in ("name", "mpn"):
+                name = entry.get(field)
+                tier = name_match_tier(row["marking"], name) if isinstance(name, str) else None
+                if tier:
+                    candidates.append((tier, field, name))
+            if candidates:
+                tier, field, name = min(candidates, key=lambda c: c[0] != "exact")
+                matches.append({"module": entry["id"], "name": entry["name"], "tier": tier,
+                                "matched_field": field, "matched_name": name})
+        matches.sort(key=lambda m: m["tier"] != "exact")
+        row.update(matched=bool(matches), matches=matches)
+    return {"parts": rows, "source": "device planner module library", "note": ADVISORY_NOTE}

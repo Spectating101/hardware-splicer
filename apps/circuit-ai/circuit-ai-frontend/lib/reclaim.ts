@@ -1,6 +1,6 @@
 import type { AssemblyPlan } from '@/components/engineering/assembly-viewer';
 
-export type ReclaimRow = { ref: string; what: string; package: string; verdict: string; evidence: string; datasheet: string; why: string };
+export type ReclaimRow = { ref: string; what: string; marking: string; kind: string; package: string; verdict: string; evidence: string; datasheet: string; why: string };
 
 const WANTED = new Set(['keep', 'test_first', 'identify', 'optional']);
 
@@ -14,6 +14,8 @@ export function reclaimRows(plan: AssemblyPlan): ReclaimRow[] {
     const evidence = lookup?.evidence && lookup.evidence.total ? `${lookup.evidence.recorded} of ${lookup.evidence.total} readings recorded` : '';
     rows.push({
       ref: part.ref,
+      marking: part.identity?.typed ?? '',
+      kind: part.component ?? part.kind,
       what: part.identity?.typed || part.identity?.mpn || part.value || '',
       package: part.footprint.split(':').pop() ?? part.footprint,
       verdict: salvage.label,

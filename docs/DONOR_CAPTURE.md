@@ -32,6 +32,10 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
 - **Where did it come from?** A teardown search finds iFixit pages for the device, with their credit.
 - **What you could reclaim.** After planning, a table and a spreadsheet list the parts worth taking, the advice, the readings and the
   datasheet. Spreadsheet cells that a program would run as a formula get a leading apostrophe.
+- **Parts you may have on hand.** Reclaim rows whose typed marking matches a whole name or explicit MPN in the device planner's
+  library (exact/variant only) link to **Build a device**, which shows an advisory list. The markings and kinds come from the
+  current capture plan; stale plans offer no handoff links. A name match does not identify your chip or establish compatibility,
+  and the planner's data remains the library's. See `docs/DEVICE_PLAN.md`.
 
 ## What is cleaned and refused
 
@@ -50,5 +54,5 @@ At most 300 parts, markings of at most 40 printable characters, parts whose cent
 
 ## Not yet
 
-Recognising parts from the photo, the repo's donor *blocks* with their own evidence gates ("measure VMOTOR at J_LOGIC") as steps, and a
-way to move from a described board to a build that uses what you reclaimed.
+Recognising parts from the photo, the repo's donor *blocks* with their own evidence gates ("measure VMOTOR at J_LOGIC") as steps, and
+planning wiring or qualifying a build around a reclaimed part. The name-match handoff is advisory only.

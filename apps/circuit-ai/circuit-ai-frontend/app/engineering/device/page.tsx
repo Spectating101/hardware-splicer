@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Info, LoaderCircle, RotateCcw } from 'luci
 import { DeviceViewer, type DeviceFinding, type DevicePlan } from '@/components/engineering/device-viewer';
 import { usePageTitle } from '@/components/use-page-title';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/proxy-client';
+import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 
 type Spec = Record<string, unknown>;
 type ModuleInfo = { id: string; name: string; sources: { label: string; url: string; as_of: string }[]; dimension_basis?: Record<string, string>; notes?: string[] };
@@ -32,6 +33,25 @@ export default function DevicePage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [onHand, setOnHand] = useState<DeviceReclaimResult | null>(null);
+  const [onHandError, setOnHandError] = useState('');
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('from') !== 'donor') return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const raw = window.sessionStorage.getItem(RECLAIM_DEVICE_STORAGE);
+        if (!raw || raw.length > 64 * 1024) throw new Error('The reclaim list could not be read. Return to Salvage a board to send it again.');
+        // Browser storage contains only input; the backend validates it and checks the current library again.
+        const result = await fetchDeviceReclaimMatches(JSON.parse(raw), controller.signal);
+        if (!controller.signal.aborted) setOnHand(result);
+      } catch {
+        if (!controller.signal.aborted) setOnHandError('The reclaim list could not be checked. Return to Salvage a board to send it again.');
+      }
+    })();
+    return () => controller.abort();
+  }, []);
 
   const planFrom = useCallback(async (text: string) => {
     setBusy(true);
@@ -90,6 +110,19 @@ export default function DevicePage() {
             It is a plan to follow and check, not proof that the device works.
           </p>
         </header>
+
+        {onHand ? <section className="mb-4 rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-on-hand" aria-label="Parts you may have on hand">
+          <h2 className="text-sm font-semibold text-stone-100">Parts you may have on hand</h2>
+          <p className="mt-1 text-xs leading-5 text-stone-400">{onHand.note}</p>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-stone-300">
+            {onHand.parts.filter((part) => part.matched).map((part) => <li key={part.ref} data-testid="device-on-hand-part">
+              {part.ref} · marking you read: {part.marking} · kind you reported: {part.kind}
+              {part.matches.map((match) => <span key={match.module} className="block text-stone-400">Library: {match.name} ({match.tier === 'exact' ? 'same name' : 'variant'}).</span>)}
+            </li>)}
+          </ul>
+          {!onHand.parts.some((part) => part.matched) ? <p className="mt-2 text-xs text-stone-400">No exact or variant name matches in the device library.</p> : null}
+        </section> : null}
+        {onHandError ? <p role="status" className="mb-4 text-xs text-stone-400" data-testid="device-on-hand-error">{onHandError}</p> : null}
 
         {loading ? <div className="flex h-64 items-center justify-center text-stone-400"><LoaderCircle className="h-5 w-5 animate-spin" aria-label="Loading" /></div> : null}
         {!loading && !plan ? <div role="alert" className="rounded-lg border border-red-500/40 bg-red-950/40 p-4 text-sm text-red-100" data-testid="device-error">{error || 'No plan is available.'}</div> : null}
