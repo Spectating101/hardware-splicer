@@ -11,8 +11,9 @@ async function open(page) {
   await page.goto(DONOR);
   await expect(page.getByTestId('donor-kind').locator('option')).not.toHaveCount(0, { timeout: 20000 });
 }
-async function chip(page, marking) {
+async function chip(page, marking, pkg = 'DIP') {
   await page.getByTestId('donor-add-centre').click();
+  await page.getByTestId('donor-selected').locator('select').nth(1).selectOption(pkg);
   await page.getByTestId('donor-marking').fill(marking);
 }
 const panel = (page) => page.getByTestId('lookup-panel');
@@ -24,7 +25,7 @@ test('a marking is looked up in KiCad\'s library, says how close each answer is,
   const matches = page.getByTestId('lookup-matches').locator('li');
   await expect(matches).toHaveCount(2);                                           // NE555D and NE555P: variants of the name typed
   await expect(matches.first()).toHaveAttribute('data-tier', 'variant');
-  await expect(matches.first()).toContainText('a different package or grade');
+  await expect(matches.first()).toContainText('a package, a grade or a different chip');
   await expect(panel(page)).toContainText('KiCad symbol library 9.0');
   await expect(panel(page)).toContainText('not proof that the chip you hold is that part');
   const links = await panel(page).locator('a').evaluateAll((nodes) => nodes.map((n) => n.getAttribute('href')));
@@ -177,6 +178,7 @@ test('a reading belongs to the chip it was taken from', async ({ page }) => {
   await chip(page, 'NE555P');
   await expect(page.getByTestId('lookup-reading')).toHaveCount(3, { timeout: 15000 });
   await page.getByTestId('lookup-reading').first().fill('5.02 V');
+  await page.getByTestId('donor-selected').locator('select').nth(1).selectOption('SOIC');
   await page.getByTestId('donor-marking').fill('NE555D');
   await expect(page.getByTestId('lookup-reading')).toHaveCount(3, { timeout: 15000 });
   await expect(page.getByTestId('lookup-reading').first()).toHaveValue('');

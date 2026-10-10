@@ -14,6 +14,7 @@ type LookupData = {
   libraries_available: boolean;
   gates: Gate[];
   gates_from: string | null;
+  package_note: string | null;
   search_links: { smd_code?: string };
 };
 
@@ -44,11 +45,13 @@ export function packageFromFootprint(footprint: string | null): string | null {
  */
 export function PartLookupPanel({
   marking,
+  packageName,
   readings,
   onReading,
   onUsePackage,
 }: {
   marking: string;
+  packageName?: string;
   readings: Record<string, string>;
   onReading: (key: string, value: string) => void;
   onUsePackage: (pkg: string) => void;
@@ -62,7 +65,9 @@ export function PartLookupPanel({
     let current = true;                 // false once this marking has been replaced: a late answer must not be shown under a newer one
     setState({ status: 'loading' });
     const timer = window.setTimeout(() => {
-      fetch(`/api/proxy/engineering/parts/lookup?marking=${encodeURIComponent(text)}`, { cache: 'no-store', signal: controller.signal })
+      const query = new URLSearchParams({ marking: text });
+      if (packageName) query.set('package', packageName);
+      fetch(`/api/proxy/engineering/parts/lookup?${query.toString()}`, { cache: 'no-store', signal: controller.signal })
         .then((response) => response.json())
         .then((body: unknown) => {
           if (!body || isProxyFailure(body)) throw new Error(getProxyErrorMessage(body, 'The lookup failed.'));
@@ -74,7 +79,7 @@ export function PartLookupPanel({
         });
     }, 400);
     return () => { current = false; window.clearTimeout(timer); controller.abort(); };
-  }, [marking]);
+  }, [marking, packageName]);
 
   const { status, data } = state;
   const recorded = data ? data.gates.filter((g) => (readings[g.key] ?? '').trim() !== '').length : 0;
@@ -119,6 +124,7 @@ export function PartLookupPanel({
               })}
             </ul>
           ) : null}
+          {data.package_note ? <p className="mt-1 leading-4 text-stone-400" data-testid="lookup-package-note">{data.package_note}</p> : null}
           {data.gates.length ? (
             <div className="mt-2" data-testid="lookup-gates">
               <div className="font-medium text-stone-100">Measure these and write the readings down</div>

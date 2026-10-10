@@ -29,6 +29,8 @@ MIN_QUERY = 3
 MAX_MATCHES = 8
 MAX_PINS = 128
 MAX_PINS_FOR_GATES = 64         # a part with more pins than this has many supplies and grounds: picking one honestly takes its datasheet
+MAX_VOLTAGE_GATES = 6
+MAX_ISOLATION_RAILS = 3
 MAX_LIBRARY_FILE = 80 * 1024 * 1024
 # A package or grade code after a part number: a few letters (D, DBV, Tx), or something that starts with a separator (-D, _DFN, -LP). Digits
 # without a separator mean a different function: 74HC00 is not 74HC04, and LM35 is not LM358.
@@ -45,13 +47,18 @@ _GROUND_RANK = ("GND", "VSS", "DGND", "AGND", "GNDD", "GNDA", "VSSA", "PGND")
 # Pins that carry no supply: the exposed pad, a tab or shield, and pins marked not connected.
 _MAIN_SUPPLY = ("VDD", "VCC", "VDDIO", "VCCIO", "VIN", "VI", "IN", "V+", "VS", "VSUP", "AVDD", "AVCC", "VDDA", "VM", "VMOT")
 _NEG_REF = ("V-", "VEE", "VCC-")
-# Sense / internal / bypass pins are not a rail the person should drive (TI DRV8833 VINT; ST L298 SENSE).
-_INTERNAL_STEM = ("SENSE", "VINT", "VCAP", "VREG", "VBYP", "VREF")
+# Exact internal / bypass names are not a rail to drive (TI DRV8833 VINT). VREGIN is a regulator input
+# (Silicon Labs CP2102N §2.1) and must not be dropped by a VREG prefix. SENSE / VREF stay prefix exclusions
+# (ST L298 SENSE; TI PCA9306 VREF1/VREF2), so a part whose only supplies are VREF gets no gates by design.
+_INTERNAL_EXACT = frozenset({"VINT", "VCAP", "VCAP1", "VCAP2", "VBYP", "VREG"})
+_INTERNAL_PREFIX = ("SENSE", "VREF")
 _NOT_A_SUPPLY = re.compile(r"^(EP|EPAD|PAD|TAB|SHIELD|SHLD|NC|DNC|N/C|~)\d*$", re.IGNORECASE)
 _PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):", re.IGNORECASE)
 _TO220 = re.compile(r"TO-?220", re.IGNORECASE)
 _SOT23 = re.compile(r"SOT-?23", re.IGNORECASE)
-_BGA_OR_MODULE = re.compile(r"^(Package_BGA|RF_Module):", re.IGNORECASE)
+_BGA = re.compile(r"^Package_BGA:", re.IGNORECASE)
+_RF_MODULE = re.compile(r"^RF_Module:", re.IGNORECASE)
+_NUMBERED_RAIL = re.compile(r"^([A-Z]+)(\d+)$")
 _BRACES = re.compile(r"[_\\{}]")
 
 
@@ -269,7 +276,7 @@ def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
                 break
     texts = {
         "exact": "the library has a part with exactly this name",
-        "variant": "the library has a part with this name plus or minus a short package or grade code: a different package or grade, whose pin numbers follow that entry",
+        "variant": "the library has a part whose name is this name plus a code; the code may be a package, a grade or a different chip, so check the datasheet",
         "family": "the library has parts from the same family, not this one: use them to learn what kind of chip it probably is, no more",
     }
     for name, tier in chosen:
@@ -355,7 +362,9 @@ def _ground_rank(token: str) -> int | None:
 
 
 def _is_internal(token: str) -> bool:
-    return any(token == stem or token.startswith(stem) for stem in _INTERNAL_STEM)
+    if token in _INTERNAL_EXACT:
+        return True
+    return any(token == stem or token.startswith(stem) for stem in _INTERNAL_PREFIX)
 
 
 def _supply_rank(token: str) -> int:
@@ -439,16 +448,43 @@ def _orientation(footprint: str | None) -> str:
             " The lead order depends on the part and must be taken from the datasheet's package drawing, "
             "not from the package name (7805 vs LM317)."
         )
-    if _BGA_OR_MODULE.match(footprint):
+    if _BGA.match(footprint):
         return " Balls are named by row and column, not counted around the edge."
+    if _RF_MODULE.match(footprint):
+        # Espressif ESP32-WROOM-32 datasheet §2: numbered perimeter contacts from the pin-1 mark, not a BGA ball array.
+        return (
+            " Modules have numbered contacts around the edge from the pin-1 mark in the datasheet drawing."
+        )
     return ""
 
 
-def _rail_pairs(pins: list[dict[str, str]]) -> tuple[list[dict[str, str]], dict[str, str]] | tuple[list[dict[str, str]], None]:
-    """Supply pins to measure, and the pin each is measured against. Empty when the symbol does not name a pair."""
+def _isolation_domain(token: str) -> str | None:
+    """GND1 / VSS2 / GNDA — not PGND, which is a motor return rather than an isolation domain."""
 
+    for stem in ("GND", "VSS"):
+        if token.startswith(stem) and len(token) > len(stem):
+            suffix = token[len(stem):]
+            if re.fullmatch(r"[0-9A-Z]", suffix):
+                return suffix
+    return None
+
+
+def _supply_domain(token: str, domains: set[str]) -> str | None:
+    """VCC1/GND1, VDDA/VSSA — not VBAT (the last letter is part of the name) or VDD3P3."""
+
+    for suffix in sorted(domains, key=len, reverse=True):
+        if token.endswith(suffix) and token[: -len(suffix)].isalpha():
+            return suffix
+    return None
+
+
+def _looks_like_domain_supply(token: str) -> bool:
+    return bool(re.fullmatch(r"(?:VCC|VDD|VIN|VM)(?:\d|[A-Z])$", token))
+
+
+def _collect_supplies_and_grounds(pins: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[tuple[int, dict[str, str]]]]:
     has_plain_gnd = any(_pin_token(p["name"]) == "GND" for p in pins)
-    grounds = []
+    grounds: list[tuple[int, dict[str, str]]] = []
     seen_g: set[str] = set()
     for pin in pins:
         token = _pin_token(pin["name"])
@@ -475,12 +511,59 @@ def _rail_pairs(pins: list[dict[str, str]]) -> tuple[list[dict[str, str]], dict[
             continue
         supply.append(pin)
     supply.sort(key=lambda pin: (_supply_rank(_pin_token(pin["name"])), len(pin["number"]), pin["number"]))
+    return supply, grounds
+
+
+def _numbered_suffix(pin: dict[str, str]) -> int:
+    found = _NUMBERED_RAIL.fullmatch(_pin_token(pin["name"]))
+    return int(found.group(2)) if found else 0
+
+
+def _collapse_numbered_rails(supply: list[dict[str, str]], domains: set[str]) -> list[dict[str, str]]:
+    """VM1/VM2/VM3 are one motor rail; VCC1/VCC2 stay separate when GND1/GND2 exist."""
+
+    kept: list[dict[str, str]] = []
+    numbered: dict[str, list[dict[str, str]]] = {}
+    for pin in supply:
+        token = _pin_token(pin["name"])
+        found = _NUMBERED_RAIL.fullmatch(token)
+        if found and found.group(2) not in domains:
+            numbered.setdefault(found.group(1), []).append(pin)
+        else:
+            kept.append(pin)
+    for group in numbered.values():
+        kept.append(min(group, key=_numbered_suffix))
+    kept.sort(key=lambda pin: (_supply_rank(_pin_token(pin["name"])), len(pin["number"]), pin["number"]))
+    return kept
+
+
+def _rail_pairs(pins: list[dict[str, str]]) -> list[tuple[dict[str, str], dict[str, str]]]:
+    """Each supply paired with the ground of its own domain. No pair when a domain cannot be matched."""
+
+    supply, grounds = _collect_supplies_and_grounds(pins)
+    domains: dict[str, dict[str, str]] = {}
+    for _rank, pin in grounds:
+        suffix = _isolation_domain(_pin_token(pin["name"]))
+        if suffix and suffix not in domains:
+            domains[suffix] = pin
+    undomained = next((pin for _rank, pin in grounds if _isolation_domain(_pin_token(pin["name"])) is None), None)
+    supply = _collapse_numbered_rails(supply, set(domains))
     if grounds:
-        return supply, grounds[0][1]
+        pairs: list[tuple[dict[str, str], dict[str, str]]] = []
+        for pin in supply:
+            token = _pin_token(pin["name"])
+            marker = _supply_domain(token, set(domains))
+            if marker:
+                pairs.append((pin, domains[marker]))
+            elif domains and _looks_like_domain_supply(token):
+                continue
+            elif undomained is not None:
+                pairs.append((pin, undomained))
+        return pairs[:MAX_VOLTAGE_GATES]
     neg = next((pin for pin in supply if _pin_token(pin["name"]) in _NEG_REF), None)
     pos = [pin for pin in supply if _pin_token(pin["name"]) not in _NEG_REF]
     if neg and pos:
-        return pos, neg
+        return [(pin, neg) for pin in pos][:MAX_VOLTAGE_GATES]
     outs = [
         pin for pin in pins
         if pin["type"] == "power_out"
@@ -488,8 +571,8 @@ def _rail_pairs(pins: list[dict[str, str]]) -> tuple[list[dict[str, str]], dict[
         and not _NOT_A_SUPPLY.match(pin["name"])
     ]
     if supply and outs:
-        return supply, outs[0]
-    return [], None
+        return [(pin, outs[0]) for pin in supply][:MAX_VOLTAGE_GATES]
+    return []
 
 
 def _split_rails(supply: list[dict[str, str]]) -> bool:
@@ -513,9 +596,13 @@ def _notes(pins: list[dict[str, str]], supply_pin: dict[str, str], *, kind: str,
         token == "VS" and any(name.startswith("SENSE") for name in names)
     )
     if motor and kind in {"isolation", "voltage"}:
-        bits.append("Motor drivers read low through body diodes and windings.")
+        # TI DRV8833 datasheet, functional block diagram and typical application: output-stage diodes and attached windings sit across the outputs.
+        bits.append(
+            "Windings attached to the outputs, and the output stage's own diodes, are in parallel with what you measure on a connected driver."
+        )
     if split and kind == "isolation":
-        bits.append("These rails must not be joined.")
+        # TI TXB0108 datasheet §§1 and 5.20–5.21: the constraint is VCCA <= VCCB; equal rails are allowed, so they are not forbidden to join.
+        bits.append("The two rails are separate pins to check each on its own.")
     if kind == "voltage" and any(_pin_token(pin["name"]) in {"OUT", "VO"} and pin["type"] == "power_out" for pin in pins):
         bits.append("A reading on the input does not show what the output is doing.")
     if kind == "voltage" and footprint and _TO220.search(footprint):
@@ -523,7 +610,8 @@ def _notes(pins: list[dict[str, str]], supply_pin: dict[str, str], *, kind: str,
     if kind == "voltage" and footprint and "DFN_QFN" in footprint.upper():
         bits.append("If the datasheet puts the ground on the exposed pad, that pad is the return, not a supply.")
     if kind == "voltage":
-        bits.append("Reversing the probes on a supply pair can destroy the part.")
+        # Fluke DC-voltage procedure: measurement-lead polarity may be reversed; reversing the supply on a chip can destroy it.
+        bits.append("Connect a supply the right way round: reversing the supply on a chip can destroy it.")
     return (" " + " ".join(bits)) if bits else ""
 
 
@@ -531,6 +619,7 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
     """What to measure on a library symbol: power-off diode and ohms first, then a current-limited bench supply.
 
     They say what to measure and where, never what the reading should be: the range is the datasheet's to give.
+    Voltage uses a bench supply with a current limit, not the board and not an unisolated mains connection.
     """
 
     try:
@@ -539,17 +628,21 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         return []
     if len(pins) > MAX_PINS_FOR_GATES:
         return []
-    supply, reference = _rail_pairs(pins)
-    if not supply or reference is None:
+    pairs = _rail_pairs(pins)
+    if not pairs:
         return []
-    supply = supply[:3]
-    split = _split_rails(supply)
+    supply_pins = [pin for pin, _ref in pairs]
+    split = _split_rails(supply_pins)
     where = _orientation(footprint)
     # Fluke 87V MAX: "disconnect power and discharge all high-voltage capacitors before you measure resistance, continuity, capacitance, or a diode junction."
     # Fluke 87V MAX: "the resistance reading represents the total resistance of all paths between the probes."
     # TI SCDA039: "there are ESD diodes tied between the input and the positive supply rail (VDD/VCC) and an ESD diode tied from the input to the negative supply rail or ground (VSS/GND)."
     gates: list[dict[str, Any]] = []
-    g_from = f"pin {reference['number']} ({reference['name']})"
+    kind_pairs = {
+        "diode": pairs,
+        "isolation": pairs[:MAX_ISOLATION_RAILS],
+        "voltage": pairs[:MAX_VOLTAGE_GATES],
+    }
     for kind, expect in (
         (
             "diode",
@@ -564,9 +657,10 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
             "write down the voltage and the current; only the datasheet says what belongs on that pin pair",
         ),
     ):
-        for pin in supply:
+        for pin, reference in kind_pairs[kind]:
             extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split)
             pair = f"pin {pin['number']} ({pin['name']})"
+            g_from = f"pin {reference['number']} ({reference['name']})"
             if kind == "diode":
                 instruction = (
                     f"With the power off, in diode mode, measure both ways between {pair} and {g_from}. "
@@ -579,9 +673,11 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
                     f"so write both readings down and compare them with the datasheet or a known-good chip.{where}{extra}"
                 )
             else:
+                # General practice: a bench supply takes energy from the mains but is isolated; do not use the board or an unisolated mains connection.
                 instruction = (
-                    f"Only after writing down the power-off readings, and only from a current-limited bench supply set to the "
-                    f"supply voltage in the datasheet for this pin pair (never the board's own supply, never a mains-derived one), "
+                    f"Only after writing down the power-off readings, and only from a bench supply with a current limit set to the "
+                    f"supply voltage in the datasheet for this pin pair (not the board's own supply and not anything connected to "
+                    f"the mains without isolation), "
                     f"measure between {pair} and {g_from}. Write down the voltage and the current it draws.{where}{extra}"
                 )
             gates.append(
@@ -595,6 +691,38 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
                 }
             )
     return gates
+
+
+_MISSING_PACKAGE_NOTE = (
+    "the library does not say which package these pin numbers belong to and they must be taken from the "
+    "datasheet drawing of the person's package (names still shown)"
+)
+
+
+def resolve_lookup_gates(matches: list[dict[str, Any]], user_footprint: str | None) -> dict[str, Any]:
+    """The named match a plan would pick, its gates, and a note when pin numbers are not known to be this package."""
+
+    best = pick_named_match(matches, user_footprint)
+    package_note: str | None = None
+    gates: list[dict[str, Any]] = []
+    if best and best.get("footprint") and user_footprint and not footprint_fits_user(best.get("footprint"), user_footprint):
+        family = footprint_family(best["footprint"]) or best["footprint"]
+        package_note = (
+            f"the library's closest entry is {best['name']} in package {family}, so its pin numbers would not be yours"
+        )
+    elif best and not best.get("footprint") and user_footprint:
+        package_note = _MISSING_PACKAGE_NOTE
+        gates = power_gates(best["library"], best["name"], best.get("footprint"))
+        for gate in gates:
+            gate["instruction"] = f"{gate['instruction']} {package_note[0].upper()}{package_note[1:]}"
+    elif best:
+        gates = power_gates(best["library"], best["name"], best.get("footprint"))
+    return {
+        "best": best,
+        "gates": gates,
+        "gates_from": best["name"] if best else None,
+        "package_note": package_note,
+    }
 
 
 @lru_cache(maxsize=512)

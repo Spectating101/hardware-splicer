@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from .part_lookup import PartLookupError, libraries_available, lookup_part, power_gates
+from .part_lookup import PartLookupError, libraries_available, lookup_part, normalise, resolve_lookup_gates
 from .parts_intel import enrich_bom, parts_providers_from_env
 from .teardown_search import TeardownSearchError, search_teardowns
 
@@ -19,16 +19,22 @@ def create_parts_lookup_router() -> APIRouter:
     router = APIRouter(prefix="/v1", tags=["lookup"])
 
     @router.get("/parts/lookup")
-    def get_lookup(marking: str = Query(default="", max_length=200), online: bool = False) -> Dict[str, Any]:
+    def get_lookup(
+        marking: str = Query(default="", max_length=200),
+        online: bool = False,
+        package: str = Query(default="", max_length=200),
+    ) -> Dict[str, Any]:
         try:
             found = lookup_part(marking)
+            user_fp = normalise(package) if str(package).strip() else None
         except PartLookupError as exc:
             raise _unprocessable("invalid_marking", str(exc)) from None
         found["libraries_available"] = libraries_available()
-        best = next((m for m in found["matches"] if m["tier"] in {"exact", "variant"}), None)
+        resolved = resolve_lookup_gates(found["matches"], user_fp)
         # Only a name or variant match has pins we may speak of; a family match is another chip.
-        found["gates"] = power_gates(best["library"], best["name"], best["footprint"]) if best else []
-        found["gates_from"] = best["name"] if best else None
+        found["gates"] = resolved["gates"]
+        found["gates_from"] = resolved["gates_from"]
+        found["package_note"] = resolved["package_note"]
         found["search_links"] = {}
         text = found["query"]
         if not found["matches"] and 3 <= len(text) <= 8 and text.isalnum():

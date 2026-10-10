@@ -245,9 +245,10 @@ def _lookup_reasons(part: dict[str, Any]) -> list[str]:
         m = found["match"]
         text = f"KiCad's library has a part called \"{m['name']}\": {m['description'] or 'no description'}"
         if found["tier"] != "exact":
-            extra = " (a variant: a library name with a short package or grade code)"
-            if not found.get("package_note"):
-                extra += "; pin numbers follow that entry's package"
+            extra = (
+                " (a variant: a library name that is this name plus a code; "
+                "the code may be a package, a grade or a different chip)"
+            )
             text += extra
         notes.append(text)
         if found.get("package_note"):
@@ -460,17 +461,10 @@ def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
         done += 1
         matches = found["matches"]
         user_fp = part.get("footprint")
-        best = part_lookup.pick_named_match(matches, user_fp)
+        resolved = part_lookup.resolve_lookup_gates(matches, user_fp)
+        best = resolved["best"]
         readings = part.get("readings") or {}
-        package_note = None
-        if best and best.get("footprint") and user_fp and not part_lookup.footprint_fits_user(best.get("footprint"), user_fp):
-            family = part_lookup.footprint_family(best["footprint"]) or best["footprint"]
-            package_note = (
-                f"the library's closest entry is {best['name']} in package {family}, so its pin numbers would not be yours"
-            )
-            gates = []
-        else:
-            gates = part_lookup.power_gates(best["library"], best["name"], best["footprint"]) if best else []
+        gates = resolved["gates"]
         for gate in gates:
             gate["reading"] = readings.get(gate["key"]) or None
         part["lookup"] = {
@@ -478,7 +472,7 @@ def _attach_lookups(parts: list[dict[str, Any]]) -> dict[str, Any] | None:
             "match": {k: best[k] for k in ("name", "library", "description", "datasheet", "footprint", "tier_text")} if best else None,
             "family": [m["name"] for m in matches if m["tier"] == "family"][:4],
             "gates": gates,
-            "package_note": package_note,
+            "package_note": resolved["package_note"],
             "evidence": {"total": len(gates), "recorded": sum(1 for g in gates if g["reading"]), "ignored": max(0, len(readings) - sum(1 for g in gates if g["reading"]))},
         }
     return part_lookup.source() if done else None
@@ -545,10 +539,29 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
                 text += " " + note[0].upper() + note[1:] + ("" if note.endswith(".") else ".")
         if first["kind"] == "ic" and first.get("lookup") and first["lookup"]["gates"]:
             library_name = first["lookup"]["match"]["name"]
+            recorded_pairs = 0
+            total_pairs = 0
             for gate in first["lookup"]["gates"]:
-                checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"], "reading": gate.get("reading")})
-            evidence = first["lookup"]["evidence"]
-            text += f" Readings recorded: {evidence['recorded']} of {evidence['total']}. A recorded reading is a number you wrote down, not a pass: only the datasheet says what it should be. None of these readings shows a removed chip works."
+                bits: list[str] = []
+                for part in group:
+                    total_pairs += 1
+                    reading = None
+                    for other in (part.get("lookup") or {}).get("gates") or []:
+                        if other.get("key") == gate["key"]:
+                            reading = other.get("reading")
+                            break
+                    if reading:
+                        recorded_pairs += 1
+                        bits.append(f"{part['ref']}: {reading}")
+                    else:
+                        bits.append(f"{part['ref']}: not recorded")
+                reading_text: str | None
+                if len(group) > 1:
+                    reading_text = "; ".join(bits)
+                else:
+                    reading_text = gate.get("reading")
+                checks.append({"kind": "suggested_check", "check": "measure", "from": f"{', '.join(refs)} {gate['from']}", "to": gate["to"], "net": None, "detail": gate["instruction"], "expect": gate["expect"], "gate_kind": gate["kind"], "reading": reading_text})
+            text += f" Readings recorded: {recorded_pairs} of {total_pairs}. A recorded reading is a number you wrote down, not a pass: only the datasheet says what it should be. None of these readings shows a removed chip works."
             text += f" The pin names in the measurements come from KiCad's entry for {library_name}, not from your chip: confirm them in its datasheet before you touch a probe to it."
         if first["kind"] == "connector":
             checks.append({"kind": "suggested_check", "check": "inspect", "from": ", ".join(refs), "to": "pins and housing", "net": None, "expect": "straight pins, no melted plastic"})
@@ -569,7 +582,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else "")
             + (f" Measurements still to record as notes (none of them shows a removed chip works): {', '.join(open_gates[:12])}{' and more' if len(open_gates) > 12 else ''}." if open_gates else ""),
             "side": current_side, "turn_board_over": False, "refs": [], "part_ids": [],
-            "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "record the test setup and results; nothing here approves reuse or powering"}],
+            "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "write down what you tried and what you saw"}],
         }
     )
 

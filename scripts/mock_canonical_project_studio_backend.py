@@ -644,15 +644,17 @@ async def device_plan_post(request: Request) -> dict[str, Any]:
 # --- Boards a person describes: the real capture code, stateless, as the real API serves it ----------------------------
 # --- Marking lookup (the real KiCad-library code) and a fixed teardown answer, so tests never depend on the internet --------
 _lookup_part = _load_hs_attr("part_lookup", "lookup_part")
-_power_gates = _load_hs_attr("part_lookup", "power_gates")
+_resolve_lookup_gates = _load_hs_attr("part_lookup", "resolve_lookup_gates")
+_normalise = _load_hs_attr("part_lookup", "normalise")
 _libraries_available = _load_hs_attr("part_lookup", "libraries_available")
 _PartLookupError = _load_hs_attr("part_lookup", "PartLookupError")
 
 
 @app.get("/v1/parts/lookup")
-def parts_lookup(marking: str = "", online: bool = False) -> dict[str, Any]:
+def parts_lookup(marking: str = "", online: bool = False, package: str = "") -> dict[str, Any]:
     try:
         found = _lookup_part(marking)
+        user_fp = _normalise(package) if str(package).strip() else None
     except _PartLookupError as exc:
         raise _thread_error(422, "invalid_marking", str(exc)) from None
     found["libraries_available"] = _libraries_available()
@@ -660,9 +662,10 @@ def parts_lookup(marking: str = "", online: bool = False) -> dict[str, Any]:
     text = found["query"]
     if not found["matches"] and 3 <= len(text) <= 8 and text.isalnum():
         found["search_links"]["smd_code"] = f"https://www.s-manuals.com/smd/{text.lower()}"
-    best = next((m for m in found["matches"] if m["tier"] in {"exact", "variant"}), None)
-    found["gates"] = _power_gates(best["library"], best["name"], best["footprint"]) if best else []
-    found["gates_from"] = best["name"] if best else None
+    resolved = _resolve_lookup_gates(found["matches"], user_fp)
+    found["gates"] = resolved["gates"]
+    found["gates_from"] = resolved["gates_from"]
+    found["package_note"] = resolved["package_note"]
     return {"ok": True, **found}
 
 
