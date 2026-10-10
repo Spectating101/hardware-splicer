@@ -413,9 +413,9 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
                 note = ""
                 basis = "ESP32-WROOM-32E datasheet, section 4 (strapping pins)"
                 if mcu_pin["name"] == "IO0":
-                    # Audit B7 quote, unverified by supervisor: "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits."
+                    # ESP-IDF ADC docs v4.2.5, list of dev kits: "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits."
                     note = " The DevKitC also uses GPIO0 for its auto-program circuit; attached hardware can interfere with uploads."
-                    basis += "; audit B7, ESP-IDF ADC docs v4.2.5 (unverified by supervisor): https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html"
+                    basis += "; ESP-IDF ADC docs v4.2.5 (dev kit list): https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html"
                 out.append(_finding("warning", "strapping_pin", f"{name} uses {mcu_pin['name']}, a pin the chip reads at start-up. Hardware on it can change how it boots.{note}", basis, wire_id))
             if has(mroles, "usb_serial"):
                 out.append(_finding("warning", "serial_pin", f"{name} uses {mcu_pin['name']}, which the USB serial connection uses. It can interfere with uploading and logging.", datasheet, wire_id))

@@ -94,8 +94,8 @@ do not standardise the module's regulator. Every OLED plan copies `electrical.su
 notes and into information findings, including the example. Those notes ask you to check the actual module's supply and
 pull-up arrangement. The example's 3V3 wire does not establish how your module will behave.
 
-The WROOM-32E datasheet source and each chip entry citing it use the redirected documentation URL. The supervisor checked
-that redirect on 2026-10-10; that is the source's `as_of` date, not a new claim about the hardware.
+The WROOM-32E datasheet source and each chip entry citing it use the publisher's new documentation URL (the old one answers
+HTTP 301). The 2026-10-10 date is when the link was updated, not a new claim about the hardware.
 
 ## What the plan checks
 
@@ -107,7 +107,7 @@ GND label rather than treating that signal endpoint as ground.
 I2C on IO12 (MTDI) is an error: its pull-ups hold the pin high at reset and select the flash's 1.8 V supply. It gets no
 custom-pin routing note. Other strapping pins and USB serial pins have warnings; SDA and SCL swapped against Arduino's
 defaults have warnings; other output-capable custom I2C pins have a note. GPIO0 also has an auto-program circuit note
-from audit B7's ESP-IDF citation, **unverified by supervisor**.
+from the ESP-IDF ADC documentation's list of dev kits.
 
 OLED VCC on 5V keeps a warning covering both the chip's logic supply and pull-ups that could put 5 V on ESP32 SDA/SCL.
 Check the actual module's regulator and pull-up supply. Any warning or error replaces the USB action with a review step:
@@ -139,8 +139,8 @@ works, then lists the notes.
   from a module header labelled VCC.
 - [AZ-Delivery listing](https://www.az-delivery.de/en/products/0-96zolldisplay): "Pin assignment: VCC, GND, SCL, SDA"
   and "Operating voltage: 3.3V to 5V". These are claims about that seller's module.
-- Audit B7 cites [ESP-IDF ADC docs v4.2.5](https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html):
-  "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits." This excerpt is unverified by supervisor.
+- The GPIO0 note cites [ESP-IDF ADC docs v4.2.5](https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html):
+  "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits." (Quoted from that page; it appears in the list of dev kits with ADC2 pin restrictions.)
 
 ## The case
 

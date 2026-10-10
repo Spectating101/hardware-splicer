@@ -613,7 +613,7 @@
           "as_of": "2026-10-09"
         },
         {
-          "label": "ESP32-WROOM-32E datasheet (module size 18.0 x 25.5 x 3.1 mm; supply 3.0-3.6 V; GPIO6-11 on the flash; strapping pins GPIO0, GPIO2, MTDI, MTDO, GPIO5; VIH max VDD+0.3 V); redirect checked by supervisor 2026-10-10",
+          "label": "ESP32-WROOM-32E datasheet (module size 18.0 x 25.5 x 3.1 mm; supply 3.0-3.6 V; GPIO6-11 on the flash; strapping pins GPIO0, GPIO2, MTDI, MTDO, GPIO5; VIH max VDD+0.3 V); link updated 2026-10-10 after the publisher moved the file",
           "url": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
           "as_of": "2026-10-10"
         },

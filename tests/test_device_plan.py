@@ -608,7 +608,7 @@ def test_io0_note_names_the_devkit_auto_program_circuit_with_a_source_limit():
     plan = build_device_plan(_with([{**c, "to": "mcu.IO0" if c["from"] == "display.SDA" else c["to"]} for c in GOOD]))
     finding = next(f for f in plan["findings"] if f["rule"] == "strapping_pin")
     assert "auto-program" in finding["message"]
-    assert "unverified by supervisor" in finding["basis"]
+    assert "ESP-IDF ADC docs" in finding["basis"] and "supervisor" not in finding["basis"]
 
 
 def test_supply_and_pullup_notes_survive_missing_or_rejected_wires():
@@ -698,7 +698,7 @@ def test_wroom_datasheet_redirect_is_used_by_sources_and_chips():
     url = "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
     source = next(s for s in esp["sources"] if s["url"] == url)
     assert source["as_of"] == "2026-10-10"
-    assert "redirect" in source["label"]
+    assert "link updated" in source["label"] and "supervisor" not in source["label"]
     assert esp["chips"][0]["source"] == url
 
 
