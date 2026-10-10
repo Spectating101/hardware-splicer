@@ -424,3 +424,187 @@ def test_resolve_lookup_gates_follows_the_chosen_package_and_warns_without_a_foo
     assert tl["package_note"] and "does not say which package" in tl["package_note"]
     assert all("does not say which package" in g["instruction"] for g in tl["gates"])
     assert any("V+" in g["from"] for g in tl["gates"])
+
+
+# --- sourced part-caution table -------------------------------------------------------------------------------------------
+
+
+def _cautions(*args, **kwargs) -> str:
+    return " ".join(pl.part_cautions(*args, **kwargs))
+
+
+def test_mcp73831_cautions_name_the_charger_pins_and_skip_a_different_digit() -> None:
+    text = _cautions("MCP73831-2-OT", tier="exact", library="Battery_Management")
+    assert "Li-Ion" in text or "Li-Polymer" in text
+    assert "VBAT" in text and "positive terminal" in text
+    assert "STAT" in text and "status" in text
+    assert "PROG" in text and "floating" in text
+    assert "no cell connected" in text
+    assert "Microchip MCP73831/2 datasheet DS20001984H" in text
+    assert "General practice, not from the datasheet." in text
+    assert "Li-Ion" not in _cautions("MCP73833", tier="exact")
+    assert "PROG" not in _cautions("MCP73833", tier="exact")
+    assert "Li-Ion" not in _cautions("MCP73831-2-OT", tier="family", library="Battery_Management")
+
+
+def test_tb6612_cautions_keep_the_two_supplies_apart() -> None:
+    text = _cautions("TB6612FNG", tier="exact", library="Driver_Motor")
+    assert "Vcc" in text and "VM" in text
+    assert "own range" in text
+    assert "neither is fed from the other" in text or "do not feed one from the other" in text
+    assert "Toshiba TB6612FNG datasheet" in text
+    assert "Vcc" not in _cautions("TB6612FNG", tier="family")
+
+
+def test_l298_cautions_say_sense_is_not_a_supply() -> None:
+    text = _cautions("L298N", tier="exact", library="Driver_Motor")
+    assert "SENSE" in text and "not supplies" in text
+    assert "logic" in text.lower()
+    assert "diode" in text.lower() and "inductive" in text.lower()
+    assert "STMicroelectronics L298 datasheet" in text
+    assert "SENSE" not in _cautions("L297", tier="exact")
+
+
+def test_2n7002_cautions_name_the_body_diode_and_sot23_and_skip_2n7000() -> None:
+    text = _cautions("2N7002", tier="exact")
+    assert "body diode" in text.lower()
+    assert "source" in text.lower() and "drain" in text.lower()
+    assert "gate" in text.lower()
+    assert "Diodes Incorporated 2N7002 datasheet DS11303" in text
+    assert "Nexperia 2N7002 datasheet" in text
+    blob = _cautions("2N7000", tier="exact")
+    assert "body diode" not in blob.lower()
+    assert "DS11303" not in blob
+
+
+def test_tip120_cautions_name_the_darlington_and_skip_a_different_digit() -> None:
+    text = _cautions("TIP120", tier="exact")
+    assert "Darlington" in text
+    assert "shunt" in text.lower() or "resistor" in text.lower()
+    assert "onsemi TIP120/121/122 datasheet" in text
+    assert "Darlington" not in _cautions("TIP125", tier="exact")
+    assert "Darlington" in _cautions("TIP122", tier="exact")
+
+
+def test_irf840_cautions_name_the_body_diode() -> None:
+    text = _cautions("IRF840", tier="exact")
+    assert "body diode" in text.lower()
+    assert "Vishay IRF840 datasheet" in text
+    assert "body diode" not in _cautions("IRF840", tier="family").lower()
+
+
+def test_nrf24l01_cautions_name_the_plus_document_and_power_outputs() -> None:
+    text = _cautions("nRF24L01", tier="exact")
+    assert "nRF24L01+" in text
+    assert "chip actually in hand" in text or "chip in hand" in text
+    assert "VDD_PA" in text and "DVDD" in text
+    assert "power" in text.lower() and "output" in text.lower()
+    assert "ANT1" in text and "ANT2" in text and "VDD_PA" in text
+    assert "Nordic nRF24L01+ preliminary product specification" in text
+    assert "VDD_PA" not in _cautions("nRF24L01", tier="family")
+
+
+def test_every_datasheet_caution_has_quote_url_label_and_as_of() -> None:
+    for entry in pl.load_part_cautions():
+        assert entry["names"] and all(isinstance(pattern, str) for pattern in entry["names"])
+        for caution in entry["cautions"]:
+            assert caution["text"].strip()
+            if caution["basis"] == "datasheet":
+                assert caution["quote"].strip()
+                source = caution["source"]
+                assert source["url"].startswith(("http://", "https://"))
+                assert source["label"].strip()
+                assert source["as_of"] == "2026-10-11"
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        [{"names": ["^X"], "cautions": [{"basis": "general practice", "source": {"label": "x", "url": "https://example.com/x", "as_of": "2026-10-11"}}]}],
+        [{"names": ["^X"], "cautions": [{"text": "x", "basis": "datasheet", "source": {"label": "x", "url": "https://example.com/x", "as_of": "2026-10-11"}}]}],
+        [{"names": ["^X"], "cautions": [{"text": "x", "basis": "datasheet", "quote": "q", "source": {"url": "https://example.com/x", "as_of": "2026-10-11"}}]}],
+        [{"names": ["^X"], "cautions": [{"text": "x", "basis": "datasheet", "quote": "q", "source": {"label": "x", "as_of": "2026-10-11"}}]}],
+        [{"names": ["("], "cautions": [{"text": "x", "basis": "general practice"}]}],
+        [{"names": ["^X"], "cautions": [{"text": "x", "basis": "general practice", "extra": 1}]}],
+        [{"names": ["^X"], "oops": 1, "cautions": [{"text": "x", "basis": "general practice"}]}],
+    ],
+)
+def test_the_caution_loader_rejects_each_malformed_shape(tmp_path: Path, payload: list) -> None:
+    path = tmp_path / "part_cautions.json"
+    path.write_text(__import__("json").dumps({"entries": payload}), encoding="utf-8")
+    with pytest.raises(RuntimeError):
+        pl.load_part_cautions(path)
+
+
+def test_ball_grid_cautions_and_no_dip_style_pin_count() -> None:
+    footprint = "Package_BGA:Texas_DSBGA-8_0.9x1.9mm_Layout2x4_P0.5mm"
+    pins = [{"number": "A1", "name": "VCCA", "type": "power_in"}, {"number": "B2", "name": "GND", "type": "power_in"}]
+    text = _cautions("TXB0102YZP", tier="exact", footprint=footprint, pins=pins)
+    assert "cannot be probed" in text or "can't be probed" in text
+    assert "DIP" in text
+    assert "accessible pads" in text or "test points" in text
+    assert "General practice, not from the datasheet." in text
+    dip = _cautions("NE555P", tier="exact", footprint="Package_DIP:DIP-8_W7.62mm")
+    assert "cannot be probed" not in dip and "can't be probed" not in dip
+    bga = _blob(pl.power_gates("Logic_LevelTranslator", "TXB0102YZP", footprint))
+    assert "dot or notch marks the pin-1 end" not in bga
+    assert "first leg counter-clockwise" not in bga
+    assert "row and column" in bga
+
+
+def test_three_lead_sot23_uses_the_drawing_not_dip_wording() -> None:
+    footprint = "Package_TO_SOT_SMD:SOT-23"
+    text = _cautions("2N7002", tier="exact", footprint=footprint)
+    assert "pin 1" in text.lower() and "left" in text
+    assert "pin 2" in text.lower() and "right" in text
+    assert "pin 3" in text.lower() or "single lead" in text
+    assert "datasheet drawing" in text or "package drawing" in text
+    three = pl._orientation(footprint)
+    assert "dot or notch marks the pin-1 end" not in three
+    assert "counter-clockwise" not in three
+    assert "7805 vs LM317" not in three
+    assert "pin 1" in three.lower() and "left" in three
+    five = _blob(pl.power_gates("Regulator_Linear", "TLV75518PDBV", "Package_TO_SOT_SMD:SOT-23-5"))
+    assert "dot or notch marks the pin-1 end" not in five
+    assert "round the package" in five or "around the package" in five
+    assert "datasheet's package drawing" in five
+    assert "7805 vs LM317" not in five
+
+
+def test_battery_management_outside_the_table_gets_the_generic_cell_caution() -> None:
+    text = _cautions("TP4056-42-ESOP8", tier="exact", library="Battery_Management")
+    assert "no cell connected" in text
+    assert "fire" in text.lower()
+    assert "General practice, not from the datasheet." in text
+    named = _cautions("MCP73831-2-OT", tier="exact", library="Battery_Management")
+    assert "fire" not in named.lower()          # the curated charger has its own no-cell line, not this generic
+
+
+def test_separate_supply_pins_get_a_pointer_only_caution() -> None:
+    pins = [
+        {"number": "1", "name": "VDD", "type": "power_in"},
+        {"number": "2", "name": "VDDA", "type": "power_in"},
+        {"number": "3", "name": "VBAT", "type": "power_in"},
+        {"number": "4", "name": "VDDIO", "type": "power_in"},
+        {"number": "5", "name": "GND", "type": "power_in"},
+    ]
+    text = _cautions("STM32F103C8Tx", tier="exact", library="MCU_ST_STM32F1", pins=pins)
+    assert "separate supply" in text
+    assert "datasheet" in text.lower()
+    assert "General practice, not from the datasheet." in text
+    plain = _cautions("NE555P", tier="exact", library="Timer", pins=[{"number": "8", "name": "VCC", "type": "power_in"}, {"number": "1", "name": "GND", "type": "power_in"}])
+    assert "separate supply" not in plain
+
+
+def test_lookup_attaches_cautions_only_to_a_named_match() -> None:
+    named = pl.lookup_part("MCP73831")
+    assert named["cautions"]
+    assert any("PROG" in row for row in named["cautions"])
+    family = pl.lookup_part("W25Q128JWSIQ")
+    assert family["matches"] and {m["tier"] for m in family["matches"]} == {"family"}
+    assert family.get("cautions") in (None, [])
+    resolved = pl.resolve_lookup_gates(named["matches"], None)
+    assert resolved["cautions"]
+    assert any("PROG" in row for row in resolved["cautions"])
+    family_resolved = pl.resolve_lookup_gates(family["matches"], None)
+    assert family_resolved.get("cautions") in (None, [])

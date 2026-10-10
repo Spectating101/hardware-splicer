@@ -336,6 +336,57 @@ def test_the_lookup_api_uses_the_chosen_package(api: TestClient) -> None:
     assert api.get("/v1/parts/lookup", params={"marking": "NE555P", "package": "NE\u202e555"}).status_code == 422
 
 
+@needs_libraries
+def test_lookup_of_a_curated_charger_carries_the_sourced_cautions() -> None:
+    found = part_lookup.lookup_part("MCP73831")
+    blob = " ".join(found.get("cautions") or [])
+    assert found["matches"] and found["matches"][0]["tier"] in {"exact", "variant"}
+    assert "PROG" in blob and "floating" in blob
+    assert "Microchip MCP73831/2 datasheet DS20001984H" in blob
+    gates = part_lookup.power_gates("Battery_Management", "MCP73831-2-OT", "Package_TO_SOT_SMD:SOT-23-5")
+    assert gates and any("PROG" in g["instruction"] and "floating" in g["instruction"] for g in gates)
+    spec = _spec(("MCP73831", ""))
+    spec["parts"][0]["package"] = "SOT-23"
+    plan = build_donor_salvage_plan(spec)
+    step = json.dumps(_step(plan, "U1"))
+    assert "PROG" in step and "floating" in step
+
+
+@needs_libraries
+def test_a_different_digit_and_a_family_match_do_not_inherit_curated_cautions() -> None:
+    two_n7000 = " ".join(part_lookup.part_cautions("2N7000", tier="exact"))
+    assert "DS11303" not in two_n7000 and "body diode" not in two_n7000.lower()
+    mcp73833 = " ".join(part_lookup.part_cautions("MCP73833", tier="exact"))
+    assert "MCP73831/2" not in mcp73833 and "PROG" not in mcp73833
+    family = part_lookup.lookup_part("W25Q128JWSIQ")
+    assert family["matches"] and {m["tier"] for m in family["matches"]} == {"family"}
+    assert not family.get("cautions")
+    assert not part_lookup.resolve_lookup_gates(family["matches"], None).get("cautions")
+
+
+@needs_libraries
+def test_generic_package_cautions_fire_on_a_sample_footprint_each() -> None:
+    bga = " ".join(
+        part_lookup.part_cautions(
+            "TXB0102YZP",
+            tier="exact",
+            footprint="Package_BGA:Texas_DSBGA-8_0.9x1.9mm_Layout2x4_P0.5mm",
+            pins=[{"number": "A1", "name": "VCCA", "type": "power_in"}],
+        )
+    )
+    assert "accessible pads" in bga or "test points" in bga
+    sot = " ".join(
+        part_lookup.part_cautions("TLV75518PDBV", tier="exact", footprint="Package_TO_SOT_SMD:SOT-23-5")
+    )
+    assert "round the package" in sot or "around the package" in sot
+    cell = " ".join(part_lookup.part_cautions("TP4056-42-ESOP8", tier="exact", library="Battery_Management"))
+    assert "no cell connected" in cell and "fire" in cell.lower()
+    dip = " ".join(
+        part_lookup.part_cautions("NE555P", tier="exact", library="Timer", footprint="Package_DIP:DIP-8_W7.62mm")
+    )
+    assert "accessible pads" not in dip and "no cell connected" not in dip
+
+
 def test_the_teardown_fetch_follows_no_redirect_and_speaks_only_https() -> None:
     opener = teardown_search._opener()
     names = {type(h).__name__ for h in opener.handlers}
