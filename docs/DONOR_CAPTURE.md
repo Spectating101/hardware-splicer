@@ -19,18 +19,26 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
   number gets "worth taking" together with a reminder to check a datasheet; anything else is "read the marking".
 - Sizes are **typical for the package** unless you typed them, and the page and viewer say so. A wrong size only changes the picture.
 - The chosen kind decides ordinary handling, regardless of its reference label. Hazard markings override it: choosing “other”
-  or “chip” does not hide a magnetron, CRT flyback, lamp, heater or thermal fuse warning.
+  or “chip” does not hide a magnetron, CRT flyback transformer, CCFL or thermal fuse warning.
 - Type hazard words that you can read, even when the package menu has no matching entry. “Something else” accepts markings such
-  as magnetron, MOT, CRT flyback, anode, CCFL, backlight, lamp, heater, fuser, thermal fuse, TCO or HV; those parts are left in place.
+  as magnetron (also magnatron, magentron or magnetrons), MOT, CRT, anode cap, aquadag, EHT, LOPT, flyback transformer,
+  TV flyback, CCFL, backlight, fluorescent, mercury, cold cathode, lamp inverter, photoflash, heater, fuser, thermal fuse, TCO or HV/HVC;
+  those parts are left in place. Common anode, flyback diode, LED lamp, white LED lamp and lamp driver labels do not trigger
+  CRT or CCFL wording. Heater/fuser labels apply only to “other” and “mains or power part”; “10k heater sense” on a resistor
+  does not become a fuser.
   A typed XT60 marking warns that the battery pack may still be live. No cell chemistry or capacitor rating is guessed.
   Supercapacitor and tantalum markings also add their handling warnings with “something else”; no new package size is assumed.
 - Film boxes and ceramic discs without readable voltage stay optional with a warning that they might be mains safety
-  capacitors. kV, WV and HV/high voltage/microwave/flash capacitor markings trigger the leave-in-place rule. Wide terminal
+  capacitors. kV, WV, V, VAC, VDC, kVDC, kVAC, WVDC and WVAC markings are read with or without a space; the voltage policy
+  and HV/HVC/high voltage/microwave/flash capacitor context trigger the leave-in-place rule. Wide terminal
   blocks are optional, never “worth taking”.
 - The hazard rules are shared with file plans. Before any iron work, preparation names fitted parts with mains or high-voltage
-  context, including parts left on the board, and warns against a wrist strap near high voltage. Discharge and prove zero with
-  a meter; leave a resistor across the capacitors and re-measure after a wait because voltage can come back. CRT, microwave and
-  lamp circuits need trained help. See [the hazard rules and their sources](SALVAGE_PLAN.md#hazards-it-names).
+  context, including parts left on the board, and warns against a wrist strap near high voltage. Ordinary boards retain resistor
+  discharge, meter proof-of-zero and a check again after a wait. The high-voltage tier replaces those instructions: these circuits
+  can hold a lethal charge that a hand meter and an ordinary resistor are not made for. The tool gives no discharge procedure;
+  leave the part in place and the case closed, and leave it to someone trained. This includes every part skipped for voltage
+  reasons and explicit microwave, CRT, photoflash, CCFL or lamp inverter context. An unmarked film cap or optocoupler alone
+  does not get an appliance-circuit disclaimer. See [the hazard rules and their sources](SALVAGE_PLAN.md#hazards-it-names).
 - The rule list depends on what you enter: a missing warning proves nothing. The plan approves no powering or reuse.
 
 ## Looking things up, measuring, reclaiming

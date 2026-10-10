@@ -36,7 +36,8 @@ def advice(plan):
     return plan["parts"][0]["salvage"]
 
 
-@pytest.mark.parametrize("marking", ["2kV", "0.1kV", "330WV", "330 WV", "HV", "high voltage", "microwave", "flash"])
+@pytest.mark.parametrize("marking", ["2kV", "0.1kV", "330WV", "330 WV", "HV", "HVC", "high voltage", "microwave", "flash",
+                                    "2KVDC", "2kVDC", "2kVAC", "2 kVDC", "400WVDC", "400 WVDC", "330WVDC", "330 WVDC"])
 def test_a2_a3_b2_b3_capacitor_markings_leave_the_part_in_place(marking):
     for plan in (donor(typed("capacitor", "film box", marking, "C1")), board("C1", "Capacitor_THT:C_Rect_L18", marking)):
         got = advice(plan)
@@ -60,9 +61,11 @@ def test_a3_b6_unreadable_voltage_is_a_warning_not_a_guessed_rating(package, mar
 
 
 @pytest.mark.parametrize("marking,warning", [
-    ("magnetron", "radiation"), ("CRT flyback", "charge"), ("anode", "charge"),
-    ("CCFL", "mercury"), ("backlight", "lamp"), ("lamp", "break"),
-    ("heater", "cool"), ("fuser", "cool"), ("thermal fuse", "bypass"),
+    ("magnetron", "waveguide"), ("magnatron", "waveguide"), ("magentron", "waveguide"), ("magnetrons", "waveguide"),
+    ("CRT flyback", "charge"), ("anode cap", "charge"), ("aquadag", "charge"), ("EHT", "charge"), ("LOPT", "charge"),
+    ("flyback transformer", "charge"), ("TV flyback", "charge"),
+    ("CCFL", "mercury"), ("backlight", "lamp"), ("fluorescent", "break"), ("mercury", "break"), ("cold cathode", "break"),
+    ("thermal fuse", "bypass"), ("lamp inverter", "high voltage"), ("photoflash", "lethal charge"),
     ("TCO", "bypass"), ("microwave", "capacitor"), ("HV diode", "high voltage"),
     ("MOT", "microwave"), ("high voltage", "high voltage"),
 ])
@@ -75,7 +78,7 @@ def test_a6_a7_b1_b2_b5_b7_b14_typed_hazards_override_other_and_wrong_kinds(mark
 
 
 @pytest.mark.parametrize("ref,footprint,value,kind,warning,verdict", [
-    ("T1", "MyLib:Flyback_EE25", "EE25", "other", "charge", "skip"),
+    ("T1", "MyLib:Flyback_Transformer_EE25", "EE25", "other", "charge", "skip"),
     ("T1", "MyLib:EE16", "CCFL 1500V", "other", "mercury", "skip"),
     ("F1", "Fuse:ThermalFuse_L13", "10A 250V", "passive", "bypass", "skip"),
     ("Z1", "MyLib:Thermal_Cut-Off", "", "passive", "bypass", "skip"),
@@ -89,13 +92,15 @@ def test_a7_b7_b16_file_appliance_parts_get_their_kind_and_hazard(ref, footprint
 
 
 def test_a4_a5_b17_prepare_names_leftover_charge_before_iron_work():
-    plan = donor(typed("capacitor", "electrolytic can", "47uF 400V", "C1"), typed("connector", "USB", "", "J1"))
+    plan = donor(typed("capacitor", "electrolytic can", "4700uF 63V", "C1"),
+                 typed("mains or power part", "relay", "", "K1"), typed("connector", "USB", "", "J1"))
     prep = plan["steps"][0]
     text = prep["instruction"]
-    assert "C1" in text and "meter" in text and "prove" in text and "zero" in text
+    assert "K1" in text and "meter" in text and "prove" in text and "zero" in text
     assert "leave a resistor across" in text.lower() and "re-measure after a wait" in text and "come back" in text
-    assert "do not wear a wrist strap near high voltage" in text
+    assert "do not wear a wrist strap near high voltage" in text.lower()
     assert "Use an anti-static strap" not in text
+    assert "no discharge procedure" not in text and "CRT, microwave and lamp" not in text
     assert any("J1" in s["refs"] and "iron" in s["instruction"] for s in plan["steps"][1:])
     assert "safe" not in prep["title"].lower()
 
@@ -107,7 +112,7 @@ def test_a4_a5_b17_prepare_names_leftover_charge_before_iron_work():
 ])
 def test_a5_mains_and_hv_context_also_remove_the_strap_suggestion(part):
     text = donor(part)["steps"][0]["instruction"]
-    assert part["ref"] in text and "do not wear a wrist strap near high voltage" in text
+    assert part["ref"] in text and "do not wear a wrist strap near high voltage" in text.lower()
 
 
 def test_a9_mains_parts_point_at_capacitors_for_stored_charge():
@@ -119,8 +124,8 @@ def test_a10_rating_is_a_leave_in_place_policy_not_a_claim_of_present_voltage():
     got = advice(donor(typed("capacitor", "electrolytic can", "400V", "C1")))
     assert "policy" in " ".join(got["reasons"])
     assert "not the voltage now present" in " ".join(got["reasons"])
-    assert "if you decide to take it" in " ".join(got["hazards"])
-    assert "prove zero" in " ".join(got["hazards"])
+    assert "leave the part in place" in " ".join(got["hazards"])
+    assert "prove zero" not in " ".join(got["hazards"])
 
 
 def test_a8_wide_terminal_is_never_worth_taking():
@@ -218,6 +223,7 @@ def test_b18_surge_parts_get_only_a_generic_protection_note():
 def test_no_test_instruction_invents_a_capacitor_reading():
     plan = donor(typed("capacitor", "electrolytic can", "470uF 16V"))
     checks = [c for s in plan["steps"] for c in s["checks"] if c["check"] == "test"]
+    assert checks
     assert all("close to the printed value" not in c["expect"] for c in checks)
 
 
@@ -245,3 +251,102 @@ def test_a5_design_omissions_do_not_add_fitted_hazards():
 def test_b3_unmarked_polarised_can_names_possible_flash_charge():
     text = " ".join(advice(donor(typed("capacitor", "electrolytic can", "330uF")))["hazards"])
     assert "could be a photoflash" in text and "prove zero with a meter" in text
+
+
+def test_review_1a_loose_magnetron_warning_does_not_invent_stored_radiation():
+    text = " ".join(advice(donor(typed("other", "something else", "magnetron")))["hazards"])
+    assert "do not power a loose magnetron" in text
+    assert "fitted to its own waveguide and cavity" in text
+    assert "contain microwave radiation" not in text
+
+
+@pytest.mark.parametrize("kind,package", [("other", "something else"), ("ic", "DIP"), ("connector", "USB")])
+@pytest.mark.parametrize("marking", ["common anode", "common cathode", "flyback diode", "LED anode", "anode", "lamp",
+                                    "LED lamp", "white LED lamp", "lamp driver", "FLASH memory", "W25Q128 FLASH", "MOTOR driver"])
+def test_review_1d_1e_ordinary_labels_do_not_invent_crt_or_ccfl(kind, package, marking):
+    plan = donor(typed(kind, package, marking))
+    got = advice(plan)
+    assert got["verdict"] != "skip"
+    assert got["hazards"] == (["heat and moisture can damage a chip: do not stay on one spot, and keep it dry"] if kind == "ic" else [])
+    removals = [s for s in plan["steps"] if s["kind"] == "salvage"]
+    assert len(removals) == 1 and removals[0]["refs"] == ["Z1"]
+    assert "CRT" not in plan["steps"][0]["instruction"]
+    assert "mercury" not in removals[0]["instruction"]
+
+
+@pytest.mark.parametrize("marking", ["heater", "fuser", "heating element"])
+def test_review_1e_heater_labels_apply_to_other_and_power_parts_only(marking):
+    for kind, package in [("other", "something else"), ("mains or power part", "transformer")]:
+        got = advice(donor(typed(kind, package, marking)))
+        assert got["verdict"] == "skip" and "cool" in " ".join(got["hazards"])
+    for kind, package in [("resistor", "0805"), ("ic", "DIP"), ("connector", "USB")]:
+        got = advice(donor(typed(kind, package, "10k " + marking + " sense")))
+        assert got["verdict"] != "skip"
+        assert not any("heater or fuser" in h for h in got["hazards"])
+    got = advice(board("R1", "MyLib:Heater_Element"))
+    assert got["verdict"] == "skip" and "cool" in " ".join(got["hazards"])
+    assert advice(board("R1", "Resistor:R_0603", "10k heater sense"))["hazards"] == []
+
+
+@pytest.mark.parametrize("marking,volts", [
+    ("2KVDC", 2000), ("2kVDC", 2000), ("2kVAC", 2000), ("2 kVDC", 2000), ("2 kVAC", 2000),
+    ("400WVDC", 400), ("400 WVDC", 400), ("330WVDC", 330), ("330 WVDC", 330),
+    ("400WVAC", 400), ("400 WVAC", 400), ("2kV", 2000), ("2 kV", 2000),
+    ("330WV", 330), ("330 WV", 330), ("400V", 400), ("400 V", 400),
+    ("275VAC", 275), ("275 VAC", 275), ("400VDC", 400), ("400 VDC", 400),
+    ("2kV DC", 2000), ("2KV/DC", 2000),
+])
+def test_review_1c_voltage_parser_reads_rated_markings(marking, volts):
+    from hardware_splicer.salvage_plan import _voltages
+    for plan in (donor(typed("capacitor", "film box", marking, "C1")), board("C1", "Capacitor_THT:C_Rect_L18", marking)):
+        assert set(_voltages(plan["parts"][0])) == {volts}
+        assert "no readable voltage" not in " ".join(advice(plan)["hazards"] + advice(plan)["reasons"])
+
+
+@pytest.mark.parametrize("part", [
+    typed("capacitor", "film box", "1kV", "C1"), typed("capacitor", "film box", "2KVDC", "C1"),
+    typed("capacitor", "electrolytic can", "400WVDC", "C1"),
+    typed("capacitor", "electrolytic can", "330 WVDC", "C1"), typed("capacitor", "ceramic disc", "HVC", "C1"),
+    *[typed("other", "something else", m) for m in ["magnetron", "magnatron", "magentron", "magnetrons", "microwave", "MOT",
+                                                  "HV diode", "CRT", "anode cap", "flyback transformer", "EHT", "photoflash", "CCFL", "lamp inverter"]],
+])
+def test_review_1b_2_hv_tier_has_no_resistor_or_meter_discharge_procedure(part):
+    plan = donor(part)
+    assert advice(plan)["verdict"] == "skip"
+    text = plan["steps"][0]["instruction"]
+    assert part["ref"] in text and "lethal charge" in text
+    assert "a hand meter and an ordinary resistor are not made for" in text
+    assert "no discharge procedure" in text and "case closed" in text and "someone trained" in text
+    assert "prove zero" not in text and "discharge through" not in text and "re-measure" not in text
+    assert "Use an anti-static strap" not in text
+    hazards = " ".join(advice(plan)["hazards"])
+    assert "prove zero" not in hazards and "discharge it through" not in hazards
+
+
+@pytest.mark.parametrize("part", [typed("capacitor", "film box", "", "C1"), typed("ic", "DIP", "PC817", "U1")])
+def test_review_1b_unrelated_unknown_cap_or_opto_has_no_appliance_discharge_disclaimer(part):
+    text = donor(part)["steps"][0]["instruction"]
+    assert "CRT" not in text and "microwave" not in text and "lamp circuits" not in text
+    assert "discharge through a suitable resistor" in text and "prove zero" in text and "re-measure after a wait" in text
+
+
+@pytest.mark.parametrize("package,marking", [
+    *[("film box", m) for m in ["2KVDC", "2kVDC", "2kVAC", "2 kVDC", "2 kVAC", "2kV", "2 kV", "2000V", "2.1kV", "HVC"]],
+    *[("electrolytic can", m) for m in ["400WVDC", "400 WVDC", "330WVDC", "330 WVDC", "400WVAC", "400 WVAC", "400V", "330WV", "330 WV"]],
+])
+def test_review_3_mixed_board_never_puts_hv_skip_in_an_iron_step(package, marking):
+    plan = donor(typed("capacitor", package, marking, "C1"), typed("connector", "USB", "", "J1"), typed("ic", "DIP", "NE555P", "U1"))
+    assert advice(plan)["verdict"] == "skip" and advice(plan)["tool"] == ""
+    steps = [s for s in plan["steps"] if s["kind"] == "salvage"]
+    assert [s["refs"] for s in steps] == [["J1"], ["U1"]]
+    assert all("iron" in s["instruction"] for s in steps)
+    assert "no discharge procedure" in plan["steps"][0]["instruction"]
+    assert "Use an anti-static strap" not in plan["steps"][0]["instruction"]
+
+
+def test_review_1d_file_flyback_diode_does_not_override_chip_or_connector_kind():
+    assert _classify("U1", "MyLib:Flyback_Diode") == "ic"
+    assert _classify("J1", "MyLib:Flyback_Diode") == "connector"
+    for ref, footprint in [("U1", "MyLib:Flyback_Diode"), ("J1", "MyLib:Flyback_Diode")]:
+        assert advice(board(ref, footprint))["verdict"] != "skip"
+        assert not any("CRT" in h or "charge" in h for h in advice(board(ref, footprint))["hazards"])

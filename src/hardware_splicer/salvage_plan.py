@@ -42,18 +42,30 @@ TYPED_AUTHORITY = (
 )
 
 GENERAL_SAFETY = (
-    "Unplug the board and disconnect any battery or pack before you start. Capacitors can hold a charge even without a readable "
+    "Unplug the board and disconnect any battery or pack before you start. "
+    "Work with ventilation and eye protection, and wash your hands afterwards: older boards can contain leaded solder."
+)
+# Ordinary workshop practice; no resistor value or wait duration is prescribed.
+ORDINARY_CHARGE_PRECAUTIONS = (
+    "Capacitors can hold a charge even without a readable "
     "voltage marking: discharge through a suitable resistor, not a screwdriver; use a meter to prove zero before touching or heating. "
     "Leave a resistor across the capacitors and re-measure after a wait: voltage can come back. If you do not know how to do this, "
-    "leave the board alone and get help. Work with ventilation and eye protection, and wash your hands afterwards: older boards can "
-    "contain leaded solder."
+    "leave the board alone and get help."
+)
+# Microwave service warning: https://www.partmaster.co.uk/images/mediator/121/nne281bmbpq%20service%20manual.pdf
+# leaving HV work to trained personnel is generic practice, not a discharge method.
+HV_NO_PROCEDURE = (
+    "These circuits can hold a lethal charge that a hand meter and an ordinary resistor are not made for. "
+    "This tool gives no discharge procedure: leave the part in place and the case closed, and leave it to someone trained."
 )
 
 _SPECIAL_CONNECTOR = re.compile(r"USB|JST|Molex|Micro|Mini|RJ45|Barrel|Audio|FPC|FFC|Terminal|Screw|SMA|HDMI|SD_|Card", re.IGNORECASE)
 _PLAIN_HEADER = re.compile(r"PinHeader|PinSocket|Pin_Header", re.IGNORECASE)
 # Anchored to whole parts of a name, so a word that merely contains one ("Electronic", "MOVEMENT", "OnePiece") does not match.
 _ELECTROLYTIC = re.compile(r"(^|[:_])CP_|C_Elec|Electrolytic|(^|[:_])Elec_|Tantalum|TantalC|EDLC|Supercap", re.IGNORECASE)
-_VOLTS = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)\s*(kV|WV|V(?:AC|DC)?)(?![a-z])", re.IGNORECASE)
+# Illinois Capacitor TTA: WVDC is rated working voltage, not measured voltage.
+# https://www1.futureelectronics.com/doc/ILLINOIS%20CAPACITOR/338TTA016M.pdf
+_VOLTS = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)\s*((?:kV|WV|V)(?:AC|DC)?)(?![a-z])", re.IGNORECASE)
 _MAINS_RATED_CAP = re.compile(r"\b[XY][12]\b", re.IGNORECASE)
 _PITCH = r"(?<![\d.])(?:5\.0{1,2}|5\.08|7\.50?|7\.62|10\.16|11\.0{1,2})(?!\d)"
 _WIDE_TERMINAL = re.compile(rf"(Terminal|Screw|MKDS|Phoenix).*{_PITCH}|{_PITCH}.*(Terminal|Screw|MKDS|Phoenix)", re.IGNORECASE)
@@ -75,11 +87,15 @@ _LITHIUM = re.compile(r"Lithium|LiPo|Li-?ion|18650|Pouch|CR\d{4}", re.IGNORECASE
 _PACK_PLUG = re.compile(r"(?<![a-z0-9])(?:XT(?:30|60|90)|battery[-_ ]?connector)(?![a-z0-9])", re.IGNORECASE)
 _CAP_PACKAGE = re.compile(r"Capacitor|(^|:)C[P]?_|Tantalum|EDLC|Supercap", re.IGNORECASE)
 _UNMARKED_CAP = re.compile(r"C_Rect|C_Disc|Film|Ceramic[-_ ]?Disc", re.IGNORECASE)
-_HV_EQUIPMENT = re.compile(r"(?<![a-z0-9])HV(?![a-z0-9])|high[-_ ]*voltage", re.IGNORECASE)
-_HV_TOKEN = re.compile(_HV_EQUIPMENT.pattern + r"|microwave|(?<![a-z0-9])flash(?![a-z0-9])", re.IGNORECASE)
-_CRT = re.compile(r"(?<![a-z0-9])CRT(?![a-z0-9])|flyback|anode|aquadag", re.IGNORECASE)
-_MICROWAVE = re.compile(r"microwave|magnetron|(?<![a-z0-9])MOT(?![a-z0-9])", re.IGNORECASE)
-_LAMP = re.compile(r"CCFL|backlight|(?<![a-z0-9])lamp(?![a-z0-9])", re.IGNORECASE)
+# HVC ceramic-disc series: https://www.hv-caps.com/HV-Ceramic-Disc-Capacitor/hv-ceramic-disc-capacitor163.html
+_HV_EQUIPMENT = re.compile(r"(?<![a-z0-9])(?:HV|HVC)(?![a-z])|high[-_ ]*voltage", re.IGNORECASE)
+_HV_TOKEN = re.compile(_HV_EQUIPMENT.pattern + r"|microwave|photoflash|(?<![a-z0-9])flash(?![a-z0-9])", re.IGNORECASE)
+# CRT service guidance (docs/SALVAGE_PLAN.md); bare anode/flyback also describe ordinary diodes.
+_CRT = re.compile(r"(?<![a-z0-9])(?:CRT|EHT|LOPT)(?![a-z0-9])|flyback[-_ ]+transformer|TV[-_ ]+flyback|anode[-_ ]+cap(?![a-z])|aquadag", re.IGNORECASE)
+_MICROWAVE = re.compile(r"microwave|(?<![a-z0-9])ma(?:gnet|gnat|gent)rons?(?![a-z0-9])|(?<![a-z0-9])MOT(?![a-z0-9])", re.IGNORECASE)
+# EPA lamp guidance in docs/SALVAGE_PLAN.md concerns fluorescent/CCFL lamps, not LED lamp labels.
+_LAMP = re.compile(r"CCFL|backlight|fluorescent|mercury|cold[-_ ]+cathode", re.IGNORECASE)
+_LAMP_INVERTER = re.compile(r"lamp[-_ ]+inverter", re.IGNORECASE)
 _HEATER = re.compile(r"heater|fuser|heating[-_ ]?element", re.IGNORECASE)
 _THERMAL_FUSE = re.compile(r"thermal[-_ ]*(?:fuse|cut[-_ ]?off|cut[-_ ]?out)|(?<![a-z0-9])TCO(?![a-z0-9])", re.IGNORECASE)
 _THERMISTOR = re.compile(r"thermistor|(?<![a-z0-9])NTC(?![a-z0-9])", re.IGNORECASE)
@@ -131,7 +147,7 @@ def _voltages(part: dict[str, Any]) -> list[float]:
     # Read markings, not footprint dimensions or part numbers. kV and WV are audit A2 cases.
     identity = part.get("identity") or {}
     text = " ".join(str(x or "") for x in (part.get("value"), identity.get("typed")))
-    return [float(m.group(1)) * (1000 if m.group(2).lower() == "kv" else 1) for m in _VOLTS.finditer(text)]
+    return [float(m.group(1)) * (1000 if m.group(2).lower().startswith("kv") else 1) for m in _VOLTS.finditer(text)]
 
 
 def _is_capacitor(part: dict[str, Any]) -> bool:
@@ -176,16 +192,39 @@ def _special_hazards(part: dict[str, Any]) -> list[str]:
         hazards.append("CRT anodes and flyback circuits can retain charge and regain it after discharge: leave them in place and get trained help")
     if _MICROWAVE.search(text):
         hazards.append("microwave circuits can retain charge in the high-voltage capacitor; leave the HV stack in place, including its transformer and diode")
-        hazards.append("do not power or reuse a loose magnetron: its original cavity and waveguide contain microwave radiation")
+        # Panasonic: "Never operate the magnetron unless it is properly installed."
+        # https://www.partmaster.co.uk/images/mediator/121/nne281bmbpq%20service%20manual.pdf
+        hazards.append("do not power a loose magnetron: it is meant to run fitted to its own waveguide and cavity")
     if _LAMP.search(text):
-        hazards.append("a CCFL backlight has high voltage and a mercury-containing lamp; a lamp or backlight marking may mean one: do not break or force it out")
+        hazards.append("this marking may refer to a fluorescent or CCFL backlight with high voltage and a mercury-containing lamp: do not break or force it out")
+    if _LAMP_INVERTER.search(text):
+        # Generic practice for an unknown lamp inverter; no lamp chemistry is inferred.
+        hazards.append("a lamp inverter marking points to high voltage: leave it in place and get trained help")
     if _THERMAL_FUSE.search(text):
         hazards.append("a thermal fuse is a non-resettable cut-off: do not bypass it; replace it using the appliance's service information")
-    if _HEATER.search(text):
+    if _heater_context(part):
         hazards.append("a heater or fuser may be hot and connected to mains: let it cool; do not power it without its original thermal cut-off")
     if _HV_EQUIPMENT.search(text) and not _is_capacitor(part):
         hazards.append("this marking points to high voltage: leave the part in place and get trained help")
     return hazards
+
+
+def _heater_context(part: dict[str, Any]) -> bool:
+    # A typed resistor's application label does not turn it into a heater.
+    component = part.get("component")
+    if component is not None:
+        return component in {"other", "mains or power part"} and bool(_HEATER.search(_part_text(part)))
+    return bool(_HEATER.search(part["footprint"])) or (
+        part["kind"] == "other" and bool(_HEATER.search(_part_text(part)))
+    )
+
+
+def _hv_no_procedure(part: dict[str, Any]) -> bool:
+    """Policy tier, not a statement of measured voltage or a discharge procedure."""
+    text = _part_text(part)
+    return bool(_high_voltage(part) or _CRT.search(text) or _MICROWAVE.search(text)
+                or _LAMP.search(text) or _LAMP_INVERTER.search(text) or _HV_EQUIPMENT.search(text)
+                or re.search(r"photoflash", text, re.IGNORECASE))
 
 
 def _mains_context(part: dict[str, Any]) -> bool:
@@ -193,7 +232,7 @@ def _mains_context(part: dict[str, Any]) -> bool:
     unknown_charge = _is_capacitor(part) and not _voltages(part) and bool(
         _UNMARKED_CAP.search(part["footprint"]) or _ELECTROLYTIC.search(part["footprint"])
     )
-    return bool(_high_voltage(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
+    return bool(_hv_no_procedure(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
                 or _mains_silicon(part) or _OPTO.search(text) or unknown_charge)
 
 
@@ -238,7 +277,14 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         verdict = "skip"
         reasons.append("a solder jumper is a bridge on the board itself: there is no part to take")
         effort, tool = "none", ""
-    elif special and not _high_voltage(part):
+    elif _hv_no_procedure(part):
+        verdict = "skip"
+        reasons.append("leave-in-place policy: a marking of 100 V or more, X/Y mains class or HV circuit context; a rating is not the voltage now present")
+        hazards.append("a high-voltage circuit can hold a dangerous charge; leave it in place and get trained help")
+        hazards.append(HV_NO_PROCEDURE)
+        hazards.extend(special)
+        effort, tool = "none", ""
+    elif special:
         verdict = "skip"
         reasons.append("a marking or package points to an appliance hazard: leave it in place")
         hazards.extend(special)
@@ -258,12 +304,12 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
     elif _MAINS_PART.search(text) and not _is_capacitor(part):
         verdict = "optional"
         reasons.append("a part from mains wiring or a switching supply: it can wear out or have carried mains voltage in its original use")
-        hazards.append("it may have carried mains voltage; nearby capacitors can hold charge after unplugging, so discharge and prove zero before work")
+        hazards.append("it may have carried mains voltage; nearby capacitors can hold charge after unplugging: follow the preparation tier before work")
         if re.search(r"Relay|SONGLE|SRD[-_]", text, re.IGNORECASE):
             hazards.append("relay contacts may be worn; do not rely on a used relay for mains switching")
         if _MOV.search(text):
             hazards.append("varistors wear out and may fail short: do not put a used MOV back on mains")
-    elif _ELECTROLYTIC.search(text) or _high_voltage(part):
+    elif _ELECTROLYTIC.search(text):
         verdict = "test_first"
         reasons.append("a polarised or high-voltage capacitor ages and can fail; its condition is unknown")
         hazards.append("may still hold a charge: discharge it through a resistor first")
@@ -276,12 +322,6 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
             hazards.append("tantalum is polarised: reverse polarity destroys it; record its polarity before removal")
         if re.search(r"EDLC|Supercap", text, re.IGNORECASE):
             hazards.append("a supercapacitor can arc when shorted: remove jewellery and do not short its terminals")
-        if _high_voltage(part):
-            verdict = "skip"
-            reasons.append("leave-in-place policy: a marking of 100 V or more, X/Y mains class or HV context; a rating is not the voltage now present")
-            hazards.append("a high-voltage capacitor can hold a dangerous charge; if you decide to take it, discharge and prove zero first, then re-measure after a wait")
-            hazards.extend(special)
-            effort, tool = "none", ""
         if _ELECTROLYTIC.search(text) and re.search(r"bulg|leak|vented", text, re.IGNORECASE):
             verdict = "skip"
             reasons.insert(0, "reported damage: discard a bulged or leaking capacitor")
@@ -466,12 +506,15 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             groups.append([part])
 
     context_parts = [p for p in fitted if _mains_context(p)]
+    hv_parts = [p for p in fitted if _hv_no_procedure(p)]
     preparation = GENERAL_SAFETY
+    if hv_parts:
+        preparation += " High-voltage leave-in-place context: " + ", ".join(p["ref"] for p in hv_parts) + ". " + HV_NO_PROCEDURE
+    else:
+        preparation += " " + ORDINARY_CHARGE_PRECAUTIONS
     if context_parts:
         preparation += " Mains or high-voltage context: " + ", ".join(p["ref"] for p in context_parts) + "."
-        preparation += " Before any iron work, prove the capacitors in and around these circuits are discharged with a meter."
-        preparation += " Leave a resistor across them and re-measure after a wait because voltage can come back; do not wear a wrist strap near high voltage."
-        preparation += " CRT, microwave and lamp circuits need trained help; this report gives no discharge procedure for them."
+        preparation += " Do not wear a wrist strap near high voltage."
     else:
         preparation += " Use an anti-static strap if you can."
 

@@ -243,7 +243,7 @@ def _classify(ref: str, footprint: str) -> str:
         return "passive"
     if re.match(r"^CX\d", ref, re.IGNORECASE):
         return "passive"
-    if re.search(r"Transformer|Trafo|Flyback|CCFL|Relay|SONGLE|SRD[-_]", footprint, re.IGNORECASE) or re.match(r"^T\d", ref, re.IGNORECASE):
+    if re.search(r"Transformer|Trafo|TV[-_ ]+Flyback|CCFL|Relay|SONGLE|SRD[-_]", footprint, re.IGNORECASE) or re.match(r"^T\d", ref, re.IGNORECASE):
         return "other"
     for pattern, kind in _REF_KIND:
         if pattern.match(ref):
