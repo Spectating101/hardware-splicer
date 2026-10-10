@@ -105,14 +105,16 @@ _THERMAL_FUSE = re.compile(r"thermal[-_ ]*(?:fuse|cut[-_ ]?off|cut[-_ ]?out)|(?<
 _THERMISTOR = re.compile(r"thermistor|(?<![a-z0-9])NTC(?![a-z0-9])", re.IGNORECASE)
 # TDK ICL notes: an inrush disc, not a temperature-sensor NTC or a plain ceramic disc.
 _INRUSH_MARK = re.compile(r"(?<![a-z0-9])(?:icl|inrush|sck[-_]?\d+)(?![a-z0-9])", re.IGNORECASE)
-_INRUSH_BODY = re.compile(r"thermistor|(?<![a-z0-9])(?:ntc|disc)(?![a-z0-9])", re.IGNORECASE)
+_INRUSH_BODY = re.compile(r"thermistor|(?<![a-z0-9])ntc(?![a-z0-9])", re.IGNORECASE)
+_INRUSH_SERIES = re.compile(r"(?<![a-z0-9])(?:icl|sck[-_]?\d[a-z0-9]*)(?![a-z0-9])", re.IGNORECASE)
+_DISC = re.compile(r"(?<![a-z0-9])disc(?![a-z0-9])", re.IGNORECASE)
 _SURGE = re.compile(r"gas[-_ ]?discharge|spark[-_ ]?gap|(?<![a-z0-9])GDT\d*\b", re.IGNORECASE)
 _MOV = re.compile(r"varistor|(^|[:_ ])RV_|(^|[:_ ])MOV(_|\d|$)", re.IGNORECASE)
 _OPTO = re.compile(r"opto|(?<![a-z0-9])(?:PC8\d{2}|4N[23]\d|VO6\d{2,3}|LTV\d{3}|EL8\d{2}|TLP\d+)", re.IGNORECASE)
-_BARRIER = re.compile(
-    _OPTO.pattern + r"|digital[-_ ]+isolat|(?<![a-z0-9])ISO\d+",
-    re.IGNORECASE,
-)
+_BARRIER = re.compile(_OPTO.pattern + r"|digital[-_ ]+isolat", re.IGNORECASE)
+# An ISO-prefixed isolator is a chip: the same digits on a screw or a standard are not.
+_ISO_CHIP = re.compile(r"(?<![a-z0-9])ISO\d+", re.IGNORECASE)
+_CHIP_PACKAGE = re.compile(r"SOIC|SOP|SSOP|TSSOP|DIP|SO-?\d|QFN|LGA|SOT", re.IGNORECASE)
 _POWER_TAB = re.compile(r"TO-220|TO-247", re.IGNORECASE)
 _MAINS_SILICON = re.compile(r"(?<![a-z0-9])(?:LNK\d+|TNY\d+|TOP\d+|VIPER\d+|UC384\d|NCP12\d+|ICE[23]\w+|IRF840)|offline[-_ ]?switch", re.IGNORECASE)
 _SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603)|LED_(01005|0201|0402|0603)", re.IGNORECASE)
@@ -233,11 +235,15 @@ def _heater_context(part: dict[str, Any]) -> bool:
 
 def _inrush_ntc(part: dict[str, Any]) -> bool:
     text = _part_text(part)
-    return bool(_INRUSH_MARK.search(text) and _INRUSH_BODY.search(text))
+    # A named inrush series on a disc is enough; the bare word "inrush" needs an NTC or thermistor beside it.
+    return bool((_INRUSH_MARK.search(text) and _INRUSH_BODY.search(text)) or (_INRUSH_SERIES.search(text) and _DISC.search(text)))
 
 
 def _barrier_part(part: dict[str, Any]) -> bool:
-    return bool(_BARRIER.search(_part_text(part)))
+    text = _part_text(part)
+    if _BARRIER.search(text):
+        return True
+    return bool(_ISO_CHIP.search(text) and (part.get("kind") == "ic" or _CHIP_PACKAGE.search(part.get("footprint", ""))))
 
 
 def _power_tab(part: dict[str, Any]) -> bool:

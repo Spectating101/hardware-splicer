@@ -3,7 +3,7 @@
   "entries": [
     {
       "names": [
-        "^MCP7383[12]"
+        "^MCP7383[12](?!\\d)"
       ],
       "cautions": [
         {
@@ -44,7 +44,7 @@
     },
     {
       "names": [
-        "^TB6612FNG"
+        "^TB6612FNG(?!\\d)"
       ],
       "cautions": [
         {
@@ -71,7 +71,7 @@
     },
     {
       "names": [
-        "^L298"
+        "^L298(?!\\d)"
       ],
       "cautions": [
         {
@@ -108,7 +108,7 @@
     },
     {
       "names": [
-        "^2N7002"
+        "^2N7002(?!\\d)"
       ],
       "cautions": [
         {
@@ -139,7 +139,7 @@
       ],
       "cautions": [
         {
-          "text": "This is a Darlington: two transistors in one package with built-in base-emitter shunt resistors. A plain transistor test misleads — the base-emitter path reads more than one diode drop and has a resistor in parallel.",
+          "text": "This is a Darlington: two transistors in one package with built-in base-emitter shunt resistors, so a plain transistor test can mislead. Read the base-emitter figures in the datasheet before judging a reading.",
           "basis": "datasheet",
           "quote": "Monolithic Construction with Built−In Base−Emitter Shunt Resistors",
           "source": {
@@ -162,7 +162,7 @@
     },
     {
       "names": [
-        "^IRF840"
+        "^IRF840(?!\\d)"
       ],
       "cautions": [
         {
@@ -179,7 +179,7 @@
     },
     {
       "names": [
-        "^NRF24L01"
+        "^NRF24L01(?!\\d)"
       ],
       "cautions": [
         {

@@ -438,3 +438,12 @@ def test_mains_side_to220_keeps_the_insulating_pad_and_a_logic_to220_does_not():
         assert "General practice, not from the datasheet." in text
     assert "insulating pad" not in lone and "bushing" not in lone
     assert "insulating pad" not in " ".join(advice(donor(typed("ic", "DIP", "NE555P", "U1")))["hazards"])
+
+
+def test_an_iso_numbered_screw_is_not_an_isolator_and_an_inrush_snubber_capacitor_is_not_an_ntc():
+    screw = advice(donor(typed("other", "something else", "ISO4762 M3 screw", "H1")))
+    assert not any("unknown isolation" in h for h in screw["hazards"])
+    snubber = advice(donor(typed("capacitor", "ceramic disc", "inrush snubber 1nF 50V", "C1")))
+    assert not any("NTC inrush limiter" in h for h in snubber["hazards"])
+    chip = advice(donor(typed("ic", "SOIC", "ISO7721", "U1")))
+    assert any("unknown isolation" in h for h in chip["hazards"])

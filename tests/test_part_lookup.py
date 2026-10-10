@@ -607,3 +607,26 @@ def test_lookup_attaches_cautions_only_to_a_named_match() -> None:
     assert any("PROG" in row for row in resolved["cautions"])
     family_resolved = pl.resolve_lookup_gates(family["matches"], None)
     assert family_resolved.get("cautions") in (None, [])
+
+
+@pytest.mark.parametrize("name", ["MCP738310", "TB6612FNG1", "L2980", "2N70020", "IRF8400", "NRF24L010"])
+def test_a_part_number_with_an_extra_digit_gets_none_of_the_original_chips_cautions(name) -> None:
+    assert pl.part_cautions(name, tier="exact") == []
+
+
+@pytest.mark.parametrize("name", ["MCP73831-2-OT", "TB6612FNG", "L298N", "2N7002K", "IRF840A", "NRF24L01P"])
+def test_a_real_suffix_still_gets_the_chips_cautions(name) -> None:
+    assert pl.part_cautions(name, tier="exact")
+
+
+def test_an_eight_lead_sot23_does_not_get_the_three_lead_numbering() -> None:
+    got = " ".join(pl.part_cautions("OPA2677", footprint="Package_TO_SOT_SMD:SOT-23-8"))
+    assert "single lead" not in got
+    assert "single lead" in " ".join(pl.part_cautions("2N7002", footprint="Package_TO_SOT_SMD:SOT-23"))
+    assert "single lead" in " ".join(pl.part_cautions("2N7002", footprint="Package_TO_SOT_SMD:SOT-23_Handsoldering"))
+
+
+def test_the_darlington_caution_predicts_no_meter_reading() -> None:
+    got = " ".join(pl.part_cautions("TIP120", tier="exact"))
+    assert "Darlington" in got and "shunt" in got
+    assert "diode drop" not in got
