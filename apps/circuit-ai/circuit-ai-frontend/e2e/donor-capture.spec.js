@@ -118,7 +118,7 @@ test('the example shows hazards named, what is left alone, and the 3D take-apart
     titles.push(await page.getByTestId('assembly-title').innerText());
     if (/Sort, label/.test(titles[titles.length - 1])) break;
   }
-  expect(titles.some((t) => /Make the board safe/.test(t))).toBe(true);
+  expect(titles.some((t) => /Unplug and check stored charge/.test(t))).toBe(true);
   await expect(page.getByTestId('donor-parts-list')).toContainText('Leave it');            // the 0603 resistor and the cell are left alone
 });
 

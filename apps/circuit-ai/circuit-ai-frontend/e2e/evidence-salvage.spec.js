@@ -49,7 +49,7 @@ test('taking the board apart: safety first, then the parts worth keeping lift of
   const stage = viewer.locator('canvas');
 
   await expect(page.getByTestId('assembly-counter')).toHaveText(/Step 1 of 7/);
-  await expect(page.getByTestId('assembly-title')).toHaveText('Make the board safe to work on');
+  await expect(page.getByTestId('assembly-title')).toHaveText('Unplug and check stored charge');
   await expect(page.getByTestId('assembly-instruction')).toContainText('discharge');
   await expect(viewer).toHaveAttribute('data-placed', '38');       // every fitted part is on the board; R1 and R4 are not fitted
   await expect(viewer).toHaveAttribute('data-removed', '0');
