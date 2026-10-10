@@ -39,8 +39,8 @@ export function packageFromFootprint(footprint: string | null): string | null {
 }
 
 /**
- * What KiCad's own libraries say about a marking, and the measurements to make before trusting a chip. A library entry is a part with
- * that name, not proof that the chip in hand is that part, and the panel says so. Readings are numbers you write down: never a pass.
+ * What KiCad's own libraries say about a marking, and the measurements to write down. A library entry is a part with
+ * that name, not proof that the chip in hand is that part, and the panel says so. Readings are notes: never a pass.
  */
 export function PartLookupPanel({
   marking,
@@ -121,8 +121,8 @@ export function PartLookupPanel({
           ) : null}
           {data.gates.length ? (
             <div className="mt-2" data-testid="lookup-gates">
-              <div className="font-medium text-stone-100">Measure these before you trust it</div>
-              <p className="mt-0.5 text-[10px] leading-4 text-stone-500">The pin names are from the library&apos;s {data.gates_from}, not read from your chip: confirm them in its datasheet. Write down what you measure; only the datasheet says what it should be.</p>
+              <div className="font-medium text-stone-100">Measure these and write the readings down</div>
+              <p className="mt-0.5 text-[10px] leading-4 text-stone-500">The pin names are from the library&apos;s {data.gates_from}, not read from your chip: confirm them in its datasheet. Write down what you measure; only the datasheet says what it should be. None of these readings shows a removed chip works.</p>
               <ul className="mt-1.5 space-y-2">
                 {data.gates.map((gate) => (
                   <li key={gate.key} className="leading-4 text-stone-300">

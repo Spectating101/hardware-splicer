@@ -40,12 +40,19 @@ _EXTENDS = re.compile(r'\(extends "([^"]+)"\)')
 _GENERATOR = re.compile(r'\(generator_version "([^"]+)"\)')
 _FOOTPRINT_NAME = re.compile(r"^[A-Za-z0-9_.+\-]+:[A-Za-z0-9_.,+\- ]+$")
 # A negative supply (VEE) is a supply, not a ground. Several grounds are ranked: the plain one first.
+# KiCad writes V_{SS} / V_{CC}: strip the braces before matching. PGND1 ranks with PGND.
 _GROUND_RANK = ("GND", "VSS", "DGND", "AGND", "GNDD", "GNDA", "VSSA", "PGND")
-_GROUND_NAME = re.compile(r"^(" + "|".join(_GROUND_RANK) + r")$", re.IGNORECASE)
 # Pins that carry no supply: the exposed pad, a tab or shield, and pins marked not connected.
-_MAIN_SUPPLY = ("VDD", "VCC", "VDDIO", "VCCIO", "VIN", "VI", "IN", "V+", "VS", "VSUP", "AVDD", "AVCC", "VDDA")   # measured first; a backup or reference pin is not the main supply
+_MAIN_SUPPLY = ("VDD", "VCC", "VDDIO", "VCCIO", "VIN", "VI", "IN", "V+", "VS", "VSUP", "AVDD", "AVCC", "VDDA", "VM", "VMOT")
+_NEG_REF = ("V-", "VEE", "VCC-")
+# Sense / internal / bypass pins are not a rail the person should drive (TI DRV8833 VINT; ST L298 SENSE).
+_INTERNAL_STEM = ("SENSE", "VINT", "VCAP", "VREG", "VBYP", "VREF")
 _NOT_A_SUPPLY = re.compile(r"^(EP|EPAD|PAD|TAB|SHIELD|SHLD|NC|DNC|N/C|~)\d*$", re.IGNORECASE)
-_PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):")
+_PIN_ONE_PACKAGES = re.compile(r"^(Package_DIP|Package_SO|Package_QFP|Package_DFN_QFN):", re.IGNORECASE)
+_TO220 = re.compile(r"TO-?220", re.IGNORECASE)
+_SOT23 = re.compile(r"SOT-?23", re.IGNORECASE)
+_BGA_OR_MODULE = re.compile(r"^(Package_BGA|RF_Module):", re.IGNORECASE)
+_BRACES = re.compile(r"[_\\{}]")
 
 
 class PartLookupError(ValueError):
@@ -262,7 +269,7 @@ def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
                 break
     texts = {
         "exact": "the library has a part with exactly this name",
-        "variant": "the library has a part with this name plus or minus a short package or grade code: likely the same chip with a different package or grade",
+        "variant": "the library has a part with this name plus or minus a short package or grade code: a different package or grade, whose pin numbers follow that entry",
         "family": "the library has parts from the same family, not this one: use them to learn what kind of chip it probably is, no more",
     }
     for name, tier in chosen:
@@ -333,8 +340,195 @@ def _all_pins(library: str, name: str) -> list[dict[str, str]]:
     return found["pins"]
 
 
+def _pin_token(name: str) -> str:
+    return _BRACES.sub("", name).upper()
+
+
+def _ground_rank(token: str) -> int | None:
+    if token in _GROUND_RANK:
+        return _GROUND_RANK.index(token)
+    if token.startswith("PGND"):
+        return _GROUND_RANK.index("PGND")
+    if token.startswith("GND"):
+        return 0
+    return None
+
+
+def _is_internal(token: str) -> bool:
+    return any(token == stem or token.startswith(stem) for stem in _INTERNAL_STEM)
+
+
+def _supply_rank(token: str) -> int:
+    if token in _MAIN_SUPPLY:
+        return _MAIN_SUPPLY.index(token)
+    for i, stem in enumerate(_MAIN_SUPPLY):
+        if token.startswith(stem):
+            return i
+    return len(_MAIN_SUPPLY)
+
+
+def footprint_family(footprint: str | None) -> str | None:
+    """The capture-page family a KiCad footprint name belongs to, or None when it does not map."""
+
+    if not footprint:
+        return None
+    upper = footprint.upper()
+    library, _, item = upper.partition(":")
+    if _TO220.search(upper):
+        return "TO-220"
+    if _SOT23.search(upper):
+        return "SOT-23"
+    if library == "PACKAGE_DIP":
+        return "DIP"
+    if library == "PACKAGE_QFP":
+        return "QFP"
+    if library == "PACKAGE_DFN_QFN":
+        return "QFN"
+    if library == "PACKAGE_BGA":
+        return "BGA"
+    if library == "RF_MODULE":
+        return "MODULE"
+    if library == "PACKAGE_SO":
+        if "TSSOP" in item:
+            return "TSSOP"
+        if "SOIC" in item or item.startswith("SO-") or item.startswith("SO_"):
+            return "SOIC"
+        return "SO"
+    if library == "PACKAGE_TO_SOT_THT":
+        return "TO_THT:" + item.split("_", 1)[0]
+    if library == "PACKAGE_TO_SOT_SMD":
+        return "TO_SMD:" + item.split("_", 1)[0]
+    return library or None
+
+
+def footprint_fits_user(library_footprint: str | None, user_footprint: str | None) -> bool:
+    """True unless both sides name a family and those families differ."""
+
+    if not library_footprint or not user_footprint:
+        return True
+    library_key, user_key = footprint_family(library_footprint), footprint_family(user_footprint)
+    if library_key is None or user_key is None:
+        return True
+    return library_key == user_key
+
+
+def pick_named_match(matches: list[dict[str, Any]], user_footprint: str | None) -> dict[str, Any] | None:
+    """The first exact/variant hit, preferring one whose footprint family fits the package the person chose."""
+
+    named = [row for row in matches if row.get("tier") in {"exact", "variant"}]
+    if not named:
+        return None
+    if user_footprint:
+        fitting = [row for row in named if row.get("footprint") and footprint_fits_user(row.get("footprint"), user_footprint)]
+        if fitting:
+            return fitting[0]
+    return named[0]
+
+
+def _orientation(footprint: str | None) -> str:
+    # JEDEC SPP-012: "The pin-numbering convention is counterclockwise, as viewed from above, for standard-bend product (leads bent down)"
+    if not footprint:
+        return ""
+    if _PIN_ONE_PACKAGES.match(footprint):
+        return (
+            " The dot or notch marks the pin-1 end; pin 1 is the first leg counter-clockwise from it seen from the top "
+            "for standard-bend leads; if you are looking at the underside of a board, the order appears reversed."
+        )
+    if _TO220.search(footprint) or _SOT23.search(footprint) or footprint.upper().startswith("PACKAGE_TO_SOT"):
+        return (
+            " The lead order depends on the part and must be taken from the datasheet's package drawing, "
+            "not from the package name (7805 vs LM317)."
+        )
+    if _BGA_OR_MODULE.match(footprint):
+        return " Balls are named by row and column, not counted around the edge."
+    return ""
+
+
+def _rail_pairs(pins: list[dict[str, str]]) -> tuple[list[dict[str, str]], dict[str, str]] | tuple[list[dict[str, str]], None]:
+    """Supply pins to measure, and the pin each is measured against. Empty when the symbol does not name a pair."""
+
+    has_plain_gnd = any(_pin_token(p["name"]) == "GND" for p in pins)
+    grounds = []
+    seen_g: set[str] = set()
+    for pin in pins:
+        token = _pin_token(pin["name"])
+        rank = _ground_rank(token)
+        if rank is None:
+            continue
+        if token == "VSS" and has_plain_gnd:
+            continue          # L298 names the logic rail Vss while GND is the return (ST L298)
+        if token in seen_g:
+            continue
+        seen_g.add(token)
+        grounds.append((rank, pin))
+    grounds.sort(key=lambda item: (item[0], len(item[1]["number"]), item[1]["number"]))
+    supply: list[dict[str, str]] = []
+    for pin in pins:
+        token = _pin_token(pin["name"])
+        if pin["type"] != "power_in":
+            continue
+        if _ground_rank(token) is not None and not (token == "VSS" and has_plain_gnd):
+            continue
+        if _is_internal(token) or _NOT_A_SUPPLY.match(pin["name"]) or _NOT_A_SUPPLY.match(token):
+            continue
+        if any(_pin_token(other["name"]) == token for other in supply):
+            continue
+        supply.append(pin)
+    supply.sort(key=lambda pin: (_supply_rank(_pin_token(pin["name"])), len(pin["number"]), pin["number"]))
+    if grounds:
+        return supply, grounds[0][1]
+    neg = next((pin for pin in supply if _pin_token(pin["name"]) in _NEG_REF), None)
+    pos = [pin for pin in supply if _pin_token(pin["name"]) not in _NEG_REF]
+    if neg and pos:
+        return pos, neg
+    outs = [
+        pin for pin in pins
+        if pin["type"] == "power_out"
+        and not _is_internal(_pin_token(pin["name"]))
+        and not _NOT_A_SUPPLY.match(pin["name"])
+    ]
+    if supply and outs:
+        return supply, outs[0]
+    return [], None
+
+
+def _split_rails(supply: list[dict[str, str]]) -> bool:
+    tokens = [_pin_token(pin["name"]) for pin in supply]
+    return sum(1 for token in tokens if re.fullmatch(r"VCC[A-Z]", token)) >= 2
+
+
+def _notes(pins: list[dict[str, str]], supply_pin: dict[str, str], *, kind: str, footprint: str | None, split: bool) -> str:
+    names = {_pin_token(pin["name"]) for pin in pins}
+    token = _pin_token(supply_pin["name"])
+    bits: list[str] = []
+    if kind == "voltage" and token.startswith("VBAT"):
+        bits.append("VBAT may be a coin-cell backup: do not feed it from a supply you did not plan.")
+    if kind == "voltage" and any(name.startswith("VCAP") for name in names):
+        bits.append("VCAP is not a supply: do not apply a voltage there.")
+    if kind == "voltage" and "EN" in names:
+        bits.append("An enable pin (EN) can make a regulator's output read off with input present.")
+    if kind == "voltage" and names & {"PROG", "STAT", "BAT"}:
+        bits.append("Do not charge a cell to test a charger chip.")
+    motor = any(name.startswith("VM") or name.startswith("PGND") or name == "VMOT" for name in names) or (
+        token == "VS" and any(name.startswith("SENSE") for name in names)
+    )
+    if motor and kind in {"isolation", "voltage"}:
+        bits.append("Motor drivers read low through body diodes and windings.")
+    if split and kind == "isolation":
+        bits.append("These rails must not be joined.")
+    if kind == "voltage" and any(_pin_token(pin["name"]) in {"OUT", "VO"} and pin["type"] == "power_out" for pin in pins):
+        bits.append("A reading on the input does not show what the output is doing.")
+    if kind == "voltage" and footprint and _TO220.search(footprint):
+        bits.append("The metal tab is a terminal: its function is in the datasheet, not implied by the package name.")
+    if kind == "voltage" and footprint and "DFN_QFN" in footprint.upper():
+        bits.append("If the datasheet puts the ground on the exposed pad, that pad is the return, not a supply.")
+    if kind == "voltage":
+        bits.append("Reversing the probes on a supply pair can destroy the part.")
+    return (" " + " ".join(bits)) if bits else ""
+
+
 def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str, Any]]:
-    """Things to measure before trusting a chip, read from its pin names and types: supply against ground, and whether they are shorted.
+    """What to measure on a library symbol: power-off diode and ohms first, then a current-limited bench supply.
 
     They say what to measure and where, never what the reading should be: the range is the datasheet's to give.
     """
@@ -345,38 +539,61 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         return []
     if len(pins) > MAX_PINS_FOR_GATES:
         return []
-    ground = sorted((p for p in pins if _GROUND_NAME.match(p["name"])), key=lambda p: (_GROUND_RANK.index(p["name"].upper()), len(p["number"]), p["number"]))
-    supply: list[dict[str, str]] = []
-    for p in pins:
-        if p["type"] == "power_in" and not _GROUND_NAME.match(p["name"]) and not _NOT_A_SUPPLY.match(p["name"]) and all(q["name"] != p["name"] for q in supply):
-            supply.append(p)          # one measurement per supply name: a part with four VDD pins is measured at one
-    if not ground or not supply:
+    supply, reference = _rail_pairs(pins)
+    if not supply or reference is None:
         return []
-    supply.sort(key=lambda p: _MAIN_SUPPLY.index(p["name"].upper()) if p["name"].upper() in _MAIN_SUPPLY else len(_MAIN_SUPPLY))
-    g = ground[0]
-    where = " Pin 1 is the corner with the dot or notch; count anticlockwise from it, seen from above." if footprint and _PIN_ONE_PACKAGES.match(footprint) else ""
+    supply = supply[:3]
+    split = _split_rails(supply)
+    where = _orientation(footprint)
+    # Fluke 87V MAX: "disconnect power and discharge all high-voltage capacitors before you measure resistance, continuity, capacitance, or a diode junction."
+    # Fluke 87V MAX: "the resistance reading represents the total resistance of all paths between the probes."
+    # TI SCDA039: "there are ESD diodes tied between the input and the positive supply rail (VDD/VCC) and an ESD diode tied from the input to the negative supply rail or ground (VSS/GND)."
     gates: list[dict[str, Any]] = []
-    for s in supply[:3]:
-        gates.append(
-            {
-                "key": f"{library}:{name}|voltage|pin {s['number']} ({s['name']})|pin {g['number']} ({g['name']})",
-                "kind": "voltage",
-                "from": f"pin {s['number']} ({s['name']})",
-                "to": f"pin {g['number']} ({g['name']})",
-                "instruction": f"With the board powered the way it was originally, measure between pin {s['number']} ({s['name']}) and pin {g['number']} ({g['name']}), and write the reading down.{where}",
-                "expect": "write down what you see, then compare it with the datasheet's supply range before you connect anything of yours",
-            }
-        )
-    gates.append(
-        {
-            "key": f"{library}:{name}|isolation|pin {supply[0]['number']} ({supply[0]['name']})|pin {g['number']} ({g['name']})",
-            "kind": "isolation",
-            "from": f"pin {supply[0]['number']} ({supply[0]['name']})",
-            "to": f"pin {g['number']} ({g['name']})",
-            "instruction": f"With the power off, check that pin {supply[0]['number']} ({supply[0]['name']}) and pin {g['number']} ({g['name']}) are not shorted together.{where}",
-            "expect": "write down what you see: a reading near zero ohms means something is shorted, which needs understanding before you apply power",
-        }
-    )
+    g_from = f"pin {reference['number']} ({reference['name']})"
+    for kind, expect in (
+        (
+            "diode",
+            "write down both readings, then compare them with the datasheet or a known-good chip",
+        ),
+        (
+            "isolation",
+            "write down both readings: ohms is every path in parallel, not a fact that the pins are shorted",
+        ),
+        (
+            "voltage",
+            "write down the voltage and the current; only the datasheet says what belongs on that pin pair",
+        ),
+    ):
+        for pin in supply:
+            extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split)
+            pair = f"pin {pin['number']} ({pin['name']})"
+            if kind == "diode":
+                instruction = (
+                    f"With the power off, in diode mode, measure both ways between {pair} and {g_from}. "
+                    f"Write both readings down.{where}{extra}"
+                )
+            elif kind == "isolation":
+                instruction = (
+                    f"With the power off, measure ohms both ways between {pair} and {g_from}. "
+                    f"Ohms reads every path in parallel, and a chip's protection diodes can read low in one probe direction, "
+                    f"so write both readings down and compare them with the datasheet or a known-good chip.{where}{extra}"
+                )
+            else:
+                instruction = (
+                    f"Only after writing down the power-off readings, and only from a current-limited bench supply set to the "
+                    f"supply voltage in the datasheet for this pin pair (never the board's own supply, never a mains-derived one), "
+                    f"measure between {pair} and {g_from}. Write down the voltage and the current it draws.{where}{extra}"
+                )
+            gates.append(
+                {
+                    "key": f"{library}:{name}|{kind}|{pair}|{g_from}",
+                    "kind": kind,
+                    "from": pair,
+                    "to": g_from,
+                    "instruction": instruction,
+                    "expect": expect,
+                }
+            )
     return gates
 
 
@@ -404,9 +621,9 @@ def _footprint_size(name: str) -> tuple[float, float] | None:
 
 
 def footprint_size(name: str) -> dict[str, Any] | None:
-    """The courtyard of a KiCad footprint, in mm: a little larger than the part itself, and exact for that footprint."""
+    """The courtyard of the KiCad footprint named, which may not be your exact package."""
 
     size = _footprint_size(name)
     if size is None:
         return None
-    return {"width_mm": size[0], "length_mm": size[1], "source": f"KiCad footprint library {name}, courtyard"}
+    return {"width_mm": size[0], "length_mm": size[1], "source": f"courtyard of the KiCad footprint {name}, which may not be your exact package"}

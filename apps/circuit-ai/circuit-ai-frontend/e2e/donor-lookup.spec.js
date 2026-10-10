@@ -24,7 +24,7 @@ test('a marking is looked up in KiCad\'s library, says how close each answer is,
   const matches = page.getByTestId('lookup-matches').locator('li');
   await expect(matches).toHaveCount(2);                                           // NE555D and NE555P: variants of the name typed
   await expect(matches.first()).toHaveAttribute('data-tier', 'variant');
-  await expect(matches.first()).toContainText('the same chip with a different package or grade');
+  await expect(matches.first()).toContainText('a different package or grade');
   await expect(panel(page)).toContainText('KiCad symbol library 9.0');
   await expect(panel(page)).toContainText('not proof that the chip you hold is that part');
   const links = await panel(page).locator('a').evaluateAll((nodes) => nodes.map((n) => n.getAttribute('href')));
@@ -39,27 +39,27 @@ test('a marking is looked up in KiCad\'s library, says how close each answer is,
   await expect(page.getByTestId('donor-selected').locator('select').nth(1)).toHaveValue('DIP');
   await expect(page.getByTestId('lookup-gates')).toContainText('pin 8 (VCC)');
   await expect(page.getByTestId('lookup-gates')).toContainText('not read from your chip');
-  await expect(page.getByTestId('lookup-reading')).toHaveCount(2);
-  await expect(page.getByTestId('lookup-recorded')).toHaveText('0 of 2 readings recorded');
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(3);
+  await expect(page.getByTestId('lookup-recorded')).toHaveText('0 of 3 readings recorded');
 });
 
 test('what you measure is written down, counted, carried into the plan and the spreadsheet, and never called a pass', async ({ page }, testInfo) => {
   await open(page);
   await chip(page, 'NE555P');
-  await expect(page.getByTestId('lookup-reading')).toHaveCount(2, { timeout: 15000 });
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(3, { timeout: 15000 });
   await page.getByTestId('lookup-reading').first().fill('5.02 V');
-  await expect(page.getByTestId('lookup-recorded')).toHaveText('1 of 2 readings recorded');
+  await expect(page.getByTestId('lookup-recorded')).toHaveText('1 of 3 readings recorded');
   await page.getByTestId('donor-plan').click();
   const viewer = page.getByTestId('assembly-viewer');
   await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
   await page.getByTestId('assembly-slider').focus();
   await page.keyboard.press('ArrowRight');
-  await expect(page.getByTestId('assembly-instruction')).toContainText('Readings recorded: 1 of 2');
+  await expect(page.getByTestId('assembly-instruction')).toContainText('Readings recorded: 1 of 3');
   await expect(page.getByTestId('assembly-instruction')).toContainText('not a pass');
   await expect(page.getByTestId('assembly-instruction')).toContainText('not from your chip');
   await expect(page.getByTestId('assembly-reading')).toHaveText(['Recorded: 5.02 V', 'Not recorded yet', 'Not recorded yet'].slice(0, 3).slice(0, await page.getByTestId('assembly-reading').count()));
-  await expect(page.getByTestId('donor-parts-list')).toContainText('1/2 measured');
-  await expect(page.getByTestId('reclaim-table')).toContainText('1 of 2 readings recorded');
+  await expect(page.getByTestId('donor-parts-list')).toContainText('1/3 measured');
+  await expect(page.getByTestId('reclaim-table')).toContainText('1 of 3 readings recorded');
 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('reclaim-csv').click()]);
   const saved = testInfo.outputPath('reclaim.csv');
@@ -69,7 +69,7 @@ test('what you measure is written down, counted, carried into the plan and the s
   const csv = raw.slice(1);
   expect(csv.split('\r\n')[0]).toBe('Label,What it is (as you read it),Package,Advice,Measurements,Datasheet,Why');
   expect(csv).toContain('U1,NE555P,');
-  expect(csv).toContain('1 of 2 readings recorded');
+  expect(csv).toContain('1 of 3 readings recorded');
   expect(csv).toContain('http://www.ti.com/lit/ds/symlink/ne555.pdf');
   expect(csv.toLowerCase()).not.toContain('passed');
 });
@@ -175,12 +175,12 @@ test('a new marking never shows the old chip\'s answer, and a right-click places
 test('a reading belongs to the chip it was taken from', async ({ page }) => {
   await open(page);
   await chip(page, 'NE555P');
-  await expect(page.getByTestId('lookup-reading')).toHaveCount(2, { timeout: 15000 });
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(3, { timeout: 15000 });
   await page.getByTestId('lookup-reading').first().fill('5.02 V');
   await page.getByTestId('donor-marking').fill('NE555D');
-  await expect(page.getByTestId('lookup-reading')).toHaveCount(2, { timeout: 15000 });
+  await expect(page.getByTestId('lookup-reading')).toHaveCount(3, { timeout: 15000 });
   await expect(page.getByTestId('lookup-reading').first()).toHaveValue('');
-  await expect(page.getByTestId('lookup-recorded')).toHaveText('0 of 2 readings recorded');
+  await expect(page.getByTestId('lookup-recorded')).toHaveText('0 of 3 readings recorded');
 });
 
 test('the capture page with the lookup open has no sideways scrolling on a phone', async ({ page }) => {
