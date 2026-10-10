@@ -154,3 +154,13 @@ handling practice, not a force limit or a fit claim.
 
 A battery (needs a charger and regulator modules), more module types, a case export you can print, and a wire-by-wire
 animation for boards other than the ones in the library.
+
+Every plan also reports the WROOM-32E supply requirement (datasheet v2.1, Table 14: IVDD minimum 0.5 A).
+Weak chargers, cables or unpowered hubs and resets when Wi-Fi starts are labelled general practice, not datasheet claims.
+Wires on pins whose library function names ADC2 get an information note: analog reads fail while Wi-Fi runs
+(ESP-IDF v4.2.5 ADC docs); digital I2C still works. This also appears on wires rejected by other checks.
+The antenna `keep_clear` entry cites Figure 3 note A: the datasheet marks a keepout zone but gives no case-wall distance.
+The information note reports the actual antenna-to-inside-wall gap from the existing layout without judging it.
+One kit-fit note names the typical housing, bend, USB overmold, PCB and under-board header sizes and asks you to
+check your actual kit; female-to-female jumpers require male pins at both ends. Display seating puts force on board
+edges and never the glass, explicitly labelled general practice, not from the datasheet. These notes approve nothing.

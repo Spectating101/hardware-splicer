@@ -583,8 +583,9 @@
       "keep_clear": [
         {
           "id": "antenna",
-          "what": "Keep metal and the case wall away from the antenna end.",
-          "edge": "top"
+          "what": "The datasheet marks a keepout zone at the antenna end; the figure note gives no distance to a case wall.",
+          "edge": "top",
+          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
         }
       ],
       "electrical": {
@@ -594,7 +595,9 @@
         ],
         "io_v": 3.3,
         "io_5v_tolerant": false,
-        "usb_supply_v": 5.0
+        "usb_supply_v": 5.0,
+        "supply_current_note": "The ESP32-WROOM-32E module needs a supply that can deliver at least 0.5 A.",
+        "supply_current_source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
       },
       "dimension_basis": {
         "pcb": "Espressif drawing, unit mm: 27.94 x 48.26, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang (exact)",
@@ -621,6 +624,11 @@
           "label": "arduino-esp32 pins_arduino.h (SDA = 21, SCL = 22)",
           "url": "https://raw.githubusercontent.com/espressif/arduino-esp32/master/variants/esp32/pins_arduino.h",
           "as_of": "2026-10-09"
+        },
+        {
+          "label": "ESP-IDF ADC docs v4.2.5 (ADC2 and Wi-Fi; DevKitC GPIO0 auto-program circuit)",
+          "url": "https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html",
+          "as_of": "2026-10-10"
         }
       ],
       "notes": [
