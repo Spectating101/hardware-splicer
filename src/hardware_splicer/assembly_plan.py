@@ -238,6 +238,13 @@ def _to_board(x: float, y: float, origin: tuple[float, float], degrees: float, m
 
 
 def _classify(ref: str, footprint: str) -> str:
+    # Package evidence precedes ambiguous refs: X/CX can name mains capacitors, T can name transformers.
+    if re.search(r"Capacitor|(^|:)C[P]?_|Thermal[-_ ]*(?:Fuse|Cut[-_ ]?Off|Cut[-_ ]?Out)", footprint, re.IGNORECASE):
+        return "passive"
+    if re.match(r"^CX\d", ref, re.IGNORECASE):
+        return "passive"
+    if re.search(r"Transformer|Trafo|Flyback|CCFL|Relay|SONGLE|SRD[-_]", footprint, re.IGNORECASE) or re.match(r"^T\d", ref, re.IGNORECASE):
+        return "other"
     for pattern, kind in _REF_KIND:
         if pattern.match(ref):
             return kind

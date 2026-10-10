@@ -18,8 +18,20 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
 - A marking is **what you read**, never proof of what the part is: it can be a house code, worn or fake. A marking that looks like a part
   number gets "worth taking" together with a reminder to check a datasheet; anything else is "read the marking".
 - Sizes are **typical for the package** unless you typed them, and the page and viewer say so. A wrong size only changes the picture.
-- What you chose for a part (its kind) decides how it is treated, not its label: a part you call `J9` but mark as a chip is a chip.
-- The hazard rules are the same as for a file (batteries, stored charge, mains parts). They are a rule list, not a guarantee.
+- The chosen kind decides ordinary handling, regardless of its reference label. Hazard markings override it: choosing “other”
+  or “chip” does not hide a magnetron, CRT flyback, lamp, heater or thermal fuse warning.
+- Type hazard words that you can read, even when the package menu has no matching entry. “Something else” accepts markings such
+  as magnetron, MOT, CRT flyback, anode, CCFL, backlight, lamp, heater, fuser, thermal fuse, TCO or HV; those parts are left in place.
+  A typed XT60 marking warns that the battery pack may still be live. No cell chemistry or capacitor rating is guessed.
+  Supercapacitor and tantalum markings also add their handling warnings with “something else”; no new package size is assumed.
+- Film boxes and ceramic discs without readable voltage stay optional with a warning that they might be mains safety
+  capacitors. kV, WV and HV/high voltage/microwave/flash capacitor markings trigger the leave-in-place rule. Wide terminal
+  blocks are optional, never “worth taking”.
+- The hazard rules are shared with file plans. Before any iron work, preparation names fitted parts with mains or high-voltage
+  context, including parts left on the board, and warns against a wrist strap near high voltage. Discharge and prove zero with
+  a meter; leave a resistor across the capacitors and re-measure after a wait because voltage can come back. CRT, microwave and
+  lamp circuits need trained help. See [the hazard rules and their sources](SALVAGE_PLAN.md#hazards-it-names).
+- The rule list depends on what you enter: a missing warning proves nothing. The plan approves no powering or reuse.
 
 ## Looking things up, measuring, reclaiming
 
