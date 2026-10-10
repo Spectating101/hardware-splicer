@@ -55,10 +55,32 @@ says per ref (`U1: 5.02 V; U2: not recorded`) and the recorded count is the numb
 **a note, not a pass**, and none of them shows a removed chip works.
 
 Pin-1 wording for DIP, SO, QFP and QFN follows JEDEC SPP-012: the dot or notch marks the pin-1 end; pin 1 is the first leg
-counter-clockwise from it seen from the top for standard-bend leads; from the underside the order appears reversed. For TO-220,
-SOT-23 and other TO/SOT outlines the lead order is taken from the datasheet's package drawing, not from the package name (7805 vs
-LM317). BGA balls are named by row and column. RF modules have numbered contacts around the edge from the pin-1 mark in the
+counter-clockwise from it seen from the top for standard-bend leads; from the underside the order appears reversed. A 3-lead
+SOT-23 (or TO-236) uses the usual top-view order from the Diodes and Nexperia 2N7002 drawings: two-lead side below, pin 1 left,
+pin 2 right, pin 3 the single lead; confirm against the drawing for the part in hand. SOT-23-5 and SOT-23-6 numbers go round
+the package, not across it. Other TO-220 and TO/SOT outlines still take the lead order from the datasheet's package drawing,
+not from the package name (7805 vs LM317). BGA, DSBGA and WLCSP balls are named by row and column, not counted around the
+edge, and cannot be probed under the package. RF modules have numbered contacts around the edge from the pin-1 mark in the
 datasheet drawing.
+
+## Sourced cautions
+
+A small curated table (`src/hardware_splicer/data/part_cautions.json`) adds chip-specific cautions for a few exact names
+(MCP73831/2, TB6612FNG, L298, 2N7002, TIP120–122, IRF840, nRF24L01). Each entry is a list of **anchored** regexes, matched
+case-insensitively against the KiCad symbol **name**, and only on an exact or variant hit — never on a family match, and never
+by inheriting another digit's function (`MCP73833` does not get the MCP73831/2 lines; `2N7000` does not get the 2N7002 lines).
+
+Each caution is `{text, basis, quote, source: {label, url, as_of}}`. `basis` is `datasheet` or `general practice`. A datasheet
+row must have a verbatim `quote` (a substring of the named datasheet text after whitespace is collapsed; no paraphrase, no
+line break, keep the original Unicode) plus `source.label`, `source.url` and `source.as_of`. The loader rejects a missing
+text, a datasheet row without quote/url/label, any unknown key, or a regex that does not compile — the same style of check as
+the device module library. Rendered text shows the source label; general-practice lines end with "General practice, not from
+the datasheet."
+
+To add a row: copy an existing entry, keep the name pattern anchored so a different digit cannot match, put only facts the
+quote supports in `text`, and keep `as_of` as a calendar date. Generic package and charger warnings that need no per-part
+source (ball-grid probing, SOT-23 numbering, unlisted battery-management cells, separate VDDA/VBAT/VREF+/VDDIO pins) live
+in code beside the table.
 
 ## Sizes
 

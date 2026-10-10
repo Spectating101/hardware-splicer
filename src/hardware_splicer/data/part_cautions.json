@@ -1,0 +1,234 @@
+{
+  "schema_version": "hardware_splicer.part_cautions.v1",
+  "entries": [
+    {
+      "names": ["^MCP7383[12]"],
+      "cautions": [
+        {
+          "text": "This is a single-cell Li-Ion/Li-Polymer charger. VBAT is the connection to the cell's positive terminal. STAT is a status output; leaving PROG open or floating disables charging.",
+          "basis": "datasheet",
+          "quote": "If the PROG pin is open or floating, the MCP73831/2 are disabled",
+          "source": {
+            "label": "Microchip MCP73831/2 datasheet DS20001984H",
+            "url": "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "STAT is a status output for an LED or a host, and VBAT connects to the cell's positive terminal.",
+          "basis": "datasheet",
+          "quote": "STAT is an output for connection to an LED for charge",
+          "source": {
+            "label": "Microchip MCP73831/2 datasheet DS20001984H",
+            "url": "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "VBAT is the connection to the cell's positive terminal, not a second input supply.",
+          "basis": "datasheet",
+          "quote": "Connect to positive terminal of battery.",
+          "source": {
+            "label": "Microchip MCP73831/2 datasheet DS20001984H",
+            "url": "https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "Do these checks with no cell connected.",
+          "basis": "general practice"
+        }
+      ]
+    },
+    {
+      "names": ["^TB6612FNG"],
+      "cautions": [
+        {
+          "text": "Vcc is the small-signal supply and VM is the motor supply. Set each from its own range; neither is fed from the other.",
+          "basis": "datasheet",
+          "quote": "Small signal supply (2.7V\u301c5.5V)",
+          "source": {
+            "label": "Toshiba TB6612FNG datasheet (copy hosted by SparkFun)",
+            "url": "https://cdn.sparkfun.com/datasheets/Robotics/TB6612FNG.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "VM has its own operating range, separate from Vcc; do not feed one rail from the other.",
+          "basis": "datasheet",
+          "quote": "VM        4.5            5      13.5        V",
+          "source": {
+            "label": "Toshiba TB6612FNG datasheet (copy hosted by SparkFun)",
+            "url": "https://cdn.sparkfun.com/datasheets/Robotics/TB6612FNG.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "A low on STBY holds the driver in standby.",
+          "basis": "datasheet",
+          "quote": "\u201cL\u201d=standby",
+          "source": {
+            "label": "Toshiba TB6612FNG datasheet (copy hosted by SparkFun)",
+            "url": "https://cdn.sparkfun.com/datasheets/Robotics/TB6612FNG.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    },
+    {
+      "names": ["^L298"],
+      "cautions": [
+        {
+          "text": "The SENSE pins are not supplies; a sense resistor sits between each of them and ground.",
+          "basis": "datasheet",
+          "quote": "Between this pin and ground is connected the sense resistor",
+          "source": {
+            "label": "STMicroelectronics L298 datasheet (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Robotics/L298_H_Bridge.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "The logic blocks have their own supply, separate from the power stage.",
+          "basis": "datasheet",
+          "quote": "Supply Voltage for the Logic Blocks.",
+          "source": {
+            "label": "STMicroelectronics L298 datasheet (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Robotics/L298_H_Bridge.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "External diodes are required when driving inductive loads.",
+          "basis": "datasheet",
+          "quote": "An external bridge of diodes are required when in-",
+          "source": {
+            "label": "STMicroelectronics L298 datasheet (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Robotics/L298_H_Bridge.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    },
+    {
+      "names": ["^2N7002"],
+      "cautions": [
+        {
+          "text": "A MOSFET has a body diode, so a diode-mode check from source to drain conducts one way; that is not a fault.",
+          "basis": "datasheet",
+          "quote": "Maximum Body Diode Forward Current",
+          "source": {
+            "label": "Diodes Incorporated 2N7002 datasheet DS11303",
+            "url": "https://www.diodes.com/assets/Datasheets/ds11303.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "The body diode is a real path: a source-to-drain reading in one direction is that diode, not a damaged FET.",
+          "basis": "datasheet",
+          "quote": "Diode Forward Voltage",
+          "source": {
+            "label": "Diodes Incorporated 2N7002 datasheet DS11303",
+            "url": "https://www.diodes.com/assets/Datasheets/ds11303.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "On the 3-lead SOT-23 top view the drain is the single lead at the top, the gate is on the left and the source is on the right.",
+          "basis": "datasheet",
+          "quote": "Terminal Connections: See Diagram",
+          "source": {
+            "label": "Diodes Incorporated 2N7002 datasheet DS11303",
+            "url": "https://www.diodes.com/assets/Datasheets/ds11303.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "The usual SOT-23 pin table numbers pin 1 gate, pin 2 source and pin 3 drain.",
+          "basis": "datasheet",
+          "quote": "1          G        gate",
+          "source": {
+            "label": "Nexperia 2N7002 datasheet",
+            "url": "https://assets.nexperia.com/documents/data-sheet/2N7002.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    },
+    {
+      "names": ["^TIP12[0-2]$"],
+      "cautions": [
+        {
+          "text": "This is a Darlington: two transistors in one package with built-in base-emitter shunt resistors. A plain transistor test misleads \u2014 the base-emitter path reads more than one diode drop and has a resistor in parallel.",
+          "basis": "datasheet",
+          "quote": "Monolithic Construction with Built\u2212In Base\u2212Emitter Shunt Resistors",
+          "source": {
+            "label": "onsemi TIP120/121/122 datasheet",
+            "url": "https://www.onsemi.com/pdf/datasheet/tip120-d.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "The base-emitter on-voltage is specified for the Darlington pair, not a single junction.",
+          "basis": "datasheet",
+          "quote": "Base\u2212Emitter On Voltage",
+          "source": {
+            "label": "onsemi TIP120/121/122 datasheet",
+            "url": "https://www.onsemi.com/pdf/datasheet/tip120-d.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    },
+    {
+      "names": ["^IRF840"],
+      "cautions": [
+        {
+          "text": "A diode-mode check from source to drain that conducts one way is the body diode, not a short.",
+          "basis": "datasheet",
+          "quote": "Body diode voltage",
+          "source": {
+            "label": "Vishay IRF840 datasheet",
+            "url": "https://www.vishay.com/docs/91070/91070.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    },
+    {
+      "names": ["^NRF24L01"],
+      "cautions": [
+        {
+          "text": "This document is for the nRF24L01+; the library part may be the older nRF24L01, so check the datasheet of the chip actually in hand. VDD_PA and DVDD are power outputs for the chip's own use \u2014 never drive them or measure them as supplies.",
+          "basis": "datasheet",
+          "quote": "Power Supply Output (+1.8V) for the internal",
+          "source": {
+            "label": "Nordic nRF24L01+ preliminary product specification v1.0 (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "DVDD is an internal digital supply output, not a pin to drive.",
+          "basis": "datasheet",
+          "quote": "Internal digital supply output",
+          "source": {
+            "label": "Nordic nRF24L01+ preliminary product specification v1.0 (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf",
+            "as_of": "2026-10-11"
+          }
+        },
+        {
+          "text": "ANT1 and ANT2 are RF pins that need a DC path to VDD_PA.",
+          "basis": "datasheet",
+          "quote": "The pins must have a DC path to VDD_PA",
+          "source": {
+            "label": "Nordic nRF24L01+ preliminary product specification v1.0 (copy hosted by SparkFun)",
+            "url": "https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf",
+            "as_of": "2026-10-11"
+          }
+        }
+      ]
+    }
+  ]
+}

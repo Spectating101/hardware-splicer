@@ -12,6 +12,7 @@ library's name and version so it can be checked.
 from __future__ import annotations
 
 import bisect
+import json
 import os
 import re
 import threading
@@ -60,6 +61,18 @@ _BGA = re.compile(r"^Package_BGA:", re.IGNORECASE)
 _RF_MODULE = re.compile(r"^RF_Module:", re.IGNORECASE)
 _NUMBERED_RAIL = re.compile(r"^([A-Z]+)(\d+)$")
 _BRACES = re.compile(r"[_\\{}]")
+_BALL_GRID = re.compile(r"BGA|DSBGA|WLCSP", re.IGNORECASE)
+_BALL_PIN = re.compile(r"^[A-Z]+\d+$", re.IGNORECASE)
+_SOT23_56 = re.compile(r"SOT-?23-?[56]\b", re.IGNORECASE)
+_SOT23_3 = re.compile(r"(?:SOT-?23(?:-?3)?\b|TO-?236)", re.IGNORECASE)
+_POINTER_SUPPLY = frozenset({"VDDA", "VREF+", "VREF-", "VDDIO", "VCCIO", "AVDD", "AVCC"})
+_CHARGER_PINS = frozenset({"PROG", "STAT", "CHRG", "BAT"})
+_GENERAL_PRACTICE = " General practice, not from the datasheet."
+CAUTIONS_PATH = Path(__file__).resolve().parent / "data" / "part_cautions.json"
+_ENTRY_KEYS = frozenset({"names", "cautions"})
+_CAUTION_KEYS = frozenset({"text", "basis", "quote", "source"})
+_SOURCE_KEYS = frozenset({"label", "url", "as_of"})
+_BASIS = frozenset({"datasheet", "general practice"})
 
 
 class PartLookupError(ValueError):
@@ -155,6 +168,188 @@ def clear_cache() -> None:
     with _LOCK:
         _build_index.cache_clear()
         _footprint_size.cache_clear()
+        _caution_table.cache_clear()
+
+
+def _require_text(value: Any, label: str) -> str:
+    if not isinstance(value, str) or not value.strip() or has_hidden_characters(value):
+        raise RuntimeError(f"{label} must be plain text")
+    if "\n" in value or "\r" in value:
+        raise RuntimeError(f"{label} may not contain a line break")
+    return value
+
+
+def _validate_source(source: Any, label: str, *, required: bool) -> dict[str, str] | None:
+    if source is None:
+        if required:
+            raise RuntimeError(f"{label} needs a source")
+        return None
+    if not isinstance(source, dict) or set(source) - _SOURCE_KEYS:
+        raise RuntimeError(f"{label} source may only have label, url and as_of")
+    for field in ("label", "url", "as_of") if required else [key for key in ("label", "url", "as_of") if key in source]:
+        if field not in source:
+            raise RuntimeError(f"{label} source needs {field}")
+        _require_text(source[field], f"{label} source {field}")
+    if required:
+        if not str(source["url"]).startswith(("http://", "https://")):
+            raise RuntimeError(f"{label} source url must be a web link")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(source["as_of"])):
+            raise RuntimeError(f"{label} source as_of must be a YYYY-MM-DD date")
+    return {key: str(source[key]) for key in ("label", "url", "as_of") if key in source}
+
+
+def _validate_caution(caution: Any, label: str) -> dict[str, Any]:
+    if not isinstance(caution, dict) or set(caution) - _CAUTION_KEYS:
+        raise RuntimeError(f"{label} may only have text, basis, quote and source")
+    text = _require_text(caution.get("text"), f"{label} text")
+    basis = caution.get("basis")
+    if basis not in _BASIS:
+        raise RuntimeError(f"{label} basis must be datasheet or general practice")
+    quote = caution.get("quote")
+    source = caution.get("source")
+    if basis == "datasheet":
+        quote = _require_text(quote, f"{label} quote")
+        source = _validate_source(source, label, required=True)
+    else:
+        if quote is not None:
+            quote = _require_text(quote, f"{label} quote")
+        source = _validate_source(source, label, required=False)
+    row: dict[str, Any] = {"text": text, "basis": basis}
+    if quote is not None:
+        row["quote"] = quote
+    if source is not None:
+        row["source"] = source
+    return row
+
+
+@lru_cache(maxsize=8)
+def _caution_table(path: str) -> list[dict[str, Any]]:
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"part caution table could not be read: {exc}") from exc
+    entries = data.get("entries") if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        raise RuntimeError("part caution table must have an entries list")
+    out: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        label = f"part caution entry {index}"
+        if not isinstance(entry, dict) or set(entry) != _ENTRY_KEYS:
+            raise RuntimeError(f"{label} must have exactly names and cautions")
+        names = entry.get("names")
+        if not isinstance(names, list) or not names or not all(isinstance(item, str) and item.strip() for item in names):
+            raise RuntimeError(f"{label} names must be a non-empty list of text")
+        compiled: list[re.Pattern[str]] = []
+        for pattern in names:
+            try:
+                compiled.append(re.compile(pattern, re.IGNORECASE))
+            except re.error as exc:
+                raise RuntimeError(f"{label} has a bad name pattern {pattern!r}: {exc}") from exc
+        cautions = entry.get("cautions")
+        if not isinstance(cautions, list) or not cautions:
+            raise RuntimeError(f"{label} needs a cautions list")
+        rows = [_validate_caution(item, f"{label} caution {i}") for i, item in enumerate(cautions)]
+        out.append({"names": list(names), "patterns": compiled, "cautions": rows})
+    return out
+
+
+def load_part_cautions(path: Path | None = None) -> list[dict[str, Any]]:
+    """The curated caution table after the same kind of checks as the device module library."""
+
+    table = _caution_table(str(path or CAUTIONS_PATH))
+    return [{"names": row["names"], "cautions": row["cautions"]} for row in table]
+
+
+def _render_caution(row: dict[str, Any]) -> str:
+    text = str(row["text"]).rstrip()
+    if row.get("basis") == "general practice":
+        return text if text.endswith(_GENERAL_PRACTICE.strip()) else f"{text}{_GENERAL_PRACTICE}"
+    label = str((row.get("source") or {}).get("label") or "").strip()
+    if not label or label in text:
+        return text
+    return f"{text} {label}."
+
+
+def _curated_rows(name: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for entry in _caution_table(str(CAUTIONS_PATH)):
+        if any(pattern.search(name) for pattern in entry["patterns"]):
+            rows.extend(entry["cautions"])
+    return rows
+
+
+def _is_ball_grid(footprint: str | None, pins: list[dict[str, str]] | None) -> bool:
+    if footprint and _BALL_GRID.search(footprint):
+        return True
+    return bool(pins) and any(_BALL_PIN.fullmatch(str(pin.get("number") or "")) for pin in pins or [])
+
+
+def _sot23_leads(footprint: str | None) -> int | None:
+    if not footprint:
+        return None
+    if _SOT23_56.search(footprint):
+        return 6 if re.search(r"6", _SOT23_56.search(footprint).group(0)) else 5
+    if _SOT23_3.search(footprint):
+        return 3
+    return None
+
+
+_SOT23_3_TEXT = (
+    "Top view, two-lead side below: pin 1 is left, pin 2 is right, and pin 3 is the single lead "
+    "on the other side. That order is the usual SOT-23 drawing (Diodes Incorporated 2N7002 "
+    "datasheet DS11303; Nexperia 2N7002 datasheet as examples); confirm against the datasheet "
+    "drawing for the exact part."
+)
+_SOT23_56_TEXT = "Pin numbers go round the package, not across it. Use the package drawing for the part in hand."
+_BALL_TEXT = (
+    "Balls under the package cannot be probed, and the contacts are not counted like DIP pins. "
+    "Measure only at accessible pads or test points."
+)
+_CELL_TEXT = "Do these checks with no cell connected. A lithium cell can start a fire if charged wrongly."
+_POINTER_TEXT = (
+    "Pins such as VDDA, VBAT, VREF+ and VDDIO are separate supply pins. Whether they may differ "
+    "from the main supply is a datasheet question; read the power-supply section before measuring them."
+)
+
+
+def part_cautions(
+    name: str,
+    *,
+    tier: str = "exact",
+    library: str | None = None,
+    footprint: str | None = None,
+    pins: list[dict[str, str]] | None = None,
+) -> list[str]:
+    """Sourced and general-practice cautions for a named library symbol. A family match gets none."""
+
+    if tier not in {"exact", "variant"}:
+        return []
+    if pins is None and library:
+        try:
+            pins = _all_pins(library, name)
+        except PartLookupError:
+            pins = []
+    names = {_pin_token(pin["name"]) for pin in (pins or [])}
+    curated = _curated_rows(name)
+    out = [_render_caution(row) for row in curated]
+    if _is_ball_grid(footprint, pins):
+        out.append(_render_caution({"text": _BALL_TEXT, "basis": "general practice"}))
+    leads = _sot23_leads(footprint)
+    if leads == 3:
+        out.append(_SOT23_3_TEXT)
+    elif leads in {5, 6}:
+        out.append(_render_caution({"text": _SOT23_56_TEXT, "basis": "general practice"}))
+    charger_named = bool(curated) and any("no cell connected" in row["text"].lower() for row in curated)
+    if not charger_named and (
+        (library or "") == "Battery_Management" or ("BAT" in names and names & {"PROG", "STAT", "CHRG"})
+    ):
+        out.append(_render_caution({"text": _CELL_TEXT, "basis": "general practice"}))
+    pointer = names & _POINTER_SUPPLY
+    if "VBAT" in names and not (names & _CHARGER_PINS):
+        pointer.add("VBAT")
+    if pointer:
+        out.append(_render_caution({"text": _POINTER_TEXT, "basis": "general practice"}))
+    return out
 
 
 def source() -> dict[str, Any]:
@@ -288,6 +483,11 @@ def lookup_part(marking: Any, limit: int = MAX_MATCHES) -> dict[str, Any]:
                 }
             )
     result["matches"] = result["matches"][:limit]
+    named = next((match for match in result["matches"] if match["tier"] in {"exact", "variant"}), None)
+    result["cautions"] = (
+        part_cautions(named["name"], tier=named["tier"], library=named["library"], footprint=named.get("footprint"))
+        if named else []
+    )
     return result
 
 
@@ -438,18 +638,32 @@ def _orientation(footprint: str | None) -> str:
     # JEDEC SPP-012: "The pin-numbering convention is counterclockwise, as viewed from above, for standard-bend product (leads bent down)"
     if not footprint:
         return ""
+    if _is_ball_grid(footprint, None):
+        return (
+            " Balls are named by row and column, not counted around the edge. "
+            "Balls under the package cannot be probed; measure only at accessible pads or test points."
+        )
     if _PIN_ONE_PACKAGES.match(footprint):
         return (
             " The dot or notch marks the pin-1 end; pin 1 is the first leg counter-clockwise from it seen from the top "
             "for standard-bend leads; if you are looking at the underside of a board, the order appears reversed."
         )
-    if _TO220.search(footprint) or _SOT23.search(footprint) or footprint.upper().startswith("PACKAGE_TO_SOT"):
+    leads = _sot23_leads(footprint)
+    if leads == 3:
+        return (
+            " Top view, two-lead side below: pin 1 is left, pin 2 is right, and pin 3 is the single lead "
+            "on the other side. Confirm against the datasheet drawing for this part."
+        )
+    if leads in {5, 6}:
+        return (
+            " Pin numbers go round the package, not across it; take them from the "
+            "datasheet's package drawing."
+        )
+    if _TO220.search(footprint) or footprint.upper().startswith("PACKAGE_TO_SOT"):
         return (
             " The lead order depends on the part and must be taken from the datasheet's package drawing, "
             "not from the package name (7805 vs LM317)."
         )
-    if _BGA.match(footprint):
-        return " Balls are named by row and column, not counted around the edge."
     if _RF_MODULE.match(footprint):
         # Espressif ESP32-WROOM-32 datasheet §2: numbered perimeter contacts from the pin-1 mark, not a BGA ball array.
         return (
@@ -634,6 +848,8 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
     supply_pins = [pin for pin, _ref in pairs]
     split = _split_rails(supply_pins)
     where = _orientation(footprint)
+    sourced = part_cautions(name, tier="exact", library=library, footprint=footprint, pins=pins)
+    sourced_text = (" " + " ".join(sourced)) if sourced else ""
     # Fluke 87V MAX: "disconnect power and discharge all high-voltage capacitors before you measure resistance, continuity, capacitance, or a diode junction."
     # Fluke 87V MAX: "the resistance reading represents the total resistance of all paths between the probes."
     # TI SCDA039: "there are ESD diodes tied between the input and the positive supply rail (VDD/VCC) and an ESD diode tied from the input to the negative supply rail or ground (VSS/GND)."
@@ -658,7 +874,7 @@ def power_gates(library: str, name: str, footprint: str | None) -> list[dict[str
         ),
     ):
         for pin, reference in kind_pairs[kind]:
-            extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split)
+            extra = _notes(pins, pin, kind=kind, footprint=footprint, split=split) + sourced_text
             pair = f"pin {pin['number']} ({pin['name']})"
             g_from = f"pin {reference['number']} ({reference['name']})"
             if kind == "diode":
@@ -717,11 +933,16 @@ def resolve_lookup_gates(matches: list[dict[str, Any]], user_footprint: str | No
             gate["instruction"] = f"{gate['instruction']} {package_note[0].upper()}{package_note[1:]}"
     elif best:
         gates = power_gates(best["library"], best["name"], best.get("footprint"))
+    cautions = (
+        part_cautions(best["name"], tier=best["tier"], library=best["library"], footprint=best.get("footprint") or user_footprint)
+        if best else []
+    )
     return {
         "best": best,
         "gates": gates,
         "gates_from": best["name"] if best else None,
         "package_note": package_note,
+        "cautions": cautions,
     }
 
 
