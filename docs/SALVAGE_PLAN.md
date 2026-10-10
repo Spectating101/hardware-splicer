@@ -16,24 +16,36 @@ Unplug and disconnect batteries and packs first. Tape exposed battery terminals 
 disassemble, heat or solder directly onto a cell. A swollen or damaged lithium cell is not for reuse. A holder's chemistry is
 not guessed; an AA holder gets a cell warning. An XT30/60/90 plug warns that the pack may still be live.
 
-Capacitors can retain charge, including ones with no readable voltage. Discharge through a suitable resistor and use a meter
+Preparation has two tiers. On an ordinary board, including mains-side parts without the high-voltage context below,
+capacitors can retain charge, including ones with no readable voltage. Discharge through a suitable resistor and use a meter
 to prove zero before touching or heating. Leave a resistor across them and re-measure after a wait: voltage can come back.
-If you do not know how, leave the board alone and get help. The report gives no discharge procedure for CRT, microwave or lamp
-circuits; get trained help for those.
+If you do not know how, leave the board alone and get help.
+
+For the high-voltage tier, preparation gives no discharge procedure. These circuits can hold a lethal charge that a hand
+meter and an ordinary resistor are not made for. Leave the part in place and the case closed, and leave it to someone trained.
+This tier includes capacitors marked at least 1 kV, microwave/magnetron/MOT/HV diode, CRT/anode cap/flyback transformer/EHT,
+photoflash, CCFL and lamp inverter contexts, and every capacitor left in place by the voltage policy below. It replaces the
+ordinary resistor and meter instructions; neither the preparation nor the skipped part advises a discharge attempt.
+Unmarked film boxes and optocouplers alone do not get a CRT/microwave/lamp disclaimer.
 
 The 100 V marking rule is a decision to leave a capacitor in place, not a claim about its present charge. It also covers kV
-(converted to volts), WV, X1/X2/Y1/Y2 and HV, high voltage, microwave or flash markings. If you decide to take one anyway,
-discharge and prove zero first, then re-measure after a wait. Film boxes and ceramic discs without readable voltage stay
+(converted to volts), WV, V, VAC, VDC, kVDC, kVAC, WVDC and WVAC, with or without a space, X1/X2/Y1/Y2 and HV/HVC,
+high voltage, microwave or flash markings. The no-procedure tier applies to those skipped parts. Film boxes and ceramic discs without readable voltage stay
 optional but warn that they might be mains safety capacitors: do not reuse them as generic capacitors or mains protection
 parts. No rating is guessed. A polarised can without readable voltage warns that it could be a photoflash capacitor.
 
 Discard bulged or leaking electrolytics; reported bulging or leaking changes the verdict to leave it. Record tantalum
 polarity: reverse polarity destroys it. For supercapacitors, remove jewellery and do not short the terminals.
 
-CRT, flyback, anode, microwave, MOT, magnetron, CCFL, backlight, lamp, heater, fuser and thermal cut-off markings override the
-chosen kind and leave the part in place. CRT circuits can regain charge. Do not power or reuse a loose magnetron. A lamp or
-backlight may be a mercury-containing CCFL: do not break or force it out. Let heaters cool; do not power one without its original
-thermal cut-off. Do not bypass a thermal fuse; use the appliance's service information for replacement.
+CRT, anode cap, aquadag, EHT, LOPT, flyback transformer, TV flyback, microwave, MOT, magnetron, CCFL, backlight,
+fluorescent, mercury, cold cathode, lamp inverter, photoflash and thermal cut-off markings override the chosen kind and leave
+the part in place. The spellings magnatron, magentron and magnetrons also get the microwave warning. CRT circuits can regain
+charge. Do not power a loose magnetron: it is meant to run fitted to its own waveguide and cavity. No stored microwave
+radiation is claimed. A fluorescent or backlight marking may refer to a mercury-containing CCFL: do not break or force it out.
+Common anode, flyback diode, LED lamp, white LED lamp and lamp driver labels do not trigger CRT or mercury wording.
+Heater/fuser markings apply to typed “other” or “mains or power part” entries, and to file footprint names; a resistor marked
+“10k heater sense” does not become a fuser. Let heaters cool; do not power one without its original thermal cut-off.
+Do not bypass a thermal fuse; use the appliance's service information for replacement.
 
 Mains parts (transformers, relays including SRD/SONGLE, varistors, fuses and holders, inlets, common-mode chokes and wide
 terminal blocks) remain optional and are never "worth taking". Capacitors nearby hold the charge after unplugging; this is not
@@ -58,6 +70,8 @@ ordinary workshop practice; this report supplies no discharge resistor value, wa
 - [Vishay, mains capacitors](https://www.vishay.com/docs/48251/_checklist_safety_caps_vmn_ms7357_1707.pdf): X capacitors “connect line and neutral”; Y failure can cause “an immediate danger of an electric shock”.
 - [Technical Safety BC, microwave report](https://files.technicalsafetybc.ca/v3/assets/bltdec2ded849740f4d/blt4ad92d5639485f4d/64e8eef51647f96c739bce17/Appendix_A_-_Engineering_Report_-_Microwave_Safety_-_TSBC_-_Final_-_2022.11.23_Redacted.pdf): “a bleed resistor can cease to function”.
 - [Rubycon FKX](https://www.bdtic.com/datasheet/Rubycon/FKX.pdf): the photoflash datasheet uses “330WV”.
+- [Illinois Capacitor TTA](https://www1.futureelectronics.com/doc/ILLINOIS%20CAPACITOR/338TTA016M.pdf): “WVDC: MAXIMUM RATED DC WORKING VOLTAGE”. A printed rating reports no present charge.
+- [HVC ceramic-disc series](https://www.hv-caps.com/HV-Ceramic-Disc-Capacitor/hv-ceramic-disc-capacitor163.html): source for treating HVC as a high-voltage context token.
 - [IEEE IAS, stored capacitor energy](https://hallaweb.jlab.org/tech/Detectors/public_html/hall_a/miscellaneous_info/Working_Safely_With_Hazardous_Capacitors_Establishing_Practical_Thresholds_for_Risks_Associated_With_Stored_Capacitor_Energy.pdf): “voltage rebound after the initial discharge due to dielectric absorption”.
 - [Desco, wrist straps around high voltage](https://desco.descoindustries.com/Articles/ESD-Around-High-Voltage.aspx): “We would not recommend grounding personnel” during high-voltage work.
 - [CRT service guidance](https://www.crt-mon.com/pdf/_CRT-Data/CRT-Safety.pdf): the anode “can regain some charge even after being discharged”.

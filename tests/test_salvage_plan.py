@@ -319,3 +319,24 @@ def test_unidentified_chips_with_different_junk_labels_are_one_job() -> None:
     plan = build_salvage_plan(_board(_fp("U1", lq, "10 10", "FLASH_128M") + _fp("U2", lq, "20 10", "SPI_1x06") + _fp("U3", lq, "30 10", "")))
     steps = [s for s in plan["steps"] if s["kind"] == "salvage"]
     assert len(steps) == 1 and steps[0]["refs"] == ["U1", "U2", "U3"] and steps[0]["verdict"] == "identify"
+
+
+@pytest.mark.parametrize("footprint,marking", [
+    ("Capacitor_THT:C_Rect_L18", "2KVDC"),
+    ("Capacitor_THT:CP_Radial", "400WVDC"),
+    ("Capacitor_THT:CP_Radial", "330 WVDC"),
+])
+def test_review_3_file_mixed_board_keeps_hv_capacitor_out_of_removal(footprint, marking, monkeypatch):
+    monkeypatch.setattr("hardware_splicer.part_lookup.libraries_available", lambda: False)
+    plan = build_salvage_plan(_board(
+        _fp("C1", footprint, "10 10", marking, "through_hole")
+        + _fp("J1", "Connector_USB:USB_Micro-B", "20 10", "USB", "through_hole")
+        + _fp("U1", "Package_DIP:DIP-8", "30 10", "NE555P", "through_hole")
+    ))
+    assert _verdict(plan, "C1")["verdict"] == "skip"
+    assert _verdict(plan, "C1")["tool"] == ""
+    removals = [s for s in plan["steps"] if s["kind"] == "salvage"]
+    assert [s["refs"] for s in removals] == [["J1"], ["U1"]]
+    prep = plan["steps"][0]["instruction"]
+    assert "C1" in prep and "case closed" in prep and "no discharge procedure" in prep
+    assert "prove zero" not in prep and "Use an anti-static strap" not in prep

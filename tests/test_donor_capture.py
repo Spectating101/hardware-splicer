@@ -294,3 +294,16 @@ def test_a_part_with_no_library_footprint_is_drawn_at_a_typical_size_and_says_so
     spec["parts"] = [{"ref": "BT1", "kind": "battery", "package": "lithium pouch", "x_mm": 30, "y_mm": 20}]
     part = capture_to_assembly(spec)["parts"][0]
     assert part["outline_basis"].startswith("typical size for a lithium pouch")
+
+
+def test_review_1e_heater_sense_resistor_preserves_the_typed_kind(monkeypatch) -> None:
+    monkeypatch.setattr("hardware_splicer.part_lookup.libraries_available", lambda: False)
+    spec = copy.deepcopy(SPEC)
+    spec["parts"] = [{"ref": "R1", "kind": "resistor", "package": "0805", "marking": "10k heater sense", "x_mm": 10, "y_mm": 10}]
+    plan = build_donor_salvage_plan(spec)
+    assert plan["parts"][0]["component"] == "resistor"
+    got = _verdict(plan, "R1")
+    assert got["verdict"] == "optional" and got["hazards"] == []
+    steps = [s for s in plan["steps"] if s["kind"] == "salvage"]
+    assert len(steps) == 1 and steps[0]["refs"] == ["R1"]
+    assert "fuser" not in plan["steps"][0]["instruction"]
