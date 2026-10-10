@@ -144,7 +144,7 @@ def _part_text(part: dict[str, Any]) -> str:
 
 
 def _voltages(part: dict[str, Any]) -> list[float]:
-    # Read markings, not footprint dimensions or part numbers. kV and WV are audit A2 cases.
+    # Read markings, not footprint dimensions or part numbers. kV and WV markings are read too (photoflash and microwave capacitors).
     identity = part.get("identity") or {}
     text = " ".join(str(x or "") for x in (part.get("value"), identity.get("typed")))
     return [float(m.group(1)) * (1000 if m.group(2).lower().startswith("kv") else 1) for m in _VOLTS.finditer(text)]
@@ -222,7 +222,10 @@ def _heater_context(part: dict[str, Any]) -> bool:
 def _hv_no_procedure(part: dict[str, Any]) -> bool:
     """Policy tier, not a statement of measured voltage or a discharge procedure."""
     text = _part_text(part)
-    return bool(_high_voltage(part) or _CRT.search(text) or _MICROWAVE.search(text)
+    # Mains-range capacitors (100 V to under 1 kV: a charger's bulk capacitor) are left in place but keep the ordinary
+    # resistor-and-meter procedure; only 1 kV and up, or an explicit HV / microwave / CRT / lamp / flash context, gets none.
+    extreme_capacitor = _is_capacitor(part) and (any(v >= 1000 for v in _voltages(part)) or bool(_HV_TOKEN.search(text)))
+    return bool(extreme_capacitor or _CRT.search(text) or _MICROWAVE.search(text)
                 or _LAMP.search(text) or _LAMP_INVERTER.search(text) or _HV_EQUIPMENT.search(text)
                 or re.search(r"photoflash", text, re.IGNORECASE))
 
@@ -232,7 +235,7 @@ def _mains_context(part: dict[str, Any]) -> bool:
     unknown_charge = _is_capacitor(part) and not _voltages(part) and bool(
         _UNMARKED_CAP.search(part["footprint"]) or _ELECTROLYTIC.search(part["footprint"])
     )
-    return bool(_hv_no_procedure(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
+    return bool(_hv_no_procedure(part) or _high_voltage(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
                 or _mains_silicon(part) or _OPTO.search(text) or unknown_charge)
 
 
@@ -278,11 +281,15 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         verdict = "skip"
         reasons.append("a solder jumper is a bridge on the board itself: there is no part to take")
         effort, tool = "none", ""
-    elif _hv_no_procedure(part):
+    elif _hv_no_procedure(part) or _high_voltage(part):
         verdict = "skip"
         reasons.append("leave-in-place policy: a marking of 100 V or more, X/Y mains class or HV circuit context; a rating is not the voltage now present")
-        hazards.append("a high-voltage circuit can hold a dangerous charge; leave it in place and get trained help")
-        hazards.append(HV_NO_PROCEDURE)
+        if _hv_no_procedure(part):
+            hazards.append("a high-voltage circuit can hold a dangerous charge; leave it in place and get trained help")
+            hazards.append(HV_NO_PROCEDURE)
+        else:
+            hazards.append("a mains-range capacitor can hold a dangerous charge; leave it in place unless you know how to discharge it")
+            hazards.append("if you decide to take it anyway: " + ORDINARY_CHARGE_PRECAUTIONS)
         hazards.extend(special)
         effort, tool = "none", ""
     elif special:

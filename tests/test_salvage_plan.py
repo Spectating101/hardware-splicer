@@ -338,5 +338,8 @@ def test_review_3_file_mixed_board_keeps_hv_capacitor_out_of_removal(footprint, 
     removals = [s for s in plan["steps"] if s["kind"] == "salvage"]
     assert [s["refs"] for s in removals] == [["J1"], ["U1"]]
     prep = plan["steps"][0]["instruction"]
-    assert "C1" in prep and "case closed" in prep and "no discharge procedure" in prep
-    assert "prove zero" not in prep and "Use an anti-static strap" not in prep
+    assert "C1" in prep and "Use an anti-static strap" not in prep
+    if marking == "2KVDC":
+        assert "case closed" in prep and "no discharge procedure" in prep and "prove zero" not in prep
+    else:                                  # a 330 to 400 V can on a charger: left in place, ordinary resistor, meter and wait
+        assert "no discharge procedure" not in prep and "prove zero" in prep

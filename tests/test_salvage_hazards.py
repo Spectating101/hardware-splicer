@@ -124,8 +124,9 @@ def test_a10_rating_is_a_leave_in_place_policy_not_a_claim_of_present_voltage():
     got = advice(donor(typed("capacitor", "electrolytic can", "400V", "C1")))
     assert "policy" in " ".join(got["reasons"])
     assert "not the voltage now present" in " ".join(got["reasons"])
-    assert "leave the part in place" in " ".join(got["hazards"])
-    assert "prove zero" not in " ".join(got["hazards"])
+    text = " ".join(got["hazards"])
+    assert "leave it in place unless you know how to discharge it" in text          # a charger's 400 V can: left alone, not a no-procedure case
+    assert "if you decide to take it anyway" in text and "prove zero" in text and "no discharge procedure" not in text
 
 
 def test_a8_wide_terminal_is_never_worth_taking():
@@ -305,8 +306,7 @@ def test_review_1c_voltage_parser_reads_rated_markings(marking, volts):
 
 @pytest.mark.parametrize("part", [
     typed("capacitor", "film box", "1kV", "C1"), typed("capacitor", "film box", "2KVDC", "C1"),
-    typed("capacitor", "electrolytic can", "400WVDC", "C1"),
-    typed("capacitor", "electrolytic can", "330 WVDC", "C1"), typed("capacitor", "ceramic disc", "HVC", "C1"),
+    typed("capacitor", "ceramic disc", "HVC", "C1"),
     *[typed("other", "something else", m) for m in ["magnetron", "magnatron", "magentron", "magnetrons", "microwave", "MOT",
                                                   "HV diode", "CRT", "anode cap", "flyback transformer", "EHT", "photoflash", "CCFL", "lamp inverter"]],
 ])
@@ -330,6 +330,9 @@ def test_review_1b_unrelated_unknown_cap_or_opto_has_no_appliance_discharge_disc
     assert "discharge through a suitable resistor" in text and "prove zero" in text and "re-measure after a wait" in text
 
 
+KILOVOLT_OR_HV_MARKINGS = {"2KVDC", "2kVDC", "2kVAC", "2 kVDC", "2 kVAC", "2kV", "2 kV", "2000V", "2.1kV", "HVC"}
+
+
 @pytest.mark.parametrize("package,marking", [
     *[("film box", m) for m in ["2KVDC", "2kVDC", "2kVAC", "2 kVDC", "2 kVAC", "2kV", "2 kV", "2000V", "2.1kV", "HVC"]],
     *[("electrolytic can", m) for m in ["400WVDC", "400 WVDC", "330WVDC", "330 WVDC", "400WVAC", "400 WVAC", "400V", "330WV", "330 WV"]],
@@ -340,8 +343,12 @@ def test_review_3_mixed_board_never_puts_hv_skip_in_an_iron_step(package, markin
     steps = [s for s in plan["steps"] if s["kind"] == "salvage"]
     assert [s["refs"] for s in steps] == [["J1"], ["U1"]]
     assert all("iron" in s["instruction"] for s in steps)
-    assert "no discharge procedure" in plan["steps"][0]["instruction"]
-    assert "Use an anti-static strap" not in plan["steps"][0]["instruction"]
+    prep = plan["steps"][0]["instruction"]
+    if marking in KILOVOLT_OR_HV_MARKINGS:
+        assert "no discharge procedure" in prep and "prove zero" not in prep
+    else:                                  # mains range: left in place, with the ordinary resistor, meter and wait
+        assert "no discharge procedure" not in prep and "prove zero" in prep and "re-measure after a wait" in prep
+    assert "Use an anti-static strap" not in prep and "wrist strap near high voltage" in prep.lower()
 
 
 def test_review_1d_file_flyback_diode_does_not_override_chip_or_connector_kind():
