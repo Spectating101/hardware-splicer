@@ -28,7 +28,7 @@ def _rules(plan: dict, severity: str | None = None) -> set[str]:
 
 
 GOOD = EXAMPLE["connections"]
-ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply", "pin_order_assumed"}
+ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply", "pin_order_assumed", "supply_current", "antenna_keepout", "kit_fit"}
 
 
 def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() -> None:
@@ -315,7 +315,7 @@ def api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     return TestClient(create_product_app(ProjectStore(tmp_path / "store")))
 
 
-def test_the_library_examples_and_a_plan_are_served(api: TestClient) -> None:
+def test_the_library_examples_and_a_plan_are_served_api(api: TestClient) -> None:
     assert api.get("/v1/devices/modules").json()["library"]["modules"][0]["id"] == "esp32-devkitc-v4"
     assert api.get("/v1/devices/modules").json()["library"]["modules"][0]["chips"][0]["marking"] == "ESP32-WROOM-32E"
     assert "esp32_oled_usb" in api.get("/v1/devices/examples").json()["examples"]
@@ -327,7 +327,7 @@ def test_the_library_examples_and_a_plan_are_served(api: TestClient) -> None:
     assert api.post("/v1/devices/plan", json={"spec": EXAMPLE}).json()["plan"] == served["plan"]
 
 
-def test_a_bad_request_is_a_clear_422_and_a_huge_one_is_refused(api: TestClient) -> None:
+def test_a_bad_request_is_a_clear_422_and_a_huge_one_is_refused_api(api: TestClient) -> None:
     bad = api.post("/v1/devices/plan", json={**EXAMPLE, "modules": []})
     assert bad.status_code == 422 and bad.json()["detail"]["type"] == "invalid_device_spec"
     assert api.post("/v1/devices/plan", content=b"not json", headers={"content-type": "application/json"}).status_code == 422
@@ -335,7 +335,7 @@ def test_a_bad_request_is_a_clear_422_and_a_huge_one_is_refused(api: TestClient)
     assert api.post("/v1/devices/plan", json=huge).status_code == 413
 
 
-def test_planning_writes_nothing(api: TestClient, tmp_path: Path) -> None:
+def test_planning_writes_nothing_api(api: TestClient, tmp_path: Path) -> None:
     before = sorted(str(p) for p in tmp_path.rglob("*"))
     for _ in range(3):
         assert api.post("/v1/devices/plan", json=EXAMPLE).status_code == 200
@@ -443,7 +443,7 @@ def test_a_spec_with_any_value_swapped_for_something_odd_is_a_plan_or_a_clear_re
         assert plan["schema_version"].endswith("v1") and all(math.isfinite(v) for module in plan["modules"] for v in module["box"].values())
 
 
-def test_a_body_with_no_declared_length_is_refused_as_soon_as_it_is_too_big(api: TestClient) -> None:
+def test_a_body_with_no_declared_length_is_refused_as_soon_as_it_is_too_big_api(api: TestClient) -> None:
     def pieces():
         # A chunked upload: no content-length, far more than the limit, and never finished.
         for _ in range(100000):
@@ -452,7 +452,7 @@ def test_a_body_with_no_declared_length_is_refused_as_soon_as_it_is_too_big(api:
     assert api.post("/v1/devices/plan", content=pieces(), headers={"content-type": "application/json"}).status_code == 413
 
 
-def test_json_nested_far_too_deeply_is_a_422_not_a_server_error(api: TestClient) -> None:
+def test_json_nested_far_too_deeply_is_a_422_not_a_server_error_api(api: TestClient) -> None:
     deep = b"[" * 30000 + b"0" + b"]" * 30000        # about 60 KB: under the size limit, far over what the parser can nest
     response = api.post("/v1/devices/plan", content=deep, headers={"content-type": "application/json"})
     assert response.status_code == 422 and "nested" in response.json()["detail"]["message"]
@@ -506,7 +506,7 @@ def test_a_rejected_wire_does_not_hide_a_separate_supply_bridge() -> None:
     assert [f["rule"] for f in shorted["findings"]].count("nets_bridged") == 0 and "ground_to_other" in _rules(shorted, "error")
 
 
-def test_an_integer_too_big_to_be_a_number_is_a_clear_refusal_in_a_device_spec_too(api: TestClient) -> None:
+def test_an_integer_too_big_to_be_a_number_is_a_clear_refusal_in_a_device_spec_too_api(api: TestClient) -> None:
     huge = 10 ** 400
     spec = copy.deepcopy(EXAMPLE)
     spec["modules"][0]["overrides"] = {"above_board_mm": huge}
@@ -715,3 +715,65 @@ def test_checks_request_observations_without_predicting_readings():
         for check in step["checks"]:
             assert check["expect"] == "record what you observe; this plan supplies no reading"
     assert "should report one device" not in plan["steps"][-1]["instruction"]
+
+
+def test_supply_current_note_is_present_without_wires_or_display():
+    for spec in (EXAMPLE, _with([]), {**EXAMPLE, "modules": EXAMPLE["modules"][:1], "connections": []}):
+        plan = build_device_plan(spec)
+        finding = next(f for f in plan["findings"] if f["rule"] == "supply_current")
+        assert finding["severity"] == "info"
+        assert "at least 0.5 A" in finding["message"]
+        assert all(text in finding["message"] for text in ("weak charger", "charge-only or thin cable", "unpowered hub", "resets when Wi-Fi starts", "General practice, not from the datasheet"))
+        assert "Table 14" in finding["basis"]
+        assert module_library()["modules"][0]["electrical"]["supply_current_source"] in finding["basis"]
+    assert build_device_plan(EXAMPLE)["counts"]["errors"] == 0
+    assert build_device_plan(EXAMPLE)["counts"]["warnings"] == 0
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_adc2_wifi_note_follows_pin_functions_even_on_rejected_wires(reverse):
+    esp = module_library()["modules"][0]
+    for pin in esp["pins"]:
+        wire = {"from": "display.SDA", "to": f"mcu.{pin['id']}"}
+        if reverse:
+            wire = {"from": wire["to"], "to": wire["from"]}
+        plan = build_device_plan(_with([wire]))
+        notes = [f for f in plan["findings"] if f["rule"] == "adc2_wifi"]
+        assert bool(notes) == ("ADC2_CH" in pin["function"])
+        for note in notes:
+            assert note["severity"] == "info" and note["wire"] == "wire-01"
+            assert f"mcu.{pin['name']}" in note["message"]
+            assert "analog reads" in note["message"] and "while Wi-Fi is running" in note["message"]
+            assert "Digital use such as I2C is not affected" in note["message"]
+            assert any(source["url"] in note["basis"] for source in esp["sources"] if "ESP-IDF ADC docs" in source["label"])
+
+
+@pytest.mark.parametrize("width,clearance", [(27, 1), (90, 0.2), (90, 3)])
+def test_antenna_note_reports_the_existing_layout_gap(width, clearance):
+    spec = copy.deepcopy(EXAMPLE)
+    spec["case"]["clearance_mm"] = clearance
+    spec["modules"][1]["overrides"] = {"pcb_mm": {"x": width}}
+    plan = build_device_plan(spec)
+    board = next(m for m in plan["modules"] if m["id"] == "mcu")
+    gap = round(plan["case"]["inner_mm"]["x"] / 2 - board["box"]["x1"] - board["overhang_mm"]["antenna_end"], 3)
+    note = next(f for f in plan["findings"] if f["rule"] == "antenna_keepout")
+    assert note["severity"] == "info"
+    assert "marks a keepout zone at the antenna end" in note["message"]
+    assert "figure note gives no distance to a case wall" in note["message"]
+    assert f"is {gap:g} mm" in note["message"]
+    assert module_library()["modules"][0]["keep_clear"][0]["source"] in note["basis"]
+    assert "enough" not in note["message"]
+
+
+def test_display_seating_labels_glass_handling_as_general_practice():
+    step = next(s for s in build_device_plan(EXAMPLE)["steps"] if s["kind"] == "place" and s["parts"] == ["display"])
+    assert "circuit-board edges, not by the glass" in step["instruction"]
+    assert "Never put force on the glass" in step["instruction"]
+    assert "General practice, not from the datasheet" in step["instruction"]
+
+
+def test_kit_fit_note_names_typical_sizes_and_male_pins_once():
+    notes = [f for f in build_device_plan(EXAMPLE)["findings"] if f["rule"] == "kit_fit"]
+    assert len(notes) == 1 and notes[0]["severity"] == "info"
+    text = notes[0]["message"]
+    assert all(value in text for value in ("case uses typical values, not measurements", "14 mm jumper housing", "10 mm wire bend", "14 x 8 mm USB overmold", "1.6 mm PCB", "8.5 mm under-board header", "actual kit", "male pins on both ends"))

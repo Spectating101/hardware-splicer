@@ -356,6 +356,11 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     def has(roles: set[str], *wanted: str) -> bool:
         return bool(roles & set(wanted))
 
+    for pin, owner in ((pa, ma), (pb, mb)):
+        if re.search(r"\bADC2_CH\d+\b", pin.get("function", "")):
+            source = next((src["url"] for src in owner.entry["sources"] if "ESP-IDF ADC docs v4.2.5" in src.get("label", "")), "")
+            out.append(_finding("info", "adc2_wifi", f"{owner.ref}.{pin['name']}: analog reads on this ADC2 pin fail while Wi-Fi is running. Digital use such as I2C is not affected by that.", f"ESP-IDF ADC docs v4.2.5: adc2_get_raw() fails between esp_wifi_start() and esp_wifi_stop(); {source}", wire_id))
+
     # Some pins are wrong to wire to anything at all, whichever end they are on.
     for pin, owner in ((pa, ma), (pb, mb)):
         pin_roles = set(pin["roles"])
@@ -363,7 +368,7 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
             out.append(_finding("error", "flash_pin", f"{name} uses {owner.ref}.{pin['name']}, which belongs to the module's flash memory. Anything connected there can stop the board from running.", datasheet, wire_id))
         elif "reset" in pin_roles:
             out.append(_finding("error", "reset_pin", f"{name} uses the reset pin ({owner.ref}.{pin['name']}). Holding it low stops the board; nothing belongs on it here.", datasheet, wire_id))
-    if out:
+    if any(f["severity"] == "error" for f in out):
         return out
 
     ground_a, ground_b = has(ra, "ground"), has(rb, "ground")
@@ -609,6 +614,15 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     supply_note = "Use one and only one supply for the DevKitC: Micro USB, 5V and GND, or 3V3 and GND. Combining these supplies can damage the board or the power source. An OLED load on a header is not another supply."
     supply_basis = "ESP32-DevKitC V4 user guide, Power Supply Options: one and only one of the options"
     findings.append(_finding("info", "single_power_supply", supply_note, supply_basis))
+    electrical = mcu.entry["electrical"]
+    current_note = electrical["supply_current_note"] + " General practice, not from the datasheet: a weak charger, a charge-only or thin cable, or an unpowered hub may not deliver this; the usual symptom is resets when Wi-Fi starts."
+    findings.append(_finding("info", "supply_current", current_note, f"ESP32-WROOM-32E datasheet v2.1, Table 14, IVDD: minimum 0.5 A; {electrical['supply_current_source']}"))
+    for keep_clear in mcu.entry.get("keep_clear", []):
+        if keep_clear["id"] == "antenna":
+            gap = _r(inner_x / 2 - (mcu.origin[0] + antenna))
+            findings.append(_finding("info", "antenna_keepout", f"{keep_clear['what']} The actual gap from the antenna end to the inside case wall in this layout is {gap:g} mm.", f"ESP32-WROOM-32E datasheet, Figure 3 note A; {keep_clear['source']}"))
+    plug_w, plug_h = PLUG_CUTOUT_MM
+    findings.append(_finding("info", "kit_fit", f"Unless you entered your own, the case uses typical values, not measurements: {WIRE_CONNECTOR_HEIGHT_MM:g} mm jumper housing height, {WIRE_BEND_ALLOWANCE_MM:g} mm wire bend allowance, {plug_w:g} x {plug_h:g} mm USB overmold, {mcu.pcb['z']:g} mm PCB thickness and {mcu.below:g} mm under-board header length. Check these against your actual kit. Female-to-female jumpers require male pins on both ends. General practice, not from the datasheet.", "typical case and jumper assumptions; general practice, not from the datasheet"))
     if clean["power"]["source"] != "usb":
         findings.append(_finding("error", "power_source_not_supported", f"Power source {clean['power']['source']!r} is not supported yet. {supply_note} This source label does not describe a supply wire or its voltage.", supply_basis))
     for module in placed.values():
@@ -754,7 +768,7 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             parts=[mcu.ref],
         )
     if display and window:
-        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Seat the display by its circuit-board edges, not by the glass, screen towards the window, header pins hanging inside. Avoid straining the header or wires.", parts=[display.ref], motion="drop")
+        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Seat the display by its circuit-board edges, not by the glass, screen towards the window, header pins hanging inside. Never put force on the glass. Avoid straining the header or wires. General practice, not from the datasheet.", parts=[display.ref], motion="drop")
     add("close", "Close the case", "Lower the lid onto the base without trapping a wire. Fasten it the way your print is designed to (screws or snap fit).", parts=["case_lid"], motion="close")
     checks = [{"kind": "suggested_check", "check": "voltage", "from": f"{mcu.ref}.3V3", "to": f"{mcu.ref}.GND", "net": None, "expect": "record what you observe; this plan supplies no reading"}]
     if any(f["severity"] in {"warning", "error"} for f in findings):
