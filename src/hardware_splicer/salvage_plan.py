@@ -4,8 +4,8 @@ It is the build sequence run the other way, over the same retained board. It is 
 assessment. It carries no engineering authority and measures nothing: a part's condition is unknown until it is tested, a
 verdict is advice about effort and reuse, and nothing here approves using a salvaged part in a device.
 
-Two limits are stated, not hidden. It needs the board file: a physical board with no file cannot be planned from. And it names a
-part only as far as the file does: a part with no part number is "identify first", never guessed.
+The file path needs a board file; donor capture also accepts a typed description. A part is named only as far as that input
+does: a part with no part number is "read the marking", never guessed.
 """
 
 from __future__ import annotations
@@ -42,22 +42,24 @@ TYPED_AUTHORITY = (
 )
 
 GENERAL_SAFETY = (
-    "Unplug the board and take out any battery before you start. Large capacitors can hold a charge: discharge them through a "
-    "resistor, not a screwdriver. Work with ventilation and eye protection, and wash your hands afterwards: older boards can "
-    "contain leaded solder. Use an anti-static strap if you can."
+    "Unplug the board and disconnect any battery or pack before you start. Capacitors can hold a charge even without a readable "
+    "voltage marking: discharge through a suitable resistor, not a screwdriver; use a meter to prove zero before touching or heating. "
+    "Leave a resistor across the capacitors and re-measure after a wait: voltage can come back. If you do not know how to do this, "
+    "leave the board alone and get help. Work with ventilation and eye protection, and wash your hands afterwards: older boards can "
+    "contain leaded solder."
 )
 
 _SPECIAL_CONNECTOR = re.compile(r"USB|JST|Molex|Micro|Mini|RJ45|Barrel|Audio|FPC|FFC|Terminal|Screw|SMA|HDMI|SD_|Card", re.IGNORECASE)
 _PLAIN_HEADER = re.compile(r"PinHeader|PinSocket|Pin_Header", re.IGNORECASE)
 # Anchored to whole parts of a name, so a word that merely contains one ("Electronic", "MOVEMENT", "OnePiece") does not match.
 _ELECTROLYTIC = re.compile(r"(^|[:_])CP_|C_Elec|Electrolytic|(^|[:_])Elec_|Tantalum|TantalC|EDLC|Supercap", re.IGNORECASE)
-_VOLTS = re.compile(r"(\d+(?:\.\d+)?)\s*V(?:AC|DC)?\b", re.IGNORECASE)
+_VOLTS = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)\s*(kV|WV|V(?:AC|DC)?)(?![a-z])", re.IGNORECASE)
 _MAINS_RATED_CAP = re.compile(r"\b[XY][12]\b", re.IGNORECASE)
 _PITCH = r"(?<![\d.])(?:5\.0{1,2}|5\.08|7\.50?|7\.62|10\.16|11\.0{1,2})(?!\d)"
 _WIDE_TERMINAL = re.compile(rf"(Terminal|Screw|MKDS|Phoenix).*{_PITCH}|{_PITCH}.*(Terminal|Screw|MKDS|Phoenix)", re.IGNORECASE)
 _SOLDER_JUMPER = re.compile(r"SolderJumper|SolderBridge|Jumper:", re.IGNORECASE)
 _MAINS_PART = re.compile(
-    r"Varistor|(^|[:_])RV_|(^|[:_])MOV(_|\d|$)|(^|[:_])IEC(_|\d|$)|Mains|AC_Inlet|Fuse_?holder|Fuse_\d+x\d+|Cartridge|Transformer|Trafo|Common_?Mode|Relay",
+    r"Varistor|(^|[:_ ])RV_|(^|[:_ ])MOV(_|\d|$)|(^|[:_ ])IEC(_|\d|$)|Mains|AC_Inlet|Fuse_?holder|Fuse_\d+x\d+|Cartridge|Transformer|Trafo|Common_?Mode|Relay|SONGLE|(?<![a-z])SRD[-_]",
     re.IGNORECASE,
 )
 _BATTERY_HOLDER = re.compile(r"Holder|Clip|Keystone", re.IGNORECASE)
@@ -68,7 +70,23 @@ _MEDIUM_PACKAGE = re.compile(r"SOIC|SOP|SOT|TSSOP|MSOP|SSOP|TO-252|TO-263|SO-", 
 # A part number is one token: letters and digits, with hyphens, dots or plus signs, and no spaces or underscores. A label that describes
 # a function ("FLASH_128M", "SPI_1x06") is not one, and neither is a bare number.
 _PART_NUMBER = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+/-]{2,39}")
-_BATTERY = re.compile(r"Battery|CR\d{4}|LiPo|Li-?ion|Lithium|18650|Coin|Pouch", re.IGNORECASE)
+_BATTERY = re.compile(r"Battery|CR\d{4}|LiPo|Li-?ion|Lithium|18650|Coin|Pouch|\b(?:vape|battery pack)\b", re.IGNORECASE)
+_LITHIUM = re.compile(r"Lithium|LiPo|Li-?ion|18650|Pouch|CR\d{4}", re.IGNORECASE)
+_PACK_PLUG = re.compile(r"(?<![a-z0-9])(?:XT(?:30|60|90)|battery[-_ ]?connector)(?![a-z0-9])", re.IGNORECASE)
+_CAP_PACKAGE = re.compile(r"Capacitor|(^|:)C[P]?_|Tantalum|EDLC|Supercap", re.IGNORECASE)
+_UNMARKED_CAP = re.compile(r"C_Rect|C_Disc|Film|Ceramic[-_ ]?Disc", re.IGNORECASE)
+_HV_EQUIPMENT = re.compile(r"(?<![a-z0-9])HV(?![a-z0-9])|high[-_ ]*voltage", re.IGNORECASE)
+_HV_TOKEN = re.compile(_HV_EQUIPMENT.pattern + r"|microwave|(?<![a-z0-9])flash(?![a-z0-9])", re.IGNORECASE)
+_CRT = re.compile(r"(?<![a-z0-9])CRT(?![a-z0-9])|flyback|anode|aquadag", re.IGNORECASE)
+_MICROWAVE = re.compile(r"microwave|magnetron|(?<![a-z0-9])MOT(?![a-z0-9])", re.IGNORECASE)
+_LAMP = re.compile(r"CCFL|backlight|(?<![a-z0-9])lamp(?![a-z0-9])", re.IGNORECASE)
+_HEATER = re.compile(r"heater|fuser|heating[-_ ]?element", re.IGNORECASE)
+_THERMAL_FUSE = re.compile(r"thermal[-_ ]*(?:fuse|cut[-_ ]?off|cut[-_ ]?out)|(?<![a-z0-9])TCO(?![a-z0-9])", re.IGNORECASE)
+_THERMISTOR = re.compile(r"thermistor|(?<![a-z0-9])NTC(?![a-z0-9])", re.IGNORECASE)
+_SURGE = re.compile(r"gas[-_ ]?discharge|spark[-_ ]?gap|(?<![a-z0-9])GDT\d*\b", re.IGNORECASE)
+_MOV = re.compile(r"varistor|(^|[:_ ])RV_|(^|[:_ ])MOV(_|\d|$)", re.IGNORECASE)
+_OPTO = re.compile(r"opto|(?<![a-z0-9])(?:PC8\d{2}|VO6\d{2,3}|LTV\d{3}|EL8\d{2}|TLP\d+)", re.IGNORECASE)
+_MAINS_SILICON = re.compile(r"(?<![a-z0-9])(?:LNK\d+|TNY\d+|TOP\d+|VIPER\d+|UC384\d|NCP12\d+|ICE[23]\w+|IRF840)|offline[-_ ]?switch", re.IGNORECASE)
 _SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603)|LED_(01005|0201|0402|0603)", re.IGNORECASE)
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
 
@@ -104,12 +122,79 @@ def _effort(part: dict[str, Any]) -> tuple[str, str]:
     return "medium", "an iron or hot air, flux and tweezers"
 
 
+def _part_text(part: dict[str, Any]) -> str:
+    identity = part.get("identity") or {}
+    return " ".join(str(x or "") for x in (part.get("footprint"), part.get("value"), identity.get("mpn"), identity.get("typed")))
+
+
+def _voltages(part: dict[str, Any]) -> list[float]:
+    # Read markings, not footprint dimensions or part numbers. kV and WV are audit A2 cases.
+    identity = part.get("identity") or {}
+    text = " ".join(str(x or "") for x in (part.get("value"), identity.get("typed")))
+    return [float(m.group(1)) * (1000 if m.group(2).lower() == "kv" else 1) for m in _VOLTS.finditer(text)]
+
+
+def _is_capacitor(part: dict[str, Any]) -> bool:
+    return part.get("component") == "capacitor" or bool(_CAP_PACKAGE.search(part["footprint"])) or bool(
+        re.search(r"\b(?:capacitor|supercap\w*|EDLC|tantalum)\b", _part_text(part), re.IGNORECASE)
+    ) or (
+        part.get("kind") == "passive" and bool(re.match(r"^(?:C|CX)\d", part["ref"], re.IGNORECASE))
+    )
+
+
 def _high_voltage(part: dict[str, Any]) -> bool:
-    is_capacitor = str(part.get("ref", "")).upper().startswith("C") or part.get("component") == "capacitor"
-    if part.get("kind") != "passive" or not is_capacitor:
+    return _is_capacitor(part) and (
+        bool(_MAINS_RATED_CAP.search(_part_text(part)) or _HV_TOKEN.search(_part_text(part)))
+        or any(v >= 100 for v in _voltages(part))
+    )
+
+
+def _mains_silicon(part: dict[str, Any]) -> bool:
+    text = _part_text(part)
+    return bool(_MAINS_SILICON.search(text)) or (
+        bool(re.search(r"MOSFET|TO-220|TO-247", text, re.IGNORECASE)) and any(v >= 500 for v in _voltages(part))
+    )
+
+
+def _wide_terminal(part: dict[str, Any]) -> bool:
+    text = _part_text(part)
+    if _WIDE_TERMINAL.search(text):
+        return True
+    if not re.search(r"Terminal|Screw|MKDS|Phoenix", text, re.IGNORECASE):
         return False
-    value = str(part.get("value") or "")
-    return bool(_MAINS_RATED_CAP.search(value)) or any(float(m.group(1)) >= 100 for m in _VOLTS.finditer(value))
+    # Explicit pitch fields cover widths beyond the legacy list; no body dimension is inferred as pitch.
+    return any(float(m.group(1)) >= 5 for m in re.finditer(
+        r"(?<![a-z0-9])(?:P|pitch\s*)(\d+(?:\.\d+)?)\s*mm\b", text, re.IGNORECASE
+    ))
+
+
+def _special_hazards(part: dict[str, Any]) -> list[str]:
+    """Hazard tokens override a guessed kind. Short source quotes are in docs/SALVAGE_PLAN.md."""
+    text = _part_text(part)
+    hazards = []
+    if _CRT.search(text):
+        hazards.append("CRT anodes and flyback circuits can retain charge and regain it after discharge: leave them in place and get trained help")
+    if _MICROWAVE.search(text):
+        hazards.append("microwave circuits can retain charge in the high-voltage capacitor; leave the HV stack in place, including its transformer and diode")
+        hazards.append("do not power or reuse a loose magnetron: its original cavity and waveguide contain microwave radiation")
+    if _LAMP.search(text):
+        hazards.append("a CCFL backlight has high voltage and a mercury-containing lamp; a lamp or backlight marking may mean one: do not break or force it out")
+    if _THERMAL_FUSE.search(text):
+        hazards.append("a thermal fuse is a non-resettable cut-off: do not bypass it; replace it using the appliance's service information")
+    if _HEATER.search(text):
+        hazards.append("a heater or fuser may be hot and connected to mains: let it cool; do not power it without its original thermal cut-off")
+    if _HV_EQUIPMENT.search(text) and not _is_capacitor(part):
+        hazards.append("this marking points to high voltage: leave the part in place and get trained help")
+    return hazards
+
+
+def _mains_context(part: dict[str, Any]) -> bool:
+    text = _part_text(part)
+    unknown_charge = _is_capacitor(part) and not _voltages(part) and bool(
+        _UNMARKED_CAP.search(part["footprint"]) or _ELECTROLYTIC.search(part["footprint"])
+    )
+    return bool(_high_voltage(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
+                or _mains_silicon(part) or _OPTO.search(text) or unknown_charge)
 
 
 def _lookup_reasons(part: dict[str, Any]) -> list[str]:
@@ -133,6 +218,8 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
     reasons: list[str] = []
     hazards: list[str] = []
     verdict = "optional"
+    text = _part_text(part)
+    special = _special_hazards(part)
 
     if kind in {"testpoint", "mounting_hole"}:
         verdict = "skip"
@@ -142,8 +229,16 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         verdict = "skip"
         reasons.append("a solder jumper is a bridge on the board itself: there is no part to take")
         effort, tool = "none", ""
-    elif _BATTERY.search(name) or _BATTERY_REF.match(part["ref"]):
-        hazards.append("take any battery out before heating anything, and never heat a lithium cell")
+    elif special and not _high_voltage(part):
+        verdict = "skip"
+        reasons.append("a marking or package points to an appliance hazard: leave it in place")
+        hazards.extend(special)
+        effort, tool = "none", ""
+    elif _BATTERY.search(text) or _BATTERY_REF.match(part["ref"]):
+        hazards.append("take any cell out before heating anything; never heat a cell")
+        hazards.append("tape exposed battery terminals separately; do not short, do not puncture or disassemble, and do not solder directly onto a cell")
+        if _LITHIUM.search(text):
+            hazards.append("do not reuse a swollen or damaged lithium cell; do not puncture a bulge")
         if _BATTERY_HOLDER.search(name):
             verdict = "optional"
             reasons.append("a battery holder: take it if you need it; the cell is never part of this")
@@ -151,23 +246,47 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
             verdict = "skip"
             reasons.append("a battery cell: take it out by hand before you start, never with heat, and do not reuse a swollen or damaged one")
             effort, tool = "none", ""
-    elif _MAINS_PART.search(name):
+    elif _MAINS_PART.search(text) and not _is_capacitor(part):
         verdict = "optional"
         reasons.append("a part from mains wiring or a switching supply: it can wear out or have carried mains voltage in its original use")
-        hazards.append("only reuse it if you know how to work safely with mains voltage; varistors and relays wear out, and transformers and filter parts can hold energy")
-    elif _ELECTROLYTIC.search(name) or _high_voltage(part):
+        hazards.append("it may have carried mains voltage; nearby capacitors can hold charge after unplugging, so discharge and prove zero before work")
+        if re.search(r"Relay|SONGLE|SRD[-_]", text, re.IGNORECASE):
+            hazards.append("relay contacts may be worn; do not rely on a used relay for mains switching")
+        if _MOV.search(text):
+            hazards.append("varistors wear out and may fail short: do not put a used MOV back on mains")
+    elif _ELECTROLYTIC.search(text) or _high_voltage(part):
         verdict = "test_first"
         reasons.append("a polarised or high-voltage capacitor ages and can fail; its condition is unknown")
         hazards.append("may still hold a charge: discharge it through a resistor first")
+        hazards.append("prove zero with a meter before touching or heating; leave a resistor across it and re-measure after a wait because voltage can come back")
+        if _ELECTROLYTIC.search(text):
+            hazards.append("inspect before removal: discard a bulged or leaking capacitor")
+            if not _voltages(part):
+                hazards.append("no readable voltage: this could be a photoflash or other high-energy capacitor; treat it as charged until measured")
+        if re.search(r"Tantalum|TantalC", text, re.IGNORECASE):
+            hazards.append("tantalum is polarised: reverse polarity destroys it; record its polarity before removal")
+        if re.search(r"EDLC|Supercap", text, re.IGNORECASE):
+            hazards.append("a supercapacitor can arc when shorted: remove jewellery and do not short its terminals")
         if _high_voltage(part):
             verdict = "skip"
-            reasons.append("rated for 100 V or more: not worth the risk of a stored charge")
-            hazards.append("a high-voltage capacitor can hold a dangerous charge for a long time")
+            reasons.append("leave-in-place policy: a marking of 100 V or more, X/Y mains class or HV context; a rating is not the voltage now present")
+            hazards.append("a high-voltage capacitor can hold a dangerous charge; if you decide to take it, discharge and prove zero first, then re-measure after a wait")
+            hazards.extend(special)
             effort, tool = "none", ""
+        if _ELECTROLYTIC.search(text) and re.search(r"bulg|leak|vented", text, re.IGNORECASE):
+            verdict = "skip"
+            reasons.insert(0, "reported damage: discard a bulged or leaking capacitor")
+            effort, tool = "none", ""
+    elif _is_capacitor(part) and _UNMARKED_CAP.search(name) and not _voltages(part):
+        reasons.append("no readable voltage on a film box or ceramic disc: its role is unknown")
+        hazards.append("might be a mains safety capacitor: do not reuse it as a generic capacitor or as a mains protection part")
+        hazards.append("may hold charge: discharge through a resistor and prove zero with a meter before touching or heating")
     elif kind == "connector" and _SPECIAL_CONNECTOR.search(name):
         verdict = "keep"
         reasons.append("a specialised connector: harder to find and cheap to keep")
-        if _WIDE_TERMINAL.search(name):
+        if _wide_terminal(part):
+            verdict = "optional"
+            reasons[0] = "a wide terminal block: its previous use and condition are unknown"
             hazards.append("a terminal block this wide often carried mains voltage: check where it was connected before you trust or reuse it")
     elif kind == "connector" and _PLAIN_HEADER.search(name):
         verdict = "optional"
@@ -185,7 +304,7 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
             else:
                 named = identity.get("mpn") or part.get("value")
                 who = f" ({identity['manufacturer']})" if identity.get("manufacturer") else ""
-                reasons.append(f"the board file names it: \"{named}\"{who}, so it can be identified without guessing")
+                reasons.append(f"the board file names it: \"{named}\"{who}; read that as the file's claim")
                 reasons.append("read the marking on the chip itself before trusting that")
             reasons.extend(_lookup_reasons(part))
         else:
@@ -194,7 +313,7 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
     elif kind == "passive":
         if _SMALL_CHIP.search(name):
             verdict = "skip"
-            reasons.append("a tiny chip part: cheaper and safer to buy new than to heat for")
+            reasons.append("a tiny chip part: cheaper to buy new than to heat for")
             effort = "hard"
             tool = "tweezers and hot air; easy to lose or overheat"
         elif _BIG_CHIP.search(name):
@@ -210,6 +329,16 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         reasons.append("the footprint names no package and has no outline, so its size and effort are guesses")
     if verdict in {"keep", "test_first", "identify", "optional"} and kind == "ic":
         hazards.append("heat and moisture can damage a chip: do not stay on one spot, and keep it dry")
+    if _PACK_PLUG.search(text):
+        hazards.append("a battery plug means the pack may still be live: disconnect it before work and tape exposed terminals separately")
+    if _OPTO.search(text):
+        hazards.append("an optocoupler is an isolation barrier only within its ratings; a used one is not known to still be one: do not rely on it for mains isolation")
+    if _mains_silicon(part):
+        hazards.append("this chip may have sat on a mains primary: its previous stress and condition are unknown")
+    if _THERMISTOR.search(text):
+        hazards.append("a thermistor may still be hot: let it cool before handling; its previous use is unknown")
+    if _SURGE.search(text):
+        hazards.append("do not rely on a used surge protector for protection; its previous use is unknown")
     typed = (part.get("identity") or {}).get("source") == "typed"
     label = VERDICT_TEXT[verdict]
     if typed and verdict == "keep" and kind == "ic":
@@ -310,17 +439,27 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
     to_take = sorted([p for p in fitted if p["salvage"]["verdict"] != "skip"], key=_order_key)
     groups: list[list[dict[str, Any]]] = []
     for part in to_take:
-        key = (part["side"], part["kind"], part["footprint"], part["salvage"]["verdict"], part["salvage"]["effort"], _what(part))
+        key = (part["side"], part["kind"], part["footprint"], part["salvage"]["verdict"], part["salvage"]["effort"], _what(part), tuple(part["salvage"]["hazards"]))
         if groups and groups[-1][0].get("_key") == key:
             groups[-1].append(part)
         else:
             part["_key"] = key
             groups.append([part])
 
+    context_parts = [p for p in fitted if _mains_context(p)]
+    preparation = GENERAL_SAFETY
+    if context_parts:
+        preparation += " Mains or high-voltage context: " + ", ".join(p["ref"] for p in context_parts) + "."
+        preparation += " Before any iron work, prove the capacitors in and around these circuits are discharged with a meter."
+        preparation += " Leave a resistor across them and re-measure after a wait because voltage can come back; do not wear a wrist strap near high voltage."
+        preparation += " CRT, microwave and lamp circuits need trained help; this report gives no discharge procedure for them."
+    else:
+        preparation += " Use an anti-static strap if you can."
+
     steps: list[dict[str, Any]] = [
         {
-            "step_id": "step-01", "order": 1, "kind": "prepare", "title": "Make the board safe to work on",
-            "instruction": GENERAL_SAFETY, "side": "front", "turn_board_over": False, "refs": [], "part_ids": [], "checks": [],
+            "step_id": "step-01", "order": 1, "kind": "prepare", "title": "Unplug and check stored charge",
+            "instruction": preparation, "side": "front", "turn_board_over": False, "refs": [], "part_ids": [], "checks": [],
         }
     ]
     current_side = "front"
@@ -336,7 +475,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             text += " " + " ".join(h[0].upper() + h[1:] + ("" if h.endswith(".") else ".") for h in salvage["hazards"])
         checks: list[dict[str, Any]] = []
         if salvage["verdict"] == "test_first":
-            checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "close to the printed value; otherwise discard"})
+            checks.append({"kind": "suggested_check", "check": "test", "from": ", ".join(refs), "to": "capacitance and ESR meter", "net": None, "expect": "record the test setup and readings; consult the datasheet; this report gives no expected reading"})
         if salvage["verdict"] in {"keep", "identify"} and first["kind"] == "ic":
             checks.append({"kind": "suggested_check", "check": "read_marking", "from": ", ".join(refs), "to": "the text printed on the chip", "net": None, "expect": "write down what is printed, then compare it with a datasheet" if typed else "write down what is printed and whether it agrees with what the file says"})
         if first["kind"] == "ic":
@@ -368,7 +507,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
             + (f" Left on the board: {', '.join(skipped[:12])}{' and more' if len(skipped) > 12 else ''}." if skipped else "")
             + (f" Measurements still to record before you trust them: {', '.join(open_gates[:12])}{' and more' if len(open_gates) > 12 else ''}." if open_gates else ""),
             "side": current_side, "turn_board_over": False, "refs": [], "part_ids": [],
-            "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "behaves as its type should; otherwise discard"}],
+            "checks": [{"kind": "suggested_check", "check": "test", "from": "every part you kept", "to": "a meter or a test circuit", "net": None, "expect": "record the test setup and results; nothing here approves reuse or powering"}],
         }
     )
 
@@ -382,7 +521,7 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
         "origin": "typed" if typed else "file",
         "lookup_source": lookup_source,
         "limits": TYPED_LIMITS if typed else [
-            "Needs the board's file. A physical board with no file cannot be planned from.",
+            "Needs the board's file for this path. For a physical board without a file, use the separate typed capture path.",
             "A part is named only as far as the file names it. Anything else is 'read the marking', never a guess.",
             "Whether a part still works is unknown until it is tested.",
         ],

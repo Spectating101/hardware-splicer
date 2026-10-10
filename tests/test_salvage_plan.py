@@ -301,15 +301,16 @@ def test_a_word_that_merely_contains_a_hazard_keyword_is_not_that_hazard(ref, fo
 def test_the_mains_and_stored_energy_parts_the_first_pass_missed_now_carry_a_hazard(ref, footprint, value, attr, hazard) -> None:
     got = _verdict(build_salvage_plan(_board(_fp(ref, footprint, "10 10", value, attr))), ref)
     assert any(hazard in h for h in got["hazards"]), got
-    assert got["verdict"] != "keep" or "terminal" in footprint.lower(), got       # a transformer or a relay is never "worth taking"
+    assert got["verdict"] != "keep", got       # mains parts, including wide terminals, are never "worth taking"
 
 
 def test_a_wide_pitch_terminal_block_carries_a_mains_warning_and_a_small_connector_does_not() -> None:
     wide = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_TerminalBlock:TerminalBlock_Phoenix_PT-1.5-2-5.08-H", "10 10", "", "through_hole"))), "J1")
     narrow = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_TerminalBlock:TerminalBlock_Altech_AK300-2_P5.00mm", "10 10", "", "through_hole"))), "J1")
     thin = _verdict(build_salvage_plan(_board(_fp("J1", "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", "10 10", "", "through_hole"))), "J1")
-    assert wide["verdict"] == "keep" and any("mains" in h for h in wide["hazards"])
-    assert narrow["verdict"] == "keep" and any("mains" in h for h in narrow["hazards"])     # 5.00 mm pitch is a mains-class block too
+    # Audit A8: the old keep assertions contradicted the documented wide-terminal rule.
+    assert wide["verdict"] == "optional" and any("mains" in h for h in wide["hazards"])
+    assert narrow["verdict"] == "optional" and any("mains" in h for h in narrow["hazards"])
     assert thin["verdict"] == "keep" and thin["hazards"] == []
 
 
