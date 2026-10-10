@@ -28,6 +28,7 @@ def _rules(plan: dict, severity: str | None = None) -> set[str]:
 
 
 GOOD = EXAMPLE["connections"]
+ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply"}
 
 
 def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() -> None:
@@ -127,9 +128,13 @@ def test_eight_printable_chip_entries_at_the_text_limits_are_allowed(synthetic_l
     assert synthetic_library([chip] * 8)["modules"][0]["chips"] == [chip] * 8
 
 
-def test_the_example_is_a_clean_plan_with_real_pins_and_ordered_steps() -> None:
+def test_the_example_has_supply_notes_with_logical_pins_and_ordered_steps() -> None:
     plan = build_device_plan(EXAMPLE)
-    assert plan["findings"] == [] and plan["counts"]["errors"] == 0
+    assert _rules(plan) == ADVISORY_RULES and plan["counts"]["errors"] == 0
+    assert all(f["severity"] == "info" for f in plan["findings"])
+    display = next(m for m in plan["modules"] if m["id"] == "display")
+    electrical = module_library()["modules"][1]["electrical"]
+    assert all(electrical[key] in display["notes"] for key in ("supply_note", "pullups_note"))
     wires = {(w["from"]["pin"], w["to"]["pin_id"]) for w in plan["wires"]}
     assert wires == {("VCC", "J2-1"), ("GND", "J2-14"), ("SCL", "J3-3"), ("SDA", "J3-6")}
     colors = {w["from"]["pin"]: w["color"] for w in plan["wires"]}
@@ -190,7 +195,7 @@ def test_the_board_sits_inside_the_case_and_the_display_clears_the_wires_and_the
         ({"display.SDA": "mcu.IO34"}, "input_only_pin", "error"),
         ({"display.SDA": "mcu.EN"}, "reset_pin", "error"),
         ({"display.SDA": "mcu.IO22"}, "swapped_default_i2c", "warning"),
-        ({"display.SDA": "mcu.IO12"}, "strapping_pin", "warning"),
+        ({"display.SDA": "mcu.IO12"}, "i2c_on_mtdi", "error"),
         ({"display.SDA": "mcu.TX"}, "serial_pin", "warning"),
         ({"display.SDA": "mcu.IO19"}, "custom_i2c_pin", "info"),
         ({"display.VCC": "mcu.5V"}, "five_volts_to_a_3v3_system", "warning"),
@@ -233,15 +238,20 @@ def test_swapping_sda_and_scl_between_the_two_modules_is_caught_in_either_direct
         assert [f["rule"] for f in plan["findings"]].count("swapped_default_i2c") == 2
     # Written the other way round, the same good wiring is still good.
     flipped = build_device_plan(_with([{"from": c["to"], "to": c["from"]} for c in GOOD]))
-    assert flipped["findings"] == []
+    assert _rules(flipped) == ADVISORY_RULES
 
 
-def test_a_battery_straight_onto_the_board_is_refused_with_the_reason() -> None:
+@pytest.mark.parametrize("source", ["lipo_direct", "battery", "5v_barrel"])
+def test_non_usb_power_does_not_invent_a_battery_wire(source) -> None:
     spec = copy.deepcopy(EXAMPLE)
-    spec["power"] = {"source": "lipo_direct"}
+    spec["power"] = {"source": source}
     plan = build_device_plan(spec)
     finding = next(f for f in plan["findings"] if f["rule"] == "power_source_not_supported")
-    assert finding["severity"] == "error" and "3.6 V" in finding["message"]
+    assert finding["severity"] == "error" and "one and only one" in finding["message"]
+    assert "battery" not in finding["message"].split("is not supported yet.", 1)[1].lower()
+    assert "3.6 V" not in finding["message"]
+    assert not any(s["kind"] == "power" for s in plan["steps"])
+    assert not any("Connect the Micro-USB" in s["instruction"] for s in plan["steps"])
 
 
 # --- the spec ---------------------------------------------------------------------------------------------------------------
@@ -462,7 +472,7 @@ def test_wires_that_are_each_fine_but_together_join_two_supplies_are_an_error() 
     assert len(bridged) == 1 and bridged[0]["severity"] == "error" and "3.3 V and 5 V" in bridged[0]["message"]
     assert "mcu.3V3" in bridged[0]["message"] and "mcu.5V" in bridged[0]["message"]
     # Each wire on its own was only the 5 V warning; it is the pair that is the problem.
-    assert {f["rule"] for f in build_device_plan(_with([GOOD[0], GOOD[1], GOOD[2], GOOD[3]]))["findings"]} == set()
+    assert _rules(build_device_plan(_with(GOOD))) == ADVISORY_RULES
     assert "nets_bridged" not in _rules(build_device_plan(_with([{"from": "display.VCC", "to": "mcu.5V"}, *GOOD[1:]])))
 
 
@@ -475,13 +485,13 @@ def test_a_supply_reaching_ground_through_the_modules_own_ground_pins_is_caught(
     assert [f["rule"] for f in plan["findings"]].count("nets_bridged") == 0
     # Three ground pins are one net, so a supply that meets ground through two of them is still one problem.
     indirect = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": "mcu.J2-14"}, {"from": "display.GND", "to": "mcu.J3-1"}, GOOD[2], GOOD[3]]))
-    assert indirect["findings"] == []       # two ground wires to two ground pins is harmless
+    assert _rules(indirect) == ADVISORY_RULES       # neither ground wire adds a fault
 
 
 def test_the_board_can_be_wired_correctly_to_any_of_its_three_ground_pins() -> None:
     for pin in ("mcu.J2-14", "mcu.J3-1", "mcu.J3-7", "mcu.GND"):
         plan = build_device_plan(_with([GOOD[0], {"from": "display.GND", "to": pin}, GOOD[2], GOOD[3]]))
-        assert plan["findings"] == [], (pin, plan["findings"])
+        assert _rules(plan) == ADVISORY_RULES, (pin, plan["findings"])
 
 
 def test_a_rejected_wire_does_not_hide_a_separate_supply_bridge() -> None:
@@ -543,3 +553,115 @@ def test_malformed_module_sources_fail_closed_with_the_loaders_own_error(tmp_pat
                 module_library()
     finally:
         device_plan._library.cache_clear()
+
+
+# --- electronics audit regressions (W3) -------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("pin", ["IO34", "IO35", "VP", "VN"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_ground_on_an_input_only_pin_is_an_error_and_not_a_ground_return(pin, reverse):
+    connections = [{**c, "to": f"mcu.{pin}" if c["from"] == "display.GND" else c["to"]} for c in GOOD]
+    if reverse:
+        connections = [{"from": c["to"], "to": c["from"]} for c in connections]
+    plan = build_device_plan(_with(connections))
+    assert "ground_to_other" in _rules(plan, "error")
+    assert any(f["rule"] == "missing_connection" and "ground" in f["message"] for f in plan["findings"])
+    isolation = next(c for s in plan["steps"] for c in s["checks"] if c["check"] == "isolation")
+    assert isolation["to"] == "mcu.GND"
+
+
+@pytest.mark.parametrize("signal", ["SDA", "SCL"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_i2c_pullups_on_io12_are_an_error_without_a_pin_routing_note(signal, reverse):
+    connections = [{**c, "to": "mcu.IO12" if c["from"] == f"display.{signal}" else c["to"]} for c in GOOD]
+    if reverse:
+        connections = [{"from": c["to"], "to": c["from"]} for c in connections]
+    plan = build_device_plan(_with(connections))
+    finding = next(f for f in plan["findings"] if f["rule"] == "i2c_on_mtdi")
+    assert finding["severity"] == "error" and "1.8 V" in finding["message"]
+    assert "IO12 should be kept low" in finding["basis"]
+    assert "custom_i2c_pin" not in _rules(plan)
+    assert "missing_connection" in _rules(plan, "error")
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_five_volt_oled_warning_covers_logic_and_pullups_and_gates_usb(reverse):
+    connections = [{**c, "to": "mcu.5V" if c["from"] == "display.VCC" else c["to"]} for c in GOOD]
+    if reverse:
+        connections = [{"from": c["to"], "to": c["from"]} for c in connections]
+    plan = build_device_plan(_with(connections))
+    finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system")
+    assert finding["severity"] == "warning"
+    assert all(text in finding["message"] for text in ("1.65", "3.3 V", "regulator", "damage", "SDA", "SCL"))
+    assert not any(s["kind"] == "power" for s in plan["steps"])
+    assert any("Do not plug in until you have checked the warnings above" in s["instruction"] for s in plan["steps"])
+
+
+@pytest.mark.parametrize("target", ["mcu.IO0", "mcu.IO22", "mcu.D2"])
+def test_any_warning_or_error_adds_a_power_review(target):
+    plan = build_device_plan(_with([{**c, "to": target if c["from"] == "display.SDA" else c["to"]} for c in GOOD]))
+    assert any("Do not plug in until you have checked the warnings above" in s["instruction"] for s in plan["steps"])
+    assert not any(s["kind"] == "power" for s in plan["steps"])
+
+
+def test_io0_note_names_the_devkit_auto_program_circuit_with_a_source_limit():
+    plan = build_device_plan(_with([{**c, "to": "mcu.IO0" if c["from"] == "display.SDA" else c["to"]} for c in GOOD]))
+    finding = next(f for f in plan["findings"] if f["rule"] == "strapping_pin")
+    assert "auto-program" in finding["message"]
+    assert "unverified by supervisor" in finding["basis"]
+
+
+def test_supply_and_pullup_notes_survive_missing_or_rejected_wires():
+    for connections in ([], [{"from": "display.SDA", "to": "mcu.D2"}]):
+        plan = build_device_plan(_with(connections))
+        assert ADVISORY_RULES <= _rules(plan, "info")
+        display = next(m for m in plan["modules"] if m["id"] == "display")
+        assert any("pull-up resistors" in note for note in display["notes"])
+
+
+def test_oled_pin_order_is_not_encoded_as_numbered_electrical_positions():
+    oled = module_library()["modules"][1]
+    assert oled["pin_order_varies"] is True
+    assert oled["pin_orders"] == [["GND", "VCC", "SCL", "SDA"], ["VCC", "GND", "SCL", "SDA"]]
+    assert "usual" not in oled["dimension_basis"]["pins"]
+    assert all(p["id"] == p["name"] and "number" not in p for p in oled["pins"])
+    assert len({(p["x"], p["y"]) for p in oled["pins"]}) == 1  # logical header centre, not a pin position
+    plan = build_device_plan(EXAMPLE)
+    display = next(m for m in plan["modules"] if m["id"] == "display")
+    assert all(p["roles"] == [] and "printed" in p["label"] for p in display["pins"])
+    assert len({tuple(p["point"].values()) for p in display["pins"]}) == 4  # unnamed drawing pads
+    assert {p["id"] for p in display["logical_pins"]} == {"GND", "VCC", "SCL", "SDA"}
+    for wire in plan["wires"]:
+        assert "physical pin position unknown" in wire["from"]["point_basis"]
+        assert wire["from"]["pin_id"] in {p["id"] for p in display["logical_pins"]}
+    for step in plan["steps"]:
+        if step["kind"] in ("measure", "wire"):
+            assert "follow the labels printed on your module" in step["instruction"].lower()
+        if step["kind"] == "wire":
+            assert "wire" not in step  # current viewer draws labelled endpoints only when this key is present
+    with pytest.raises(DevicePlanError, match="no pin named"):
+        build_device_plan(_with([{"from": "display.P1", "to": "mcu.GND"}]))
+
+
+def test_wroom_datasheet_redirect_is_used_by_sources_and_chips():
+    esp = module_library()["modules"][0]
+    url = "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+    source = next(s for s in esp["sources"] if s["url"] == url)
+    assert source["as_of"] == "2026-10-10"
+    assert "redirect" in source["label"]
+    assert esp["chips"][0]["source"] == url
+
+
+def test_display_seating_uses_board_edges():
+    plan = build_device_plan(EXAMPLE)
+    seating = next(s for s in plan["steps"] if s["kind"] == "place" and s["parts"] == ["display"])
+    assert "circuit-board edges, not by the glass" in seating["instruction"]
+    assert "Press the display" not in seating["instruction"]
+
+
+def test_checks_request_observations_without_predicting_readings():
+    plan = build_device_plan(EXAMPLE)
+    for step in plan["steps"]:
+        for check in step["checks"]:
+            assert check["expect"] == "record what you observe; this plan supplies no reading"
+    assert "should report one device" not in plan["steps"][-1]["instruction"]

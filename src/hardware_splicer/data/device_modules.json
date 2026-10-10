@@ -10,7 +10,7 @@
         {
           "marking": "ESP32-WROOM-32E",
           "role": "Wi-Fi/Bluetooth module on the board",
-          "source": "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
         }
       ],
       "summary": "Espressif's ESP32 development board with two 19-pin headers and a Micro-USB port.",
@@ -613,9 +613,9 @@
           "as_of": "2026-10-09"
         },
         {
-          "label": "ESP32-WROOM-32E datasheet (module size 18.0 x 25.5 x 3.1 mm; supply 3.0-3.6 V; GPIO6-11 on the flash; strapping pins GPIO0, GPIO2, MTDI, MTDO, GPIO5; VIH max VDD+0.3 V)",
-          "url": "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
-          "as_of": "2026-10-09"
+          "label": "ESP32-WROOM-32E datasheet (module size 18.0 x 25.5 x 3.1 mm; supply 3.0-3.6 V; GPIO6-11 on the flash; strapping pins GPIO0, GPIO2, MTDI, MTDO, GPIO5; VIH max VDD+0.3 V); redirect checked by supervisor 2026-10-10",
+          "url": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+          "as_of": "2026-10-10"
         },
         {
           "label": "arduino-esp32 pins_arduino.h (SDA = 21, SCL = 22)",
@@ -667,46 +667,42 @@
       },
       "pins": [
         {
-          "id": "P1",
-          "number": 1,
+          "id": "GND",
           "name": "GND",
           "roles": [
             "ground"
           ],
-          "x": 9.65,
+          "x": 13.46,
           "y": 1.5,
           "side": "top"
         },
         {
-          "id": "P2",
-          "number": 2,
+          "id": "VCC",
           "name": "VCC",
           "roles": [
             "power_in"
           ],
-          "x": 12.19,
+          "x": 13.46,
           "y": 1.5,
           "side": "top"
         },
         {
-          "id": "P3",
-          "number": 3,
+          "id": "SCL",
           "name": "SCL",
           "roles": [
             "i2c_scl"
           ],
-          "x": 14.73,
+          "x": 13.46,
           "y": 1.5,
           "side": "top"
         },
         {
-          "id": "P4",
-          "number": 4,
+          "id": "SDA",
           "name": "SDA",
           "roles": [
             "i2c_sda"
           ],
-          "x": 17.27,
+          "x": 13.46,
           "y": 1.5,
           "side": "top"
         }
@@ -720,13 +716,13 @@
         "address_basis": "SSD1306 datasheet: slave address 0 1 1 1 1 0 SA0, so 0111100 or 0111101"
       },
       "electrical": {
-        "supply_note": "Set by the module's own regulator, which sellers do not standardise. Many list 3 V to 5 V. The SSD1306 chip itself runs its logic at 1.65 V to 3.3 V.",
-        "pullups_note": "Many modules pull SDA and SCL up to VCC, so powering one from 5 V puts 5 V on those lines."
+        "supply_note": "Check the supply requirements of your exact module. Its regulator arrangement is unknown here. AZ-Delivery lists a module operating voltage of 3.3 V to 5 V; that claim does not describe every board. The SSD1306 chip's own logic supply is 1.65 V to 3.3 V. This plan does not establish how your module will behave on 3V3.",
+        "pullups_note": "SDA and SCL must have pull-up resistors (SSD1306 datasheet). Check whether your module has them and which supply they connect to. Pull-ups to VCC would put 5 V on these lines when VCC is 5 V; do not connect that to ESP32 GPIOs."
       },
       "dimension_basis": {
         "pcb": "typical; sellers list 27.0 to 27.8 mm and 3.8 to 4.1 mm overall height. Measure yours.",
         "active_area": "21.74 x 10.86 mm, as listed by several sellers",
-        "pins": "order GND, VCC, SCL, SDA is the usual one; some modules use VCC, GND, SCL, SDA. Follow the printed labels, not the position."
+        "pins": "Order varies: seller listings give GND, VCC, SCL, SDA and VCC, GND, SCL, SDA (AZ-Delivery). Follow the labels printed on your module. Logical pin coordinates mark the header centre only; drawing pads have no assigned signals."
       },
       "sources": [
         {
@@ -747,6 +743,38 @@
       ],
       "notes": [
         "Figures other than the I2C address and the active area are typical and vary by seller. The plan's first step is to measure yours."
+      ],
+      "header_positions": [
+        {
+          "x": 9.65,
+          "y": 1.5
+        },
+        {
+          "x": 12.19,
+          "y": 1.5
+        },
+        {
+          "x": 14.73,
+          "y": 1.5
+        },
+        {
+          "x": 17.27,
+          "y": 1.5
+        }
+      ],
+      "pin_orders": [
+        [
+          "GND",
+          "VCC",
+          "SCL",
+          "SDA"
+        ],
+        [
+          "VCC",
+          "GND",
+          "SCL",
+          "SDA"
+        ]
       ]
     }
   ]

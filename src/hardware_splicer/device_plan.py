@@ -236,6 +236,8 @@ def _label(placed: _Placed, pin: dict[str, Any]) -> str:
         gpio = re.search(r"GPIO\d+", pin.get("function", ""))
         extra = f", also called {gpio.group(0)}" if gpio and gpio.group(0).replace("GPIO", "IO") != pin["name"] else ""
         return f"{pin['name']} (header {pin['header']}, pin {pin['number']} counting from the antenna end{extra})"
+    if placed.entry.get("pin_order_varies"):
+        return f"the pin labelled {pin['name']} (follow the labels printed on your module; position varies)"
     return f"the pin labelled {pin['name']}"
 
 
@@ -343,16 +345,20 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     if has(ra, *sources) and has(rb, *sources):
         out.append(_finding("error", "supplies_joined", f"{name} joins two supply pins together.", "pin roles from the module library", wire_id))
         return out
-    if ground_a != ground_b and (has(ra, *powers) or has(rb, *powers) or has(ra, "gpio", "i2c_sda", "i2c_scl") or has(rb, "gpio", "i2c_sda", "i2c_scl")):
+    # DevKitC user guide, J2: "IO34 | I | GPIO34, ADC1_CH6, VDET_1"; "I: Input".
+    if ground_a != ground_b and (has(ra, *powers) or has(rb, *powers) or has(ra, "gpio", "gpio_input_only", "i2c_sda", "i2c_scl") or has(rb, "gpio", "gpio_input_only", "i2c_sda", "i2c_scl")):
         kind = "a power pin" if has(ra | rb, *powers) else "a signal pin"
-        out.append(_finding("error", "ground_to_other", f"{name} joins ground to {kind}. That is a short or a stuck signal.", "pin roles from the module library", wire_id))
+        detail = "A signal pin cannot provide the display's ground return." if kind == "a signal pin" else "Supply and ground must not be joined."
+        out.append(_finding("error", "ground_to_other", f"{name} joins ground to {kind}. {detail}", "pin roles from the module library; ESP32-DevKitC V4 user guide, header types", wire_id))
         return out
     if ground_a and ground_b:
         return out
     if has(ra, *powers) and has(rb, *powers):
         supply, user = (pa, pb) if has(ra, "power_3v3", "power_5v") else (pb, pa)
         if has(set(supply["roles"]), "power_5v"):
-            out.append(_finding("warning", "five_volts_to_a_3v3_system", f"{name} runs a module from 5 V. Many modules pull SDA and SCL up to their supply, which would put 5 V on ESP32 pins that are rated for 3.3 V.", "ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V; the module note says pull-ups usually go to VCC", wire_id))
+            # SSD1306 datasheet: "VDD = 1.65V to 3.3V for IC logic".
+            # WROOM-32E Table 15: "VIH | High-level input voltage | 0.75 × VDD | — | VDD + 0.3 | V".
+            out.append(_finding("warning", "five_volts_to_a_3v3_system", f"{name} runs a module from 5 V. The SSD1306's own logic supply is 1.65 V to 3.3 V; 5 V can damage a module without a regulator. Pull-ups to VCC would also put 5 V on ESP32 SDA and SCL. Check the module's regulator and pull-up supply before connecting power.", "SSD1306 datasheet: VDD = 1.65V to 3.3V for IC logic; ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V", wire_id))
         return out
     if has(ra | rb, *powers) and has(ra | rb, "gpio", "i2c_sda", "i2c_scl", "gpio_input_only"):
         out.append(_finding("error", "power_to_signal", f"{name} joins a power pin to a signal pin.", "pin roles from the module library", wire_id))
@@ -371,9 +377,19 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
             out.append(_finding("error", "input_only_pin", f"{name} uses {mcu_pin['name']}, which can only be an input. I2C needs to drive the line.", datasheet, wire_id))
         elif not has(mroles, "gpio"):
             out.append(_finding("error", "not_a_signal_pin", f"{name} uses {mcu_pin['name']}, which is not a signal pin.", datasheet, wire_id))
+        elif "MTDI" in mcu_pin.get("function", "") and has(mroles, "strapping"):
+            # WROOM-32E §4.2: "MTDI = 1, VDD_SDIO pin is powered from internal 1.8 V LDO."
+            # Schematic note: "IO12 should be kept low when the module is powered on."
+            out.append(_finding("error", "i2c_on_mtdi", f"{name} uses IO12 (MTDI). I2C pull-ups hold it high at reset, selecting the flash's 1.8 V supply. Keep IO12 low at power-on; move this I2C wire to another output-capable pin.", "ESP32-WROOM-32E datasheet, section 4.2 and schematic: IO12 should be kept low when the module is powered on.", wire_id))
         else:
             if has(mroles, "strapping"):
-                out.append(_finding("warning", "strapping_pin", f"{name} uses {mcu_pin['name']}, a pin the chip reads at start-up. Hardware on it can change how it boots.", "ESP32-WROOM-32E datasheet, Table 4 (strapping pins)", wire_id))
+                note = ""
+                basis = "ESP32-WROOM-32E datasheet, section 4 (strapping pins)"
+                if mcu_pin["name"] == "IO0":
+                    # Audit B7 quote, unverified by supervisor: "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits."
+                    note = " The DevKitC also uses GPIO0 for its auto-program circuit; attached hardware can interfere with uploads."
+                    basis += "; audit B7, ESP-IDF ADC docs v4.2.5 (unverified by supervisor): https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html"
+                out.append(_finding("warning", "strapping_pin", f"{name} uses {mcu_pin['name']}, a pin the chip reads at start-up. Hardware on it can change how it boots.{note}", basis, wire_id))
             if has(mroles, "usb_serial"):
                 out.append(_finding("warning", "serial_pin", f"{name} uses {mcu_pin['name']}, which the USB serial connection uses. It can interfere with uploading and logging.", datasheet, wire_id))
             default_sda, default_scl = has(mroles, "i2c_sda_default"), has(mroles, "i2c_scl_default")
@@ -532,6 +548,9 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 "bezier": path,
             }
         )
+        for owner, end in ((ma, wires[-1]["from"]), (mb, wires[-1]["to"])):
+            if owner.entry.get("pin_order_varies"):
+                end["point_basis"] = "header centre only; physical pin position unknown; follow the labels printed on your module"
         resolved_pairs.append((wire_id, (ma, pa), (mb, pb)))
         findings.extend(_check_connection(wire_id, (ma, pa), (mb, pb)))
     if errors:
@@ -561,8 +580,18 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             )
             if not connected:
                 findings.append(_finding("error", "missing_connection", f"{module.ref} ({module.entry['name']}) has no wire on its {label} pin.", "module library: required pins"))
+    # DevKitC user guide: "The power supply must be provided using one and only one of the options above".
+    # power.source is a label, not a pin or a wire. The library contains no external power-source module.
+    supply_note = "Use one and only one supply for the DevKitC: Micro USB, 5V and GND, or 3V3 and GND. Combining these supplies can damage the board or the power source. An OLED load on a header is not another supply."
+    supply_basis = "ESP32-DevKitC V4 user guide, Power Supply Options: one and only one of the options"
+    findings.append(_finding("info", "single_power_supply", supply_note, supply_basis))
     if clean["power"]["source"] != "usb":
-        findings.append(_finding("error", "power_source_not_supported", f"Power source {clean['power']['source']!r} is not supported yet. A battery needs a charger and a regulator between it and the board; wiring one straight to the 3V3 pin exceeds the 3.6 V the module allows.", "ESP32-WROOM-32E datasheet: VDD33 abs. max 3.6 V"))
+        findings.append(_finding("error", "power_source_not_supported", f"Power source {clean['power']['source']!r} is not supported yet. {supply_note} This source label does not describe a supply wire or its voltage.", supply_basis))
+    for module in placed.values():
+        electrical = module.entry.get("electrical", {})
+        for key, rule in (("supply_note", "oled_supply_note"), ("pullups_note", "i2c_pullups_note")):
+            if electrical.get(key):
+                findings.append(_finding("info", rule, f"{module.ref}: {electrical[key]}", "SSD1306 datasheet (logic supply and I2C pull-ups); cited module seller listings"))
     findings.sort(key=lambda f: ({"error": 0, "warning": 1, "info": 2}[f["severity"]], f["rule"], f["message"]))
 
     # Case.
@@ -591,6 +620,13 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         for pin in module.entry["pins"]:
             point = module.point(pin["x"], pin["y"], _pin_tip(module))
             pins.append({"id": pin["id"], "name": pin["name"], "roles": pin["roles"], "point": point, "label": _label(module, pin)})
+        logical_pins = pins
+        if module.entry.get("pin_order_varies"):
+            # Draw unnamed header pads only: the library's logical pins have no physical order.
+            pins = [{"id": f"header-{index}", "name": "unassigned header pad", "roles": [],
+                     "point": module.point(pad["x"], pad["y"], _pin_tip(module)),
+                     "label": "Follow the labels printed on your module; this pad has no assigned signal."}
+                    for index, pad in enumerate(module.entry["header_positions"], 1)]
         corner_a, corner_b = module.point(0, 0), module.point(module.pcb["x"], module.pcb["y"])
         modules_out.append(
             {
@@ -601,9 +637,11 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 "overhang_mm": module.entry.get("overhang_mm", {}),
                 "overridden": module.overridden,
                 "pins": pins,
+                "logical_pins": logical_pins,
                 "dimension_basis": module.entry.get("dimension_basis", {}),
                 "sources": module.entry["sources"],
-                "notes": module.entry.get("notes", []),
+                "notes": [*module.entry.get("notes", []),
+                          *[module.entry["electrical"][key] for key in ("supply_note", "pullups_note") if module.entry.get("electrical", {}).get(key)]],
                 "pin_order_varies": bool(module.entry.get("pin_order_varies")),
             }
         )
@@ -663,40 +701,45 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
         pcb = display.pcb
         add(
             "measure", "Measure your display before anything else",
-            f"The plan assumes the display board is about {pcb['x']:g} x {pcb['y']:g} mm and that its pins are labelled GND, VCC, SCL and SDA. Sellers differ. "
-            "Measure yours with calipers. If it is more than 1 mm off, or the pins are in another order, change the numbers in the spec before printing. "
-            "Always connect by the printed label, never by position.",
+            "Follow the labels printed on your module, never the position in a drawing. Pin order varies between sellers. "
+            f"The case proposal uses a display board about {pcb['x']:g} x {pcb['y']:g} mm. Measure yours with calipers and update the spec before printing. "
+            "The drawing's header pads are unnamed; it does not assign signals to positions.",
             parts=[display.ref],
-            checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": f"about {pcb['x']:g} mm", "net": None, "expect": "within 1 mm"}],
+            checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": "your spec's dimension override", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     add("place", f"Lay the {mcu.entry['name'].split(' (')[0]} in the case", f"Lower the board into the base with the USB socket at the cut-out and the antenna end clear of the wall. {'It rests on its header pins.' if mcu.below else ''}", parts=[mcu.ref], motion="drop")
     for wire in wires:
         a, b = wire["from"], wire["to"]
+        # The current viewer uses step.wire for both animation and positioned signal labels.
+        # Omit it when the physical order is unknown; retain the logical wiring instructions.
+        drawing = {} if any(placed[end["module"]].entry.get("pin_order_varies") for end in (a, b)) else {"wire": wire["id"]}
         add(
             "wire", f"Connect {a['module']}.{a['pin']} to {b['module']}.{b['pin']}",
             f"Plug one end of a {wire['color']} jumper wire onto {a['label']} on the {a['module']}, and the other end onto {b['label']} on the {b['module']}. "
             f"The wire runs about {wire['curve_mm']:.0f} mm; a {wire['stock_length_mm'] / 10:g} cm wire gives slack." if wire["stock_length_mm"] else
             f"Plug a {wire['color']} jumper wire from {a['label']} to {b['label']}.",
-            wire=wire["id"], parts=[a["module"], b["module"]], color=wire["color"],
-            checks=[{"kind": "suggested_check", "check": "continuity", "from": f"{a['module']}.{a['pin']}", "to": f"{b['module']}.{b['pin']}", "net": None, "expect": "the two points are connected (beep)"}],
+            **drawing, parts=[a["module"], b["module"]], color=wire["color"],
+            checks=[{"kind": "suggested_check", "check": "continuity", "from": f"{a['module']}.{a['pin']}", "to": f"{b['module']}.{b['pin']}", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     power_wires = [w for w in wires if w["color"] in ("red",) or w["from"]["pin"] in ("3V3", "5V", "VCC") or w["to"]["pin"] in ("3V3", "5V", "VCC")]
     ground_wires = [w for w in wires if "GND" in (w["from"]["pin"], w["to"]["pin"])]
     if power_wires and ground_wires:
-        p, g = power_wires[0], ground_wires[0]
+        p = power_wires[0]
         pa = p["from"] if p["from"]["module"] == mcu.ref else p["to"]
-        ga = g["from"] if g["from"]["module"] == mcu.ref else g["to"]
         add(
             "check", "Check for a short before plugging in",
-            "With nothing connected to USB, use a meter in continuity mode between the supply and ground. They must not be connected. These are things to try, not results.",
-            checks=[{"kind": "suggested_check", "check": "isolation", "from": f"{mcu.ref}.{pa['pin']}", "to": f"{mcu.ref}.{ga['pin']}", "net": None, "expect": "NOT connected"}],
+            "With all power disconnected, use a meter in continuity mode between the supply and the board's GND label. Record and investigate the reading before connecting power. These are things to try, not results.",
+            checks=[{"kind": "suggested_check", "check": "isolation", "from": f"{mcu.ref}.{pa['pin']}", "to": f"{mcu.ref}.GND", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
             parts=[mcu.ref],
         )
     if display and window:
-        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Press the display into the lid from below, screen towards the window, header pins hanging inside. Wires stay attached.", parts=[display.ref], motion="drop")
+        add("place", f"Fit the {display.entry['name'].split(',')[0]} into the lid", "Seat the display by its circuit-board edges, not by the glass, screen towards the window, header pins hanging inside. Avoid straining the header or wires.", parts=[display.ref], motion="drop")
     add("close", "Close the case", "Lower the lid onto the base without trapping a wire. Fasten it the way your print is designed to (screws or snap fit).", parts=["case_lid"], motion="close")
-    checks = [{"kind": "suggested_check", "check": "voltage", "from": f"{mcu.ref}.3V3", "to": f"{mcu.ref}.GND", "net": None, "expect": "between 3.0 V and 3.6 V (the module's supply range in its datasheet)"}]
-    add("power", "Plug in USB and check the supply", "Connect the Micro-USB data cable. Nothing will show on the display yet: it needs code. If anything gets hot or smells, unplug it.", checks=checks, parts=[mcu.ref])
+    checks = [{"kind": "suggested_check", "check": "voltage", "from": f"{mcu.ref}.3V3", "to": f"{mcu.ref}.GND", "net": None, "expect": "record what you observe; this plan supplies no reading"}]
+    if any(f["severity"] in {"warning", "error"} for f in findings):
+        add("check", "Review power before connecting USB", "Do not plug in until you have checked the warnings above and resolved the errors. Check the module supply and pull-ups. The DevKitC takes one and only one supply; do not combine USB with an external supply on 5V or 3V3.", checks=checks, parts=[mcu.ref])
+    else:
+        add("power", "USB power and supply check", "Review the supply and pull-up notes first. Use one and only one DevKitC supply: do not add an external supply on 5V or 3V3 while using USB. Connect the Micro-USB data cable only after those checks. Record the supply reading; this plan gives no result. If anything gets hot or smells, unplug it.", checks=checks, parts=[mcu.ref])
     if display:
-        add("test", "Look for the display on the I2C bus", "Upload any I2C scanner sketch with the Arduino IDE. It should report one device, at 0x3C or 0x3D (the SSD1306 datasheet gives those two addresses).", parts=[display.ref], checks=[{"kind": "suggested_check", "check": "i2c_scan", "from": "I2C scanner", "to": f"{display.ref}", "net": None, "expect": "a device at 0x3C or 0x3D"}])
+        add("test", "Record an I2C scan after the wiring and power review", "After resolving the wiring and power questions, use an I2C scanner sketch that names your chosen pins. Record what it finds. The SSD1306 datasheet lists 0x3C and 0x3D as possible addresses; this plan does not predict a scan result.", parts=[display.ref], checks=[{"kind": "suggested_check", "check": "i2c_scan", "from": "I2C scanner", "to": f"{display.ref}", "net": None, "expect": "record what you observe; this plan supplies no reading"}])
     return steps

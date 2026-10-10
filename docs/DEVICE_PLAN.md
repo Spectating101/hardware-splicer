@@ -1,8 +1,9 @@
 # Device assembly (whole gadget)
 
 The **Build a device** page (`/engineering/device`) shows a whole gadget going together: parts hover apart, the board drops
-into the case, each wire grows from the pin it starts on to the pin it ends on, the display and lid come down, and USB plugs
-in. It goes past the board: modules, wires and a case.
+into the case and the display and lid come down. Wires are animated only where their physical pin positions are known.
+The generic OLED's header pads are unnamed, so its wires have label-based instructions without a positioned wire animation.
+USB stays disconnected in the animation when any warning or error needs review. The page covers modules, wires and a case.
 
 It is a **proposal and a checklist**. It carries no engineering authority, stores nothing, and approves nothing. A wire that
 passes the checks is not a wire that works, the case has not been printed, and every "check" is something to try, not a result.
@@ -51,6 +52,18 @@ A pin is `module.NAME` (the name printed on the module) or `module.ID` (for exam
 such as `GND`, takes the pin nearest the other end of the wire, and the plan says which it chose. Measured sizes can replace the
 library's typical ones with `"overrides": {"pcb_mm": {"x": 28.1}}`.
 
+For the generic OLED, **follow the labels printed on your module**. Its IDs are `GND`, `VCC`, `SCL` and `SDA`, not numbered
+positions. The old `display.P1` through `display.P4` aliases are refused because they implied a pin order. Seller orders
+include `GND VCC SCL SDA` and `VCC GND SCL SDA`; neither is a default. Logical OLED wire coordinates mark the header centre
+only, with a `point_basis` stating that the physical pin position is unknown. Separate library `header_positions` draw
+unnamed pads in the plan's `modules[].pins`; `modules[].logical_pins` retains the electrical names and roles for wire
+endpoints. The pads do not map signals to positions. Wire lengths remain estimates.
+
+`power.source` is a text label, not a wire or a voltage. Only `usb` is supported by this planner. Other labels report an error
+and show a power-review step without asking you to connect USB. There is no external power-source module in this library,
+so this spec cannot describe or detect a second supply, or establish a battery wire to 3V3. It does not claim that a supply
+exceeds a voltage limit from its name. A display load on 3V3 or 5V is not another supply.
+
 ## The module library (`data/device_modules.json`)
 
 Every figure names where it came from, or says it is typical and tells you to measure.
@@ -64,24 +77,62 @@ ESP32-WROOM-32E radio module are listed, using their already-cited datasheets; n
 | 0.96 inch SSD1306 I2C OLED | the SSD1306 datasheet (I2C address 0x3C or 0x3D), seller listings (active area 21.74 × 10.86 mm) | board size, glass position, pin order (follow the printed labels) |
 
 The library does not claim a supply range for the OLED module: the chip's own limit is not what a module accepts, and sellers
-do not standardise the module's regulator.
+do not standardise the module's regulator. Every OLED plan copies `electrical.supply_note` and `pullups_note` into the module's
+notes and into information findings, including the example. Those notes ask you to check the actual module's supply and
+pull-up arrangement. The example's 3V3 wire does not establish how your module will behave.
+
+The WROOM-32E datasheet source and each chip entry citing it use the redirected documentation URL. The supervisor checked
+that redirect on 2026-10-10; that is the source's `as_of` date, not a new claim about the hardware.
 
 ## What the plan checks
 
-Shorts (ground to power or signal), power onto a signal pin, SDA joined to SCL, a pin wired to two things, a missing wire on
-a required pin, the module's flash pins (error), input-only pins and the reset pin (error), strapping pins and the USB serial
-pins (warning), SDA and SCL swapped against Arduino's defaults (warning), a custom I2C pin (note), 5 V on a module whose
-pull-ups would put 5 V on 3.3 V pins (warning), and a battery wired straight to the board (error: it exceeds the 3.6 V maximum).
+Ground to power or signal (including input-only pins), power onto a signal pin, SDA joined to SCL, a pin wired to two things,
+a missing wire on a required pin, the module's flash pins, input-only I2C pins and the reset pin are errors.
+Display GND on IO34, IO35, VP or VN is an error and does not count as a ground return. The isolation check names the board's
+GND label rather than treating that signal endpoint as ground.
+
+I2C on IO12 (MTDI) is an error: its pull-ups hold the pin high at reset and select the flash's 1.8 V supply. It gets no
+custom-pin routing note. Other strapping pins and USB serial pins have warnings; SDA and SCL swapped against Arduino's
+defaults have warnings; other output-capable custom I2C pins have a note. GPIO0 also has an auto-program circuit note
+from audit B7's ESP-IDF citation, **unverified by supervisor**.
+
+OLED VCC on 5V keeps a warning covering both the chip's logic supply and pull-ups that could put 5 V on ESP32 SDA/SCL.
+Check the actual module's regulator and pull-up supply. Any warning or error replaces the USB action with a review step:
+"Do not plug in until you have checked the warnings above and resolved the errors."
+
 The reset pin and the flash pins are wrong whatever they are wired to, from either end, and a wire the checks reject does not
 count toward a module's required pins. Wires are also checked as nets: a module's ground pins are one net, so are its 3V3 pins
 and its 5V pins, and wires that are each fine but together join 3V3 to 5V, or a supply to ground, are an error. Each finding
 carries the basis it rests on.
+
+The example has information findings, not an empty findings list. A DevKit one-supply note appears in every plan. No
+finding or checklist approves building, powering, reuse or release. Meter checks ask you to record what you observe;
+they supply no expected reading. An I2C scan records observations rather than predicting a device or address.
+
+## Source excerpts used for these rules
+
+- [DevKitC V4 user guide](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html):
+  "The power supply must be provided using one and only one of the options above"; the options are Micro USB, 5V/GND and
+  3V3/GND. It warns: "otherwise the board and/or the power supply source can be damaged."
+  Its J2 table lists "IO34 | I | GPIO34, ADC1_CH6, VDET_1" and defines "I: Input".
+- [WROOM-32E datasheet](https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf), section 4.2:
+  "MTDI = 1, VDD_SDIO pin is powered from internal 1.8 V LDO." Its schematic says:
+  "IO12 should be kept low when the module is powered on."
+- [SSD1306 datasheet](https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf): "VDD = 1.65V to 3.3V for IC logic";
+  I2C data and clock "must be connected to pull-up resistors". The chip's panel-driving VCC is a different supply
+  from a module header labelled VCC.
+- [AZ-Delivery listing](https://www.az-delivery.de/en/products/0-96zolldisplay): "Pin assignment: VCC, GND, SCL, SDA"
+  and "Operating voltage: 3.3V to 5V". These are claims about that seller's module.
+- Audit B7 cites [ESP-IDF ADC docs v4.2.5](https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html):
+  "ESP32 DevKitC: GPIO 0 cannot be used due to external auto program circuits." This excerpt is unverified by supervisor.
 
 ## The case
 
 A two-part box sized from every module (so a larger measured display makes a larger case, and a display too small for its own screen is refused), a typical jumper-wire housing height (14 mm), room for the wires to bend (10 mm), the
 board resting on its header pins, a USB cut-out wide enough for the plug's moulded body, and a window around the display's
 active area. It is **a proposal, not printed and not test-fitted**; the page says so and lists what to measure first.
+Seat the display by its circuit-board edges, not by the glass, and avoid straining the header or wires. This is general
+handling practice, not a force limit or a fit claim.
 
 ## Not yet
 
