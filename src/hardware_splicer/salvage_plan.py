@@ -96,12 +96,24 @@ _MICROWAVE = re.compile(r"microwave|(?<![a-z0-9])ma(?:gnet|gnat|gent)rons?(?![a-
 # EPA lamp guidance in docs/SALVAGE_PLAN.md concerns fluorescent/CCFL lamps, not LED lamp labels.
 _LAMP = re.compile(r"CCFL|backlight|fluorescent|mercury|cold[-_ ]+cathode", re.IGNORECASE)
 _LAMP_INVERTER = re.compile(r"lamp[-_ ]+inverter", re.IGNORECASE)
-_HEATER = re.compile(r"heater|fuser|heating[-_ ]?element", re.IGNORECASE)
+_HEATER = re.compile(
+    r"heater|fuser|heating[-_ ]?element|(?<![a-z0-9])toaster(?![a-z0-9])|mica[-_ ]?heater|"
+    r"hair[-_ ]+dryer[-_ ]+element|kettle[-_ ]+element|oven[-_ ]+element|iron[-_ ]+sole[-_ ]+plate",
+    re.IGNORECASE,
+)
 _THERMAL_FUSE = re.compile(r"thermal[-_ ]*(?:fuse|cut[-_ ]?off|cut[-_ ]?out)|(?<![a-z0-9])TCO(?![a-z0-9])", re.IGNORECASE)
 _THERMISTOR = re.compile(r"thermistor|(?<![a-z0-9])NTC(?![a-z0-9])", re.IGNORECASE)
+# TDK ICL notes: an inrush disc, not a temperature-sensor NTC or a plain ceramic disc.
+_INRUSH_MARK = re.compile(r"(?<![a-z0-9])(?:icl|inrush|sck[-_]?\d+)(?![a-z0-9])", re.IGNORECASE)
+_INRUSH_BODY = re.compile(r"thermistor|(?<![a-z0-9])(?:ntc|disc)(?![a-z0-9])", re.IGNORECASE)
 _SURGE = re.compile(r"gas[-_ ]?discharge|spark[-_ ]?gap|(?<![a-z0-9])GDT\d*\b", re.IGNORECASE)
 _MOV = re.compile(r"varistor|(^|[:_ ])RV_|(^|[:_ ])MOV(_|\d|$)", re.IGNORECASE)
-_OPTO = re.compile(r"opto|(?<![a-z0-9])(?:PC8\d{2}|VO6\d{2,3}|LTV\d{3}|EL8\d{2}|TLP\d+)", re.IGNORECASE)
+_OPTO = re.compile(r"opto|(?<![a-z0-9])(?:PC8\d{2}|4N[23]\d|VO6\d{2,3}|LTV\d{3}|EL8\d{2}|TLP\d+)", re.IGNORECASE)
+_BARRIER = re.compile(
+    _OPTO.pattern + r"|digital[-_ ]+isolat|(?<![a-z0-9])ISO\d+",
+    re.IGNORECASE,
+)
+_POWER_TAB = re.compile(r"TO-220|TO-247", re.IGNORECASE)
 _MAINS_SILICON = re.compile(r"(?<![a-z0-9])(?:LNK\d+|TNY\d+|TOP\d+|VIPER\d+|UC384\d|NCP12\d+|ICE[23]\w+|IRF840)|offline[-_ ]?switch", re.IGNORECASE)
 _SMALL_CHIP = re.compile(r"_(01005|0201|0402|0603)_|[RCLD]_(01005|0201|0402|0603)|LED_(01005|0201|0402|0603)", re.IGNORECASE)
 _BIG_CHIP = re.compile(r"_(0805|1206|1210|2010|2512)_|[RCLD]_(0805|1206|1210|2010|2512)|LED_(0805|1206)", re.IGNORECASE)
@@ -219,6 +231,27 @@ def _heater_context(part: dict[str, Any]) -> bool:
     )
 
 
+def _inrush_ntc(part: dict[str, Any]) -> bool:
+    text = _part_text(part)
+    return bool(_INRUSH_MARK.search(text) and _INRUSH_BODY.search(text))
+
+
+def _barrier_part(part: dict[str, Any]) -> bool:
+    return bool(_BARRIER.search(_part_text(part)))
+
+
+def _power_tab(part: dict[str, Any]) -> bool:
+    return bool(_POWER_TAB.search(_part_text(part)))
+
+
+def _mains_side_board(parts: list[dict[str, Any]]) -> bool:
+    return any(
+        (not p.get("do_not_populate"))
+        and bool(_MAINS_PART.search(_part_text(p)) or _high_voltage(p) or _hv_no_procedure(p) or _mains_silicon(p))
+        for p in parts
+    )
+
+
 def _hv_no_procedure(part: dict[str, Any]) -> bool:
     """Policy tier, not a statement of measured voltage or a discharge procedure."""
     text = _part_text(part)
@@ -236,7 +269,7 @@ def _mains_context(part: dict[str, Any]) -> bool:
         _UNMARKED_CAP.search(part["footprint"]) or _ELECTROLYTIC.search(part["footprint"])
     )
     return bool(_hv_no_procedure(part) or _high_voltage(part) or _special_hazards(part) or _MAINS_PART.search(text) or _wide_terminal(part)
-                or _mains_silicon(part) or _OPTO.search(text) or unknown_charge)
+                or _mains_silicon(part) or _barrier_part(part) or _inrush_ntc(part) or unknown_charge)
 
 
 def _lookup_reasons(part: dict[str, Any]) -> list[str]:
@@ -262,7 +295,7 @@ def _lookup_reasons(part: dict[str, Any]) -> list[str]:
     return ["KiCad's library does not list it: search its datasheet by the marking"]
 
 
-def _assess(part: dict[str, Any]) -> dict[str, Any]:
+def _assess(part: dict[str, Any], *, mains_board: bool = False) -> dict[str, Any]:
     """The verdict for one part, with the reasons for it. Never a statement about the part's condition."""
 
     kind, name = part["kind"], part["footprint"]
@@ -328,6 +361,14 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
                 hazards.append("no readable voltage: this could be a photoflash or other high-energy capacitor; treat it as charged until measured")
         if re.search(r"Tantalum|TantalC", text, re.IGNORECASE):
             hazards.append("tantalum is polarised: reverse polarity destroys it; record its polarity before removal")
+            # Vishay solid tantalum capacitors FAQ (document 40110):
+            # https://www.vishay.com/docs/40110/faq.pdf
+            # "overstressing of tantalum capacitors that can lead to overheating and possibly ignition"
+            # "Vishay does not recommend the intentional application of reverse voltage on solid tantalum capacitors"
+            hazards.append(
+                "overstress can overheat a tantalum and possibly ignite it; the maker does not recommend reverse voltage, "
+                "so keep the polarity, and a tantalum whose polarity is unknown is not reused"
+            )
         if re.search(r"EDLC|Supercap", text, re.IGNORECASE):
             hazards.append("a supercapacitor can arc when shorted: remove jewellery and do not short its terminals")
         if _ELECTROLYTIC.search(text) and re.search(r"bulg|leak|vented", text, re.IGNORECASE):
@@ -390,9 +431,29 @@ def _assess(part: dict[str, Any]) -> dict[str, Any]:
         hazards.append("a battery plug means the pack may still be live: disconnect it before work and tape exposed terminals separately")
     if _OPTO.search(text):
         hazards.append("an optocoupler is an isolation barrier only within its ratings; a used one is not known to still be one: do not rely on it for mains isolation")
+    if _barrier_part(part) and not _OPTO.search(text):
+        hazards.append(
+            "this tool cannot tell whether the isolation it provides still meets its rating after removal and reuse, "
+            "so treat a reused one as a part of unknown isolation and do not use it in a place where isolation matters. "
+            "General practice, not from the datasheet."
+        )
     if _mains_silicon(part):
         hazards.append("this chip may have sat on a mains primary: its previous stress and condition are unknown")
-    if _THERMISTOR.search(text):
+    if _power_tab(part) and (mains_board or _mains_silicon(part)):
+        hazards.append(
+            "keep any insulating pad or bushing that was under its tab; the metal tab can be connected to one of the pins, "
+            "check the datasheet before mounting it. General practice, not from the datasheet."
+        )
+    if _inrush_ntc(part):
+        # TDK Electronics NTC inrush current limiters application notes (July 2019):
+        # https://www.tdk-electronics.tdk.com/download/531332/47c4c7e326bcb6f7d72c41945477a94e/pdf-applicationnotes.pdf
+        # "may in extreme cases reach a mean" / "temperature of up to 250 °C"
+        # "the contact areas may become quite"
+        hazards.append(
+            "an NTC inrush limiter runs hot in use and may in extreme cases reach a mean temperature of up to 250 °C; "
+            "the contact areas may become quite hot too: identify it and read its ratings before reuse, and remove it only when cold"
+        )
+    elif _THERMISTOR.search(text):
         hazards.append("a thermistor may still be hot: let it cool before handling; its previous use is unknown")
     if _SURGE.search(text):
         hazards.append("do not rely on a used surge protector for protection; its previous use is unknown")
@@ -491,8 +552,9 @@ def plan_from_assembly(base: dict[str, Any], *, typed: bool = False) -> dict[str
     parts = [dict(p) for p in base["parts"]]
     lookup_source = _attach_lookups(parts)
     fitted = [p for p in parts if not p["do_not_populate"]]
+    mains_board = _mains_side_board(fitted)
     for part in parts:
-        part["salvage"] = _assess(part) if not part["do_not_populate"] else {
+        part["salvage"] = _assess(part, mains_board=mains_board) if not part["do_not_populate"] else {
             "verdict": "skip", "label": "Not fitted", "effort": "none", "tool": "", "reasons": ["the design marks it do-not-populate, so there is no part on the board"], "hazards": [], "basis": BASIS,
         }
 

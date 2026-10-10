@@ -35,7 +35,9 @@ optional but warn that they might be mains safety capacitors: do not reuse them 
 parts. No rating is guessed. A polarised can without readable voltage warns that it could be a photoflash capacitor.
 
 Discard bulged or leaking electrolytics; reported bulging or leaking changes the verdict to leave it. Record tantalum
-polarity: reverse polarity destroys it. For supercapacitors, remove jewellery and do not short the terminals.
+polarity: reverse polarity destroys it. Overstress can overheat a tantalum and possibly ignite it; the maker does not
+recommend reverse voltage, so keep the polarity, and a tantalum whose polarity is unknown is not reused. For
+supercapacitors, remove jewellery and do not short the terminals.
 
 CRT, anode cap, aquadag, EHT, LOPT, flyback transformer, TV flyback, microwave, MOT, magnetron, CCFL, backlight,
 fluorescent, mercury, cold cathode, lamp inverter, photoflash and thermal cut-off markings override the chosen kind and leave
@@ -44,17 +46,24 @@ charge. Do not power a loose magnetron: it is meant to run fitted to its own wav
 radiation is claimed. A fluorescent or backlight marking may refer to a mercury-containing CCFL: do not break or force it out.
 Common anode, flyback diode, LED lamp, white LED lamp and lamp driver labels do not trigger CRT or mercury wording.
 Heater/fuser markings apply to typed “other” or “mains or power part” entries, and to file footprint names; a resistor marked
-“10k heater sense” does not become a fuser. Let heaters cool; do not power one without its original thermal cut-off.
+“10k heater sense” does not become a fuser. The same heater branch also covers toaster, mica heater, hair dryer element,
+kettle element, oven element and iron sole plate. Let heaters cool; do not power one without its original thermal cut-off.
 Do not bypass a thermal fuse; use the appliance's service information for replacement.
 
 Mains parts (transformers, relays including SRD/SONGLE, varistors, fuses and holders, inlets, common-mode chokes and wide
 terminal blocks) remain optional and are never "worth taking". Capacitors nearby hold the charge after unplugging; this is not
 a claim that transformers retain charge. Do not put a used MOV back on mains or rely on a used relay for mains switching.
-Thermistors may be hot: let them cool. Do not rely on a used surge protector for protection.
+Thermistors may be hot: let them cool. An NTC inrush limiter (NTC/inrush/ICL or an SCK-style marking with thermistor or
+disc wording) can run hot in use — in extreme cases a mean temperature of up to 250 °C — and the contacts get hot too:
+identify it and read its ratings before reuse, and remove it only when cold. A plain ceramic disc is not that part.
+Do not rely on a used surge protector for protection.
 
 Offline-switcher families such as LNK, TNY, TOP, VIPer and UC384x, and a MOSFET with a high-voltage marking, keep their usual
-verdict with a short note that they may have sat on a mains primary. An optocoupler keeps its usual verdict but warns that
-isolation depends on its ratings; a used one is not known to remain an isolation barrier. These notes approve no reuse.
+verdict with a short note that they may have sat on a mains primary. A TO-220 or TO-247 taken from a mains-side board keeps
+any insulating pad or bushing that was under its tab; the metal tab can be connected to one of the pins, so check the
+datasheet before mounting it. An optocoupler, an ISO-prefixed isolator or a digital isolator keeps its usual verdict but
+warns that this tool cannot tell whether the isolation still meets its rating after removal and reuse: treat a reused one
+as a part of unknown isolation and do not use it where isolation matters. These notes approve no reuse.
 
 When fitted parts show mains or high-voltage context, the first step names them, including parts left on the board, before any
 iron work. It replaces the anti-static strap suggestion with “do not wear a wrist strap near high voltage”. Small unrelated
@@ -82,9 +91,11 @@ ordinary workshop practice; this report supplies no discharge resistor value, wa
 - [University of Reading, swollen cells](https://www.reading.ac.uk/health-safety-services/fire-safety/lithium-battery-information/i-have-a-swollen-lithium-ion-battery-what-should-i-do): “Do not ever try to puncture the bulge”.
 - [Maxwell, supercapacitors](https://maxwell.com/wp-content/uploads/2021/08/Maxwell_UC_Safety_Data_Sheet_Rev6_.pdf): “when charged and shorted, arcing may occur”; “Remove hand jewelry”.
 - [KEMET, tantalum](https://content.kemet.com/datasheets/KEM_T2024_T489.pdf): “damaged or destroyed if connected with the wrong polarity”.
+- [Vishay solid tantalum capacitors FAQ (document 40110)](https://www.vishay.com/docs/40110/faq.pdf): “overstressing of tantalum capacitors that can lead to overheating and possibly ignition”; “Vishay does not recommend the intentional application of reverse voltage on solid tantalum capacitors”.
 - [Panasonic, leaked electrolyte](https://industrial.panasonic.com/content/data/CP/PDF/news2014/en/VH_E.pdf): “combustible and electrically conductive”.
 - [Vishay, optocoupler ratings](https://www.vishay.com/docs/83430/vo617a.pdf): “only within the safety ratings”.
 - [Littelfuse, MOV stress](https://www.littelfuse.com/data/en/application_notes/an9311.pdf): stressed MOVs “can fail as a short circuit”.
+- [TDK Electronics NTC inrush current limiters application notes (July 2019)](https://www.tdk-electronics.tdk.com/download/531332/47c4c7e326bcb6f7d72c41945477a94e/pdf-applicationnotes.pdf): “may in extreme cases reach a mean” temperature of up to 250 °C; “the contact areas may become quite” hot.
 
 ## Stated limits
 
