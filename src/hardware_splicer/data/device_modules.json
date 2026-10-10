@@ -6,6 +6,13 @@
       "id": "esp32-devkitc-v4",
       "name": "ESP32-DevKitC V4 (ESP32-WROOM-32E)",
       "kind": "mcu_board",
+      "chips": [
+        {
+          "marking": "ESP32-WROOM-32E",
+          "role": "Wi-Fi/Bluetooth module on the board",
+          "source": "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+        }
+      ],
       "summary": "Espressif's ESP32 development board with two 19-pin headers and a Micro-USB port.",
       "frame": "Top view, origin at the board's top-left corner (the antenna end), x across the width, y along the length towards the USB end.",
       "pcb_mm": {
@@ -626,6 +633,13 @@
       "id": "ssd1306-096-i2c",
       "name": "0.96 inch SSD1306 OLED, 4-pin I2C module",
       "kind": "display",
+      "chips": [
+        {
+          "marking": "SSD1306",
+          "role": "display controller on the module",
+          "source": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf"
+        }
+      ],
       "summary": "The very common 128 x 64 monochrome OLED on a small board with four pins.",
       "frame": "Top view (looking at the screen), origin at the module's top-left corner, header along the top edge.",
       "pcb_mm": {

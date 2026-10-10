@@ -32,8 +32,11 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
 - **Where did it come from?** A teardown search finds iFixit pages for the device, with their credit.
 - **What you could reclaim.** After planning, a table and a spreadsheet list the parts worth taking, the advice, the readings and the
   datasheet. Spreadsheet cells that a program would run as a formula get a leading apostrophe.
-- **Parts you may have on hand.** Reclaim rows whose typed marking matches a whole name or explicit MPN in the device planner's
-  library (exact/variant only) link to **Build a device**, which shows an advisory list. The markings and kinds come from the
+- **Parts you may have on hand.** Reclaim rows whose typed marking matches a whole name, explicit MPN or sourced chip marking in the device planner's
+  library (exact/variant only) link to **Build a device**, which shows an advisory list. Chip matches say what the library lists **on**
+  its module: the SSD1306 display controller or ESP32-WROOM-32E Wi-Fi/Bluetooth radio module. The chip alone is not that module;
+  it does not come with its board, pins, regulator or wiring rules. Both pages distinguish `chip_on_module` from `module` matches.
+  The markings and kinds come from the
   current capture plan; stale plans offer no handoff links. A name match does not identify your chip or establish compatibility,
   and the planner's data remains the library's. See `docs/DEVICE_PLAN.md`.
 

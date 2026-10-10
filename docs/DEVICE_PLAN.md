@@ -11,21 +11,23 @@ passes the checks is not a wire that works, the case has not been printed, and e
 
 | Route | Returns |
 |-------|---------|
-| `GET /v1/devices/modules` | the module library, with each module's sources and dimension basis |
+| `GET /v1/devices/modules` | the module library, with each module's sources, dimension basis and optional sourced `chips` roles |
 | `GET /v1/devices/examples` | example device specs |
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
 | `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
 | `POST /v1/devices/reclaim-matches` | advisory exact/variant name matches for a reclaim list; 422 for invalid text or shape, 413 over 64 KB in both proxy and backend |
 
 From **Salvage a board**, matching reclaim rows link here to a small **Parts you may have on hand** list. It compares the markings
-and kinds reported in that plan with whole `name` or explicit `mpn` fields in the existing device library, using the exact/variant
-rules from marking lookup; family matches are never offered. It does not extract chip names from module descriptions.
-The current library has two modules with descriptive names and no separate MPN fields, so a chip marking such as `SSD1306`
-does not match the complete OLED module.
+and kinds reported in that plan with whole `name`, explicit `mpn` fields or explicit `chips[].marking` entries in the device library,
+using the exact/variant rules from marking lookup; family matches are never offered. It does not extract chip names from descriptions.
+Whole-name matches have `relation: "module"`. Chip-name matches have `relation: "chip_on_module"`, with the listed role, source URL
+and an advisory note. `SSD1306` names the display controller listed on the OLED module; `ESP32-WROOM-32E` names the Wi-Fi/Bluetooth
+radio module listed on the DevKitC board. The chip or radio module alone is **not that module**, and does not come with its board,
+pins, regulator or wiring rules. These are name comparisons against the library, not proof of the reclaimed part.
 
 The request is `{"parts": [{"ref": "U1", "kind": "ic", "marking": "what you read"}]}` with at most 300 rows and 40 characters
-per text field. Each returned row preserves those fields and has `matched` and `matches` (module id, library name, tier and
-which name field matched). An empty marking is allowed. Hidden/control characters and non-text values are refused;
+per text field. Each returned row preserves those fields and has `matched` and `matches` (module id, library name, tier, relation and
+which name field matched; chip matches also carry `role`, `source` and `note`). An empty marking is allowed. Hidden/control characters and non-text values are refused;
 dimensions and readings are not consumed. The response names its library source and carries the advisory limit.
 
 The handoff keeps only these input fields in this tab's session storage; the device page validates them through the backend
@@ -52,6 +54,9 @@ library's typical ones with `"overrides": {"pcb_mm": {"x": 28.1}}`.
 ## The module library (`data/device_modules.json`)
 
 Every figure names where it came from, or says it is typical and tells you to measure.
+Optional `chips` lists hold at most eight entries, each with printable, nonempty `marking` (at most 40 characters), `role` (80)
+and `source` (2048). The source must equal a URL already in that module's `sources`. Only the SSD1306 controller and
+ESP32-WROOM-32E radio module are listed, using their already-cited datasheets; no chip pin or electrical contract is added.
 
 | Module | Taken from | Typical, so measure |
 |--------|-----------|---------------------|

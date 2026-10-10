@@ -117,7 +117,9 @@ export default function DevicePage() {
           <ul className="mt-2 space-y-1 text-xs leading-5 text-stone-300">
             {onHand.parts.filter((part) => part.matched).map((part) => <li key={part.ref} data-testid="device-on-hand-part">
               {part.ref} · marking you read: {part.marking} · kind you reported: {part.kind}
-              {part.matches.map((match) => <span key={match.module} className="block text-stone-400">Library: {match.name} ({match.tier === 'exact' ? 'same name' : 'variant'}).</span>)}
+              {part.matches.map((match) => <span key={`${match.module}:${match.relation}:${match.matched_name}`} data-relation={match.relation} className="block text-stone-400">
+                {match.relation === 'chip_on_module' ? <>{match.note} ({match.tier === 'exact' ? 'same name' : 'variant'}). <a href={match.source} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline-offset-2 hover:underline">Source</a></> : <>Library: {match.name} ({match.tier === 'exact' ? 'same name' : 'variant'}).</>}
+              </span>)}
             </li>)}
           </ul>
           {!onHand.parts.some((part) => part.matched) ? <p className="mt-2 text-xs text-stone-400">No exact or variant name matches in the device library.</p> : null}

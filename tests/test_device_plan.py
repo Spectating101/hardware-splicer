@@ -61,6 +61,72 @@ def test_the_pin_positions_match_espressifs_drawing() -> None:
     assert by_id["J2-1"]["name"] == "3V3" and by_id["J2-19"]["name"] == "5V"
 
 
+def test_only_the_two_sourced_chip_roles_are_published() -> None:
+    library = module_library()
+    assert [(m["id"], c["marking"], c["role"]) for m in library["modules"] for c in m["chips"]] == [
+        ("esp32-devkitc-v4", "ESP32-WROOM-32E", "Wi-Fi/Bluetooth module on the board"),
+        ("ssd1306-096-i2c", "SSD1306", "display controller on the module"),
+    ]
+    for module in library["modules"]:
+        assert all(c["source"] in [s["url"] for s in module["sources"]] for c in module["chips"])
+
+
+@pytest.fixture
+def synthetic_library(tmp_path, monkeypatch):
+    from hardware_splicer import device_plan
+
+    path = tmp_path / "device_modules.json"
+    data = module_library()
+    monkeypatch.setattr(device_plan, "LIBRARY_PATH", path)
+    def load(chips):
+        candidate = copy.deepcopy(data)
+        if chips is ...:
+            candidate["modules"][0].pop("chips", None)
+        else:
+            candidate["modules"][0]["chips"] = chips
+        path.write_text(json.dumps(candidate), encoding="utf-8")
+        device_plan._library.cache_clear()
+        return module_library()
+    yield load
+    device_plan._library.cache_clear()
+
+
+def test_a_chip_source_outside_its_own_module_sources_is_refused(synthetic_library):
+    # A real source for the other module still cannot support this module's chip entry.
+    chip = {"marking": "fixture", "role": "fixture role", "source": module_library()["modules"][1]["sources"][0]["url"]}
+    with pytest.raises(RuntimeError, match="source"):
+        synthetic_library([chip])
+
+
+@pytest.mark.parametrize("chips", [None, {}, "fixture", [None], [{}], [{}] * 9])
+def test_bad_chip_list_shapes_are_refused(synthetic_library, chips):
+    with pytest.raises(RuntimeError, match="chips"):
+        synthetic_library(chips)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("marking", ""), ("marking", " " * 41), ("marking", "x" * 41), ("marking", 123),
+    ("marking", "fixture\u200b"), ("marking", "fixture\n"),
+    ("role", ""), ("role", "x" * 81), ("role", None), ("role", "\u202econtroller"),
+    ("source", ""), ("source", "x" * 2049), ("source", []), ("source", "url\x00"),
+])
+def test_chip_text_is_bounded_printable_and_required(synthetic_library, field, value):
+    chip = {"marking": "fixture", "role": "fixture role", "source": module_library()["modules"][0]["sources"][0]["url"]}
+    chip[field] = value
+    with pytest.raises(RuntimeError, match="chips"):
+        synthetic_library([chip])
+
+
+@pytest.mark.parametrize("chips", [..., []])
+def test_chip_knowledge_is_optional(synthetic_library, chips):
+    assert synthetic_library(chips)["modules"][0].get("chips", []) == []
+
+
+def test_eight_printable_chip_entries_at_the_text_limits_are_allowed(synthetic_library):
+    chip = {"marking": "標" * 40, "role": "角" * 80, "source": module_library()["modules"][0]["sources"][0]["url"]}
+    assert synthetic_library([chip] * 8)["modules"][0]["chips"] == [chip] * 8
+
+
 def test_the_example_is_a_clean_plan_with_real_pins_and_ordered_steps() -> None:
     plan = build_device_plan(EXAMPLE)
     assert plan["findings"] == [] and plan["counts"]["errors"] == 0
@@ -241,6 +307,7 @@ def api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 def test_the_library_examples_and_a_plan_are_served(api: TestClient) -> None:
     assert api.get("/v1/devices/modules").json()["library"]["modules"][0]["id"] == "esp32-devkitc-v4"
+    assert api.get("/v1/devices/modules").json()["library"]["modules"][0]["chips"][0]["marking"] == "ESP32-WROOM-32E"
     assert "esp32_oled_usb" in api.get("/v1/devices/examples").json()["examples"]
     served = api.get("/v1/devices/examples/esp32_oled_usb/plan").json()
     assert served["plan"]["counts"]["errors"] == 0 and served["spec"]["name"].startswith("ESP32")

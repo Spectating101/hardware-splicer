@@ -35,7 +35,7 @@ def _text(value: Any, label: str, limit: int, *, required: bool = False) -> str:
 
 
 def match_reclaimed_parts(body: Any) -> dict[str, Any]:
-    """For each reported marking/kind, compare only whole library names and explicit MPNs.
+    """Compare reported markings with whole library names, explicit MPNs and sourced chip markings.
 
     Kinds are preserved as reported, not inferred from a name or used as a compatibility claim.
     The request contains text only: dimensions, readings and numeric values are not consumed.
@@ -64,12 +64,24 @@ def match_reclaimed_parts(body: Any) -> dict[str, Any]:
             for field in ("name", "mpn"):
                 name = entry.get(field)
                 tier = name_match_tier(row["marking"], name) if isinstance(name, str) else None
-                if tier:
+                if tier in ("exact", "variant"):
                     candidates.append((tier, field, name))
             if candidates:
                 tier, field, name = min(candidates, key=lambda c: c[0] != "exact")
                 matches.append({"module": entry["id"], "name": entry["name"], "tier": tier,
-                                "matched_field": field, "matched_name": name})
+                                "relation": "module", "matched_field": field, "matched_name": name})
+            for chip in entry.get("chips", []):
+                tier = name_match_tier(row["marking"], chip["marking"])
+                if tier in ("exact", "variant"):
+                    note = (
+                        f"The library lists {chip['marking']} as the {chip['role']} ({entry['name']}). "
+                        "The chip or radio module alone is not that module and does not come with its board, pins, "
+                        "regulator or wiring rules. The marking is what you read, not proof."
+                    )
+                    matches.append({"module": entry["id"], "name": entry["name"], "tier": tier,
+                                    "relation": "chip_on_module", "matched_field": "chips.marking",
+                                    "matched_name": chip["marking"], "role": chip["role"],
+                                    "source": chip["source"], "note": note})
         matches.sort(key=lambda m: m["tier"] != "exact")
         row.update(matched=bool(matches), matches=matches)
     return {"parts": rows, "source": "device planner module library", "note": ADVISORY_NOTE}

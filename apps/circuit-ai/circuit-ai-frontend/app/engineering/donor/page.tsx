@@ -485,10 +485,10 @@ export default function DonorPage() {
                     <tbody className="text-stone-300">
                       {reclaimed.map((row) => (
                         <tr key={row.ref} className="border-t border-stone-800 align-top"><td className="py-1 pr-2 font-medium text-stone-100">{row.ref}</td><td className="pr-2">{row.what || <span className="text-stone-600">no marking</span>}
-                          {matchesOf.get(row.ref)?.length ? <a href="/engineering/device?from=donor" data-testid="reclaim-device-match" className="mt-1 block text-sky-300 underline-offset-2 hover:underline" onClick={(event) => {
+                          {matchesOf.get(row.ref)?.map((match) => <a key={`${match.module}:${match.relation}:${match.matched_name}`} href="/engineering/device?from=donor" data-testid="reclaim-device-match" data-relation={match.relation} className="mt-1 block text-sky-300 underline-offset-2 hover:underline" onClick={(event) => {
                             try { window.sessionStorage.setItem(RECLAIM_DEVICE_STORAGE, JSON.stringify(reclaimInput)); }
                             catch { event.preventDefault(); setNotice('Browser storage is unavailable, so these markings could not be passed to the device page.'); }
-                          }}>You may have this on hand · see the device planner ({matchesOf.get(row.ref)?.[0].tier === 'exact' ? 'same name' : 'variant'})</a> : null}
+                          }}>{match.relation === 'chip_on_module' ? match.note : 'You may have this on hand'} · see the device planner ({match.tier === 'exact' ? 'same name' : 'variant'})</a>)}
                         </td><td className="pr-2">{row.verdict}</td><td className="pr-2">{row.evidence || <span className="text-stone-600">none to make</span>}</td><td>{/^https?:\/\//.test(row.datasheet) ? <a href={row.datasheet} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline-offset-2 hover:underline">link</a> : <span className="text-stone-600">none</span>}</td></tr>
                       ))}
                     </tbody>

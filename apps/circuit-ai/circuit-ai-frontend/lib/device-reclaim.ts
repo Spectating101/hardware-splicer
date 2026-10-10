@@ -2,9 +2,13 @@ import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/pro
 
 export const RECLAIM_DEVICE_STORAGE = 'hs-device-reclaim-v1';
 export type ReclaimInput = { ref: string; kind: string; marking: string };
+export type DeviceReclaimMatch = { module: string; name: string; tier: 'exact' | 'variant'; matched_name: string } & (
+  | { relation: 'module'; matched_field: 'name' | 'mpn' }
+  | { relation: 'chip_on_module'; matched_field: 'chips.marking'; role: string; source: string; note: string }
+);
 export type DeviceReclaimRow = ReclaimInput & {
   matched: boolean;
-  matches: { module: string; name: string; tier: 'exact' | 'variant'; matched_field: 'name' | 'mpn'; matched_name: string }[];
+  matches: DeviceReclaimMatch[];
 };
 export type DeviceReclaimResult = { parts: DeviceReclaimRow[]; note: string };
 

@@ -64,11 +64,27 @@ def _library() -> dict[str, Any]:
             raise RuntimeError(f"module {module['id']} has duplicate pin ids")
         if not module.get("sources"):
             raise RuntimeError(f"module {module['id']} names no source")
+        chips = module.get("chips", [])
+        label = f"module {module['id']} chips"
+        if not isinstance(chips, list) or len(chips) > 8:
+            raise RuntimeError(f"{label} must be a list of at most 8 entries")
+        source_urls = [source["url"] for source in module["sources"]]
+        for index, chip in enumerate(chips):
+            if not isinstance(chip, dict):
+                raise RuntimeError(f"{label}[{index}] must be an object")
+            for field, limit in (("marking", 40), ("role", 80), ("source", 2048)):
+                value = chip.get(field)
+                if not isinstance(value, str) or not value.strip() or len(value) > limit:
+                    raise RuntimeError(f"{label}[{index}].{field} must be text of 1 to {limit} characters")
+                if has_hidden_characters(value):
+                    raise RuntimeError(f"{label}[{index}].{field} may not contain control or invisible characters")
+            if chip["source"] not in source_urls:
+                raise RuntimeError(f"{label}[{index}].source must equal one of this module's source urls")
     return data
 
 
 def module_library() -> dict[str, Any]:
-    """The module library as published: every module with its sources, dimension basis and pins."""
+    """The module library as published: sources, dimension basis, pins and optional chip roles."""
 
     return json.loads(json.dumps(_library()))
 

@@ -16,7 +16,7 @@ def row(marking, ref="U1", kind="ic"):
     return {"ref": ref, "kind": kind, "marking": marking}
 
 
-def test_real_library_match_preserves_the_read_marking_and_does_not_expand_chip_names():
+def test_real_library_match_preserves_the_read_marking_and_relations():
     before = module_library()
     name = before["modules"][0]["name"]
     parts = [row(name.lower()), row("SSD1306", "U2"), row("ESP32-WROOM-32E", "U3"), row("", "U4")]
@@ -26,11 +26,43 @@ def test_real_library_match_preserves_the_read_marking_and_does_not_expand_chip_
     match = result["parts"][0]["matches"][0]
     assert match["module"] == "esp32-devkitc-v4" and match["tier"] == "exact"
     assert match["matched_field"] == "name" and match["name"] == name
-    assert all(not item["matched"] and item["matches"] == [] for item in result["parts"][1:])
+    assert match["relation"] == "module"
+    assert all(item["matches"][0]["relation"] == "chip_on_module" for item in result["parts"][1:3])
+    assert not result["parts"][3]["matched"] and result["parts"][3]["matches"] == []
     assert "may already have" in result["note"] and "not proof" in result["note"]
     assert "library's" in result["note"] and "not your chip's" in result["note"]
     assert "compatibility" in result["note"] and "approves" in result["note"]
     assert parts == original and module_library() == before
+
+
+@pytest.mark.parametrize("marking,module,tier", [
+    ("SSD1306", "ssd1306-096-i2c", "exact"),
+    ("ESP32-WROOM-32E", "esp32-devkitc-v4", "exact"),
+    ("ssd1306", "ssd1306-096-i2c", "exact"),
+    ("SSD1306B", "ssd1306-096-i2c", "variant"),
+])
+def test_chip_markings_match_only_a_part_listed_on_the_module(marking, module, tier):
+    found = reclaim.match_reclaimed_parts({"parts": [row(marking, kind="connector")]})["parts"][0]
+    assert found["marking"] == marking and found["kind"] == "connector"
+    assert found["matched"] and len(found["matches"]) == 1
+    match = found["matches"][0]
+    entry = next(m for m in module_library()["modules"] if m["id"] == module)
+    chip = entry["chips"][0]
+    assert match["module"] == module and match["tier"] == tier
+    assert match["relation"] == "chip_on_module" and match["matched_field"] == "chips.marking"
+    assert match["matched_name"] == chip["marking"]
+    assert match["role"] == chip["role"] and match["source"] == chip["source"]
+    note = match["note"].lower()
+    assert "library lists" in note and chip["role"].lower() in note
+    assert "not that module" in note and "what you read, not proof" in note
+    assert all(word in note for word in ("board", "pins", "regulator", "wiring rules"))
+    assert not any(word in note for word in ("identified", "verified", "compatible", "ready", "safe", "pass"))
+
+
+@pytest.mark.parametrize("marking", ["SSD1315", "NE555P", "SSD130"])
+def test_other_chips_family_names_and_digit_prefixes_do_not_match(marking):
+    found = reclaim.match_reclaimed_parts({"parts": [row(marking)]})["parts"][0]
+    assert not found["matched"] and found["matches"] == []
 
 
 @pytest.mark.parametrize("marking,name,tier", [
@@ -89,10 +121,11 @@ def api():
 
 
 def test_endpoint_serves_the_real_matcher_and_clear_validation_errors(api):
-    payload = {"parts": [row(module_library()["modules"][0]["name"]), row("LM358", "U2")]}
+    payload = {"parts": [row(module_library()["modules"][0]["name"]), row("SSD1306", "U2")]}
     response = api.post("/v1/devices/reclaim-matches", json=payload)
     assert response.status_code == 200
     assert response.json() == {"ok": True, **reclaim.match_reclaimed_parts(payload)}
+    assert response.json()["parts"][1]["matches"][0]["relation"] == "chip_on_module"
     for body in ({"parts": "wrong"}, {"parts": [row("x\u200b")]}, {"parts": [row(10**500)]}):
         bad = api.post("/v1/devices/reclaim-matches", json=body)
         assert bad.status_code == 422 and bad.json()["detail"]["type"] == "invalid_reclaim_list"
