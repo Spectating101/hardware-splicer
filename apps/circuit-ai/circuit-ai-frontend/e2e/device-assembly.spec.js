@@ -279,3 +279,137 @@ test('while the display descends to be wired, each wire stays attached to it', a
   await expect(viewer).toHaveAttribute('data-wires', '1');
   expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
 });
+
+async function sensorExample(page, viewer) {
+  await page.getByTestId('device-example').selectOption('esp32_oled_bme280_usb');
+  await expect(viewer).toHaveAttribute('data-step-count', '17', { timeout: 15000 });
+  await expect(viewer).toHaveAttribute('data-rendered-modules', JSON.stringify(['mcu', 'display', 'sensor']));
+  await expect(viewer).toHaveAttribute('data-ready', '1');
+  await settle(viewer);
+  return JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
+}
+
+for (const sensor of [
+  { id: 'adafruit-bme280-stemma-qt', name: 'BME280', power: 'Vin', clock: 'SCK', data: 'SDI', address: '0x77', sources: 11 },
+  { id: 'adafruit-bh1750-stemma-qt', name: 'BH1750', power: 'VIN', clock: 'SCL', data: 'SDA', address: '0x23', sources: 11 },
+  { id: 'adafruit-ds3231-stemma-qt', name: 'DS3231', power: 'Vin', clock: 'SCL', data: 'SDA', address: '0x68', sources: 12 },
+]) {
+  test(`${sensor.name} is a third drawn part, its wires follow its own group, and its scan remains an observation`, async ({ page }, testInfo) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+    const viewer = await open(page);
+    const spec = await sensorExample(page, viewer);
+    if (sensor.name !== 'BME280') {
+      spec.modules.find((module) => module.id === 'sensor').module = sensor.id;
+      spec.connections = spec.connections.map((wire) => ({ ...wire, from: wire.from.replace('sensor.Vin', `sensor.${sensor.power}`).replace('sensor.SCK', `sensor.${sensor.clock}`).replace('sensor.SDI', `sensor.${sensor.data}`) }));
+      await page.getByTestId('device-spec-editor').fill(JSON.stringify(spec));
+      await page.getByTestId('device-spec-apply').click();
+      await expect(page.getByTestId('device-shopping')).toContainText(sensor.name);
+      await expect(viewer).toHaveAttribute('data-ready', '1');
+      await settle(viewer);
+    }
+    await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'away', display: 'away', sensor: 'away' }));
+    await expect(page.getByTestId('device-label')).toHaveCount(5);
+    await expect(page.getByTestId('device-label').filter({ hasText: sensor.name })).toHaveCount(1);
+    await expect(page.getByTestId('device-pin-order')).toHaveCount(1); // Only the OLED has a published choice.
+    await expect(page.getByTestId('device-sources').locator('a')).toHaveCount(sensor.sources);
+    await expect(viewer).toContainText('Sensor pin positions are illustrative');
+    await next(page, viewer, 2);
+    await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'home', display: 'away', sensor: 'away' }));
+    const before = await pixels(viewer.locator('canvas'));
+    await next(page, viewer);
+    await expect(page.getByTestId('device-title')).toContainText(sensor.name);
+    await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'home', display: 'away', sensor: 'home' }));
+    await expect(page.locator('[data-testid="device-label"][data-module="sensor"]')).toContainText('printed pin names');
+    expect(await differing(page, before, await pixels(viewer.locator('canvas')))).toBeGreaterThan(100);
+    // All eight wires, including sensor endpoints, really grow and remain attached.
+    for (let number = 1; number <= 8; number += 1) {
+      await next(page, viewer);
+      await expect(viewer).toHaveAttribute('data-wires', String(number));
+      await expect(page.getByTestId('device-label')).toHaveCount(2);
+      expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
+    }
+    await expect(page.locator('[data-testid="device-label"][data-module="sensor"]')).toContainText(sensor.data);
+    await page.getByTestId('device-slider').focus();
+    await page.keyboard.press('End');
+    await settle(viewer);
+    await expect(page.getByTestId('device-instruction')).toContainText(sensor.address);
+    await expect(page.getByTestId('device-checks')).toContainText('record what you observe; this plan supplies no reading');
+    await expect(page.getByTestId('device-panel')).toContainText('Nothing here approves building, powering or releasing');
+    await testInfo.attach(`${sensor.name}-desktop`, { body: await viewer.screenshot(), contentType: 'image/png' });
+    // Use the real range control's keyboard event to exercise React, not a synthetic scene API.
+    await page.keyboard.press('Home');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowRight');
+    await settle(viewer);
+    await expect(viewer).toHaveAttribute('data-wires', '0');
+    await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'home', display: 'away', sensor: 'away' }));
+    expect(errors).toEqual([]);
+  });
+}
+
+test('module IDs, including lid, are not mistaken for scene roles', async ({ page }) => {
+  const viewer = await open(page);
+  const spec = await sensorExample(page, viewer);
+  const refs = { mcu: 'controller', display: 'screen', sensor: 'lid' };
+  spec.modules = spec.modules.map((module) => ({ ...module, id: refs[module.id] }));
+  spec.connections = spec.connections.map((wire) => Object.fromEntries(Object.entries(wire).map(([key, endpoint]) => {
+    const [ref, pin] = endpoint.split('.');
+    return [key, `${refs[ref]}.${pin}`];
+  })));
+  await page.getByTestId('device-spec-editor').fill(JSON.stringify(spec));
+  await page.getByTestId('device-spec-apply').click();
+  await expect(viewer).toHaveAttribute('data-rendered-modules', JSON.stringify(['controller', 'screen', 'lid']));
+  await expect(viewer).toHaveAttribute('data-ready', '1');
+  await next(page, viewer, 4);
+  await expect(page.getByTestId('device-title')).toContainText('screen.VCC');
+  expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
+  await page.getByTestId('device-slider').focus();
+  await page.keyboard.press('End');
+  await settle(viewer);
+  await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ controller: 'home', screen: 'home', lid: 'home' }));
+});
+
+test('two breakouts are placed independently and an address conflict never plugs in USB', async ({ page }) => {
+  const viewer = await open(page);
+  const spec = await sensorExample(page, viewer);
+  spec.modules.push({ id: 'sensor2', module: 'adafruit-bme280-stemma-qt' });
+  spec.connections.push(...spec.connections.filter((wire) => wire.from.startsWith('sensor.')).map((wire) => ({ ...wire, from: wire.from.replace('sensor.', 'sensor2.') })));
+  await page.getByTestId('device-spec-editor').fill(JSON.stringify(spec));
+  await page.getByTestId('device-spec-apply').click();
+  await expect(viewer).toHaveAttribute('data-rendered-modules', JSON.stringify(['mcu', 'display', 'sensor', 'sensor2']));
+  await expect(page.locator('[data-rule="i2c_address_overlap"]')).toBeVisible();
+  await expect(viewer).toHaveAttribute('data-ready', '1');
+  await next(page, viewer, 3);
+  await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'home', display: 'away', sensor: 'home', sensor2: 'away' }));
+  await next(page, viewer);
+  await expect(viewer).toHaveAttribute('data-modules', JSON.stringify({ mcu: 'home', display: 'away', sensor: 'home', sensor2: 'home' }));
+  await page.getByTestId('device-slider').focus();
+  await page.keyboard.press('End');
+  await settle(viewer);
+  await expect(viewer).toHaveAttribute('data-wires', '12');
+  await expect(viewer).toHaveAttribute('data-usb', 'out');
+  expect(Number(await viewer.getAttribute('data-wire-lag'))).toBeLessThan(0.3);
+});
+
+test('the sensor example fits a phone and can return to the unchanged OLED example', async ({ page }, testInfo) => {
+  const viewer = await open(page);
+  await sensorExample(page, viewer);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await settle(viewer);
+  const overflow = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth - window.innerWidth,
+    escaped: [...document.querySelectorAll('[data-testid="device-page"] *')].map((element) => ({
+      tag: element.tagName, text: element.textContent.slice(0, 100), right: element.getBoundingClientRect().right,
+    })).filter((element) => element.right > window.innerWidth + 1).slice(0, 8),
+  }));
+  expect(overflow.width, JSON.stringify(overflow.escaped)).toBeLessThanOrEqual(1);
+  const shot = await viewer.screenshot();
+  expect(shot.length).toBeGreaterThan(5000);
+  await testInfo.attach('BME280-phone', { body: shot, contentType: 'image/png' });
+  await page.getByTestId('device-example').selectOption('esp32_oled_usb');
+  await expect(viewer).toHaveAttribute('data-step-count', '12');
+  await expect(viewer).toHaveAttribute('data-rendered-modules', JSON.stringify(['mcu', 'display']));
+  await expect(page.getByTestId('device-sources').locator('a')).toHaveCount(8);
+});

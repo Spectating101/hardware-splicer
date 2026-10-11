@@ -6,6 +6,13 @@ an explicit pin-order choice, shown beside the viewer: **Which order is printed 
 spec, makes another plan and redraws the pads and wires. Read the order left to right looking at the screen, header at the top.
 USB stays disconnected in the animation when any warning or error needs review. The page covers modules, wires and a case.
 
+The example selector keeps the original ESP32/OLED example as the default and
+also offers ESP32/OLED/BME280. I2C breakouts have independent stand-in shapes on
+the case floor, placement steps and printed-name labels. Each wire and connector
+follows its owning module, including when module IDs are renamed or several
+breakouts are present. Sensor pin positions and component shapes are
+illustrative, not a published header order or physical fit result.
+
 It is a **proposal and a checklist**. It carries no engineering authority, stores nothing, and approves nothing. A wire that
 passes the checks is not a wire that works, the case has not been printed, and every "check" is something to try, not a result.
 

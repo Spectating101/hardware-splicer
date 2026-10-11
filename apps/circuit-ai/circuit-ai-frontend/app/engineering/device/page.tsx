@@ -28,6 +28,8 @@ export default function DevicePage() {
   usePageTitle('Build a device');
   const [specText, setSpecText] = useState('');
   const [exampleText, setExampleText] = useState('');
+  const [examples, setExamples] = useState<Record<string, Spec>>({});
+  const [selectedExample, setSelectedExample] = useState('');
   const [plan, setPlan] = useState<DevicePlan | null>(null);
   const [modules, setModules] = useState<ModuleInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,11 +83,15 @@ export default function DevicePage() {
           fetch('/api/proxy/engineering/devices/modules', { cache: 'no-store' }).then((r) => r.json()),
         ]);
         if (cancelled) return;
-        const first = Object.values((examples?.examples ?? {}) as Record<string, Spec>)[0];
+        const available = (examples?.examples ?? {}) as Record<string, Spec>;
+        const firstKey = available.esp32_oled_usb ? 'esp32_oled_usb' : Object.keys(available)[0];
+        const first = available[firstKey];
         if (!first) throw new Error('No example device is available.');
         const text = JSON.stringify(first, null, 2);
         setSpecText(text);
         setExampleText(text);
+        setExamples(available);
+        setSelectedExample(firstKey);
         setModules((library?.library?.modules ?? []) as ModuleInfo[]);
         await planFrom(text);
       } catch (caught) {
@@ -100,6 +106,16 @@ export default function DevicePage() {
   const used = useMemo(() => (plan ? modules.filter((m) => plan.modules.some((p) => p.module === m.id)) : []), [plan, modules]);
   const errors = plan?.findings.filter((f) => f.severity === 'error').length ?? 0;
   const hasWiringFindings = plan?.findings.some((finding) => finding.severity === 'error' || finding.severity === 'warning') ?? false;
+
+  const chooseExample = (key: string) => {
+    const example = examples[key];
+    if (!example) return;
+    const text = JSON.stringify(example, null, 2);
+    setSelectedExample(key);
+    setSpecText(text);
+    setExampleText(text);
+    void planFrom(text);
+  };
 
   const choosePinOrder = (moduleRef: string, pinOrder: string) => {
     try {
@@ -122,9 +138,15 @@ export default function DevicePage() {
         <header className="mb-3">
           <h1 className="text-lg font-semibold text-stone-50">Build a device</h1>
           <p className="mt-0.5 max-w-3xl text-xs leading-5 text-stone-400">
-            Watch a whole gadget go together: the board into its case, each wire from the pin it starts on to the pin it ends on, then the display, the lid and USB.
+            Watch a whole gadget go together: the boards into their case, each wire from the pin it starts on to the pin it ends on, then the display, the lid and USB.
             It is a plan to follow and check, not proof that the device works.
           </p>
+          {Object.keys(examples).length > 1 ? <div className="mt-3 max-w-xl">
+            <label htmlFor="device-example" className="text-xs font-medium text-stone-300">Try an example</label>
+            <select id="device-example" data-testid="device-example" value={selectedExample} disabled={busy || loading} onChange={(event) => chooseExample(event.target.value)} className="mt-1 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
+              {Object.entries(examples).map(([key, example]) => <option key={key} value={key}>{typeof example.name === 'string' ? example.name : key}</option>)}
+            </select>
+          </div> : null}
         </header>
 
         {onHand ? <section className="mb-4 rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-on-hand" aria-label="Parts you may have on hand">
@@ -151,13 +173,13 @@ export default function DevicePage() {
               <DeviceViewer plan={plan} />
             </section>
 
-            <aside className="min-w-0 space-y-4" aria-label="About this device">
+            <aside className="min-w-0 space-y-4 [overflow-wrap:anywhere]" aria-label="About this device">
               {plan.modules.map((placed) => {
                 const orders = modules.find((module) => module.id === placed.module)?.pin_orders;
                 if (!orders?.length) return null;
                 return <section key={placed.id} className="rounded-xl border border-stone-800 bg-stone-900/50 p-4">
                   <label htmlFor={`pin-order-${placed.id}`} className="text-sm font-semibold text-stone-100">Which order is printed on your module?</label>
-                  <p className="mt-1 text-xs leading-5 text-stone-400">{placed.name}. Read left to right looking at the screen, with the header at the top. Connect by the printed labels, not by position in the picture.</p>
+                  <p className="mt-1 text-xs leading-5 text-stone-400">{placed.name}. {placed.kind === 'display' ? 'Read left to right looking at the screen, with the header at the top. ' : null}Connect by the printed labels, not by position in the picture.</p>
                   <select id={`pin-order-${placed.id}`} data-testid="device-pin-order" value={placed.pin_order ?? ''} disabled={busy} onChange={(event) => choosePinOrder(placed.id, event.target.value)} className="mt-2 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
                     {orders.map((order) => <option key={order.id} value={order.id}>{order.signals.join(', ')} ({order.label})</option>)}
                   </select>

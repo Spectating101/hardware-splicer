@@ -54,3 +54,22 @@ test('the device page without a handoff shows no on-hand list', async ({ page })
   await page.goto(`${APP_URL}/engineering/device`);
   await expect(page.getByTestId('device-on-hand')).toHaveCount(0);
 });
+
+for (const marking of ['BME280', 'BH1750FVI', 'DS3231']) {
+  test(`${marking} reaches the device page as a chip hint, not a complete module`, async ({ page }) => {
+    await planWith(page, marking);
+    const link = page.getByTestId('reclaim-device-match');
+    await expect(link).toHaveCount(1, { timeout: 15000 });
+    await expect(link).toHaveAttribute('data-relation', 'chip_on_module');
+    await expect(link).toContainText('not that module');
+    expect((await link.textContent()) || '').not.toMatch(BANNED);
+    await link.click();
+    const onHand = page.getByTestId('device-on-hand');
+    await expect(onHand).toContainText(`marking you read: ${marking}`, { timeout: 15000 });
+    await expect(onHand.locator('[data-relation="chip_on_module"]')).toContainText('not that module');
+    expect((await onHand.textContent()) || '').not.toMatch(BANNED);
+    const spec = JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
+    expect(spec.modules).toHaveLength(2); // The hint must not insert a sensor or alter the default wiring.
+    expect(spec.modules.some((module) => module.id === 'sensor')).toBe(false);
+  });
+}

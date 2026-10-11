@@ -70,14 +70,14 @@ export type DevicePlan = {
   counts: { modules: number; wires: number; steps: number; errors: number; warnings: number };
 };
 
-type Stats = { moving: boolean; wires: number; lid: string; mcu: string; display: string; usb: string; lag: number };
-type Label = { id: string; text: string; point: Point; part: 'mcu' | 'display' | 'lid' | 'case' | null; tone: 'part' | 'pin' };
+type Stats = { moving: boolean; wires: number; lid: string; modules: Record<string, string>; usb: string; lag: number };
+type Label = { id: string; text: string; point: Point; part: { module: string } | 'lid' | 'case' | null; tone: 'part' | 'pin' };
 type SceneApi = { goTo: (index: number, instant: boolean) => void };
 
 const WIRE_COLORS: Record<string, string> = {
   red: '#e5484d', black: '#23252b', yellow: '#f5c542', green: '#3fb950', blue: '#4c8dff', white: '#e8eaed', orange: '#f08c3a',
 };
-const AWAY = { mcu: 30, display: 42, lid: 66 } as const;
+const AWAY = { mcu: 30, display: 42, breakout: 36, lid: 66 } as const;
 const LID_HOVER = 18;
 const EASE = 6.5;
 
@@ -86,15 +86,18 @@ const kindOf = (step: DeviceStep) => step.kind;
 /** What each step asks of each part. The scene eases toward this, so jumping around the steps is always smooth. */
 function targetsFor(plan: DevicePlan, index: number) {
   const done = plan.steps.slice(0, index + 1);
-  const placed = done.some((s) => kindOf(s) === 'place' && s.parts?.some((id) => plan.modules.find((m) => m.id === id)?.kind === 'mcu_board'));
+  const placedParts = new Set(done.filter((s) => kindOf(s) === 'place').flatMap((s) => s.parts ?? []));
+  const placed = plan.modules.some((m) => m.kind === 'mcu_board' && placedParts.has(m.id));
   const wired = done.filter((s) => kindOf(s) === 'wire' && s.wire).map((s) => s.wire as string);
-  const displayFitted = done.some((s) => kindOf(s) === 'place' && s.parts?.some((id) => plan.modules.find((m) => m.id === id)?.kind === 'display'));
+  const displayFitted = plan.modules.some((m) => m.kind === 'display' && placedParts.has(m.id));
   const closed = done.some((s) => kindOf(s) === 'close');
   const powered = done.some((s) => kindOf(s) === 'power');
   const displayHome = placed && (wired.length > 0 || displayFitted || done.some((s) => kindOf(s) === 'check'));
   return {
-    mcu: placed ? 0 : AWAY.mcu,
-    display: displayHome ? 0 : AWAY.display,
+    modules: Object.fromEntries(plan.modules.map((module) => [module.id,
+      module.kind === 'display' ? (displayHome ? 0 : AWAY.display)
+        : placedParts.has(module.id) ? 0 : module.kind === 'mcu_board' ? AWAY.mcu : AWAY.breakout,
+    ])),
     lid: closed ? 0 : displayFitted ? LID_HOVER : AWAY.lid,
     usb: powered ? 0 : -46,
     wires: new Set(wired),
@@ -105,34 +108,38 @@ function labelsFor(plan: DevicePlan, index: number): Label[] {
   const step = plan.steps[index];
   if (!step) return [];
   const mcu = plan.modules.find((m) => m.kind === 'mcu_board');
-  const display = plan.modules.find((m) => m.kind === 'display');
+  const modulesById = new Map(plan.modules.map((module) => [module.id, module]));
   const labels: Label[] = [];
   const short = (name: string) => name.split(/ \(|, /)[0];
   const centre = (m: DeviceModule, up: number): Point => ({ x: (m.box.x0 + m.box.x1) / 2, y: m.base_y + up, z: (m.box.z0 + m.box.z1) / 2 });
   if (step.kind === 'gather' || step.kind === 'measure') {
-    if (mcu) labels.push({ id: 'mcu', text: short(mcu.name), point: centre(mcu, mcu.pcb_mm.z + mcu.above_board_mm + 4), part: 'mcu', tone: 'part' });
-    if (display) labels.push({ id: 'display', text: short(display.name), point: centre(display, display.pcb_mm.z + display.above_board_mm + 4), part: 'display', tone: 'part' });
+    for (const placed of plan.modules) labels.push({ id: `module-${placed.id}`, text: short(placed.name), point: centre(placed, placed.pcb_mm.z + placed.above_board_mm + 4), part: { module: placed.id }, tone: 'part' });
     labels.push({ id: 'lid', text: 'Case lid', point: { x: 0, y: plan.case.lid_underside_y + plan.case.wall_mm + 4, z: 0 }, part: 'lid', tone: 'part' });
     labels.push({ id: 'case', text: 'Case base', point: { x: 0, y: 0, z: plan.case.outer_mm.z / 2 + 4 }, part: 'case', tone: 'part' });
   }
   if (step.kind === 'place' && step.motion === 'drop' && mcu && step.parts?.includes(mcu.id)) {
     const usb = plan.case.usb_cutout;
     if (usb) labels.push({ id: 'usb', text: 'USB end', point: { x: -plan.case.outer_mm.x / 2 - 2, y: usb.y + 5, z: usb.z }, part: null, tone: 'part' });
-    labels.push({ id: 'antenna', text: 'Antenna end: keep clear', point: { x: mcu.box.x1 + (mcu.overhang_mm.antenna_end ?? 0), y: mcu.base_y + mcu.pcb_mm.z + 6, z: (mcu.box.z0 + mcu.box.z1) / 2 }, part: 'mcu', tone: 'part' });
+    labels.push({ id: 'antenna', text: 'Antenna end: keep clear', point: { x: mcu.box.x1 + (mcu.overhang_mm.antenna_end ?? 0), y: mcu.base_y + mcu.pcb_mm.z + 6, z: (mcu.box.z0 + mcu.box.z1) / 2 }, part: { module: mcu.id }, tone: 'part' });
+  }
+  if (step.kind === 'place') {
+    for (const placed of plan.modules) {
+      if (placed.kind === 'i2c_breakout' && step.parts?.includes(placed.id)) labels.push({ id: `module-${placed.id}`, text: `${short(placed.name)} · printed pin names`, point: centre(placed, placed.pcb_mm.z + placed.above_board_mm + 4), part: { module: placed.id }, tone: 'part' });
+    }
   }
   if (step.kind === 'wire' && step.wire) {
     const wire = plan.wires.find((w) => w.id === step.wire);
     if (wire) {
       for (const end of [wire.from, wire.to]) {
-        const owner = plan.modules.find((m) => m.id === end.module);
+        const owner = modulesById.get(end.module);
         const text = owner?.kind === 'mcu_board' ? `${end.pin} · ${end.pin_id}` : end.pin;
-        labels.push({ id: `${wire.id}-${end.module}`, text: `${end.module}: ${text}`, point: { x: end.exit.x, y: end.exit.y + (owner?.kind === 'mcu_board' ? 4 : -4), z: end.exit.z }, part: owner?.kind === 'display' ? 'display' : 'mcu', tone: 'pin' });
+        labels.push({ id: `${wire.id}-${end.module}-${end.pin_id}`, text: `${end.module}: ${text}`, point: { x: end.exit.x, y: end.exit.y + (end.exit.y > end.point.y ? 4 : -4), z: end.exit.z }, part: { module: end.module }, tone: 'pin' });
       }
     }
   }
   if (step.kind === 'check' || step.kind === 'power') {
     if (mcu) {
-      for (const pin of mcu.pins) if (pin.name === '3V3' || (pin.roles.includes('ground') && plan.wires.some((w) => w.to.pin_id === pin.id))) labels.push({ id: pin.id, text: `${pin.name} · ${pin.id}`, point: { x: pin.point.x, y: pin.point.y + 4, z: pin.point.z }, part: 'mcu', tone: 'pin' });
+      for (const pin of mcu.pins) if (pin.name === '3V3' || (pin.roles.includes('ground') && plan.wires.some((w) => [w.from, w.to].some((end) => end.module === mcu.id && end.pin_id === pin.id)))) labels.push({ id: pin.id, text: `${pin.name} · ${pin.id}`, point: { x: pin.point.x, y: pin.point.y + 4, z: pin.point.z }, part: { module: mcu.id }, tone: 'pin' });
     }
   }
   return labels;
@@ -151,7 +158,8 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState('');
-  const [stats, setStats] = useState<Stats>({ moving: false, wires: 0, lid: 'open', mcu: 'away', display: 'away', usb: 'out', lag: 0 });
+  const [stats, setStats] = useState<Stats>({ moving: false, wires: 0, lid: 'open', modules: {}, usb: 'out', lag: 0 });
+  const [renderedModules, setRenderedModules] = useState<string[]>([]);
   const last = plan.steps.length - 1;
 
   useEffect(() => {
@@ -159,6 +167,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
     setPlaying(false);
     setReady(false);
     setFailed('');
+    setRenderedModules([]);
   }, [plan]);
 
   useEffect(() => {
@@ -195,8 +204,9 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
 
     (async () => {
       try {
-        const THREE = await import('three');
-        const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls.js');
+        const [THREE, { OrbitControls }] = await Promise.all([
+          import('three'), import('three/examples/jsm/controls/OrbitControls.js'),
+        ]);
         if (disposed) return;
         const reduced = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const world = new THREE.Scene();
@@ -272,12 +282,17 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
         world.add(base, lid);
 
         // --- the modules ---
-        const mcuGroup = new THREE.Group();
-        const displayGroup = new THREE.Group();
-        world.add(mcuGroup, displayGroup);
+        const moduleGroups = new Map(plan.modules.map((module) => [module.id, new THREE.Group()]));
+        world.add(...moduleGroups.values());
+        const groupOf = (moduleId: string) => {
+          const group = moduleGroups.get(moduleId);
+          if (!group) throw new Error(`No drawn module for ${moduleId}.`);
+          return group;
+        };
         const mcu = plan.modules.find((m) => m.kind === 'mcu_board');
         const display = plan.modules.find((m) => m.kind === 'display');
         if (mcu) {
+          const mcuGroup = groupOf(mcu.id);
           const { x0, x1, z0, z1 } = mcu.box;
           const y0 = mcu.base_y;
           const y1 = y0 + mcu.pcb_mm.z;
@@ -302,6 +317,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           if (usb) slab(mcuGroup, x0 - 0.9, x0 + 5.5, y1, y1 + 2.6, usb.z - 4.25, usb.z + 4.25, mat('#b8bec7', { metalness: 0.85, roughness: 0.3 }));
         }
         if (display) {
+          const displayGroup = groupOf(display.id);
           const { x0, x1, z0, z1 } = display.box;
           const y0 = display.base_y;
           const y1 = y0 + display.pcb_mm.z;
@@ -314,20 +330,36 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           const goldDisplay = mat('#d6b24a', { metalness: 0.8, roughness: 0.35 });
           for (const pin of display.pins) slab(displayGroup, pin.point.x - 0.32, pin.point.x + 0.32, y0 - 6, y0, pin.point.z - 0.32, pin.point.z + 0.32, goldDisplay);
         }
+        for (const placed of plan.modules) {
+          if (placed.kind === 'mcu_board' || placed.kind === 'display') continue;
+          if (placed.kind !== 'i2c_breakout') throw new Error(`No stand-in shape for ${placed.kind}.`);
+          const group = groupOf(placed.id);
+          const { x0, x1, z0, z1 } = placed.box;
+          const y0 = placed.base_y;
+          const y1 = y0 + placed.pcb_mm.z;
+          slab(group, x0, x1, y0, y1, z0, z1, mat('#176a60'));
+          // An illustrative component envelope, not a sourced chip or header layout.
+          slab(group, x0 + (x1 - x0) * 0.2, x1 - (x1 - x0) * 0.2, y1, y1 + placed.above_board_mm, z0 + (z1 - z0) * 0.2, z1 - (z1 - z0) * 0.2, mat('#24282e'));
+          const gold = mat('#d6b24a', { metalness: 0.8, roughness: 0.35 });
+          const markers = new Set<string>();
+          for (const pin of placed.pins) {
+            const key = `${pin.point.x},${pin.point.y},${pin.point.z}`;
+            if (markers.has(key)) continue;
+            markers.add(key);
+            slab(group, pin.point.x - 0.32, pin.point.x + 0.32, y0 - placed.below_board_mm, pin.point.y, pin.point.z - 0.32, pin.point.z + 0.32, gold);
+          }
+        }
 
         // --- wires: a tube that grows from end to end, with a female housing on each pin. The housings ride with their module and
         // the tube is rebuilt from where the two modules are now, so a wire stays attached at both ends while a part moves. ---
-        type Part = 'mcu' | 'display';
         type WireEntry = {
           id: string; mesh: ThreeNS.Mesh; total: number; housings: ThreeNS.Mesh[]; progress: number; target: number; rings: ThreeNS.Mesh[];
-          ends: [Part, Part]; builtKey: string; path: Point[]; exits: { up: boolean; height: number }[];
+          ends: [string, string]; builtKey: string; path: Point[]; exits: { up: boolean; height: number }[];
         };
         const wires = new Map<string, WireEntry>();
         const housingMaterial = mat('#15161a');
-        const partOf = (moduleId: string): Part => (plan.modules.find((m) => m.id === moduleId)?.kind === 'display' ? 'display' : 'mcu');
-        const groupOf = (part: Part) => (part === 'display' ? displayGroup : mcuGroup);
         for (const wire of plan.wires) {
-          const ends: [Part, Part] = [partOf(wire.from.module), partOf(wire.to.module)];
+          const ends: [string, string] = [wire.from.module, wire.to.module];
           const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat(WIRE_COLORS[wire.color] ?? '#e8eaed', { roughness: 0.45 }));
           mesh.visible = false;
           world.add(mesh);
@@ -389,8 +421,8 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
         resize();
 
         // --- poses: each part eases toward what the current step asks of it ---
-        const pose = { mcu: AWAY.mcu as number, display: AWAY.display as number, lid: AWAY.lid as number, usb: -46 };
         let want = targetsFor(plan, 0);
+        const pose = { modules: { ...want.modules }, lid: want.lid as number, usb: -46 };
         let current = 0;
         // The camera follows the height of whatever is on screen, until the person takes hold of it themselves.
         let userMoved = false;
@@ -399,7 +431,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
         const lidDepth = wall;
         let lastSignature = '';
         let labels: Label[] = [];
-        const partOffset = (part: Label['part']) => (part === 'mcu' ? pose.mcu : part === 'display' ? pose.display : part === 'lid' ? pose.lid : 0);
+        const partOffset = (part: Label['part']) => (typeof part === 'object' && part ? pose.modules[part.module] : part === 'lid' ? pose.lid : 0);
 
         const syncLabels = () => {
           labels = labelsFor(plan, current);
@@ -415,6 +447,8 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
               labelNodes.set(label.id, node);
             }
             node.textContent = label.text;
+            if (typeof label.part === 'object' && label.part) node.dataset.module = label.part.module;
+            else delete node.dataset.module;
             node.className = `pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold shadow ${label.tone === 'pin' ? 'bg-amber-300 text-stone-950' : 'bg-stone-100/90 text-stone-900'}`;
           }
         };
@@ -430,7 +464,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
             entry.rings.forEach((ring) => { ring.visible = isCurrent; });
           });
           if (instant || reduced) {
-            pose.mcu = want.mcu; pose.display = want.display; pose.lid = want.lid; pose.usb = want.usb;
+            Object.assign(pose.modules, want.modules); pose.lid = want.lid; pose.usb = want.usb;
             wires.forEach((entry) => { entry.progress = entry.target; });
           }
           syncLabels();
@@ -450,21 +484,20 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
             moving = true;
             return next;
           };
-          pose.mcu = ease(pose.mcu, want.mcu);
-          pose.display = ease(pose.display, want.display);
+          moduleGroups.forEach((group, id) => {
+            pose.modules[id] = ease(pose.modules[id], want.modules[id]);
+            group.position.y = pose.modules[id];
+            group.updateMatrixWorld(true);
+          });
           pose.lid = ease(pose.lid, want.lid);
           pose.usb = ease(pose.usb, want.usb);
-          mcuGroup.position.y = pose.mcu;
-          displayGroup.position.y = pose.display;
           lid.position.y = pose.lid;
           cable.position.x = pose.usb;
           cable.visible = pose.usb > -45.9;
           let finished = 0;
           let lag = 0;
-          mcuGroup.updateMatrixWorld(true);
-          displayGroup.updateMatrixWorld(true);
           const pulse = 1 + Math.sin(now / 160) * 0.18;
-          const offsetOf = (part: Part) => (part === 'mcu' ? pose.mcu : pose.display);
+          const offsetOf = (moduleId: string) => pose.modules[moduleId];
           wires.forEach((entry) => {
             const next = entry.progress + (entry.target - entry.progress) * k * 0.8;
             entry.progress = Math.abs(entry.target - next) < 0.004 ? entry.target : next;
@@ -503,13 +536,13 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
             entry.rings.forEach((ring) => ring.scale.setScalar(pulse));
           });
           const lagRounded = Math.round(lag * 10) / 10;
-          const signature = `${moving}|${finished}|${want.lid}|${want.mcu}|${want.display}|${want.usb}|${lagRounded}`;
+          const signature = `${moving}|${finished}|${want.lid}|${JSON.stringify(want.modules)}|${want.usb}|${lagRounded}`;
           if (signature !== lastSignature) {
             lastSignature = signature;
             setStats({
               moving, wires: finished,
               lid: want.lid === 0 ? 'closed' : want.lid === LID_HOVER ? 'hover' : 'open',
-              mcu: want.mcu === 0 ? 'home' : 'away', display: want.display === 0 ? 'home' : 'away', usb: want.usb === 0 ? 'in' : 'out', lag: lagRounded,
+              modules: Object.fromEntries(Object.entries(want.modules).map(([id, offset]) => [id, offset === 0 ? 'home' : 'away'])), usb: want.usb === 0 ? 'in' : 'out', lag: lagRounded,
             });
           }
           if (labelHost && labelNodes.size) {
@@ -524,7 +557,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
             }
           }
           if (!userMoved) {
-            const top = Math.max(caseTop, c.lid_underside_y + lidDepth + pose.lid, (display ? display.base_y + display.pcb_mm.z + display.above_board_mm + pose.display : 0), (mcu ? mcu.base_y + mcu.pcb_mm.z + mcu.above_board_mm + pose.mcu : 0));
+            const top = Math.max(caseTop, c.lid_underside_y + lidDepth + pose.lid, ...plan.modules.map((module) => module.base_y + module.pcb_mm.z + module.above_board_mm + pose.modules[module.id]));
             const lift = (top * 0.42 - orbit.target.y) * k * 0.6;
             if (Math.abs(lift) > 0.002) { orbit.target.y += lift; camera.position.y += lift; }
           }
@@ -532,6 +565,9 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           gl.render(world, camera);
           frame = window.requestAnimationFrame(tick);
         };
+        // A cached import can batch ready=false/true when replanning at step 0.
+        // Initialize labels here rather than relying on a readiness state change.
+        goTo(0, true);
         tick();
 
         sceneRef.current = { goTo };
@@ -539,6 +575,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           cleanup();
           return;
         }
+        setRenderedModules(Array.from(moduleGroups.keys()));
         setReady(true);
       } catch (caught) {
         cleanup();
@@ -581,8 +618,10 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
       data-moving={stats.moving ? '1' : '0'}
       data-wires={stats.wires}
       data-lid={stats.lid}
-      data-mcu={stats.mcu}
-      data-display={stats.display}
+      data-mcu={stats.modules[plan.modules.find((module) => module.kind === 'mcu_board')?.id ?? ''] ?? 'away'}
+      data-display={stats.modules[plan.modules.find((module) => module.kind === 'display')?.id ?? ''] ?? 'away'}
+      data-modules={JSON.stringify(stats.modules)}
+      data-rendered-modules={JSON.stringify(renderedModules)}
       data-display-vcc-pad={JSON.stringify(plan.modules.find((module) => module.kind === 'display')?.pins.find((pin) => pin.name === 'VCC')?.point)}
       data-usb={stats.usb}
       data-wire-lag={stats.lag}
@@ -603,6 +642,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
         {ready ? (
           <div className="pointer-events-none absolute left-3 top-3 max-w-[18rem] rounded bg-stone-950/75 px-2 py-1 text-[10px] leading-4 text-stone-300" title={plan.case.basis}>
             Stand-in shapes · the case is a proposal, not yet printed
+            {plan.modules.some((module) => module.kind === 'i2c_breakout') ? <span className="block">Sensor pin positions are illustrative; use the printed names.</span> : null}
           </div>
         ) : null}
         {ready && problems > 0 ? (
