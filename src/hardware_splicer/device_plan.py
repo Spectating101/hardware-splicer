@@ -42,7 +42,7 @@ WINDOW_MARGIN_MM = 1.5
 WIRE_COLORS = {"red", "black", "yellow", "green", "blue", "white", "orange"}
 _SLUG = re.compile(r"^[a-z][a-z0-9_]{0,23}$")
 _OVERRIDE_KEYS = {"pcb_mm": {"x", "y", "z"}, "above_board_mm": None}
-_MODULE_KINDS = {"mcu_board", "display"}
+_MODULE_KINDS = {"mcu_board", "display", "i2c_breakout"}
 
 
 class DevicePlanError(ValueError):
@@ -98,6 +98,23 @@ def _library() -> dict[str, Any]:
                     raise RuntimeError(f"{label}[{index}].{field} may not contain control or invisible characters")
             if chip["source"] not in source_urls:
                 raise RuntimeError(f"{label}[{index}].source must equal one of this module's source urls")
+        quotes = module.get("quotes", [])
+        quote_label = f"module {module['id']} quotes"
+        if not isinstance(quotes, list):
+            raise RuntimeError(f"{quote_label} must be a list")
+        for index, quote in enumerate(quotes):
+            if not isinstance(quote, dict):
+                raise RuntimeError(f"{quote_label}[{index}] must be an object")
+            if set(quote) != {"claim", "quote", "source"}:
+                raise RuntimeError(f"{quote_label}[{index}] must have exactly claim, quote and source")
+            for field in ("claim", "quote", "source"):
+                value = quote.get(field)
+                if not isinstance(value, str) or not value.strip():
+                    raise RuntimeError(f"{quote_label}[{index}].{field} must be non-empty text")
+                if has_hidden_characters(value):
+                    raise RuntimeError(f"{quote_label}[{index}].{field} may not contain control or invisible characters")
+            if quote["source"] not in source_urls:
+                raise RuntimeError(f"{quote_label}[{index}].source must equal one of this module's source urls")
     return data
 
 
@@ -132,7 +149,28 @@ EXAMPLES: dict[str, dict[str, Any]] = {
             {"from": "display.SDA", "to": "mcu.IO21"},
         ],
         "case": {"wall_mm": 2.0, "clearance_mm": 1.0},
-    }
+    },
+    "esp32_oled_bme280_usb": {
+        "schema_version": DEVICE_SPEC_SCHEMA,
+        "name": "ESP32 with an OLED display and a BME280, powered over USB",
+        "power": {"source": "usb"},
+        "modules": [
+            {"id": "mcu", "module": "esp32-devkitc-v4"},
+            {"id": "display", "module": "ssd1306-096-i2c"},
+            {"id": "sensor", "module": "adafruit-bme280-stemma-qt"},
+        ],
+        "connections": [
+            {"from": "display.VCC", "to": "mcu.3V3"},
+            {"from": "display.GND", "to": "mcu.GND"},
+            {"from": "display.SCL", "to": "mcu.IO22"},
+            {"from": "display.SDA", "to": "mcu.IO21"},
+            {"from": "sensor.Vin", "to": "mcu.3V3"},
+            {"from": "sensor.GND", "to": "mcu.GND"},
+            {"from": "sensor.SCK", "to": "mcu.IO22"},
+            {"from": "sensor.SDI", "to": "mcu.IO21"},
+        ],
+        "case": {"wall_mm": 2.0, "clearance_mm": 1.0},
+    },
 }
 
 
@@ -292,10 +330,21 @@ def _resolve_pin(placed: dict[str, _Placed], endpoint: str, other: dict[str, flo
     return module, pin, point, len(points) > 1
 
 
+def _pins_up(module: _Placed) -> bool:
+    """Headers point up unless the module says they hang below the board (the OLED)."""
+
+    face = module.entry.get("header_face")
+    if face == "below":
+        return False
+    if face == "above":
+        return True
+    return module.entry["kind"] != "display"
+
+
 def _pin_tip(module: _Placed) -> float:
     """How far above the module's PCB a connected wire reaches: the pin tips on a board with headers; the board's face for the rest."""
 
-    if module.entry["kind"] == "display":
+    if not _pins_up(module):
         return -0.0  # the header is on the back, so the wire meets the underside
     return module.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM
 
@@ -304,7 +353,7 @@ def _end(module: _Placed, point: dict[str, float]) -> dict[str, Any]:
     """One end of a jumper: its female housing and where the wire leaves it. A board with headers has its pins pointing up, so the
     housing stands on the pin tip; a display's pins hang down from its back, so the housing hangs below it."""
 
-    up = module.entry["kind"] != "display"
+    up = _pins_up(module)
     y0, y1 = (point["y"], point["y"] + WIRE_CONNECTOR_HEIGHT_MM) if up else (point["y"] - WIRE_CONNECTOR_HEIGHT_MM, point["y"])
     exit_point = {"x": point["x"], "y": _r(y1 if up else y0), "z": point["z"]}
     lead = {"x": point["x"], "y": _r(exit_point["y"] + (6.0 if up else -6.0)), "z": point["z"]}
@@ -374,6 +423,9 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     ground_a, ground_b = has(ra, "ground"), has(rb, "ground")
     powers = {"power_3v3", "power_5v", "power_in"}
     sources = {"power_3v3", "power_5v"}
+    if (has(ra, "backup_battery") and has(rb, "power_3v3", "power_5v")) or (has(rb, "backup_battery") and has(ra, "power_3v3", "power_5v")):
+        out.append(_finding("error", "backup_to_supply", f"{name} ties the backup-battery pin to a board supply. The coin cell is backup only; do not join BAT to 3V3 or 5V.", "module library: backup-battery pin; coin cell is backup only", wire_id))
+        return out
     if has(ra, *sources) and has(rb, *sources):
         out.append(_finding("error", "supplies_joined", f"{name} joins two supply pins together.", "pin roles from the module library", wire_id))
         return out
@@ -388,9 +440,14 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     if has(ra, *powers) and has(rb, *powers):
         supply, user = (pa, pb) if has(ra, "power_3v3", "power_5v") else (pb, pa)
         if has(set(supply["roles"]), "power_5v"):
-            # SSD1306 datasheet: "VDD = 1.65V to 3.3V for IC logic".
+            user_module = ma if user is pa else mb
+            electrical = user_module.entry.get("electrical", {})
+            note = " ".join(part for part in (electrical.get("supply_note"), electrical.get("pullups_note")) if part)
+            sources = "; ".join(source["url"] for source in user_module.entry.get("sources", []))
             # WROOM-32E Table 15: "VIH | High-level input voltage | 0.75 × VDD | — | VDD + 0.3 | V".
-            out.append(_finding("warning", "five_volts_to_a_3v3_system", f"{name} runs a module from 5 V. The SSD1306's own logic supply is 1.65 V to 3.3 V; 5 V can damage a module without a regulator. Pull-ups to VCC would also put 5 V on ESP32 SDA and SCL. Check the module's regulator and pull-up supply before connecting power.", "SSD1306 datasheet: VDD = 1.65V to 3.3V for IC logic; ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V", wire_id))
+            message = f"{name} runs a module from 5 V. {note} The ESP32-WROOM-32E datasheet lists VIH max as VDD + 0.3 V."
+            basis = f"{sources}; ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V" if sources else "ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V"
+            out.append(_finding("warning", "five_volts_to_a_3v3_system", " ".join(message.split()), basis, wire_id))
         return out
     if has(ra | rb, *powers) and has(ra | rb, "gpio", "i2c_sda", "i2c_scl", "gpio_input_only"):
         out.append(_finding("error", "power_to_signal", f"{name} joins a power pin to a signal pin.", "pin roles from the module library", wire_id))
@@ -484,7 +541,7 @@ def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Plac
 
 
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
-    if module.entry["kind"] == "display":
+    if module.entry["kind"] in {"display", "i2c_breakout"}:
         return [("ground", "ground"), ("power_in", "power"), ("i2c_sda", "SDA"), ("i2c_scl", "SCL")]
     return []
 
@@ -534,6 +591,16 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         lid_underside = max(display_top + 0.5, mcu_top + c)
     else:
         lid_underside = mcu_top + c
+    cursor_z = c + mcu.pcb["x"] + c
+    for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
+        breakout.base_y = wall + breakout.below
+        # USB-side of the antenna, on the case floor, beside the board so the case grows from every module.
+        breakout.origin = (c + usb_over + 4.0, cursor_z)
+        extent_x = max(extent_x, breakout.origin[0] + breakout.pcb["x"])
+        extent_z = max(extent_z, breakout.origin[1] + breakout.pcb["y"])
+        cursor_z = breakout.origin[1] + breakout.pcb["y"] + c
+        housing_top = breakout.base_y + breakout.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
+        lid_underside = max(lid_underside, housing_top + c)
     inner_x = extent_x + c
     inner_z = extent_z + c
     inner_height = lid_underside - wall
@@ -585,16 +652,21 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     if errors:
         raise DevicePlanError("; ".join(errors))
 
-    # A signal pin used for two different signals.
-    users: dict[tuple[str, str], list[str]] = {}
+    # A signal pin used for two different signals. Several I2C data (or clock) wires on one bus pin are the same signal.
+    users: dict[tuple[str, str], list[tuple[str, set[str]]]] = {}
     for wire_id, (ma, pa), (mb, pb) in resolved_pairs:
         for module, pin, other in ((ma, pa, (mb, pb)), (mb, pb, (ma, pa))):
             if set(pin["roles"]) & {"ground", "power_3v3", "power_5v", "power_in"}:
                 continue
-            users.setdefault((module.ref, pin["id"]), []).append(f"{other[0].ref}.{other[1]['name']}")
+            users.setdefault((module.ref, pin["id"]), []).append((f"{other[0].ref}.{other[1]['name']}", set(other[1]["roles"])))
     for (ref, pin_id), others in sorted(users.items()):
-        if len(set(others)) > 1:
-            findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(set(others)))}.", "a signal pin carries one signal"))
+        names = {name for name, _roles in others}
+        if len(names) <= 1:
+            continue
+        other_roles = [roles for _name, roles in others]
+        if all("i2c_sda" in roles for roles in other_roles) or all("i2c_scl" in roles for roles in other_roles):
+            continue
+        findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(names))}.", "a signal pin carries one signal"))
 
     rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
     findings.extend(_net_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
@@ -633,9 +705,34 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 message += " This order was assumed because the spec did not choose a pin order."
             findings.append(_finding("info", "pin_order_assumed" if module.pin_order_assumed else "pin_order_drawn", message, f"{order['label']}: {order['source']}"))
         electrical = module.entry.get("electrical", {})
-        for key, rule in (("supply_note", "oled_supply_note"), ("pullups_note", "i2c_pullups_note")):
+        source_basis = "; ".join(source["url"] for source in module.entry.get("sources", [])) or "module library"
+        supply_rule = "oled_supply_note" if module.entry["kind"] == "display" else "module_supply_note"
+        for key, rule in (("supply_note", supply_rule), ("pullups_note", "i2c_pullups_note")):
             if electrical.get(key):
-                findings.append(_finding("info", rule, f"{module.ref}: {electrical[key]}", "SSD1306 datasheet (logic supply and I2C pull-ups); cited module seller listings"))
+                findings.append(_finding("info", rule, f"{module.ref}: {electrical[key]}", source_basis))
+        if electrical.get("backup_note"):
+            findings.append(_finding("info", "coin_cell_backup", f"{module.ref}: {electrical['backup_note']}", source_basis))
+    i2c_modules = [module for module in placed.values() if module.entry.get("i2c", {}).get("addresses")]
+    for index, left in enumerate(i2c_modules):
+        left_addrs = set(left.entry["i2c"]["addresses"])
+        for right in i2c_modules[index + 1:]:
+            shared = left_addrs & set(right.entry["i2c"]["addresses"])
+            if shared:
+                findings.append(_finding(
+                    "warning",
+                    "i2c_address_overlap",
+                    f"{left.ref} ({left.entry['name']}) and {right.ref} ({right.entry['name']}) list overlapping I2C addresses ({', '.join(sorted(shared))}). This plan does not predict which address a scan will show.",
+                    f"{left.entry['name']}: {left.entry['i2c'].get('address_basis', '')}; {right.entry['name']}: {right.entry['i2c'].get('address_basis', '')}",
+                ))
+    pulled = [module for module in placed.values() if module.entry.get("electrical", {}).get("onboard_pullups") is True]
+    if len(pulled) >= 2:
+        names = ", ".join(f"{module.ref} ({module.entry['name']})" for module in sorted(pulled, key=lambda m: m.ref))
+        findings.append(_finding(
+            "info",
+            "i2c_pullup_stack",
+            f"Two or more modules state that they already have pull-up resistors ({names}). Stacked pull-ups change the bus resistance. Check each board.",
+            "; ".join(source["url"] for module in pulled for source in module.entry.get("sources", [])),
+        ))
     findings.sort(key=lambda f: ({"error": 0, "warning": 1, "info": 2}[f["severity"]], f["rule"], f["message"]))
 
     # Case.
@@ -746,6 +843,14 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": "your spec's dimension override", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     add("place", f"Lay the {mcu.entry['name'].split(' (')[0]} in the case", f"Lower the board into the base with the USB socket at the cut-out and the antenna end clear of the wall. {'It rests on its header pins.' if mcu.below else ''}", parts=[mcu.ref], motion="drop")
+    for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
+        add(
+            "place",
+            f"Seat the {breakout.entry['name'].split(',')[0]} on the case floor",
+            f"Lay {breakout.entry['name']} on the floor of the base, USB-side of the antenna, not in the lid. Connect by the printed pin names; header order was not published.",
+            parts=[breakout.ref],
+            motion="drop",
+        )
     for wire in wires:
         a, b = wire["from"], wire["to"]
         add(
@@ -775,6 +880,17 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
         add("check", "Review power before connecting USB", "Do not plug in until you have checked the warnings above and resolved the errors. Check the module supply and pull-ups. The DevKitC takes one and only one supply; do not combine USB with an external supply on 5V or 3V3.", checks=checks, parts=[mcu.ref])
     else:
         add("power", "USB power and supply check", "Review the supply and pull-up notes first. Use one and only one DevKitC supply: do not add an external supply on 5V or 3V3 while using USB. Connect the Micro-USB data cable only after those checks. Record the supply reading; this plan gives no result. If anything gets hot or smells, unplug it.", checks=checks, parts=[mcu.ref])
-    if display:
-        add("test", "Record an I2C scan after the wiring and power review", "After resolving the wiring and power questions, use an I2C scanner sketch that names your chosen pins. Record what it finds. The SSD1306 datasheet lists 0x3C and 0x3D as possible addresses; this plan does not predict a scan result.", parts=[display.ref], checks=[{"kind": "suggested_check", "check": "i2c_scan", "from": "I2C scanner", "to": f"{display.ref}", "net": None, "expect": "record what you observe; this plan supplies no reading"}])
+    i2c_modules = [module for module in placed.values() if module.entry.get("i2c", {}).get("addresses")]
+    if i2c_modules:
+        listed = "; ".join(
+            f"{module.entry['name']} lists {', '.join(module.entry['i2c']['addresses'])}"
+            for module in sorted(i2c_modules, key=lambda m: m.ref)
+        )
+        add(
+            "test",
+            "Record an I2C scan after the wiring and power review",
+            f"After resolving the wiring and power questions, use an I2C scanner sketch that names your chosen pins. Record what it finds. {listed}. This plan does not predict a scan result.",
+            parts=[module.ref for module in i2c_modules],
+            checks=[{"kind": "suggested_check", "check": "i2c_scan", "from": "I2C scanner", "to": ", ".join(module.ref for module in i2c_modules), "net": None, "expect": "record what you observe; this plan supplies no reading"}],
+        )
     return steps

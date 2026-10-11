@@ -24,8 +24,10 @@ and kinds reported in that plan with whole `name`, explicit `mpn` fields or expl
 using the exact/variant rules from marking lookup; family matches are never offered. It does not extract chip names from descriptions.
 Whole-name matches have `relation: "module"`. Chip-name matches have `relation: "chip_on_module"`, with the listed role, source URL
 and an advisory note. `SSD1306` names the display controller listed on the OLED module; `ESP32-WROOM-32E` names the Wi-Fi/Bluetooth
-radio module listed on the DevKitC board. The chip or radio module alone is **not that module**, and does not come with its board,
-pins, regulator or wiring rules. These are name comparisons against the library, not proof of the reclaimed part.
+radio module listed on the DevKitC board; `BME280`, `BH1750FVI` and `DS3231` name the chips listed on the three I2C breakouts.
+The chip or radio module alone is **not that module**, and does not come with its board,
+pins, regulator or wiring rules. These are name comparisons against the library, not proof of the reclaimed part. Family matches
+are never offered.
 
 The request is `{"parts": [{"ref": "U1", "kind": "ic", "marking": "what you read"}]}` with at most 300 rows and 40 characters
 per text field. Each returned row preserves those fields and has `matched` and `matches` (module id, library name, tier, relation and
@@ -81,18 +83,32 @@ Every figure names where it came from, or says it is typical and tells you to me
 Each `pin_orders` entry has an `id`, source-name `label`, exact `signals` sequence and `source` URL from that module's
 existing `sources`. The loader requires each signal once, unique order IDs, a valid default and a header pad per signal.
 Optional `chips` lists hold at most eight entries, each with printable, nonempty `marking` (at most 40 characters), `role` (80)
-and `source` (2048). The source must equal a URL already in that module's `sources`. Only the SSD1306 controller and
-ESP32-WROOM-32E radio module are listed, using their already-cited datasheets; no chip pin or electrical contract is added.
+and `source` (2048). The source must equal a URL already in that module's `sources`. The listed chips are the
+ESP32-WROOM-32E radio module, the SSD1306 display controller, and the BME280, BH1750FVI and DS3231 chips on the
+three I2C breakouts, each using an already-cited datasheet; no chip pin or electrical contract is added.
+Optional `quotes` lists hold sourced fragments: each item has exactly `claim`, `quote` and `source`, the source must
+equal a URL already in that module's `sources`, and the quote is a verbatim excerpt.
 
 | Module | Taken from | Typical, so measure |
 |--------|-----------|---------------------|
 | ESP32-DevKitC V4 | Espressif's dimensions drawing (27.94 × 48.26 mm, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang), the user guide pin tables (J2, J3), the WROOM-32E datasheet (module 18.0 × 25.5 × 3.1 mm, 3.0 to 3.6 V supply, GPIO6 to 11 on the flash, strapping pins, VIH max VDD + 0.3 V), the arduino-esp32 pin file (SDA 21, SCL 22) | PCB thickness, header length below the board, USB socket height |
 | 0.96 inch SSD1306 I2C OLED | the SSD1306 datasheet (I2C address 0x3C or 0x3D), seller listings (active area 21.74 × 10.86 mm) | board size, glass position, pin order (follow the printed labels) |
+| Adafruit BME280 STEMMA QT | Adafruit pinouts (Vin, 3Vo, GND, SCK, SDI; regulator 3–5 V; default I2C 0x77 / 0x76; level shifting follows Vin), Adafruit product 2652 Product Dimensions 25.2 × 18.0 × 4.6 mm, Bosch BME280 datasheet (chip 1.71–3.6 V; address 111011x; SDI needs a pull-up) | header positions, header length below the board, mounting-hole positions; pin order was not published — connect by the printed names |
+| Adafruit BH1750 STEMMA QT | Adafruit pinouts (VIN, 3Vo, GND, SCL, SDA; 10 kΩ pull-ups; addresses 0x23 / 0x5C), Adafruit product 4681 Product Dimensions 25.3 × 17.7 × 4.5 mm, Rohm BH1750FVI datasheet from an Internet Archive copy (chip 2.4–3.6 V; two slave addresses) | header positions, header length below the board, mounting-hole positions, which rail the pull-ups join; pin order was not published |
+| Adafruit DS3231 STEMMA QT | Adafruit pinouts (Vin, GND, SCL, SDA, BAT; 10 kΩ pull-ups to Vin; 2.3–5.5 V, no regulator), Arduino usage (address 0x68, not changeable), product 5188 Product Dimensions 25.4 × 17.8 × 7.8 mm and CR1220 backup cell, Maxim DS3231 datasheet from an Internet Archive copy (chip VCC 2.3–5.5 V; address 1101000) | header positions, header length below the board, mounting-hole positions; pin order was not published |
 
 The library does not claim a supply range for the OLED module: the chip's own limit is not what a module accepts, and sellers
-do not standardise the module's regulator. Every OLED plan copies `electrical.supply_note` and `pullups_note` into the module's
-notes and into information findings, including the example. Those notes ask you to check the actual module's supply and
-pull-up arrangement. The example's 3V3 wire does not establish how your module will behave.
+do not standardise the module's regulator. Product Dimensions on the three Adafruit breakouts are the seller's overall
+product size, not a board outline. Bosch, Rohm and Maxim voltages are chip limits, not header VIN contracts.
+
+Every plan copies each wired module's `electrical.supply_note` and `pullups_note` into that module's notes and into
+information findings, including the example. OLED notes keep the `oled_supply_note` rule name; other modules use
+`module_supply_note`. Those notes ask you to check the actual module's supply and pull-up arrangement. A 3V3 or 5 V
+wire does not establish how your module will behave, and a 5 V Vin finding is not a build permit.
+
+A device still needs exactly one microcontroller board and at most one display. Any number of `i2c_breakout` modules
+may sit on the case floor, USB-side of the antenna, up to the existing module limit. They do not get a lid window.
+Header order was not published for the three breakouts: connect by the printed names (SCK and SDI on the BME280).
 
 The WROOM-32E datasheet source and each chip entry citing it use the publisher's new documentation URL (the old one answers
 HTTP 301). The 2026-10-10 date is when the link was updated, not a new claim about the hardware.
@@ -109,9 +125,15 @@ custom-pin routing note. Other strapping pins and USB serial pins have warnings;
 defaults have warnings; other output-capable custom I2C pins have a note. GPIO0 also has an auto-program circuit note
 from the ESP-IDF ADC documentation's list of dev kits.
 
-OLED VCC on 5V keeps a warning covering both the chip's logic supply and pull-ups that could put 5 V on ESP32 SDA/SCL.
-Check the actual module's regulator and pull-up supply. Any warning or error replaces the USB action with a review step:
+A module VIN or VCC on 5V keeps a warning that uses that module's own supply and pull-up notes, plus the WROOM VIH
+limit (VDD + 0.3 V). Check the actual module's regulator and pull-up supply. 5 V on DS3231 Vin is especially a
+pull-up-to-Vin warning, not a missing-regulator warning. That finding is not a permit to build or power the gadget.
+Any warning or error replaces the USB action with a review step:
 "Do not plug in until you have checked the warnings above and resolved the errors."
+
+Overlapping I2C address sets are a warning. Two or more modules that state onboard pull-ups get an information note
+about stacked resistors. The DS3231 coin cell is backup only and is not a power source; wiring BAT to 3V3 or 5V is
+an error.
 
 The reset pin and the flash pins are wrong whatever they are wired to, from either end, and a wire the checks reject does not
 count toward a module's required pins. Wires are also checked as nets: a module's ground pins are one net, so are its 3V3 pins
@@ -152,7 +174,7 @@ handling practice, not a force limit or a fit claim.
 
 ## Not yet
 
-A battery (needs a charger and regulator modules), more module types, a case export you can print, and a wire-by-wire
+A battery (needs a charger and regulator modules; the DS3231 coin-cell backup is not that feature), more module types, a case export you can print, and a wire-by-wire
 animation for boards other than the ones in the library.
 
 Every plan also reports the WROOM-32E supply requirement (datasheet v2.1, Table 14: IVDD minimum 0.5 A).

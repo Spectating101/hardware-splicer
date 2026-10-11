@@ -31,9 +31,18 @@ GOOD = EXAMPLE["connections"]
 ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply", "pin_order_assumed", "supply_current", "antenna_keepout", "kit_fit"}
 
 
+BREAKOUT_IDS = (
+    "adafruit-bme280-stemma-qt",
+    "adafruit-bh1750-stemma-qt",
+    "adafruit-ds3231-stemma-qt",
+)
+
+
 def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() -> None:
     library = module_library()
-    assert [m["id"] for m in library["modules"]] == ["esp32-devkitc-v4", "ssd1306-096-i2c"]
+    ids = [m["id"] for m in library["modules"]]
+    assert ids[:2] == ["esp32-devkitc-v4", "ssd1306-096-i2c"]
+    assert list(BREAKOUT_IDS) == ids[2:]
     for module in library["modules"]:
         assert module["sources"] and all(s["url"].startswith("https://") and s["as_of"] for s in module["sources"])
         assert module["dimension_basis"]
@@ -67,6 +76,9 @@ def test_only_the_two_sourced_chip_roles_are_published() -> None:
     assert [(m["id"], c["marking"], c["role"]) for m in library["modules"] for c in m["chips"]] == [
         ("esp32-devkitc-v4", "ESP32-WROOM-32E", "Wi-Fi/Bluetooth module on the board"),
         ("ssd1306-096-i2c", "SSD1306", "display controller on the module"),
+        ("adafruit-bme280-stemma-qt", "BME280", "temperature, humidity and pressure sensor on the module"),
+        ("adafruit-bh1750-stemma-qt", "BH1750FVI", "ambient light sensor on the module"),
+        ("adafruit-ds3231-stemma-qt", "DS3231", "real-time clock on the module"),
     ]
     for module in library["modules"]:
         assert all(c["source"] in [s["url"] for s in module["sources"]] for c in module["chips"])
@@ -592,7 +604,9 @@ def test_five_volt_oled_warning_covers_logic_and_pullups_and_gates_usb(reverse):
     plan = build_device_plan(_with(connections))
     finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system")
     assert finding["severity"] == "warning"
-    assert all(text in finding["message"] for text in ("1.65", "3.3 V", "regulator", "damage", "SDA", "SCL"))
+    oled = module_library()["modules"][1]
+    assert oled["electrical"]["supply_note"] in finding["message"]
+    assert "VDD + 0.3" in finding["message"] or "VDD + 0.3" in finding["basis"]
     assert not any(s["kind"] == "power" for s in plan["steps"])
     assert any("Do not plug in until you have checked the warnings above" in s["instruction"] for s in plan["steps"])
 
@@ -777,3 +791,274 @@ def test_kit_fit_note_names_typical_sizes_and_male_pins_once():
     assert len(notes) == 1 and notes[0]["severity"] == "info"
     text = notes[0]["message"]
     assert all(value in text for value in ("case uses typical values, not measurements", "14 mm jumper housing", "10 mm wire bend", "14 x 8 mm USB overmold", "1.6 mm PCB", "8.5 mm under-board header", "actual kit", "male pins on both ends"))
+
+
+# --- I2C breakout modules ---------------------------------------------------------------------------------------------------
+
+
+OLED_PLUS_BME_WIRES = [
+    *GOOD,
+    {"from": "sensor.Vin", "to": "mcu.3V3"},
+    {"from": "sensor.GND", "to": "mcu.GND"},
+    {"from": "sensor.SCK", "to": "mcu.IO22"},
+    {"from": "sensor.SDI", "to": "mcu.IO21"},
+]
+
+
+def _oled_plus_bme(connections=None) -> dict:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["name"] = "ESP32 with an OLED display and a BME280, powered over USB"
+    spec["modules"].append({"id": "sensor", "module": "adafruit-bme280-stemma-qt"})
+    spec["connections"] = copy.deepcopy(OLED_PLUS_BME_WIRES if connections is None else connections)
+    return spec
+
+
+def _module_by_id(module_id: str) -> dict:
+    return next(m for m in module_library()["modules"] if m["id"] == module_id)
+
+
+def test_the_library_loads_the_three_breakouts_with_quotes() -> None:
+    library = module_library()
+    by_id = {m["id"]: m for m in library["modules"]}
+    assert [by_id[mid]["kind"] for mid in BREAKOUT_IDS] == ["i2c_breakout"] * 3
+    bme, light, rtc = (by_id[mid] for mid in BREAKOUT_IDS)
+    assert {p["name"] for p in bme["pins"]} >= {"Vin", "3Vo", "GND", "SCK", "SDI"}
+    assert {p["name"] for p in light["pins"]} >= {"VIN", "GND", "SCL", "SDA"}
+    assert {p["name"] for p in rtc["pins"]} >= {"Vin", "GND", "SCL", "SDA", "BAT"}
+    assert not any(name in {p["name"] for p in bme["pins"]} for name in ("SCL", "SDA"))
+    for module in (bme, light, rtc):
+        assert module["pin_order_varies"] is True
+        assert "pin_orders" not in module
+        assert "Product Dimensions" in module["dimension_basis"]["pcb"]
+        assert "typical" in module["dimension_basis"]["pins"].lower()
+        assert "typical" in module["dimension_basis"]["heights"].lower()
+        assert module["quotes"]
+        urls = {s["url"] for s in module["sources"]}
+        for item in module["quotes"]:
+            assert set(item) == {"claim", "quote", "source"}
+            assert item["claim"].strip() and item["quote"].strip()
+            assert item["source"] in urls
+        assert any("Internet Archive" in s["label"] for s in module["sources"]) or module is bme
+    assert not any("Internet Archive" in s["label"] for s in bme["sources"])
+    assert "0x77" in bme["i2c"]["addresses"] and "0x76" in bme["i2c"]["addresses"]
+    assert light["i2c"]["addresses"] == ["0x23", "0x5C"]
+    assert rtc["i2c"]["addresses"] == ["0x68"]
+    assert light["electrical"]["onboard_pullups"] is True
+    assert rtc["electrical"]["onboard_pullups"] is True
+    assert "onboard_pullups" not in bme["electrical"]
+    assert "onboard_pullups" not in by_id["ssd1306-096-i2c"]["electrical"]
+    assert "pin_orders" not in bme and "4.7" not in json.dumps(bme)
+    assert "supply_v" not in bme["electrical"]
+
+
+@pytest.fixture
+def write_library(tmp_path, monkeypatch):
+    from hardware_splicer import device_plan
+
+    original = copy.deepcopy(module_library())
+    path = tmp_path / "device_modules.json"
+    monkeypatch.setattr(device_plan, "LIBRARY_PATH", path)
+
+    def load(mutate) -> dict:
+        candidate = copy.deepcopy(original)
+        mutate(candidate)
+        path.write_text(json.dumps(candidate), encoding="utf-8")
+        device_plan._library.cache_clear()
+        return module_library()
+
+    yield load
+    device_plan._library.cache_clear()
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda data: data["modules"][1].__setitem__("quotes", [{"claim": "", "quote": "Vin - this is the power pin.", "source": data["modules"][1]["sources"][0]["url"]}]),
+        lambda data: data["modules"][1].__setitem__("quotes", [{"claim": "power pin", "quote": "", "source": data["modules"][1]["sources"][0]["url"]}]),
+        lambda data: data["modules"][1].__setitem__("quotes", [{"claim": "power pin", "quote": "Vin - this is the power pin."}]),
+        lambda data: data["modules"][1].__setitem__("quotes", [{"claim": "power pin", "quote": "Vin - this is the power pin.", "source": data["modules"][1]["sources"][0]["url"], "extra": "no"}]),
+        lambda data: data["modules"][1].__setitem__("quotes", [{"claim": "power pin", "quote": "Vin - this is the power pin.", "source": "https://example.com/not-this-module"}]),
+    ],
+)
+def test_a_bad_quote_shape_is_rejected(write_library, mutate) -> None:
+    with pytest.raises(RuntimeError, match="quotes"):
+        write_library(mutate)
+
+
+def test_unknown_kind_still_cannot_be_placed(write_library) -> None:
+    write_library(lambda data: data["modules"][1].__setitem__("kind", "fixture_kind"))
+    with pytest.raises(DevicePlanError, match="cannot be placed"):
+        build_device_plan(EXAMPLE)
+
+
+def test_unknown_kind_is_a_422_api(api: TestClient, write_library) -> None:
+    write_library(lambda data: data["modules"][1].__setitem__("kind", "fixture_kind"))
+    response = api.post("/v1/devices/plan", json=EXAMPLE)
+    assert response.status_code == 422
+    assert response.json()["detail"]["type"] == "invalid_device_spec"
+
+
+def test_two_microcontrollers_are_still_refused() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"].append({"id": "other", "module": "esp32-devkitc-v4"})
+    with pytest.raises(DevicePlanError, match="exactly one microcontroller"):
+        build_device_plan(spec)
+
+
+def test_two_displays_are_still_refused() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"].append({"id": "screen", "module": "ssd1306-096-i2c"})
+    with pytest.raises(DevicePlanError, match="at most one display"):
+        build_device_plan(spec)
+
+
+def test_mcu_oled_and_bme280_make_a_plan() -> None:
+    plan = build_device_plan(_oled_plus_bme())
+    assert {m["id"] for m in plan["modules"]} == {"mcu", "display", "sensor"}
+    assert plan["counts"]["errors"] == 0
+    assert plan["authority"] == (
+        "This is a proposal and a checklist. A wire that passes these checks is not a wire that works, the case has not been "
+        "printed, and every check is something to try, not a result. Nothing here approves building, powering or releasing a device."
+    )
+    sensor = next(m for m in plan["modules"] if m["id"] == "sensor")
+    assert sensor["kind"] == "i2c_breakout"
+    assert any("printed" in note.lower() and "name" in note.lower() for note in sensor["notes"])
+    assert "pin_used_twice" not in _rules(plan)
+    assert plan["case"]["window"] is not None
+    display = next(m for m in plan["modules"] if m["id"] == "display")
+    assert sensor["base_y"] < display["base_y"]
+    seat = next(s for s in plan["steps"] if s["kind"] == "place" and s["parts"] == ["sensor"])
+    assert "not in the lid" in seat["instruction"]
+    assert "floor" in seat["instruction"].lower()
+    assert "Fit the" not in seat["instruction"]
+
+
+def test_missing_sda_on_a_sensor_is_a_missing_connection() -> None:
+    plan = build_device_plan(_oled_plus_bme([*GOOD, {"from": "sensor.Vin", "to": "mcu.3V3"}, {"from": "sensor.GND", "to": "mcu.GND"}, {"from": "sensor.SCK", "to": "mcu.IO22"}]))
+    assert "missing_connection" in _rules(plan, "error")
+    assert any("sensor" in f["message"] and "SDA" in f["message"] for f in plan["findings"] if f["rule"] == "missing_connection")
+
+
+def test_five_volts_on_a_sensor_uses_that_module_own_warning() -> None:
+    bme = _module_by_id("adafruit-bme280-stemma-qt")
+    plan = build_device_plan(_oled_plus_bme([{**c, "to": "mcu.5V"} if c["from"] == "sensor.Vin" else c for c in OLED_PLUS_BME_WIRES]))
+    finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system" and "sensor" in f["message"])
+    assert finding["severity"] == "warning"
+    assert bme["electrical"]["supply_note"] in finding["message"]
+    assert "VDD + 0.3" in finding["message"] or "VDD + 0.3" in finding["basis"]
+    assert any(s["url"] in finding["basis"] for s in bme["sources"])
+    assert not any(s["kind"] == "power" for s in plan["steps"])
+
+
+def test_ds3231_bat_to_a_supply_is_an_error() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "clock", "module": "adafruit-ds3231-stemma-qt"}]
+    spec["connections"] = [
+        {"from": "clock.Vin", "to": "mcu.3V3"},
+        {"from": "clock.GND", "to": "mcu.GND"},
+        {"from": "clock.SCL", "to": "mcu.IO22"},
+        {"from": "clock.SDA", "to": "mcu.IO21"},
+        {"from": "clock.BAT", "to": "mcu.3V3"},
+    ]
+    plan = build_device_plan(spec)
+    finding = next(f for f in plan["findings"] if f["rule"] == "backup_to_supply")
+    assert finding["severity"] == "error"
+    assert "BAT" in finding["message"] and "backup" in finding["message"].lower()
+
+
+def test_cr1220_is_backup_only_and_not_a_power_source() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "clock", "module": "adafruit-ds3231-stemma-qt"}]
+    spec["connections"] = [
+        {"from": "clock.Vin", "to": "mcu.3V3"},
+        {"from": "clock.GND", "to": "mcu.GND"},
+        {"from": "clock.SCL", "to": "mcu.IO22"},
+        {"from": "clock.SDA", "to": "mcu.IO21"},
+    ]
+    plan = build_device_plan(spec)
+    finding = next(f for f in plan["findings"] if f["rule"] == "coin_cell_backup")
+    assert finding["severity"] == "info"
+    assert "CR1220" in finding["message"] and "backup" in finding["message"].lower()
+    assert "power.source" not in finding["message"]
+    assert plan["power"] == {"source": "usb"}
+    assert "coin_cell_backup" not in _rules(build_device_plan(EXAMPLE))
+    assert "coin_cell_backup" not in _rules(build_device_plan(_oled_plus_bme()))
+
+
+def test_i2c_scan_lists_every_sourced_address_and_predicts_nothing() -> None:
+    plan = build_device_plan(_oled_plus_bme())
+    scan = next(s for s in plan["steps"] if s["kind"] == "test")
+    text = scan["instruction"]
+    for address in ("0x3C", "0x3D", "0x77", "0x76"):
+        assert address in text
+    assert "does not predict a scan result" in text
+
+
+def test_address_overlap_and_pullup_stack_fire_only_when_true(write_library) -> None:
+    clean = build_device_plan(_oled_plus_bme())
+    assert "i2c_address_overlap" not in _rules(clean)
+    assert "i2c_pullup_stack" not in _rules(clean)
+
+    write_library(lambda data: data["modules"][2]["i2c"].__setitem__("addresses", ["0x3C", "0x76"]))
+    overlapped = build_device_plan(_oled_plus_bme())
+    finding = next(f for f in overlapped["findings"] if f["rule"] == "i2c_address_overlap")
+    assert finding["severity"] in {"info", "warning"}
+    assert "0x3C" in finding["message"]
+
+    stacked_spec = copy.deepcopy(EXAMPLE)
+    stacked_spec["modules"].extend([
+        {"id": "light", "module": "adafruit-bh1750-stemma-qt"},
+        {"id": "clock", "module": "adafruit-ds3231-stemma-qt"},
+    ])
+    stacked_spec["connections"] = [
+        *GOOD,
+        {"from": "light.VIN", "to": "mcu.3V3"},
+        {"from": "light.GND", "to": "mcu.GND"},
+        {"from": "light.SCL", "to": "mcu.IO22"},
+        {"from": "light.SDA", "to": "mcu.IO21"},
+        {"from": "clock.Vin", "to": "mcu.3V3"},
+        {"from": "clock.GND", "to": "mcu.GND"},
+        {"from": "clock.SCL", "to": "mcu.IO22"},
+        {"from": "clock.SDA", "to": "mcu.IO21"},
+    ]
+    stacked = build_device_plan(stacked_spec)
+    stack = next(f for f in stacked["findings"] if f["rule"] == "i2c_pullup_stack")
+    assert stack["severity"] in {"info", "warning"}
+    assert "pull-up" in stack["message"].lower() or "pullup" in stack["message"].lower()
+    light_only = copy.deepcopy(EXAMPLE)
+    light_only["modules"].append({"id": "light", "module": "adafruit-bh1750-stemma-qt"})
+    light_only["connections"] = [
+        *GOOD,
+        {"from": "light.VIN", "to": "mcu.3V3"},
+        {"from": "light.GND", "to": "mcu.GND"},
+        {"from": "light.SCL", "to": "mcu.IO22"},
+        {"from": "light.SDA", "to": "mcu.IO21"},
+    ]
+    assert "i2c_pullup_stack" not in _rules(build_device_plan(light_only))
+
+
+def test_the_bme280_example_is_added_and_the_default_stays() -> None:
+    examples = example_specs()
+    assert "esp32_oled_usb" in examples and "esp32_oled_bme280_usb" in examples
+    assert examples["esp32_oled_usb"] == EXAMPLE
+    plan = build_device_plan(examples["esp32_oled_bme280_usb"])
+    assert {m["module"] for m in plan["modules"]} == {"esp32-devkitc-v4", "ssd1306-096-i2c", "adafruit-bme280-stemma-qt"}
+    assert plan["counts"]["errors"] == 0
+
+
+def test_a_breakout_grows_the_case_and_does_not_invent_a_lid_window() -> None:
+    oled = build_device_plan(EXAMPLE)
+    with_sensor = build_device_plan(_oled_plus_bme())
+    assert with_sensor["case"]["inner_mm"]["z"] > oled["case"]["inner_mm"]["z"] or with_sensor["case"]["inner_mm"]["x"] > oled["case"]["inner_mm"]["x"]
+    solo = copy.deepcopy(EXAMPLE)
+    solo["modules"] = [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "sensor", "module": "adafruit-bme280-stemma-qt"}]
+    solo["connections"] = [
+        {"from": "sensor.Vin", "to": "mcu.3V3"},
+        {"from": "sensor.GND", "to": "mcu.GND"},
+        {"from": "sensor.SCK", "to": "mcu.IO22"},
+        {"from": "sensor.SDI", "to": "mcu.IO21"},
+    ]
+    floor = build_device_plan(solo)
+    assert floor["case"]["window"] is None
+    sensor = next(m for m in floor["modules"] if m["id"] == "sensor")
+    assert sensor["base_y"] <= next(m for m in floor["modules"] if m["id"] == "mcu")["base_y"] + 0.01

@@ -40,6 +40,9 @@ def test_real_library_match_preserves_the_read_marking_and_relations():
     ("ESP32-WROOM-32E", "esp32-devkitc-v4", "exact"),
     ("ssd1306", "ssd1306-096-i2c", "exact"),
     ("SSD1306B", "ssd1306-096-i2c", "variant"),
+    ("BME280", "adafruit-bme280-stemma-qt", "exact"),
+    ("BH1750FVI", "adafruit-bh1750-stemma-qt", "exact"),
+    ("DS3231", "adafruit-ds3231-stemma-qt", "exact"),
 ])
 def test_chip_markings_match_only_a_part_listed_on_the_module(marking, module, tier):
     found = reclaim.match_reclaimed_parts({"parts": [row(marking, kind="connector")]})["parts"][0]
@@ -59,7 +62,7 @@ def test_chip_markings_match_only_a_part_listed_on_the_module(marking, module, t
     assert not any(word in note for word in ("identified", "verified", "compatible", "ready", "safe", "pass"))
 
 
-@pytest.mark.parametrize("marking", ["SSD1315", "NE555P", "SSD130"])
+@pytest.mark.parametrize("marking", ["SSD1315", "NE555P", "SSD130", "BH1750", "BME28", "DS323"])
 def test_other_chips_family_names_and_digit_prefixes_do_not_match(marking):
     found = reclaim.match_reclaimed_parts({"parts": [row(marking)]})["parts"][0]
     assert not found["matched"] and found["matches"] == []

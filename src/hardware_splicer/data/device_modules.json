@@ -775,14 +775,548 @@
         {
           "id": "gnd-vcc-scl-sda",
           "label": "DisplayModule (existing library order; source detail not rechecked)",
-          "signals": ["GND", "VCC", "SCL", "SDA"],
+          "signals": [
+            "GND",
+            "VCC",
+            "SCL",
+            "SDA"
+          ],
           "source": "https://www.displaymodule.com/products/0-96-inch-oled-graphic-display-128x64-with-spi-i2c"
         },
         {
           "id": "vcc-gnd-scl-sda",
           "label": "AZ-Delivery",
-          "signals": ["VCC", "GND", "SCL", "SDA"],
+          "signals": [
+            "VCC",
+            "GND",
+            "SCL",
+            "SDA"
+          ],
           "source": "https://www.az-delivery.de/en/products/0-96zolldisplay"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-bme280-stemma-qt",
+      "name": "Adafruit BME280 I2C/SPI breakout, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "BME280",
+          "role": "temperature, humidity and pressure sensor on the module",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the Bosch BME280 temperature, humidity and pressure sensor.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 25.2,
+        "y": 18.0,
+        "z": 4.6
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "Vin",
+          "name": "Vin",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "3Vo",
+          "name": "3Vo",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCK",
+          "name": "SCK",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDI",
+          "name": "SDI",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDO",
+          "name": "SDO",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "CS",
+          "name": "CS",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x77",
+          "0x76"
+        ],
+        "address_basis": "Adafruit pinouts: default 0x77, 0x76 if ADDR/SDO is tied to ground. Bosch datasheet: 7-bit address 111011x (0x76 or 0x77)."
+      },
+      "electrical": {
+        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level shifting that follows Vin. 5 V on Vin can put 5 V on the I2C pins. The Bosch chip supply (1.71 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "pullups_note": "Adafruit's fetched text does not say whether this board has I2C pull-ups. The Bosch chip requires a pull-up on SDI. Check this board and any other device on the bus. Unknown pull-ups stacked together are not a pass."
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 25.2mm x 18.0mm x 4.6mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit BME280 learn guide, pinouts",
+          "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Adafruit product 2652",
+          "url": "https://www.adafruit.com/product/2652",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Bosch BME280 datasheet BST-BME280-DS001-24",
+          "url": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
+          "as_of": "2026-10-11"
+        }
+      ],
+      "notes": [
+        "I2C pins on this board are labelled SCK and SDI, not SCL and SDA. Connect by the printed names.",
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case."
+      ],
+      "quotes": [
+        {
+          "claim": "Power pin name",
+          "quote": "Vin - this is the power pin.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "I2C clock pin is SCK",
+          "quote": "SCK - this is also the I2C clock pin, connect to your microcontrollers I2C clock line.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "I2C data pin is SDI",
+          "quote": "SDI - this is also the I2C data pin, connect to your microcontrollers I2C data line.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "On-board regulator",
+          "quote": "Since the sensor chip uses 3 VDC, we have included a voltage regulator on board that will take 3-5VDC and safely convert it down.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Level shifting follows Vin",
+          "quote": "All pins going into the breakout have level shifting circuitry to make them 3-5V logic level safe.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Default I2C address",
+          "quote": "By default, the I2C address is 0x77.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 25.2mm x 18.0mm x 4.6mm / 1.0\" x 0.7\" x 0.2\"",
+          "source": "https://www.adafruit.com/product/2652"
+        },
+        {
+          "claim": "Chip supply is not header VIN",
+          "quote": "VDD main supply voltage range: 1.71 V to 3.6 V",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        },
+        {
+          "claim": "Chip I2C address",
+          "quote": "The 7-bit device address is 111011x.",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        },
+        {
+          "claim": "Chip needs a pull-up on SDI",
+          "quote": "SDI is bi-directional with open drain to GND: it must be externally connected to VDDIO via a pull up resistor.",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-bh1750-stemma-qt",
+      "name": "Adafruit BH1750 ambient-light breakout, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "BH1750FVI",
+          "role": "ambient light sensor on the module",
+          "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the Rohm BH1750 ambient-light sensor.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 25.3,
+        "y": 17.7,
+        "z": 4.5
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "VIN",
+          "name": "VIN",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "3Vo",
+          "name": "3Vo",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x23",
+          "0x5C"
+        ],
+        "address_basis": "Adafruit pinouts: 0x23, or 0x5C if ADDR is pulled high. Rohm datasheet: two slave addresses set by ADDR."
+      },
+      "electrical": {
+        "supply_note": "Check this board's supply. Adafruit describes a regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on VIN can put 5 V on SDA and SCL. The Rohm chip supply (2.4 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "pullups_note": "Adafruit states a 10 kΩ pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 25.3mm x 17.7mm x 4.5mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit BH1750 learn guide, pinouts",
+          "url": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Adafruit product 4681",
+          "url": "https://www.adafruit.com/product/4681",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Rohm BH1750FVI datasheet, copy from the Internet Archive",
+          "url": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf",
+          "as_of": "2026-10-11"
+        }
+      ],
+      "notes": [
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case.",
+        "This plan does not cut a lid window for the light sensor."
+      ],
+      "quotes": [
+        {
+          "claim": "Power pin name",
+          "quote": "VIN - this is the power pin.",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        },
+        {
+          "claim": "On-board regulator",
+          "quote": "Since the sensor chip uses 3 VDC, we have included a voltage regulator on board that will take 3-5VDC and safely convert it down.",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        },
+        {
+          "claim": "Level-shifted I2C with 10K pull-up",
+          "quote": "This pin is level shifted so you can use 3-5V logic, and there's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        },
+        {
+          "claim": "I2C addresses",
+          "quote": "Pulling this pin high or bridging the solder jumper on the back will change the I2C address from 0x23 to 0x5C",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 25.3mm x 17.7mm x 4.5mm / 1.0\" x 0.7\" x 0.2\"",
+          "source": "https://www.adafruit.com/product/4681"
+        },
+        {
+          "claim": "Chip I2C addresses",
+          "quote": "Slave Address is 2 types, it is determined by ADDR Terminal",
+          "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
+        },
+        {
+          "claim": "Chip supply is not header VIN",
+          "quote": "VCC Voltage                              Vcc          2.4          3.0         3.6         V",
+          "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-ds3231-stemma-qt",
+      "name": "Adafruit DS3231 Precision RTC, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "DS3231",
+          "role": "real-time clock on the module",
+          "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the Maxim DS3231 real-time clock, with a coin-cell backup holder.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 25.4,
+        "y": 17.8,
+        "z": 7.8
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "Vin",
+          "name": "Vin",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "BAT",
+          "name": "BAT",
+          "roles": [
+            "backup_battery"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "32K",
+          "name": "32K",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SQW",
+          "name": "SQW",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "RST",
+          "name": "RST",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x68"
+        ],
+        "address_basis": "Adafruit Arduino usage: default 0x68 and cannot be changed. Maxim datasheet: 7-bit address 1101000."
+      },
+      "electrical": {
+        "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for ESP32 I2C pins. Adafruit states 10 kΩ pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
+        "pullups_note": "Adafruit states a 10 kΩ pull-up to Vin on SCL and on SDA. If Vin is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "onboard_pullups": true,
+        "backup_note": "A coin cell is required only for battery-backup. Adafruit says to use any CR1220 you have handy. That cell is backup only; it is not a power source for this plan and does not change the USB supply."
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 25.4mm x 17.8mm x 7.8mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit DS3231 learn guide, pinouts",
+          "url": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/pinouts",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Adafruit DS3231 Arduino usage",
+          "url": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/arduino-usage",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Adafruit product 5188",
+          "url": "https://www.adafruit.com/product/5188",
+          "as_of": "2026-10-11"
+        },
+        {
+          "label": "Maxim DS3231 datasheet, copy from the Internet Archive",
+          "url": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf",
+          "as_of": "2026-10-11"
+        }
+      ],
+      "notes": [
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "The coin cell is backup only. It is not a power source for this plan.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case."
+      ],
+      "quotes": [
+        {
+          "claim": "Power pin name",
+          "quote": "Vin - this is the power pin.",
+          "source": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/pinouts"
+        },
+        {
+          "claim": "No regulator required on this board",
+          "quote": "Since the RTC can be powered from 2.3V to 5.5V power, you do not need a regulator or level shifter for 3.3V or 5V logic/power.",
+          "source": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/pinouts"
+        },
+        {
+          "claim": "Pull-ups to Vin",
+          "quote": "This pin has a 10K pullup resistor to Vin",
+          "source": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/pinouts"
+        },
+        {
+          "claim": "I2C address cannot be changed",
+          "quote": "The DS3231 has a default I2C address of 0x68 and cannot be changed",
+          "source": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/arduino-usage"
+        },
+        {
+          "claim": "Coin cell is for backup",
+          "quote": "A coin cell is required to use the battery-backup capabilities!",
+          "source": "https://www.adafruit.com/product/5188"
+        },
+        {
+          "claim": "CR1220 coin cell",
+          "quote": "use any CR1220 you have handy.",
+          "source": "https://www.adafruit.com/product/5188"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 25.4mm x 17.8mm x 7.8mm / 1.0\" x 0.7\" x 0.3\"",
+          "source": "https://www.adafruit.com/product/5188"
+        },
+        {
+          "claim": "Chip I2C address",
+          "quote": "which is 1101000, followed by the direction bit (R/W)",
+          "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
+        },
+        {
+          "claim": "Chip supply is not a header VIN permit",
+          "quote": "VCC = 2.3V to 5.5V",
+          "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
         }
       ]
     }
