@@ -217,3 +217,26 @@ error and warning text. It also reports whether the example spec, authority
 sentence and complete default plan match the selected revision. Default-plan
 equality is reported separately from wiring-check parity; differences may include
 notes, sources or instructions added before this module extension.
+
+## Headless frontend verification
+
+```sh
+bash scripts/verify_device_frontend.sh mock device-assembly donor-lookup donor-device-handoff donor-capture evidence-
+bash scripts/verify_device_frontend.sh real device-assembly donor-device-handoff
+```
+
+The harness needs the repo Python environment, installed frontend dependencies
+and pinned Playwright in `/tmp/hs-playwright` (override with
+`HS_PLAYWRIGHT_ROOT`). It builds a source copy without `.env` files in a fresh
+ignored directory and uses isolated project/output roots. Default test ports
+are 3102/8102; `HS_FRONTEND_TEST_PORT` and `HS_BACKEND_TEST_PORT` can change them.
+Occupied ports are refused, not reclaimed. Cleanup stops only the two processes
+started by the harness and leaves build logs, JSON results and screenshots in
+the reported directory. It does not rebuild the live `.next` directory.
+
+`mock` uses the existing studio fixture, which delegates device plans and reclaim
+matching to their real implementations. `real` mounts the actual product API;
+it does not seed an outsider project. The browser tests cover the original OLED
+flow, each of the three breakouts, independent multi-module motion, renamed IDs,
+wire attachment, conservative warning behavior, phone layout and advisory chip
+handoffs. Passing them supplies no physical evidence or release authority.
