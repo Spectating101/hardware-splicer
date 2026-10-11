@@ -832,7 +832,7 @@
         {
           "id": "3Vo",
           "name": "3Vo",
-          "roles": [],
+          "roles": ["power_3v3"],
           "x": 12.6,
           "y": 1.5,
           "side": "top"
@@ -931,6 +931,11 @@
           "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
         },
         {
+          "claim": "3Vo is a regulator output",
+          "quote": "3Vo - this is the 3.3V output from the voltage regulator",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
           "claim": "I2C clock pin is SCK",
           "quote": "SCK - this is also the I2C clock pin, connect to your microcontrollers I2C clock line.",
           "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
@@ -951,8 +956,18 @@
           "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
         },
         {
+          "claim": "Logic level follows Vin",
+          "quote": "Use whatever logic level is on Vin!",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
           "claim": "Default I2C address",
           "quote": "By default, the I2C address is 0x77.",
+          "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Alternate I2C address",
+          "quote": "the address will change to 0x76",
           "source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
         },
         {
@@ -1013,7 +1028,7 @@
         {
           "id": "3Vo",
           "name": "3Vo",
-          "roles": [],
+          "roles": ["power_3v3"],
           "x": 12.6,
           "y": 1.5,
           "side": "top"
@@ -1094,6 +1109,11 @@
         {
           "claim": "Power pin name",
           "quote": "VIN - this is the power pin.",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        },
+        {
+          "claim": "3Vo is a regulator output",
+          "quote": "3Vo - this is the 3.3V output from the voltage regulator",
           "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
         },
         {

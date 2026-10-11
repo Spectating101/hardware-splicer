@@ -88,8 +88,11 @@ ESP32-WROOM-32E radio module, the SSD1306 display controller, and the BME280, BH
 three I2C breakouts, each using an already-cited datasheet; no chip pin or electrical contract is added.
 Optional `quotes` lists hold sourced fragments: each item has exactly `claim`, `quote` and `source`, the source must
 equal a URL already in that module's `sources`, and the quote is a verbatim excerpt.
+The loader checks the quote's shape and source membership. The separate
+`scripts/verify_device_module_quotes.py --source-dir <capture-directory>` check
+compares each fragment with its exact cited capture and reports capture hashes.
 
-| Module | Taken from | Typical, so measure |
+| Module | Taken from | Typical or unpublished, so check |
 |--------|-----------|---------------------|
 | ESP32-DevKitC V4 | Espressif's dimensions drawing (27.94 × 48.26 mm, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang), the user guide pin tables (J2, J3), the WROOM-32E datasheet (module 18.0 × 25.5 × 3.1 mm, 3.0 to 3.6 V supply, GPIO6 to 11 on the flash, strapping pins, VIH max VDD + 0.3 V), the arduino-esp32 pin file (SDA 21, SCL 22) | PCB thickness, header length below the board, USB socket height |
 | 0.96 inch SSD1306 I2C OLED | the SSD1306 datasheet (I2C address 0x3C or 0x3D), seller listings (active area 21.74 × 10.86 mm) | board size, glass position, pin order (follow the printed labels) |
@@ -125,15 +128,27 @@ custom-pin routing note. Other strapping pins and USB serial pins have warnings;
 defaults have warnings; other output-capable custom I2C pins have a note. GPIO0 also has an auto-program circuit note
 from the ESP-IDF ADC documentation's list of dev kits.
 
-A module VIN or VCC on 5V keeps a warning that uses that module's own supply and pull-up notes, plus the WROOM VIH
+A breakout VIN on 5V keeps a warning that uses that module's own supply and pull-up notes, plus the WROOM VIH
 limit (VDD + 0.3 V). Check the actual module's regulator and pull-up supply. 5 V on DS3231 Vin is especially a
 pull-up-to-Vin warning, not a missing-regulator warning. That finding is not a permit to build or power the gadget.
+The existing OLED 5 V warning, information findings and single-display scan step keep their established text.
 Any warning or error replaces the USB action with a review step:
 "Do not plug in until you have checked the warnings above and resolved the errors."
 
 Overlapping I2C address sets are a warning. Two or more modules that state onboard pull-ups get an information note
 about stacked resistors. The DS3231 coin cell is backup only and is not a power source; wiring BAT to 3V3 or 5V is
 an error.
+The BME280 and BH1750 `3Vo` pins are regulator outputs, so supply-to-signal,
+ground shorts and parallel supply-output connections are also checked there.
+The BAT restriction is the planner's conservative wiring policy with an optional
+coin cell, rather than a claim that the datasheet forbids every external backup supply.
+Other BAT wiring and optional breakout pins with no supported electrical role are
+reported as unsupported connections; listing a pin name supplies no wiring check.
+
+Matching I2C data or clock pins may share a bus, directly at the MCU or through
+another module. In a plan with breakouts, the whole connected signal path must
+reach one MCU pin; disconnected buses, multiple MCU pins on one signal and
+indirect SDA/SCL bridges are errors. These checks supply no scan result.
 
 The reset pin and the flash pins are wrong whatever they are wired to, from either end, and a wire the checks reject does not
 count toward a module's required pins. Wires are also checked as nets: a module's ground pins are one net, so are its 3V3 pins
@@ -186,3 +201,12 @@ The information note reports the actual antenna-to-inside-wall gap from the exis
 One kit-fit note names the typical housing, bend, USB overmold, PCB and under-board header sizes and asks you to
 check your actual kit; female-to-female jumpers require male pins at both ends. Display seating puts force on board
 edges and never the glass, explicitly labelled general practice, not from the datasheet. These notes approve nothing.
+
+## Compatibility check
+
+`PYTHONPATH=src .venv/bin/python scripts/audit_device_plan_compatibility.py --baseline bfeb992b`
+compares every MCU/OLED pin pair in both directions (304 cases), including exact
+error and warning text. It also reports whether the example spec, authority
+sentence and complete default plan match the selected revision. Default-plan
+equality is reported separately from wiring-check parity; differences may include
+notes, sources or instructions added before this module extension.

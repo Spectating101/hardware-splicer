@@ -71,7 +71,7 @@ def test_the_pin_positions_match_espressifs_drawing() -> None:
     assert by_id["J2-1"]["name"] == "3V3" and by_id["J2-19"]["name"] == "5V"
 
 
-def test_only_the_two_sourced_chip_roles_are_published() -> None:
+def test_only_the_sourced_chip_roles_are_published() -> None:
     library = module_library()
     assert [(m["id"], c["marking"], c["role"]) for m in library["modules"] for c in m["chips"]] == [
         ("esp32-devkitc-v4", "ESP32-WROOM-32E", "Wi-Fi/Bluetooth module on the board"),
@@ -604,9 +604,7 @@ def test_five_volt_oled_warning_covers_logic_and_pullups_and_gates_usb(reverse):
     plan = build_device_plan(_with(connections))
     finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system")
     assert finding["severity"] == "warning"
-    oled = module_library()["modules"][1]
-    assert oled["electrical"]["supply_note"] in finding["message"]
-    assert "VDD + 0.3" in finding["message"] or "VDD + 0.3" in finding["basis"]
+    assert all(text in finding["message"] for text in ("1.65", "3.3 V", "regulator", "damage", "SDA", "SCL"))
     assert not any(s["kind"] == "power" for s in plan["steps"])
     assert any("Do not plug in until you have checked the warnings above" in s["instruction"] for s in plan["steps"])
 
@@ -1062,3 +1060,153 @@ def test_a_breakout_grows_the_case_and_does_not_invent_a_lid_window() -> None:
     assert floor["case"]["window"] is None
     sensor = next(m for m in floor["modules"] if m["id"] == "sensor")
     assert sensor["base_y"] <= next(m for m in floor["modules"] if m["id"] == "mcu")["base_y"] + 0.01
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_shared_i2c_can_run_through_the_display_header(reverse):
+    spec = _oled_plus_bme()
+    for wire in spec["connections"]:
+        if wire["from"] == "sensor.SDI":
+            wire["to"] = "display.SDA"
+        elif wire["from"] == "sensor.SCK":
+            wire["to"] = "display.SCL"
+    if reverse:
+        spec["connections"] = [{"from": w["to"], "to": w["from"]} for w in spec["connections"]]
+    plan = build_device_plan(spec)
+    assert not _rules(plan, "error")
+    assert plan["authority"] == build_device_plan(EXAMPLE)["authority"]
+
+
+@pytest.mark.parametrize("fault", ["no_controller", "two_controllers", "data_to_clock"])
+def test_shared_i2c_reports_invalid_connected_signal_paths(fault):
+    spec = _oled_plus_bme()
+    if fault == "no_controller":
+        spec["connections"] = [w for w in spec["connections"] if w["from"] not in {"display.SDA", "sensor.SDI"}]
+        spec["connections"].append({"from": "sensor.SDI", "to": "display.SDA"})
+    elif fault == "two_controllers":
+        spec["connections"][7]["to"] = "mcu.IO23"
+        spec["connections"].append({"from": "sensor.SDI", "to": "display.SDA"})
+    else:
+        # Per-wire checks accept each GPIO connection, but both signal kinds
+        # then share IO21 through three wires.
+        spec["connections"][6]["to"] = "mcu.IO21"
+    plan = build_device_plan(spec)
+    assert ("i2c_signals_joined" if fault == "data_to_clock" else "i2c_controller_connection") in _rules(plan, "error")
+    assert not any(step["kind"] == "power" for step in plan["steps"])
+
+
+@pytest.mark.parametrize("module_id", BREAKOUT_IDS[:2])
+@pytest.mark.parametrize("target,rule", [("mcu.IO21", "power_to_signal"), ("mcu.GND", "ground_to_other"), ("mcu.3V3", "supplies_joined")])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_breakout_regulator_output_is_checked_as_a_supply(module_id, target, rule, reverse):
+    spec = _oled_plus_bme()
+    spec["modules"][2]["module"] = module_id
+    spec["connections"] = copy.deepcopy(GOOD)
+    connection = {"from": "sensor.3Vo", "to": target}
+    if reverse:
+        connection = {"from": target, "to": "sensor.3Vo"}
+    spec["connections"].append(connection)
+    plan = build_device_plan(spec)
+    assert rule in _rules(plan, "error")
+    assert not any(step["kind"] == "power" for step in plan["steps"])
+
+
+@pytest.mark.parametrize("target", ["mcu.3V3", "mcu.5V", "sensor.3Vo"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_backup_cannot_join_any_board_supply(target, reverse):
+    spec = _oled_plus_bme()
+    spec["modules"].append({"id": "clock", "module": BREAKOUT_IDS[2]})
+    connection = {"from": "clock.BAT", "to": target}
+    if reverse:
+        connection = {"from": target, "to": "clock.BAT"}
+    spec["connections"].append(connection)
+    plan = build_device_plan(spec)
+    assert "backup_to_supply" in _rules(plan, "error")
+
+
+@pytest.mark.parametrize("module_id,power_pin", [(BREAKOUT_IDS[0], "Vin"), (BREAKOUT_IDS[1], "VIN"), (BREAKOUT_IDS[2], "Vin")])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_each_breakout_five_volt_warning_cites_its_own_sources(module_id, power_pin, reverse):
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [spec["modules"][0], {"id": "sensor", "module": module_id}]
+    wire = {"from": f"sensor.{power_pin}", "to": "mcu.5V"}
+    if reverse:
+        wire = {"from": wire["to"], "to": wire["from"]}
+    spec["connections"] = [wire]
+    plan = build_device_plan(spec)
+    finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system")
+    entry = _module_by_id(module_id)
+    assert entry["electrical"]["supply_note"] in finding["message"]
+    assert all(source["url"] in finding["basis"] for source in entry["sources"])
+    assert "SSD1306" not in finding["message"] + finding["basis"]
+
+
+def test_breakout_component_height_override_increases_case_height():
+    spec = _oled_plus_bme()
+    original = build_device_plan(spec)
+    spec["modules"][2]["overrides"] = {"above_board_mm": 80}
+    plan = build_device_plan(spec)
+    sensor = next(module for module in plan["modules"] if module["id"] == "sensor")
+    assert plan["case"]["lid_underside_y"] >= sensor["base_y"] + sensor["pcb_mm"]["z"] + 80
+    assert plan["case"]["outer_mm"]["y"] > original["case"]["outer_mm"]["y"]
+
+
+@pytest.mark.parametrize("pin", ["32K", "SQW", "RST", "BAT"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_unmodelled_rtc_pins_cannot_silently_pass_a_wiring_check(pin, reverse):
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [spec["modules"][0], {"id": "clock", "module": BREAKOUT_IDS[2]}]
+    wire = {"from": f"clock.{pin}", "to": "mcu.IO23"}
+    if reverse:
+        wire = {"from": wire["to"], "to": wire["from"]}
+    spec["connections"] = [
+        {"from": "clock.Vin", "to": "mcu.3V3"},
+        {"from": "clock.GND", "to": "mcu.GND"},
+        {"from": "clock.SCL", "to": "mcu.IO22"},
+        {"from": "clock.SDA", "to": "mcu.IO21"},
+        wire,
+    ]
+    plan = build_device_plan(spec)
+    expected = "backup_connection_not_supported" if pin == "BAT" else "unsupported_breakout_pin"
+    assert expected in _rules(plan, "error")
+    assert not any(step["kind"] == "power" for step in plan["steps"])
+
+
+def test_maximum_module_count_supports_shared_bus_without_overlapping_floor_parts():
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [spec["modules"][0]]
+    spec["connections"] = []
+    for index in range(7):
+        ref = f"sensor{index}"
+        spec["modules"].append({"id": ref, "module": BREAKOUT_IDS[0]})
+        spec["connections"].extend([
+            {"from": f"{ref}.Vin", "to": "mcu.3V3"},
+            {"from": f"{ref}.GND", "to": "mcu.GND"},
+            {"from": f"{ref}.SDI", "to": "mcu.IO21"},
+            {"from": f"{ref}.SCK", "to": "mcu.IO22"},
+        ])
+    plan = build_device_plan(spec)
+    assert plan["counts"]["modules"] == 8
+    assert not _rules(plan, "error")
+    assert "i2c_address_overlap" in _rules(plan, "warning")
+    sensors = [module for module in plan["modules"] if module["kind"] == "i2c_breakout"]
+    for left, right in zip(sensors, sensors[1:]):
+        assert left["box"]["z1"] < right["box"]["z0"]
+    spec["modules"].append({"id": "overflow", "module": BREAKOUT_IDS[0]})
+    with pytest.raises(DevicePlanError, match="1 to 8"):
+        build_device_plan(spec)
+
+
+def test_sensor_example_http_contract_is_stateless(api, tmp_path):
+    before = sorted(str(path) for path in tmp_path.rglob("*"))
+    response = api.get("/v1/devices/examples/esp32_oled_bme280_usb/plan")
+    assert response.status_code == 200
+    served = response.json()
+    posted = api.post("/v1/devices/plan", json=served["spec"])
+    assert posted.status_code == 200
+    assert posted.json()["plan"] == served["plan"]
+    assert served["plan"]["counts"]["modules"] == 3
+    sensor = next(module for module in served["plan"]["modules"] if module["id"] == "sensor")
+    assert sensor["kind"] == "i2c_breakout" and sensor["pin_order"] is None
+    assert {pin["name"] for pin in sensor["pins"]} >= {"Vin", "GND", "SCK", "SDI"}
+    assert sorted(str(path) for path in tmp_path.rglob("*")) == before

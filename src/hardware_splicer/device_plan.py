@@ -413,7 +413,9 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     # Some pins are wrong to wire to anything at all, whichever end they are on.
     for pin, owner in ((pa, ma), (pb, mb)):
         pin_roles = set(pin["roles"])
-        if "do_not_use" in pin_roles:
+        if owner.entry["kind"] == "i2c_breakout" and not pin_roles:
+            out.append(_finding("error", "unsupported_breakout_pin", f"{name} uses {owner.ref}.{pin['name']}. This pin is listed by name, but this I2C plan has no wiring checks for it. Leave it disconnected here.", "; ".join(source["url"] for source in owner.entry["sources"]) + "; this planner supports the I2C power, ground, data and clock connections", wire_id))
+        elif "do_not_use" in pin_roles:
             out.append(_finding("error", "flash_pin", f"{name} uses {owner.ref}.{pin['name']}, which belongs to the module's flash memory. Anything connected there can stop the board from running.", datasheet, wire_id))
         elif "reset" in pin_roles:
             out.append(_finding("error", "reset_pin", f"{name} uses the reset pin ({owner.ref}.{pin['name']}). Holding it low stops the board; nothing belongs on it here.", datasheet, wire_id))
@@ -424,7 +426,12 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     powers = {"power_3v3", "power_5v", "power_in"}
     sources = {"power_3v3", "power_5v"}
     if (has(ra, "backup_battery") and has(rb, "power_3v3", "power_5v")) or (has(rb, "backup_battery") and has(ra, "power_3v3", "power_5v")):
-        out.append(_finding("error", "backup_to_supply", f"{name} ties the backup-battery pin to a board supply. The coin cell is backup only; do not join BAT to 3V3 or 5V.", "module library: backup-battery pin; coin cell is backup only", wire_id))
+        backup_owner = ma if has(ra, "backup_battery") else mb
+        basis = "; ".join(source["url"] for source in backup_owner.entry["sources"])
+        out.append(_finding("error", "backup_to_supply", f"{name} ties the backup-battery pin to a board supply. The coin cell is backup only; do not join BAT to 3V3 or 5V.", basis + "; planner restriction: keep the coin-cell connection separate from board supplies", wire_id))
+        return out
+    if has(ra | rb, "backup_battery"):
+        out.append(_finding("error", "backup_connection_not_supported", f"{name} uses the backup-battery pin. This plan does not describe a separate backup supply or validate this connection. Leave BAT disconnected here.", "planner supports USB power and an optional separate coin cell, without BAT wiring", wire_id))
         return out
     if has(ra, *sources) and has(rb, *sources):
         out.append(_finding("error", "supplies_joined", f"{name} joins two supply pins together.", "pin roles from the module library", wire_id))
@@ -447,6 +454,11 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
             # WROOM-32E Table 15: "VIH | High-level input voltage | 0.75 × VDD | — | VDD + 0.3 | V".
             message = f"{name} runs a module from 5 V. {note} The ESP32-WROOM-32E datasheet lists VIH max as VDD + 0.3 V."
             basis = f"{sources}; ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V" if sources else "ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V"
+            if user_module.entry["id"] == "ssd1306-096-i2c":
+                # Preserve the established OLED warning while new boards use
+                # their own supply and pull-up evidence.
+                message = f"{name} runs a module from 5 V. The SSD1306's own logic supply is 1.65 V to 3.3 V; 5 V can damage a module without a regulator. Pull-ups to VCC would also put 5 V on ESP32 SDA and SCL. Check the module's regulator and pull-up supply before connecting power."
+                basis = "SSD1306 datasheet: VDD = 1.65V to 3.3V for IC logic; ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V"
             out.append(_finding("warning", "five_volts_to_a_3v3_system", " ".join(message.split()), basis, wire_id))
         return out
     if has(ra | rb, *powers) and has(ra | rb, "gpio", "i2c_sda", "i2c_scl", "gpio_input_only"):
@@ -458,6 +470,8 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     if (sda_a and scl_b) or (scl_a and sda_b):
         out.append(_finding("error", "sda_to_scl", f"{name} joins SDA to SCL.", "I2C signals", wire_id))
         return out
+    if (sda_a and sda_b) or (scl_a and scl_b):
+        return out  # Matching signals may share a bus; its controller is checked below.
     mcu_pin = pb if (sda_a or scl_a) else pa if (sda_b or scl_b) else None
     if mcu_pin is not None:
         mroles = set(mcu_pin["roles"])
@@ -537,7 +551,47 @@ def _net_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Plac
             out.append(_finding("error", "nets_bridged", f"These wires together join the 3.3 V and 5 V supplies ({', '.join(names)}).", "pin roles from the module library", wires[0]))
         elif kinds & {"power_3v3", "power_5v"} and "ground" in kinds:
             out.append(_finding("error", "nets_bridged", f"These wires together join a supply to ground ({', '.join(names)}).", "pin roles from the module library", wires[0]))
+        if "backup_battery" in kinds and kinds & {"power_3v3", "power_5v", "power_in"}:
+            out.append(_finding("error", "backup_to_supply", "These wires together join the backup-battery pin to a board supply. Do not join BAT to a supply while a coin cell is fitted.", "module library: backup-battery and power pin roles", wires[0]))
     return out
+
+
+def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]]) -> list[dict[str, Any]]:
+    """Check shared signal paths introduced by multiple breakout modules."""
+
+    if not any(module.entry["kind"] == "i2c_breakout" for module in placed.values()):
+        return []
+    adjacency: dict[tuple[str, str], set[tuple[str, str]]] = {}
+    pins: dict[tuple[str, str], tuple[_Placed, dict[str, Any]]] = {}
+    for _wire, a, b in pairs:
+        ka, kb = (a[0].ref, a[1]["id"]), (b[0].ref, b[1]["id"])
+        adjacency.setdefault(ka, set()).add(kb)
+        adjacency.setdefault(kb, set()).add(ka)
+        pins[ka], pins[kb] = a, b
+    seen: set[tuple[str, str]] = set()
+    findings = []
+    for first in sorted(adjacency):
+        if first in seen:
+            continue
+        members, pending = set(), [first]
+        while pending:
+            node = pending.pop()
+            if node in members:
+                continue
+            members.add(node)
+            pending.extend(adjacency[node] - members)
+        seen.update(members)
+        roles = {role for node in members for role in pins[node][1]["roles"]}
+        if not roles & {"i2c_sda", "i2c_scl"}:
+            continue
+        names = ", ".join(sorted(f"{pins[node][0].ref}.{pins[node][1]['name']}" for node in members))
+        controllers = [node for node in members if pins[node][0].entry["kind"] == "mcu_board" and "gpio" in pins[node][1]["roles"]]
+        if {"i2c_sda", "i2c_scl"} <= roles:
+            findings.append(_finding("error", "i2c_signals_joined", f"These wires together join SDA to SCL ({names}).", "I2C signal roles from the module library"))
+        elif len(controllers) != 1:
+            message = "has no connected microcontroller pin" if not controllers else "joins more than one microcontroller pin"
+            findings.append(_finding("error", "i2c_controller_connection", f"This I2C signal {message} ({names}).", "each I2C signal needs one selected microcontroller pin in this plan"))
+    return findings
 
 
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
@@ -600,7 +654,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         extent_z = max(extent_z, breakout.origin[1] + breakout.pcb["y"])
         cursor_z = breakout.origin[1] + breakout.pcb["y"] + c
         housing_top = breakout.base_y + breakout.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
-        lid_underside = max(lid_underside, housing_top + c)
+        component_top = breakout.base_y + breakout.pcb["z"] + breakout.above
+        lid_underside = max(lid_underside, housing_top + c, component_top + c)
     inner_x = extent_x + c
     inner_z = extent_z + c
     inner_height = lid_underside - wall
@@ -664,12 +719,19 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         if len(names) <= 1:
             continue
         other_roles = [roles for _name, roles in others]
-        if all("i2c_sda" in roles for roles in other_roles) or all("i2c_scl" in roles for roles in other_roles):
+        owner = next(pin for pin in placed[ref].entry["pins"] if pin["id"] == pin_id)
+        owner_roles = set(owner["roles"])
+        if any(
+            signal in owner_roles and all(signal in roles or "gpio" in roles for roles in other_roles)
+            or "gpio" in owner_roles and all(signal in roles for roles in other_roles)
+            for signal in ("i2c_sda", "i2c_scl")
+        ):
             continue
         findings.append(_finding("error", "pin_used_twice", f"{ref}.{pin_id} is wired to more than one thing: {', '.join(sorted(names))}.", "a signal pin carries one signal"))
 
     rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
     findings.extend(_net_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
+    findings.extend(_i2c_bus_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
     # Everything a module needs to work is wired, by a wire that the checks did not reject.
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
@@ -706,6 +768,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             findings.append(_finding("info", "pin_order_assumed" if module.pin_order_assumed else "pin_order_drawn", message, f"{order['label']}: {order['source']}"))
         electrical = module.entry.get("electrical", {})
         source_basis = "; ".join(source["url"] for source in module.entry.get("sources", [])) or "module library"
+        if module.entry["id"] == "ssd1306-096-i2c":
+            source_basis = "SSD1306 datasheet (logic supply and I2C pull-ups); cited module seller listings"
         supply_rule = "oled_supply_note" if module.entry["kind"] == "display" else "module_supply_note"
         for key, rule in (("supply_note", supply_rule), ("pullups_note", "i2c_pullups_note")):
             if electrical.get(key):
@@ -881,7 +945,9 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
     else:
         add("power", "USB power and supply check", "Review the supply and pull-up notes first. Use one and only one DevKitC supply: do not add an external supply on 5V or 3V3 while using USB. Connect the Micro-USB data cable only after those checks. Record the supply reading; this plan gives no result. If anything gets hot or smells, unplug it.", checks=checks, parts=[mcu.ref])
     i2c_modules = [module for module in placed.values() if module.entry.get("i2c", {}).get("addresses")]
-    if i2c_modules:
+    if len(i2c_modules) == 1 and display and i2c_modules[0] is display:
+        add("test", "Record an I2C scan after the wiring and power review", "After resolving the wiring and power questions, use an I2C scanner sketch that names your chosen pins. Record what it finds. The SSD1306 datasheet lists 0x3C and 0x3D as possible addresses; this plan does not predict a scan result.", parts=[display.ref], checks=[{"kind": "suggested_check", "check": "i2c_scan", "from": "I2C scanner", "to": f"{display.ref}", "net": None, "expect": "record what you observe; this plan supplies no reading"}])
+    elif i2c_modules:
         listed = "; ".join(
             f"{module.entry['name']} lists {', '.join(module.entry['i2c']['addresses'])}"
             for module in sorted(i2c_modules, key=lambda m: m.ref)
