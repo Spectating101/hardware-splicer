@@ -1,0 +1,112 @@
+// Thin Arduino adapter. No application behaviour lives here.
+#include <Adafruit_SSD1306.h>
+#include <Arduino.h>
+#include <Wire.h>
+#include "app_core.h"
+
+constexpr int SDA_PIN = {{SDA}};
+constexpr int SCL_PIN = {{SCL}};
+
+static const uint8_t kSensorAddrs[] = { {{SENSOR_ADDRS}} };
+{{DISPLAY_DECL}}
+
+// Direct driver written from the Rohm BH1750FVI datasheet, 2009.04 Rev.B. The claws/BH1750 library is not used:
+// it prints "[BH1750] ERROR" lines to Serial on failure, and the documented serial grammar allows no such lines.
+// The datasheet defines no ID register, so a successful begin() means only that the chip acknowledged the command.
+class Bh1750 {
+public:
+    // p.5 instruction set: 0001_0000 starts continuous H-resolution measurement.
+    // p.4: the initial state is power down and the Power On command may be omitted before a measurement command.
+    bool begin(uint8_t addr, TwoWire* wire) {
+        wire_ = wire;
+        addr_ = addr;
+        configured_ = false;
+        wire_->beginTransmission(addr_);
+        wire_->write(kContinuousHighRes);
+        if (wire_->endTransmission() != 0) return false;
+        started_ms_ = millis();
+        configured_ = true;
+        return true;
+    }
+
+    bool read_lux(float& lux) {
+        if (!configured_) return false;
+        // p.2: H-resolution measurement takes 120 ms typical, 180 ms maximum. p.4: before the first result the
+        // data register holds its reset value 0, which would read as a valid dark reading, so wait it out.
+        const uint32_t waited = uint32_t(millis() - started_ms_);
+        if (waited < kMaxMeasurementMs) delay(kMaxMeasurementMs - waited);
+        if (wire_->requestFrom(int(addr_), 2) != 2) return false;
+        const uint16_t high = uint16_t(wire_->read());
+        const uint16_t low = uint16_t(wire_->read());
+        // p.7: the 16-bit result, high byte first, divided by 1.2 gives lx.
+        lux = float((high << 8) | low) / 1.2f;
+        return true;
+    }
+
+private:
+    static constexpr uint8_t kContinuousHighRes = 0x10;
+    static constexpr uint32_t kMaxMeasurementMs = 180;
+    TwoWire* wire_ = nullptr;
+    uint8_t addr_ = 0;
+    uint32_t started_ms_ = 0;
+    bool configured_ = false;
+};
+
+class ArduinoHal final : public Hal {
+public:
+    uint32_t now_ms() override { return millis(); }
+
+    bool sensor_begin(uint8_t addr) override { return bh_.begin(addr, &Wire); }
+
+    bool sensor_read(Reading& out) override { return bh_.read_lux(out.lux); }
+
+    bool display_begin(uint8_t addr) override {
+        // 128x64 is the catalog 0.96" SSD1306 listing, not a measurement of a particular module.
+        // Adafruit_SSD1306.cpp, tag 2.5.17: "return true; // Success"
+        // begin() does not detect the display; its only return false is a failed buffer allocation.
+        Wire.beginTransmission(addr);
+        if (Wire.endTransmission() != 0) return false;
+        // reset=true, periphBegin=false so the library does not call Wire.begin() again.
+        return display_.begin(SSD1306_SWITCHCAPVCC, addr, true, false);
+    }
+
+    void display_show(const char* l1, const char* l2, const char* l3, const char* l4) override {
+        display_.clearDisplay();
+        display_.setTextSize(1);
+        display_.setTextColor(SSD1306_WHITE);
+        display_.setCursor(0, 0);
+        display_.println(l1);
+        display_.println(l2);
+        display_.println(l3);
+        display_.println(l4);
+        display_.display();
+    }
+
+    void log(const char* line) override { Serial.println(line); }
+
+    bool bus_recover() override {
+        Wire.end();
+        Wire.setTimeOut(50);
+        return Wire.begin(SDA_PIN, SCL_PIN, 100000);
+    }
+
+private:
+    Bh1750 bh_;
+    Adafruit_SSD1306 display_{128, 64, &Wire, -1};
+};
+
+static ArduinoHal g_hal;
+static SensorApp* g_app = nullptr;
+
+void setup() {
+    Serial.begin(115200);
+    Wire.setTimeOut(50);
+    Wire.begin(SDA_PIN, SCL_PIN, 100000);
+    static SensorApp app(g_hal, kSensorAddrs, sizeof kSensorAddrs / sizeof kSensorAddrs[0],
+                         {{DISPLAY_PTR}}, {{DISPLAY_COUNT}});
+    g_app = &app;
+}
+
+void loop() {
+    g_app->loop_once();
+}
