@@ -610,6 +610,7 @@ _DeviceReclaimError = _load_hs_attr("device_reclaim", "DeviceReclaimError")
 _read_device_body = _load_hs_attr("device_api", "_read_body")
 _build_device_firmware = _load_hs_attr("device_firmware", "build_device_firmware")
 _check_device_observations = _load_hs_attr("device_observations", "check_device_observations")
+_build_device_application = _load_hs_attr("device_application", "build_device_application")
 
 
 @app.post("/v1/devices/firmware")
@@ -618,6 +619,17 @@ async def device_firmware_post(request: Request) -> Response:
     spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
     try:
         _metadata, archive = _build_device_firmware(spec)
+    except _DevicePlanError as exc:
+        raise _thread_error(422, "invalid_device_spec", str(exc)) from None
+    return Response(archive, media_type="application/zip", headers={"Cache-Control": "no-store"})
+
+
+@app.post("/v1/devices/application")
+async def device_application_post(request: Request) -> Response:
+    body = await _read_device_body(request, error_type="invalid_device_spec", label="spec")
+    spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+    try:
+        _metadata, archive = _build_device_application(spec)
     except _DevicePlanError as exc:
         raise _thread_error(422, "invalid_device_spec", str(exc)) from None
     return Response(archive, media_type="application/zip", headers={"Cache-Control": "no-store"})

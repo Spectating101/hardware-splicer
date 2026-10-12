@@ -382,3 +382,25 @@ def test_uint32_t_printf_casts_to_unsigned():
     assert "(unsigned)now" in core
     assert not re.search(r'"T=%u STATE=%s", now\b', core)
     assert not re.search(r'TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f",\s*now\b', core)
+
+
+def test_the_http_endpoint_serves_the_same_bytes_and_refuses_unsupported_specs(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from hardware_splicer.product_api import create_product_app
+    from hardware_splicer.project_store import ProjectStore
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    client = TestClient(create_product_app(ProjectStore(tmp_path / "store")))
+    _meta, expected = _package()
+    ok = client.post("/v1/devices/application", json=example_specs()["esp32_oled_bme280_usb"])
+    assert ok.status_code == 200
+    assert ok.headers["content-type"] == "application/zip"
+    assert "device-application-proposal.zip" in ok.headers["content-disposition"]
+    assert ok.content == expected
+    wrapped = client.post("/v1/devices/application", json={"spec": example_specs()["esp32_oled_bme280_usb"]})
+    assert wrapped.content == expected
+    refused = client.post("/v1/devices/application", json=example_specs()["esp32_oled_usb"])
+    assert refused.status_code == 422
+    assert "BME280" in refused.json()["detail"]["message"]
+    assert client.post("/v1/devices/application", content=b"nope").status_code == 422

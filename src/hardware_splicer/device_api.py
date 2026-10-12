@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
+from .device_application import build_device_application
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
 
@@ -92,6 +93,19 @@ def create_device_router() -> APIRouter:
             raise _unprocessable(str(exc)) from None
         return Response(archive, media_type="application/zip", headers={
             "Content-Disposition": 'attachment; filename="device-diagnostic-proposal.zip"',
+            "Cache-Control": "no-store",
+        })
+
+    @router.post("/application")
+    async def post_application(request: Request) -> Response:
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+        try:
+            _metadata, archive = build_device_application(spec)
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
+        return Response(archive, media_type="application/zip", headers={
+            "Content-Disposition": 'attachment; filename="device-application-proposal.zip"',
             "Cache-Control": "no-store",
         })
 
