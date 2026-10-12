@@ -832,7 +832,9 @@
         {
           "id": "3Vo",
           "name": "3Vo",
-          "roles": ["power_3v3"],
+          "roles": [
+            "power_3v3"
+          ],
           "x": 12.6,
           "y": 1.5,
           "side": "top"
@@ -1028,7 +1030,9 @@
         {
           "id": "3Vo",
           "name": "3Vo",
-          "roles": ["power_3v3"],
+          "roles": [
+            "power_3v3"
+          ],
           "x": 12.6,
           "y": 1.5,
           "side": "top"
@@ -1074,7 +1078,7 @@
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit describes a regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on VIN can put 5 V on SDA and SCL. The Rohm chip supply (2.4 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
-        "pullups_note": "Adafruit states a 10 kΩ pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true
       },
       "dimension_basis": {
@@ -1254,8 +1258,8 @@
         "address_basis": "Adafruit Arduino usage: default 0x68 and cannot be changed. Maxim datasheet: 7-bit address 1101000."
       },
       "electrical": {
-        "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for ESP32 I2C pins. Adafruit states 10 kΩ pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
-        "pullups_note": "Adafruit states a 10 kΩ pull-up to Vin on SCL and on SDA. If Vin is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for ESP32 I2C pins. Adafruit states 10 k\u03a9 pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
+        "pullups_note": "Adafruit states a 10 k\u03a9 pull-up to Vin on SCL and on SDA. If Vin is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true,
         "backup_note": "A coin cell is required only for battery-backup. Adafruit says to use any CR1220 you have handy. That cell is backup only; it is not a power source for this plan and does not change the USB supply."
       },
@@ -1337,6 +1341,699 @@
           "claim": "Chip supply is not a header VIN permit",
           "quote": "VCC = 2.3V to 5.5V",
           "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-ina219-stemma-qt",
+      "name": "Adafruit INA219 high-side DC current sensor, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "INA219",
+          "role": "high-side current and power monitor on the module",
+          "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the Texas Instruments INA219 high-side current and power monitor.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 25.6,
+        "y": 20.4,
+        "z": 4.7
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "VIN",
+          "name": "VIN",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "Vin+",
+          "name": "Vin+",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "Vin-",
+          "name": "Vin-",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x40",
+          "0x41",
+          "0x44",
+          "0x45"
+        ],
+        "address_basis": "Adafruit pinouts: default 0x40; A0 soldered 0x41; A1 soldered 0x44; A0 and A1 soldered 0x45. Adafruit product 904 lists those four 7-bit addresses."
+      },
+      "electrical": {
+        "supply_note": "Check this board's supply. Adafruit says the sensor on the breakout requires between a 2.7V and 5.5V, and to give it the same power as the logic level. Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA; which rail they join is not published. 5 V on VIN can put 5 V on the I2C pins. The TI chip supply (3 to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32. Vin+ and Vin- are the load-side shunt connection, not this board's logic supply.",
+        "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 25.6mm x 20.4mm x 4.7mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit INA219 learn guide, pinouts",
+          "url": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "Adafruit product 904",
+          "url": "https://www.adafruit.com/product/904",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "Texas Instruments INA219 datasheet",
+          "url": "https://www.ti.com/lit/ds/symlink/ina219.pdf",
+          "as_of": "2026-10-12"
+        }
+      ],
+      "notes": [
+        "Vin+ and Vin- are the measured load's shunt connection, not a logic supply. The measured load and its supply are outside this plan.",
+        "Adafruit states up to +26V target voltage and up to \u00b13.2A current measurement. Those figures are quoted from the product page; this plan does not check them.",
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case."
+      ],
+      "quotes": [
+        {
+          "claim": "Power pin name",
+          "quote": "VIN - This is the power pin.",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Board sensor supply range",
+          "quote": "The sensor on the breakout requires between a 2.7V and 5.5V",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Default I2C address",
+          "quote": "Default address is 0x40.",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Onboard 10K pull-up",
+          "quote": "There's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Vin+ is the load-side positive shunt input",
+          "quote": "Vin+ is the positive input pin. Connect to supply for high side current sensing or to load ground for low side sensing.",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Vin- is the load-side negative shunt input",
+          "quote": "Vin- is the negative input pin. Connect to load for high side current sensing or to board ground for low side sensing",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "A0 jumper address",
+          "quote": "A0 soldered = 0x41",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "A1 jumper address",
+          "quote": "A1 soldered = 0x44",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "A0 and A1 jumper address",
+          "quote": "A0 and A1 soldered = 0x45",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 25.6mm x 20.4mm x 4.7mm / 1.0\" x 0.8\" x 0.2\"",
+          "source": "https://www.adafruit.com/product/904"
+        },
+        {
+          "claim": "Seller I2C addresses",
+          "quote": "This board/chip uses I2C 7-bit addresses 0x40, 0x41, 0x44, 0x45, selectable with jumpers",
+          "source": "https://www.adafruit.com/product/904"
+        },
+        {
+          "claim": "Quoted target voltage limit",
+          "quote": "Up to +26V target voltage",
+          "source": "https://www.adafruit.com/product/904"
+        },
+        {
+          "claim": "Quoted current measurement limit",
+          "quote": "Up to \u00b13.2A current measurement",
+          "source": "https://www.adafruit.com/product/904"
+        },
+        {
+          "claim": "VIN+ and VIN- connect the measured load",
+          "quote": "connect your target power supply to VIN+ and the load to ground to VIN-",
+          "source": "https://www.adafruit.com/product/904"
+        },
+        {
+          "claim": "Chip supply is not a header VIN permit",
+          "quote": "Power supply, 3 to 5.5 V",
+          "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
+        },
+        {
+          "claim": "Chip bus-voltage sense range",
+          "quote": "Senses Bus Voltages from 0 to 26 V",
+          "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-mpu-6050-stemma-qt",
+      "name": "Adafruit MPU-6050 6-DoF accel and gyro breakout, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "MPU-6050",
+          "role": "6-DoF accelerometer and gyro on the module",
+          "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the InvenSense MPU-6050 6-DoF accelerometer and gyroscope.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 26.0,
+        "y": 17.8,
+        "z": 4.6
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "Vin",
+          "name": "Vin",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "3Vo",
+          "name": "3Vo",
+          "roles": [
+            "power_3v3"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "INT",
+          "name": "INT",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "AD0",
+          "name": "AD0",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "FS",
+          "name": "FS",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCE",
+          "name": "SCE",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDE",
+          "name": "SDE",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "CLKIN",
+          "name": "CLKIN",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x68",
+          "0x69"
+        ],
+        "address_basis": "Adafruit pinouts: default 0x68, 0x69 if AD0 is pulled high or the back jumper is bridged. InvenSense datasheet: 7-bit address b110100X, AD0 low 1101000, AD0 high 1101001."
+      },
+      "electrical": {
+        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on Vin can put 5 V on SDA and SCL. The InvenSense chip supply (2.375 V to 3.46 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 26.0mm x 17.8mm x 4.6mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit MPU-6050 learn guide, pinouts",
+          "url": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "Adafruit product 3886",
+          "url": "https://www.adafruit.com/product/3886",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "InvenSense MPU-6000/MPU-6050 datasheet, copy from the Internet Archive",
+          "url": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf",
+          "as_of": "2026-10-12"
+        }
+      ],
+      "notes": [
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case.",
+        "The printed extra pins are INT, AD0, FS, SCE, SDE and CLKIN. This I2C plan has no wiring checks for them."
+      ],
+      "quotes": [
+        {
+          "claim": "Power pin name",
+          "quote": "Vin - this is the power pin.",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "On-board regulator",
+          "quote": "we have included a voltage regulator on board that will take 3-5VDC and safely convert it down.",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "3Vo is a regulator output",
+          "quote": "3Vo - this is the 3.3V output from the voltage regulator",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "Level-shifted I2C with 10K pull-up",
+          "quote": "This pin is level shifted so you can use 3-5V logic, and there's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "INT pin",
+          "quote": "INT -This is the interrupt pin.",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "I2C addresses via AD0",
+          "quote": "AD0 - I2C Address pin. Pulling this pin high or bridging the solder jumper on the back will change the I2C address from 0x68 to 0x69",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "Advanced pin names",
+          "quote": "FS, SCE, SDE, CLKIN - Pins for advanced users",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 26.0mm x 17.8mm x 4.6mm / 1.0\" x 0.7\" x 0.2\"",
+          "source": "https://www.adafruit.com/product/3886"
+        },
+        {
+          "claim": "Chip I2C address",
+          "quote": "The slave address of the MPU-60X0 is b110100X which is 7 bits long.",
+          "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
+        },
+        {
+          "claim": "Chip supply is not header VIN",
+          "quote": "the MPU-60X0 operates from VDD power supply voltage range of 2.375V-3.46V.",
+          "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
+        }
+      ]
+    },
+    {
+      "id": "adafruit-ads1115-stemma-qt",
+      "name": "Adafruit ADS1115 16-bit ADC breakout, STEMMA QT",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "ADS1115",
+          "role": "16-bit ADC on the module",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT breakout for the Texas Instruments ADS1115 16-bit ADC.",
+      "frame": "Top view, origin at the module's top-left corner. Header positions are typical; pin order was not published.",
+      "pcb_mm": {
+        "x": 25.4,
+        "y": 17.8,
+        "z": 4.6
+      },
+      "above_board_mm": 0.0,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "VIN",
+          "name": "VIN",
+          "roles": [
+            "power_in"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "ADDR",
+          "name": "ADDR",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "ALRT",
+          "name": "ALRT",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A+",
+          "name": "A+",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A-",
+          "name": "A-",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A0",
+          "name": "A0",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A1",
+          "name": "A1",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A2",
+          "name": "A2",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        },
+        {
+          "id": "A3",
+          "name": "A3",
+          "roles": [],
+          "x": 12.6,
+          "y": 1.5,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": true,
+      "i2c": {
+        "addresses": [
+          "0x48",
+          "0x49",
+          "0x4A",
+          "0x4B"
+        ],
+        "address_basis": "Adafruit pinouts: default 0x48; A0 jumper closed 0x49; four different addresses using the ADDR pin; base 7-bit address 0x48 (1001000). Adafruit product 1085: 7-bit addresses between 0x48-0x4B. TI datasheet ADDR table: GND 1001000b, VDD 1001001b, SDA 1001010b, SCL 1001011b."
+      },
+      "electrical": {
+        "supply_note": "Check this board's supply. Adafruit says the ADC requires between 2V to 5V power/logic, and states a 10 k\u03a9 pull-up to VIN on SCL and on SDA, so 5 V on VIN puts 5 V on the bus. The TI chip supply (2.0 V to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "pullups_note": "Adafruit states a 10 k\u03a9 pull-up to VIN on SCL and on SDA. If VIN is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Seller Product Dimensions: 25.4mm x 17.8mm x 4.6mm. This is the seller's overall product size, not a board outline.",
+        "pins": "Header positions are typical. Pin order was not published; connect by the printed names, not by position. Measure yours.",
+        "heights": "Header length below the board is typical, not published. Measure yours.",
+        "holes": "Mounting-hole positions were not published. Any hole pattern would be typical; measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit 4-channel ADC learn guide, pinouts",
+          "url": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "Adafruit product 1085",
+          "url": "https://www.adafruit.com/product/1085",
+          "as_of": "2026-10-12"
+        },
+        {
+          "label": "Texas Instruments ADS1115 datasheet",
+          "url": "https://www.ti.com/lit/ds/symlink/ads1115.pdf",
+          "as_of": "2026-10-12"
+        }
+      ],
+      "notes": [
+        "Header pin order was not published. Connect by the printed names, not by position.",
+        "ADDR, ALRT, A+, A- and A0\u2013A3 are listed by printed name. This I2C plan has no wiring checks for them.",
+        "A+ and A- are described as ADC supply outputs, not inputs.",
+        "Mounting-hole coordinates were not published; measure yours before cutting a case."
+      ],
+      "quotes": [
+        {
+          "claim": "Default I2C address",
+          "quote": "The default I2C address is 0x48.",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "Power pin name and board supply",
+          "quote": "VIN - this is the power pin. Acceptable voltages are 2V to 5V.",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "Pull-ups to VIN",
+          "quote": "This pin has a 10K pullup to VIN",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "ADDR pin",
+          "quote": "ADDR - I2C address selection pin.",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "Four addresses via ADDR",
+          "quote": "four different addresses using just one address pin",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "Base 7-bit address",
+          "quote": "base 7-bit I2C address of 0x48 (1001000)",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "A0 jumper alternate address",
+          "quote": "If A0 is soldered closed, the address is 0x48 + 1 = 0x49",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "ALRT pin",
+          "quote": "ALRT - Digital comparator output or conversion ready",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "A+ and A- are outputs",
+          "quote": "A+ and A- - ADC power supply (VIN through a ferrite) and ADC ground (digital GND through a ferrite) these are OUTPUTs not inputs!",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "ADC input pin names",
+          "quote": "A0, A1, A2, A3 - ADC input pins for each channel.",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        },
+        {
+          "claim": "Seller product size",
+          "quote": "Product Dimensions: 25.4mm x 17.8mm x 4.6mm / 1.0\" x 0.7\" x 0.2\"",
+          "source": "https://www.adafruit.com/product/1085"
+        },
+        {
+          "claim": "Seller I2C address range",
+          "quote": "This board/chip uses I2C 7-bit addresses between 0x48-0x4B, selectable with jumpers",
+          "source": "https://www.adafruit.com/product/1085"
+        },
+        {
+          "claim": "Chip supply is not a header VIN permit",
+          "quote": "Wide supply range: 2.0V to 5.5V",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "Chip has four pin-selectable addresses",
+          "quote": "I2C interface: four pin-selectable addresses",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "ADDR pin address table",
+          "quote": "Table 7-2. ADDR Pin Connection and Corresponding Target Address",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "ADDR to GND is 1001000b",
+          "quote": "GND                                         1001000b",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "ADDR to VDD is 1001001b",
+          "quote": "VDD                                         1001001b",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "ADDR to SDA is 1001010b",
+          "quote": "SDA                                         1001010b",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        {
+          "claim": "ADDR to SCL is 1001011b",
+          "quote": "SCL                                         1001011b",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
         }
       ]
     }
