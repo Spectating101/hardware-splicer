@@ -47,6 +47,30 @@ VENDOR_LIB_SOURCES = (
 )
 # The diagnostic verifier's toolchain cache, so one download serves both. Set PLATFORMIO_CORE_DIR to use another.
 DEFAULT_CORE_DIR = Path(__file__).resolve().parents[1] / ".cache" / "hardware-splicer" / "device-firmware" / "platformio-core"
+HOST_SCENARIOS = (
+    "boot_ok", "default_address_binding", "sensor_missing_at_boot", "display_missing",
+    "display_at_second_address", "transient_read_failure", "read_fault_persistent_recovery",
+    "ambiguous_during_read_fault", "second_read_fault_starts_at_one_second", "implausible_values",
+    "clock_wrap", "read_period", "two_devices_answer", "first_read_fails", "serial_grammar",
+)
+VENDOR_SCENARIOS = (
+    "sensor_default_address_0x77_with_display_0x3C", "sensor_0x76_only", "display_at_0x3D_only",
+    "display_absent", "sensor_absent_then_appears", "unplug_replug_mid_run", "both_addresses_answer",
+    "transient_data_nack", "wire_pins_stay_explicit", "blocking_budget", "im_update_never_clears",
+)
+
+
+def _scenario_failure(rows: list, expected: tuple[str, ...], exit_code: int) -> str:
+    if exit_code != 0:
+        return f"harness exited unsuccessfully ({exit_code})"
+    if any(not isinstance(row, dict) for row in rows):
+        return "harness scenario records must be objects"
+    names = [row.get("scenario") for row in rows]
+    if any(not isinstance(name, str) for name in names) or len(names) != len(expected) or set(names) != set(expected):
+        return "harness did not report each expected scenario exactly once"
+    if any(row.get("pass") is not True or row.get("finding", False) is not False for row in rows):
+        return "one or more harness scenarios failed or reported a finding"
+    return ""
 
 
 def _sha(data: bytes) -> str:
@@ -121,22 +145,25 @@ def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
         report = _not_run_vendor("vendor-host harness did not compile")
         report["compiler"] = compiler
         return report, log
-    ran = subprocess.run([str(binary)], cwd=project, capture_output=True, check=False)
+    try:
+        ran = subprocess.run([str(binary)], cwd=project, capture_output=True, check=False, timeout=60)
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        report = _not_run_vendor(f"vendor-host harness could not complete: {exc}")
+        report["compiler"] = compiler
+        return report, log + (getattr(exc, "stdout", None) or b"")
     log = log + ran.stdout + ran.stderr
     scenarios: list[dict] = []
     reason = ""
     try:
         scenarios = [json.loads(line) for line in ran.stdout.decode().splitlines() if line.strip()]
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         reason = "vendor-host harness did not print JSON scenario results"
         report = _not_run_vendor(reason)
         report["compiler"] = compiler
         return report, log
-    findings = [row for row in scenarios if row.get("finding")]
-    counted = [row for row in scenarios if not row.get("finding")]
-    passed = bool(counted) and all(row.get("pass") for row in counted)
-    if not passed and not reason:
-        reason = "one or more vendor-host scenarios failed"
+    reason = _scenario_failure(scenarios, VENDOR_SCENARIOS, ran.returncode)
+    findings = [row for row in scenarios if isinstance(row, dict) and row.get("finding")]
+    passed = not reason
     return {
         "schema_version": "hardware_splicer.device_application_vendor_host.v1",
         "pass": passed,
@@ -144,6 +171,7 @@ def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
         "scenarios": scenarios,
         "findings": findings,
         "compiler": compiler,
+        "exit_code": ran.returncode,
         "claim_boundary": VENDOR_HOST_CLAIM_BOUNDARY,
         "firmware_authorized": False,
         "power_on_authorized": False,
@@ -173,16 +201,23 @@ def _run_host(project: Path) -> tuple[dict, bytes]:
         if compiled.returncode != 0:
             reason = "host harness did not compile"
         else:
-            ran = subprocess.run([str(project / "harness")], cwd=project, capture_output=True, check=False)
+            try:
+                ran = subprocess.run([str(project / "harness")], cwd=project, capture_output=True, check=False, timeout=60)
+            except (subprocess.TimeoutExpired, OSError) as exc:
+                return {
+                    "schema_version": "hardware_splicer.device_application_behaviour.v1", "pass": False,
+                    "reason": f"host harness could not complete: {exc}", "scenarios": [], "compiler": compiler,
+                    "claim_boundary": CLAIM_BOUNDARY, "firmware_authorized": False,
+                    "power_on_authorized": False, "physical_correctness": "UNPROVEN",
+                }, log + (getattr(exc, "stdout", None) or b"")
             log = log + ran.stdout + ran.stderr
             try:
                 scenarios = [json.loads(line) for line in ran.stdout.decode().splitlines() if line.strip()]
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 reason = "host harness did not print JSON scenario results"
             else:
-                passed = ran.returncode == 0 and bool(scenarios) and all(row.get("pass") for row in scenarios)
-                if not passed:
-                    reason = "one or more host scenarios failed"
+                reason = _scenario_failure(scenarios, HOST_SCENARIOS, ran.returncode)
+                passed = not reason
     return {
         "schema_version": "hardware_splicer.device_application_behaviour.v1",
         "pass": passed,
