@@ -9,10 +9,11 @@ from __future__ import annotations
 import json
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
+from .device_firmware import build_device_firmware
 
 MAX_BODY_BYTES = 64 * 1024
 
@@ -79,5 +80,18 @@ def create_device_router() -> APIRouter:
             return {"ok": True, **match_reclaimed_parts(body)}
         except DeviceReclaimError as exc:
             raise HTTPException(status_code=422, detail={"type": "invalid_reclaim_list", "message": str(exc)}) from None
+
+    @router.post("/firmware")
+    async def post_firmware(request: Request) -> Response:
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+        try:
+            _metadata, archive = build_device_firmware(spec)
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
+        return Response(archive, media_type="application/zip", headers={
+            "Content-Disposition": 'attachment; filename="device-diagnostic-proposal.zip"',
+            "Cache-Control": "no-store",
+        })
 
     return router

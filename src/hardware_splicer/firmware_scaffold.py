@@ -14,6 +14,60 @@ SCHEMA_VERSION = "hardware_splicer.firmware_scaffold.v1"
 SketchFn = Callable[[str, List[str], Mapping[str, Any]], str]
 
 
+def generate_i2c_diagnostic_source(*, sda: int, scl: int, declared_addresses: List[str]) -> str:
+    """Compile-only catalog proposal; no fallback GPIOs or invented observations.
+
+    This is not the donor/verified-interface PlatformIO projection. It grants
+    neither firmware authorization nor permission to flash, power or scan.
+    """
+    if any(type(pin) is not int or not 0 <= pin <= 33 for pin in (sda, scl)) or sda == scl:
+        raise ValueError("two distinct output-capable ESP32 GPIO numbers are required")
+    if any(len(address) != 4 or not address.startswith("0x") or not 8 <= int(address, 16) <= 0x77 for address in declared_addresses):
+        raise ValueError("declared addresses must be non-reserved 7-bit hexadecimal addresses")
+    declarations = " ".join(sorted(set(declared_addresses)))
+    return f'''// Compile-only diagnostic proposal. Not authorized for flashing or powering.
+#include <Arduino.h>
+#include <Wire.h>
+
+constexpr int SDA_PIN = {sda};
+constexpr int SCL_PIN = {scl};
+constexpr uint32_t BUS_HZ = 100000; // Diagnostic choice, not validated bus timing.
+
+void setup() {{
+  Serial.begin(115200);
+  Serial.println("PROPOSAL ONLY: review wiring, supply and pull-ups before use.");
+  Serial.println("Declared possible addresses, NOT observations: {declarations}");
+  Serial.println("No automatic scan. A serial 's' requests an address probe.");
+}}
+
+void loop() {{
+  if (!Serial.available() || Serial.read() != 's') {{
+    delay(10);
+    return;
+  }}
+  if (!Wire.begin(SDA_PIN, SCL_PIN, BUS_HZ)) {{
+    Serial.println("I2C initialization failed; no scan result.");
+    return;
+  }}
+  Wire.setTimeOut(50);
+  unsigned acknowledgements = 0;
+  // Reserved I2C addresses are excluded. Probes still drive the physical bus.
+  for (uint8_t address = 0x08; address <= 0x77; ++address) {{
+    Wire.beginTransmission(address);
+    const uint8_t result = Wire.endTransmission(true);
+    if (result == 0) {{
+      ++acknowledgements;
+      Serial.printf("Observed ACK at 0x%02X; identity and function unverified.\\n", address);
+    }} else if (result != 2) {{
+      Serial.printf("Probe error %u at 0x%02X.\\n", result, address);
+    }}
+  }}
+  Wire.end();
+  Serial.printf("Observed acknowledgements: %u. No sensor readings or physical validation.\\n", acknowledgements);
+}}
+'''
+
+
 def _plant_watering_esp32(build_id: str, modules: List[str], pins: Mapping[str, Any]) -> str:
     soil = int(pins.get("soil") or 34)
     pump = int(pins.get("pump") or 4)
