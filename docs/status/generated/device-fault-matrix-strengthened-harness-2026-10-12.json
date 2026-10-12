@@ -863,6 +863,7 @@
       "story": "the boot time is not recorded as the first action time"
     }
   ],
+  "part": "adafruit-bme280-stemma-qt",
   "physical_correctness": "UNPROVEN",
   "power_on_authorized": false,
   "schema_version": "hardware_splicer.device_fault_matrix_benchmark.v1",
@@ -977,5 +978,5 @@
       }
     }
   },
-  "target": "esp32_oled_bme280_usb host application core (src/app_core.h)"
+  "target": "adafruit-bme280-stemma-qt host application core (src/app_core.h and the part's src/part_traits.h)"
 }

@@ -1,0 +1,1004 @@
+{
+  "claim_boundary": "Mutation benchmark of host application-logic tests against a modelled bus. It is not silicon, ESP32 timing, vendor-library behaviour or electrical evidence, and it authorizes nothing.",
+  "detectors": {
+    "healthy": [
+      "boot_ok",
+      "default_address_binding",
+      "read_period"
+    ],
+    "matrix": "all host scenarios",
+    "smoke": [
+      "boot_ok"
+    ]
+  },
+  "firmware_authorized": false,
+  "harness_override": null,
+  "mutant_set": "all",
+  "mutants": [
+    {
+      "bug_class": "threshold",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "display_missing",
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "fail_threshold_off_by_one",
+      "outcome": "KILLED",
+      "story": "needs four failed reads, not three, before declaring a read fault"
+    },
+    {
+      "bug_class": "threshold",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "fail_threshold_too_eager",
+      "outcome": "KILLED",
+      "story": "declares a read fault after two failures"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "clock_wrap",
+        "display_missing",
+        "implausible_values",
+        "read_fault_persistent_recovery",
+        "read_period",
+        "second_read_fault_starts_at_one_second",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "read_period_wrong",
+      "outcome": "KILLED",
+      "story": "reads every 2.5 s instead of every 2 s"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second",
+        "sensor_missing_at_boot",
+        "serial_grammar"
+      ],
+      "id": "backoff_initial_wrong",
+      "outcome": "KILLED",
+      "story": "first retry waits 2 s instead of 1 s"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "backoff_cap_unbounded",
+      "outcome": "KILLED",
+      "story": "retry backoff cap is effectively removed"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "backoff_never_grows_when_missing",
+      "outcome": "KILLED",
+      "story": "a missing sensor is retried at a constant interval"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "clock_wrap"
+      ],
+      "id": "naive_clock_rollover",
+      "outcome": "KILLED",
+      "story": "elapsed time clamps to zero when the 32-bit millisecond counter wraps"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "plausibility_skipped_on_read",
+      "outcome": "KILLED",
+      "story": "a successful bus read is trusted without a range check"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "sensor_missing_at_boot",
+        "serial_grammar",
+        "two_devices_answer"
+      ],
+      "id": "first_matching_address_wins",
+      "outcome": "KILLED",
+      "story": "stops probing at the first chip that answers, so a second device is never noticed"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "failed_rebind_ignored",
+      "outcome": "KILLED",
+      "story": "a failed rebind to the matched address is ignored"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "default_address_binding",
+        "sensor_missing_at_boot",
+        "serial_grammar"
+      ],
+      "id": "no_rebind_after_probe",
+      "outcome": "KILLED",
+      "story": "driver is left bound to the last address probed"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "serial_grammar",
+        "two_devices_answer"
+      ],
+      "id": "boot_ignores_ambiguity",
+      "outcome": "KILLED",
+      "story": "two answering chips at boot are not treated as ambiguous"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "serial_grammar",
+        "two_devices_answer"
+      ],
+      "id": "ambiguity_not_latched",
+      "outcome": "KILLED",
+      "story": "after an ambiguous-address fault the application keeps reading"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_second_address",
+        "serial_grammar"
+      ],
+      "id": "display_first_address_only",
+      "outcome": "KILLED",
+      "story": "only the first declared display address is tried"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_missing",
+        "serial_grammar"
+      ],
+      "id": "display_missing_never_logged",
+      "outcome": "KILLED",
+      "story": "an absent declared display is never reported"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_missing",
+        "serial_grammar"
+      ],
+      "id": "display_missing_log_repeats",
+      "outcome": "KILLED",
+      "story": "the missing-display line repeats on every loop"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_missing",
+        "serial_grammar"
+      ],
+      "id": "writes_to_absent_display",
+      "outcome": "KILLED",
+      "story": "draws readings even when no display answered"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_missing",
+        "serial_grammar"
+      ],
+      "id": "fault_drawn_without_display",
+      "outcome": "KILLED",
+      "story": "draws fault text even when no display answered"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "stale_headlined_as_ok",
+      "outcome": "KILLED",
+      "story": "a stale reading is shown under an OK headline"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "boot_ok",
+        "display_at_second_address",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "last_reading_not_kept",
+      "outcome": "KILLED",
+      "story": "the last good reading is never remembered, so stale shows no data"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "recovery_from_missing_not_announced",
+      "outcome": "KILLED",
+      "story": "a sensor that reappears is not announced as recovered"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "read_fault_recovery_not_announced",
+      "outcome": "KILLED",
+      "story": "a read fault that clears is not announced as recovered"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "second_read_fault_starts_at_one_second"
+      ],
+      "id": "failure_count_not_cleared_on_success",
+      "outcome": "KILLED",
+      "story": "isolated failures accumulate across good reads and eventually fault"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "first_read_fails",
+        "implausible_values",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "stale_not_logged",
+      "outcome": "KILLED",
+      "story": "the first failed read is not reported as STALE"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "read_fault_persistent_recovery",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "no_bus_recovery_on_fault_entry",
+      "outcome": "KILLED",
+      "story": "entering a read fault does not try to recover the bus"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second"
+      ],
+      "id": "no_bus_recovery_on_retry",
+      "outcome": "KILLED",
+      "story": "retries from a read fault never recover the bus"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "no_rebind_on_fault_entry",
+      "outcome": "KILLED",
+      "story": "entering a read fault does not rebind the driver"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": false,
+        "smoke": false
+      },
+      "equivalent_reason": "backoff_ms_ is read only inside the two fault branches, and every entry into FAULT_SENSOR_READ resets it in take_reading, so also resetting it at recovery is unobservable.",
+      "failing_scenarios": [],
+      "id": "read_fault_backoff_not_reset",
+      "outcome": "SURVIVED",
+      "story": "backoff keeps its grown value after a read fault clears, so the next fault starts slow"
+    },
+    {
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "display_missing",
+        "first_read_fails",
+        "implausible_values",
+        "read_fault_persistent_recovery",
+        "second_read_fault_starts_at_one_second",
+        "sensor_missing_at_boot",
+        "serial_grammar",
+        "transient_read_failure",
+        "two_devices_answer"
+      ],
+      "id": "state_line_grammar_drift",
+      "outcome": "KILLED",
+      "story": "the state line separator changes from '=' to ': '"
+    },
+    {
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "boot_ok",
+        "default_address_binding",
+        "display_at_second_address",
+        "first_read_fails",
+        "sensor_missing_at_boot",
+        "serial_grammar"
+      ],
+      "id": "boot_line_addresses_swapped",
+      "outcome": "KILLED",
+      "story": "the BOOT line reports the display address as the sensor's"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": false,
+        "smoke": false
+      },
+      "equivalent_reason": "FAULT_SENSOR_MISSING is reachable only from boot(), where consecutive_fails_ is still 0, and take_reading() clears it on the next success; the extra reset cannot change any output.",
+      "failing_scenarios": [],
+      "id": "missing_recovery_clears_count_redundant",
+      "outcome": "SURVIVED",
+      "story": "drops a counter reset that take_reading repeats immediately"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "bh1750_nan_not_rejected",
+      "outcome": "KILLED",
+      "story": "NaN illuminance is accepted as a reading"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "bh1750_upper_bound_removed",
+      "outcome": "KILLED",
+      "story": "illuminance above 65535 lx is accepted"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "bh1750_lower_bound_removed",
+      "outcome": "KILLED",
+      "story": "negative illuminance is accepted"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "bh1750_range_widened",
+      "outcome": "KILLED",
+      "story": "illuminance up to 1,000,000 lx is accepted"
+    },
+    {
+      "bug_class": "plausibility",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "implausible_values"
+      ],
+      "id": "bh1750_dark_rejected",
+      "outcome": "KILLED",
+      "story": "a valid dark reading of 0 lx is rejected as implausible"
+    },
+    {
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "boot_ok",
+        "clock_wrap",
+        "default_address_binding",
+        "display_at_second_address",
+        "display_missing",
+        "implausible_values",
+        "read_fault_persistent_recovery",
+        "read_period",
+        "second_read_fault_starts_at_one_second",
+        "sensor_missing_at_boot",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "bh1750_serial_precision_drift",
+      "outcome": "KILLED",
+      "story": "the serial reading loses its decimal place"
+    },
+    {
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "boot_ok",
+        "clock_wrap",
+        "default_address_binding",
+        "display_at_second_address",
+        "display_missing",
+        "implausible_values",
+        "read_fault_persistent_recovery",
+        "read_period",
+        "second_read_fault_starts_at_one_second",
+        "sensor_missing_at_boot",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "bh1750_serial_key_renamed",
+      "outcome": "KILLED",
+      "story": "the serial key changes from LUX to LX"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "boot_ok",
+        "display_at_second_address",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "bh1750_display_unit_dropped",
+      "outcome": "KILLED",
+      "story": "the display line loses its unit"
+    },
+    {
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "boot_ok",
+        "default_address_binding",
+        "display_at_second_address",
+        "display_missing",
+        "first_read_fails",
+        "sensor_missing_at_boot",
+        "serial_grammar"
+      ],
+      "id": "heldout_sensor_addr_not_recorded",
+      "outcome": "KILLED",
+      "story": "the matched address is never stored, so BOOT reports 0x00"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "read_fault_persistent_recovery"
+      ],
+      "id": "heldout_read_fault_backoff_linear",
+      "outcome": "KILLED",
+      "story": "read-fault retry backoff grows by a constant instead of doubling"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "ambiguous_during_read_fault",
+        "clock_wrap",
+        "display_missing",
+        "implausible_values",
+        "read_fault_persistent_recovery",
+        "read_period",
+        "second_read_fault_starts_at_one_second",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "heldout_period_boundary_exclusive",
+      "outcome": "KILLED",
+      "story": "a reading is taken only strictly after the period, so the period edge is missed"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "heldout_missing_retry_boundary_exclusive",
+      "outcome": "KILLED",
+      "story": "a missing sensor is retried only strictly after its backoff"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "heldout_recovery_skips_boot_line",
+      "outcome": "KILLED",
+      "story": "a sensor that reappears is not re-identified in the BOOT line"
+    },
+    {
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "healthy": true,
+        "matrix": true,
+        "smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "boot_ok",
+        "default_address_binding",
+        "display_at_second_address",
+        "first_read_fails",
+        "sensor_missing_at_boot",
+        "serial_grammar",
+        "transient_read_failure"
+      ],
+      "id": "heldout_display_never_probed",
+      "outcome": "KILLED",
+      "story": "the display is never probed, so it is always reported missing"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_missing_at_boot"
+      ],
+      "id": "heldout_missing_backoff_cap_removed",
+      "outcome": "KILLED",
+      "story": "the 30 s cap is not applied to a missing sensor's backoff"
+    },
+    {
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": false,
+        "smoke": false
+      },
+      "equivalent_reason": "STALE is never read back by loop_once or take_reading: only FAULT_* and OK are branched on, and log_state takes the state as an argument, so tracking it internally is unobservable.",
+      "failing_scenarios": [],
+      "id": "heldout_stale_state_not_tracked",
+      "outcome": "SURVIVED",
+      "story": "the STALE state is logged but not tracked internally"
+    },
+    {
+      "bug_class": "timing",
+      "detail": "",
+      "detected_by": {
+        "healthy": false,
+        "matrix": true,
+        "smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "clock_wrap"
+      ],
+      "id": "heldout_boot_clock_not_recorded",
+      "outcome": "KILLED",
+      "story": "the boot time is not recorded as the first action time"
+    }
+  ],
+  "part": "adafruit-bh1750-stemma-qt",
+  "physical_correctness": "UNPROVEN",
+  "power_on_authorized": false,
+  "schema_version": "hardware_splicer.device_fault_matrix_benchmark.v1",
+  "summary": {
+    "by_bug_class": {
+      "addressing": {
+        "healthy": 2,
+        "matrix": 7,
+        "smoke": 1,
+        "total": 7
+      },
+      "display": {
+        "healthy": 3,
+        "matrix": 8,
+        "smoke": 3,
+        "total": 8
+      },
+      "grammar": {
+        "healthy": 3,
+        "matrix": 4,
+        "smoke": 3,
+        "total": 4
+      },
+      "plausibility": {
+        "healthy": 0,
+        "matrix": 6,
+        "smoke": 0,
+        "total": 6
+      },
+      "recovery": {
+        "healthy": 0,
+        "matrix": 8,
+        "smoke": 0,
+        "total": 8
+      },
+      "threshold": {
+        "healthy": 0,
+        "matrix": 2,
+        "smoke": 0,
+        "total": 2
+      },
+      "timing": {
+        "healthy": 2,
+        "matrix": 10,
+        "smoke": 0,
+        "total": 10
+      }
+    },
+    "caught_only_by_fault_scenarios": [
+      "fail_threshold_off_by_one",
+      "fail_threshold_too_eager",
+      "backoff_initial_wrong",
+      "backoff_cap_unbounded",
+      "backoff_never_grows_when_missing",
+      "naive_clock_rollover",
+      "plausibility_skipped_on_read",
+      "first_matching_address_wins",
+      "failed_rebind_ignored",
+      "boot_ignores_ambiguity",
+      "ambiguity_not_latched",
+      "display_first_address_only",
+      "display_missing_never_logged",
+      "display_missing_log_repeats",
+      "writes_to_absent_display",
+      "fault_drawn_without_display",
+      "stale_headlined_as_ok",
+      "recovery_from_missing_not_announced",
+      "read_fault_recovery_not_announced",
+      "failure_count_not_cleared_on_success",
+      "stale_not_logged",
+      "no_bus_recovery_on_fault_entry",
+      "no_bus_recovery_on_retry",
+      "no_rebind_on_fault_entry",
+      "state_line_grammar_drift",
+      "bh1750_nan_not_rejected",
+      "bh1750_upper_bound_removed",
+      "bh1750_lower_bound_removed",
+      "bh1750_range_widened",
+      "bh1750_dark_rejected",
+      "heldout_read_fault_backoff_linear",
+      "heldout_missing_retry_boundary_exclusive",
+      "heldout_recovery_skips_boot_line",
+      "heldout_missing_backoff_cap_removed",
+      "heldout_boot_clock_not_recorded"
+    ],
+    "mutants_defined": 48,
+    "reviewed_equivalent": [
+      "read_fault_backoff_not_reset",
+      "missing_recovery_clears_count_redundant",
+      "heldout_stale_state_not_tracked"
+    ],
+    "scored_mutants": 45,
+    "stillborn_compile_errors": [],
+    "survivors_without_review": [],
+    "tiers": {
+      "healthy": {
+        "killed": 10,
+        "of": 45,
+        "score": 0.222
+      },
+      "matrix": {
+        "killed": 45,
+        "of": 45,
+        "score": 1.0
+      },
+      "smoke": {
+        "killed": 7,
+        "of": 45,
+        "score": 0.156
+      }
+    }
+  },
+  "target": "adafruit-bh1750-stemma-qt host application core (src/app_core.h and the part's src/part_traits.h)"
+}

@@ -54,6 +54,29 @@ primary set used to tune the harness and a second set written afterwards and not
 (logic 91 % / 91 %; adapter 67 % / 88 % before tuning). The "after" figures include the mutants that exposed
 the gaps below.
 
+## Lane 3 — a second part, generated from its descriptor
+
+The application logic is generic and the part-specific text is generated from a cited descriptor
+([DEVICE_PART_DESCRIPTORS.md](../DEVICE_PART_DESCRIPTORS.md)). The BME280 package, regenerated from its descriptor,
+produced output byte-identical to the committed baseline (all 15 scenarios, all 158 serial lines), and the
+refactor left every number above unchanged. The BH1750, a part with no ID register, was then generated and
+scored with the same detectors and no BH1750-specific scenario edits (one leftover BME280 literal in the generic
+harness was found and fixed).
+
+| BH1750, 48 mutants (45 scored) | Caught |
+|--|--|
+| smoke | 7 / 45 (16 %) |
+| healthy bus | 10 / 45 (22 %) |
+| fault matrix | 45 / 45 |
+
+40 mutants are generic engine bugs, and 39 of them behave identically on both parts (the same scenarios catch
+them, or none for the three reviewed equivalents).
+8 are specific to the BH1750's generated traits, written before the battery was run against it, and all 8 were
+caught, five of them only by `implausible_values`. Read this as "the battery transfers", not "the part is verified":
+those cases are generated from the same numbers the code uses, so they show the code matches the descriptor and
+cannot show the descriptor matches the datasheet. The BH1750's Arduino adapter has no bus model, so lane 2 does
+not apply to it.
+
 ## Gaps found and closed
 
 | Gap | Now asserted in |
@@ -90,5 +113,5 @@ function-static state. The scenario sets stay at 15 and 11.
   electrical behaviour are untested here, and so is the compiled ESP32 binary.
 - Nothing changes any authority flag: `physical_correctness` stays `UNPROVEN`, flashing and power-on stay closed.
 
-Evidence, all under `docs/status/generated/`: `device-fault-matrix-{original,strengthened}-harness-2026-10-12.json`
-and `device-adapter-matrix-{original,strengthened}-vendor-host-2026-10-12.json`.
+Evidence, all under `docs/status/generated/`: `device-fault-matrix-{original,strengthened}-harness-2026-10-12.json`,
+`device-fault-matrix-bh1750-2026-10-12.json` and `device-adapter-matrix-{original,strengthened}-vendor-host-2026-10-12.json`.
