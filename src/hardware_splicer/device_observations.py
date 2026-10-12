@@ -172,8 +172,8 @@ def _application_row(library_id: str, addresses: list[str], application: dict[st
             return {"status": "ambiguous", "acknowledged_at": [], "evidence": "application_fault",
                     "note": "The latest application state reports more than one matching sensor address; an earlier boot does not resolve it."}
         if latest == "FAULT_SENSOR_MISSING":
-            return {"status": "no_acknowledge", "acknowledged_at": [], "evidence": "application_fault",
-                    "note": "The latest application state reports no matching sensor; an earlier boot does not establish current presence. It cannot say why."}
+            return {"status": "sensor_init_fault", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The application could not initialize a usable sensor. A chip may have answered but failed calibration; this does not establish absence. It cannot say why, and an earlier boot does not resolve it."}
         if boot and boot["sensor"] in addresses:
             return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_chip_id_match",
                     "note": f"The application reported that a chip identified itself as a BME280 (register 0xD0 read 0x60) at {boot['sensor']}."}
@@ -269,7 +269,7 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
     elif statuses <= {"acknowledged"}:
         consistent = True
         statement = "Every module with declared addresses has something answering at one of them. That is all this scan shows."
-    elif statuses & {"no_acknowledge", "ambiguous", "bus_error", "sensor_read_fault", "stale"}:
+    elif statuses & {"no_acknowledge", "ambiguous", "bus_error", "sensor_init_fault", "sensor_read_fault", "stale"}:
         consistent = False
         statement = "The scan differs from the plan for at least one module. See each module below; the scan cannot say why."
     else:

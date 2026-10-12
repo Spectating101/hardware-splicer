@@ -215,7 +215,8 @@ def test_a_missing_display_and_a_missing_sensor_are_reported_from_the_applicatio
 
     missing_sensor = check_device_observations(SPEC, _app("T=0 STATE=FAULT_SENSOR_MISSING"))
     by_id = {m["id"]: m for m in missing_sensor["modules"]}
-    assert by_id["sensor"]["status"] == "no_acknowledge"
+    assert by_id["sensor"]["status"] == "sensor_init_fault"
+    assert "does not establish absence" in by_id["sensor"]["note"]
     assert "cannot say why" in by_id["sensor"]["note"]
     assert by_id["display"]["status"] == "not_assessed"
 
@@ -275,7 +276,7 @@ def test_application_text_with_timestamps_is_accepted():
 
 
 @pytest.mark.parametrize("state,status", [
-    ("FAULT_AMBIGUOUS_ADDRESS", "ambiguous"), ("FAULT_SENSOR_MISSING", "no_acknowledge"),
+    ("FAULT_AMBIGUOUS_ADDRESS", "ambiguous"), ("FAULT_SENSOR_MISSING", "sensor_init_fault"),
     ("FAULT_SENSOR_READ", "sensor_read_fault"), ("STALE", "stale"),
 ])
 def test_a_later_fault_is_not_masked_by_boot_success(state, status):

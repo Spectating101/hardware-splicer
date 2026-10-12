@@ -8,7 +8,7 @@ import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/pro
 import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 
 type Spec = Record<string, unknown>;
-type ScanModule = { id: string; name: string; declared_addresses: string[]; acknowledged_at: string[]; status: 'acknowledged' | 'no_acknowledge' | 'ambiguous' | 'shared_address' | 'bus_error' | 'sensor_read_fault' | 'stale' | 'not_assessed'; note: string; evidence?: string; application?: { agrees?: boolean } };
+type ScanModule = { id: string; name: string; declared_addresses: string[]; acknowledged_at: string[]; status: 'acknowledged' | 'no_acknowledge' | 'ambiguous' | 'shared_address' | 'bus_error' | 'sensor_init_fault' | 'sensor_read_fault' | 'stale' | 'not_assessed'; note: string; evidence?: string; application?: { agrees?: boolean } };
 const SCAN_EVIDENCE: Record<string, string> = {
   application_chip_id_match: "Reported by the application's own chip-id check.",
   application_presence_check: "Reported by the application's presence check.",
@@ -32,6 +32,7 @@ const SCAN_STATUS: Record<ScanModule['status'], { label: string; className: stri
   shared_address: { label: 'Answered, but the address is shared', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
   bus_error: { label: 'Bus error, absence not established', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
   sensor_read_fault: { label: 'Sensor read fault', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
+  sensor_init_fault: { label: 'Sensor initialization failed', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
   stale: { label: 'Readings stale', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
   not_assessed: { label: 'Not assessed', className: 'border-stone-700 bg-stone-900/60 text-stone-300' },
 };
