@@ -1041,3 +1041,49 @@ def test_rejects_deleted_uuidless_zone_among_identical() -> None:
 def test_rejects_replaced_uuidless_zone_among_identical() -> None:
     with pytest.raises(RoutingError, match=r"routing changed more than copper tracks: zone"):
         route_pcb(PCB_UUIDLESS_ZONES, engine=_ReplaceFirstUuidlessZoneEngine())
+
+
+GRAPHIC_A = '''  (gr_line
+    (start 0 0)
+    (end 10 0)
+    (stroke (width 0.1) (type default))
+    (layer "Edge.Cuts")
+    (uuid "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1")
+  )
+'''
+GRAPHIC_B = GRAPHIC_A.replace("(end 10 0)", "(end 0 10)").replace("bbb1", "bbb2")
+
+
+class _TextEngine:
+    """Routes by returning the board text through one function."""
+
+    def __init__(self, transform) -> None:
+        self._transform = transform
+
+    def route(self, pcb_text: str, *, timeout_s: float, max_passes: int, keep_existing_tracks: bool) -> str:
+        del timeout_s, max_passes, keep_existing_tracks
+        return self._transform(pcb_text)
+
+
+def test_allows_the_same_graphics_written_in_another_order() -> None:
+    # KiCad 9.0.9 writes a board's graphic items in a different order than 9.0.2 and the items are unchanged.
+    board = _insert_before_close(MINIMAL_PCB, GRAPHIC_A + GRAPHIC_B)
+    engine = _TextEngine(lambda text: text.replace(GRAPHIC_A + GRAPHIC_B, GRAPHIC_B + GRAPHIC_A))
+    result = route_pcb(board, engine=engine)
+    assert result.text.index(GRAPHIC_B) < result.text.index(GRAPHIC_A)
+
+
+def test_rejects_an_edited_graphic_even_when_the_order_also_changed() -> None:
+    board = _insert_before_close(MINIMAL_PCB, GRAPHIC_A + GRAPHIC_B)
+    moved = GRAPHIC_A.replace("(end 10 0)", "(end 11 0)")
+    engine = _TextEngine(lambda text: text.replace(GRAPHIC_A + GRAPHIC_B, GRAPHIC_B + moved))
+    with pytest.raises(RoutingError, match=r"routing changed more than copper tracks: gr_line"):
+        route_pcb(board, engine=engine)
+
+
+def test_rejects_one_graphic_standing_in_for_its_duplicate() -> None:
+    # Same count, same set of distinct items, different multiplicity: A, A, B becomes A, B, B.
+    board = _insert_before_close(MINIMAL_PCB, GRAPHIC_A + GRAPHIC_A + GRAPHIC_B)
+    engine = _TextEngine(lambda text: text.replace(GRAPHIC_A + GRAPHIC_A + GRAPHIC_B, GRAPHIC_A + GRAPHIC_B + GRAPHIC_B))
+    with pytest.raises(RoutingError, match=r"routing changed more than copper tracks"):
+        route_pcb(board, engine=engine)

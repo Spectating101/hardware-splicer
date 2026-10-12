@@ -628,7 +628,9 @@ def _graphics(tree: list[Any]) -> list[tuple[str, str]]:
 def _first_graphic_change(before: list[Any], after: list[Any]) -> str | None:
     before_rows = _graphics(before)
     after_rows = _graphics(after)
-    if before_rows == after_rows:
+    # The order of the items is the writer's choice (KiCad 9.0.9 writes the same nine items in a different order than
+    # 9.0.2); what routing must leave alone is the items themselves, counted with multiplicity.
+    if Counter(before_rows) == Counter(after_rows):
         return None
     before_types = Counter(name for name, _payload in before_rows)
     after_types = Counter(name for name, _payload in after_rows)
