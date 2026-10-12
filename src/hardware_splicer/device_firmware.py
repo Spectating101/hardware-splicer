@@ -28,19 +28,18 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
-    """Recompute from spec; never credit caller-supplied plan/findings/authority."""
-    plan = build_device_plan(spec)
-    try:
-        spec_bytes = _json(spec)
-    except (ValueError, TypeError, RecursionError) as exc:
-        raise DevicePlanError("the spec must contain finite, JSON-compatible values") from exc
-    blockers = [f for f in plan["findings"] if f["severity"] in {"error", "warning"}]
-    if blockers:
-        raise DevicePlanError("Resolve wiring checks before exporting diagnostic source: " + ", ".join(sorted({f["rule"] for f in blockers})))
+def resolve_shared_i2c_bus(
+    plan: dict[str, Any],
+    *,
+    bus_error: str = "diagnostic source requires exactly one explicitly wired shared I2C bus",
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Trace I2C peripherals onto controller GPIOs and list declared address alternatives.
+
+    Bindings map ``sda``/``scl`` to ``{module, pin_id, printed_name, gpio}``.
+    Declarations keep library address alternatives and their basis; they are not
+    chosen addresses or evidence of identity.
+    """
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    if mcu["module"] != "esp32-devkitc-v4":
-        raise DevicePlanError("diagnostic source supports only the catalog ESP32-DevKitC V4")
     library = {m["id"]: m for m in module_library()["modules"]}
     pins = {(m["id"], p["id"]): p for m in plan["modules"] for p in m["logical_pins"]}
     adjacency: dict[tuple[str, str], set[tuple[str, str]]] = {}
@@ -77,7 +76,7 @@ def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
                              "possible_addresses": entry["i2c"]["addresses"],
                              "basis": entry["i2c"]["address_basis"], "sources": placed["sources"]})
     if not declarations or any(len(nodes) != 1 for nodes in selected.values()):
-        raise DevicePlanError("diagnostic source requires exactly one explicitly wired shared I2C bus")
+        raise DevicePlanError(bus_error)
     bindings = {}
     for signal, nodes in selected.items():
         node = next(iter(nodes))
@@ -88,6 +87,23 @@ def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
         bindings[signal] = {"module": node[0], "pin_id": node[1], "printed_name": pin["name"], "gpio": int(match[1])}
     if bindings["sda"]["gpio"] == bindings["scl"]["gpio"]:
         raise DevicePlanError("data and clock must use distinct GPIOs")
+    return bindings, declarations
+
+
+def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
+    """Recompute from spec; never credit caller-supplied plan/findings/authority."""
+    plan = build_device_plan(spec)
+    try:
+        spec_bytes = _json(spec)
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise DevicePlanError("the spec must contain finite, JSON-compatible values") from exc
+    blockers = [f for f in plan["findings"] if f["severity"] in {"error", "warning"}]
+    if blockers:
+        raise DevicePlanError("Resolve wiring checks before exporting diagnostic source: " + ", ".join(sorted({f["rule"] for f in blockers})))
+    mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
+    if mcu["module"] != "esp32-devkitc-v4":
+        raise DevicePlanError("diagnostic source supports only the catalog ESP32-DevKitC V4")
+    bindings, declarations = resolve_shared_i2c_bus(plan)
 
     source = generate_i2c_diagnostic_source(sda=bindings["sda"]["gpio"], scl=bindings["scl"]["gpio"],
                                           declared_addresses=[a for d in declarations for a in d["possible_addresses"]])
