@@ -35,6 +35,9 @@ export default function DevicePage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [plannedText, setPlannedText] = useState('');
+  const [firmwareBusy, setFirmwareBusy] = useState(false);
+  const [firmwareMessage, setFirmwareMessage] = useState('');
   const [onHand, setOnHand] = useState<DeviceReclaimResult | null>(null);
   const [onHandError, setOnHandError] = useState('');
 
@@ -58,6 +61,7 @@ export default function DevicePage() {
   const planFrom = useCallback(async (text: string) => {
     setBusy(true);
     setError('');
+    setFirmwareMessage('');
     try {
       let spec: unknown;
       try { spec = JSON.parse(text); } catch { throw new Error('That is not valid JSON. Check the brackets and quotes.'); }
@@ -67,6 +71,7 @@ export default function DevicePage() {
       const planned = (body as { plan?: DevicePlan }).plan;
       if (!planned) throw new Error('The plan could not be made.');
       setPlan(planned);
+      setPlannedText(text);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The plan could not be made.');
     } finally {
@@ -106,6 +111,33 @@ export default function DevicePage() {
   const used = useMemo(() => (plan ? modules.filter((m) => plan.modules.some((p) => p.module === m.id)) : []), [plan, modules]);
   const errors = plan?.findings.filter((f) => f.severity === 'error').length ?? 0;
   const hasWiringFindings = plan?.findings.some((finding) => finding.severity === 'error' || finding.severity === 'warning') ?? false;
+
+  const downloadFirmware = async () => {
+    setFirmwareBusy(true);
+    setFirmwareMessage('');
+    try {
+      const response = await fetch('/api/proxy/engineering/devices/firmware', {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: specText, cache: 'no-store',
+      });
+      if (!response.ok || !response.headers.get('content-type')?.startsWith('application/zip')) {
+        const body = await readJsonPayload<unknown>(response);
+        throw new Error(getProxyErrorMessage(body, 'The diagnostic source could not be downloaded.'));
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'device-diagnostic-proposal.zip';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setFirmwareMessage('Source downloaded. Compilation has not run; no hardware authorization.');
+    } catch (caught) {
+      setFirmwareMessage(caught instanceof Error ? caught.message : 'The diagnostic source could not be downloaded.');
+    } finally {
+      setFirmwareBusy(false);
+    }
+  };
 
   const chooseExample = (key: string) => {
     const example = examples[key];
@@ -174,6 +206,17 @@ export default function DevicePage() {
             </section>
 
             <aside className="min-w-0 space-y-4 [overflow-wrap:anywhere]" aria-label="About this device">
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-firmware">
+                <h2 className="text-sm font-semibold text-stone-100">Diagnostic source</h2>
+                <p className="mt-1 text-xs leading-5 text-stone-400">Download an ESP32 I2C probe sketch using this wiring&apos;s GPIOs. Possible addresses are declarations, not readings. The source waits for a serial command before probing. Probes drive the bus.</p>
+                <p className="mt-1 text-xs leading-5 text-stone-400">Compile-only proposal. No flashing, powering or physical authorization.</p>
+                <button type="button" data-testid="device-firmware-download" onClick={() => void downloadFirmware()} disabled={busy || firmwareBusy || hasWiringFindings || Boolean(error) || specText !== plannedText} className="mt-2 rounded-md bg-stone-800 px-3 py-2 text-xs font-medium text-stone-100 hover:bg-stone-700 disabled:opacity-50">
+                  {firmwareBusy ? 'Preparing source…' : 'Download diagnostic source'}
+                </button>
+                {specText !== plannedText ? <p className="mt-1 text-xs text-amber-200">Check the edited wiring before downloading.</p> : null}
+                {hasWiringFindings ? <p className="mt-1 text-xs text-amber-200">Resolve the wiring checks first.</p> : null}
+                {firmwareMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-firmware-message">{firmwareMessage}</p> : null}
+              </section>
               {plan.modules.map((placed) => {
                 const orders = modules.find((module) => module.id === placed.module)?.pin_orders;
                 if (!orders?.length) return null;
