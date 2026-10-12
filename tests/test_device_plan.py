@@ -35,7 +35,22 @@ BREAKOUT_IDS = (
     "adafruit-bme280-stemma-qt",
     "adafruit-bh1750-stemma-qt",
     "adafruit-ds3231-stemma-qt",
+    "adafruit-ina219-stemma-qt",
+    "adafruit-mpu-6050-stemma-qt",
+    "adafruit-ads1115-stemma-qt",
 )
+
+NEW_BREAKOUTS = (
+    ("adafruit-ina219-stemma-qt", "VIN", "SCL", "SDA"),
+    ("adafruit-mpu-6050-stemma-qt", "Vin", "SCL", "SDA"),
+    ("adafruit-ads1115-stemma-qt", "VIN", "SCL", "SDA"),
+)
+
+ARCHIVE_BREAKOUT_IDS = {
+    "adafruit-bh1750-stemma-qt",
+    "adafruit-ds3231-stemma-qt",
+    "adafruit-mpu-6050-stemma-qt",
+}
 
 
 def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() -> None:
@@ -79,6 +94,9 @@ def test_only_the_sourced_chip_roles_are_published() -> None:
         ("adafruit-bme280-stemma-qt", "BME280", "temperature, humidity and pressure sensor on the module"),
         ("adafruit-bh1750-stemma-qt", "BH1750FVI", "ambient light sensor on the module"),
         ("adafruit-ds3231-stemma-qt", "DS3231", "real-time clock on the module"),
+        ("adafruit-ina219-stemma-qt", "INA219", "high-side current and power monitor on the module"),
+        ("adafruit-mpu-6050-stemma-qt", "MPU-6050", "6-DoF accelerometer and gyro on the module"),
+        ("adafruit-ads1115-stemma-qt", "ADS1115", "16-bit ADC on the module"),
     ]
     for module in library["modules"]:
         assert all(c["source"] in [s["url"] for s in module["sources"]] for c in module["chips"])
@@ -818,13 +836,16 @@ def _module_by_id(module_id: str) -> dict:
 def test_the_library_loads_the_three_breakouts_with_quotes() -> None:
     library = module_library()
     by_id = {m["id"]: m for m in library["modules"]}
-    assert [by_id[mid]["kind"] for mid in BREAKOUT_IDS] == ["i2c_breakout"] * 3
-    bme, light, rtc = (by_id[mid] for mid in BREAKOUT_IDS)
+    assert [by_id[mid]["kind"] for mid in BREAKOUT_IDS] == ["i2c_breakout"] * len(BREAKOUT_IDS)
+    bme, light, rtc, ina, mpu, ads = (by_id[mid] for mid in BREAKOUT_IDS)
     assert {p["name"] for p in bme["pins"]} >= {"Vin", "3Vo", "GND", "SCK", "SDI"}
     assert {p["name"] for p in light["pins"]} >= {"VIN", "GND", "SCL", "SDA"}
     assert {p["name"] for p in rtc["pins"]} >= {"Vin", "GND", "SCL", "SDA", "BAT"}
+    assert {p["name"] for p in ina["pins"]} >= {"VIN", "GND", "SCL", "SDA", "Vin+", "Vin-"}
+    assert {p["name"] for p in mpu["pins"]} >= {"Vin", "3Vo", "GND", "SCL", "SDA", "INT", "AD0"}
+    assert {p["name"] for p in ads["pins"]} >= {"VIN", "GND", "SCL", "SDA", "ADDR", "ALRT", "A0", "A1", "A2", "A3"}
     assert not any(name in {p["name"] for p in bme["pins"]} for name in ("SCL", "SDA"))
-    for module in (bme, light, rtc):
+    for module in (bme, light, rtc, ina, mpu, ads):
         assert module["pin_order_varies"] is True
         assert "pin_orders" not in module
         assert "Product Dimensions" in module["dimension_basis"]["pcb"]
@@ -836,11 +857,17 @@ def test_the_library_loads_the_three_breakouts_with_quotes() -> None:
             assert set(item) == {"claim", "quote", "source"}
             assert item["claim"].strip() and item["quote"].strip()
             assert item["source"] in urls
-        assert any("Internet Archive" in s["label"] for s in module["sources"]) or module is bme
+        has_archive = any("Internet Archive" in s["label"] for s in module["sources"])
+        assert has_archive is (module["id"] in ARCHIVE_BREAKOUT_IDS)
     assert not any("Internet Archive" in s["label"] for s in bme["sources"])
     assert "0x77" in bme["i2c"]["addresses"] and "0x76" in bme["i2c"]["addresses"]
     assert light["i2c"]["addresses"] == ["0x23", "0x5C"]
     assert rtc["i2c"]["addresses"] == ["0x68"]
+    assert ina["i2c"]["addresses"] == ["0x40", "0x41", "0x44", "0x45"]
+    assert mpu["i2c"]["addresses"] == ["0x68", "0x69"]
+    assert ads["i2c"]["addresses"] == ["0x48", "0x49", "0x4A", "0x4B"]
+    assert {p["name"]: p["roles"] for p in ina["pins"]}["Vin+"] == []
+    assert {p["name"]: p["roles"] for p in ina["pins"]}["Vin-"] == []
     assert light["electrical"]["onboard_pullups"] is True
     assert rtc["electrical"]["onboard_pullups"] is True
     assert "onboard_pullups" not in bme["electrical"]
@@ -1095,7 +1122,7 @@ def test_shared_i2c_reports_invalid_connected_signal_paths(fault):
     assert not any(step["kind"] == "power" for step in plan["steps"])
 
 
-@pytest.mark.parametrize("module_id", BREAKOUT_IDS[:2])
+@pytest.mark.parametrize("module_id", [BREAKOUT_IDS[0], BREAKOUT_IDS[1], "adafruit-mpu-6050-stemma-qt"])
 @pytest.mark.parametrize("target,rule", [("mcu.IO21", "power_to_signal"), ("mcu.GND", "ground_to_other"), ("mcu.3V3", "supplies_joined")])
 @pytest.mark.parametrize("reverse", [False, True])
 def test_breakout_regulator_output_is_checked_as_a_supply(module_id, target, rule, reverse):
@@ -1124,7 +1151,7 @@ def test_backup_cannot_join_any_board_supply(target, reverse):
     assert "backup_to_supply" in _rules(plan, "error")
 
 
-@pytest.mark.parametrize("module_id,power_pin", [(BREAKOUT_IDS[0], "Vin"), (BREAKOUT_IDS[1], "VIN"), (BREAKOUT_IDS[2], "Vin")])
+@pytest.mark.parametrize("module_id,power_pin", [(BREAKOUT_IDS[0], "Vin"), (BREAKOUT_IDS[1], "VIN"), (BREAKOUT_IDS[2], "Vin"), (BREAKOUT_IDS[3], "VIN"), (BREAKOUT_IDS[4], "Vin"), (BREAKOUT_IDS[5], "VIN")])
 @pytest.mark.parametrize("reverse", [False, True])
 def test_each_breakout_five_volt_warning_cites_its_own_sources(module_id, power_pin, reverse):
     spec = copy.deepcopy(EXAMPLE)
@@ -1210,3 +1237,88 @@ def test_sensor_example_http_contract_is_stateless(api, tmp_path):
     assert sensor["kind"] == "i2c_breakout" and sensor["pin_order"] is None
     assert {pin["name"] for pin in sensor["pins"]} >= {"Vin", "GND", "SCK", "SDI"}
     assert sorted(str(path) for path in tmp_path.rglob("*")) == before
+
+
+def _mcu_and_breakout(module_id: str, power: str, clock: str, data: str, extra=()) -> dict:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [{"id": "mcu", "module": "esp32-devkitc-v4"}, {"id": "sensor", "module": module_id}]
+    spec["connections"] = [
+        {"from": f"sensor.{power}", "to": "mcu.3V3"},
+        {"from": "sensor.GND", "to": "mcu.GND"},
+        {"from": f"sensor.{clock}", "to": "mcu.IO22"},
+        {"from": f"sensor.{data}", "to": "mcu.IO21"},
+        *extra,
+    ]
+    return spec
+
+
+@pytest.mark.parametrize("module_id,power,clock,data", NEW_BREAKOUTS)
+def test_each_new_breakout_makes_an_mcu_plan_with_no_errors(module_id, power, clock, data) -> None:
+    plan = build_device_plan(_mcu_and_breakout(module_id, power, clock, data))
+    assert plan["counts"]["errors"] == 0
+    sensor = next(m for m in plan["modules"] if m["id"] == "sensor")
+    assert sensor["kind"] == "i2c_breakout"
+    entry = _module_by_id(module_id)
+    assert entry["electrical"]["supply_note"]
+    assert any(f["rule"] == "module_supply_note" and entry["electrical"]["supply_note"] in f["message"] for f in plan["findings"])
+
+
+@pytest.mark.parametrize("module_id,power,clock,data", NEW_BREAKOUTS)
+def test_five_volts_on_each_new_breakout_uses_that_module_own_warning(module_id, power, clock, data) -> None:
+    spec = _mcu_and_breakout(module_id, power, clock, data)
+    spec["connections"][0]["to"] = "mcu.5V"
+    plan = build_device_plan(spec)
+    finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system" and "sensor" in f["message"])
+    entry = _module_by_id(module_id)
+    assert finding["severity"] == "warning"
+    assert entry["electrical"]["supply_note"] in finding["message"]
+    assert all(source["url"] in finding["basis"] for source in entry["sources"])
+    assert "SSD1306" not in finding["message"] + finding["basis"]
+    assert not any(s["kind"] == "power" for s in plan["steps"])
+
+
+def test_mpu6050_and_ds3231_share_default_address_0x68() -> None:
+    spec = copy.deepcopy(EXAMPLE)
+    spec["modules"] = [
+        {"id": "mcu", "module": "esp32-devkitc-v4"},
+        {"id": "imu", "module": "adafruit-mpu-6050-stemma-qt"},
+        {"id": "clock", "module": "adafruit-ds3231-stemma-qt"},
+    ]
+    spec["connections"] = [
+        {"from": "imu.Vin", "to": "mcu.3V3"},
+        {"from": "imu.GND", "to": "mcu.GND"},
+        {"from": "imu.SCL", "to": "mcu.IO22"},
+        {"from": "imu.SDA", "to": "mcu.IO21"},
+        {"from": "clock.Vin", "to": "mcu.3V3"},
+        {"from": "clock.GND", "to": "mcu.GND"},
+        {"from": "clock.SCL", "to": "mcu.IO22"},
+        {"from": "clock.SDA", "to": "mcu.IO21"},
+    ]
+    plan = build_device_plan(spec)
+    finding = next(f for f in plan["findings"] if f["rule"] == "i2c_address_overlap")
+    assert finding["severity"] == "warning"
+    assert "0x68" in finding["message"]
+    assert "imu" in finding["message"] and "clock" in finding["message"]
+
+
+@pytest.mark.parametrize("pin", ["Vin+", "Vin-"])
+@pytest.mark.parametrize("target", ["mcu.3V3", "mcu.5V", "mcu.IO21"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_ina219_load_shunt_pins_are_not_a_logic_supply(pin, target, reverse) -> None:
+    spec = _mcu_and_breakout("adafruit-ina219-stemma-qt", "VIN", "SCL", "SDA")
+    wire = {"from": f"sensor.{pin}", "to": target}
+    if reverse:
+        wire = {"from": wire["to"], "to": wire["from"]}
+    spec["connections"].append(wire)
+    plan = build_device_plan(spec)
+    assert "unsupported_breakout_pin" in _rules(plan, "error")
+    assert "five_volts_to_a_3v3_system" not in {f["rule"] for f in plan["findings"] if pin in f["message"]}
+    assert not any(step["kind"] == "power" for step in plan["steps"])
+
+
+def test_ads1115_lists_the_four_addr_pin_addresses() -> None:
+    ads = _module_by_id("adafruit-ads1115-stemma-qt")
+    assert ads["i2c"]["addresses"] == ["0x48", "0x49", "0x4A", "0x4B"]
+    basis = ads["i2c"]["address_basis"]
+    assert "0x48" in basis and "ADDR" in basis
+    assert {p["name"]: p["roles"] for p in ads["pins"]}["ADDR"] == []

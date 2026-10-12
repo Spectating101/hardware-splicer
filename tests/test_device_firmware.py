@@ -131,6 +131,9 @@ def test_nonfinite_extra_fields_are_a_clear_refusal_not_http_500(value):
 @pytest.mark.parametrize("module,power,clock,data,addresses", [
     ("adafruit-bh1750-stemma-qt", "VIN", "SCL", "SDA", ["0x23", "0x5C"]),
     ("adafruit-ds3231-stemma-qt", "Vin", "SCL", "SDA", ["0x68"]),
+    ("adafruit-ina219-stemma-qt", "VIN", "SCL", "SDA", ["0x40", "0x41", "0x44", "0x45"]),
+    ("adafruit-mpu-6050-stemma-qt", "Vin", "SCL", "SDA", ["0x68", "0x69"]),
+    ("adafruit-ads1115-stemma-qt", "VIN", "SCL", "SDA", ["0x48", "0x49", "0x4A", "0x4B"]),
 ])
 def test_other_catalog_breakouts_keep_their_own_declared_addresses(module, power, clock, data, addresses):
     spec = example()

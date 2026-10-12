@@ -26,6 +26,15 @@ SOURCE_FILES = {
     "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/arduino-usage": "ada_ds_usage.txt",
     "https://www.adafruit.com/product/5188": "ada_ds_product.txt",
     "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf": "maxim_ds3231.txt",
+    "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts": "ada_ina_pinouts.txt",
+    "https://www.adafruit.com/product/904": "ada_ina_product.txt",
+    "https://www.ti.com/lit/ds/symlink/ina219.pdf": "ina219_datasheet.txt",
+    "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts": "ada_mpu_pinouts.txt",
+    "https://www.adafruit.com/product/3886": "ada_mpu_product.txt",
+    "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf": "mpu6050_datasheet.txt",
+    "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts": "ada_ads_pinouts.txt",
+    "https://www.adafruit.com/product/1085": "ada_ads_product.txt",
+    "https://www.ti.com/lit/ds/symlink/ads1115.pdf": "ads1115_datasheet.txt",
 }
 
 
