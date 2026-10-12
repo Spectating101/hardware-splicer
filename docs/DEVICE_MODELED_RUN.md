@@ -20,6 +20,9 @@ Execution is disabled unless the server operator sets:
 HS_DEVICE_RUNTIME_ENABLED=1
 ```
 
+The host needs `g++`. A missing compiler is reported as unavailable with no
+tests run, not mislabeled as a failing application scenario.
+
 For vendor-host tests, first provision the pinned dependencies with the existing
 `scripts/verify_device_application.py --platformio <pio>` command, then set
 `HS_DEVICE_RUNTIME_VENDOR_LIBS` to that run's `project/.pio/libdeps/application`

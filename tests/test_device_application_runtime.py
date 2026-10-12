@@ -123,3 +123,12 @@ def test_sensor_only_export_does_not_claim_the_display_vendor_fixture_was_tested
     result = runtime.run_device_application(spec)
     assert result["status"] == "PARTIAL" and result["vendor_host"]["status"] == "NOT_RUN"
     assert "sensor-only adapter was not tested" in result["vendor_host"]["reason"]
+
+
+def test_missing_compiler_is_unavailable_not_a_failed_engineering_scenario(monkeypatch):
+    monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
+    monkeypatch.setattr(runtime.shutil, "which", lambda _: None)
+    monkeypatch.setattr(runtime, "_run_host", lambda _: pytest.fail("no compiler should be launched"))
+    with pytest.raises(runtime.DeviceRuntimeError, match="no modeled tests ran") as caught:
+        runtime.run_device_application(SPEC)
+    assert caught.value.status_code == 503

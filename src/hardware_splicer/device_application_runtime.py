@@ -5,6 +5,7 @@ import hashlib
 import io
 import os
 import subprocess
+import shutil
 from pathlib import Path
 import tempfile
 import threading
@@ -52,6 +53,8 @@ def run_device_application(spec: dict) -> dict:
     metadata, package = build_device_application(spec)
     if os.environ.get("HS_DEVICE_RUNTIME_ENABLED") != "1":
         raise DeviceRuntimeError("Modeled execution is disabled on this server; enable HS_DEVICE_RUNTIME_ENABLED=1.")
+    if not shutil.which("g++"):
+        raise DeviceRuntimeError("The host C++ compiler is unavailable; no modeled tests ran.")
     if not _RUN_SLOT.acquire(blocking=False):
         raise DeviceRuntimeError("Another modeled run is active. Try again after it finishes.", 429)
     try:
