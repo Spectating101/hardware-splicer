@@ -1,5 +1,9 @@
 # Run the generated device application off-hardware
 
+> **A tested engineering-software system with modeled execution — not physically validated hardware.**
+> It is suitable for an evaluator, developer or portfolio demonstration. It is not authorization to
+> fabricate, flash or power hardware.
+
 On **Build a device**, choose the ESP32/OLED/BME280 example, check the wiring,
 then select **Run modeled tests**. Open scenario rows to see synthetic serial
 readings, missing-device faults, stale data and recovery. Download the modeled
@@ -75,3 +79,11 @@ are never automatically submitted as physical evidence.
 All results retain `physical_correctness=UNPROVEN`, `firmware_authorized=false`
 and `power_on_authorized=false`. No flashing, powering, fabrication or procurement
 occurs in this workflow.
+
+## Evidence
+
+- [Mutation benchmark of these tests](status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md): how many seeded bugs the
+  boot-only, healthy-bus and fault scenarios catch, for the application logic and the Arduino adapter.
+- [Running the compiled firmware in an emulator](status/DEVICE_EMULATOR_FEASIBILITY_2026-10-12.md): what is known,
+  what was not run, and the protocol to finish it.
+
