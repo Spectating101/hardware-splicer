@@ -1,0 +1,80 @@
+// Thin Arduino adapter. No application behaviour lives here.
+#include <Adafruit_BME280.h>
+#include <Adafruit_SSD1306.h>
+#include <Arduino.h>
+#include <Wire.h>
+#include "app_core.h"
+
+constexpr int SDA_PIN = {{SDA}};
+constexpr int SCL_PIN = {{SCL}};
+
+static const uint8_t kSensorAddrs[] = { {{SENSOR_ADDRS}} };
+{{DISPLAY_DECL}}
+
+class ArduinoHal final : public Hal {
+public:
+    uint32_t now_ms() override { return millis(); }
+
+    bool sensor_begin(uint8_t addr) override {
+        // Adafruit_BME280 2.3.0 begin(addr, wire) always replaces its I2C device with one
+        // bound to addr, then returns false if chip id is not 0x60. A failed begin leaves
+        // the driver bound to the address it just tried.
+        // Bosch BST-BME280-DS001-24: "The “id” register contains the chip identification number chip_id[7:0], which is 0x60."
+        return bme_.begin(addr, &Wire);
+    }
+
+    bool sensor_read(Reading& out) override {
+        out.temp_c = bme_.readTemperature();
+        out.hum_pct = bme_.readHumidity();
+        out.pres_hpa = bme_.readPressure() / 100.0f;  // Adafruit reports Pascal
+        return true;
+    }
+
+    bool display_begin(uint8_t addr) override {
+        // 128x64 is the catalog 0.96" SSD1306 listing, not a measurement of a particular module.
+        // Adafruit_SSD1306.cpp, tag 2.5.17: "return true; // Success"
+        // begin() does not detect the display; its only return false is a failed buffer allocation.
+        Wire.beginTransmission(addr);
+        if (Wire.endTransmission() != 0) return false;
+        // reset=true, periphBegin=false so the library does not call Wire.begin() again.
+        return display_.begin(SSD1306_SWITCHCAPVCC, addr, true, false);
+    }
+
+    void display_show(const char* l1, const char* l2, const char* l3, const char* l4) override {
+        display_.clearDisplay();
+        display_.setTextSize(1);
+        display_.setTextColor(SSD1306_WHITE);
+        display_.setCursor(0, 0);
+        display_.println(l1);
+        display_.println(l2);
+        display_.println(l3);
+        display_.println(l4);
+        display_.display();
+    }
+
+    void log(const char* line) override { Serial.println(line); }
+
+    bool bus_recover() override {
+        Wire.end();
+        return Wire.begin(SDA_PIN, SCL_PIN, 100000);
+    }
+
+private:
+    Adafruit_BME280 bme_;
+    Adafruit_SSD1306 display_{128, 64, &Wire, -1};
+};
+
+static ArduinoHal g_hal;
+static SensorApp* g_app = nullptr;
+
+void setup() {
+    Serial.begin(115200);
+    Wire.begin(SDA_PIN, SCL_PIN, 100000);
+    static SensorApp app(g_hal, kSensorAddrs, sizeof kSensorAddrs / sizeof kSensorAddrs[0],
+                         {{DISPLAY_PTR}}, {{DISPLAY_COUNT}});
+    g_app = &app;
+}
+
+void loop() {
+    g_app->loop_once();
+}
