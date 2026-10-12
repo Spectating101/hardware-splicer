@@ -68,3 +68,24 @@ def test_complete_results_pass_only_with_successful_exit():
         rows = [{"scenario": name, "pass": True} for name in expected]
         assert module._scenario_failure(rows, expected, 0) == ""
         assert module._scenario_failure(rows, expected, -11)
+
+
+def test_relative_vendor_library_path_is_resolved_before_changing_compile_directory(tmp_path, monkeypatch):
+    module = verifier()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "vendor_libs_available", lambda _: True)
+    monkeypatch.setattr(module.shutil, "which", lambda _: "/usr/bin/g++")
+    rows = [{"scenario": name, "pass": True} for name in module.VENDOR_SCENARIOS]
+
+    def run(command, **kwargs):
+        if command[-1] == "--version":
+            return SimpleNamespace(returncode=0, stdout=b"g++ test\n", stderr=b"")
+        if "-std=c++17" in command:
+            for name in module.VENDOR_LIB_DIRS:
+                assert str(tmp_path / "libs" / name) in command
+            return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+        return SimpleNamespace(returncode=0, stdout=("\n".join(json.dumps(row) for row in rows)).encode(), stderr=b"")
+
+    monkeypatch.setattr(module.subprocess, "run", run)
+    report, _ = module._run_vendor_host(tmp_path / "project", Path("libs"))
+    assert report["pass"] is True

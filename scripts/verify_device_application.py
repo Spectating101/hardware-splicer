@@ -135,6 +135,8 @@ def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
     if not gxx:
         return _not_run_vendor("not run: libraries not available"), b"g++ is missing\n"
     assert libdeps is not None
+    # Compilation runs inside the extracted project, not the caller's cwd.
+    libdeps = libdeps.resolve()
     version = subprocess.run([gxx, "--version"], capture_output=True, check=False)
     compiler = version.stdout.decode(errors="replace").splitlines()[0] if version.stdout else ""
     binary = project / "vendor_harness"
