@@ -49,6 +49,10 @@ if [[ "${HARDWARE_SPLICER_SKIP_CADQUERY:-}" != "1" && -f "$ROOT/apps/3d-splicer/
   if ! "$SPLICER3D_VENV/bin/pip" install -q -r "$ROOT/apps/3d-splicer/requirements.txt"; then
     echo "WARN: CadQuery install failed — STL rendering unavailable; run: make setup-cadquery"
   fi
+  # A quiet install can succeed and still leave a module that cannot be imported (for example a missing libGL.so.1).
+  if ! cadquery_error="$("$SPLICER3D_VENV/bin/python" -c 'import cadquery' 2>&1)"; then
+    echo "WARN: CadQuery cannot be imported — STL rendering unavailable: $(printf '%s' "$cadquery_error" | tail -n 1)"
+  fi
 fi
 
 echo "==> Doctor check"
