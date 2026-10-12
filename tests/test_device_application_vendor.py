@@ -28,6 +28,7 @@ VENDOR_SCENARIOS = (
     "transient_data_nack",
     "wire_pins_stay_explicit",
     "blocking_budget",
+    "im_update_never_clears",
 )
 
 # Each mutation is one textual change the vendor harness must reject.
@@ -42,14 +43,14 @@ VENDOR_MUTATIONS = (
     (
         "remove_rebind_after_probing",
         "src/app_core.h",
-        "            (void)hal_.sensor_begin(found);  // rebind: last HAL call so the driver is bound to the match\n",
+        "            if (!hal_.sensor_begin(found)) return 0;\n",
         "",
     ),
     (
         "bus_recover_default_wire_begin",
         "src/main.cpp",
-        "        Wire.end();\n        return Wire.begin(SDA_PIN, SCL_PIN, 100000);\n",
-        "        Wire.end();\n        return Wire.begin();\n",
+        "        Wire.end();\n        Wire.setTimeOut(50);\n        return Wire.begin(SDA_PIN, SCL_PIN, 100000);\n",
+        "        Wire.end();\n        Wire.setTimeOut(50);\n        return Wire.begin();\n",
     ),
     (
         "drop_display_begin_true_false",
@@ -62,6 +63,12 @@ VENDOR_MUTATIONS = (
         "src/main.cpp",
         "        out.pres_hpa = bme_.readPressure() / 100.0f;  // Adafruit reports Pascal\n",
         "        out.pres_hpa = bme_.readPressure();  // Adafruit reports Pascal\n",
+    ),
+    (
+        "remove_calibration_timeout",
+        "src/main.cpp",
+        "            if (uint32_t(millis() - started) >= 50) return false;\n",
+        "",
     ),
 )
 
@@ -143,12 +150,8 @@ def test_vendor_host_scenarios_against_the_model(tmp_path):
     names = [row["scenario"] for row in report["scenarios"] if not row.get("finding")]
     assert names == list(VENDOR_SCENARIOS)
     for row in report["scenarios"]:
-        if row.get("finding"):
-            assert row["scenario"] == "im_update_never_clears"
-            assert row["pass"] is False
-            assert "Adafruit_BME280.cpp" in row["detail"]
-            continue
         assert row["pass"] is True, row
+    assert report["findings"] == []
     assert report["firmware_authorized"] is False
     assert "not silicon" in report["claim_boundary"].lower() or "Not silicon" in report["claim_boundary"]
 
@@ -193,4 +196,4 @@ def test_vendor_mutations_are_caught(tmp_path):
             f"mutation {name} did not change vendor-host-observable behaviour; "
             f"scenarios={report.get('scenarios')} log={log.decode(errors='replace')[-1500:]}"
         )
-    assert len(caught) >= 5 and all(caught.values())
+    assert len(caught) >= 6 and all(caught.values())

@@ -574,21 +574,26 @@ static Result scenario_im_update_hang() {
     w.oled3c.plug();
     setup();
     Result r;
-    r.finding = true;
-    r.pass = false;
     const bool returned = tracked_loop();
     if (g_sim_clock.watchdog_fired || !returned) {
-        r.detail =
-            "FINDING: Adafruit_BME280 2.3.0 init() (Adafruit_BME280.cpp:120-121) loops "
-            "while(isReadingCalibration()) delay(10) with no timeout. Against a chip whose status "
-            "im_update bit never clears, the call did not return. Guard aborted after 5000 ms of "
-            "simulated time. Not silicon.";
+        r.detail = "bounded initializer did not return before the host watchdog";
         return r;
     }
-    r.detail =
-        "FINDING: expected Adafruit_BME280 begin() to hang while im_update stays set; it returned. "
-        "Adafruit_BME280.cpp:120-121 still has the unbounded loop; this observation is against the "
-        "model.";
+    if (g_max_loop_ms > kLoopBudgetMs || count_exact(Serial.lines(), "T=0 STATE=FAULT_SENSOR_MISSING") != 1
+        || count_contains(Serial.lines(), "STATE=OK") != 0) {
+        r.detail = "stuck calibration must be bounded, faulted, and produce no readings";
+        return r;
+    }
+    pump_to(1000);
+    if (g_sim_clock.watchdog_fired || count_contains(Serial.lines(), "STATE=OK") != 0) {
+        r.detail = "retry while calibration is stuck must also remain bounded";
+        return r;
+    }
+    w.bme77.set_im_update_stuck(false);
+    pump_to(10000);
+    if (count_exact(Serial.lines(), "RECOVERED") < 1 || !readings_match_oracle(w.bme77, r.detail)) return r;
+    r.pass = true;
+    r.detail = "stuck calibration returns a fault within the software budget, no stale reading, then recovers; model only";
     return r;
 }
 

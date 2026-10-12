@@ -184,8 +184,9 @@ private:
             }
         }
         if (hits == 1) {
+            // A failed rebind must not turn an earlier probe into a usable device.
+            if (!hal_.sensor_begin(found)) return 0;
             sensor_addr_ = found;
-            (void)hal_.sensor_begin(found);  // rebind: last HAL call so the driver is bound to the match
         }
         return hits;
     }

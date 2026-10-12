@@ -39,5 +39,9 @@ g++ -std=c++17 -Wall -Wextra -Wno-macro-redefined -DARDUINO=10812 -DESP32 -DARDU
   -o vendor_harness && ./vendor_harness
 ```
 
-Prints one JSON object per scenario. `im_update_never_clears` is a FINDING
-about Adafruit_BME280 2.3.0, not a pass.
+Prints one JSON object per scenario. All 11 scenarios must pass.
+`im_update_never_clears` now tests the adapter's bounded initializer: report a
+fault without readings, remain bounded on retry, and recover after the model
+clears calibration status. The upstream unbounded `init()` is not called;
+vendor coefficient and compensation code is unchanged. This is still a model,
+not a physical timing guarantee.

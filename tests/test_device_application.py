@@ -98,7 +98,7 @@ MUTATIONS = (
     ),
     (
         "skip_rebind_after_probe",
-        "(void)hal_.sensor_begin(found);  // rebind: last HAL call so the driver is bound to the match",
+        "if (!hal_.sensor_begin(found)) return 0;",
         "",
     ),
     (

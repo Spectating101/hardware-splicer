@@ -68,7 +68,8 @@ The chosen address is printed on serial (`BOOT sensor=0x76 display=0x3C`, or
 `display=NONE`). If the BME280 answers at both declared addresses, that is
 `FAULT_AMBIGUOUS_ADDRESS`. The application does not pick. After probing, if
 exactly one address matched, `sensor_begin` is called again on that address so
-the driver is bound there. Adafruit_BME280 2.3.0 `begin(addr, wire)` always
+the driver is bound there; a failed rebind rejects the probe. The bounded
+adapter follows the binding behavior of Adafruit_BME280 2.3.0 `begin(addr, wire)`, which always
 replaces its I2C device with one bound to `addr`, then returns false if the
 chip id is not 0x60 — a failed begin leaves the driver bound to the address it
 just tried.
@@ -163,14 +164,29 @@ four text lines (the framebuffer encodings differ; the pixels must match).
 | `transient_data_nack` | 1–2 `requestFrom` / data-NACK failures → `STALE` then recovery, no fault | Library retry policy on hardware |
 | `wire_pins_stay_explicit` | Pins in effect after boot and after fault/recovery are the planned GPIOs (example 21/22, and a spec on IO25/IO26). Default-arg `Wire.begin()` that actually inits the bus after `end()` fails the scenario | GPIO electrical behaviour |
 | `blocking_budget` | Simulated time inside any one `loop()` stays within 250 ms: `2*(delay(10)+delay(100))` plus one calibration poll per successful `begin` (Adafruit_BME280.cpp:117–127) | That Adafruit `begin` is non-blocking on silicon |
+| `im_update_never_clears` | Bounded initializer reports a fault without readings, stays bounded during retries, then recovers when the modeled calibration condition clears | Physical timing or correctness of a real device |
 
-### Known limitation (FINDING, not a pass)
+### Bounded calibration initialization
 
-`im_update_never_clears`: Adafruit_BME280 2.3.0 `init()` contains
-`while (isReadingCalibration()) delay(10);` with no timeout (`Adafruit_BME280.cpp` lines
-120–121). Against a modelled chip whose status `im_update` bit never clears, the call does
-not return. The harness aborts after 5000 ms of simulated time and records a FINDING. That
-row is not a pass.
+The earlier `im_update_never_clears` experiment found that Adafruit_BME280 2.3.0
+`init()` waits without a timeout. The vendor files remain untouched. The generated
+adapter now uses a `BoundedBme280` subclass that binds the device, checks the chip
+ID and reset/status I2C results, waits at most 50 ms for calibration status to clear,
+then reuses the vendor coefficient, sampling and compensation code. A failed
+rebind is also a failed probe, never a successful boot.
+
+`im_update_never_clears` is now a required passing regression: stuck calibration
+must return a fault within the modeled software budget, produce no readings, stay
+bounded during retries, and recover after the model clears that condition. A
+mutation removing the timeout must fail this scenario. The 50 ms status deadline
+and Wire transaction timeout are software choices, not validated physical timing.
+Library calibration and compensation code is still tested; the unbounded vendor
+`begin()`/`init()` path is deliberately not used by this application.
+
+Both verifier lanes require every named scenario exactly once, literal boolean
+passes, no findings, and a zero process exit status. Missing/duplicate results,
+crashes, malformed output and a 60-second execution timeout are failures, not
+partial successes.
 
 The verifier takes `--vendor-libs DIR` pointing at a PlatformIO
 `.pio/libdeps/application` tree. After `--platformio` it uses
@@ -191,8 +207,8 @@ source (`Adafruit_SSD1306.cpp`, `return true; // Success`) and by the
 compile of `main.cpp` (`Wire.beginTransmission` / `endTransmission` before
 `begin(..., true, false)`). The host harness does not prove that.
 
-Adafruit library calls block: `begin()` contains `delay(10)` and `delay(100)`
-and a calibration wait loop, so a successful begin blocks for roughly 110 ms.
+The adapter's bounded initialization still calls `delay(10)` and `delay(100)`;
+a successful initialization blocks for roughly 110 ms plus bounded status polling.
 `loop_once()` is non-blocking only in application logic.
 
 ## What this does not prove
