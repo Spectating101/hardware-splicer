@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Info, LoaderCircle, RotateCcw } from 'lucide-react';
 import { DeviceViewer, type DeviceFinding, type DevicePlan } from '@/components/engineering/device-viewer';
+import { DeviceModeledRun } from '@/components/engineering/device-modeled-run';
 import { usePageTitle } from '@/components/use-page-title';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/proxy-client';
 import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
@@ -332,6 +333,7 @@ export default function DevicePage() {
                 </button>
                 {applicationMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-application-message">{applicationMessage}</p> : null}
               </section>
+              <DeviceModeledRun specText={specText} enabled={!busy && !hasWiringFindings && !error && specText === plannedText} />
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-scan">
                 <h2 className="text-sm font-semibold text-stone-100">Check a bench scan</h2>
                 <p className="mt-1 text-xs leading-5 text-stone-400">After you have run the diagnostic or the application on your own board, paste what it printed (the diagnostic prints its scan when you send <code className="text-stone-200">s</code>). This compares it with the addresses this plan declares. It is text you supply, so it is a report, not proof.</p>

@@ -58,6 +58,7 @@ export HARDWARE_SPLICER_PROJECT_ROOT="$RUN_DIR/projects"
 export HARDWARE_SPLICER_OUTPUT_ROOT="$RUN_DIR/outputs"
 export HARDWARE_SPLICER_TMP_ROOT="$RUN_DIR/scratch"
 export HARDWARE_SPLICER_OFFLINE_LLM=1
+export HS_DEVICE_RUNTIME_ENABLED=1
 if [[ "$MODE" == real ]]; then
   "$ROOT/.venv/bin/python" -m uvicorn hardware_splicer.product_api:create_product_app --factory --host 127.0.0.1 --port "$BACKEND_PORT" > "$RUN_DIR/backend.log" 2>&1 &
 else
@@ -84,5 +85,5 @@ wait_for "http://127.0.0.1:$APP_PORT/engineering/device" "$frontend_pid"
 export NODE_PATH="$PLAYWRIGHT_ROOT/node_modules"
 export OUTSIDER_APP_URL="http://127.0.0.1:$APP_PORT"
 export HS_FRONTEND_VERIFY_DIR="$RUN_DIR"
-if [[ $# -eq 0 ]]; then set -- device-assembly device-firmware device-application device-observations donor-device-handoff; fi
+if [[ $# -eq 0 ]]; then set -- device-assembly device-firmware device-application device-observations device-modeled-run donor-device-handoff; fi
 node "$PLAYWRIGHT_ROOT/node_modules/@playwright/test/cli.js" test -c "$FRONTEND/playwright.device.config.cjs" "$@"
