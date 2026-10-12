@@ -34,6 +34,7 @@ public:
     std::vector<std::string> logs;
     std::vector<std::array<std::string, 4>> displays;
     int sensor_begin_calls = 0;
+    int fail_begin_call = 0;  // 1-based: that sensor_begin call fails (driver rebinds, stays uncalibrated)
     int display_begin_calls = 0;
     int read_calls = 0;
     int recover_calls = 0;
@@ -59,7 +60,7 @@ public:
         sensor_begin_calls += 1;
         sensor_begin_addrs.push_back(addr);
         bound_addr = addr;  // Adafruit_BME280 2.3.0 begin always (re)binds, even when it returns false
-        calibrated = present[addr] && chip_id[addr] == kBme280ChipId;
+        calibrated = present[addr] && chip_id[addr] == kBme280ChipId && sensor_begin_calls != fail_begin_call;
         return calibrated;
     }
 
@@ -414,6 +415,26 @@ static bool scenario_sensor_missing_at_boot(std::string& detail) {
     if (!check_grammar(hal, detail)) {
         return false;
     }
+    {
+        // The probe found the chip, but the final rebind to it fails (call 3: probe 0x77, probe 0x76, rebind 0x77).
+        // A chip that was seen once but cannot be bound again must not be reported as a usable device.
+        FakeHal flaky;
+        flaky.set_sensor(0x77, true, kBme280ChipId);
+        flaky.set_display(0x3C, true);
+        flaky.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+        flaky.fail_begin_call = 3;
+        SensorApp flaky_app(flaky, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
+        flaky.clock = 0;
+        flaky_app.loop_once();
+        if (count_contains(flaky.logs, "BOOT sensor=") != 0) {
+            detail = "a failed rebind was reported as a usable sensor";
+            return false;
+        }
+        if (count_contains(flaky.logs, "FAULT_SENSOR_MISSING") != 1 || count_contains(flaky.logs, "STATE=OK") != 0) {
+            detail = "a failed rebind must leave FAULT_SENSOR_MISSING and no reading";
+            return false;
+        }
+    }
     return true;
 }
 
@@ -442,6 +463,34 @@ static bool scenario_display_missing(std::string& detail) {
     if (count_contains(hal.logs, "STATE=OK") < 1) {
         detail = "readings must still be logged on serial";
         return false;
+    }
+    // Faults must not draw on a display that never answered, whether the sensor read fails or is absent.
+    hal.queue_fail();
+    hal.clock = 8000;
+    app.loop_once();
+    hal.queue_fail();
+    hal.clock = 10000;
+    app.loop_once();
+    hal.queue_fail();
+    hal.clock = 12000;
+    app.loop_once();
+    if (count_contains(hal.logs, "FAULT_SENSOR_READ") != 1) {
+        detail = "the sensor read fault was not reached while the display was missing";
+        return false;
+    }
+    if (!hal.displays.empty()) {
+        detail = "a read fault must not draw on a display that never answered";
+        return false;
+    }
+    {
+        FakeHal bare;
+        SensorApp bare_app(bare, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
+        bare.clock = 0;
+        bare_app.loop_once();
+        if (count_contains(bare.logs, "FAULT_SENSOR_MISSING") != 1 || !bare.displays.empty()) {
+            detail = "a missing sensor must not draw on a display that never answered";
+            return false;
+        }
     }
     if (!check_grammar(hal, detail)) {
         return false;
@@ -504,6 +553,10 @@ static bool scenario_transient_read_failure(std::string& detail) {
     }
     if (!has_exact(hal.logs, "T=2000 STATE=STALE")) {
         detail = "first failed read was not marked STALE";
+        return false;
+    }
+    if (hal.displays.empty() || hal.displays.back()[0] != "STATE STALE" || hal.displays.back()[1] != "21.50 C") {
+        detail = "a stale reading must be shown as STATE STALE with the last good values, not as fresh";
         return false;
     }
     hal.queue_fail();
@@ -922,6 +975,28 @@ static bool scenario_clock_wrap(std::string& detail) {
     if (hal.read_calls != after_jump + 1) {
         detail = "wrap caused a burst of reads";
         return false;
+    }
+    {
+        // A real first loop runs some time after reset. The period is measured from that boot, not from zero.
+        FakeHal late;
+        wire_boot_ok_bus(late);
+        SensorApp late_app(late, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
+        late.clock = 1500;
+        late_app.loop_once();
+        late.clock = 2000;
+        late_app.loop_once();
+        late.clock = 3499;
+        late_app.loop_once();
+        if (late.read_calls != 1) {
+            detail = "a boot at t=1500 must not read again before t=3500";
+            return false;
+        }
+        late.clock = 3500;
+        late_app.loop_once();
+        if (late.read_calls != 2) {
+            detail = "a boot at t=1500 must read again at t=3500";
+            return false;
+        }
     }
     if (!check_grammar(hal, detail)) {
         return false;
