@@ -5,9 +5,9 @@ import Link from 'next/link';
 import {
   AlertTriangle,
   ArrowRight,
+  FileDown,
   Check,
   ChevronRight,
-  CircuitBoard,
   FileCheck2,
   FileText,
   GitBranch,
@@ -22,6 +22,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePageTitle } from '@/components/use-page-title';
+import { ProvenanceChip, findProvenance, type FindingProvenance } from '@/components/engineering/provenance-chip';
+import { ReviewThreadsPanel } from '@/components/engineering/review-threads-panel';
+import { useProjectFindings } from '@/lib/project-findings';
+import { setPresenceFocus } from '@/lib/project-live';
+import { useProjectParts } from '@/lib/project-parts';
+import { PartsPanel } from '@/components/engineering/parts-panel';
+import { EvidenceArtifactViewport, type ActiveArtifact, type FocusPart, type PlacedPin, type ProposalPreview, type ViewerPin } from '@/components/engineering/evidence-artifact-viewport';
+import { ProposalsPanel } from '@/components/engineering/proposals-panel';
+import { fetchCandidateFile, useCandidates, type Candidate } from '@/lib/project-candidates';
+import { changesToHighlights } from '@/lib/artifact-diff';
 import {
   deriveCanonicalSystemGraph,
   type CanonicalVisualObject,
@@ -43,11 +53,8 @@ type ProjectSummary = {
 type ProjectsResponse = { ok?: boolean; projects?: ProjectSummary[] };
 type ProjectEnvelope = { project_id?: string; revision?: number; snapshot?: JsonRecord };
 type ProjectResponse = { ok?: boolean; project?: ProjectEnvelope };
-type BuildFile = { name?: string; relative?: string; kind?: string };
-type BuildFilesResponse = { ok?: boolean; files?: BuildFile[] };
-type BuildContentResponse = { ok?: boolean; content?: string };
-type RailTab = 'project' | 'findings' | 'history';
-type InspectorTab = 'object' | 'findings' | 'evidence';
+type RailTab = 'project' | 'findings' | 'parts' | 'proposals' | 'history';
+type InspectorTab = 'object' | 'findings' | 'evidence' | 'threads';
 
 function record(value: unknown): JsonRecord {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -130,186 +137,6 @@ function statusChip(label: string, state: 'verified' | 'blocked' | 'pending') {
   );
 }
 
-function useKiCanvasScript() {
-  const [ready, setReady] = useState(() => (
-    typeof customElements !== 'undefined' && Boolean(customElements.get('kicanvas-embed'))
-  ));
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    if (ready) return;
-    const existing = document.querySelector('script[data-kicanvas-vnext="1"]');
-    if (existing) {
-      const onLoad = () => setReady(true);
-      const onError = () => setFailed(true);
-      existing.addEventListener('load', onLoad, { once: true });
-      existing.addEventListener('error', onError, { once: true });
-      return () => {
-        existing.removeEventListener('load', onLoad);
-        existing.removeEventListener('error', onError);
-      };
-    }
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = '/kicanvas/kicanvas.js';
-    script.dataset.kicanvasVnext = '1';
-    script.onload = () => setReady(true);
-    script.onerror = () => setFailed(true);
-    document.head.appendChild(script);
-  }, [ready]);
-
-  return { ready, failed };
-}
-
-function ArtifactViewport({ buildDir, overlayFinding }: { buildDir: string; overlayFinding: string }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const { ready, failed: viewerFailed } = useKiCanvasScript();
-  const [files, setFiles] = useState<BuildFile[]>([]);
-  const [activeRelative, setActiveRelative] = useState('');
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!buildDir) {
-      setFiles([]);
-      setActiveRelative('');
-      setContent('');
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    setError('');
-    fetch('/api/proxy/hardware-splicer/build-files/list', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ build_dir: buildDir }),
-      cache: 'no-store',
-    })
-      .then(async (response) => {
-        const payload = await response.json() as BuildFilesResponse & { detail?: unknown };
-        if (!response.ok) throw new Error('Build artifact list is unavailable.');
-        return payload;
-      })
-      .then((payload) => {
-        if (cancelled) return;
-        const nextFiles = payload.files || [];
-        setFiles(nextFiles);
-        const preferred = nextFiles.find((file) => file.kind === 'schematic')
-          || nextFiles.find((file) => file.kind === 'pcb')
-          || nextFiles[0];
-        setActiveRelative(preferred?.relative || '');
-      })
-      .catch((caught) => {
-        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Build artifact list is unavailable.');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [buildDir]);
-
-  useEffect(() => {
-    if (!buildDir || !activeRelative) {
-      setContent('');
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    setError('');
-    fetch('/api/proxy/hardware-splicer/build-files/content', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ build_dir: buildDir, relative: activeRelative }),
-      cache: 'no-store',
-    })
-      .then(async (response) => {
-        const payload = await response.json() as BuildContentResponse;
-        if (!response.ok) throw new Error('Artifact content is unavailable.');
-        return payload;
-      })
-      .then((payload) => {
-        if (!cancelled) setContent(payload.content || '');
-      })
-      .catch((caught) => {
-        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Artifact content is unavailable.');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [activeRelative, buildDir]);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host || !ready || !content) return;
-    host.replaceChildren();
-    const embed = document.createElement('kicanvas-embed');
-    embed.setAttribute('controls', 'basic');
-    embed.setAttribute('controlslist', 'nodownload nooverlay');
-    const source = document.createElement('kicanvas-source');
-    source.textContent = content;
-    embed.appendChild(source);
-    host.appendChild(embed);
-  }, [content, ready]);
-
-  const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
-
-  return (
-    <div className="flex h-full min-h-[650px] flex-col bg-white">
-      <div className="flex min-h-12 items-center justify-between gap-3 border-b border-stone-200 px-3">
-        <div className="flex items-center gap-1">
-          {visibleFiles.map((file) => {
-            const active = file.relative === activeRelative;
-            return (
-              <button
-                key={file.relative || file.name}
-                type="button"
-                onClick={() => setActiveRelative(file.relative || '')}
-                className={`border-b-2 px-3 py-3 text-xs font-medium ${active ? 'border-stone-900 text-stone-950' : 'border-transparent text-stone-500 hover:text-stone-900'}`}
-              >
-                {file.kind === 'schematic' ? 'Schematic' : file.kind === 'pcb' ? 'PCB' : file.name}
-              </button>
-            );
-          })}
-          {!visibleFiles.length ? <span className="px-3 text-xs text-stone-500">Artifact</span> : null}
-        </div>
-        <span className="max-w-[38%] truncate font-mono text-[10px] text-stone-400">{activeRelative || 'no KiCad artifact attached'}</span>
-      </div>
-
-      <div className="relative min-h-0 flex-1 overflow-hidden bg-[#fbfbfa]">
-        {loading ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70"><LoaderCircle className="h-5 w-5 animate-spin text-stone-500" /></div>
-        ) : null}
-
-        {!buildDir || error || viewerFailed || (!content && !loading) ? (
-          <div className="flex h-full min-h-[600px] items-center justify-center p-8">
-            <div className="max-w-sm text-center">
-              <CircuitBoard className="mx-auto h-9 w-9 text-stone-300" />
-              <div className="mt-3 text-sm font-medium text-stone-800">{buildDir ? 'KiCad preview unavailable' : 'No build artifact attached'}</div>
-              <div className="mt-1 text-xs leading-5 text-stone-500">{error || (viewerFailed ? 'The bundled KiCanvas viewer failed to load.' : 'The current project snapshot does not expose a build directory yet.')}</div>
-            </div>
-          </div>
-        ) : (
-          <div ref={hostRef} className="h-full min-h-[600px] w-full [&>kicanvas-embed]:block [&>kicanvas-embed]:h-full [&>kicanvas-embed]:min-h-[600px] [&>kicanvas-embed]:w-full" />
-        )}
-
-        {overlayFinding ? (
-          <div className="absolute left-5 top-5 z-10 max-w-xs rounded-md border border-red-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
-            <div className="flex gap-2">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-600 text-white"><AlertTriangle className="h-3 w-3" /></span>
-              <div>
-                <div className="text-xs font-semibold text-red-800">Review required</div>
-                <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-stone-700">{overlayFinding}</div>
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 export default function EvidenceOverviewPage() {
   usePageTitle('Project Review | Hardware Splicer');
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -321,6 +148,43 @@ export default function EvidenceOverviewPage() {
   const [railTab, setRailTab] = useState<RailTab>('project');
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>('object');
   const [query, setQuery] = useState('');
+  const { findings } = useProjectFindings(projectId);
+  const parts = useProjectParts(projectId, revision, railTab === 'parts');
+  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
+  const candidates = useCandidates(projectId);
+  const [preview, setPreview] = useState<ProposalPreview | null>(null);
+  const [previewError, setPreviewError] = useState('');
+  const [focusChange, setFocusChange] = useState<string | null>(null);
+  const [focusPart, setFocusPart] = useState<FocusPart | null>(null);
+
+  async function previewCandidate(candidate: Candidate | null) {
+    setPreviewError('');
+    if (!candidate) { setPreview(null); setFocusChange(null); return; }
+    try {
+      const text = await fetchCandidateFile(projectId, candidate.candidate_id, candidate.kind);
+      setPreview({ candidateId: candidate.candidate_id, kind: candidate.kind, text, relative: candidate.files?.[candidate.kind]?.retained_relative || undefined });
+    } catch (caught) {
+      setPreview(null);
+      setPreviewError(caught instanceof Error ? caught.message : 'The proposed file could not be loaded.');
+    }
+  }
+
+  // A preview belongs to one project; leaving it must not leave another project's file on screen.
+  useEffect(() => { setPreview(null); setPreviewError(''); setFocusChange(null); setFocusPart(null); }, [projectId]);
+
+  // The previewed proposal's changes, boxed on the file they belong to. Shown only while that file is the one on screen.
+  const previewedCandidate = preview ? candidates.candidates.find((item) => item.candidate_id === preview.candidateId) || null : null;
+  const previewHighlights = previewedCandidate && activeArtifact && activeArtifact.kind === previewedCandidate.kind
+    ? changesToHighlights({
+        available: true,
+        kind: previewedCandidate.kind,
+        summary: previewedCandidate.diff?.summary || { added: 0, removed: 0, changed: 0, unchanged: 0 },
+        changes: previewedCandidate.diff?.changes || [],
+      }, activeArtifact.relative)
+    : [];
+  const [placing, setPlacing] = useState(false);
+  const [pendingPin, setPendingPin] = useState<PlacedPin | null>(null);
+  const [threadPins, setThreadPins] = useState<ViewerPin[]>([]);
   const [busy, setBusy] = useState<'projects' | 'project' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -355,6 +219,60 @@ export default function EvidenceOverviewPage() {
   const overlayFinding = selected?.blockers[0]
     || blockedObjects[0]?.blockers[0]
     || (failedActions.length ? text(failedActions[0]?.title || failedActions[0]?.action_type, 'Deterministic check failed') : '');
+
+  /** What a registered source is and which recorded requirements cite it. Nothing here is inferred. */
+  function evidenceDetail(id: string) {
+    const source = sources.find((item) => text(item.source_id || item.id, '') === id) || null;
+    const supports = sessions.flatMap((item) => rows(item.requirements)
+      .filter((requirement) => (Array.isArray(requirement.source_ids) ? requirement.source_ids : []).map(String).includes(id))
+      .map((requirement) => text(requirement.statement, '')))
+      .filter(Boolean);
+    return { source, supports: Array.from(new Set(supports)) };
+  }
+
+  const failedCheckProvenance = (actionId: string): FindingProvenance | null => findings
+    .find((item) => item.category === 'failed_check' && item.provenance.source_ref === actionId)?.provenance || null;
+
+  // Findings the backend recorded that this page did not already derive itself (for example release blockers).
+  const recordedFindings = useMemo(() => {
+    const shownTexts = new Set([...blockedObjects.flatMap((object) => object.blockers), ...failedActions.map((action) => text(action.title || action.action_type, ''))]);
+    const shownRefs = new Set(failedActions.map((action) => text(action.action_id, '')));
+    return findings.filter((item) => !shownTexts.has(item.text) && !(item.category === 'failed_check' && item.provenance.source_ref && shownRefs.has(item.provenance.source_ref)));
+  }, [findings, blockedObjects, failedActions]);
+
+  const firstBlocked = blockedObjects[0] || null;
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPresenceFocus(selected?.id || '');
+  }, [selected?.id]);
+
+  useEffect(() => {
+    // A pin placed for one object must not leak into a thread started on another.
+    setPendingPin(null);
+    setPlacing(false);
+  }, [selected?.id]);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName))) return;
+      if (event.key === '/') {
+        event.preventDefault();
+        setRailTab('project');
+        window.setTimeout(() => searchRef.current?.focus(), 0);
+      } else if ((event.key === 'j' || event.key === 'k') && filteredObjects.length) {
+        event.preventDefault();
+        const index = filteredObjects.findIndex((object) => object.id === selected?.id);
+        const next = event.key === 'j' ? Math.min(index + 1, filteredObjects.length - 1) : Math.max(index - 1, 0);
+        setSelectedObject(filteredObjects[next]);
+        setInspectorTab('object');
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [filteredObjects, selected?.id]);
 
   async function loadProject(selectedProjectId: string, preferredObjectId = '') {
     if (!selectedProjectId) return;
@@ -426,12 +344,14 @@ export default function EvidenceOverviewPage() {
   const railTabs: Array<[RailTab, string, number | null]> = [
     ['project', 'Project', null],
     ['findings', 'Findings', blockedObjects.length + failedActions.length],
-    ['history', 'History', actions.length],
+    ['parts', 'Parts', null],
+    ['proposals', 'Proposals', candidates.candidates.length],
+    ['history', 'History', null],
   ];
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
-      <div className="flex min-h-screen flex-col">
+    <main className="h-full bg-stone-100 text-stone-950">
+      <div className="flex h-full min-h-[760px] flex-col">
         <header className="border-b border-stone-200 bg-white">
           <div className="flex min-h-14 flex-wrap items-center gap-3 px-4 lg:px-5">
             <Link href="/engineering/studio" className="text-sm font-semibold tracking-tight text-stone-950">Hardware Splicer</Link>
@@ -453,6 +373,28 @@ export default function EvidenceOverviewPage() {
               <Button size="sm" variant="outline" onClick={loadProjects} disabled={busy !== null} className="h-8 border-stone-300 bg-white text-stone-700">
                 {busy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
               </Button>
+              {projectId && revision ? (
+                <a
+                  href={`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/review-packet?revision=${revision}&format=markdown`}
+                  download
+                  title="Download what this revision holds, with its file hashes and how each finding was established. It reports only; it approves nothing."
+                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-stone-300 bg-white px-3 text-xs font-medium text-stone-700 hover:bg-stone-50"
+                  data-testid="review-packet-link"
+                >
+                  <FileDown className="h-3.5 w-3.5" aria-hidden="true" />Review packet
+                </a>
+              ) : null}
+              {projectId && revision ? (
+                <a
+                  href={`/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/review-packet?revision=${revision}&format=markdown&include_text=false`}
+                  download
+                  title="The same packet with no comments, notes or finding text: only who did what and when, the file hashes and the counts. The one to share outside the team."
+                  className="inline-flex h-8 items-center rounded-md px-2 text-[11px] font-medium text-stone-500 underline-offset-2 hover:text-stone-900 hover:underline"
+                  data-testid="review-packet-share-link"
+                >
+                  Without comments
+                </a>
+              ) : null}
               <Link href={`/engineering/visual?project=${encodeURIComponent(projectId)}&mode=decide`} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-stone-900 px-3 text-xs font-medium text-white hover:bg-stone-800">
                 Compare <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -460,16 +402,49 @@ export default function EvidenceOverviewPage() {
           </div>
         </header>
 
+        {projectId ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-stone-200 bg-white px-4 py-2 text-xs text-stone-600" data-testid="next-step">
+            {firstBlocked || failedActions.length ? (
+              <>
+                <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-hidden="true" />
+                <span>
+                  <span className="font-medium text-stone-900">Design is blocked.</span>{' '}
+                  {blockedObjects.length ? `${blockedObjects.length} of ${graph.objects.length} objects carry a blocker` : ''}
+                  {blockedObjects.length && failedActions.length ? ' and ' : ''}
+                  {failedActions.length ? `${failedActions.length} check${failedActions.length === 1 ? '' : 's'} failed` : ''}.
+                </span>
+                {firstBlocked ? (
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedObject(firstBlocked); setRailTab('findings'); setInspectorTab('findings'); }}
+                    className="inline-flex items-center gap-1 rounded-md border border-stone-300 px-2 py-1 font-medium text-stone-800 hover:bg-stone-50"
+                  >
+                    Review {firstBlocked.label} first <ArrowRight className="h-3 w-3" />
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+                <span>
+                  <span className="font-medium text-stone-900">No recorded blockers.</span>
+                  {powerOnAuthorized ? '' : ' Power-on stays closed until real measurements are attached.'}
+                </span>
+              </>
+            )}
+          </div>
+        ) : null}
+
         {error ? (
           <div className="flex items-start gap-2 border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800"><XCircle className="mt-0.5 h-3.5 w-3.5" />{error}</div>
         ) : null}
 
-        <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
-          <aside className="flex min-h-[720px] flex-col bg-white">
-            <div className="grid grid-cols-3 border-b border-stone-200 p-2">
+        <section className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[320px_minmax(0,1fr)_340px] xl:grid-rows-[minmax(0,1fr)]">
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
+            <div className="flex overflow-x-auto border-b border-stone-200 p-2">
               {railTabs.map(([id, label, count]) => (
-                <button key={id} type="button" onClick={() => setRailTab(id)} className={`rounded-md px-2 py-2 text-xs font-medium ${railTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>
-                  {label}{count ? <span className="ml-1 text-stone-400">{count}</span> : null}
+                <button key={id} type="button" onClick={() => setRailTab(id)} className={`shrink-0 rounded-md px-1 py-2 text-[11.5px] font-medium ${railTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>
+                  {label}{count ? <span className="ml-0.5 text-stone-400">{count}</span> : null}
                 </button>
               ))}
             </div>
@@ -478,7 +453,7 @@ export default function EvidenceOverviewPage() {
               <>
                 <label className="m-3 flex items-center gap-2 rounded-md border border-stone-200 bg-stone-50 px-2.5 py-2">
                   <Search className="h-3.5 w-3.5 text-stone-400" />
-                  <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-stone-400" />
+                  <input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-stone-400" />
                 </label>
                 <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
                   <div className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400">Objects</div>
@@ -497,19 +472,38 @@ export default function EvidenceOverviewPage() {
                 </div>
                 <div className="border-t border-stone-200 p-3 text-[10px] text-stone-400">{sources.length} sources · {graph.objects.length} objects · {sessions.length} AI sessions</div>
               </>
+            ) : railTab === 'proposals' ? (
+              <>
+                {previewError ? <div role="alert" className="m-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">{previewError}</div> : null}
+                <ProposalsPanel candidates={candidates.candidates} loading={candidates.loading} projectId={projectId} nextRevision={revision ? revision + 1 : null} previewId={preview?.candidateId || null} onPreview={(candidate) => void previewCandidate(candidate)} onFocusChange={setFocusChange} decide={candidates.decide} />
+              </>
+            ) : railTab === 'parts' ? (
+              <PartsPanel result={parts.result} loading={parts.loading} error={parts.error} onCheckAvailability={() => void parts.checkAvailability()} onLocate={(ref) => setFocusPart({ ref, kind: 'schematic', nonce: Date.now(), relative: parts.result?.source?.relative || undefined })} />
             ) : railTab === 'findings' ? (
               <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                {!blockedObjects.length && !failedActions.length ? <div className="text-xs text-stone-500">No recorded blocker or failed check.</div> : null}
+                {!blockedObjects.length && !failedActions.length && !recordedFindings.length ? <div className="text-xs text-stone-500">No recorded blocker or failed check.</div> : null}
+                {blockedObjects.length ? <div className="px-0.5 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400">Blocked objects · {blockedObjects.length}</div> : null}
                 {blockedObjects.map((object) => (
                   <button key={object.id} type="button" onClick={() => { setSelectedObject(object); setInspectorTab('findings'); }} className="mb-2 w-full rounded-md border border-red-100 bg-red-50 p-3 text-left">
                     <div className="text-xs font-semibold text-red-800">{object.label}</div>
                     <div className="mt-1 line-clamp-2 text-[11px] leading-4 text-red-700/80">{object.blockers[0] || 'Blocked object'}</div>
+                    {object.blockers[0] ? <div className="mt-2"><ProvenanceChip provenance={findProvenance(findings, object.blockers[0], object.id)} /></div> : null}
                   </button>
                 ))}
+                {failedActions.length ? <div className="px-0.5 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400">Failed checks · {failedActions.length}</div> : null}
                 {failedActions.map((action, index) => (
                   <div key={text(action.action_id, `failed-${index}`)} className="mb-2 rounded-md border border-red-100 bg-red-50 p-3">
                     <div className="text-xs font-semibold text-red-800">{text(action.title || action.action_type, 'Failed check')}</div>
                     <div className="mt-1 font-mono text-[10px] text-red-600/70">{text(action.action_id, '')}</div>
+                    <div className="mt-2"><ProvenanceChip provenance={failedCheckProvenance(text(action.action_id, ''))} /></div>
+                  </div>
+                ))}
+                {recordedFindings.length ? <div className="px-0.5 pb-2 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400">Recorded by checks · {recordedFindings.length}</div> : null}
+                {recordedFindings.map((item) => (
+                  <div key={item.finding_id} className="mb-2 rounded-md border border-red-100 bg-red-50 p-3">
+                    <div className="text-[10px] font-medium text-red-700/80">{item.category === 'release_blocker' ? 'Release blocker' : item.category === 'traceability_issue' ? 'Traceability' : item.category === 'failed_check' ? 'Check' : 'Finding'}</div>
+                    <div className="mt-1 text-[11px] leading-4 text-red-800">{item.text}</div>
+                    <div className="mt-2"><ProvenanceChip provenance={item.provenance} /></div>
                   </div>
                 ))}
               </div>
@@ -528,13 +522,32 @@ export default function EvidenceOverviewPage() {
             )}
           </aside>
 
-          <section className="min-w-0 bg-white">
-            <ArtifactViewport buildDir={buildDir} overlayFinding={overlayFinding} />
+          <section className="order-first min-w-0 bg-white xl:order-none">
+            <EvidenceArtifactViewport
+              buildDir={buildDir}
+              overlayFinding={overlayFinding}
+              pins={threadPins}
+              placing={placing}
+              onPlace={(pin) => { setPendingPin(pin); setPlacing(false); }}
+              onCancelPlace={() => setPlacing(false)}
+              onActiveArtifact={setActiveArtifact}
+              model3d={{ projectId, revision }}
+              preview={preview}
+              focusPart={focusPart}
+              highlights={previewHighlights}
+              focusHighlightId={focusChange}
+              proposing={revision ? {
+                projectId,
+                baseRevision: revision,
+                onPropose: (kind, input, note) => candidates.propose({ baseRevision: revision, kind, note, ...input }),
+                onProposed: () => setRailTab('proposals'),
+              } : undefined}
+            />
           </section>
 
-          <aside className="flex min-h-[720px] flex-col bg-white">
-            <div className="grid grid-cols-3 border-b border-stone-200 p-2">
-              {([['object', 'Object'], ['findings', `Findings${selected?.blockers.length ? ` ${selected.blockers.length}` : ''}`], ['evidence', `Evidence${selected?.evidenceIds.length ? ` ${selected.evidenceIds.length}` : ''}`]] as Array<[InspectorTab, string]>).map(([id, label]) => (
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
+            <div className="grid grid-cols-4 border-b border-stone-200 p-2">
+              {([['object', 'Object'], ['findings', `Findings${selected?.blockers.length ? ` ${selected.blockers.length}` : ''}`], ['evidence', `Evidence${selected?.evidenceIds.length ? ` ${selected.evidenceIds.length}` : ''}`], ['threads', 'Threads']] as Array<[InspectorTab, string]>).map(([id, label]) => (
                 <button key={id} type="button" onClick={() => setInspectorTab(id)} className={`rounded-md px-2 py-2 text-xs font-medium ${inspectorTab === id ? 'bg-stone-100 text-stone-950' : 'text-stone-500 hover:text-stone-900'}`}>{label}</button>
               ))}
             </div>
@@ -568,16 +581,48 @@ export default function EvidenceOverviewPage() {
                     {selected.blockers.map((blocker) => (
                       <div key={blocker} className="rounded-md border border-red-200 bg-red-50 p-3">
                         <div className="flex gap-2"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-red-700" /><div className="text-xs leading-5 text-red-800">{blocker}</div></div>
+                        <div className="mt-2"><ProvenanceChip provenance={findProvenance(findings, blocker, selected.id)} /></div>
                       </div>
                     ))}
                     {!selected.blockers.length ? <div className="flex gap-2 rounded-md border border-stone-200 p-3 text-xs text-stone-500"><ShieldCheck className="h-4 w-4 text-emerald-600" />No blocker is attached to this object.</div> : null}
                   </div>
                 </div>
+              ) : inspectorTab === 'threads' ? (
+                <ReviewThreadsPanel
+                  projectId={projectId}
+                  revision={revision}
+                  objectId={selected.id}
+                  objectLabel={selected.label}
+                  activeArtifact={activeArtifact}
+                  pendingPin={pendingPin}
+                  onRequestPin={() => setPlacing(true)}
+                  onClearPin={() => { setPendingPin(null); setPlacing(false); }}
+                  onPinsChange={setThreadPins}
+                />
               ) : (
                 <div>
                   <h2 className="text-sm font-semibold text-stone-900">Evidence identities</h2>
                   <div className="mt-3 space-y-2">
-                    {selected.evidenceIds.map((id) => <div key={id} className="flex items-center gap-2 rounded-md border border-stone-200 px-3 py-2.5"><FileText className="h-3.5 w-3.5 text-stone-400" /><span className="break-all font-mono text-[10px] text-stone-600">{id}</span></div>)}
+                    {selected.evidenceIds.map((id) => {
+                      const detail = evidenceDetail(id);
+                      return (
+                        <div key={id} className="rounded-md border border-stone-200 px-3 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-3.5 w-3.5 shrink-0 text-stone-400" />
+                            <span className="min-w-0 flex-1 break-all font-mono text-[10px] text-stone-700">{id}</span>
+                            <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${detail.source ? 'bg-stone-100 text-stone-600' : 'bg-amber-50 text-amber-700'}`}>
+                              {detail.source ? text(detail.source.source_type, 'source') : 'not registered'}
+                            </span>
+                          </div>
+                          <div className="mt-2 text-[10px] font-medium text-stone-400">Cited by</div>
+                          {detail.supports.length ? (
+                            <ul className="mt-1 space-y-1">
+                              {detail.supports.map((statement) => <li key={statement} className="text-[11px] leading-4 text-stone-600">{statement}</li>)}
+                            </ul>
+                          ) : <div className="mt-1 text-[11px] text-stone-500">No recorded requirement cites this source.</div>}
+                        </div>
+                      );
+                    })}
                     {!selected.evidenceIds.length ? <div className="text-xs text-stone-500">No evidence identity is attached.</div> : null}
                   </div>
                 </div>

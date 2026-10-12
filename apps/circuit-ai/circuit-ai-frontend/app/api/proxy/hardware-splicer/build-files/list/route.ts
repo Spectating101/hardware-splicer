@@ -1,6 +1,7 @@
 import {
   forwardUiJsonResponse,
   getHardwareSplicerApiUrl,
+  getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../../_backend";
 
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
   try {
     const response = await fetch(target, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...getProxyAuthHeaders(request) },
       body,
       cache: "no-store",
     });

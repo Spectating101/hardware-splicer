@@ -1,332 +1,226 @@
-'use client';
-
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  Boxes,
-  Camera,
-  CircuitBoard,
-  Cpu,
-  Lightbulb,
-  Recycle,
-  Scissors,
-  ShieldAlert,
-  Sparkles,
-  Wrench,
-  Zap,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { usePageTitle } from '@/components/use-page-title';
+import { Check, Circle, GitCompareArrows, Lock, Microscope, ScanLine, FileCheck2 } from 'lucide-react';
+import { CLAIM_BOUNDARY } from '@/lib/claim-boundary';
 
-const killerFlows = [
+const views = [
   {
-    icon: Camera,
-    eyebrow: 'Start',
-    title: 'Show us what you have.',
-    copy: 'Upload a photo, describe symptoms, or paste sourcing context. Circuit.AI creates a case file and routes it into repair, salvage, build, resale, or evidence collection.',
-    cta: 'Start a case',
-    href: '/start',
-    accent: 'from-cyan-500/20 to-sky-500/10',
-    stroke: 'border-cyan-300/50',
+    href: '/engineering/evidence',
+    label: 'Review',
+    icon: ScanLine,
+    text: 'Browse the schematic and PCB, with findings listed against the object they concern.',
   },
   {
-    icon: Scissors,
-    eyebrow: 'Salvage',
-    title: 'Cut and reuse modules from anything.',
-    copy: 'Got a dead router, microwave, or vape? We decompose the board into functional modules and show you exactly where to cut to reuse the parts that still work.',
-    cta: 'See salvage plans',
-    href: '/scan?mode=salvage',
-    accent: 'from-amber-500/20 to-orange-500/10',
-    stroke: 'border-amber-300/50',
+    href: '/engineering/evidence/compare',
+    label: 'Compare',
+    icon: GitCompareArrows,
+    text: 'See what changed between two revisions and which blockers opened, were resolved, or persisted. Nothing merges automatically.',
   },
   {
-    icon: Wrench,
-    eyebrow: 'Build',
-    title: 'Wire it up without knowing electronics.',
-    copy: 'Drop salvaged modules onto a virtual breadboard. Jarvis wires them into a working project, explains every connection, and flags anything dangerous before you power it on.',
-    cta: 'Open Build',
-    href: '/build',
-    accent: 'from-violet-500/20 to-fuchsia-500/10',
-    stroke: 'border-violet-300/50',
+    href: '/engineering/evidence/verify',
+    label: 'Verify',
+    icon: FileCheck2,
+    text: 'Walk the checks for one revision, from the attached design files to physical correctness.',
+  },
+  {
+    href: '/engineering/evidence/bringup',
+    label: 'Bring-up',
+    icon: Microscope,
+    text: 'Follow identity, cold checks, power, functional test and release, and see which steps have real measurements behind them.',
   },
 ];
 
-const beliefs = [
-  {
-    icon: Recycle,
-    title: 'E-waste is a parts bin.',
-    copy: 'A broken microwave has a perfectly good transformer. A dead router has a Wi-Fi module worth salvaging. We help you see it that way.',
-  },
-  {
-    icon: Lightbulb,
-    title: 'You do not need to be an EE.',
-    copy: 'We answer the questions forums make you feel stupid for asking. What is this chip? Will it blow up if I connect it to 9V? What can I actually build with this stuff?',
-  },
-  {
-    icon: ShieldAlert,
-    title: 'Safety first, always.',
-    copy: 'Mains voltage, lithium cells, and bulk capacitors kill people. Every plan runs through a safety classifier — scary stuff is gated behind clear warnings and capability checks.',
-  },
-  {
-    icon: Cpu,
-    title: 'Graduate into real tools.',
-    copy: 'When you outgrow the breadboard, export a real KiCad project and send it to a fab. The AI grows with you — beginner mode to professional output.',
-  },
-];
+const gates = ['Fabrication', 'Power-on', 'Release'];
 
-const projectExamples = [
-  { title: 'Weather station', parts: 'ESP32 + DHT22 + OLED', difficulty: 'Beginner' },
-  { title: 'Salvaged speaker amp', parts: 'Old radio amp + 5V buck + any speaker', difficulty: 'Beginner' },
-  { title: 'Smart lamp', parts: 'ESP32 + relay module + wall bulb', difficulty: 'Intermediate' },
-  { title: 'Router Wi-Fi repeater', parts: 'Old router Wi-Fi module + USB-C 5V + antenna', difficulty: 'Intermediate' },
-  { title: 'Battery bank from laptop cells', parts: '18650 cells + BMS + buck/boost', difficulty: 'Advanced' },
-  { title: 'Retro game handheld', parts: 'Raspberry Pi + screen + old Gameboy shell', difficulty: 'Advanced' },
-];
+const focusRing =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900';
 
 export default function HomePage() {
-  usePageTitle('Circuit.AI | Build Electronics From Anything');
+  const b = CLAIM_BOUNDARY;
 
   return (
-    <div className="min-h-screen bg-[#0a0f1a] text-slate-100">
-      <SiteHeader />
+    <main className="hs-reset min-h-screen bg-[#f7f7f5] text-stone-900">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+        <span className="text-sm font-semibold tracking-tight">Hardware Splicer</span>
+        <nav aria-label="Primary" className="flex items-center gap-5 text-sm text-stone-600">
+          <Link href="/engineering/evidence" className={`hover:text-stone-950 ${focusRing}`}>
+            Review workspace
+          </Link>
+          <a
+            href="https://github.com/Spectating101/hardware-splicer"
+            className={`hover:text-stone-950 ${focusRing}`}
+          >
+            Source
+          </a>
+        </nav>
+      </header>
 
-      <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-white/5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_80%_20%,rgba(249,115,22,0.12),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(167,139,250,0.10),transparent_40%)]" />
-          <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-cyan-300/90"
+      <section className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:pt-14">
+        <div className="max-w-xl">
+          <h1 className="text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl">
+            See what has actually been proven about a hardware design.
+          </h1>
+          <p className="mt-6 text-base leading-7 text-stone-600">
+            Hardware Splicer ties every check, finding and measurement to one exact revision of a
+            design. Fabrication, power-on and release stay closed until a person opens them, and
+            passing software checks never opens them on its own.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link
+              href="/engineering/evidence"
+              className={`inline-flex h-11 items-center rounded-md bg-stone-900 px-5 text-sm font-medium text-white transition hover:bg-stone-700 ${focusRing}`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              AI copilot for makers, tinkerers, repair folks
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 }}
-              className="max-w-4xl text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl"
+              Open the review workspace
+            </Link>
+            <a
+              href="#claims"
+              className={`inline-flex h-11 items-center rounded-md border border-stone-300 px-5 text-sm font-medium text-stone-800 transition hover:border-stone-400 hover:bg-white ${focusRing}`}
             >
-              Build electronics
-              <br />
-              <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-amber-300 bg-clip-text text-transparent">
-                from anything.
-              </span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="mt-6 max-w-2xl text-lg leading-8 text-slate-300"
-            >
-              Point your phone at a dead gadget and we&apos;ll tell you what&apos;s salvageable. Drop those parts
-              on a virtual breadboard and we&apos;ll wire them into something that works. You don&apos;t need to
-              know what a capacitor does. Jarvis handles that — you bring the curiosity.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="mt-8 flex flex-wrap items-center gap-3"
-            >
-              <Button asChild size="lg" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
-                <Link href="/start">
-                  <Camera className="mr-2 h-5 w-5" />
-                  Start a case
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                <Link href="/build">
-                  <Wrench className="mr-2 h-5 w-5" />
-                  Start building
-                </Link>
-              </Button>
-              <Link href="/parts" className="ml-1 inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
-                <Boxes className="h-4 w-4" />
-                I already have a parts bin
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-
-            {/* Mini stat row */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-14 grid gap-4 sm:grid-cols-3"
-            >
-              {[
-                ['Photo in', '~5s average identification'],
-                ['Modules mapped', '200+ common parts preloaded'],
-                ['Safety gated', 'Mains & lithium always flagged'],
-              ].map(([title, copy]) => (
-                <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{title}</div>
-                  <div className="mt-1 text-sm font-medium text-slate-200">{copy}</div>
-                </div>
-              ))}
-            </motion.div>
+              Read the claim boundary
+            </a>
           </div>
-        </section>
+        </div>
 
-        {/* Three killer flows */}
-        <section className="border-b border-white/5 bg-[#070b14]">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="mb-12 max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400/80">What it does</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Three flows. One product. Zero EE degree required.
-              </h2>
+        <figure className="overflow-hidden rounded-lg border border-stone-300 bg-white">
+          <div className="bg-white p-4 sm:p-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/product/spi_flash_adapter_v1-top.svg"
+              alt="Top view of the spi-flash-adapter-v1 reference board"
+              width={1200}
+              height={800}
+              className="mx-auto h-auto w-full"
+            />
+          </div>
+          <figcaption className="border-t border-stone-200 px-4 py-3 text-sm">
+            <span className="font-medium">{b.design}</span>
+            <span className="text-stone-500"> at revision {b.commit.slice(0, 7)}</span>
+            <ul className="mt-3 grid grid-cols-3 gap-2" aria-label="Authority state">
+              {gates.map((gate) => (
+                <li
+                  key={gate}
+                  className="flex items-center gap-1.5 rounded-md border border-stone-200 bg-stone-50 px-2.5 py-2 text-xs text-stone-700"
+                >
+                  <Lock className="h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
+                  <span>
+                    {gate} <span className="font-medium text-stone-950">closed</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="claims" className="border-t border-stone-200 bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            What is claimed for {b.design}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
+            Status as of {b.asOf}. The package is built and checked in software. It has not been
+            fabricated or measured.
+          </p>
+
+          <div className="mt-8 grid gap-10 lg:grid-cols-2">
+            <div>
+              <h3 className="text-sm font-semibold">Supported</h3>
+              <ul className="mt-3 divide-y divide-stone-200 border-y border-stone-200">
+                {b.supported.map((item) => (
+                  <li key={item.claim} className="flex gap-3 py-3.5">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
+                    <div>
+                      <p className="text-sm leading-6 text-stone-900">{item.claim}</p>
+                      <p className="mt-0.5 text-sm leading-6 text-stone-500">{item.evidence}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
-              {killerFlows.map((flow) => {
-                const Icon = flow.icon;
-                return (
+            <div>
+              <h3 className="text-sm font-semibold">Not established</h3>
+              <ul className="mt-3 divide-y divide-stone-200 border-y border-stone-200">
+                {b.notEstablished.map((claim) => (
+                  <li key={claim} className="flex gap-3 py-3.5">
+                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-stone-400" aria-hidden="true" />
+                    <p className="text-sm leading-6 text-stone-700">{claim}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <h3 className="mt-12 text-sm font-semibold">What each claim needs before it can move</h3>
+          <dl className="mt-3 grid gap-6 sm:grid-cols-3">
+            {b.promotion.map((step) => (
+              <div key={step.stage} className="border-t border-stone-300 pt-3">
+                <dt className="text-sm font-medium">{step.stage}</dt>
+                <dd className="mt-2">
+                  <ul className="space-y-1.5 text-sm leading-6 text-stone-600">
+                    {step.requires.map((need) => (
+                      <li key={need}>{need}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="border-t border-stone-200">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <h2 className="text-2xl font-semibold tracking-tight">Four views of one project</h2>
+          <figure className="mt-6 overflow-hidden rounded-lg border border-stone-300 bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/product/review-workspace.png"
+              alt="The Review view: object list on the left, schematic in the centre, selected object, findings and authority state on the right"
+              width={1440}
+              height={900}
+              loading="lazy"
+              className="h-auto w-full"
+            />
+            <figcaption className="border-t border-stone-200 px-4 py-3 text-sm text-stone-600">
+              The Review view on a fixture project, not the SPI board above. The schematic stays central, every blocker
+              is listed beside it, and fabrication, power-on and release show as closed.
+            </figcaption>
+          </figure>
+          <ul className="mt-8 grid gap-px overflow-hidden rounded-lg border border-stone-300 bg-stone-300 sm:grid-cols-2">
+            {views.map((view) => {
+              const Icon = view.icon;
+              return (
+                <li key={view.href} className="bg-[#f7f7f5]">
                   <Link
-                    key={flow.eyebrow}
-                    href={flow.href}
-                    className={`group relative overflow-hidden rounded-3xl border ${flow.stroke} bg-gradient-to-br ${flow.accent} p-6 transition-transform hover:-translate-y-1`}
+                    href={view.href}
+                    className={`flex h-full gap-3 p-5 transition hover:bg-white ${focusRing}`}
                   >
-                    <div className="absolute inset-0 bg-[#0a0f1a]/70" />
-                    <div className="relative">
-                      <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
-                        {flow.eyebrow}
-                      </div>
-                      <h3 className="mt-2 text-xl font-semibold text-white">{flow.title}</h3>
-                      <p className="mt-3 text-sm leading-6 text-slate-300">{flow.copy}</p>
-                      <div className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-white">
-                        {flow.cta}
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </div>
-                    </div>
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-stone-500" aria-hidden="true" />
+                    <span>
+                      <span className="block text-sm font-semibold">{view.label}</span>
+                      <span className="mt-1 block text-sm leading-6 text-stone-600">{view.text}</span>
+                    </span>
                   </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
 
-        {/* What we believe */}
-        <section className="border-b border-white/5">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="mb-12 max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">The point</div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Electronics should feel like Lego, not like a textbook.
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                Every other tool in this space assumes you&apos;re already an engineer. We&apos;re building for
-                everyone else — the kids hacking gameboys, the artists embedding LEDs, the repair folks
-                who don&apos;t want to throw things out, the Arduino owners who never graduated past blinking.
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {beliefs.map((b) => {
-                const Icon = b.icon;
-                return (
-                  <div key={b.title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 text-white">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-base font-semibold text-white">{b.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">{b.copy}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Project examples */}
-        <section className="border-b border-white/5 bg-[#070b14]">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="mb-10 flex items-end justify-between gap-4 flex-wrap">
-              <div className="max-w-2xl">
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-400/80">What you can build</div>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                  Projects our users start with.
-                </h2>
-              </div>
-              <Button asChild variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">
-                <Link href="/parts">
-                  <Boxes className="mr-2 h-4 w-4" />
-                  What can I build from my parts?
-                </Link>
-              </Button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {projectExamples.map((p) => (
-                <div key={p.title} className="group rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-white/15 transition-colors">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-base font-medium text-white">{p.title}</h3>
-                    <span className={`text-[10px] font-semibold uppercase tracking-wider rounded-full px-2 py-0.5 ${
-                      p.difficulty === 'Beginner' ? 'bg-emerald-400/15 text-emerald-300' :
-                      p.difficulty === 'Intermediate' ? 'bg-amber-400/15 text-amber-300' :
-                      'bg-rose-400/15 text-rose-300'
-                    }`}>{p.difficulty}</span>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-400">{p.parts}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Advanced escape hatch / developer surfaces */}
-        <section>
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="rounded-3xl border border-white/5 bg-white/[0.02] p-8">
-              <div className="flex items-start gap-4 flex-wrap">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/30 to-violet-500/30 text-white">
-                  <CircuitBoard className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">For developers and power users</div>
-                  <h3 className="mt-2 text-xl font-semibold text-white">You&apos;re past beginner? We&apos;ve got you covered too.</h3>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-                    Full KiCad project import/export. Real PCB validation with DRC. SPICE simulation. BOM pricing
-                    and fab package generation. Public API with Python + JS SDKs. Graduate into the full stack
-                    whenever you&apos;re ready — the canvas and the AI travel with you.
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <Link href="/cad" className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
-                      <Zap className="h-3.5 w-3.5" />
-                      Advanced / KiCad
-                    </Link>
-                    <Link href="/docs" className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
-                      API Docs
-                    </Link>
-                    <Link href="/playground" className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
-                      Playground
-                    </Link>
-                    <Link href="/dashboard/keys" className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
-                      API Keys
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+      <footer className="border-t border-stone-200">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 text-xs leading-5 text-stone-500 sm:px-8 md:flex-row md:items-center md:justify-between">
+          <p>
+            Package SHA-256 <span className="break-all text-stone-700">{b.packageSha256}</span>
+          </p>
+          <p>
+            Looking for the salvage and repair tools?{' '}
+            <Link href="/maker" className={`underline hover:text-stone-900 ${focusRing}`}>
+              Circuit.AI maker tools
+            </Link>
+          </p>
+        </div>
+      </footer>
+    </main>
   );
 }

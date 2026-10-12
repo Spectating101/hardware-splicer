@@ -62,6 +62,35 @@ def test_current_envelope_passes_without_data_loss() -> None:
     assert migrated is not envelope
 
 
+def test_migrate_preserves_engineering_findings() -> None:
+    envelope = {
+        "schema_version": PROJECT_STORE_SCHEMA,
+        "project_id": "findings-demo",
+        "revision": 1,
+        "saved_at": "2026-10-05T00:00:00+00:00",
+        "snapshot": {
+            "engineeringFindings": [
+                {
+                    "category": "failed_check",
+                    "text": "DRC failed with 1 error(s).",
+                    "producer": "design_quality_gate",
+                    "provenance": {
+                        "kind": "deterministic",
+                        "basis": "design_quality gate blocker from an executed deterministic compose",
+                        "source_ref": "action-1",
+                        "authority_ceiling": "observed",
+                    },
+                }
+            ]
+        },
+        "metadata": {},
+    }
+
+    migrated = migrate_project_envelope(envelope)
+
+    assert migrated["snapshot"]["engineeringFindings"] == envelope["snapshot"]["engineeringFindings"]
+
+
 def test_unversioned_envelope_migrates_deterministically_and_preserves_unknown_fields(
     tmp_path: Path,
 ) -> None:

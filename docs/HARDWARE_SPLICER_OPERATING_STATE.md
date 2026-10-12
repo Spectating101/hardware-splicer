@@ -1,7 +1,7 @@
 # Hardware-Splicer Operating State
 
 Status: **flagship / selectively active**  
-Snapshot: **2026-09-23**  
+Snapshot: **2026-10-06**  
 Canonical machine state: `docs/HARDWARE_SPLICER_OPERATING_STATE.json`
 
 Hardware-Splicer is not being wound down. It is being run as a **selectively invested flagship**: continue improving the parts that are native to physical-agent engineering, hardware evidence, revision-bound verification, physical bring-up, and release authority; integrate commodity/source-tool capability rather than rebuilding it; and force external proof before opening broad new product scope.
@@ -87,8 +87,39 @@ The current external comparison set includes Flux, AllSpice DRCY, Circuitly, Sch
 | Competitive frontend | **Closed / reopen-on-trigger** | PR #104 is merged; reopen only from concrete gap. |
 | Route-specific integrations | **Allowed / P1-P2** | Build only when native, source-bound, and useful to a real workflow/route. |
 | Generic feature expansion | **Off by default** | No generic AI/EDA feature race. |
+| Proposal-producing capabilities | **Active / P1** (decided 2026-10-06) | Authoring, routing, parts, 3D and live collaboration, each emitting reviewable candidates. See below. |
 | Competitor-driven improvement | **Allowed and expected** | Improve HS where the gap is native and evidence-backed. |
 | Gauntlet conversion | **Active** | Force external verdicts instead of manufacturing endless internal maturity. |
+
+## Capability expansion (decided 2026-10-06)
+
+A competitor review found that authoring, routing, parts, 3D and real-time collaboration are table stakes in Flux, AllSpice, Altium 365 and Quilter-class products. Leaving them out is a gap, not a position. They are now built, under these rules:
+
+- **Every capability emits a candidate.** An edit, a route or a part swap becomes a candidate with a diff and checks, reviewed through the existing staged review before it can become a revision. Nothing edits project truth directly.
+- **No capability grants authority.** None can change a release, fabrication, power-on or other authority state.
+- **Integrate mature engines.** KiCad and `kicad-cli`, FreeRouting and distributor data sources are consumed, not rebuilt.
+- **Never invent data.** Part identity, availability and provenance are filled only from the design or from a named provider with an as-of time.
+- **Physical proof stays P0.** This work runs beside the SPI proof campaign and never ahead of it.
+- **No generic feature race.** Each addition must be native to the evidence and review model.
+
+This satisfies the frontend-closure reopen trigger "source-bound native competitor gap".
+
+### Delivered so far (2026-10-06)
+
+- **Edit operations** (`kicad_edit.py`): deterministic move, rotate, set property, set flag, add label, set track width and delete over retained bytes.
+- **Candidate proposals** (`project_candidates.py`, [`CANDIDATE_PROPOSALS.md`](CANDIDATE_PROPOSALS.md)): an edit or an autoroute becomes a pending staged review with a structural diff and optional DRC/ERC counts.
+- **Routing** (`routing_engine.py`, [`ROUTING_ENGINE.md`](ROUTING_ENGINE.md)): FreeRouting through KiCad's pcbnew, behind a capability probe and a copper-only result guard.
+- **Parts** (`parts_intel.py`, [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md)): the BOM from the design's own properties; enrichment is opt-in and carries source and as-of.
+- **3D** (`model3d.py`, [`MODEL3D.md`](MODEL3D.md)): a GLB of the retained PCB, cached by hash.
+- **Live collaboration** (`project_events.py`, `project_presence.py`, [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md)): a change stream and ephemeral presence; information only.
+- **Workspace**: Parts and Proposals tabs, a 3D tab, presence and live thread refresh, and a docked Edit toolbar with a live draft preview. A verified operator can accept or reject a proposal; accepting makes a revision and nothing more.
+
+Independent review: Codex adversarial reviews (2026-10-06 and 07) found real defects, among them orphan cleanup through a symlinked ancestor, subprocess groups surviving an exited leader, a read-only preview that could repair a damaged store, and drafts matched to files by kind or name instead of full path. Each has a regression test that fails on the old behaviour.
+
+Not yet verified: a live FreeRouting run (no jar was available, so the guard was exercised with fake engines and a real pcbnew round-trip), and parts availability from a real distributor provider.
+
+- **Visual comparison (2026-10-07).** Compare shows Before, Swipe and Difference views of two retained revisions with a shared camera, from the hash-verified files, via `GET /revisions/{rev}/artifacts/{kind}/file` (exact bytes, ETag).
+- **Review packet (2026-10-07).** `GET /v1/projects/{id}/review-packet` returns a hash-bound, read-only packet of one revision with an explicit "not established" section. Credentials and absolute paths are removed on a best-effort basis; `include_text=false` builds the version to share, with every user-written field left out. See `docs/REVIEW_PACKET.md`.
 
 ## What counts as useful HS progress now
 
@@ -155,3 +186,7 @@ update claims, paper, roadmap, and next investment decision
 6. Reassess HS from external outcomes and physical evidence, not from generalized pessimism.
 
 The intended state is **not smaller HS**. It is a stronger HS with a narrower definition of what deserves engineering time.
+- **Build sequence (2026-10-09).** The Assemble tab animates the board going together part by part on the real KiCad-exported board, from `GET /revisions/{rev}/assembly-plan`. Heights are typical values and the order is conventional, both labelled; parts the design marks do-not-populate are reported, never instructed. Off-board parts (screen, battery, case) are not yet drawn. See `docs/ASSEMBLY_PLAN.md`.
+- **Whole-device assembly (2026-10-09).** Engineering > Build a device animates a gadget going together: board into case, each wire pin to pin, display, lid and USB. Built from a module library whose figures all name a source or say they are typical; wiring is checked against pin roles and as nets. The case is a proposal, not printed. See `docs/DEVICE_PLAN.md`.
+- **Take apart (2026-10-09).** The Assemble tab can play a board in reverse with a verdict per part (see `docs/SALVAGE_PLAN.md`). It needs the board's file; capturing a physical board with no file is the next gap. A sourced competitor re-check is in `docs/COMPETITIVE_LANDSCAPE.md`.
+- **Salvage a board (2026-10-10).** A board with no file can be described by hand (size, parts, markings) and planned in 3D: `docs/DONOR_CAPTURE.md`. Everything in it is typed or placed, and says so.

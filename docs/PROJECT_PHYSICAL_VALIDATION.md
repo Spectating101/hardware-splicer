@@ -59,6 +59,25 @@ capture must also include this metadata:
 }
 ```
 
+Optional `finding_links` on the record name which persisted finding the
+measurement establishes or claims to clear. Each link is
+`{finding_id, relation, text, object_id}` with `relation` of
+`establishes` or `clears`. At most 20 links per record. The field is
+absent by default; omitting it leaves envelope hashes unchanged.
+
+- `establishes` requires a failed (`passed: false`) non-simulated record
+  (`metadata.simulated` exactly `false`) with measured/verified/authorized
+  authority, and required `text` (≤1000 characters) so the findings
+  projection can reconstruct a `measured_finding` with provenance kind
+  `physical`.
+- `clears` requires a passing record. The findings projection annotates
+  the matching finding; it does not remove it, close a gate, or change
+  release/fabrication/power-on state. A `clears` link is a measurement
+  claim, not closure.
+
+Malformed links are rejected with the existing evidence validation
+errors. Simulated evidence can never produce a physical finding.
+
 Send the record and base64 raw capture bytes to:
 
 ```text

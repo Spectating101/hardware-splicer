@@ -21,8 +21,12 @@ import { Button } from '@/components/ui/button';
 import { usePageTitle } from '@/components/use-page-title';
 import {
   EvidenceArtifactViewport,
+  type ActiveArtifact,
   deriveEvidenceBuildDir,
 } from '@/components/engineering/evidence-artifact-viewport';
+import { ArtifactChangesPanel } from '@/components/engineering/artifact-changes-panel';
+import { changesToHighlights, useArtifactDiffs } from '@/lib/artifact-diff';
+import { ComparisonViewer, type CompareMode } from '@/components/engineering/comparison-viewer';
 import {
   summarizeRevisionDiff,
   type ProjectRevision,
@@ -134,6 +138,9 @@ export default function EvidenceComparePage() {
   const [candidateRevision, setCandidateRevision] = useState<number | null>(null);
   const [diff, setDiff] = useState<RevisionDiffResponse | null>(null);
   const [selectedDeltaId, setSelectedDeltaId] = useState('');
+  const [activeArtifact, setActiveArtifact] = useState<ActiveArtifact | null>(null);
+  const [focusedChange, setFocusedChange] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'candidate' | CompareMode>('candidate');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -145,6 +152,9 @@ export default function EvidenceComparePage() {
   const buildDir = deriveEvidenceBuildDir(snapshot, session);
   const semantic = diff?.engineering_revision_diff;
   const summary = useMemo(() => summarizeRevisionDiff(diff), [diff]);
+  const artifactDiffs = useArtifactDiffs(projectId, baseRevision, candidateRevision);
+  const activeDiff = activeArtifact?.kind === 'pcb' ? artifactDiffs.pcb : artifactDiffs.schematic;
+  const artifactHighlights = useMemo(() => changesToHighlights(activeDiff, activeArtifact?.relative || ''), [activeDiff, activeArtifact?.relative]);
 
   const deltaItems = useMemo<DeltaItem[]>(() => {
     if (!semantic) return [];
@@ -273,8 +283,8 @@ export default function EvidenceComparePage() {
   };
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
-      <div className="flex min-h-screen flex-col">
+    <main className="h-full bg-stone-100 text-stone-950">
+      <div className="flex h-full min-h-[760px] flex-col">
         <header className="border-b border-stone-200 bg-white">
           <div className="flex min-h-14 flex-wrap items-center gap-3 px-4 lg:px-5">
             <Link href={`/engineering/evidence?project=${encodeURIComponent(projectId)}`} className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-stone-950">
@@ -314,8 +324,8 @@ export default function EvidenceComparePage() {
 
         {error ? <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-800">{error}</div> : null}
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
-          <aside className="min-h-[720px] overflow-y-auto bg-white p-3">
+        <div className="grid min-h-0 flex-1 xl:grid-rows-[minmax(0,1fr)] grid-cols-1 gap-px bg-stone-200 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
+          <aside className="min-h-[720px] xl:min-h-0 overflow-y-auto bg-white p-3">
             <div className="flex items-center gap-2 px-1 pb-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-stone-400"><GitCompareArrows className="h-3.5 w-3.5" />Semantic delta</div>
             {([
               ['risk', 'Needs review'],
@@ -346,10 +356,11 @@ export default function EvidenceComparePage() {
                 </div>
               </section>
             ))}
+            <ArtifactChangesPanel kind={activeArtifact?.kind || 'schematic'} diff={activeDiff} loading={artifactDiffs.loading} selectedKey={focusedChange} onSelect={setFocusedChange} />
           </aside>
 
-          <section className="min-w-0 bg-white">
-            <div className="flex min-h-11 items-center justify-between border-b border-stone-200 px-4">
+          <section className="order-first flex min-h-0 min-w-0 flex-col bg-white xl:order-none">
+            <div className="flex min-h-11 shrink-0 items-center justify-between border-b border-stone-200 px-4">
               <div>
                 <span className="text-xs font-medium text-stone-500">Candidate artifact</span>
                 <span className="ml-2 font-mono text-[10px] text-stone-400">Rev {candidateRevision ?? '—'}</span>
@@ -360,10 +371,31 @@ export default function EvidenceComparePage() {
                 <span>{summary.artifacts} artifact change</span>
               </div>
             </div>
-            <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact />
+            <div className="flex shrink-0 items-center gap-1 border-b border-stone-200 bg-stone-50 px-3 py-1.5" role="group" aria-label="How to compare the two revisions">
+              {([['candidate', 'Candidate'], ['before', 'Before'], ['swipe', 'Swipe'], ['difference', 'Difference']] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setViewMode(value)}
+                  aria-pressed={viewMode === value}
+                  disabled={value !== 'candidate' && !(projectId && baseRevision && candidateRevision && baseRevision !== candidateRevision)}
+                  title={value === 'candidate' ? 'The candidate revision with its changes marked' : value === 'before' ? 'The earlier revision as it was saved' : value === 'swipe' ? 'Drag a divider between the two revisions' : 'Only what changed: identical parts cancel out'}
+                  className={`h-7 rounded-md px-3 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-40 ${viewMode === value ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-200'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="min-h-0 flex-1">
+              {viewMode !== 'candidate' && projectId && baseRevision && candidateRevision ? (
+                <ComparisonViewer projectId={projectId} baseRevision={baseRevision} candidateRevision={candidateRevision} mode={viewMode} highlights={artifactHighlights} focusHighlightId={focusedChange} onActiveArtifact={setActiveArtifact} />
+              ) : (
+              <EvidenceArtifactViewport buildDir={buildDir} overlayFinding={overlay} compact highlights={artifactHighlights} onActiveArtifact={setActiveArtifact} focusHighlightId={focusedChange} model3d={{ projectId, revision: candidateRevision }} />
+              )}
+            </div>
           </section>
 
-          <aside className="flex min-h-[720px] flex-col bg-white">
+          <aside className="flex min-h-[720px] xl:min-h-0 flex-col bg-white">
             <div className="border-b border-stone-200 px-4 py-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-stone-400">Selected delta</div>
               <div className="mt-1 text-xs text-stone-500">Rev {baseRevision ?? '—'} → Rev {candidateRevision ?? '—'}</div>

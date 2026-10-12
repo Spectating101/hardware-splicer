@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import zipfile
 from pathlib import Path
@@ -112,12 +113,17 @@ def read_build_file(build_dir: str | Path, relative: str) -> Dict[str, Any]:
     assert_file_size(target, max_bytes=max_kicad_content_bytes())
     if target.suffix.lower() not in KICAD_SUFFIXES:
         raise ValueError("only KiCad preview files are served via this endpoint")
-    text = target.read_text(encoding="utf-8", errors="replace")
+    # One read: the text shown and the hash of the bytes it came from cannot disagree about which file they describe.
+    raw = target.read_bytes()
+    # The same text `read_text` produced: decoded leniently, with line endings normalised to "\n".
+    text = raw.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
     return {
         "relative": rel_check,
         "name": target.name,
         "kind": "pcb" if target.suffix.lower() == ".kicad_pcb" else "schematic",
-        "size_bytes": target.stat().st_size,
+        "size_bytes": len(raw),
+        # Of the exact bytes on disk, not of the display text, so it can be compared with a retained file's recorded hash.
+        "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
         "content": text,
     }
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Callable, Dict, Mapping
+from typing import Any, Callable, Dict, Mapping, Sequence
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,6 +16,8 @@ from .ai_project_tool_executor import (
     AIProjectToolExecutorError,
     execute_ai_project_action_preview,
 )
+from .engineering_review_identity import AUTHORITY_CEILING
+from .finding_ledger import bound_finding_text, replace_producer_findings
 from .project_store import (
     CorruptProject,
     InvalidProjectId,
@@ -83,6 +85,81 @@ def _executor_error(exc: Exception) -> HTTPException:
 
 def _rows(value: Any) -> list[Dict[str, Any]]:
     return [dict(row) for row in value or [] if isinstance(row, Mapping)]
+
+
+_DESIGN_QUALITY_GATE_BASIS = (
+    "design_quality gate blocker from an executed deterministic compose"
+)
+
+
+def _mapping(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _design_quality_gate(tool_result: Any) -> dict[str, Any] | None:
+    """Return the persisted gate when an executed tool_result actually carries one."""
+
+    if not isinstance(tool_result, Mapping):
+        return None
+    summary = _mapping(tool_result.get("summary"))
+    if "design_quality_gate" in summary:
+        gate = summary.get("design_quality_gate")
+        return dict(gate) if isinstance(gate, Mapping) else {}
+    failure = _mapping(summary.get("failure"))
+    if "design_quality_gate" in failure:
+        gate = failure.get("design_quality_gate")
+        return dict(gate) if isinstance(gate, Mapping) else {}
+    if "design_quality_gate" in tool_result:
+        gate = tool_result.get("design_quality_gate")
+        return dict(gate) if isinstance(gate, Mapping) else {}
+    return None
+
+
+def _design_quality_gate_findings(tool_result: Mapping[str, Any], action_id: str) -> list[dict[str, Any]]:
+    gate = _design_quality_gate(tool_result)
+    if gate is None:
+        return []
+    entries: list[dict[str, Any]] = []
+    blockers = gate.get("blockers") or []
+    if isinstance(blockers, Sequence) and not isinstance(blockers, (str, bytes, bytearray)):
+        for item in blockers:
+            text, truncated = bound_finding_text(
+                str(item).strip() if item is not None else ""
+            )
+            if not text:
+                continue
+            basis = _DESIGN_QUALITY_GATE_BASIS
+            if truncated:
+                basis = f"{basis} (message truncated)"
+            entries.append(
+                {
+                    "category": "failed_check",
+                    "object_id": None,
+                    "text": text,
+                    "provenance": {
+                        "kind": "deterministic",
+                        "basis": basis,
+                        "source_ref": action_id,
+                        "authority_ceiling": AUTHORITY_CEILING,
+                    },
+                }
+            )
+    return entries
+
+
+def _record_design_quality_findings(
+    snapshot: Mapping[str, Any],
+    action_id: str,
+    tool_result: Any,
+) -> dict[str, Any]:
+    if _design_quality_gate(tool_result) is None:
+        return dict(snapshot)
+    return replace_producer_findings(
+        snapshot,
+        "design_quality_gate",
+        action_id,
+        _design_quality_gate_findings(_mapping(tool_result), action_id),
+    )
 
 
 def _find_session_action(
@@ -205,6 +282,9 @@ def create_ai_project_tool_executor_router(
             session["physical_authority_unchanged"] = True
             sessions[session_index] = session
             snapshot["engineeringAiSessions"] = sessions
+            # Findings come from the executed tool_result gate, never from the
+            # request body. The request carries only expected_revision.
+            snapshot = _record_design_quality_findings(snapshot, action_id, tool_result)
 
             saved = store.save(
                 project_id,

@@ -38,6 +38,10 @@ test('bring-up defaults to the PCB and keeps measurements distinct from authorit
   await expect(page.getByText('Physical bring-up', { exact: true })).toBeVisible();
   await expect(page.getByText('Rev 6', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /1\. Identity & assembly/ })).toBeVisible();
+  // Registered engineering sources are digital identity only; the gate must not read as physical progress.
+  await expect(page.getByRole('button', { name: /1\. Identity & assembly/ })).not.toContainText(/complete/i);
+  const selectedGate = page.getByText('Selected gate', { exact: true }).locator('..');
+  await expect(selectedGate).toContainText('physical board identity not captured');
   await expect(page.getByRole('button', { name: /2\. Cold checks/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /3\. Controlled power/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /4\. Functional test/ })).toBeVisible();

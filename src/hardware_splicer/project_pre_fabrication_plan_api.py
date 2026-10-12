@@ -22,6 +22,12 @@ from .project_store import (
 
 PRE_FABRICATION_PLAN_SCHEMA = "hardware_splicer.pre_fabrication_plan.v1"
 
+# engineeringFindings is intentionally omitted. Pre-fab quarantine pops generated
+# plan surfaces; it does not rewrite the observed write-time finding ledger.
+# design_quality_gate entries come from AI sessions (not quarantined).
+# release_assessment entries stay as previously recorded observations and
+# confer no authority — clearing them here would guess that quarantine
+# invalidates those observations.
 _GENERATED_PLAN_SURFACES = {
     "changeImpact",
     "currentStage",
@@ -211,6 +217,8 @@ def create_project_pre_fabrication_plan_router(
                         f"actions[{index - 1}] requires action, title, or description"
                     )
 
+            # Request body cannot supply engineeringFindings (extra=forbid).
+            # The ledger is copied from the persisted snapshot, not the plan.
             snapshot = deepcopy(dict(envelope["snapshot"]))
             known_source_ids = {
                 str(row.get("source_id") or "").strip()

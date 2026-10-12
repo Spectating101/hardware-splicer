@@ -20,7 +20,7 @@ from hardware_splicer.build_compiler import CATALOG_BUILD_IDS, compile_catalog_b
 from hardware_splicer.fabrication_inspection import inspect_fabrication_package  # noqa: E402
 from hardware_splicer.functional_delivery import build_functional_delivery_score  # noqa: E402
 from hardware_splicer.project_intake import load_project_intake, run_project_intake, splice_and_build_from_intake  # noqa: E402
-from hardware_splicer.runtime import runtime_status, scratch_path  # noqa: E402
+from hardware_splicer.runtime import SPLICER3D_VENV_PYTHON, runtime_status, scratch_path  # noqa: E402
 from hardware_splicer.schemas import HardwareCompileSpec  # noqa: E402
 from hardware_splicer import compile_hardware_bundle  # noqa: E402
 
@@ -112,6 +112,20 @@ def test_intakes(rows: List[Dict[str, Any]]) -> None:
             rows.append(_row("intake", name, False, str(exc)))
 
 
+def _splicer_cadquery_note() -> str:
+    """Why a scenario built from CadQuery output cannot clear, so a failure names it and not only "claimable=False"."""
+    override = os.environ.get("SPLICER3D_PYTHON", "").strip()
+    python = override or (str(SPLICER3D_VENV_PYTHON) if SPLICER3D_VENV_PYTHON.exists() else sys.executable)
+    try:
+        probe = subprocess.run([python, "-c", "import cadquery"], capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return f"3D-Splicer python {python} could not be probed for cadquery: {exc}"
+    if probe.returncode == 0:
+        return ""
+    lines = probe.stderr.strip().splitlines()
+    return f"3D-Splicer python {python} cannot import cadquery: {lines[-1] if lines else 'no message'}"
+
+
 def _scenario_passes(scenario_path: Path, result_path: Path, proc: subprocess.CompletedProcess[str]) -> tuple[bool, str]:
     if not result_path.is_file():
         return False, proc.stderr.strip()[-200:] or "missing SCENARIO_RESULT.json"
@@ -125,6 +139,10 @@ def _scenario_passes(scenario_path: Path, result_path: Path, proc: subprocess.Co
         return ok, detail
     ok = compile_ok and (proc.returncode == 0 or claimable)
     detail = f"compile_ok={compile_ok} claimable={claimable} exit={proc.returncode}"
+    if not ok:
+        note = _splicer_cadquery_note()
+        if note:
+            detail += "; " + note
     return ok, detail
 
 
