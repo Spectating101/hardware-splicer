@@ -70,7 +70,17 @@ def test_a_description_instead_of_a_part_number_is_not_an_identification_and_a_t
     assert _verdict(plan, "Q7")["verdict"] != "keep" and any("mains" in h for h in _verdict(plan, "Q7")["hazards"])
 
 
-def test_geometry_is_what_was_typed_and_sizes_say_whether_they_were_measured() -> None:
+@pytest.fixture
+def soic_library_fixture(monkeypatch):
+    """Controlled courtyard metadata; neither an installed library nor a physical measurement."""
+    monkeypatch.setattr("hardware_splicer.donor_capture.libraries_available", lambda: True)
+    monkeypatch.setattr("hardware_splicer.donor_capture.footprint_size", lambda name:
+                        {"width_mm": 7.4, "length_mm": 5.4,
+                         "source": "fixture KiCad courtyard: Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"}
+                        if name == "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" else None)
+
+
+def test_geometry_is_what_was_typed_and_sizes_say_whether_they_were_measured(soic_library_fixture) -> None:
     base = capture_to_assembly(SPEC)
     assert base["board"]["size_mm"] == [60.0, 40.0] and base["board"]["outline"]["bbox"] == {"x0": 0.0, "y0": 0.0, "x1": 60.0, "y1": 40.0}
     u3 = next(p for p in base["parts"] if p["ref"] == "U3")
@@ -164,7 +174,7 @@ def test_an_empty_board_and_a_full_one_both_plan() -> None:
     assert build_donor_salvage_plan(full)["summary"]["counts"]["skip"] == MAX_PARTS
 
 
-def test_the_options_list_every_kind_with_a_typical_size_and_says_it_is_typical() -> None:
+def test_the_options_list_every_kind_with_a_typical_size_and_says_it_is_typical(soic_library_fixture) -> None:
     options = capture_options()
     assert "Measure the real part" in options["size_basis"]
     assert set(options["kinds"]) >= {"connector", "ic", "capacitor", "resistor", "battery", "mains or power part"}
@@ -172,6 +182,16 @@ def test_the_options_list_every_kind_with_a_typical_size_and_says_it_is_typical(
     assert (soic["width_mm"], soic["length_mm"], soic["mounting"], soic["size_is_typical"]) == (7.4, 5.4, "smd", False)
     assert "courtyard" in soic["size_source"] and "Package_SO:SOIC-8" in soic["size_source"]
     assert options["kinds"]["capacitor"]["prefix"] == "C"
+
+
+def test_missing_libraries_use_labeled_typical_geometry_not_courtyard_claims(monkeypatch):
+    monkeypatch.setattr("hardware_splicer.donor_capture.libraries_available", lambda: False)
+    soic = capture_options()["kinds"]["ic"]["packages"]["SOIC"]
+    assert (soic["width_mm"], soic["length_mm"], soic["size_is_typical"]) == (6.0, 5.0, True)
+    assert "typical" in soic["size_source"]
+    part = next(row for row in capture_to_assembly(SPEC)["parts"] if row["ref"] == "U3")
+    assert part["corners"] == [[17.0, 7.5], [23.0, 7.5], [23.0, 12.5], [17.0, 12.5]]
+    assert "typical size" in part["outline_basis"] and "did not measure" in part["outline_basis"]
 
 
 @pytest.fixture()

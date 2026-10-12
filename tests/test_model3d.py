@@ -88,6 +88,8 @@ def _runner_from(handler):
 
 
 def _install_popen(monkeypatch: pytest.MonkeyPatch, handler):
+    # Fake runner tests must not depend on a real CLI being installed.
+    monkeypatch.setattr("hardware_splicer.model3d.resolve_kicad_cli", lambda: "fixture-kicad-cli")
     monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
 
 
