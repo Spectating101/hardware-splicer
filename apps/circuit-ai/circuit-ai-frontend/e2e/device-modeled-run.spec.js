@@ -86,3 +86,41 @@ test('a late modeled response cannot attach itself to newly checked wiring', asy
   await page.waitForTimeout(500);
   await expect(page.getByTestId('device-modeled-result')).toHaveCount(0);
 });
+
+test('a BH1750 build runs the same modeled tests and says its adapter has no bus model', async ({ page }, info) => {
+  await open(page);
+  const spec = JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
+  spec.modules.find((module) => module.id === 'sensor').module = 'adafruit-bh1750-stemma-qt';
+  const rename = { 'sensor.Vin': 'sensor.VIN', 'sensor.SCK': 'sensor.SCL', 'sensor.SDI': 'sensor.SDA' };
+  spec.connections = spec.connections.map((wire) => ({
+    from: Object.entries(rename).reduce((value, [from, to]) => value.replace(from, to), wire.from),
+    to: Object.entries(rename).reduce((value, [from, to]) => value.replace(from, to), wire.to),
+  }));
+  await page.getByTestId('device-spec-editor').fill(JSON.stringify(spec));
+  await page.getByTestId('device-spec-apply').click();
+  await expect(page.getByTestId('device-modeled-start')).toBeEnabled({ timeout: 40000 });
+  await page.getByTestId('device-modeled-start').click();
+  const result = page.getByTestId('device-modeled-result');
+  await expect(result).toBeVisible({ timeout: 90000 });
+  await expect(result).toHaveAttribute('data-status', 'PARTIAL');
+  await expect(result).toContainText('No vendor-host lane exists for the BH1750');
+  await expect(result).toContainText('Core logic: PASSED (15/15 scenarios)');
+  const boot = result.getByTestId('device-modeled-scenario').filter({ hasText: 'boot_ok:' });
+  await boot.locator('summary').click();
+  await expect(boot.getByTestId('device-modeled-serial')).toContainText('LUX=320.0');
+  const reportEvent = page.waitForEvent('download');
+  await page.getByTestId('device-modeled-download').click();
+  const reportFile = info.outputPath('modeled-run-bh1750.json');
+  await (await reportEvent).saveAs(reportFile);
+  const report = JSON.parse(await fs.readFile(reportFile, 'utf8'));
+  expect(report.host.scenarios).toHaveLength(15);
+  expect(report.vendor_host.status).toBe('NOT_RUN');
+  expect(report.firmware_authorized).toBe(false);
+  expect(report.power_on_authorized).toBe(false);
+  expect(report.physical_correctness).toBe('UNPROVEN');
+  const sourceEvent = page.waitForEvent('download');
+  await page.getByTestId('device-application-download').click();
+  const sourceFile = info.outputPath('source-bh1750.zip');
+  await (await sourceEvent).saveAs(sourceFile);
+  expect(crypto.createHash('sha256').update(await fs.readFile(sourceFile)).digest('hex')).toBe(report.proposal_sha256);
+});
