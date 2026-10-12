@@ -43,6 +43,8 @@ splice-ui-auditor-demo.png
 # Generated outputs and local corpora/cache
 .cache/
 artifacts/
+# The revision-artifacts proxy route is source that happens to share the name.
+!apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/*/revisions/*/artifacts/
 data/
 !tests/data/
 !tests/data/**
