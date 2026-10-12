@@ -43,8 +43,9 @@ _DECLARED = re.compile(_PREFIX + r"Declared possible addresses, NOT observations
 # These shapes are the application's own serial output (data/firmware_application/app_core.h); a test keeps them in step.
 _BOOT = re.compile(_PREFIX + r"BOOT sensor=0x([0-9A-Fa-f]{2}) display=(?:0x([0-9A-Fa-f]{2})|NONE)\s*$")
 _STATE = re.compile(
-    _PREFIX + r"T=\d{1,10} STATE=(OK|STALE|FAULT_SENSOR_MISSING|FAULT_SENSOR_READ|FAULT_AMBIGUOUS_ADDRESS)"
-    r"(?: TEMP_C=-?\d+\.\d{2} HUM_PCT=-?\d+\.\d PRES_HPA=-?\d+\.\d)?\s*$"
+    _PREFIX + r"T=\d{1,10} STATE=(?:"
+    r"(OK) TEMP_C=-?\d+\.\d{2} HUM_PCT=-?\d+\.\d PRES_HPA=-?\d+\.\d|"
+    r"(STALE|FAULT_SENSOR_MISSING|FAULT_SENSOR_READ|FAULT_AMBIGUOUS_ADDRESS))\s*$"
 )
 _DISPLAY_MISSING = re.compile(_PREFIX + r"DISPLAY MISSING\s*$")
 _RECOVERED = re.compile(_PREFIX + r"RECOVERED\s*$")
@@ -87,7 +88,7 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
     declared: list[str] | None = None
     unrecognised = 0
     current: dict[str, Any] | None = None
-    application: dict[str, Any] = {"boot": None, "states": {}, "display_missing": False, "recovered": False, "readings": 0}
+    application: dict[str, Any] = {"boot": None, "states": {}, "latest_state": None, "display_missing": False, "recovered": False, "readings": 0}
 
     def open_scan() -> dict[str, Any]:
         return {"acknowledged": [], "errors": [], "complete": False, "consistent": False, "note": ""}
@@ -135,9 +136,12 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
             continue
         if (match := _BOOT.match(line)):
             application["boot"] = {"sensor": _address(match.group(1)), "display": _address(match.group(2)) if match.group(2) else None}
+            application["latest_state"] = None
+            application["display_missing"] = match.group(2) is None
             continue
         if (match := _STATE.match(line)):
-            state = match.group(1)
+            state = match.group(1) or match.group(2)
+            application["latest_state"] = state
             application["states"][state] = application["states"].get(state, 0) + 1
             if state == "OK":
                 application["readings"] += 1
@@ -151,23 +155,28 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
         unrecognised += 1
     if current is not None:
         close("The scan has no closing total line, so it may be cut short.", complete=False, consistent=False)
-    return scans[:MAX_SCANS], declared, unrecognised, application
+    return scans[-MAX_SCANS:], declared, unrecognised, application
 
 
 def _application_row(library_id: str, addresses: list[str], application: dict[str, Any]) -> dict[str, Any] | None:
     """What the application's own serial output says about one module, or None when it says nothing about it."""
 
-    boot, states = application["boot"], application["states"]
+    boot = application["boot"]
     if library_id == BME280_ID:
+        latest = application["latest_state"]
+        if latest in {"FAULT_SENSOR_READ", "STALE"}:
+            return {"status": "sensor_read_fault" if latest == "FAULT_SENSOR_READ" else "stale",
+                    "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The latest application state reports failed sensor readings; an earlier boot is not a current successful reading."}
+        if latest == "FAULT_AMBIGUOUS_ADDRESS":
+            return {"status": "ambiguous", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The latest application state reports more than one matching sensor address; an earlier boot does not resolve it."}
+        if latest == "FAULT_SENSOR_MISSING":
+            return {"status": "no_acknowledge", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The latest application state reports no matching sensor; an earlier boot does not establish current presence. It cannot say why."}
         if boot and boot["sensor"] in addresses:
             return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_chip_id_match",
                     "note": f"The application reported that a chip identified itself as a BME280 (register 0xD0 read 0x60) at {boot['sensor']}."}
-        if "FAULT_AMBIGUOUS_ADDRESS" in states:
-            return {"status": "ambiguous", "acknowledged_at": [], "evidence": "application_fault",
-                    "note": "The application reported that a BME280 identified itself at more than one declared address."}
-        if "FAULT_SENSOR_MISSING" in states:
-            return {"status": "no_acknowledge", "acknowledged_at": [], "evidence": "application_fault",
-                    "note": "The application reported that no chip identified itself as a BME280 at any declared address. It cannot say why."}
         return None
     if library_id == SSD1306_ID:
         if boot and boot["display"] in addresses:
@@ -254,10 +263,13 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
     if not assessed or not modules:
         consistent = None
         statement = "No complete scan was found, so nothing is concluded about the wiring."
+    elif any(row.get("application", {}).get("agrees") is False for row in modules):
+        consistent = False
+        statement = "The scan and the application's output disagree. An earlier successful scan does not resolve a later fault."
     elif statuses <= {"acknowledged"}:
         consistent = True
         statement = "Every module with declared addresses has something answering at one of them. That is all this scan shows."
-    elif statuses & {"no_acknowledge", "ambiguous", "bus_error"}:
+    elif statuses & {"no_acknowledge", "ambiguous", "bus_error", "sensor_read_fault", "stale"}:
         consistent = False
         statement = "The scan differs from the plan for at least one module. See each module below; the scan cannot say why."
     else:

@@ -78,3 +78,15 @@ test('the application\'s own boot line is read, with what it does and does not e
   await compare(page, 'DISPLAY MISSING\nBOOT sensor=0x76 display=NONE');
   await expect(page.getByTestId('device-scan-module').filter({ hasText: 'SSD1306' })).toHaveAttribute('data-status', 'no_acknowledge');
 });
+
+test('later faults and stale readings do not inherit an earlier boot success', async ({ page }) => {
+  await open(page);
+  const sensor = page.getByTestId('device-scan-module').filter({ hasText: 'BME280' });
+  for (const [state, status] of [['FAULT_AMBIGUOUS_ADDRESS', 'ambiguous'], ['FAULT_SENSOR_READ', 'sensor_read_fault'], ['STALE', 'stale']]) {
+    await compare(page, `BOOT sensor=0x77 display=0x3C\nT=2000 STATE=${state}`);
+    await expect(sensor).toHaveAttribute('data-status', status);
+    await expect(sensor).toContainText('earlier boot');
+  }
+  await compare(page, 'BOOT sensor=0x77 display=0x3C\nT=2000 STATE=FAULT_SENSOR_READ\nRECOVERED\nT=4000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3');
+  await expect(sensor).toHaveAttribute('data-status', 'acknowledged');
+});

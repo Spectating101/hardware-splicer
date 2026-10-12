@@ -272,3 +272,42 @@ def test_application_text_with_timestamps_is_accepted():
     stamped = "12:03:44.123 > BOOT sensor=0x77 display=0x3C\r\n"
     assert {m["id"]: m["status"] for m in check_device_observations(SPEC, stamped)["modules"]} == {
         "display": "acknowledged", "sensor": "acknowledged"}
+
+
+@pytest.mark.parametrize("state,status", [
+    ("FAULT_AMBIGUOUS_ADDRESS", "ambiguous"), ("FAULT_SENSOR_MISSING", "no_acknowledge"),
+    ("FAULT_SENSOR_READ", "sensor_read_fault"), ("STALE", "stale"),
+])
+def test_a_later_fault_is_not_masked_by_boot_success(state, status):
+    result = check_device_observations(SPEC, _app("BOOT sensor=0x77 display=0x3C", f"T=2000 STATE={state}"))
+    assert _status(result)["sensor"] == status
+    assert result["summary"]["consistent_with_declared_addresses"] is False
+    assert result["physical_correctness"] == "UNPROVEN" and result["power_on_authorized"] is False
+
+
+def test_recovery_and_reboot_replace_the_latest_fault_not_the_history():
+    result = check_device_observations(SPEC, _app("BOOT sensor=0x77 display=0x3C", "T=2000 STATE=FAULT_SENSOR_READ",
+                                                "RECOVERED", READING))
+    assert _status(result)["sensor"] == "acknowledged"
+    assert result["application"]["states"]["FAULT_SENSOR_READ"] == 1
+    assert result["application"]["latest_state"] == "OK"
+    reboot = check_device_observations(SPEC, _app("T=0 STATE=FAULT_AMBIGUOUS_ADDRESS", "BOOT sensor=0x76 display=0x3D"))
+    assert _status(reboot)["sensor"] == "acknowledged"
+
+
+def test_a_good_scan_does_not_resolve_a_later_application_fault():
+    result = check_device_observations(SPEC, _scan(0x3C, 0x77) + _app("BOOT sensor=0x77 display=0x3C", "T=2000 STATE=FAULT_SENSOR_READ"))
+    assert result["summary"]["consistent_with_declared_addresses"] is False
+    assert next(m for m in result["modules"] if m["id"] == "sensor")["application"]["agrees"] is False
+
+
+@pytest.mark.parametrize("line", ["T=0 STATE=OK", "T=0 STATE=FAULT_SENSOR_READ TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3"])
+def test_invalid_application_state_shapes_are_not_readings(line):
+    result = check_device_observations(SPEC, line)
+    assert result["unrecognised_lines"] == 1 and result["application"] is None
+
+
+def test_more_than_fifty_scans_keep_the_latest_not_the_first():
+    result = check_device_observations(SPEC, _scan(0x3C, 0x77) * 50 + _scan(0x3C))
+    assert len(result["scans"]) == 50
+    assert _status(result)["sensor"] == "no_acknowledge"
