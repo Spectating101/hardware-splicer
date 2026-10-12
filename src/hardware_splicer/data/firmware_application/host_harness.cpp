@@ -21,6 +21,8 @@ struct ReadCmd {
     Reading value{};
 };
 
+static std::vector<std::string> g_serial_trace;
+
 class FakeHal final : public Hal {
 public:
     uint32_t clock = 0;
@@ -94,7 +96,10 @@ public:
         displays.push_back({l1 ? l1 : "", l2 ? l2 : "", l3 ? l3 : "", l4 ? l4 : ""});
     }
 
-    void log(const char* line) override { logs.push_back(line ? line : ""); }
+    void log(const char* line) override {
+        logs.push_back(line ? line : "");
+        g_serial_trace.push_back(line ? line : "");
+    }
 
     bool bus_recover() override {
         recover_calls += 1;
@@ -1120,10 +1125,15 @@ int main() {
     };
     bool all = true;
     for (const auto& scenario : scenarios) {
+        g_serial_trace.clear();
         std::string detail;
         const bool ok = scenario.fn(detail);
-        std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\"}\n",
+        std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\",\"modeled_serial\":[",
                     scenario.name, ok ? "true" : "false", json_escape(detail).c_str());
+        for (size_t i = 0; i < g_serial_trace.size(); ++i) {
+            std::printf("%s\"%s\"", i ? "," : "", json_escape(g_serial_trace[i]).c_str());
+        }
+        std::printf("]}\n");
         all = all && ok;
     }
     return all ? 0 : 1;
