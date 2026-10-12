@@ -26,12 +26,129 @@ CLAIM_BOUNDARY = (
     "Host model of the application logic. Does not test the Adafruit libraries, "
     "the Wire driver, timing, electrical behaviour or any real device."
 )
+VENDOR_HOST_CLAIM_BOUNDARY = (
+    "Vendor-host compile of the real Arduino adapter and the pinned Adafruit sources "
+    "against a modelled I2C bus. Not silicon, not ESP32 Wire timing, not electrical behaviour."
+)
+VENDOR_LIB_DIRS = (
+    "Adafruit BME280 Library",
+    "Adafruit SSD1306",
+    "Adafruit GFX Library",
+    "Adafruit BusIO",
+    "Adafruit Unified Sensor",
+)
+VENDOR_LIB_SOURCES = (
+    ("Adafruit BME280 Library", "Adafruit_BME280.cpp"),
+    ("Adafruit SSD1306", "Adafruit_SSD1306.cpp"),
+    ("Adafruit GFX Library", "Adafruit_GFX.cpp"),
+    ("Adafruit BusIO", "Adafruit_I2CDevice.cpp"),
+    ("Adafruit BusIO", "Adafruit_SPIDevice.cpp"),
+    ("Adafruit Unified Sensor", "Adafruit_Sensor.cpp"),
+)
 # The diagnostic verifier's toolchain cache, so one download serves both. Set PLATFORMIO_CORE_DIR to use another.
 DEFAULT_CORE_DIR = Path(__file__).resolve().parents[1] / ".cache" / "hardware-splicer" / "device-firmware" / "platformio-core"
 
 
 def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def vendor_libs_available(libdeps: Path | None) -> bool:
+    if libdeps is None or not libdeps.is_dir():
+        return False
+    for name in VENDOR_LIB_DIRS:
+        if not (libdeps / name).is_dir():
+            return False
+    for folder, source in VENDOR_LIB_SOURCES:
+        if not (libdeps / folder / source).is_file():
+            return False
+    return True
+
+
+def vendor_host_compile_command(project: Path, libdeps: Path, output: Path) -> list[str]:
+    gxx = shutil.which("g++") or "g++"
+    includes = [
+        "-I", str(project / "test" / "vendor_host"),
+        "-I", str(project / "src"),
+    ]
+    for name in VENDOR_LIB_DIRS:
+        includes += ["-I", str(libdeps / name)]
+    sources = [
+        str(project / "src" / "main.cpp"),
+        str(project / "test" / "vendor_host" / "arduino_core.cpp"),
+        str(project / "test" / "vendor_host" / "Wire.cpp"),
+        str(project / "test" / "vendor_host" / "models.cpp"),
+        str(project / "test" / "vendor_host" / "vendor_harness.cpp"),
+    ]
+    for folder, source in VENDOR_LIB_SOURCES:
+        sources.append(str(libdeps / folder / source))
+    return [
+        gxx, "-std=c++17", "-Wall", "-Wextra", "-Wno-macro-redefined",
+        "-DARDUINO=10812", "-DESP32", "-DARDUINO_ARCH_ESP32",
+        *includes, *sources, "-o", str(output),
+    ]
+
+
+def _not_run_vendor(reason: str) -> dict:
+    return {
+        "schema_version": "hardware_splicer.device_application_vendor_host.v1",
+        "pass": False,
+        "reason": reason,
+        "scenarios": [],
+        "findings": [],
+        "compiler": "",
+        "claim_boundary": VENDOR_HOST_CLAIM_BOUNDARY,
+        "firmware_authorized": False,
+        "power_on_authorized": False,
+        "physical_correctness": "UNPROVEN",
+    }
+
+
+def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
+    if not vendor_libs_available(libdeps):
+        return _not_run_vendor("not run: libraries not available"), b""
+    gxx = shutil.which("g++")
+    if not gxx:
+        return _not_run_vendor("not run: libraries not available"), b"g++ is missing\n"
+    assert libdeps is not None
+    version = subprocess.run([gxx, "--version"], capture_output=True, check=False)
+    compiler = version.stdout.decode(errors="replace").splitlines()[0] if version.stdout else ""
+    binary = project / "vendor_harness"
+    command = vendor_host_compile_command(project, libdeps, binary)
+    compiled = subprocess.run(command, cwd=project, capture_output=True, check=False)
+    log = compiled.stdout + compiled.stderr
+    if compiled.returncode != 0:
+        report = _not_run_vendor("vendor-host harness did not compile")
+        report["compiler"] = compiler
+        return report, log
+    ran = subprocess.run([str(binary)], cwd=project, capture_output=True, check=False)
+    log = log + ran.stdout + ran.stderr
+    scenarios: list[dict] = []
+    reason = ""
+    try:
+        scenarios = [json.loads(line) for line in ran.stdout.decode().splitlines() if line.strip()]
+    except json.JSONDecodeError:
+        reason = "vendor-host harness did not print JSON scenario results"
+        report = _not_run_vendor(reason)
+        report["compiler"] = compiler
+        return report, log
+    findings = [row for row in scenarios if row.get("finding")]
+    counted = [row for row in scenarios if not row.get("finding")]
+    passed = bool(counted) and all(row.get("pass") for row in counted)
+    if not passed and not reason:
+        reason = "one or more vendor-host scenarios failed"
+    return {
+        "schema_version": "hardware_splicer.device_application_vendor_host.v1",
+        "pass": passed,
+        "reason": reason,
+        "scenarios": scenarios,
+        "findings": findings,
+        "compiler": compiler,
+        "claim_boundary": VENDOR_HOST_CLAIM_BOUNDARY,
+        "firmware_authorized": False,
+        "power_on_authorized": False,
+        "physical_correctness": "UNPROVEN",
+    }, log
 
 
 def _run_host(project: Path) -> tuple[dict, bytes]:
@@ -125,7 +242,14 @@ def _compile_platformio(project: Path, platformio: str, output_root: Path, timeo
     return report, log
 
 
-def verify(spec: dict, *, output_root: Path, platformio: str | None = None, timeout: int = 600) -> tuple[Path, dict, dict | None]:
+def verify(
+    spec: dict,
+    *,
+    output_root: Path,
+    platformio: str | None = None,
+    timeout: int = 600,
+    vendor_libs: Path | None = None,
+) -> tuple[Path, dict, dict | None, dict | None]:
     metadata, package = build_device_application(spec)
     output_root.mkdir(parents=True, exist_ok=True)
     run = Path(tempfile.mkdtemp(prefix="device-application-", dir=output_root))
@@ -147,7 +271,17 @@ def verify(spec: dict, *, output_root: Path, platformio: str | None = None, time
         compile_report["source_sha256"] = metadata["files"]["src/app_core.h"]["sha256"]
         (run / "compile.log").write_bytes(compile_log)
         (run / "COMPILE_RESULT.json").write_text(json.dumps(compile_report, indent=2, sort_keys=True) + "\n")
-    return run, behaviour, compile_report
+    vendor_report = None
+    libs = vendor_libs
+    if libs is None and platformio:
+        libs = project / ".pio" / "libdeps" / "application"
+    if vendor_libs is not None or platformio:
+        vendor_report, vendor_log = _run_vendor_host(project, libs)
+        vendor_report["core_sha256"] = metadata["files"]["src/app_core.h"]["sha256"]
+        vendor_report["adapter_sha256"] = metadata["files"]["src/main.cpp"]["sha256"]
+        (run / "vendor_host.log").write_bytes(vendor_log)
+        (run / "VENDOR_HOST_RESULT.json").write_text(json.dumps(vendor_report, indent=2, sort_keys=True) + "\n")
+    return run, behaviour, compile_report, vendor_report
 
 
 def main() -> int:
@@ -157,6 +291,12 @@ def main() -> int:
     inputs.add_argument("--spec", type=Path)
     parser.add_argument("--output-root", type=Path, default=Path(".cache/hardware-splicer/device-application"))
     parser.add_argument("--platformio", default=None, help="Optional PlatformIO Core 6.1.18 binary")
+    parser.add_argument(
+        "--vendor-libs",
+        type=Path,
+        default=None,
+        help="Pinned PlatformIO libdeps/application directory for the vendor-host compile",
+    )
     args = parser.parse_args()
     if args.spec:
         if args.spec.stat().st_size > 64 * 1024:
@@ -164,7 +304,12 @@ def main() -> int:
         spec = json.loads(args.spec.read_text())
     else:
         spec = example_specs()[args.example or "esp32_oled_bme280_usb"]
-    run, behaviour, compile_report = verify(spec, output_root=args.output_root, platformio=args.platformio)
+    run, behaviour, compile_report, vendor_report = verify(
+        spec,
+        output_root=args.output_root,
+        platformio=args.platformio,
+        vendor_libs=args.vendor_libs,
+    )
     summary = {
         "artifacts": str(run),
         "behaviour_pass": behaviour["pass"],
@@ -176,10 +321,15 @@ def main() -> int:
     if compile_report is not None:
         summary["compile_pass"] = compile_report["compile_pass"]
         summary["compile_reason"] = compile_report["reason"]
+    if vendor_report is not None:
+        summary["vendor_host_pass"] = vendor_report["pass"]
+        summary["vendor_host_reason"] = vendor_report["reason"]
     print(json.dumps(summary, indent=2))
     if not behaviour["pass"]:
         return 1
     if compile_report is not None and not compile_report["compile_pass"]:
+        return 1
+    if vendor_report is not None and not vendor_report["pass"]:
         return 1
     return 0
 

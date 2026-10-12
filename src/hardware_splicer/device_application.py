@@ -23,11 +23,18 @@ BOUNDARY = (
     "Host scenarios exercise application logic against a modelled bus. They do not test Adafruit libraries, "
     "the Wire driver, timing, electrical behaviour or any real device."
 )
+VENDOR_HOST_BOUNDARY = (
+    "Vendor-host compile of the real Arduino adapter and the pinned Adafruit sources against a modelled "
+    "I2C bus and a host Arduino shim. A pass is not silicon, not the ESP32 Wire driver's real timing, "
+    "and not electrical behaviour. It does not authorize flashing or power-on."
+)
 NON_CLAIMS = [
     "Does not authorize flashing, powering or physical use.",
     "Does not pick an I2C address; declared alternatives are tried and the chip-id match is reported.",
     "Host scenarios are a model of application logic, not a sensor, display, timing or electrical test.",
     "Does not test the Adafruit libraries, the Wire driver, pull-ups, supply or any real device.",
+    "Vendor-host scenarios compile those Adafruit sources against a model; they are still not silicon, "
+    "not ESP32 Wire timing, and not electrical behaviour.",
     "Compilation is NOT_RUN until a separate compiler result exists.",
     "Behaviour tests are NOT_RUN until a separate host-harness result exists.",
     "physical_correctness remains UNPROVEN even if host tests and compilation later pass.",
@@ -43,6 +50,16 @@ def _fill(template: str, mapping: dict[str, str]) -> str:
     for key, value in mapping.items():
         text = text.replace("{{" + key + "}}", value)
     return text
+
+
+def _vendor_host_files() -> dict[str, bytes]:
+    bundled: dict[str, bytes] = {}
+    root = TEMPLATE_DIR / "vendor_host"
+    for path in sorted(root.rglob("*")):
+        if path.is_file():
+            rel = path.relative_to(TEMPLATE_DIR).as_posix()
+            bundled[f"test/{rel}"] = path.read_bytes()
+    return bundled
 
 
 def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
@@ -109,6 +126,9 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "platformio.ini": _template("platformio.ini.tmpl").encode(),
         "test/host/harness.cpp": _template("host_harness.cpp").encode(),
         "test/host/README.md": _template("host_README.md").encode(),
+    }
+    files.update(_vendor_host_files())
+    files.update({
         "DEVICE_SPEC.json": spec_bytes,
         "DEVICE_PLAN.json": _json(plan),
         "README.md": (
@@ -123,12 +143,15 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n"
             "Addresses are declared alternatives. The application reports the chip-id match; it does not assume 0x76 or 0x3C.\n"
             "Review exact hardware, supplies, grounds and pull-ups separately before any physical operation.\n"
-            "The diagnostic export remains available for other catalog parts.\n"
+            "The diagnostic export remains available for other catalog parts.\n\n"
+            + VENDOR_HOST_BOUNDARY
+            + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
         ).encode(),
-    }
+    })
     metadata = {
         "schema_version": SCHEMA,
         "claim_boundary": BOUNDARY,
+        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY,
         "status": "HOST_TESTABLE_PROPOSAL",
         "compilation": "NOT_RUN",
         "behaviour_tests": "NOT_RUN",

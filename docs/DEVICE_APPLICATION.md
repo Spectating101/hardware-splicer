@@ -28,6 +28,7 @@ A deterministic ZIP with:
 - `platformio.ini`: `espressif32@6.10.0`, `board = esp32dev`, Arduino,
   `monitor_speed = 115200`, and pinned Adafruit libraries.
 - `test/host/harness.cpp` and `test/host/README.md`: the host behaviour tests.
+- `test/vendor_host/`: Arduino shim, modelled I2C bus, BME280/SSD1306 register models, and a harness that compiles the real `src/main.cpp` with the pinned Adafruit sources.
 - `DEVICE_SPEC.json`, `DEVICE_PLAN.json`, `FIRMWARE_PROPOSAL.json`, `README.md`.
 
 `FIRMWARE_PROPOSAL.json` uses schema
@@ -123,6 +124,60 @@ RECOVERED
 A stale or fault line carries no temperature, humidity or pressure figures.
 Those numbers would be ones the application cannot stand behind.
 
+## Vendor-host scenarios
+
+A second harness compiles the package's real `src/main.cpp` and `src/app_core.h` together
+with the pinned Adafruit sources (BME280 2.3.0, SSD1306 2.5.17, GFX 1.12.6, BusIO 1.17.4,
+Unified Sensor 1.1.15) on the host, against a shim of Arduino and of arduino-esp32 2.0.17
+`TwoWire`, and a modelled I2C bus with fault injection. It drives `setup()` / `loop()`.
+
+A pass shows that this adapter and this vendor code behave as modelled. It is **not**
+silicon, **not** the ESP32 Wire driver's real timing, and **not** electrical behaviour.
+
+The shim clock is simulated: `delay(ms)` advances it; nothing sleeps. `Wire.begin()` with
+no arguments follows 2.0.17 `Wire.cpp`: it calls `begin(-1, -1, 0)`. If the bus is already
+inited, that returns true without changing pins. Otherwise `initPins` reuses the prior
+`sda`/`scl` if they were set, else the esp32dev defaults `SDA=21` `SCL=22`
+(`variants/esp32/pins_arduino.h`).
+
+BME280 registers follow BST-BME280-DS001-24 §5. Compensation compared to the library is
+the datasheet §8.1 double-precision formulas, implemented independently. ADC and
+calibration bytes used in the scenarios are **synthetic** and labelled so. Tolerance:
+0.05 °C (Adafruit reports 0.01 °C steps from the integer formula), 0.2 hPa, 0.3 %RH
+(integer / 64-bit Adafruit vs datasheet double; table 15 of the datasheet treats those as
+different implementations).
+
+SSD1306 command/data bytes are split on control byte `0x00` / `0x40` as Adafruit 2.5.17
+writes them. After `display()`, pixels are compared with `GFXcanvas1` drawing the same
+four text lines (the framebuffer encodings differ; the pixels must match).
+
+| Scenario | What it asserts | What it does not establish |
+|---|---|---|
+| `sensor_default_address_0x77_with_display_0x3C` | `BOOT sensor=0x77 display=0x3C`; every `STATE=OK` line matches the §8.1 oracle; driver I2C reads go to `0x77`; OLED pixels match the four text lines | A real chip ACK'd, or ESP32 Wire timing |
+| `sensor_0x76_only` | Second declared address; reads go to `0x76`; oracle match on a second synthetic calib/ADC set | Address-pin state of a particular module |
+| `display_at_0x3D_only` | `BOOT` reports `display=0x3D`; framebuffer pixels match `GFXcanvas1` | A particular OLED geometry |
+| `display_absent` | `DISPLAY MISSING` exactly once; after the 0x3C/0x3D presence probes, no further transaction to those addresses that is not a bare address probe; no framebuffer data | That Adafruit `begin()` would have detected the absence (2.5.17 returns true without probing; `Adafruit_SSD1306.cpp`: `return true; // Success`) |
+| `sensor_absent_then_appears` | `FAULT_SENSOR_MISSING`; probes at backoff 1, 2, 4, 8 s of simulated time (including library `delay`s); then `RECOVERED` | Pull-ups or a missing ACK as the only failure mode |
+| `unplug_replug_mid_run` | Unplug resets the model's registers (calibration lost until `begin()` reloads it); readings fail or are implausible; fault; retry re-begins; oracle values resume | That a real unplug power-cycles NVM the same way |
+| `both_addresses_answer` | `FAULT_AMBIGUOUS_ADDRESS`; no readings | Two physical chips |
+| `transient_data_nack` | 1–2 `requestFrom` / data-NACK failures → `STALE` then recovery, no fault | Library retry policy on hardware |
+| `wire_pins_stay_explicit` | Pins in effect after boot and after fault/recovery are the planned GPIOs (example 21/22, and a spec on IO25/IO26). Default-arg `Wire.begin()` that actually inits the bus after `end()` fails the scenario | GPIO electrical behaviour |
+| `blocking_budget` | Simulated time inside any one `loop()` stays within 250 ms: `2*(delay(10)+delay(100))` plus one calibration poll per successful `begin` (Adafruit_BME280.cpp:117–127) | That Adafruit `begin` is non-blocking on silicon |
+
+### Known limitation (FINDING, not a pass)
+
+`im_update_never_clears`: Adafruit_BME280 2.3.0 `init()` contains
+`while (isReadingCalibration()) delay(10);` with no timeout (`Adafruit_BME280.cpp` lines
+120–121). Against a modelled chip whose status `im_update` bit never clears, the call does
+not return. The harness aborts after 5000 ms of simulated time and records a FINDING. That
+row is not a pass.
+
+The verifier takes `--vendor-libs DIR` pointing at a PlatformIO
+`.pio/libdeps/application` tree. After `--platformio` it uses
+`<project>/.pio/libdeps/application` automatically. If the libraries are not there it
+writes `VENDOR_HOST_RESULT.json` with `pass: false` and
+`reason: "not run: libraries not available"` — never a pass.
+
 ## What the host tests do not prove
 
 They do not test the Adafruit libraries, the Wire driver, I2C timing, pull-up
@@ -181,6 +236,7 @@ PYTHONPATH=src .venv/bin/python scripts/verify_device_application.py \
 
 `--example` and `--spec` select the input the same way as
 `scripts/verify_device_firmware.py`. A compile run writes `COMPILE_RESULT.json`.
+`--vendor-libs DIR` runs the vendor-host harness and writes `VENDOR_HOST_RESULT.json`.
 The source ZIP continues to say `compilation=NOT_RUN` and
 `behaviour_tests=NOT_RUN`; the separate result files record execution. Do not
 upload from this package.
