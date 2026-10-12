@@ -205,7 +205,6 @@ def _runner_from(handler):
 
 def test_concurrent_requests_spawn_kicad_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     api, _store = _retain_reference(tmp_path)
-    capability_probe()
     calls: list[int] = []
     started = threading.Event()
     release = threading.Event()
@@ -220,6 +219,9 @@ def test_concurrent_requests_spawn_kicad_once(tmp_path: Path, monkeypatch: pytes
         return subprocess.CompletedProcess(list(cmd), 0, stdout=b"", stderr=b"")
 
     monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
+    monkeypatch.setattr("hardware_splicer.model3d.resolve_kicad_cli", lambda: "fixture-kicad-cli")
+    monkeypatch.setattr("hardware_splicer.model3d._PROBE_CACHE", None)
+    assert capability_probe()["available"] is True
     results: list[int] = []
     errors: list[BaseException] = []
 
@@ -255,6 +257,8 @@ def test_sidecar_install_failure_does_not_break_api(
         return subprocess.CompletedProcess(list(cmd), 0, stdout=b"", stderr=b"")
 
     monkeypatch.setattr("hardware_splicer.model3d.run_bounded", _runner_from(handler))
+    monkeypatch.setattr("hardware_splicer.model3d.resolve_kicad_cli", lambda: "fixture-kicad-cli")
+    monkeypatch.setattr("hardware_splicer.model3d._PROBE_CACHE", None)
     first = api.get("/v1/projects/robot/revisions/1/model3d")
     assert first.status_code == 200
     assert first.json()["available"] is True
