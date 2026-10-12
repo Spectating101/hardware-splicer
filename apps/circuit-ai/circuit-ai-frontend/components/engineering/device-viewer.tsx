@@ -431,6 +431,8 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
         const lidDepth = wall;
         let lastSignature = '';
         let labels: Label[] = [];
+        // Measured once per label text so the per-frame pass below never forces layout.
+        const labelSizes = new Map<string, { w: number; h: number }>();
         const partOffset = (part: Label['part']) => (typeof part === 'object' && part ? pose.modules[part.module] : part === 'lid' ? pose.lid : 0);
 
         const syncLabels = () => {
@@ -446,6 +448,7 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
               labelHost.appendChild(node);
               labelNodes.set(label.id, node);
             }
+            if (node.textContent !== label.text) labelSizes.delete(label.id);
             node.textContent = label.text;
             if (typeof label.part === 'object' && label.part) node.dataset.module = label.part.module;
             else delete node.dataset.module;
@@ -547,13 +550,27 @@ export function DeviceViewer({ plan }: { plan: DevicePlan }) {
           }
           if (labelHost && labelNodes.size) {
             const rect = host.getBoundingClientRect();
+            // Labels are projected independently, so two nearby parts can land on the same pixels.
+            // Nudge each label below any already-placed one it would cover, in label order.
+            const placed: { x: number; y: number; w: number; h: number }[] = [];
             for (const label of labels) {
               const node = labelNodes.get(label.id);
               if (!node) continue;
               project.set(label.point.x, label.point.y + partOffset(label.part), label.point.z).project(camera);
               const shown = project.z < 1;
               node.style.display = shown ? 'block' : 'none';
-              node.style.transform = `translate(${((project.x + 1) / 2) * rect.width + 6}px, ${((1 - project.y) / 2) * rect.height - 8}px)`;
+              if (!shown) continue;
+              let size = labelSizes.get(label.id);
+              if (!size) { size = { w: node.offsetWidth, h: node.offsetHeight }; labelSizes.set(label.id, size); }
+              const x = ((project.x + 1) / 2) * rect.width + 6;
+              let y = ((1 - project.y) / 2) * rect.height - 8;
+              for (let attempt = 0; attempt < 8; attempt += 1) {
+                const hit = placed.find((box) => x < box.x + box.w && x + size.w > box.x && y < box.y + box.h && y + size.h > box.y);
+                if (!hit) break;
+                y = hit.y + hit.h + 2;
+              }
+              placed.push({ x, y, w: size.w, h: size.h });
+              node.style.transform = `translate(${x}px, ${y}px)`;
             }
           }
           if (!userMoved) {
