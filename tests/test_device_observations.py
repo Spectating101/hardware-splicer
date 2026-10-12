@@ -180,3 +180,95 @@ def test_the_http_contract_is_stateless_and_strict(api, tmp_path):
     assert api.post("/v1/devices/observations", content=b"not json").status_code == 422
     assert api.post("/v1/devices/observations", json={"spec": SPEC, "transcript": "\x00"}).status_code == 422
     assert sorted(str(p) for p in tmp_path.rglob("*")) == before
+
+
+# --- the application's own serial output ------------------------------------------------------------------------------
+
+
+def _app(*lines):
+    return "\n".join(lines) + "\n"
+
+
+READING = "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3"
+
+
+def test_the_applications_boot_line_is_chip_id_evidence_for_the_sensor_and_a_presence_check_for_the_display():
+    result = check_device_observations(SPEC, _app("BOOT sensor=0x77 display=0x3C", READING))
+    by_id = {m["id"]: m for m in result["modules"]}
+    assert by_id["sensor"]["status"] == "acknowledged" and by_id["sensor"]["acknowledged_at"] == ["0x77"]
+    assert by_id["sensor"]["evidence"] == "application_chip_id_match"
+    assert "register 0xD0 read 0x60" in by_id["sensor"]["note"]
+    assert by_id["display"]["status"] == "acknowledged" and by_id["display"]["evidence"] == "application_presence_check"
+    assert "not a display identity" in by_id["display"]["note"]
+    assert result["summary"]["assessed"] is True and result["summary"]["consistent_with_declared_addresses"] is True
+    assert result["application"]["boot"] == {"sensor": "0x77", "display": "0x3C"}
+    assert result["application"]["readings"] == 1
+    assert result["provenance"] == "operator_supplied_text"
+    assert result["firmware_authorized"] is False and result["physical_correctness"] == "UNPROVEN"
+
+
+def test_a_missing_display_and_a_missing_sensor_are_reported_from_the_application_output():
+    missing_display = check_device_observations(SPEC, _app("DISPLAY MISSING", "BOOT sensor=0x76 display=NONE", READING))
+    by_id = {m["id"]: m for m in missing_display["modules"]}
+    assert by_id["sensor"]["status"] == "acknowledged" and by_id["display"]["status"] == "no_acknowledge"
+    assert missing_display["summary"]["consistent_with_declared_addresses"] is False
+
+    missing_sensor = check_device_observations(SPEC, _app("T=0 STATE=FAULT_SENSOR_MISSING"))
+    by_id = {m["id"]: m for m in missing_sensor["modules"]}
+    assert by_id["sensor"]["status"] == "no_acknowledge"
+    assert "cannot say why" in by_id["sensor"]["note"]
+    assert by_id["display"]["status"] == "not_assessed"
+
+
+def test_an_ambiguous_address_fault_is_not_resolved_by_the_text():
+    result = check_device_observations(SPEC, _app("DISPLAY MISSING", "T=0 STATE=FAULT_AMBIGUOUS_ADDRESS"))
+    assert {m["id"]: m["status"] for m in result["modules"]}["sensor"] == "ambiguous"
+
+
+def test_the_latest_boot_line_counts():
+    result = check_device_observations(SPEC, _app("BOOT sensor=0x77 display=0x3C", "BOOT sensor=0x76 display=0x3D"))
+    by_id = {m["id"]: m for m in result["modules"]}
+    assert by_id["sensor"]["acknowledged_at"] == ["0x76"] and by_id["display"]["acknowledged_at"] == ["0x3D"]
+
+
+def test_a_scan_and_the_application_that_agree_or_disagree_are_both_reported():
+    agree = check_device_observations(SPEC, _scan(0x3C, 0x77) + _app("BOOT sensor=0x77 display=0x3C"))
+    assert all(m["application"]["agrees"] is True for m in agree["modules"])
+    differ = check_device_observations(SPEC, _scan(0x3C, 0x77) + _app("BOOT sensor=0x76 display=0x3C"))
+    sensor = next(m for m in differ["modules"] if m["id"] == "sensor")
+    # Same status, different address: that is a disagreement, and the scan stays the primary text.
+    assert sensor["status"] == "acknowledged" and sensor["acknowledged_at"] == ["0x77"]
+    assert sensor["application"]["acknowledged_at"] == ["0x76"]
+    assert sensor["application"]["agrees"] is False and "differs" in sensor["note"]
+    broken = check_device_observations(SPEC, _scan(0x3C) + _app("BOOT sensor=0x77 display=0x3C"))
+    sensor = next(m for m in broken["modules"] if m["id"] == "sensor")
+    assert sensor["status"] == "no_acknowledge" and sensor["application"]["agrees"] is False
+    assert "differs" in sensor["note"]
+
+
+def test_application_lines_with_other_modules_say_nothing_about_them(tmp_path):
+    spec = copy.deepcopy(SPEC)
+    spec["modules"].append({"id": "light", "module": "adafruit-bh1750-stemma-qt"})
+    spec["connections"] += [{"from": "light.VIN", "to": "mcu.3V3"}, {"from": "light.GND", "to": "mcu.GND"},
+                            {"from": "light.SCL", "to": "mcu.IO22"}, {"from": "light.SDA", "to": "mcu.IO21"}]
+    result = check_device_observations(spec, _app("BOOT sensor=0x77 display=0x3C"))
+    assert {m["id"]: m["status"] for m in result["modules"]}["light"] == "not_assessed"
+    assert result["summary"]["consistent_with_declared_addresses"] is None or result["summary"]["consistent_with_declared_addresses"] is False
+
+
+def test_the_parser_matches_the_lines_the_application_actually_prints():
+    from pathlib import Path
+
+    core = (Path(__file__).resolve().parents[1] / "src/hardware_splicer/data/firmware_application/app_core.h").read_text()
+    for fragment in ('"BOOT sensor=0x%02X display=0x%02X"', '"BOOT sensor=0x%02X display=NONE"', '"T=%u STATE=%s"',
+                     '"T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f"', 'hal_.log("DISPLAY MISSING")',
+                     'hal_.log("RECOVERED")'):
+        assert fragment in core
+    for state in ("OK", "STALE", "FAULT_SENSOR_MISSING", "FAULT_SENSOR_READ", "FAULT_AMBIGUOUS_ADDRESS"):
+        assert f'return "{state}";' in core
+
+
+def test_application_text_with_timestamps_is_accepted():
+    stamped = "12:03:44.123 > BOOT sensor=0x77 display=0x3C\r\n"
+    assert {m["id"]: m["status"] for m in check_device_observations(SPEC, stamped)["modules"]} == {
+        "display": "acknowledged", "sensor": "acknowledged"}
