@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_firmware import build_device_firmware
+from .device_observations import check_device_observations
 
 MAX_BODY_BYTES = 64 * 1024
 
@@ -93,5 +94,17 @@ def create_device_router() -> APIRouter:
             "Content-Disposition": 'attachment; filename="device-diagnostic-proposal.zip"',
             "Cache-Control": "no-store",
         })
+
+    @router.post("/observations")
+    async def post_observations(request: Request) -> Dict[str, Any]:
+        """Compare a pasted diagnostic scan with the plan. Stateless; the text is operator-supplied."""
+
+        body = await _read_body(request, error_type="invalid_device_observation", label="request")
+        if not isinstance(body, dict) or "spec" not in body or "transcript" not in body:
+            raise HTTPException(status_code=422, detail={"type": "invalid_device_observation", "message": "send {spec, transcript}"})
+        try:
+            return {"ok": True, "observation": check_device_observations(body["spec"], body["transcript"])}
+        except DevicePlanError as exc:
+            raise HTTPException(status_code=422, detail={"type": "invalid_device_observation", "message": str(exc)}) from None
 
     return router
