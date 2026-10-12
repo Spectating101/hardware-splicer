@@ -58,6 +58,8 @@ export default function DevicePage() {
   const [plannedText, setPlannedText] = useState('');
   const [firmwareBusy, setFirmwareBusy] = useState(false);
   const [firmwareMessage, setFirmwareMessage] = useState('');
+  const [applicationBusy, setApplicationBusy] = useState(false);
+  const [applicationMessage, setApplicationMessage] = useState('');
   const [scanText, setScanText] = useState('');
   const [scanBusy, setScanBusy] = useState(false);
   const [scanError, setScanError] = useState('');
@@ -86,6 +88,7 @@ export default function DevicePage() {
     setBusy(true);
     setError('');
     setFirmwareMessage('');
+    setApplicationMessage('');
     setScanResult(null);
     setScanError('');
     try {
@@ -138,32 +141,47 @@ export default function DevicePage() {
   const errors = plan?.findings.filter((f) => f.severity === 'error').length ?? 0;
   const hasWiringFindings = plan?.findings.some((finding) => finding.severity === 'error' || finding.severity === 'warning') ?? false;
 
-  const downloadFirmware = async () => {
-    setFirmwareBusy(true);
-    setFirmwareMessage('');
+  const downloadPackage = async (
+    path: string,
+    filename: string,
+    setBusyState: (value: boolean) => void,
+    setMessage: (value: string) => void,
+    failure: string,
+    done: string,
+  ) => {
+    setBusyState(true);
+    setMessage('');
     try {
-      const response = await fetch('/api/proxy/engineering/devices/firmware', {
-        method: 'POST', headers: { 'content-type': 'application/json' }, body: specText, cache: 'no-store',
-      });
+      const response = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: specText, cache: 'no-store' });
       if (!response.ok || !response.headers.get('content-type')?.startsWith('application/zip')) {
         const body = await readJsonPayload<unknown>(response);
-        throw new Error(getProxyErrorMessage(body, 'The diagnostic source could not be downloaded.'));
+        throw new Error(getProxyErrorMessage(body, failure));
       }
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'device-diagnostic-proposal.zip';
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setFirmwareMessage('Source downloaded. Compilation has not run; no hardware authorization.');
+      setMessage(done);
     } catch (caught) {
-      setFirmwareMessage(caught instanceof Error ? caught.message : 'The diagnostic source could not be downloaded.');
+      setMessage(caught instanceof Error ? caught.message : failure);
     } finally {
-      setFirmwareBusy(false);
+      setBusyState(false);
     }
   };
+
+  const downloadFirmware = () => downloadPackage(
+    '/api/proxy/engineering/devices/firmware', 'device-diagnostic-proposal.zip', setFirmwareBusy, setFirmwareMessage,
+    'The diagnostic source could not be downloaded.', 'Source downloaded. Compilation has not run; no hardware authorization.',
+  );
+
+  const downloadApplication = () => downloadPackage(
+    '/api/proxy/engineering/devices/application', 'device-application-proposal.zip', setApplicationBusy, setApplicationMessage,
+    'The application source could not be downloaded.', 'Source downloaded. Its host tests and compilation have not run here; no hardware authorization.',
+  );
 
   const checkScan = async () => {
     setScanBusy(true);
@@ -254,6 +272,38 @@ export default function DevicePage() {
             </section>
 
             <aside className="min-w-0 space-y-4 [overflow-wrap:anywhere]" aria-label="About this device">
+              {plan.modules.map((placed) => {
+                const orders = modules.find((module) => module.id === placed.module)?.pin_orders;
+                if (!orders?.length) return null;
+                return <section key={placed.id} className="rounded-xl border border-stone-800 bg-stone-900/50 p-4">
+                  <label htmlFor={`pin-order-${placed.id}`} className="text-sm font-semibold text-stone-100">Which order is printed on your module?</label>
+                  <p className="mt-1 text-xs leading-5 text-stone-400">{placed.name}. {placed.kind === 'display' ? 'Read left to right looking at the screen, with the header at the top. ' : null}Connect by the printed labels, not by position in the picture.</p>
+                  <select id={`pin-order-${placed.id}`} data-testid="device-pin-order" value={placed.pin_order ?? ''} disabled={busy} onChange={(event) => choosePinOrder(placed.id, event.target.value)} className="mt-2 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
+                    {orders.map((order) => <option key={order.id} value={order.id}>{order.signals.join(', ')} ({order.label})</option>)}
+                  </select>
+                </section>;
+              })}
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-findings">
+                <h2 className="text-sm font-semibold text-stone-100">Wiring check</h2>
+                {!hasWiringFindings ? (
+                  <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-stone-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" /><span>These checks found nothing wrong with the wiring. That does not prove it will work. These are the checks this tool makes; a wire that passes them is not a wire that works.</span></p>
+                ) : null}
+                {plan.findings.length > 0 ? (
+                  <ul className="mt-2 space-y-2">
+                    {plan.findings.map((finding, index) => {
+                      const tone = SEVERITY[finding.severity];
+                      return (
+                        <li key={`${finding.rule}-${index}`} className={`rounded-lg border p-2.5 text-xs leading-5 ${tone.className}`} data-severity={finding.severity} data-rule={finding.rule}>
+                          <div className="flex items-center gap-1.5 font-semibold"><tone.Icon className="h-3.5 w-3.5" aria-hidden="true" />{tone.label}</div>
+                          <div className="mt-0.5">{finding.message}</div>
+                          <div className="mt-1 text-[10px] opacity-70">Basis: {finding.basis}</div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : null}
+              </section>
+
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-firmware">
                 <h2 className="text-sm font-semibold text-stone-100">Diagnostic source</h2>
                 <p className="mt-1 text-xs leading-5 text-stone-400">Download an ESP32 I2C probe sketch using this wiring&apos;s GPIOs. Possible addresses are declarations, not readings. The source waits for a serial command before probing. Probes drive the bus.</p>
@@ -264,6 +314,15 @@ export default function DevicePage() {
                 {specText !== plannedText ? <p className="mt-1 text-xs text-amber-200">Check the edited wiring before downloading.</p> : null}
                 {hasWiringFindings ? <p className="mt-1 text-xs text-amber-200">Resolve the wiring checks first.</p> : null}
                 {firmwareMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-firmware-message">{firmwareMessage}</p> : null}
+              </section>
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-application">
+                <h2 className="text-sm font-semibold text-stone-100">Application source</h2>
+                <p className="mt-1 text-xs leading-5 text-stone-400">An ESP32 sketch that reads the BME280 and shows the values on the OLED when one is wired. It tries the addresses this plan declares and reports which chip answered.</p>
+                <p className="mt-1 text-xs leading-5 text-stone-400">Its logic comes with off-hardware tests against a modelled bus. They do not cover the Adafruit libraries, timing or electrical behaviour. No flashing, powering or physical authorization.</p>
+                <button type="button" data-testid="device-application-download" onClick={() => void downloadApplication()} disabled={busy || applicationBusy || hasWiringFindings || Boolean(error) || specText !== plannedText} className="mt-2 rounded-md bg-stone-800 px-3 py-2 text-xs font-medium text-stone-100 hover:bg-stone-700 disabled:opacity-50">
+                  {applicationBusy ? 'Preparing source…' : 'Download application source'}
+                </button>
+                {applicationMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-application-message">{applicationMessage}</p> : null}
               </section>
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-scan">
                 <h2 className="text-sm font-semibold text-stone-100">Check a bench scan</h2>
@@ -303,38 +362,6 @@ export default function DevicePage() {
                   <p className="text-[11px] leading-4 text-stone-400" data-testid="device-scan-boundary">{scanResult.claim_boundary}</p>
                 </div> : null}
               </section>
-              {plan.modules.map((placed) => {
-                const orders = modules.find((module) => module.id === placed.module)?.pin_orders;
-                if (!orders?.length) return null;
-                return <section key={placed.id} className="rounded-xl border border-stone-800 bg-stone-900/50 p-4">
-                  <label htmlFor={`pin-order-${placed.id}`} className="text-sm font-semibold text-stone-100">Which order is printed on your module?</label>
-                  <p className="mt-1 text-xs leading-5 text-stone-400">{placed.name}. {placed.kind === 'display' ? 'Read left to right looking at the screen, with the header at the top. ' : null}Connect by the printed labels, not by position in the picture.</p>
-                  <select id={`pin-order-${placed.id}`} data-testid="device-pin-order" value={placed.pin_order ?? ''} disabled={busy} onChange={(event) => choosePinOrder(placed.id, event.target.value)} className="mt-2 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
-                    {orders.map((order) => <option key={order.id} value={order.id}>{order.signals.join(', ')} ({order.label})</option>)}
-                  </select>
-                </section>;
-              })}
-              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-findings">
-                <h2 className="text-sm font-semibold text-stone-100">Wiring check</h2>
-                {!hasWiringFindings ? (
-                  <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-stone-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" /><span>These checks found nothing wrong with the wiring. That does not prove it will work. These are the checks this tool makes; a wire that passes them is not a wire that works.</span></p>
-                ) : null}
-                {plan.findings.length > 0 ? (
-                  <ul className="mt-2 space-y-2">
-                    {plan.findings.map((finding, index) => {
-                      const tone = SEVERITY[finding.severity];
-                      return (
-                        <li key={`${finding.rule}-${index}`} className={`rounded-lg border p-2.5 text-xs leading-5 ${tone.className}`} data-severity={finding.severity} data-rule={finding.rule}>
-                          <div className="flex items-center gap-1.5 font-semibold"><tone.Icon className="h-3.5 w-3.5" aria-hidden="true" />{tone.label}</div>
-                          <div className="mt-0.5">{finding.message}</div>
-                          <div className="mt-1 text-[10px] opacity-70">Basis: {finding.basis}</div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : null}
-              </section>
-
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-shopping">
                 <h2 className="text-sm font-semibold text-stone-100">What you need</h2>
                 <ul className="mt-2 space-y-1.5 text-xs leading-5 text-stone-300">

@@ -5,6 +5,11 @@ proposal for the catalog ESP32-DevKitC V4. This extends the existing firmware
 scaffolding; it does not replace the verified-interface PlatformIO backend,
 change its authorization gate or create another project/evidence store.
 
+The device page also offers an *application* package for ESP32 + BME280 (+ OLED)
+whose behaviour is tested off-hardware against a modelled bus; it is documented
+in [DEVICE_APPLICATION.md](DEVICE_APPLICATION.md) and has the same authority
+limits.
+
 ## What the user gets
 
 Choose ESP32/OLED/BME280, check the wiring, then select **Download diagnostic
@@ -137,7 +142,7 @@ Locally, run:
 ```sh
 PYTHONPATH=src .venv/bin/python -m pytest -q tests/test_device_firmware.py tests/test_firmware_scaffold.py
 bash scripts/verify_device_frontend.sh real
-bash scripts/verify_device_frontend.sh mock device-assembly device-firmware device-observations donor-lookup donor-device-handoff donor-capture evidence-
+bash scripts/verify_device_frontend.sh mock device-assembly device-firmware device-application device-observations donor-lookup donor-device-handoff donor-capture evidence-
 ```
 
 Run browser checks separately from the full Python suite. The harness builds an
