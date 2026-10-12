@@ -50,6 +50,7 @@ public:
     int next_write_result = -1;  // if >= 0, next endTransmission(true) returns this
     int remaining_read_fails = 0;
     int remaining_data_nacks = 0;
+    int data_nack_skip = 0;  // data writes let through before remaining_data_nacks starts NACKing
 
     void attach(uint8_t addr, I2cDevice *dev);
     void detach(uint8_t addr);

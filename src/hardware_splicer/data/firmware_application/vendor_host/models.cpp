@@ -132,7 +132,7 @@ void Bme280Model::pack_adc() {
 
 void Bme280Model::por_from_nvm() {
     std::memset(reg_, 0, sizeof reg_);
-    reg_[0xD0] = kChipId;
+    reg_[0xD0] = chip_id_;
     // Table 18 reset states for data MSBs.
     reg_[0xF7] = 0x80;
     reg_[0xFA] = 0x80;
@@ -167,6 +167,11 @@ void Bme280Model::set_adc(int32_t adc_T, int32_t adc_P, int32_t adc_H) {
 }
 
 void Bme280Model::set_im_update_stuck(bool stuck) { im_update_stuck_ = stuck; }
+
+void Bme280Model::set_chip_id(uint8_t id) {
+    chip_id_ = id;
+    if (present_) reg_[0xD0] = id;
+}
 
 uint8_t Bme280Model::status_value() const {
     uint8_t status = 0;

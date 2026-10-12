@@ -121,6 +121,9 @@ uint8_t TwoWire::do_write(uint8_t address, const uint8_t *data, size_t len, bool
     if (g_i2c_bus.next_write_result >= 0) {
         result = static_cast<uint8_t>(g_i2c_bus.next_write_result);
         g_i2c_bus.next_write_result = -1;
+    } else if (g_i2c_bus.remaining_data_nacks > 0 && len > 0 && g_i2c_bus.data_nack_skip > 0) {
+        g_i2c_bus.data_nack_skip -= 1;
+        result = (!dev || !dev->present()) ? 2 : dev->on_write(data, len);
     } else if (g_i2c_bus.remaining_data_nacks > 0 && len > 0) {
         g_i2c_bus.remaining_data_nacks -= 1;
         result = 3;

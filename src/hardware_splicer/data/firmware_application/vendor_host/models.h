@@ -47,6 +47,8 @@ public:
     void unplug();
     void set_adc(int32_t adc_T, int32_t adc_P, int32_t adc_H);
     void set_im_update_stuck(bool stuck);
+    // A chip that answers at the address but is not a BME280 (e.g. a BMP280 answers 0x58).
+    void set_chip_id(uint8_t id);
     bool present() const override { return present_; }
     uint8_t address() const { return addr_; }
     Bme280Calib nvm() const { return nvm_; }
@@ -67,6 +69,7 @@ private:
     uint8_t addr_;
     bool present_ = false;
     bool im_update_stuck_ = false;
+    uint8_t chip_id_ = kChipId;
     uint32_t reset_ms_ = 0;
     bool reset_pending_ = false;
     uint8_t ptr_ = 0;

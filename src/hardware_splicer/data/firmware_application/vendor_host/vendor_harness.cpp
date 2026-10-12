@@ -9,7 +9,9 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <new>
 #include <regex>
 #include <string>
 #include <sys/wait.h>
@@ -18,6 +20,22 @@
 
 extern void setup();
 extern void loop();
+
+// Live heap blocks, counted across the harness, the adapter and the pinned Adafruit sources. The application
+// retries a missing sensor forever, so a block leaked per attempt is a real failure mode; this can see it.
+static long g_live_allocs = 0;
+void *operator new(std::size_t size) {
+    void *block = std::malloc(size ? size : 1);
+    if (!block) throw std::bad_alloc();
+    g_live_allocs += 1;
+    return block;
+}
+void operator delete(void *block) noexcept {
+    if (!block) return;
+    g_live_allocs -= 1;
+    std::free(block);
+}
+void operator delete(void *block, std::size_t) noexcept { operator delete(block); }
 
 // Adafruit_BME280.cpp init(): delay(10) after reset, optional delay(10) per
 // isReadingCalibration poll, delay(100) after setSampling. Two successful
@@ -238,6 +256,32 @@ struct Result {
     bool finding = false;
 };
 
+// The adapter keeps function-static state and a simulated clock, so each sub-case runs in a forked child
+// that starts from the same pristine process and reports its Result through a pipe.
+static Result run_isolated(Result (*fn)(int), int arg) {
+    int fds[2];
+    if (pipe(fds) != 0) return {false, "could not create a pipe for an isolated case", false};
+    const pid_t pid = fork();
+    if (pid < 0) return {false, "could not fork an isolated case", false};
+    if (pid == 0) {
+        close(fds[0]);
+        const Result r = fn(arg);
+        const std::string wire = std::string(r.pass ? "1" : "0") + r.detail;
+        const ssize_t sent = write(fds[1], wire.data(), wire.size());
+        (void)sent;
+        _exit(0);
+    }
+    close(fds[1]);
+    std::string got;
+    char chunk[512];
+    for (ssize_t n; (n = read(fds[0], chunk, sizeof chunk)) > 0;) got.append(chunk, static_cast<size_t>(n));
+    close(fds[0]);
+    int status = 0;
+    waitpid(pid, &status, 0);
+    if (got.empty() || !WIFEXITED(status) || WEXITSTATUS(status) != 0) return {false, "an isolated case did not finish", false};
+    return {got[0] == '1', got.substr(1), false};
+}
+
 static Result scenario_sensor_default_address() {
     World w;
     w.attach();
@@ -370,6 +414,7 @@ static Result scenario_sensor_absent_then_appears() {
     }
     const uint32_t retry_at[] = {1000, 3000, 7000, 15000};
     int prev = sensor_tx_count();
+    long live_after_second_retry = 0;
     for (uint32_t t : retry_at) {
         pump_to(t - 1);
         if (sensor_tx_count() != prev)
@@ -380,6 +425,11 @@ static Result scenario_sensor_absent_then_appears() {
         if (sensor_tx_count() <= prev)
             return {false, "no probe at backoff t=" + std::to_string(t), false};
         prev = sensor_tx_count();
+        if (t == 3000) live_after_second_retry = g_live_allocs;
+        if (t == 7000 && g_live_allocs > live_after_second_retry) {
+            return {false, "each failed retry leaked a heap block (" + std::to_string(g_live_allocs - live_after_second_retry) +
+                               " more live after the next retry); the application retries forever", false};
+        }
     }
     Result r;
     if (count_exact(Serial.lines(), "RECOVERED") < 1) {
@@ -424,7 +474,7 @@ static Result scenario_unplug_replug() {
     return r;
 }
 
-static Result scenario_both_addresses() {
+static Result both_addresses_case(int) {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
@@ -450,7 +500,44 @@ static Result scenario_both_addresses() {
     return r;
 }
 
-static Result scenario_transient_nack() {
+// A chip that answers at 0x77 but identifies as something else (0x58 is a BMP280's id) is not a second BME280:
+// the real sensor at 0x76 must still be chosen, with no ambiguity.
+static Result decoy_chip_case(int) {
+    World w;
+    w.attach();
+    plug_sensor(w.bme77, synthetic_calib_a());
+    w.bme77.set_chip_id(0x58);
+    int32_t t, p, h;
+    synthetic_adc_b(t, p, h);
+    w.bme76.plug(synthetic_calib_b(), t, p, h);
+    w.oled3c.plug();
+    setup();
+    if (!tracked_loop()) return {false, "watchdog during boot", false};
+    pump_to(2500);
+    Result r;
+    if (count_contains(Serial.lines(), "FAULT_AMBIGUOUS_ADDRESS") != 0) {
+        r.detail = "a chip with the wrong identity was counted as a second BME280";
+        return r;
+    }
+    if (count_contains(Serial.lines(), "BOOT sensor=0x76 display=0x3C") != 1) {
+        r.detail = "the real BME280 at 0x76 was not chosen beside a wrong-identity chip at 0x77";
+        return r;
+    }
+    if (!readings_match_oracle(w.bme76, r.detail)) return r;
+    r.pass = true;
+    return r;
+}
+
+static Result scenario_both_addresses() {
+    Result r = run_isolated(both_addresses_case, 0);
+    if (!r.pass) return r;
+    const Result decoy = run_isolated(decoy_chip_case, 0);
+    if (!decoy.pass) return decoy;
+    r.detail += "; a wrong-identity chip at the other address is not a second sensor";
+    return r;
+}
+
+static Result transient_read_case(int) {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
@@ -478,12 +565,55 @@ static Result scenario_transient_nack() {
     return r;
 }
 
+// A NACK on one of the first three data writes of the sensor's init (chip-id pointer, soft reset, status pointer)
+// must fail that begin(), leave FAULT_SENSOR_MISSING at boot, and recover on the next retry. No display is
+// attached so the display's own init writes do not use up the NACK.
+static Result init_nack_case(int skip) {
+    static const char *const step[] = {"chip-id", "soft-reset", "status"};
+    World w;
+    w.attach();
+    plug_sensor(w.bme77, synthetic_calib_a());
+    g_i2c_bus.data_nack_skip = skip;
+    g_i2c_bus.remaining_data_nacks = 1;
+    setup();
+    if (!tracked_loop()) return {false, "watchdog during boot", false};
+    Result r;
+    if (count_exact(Serial.lines(), "T=0 STATE=FAULT_SENSOR_MISSING") != 1 || count_contains(Serial.lines(), "BOOT sensor=") != 0 ||
+        count_contains(Serial.lines(), "STATE=OK") != 0) {
+        r.detail = std::string("a NACK on the ") + step[skip] + " write must fail begin(), fault at boot and log no reading";
+        return r;
+    }
+    pump_to(3000);
+    if (count_exact(Serial.lines(), "RECOVERED") < 1) {
+        r.detail = std::string("the sensor did not recover after a transient ") + step[skip] + " NACK";
+        return r;
+    }
+    r.pass = true;
+    return r;
+}
+
+static Result scenario_transient_nack() {
+    Result r = run_isolated(transient_read_case, 0);
+    if (!r.pass) return r;
+    for (int skip = 0; skip < 3; ++skip) {
+        const Result c = run_isolated(init_nack_case, skip);
+        if (!c.pass) return c;
+    }
+    r.detail += "; a NACK on the chip-id, reset or status write at boot faults, then recovers";
+    return r;
+}
+
 static Result scenario_wire_pins() {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
     w.oled3c.plug();
     setup();
+    // Read before any loop: Adafruit_SSD1306 restores the clock to 100 kHz after its own init, which would hide
+    // a different frequency requested by setup().
+    if (Wire.getClock() != 100000) {
+        return {false, "setup() requested " + std::to_string(Wire.getClock()) + " Hz, not the planned 100000 Hz", false};
+    }
     if (!tracked_loop()) return {false, "watchdog during boot", false};
     const int sda_boot = Wire.sda_pin();
     const int scl_boot = Wire.scl_pin();
@@ -527,6 +657,16 @@ static Result scenario_wire_pins() {
     }
     if (Wire.sda_pin() != explicit_sda || Wire.scl_pin() != explicit_scl) {
         r.detail = "pins after recovery are not the planned pins";
+        return r;
+    }
+    // Recovery exists to reset a stuck peripheral: begin() on an already-initialised bus is a no-op, so the
+    // adapter must end() first. Boot plus recovery means at least two explicit begin() calls that really initialised it.
+    int explicit_inits = 0;
+    for (const auto &c : Wire.begin_calls()) {
+        if (c.actually_inited && !c.default_args) explicit_inits += 1;
+    }
+    if (explicit_inits < 2) {
+        r.detail = "bus recovery did not re-initialise the bus: Wire.begin() ran on a bus that was never ended";
         return r;
     }
     r.pass = true;
