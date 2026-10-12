@@ -139,11 +139,12 @@ test('your work is kept in this browser, and Start again clears it', async ({ pa
   await page.getByTestId('donor-name').fill('Router from the skip');
   await page.getByTestId('donor-add-centre').click();
   await page.getByTestId('donor-marking').fill('AR9331');
-  await page.waitForTimeout(700);                                                         // it is saved shortly after each change
+  // The page saves after a short pause following each change; wait for the save itself, not for a guess at how long it takes.
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem('hs-donor-capture-v1') || '')).toContain('AR9331');
   await page.reload();
   await expect(page.getByTestId('donor-name')).toHaveValue('Router from the skip');
   await expect(page.getByTestId('donor-part-U1')).toBeVisible();
-  await page.getByTestId('donor-part-U1').click({ force: true });
+  await page.getByTestId('donor-part-U1').click();
   await expect(page.getByTestId('donor-marking')).toHaveValue('AR9331');
   await page.getByTestId('donor-reset').click();
   await expect(page.getByTestId('donor-part-U1')).toHaveCount(0);
@@ -259,7 +260,7 @@ test('a file or stored board with hostile contents is cleaned or refused and nev
   fs.writeFileSync(hidden, JSON.stringify({ name: 'Router‮', board: { width_mm: 60, length_mm: 40 }, parts: [{ kind: 'ic', package: 'SOIC', x_mm: 10, y_mm: 10, ref: 'U1', marking: 'NE​555' }] }));
   await page.locator('input[type=file][accept*="json"]').setInputFiles(hidden);
   await expect(page.getByTestId('donor-name')).toHaveValue('Router');
-  await page.getByTestId('donor-part-U1').click({ force: true });
+  await page.getByTestId('donor-part-U1').click();
   await expect(page.getByTestId('donor-marking')).toHaveValue('NE555');                  // the hidden characters are gone before they are shown
   expect(errors).toEqual([]);
 });
