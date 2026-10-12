@@ -9,11 +9,8 @@ import pytest
 
 
 def verifier():
-    path = Path(__file__).resolve().parents[1] / "scripts/verify_device_application.py"
-    spec = importlib.util.spec_from_file_location("device_application_verifier_tests", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    from hardware_splicer import device_application_execution
+    return device_application_execution
 
 
 @pytest.mark.parametrize("lane", ["host", "vendor"])
@@ -55,7 +52,7 @@ def test_bad_harness_results_fail_closed(tmp_path, monkeypatch, lane, fault):
             raise subprocess.TimeoutExpired(command, 60, output=output)
         return SimpleNamespace(returncode=exit_code, stdout=output, stderr=b"")
 
-    monkeypatch.setattr(module.subprocess, "run", run)
+    monkeypatch.setattr(module, "_execute", run)
     report, _ = module._run_host(tmp_path) if lane == "host" else module._run_vendor_host(tmp_path, tmp_path)
     assert report["pass"] is False and report["reason"]
     assert report["physical_correctness"] == "UNPROVEN"
@@ -86,6 +83,16 @@ def test_relative_vendor_library_path_is_resolved_before_changing_compile_direct
             return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
         return SimpleNamespace(returncode=0, stdout=("\n".join(json.dumps(row) for row in rows)).encode(), stderr=b"")
 
-    monkeypatch.setattr(module.subprocess, "run", run)
+    monkeypatch.setattr(module, "_execute", run)
     report, _ = module._run_vendor_host(tmp_path / "project", Path("libs"))
     assert report["pass"] is True
+
+
+def test_executor_reuses_bounded_process_output_and_child_cleanup(monkeypatch):
+    module = verifier()
+    def bounded(command, **kwargs):
+        assert kwargs["timeout_s"] == 60 and kwargs["tail_bytes"] == 1024 * 1024
+        return SimpleNamespace(returncode=0, stdout_tail=b"{}\n", stderr_tail=b"")
+    monkeypatch.setattr(module, "run_bounded", bounded)
+    result = module._execute(["harness"], timeout=60)
+    assert result.returncode == 0 and result.stdout == b"{}\n"

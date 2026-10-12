@@ -84,6 +84,14 @@ export function getProxyAuthHeaders(request?: Request): Record<string, string> {
   return apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
 }
 
+/** App-level execution credential only; never an operator identity token. */
+export function getHardwareSplicerExecutionAuthHeaders(request: Request): Record<string, string> {
+  const supplied = request.headers.get('authorization');
+  if (supplied) return { Authorization: supplied };
+  const key = envValue('HARDWARE_SPLICER_API_KEY') || envValue('CIRCUIT_AI_API_KEY');
+  return key ? { Authorization: `Bearer ${key}` } : {};
+}
+
 function extractErrorMessage(text: string, fallback: string) {
   try {
     const payload = JSON.parse(text) as {
