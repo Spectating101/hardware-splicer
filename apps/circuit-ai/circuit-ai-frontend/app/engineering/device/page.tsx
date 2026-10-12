@@ -8,7 +8,12 @@ import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/pro
 import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 
 type Spec = Record<string, unknown>;
-type ScanModule = { id: string; name: string; declared_addresses: string[]; acknowledged_at: string[]; status: 'acknowledged' | 'no_acknowledge' | 'ambiguous' | 'shared_address' | 'bus_error' | 'not_assessed'; note: string };
+type ScanModule = { id: string; name: string; declared_addresses: string[]; acknowledged_at: string[]; status: 'acknowledged' | 'no_acknowledge' | 'ambiguous' | 'shared_address' | 'bus_error' | 'not_assessed'; note: string; evidence?: string; application?: { agrees?: boolean } };
+const SCAN_EVIDENCE: Record<string, string> = {
+  application_chip_id_match: "Reported by the application's own chip-id check.",
+  application_presence_check: "Reported by the application's presence check.",
+  application_fault: "Reported by the application's fault output.",
+};
 type ScanObservation = {
   summary: { assessed: boolean; consistent_with_declared_addresses: boolean | null; statement: string };
   modules: ScanModule[];
@@ -326,8 +331,8 @@ export default function DevicePage() {
               </section>
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-scan">
                 <h2 className="text-sm font-semibold text-stone-100">Check a bench scan</h2>
-                <p className="mt-1 text-xs leading-5 text-stone-400">After you have run the diagnostic on your own board and sent <code className="text-stone-200">s</code>, paste what it printed. This compares it with the addresses this plan declares. It is text you supply, so it is a report, not proof.</p>
-                <label htmlFor="device-scan-input" className="sr-only">Serial output from the diagnostic</label>
+                <p className="mt-1 text-xs leading-5 text-stone-400">After you have run the diagnostic or the application on your own board, paste what it printed (the diagnostic prints its scan when you send <code className="text-stone-200">s</code>). This compares it with the addresses this plan declares. It is text you supply, so it is a report, not proof.</p>
+                <label htmlFor="device-scan-input" className="sr-only">Serial output from the diagnostic or the application</label>
                 <textarea
                   id="device-scan-input"
                   value={scanText}
@@ -351,7 +356,7 @@ export default function DevicePage() {
                         <div className="font-semibold">{module.name}</div>
                         <div className="mt-0.5 font-medium">{tone.label}</div>
                         <div className="mt-0.5">{module.note}</div>
-                        <div className="mt-1 text-[10px] opacity-70">Declared {module.declared_addresses.join(' or ')}{module.acknowledged_at.length ? `; answered at ${module.acknowledged_at.join(', ')}` : ''}</div>
+                        <div className="mt-1 text-[10px] opacity-70">Declared {module.declared_addresses.join(' or ')}{module.acknowledged_at.length ? `; answered at ${module.acknowledged_at.join(', ')}` : ''}{module.evidence && SCAN_EVIDENCE[module.evidence] ? `. ${SCAN_EVIDENCE[module.evidence]}` : ''}</div>
                       </li>;
                     })}
                   </ul>

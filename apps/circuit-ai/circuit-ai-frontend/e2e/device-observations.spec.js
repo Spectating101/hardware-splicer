@@ -65,3 +65,16 @@ test('text with control characters is refused and a new wiring check clears the 
   await page.getByTestId('device-spec-apply').click();
   await expect(page.getByTestId('device-scan-result')).toHaveCount(0);
 });
+
+test('the application\'s own boot line is read, with what it does and does not establish', async ({ page }) => {
+  await open(page);
+  await compare(page, ['BOOT sensor=0x77 display=0x3C', 'T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3'].join('\n'));
+  const modules = page.getByTestId('device-scan-module');
+  await expect(modules).toHaveCount(2);
+  await expect(modules.filter({ hasText: 'BME280' })).toHaveAttribute('data-status', 'acknowledged');
+  await expect(modules.filter({ hasText: 'BME280' })).toContainText("application's own chip-id check");
+  await expect(modules.filter({ hasText: 'SSD1306' })).toContainText("not a display identity");
+  await expect(page.getByTestId('device-scan-boundary')).toContainText('cannot tell whether it came from the planned hardware');
+  await compare(page, 'DISPLAY MISSING\nBOOT sensor=0x76 display=NONE');
+  await expect(page.getByTestId('device-scan-module').filter({ hasText: 'SSD1306' })).toHaveAttribute('data-status', 'no_acknowledge');
+});
