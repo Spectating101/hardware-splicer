@@ -58,12 +58,14 @@ jobs:
       HS_PLAYWRIGHT_ROOT: ${{ github.workspace }}/.cache/hs-playwright
     steps:
       - uses: actions/checkout@v4
-      - name: Install KiCad 9 lookup libraries used by the broader browser checks
+      - name: Install KiCad 9 CLI and lookup libraries used by the broader browser checks
         if: matrix.backend == 'mock'
         run: |
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends kicad-symbols kicad-footprints
+          sudo apt-get install --yes --no-install-recommends kicad kicad-symbols kicad-footprints
+          kicad-cli --version | grep -E '^9\.'
+          kicad-cli pcb export glb --help
           test -f /usr/share/kicad/symbols/Timer.kicad_sym
           test -d /usr/share/kicad/footprints/Package_DIP.pretty
       - uses: actions/setup-python@v5
@@ -73,7 +75,7 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install -e '.[dev]'
-          PYTHONPATH=src .venv/bin/python -m pytest -q tests/test_device_plan.py tests/test_device_reclaim.py tests/test_device_quote_audit.py tests/test_device_firmware.py tests/test_firmware_scaffold.py
+          PYTHONPATH=src .venv/bin/python -m pytest -q tests/test_device_plan.py tests/test_device_reclaim.py tests/test_device_quote_audit.py tests/test_device_firmware.py tests/test_firmware_scaffold.py tests/test_device_observations.py tests/test_device_application_verifier.py tests/test_device_deliverables_ci.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
