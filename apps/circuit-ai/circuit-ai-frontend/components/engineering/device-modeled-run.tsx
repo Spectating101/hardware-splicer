@@ -79,20 +79,23 @@ export function DeviceModeledRun({ specText, enabled }: { specText: string; enab
     {!enabled ? <p className="mt-1 text-xs text-amber-200">Check this wiring and resolve its findings first.</p> : null}
     {error ? <p role="alert" data-testid="device-modeled-error" className="mt-2 text-xs text-amber-200">{error}</p> : null}
     {result && enabled ? <div className="mt-3 space-y-2" data-testid="device-modeled-result" data-status={result.status}>
-      <p role="status" className="text-xs font-semibold">{result.status === 'PASSED' ? 'Core and vendor-host tests passed' : result.status === 'PARTIAL' ? 'Core tests passed; vendor-host tests were not run' : 'Modeled run failed'}</p>
+      <p role="status" className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${result.status === 'PASSED' ? 'border-emerald-500/40 bg-emerald-950/30 text-emerald-100' : result.status === 'PARTIAL' ? 'border-amber-400/40 bg-amber-950/30 text-amber-100' : 'border-red-500/40 bg-red-950/40 text-red-100'}`}>{result.status === 'PASSED' ? 'Core and vendor-host tests passed' : result.status === 'PARTIAL' ? 'Core tests passed; vendor-host tests were not run' : 'Modeled run failed'}</p>
+      <p className="text-[11px] leading-4 text-stone-400" data-testid="device-modeled-claim">Modeled results only. Nothing here is a bench reading, and flashing and power authorization remain closed.</p>
       {[['Core logic', result.host], ['Vendor-host driver', result.vendor_host]] .map(([title, phase]) => {
         const report = phase as Phase;
         return <div key={title as string} className="space-y-1 text-xs" data-testid="device-modeled-phase">
           <p>{title as string}: {report.status} ({report.scenarios.filter((s) => s.pass).length}/{report.scenarios.length} scenarios)</p>
           {report.reason ? <p className="text-stone-400">{report.reason}</p> : null}
-          {report.scenarios.map((scenario) => <details key={scenario.scenario} className="rounded border border-stone-700 p-2" data-testid="device-modeled-scenario" data-pass={String(scenario.pass)}>
-            <summary className="cursor-pointer">{scenario.scenario}: {scenario.pass ? 'passed' : 'failed'}</summary>
-            <p className="mt-1 text-stone-400">{scenario.detail}</p>
-            {scenario.modeled_serial?.length ? <><p className="mt-1 text-stone-400">Modeled serial output — synthetic, not bench evidence</p><pre className="mt-1 max-h-44 overflow-auto whitespace-pre-wrap break-all text-[10px]" data-testid="device-modeled-serial">{scenario.modeled_serial.slice(0, 120).join('\n')}</pre></> : null}
+          {report.scenarios.map((scenario) => <details key={scenario.scenario} open={!scenario.pass} className="rounded border border-stone-700" data-testid="device-modeled-scenario" data-pass={String(scenario.pass)}>
+            <summary className="flex min-h-9 cursor-pointer items-center gap-2 px-2 py-1.5"><span aria-hidden="true" className={scenario.pass ? 'text-emerald-400' : 'text-red-400'}>{scenario.pass ? '✓' : '✗'}</span><span className="min-w-0 break-words">{scenario.scenario}: {scenario.pass ? 'passed' : 'failed'}</span></summary>
+            <div className="px-2 pb-2">
+              <p className="text-stone-400">{scenario.detail}</p>
+              {scenario.modeled_serial?.length ? <><p className="mt-1 text-stone-400">Modeled serial output — synthetic, not bench evidence</p><pre className="mt-1 max-h-44 overflow-auto whitespace-pre text-[11px] leading-4" data-testid="device-modeled-serial">{scenario.modeled_serial.slice(0, 120).join('\n')}</pre></> : null}
+            </div>
           </details>)}
         </div>;
       })}
-      <p className="break-all text-[10px] text-stone-400" data-testid="device-modeled-hash">Source ZIP SHA-256: {result.proposal_sha256}</p>
+      <p className="break-all font-mono text-[11px] text-stone-400" data-testid="device-modeled-hash">Source ZIP SHA-256: {result.proposal_sha256}</p>
       <p className="text-[11px] text-stone-400">ESP32 compilation: {result.esp32_compilation}. Physical correctness: {result.physical_correctness}. Flashing and power authorization remain closed.</p>
       <button type="button" data-testid="device-modeled-download" onClick={download} className="rounded-md bg-stone-800 px-3 py-2 text-xs">Download modeled-run report</button>
     </div> : null}
