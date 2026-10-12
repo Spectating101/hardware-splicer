@@ -1,4 +1,4 @@
-"""Compare a pasted bench scan with a device plan's declared I2C addresses.
+"""Compare pasted bench output with a device plan's declared I2C addresses.
 
 Stateless and read-only: no hardware, project or file is touched, and nothing is stored. The text is supplied by the
 operator, so it is reported as operator-supplied; this module cannot tell whether it came from the planned hardware. An
@@ -40,7 +40,17 @@ _ERROR = re.compile(_PREFIX + r"Probe error (\d{1,3}) at 0x([0-9A-Fa-f]{2})\.\s*
 _SUMMARY = re.compile(_PREFIX + r"Observed acknowledgements: (\d{1,3})\. No sensor readings or physical validation\.\s*$")
 _INIT_FAILED = re.compile(_PREFIX + r"I2C initialization failed; no scan result\.\s*$")
 _DECLARED = re.compile(_PREFIX + r"Declared possible addresses, NOT observations:((?: 0x[0-9A-Fa-f]{2})*)\s*$")
+# These shapes are the application's own serial output (data/firmware_application/app_core.h); a test keeps them in step.
+_BOOT = re.compile(_PREFIX + r"BOOT sensor=0x([0-9A-Fa-f]{2}) display=(?:0x([0-9A-Fa-f]{2})|NONE)\s*$")
+_STATE = re.compile(
+    _PREFIX + r"T=\d{1,10} STATE=(OK|STALE|FAULT_SENSOR_MISSING|FAULT_SENSOR_READ|FAULT_AMBIGUOUS_ADDRESS)"
+    r"(?: TEMP_C=-?\d+\.\d{2} HUM_PCT=-?\d+\.\d PRES_HPA=-?\d+\.\d)?\s*$"
+)
+_DISPLAY_MISSING = re.compile(_PREFIX + r"DISPLAY MISSING\s*$")
+_RECOVERED = re.compile(_PREFIX + r"RECOVERED\s*$")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+BME280_ID = "adafruit-bme280-stemma-qt"
+SSD1306_ID = "ssd1306-096-i2c"
 
 
 def _address(text: str) -> str:
@@ -67,13 +77,17 @@ def _validate(transcript: Any) -> str:
     return transcript
 
 
-def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int]:
-    """Split the text into scans. A scan is complete only when its summary line arrived and agrees with its lines."""
+def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int, dict[str, Any]]:
+    """Split the text into scans. A scan is complete only when its summary line arrived and agrees with its lines.
+
+    Lines the application prints are collected separately; the latest BOOT line is the one that counts.
+    """
 
     scans: list[dict[str, Any]] = []
     declared: list[str] | None = None
     unrecognised = 0
     current: dict[str, Any] | None = None
+    application: dict[str, Any] = {"boot": None, "states": {}, "display_missing": False, "recovered": False, "readings": 0}
 
     def open_scan() -> dict[str, Any]:
         return {"acknowledged": [], "errors": [], "complete": False, "consistent": False, "note": ""}
@@ -119,10 +133,50 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
             current = current or open_scan()
             close("The sketch reported that it could not start the I2C bus, so this scan has no result.", complete=False, consistent=False)
             continue
+        if (match := _BOOT.match(line)):
+            application["boot"] = {"sensor": _address(match.group(1)), "display": _address(match.group(2)) if match.group(2) else None}
+            continue
+        if (match := _STATE.match(line)):
+            state = match.group(1)
+            application["states"][state] = application["states"].get(state, 0) + 1
+            if state == "OK":
+                application["readings"] += 1
+            continue
+        if _DISPLAY_MISSING.match(line):
+            application["display_missing"] = True
+            continue
+        if _RECOVERED.match(line):
+            application["recovered"] = True
+            continue
         unrecognised += 1
     if current is not None:
         close("The scan has no closing total line, so it may be cut short.", complete=False, consistent=False)
-    return scans[:MAX_SCANS], declared, unrecognised
+    return scans[:MAX_SCANS], declared, unrecognised, application
+
+
+def _application_row(library_id: str, addresses: list[str], application: dict[str, Any]) -> dict[str, Any] | None:
+    """What the application's own serial output says about one module, or None when it says nothing about it."""
+
+    boot, states = application["boot"], application["states"]
+    if library_id == BME280_ID:
+        if boot and boot["sensor"] in addresses:
+            return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_chip_id_match",
+                    "note": f"The application reported that a chip identified itself as a BME280 (register 0xD0 read 0x60) at {boot['sensor']}."}
+        if "FAULT_AMBIGUOUS_ADDRESS" in states:
+            return {"status": "ambiguous", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The application reported that a BME280 identified itself at more than one declared address."}
+        if "FAULT_SENSOR_MISSING" in states:
+            return {"status": "no_acknowledge", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The application reported that no chip identified itself as a BME280 at any declared address. It cannot say why."}
+        return None
+    if library_id == SSD1306_ID:
+        if boot and boot["display"] in addresses:
+            return {"status": "acknowledged", "acknowledged_at": [boot["display"]], "evidence": "application_presence_check",
+                    "note": f"The application's presence check found something at {boot['display']}. That is an acknowledge, not a display identity."}
+        if application["display_missing"] or (boot and boot["display"] is None):
+            return {"status": "no_acknowledge", "acknowledged_at": [], "evidence": "application_fault",
+                    "note": "The application reported the display missing: nothing acknowledged at any declared address."}
+    return None
 
 
 def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
@@ -146,7 +200,8 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
         for address in addresses:
             users.setdefault(address, []).append(module_id)
 
-    scans, declared_in_text, unrecognised = _parse(text)
+    scans, declared_in_text, unrecognised, application = _parse(text)
+    app_seen = bool(application["boot"] or application["states"] or application["display_missing"])
     usable = [index for index, scan in enumerate(scans) if scan["complete"] and scan["consistent"]]
     used = usable[-1] if usable else None
     acks = set(scans[used]["acknowledged"]) if used is not None else set()
@@ -179,11 +234,24 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
             else:
                 row.update(status="no_acknowledge", note="Nothing answered at any address this module declares. This scan "
                            "cannot say why: wiring, power, an address setting or a different module are all possible.")
+        from_app = _application_row(placed["module"], addresses, application) if app_seen else None
+        if from_app is not None:
+            row["application"] = {"status": from_app["status"], "acknowledged_at": from_app["acknowledged_at"],
+                                  "evidence": from_app["evidence"], "note": from_app["note"]}
+            if row["status"] == "not_assessed":
+                row.update(status=from_app["status"], acknowledged_at=from_app["acknowledged_at"], note=from_app["note"],
+                           evidence=from_app["evidence"])
+            elif row["status"] != from_app["status"] or sorted(row["acknowledged_at"]) != sorted(from_app["acknowledged_at"]):
+                row["note"] += f" The application's own output differs: {from_app['note']}"
+                row["application"]["agrees"] = False
+            else:
+                row["application"]["agrees"] = True
         modules.append(row)
 
     unexpected = sorted(a for a in acks if a not in users)
     statuses = {row["status"] for row in modules}
-    if used is None or not modules:
+    assessed = used is not None or any(row["status"] != "not_assessed" for row in modules)
+    if not assessed or not modules:
         consistent = None
         statement = "No complete scan was found, so nothing is concluded about the wiring."
     elif statuses <= {"acknowledged"}:
@@ -212,7 +280,8 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
         "unrecognised_lines": unrecognised,
         "modules": modules,
         "unexpected_acknowledgements": unexpected,
-        "summary": {"assessed": used is not None, "consistent_with_declared_addresses": consistent, "statement": statement},
+        "application": application if app_seen else None,
+        "summary": {"assessed": assessed, "consistent_with_declared_addresses": consistent, "statement": statement},
         "firmware_authorized": False,
         "power_on_authorized": False,
         "physical_correctness": "UNPROVEN",

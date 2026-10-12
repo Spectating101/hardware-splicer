@@ -101,6 +101,14 @@ scans the latest complete one is used and disagreement between them is reported.
 An address nothing declares is mentioned neutrally; the plan cannot say what it
 is.
 
+The same box also reads the [application](DEVICE_APPLICATION.md)'s own serial
+lines (`BOOT sensor=0x77 display=0x3C`, `STATE=FAULT_SENSOR_MISSING`,
+`DISPLAY MISSING`). A BOOT line means the application's chip-id check matched a
+BME280 at that address, which is stronger than an acknowledge; the display is
+only a presence check. When both a scan and the application's output are
+pasted, the scan stays primary and any difference in status or address is
+reported on the module. The text is still operator-supplied.
+
 What it is not: the text is supplied by the operator, so the result says
 `provenance: operator_supplied_text` and cannot tell whether it came from the
 planned hardware. An acknowledge is not a chip identity, a reading, or a check
