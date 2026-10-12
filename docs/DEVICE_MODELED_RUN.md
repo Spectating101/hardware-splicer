@@ -30,6 +30,10 @@ directory. Requests cannot choose library paths, tools, code or authority flags.
 Missing configuration produces `PARTIAL`, with vendor-host `NOT_RUN`, not a
 vendor pass. Configured libraries must match all five pinned version declarations;
 the report includes source-member SHA-256 hashes of the libraries used.
+Libraries are copied into the private execution directory before hashing and
+compiling, so later changes to the dependency cache cannot change the recorded
+bytes. The declared versions/hashes identify inputs, not an independent attestation
+of vendor origin.
 The current vendor fixture requires BME280 plus SSD1306. A sensor-only export
 can run core scenarios but remains `PARTIAL`; its Arduino adapter is not credited
 as tested by that fixture.

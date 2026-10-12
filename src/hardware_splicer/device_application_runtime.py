@@ -66,13 +66,19 @@ def run_device_application(spec: dict) -> dict:
             project = Path(temporary)
             with zipfile.ZipFile(io.BytesIO(package)) as archive:
                 archive.extractall(project)
+            vendor_fixture_supported = any(row["library_id"] == "ssd1306-096-i2c" for row in metadata["declared_devices"])
+            frozen_libraries = project / "vendor-libraries"
+            if configured and vendor_fixture_supported:
+                # The dependency cache may be mutable. Hash and compile the same private copy.
+                for name in VENDOR_PINS:
+                    shutil.copytree(Path(configured).resolve() / name, frozen_libraries / name)
+                manifest = _vendor_manifest(frozen_libraries)
             host, log = _run_host(project)
             host = _phase(host, log)
-            vendor_fixture_supported = any(row["library_id"] == "ssd1306-096-i2c" for row in metadata["declared_devices"])
             if configured and not vendor_fixture_supported:
                 vendor["reason"] = "This vendor-host fixture requires the BME280 and SSD1306 combination; the sensor-only adapter was not tested."
             if configured and vendor_fixture_supported and host["pass"] is True:
-                report, vendor_log = _run_vendor_host(project, Path(configured).resolve())
+                report, vendor_log = _run_vendor_host(project, frozen_libraries)
                 vendor = _phase(report, vendor_log)
                 vendor["library_manifest"] = manifest
         state = "FAILED" if host["pass"] is not True or vendor["status"] == "FAILED" else (

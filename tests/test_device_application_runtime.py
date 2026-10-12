@@ -132,3 +132,24 @@ def test_missing_compiler_is_unavailable_not_a_failed_engineering_scenario(monke
     with pytest.raises(runtime.DeviceRuntimeError, match="no modeled tests ran") as caught:
         runtime.run_device_application(SPEC)
     assert caught.value.status_code == 503
+
+
+def test_vendor_manifest_hashes_the_private_bytes_used_by_the_compiler(monkeypatch, tmp_path):
+    for name, version in runtime.VENDOR_PINS.items():
+        folder = tmp_path / name
+        folder.mkdir()
+        (folder / "library.properties").write_text(f"version={version}\n")
+        (folder / "fixture.cpp").write_text("original fixture source")
+    monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
+    monkeypatch.setenv("HS_DEVICE_RUNTIME_VENDOR_LIBS", str(tmp_path))
+    monkeypatch.setattr(runtime, "_run_host", lambda _: ({"pass": True, "scenarios": []}, b""))
+    def vendor(project, frozen):
+        assert frozen != tmp_path
+        for name in runtime.VENDOR_PINS:
+            (tmp_path / name / "fixture.cpp").write_text("cache changed after capture")
+            assert (frozen / name / "fixture.cpp").read_text() == "original fixture source"
+        return {"pass": True, "scenarios": []}, b""
+    monkeypatch.setattr(runtime, "_run_vendor_host", vendor)
+    result = runtime.run_device_application(SPEC)
+    for row in result["vendor_host"]["library_manifest"].values():
+        assert row["files"]["fixture.cpp"] == hashlib.sha256(b"original fixture source").hexdigest()
