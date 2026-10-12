@@ -40,7 +40,10 @@ bytes. The declared versions/hashes identify inputs, not an independent attestat
 of vendor origin.
 The current vendor fixture requires BME280 plus SSD1306. A sensor-only export
 can run core scenarios but remains `PARTIAL`; its Arduino adapter is not credited
-as tested by that fixture.
+as tested by that fixture. A BH1750 build runs the same fifteen core scenarios
+and always reports the vendor-host lane as `NOT_RUN` with the reason that no
+register-level bus model exists for it; see
+[part descriptors](DEVICE_PART_DESCRIPTORS.md).
 
 Set `HARDWARE_SPLICER_API_KEY` before exposing execution beyond loopback. The
 Next proxy forwards this existing app credential; the execution route checks it.
@@ -82,6 +85,7 @@ occurs in this workflow.
 
 ## Evidence
 
+- [Adding a part](DEVICE_PART_DESCRIPTORS.md): the descriptor each supported sensor is generated from, and its limits.
 - [Mutation benchmark of these tests](status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md): how many seeded bugs the
   boot-only, healthy-bus and fault scenarios catch, for the application logic and the Arduino adapter.
 - [Running the compiled firmware in an emulator](status/DEVICE_EMULATOR_FEASIBILITY_2026-10-12.md): what is known,
