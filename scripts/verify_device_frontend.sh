@@ -25,6 +25,8 @@ if len(set(ports)) != 2 or any(port < 1024 or port > 65535 for port in ports):
     raise SystemExit("Choose two distinct unprivileged test ports.")
 for port in ports:
     with socket.socket() as sock:
+        # Permit TIME_WAIT from a previous test server, not an active listener.
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("127.0.0.1", port))' "$APP_PORT" "$BACKEND_PORT"
 
 mkdir -p "$ROOT/.cache/hardware-splicer"
@@ -82,5 +84,5 @@ wait_for "http://127.0.0.1:$APP_PORT/engineering/device" "$frontend_pid"
 export NODE_PATH="$PLAYWRIGHT_ROOT/node_modules"
 export OUTSIDER_APP_URL="http://127.0.0.1:$APP_PORT"
 export HS_FRONTEND_VERIFY_DIR="$RUN_DIR"
-if [[ $# -eq 0 ]]; then set -- device-assembly donor-device-handoff; fi
+if [[ $# -eq 0 ]]; then set -- device-assembly device-firmware donor-device-handoff; fi
 node "$PLAYWRIGHT_ROOT/node_modules/@playwright/test/cli.js" test -c "$FRONTEND/playwright.device.config.cjs" "$@"

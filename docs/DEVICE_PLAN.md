@@ -220,9 +220,12 @@ notes, sources or instructions added before this module extension.
 
 ## Headless frontend verification
 
+Diagnostic source downloads and compiler-only verification are described in
+[`DEVICE_FIRMWARE.md`](DEVICE_FIRMWARE.md).
+
 ```sh
-bash scripts/verify_device_frontend.sh mock device-assembly donor-lookup donor-device-handoff donor-capture evidence-
-bash scripts/verify_device_frontend.sh real device-assembly donor-device-handoff
+bash scripts/verify_device_frontend.sh mock device-assembly device-firmware donor-lookup donor-device-handoff donor-capture evidence-
+bash scripts/verify_device_frontend.sh real
 ```
 
 The harness needs the repo Python environment, installed frontend dependencies
