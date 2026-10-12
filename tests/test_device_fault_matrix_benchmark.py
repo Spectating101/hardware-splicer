@@ -72,3 +72,63 @@ def test_clean_package_passes_and_a_seeded_bug_is_caught(bench, tmp_path):
     assert row["outcome"] == "KILLED"
     assert row["detected_by"]["matrix"] is True
     assert row["detected_by"]["smoke"] is False  # a boot-only check cannot see it
+
+
+def test_every_adapter_mutant_changes_exactly_one_place(bench, tmp_path):
+    source = (bench.build_package(tmp_path) / "src" / "main.cpp").read_text(encoding="utf-8")
+    mutants = bench.ADAPTER_MUTANTS + bench.ADAPTER_HELDOUT_MUTANTS
+    for mutant in mutants:
+        assert mutant.target == "src/main.cpp", mutant.id
+        assert bench.apply_mutant(source, mutant) != source, mutant.id
+    ids = [mutant.id for mutant in bench.MUTANTS + bench.HELDOUT_MUTANTS + mutants]
+    assert len(ids) == len(set(ids))
+
+
+def _adapter_row(id, outcome, *, vendor_matrix, core_lane=False, equivalent="", blind_spot=""):
+    return {
+        "id": id, "bug_class": "c", "story": "", "outcome": outcome, "failing_scenarios": [],
+        "detected_by": {"core_lane": core_lane, "vendor_smoke": False, "vendor_healthy": False, "vendor_matrix": vendor_matrix},
+        "equivalent_reason": equivalent, "blind_spot": blind_spot, "detail": "",
+    }
+
+
+def test_adapter_summary_separates_equivalents_from_blind_spots_and_never_excuses_the_latter(bench):
+    rows = [
+        _adapter_row("killed", "KILLED", vendor_matrix=True),
+        _adapter_row("equivalent", "SURVIVED", vendor_matrix=False, equivalent="redundant with the framework default"),
+        _adapter_row("blind", "SURVIVED", vendor_matrix=False, blind_spot="the model has no start-up window"),
+        _adapter_row("gap", "SURVIVED", vendor_matrix=False),
+    ]
+    summary = bench.summarize_adapter(rows)
+    assert summary["reviewed_equivalent"] == ["equivalent"]
+    assert summary["scored_mutants"] == 3  # a blind spot still counts against the score
+    assert summary["known_host_model_blind_spots"] == ["blind"]
+    assert summary["survivors_without_review"] == ["gap"]
+    assert summary["tiers"]["vendor_matrix"]["killed"] == 1
+    assert summary["tiers"]["core_lane"]["killed"] == 0
+
+
+def _vendor_libs():
+    import os
+
+    named = os.environ.get("HS_VENDOR_LIBS", "").strip()
+    return Path(named) if named else None
+
+
+@pytest.mark.skipif(shutil.which("g++") is None, reason="needs a host compiler")
+def test_adapter_lane_catches_a_seeded_adapter_bug_that_the_core_lane_cannot_see(bench, tmp_path):
+    libs = _vendor_libs()
+    if libs is None or not bench_libs_ok(libs):
+        pytest.skip("pinned vendor libraries not available (set HS_VENDOR_LIBS to a PlatformIO libdeps directory)")
+    project = bench.build_package(tmp_path)
+    assert bench.run_vendor_project(project, libs.resolve())["outcome"] == "SURVIVED"
+    mutant = next(m for m in bench.ADAPTER_MUTANTS if m.id == "adapter_pressure_unit_wrong")
+    row = bench.evaluate_adapter(mutant, project, tmp_path, libs.resolve())
+    assert row["outcome"] == "KILLED"
+    assert row["detected_by"]["core_lane"] is False  # the core harness never compiles main.cpp
+
+
+def bench_libs_ok(libs):
+    from hardware_splicer.device_application_execution import vendor_libs_available
+
+    return vendor_libs_available(libs)
