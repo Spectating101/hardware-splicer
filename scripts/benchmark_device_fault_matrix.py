@@ -63,6 +63,7 @@ def _m(id, bug_class, story, old, new, equivalent_reason="", target="src/app_cor
 
 
 BME280 = "adafruit-bme280-stemma-qt"
+BH1750 = "adafruit-bh1750-stemma-qt"
 TRAITS = "src/part_traits.h"
 
 
@@ -284,6 +285,28 @@ ADAPTER_HELDOUT_MUTANTS: tuple[Mutant, ...] = (
 )
 
 
+# Part-specific mutants for the BH1750 traits. Written before the generic battery was ever run against that part,
+# and never used to tune it.
+BH1750_TRAITS_MUTANTS: tuple[Mutant, ...] = (
+    _m("bh1750_nan_not_rejected", "plausibility", "NaN illuminance is accepted as a reading",
+       "    if (std::isnan(reading.lux)) return false;\n", "", target=TRAITS, part=BH1750),
+    _m("bh1750_upper_bound_removed", "plausibility", "illuminance above 65535 lx is accepted",
+       " || reading.lux > kLuxMax", "", target=TRAITS, part=BH1750),
+    _m("bh1750_lower_bound_removed", "plausibility", "negative illuminance is accepted",
+       "reading.lux < kLuxMin || ", "", target=TRAITS, part=BH1750),
+    _m("bh1750_range_widened", "plausibility", "illuminance up to 1,000,000 lx is accepted",
+       "static constexpr float kLuxMax = 65535.0f;", "static constexpr float kLuxMax = 1000000.0f;", target=TRAITS, part=BH1750),
+    _m("bh1750_dark_rejected", "plausibility", "a valid dark reading of 0 lx is rejected as implausible",
+       "static constexpr float kLuxMin = 0.0f;", "static constexpr float kLuxMin = 1.0f;", target=TRAITS, part=BH1750),
+    _m("bh1750_serial_precision_drift", "grammar", "the serial reading loses its decimal place",
+       "LUX=%.1f", "LUX=%.0f", target=TRAITS, part=BH1750),
+    _m("bh1750_serial_key_renamed", "grammar", "the serial key changes from LUX to LX",
+       "STATE=OK LUX=", "STATE=OK LX=", target=TRAITS, part=BH1750),
+    _m("bh1750_display_unit_dropped", "display", "the display line loses its unit",
+       '"%.1f lx"', '"%.1f"', target=TRAITS, part=BH1750),
+)
+
+
 def apply_mutant(source: str, mutant: Mutant) -> str:
     """Return mutated source; refuse a mutant that matches zero or several places."""
     count = source.count(mutant.old)
@@ -295,11 +318,34 @@ def apply_mutant(source: str, mutant: Mutant) -> str:
     return mutated
 
 
-def build_package(directory: Path) -> Path:
-    from hardware_splicer.device_application import build_device_application
+# Pin renames that turn the BME280 example's wiring into the same wiring for another catalogue breakout.
+PART_PIN_RENAMES = {
+    BH1750: {"sensor.Vin": "sensor.VIN", "sensor.SCK": "sensor.SCL", "sensor.SDI": "sensor.SDA"},
+}
+
+
+def spec_for_part(part_id: str) -> dict:
+    """The ESP32 + OLED + sensor example wired for the given supported part."""
+    import copy
+
     from hardware_splicer.device_plan import example_specs
 
-    _metadata, archive = build_device_application(example_specs()["esp32_oled_bme280_usb"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    if part_id == BME280:
+        return spec
+    spec["name"] = f"ESP32 with an OLED display and a {part_id}, powered over USB"
+    spec["modules"][2]["module"] = part_id
+    for wire in spec["connections"]:
+        for end in ("from", "to"):
+            for old, new in PART_PIN_RENAMES[part_id].items():
+                wire[end] = wire[end].replace(old, new)
+    return spec
+
+
+def build_package(directory: Path, part_id: str = BME280) -> Path:
+    from hardware_splicer.device_application import build_device_application
+
+    _metadata, archive = build_device_application(spec_for_part(part_id))
     zip_path = directory / "application.zip"
     zip_path.write_bytes(archive)
     project = directory / "baseline"
@@ -535,6 +581,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="core: application logic via the host harness; adapter: main.cpp via the vendor-host lane")
     parser.add_argument("--libdeps", type=Path, default=None,
                         help="pinned PlatformIO libdeps directory for --lane adapter (default: $HS_DEVICE_RUNTIME_VENDOR_LIBS)")
+    parser.add_argument("--part", choices=("bme280", "bh1750"), default="bme280",
+                        help="core lane: which supported part's generated package to test (default: bme280)")
     parser.add_argument("--set", choices=("primary", "heldout", "all"), default="primary",
                         help="which mutants to score (default: the primary set)")
     parser.add_argument("--vendor-host", type=Path, dest="vendor_host",
@@ -543,11 +591,15 @@ def main(argv: list[str] | None = None) -> int:
                         help="use this host harness instead of the generated one, e.g. to score an earlier revision")
     args = parser.parse_args(argv)
     if args.lane == "adapter":
+        if args.part != "bme280":
+            print("The adapter lane has a vendor-host model only for the BME280.", file=sys.stderr)
+            return 2
         return run_adapter_lane(args)
 
+    part_id = {"bme280": BME280, "bh1750": BH1750}[args.part]
     with tempfile.TemporaryDirectory(prefix="hs-fault-matrix-") as scratch:
         work = Path(scratch)
-        baseline = build_package(work)
+        baseline = build_package(work, part_id)
         if args.harness:
             (baseline / "test" / "host" / "harness.cpp").write_bytes(args.harness.read_bytes())
         base = run_project(baseline)
@@ -555,12 +607,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Baseline is not clean ({base['outcome']}: {base['failed']}); the benchmark is invalid.", file=sys.stderr)
             return 2
         with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
-            chosen = {"primary": MUTANTS, "heldout": HELDOUT_MUTANTS, "all": MUTANTS + HELDOUT_MUTANTS}[args.set]
+            extra = BH1750_TRAITS_MUTANTS if part_id == BH1750 else ()
+            pools = {"primary": MUTANTS + extra, "heldout": HELDOUT_MUTANTS, "all": MUTANTS + extra + HELDOUT_MUTANTS}
+            chosen = tuple(m for m in pools[args.set] if m.part in ("", part_id))
             rows = list(pool.map(lambda mutant: evaluate(mutant, baseline, work), chosen))
     report = {
         "schema_version": SCHEMA,
         "claim_boundary": CLAIM_BOUNDARY,
-        "target": "esp32_oled_bme280_usb host application core (src/app_core.h)",
+        "target": f"{part_id} host application core (src/app_core.h and the part's src/part_traits.h)",
+        "part": part_id,
         "mutant_set": args.set,
         "harness_override": args.harness.name if args.harness else None,
         "detectors": {"smoke": sorted(SMOKE), "healthy": sorted(HEALTHY), "matrix": "all host scenarios"},

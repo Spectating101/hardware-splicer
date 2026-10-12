@@ -19,15 +19,24 @@ def bench():
     return module
 
 
-def test_every_mutant_changes_exactly_one_place_in_its_own_generated_file(bench, tmp_path):
-    project = bench.build_package(tmp_path)
-    for mutant in bench.MUTANTS + bench.HELDOUT_MUTANTS:
+@pytest.mark.parametrize("part_id", ["adafruit-bme280-stemma-qt", "adafruit-bh1750-stemma-qt"])
+def test_every_mutant_for_a_part_changes_exactly_one_place_in_its_own_target(bench, tmp_path, part_id):
+    project = bench.build_package(tmp_path, part_id)
+    pool = bench.MUTANTS + bench.HELDOUT_MUTANTS + bench.BH1750_TRAITS_MUTANTS
+    applicable = [m for m in pool if m.part in ("", part_id)]
+    assert len(applicable) == 48
+    for mutant in applicable:
         source = (project / mutant.target).read_text(encoding="utf-8")
         assert bench.apply_mutant(source, mutant) != source, mutant.id
 
 
+def test_part_specific_mutants_name_their_part_and_a_generated_header(bench):
+    for mutant in bench.MUTANTS + bench.HELDOUT_MUTANTS + bench.BH1750_TRAITS_MUTANTS:
+        assert (mutant.part == "") == (mutant.target == "src/app_core.h"), mutant.id
+
+
 def test_mutant_ids_are_unique(bench):
-    ids = [mutant.id for mutant in bench.MUTANTS + bench.HELDOUT_MUTANTS]
+    ids = [m.id for m in bench.MUTANTS + bench.HELDOUT_MUTANTS + bench.BH1750_TRAITS_MUTANTS]
     assert len(ids) == len(set(ids))
 
 
