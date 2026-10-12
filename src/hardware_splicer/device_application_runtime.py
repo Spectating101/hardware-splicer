@@ -58,15 +58,20 @@ def run_device_application(spec: dict) -> dict:
     if not _RUN_SLOT.acquire(blocking=False):
         raise DeviceRuntimeError("Another modeled run is active. Try again after it finishes.", 429)
     try:
+        part = metadata["part"]
+        vendor_lane_exists = bool(part["vendor_host_supported"])
         vendor = {"status": "NOT_RUN", "pass": None, "reason": "Pinned vendor libraries are not configured on this server.", "scenarios": []}
+        if not vendor_lane_exists:
+            vendor["reason"] = (f"No vendor-host lane exists for the {part['chip']}: there is no register-level bus model, "
+                                "so its Arduino adapter was not tested against a modelled bus.")
         configured = os.environ.get("HS_DEVICE_RUNTIME_VENDOR_LIBS", "").strip()
-        manifest = _vendor_manifest(Path(configured).resolve()) if configured else None
+        manifest = _vendor_manifest(Path(configured).resolve()) if configured and vendor_lane_exists else None
         # Only bytes freshly generated from HS templates enter this temporary directory.
         with tempfile.TemporaryDirectory(prefix="hs-device-modeled-") as temporary:
             project = Path(temporary)
             with zipfile.ZipFile(io.BytesIO(package)) as archive:
                 archive.extractall(project)
-            vendor_fixture_supported = any(row["library_id"] == "ssd1306-096-i2c" for row in metadata["declared_devices"])
+            vendor_fixture_supported = vendor_lane_exists and any(row["library_id"] == "ssd1306-096-i2c" for row in metadata["declared_devices"])
             frozen_libraries = project / "vendor-libraries"
             if configured and vendor_fixture_supported:
                 # The dependency cache may be mutable. Hash and compile the same private copy.
@@ -75,7 +80,7 @@ def run_device_application(spec: dict) -> dict:
                 manifest = _vendor_manifest(frozen_libraries)
             host, log = _run_host(project)
             host = _phase(host, log)
-            if configured and not vendor_fixture_supported:
+            if configured and vendor_lane_exists and not vendor_fixture_supported:
                 vendor["reason"] = "This vendor-host fixture requires the BME280 and SSD1306 combination; the sensor-only adapter was not tested."
             if configured and vendor_fixture_supported and host["pass"] is True:
                 report, vendor_log = _run_vendor_host(project, frozen_libraries)

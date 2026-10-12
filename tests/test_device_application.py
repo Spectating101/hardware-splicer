@@ -19,10 +19,13 @@ from hardware_splicer.device_plan import DevicePlanError, example_specs
 
 PACKAGE_MEMBERS = {
     "src/app_core.h",
+    "src/part_traits.h",
     "src/main.cpp",
     "platformio.ini",
     "test/host/harness.cpp",
+    "test/host/part_fixtures.h",
     "test/host/README.md",
+    "PART_DESCRIPTOR.json",
     "test/vendor_host/Arduino.h",
     "test/vendor_host/Print.h",
     "test/vendor_host/SPI.h",
@@ -286,12 +289,11 @@ def test_diagnostic_export_for_the_same_spec_stays_byte_identical():
         ),
         (
             lambda spec: (
-                spec["modules"].__setitem__(2, {**spec["modules"][2], "module": "adafruit-bh1750-stemma-qt"}),
+                spec["modules"].__setitem__(2, {**spec["modules"][2], "module": "adafruit-ds3231-stemma-qt"}),
                 [
                     w.update(
                         {
                             "from": w["from"]
-                            .replace("sensor.Vin", "sensor.VIN")
                             .replace("sensor.SCK", "sensor.SCL")
                             .replace("sensor.SDI", "sensor.SDA")
                         }
@@ -349,13 +351,15 @@ def test_host_harness_passes_every_named_scenario(tmp_path):
 def test_mutations_of_app_core_are_caught_by_the_harness(tmp_path):
     _meta, data = _package()
     original = _extract(data, tmp_path / "original")
-    core = (original / "src" / "app_core.h").read_text(encoding="utf-8")
+    # The engine (app_core.h) and the part's ranges and formats (part_traits.h) are separate generated files.
+    sources = {name: (original / "src" / name).read_text(encoding="utf-8") for name in ("app_core.h", "part_traits.h")}
     caught = {}
     for name, old, new in MUTATIONS:
-        assert core.count(old) == 1, f"mutation {name} original text must occur exactly once in app_core.h"
+        owners = [file for file, text in sources.items() if text.count(old) == 1]
+        assert len(owners) == 1, f"mutation {name} original text must occur exactly once across the generated sources"
         mutated = tmp_path / name
         shutil.copytree(original, mutated)
-        (mutated / "src" / "app_core.h").write_text(core.replace(old, new, 1), encoding="utf-8")
+        (mutated / "src" / owners[0]).write_text(sources[owners[0]].replace(old, new, 1), encoding="utf-8")
         result = _compile_and_run(mutated)
         failed = result.returncode != 0
         if result.returncode == 0:
@@ -390,11 +394,12 @@ def test_uint32_t_printf_casts_to_unsigned():
     _meta, data = _package()
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         core = archive.read("src/app_core.h").decode()
+        traits = archive.read("src/part_traits.h").decode()
     assert re.search(r'"T=%u STATE=%s", \(unsigned\)now', core)
-    assert re.search(r'"T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f"', core)
-    assert "(unsigned)now" in core
+    assert re.search(r'"T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f"', traits)
+    assert "(unsigned)now" in core and "(unsigned)now" in traits
     assert not re.search(r'"T=%u STATE=%s", now\b', core)
-    assert not re.search(r'TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f",\s*now\b', core)
+    assert not re.search(r'TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f",\s*now\b', traits)
 
 
 def test_the_http_endpoint_serves_the_same_bytes_and_refuses_unsupported_specs(tmp_path, monkeypatch):

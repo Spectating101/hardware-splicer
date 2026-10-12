@@ -260,7 +260,11 @@ def test_application_lines_with_other_modules_say_nothing_about_them(tmp_path):
 def test_the_parser_matches_the_lines_the_application_actually_prints():
     from pathlib import Path
 
+    from hardware_splicer.device_parts import load_part, render_traits
+
+    # The engine prints the state lines; the reading line's format comes from the part's generated traits.
     core = (Path(__file__).resolve().parents[1] / "src/hardware_splicer/data/firmware_application/app_core.h").read_text()
+    core += render_traits(load_part("adafruit-bme280-stemma-qt"))
     for fragment in ('"BOOT sensor=0x%02X display=0x%02X"', '"BOOT sensor=0x%02X display=NONE"', '"T=%u STATE=%s"',
                      '"T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f"', 'hal_.log("DISPLAY MISSING")',
                      'hal_.log("RECOVERED")'):

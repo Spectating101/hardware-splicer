@@ -10,11 +10,11 @@
 #include <string>
 #include <vector>
 
-static const uint8_t kSensorAddrs[] = {0x77, 0x76};
+#include "part_fixtures.h"
+
 static const uint8_t kDisplayAddrs[] = {0x3C, 0x3D};
 static constexpr size_t kSensorCount = sizeof kSensorAddrs / sizeof kSensorAddrs[0];
 static constexpr size_t kDisplayCount = sizeof kDisplayAddrs / sizeof kDisplayAddrs[0];
-static constexpr uint8_t kBme280ChipId = 0x60;  // Bosch register 0xD0 “id”
 
 struct ReadCmd {
     bool fail = false;
@@ -42,11 +42,17 @@ public:
     uint8_t bound_addr = 0;
     bool calibrated = false;
 
+    // A sensor answers at one of its two declared addresses and, when the part can identify itself, with the
+    // right id. A part with no ID register (kHasIdentity false) is recognised by its acknowledgement alone.
+    bool sensor_here(int a) const {
+        return present[a] && (a == kAddrA || a == kAddrB) && (!kHasIdentity || chip_id[a] == kChipId);
+    }
+
     uint8_t chip_address() const {
         uint8_t found = 0;
         int n = 0;
         for (int a = 0; a < 256; ++a) {
-            if (present[a] && chip_id[a] == kBme280ChipId) {
+            if (sensor_here(a)) {
                 found = static_cast<uint8_t>(a);
                 n += 1;
             }
@@ -60,7 +66,7 @@ public:
         sensor_begin_calls += 1;
         sensor_begin_addrs.push_back(addr);
         bound_addr = addr;  // Adafruit_BME280 2.3.0 begin always (re)binds, even when it returns false
-        calibrated = present[addr] && chip_id[addr] == kBme280ChipId && sensor_begin_calls != fail_begin_call;
+        calibrated = sensor_here(addr) && sensor_begin_calls != fail_begin_call;
         return calibrated;
     }
 
@@ -107,7 +113,7 @@ public:
         return true;
     }
 
-    void set_sensor(uint8_t addr, bool on, uint8_t id = kBme280ChipId) {
+    void set_sensor(uint8_t addr, bool on, uint8_t id = kChipId) {
         present[addr] = on;
         chip_id[addr] = id;
         if (!on) {
@@ -117,9 +123,9 @@ public:
 
     void set_display(uint8_t addr, bool on) { present[addr] = on; }
 
-    void set_default(float t, float h, float p) {
+    void set_default(const Reading& value) {
         default_read.fail = false;
-        default_read.value = {t, h, p};
+        default_read.value = value;
         has_default = true;
     }
 
@@ -129,17 +135,17 @@ public:
         reads.push_back(cmd);
     }
 
-    void queue_value(float t, float h, float p) {
+    void queue_value(const Reading& value) {
         ReadCmd cmd;
         cmd.fail = false;
-        cmd.value = {t, h, p};
+        cmd.value = value;
         reads.push_back(cmd);
     }
 
     void queue_nan() {
         ReadCmd cmd;
         cmd.fail = false;
-        cmd.value = {std::nanf(""), std::nanf(""), std::nanf("")};
+        cmd.value = reading_filled(std::nanf(""));
         reads.push_back(cmd);
     }
 };
@@ -169,7 +175,7 @@ static std::string json_escape(const std::string& text) {
 static bool grammar_ok(const std::string& line) {
     static const std::regex allowed[] = {
         std::regex(R"(^BOOT sensor=0x[0-9A-F]{2} display=(0x[0-9A-F]{2}|NONE)$)"),
-        std::regex(R"(^T=[0-9]+ STATE=OK TEMP_C=-?[0-9]+\.[0-9]{2} HUM_PCT=-?[0-9]+\.[0-9] PRES_HPA=-?[0-9]+\.[0-9]$)"),
+        std::regex(kOkLineRegex),
         std::regex(R"(^T=[0-9]+ STATE=STALE$)"),
         std::regex(R"(^T=[0-9]+ STATE=FAULT_SENSOR_MISSING$)"),
         std::regex(R"(^T=[0-9]+ STATE=FAULT_SENSOR_READ$)"),
@@ -219,45 +225,58 @@ static bool check_grammar(const FakeHal& hal, std::string& detail) {
     return true;
 }
 
-static Reading kGood{21.50f, 45.0f, 1013.3f};
+static std::string ok_line(uint32_t t) {
+    return "T=" + std::to_string(t) + " STATE=OK" + kGoodLineSuffix;
+}
+
+static std::string boot_line(uint8_t sensor, const char* display) {
+    char line[64];
+    std::snprintf(line, sizeof line, "BOOT sensor=0x%02X display=%s", sensor, display);
+    return line;
+}
+
+static bool display_is_good(const std::array<std::string, 4>& shown) {
+    for (size_t i = 0; i < 4; ++i) {
+        if (shown[i] != kGoodDisplay[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 static void wire_boot_ok_bus(FakeHal& hal) {
-    hal.set_sensor(0x77, true, 0x00);  // present but identity does not match
-    hal.set_sensor(0x76, true, kBme280ChipId);
+    if (kHasIdentity) {
+        hal.set_sensor(kAddrA, true, 0x00);  // present but identity does not match
+    }
+    hal.set_sensor(kAddrB, true, kChipId);
     hal.set_display(0x3C, true);
     hal.set_display(0x3D, false);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_default(kGood);
 }
 
 static int count_ok_readings(const std::vector<std::string>& lines) {
-    return count_contains(lines, "STATE=OK TEMP_C=");
+    return count_contains(lines, kOkMarker);
 }
 
 static bool display_shows_a_reading(const FakeHal& hal) {
     for (const auto& shown : hal.displays) {
-        if (shown[0] == "STATE OK" || shown[0] == "STATE STALE" ||
-            shown[1].find(" C") != std::string::npos ||
-            shown[2].find(" %") != std::string::npos ||
-            shown[3].find("hPa") != std::string::npos) {
+        if (shown[0] == "STATE OK" || shown[0] == "STATE STALE") {
             return true;
+        }
+        for (size_t i = 0; i < 3; ++i) {
+            if (kDisplayMarkers[i][0] != '\0' && shown[i + 1].find(kDisplayMarkers[i]) != std::string::npos) {
+                return true;
+            }
         }
     }
     return false;
 }
 
-struct BoundCase {
-    const char* name;
-    float temp_c;
-    float hum_pct;
-    float pres_hpa;
-    bool accept;
-};
-
 static bool check_isolated_bound(const BoundCase& c, std::string& detail) {
     FakeHal hal;
     wire_boot_ok_bus(hal);
     hal.has_default = false;
-    hal.queue_value(c.temp_c, c.hum_pct, c.pres_hpa);
+    hal.queue_value(c.value);
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     hal.clock = 0;
     app.loop_once();
@@ -294,11 +313,11 @@ static bool scenario_boot_ok(std::string& detail) {
     if (!check_grammar(hal, detail)) {
         return false;
     }
-    if (!has_exact(hal.logs, "BOOT sensor=0x76 display=0x3C")) {
+    if (!has_exact(hal.logs, boot_line(kAddrB, "0x3C"))) {
         detail = "missing BOOT with the identity-matched addresses";
         return false;
     }
-    if (!has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+    if (!has_exact(hal.logs, ok_line(0))) {
         detail = "first cycle did not show the reading";
         return false;
     }
@@ -307,12 +326,12 @@ static bool scenario_boot_ok(std::string& detail) {
         return false;
     }
     const auto& shown = hal.displays.front();
-    if (shown[0] != "STATE OK" || shown[1] != "21.50 C" || shown[2] != "45.0 %" || shown[3] != "1013.3 hPa") {
+    if (!display_is_good(shown)) {
         detail = "display did not show the first reading";
         return false;
     }
-    if (has_exact(hal.logs, "BOOT sensor=0x77 display=0x3C")) {
-        detail = "picked 0x77 without a matching chip identity";
+    if (has_exact(hal.logs, boot_line(kAddrA, "0x3C"))) {
+        detail = "picked the first declared address without a matching chip identity";
         return false;
     }
     return true;
@@ -320,25 +339,25 @@ static bool scenario_boot_ok(std::string& detail) {
 
 static bool scenario_default_address_binding(std::string& detail) {
     FakeHal hal;
-    hal.set_sensor(0x77, true, kBme280ChipId);
+    hal.set_sensor(kAddrA, true, kChipId);
     hal.set_display(0x3C, true);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_default(kGood);
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     hal.clock = 0;
     app.loop_once();
     if (!check_grammar(hal, detail)) {
         return false;
     }
-    if (!has_exact(hal.logs, "BOOT sensor=0x77 display=0x3C")) {
-        detail = "chip at the first declared address 0x77 was not reported";
+    if (!has_exact(hal.logs, boot_line(kAddrA, "0x3C"))) {
+        detail = "chip at the first declared address was not reported";
         return false;
     }
-    if (!has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+    if (!has_exact(hal.logs, ok_line(0))) {
         detail = "reading failed: driver left bound to a later probed address";
         return false;
     }
-    if (hal.sensor_begin_addrs.empty() || hal.sensor_begin_addrs.back() != 0x77) {
-        detail = "last sensor_begin was not the matched address 0x77 (rebind after probe)";
+    if (hal.sensor_begin_addrs.empty() || hal.sensor_begin_addrs.back() != kAddrA) {
+        detail = "last sensor_begin was not the matched first address (rebind after probe)";
         return false;
     }
     if (hal.displays.empty()) {
@@ -396,15 +415,15 @@ static bool scenario_sensor_missing_at_boot(std::string& detail) {
             return false;
         }
     }
-    hal.set_sensor(0x76, true, kBme280ChipId);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_sensor(kAddrB, true, kChipId);
+    hal.set_default(kGood);
     hal.clock = 61000;
     app.loop_once();
     if (!has_exact(hal.logs, "RECOVERED")) {
         detail = "capped 30 s retry did not recover when the sensor appeared";
         return false;
     }
-    if (!has_exact(hal.logs, "BOOT sensor=0x76 display=0x3C")) {
+    if (!has_exact(hal.logs, boot_line(kAddrB, "0x3C"))) {
         detail = "chosen address was not reported after recover";
         return false;
     }
@@ -416,12 +435,12 @@ static bool scenario_sensor_missing_at_boot(std::string& detail) {
         return false;
     }
     {
-        // The probe found the chip, but the final rebind to it fails (call 3: probe 0x77, probe 0x76, rebind 0x77).
+        // The probe found the chip, but the final rebind to it fails (call 3: probe A, probe B, rebind A).
         // A chip that was seen once but cannot be bound again must not be reported as a usable device.
         FakeHal flaky;
-        flaky.set_sensor(0x77, true, kBme280ChipId);
+        flaky.set_sensor(kAddrA, true, kChipId);
         flaky.set_display(0x3C, true);
-        flaky.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+        flaky.set_default(kGood);
         flaky.fail_begin_call = 3;
         SensorApp flaky_app(flaky, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
         flaky.clock = 0;
@@ -440,8 +459,8 @@ static bool scenario_sensor_missing_at_boot(std::string& detail) {
 
 static bool scenario_display_missing(std::string& detail) {
     FakeHal hal;
-    hal.set_sensor(0x76, true, kBme280ChipId);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_sensor(kAddrB, true, kChipId);
+    hal.set_default(kGood);
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     const uint32_t times[] = {0, 50, 2000, 4000, 6000};
     for (uint32_t t : times) {
@@ -456,7 +475,7 @@ static bool scenario_display_missing(std::string& detail) {
         detail = "display_show must not be called when the display is missing";
         return false;
     }
-    if (!has_exact(hal.logs, "BOOT sensor=0x76 display=NONE")) {
+    if (!has_exact(hal.logs, boot_line(kAddrB, "NONE"))) {
         detail = "missing display was not reported as NONE";
         return false;
     }
@@ -500,21 +519,21 @@ static bool scenario_display_missing(std::string& detail) {
 
 static bool scenario_display_at_second_address(std::string& detail) {
     FakeHal hal;
-    hal.set_sensor(0x76, true, kBme280ChipId);
+    hal.set_sensor(kAddrB, true, kChipId);
     hal.set_display(0x3C, false);
     hal.set_display(0x3D, true);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_default(kGood);
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     hal.clock = 0;
     app.loop_once();
     if (!check_grammar(hal, detail)) {
         return false;
     }
-    if (!has_exact(hal.logs, "BOOT sensor=0x76 display=0x3D")) {
+    if (!has_exact(hal.logs, boot_line(kAddrB, "0x3D"))) {
         detail = "display at the second declared address 0x3D was not reported";
         return false;
     }
-    if (!has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+    if (!has_exact(hal.logs, ok_line(0))) {
         detail = "reading did not reach serial when the display is at 0x3D";
         return false;
     }
@@ -523,11 +542,11 @@ static bool scenario_display_at_second_address(std::string& detail) {
         return false;
     }
     const auto& shown = hal.displays.front();
-    if (shown[0] != "STATE OK" || shown[1] != "21.50 C" || shown[2] != "45.0 %" || shown[3] != "1013.3 hPa") {
+    if (!display_is_good(shown)) {
         detail = "display at 0x3D did not show the reading";
         return false;
     }
-    if (has_exact(hal.logs, "DISPLAY MISSING") || has_exact(hal.logs, "BOOT sensor=0x76 display=NONE")) {
+    if (has_exact(hal.logs, "DISPLAY MISSING") || has_exact(hal.logs, boot_line(kAddrB, "NONE"))) {
         detail = "display at 0x3D was treated as missing";
         return false;
     }
@@ -555,7 +574,7 @@ static bool scenario_transient_read_failure(std::string& detail) {
         detail = "first failed read was not marked STALE";
         return false;
     }
-    if (hal.displays.empty() || hal.displays.back()[0] != "STATE STALE" || hal.displays.back()[1] != "21.50 C") {
+    if (hal.displays.empty() || hal.displays.back()[0] != "STATE STALE" || hal.displays.back()[1] != kGoodDisplay[1]) {
         detail = "a stale reading must be shown as STATE STALE with the last good values, not as fresh";
         return false;
     }
@@ -582,14 +601,14 @@ static bool scenario_transient_read_failure(std::string& detail) {
         detail = "third failure must re-begin the sensor";
         return false;
     }
-    hal.queue_value(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.queue_value(kGood);
     hal.clock = 8000;
     app.loop_once();
     if (!has_exact(hal.logs, "RECOVERED")) {
         detail = "a good read did not clear the fault with RECOVERED";
         return false;
     }
-    if (!has_exact(hal.logs, "T=8000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+    if (!has_exact(hal.logs, ok_line(8000))) {
         detail = "good read after the fault was not logged";
         return false;
     }
@@ -624,8 +643,8 @@ static bool scenario_read_fault_persistent_recovery(std::string& detail) {
         detail = "entering the read fault must attempt bus_recover once";
         return false;
     }
-    hal.set_sensor(0x76, false);
-    hal.set_sensor(0x77, false);
+    hal.set_sensor(kAddrB, false);
+    hal.set_sensor(kAddrA, false);
     hal.clock = 6500;
     app.loop_once();
     if (hal.recover_calls != recover_at_fault || hal.sensor_begin_calls != begins_at_fault) {
@@ -658,8 +677,8 @@ static bool scenario_read_fault_persistent_recovery(std::string& detail) {
             return false;
         }
     }
-    hal.set_sensor(0x76, true, kBme280ChipId);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_sensor(kAddrB, true, kChipId);
+    hal.set_default(kGood);
     hal.clock = 20999;
     app.loop_once();
     if (has_exact(hal.logs, "RECOVERED")) {
@@ -672,11 +691,11 @@ static bool scenario_read_fault_persistent_recovery(std::string& detail) {
         detail = "read-fault backoff did not recover when the chip re-appeared";
         return false;
     }
-    if (!has_exact(hal.logs, "T=21000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+    if (!has_exact(hal.logs, ok_line(21000))) {
         detail = "normal readings did not resume after read-fault recovery";
         return false;
     }
-    if (hal.sensor_begin_addrs.empty() || hal.sensor_begin_addrs.back() != 0x76) {
+    if (hal.sensor_begin_addrs.empty() || hal.sensor_begin_addrs.back() != kAddrB) {
         detail = "recovery probe did not rebind to the matched address";
         return false;
     }
@@ -708,8 +727,8 @@ static bool scenario_ambiguous_during_read_fault(std::string& detail) {
     const int reads_at_fault = hal.read_calls;
     const int ok_at_fault = count_ok_readings(hal.logs);
     const int boots_at_fault = count_contains(hal.logs, "BOOT sensor=");
-    hal.set_sensor(0x77, true, kBme280ChipId);
-    hal.set_sensor(0x76, true, kBme280ChipId);
+    hal.set_sensor(kAddrA, true, kChipId);
+    hal.set_sensor(kAddrB, true, kChipId);
     hal.clock = 7000;
     app.loop_once();
     if (count_contains(hal.logs, "FAULT_AMBIGUOUS_ADDRESS") != 1) {
@@ -770,8 +789,8 @@ static bool scenario_second_read_fault_starts_at_one_second(std::string& detail)
         detail = "third consecutive failure must enter FAULT_SENSOR_READ";
         return false;
     }
-    hal.set_sensor(0x76, false);
-    hal.set_sensor(0x77, false);
+    hal.set_sensor(kAddrB, false);
+    hal.set_sensor(kAddrA, false);
     const uint32_t grow_at[] = {7000, 9000, 13000};
     for (uint32_t t : grow_at) {
         hal.clock = t;
@@ -782,8 +801,8 @@ static bool scenario_second_read_fault_starts_at_one_second(std::string& detail)
         }
     }
     // After the 13000 retry, backoff is 8 s. Recover on the next expiry.
-    hal.set_sensor(0x76, true, kBme280ChipId);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_sensor(kAddrB, true, kChipId);
+    hal.set_default(kGood);
     hal.clock = 21000;
     app.loop_once();
     if (!has_exact(hal.logs, "RECOVERED")) {
@@ -830,7 +849,7 @@ static bool scenario_first_read_fails(std::string& detail) {
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     hal.clock = 0;
     app.loop_once();
-    if (!has_exact(hal.logs, "BOOT sensor=0x76 display=0x3C")) {
+    if (!has_exact(hal.logs, boot_line(kAddrB, "0x3C"))) {
         detail = "boot line missing after a failed first read";
         return false;
     }
@@ -855,23 +874,7 @@ static bool scenario_first_read_fails(std::string& detail) {
 }
 
 static bool scenario_implausible_values(std::string& detail) {
-    const BoundCase bounds[] = {
-        {"temp_min_edge", -40.0f, 45.0f, 1013.3f, true},
-        {"temp_min_beyond", -40.01f, 45.0f, 1013.3f, false},
-        {"temp_max_edge", 85.0f, 45.0f, 1013.3f, true},
-        {"temp_max_beyond", 85.01f, 45.0f, 1013.3f, false},
-        {"hum_min_edge", 21.50f, 0.0f, 1013.3f, true},
-        {"hum_min_beyond", 21.50f, -0.01f, 1013.3f, false},
-        {"hum_max_edge", 21.50f, 100.0f, 1013.3f, true},
-        {"hum_max_beyond", 21.50f, 100.01f, 1013.3f, false},
-        {"pres_min_edge", 21.50f, 45.0f, 300.0f, true},
-        {"pres_min_beyond", 21.50f, 45.0f, 299.99f, false},
-        {"pres_max_edge", 21.50f, 45.0f, 1100.0f, true},
-        {"pres_max_beyond", 21.50f, 45.0f, 1100.01f, false},
-        {"nan_humidity_only", 21.50f, std::nanf(""), 1013.3f, false},
-        {"nan_pressure_only", 21.50f, 45.0f, std::nanf(""), false},
-    };
-    for (const auto& c : bounds) {
+    for (const auto& c : kBoundCases) {
         if (!check_isolated_bound(c, detail)) {
             return false;
         }
@@ -900,39 +903,23 @@ static bool scenario_implausible_values(std::string& detail) {
         detail = "NaN must count as a failed read";
         return false;
     }
-    hal.queue_value(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
-    hal.clock = 4000;
-    app.loop_once();
-    hal.queue_value(100.0f, 45.0f, 1013.3f);
-    hal.clock = 6000;
-    app.loop_once();
-    if (count_contains(hal.logs, "TEMP_C=100.00")) {
-        detail = "temperature outside -40..85 C was logged as a reading";
-        return false;
-    }
-    if (!has_exact(hal.logs, "T=6000 STATE=STALE")) {
-        detail = "out-of-range temperature must count as a failed read";
-        return false;
-    }
-    hal.queue_value(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
-    hal.clock = 8000;
-    app.loop_once();
-    hal.queue_value(21.50f, 101.0f, 1013.3f);
-    hal.clock = 10000;
-    app.loop_once();
-    if (count_contains(hal.logs, "HUM_PCT=101.0")) {
-        detail = "humidity outside 0..100 % was logged as a reading";
-        return false;
-    }
-    hal.queue_value(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
-    hal.clock = 12000;
-    app.loop_once();
-    hal.queue_value(21.50f, 45.0f, 200.0f);
-    hal.clock = 14000;
-    app.loop_once();
-    if (count_contains(hal.logs, "PRES_HPA=200.0")) {
-        detail = "pressure outside 300..1100 hPa was logged as a reading";
-        return false;
+    for (size_t i = 0; i < sizeof kOutOfRangeCases / sizeof kOutOfRangeCases[0]; ++i) {
+        const auto& c = kOutOfRangeCases[i];
+        const uint32_t t_good = 4000 + 4000 * static_cast<uint32_t>(i);
+        hal.queue_value(kGood);
+        hal.clock = t_good;
+        app.loop_once();
+        hal.queue_value(c.value);
+        hal.clock = t_good + 2000;
+        app.loop_once();
+        if (count_contains(hal.logs, c.must_not_log)) {
+            detail = c.detail;
+            return false;
+        }
+        if (!has_exact(hal.logs, "T=" + std::to_string(t_good + 2000) + " STATE=STALE")) {
+            detail = std::string(c.name) + " out of range must count as a failed read";
+            return false;
+        }
     }
     if (count_contains(hal.logs, "FAULT_SENSOR_READ") != 0) {
         detail = "interleaved implausible values should not raise a read fault";
@@ -1011,7 +998,7 @@ static bool scenario_read_period(std::string& detail) {
         SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
         hal.clock = 0;
         app.loop_once();
-        if (hal.read_calls != 1 || !has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+        if (hal.read_calls != 1 || !has_exact(hal.logs, ok_line(0))) {
             detail = "healthy chip must take a reading at t=0";
             return false;
         }
@@ -1025,7 +1012,7 @@ static bool scenario_read_period(std::string& detail) {
         }
         hal.clock = 2000;
         app.loop_once();
-        if (hal.read_calls != 2 || !has_exact(hal.logs, "T=2000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+        if (hal.read_calls != 2 || !has_exact(hal.logs, ok_line(2000))) {
             detail = "healthy chip must take a reading at t=2000";
             return false;
         }
@@ -1039,7 +1026,7 @@ static bool scenario_read_period(std::string& detail) {
         }
         hal.clock = 4000;
         app.loop_once();
-        if (hal.read_calls != 3 || !has_exact(hal.logs, "T=4000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+        if (hal.read_calls != 3 || !has_exact(hal.logs, ok_line(4000))) {
             detail = "healthy chip must take a reading at t=4000";
             return false;
         }
@@ -1072,9 +1059,9 @@ static bool scenario_read_period(std::string& detail) {
             detail = "sensor_read count over a 10 s window must be 6, got " + std::to_string(hal.read_calls);
             return false;
         }
-        if (!has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3") ||
-            !has_exact(hal.logs, "T=2000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3") ||
-            !has_exact(hal.logs, "T=4000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
+        if (!has_exact(hal.logs, ok_line(0)) ||
+            !has_exact(hal.logs, ok_line(2000)) ||
+            !has_exact(hal.logs, ok_line(4000))) {
             detail = "coarse 500 ms steps missed a period-edge reading";
             return false;
         }
@@ -1087,10 +1074,10 @@ static bool scenario_read_period(std::string& detail) {
 
 static bool scenario_two_devices_answer(std::string& detail) {
     FakeHal hal;
-    hal.set_sensor(0x77, true, kBme280ChipId);
-    hal.set_sensor(0x76, true, kBme280ChipId);
+    hal.set_sensor(kAddrA, true, kChipId);
+    hal.set_sensor(kAddrB, true, kChipId);
     hal.set_display(0x3C, true);
-    hal.set_default(kGood.temp_c, kGood.hum_pct, kGood.pres_hpa);
+    hal.set_default(kGood);
     SensorApp app(hal, kSensorAddrs, kSensorCount, kDisplayAddrs, kDisplayCount);
     for (uint32_t t = 0; t <= 60000; t += 500) {
         hal.clock = t;
@@ -1108,7 +1095,7 @@ static bool scenario_two_devices_answer(std::string& detail) {
         detail = "two identity matches must log FAULT_AMBIGUOUS_ADDRESS once";
         return false;
     }
-    if (has_exact(hal.logs, "BOOT sensor=0x77 display=0x3C") || has_exact(hal.logs, "BOOT sensor=0x76 display=0x3C")) {
+    if (has_exact(hal.logs, boot_line(kAddrA, "0x3C")) || has_exact(hal.logs, boot_line(kAddrB, "0x3C"))) {
         detail = "ambiguous bus picked an address";
         return false;
     }
@@ -1168,8 +1155,8 @@ static bool scenario_serial_grammar(std::string& detail) {
     if (!check_grammar(hal, detail)) {
         return false;
     }
-    if (!has_exact(hal.logs, "T=0 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3")) {
-        detail = "reading line shape was not T=<ms> STATE=OK TEMP_C=<%.2f> HUM_PCT=<%.1f> PRES_HPA=<%.1f>";
+    if (!has_exact(hal.logs, ok_line(0))) {
+        detail = "reading line shape did not match the part's serial grammar";
         return false;
     }
     return true;

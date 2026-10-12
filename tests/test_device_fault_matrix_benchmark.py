@@ -19,9 +19,10 @@ def bench():
     return module
 
 
-def test_every_mutant_changes_exactly_one_place(bench):
-    source = CORE.read_text(encoding="utf-8")
+def test_every_mutant_changes_exactly_one_place_in_its_own_generated_file(bench, tmp_path):
+    project = bench.build_package(tmp_path)
     for mutant in bench.MUTANTS + bench.HELDOUT_MUTANTS:
+        source = (project / mutant.target).read_text(encoding="utf-8")
         assert bench.apply_mutant(source, mutant) != source, mutant.id
 
 

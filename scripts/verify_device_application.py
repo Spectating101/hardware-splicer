@@ -109,7 +109,13 @@ def verify(
     libs = vendor_libs
     if libs is None and platformio:
         libs = project / ".pio" / "libdeps" / "application"
-    if vendor_libs is not None or platformio:
+    if not metadata["part"]["vendor_host_supported"]:
+        # Not applicable, not a failure: there is no register-level model for this part to run against.
+        vendor_report = {
+            "pass": None,
+            "reason": f"no vendor-host lane exists for the {metadata['part']['chip']}; its Arduino adapter was not tested against a modelled bus",
+        }
+    elif vendor_libs is not None or platformio:
         vendor_report, vendor_log = _run_vendor_host(project, libs)
         vendor_report["core_sha256"] = metadata["files"]["src/app_core.h"]["sha256"]
         vendor_report["adapter_sha256"] = metadata["files"]["src/main.cpp"]["sha256"]
@@ -163,7 +169,7 @@ def main() -> int:
         return 1
     if compile_report is not None and not compile_report["compile_pass"]:
         return 1
-    if vendor_report is not None and not vendor_report["pass"]:
+    if vendor_report is not None and vendor_report["pass"] is False:
         return 1
     return 0
 

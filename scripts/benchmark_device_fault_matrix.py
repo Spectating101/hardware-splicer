@@ -55,10 +55,15 @@ class Mutant:
     target: str = "src/app_core.h"
     # A real hardware bug that no host model can observe. Set only after seeing it survive; it is never excused.
     blind_spot: str = ""
+    part: str = ""  # a library id when the mutant targets that part's generated headers; "" = the generic engine
 
 
-def _m(id, bug_class, story, old, new, equivalent_reason="", target="src/app_core.h", blind_spot=""):
-    return Mutant(id, bug_class, story, old, new, equivalent_reason, target, blind_spot)
+def _m(id, bug_class, story, old, new, equivalent_reason="", target="src/app_core.h", blind_spot="", part=""):
+    return Mutant(id, bug_class, story, old, new, equivalent_reason, target, blind_spot, part)
+
+
+BME280 = "adafruit-bme280-stemma-qt"
+TRAITS = "src/part_traits.h"
 
 
 MUTANTS: tuple[Mutant, ...] = (
@@ -80,15 +85,15 @@ MUTANTS: tuple[Mutant, ...] = (
        "    const uint32_t elapsed = now - then;\n    return elapsed;", "    return now >= then ? now - then : 0;"),
     # --- plausibility ---------------------------------------------------------------------------
     _m("nan_not_rejected", "plausibility", "NaN readings are accepted as real data",
-       "    if (std::isnan(reading.temp_c) || std::isnan(reading.hum_pct) || std::isnan(reading.pres_hpa)) return false;\n", ""),
+       "    if (std::isnan(reading.temp_c) || std::isnan(reading.hum_pct) || std::isnan(reading.pres_hpa)) return false;\n", "", target=TRAITS, part=BME280),
     _m("humidity_upper_bound_removed", "plausibility", "humidity above 100 % is accepted",
-       " || reading.hum_pct > kHumMaxPct", ""),
+       " || reading.hum_pct > kHumMaxPct", "", target=TRAITS, part=BME280),
     _m("pressure_upper_bound_removed", "plausibility", "pressure above 1100 hPa is accepted",
-       " || reading.pres_hpa > kPresMaxHpa", ""),
+       " || reading.pres_hpa > kPresMaxHpa", "", target=TRAITS, part=BME280),
     _m("temperature_range_widened", "plausibility", "temperature up to 125 C is accepted",
-       "static constexpr float kTempMaxC = 85.0f;", "static constexpr float kTempMaxC = 125.0f;"),
+       "static constexpr float kTempMaxC = 85.0f;", "static constexpr float kTempMaxC = 125.0f;", target=TRAITS, part=BME280),
     _m("pressure_floor_removed", "plausibility", "pressure of 0 hPa is accepted",
-       "static constexpr float kPresMinHpa = 300.0f;", "static constexpr float kPresMinHpa = 0.0f;"),
+       "static constexpr float kPresMinHpa = 300.0f;", "static constexpr float kPresMinHpa = 0.0f;", target=TRAITS, part=BME280),
     _m("plausibility_skipped_on_read", "plausibility", "a successful bus read is trusted without a range check",
        "const bool ok = hal_.sensor_read(reading) && reading_is_plausible(reading);",
        "const bool ok = hal_.sensor_read(reading) && (reading_is_plausible(reading) || true);"),
@@ -171,15 +176,15 @@ HELDOUT_MUTANTS: tuple[Mutant, ...] = (
        "        if (state_ == AppState::FAULT_SENSOR_MISSING) {\n            if (wrap_elapsed(now, last_action_ms_) >= backoff_ms_) {",
        "        if (state_ == AppState::FAULT_SENSOR_MISSING) {\n            if (wrap_elapsed(now, last_action_ms_) > backoff_ms_) {"),
     _m("heldout_temperature_floor_removed", "plausibility", "readings below -40 C are accepted",
-       "reading.temp_c < kTempMinC || ", ""),
+       "reading.temp_c < kTempMinC || ", "", target=TRAITS, part=BME280),
     _m("heldout_humidity_floor_removed", "plausibility", "negative humidity is accepted",
-       "reading.hum_pct < kHumMinPct || ", ""),
+       "reading.hum_pct < kHumMinPct || ", "", target=TRAITS, part=BME280),
     _m("heldout_recovery_skips_boot_line", "recovery", "a sensor that reappears is not re-identified in the BOOT line",
        "                    hal_.log(\"RECOVERED\");\n                    log_boot();", "                    hal_.log(\"RECOVERED\");"),
     _m("heldout_display_never_probed", "display", "the display is never probed, so it is always reported missing",
        "        probe_display();\n        const int hits = probe_sensor();", "        const int hits = probe_sensor();"),
     _m("heldout_pressure_unit_wrong", "display", "the display shows pressure in Pa while labelled hPa elsewhere",
-       "\"%.1f hPa\"", "\"%.1f Pa\""),
+       "\"%.1f hPa\"", "\"%.1f Pa\"", target=TRAITS, part=BME280),
     _m("heldout_missing_backoff_cap_removed", "timing", "the 30 s cap is not applied to a missing sensor's backoff",
        "                backoff_ms_ *= 2;\n                if (backoff_ms_ > kBackoffCapMs) backoff_ms_ = kBackoffCapMs;\n            }\n            return;\n        }\n        if (state_ == AppState::FAULT_SENSOR_READ) {",
        "                backoff_ms_ *= 2;\n            }\n            return;\n        }\n        if (state_ == AppState::FAULT_SENSOR_READ) {"),
