@@ -5,7 +5,7 @@ import { EngineeringExecutionCapabilityPanel } from '@/components/engineering-ex
 
 export default function EngineeringLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative bg-[#020711] pt-14">
+    <div className="relative bg-[#020711] pb-20 pt-14">
       <nav aria-label="Engineering tools" className="fixed left-1/2 top-3 z-[95] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-[#07111f]/95 p-1 shadow-xl shadow-black/30 backdrop-blur-xl [scrollbar-width:none]">
         <Link href="/engineering/evidence" className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-stone-900 hover:bg-stone-200">
           <FileCheck2 className="h-3.5 w-3.5" /> Project review
