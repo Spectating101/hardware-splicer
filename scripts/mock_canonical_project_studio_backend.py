@@ -609,6 +609,7 @@ _match_reclaimed_parts = _load_hs_attr("device_reclaim", "match_reclaimed_parts"
 _DeviceReclaimError = _load_hs_attr("device_reclaim", "DeviceReclaimError")
 _read_device_body = _load_hs_attr("device_api", "_read_body")
 _build_device_firmware = _load_hs_attr("device_firmware", "build_device_firmware")
+_check_device_observations = _load_hs_attr("device_observations", "check_device_observations")
 
 
 @app.post("/v1/devices/firmware")
@@ -620,6 +621,17 @@ async def device_firmware_post(request: Request) -> Response:
     except _DevicePlanError as exc:
         raise _thread_error(422, "invalid_device_spec", str(exc)) from None
     return Response(archive, media_type="application/zip", headers={"Cache-Control": "no-store"})
+
+
+@app.post("/v1/devices/observations")
+async def device_observations_post(request: Request) -> dict[str, Any]:
+    body = await _read_device_body(request, error_type="invalid_device_observation", label="request")
+    if not isinstance(body, dict) or "spec" not in body or "transcript" not in body:
+        raise _thread_error(422, "invalid_device_observation", "send {spec, transcript}")
+    try:
+        return {"ok": True, "observation": _check_device_observations(body["spec"], body["transcript"])}
+    except _DevicePlanError as exc:
+        raise _thread_error(422, "invalid_device_observation", str(exc)) from None
 
 
 @app.get("/v1/devices/modules")

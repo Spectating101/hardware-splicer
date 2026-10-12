@@ -8,6 +8,26 @@ import { getProxyErrorMessage, isProxyFailure, readJsonPayload } from '@/lib/pro
 import { fetchDeviceReclaimMatches, RECLAIM_DEVICE_STORAGE, type DeviceReclaimResult } from '@/lib/device-reclaim';
 
 type Spec = Record<string, unknown>;
+type ScanModule = { id: string; name: string; declared_addresses: string[]; acknowledged_at: string[]; status: 'acknowledged' | 'no_acknowledge' | 'ambiguous' | 'shared_address' | 'bus_error' | 'not_assessed'; note: string };
+type ScanObservation = {
+  summary: { assessed: boolean; consistent_with_declared_addresses: boolean | null; statement: string };
+  modules: ScanModule[];
+  unexpected_acknowledgements: string[];
+  scans: { index: number; complete: boolean; consistent: boolean; note: string }[];
+  scan_used: number | null;
+  scans_stable: boolean | null;
+  declared_addresses_match_plan: boolean | null;
+  unrecognised_lines: number;
+  claim_boundary: string;
+};
+const SCAN_STATUS: Record<ScanModule['status'], { label: string; className: string }> = {
+  acknowledged: { label: 'Something answered', className: 'border-sky-400/30 bg-sky-950/30 text-sky-100' },
+  no_acknowledge: { label: 'Nothing answered', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
+  ambiguous: { label: 'Answered at more than one address', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
+  shared_address: { label: 'Answered, but the address is shared', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
+  bus_error: { label: 'Bus error, absence not established', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
+  not_assessed: { label: 'Not assessed', className: 'border-stone-700 bg-stone-900/60 text-stone-300' },
+};
 type ModuleInfo = { id: string; name: string; sources: { label: string; url: string; as_of: string }[]; dimension_basis?: Record<string, string>; notes?: string[]; pin_orders?: { id: string; label: string; signals: string[]; source: string }[] };
 
 const BASIS_LABELS: Record<string, string> = {
@@ -38,6 +58,10 @@ export default function DevicePage() {
   const [plannedText, setPlannedText] = useState('');
   const [firmwareBusy, setFirmwareBusy] = useState(false);
   const [firmwareMessage, setFirmwareMessage] = useState('');
+  const [scanText, setScanText] = useState('');
+  const [scanBusy, setScanBusy] = useState(false);
+  const [scanError, setScanError] = useState('');
+  const [scanResult, setScanResult] = useState<ScanObservation | null>(null);
   const [onHand, setOnHand] = useState<DeviceReclaimResult | null>(null);
   const [onHandError, setOnHandError] = useState('');
 
@@ -62,6 +86,8 @@ export default function DevicePage() {
     setBusy(true);
     setError('');
     setFirmwareMessage('');
+    setScanResult(null);
+    setScanError('');
     try {
       let spec: unknown;
       try { spec = JSON.parse(text); } catch { throw new Error('That is not valid JSON. Check the brackets and quotes.'); }
@@ -136,6 +162,28 @@ export default function DevicePage() {
       setFirmwareMessage(caught instanceof Error ? caught.message : 'The diagnostic source could not be downloaded.');
     } finally {
       setFirmwareBusy(false);
+    }
+  };
+
+  const checkScan = async () => {
+    setScanBusy(true);
+    setScanError('');
+    setScanResult(null);
+    try {
+      let spec: unknown;
+      try { spec = JSON.parse(plannedText); } catch { throw new Error('That is not valid JSON. Check the brackets and quotes.'); }
+      const response = await fetch('/api/proxy/engineering/devices/observations', {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ spec, transcript: scanText }), cache: 'no-store',
+      });
+      const body = await readJsonPayload<unknown>(response);
+      if (!body || isProxyFailure(body)) throw new Error(getProxyErrorMessage(body, 'The scan could not be checked.'));
+      const observation = (body as { observation?: ScanObservation }).observation;
+      if (!observation) throw new Error('The scan could not be checked.');
+      setScanResult(observation);
+    } catch (caught) {
+      setScanError(caught instanceof Error ? caught.message : 'The scan could not be checked.');
+    } finally {
+      setScanBusy(false);
     }
   };
 
@@ -216,6 +264,44 @@ export default function DevicePage() {
                 {specText !== plannedText ? <p className="mt-1 text-xs text-amber-200">Check the edited wiring before downloading.</p> : null}
                 {hasWiringFindings ? <p className="mt-1 text-xs text-amber-200">Resolve the wiring checks first.</p> : null}
                 {firmwareMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-firmware-message">{firmwareMessage}</p> : null}
+              </section>
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-scan">
+                <h2 className="text-sm font-semibold text-stone-100">Check a bench scan</h2>
+                <p className="mt-1 text-xs leading-5 text-stone-400">After you have run the diagnostic on your own board and sent <code className="text-stone-200">s</code>, paste what it printed. This compares it with the addresses this plan declares. It is text you supply, so it is a report, not proof.</p>
+                <label htmlFor="device-scan-input" className="sr-only">Serial output from the diagnostic</label>
+                <textarea
+                  id="device-scan-input"
+                  value={scanText}
+                  onChange={(event) => setScanText(event.target.value)}
+                  maxLength={40000}
+                  spellCheck={false}
+                  placeholder={'Observed ACK at 0x3C; identity and function unverified.\nObserved acknowledgements: 1. No sensor readings or physical validation.'}
+                  data-testid="device-scan-input"
+                  className="mt-2 h-28 w-full resize-y rounded-lg border border-stone-700 bg-stone-950 p-2 font-mono text-[11px] leading-4 text-stone-200 placeholder:text-stone-600 focus:border-amber-300 focus:outline-none"
+                />
+                <button type="button" data-testid="device-scan-check" onClick={() => void checkScan()} disabled={busy || scanBusy || !scanText.trim() || Boolean(error)} className="mt-2 rounded-md bg-stone-800 px-3 py-2 text-xs font-medium text-stone-100 hover:bg-stone-700 disabled:opacity-50">
+                  {scanBusy ? 'Comparing…' : 'Compare with the plan'}
+                </button>
+                {scanError ? <p role="alert" data-testid="device-scan-error" className="mt-2 rounded-md border border-red-500/40 bg-red-950/40 p-2 text-xs leading-5 text-red-100">{scanError}</p> : null}
+                {scanResult ? <div className="mt-3 space-y-2" data-testid="device-scan-result" role="status">
+                  <p className="text-xs leading-5 text-stone-200" data-testid="device-scan-statement">{scanResult.summary.statement}</p>
+                  <ul className="list-none space-y-2 pl-0">
+                    {scanResult.modules.map((module) => {
+                      const tone = SCAN_STATUS[module.status];
+                      return <li key={module.id} className={`rounded-lg border p-2.5 text-xs leading-5 ${tone.className}`} data-status={module.status} data-testid="device-scan-module">
+                        <div className="font-semibold">{module.name}</div>
+                        <div className="mt-0.5 font-medium">{tone.label}</div>
+                        <div className="mt-0.5">{module.note}</div>
+                        <div className="mt-1 text-[10px] opacity-70">Declared {module.declared_addresses.join(' or ')}{module.acknowledged_at.length ? `; answered at ${module.acknowledged_at.join(', ')}` : ''}</div>
+                      </li>;
+                    })}
+                  </ul>
+                  {scanResult.unexpected_acknowledgements.length ? <p className="text-xs leading-5 text-stone-300" data-testid="device-scan-unexpected">Something also answered at {scanResult.unexpected_acknowledgements.join(', ')}, which this plan does not declare. The plan cannot say what it is.</p> : null}
+                  {scanResult.scans_stable === false ? <p className="text-xs leading-5 text-amber-200" data-testid="device-scan-unstable">The scans you pasted do not agree with each other, and the last complete one was used.</p> : null}
+                  {scanResult.declared_addresses_match_plan === false ? <p className="text-xs leading-5 text-amber-200" data-testid="device-scan-other-plan">The addresses the sketch listed are not the ones this plan declares. This scan may be from a different build.</p> : null}
+                  {scanResult.scans.filter((scan) => scan.note).map((scan) => <p key={scan.index} className="text-xs leading-5 text-amber-200">Scan {scan.index + 1}: {scan.note}</p>)}
+                  <p className="text-[11px] leading-4 text-stone-400" data-testid="device-scan-boundary">{scanResult.claim_boundary}</p>
+                </div> : null}
               </section>
               {plan.modules.map((placed) => {
                 const orders = modules.find((module) => module.id === placed.module)?.pin_orders;

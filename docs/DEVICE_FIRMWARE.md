@@ -78,6 +78,32 @@ unaltered source ZIP, compiler report/log and ELF/BIN artifacts. This is a
 downloadable compiler bundle, not an authorized hardware release. It is not
 claimed byte-reproducible: compiler outputs, logs and execution paths can vary.
 
+## Checking a bench scan
+
+After a person has compiled and run the diagnostic on their own board and sent
+`s`, the device page can compare what it printed with the plan. Paste the serial
+text into **Check a bench scan**. The API is `POST /v1/devices/observations`,
+taking `{spec, transcript}`; it recomputes the plan from the spec and is
+stateless, like the other device endpoints.
+
+Per module with declared addresses it reports one of: *something answered* at a
+declared address, *nothing answered*, *answered at more than one address*,
+*answered but the address is shared* with another module, *bus error* (absence
+not established), or *not assessed*. A scan counts only when its closing total
+line arrived and matches the acknowledge lines pasted; a cut-off scan, a scan
+whose total disagrees, or a failed bus start concludes nothing. With several
+scans the latest complete one is used and disagreement between them is reported.
+An address nothing declares is mentioned neutrally; the plan cannot say what it
+is.
+
+What it is not: the text is supplied by the operator, so the result says
+`provenance: operator_supplied_text` and cannot tell whether it came from the
+planned hardware. An acknowledge is not a chip identity, a reading, or a check
+of supply, pull-ups, ground or fit, and the result lists those as non-claims. It
+keeps `firmware_authorized`, `power_on_authorized` and `physical_correctness`
+(`UNPROVEN`) as they were. The parser accepts exactly the lines the sketch
+prints (with optional serial-monitor timestamps); a test keeps the two in step.
+
 ## Physical-use limits
 
 The sketch starts serial reporting but does not start Wire or automatically
@@ -111,7 +137,7 @@ Locally, run:
 ```sh
 PYTHONPATH=src .venv/bin/python -m pytest -q tests/test_device_firmware.py tests/test_firmware_scaffold.py
 bash scripts/verify_device_frontend.sh real
-bash scripts/verify_device_frontend.sh mock device-assembly device-firmware donor-lookup donor-device-handoff donor-capture evidence-
+bash scripts/verify_device_frontend.sh mock device-assembly device-firmware device-observations donor-lookup donor-device-handoff donor-capture evidence-
 ```
 
 Run browser checks separately from the full Python suite. The harness builds an

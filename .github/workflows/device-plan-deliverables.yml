@@ -89,7 +89,7 @@ jobs:
         run: bash scripts/verify_device_frontend.sh real
       - name: Run broader studio regression checks
         if: matrix.backend == 'mock'
-        run: bash scripts/verify_device_frontend.sh mock device-assembly device-firmware donor-lookup donor-device-handoff donor-capture evidence-
+        run: bash scripts/verify_device_frontend.sh mock device-assembly device-firmware device-observations donor-lookup donor-device-handoff donor-capture evidence-
       - name: Preserve test reports, service logs and downloads
         if: always()
         uses: actions/upload-artifact@v4
