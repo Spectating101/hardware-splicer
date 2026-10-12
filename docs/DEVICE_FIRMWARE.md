@@ -100,6 +100,9 @@ through the existing review/bench process before any physical operation.
 real product API headless browser checks; broader studio-fixture browser checks;
 and actual ESP32 compilation. No model allowance, vendor login or physical
 hardware is required. Dependency/toolchain downloads still require internet.
+The broader browser job installs KiCad 9 symbol/footprint libraries for actual
+donor lookup; the device/firmware-only job does not need them. Compiler and
+product API dependencies are installed in separate Python environments.
 Raw source packages, reports, service logs and compiler artifacts are uploaded
 as CI artifacts, not promoted into canonical engineering evidence.
 

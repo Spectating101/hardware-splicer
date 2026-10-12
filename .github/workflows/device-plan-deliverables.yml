@@ -58,6 +58,14 @@ jobs:
       HS_PLAYWRIGHT_ROOT: ${{ github.workspace }}/.cache/hs-playwright
     steps:
       - uses: actions/checkout@v4
+      - name: Install KiCad 9 lookup libraries used by the broader browser checks
+        if: matrix.backend == 'mock'
+        run: |
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends kicad-symbols kicad-footprints
+          test -f /usr/share/kicad/symbols/Timer.kicad_sym
+          test -d /usr/share/kicad/footprints/Package_DIP.pretty
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
