@@ -128,6 +128,7 @@ jobs:
           path: |
             .cache/hardware-splicer/device-application/device-application-*/BEHAVIOUR_RESULT.json
             .cache/hardware-splicer/device-application/device-application-*/COMPILE_RESULT.json
+            .cache/hardware-splicer/device-application/device-application-*/VENDOR_HOST_RESULT.json
             .cache/hardware-splicer/device-application/device-application-*/compile.log
             .cache/hardware-splicer/device-application/device-application-*/device-application-proposal.zip
           include-hidden-files: true
