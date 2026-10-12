@@ -35,6 +35,11 @@ REPO = Path(__file__).resolve().parents[1]
 PCB = REPO / "hardware" / "reference_designs" / "spi_flash_adapter_v1" / "spi_flash_adapter_v1.kicad_pcb"
 
 
+@pytest.fixture(autouse=True)
+def isolated_capability_cache(monkeypatch):
+    monkeypatch.setattr("hardware_splicer.model3d._PROBE_CACHE", None)
+
+
 def _require_kicad() -> None:
     probe = capability_probe()
     if not probe["available"]:
