@@ -519,6 +519,7 @@ import tempfile
 from fastapi.responses import Response
 
 _GLB_CACHE: dict[int, bytes] = {}
+_GLB_FAILURE: dict[int, str] = {}
 
 
 def _fixture_glb(revision: int) -> bytes | None:
@@ -527,18 +528,25 @@ def _fixture_glb(revision: int) -> bytes | None:
     binary = shutil.which("kicad-cli")
     if binary is None:
         return None
+    _GLB_FAILURE.pop(revision, None)
     reference = (REFERENCE_DIR / "spi_flash_adapter_v1.kicad_pcb").read_text(encoding="utf-8", errors="replace")
     text = reference if revision == 6 else _fixture_base_text("pcb", reference)
     with tempfile.TemporaryDirectory() as tmp:
         board = Path(tmp) / "board.kicad_pcb"
         board.write_text(text, encoding="utf-8")
         out = Path(tmp) / "board.glb"
-        completed = subprocess.run(
-            [binary, "pcb", "export", "glb", "--force", "--subst-models", "--include-tracks", "--include-pads",
-             "--include-zones", "--output", str(out), str(board)],
-            capture_output=True, timeout=90, env={"PATH": "/usr/bin:/bin", "HOME": tmp}, check=False,
-        )
+        try:
+            completed = subprocess.run(
+                [binary, "pcb", "export", "glb", "--force", "--subst-models", "--include-tracks", "--include-pads",
+                 "--include-zones", "--output", str(out), str(board)],
+                capture_output=True, timeout=90, env={"PATH": "/usr/bin:/bin", "HOME": tmp}, check=False,
+            )
+        except subprocess.TimeoutExpired:
+            _GLB_FAILURE[revision] = "kicad-cli did not finish the 3D export within 90 seconds."
+            return None
         if completed.returncode != 0 or not out.is_file():
+            tail = (completed.stderr or completed.stdout or b"").decode("utf-8", "replace").strip().splitlines()[-1:]
+            _GLB_FAILURE[revision] = f"kicad-cli could not export the 3D model (exit {completed.returncode})" + (f": {tail[0][:200]}" if tail else ".")
             return None
         _GLB_CACHE[revision] = out.read_bytes()
     return _GLB_CACHE[revision]
@@ -551,7 +559,8 @@ def model3d_meta(project_id: str, revision: int) -> dict[str, Any]:
         return {"ok": True, "revision": revision, "available": False, "reason": f"Revision {revision} has no retained pcb."}
     data = _fixture_glb(revision)
     if data is None:
-        return {"ok": True, "revision": revision, "available": False, "reason": "kicad-cli is not installed on this host, so no 3D model can be generated."}
+        reason = _GLB_FAILURE.get(revision) or "kicad-cli is not installed on this host, so no 3D model can be generated."
+        return {"ok": True, "revision": revision, "available": False, "reason": reason}
     digest = hashlib.sha256(data).hexdigest()
     return {
         "ok": True,
