@@ -118,6 +118,20 @@ jobs:
           .cache/firmware-tools/bin/python -m pip install platformio==6.1.18
       - name: Compile a freshly recomputed ESP32 OLED BME280 proposal
         run: .venv/bin/python scripts/verify_device_firmware.py --platformio .cache/firmware-tools/bin/pio
+      - name: Run the application's host behaviour tests and compile it
+        run: .venv/bin/python scripts/verify_device_application.py --platformio .cache/firmware-tools/bin/pio
+      - name: Preserve the application source, host and compiler results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-application-host-and-compile
+          path: |
+            .cache/hardware-splicer/device-application/device-application-*/BEHAVIOUR_RESULT.json
+            .cache/hardware-splicer/device-application/device-application-*/COMPILE_RESULT.json
+            .cache/hardware-splicer/device-application/device-application-*/compile.log
+            .cache/hardware-splicer/device-application/device-application-*/device-application-proposal.zip
+          include-hidden-files: true
+          if-no-files-found: warn
       - name: Preserve the source, compiler result, logs and binaries
         if: always()
         uses: actions/upload-artifact@v4
