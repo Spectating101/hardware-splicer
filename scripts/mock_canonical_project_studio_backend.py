@@ -611,6 +611,9 @@ _read_device_body = _load_hs_attr("device_api", "_read_body")
 _build_device_firmware = _load_hs_attr("device_firmware", "build_device_firmware")
 _check_device_observations = _load_hs_attr("device_observations", "check_device_observations")
 _build_device_application = _load_hs_attr("device_application", "build_device_application")
+_device_runtime_router = _load_hs_attr("device_api", "create_device_router")
+# Includes the same execution endpoint, not fabricated scenario results.
+app.include_router(_device_runtime_router())
 
 
 @app.post("/v1/devices/firmware")

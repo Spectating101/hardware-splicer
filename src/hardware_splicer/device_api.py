@@ -7,15 +7,19 @@ written, and it approves nothing.
 from __future__ import annotations
 
 import json
+import os
+import secrets
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
+from starlette.concurrency import run_in_threadpool
 
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_application import build_device_application
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
+from .device_application_runtime import DeviceRuntimeError, run_device_application
 
 MAX_BODY_BYTES = 64 * 1024
 
@@ -120,5 +124,25 @@ def create_device_router() -> APIRouter:
             return {"ok": True, "observation": check_device_observations(body["spec"], body["transcript"])}
         except DevicePlanError as exc:
             raise HTTPException(status_code=422, detail={"type": "invalid_device_observation", "message": str(exc)}) from None
+
+    @router.post("/application/run")
+    async def post_application_run(request: Request) -> Dict[str, Any]:
+        # This credential permits bounded software execution, never operator or physical authority.
+        key = (os.environ.get("HARDWARE_SPLICER_API_KEY") or os.environ.get("CIRCUIT_AI_API_KEY", "")).strip()
+        if key:
+            if not secrets.compare_digest(request.headers.get("authorization", "").encode("utf-8"), f"Bearer {key}".encode("utf-8")):
+                raise HTTPException(status_code=401, detail={"type": "unauthorized", "message": "Modeled execution requires the configured app API key."})
+        elif request.client is None or request.client.host not in {"127.0.0.1", "::1", "testclient"}:
+            raise HTTPException(status_code=403, detail={"type": "local_execution_only", "message": "Configure the app API key before allowing remote modeled execution."})
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        if not isinstance(body, dict) or set(body) != {"spec"}:
+            raise _unprocessable("send only {spec}; code, tools, paths and authority flags are not accepted")
+        try:
+            result = await run_in_threadpool(run_device_application, body["spec"])
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
+        except DeviceRuntimeError as exc:
+            raise HTTPException(status_code=exc.status_code, detail={"type": "modeled_run_unavailable", "message": str(exc)}) from None
+        return {"ok": True, "result": result}
 
     return router
