@@ -24,6 +24,7 @@ passes the checks is not a wire that works, the case has not been printed, and e
 | `GET /v1/devices/examples` | example device specs |
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
 | `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
+| `POST /v1/devices/case` | a zip of printable case files for a spec: `case_base.stl` and `case_lid.stl` in print orientation, the same boxes as editable `.scad`, a README and `CASE_PROPOSAL.json`. 422 for a spec with errors |
 | `POST /v1/devices/reclaim-matches` | advisory exact/variant name matches for a reclaim list; 422 for invalid text or shape, 413 over 64 KB in both proxy and backend |
 
 From **Salvage a board**, matching reclaim rows link here to a small **Parts you may have on hand** list. It compares the markings
@@ -251,3 +252,16 @@ it does not seed an outsider project. The browser tests cover the original OLED
 flow, each of the three breakouts, independent multi-module motion, renamed IDs,
 wire attachment, conservative warning behavior, phone layout and advisory chip
 handoffs. Passing them supplies no physical evidence or release authority.
+
+## Case files
+
+`POST /v1/devices/case` (and **Download case files** on the page) turns the plan's case into files a slicer opens. Each part is
+built from axis-aligned boxes on a 0.01 mm grid, so its surface is closed by construction, and the finished triangles are checked
+again for a closed manifold and a positive volume before anything is returned. The base is exported standing on its floor; the lid is
+turned over so its plate is on the bed. Tests probe the exported STL itself, from outside the code that made it: the USB opening is
+open, the walls and floor are solid, the display window is open and the lip is where it should be, and the volumes match a hand
+calculation from the plan.
+
+What it chose beyond the plan, and has not measured: a friction lip 2 mm tall and 1 mm thick, 0.3 mm inside the walls. There are no
+screw bosses, snap hooks, board standoffs, vents or strain relief, and **no thermal assessment**. The USB opening and display window
+are the plan's, whose notes already say to measure your module first. Nothing here has been printed or test-fitted.

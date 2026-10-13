@@ -17,6 +17,7 @@ from starlette.concurrency import run_in_threadpool
 from .device_plan import DevicePlanError, build_device_plan, example_specs, module_library
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_application import build_device_application
+from .device_case import build_device_case
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
 from .device_application_runtime import DeviceRuntimeError, run_device_application
@@ -110,6 +111,19 @@ def create_device_router() -> APIRouter:
             raise _unprocessable(str(exc)) from None
         return Response(archive, media_type="application/zip", headers={
             "Content-Disposition": 'attachment; filename="device-application-proposal.zip"',
+            "Cache-Control": "no-store",
+        })
+
+    @router.post("/case")
+    async def post_case(request: Request) -> Response:
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+        try:
+            _metadata, archive = build_device_case(spec)
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
+        return Response(archive, media_type="application/zip", headers={
+            "Content-Disposition": 'attachment; filename="device-case-proposal.zip"',
             "Cache-Control": "no-store",
         })
 
