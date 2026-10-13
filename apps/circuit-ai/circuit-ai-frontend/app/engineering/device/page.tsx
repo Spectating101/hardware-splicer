@@ -69,6 +69,8 @@ export default function DevicePage() {
   const [firmwareMessage, setFirmwareMessage] = useState('');
   const [applicationBusy, setApplicationBusy] = useState(false);
   const [applicationMessage, setApplicationMessage] = useState('');
+  const [caseBusy, setCaseBusy] = useState(false);
+  const [caseMessage, setCaseMessage] = useState('');
   const [scanText, setScanText] = useState('');
   const [scanBusy, setScanBusy] = useState(false);
   const [scanError, setScanError] = useState('');
@@ -190,6 +192,11 @@ export default function DevicePage() {
   const downloadApplication = () => downloadPackage(
     '/api/proxy/engineering/devices/application', 'device-application-proposal.zip', setApplicationBusy, setApplicationMessage,
     'The application source could not be downloaded.', 'Source downloaded. Its host tests and compilation have not run here; no hardware authorization.',
+  );
+
+  const downloadCase = () => downloadPackage(
+    '/api/proxy/engineering/devices/case', 'device-case-proposal.zip', setCaseBusy, setCaseMessage,
+    'The case files could not be downloaded.', 'Case files downloaded. They have not been printed or test-fitted; check every fit on a test print.',
   );
 
   const checkScan = async () => {
@@ -332,6 +339,15 @@ export default function DevicePage() {
                   {applicationBusy ? 'Preparing source…' : 'Download application source'}
                 </button>
                 {applicationMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-application-message">{applicationMessage}</p> : null}
+              </section>
+              <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-case">
+                <h2 className="text-sm font-semibold text-stone-100">Case files</h2>
+                <p className="mt-1 text-xs leading-5 text-stone-400">STL files for the base and lid, ready for a slicer, plus the same boxes as editable OpenSCAD. They use the case sizes shown above, with the USB opening and display window.</p>
+                <p className="mt-1 text-xs leading-5 text-stone-400">Not printed or test-fitted. The lid is held by a friction lip only: no screw bosses, vents or standoffs, and no thermal check. Measure your own modules first.</p>
+                <button type="button" data-testid="device-case-download" onClick={() => void downloadCase()} disabled={busy || caseBusy || hasWiringFindings || Boolean(error) || specText !== plannedText} className="mt-2 rounded-md bg-stone-800 px-3 py-2 text-xs font-medium text-stone-100 hover:bg-stone-700 disabled:opacity-50">
+                  {caseBusy ? 'Preparing files…' : 'Download case files'}
+                </button>
+                {caseMessage ? <p role="status" className="mt-2 text-xs leading-5 text-stone-300" data-testid="device-case-message">{caseMessage}</p> : null}
               </section>
               <DeviceModeledRun specText={specText} enabled={!busy && !hasWiringFindings && !error && specText === plannedText} />
               <section className="rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-scan">
