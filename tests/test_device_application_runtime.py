@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -82,7 +83,8 @@ def test_runtime_http_auth_validation_and_no_project_mutation(monkeypatch, tmp_p
 
 def test_real_vendor_execution_when_server_pinned_libraries_are_available(monkeypatch):
     root = Path(__file__).resolve().parents[1] / ".cache/hardware-splicer/device-application"
-    choices = sorted(root.glob("*/project/.pio/libdeps/application"))
+    configured = os.environ.get("HS_VENDOR_LIBS", "").strip()
+    choices = [Path(configured)] if configured else sorted(root.glob("*/project/.pio/libdeps/application"))
     if not choices:
         pytest.skip("pinned vendor libraries not available")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
