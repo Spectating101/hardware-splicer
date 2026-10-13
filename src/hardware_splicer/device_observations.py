@@ -12,6 +12,7 @@ import json
 import re
 from typing import Any
 
+from .device_parts import available_parts
 from .device_plan import DevicePlanError, build_device_plan, module_library
 
 SCHEMA = "hardware_splicer.device_bus_observation.v1"
@@ -42,16 +43,22 @@ _INIT_FAILED = re.compile(_PREFIX + r"I2C initialization failed; no scan result\
 _DECLARED = re.compile(_PREFIX + r"Declared possible addresses, NOT observations:((?: 0x[0-9A-Fa-f]{2})*)\s*$")
 # These shapes are the application's own serial output (data/firmware_application/app_core.h); a test keeps them in step.
 _BOOT = re.compile(_PREFIX + r"BOOT sensor=0x([0-9A-Fa-f]{2}) display=(?:0x([0-9A-Fa-f]{2})|NONE)\s*$")
-_STATE = re.compile(
-    _PREFIX + r"T=\d{1,10} STATE=(?:"
-    r"(OK) TEMP_C=-?\d+\.\d{2} HUM_PCT=-?\d+\.\d PRES_HPA=-?\d+\.\d|"
-    r"(STALE|FAULT_SENSOR_MISSING|FAULT_SENSOR_READ|FAULT_AMBIGUOUS_ADDRESS))\s*$"
-)
 _DISPLAY_MISSING = re.compile(_PREFIX + r"DISPLAY MISSING\s*$")
 _RECOVERED = re.compile(_PREFIX + r"RECOVERED\s*$")
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
-BME280_ID = "adafruit-bme280-stemma-qt"
 SSD1306_ID = "ssd1306-096-i2c"
+
+
+def _state_pattern(part: dict[str, Any]) -> re.Pattern:
+    """Accept only the selected descriptor's complete reading shape, plus common fault states."""
+    cells = []
+    for channel in part["channels"]:
+        digits = int(channel["serial_format"][2:-1])
+        cells.append(re.escape(channel["key"]) + rf"=-?\d+\.\d{{{digits}}}")
+    return re.compile(
+        _PREFIX + r"T=\d{1,10} STATE=(?:(OK) " + " ".join(cells)
+        + r"|(STALE|FAULT_SENSOR_MISSING|FAULT_SENSOR_READ|FAULT_AMBIGUOUS_ADDRESS))\s*$"
+    )
 
 
 def _address(text: str) -> str:
@@ -78,7 +85,7 @@ def _validate(transcript: Any) -> str:
     return transcript
 
 
-def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int, dict[str, Any]]:
+def _parse(transcript: str, parts: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str] | None, int, dict[str, Any]]:
     """Split the text into scans. A scan is complete only when its summary line arrived and agrees with its lines.
 
     Lines the application prints are collected separately; the latest BOOT line is the one that counts.
@@ -89,6 +96,7 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
     unrecognised = 0
     current: dict[str, Any] | None = None
     application: dict[str, Any] = {"boot": None, "states": {}, "latest_state": None, "display_missing": False, "recovered": False, "readings": 0}
+    patterns = {library_id: _state_pattern(part) for library_id, part in parts.items()}
 
     def open_scan() -> dict[str, Any]:
         return {"acknowledged": [], "errors": [], "complete": False, "consistent": False, "note": ""}
@@ -139,7 +147,13 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
             application["latest_state"] = None
             application["display_missing"] = match.group(2) is None
             continue
-        if (match := _STATE.match(line)):
+        # A common fault line cannot identify a sensor in a multi-sensor plan. Bind it to the
+        # current BOOT address, or to the sole supported sensor when there is no BOOT yet.
+        boot = application["boot"]
+        candidates = [library_id for library_id, part in parts.items()
+                      if boot is None or boot["sensor"] in part["addresses"]]
+        match = patterns[candidates[0]].match(line) if len(candidates) == 1 else None
+        if match:
             state = match.group(1) or match.group(2)
             application["latest_state"] = state
             application["states"][state] = application["states"].get(state, 0) + 1
@@ -158,11 +172,15 @@ def _parse(transcript: str) -> tuple[list[dict[str, Any]], list[str] | None, int
     return scans[-MAX_SCANS:], declared, unrecognised, application
 
 
-def _application_row(library_id: str, addresses: list[str], application: dict[str, Any]) -> dict[str, Any] | None:
+def _application_row(library_id: str, addresses: list[str], application: dict[str, Any],
+                     parts: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
     """What the application's own serial output says about one module, or None when it says nothing about it."""
 
     boot = application["boot"]
-    if library_id == BME280_ID:
+    if library_id in parts:
+        if (boot and boot["sensor"] not in addresses) or (not boot and len(parts) != 1):
+            return None
+        part = parts[library_id]
         latest = application["latest_state"]
         if latest in {"FAULT_SENSOR_READ", "STALE"}:
             return {"status": "sensor_read_fault" if latest == "FAULT_SENSOR_READ" else "stale",
@@ -173,10 +191,16 @@ def _application_row(library_id: str, addresses: list[str], application: dict[st
                     "note": "The latest application state reports more than one matching sensor address; an earlier boot does not resolve it."}
         if latest == "FAULT_SENSOR_MISSING":
             return {"status": "sensor_init_fault", "acknowledged_at": [], "evidence": "application_fault",
-                    "note": "The application could not initialize a usable sensor. A chip may have answered but failed calibration; this does not establish absence. It cannot say why, and an earlier boot does not resolve it."}
+                    "note": "The application could not initialize a usable sensor. A chip may have answered but initialization failed; this does not establish absence. It cannot say why, and an earlier boot does not resolve it."}
         if boot and boot["sensor"] in addresses:
-            return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_chip_id_match",
-                    "note": f"The application reported that a chip identified itself as a BME280 (register 0xD0 read 0x60) at {boot['sensor']}."}
+            identity = part["identity"]
+            if identity:
+                return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_chip_id_match",
+                        "note": f"The application reported that a chip identified itself as a {part['chip']} "
+                                f"(register {identity['register']} read {identity['value']}) at {boot['sensor']}."}
+            return {"status": "acknowledged", "acknowledged_at": [boot["sensor"]], "evidence": "application_presence_check",
+                    "note": f"The application reported a successful initialization at {boot['sensor']}. "
+                            f"The {part['chip']} has no ID register; this is an acknowledgement, not a chip identity."}
         return None
     if library_id == SSD1306_ID:
         if boot and boot["display"] in addresses:
@@ -209,7 +233,10 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
         for address in addresses:
             users.setdefault(address, []).append(module_id)
 
-    scans, declared_in_text, unrecognised, application = _parse(text)
+    known_parts = available_parts()
+    parts = {placed["module"]: known_parts[placed["module"]] for placed, _addresses in declared_by_module.values()
+             if placed["module"] in known_parts}
+    scans, declared_in_text, unrecognised, application = _parse(text, parts)
     app_seen = bool(application["boot"] or application["states"] or application["display_missing"])
     usable = [index for index, scan in enumerate(scans) if scan["complete"] and scan["consistent"]]
     used = usable[-1] if usable else None
@@ -243,7 +270,7 @@ def check_device_observations(spec: Any, transcript: Any) -> dict[str, Any]:
             else:
                 row.update(status="no_acknowledge", note="Nothing answered at any address this module declares. This scan "
                            "cannot say why: wiring, power, an address setting or a different module are all possible.")
-        from_app = _application_row(placed["module"], addresses, application) if app_seen else None
+        from_app = _application_row(placed["module"], addresses, application, parts) if app_seen else None
         if from_app is not None:
             row["application"] = {"status": from_app["status"], "acknowledged_at": from_app["acknowledged_at"],
                                   "evidence": from_app["evidence"], "note": from_app["note"]}
