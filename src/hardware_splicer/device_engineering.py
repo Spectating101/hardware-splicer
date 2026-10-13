@@ -365,10 +365,12 @@ def _fit(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:
     if usb:
         toward_cable = mcu["box"]["x0"] + hx  # gap on the USB side
         travel = hx - _far_x(mcu)        # distance the board can be pushed away from the cable
+        has_antenna = mcu.get("overhang_mm", {}).get("antenna_end", 0.0) > 0
+        end = "antenna end" if has_antenna else "far end"
         checks.append(_check(
             "usb_insertion_support", "What holds the board when a cable is plugged in", ADVISORY,
-            f"The exported case has no board stops. Pushing the plug in moves the board toward the far wall: it can travel {travel:.1f} mm before the antenna end meets the wall, "
-            "and that wall would then take the push through the antenna end.",
+            f"The exported case has no board stops. Pushing the plug in moves the board toward the far wall: it can travel {travel:.1f} mm before its {end} meets the wall, "
+            f"and that wall would then take the push through the {end}.",
             {"board_travel_mm": _r(travel, 2), "gap_on_cable_side_mm": _r(toward_cable, 2)}, [],
             ["Insertion force is not estimated: no connector force figure was sourced. Add stops or standoffs and retest."]))
     return checks

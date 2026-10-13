@@ -28,6 +28,11 @@ def _rules(plan: dict, severity: str | None = None) -> set[str]:
 
 
 GOOD = EXAMPLE["connections"]
+def _n(text):
+    """Shared module wording names the controller by a placeholder; these tests plan an ESP32."""
+    return text.replace("{controller}", "ESP32")
+
+
 ADVISORY_RULES = {"oled_supply_note", "i2c_pullups_note", "single_power_supply", "pin_order_assumed", "supply_current", "antenna_keepout", "kit_fit"}
 
 
@@ -57,7 +62,8 @@ def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() 
     library = module_library()
     ids = [m["id"] for m in library["modules"]]
     assert ids[:2] == ["esp32-devkitc-v4", "ssd1306-096-i2c"]
-    assert list(BREAKOUT_IDS) == ids[2:]
+    assert list(BREAKOUT_IDS) == ids[2:-1]
+    assert ids[-1] == "raspberry-pi-pico"  # a second controller, added as data
     for module in library["modules"]:
         assert module["sources"] and all(s["url"].startswith("https://") and s["as_of"] for s in module["sources"])
         assert module["dimension_basis"]
@@ -97,6 +103,7 @@ def test_only_the_sourced_chip_roles_are_published() -> None:
         ("adafruit-ina219-stemma-qt", "INA219", "high-side current and power monitor on the module"),
         ("adafruit-mpu-6050-stemma-qt", "MPU-6050", "6-DoF accelerometer and gyro on the module"),
         ("adafruit-ads1115-stemma-qt", "ADS1115", "16-bit ADC on the module"),
+        ("raspberry-pi-pico", "RP2040", "microcontroller on the board"),
     ]
     for module in library["modules"]:
         assert all(c["source"] in [s["url"] for s in module["sources"]] for c in module["chips"])
@@ -164,7 +171,7 @@ def test_the_example_has_supply_notes_with_logical_pins_and_ordered_steps() -> N
     assert all(f["severity"] == "info" for f in plan["findings"])
     display = next(m for m in plan["modules"] if m["id"] == "display")
     electrical = module_library()["modules"][1]["electrical"]
-    assert all(electrical[key] in display["notes"] for key in ("supply_note", "pullups_note"))
+    assert all(_n(electrical[key]) in display["notes"] for key in ("supply_note", "pullups_note"))
     wires = {(w["from"]["pin"], w["to"]["pin_id"]) for w in plan["wires"]}
     assert wires == {("VCC", "J2-1"), ("GND", "J2-14"), ("SCL", "J3-3"), ("SDA", "J3-6")}
     colors = {w["from"]["pin"]: w["color"] for w in plan["wires"]}
@@ -969,7 +976,7 @@ def test_five_volts_on_a_sensor_uses_that_module_own_warning() -> None:
     plan = build_device_plan(_oled_plus_bme([{**c, "to": "mcu.5V"} if c["from"] == "sensor.Vin" else c for c in OLED_PLUS_BME_WIRES]))
     finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system" and "sensor" in f["message"])
     assert finding["severity"] == "warning"
-    assert bme["electrical"]["supply_note"] in finding["message"]
+    assert _n(bme["electrical"]["supply_note"]) in finding["message"]
     assert "VDD + 0.3" in finding["message"] or "VDD + 0.3" in finding["basis"]
     assert any(s["url"] in finding["basis"] for s in bme["sources"])
     assert not any(s["kind"] == "power" for s in plan["steps"])
@@ -1163,7 +1170,7 @@ def test_each_breakout_five_volt_warning_cites_its_own_sources(module_id, power_
     plan = build_device_plan(spec)
     finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system")
     entry = _module_by_id(module_id)
-    assert entry["electrical"]["supply_note"] in finding["message"]
+    assert _n(entry["electrical"]["supply_note"]) in finding["message"]
     assert all(source["url"] in finding["basis"] for source in entry["sources"])
     assert "SSD1306" not in finding["message"] + finding["basis"]
 
@@ -1260,7 +1267,7 @@ def test_each_new_breakout_makes_an_mcu_plan_with_no_errors(module_id, power, cl
     assert sensor["kind"] == "i2c_breakout"
     entry = _module_by_id(module_id)
     assert entry["electrical"]["supply_note"]
-    assert any(f["rule"] == "module_supply_note" and entry["electrical"]["supply_note"] in f["message"] for f in plan["findings"])
+    assert any(f["rule"] == "module_supply_note" and _n(entry["electrical"]["supply_note"]) in f["message"] for f in plan["findings"])
 
 
 @pytest.mark.parametrize("module_id,power,clock,data", NEW_BREAKOUTS)
@@ -1271,7 +1278,7 @@ def test_five_volts_on_each_new_breakout_uses_that_module_own_warning(module_id,
     finding = next(f for f in plan["findings"] if f["rule"] == "five_volts_to_a_3v3_system" and "sensor" in f["message"])
     entry = _module_by_id(module_id)
     assert finding["severity"] == "warning"
-    assert entry["electrical"]["supply_note"] in finding["message"]
+    assert _n(entry["electrical"]["supply_note"]) in finding["message"]
     assert all(source["url"] in finding["basis"] for source in entry["sources"])
     assert "SSD1306" not in finding["message"] + finding["basis"]
     assert not any(s["kind"] == "power" for s in plan["steps"])

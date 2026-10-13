@@ -585,7 +585,8 @@
           "id": "antenna",
           "what": "The datasheet marks a keepout zone at the antenna end; the figure note gives no distance to a case wall.",
           "edge": "top",
-          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+          "basis": "ESP32-WROOM-32E datasheet, Figure 3 note A"
         }
       ],
       "electrical": {
@@ -597,7 +598,22 @@
         "io_5v_tolerant": false,
         "usb_supply_v": 5.0,
         "supply_current_note": "The ESP32-WROOM-32E module needs a supply that can deliver at least 0.5 A.",
-        "supply_current_source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+        "supply_current_source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+        "short_name": "ESP32",
+        "datasheet_basis": "ESP32-WROOM-32E datasheet; ESP32-DevKitC V4 user guide",
+        "header_types_basis": "ESP32-DevKitC V4 user guide, header types",
+        "input_high_note": "The ESP32-WROOM-32E datasheet lists VIH max as VDD + 0.3 V.",
+        "input_high_basis": "ESP32-WROOM-32E datasheet: VIH max is VDD + 0.3 V",
+        "i2c_default_owner": "Arduino",
+        "i2c_defaults_basis": "arduino-esp32 pins_arduino.h: SDA = 21, SCL = 22",
+        "i2c_remap_note": "The ESP32 can route I2C to most pins, but your code must name it.",
+        "i2c_pin_mux": "any",
+        "supply_options_note": "Use one and only one supply for the DevKitC: Micro USB, 5V and GND, or 3V3 and GND. Combining these supplies can damage the board or the power source. An OLED load on a header is not another supply.",
+        "supply_options_basis": "ESP32-DevKitC V4 user guide, Power Supply Options: one and only one of the options",
+        "supply_current_basis": "ESP32-WROOM-32E datasheet v2.1, Table 14, IVDD: minimum 0.5 A",
+        "supply_check_step": "The DevKitC takes one and only one supply; do not combine USB with an external supply on 5V or 3V3.",
+        "supply_power_step": "Use one and only one DevKitC supply: do not add an external supply on 5V or 3V3 while using USB.",
+        "supply_current_practice": "General practice, not from the datasheet: a weak charger, a long or thin cable, or an unpowered hub may not deliver this; the usual symptom is resets when Wi-Fi starts."
       },
       "dimension_basis": {
         "pcb": "Espressif drawing, unit mm: 27.94 x 48.26, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang (exact)",
@@ -690,7 +706,8 @@
           "url": "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html",
           "as_of": "2026-10-13"
         }
-      ]
+      ],
+      "pin_numbering_from": "the antenna end"
     },
     {
       "id": "ssd1306-096-i2c",
@@ -780,7 +797,7 @@
       },
       "electrical": {
         "supply_note": "Check the supply requirements of your exact module. Its regulator arrangement is unknown here. AZ-Delivery lists a module operating voltage of 3.3 V to 5 V; that claim does not describe every board. The SSD1306 chip's own logic supply is 1.65 V to 3.3 V. This plan does not establish how your module will behave on 3V3.",
-        "pullups_note": "SDA and SCL must have pull-up resistors (SSD1306 datasheet). Check whether your module has them and which supply they connect to. Pull-ups to VCC would put 5 V on these lines when VCC is 5 V; do not connect that to ESP32 GPIOs."
+        "pullups_note": "SDA and SCL must have pull-up resistors (SSD1306 datasheet). Check whether your module has them and which supply they connect to. Pull-ups to VCC would put 5 V on these lines when VCC is 5 V; do not connect that to {controller} GPIOs."
       },
       "dimension_basis": {
         "pcb": "typical; sellers list 27.0 to 27.8 mm and 3.8 to 4.1 mm overall height. Measure yours.",
@@ -966,7 +983,7 @@
         "address_basis": "Adafruit pinouts: default 0x77, 0x76 if ADDR/SDO is tied to ground. Bosch datasheet: 7-bit address 111011x (0x76 or 0x77)."
       },
       "electrical": {
-        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level shifting that follows Vin. 5 V on Vin can put 5 V on the I2C pins. The Bosch chip supply (1.71 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level shifting that follows Vin. 5 V on Vin can put 5 V on the I2C pins. The Bosch chip supply (1.71 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",
         "pullups_note": "Adafruit's fetched text does not say whether this board has I2C pull-ups. The Bosch chip requires a pull-up on SDI. Check this board and any other device on the bus. Unknown pull-ups stacked together are not a pass."
       },
       "dimension_basis": {
@@ -1190,7 +1207,7 @@
         }
       },
       "electrical": {
-        "supply_note": "Check this board's supply. Adafruit describes a regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on VIN can put 5 V on SDA and SCL. The Rohm chip supply (2.4 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "supply_note": "Check this board's supply. Adafruit describes a regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on VIN can put 5 V on SDA and SCL. The Rohm chip supply (2.4 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",
         "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true
       },
@@ -1399,7 +1416,7 @@
         }
       },
       "electrical": {
-        "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for ESP32 I2C pins. Adafruit states 10 k\u03a9 pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
+        "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for {controller} I2C pins. Adafruit states 10 k\u03a9 pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
         "pullups_note": "Adafruit states a 10 k\u03a9 pull-up to Vin on SCL and on SDA. If Vin is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true,
         "backup_note": "A coin cell is required only for battery-backup. Adafruit says to use any CR1220 you have handy. That cell is backup only; it is not a power source for this plan and does not change the USB supply."
@@ -1595,7 +1612,7 @@
         }
       },
       "electrical": {
-        "supply_note": "Check this board's supply. Adafruit says the sensor on the breakout requires between a 2.7V and 5.5V, and to give it the same power as the logic level. Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA; which rail they join is not published. 5 V on VIN can put 5 V on the I2C pins. The TI chip supply (3 to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32. Vin+ and Vin- are the load-side shunt connection, not this board's logic supply.",
+        "supply_note": "Check this board's supply. Adafruit says the sensor on the breakout requires between a 2.7V and 5.5V, and to give it the same power as the logic level. Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA; which rail they join is not published. 5 V on VIN can put 5 V on the I2C pins. The TI chip supply (3 to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}. Vin+ and Vin- are the load-side shunt connection, not this board's logic supply.",
         "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true
       },
@@ -1870,7 +1887,7 @@
         }
       },
       "electrical": {
-        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on Vin can put 5 V on SDA and SCL. The InvenSense chip supply (2.375 V to 3.46 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on Vin can put 5 V on SDA and SCL. The InvenSense chip supply (2.375 V to 3.46 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",
         "pullups_note": "Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA. Which rail they connect to is not published. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true
       },
@@ -2113,7 +2130,7 @@
         }
       },
       "electrical": {
-        "supply_note": "Check this board's supply. Adafruit says the ADC requires between 2V to 5V power/logic, and states a 10 k\u03a9 pull-up to VIN on SCL and on SDA, so 5 V on VIN puts 5 V on the bus. The TI chip supply (2.0 V to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
+        "supply_note": "Check this board's supply. Adafruit says the ADC requires between 2V to 5V power/logic, and states a 10 k\u03a9 pull-up to VIN on SCL and on SDA, so 5 V on VIN puts 5 V on the bus. The TI chip supply (2.0 V to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",
         "pullups_note": "Adafruit states a 10 k\u03a9 pull-up to VIN on SCL and on SDA. If VIN is 5 V, those pull-ups are to 5 V. Check this board and any other device on the bus; stacked pull-ups change the bus resistance.",
         "onboard_pullups": true
       },
@@ -2265,6 +2282,747 @@
         ],
         "gaps": []
       }
+    },
+    {
+      "id": "raspberry-pi-pico",
+      "name": "Raspberry Pi Pico (RP2040)",
+      "kind": "mcu_board",
+      "chips": [
+        {
+          "marking": "RP2040",
+          "role": "microcontroller on the board",
+          "source": "https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf"
+        }
+      ],
+      "summary": "Raspberry Pi's RP2040 development board with two 20-pin headers and a Micro-USB port. No radio.",
+      "frame": "Top view, origin at the board's top-left corner (the end away from USB), x across the width, y along the length towards the USB end.",
+      "pin_numbering_from": "the USB end",
+      "pcb_mm": {
+        "x": 21.0,
+        "y": 51.0,
+        "z": 1.0
+      },
+      "overhang_mm": {},
+      "above_board_mm": 3.0,
+      "below_board_mm": 6.0,
+      "pin_pitch_mm": 2.54,
+      "connectors": [
+        {
+          "id": "usb",
+          "kind": "micro_usb",
+          "edge": "bottom",
+          "x": 10.5,
+          "width_mm": 8.0,
+          "height_mm": 2.6,
+          "overhang_mm": 1.4
+        }
+      ],
+      "pins": [
+        {
+          "id": "P1",
+          "header": "left",
+          "number": 1,
+          "name": "GP0",
+          "x": 1.61,
+          "y": 49.63,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO0, UART0 TX, I2C0 SDA, SPI0 RX",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P2",
+          "header": "left",
+          "number": 2,
+          "name": "GP1",
+          "x": 1.61,
+          "y": 47.09,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO1, UART0 RX, I2C0 SCL, SPI0 CSn",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P3",
+          "header": "left",
+          "number": 3,
+          "name": "GND",
+          "x": 1.61,
+          "y": 44.55,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P4",
+          "header": "left",
+          "number": 4,
+          "name": "GP2",
+          "x": 1.61,
+          "y": 42.01,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO2, I2C1 SDA, SPI0 SCK",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P5",
+          "header": "left",
+          "number": 5,
+          "name": "GP3",
+          "x": 1.61,
+          "y": 39.47,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO3, I2C1 SCL, SPI0 TX",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P6",
+          "header": "left",
+          "number": 6,
+          "name": "GP4",
+          "x": 1.61,
+          "y": 36.93,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO4, UART1 TX, I2C0 SDA (default), SPI0 RX",
+          "roles": [
+            "gpio",
+            "i2c_sda_default",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P7",
+          "header": "left",
+          "number": 7,
+          "name": "GP5",
+          "x": 1.61,
+          "y": 34.39,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO5, UART1 RX, I2C0 SCL (default), SPI0 CSn",
+          "roles": [
+            "gpio",
+            "i2c_scl_default",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P8",
+          "header": "left",
+          "number": 8,
+          "name": "GND",
+          "x": 1.61,
+          "y": 31.85,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P9",
+          "header": "left",
+          "number": 9,
+          "name": "GP6",
+          "x": 1.61,
+          "y": 29.31,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO6, I2C1 SDA, SPI0 SCK",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P10",
+          "header": "left",
+          "number": 10,
+          "name": "GP7",
+          "x": 1.61,
+          "y": 26.77,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO7, I2C1 SCL, SPI0 TX",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P11",
+          "header": "left",
+          "number": 11,
+          "name": "GP8",
+          "x": 1.61,
+          "y": 24.23,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO8, UART1 TX, I2C0 SDA, SPI1 RX",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P12",
+          "header": "left",
+          "number": 12,
+          "name": "GP9",
+          "x": 1.61,
+          "y": 21.69,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO9, UART1 RX, I2C0 SCL, SPI1 CSn",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P13",
+          "header": "left",
+          "number": 13,
+          "name": "GND",
+          "x": 1.61,
+          "y": 19.15,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P14",
+          "header": "left",
+          "number": 14,
+          "name": "GP10",
+          "x": 1.61,
+          "y": 16.61,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO10, I2C1 SDA, SPI1 SCK",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P15",
+          "header": "left",
+          "number": 15,
+          "name": "GP11",
+          "x": 1.61,
+          "y": 14.07,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO11, I2C1 SCL, SPI1 TX",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P16",
+          "header": "left",
+          "number": 16,
+          "name": "GP12",
+          "x": 1.61,
+          "y": 11.53,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO12, UART0 TX, I2C0 SDA, SPI1 RX",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P17",
+          "header": "left",
+          "number": 17,
+          "name": "GP13",
+          "x": 1.61,
+          "y": 8.99,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO13, UART0 RX, I2C0 SCL, SPI1 CSn",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P18",
+          "header": "left",
+          "number": 18,
+          "name": "GND",
+          "x": 1.61,
+          "y": 6.45,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P19",
+          "header": "left",
+          "number": 19,
+          "name": "GP14",
+          "x": 1.61,
+          "y": 3.91,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO14, I2C1 SDA, SPI1 SCK",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P20",
+          "header": "left",
+          "number": 20,
+          "name": "GP15",
+          "x": 1.61,
+          "y": 1.37,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO15, I2C1 SCL, SPI1 TX",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P21",
+          "header": "right",
+          "number": 21,
+          "name": "GP16",
+          "x": 19.39,
+          "y": 1.37,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO16, SPI0 RX, I2C0 SDA, UART0 TX",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P22",
+          "header": "right",
+          "number": 22,
+          "name": "GP17",
+          "x": 19.39,
+          "y": 3.91,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO17, SPI0 CSn, I2C0 SCL, UART0 RX",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P23",
+          "header": "right",
+          "number": 23,
+          "name": "GND",
+          "x": 19.39,
+          "y": 6.45,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P24",
+          "header": "right",
+          "number": 24,
+          "name": "GP18",
+          "x": 19.39,
+          "y": 8.99,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO18, SPI0 SCK, I2C1 SDA",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P25",
+          "header": "right",
+          "number": 25,
+          "name": "GP19",
+          "x": 19.39,
+          "y": 11.53,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO19, SPI0 TX, I2C1 SCL",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P26",
+          "header": "right",
+          "number": 26,
+          "name": "GP20",
+          "x": 19.39,
+          "y": 14.07,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO20, I2C0 SDA",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P27",
+          "header": "right",
+          "number": 27,
+          "name": "GP21",
+          "x": 19.39,
+          "y": 16.61,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO21, I2C0 SCL",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 0
+        },
+        {
+          "id": "P28",
+          "header": "right",
+          "number": 28,
+          "name": "GND",
+          "x": 19.39,
+          "y": 19.15,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P29",
+          "header": "right",
+          "number": 29,
+          "name": "GP22",
+          "x": 19.39,
+          "y": 21.69,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO22, GPIO",
+          "roles": [
+            "gpio"
+          ]
+        },
+        {
+          "id": "P30",
+          "header": "right",
+          "number": 30,
+          "name": "RUN",
+          "x": 19.39,
+          "y": 24.23,
+          "side": "top",
+          "type": "I",
+          "function": "RUN: the RP2040 enable pin; shorting it low resets the chip",
+          "roles": [
+            "reset"
+          ]
+        },
+        {
+          "id": "P31",
+          "header": "right",
+          "number": 31,
+          "name": "GP26",
+          "x": 19.39,
+          "y": 26.77,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO26, ADC0, I2C1 SDA",
+          "roles": [
+            "gpio",
+            "i2c_sda_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P32",
+          "header": "right",
+          "number": 32,
+          "name": "GP27",
+          "x": 19.39,
+          "y": 29.31,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO27, ADC1, I2C1 SCL",
+          "roles": [
+            "gpio",
+            "i2c_scl_capable"
+          ],
+          "i2c_controller": 1
+        },
+        {
+          "id": "P33",
+          "header": "right",
+          "number": 33,
+          "name": "AGND",
+          "x": 19.39,
+          "y": 31.85,
+          "side": "top",
+          "type": "G",
+          "function": "Ground for the ADC inputs (a separate analog ground plane)",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P34",
+          "header": "right",
+          "number": 34,
+          "name": "GP28",
+          "x": 19.39,
+          "y": 34.39,
+          "side": "top",
+          "type": "I/O",
+          "function": "GPIO28, ADC2",
+          "roles": [
+            "gpio"
+          ]
+        },
+        {
+          "id": "P35",
+          "header": "right",
+          "number": 35,
+          "name": "ADC_VREF",
+          "x": 19.39,
+          "y": 36.93,
+          "side": "top",
+          "type": "P",
+          "function": "ADC_VREF: the ADC reference, the filtered 3.3 V supply",
+          "roles": [
+            "do_not_use"
+          ],
+          "avoid_reason": "ADC_VREF is the ADC's reference voltage. Nothing in this plan belongs on it, and anything connected there changes the analogue readings."
+        },
+        {
+          "id": "P36",
+          "header": "right",
+          "number": 36,
+          "name": "3V3",
+          "x": 19.39,
+          "y": 39.47,
+          "side": "top",
+          "type": "P",
+          "function": "3V3(OUT): the on-board SMPS output, which can power external circuitry; keep the load under 300 mA",
+          "roles": [
+            "power_3v3"
+          ]
+        },
+        {
+          "id": "P37",
+          "header": "right",
+          "number": 37,
+          "name": "3V3_EN",
+          "x": 19.39,
+          "y": 42.01,
+          "side": "top",
+          "type": "I",
+          "function": "3V3_EN: the SMPS enable pin; shorting it low turns the 3.3 V supply off",
+          "roles": [
+            "reset"
+          ]
+        },
+        {
+          "id": "P38",
+          "header": "right",
+          "number": 38,
+          "name": "GND",
+          "x": 19.39,
+          "y": 44.55,
+          "side": "top",
+          "type": "G",
+          "function": "Ground",
+          "roles": [
+            "ground"
+          ]
+        },
+        {
+          "id": "P39",
+          "header": "right",
+          "number": 39,
+          "name": "VSYS",
+          "x": 19.39,
+          "y": 47.09,
+          "side": "top",
+          "type": "P",
+          "function": "VSYS: the system input, 1.8 V to 5.5 V; on USB it is VBUS less a Schottky diode drop",
+          "roles": [
+            "power_5v"
+          ]
+        },
+        {
+          "id": "P40",
+          "header": "right",
+          "number": 40,
+          "name": "VBUS",
+          "x": 19.39,
+          "y": 49.63,
+          "side": "top",
+          "type": "P",
+          "function": "VBUS: the micro-USB 5 V input",
+          "roles": [
+            "power_5v"
+          ]
+        }
+      ],
+      "keep_clear": [],
+      "electrical": {
+        "supply_v": [
+          1.8,
+          5.5
+        ],
+        "io_v": 3.3,
+        "io_5v_tolerant": false,
+        "usb_supply_v": 5.0,
+        "supply_current_note": "The Pico datasheet recommends keeping the load on the 3V3(OUT) pin under 300 mA.",
+        "supply_current_source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf",
+        "supply_current_basis": "Raspberry Pi Pico datasheet, section 2.1: recommended load on 3V3(OUT) less than 300 mA",
+        "supply_current_practice": "General practice, not from the datasheet: a weak charger, a long or thin cable, or an unpowered hub may not deliver what the board draws; the usual symptom is a reset or a USB dropout.",
+        "short_name": "Pico",
+        "datasheet_basis": "Raspberry Pi Pico datasheet; RP2040 datasheet",
+        "header_types_basis": "Raspberry Pi Pico datasheet, section 2.1 and Figure 2 (pinout)",
+        "input_high_note": "The RP2040 datasheet lists the maximum voltage at an I/O pin as IOVDD + 0.5 V.",
+        "input_high_basis": "RP2040 datasheet, 5.5.3.1 Absolute Maximum Ratings: VPIN max is IOVDD + 0.5 V",
+        "i2c_default_owner": "the Pico SDK",
+        "i2c_defaults_basis": "Raspberry Pi Pico datasheet, Figure 2: I2C0 SDA on GP4 and I2C0 SCL on GP5 are marked as the default I2C pins",
+        "i2c_remap_note": "The RP2040 moves each I2C controller only to the pins marked for it in the pinout, and your code must name the pins.",
+        "i2c_pin_mux": "fixed",
+        "i2c_pin_note": "I2C0 SDA is on GP0, GP4, GP8, GP12, GP16 or GP20 and its SCL on GP1, GP5, GP9, GP13, GP17 or GP21; I2C1 SDA is on GP2, GP6, GP10, GP14, GP18 or GP26 and its SCL on GP3, GP7, GP11, GP15, GP19 or GP27.",
+        "supply_options_note": "Power a Pico from Micro-USB, or from VSYS (about 1.8 V to 5.5 V) when USB is not used. A second source must reach VSYS through a diode or a P-channel MOSFET so it cannot feed back into USB. General practice, not from the datasheet: 3V3(OUT) is an output, so nothing else should drive it.",
+        "supply_options_basis": "Raspberry Pi Pico datasheet, 4.5 Powering Pico",
+        "supply_check_step": "Power the Pico from USB alone. A second supply needs a diode or a P-channel MOSFET into VSYS (datasheet section 4.5); do not wire one to 3V3(OUT).",
+        "supply_power_step": "Power the Pico from Micro-USB alone: no second supply on VSYS or 3V3(OUT)."
+      },
+      "dimension_basis": {
+        "pcb": "Raspberry Pi Pico datasheet Figure 3, unit mm: 21 x 51, 1 mm thick, rows 17.78 apart, 2.54 pitch, 48.26 between the first and last pin; the first pin's inset from the end is taken as (51 - 48.26) / 2 = 1.37 mm and the drawing shows it to about 0.2 mm",
+        "usb": "measured off the same drawing, plus or minus 0.3 mm: 8 mm wide, centred, overhanging the top edge by about 1.4 mm; height is typical for a Micro-USB receptacle (not on the drawing)",
+        "heights": "the 3.0 mm above the board and the 6.0 mm of header below it are typical for a board on standard 2.54 mm headers, not on the drawing: measure yours"
+      },
+      "sources": [
+        {
+          "label": "Raspberry Pi Pico datasheet (pinout Figure 2, dimensions Figure 3, power chain section 4, power consumption section 3)",
+          "url": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf",
+          "as_of": "2026-10-13"
+        },
+        {
+          "label": "RP2040 datasheet (absolute maximum ratings, I2C pin functions)",
+          "url": "https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf",
+          "as_of": "2026-10-13"
+        }
+      ],
+      "notes": [
+        "GPIO23, GPIO24, GPIO25 and GPIO29 are used on the board and are not on the headers.",
+        "GP26, GP27 and GP28 can be analogue inputs; their pins have a diode to the 3.3 V rail, so the input must not exceed IOVDD plus about 300 mV.",
+        "Only the pins marked I2C0 or I2C1 in the pinout can carry that I2C controller's SDA or SCL."
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -20,
+          "max": 70,
+          "kind": "recommended",
+          "locator": "Raspberry Pi Pico datasheet, 2.3 Recommended operating conditions: recommended maximum ambient temperature of operation is 70 C (85 C including self-heating), minimum -20 C",
+          "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
+        },
+        "loads": [
+          {
+            "mode": "Popcorn demo, average VBUS current",
+            "kind": "sustained",
+            "typical_ma": 86.5,
+            "rail_v": 5.0,
+            "conditions": "25 C mean of three boards; includes the VGA, SD card and I2S audio board attached, so it overstates a bare Pico",
+            "locator": "Table 1",
+            "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
+          },
+          {
+            "mode": "Popcorn demo, maximum VBUS current, power saving disabled",
+            "kind": "peak",
+            "typical_ma": 93.5,
+            "max_ma": 95.5,
+            "rail_v": 5.0,
+            "conditions": "mean of three boards at 25 C and 85 C; includes the VGA board",
+            "locator": "Table 2",
+            "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
+          }
+        ],
+        "power_stage": {
+          "kind": "switching",
+          "note": "an RT6150 buck-boost converter makes the 3.3 V from VSYS",
+          "locator": "Raspberry Pi Pico datasheet, 4.4 Powerchain",
+          "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
+        },
+        "gaps": [
+          {
+            "field": "supply_min_a",
+            "reason": "The Pico datasheet gives example VBUS currents but no minimum supply current."
+          }
+        ]
+      },
+      "engineering_sources": []
     }
   ]
 }
