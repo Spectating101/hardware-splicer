@@ -80,6 +80,8 @@ def _geometry(plan: dict[str, Any]) -> dict[str, Any]:
         at(-hx + wall, hx - wall, wall, top, -hz, -hz + wall),          # -z wall
         at(-hx + wall, hx - wall, wall, top, hz - wall, hz),            # +z wall
     ]
+    stops = (case.get("board_stops") or {}).get("boxes", [])
+    base_add += [at(b["x0"], b["x1"], b["y0"], b["y1"], b["z0"], b["z1"]) for b in stops]
     base_cut: list[Box] = []
     usb = case.get("usb_cutout")
     if usb:

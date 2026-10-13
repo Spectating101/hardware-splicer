@@ -49,14 +49,24 @@ def test_every_input_is_sourced_with_a_url_or_assumed_with_a_reason(bme):
         assert item["name"] in STANDARDS or "." in item["name"] or item["name"] == "io_v", item["name"]
 
 
-def test_the_antenna_gap_agrees_with_the_plans_own_finding_and_is_judged_against_the_sourced_15_mm(bme):
+def test_the_case_is_sized_to_the_sourced_antenna_clearance_and_the_review_agrees_with_the_plans_own_finding(bme):
     _spec, plan, review = bme
     finding = next(f for f in plan["findings"] if f["rule"] == "antenna_keepout")
     stated = float(re.search(r"in this layout is ([\d.]+) mm", finding["message"]).group(1))
     c = checks(review)["antenna_clearance"]
+    assert stated == pytest.approx(15, abs=0.01)
     assert c["quantities"]["gap_to_case_wall_mm"] == pytest.approx(stated)
-    assert c["quantities"]["recommended_clearance_mm"] == 15
-    assert c["status"] == EXCEEDS
+    assert c["quantities"]["recommended_clearance_mm"] == 15 and c["status"] == WITHIN
+    assert c["quantities"]["extra_case_length_needed_mm"] == 0
+
+
+def test_a_case_that_opts_out_of_the_antenna_clearance_is_reported_as_too_short():
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["case"]["antenna_clearance"] = False
+    plan = build_device_plan(spec)
+    stated = float(re.search(r"in this layout is ([\d.]+) mm", next(f for f in plan["findings"] if f["rule"] == "antenna_keepout")["message"]).group(1))
+    c = checks(build_engineering_review(spec))["antenna_clearance"]
+    assert stated == 1.0 and c["status"] == EXCEEDS
     assert c["quantities"]["extra_case_length_needed_mm"] == pytest.approx(15 - stated)
     assert "at least 15 mm is recommended" in next(i for i in c["inputs"] if i["name"].endswith("antenna_clearance"))["source"]
 
@@ -133,9 +143,14 @@ def test_the_supply_check_reports_what_is_unsourced_instead_of_guessing(bme):
 def test_gaps_and_the_usb_board_travel_come_from_the_plans_layout(bme):
     _spec, plan, review = bme
     c = checks(review)["usb_insertion_support"]
-    assert c["quantities"]["board_travel_mm"] == pytest.approx(1.0, abs=0.01)
+    assert c["status"] == WITHIN and c["quantities"]["stop_count"] == 2 and c["quantities"]["board_travel_mm"] == 0.5
+    assert any("strength is not assessed" in text for text in c["limits"])
     fit = checks(review)["module_to_wall_gaps"]
     assert fit["quantities"]["smallest"]["gap_mm"] == pytest.approx(1.0, abs=0.01)
+    bare = copy.deepcopy(_spec)
+    bare["case"].update(antenna_clearance=False, board_stops=False)
+    unprotected = checks(build_engineering_review(bare))["usb_insertion_support"]
+    assert unprotected["status"] == ADVISORY and unprotected["quantities"]["board_travel_mm"] == pytest.approx(1.0, abs=0.01)
     assert {g["module"] for g in fit["quantities"]["all"]} == {"mcu", "display", "sensor"}
 
 

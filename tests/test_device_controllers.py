@@ -44,8 +44,11 @@ def rules(plan, severity="error"):
 
 
 def test_the_esp32_plans_are_byte_identical_to_before_the_planner_was_generalised():
+    # With the later case options (antenna clearance and board stops) switched off, which is how the case used to be sized.
     for name, expected in ESP32_PLAN_SHA256.items():
-        plan = build_device_plan(example_specs()[name])
+        spec = copy.deepcopy(example_specs()[name])
+        spec["case"].update(antenna_clearance=False, board_stops=False)
+        plan = build_device_plan(spec)
         assert hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest() == expected, name
 
 
@@ -131,8 +134,11 @@ def test_a_board_with_no_antenna_has_no_antenna_check_and_a_board_with_one_does(
     esp = build_engineering_review(example_specs()["esp32_oled_usb"])
     ids = lambda review: {c["id"]: c for d in review["domains"] for c in d["checks"]}
     assert ids(pico)["antenna_clearance"]["status"] == "not_assessed"
-    assert ids(esp)["antenna_clearance"]["status"] == "exceeds_limit"
+    assert ids(esp)["antenna_clearance"]["status"] == "within_limit_under_assumptions"  # the case is sized to meet it
     assert "antenna" not in ids(pico)["usb_insertion_support"]["summary"] and "antenna end" in ids(esp)["usb_insertion_support"]["summary"]
+    opted_out = copy.deepcopy(example_specs()["esp32_oled_usb"])
+    opted_out["case"]["antenna_clearance"] = False
+    assert ids(build_engineering_review(opted_out))["antenna_clearance"]["status"] == "exceeds_limit"
 
 
 def test_the_review_uses_each_boards_regulator_and_temperature_limit():
@@ -178,3 +184,41 @@ def test_the_case_of_a_pico_is_sized_from_the_pico():
     plan = build_device_plan(example_specs()["pico_oled_usb"])
     assert plan["case"]["outer_mm"]["z"] < 40  # a 21 mm wide board needs a narrower case than the 28 mm DevKitC
     assert meta["meshes"]["case_base"]["size_mm"][:2] == [plan["case"]["outer_mm"]["x"], plan["case"]["outer_mm"]["z"]]
+
+
+def test_the_case_options_are_validated_and_each_changes_only_what_it_names():
+    base = copy.deepcopy(example_specs()["esp32_oled_usb"])
+    for key in ("antenna_clearance", "board_stops"):
+        bad = copy.deepcopy(base)
+        bad["case"][key] = "yes"
+        with pytest.raises(DevicePlanError):
+            build_device_plan(bad)
+    default = build_device_plan(base)["case"]
+    no_antenna = copy.deepcopy(base)
+    no_antenna["case"]["antenna_clearance"] = False
+    shorter = build_device_plan(no_antenna)["case"]
+    assert default["outer_mm"]["x"] - shorter["outer_mm"]["x"] == pytest.approx(14.0, abs=0.01)  # 15 mm sourced clearance less the 1 mm already there
+    assert default["outer_mm"]["z"] == shorter["outer_mm"]["z"] and default["outer_mm"]["y"] == shorter["outer_mm"]["y"]
+    no_stops = copy.deepcopy(base)
+    no_stops["case"]["board_stops"] = False
+    assert "board_stops" not in build_device_plan(no_stops)["case"] and len(default["board_stops"]["boxes"]) == 2
+
+
+def test_stop_blocks_sit_just_past_each_rows_last_pin_inside_the_case_and_clear_of_the_antenna_wall():
+    for name in sorted(example_specs()):
+        plan = build_device_plan(example_specs()[name])
+        case, stops = plan["case"], plan["case"]["board_stops"]["boxes"]
+        mcu = next(m for m in plan["modules"] if m["id"] == "mcu")
+        assert len(stops) == len({p["header"] for p in library()[mcu["module"]]["pins"]}) == 2
+        for stop in stops:
+            assert -case["inner_mm"]["x"] / 2 <= stop["x0"] < stop["x1"] <= case["inner_mm"]["x"] / 2, name
+            assert -case["inner_mm"]["z"] / 2 <= stop["z0"] < stop["z1"] <= case["inner_mm"]["z"] / 2, name
+            assert stop["y0"] == case["wall_mm"] and 0 < stop["y1"] - stop["y0"] <= 3.0
+            row = [p for p in mcu["pins"] if p["id"].startswith("J" if mcu["module"].startswith("esp") else "P")]
+            far_x = max(p["point"]["x"] for p in row if abs(p["point"]["z"] - (stop["z0"] + stop["z1"]) / 2) < 1.3)
+            assert stop["x0"] - far_x == pytest.approx(0.32 + 0.5, abs=0.02)  # half a pin plus the gap
+    # a Pico has no antenna to size the case, so the stops themselves lengthen it
+    pico = build_device_plan(example_specs()["pico_oled_usb"])["case"]
+    bare = copy.deepcopy(example_specs()["pico_oled_usb"])
+    bare["case"]["board_stops"] = False
+    assert pico["outer_mm"]["x"] > build_device_plan(bare)["case"]["outer_mm"]["x"]

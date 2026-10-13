@@ -333,9 +333,9 @@ def _antenna(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     quantities = {"gap_to_case_wall_mm": _r(wall_gap, 2), "recommended_clearance_mm": need,
                   "extra_case_length_needed_mm": _r(max(0.0, need - wall_gap), 2),
                   "antenna_end_to_nearest_other_module_mm": None if nearest is None else _r(nearest, 2)}
-    status = EXCEEDS if wall_gap < need else WITHIN
+    status = EXCEEDS if wall_gap + 0.01 < need else WITHIN
     text = (f"The antenna end of {module['id']} is {wall_gap:g} mm from the inside of the case wall; its source recommends at least {need:g} mm in all directions. "
-            + (f"Lengthening the case by about {need - wall_gap:g} mm at that end would meet it." if wall_gap < need else "")).strip()
+            + (f"Lengthening the case by about {need - wall_gap:g} mm at that end would meet it." if wall_gap + 0.01 < need else "")).strip()
     return _check("antenna_clearance", "Antenna clearance inside the case", status, text, quantities,
                   [_fact(entry, "antenna_clearance", antenna["clearance_mm"], "mm", f"\"{antenna['quote']}\" ({antenna['locator']})", antenna["source"])],
                   ["It is a recommendation, not a pass/fail rule, and it does not say how a plastic wall detunes the antenna. The guidelines advise testing range on the finished product.",
@@ -364,15 +364,26 @@ def _fit(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:
     usb = case.get("usb_cutout")
     if usb:
         toward_cable = mcu["box"]["x0"] + hx  # gap on the USB side
-        travel = hx - _far_x(mcu)        # distance the board can be pushed away from the cable
         has_antenna = mcu.get("overhang_mm", {}).get("antenna_end", 0.0) > 0
         end = "antenna end" if has_antenna else "far end"
-        checks.append(_check(
-            "usb_insertion_support", "What holds the board when a cable is plugged in", ADVISORY,
-            f"The exported case has no board stops. Pushing the plug in moves the board toward the far wall: it can travel {travel:.1f} mm before its {end} meets the wall, "
-            f"and that wall would then take the push through the {end}.",
-            {"board_travel_mm": _r(travel, 2), "gap_on_cable_side_mm": _r(toward_cable, 2)}, [],
-            ["Insertion force is not estimated: no connector force figure was sourced. Add stops or standoffs and retest."]))
+        stops = case.get("board_stops")
+        if stops:
+            gap = stops["gap_mm"]
+            checks.append(_check(
+                "usb_insertion_support", "What holds the board when a cable is plugged in", WITHIN,
+                f"Stop blocks sit {gap:g} mm beyond the last header pin of each row, so a plug pushed in moves the board at most {gap:g} mm before its pins meet them. "
+                f"The push no longer goes through the {end}.",
+                {"board_travel_mm": gap, "stop_count": len(stops["boxes"]), "gap_on_cable_side_mm": _r(toward_cable, 2)}, [],
+                ["Insertion force is not estimated (no connector force figure was sourced) and the stops' strength is not assessed: they are small printed blocks.",
+                 "Pulling the plug out drags the board toward the USB wall, which stops it; the board is otherwise held only by resting on its pins."]))
+        else:
+            travel = hx - _far_x(mcu)        # distance the board can be pushed away from the cable
+            checks.append(_check(
+                "usb_insertion_support", "What holds the board when a cable is plugged in", ADVISORY,
+                f"This case has no board stops. Pushing the plug in moves the board toward the far wall: it can travel {travel:.1f} mm before its {end} meets the wall, "
+                f"and that wall would then take the push through the {end}.",
+                {"board_travel_mm": _r(travel, 2), "gap_on_cable_side_mm": _r(toward_cable, 2)}, [],
+                ["Insertion force is not estimated: no connector force figure was sourced. Add stops or standoffs and retest."]))
     return checks
 
 

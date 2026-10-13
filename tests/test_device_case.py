@@ -70,7 +70,8 @@ def test_the_volumes_match_a_hand_calculation_from_the_plan(exported):
     top = case["lid_underside_y"]
     cavity = (ox - 2 * w) * (oz - 2 * w) * (top - w)
     usb = case["usb_cutout"]
-    base = ox * oz * top - cavity - usb["width_mm"] * usb["height_mm"] * w
+    stops = sum((b["x1"] - b["x0"]) * (b["y1"] - b["y0"]) * (b["z1"] - b["z0"]) for b in (case.get("board_stops") or {}).get("boxes", []))
+    base = ox * oz * top - cavity - usb["width_mm"] * usb["height_mm"] * w + stops
     assert meta["meshes"]["case_base"]["volume_mm3"] == pytest.approx(base, abs=0.5)
     from hardware_splicer.device_case import LIP_FIT_MM, LIP_HEIGHT_MM, LIP_WALL_MM
     lip_out_x, lip_out_z = ox - 2 * w - 2 * LIP_FIT_MM, oz - 2 * w - 2 * LIP_FIT_MM
@@ -179,3 +180,17 @@ def test_the_http_endpoint_serves_the_same_bytes_and_refuses_bad_specs(tmp_path,
     broken = copy.deepcopy(spec)
     broken["connections"].append({"from": "display.VCC", "to": "mcu.GND"})
     assert client.post("/v1/devices/case", json=broken).status_code == 422
+
+
+def test_the_exported_base_has_the_stop_blocks_where_the_plan_puts_them(exported):
+    _spec, plan, _meta, _data, files = exported
+    stops = (plan["case"].get("board_stops") or {}).get("boxes", [])
+    assert len(stops) == 2
+    base = read_stl(files["case_base.stl"])
+    ox, oz = plan["case"]["outer_mm"]["x"], plan["case"]["outer_mm"]["z"]
+    for box in stops:
+        # Base frame: X = x, Y = oz - z, Z = y, with x and z centred in the plan.
+        centre = ((box["x0"] + box["x1"]) / 2 + ox / 2, oz - ((box["z0"] + box["z1"]) / 2 + oz / 2), (box["y0"] + box["y1"]) / 2)
+        assert inside(base, centre)
+        above = (centre[0], centre[1], box["y1"] + 2.0)
+        assert not inside(base, above)  # the block is low; the cavity is open above it

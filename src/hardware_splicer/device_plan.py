@@ -39,6 +39,12 @@ WIRE_BEND_ALLOWANCE_MM = 10.0   # room above the tallest connector for a jumper 
 PIN_TIP_ABOVE_BOARD_MM = 3.0
 PLUG_CUTOUT_MM = (14.0, 8.0)   # a Micro-USB plug's moulded body is much bigger than the socket
 WINDOW_MARGIN_MM = 1.5
+# Board stops: low blocks on the case floor just beyond the last header pin of each row, so a plug pushed into the board is taken by
+# the pins and not by the antenna end. Sizes are typical choices, not measurements.
+PIN_SQUARE_MM = 0.64
+STOP_GAP_MM = 0.5
+STOP_THICKNESS_MM = 2.0
+STOP_HEIGHT_MM = 3.0
 WIRE_COLORS = {"red", "black", "yellow", "green", "blue", "white", "orange"}
 _SLUG = re.compile(r"^[a-z][a-z0-9_]{0,23}$")
 _OVERRIDE_KEYS = {"pcb_mm": {"x", "y", "z"}, "above_board_mm": None}
@@ -413,7 +419,13 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
         raise DevicePlanError("case must be an object")
     wall = _number(case.get("wall_mm", 2.0), "case.wall_mm", 1.2, 5.0)
     clearance = _number(case.get("clearance_mm", 1.0), "case.clearance_mm", 0.2, 3.0)
-    return {"name": name.strip(), "power": {"source": power.get("source", "usb")}, "modules": clean_modules, "connections": clean_connections, "wall": wall, "clearance": clearance}
+    keep_antenna_clear = case.get("antenna_clearance", True)
+    if not isinstance(keep_antenna_clear, bool):
+        raise DevicePlanError("case.antenna_clearance must be true or false")
+    with_stops = case.get("board_stops", True)
+    if not isinstance(with_stops, bool):
+        raise DevicePlanError("case.board_stops must be true or false")
+    return {"name": name.strip(), "power": {"source": power.get("source", "usb")}, "modules": clean_modules, "connections": clean_connections, "wall": wall, "clearance": clearance, "antenna_clearance": keep_antenna_clear, "board_stops": with_stops}
 
 
 # --- geometry -------------------------------------------------------------------------------------------------------------
@@ -829,6 +841,14 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     board_top = board_bottom + mcu.pcb["z"]
     pin_tips = board_top + PIN_TIP_ABOVE_BOARD_MM
     extent_x = c + usb_over + mcu.pcb["y"] + antenna
+    # The board's source recommends a clearance around its antenna; the case is lengthened at that end to meet it, unless the spec opts out.
+    antenna_rule = mcu.entry.get("engineering", {}).get("antenna")
+    antenna_extra = max(0.0, antenna_rule["clearance_mm"] - c) if antenna_rule and clean["antenna_clearance"] and antenna else 0.0
+    stop_reach = 0.0
+    if mcu.below > 0 and clean["board_stops"]:
+        # Room beyond the board's far edge for the stop blocks beyond the last header pin.
+        stop_reach = min(float(pin["y"]) for pin in mcu.entry["pins"]) + PIN_SQUARE_MM / 2 + STOP_GAP_MM + STOP_THICKNESS_MM
+    extent_x = c + usb_over + mcu.pcb["y"] + max(antenna + antenna_extra, stop_reach)
     extent_z = c + mcu.pcb["x"]
     mcu_top = board_top + mcu.above
 
@@ -1042,6 +1062,19 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             }
         )
 
+    stops = []
+    if mcu.below > 0 and clean["board_stops"]:
+        rows: dict[str, list[dict[str, Any]]] = {}
+        for pin in mcu.entry["pins"]:
+            rows.setdefault(str(pin.get("header", "")), []).append(pin)
+        for header in sorted(rows):
+            far = max(rows[header], key=lambda p: mcu.point(p["x"], p["y"])["x"])
+            at = mcu.point(far["x"], far["y"])
+            x0 = at["x"] + PIN_SQUARE_MM / 2 + STOP_GAP_MM
+            stops.append({"x0": _r(x0), "x1": _r(x0 + STOP_THICKNESS_MM), "z0": _r(at["z"] - mcu.entry["pin_pitch_mm"] / 2), "z1": _r(at["z"] + mcu.entry["pin_pitch_mm"] / 2),
+                          "y0": _r(wall), "y1": _r(wall + min(STOP_HEIGHT_MM, mcu.below)), "header": header or None})
+        if any(stop["x1"] > inner_x / 2 or stop["z0"] < -inner_z / 2 or stop["z1"] > inner_z / 2 for stop in stops):
+            stops = []
     case = {
         "style": "two_part_box",
         "wall_mm": wall, "clearance_mm": c,
@@ -1050,6 +1083,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         "floor_top_y": _r(wall),
         "lid_underside_y": _r(wall + inner_height),
         "usb_cutout": usb_cut, "window": window,
+        **({"board_stops": {"boxes": stops, "gap_mm": STOP_GAP_MM, "basis": "A proposal: low blocks just beyond the last header pin of each row, so a plug pushed in is taken by the pins and not by the antenna end. Sizes are typical, not measured; the board is not otherwise held."}} if stops else {}),
         "basis": "A proposal sized from the modules, the clearances above and a typical jumper-wire housing height. It has not been printed or test-fitted.",
         "assumptions": {
             "board_rests_on_its_pins_mm": mcu.below,
