@@ -7,26 +7,15 @@
 #include <cstdio>
 #include <cmath>
 
+// Reading, plausible ranges and line formats are specific to one part and generated from its descriptor.
+#include "part_traits.h"
+
 // Software choice, not a validated sampling rate.
 static constexpr uint32_t kReadPeriodMs = 2000;
-
-// Bosch BME280 datasheet BST-BME280-DS001-24: "Operating range -40…+85 °C, 0…100 % rel. humidity, 300…1100 hPa"
-static constexpr float kTempMinC = -40.0f;
-static constexpr float kTempMaxC = 85.0f;
-static constexpr float kHumMinPct = 0.0f;
-static constexpr float kHumMaxPct = 100.0f;
-static constexpr float kPresMinHpa = 300.0f;
-static constexpr float kPresMaxHpa = 1100.0f;
 
 static constexpr int kReadFailThreshold = 3;
 static constexpr uint32_t kBackoffInitialMs = 1000;
 static constexpr uint32_t kBackoffCapMs = 30000;
-
-struct Reading {
-    float temp_c;
-    float hum_pct;
-    float pres_hpa;
-};
 
 class Hal {
 public:
@@ -51,14 +40,6 @@ enum class AppState : uint8_t {
 static uint32_t wrap_elapsed(uint32_t now, uint32_t then) {
     const uint32_t elapsed = now - then;
     return elapsed;
-}
-
-static bool reading_is_plausible(const Reading& reading) {
-    if (std::isnan(reading.temp_c) || std::isnan(reading.hum_pct) || std::isnan(reading.pres_hpa)) return false;
-    if (reading.temp_c < kTempMinC || reading.temp_c > kTempMaxC) return false;
-    if (reading.hum_pct < kHumMinPct || reading.hum_pct > kHumMaxPct) return false;
-    if (reading.pres_hpa < kPresMinHpa || reading.pres_hpa > kPresMaxHpa) return false;
-    return true;
 }
 
 static const char* state_text(AppState state) {
@@ -246,9 +227,7 @@ private:
         char l2[24];
         char l3[24];
         char l4[24];
-        std::snprintf(l2, sizeof l2, "%.2f C", last_.temp_c);
-        std::snprintf(l3, sizeof l3, "%.1f %%", last_.hum_pct);
-        std::snprintf(l4, sizeof l4, "%.1f hPa", last_.pres_hpa);
+        format_display_lines(last_, l2, l3, l4, sizeof l2);
         hal_.display_show(headline, l2, l3, l4);
     }
 
@@ -306,9 +285,7 @@ private:
             hal_.log("RECOVERED");
         }
         char line[96];
-        std::snprintf(line, sizeof line,
-                      "T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f",
-                      (unsigned)now, reading.temp_c, reading.hum_pct, reading.pres_hpa);
+        format_ok_line(line, sizeof line, now, reading);
         hal_.log(line);
         show_reading("STATE OK");
     }

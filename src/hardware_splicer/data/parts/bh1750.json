@@ -1,0 +1,42 @@
+{
+  "schema_version": "hardware_splicer.part_descriptor.v1",
+  "library_id": "adafruit-bh1750-stemma-qt",
+  "chip": "BH1750",
+  "review_status": "UNREVIEWED_EXTRACT",
+  "addresses": ["0x23", "0x5C"],
+  "identity": null,
+  "identity_note": "The datasheet instruction set defines no ID register and no read of identity, so a chip that acknowledges the address cannot be told apart from a BH1750. Only the acknowledgement and the plausibility of a reading can be checked.",
+  "bounds_citation": "Rohm BH1750FVI datasheet (2009.04 Rev.B) p.1: \"Wide range and High resolution. ( 1 - 65535 lx )\"; p.2: dark (0 lx) sensor output 0 to 3 counts, so 0 lx is a valid reading",
+  "channels": [
+    {"short": "lux", "field": "lux", "key": "LUX", "label": "illuminance", "unit": "lx",
+     "serial_format": "%.1f", "display_format": "%.1f lx", "display_marker": " lx",
+     "min": 0.0, "max": 65535.0, "min_const": "kLuxMin", "max_const": "kLuxMax",
+     "good": 320.0, "out_of_range_probe": 70000.0}
+  ],
+  "adapter": {
+    "template": "main_bh1750.cpp.tmpl",
+    "driver": "Direct Wire driver written from the datasheet. The claws/BH1750 1.3.0 library prints [BH1750] ERROR lines to Serial on failure, which the documented serial grammar does not allow.",
+    "lib_deps": [
+      "adafruit/Adafruit SSD1306 @ 2.5.17",
+      "adafruit/Adafruit GFX Library @ 1.12.6",
+      "adafruit/Adafruit BusIO @ 1.17.4"
+    ],
+    "vendor_host": true,
+    "vendor_profile": "bh1750"
+  },
+  "datasheet": {
+    "document": "Rohm BH1750FVI, 2009.04 Rev.B, 17 pages",
+    "facts": [
+      {"fact": "Slave address 0100011 (0x23) when ADDR is low, 1011100 (0x5C) when ADDR is high", "page": 10},
+      {"fact": "Instruction set: 0x00 power down, 0x01 power on, 0x07 reset (data register only, not accepted in power down), 0x10 continuous H-resolution, 0x11 continuous H-resolution mode 2, 0x13 continuous L-resolution, 0x20 0x21 0x23 one-time variants", "page": 5},
+      {"fact": "Initial state is power down; the power-on command may be omitted before a measurement command", "page": 4},
+      {"fact": "H-resolution measurement time 120 ms typical, 180 ms maximum; L-resolution 16 ms typical, 24 ms maximum", "page": 2},
+      {"fact": "Dark (0 lx) sensor output is 0 to 3 counts in H-resolution mode", "page": 2},
+      {"fact": "Result is a 16-bit value, high byte first, divided by 1.2 to give lx (typical sensor out / actual lx is 1.2, range 0.96 to 1.44)", "page": 7},
+      {"fact": "Illuminance range 1 to 65535 lx", "page": 1}
+    ]
+  },
+  "software_choices": [
+    "Serial and display formats, the fixture reading and the 65535 lx plausibility ceiling are software choices taken from the stated range, not measurements."
+  ]
+}

@@ -1,0 +1,928 @@
+{
+  "claim_boundary": "Mutation benchmark of host application-logic tests against a modelled bus. It is not silicon, ESP32 timing, vendor-library behaviour or electrical evidence, and it authorizes nothing.",
+  "detectors": {
+    "core_lane": "all 15 core scenarios (does not compile main.cpp)",
+    "vendor_healthy": [
+      "display_at_0x3D_only",
+      "sensor_0x5C_only",
+      "sensor_default_address_0x23_with_display_0x3C"
+    ],
+    "vendor_matrix": "all 11 vendor-host scenarios",
+    "vendor_smoke": [
+      "sensor_default_address_0x23_with_display_0x3C"
+    ]
+  },
+  "firmware_authorized": false,
+  "lane": "adapter",
+  "mutant_set": "all",
+  "mutants": [
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_absent",
+        "display_at_0x3D_only",
+        "transient_data_nack"
+      ],
+      "id": "adapter_display_presence_not_checked",
+      "outcome": "KILLED",
+      "story": "any address is treated as a display because begin() cannot detect one"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [],
+      "id": "adapter_display_reinitialises_bus",
+      "outcome": "SURVIVED",
+      "story": "the display library calls Wire.begin() again and resets the pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_recovery_loses_pins",
+      "outcome": "KILLED",
+      "story": "bus recovery restarts Wire on the default pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_setup_loses_pins",
+      "outcome": "KILLED",
+      "story": "setup starts Wire on the default pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_setup_pins_swapped",
+      "outcome": "KILLED",
+      "story": "setup swaps SDA and SCL"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "In arduino-esp32 2.0.17 (espressif32@6.10.0) the TwoWire constructor sets _timeOutMillis(50) (Wire.cpp:48), so the explicit 50 ms restates the default. Valid only for that framework version.",
+      "failing_scenarios": [],
+      "id": "adapter_setup_no_timeout",
+      "outcome": "SURVIVED",
+      "story": "setup never sets the Wire timeout"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "TwoWire::end() in arduino-esp32 2.0.17 frees buffers and deinitialises the bus but never touches _timeOutMillis, so re-applying 50 ms after end() is redundant. Valid only for that framework version.",
+      "failing_scenarios": [],
+      "id": "adapter_recovery_no_timeout",
+      "outcome": "SURVIVED",
+      "story": "bus recovery never re-applies the Wire timeout"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x23_with_display_0x3C"
+      ],
+      "id": "adapter_display_never_flushed",
+      "outcome": "KILLED",
+      "story": "the frame is built but display() is never called"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x23_with_display_0x3C"
+      ],
+      "id": "adapter_display_not_cleared",
+      "outcome": "KILLED",
+      "story": "the previous frame is never cleared before drawing"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "adapter_log_without_newline",
+      "outcome": "KILLED",
+      "story": "serial lines are written without a terminator"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "physical",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_bus_speed_changed",
+      "outcome": "KILLED",
+      "story": "the bus runs at 400 kHz instead of 100 kHz"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_default_address_0x23_with_display_0x3C"
+      ],
+      "id": "bh_mode_one_time",
+      "outcome": "KILLED",
+      "story": "the chip is started in one-time mode, so it powers down after the first measurement"
+    },
+    {
+      "blind_spot": "The model implements no resolution modes: L-resolution (datasheet p.2, 4 lx resolution, 16 ms typical, 24 ms maximum) returns the same count as H-resolution, so the mode choice cannot matter to it. Silicon returns a coarser value.",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [],
+      "id": "bh_mode_low_resolution",
+      "outcome": "SURVIVED",
+      "story": "the chip is started in continuous L-resolution mode"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "bh_opcode_undefined",
+      "outcome": "KILLED",
+      "story": "the measurement opcode is one the datasheet does not define"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "bh_begin_ignores_nack",
+      "outcome": "KILLED",
+      "story": "a NACKed measurement command still counts as a successful begin"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "SensorApp reads only after a sensor_begin() of the same device succeeded: every take_reading() call site follows a successful probe and rebind, and after a failed re-begin the state is FAULT_SENSOR_READ, which probes again before reading. The driver is therefore never read while unconfigured. Valid for SensorApp as written.",
+      "failing_scenarios": [],
+      "id": "bh_failed_begin_stays_configured",
+      "outcome": "SURVIVED",
+      "story": "a failed begin leaves the driver marked as configured"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-timing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_conversion_wait_removed",
+      "outcome": "KILLED",
+      "story": "the first read does not wait for the conversion, so it returns the reset value 0"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-timing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_conversion_wait_too_short",
+      "outcome": "KILLED",
+      "story": "the conversion wait is 100 ms, below the datasheet's 180 ms maximum"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-timing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "blocking_budget"
+      ],
+      "id": "bh_conversion_wait_too_long",
+      "outcome": "KILLED",
+      "story": "the conversion wait is a full second"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-timing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_absent_then_appears",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_conversion_start_not_recorded",
+      "outcome": "KILLED",
+      "story": "begin never records when the conversion started, so a replugged chip is read without waiting"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_reads_one_byte",
+      "outcome": "KILLED",
+      "story": "only one result byte is requested"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "After a failed requestFrom, read() returns -1, so the unchecked buffer is (0xFFFF << 8 | 0xFFFF) / 1.2, about 14 million lx. reading_is_plausible rejects that (kLuxMax is 65535), so the application behaves exactly as with the check. Defence in depth, valid only while the plausibility ceiling stays below that value.",
+      "failing_scenarios": [],
+      "id": "bh_short_read_unchecked",
+      "outcome": "SURVIVED",
+      "story": "a failed read is not noticed and the empty buffer is used as a result"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_byte_order_swapped",
+      "outcome": "KILLED",
+      "story": "the result bytes are combined low byte first"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_divisor_wrong",
+      "outcome": "KILLED",
+      "story": "the raw count is not divided by 1.2"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "bh_high_byte_only",
+      "outcome": "KILLED",
+      "story": "the low byte is dropped from the result"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "bh_address_fixed",
+      "outcome": "KILLED",
+      "story": "the driver is always bound to 0x23 whatever address was probed"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "bh_hal_begin_result_ignored",
+      "outcome": "KILLED",
+      "story": "the HAL reports every begin as successful"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [],
+      "id": "bh_wrong_wire_instance",
+      "outcome": "SURVIVED",
+      "story": "the driver is handed Wire1, which setup() never starts"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "The BH1750 has one channel, so display lines 3 and 4 are always empty strings; printing or omitting the empty fourth line leaves the framebuffer pixel-identical.",
+      "failing_scenarios": [],
+      "id": "heldout_adapter_fourth_line_dropped",
+      "outcome": "SURVIVED",
+      "story": "the fourth display line is never printed"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x23_with_display_0x3C"
+      ],
+      "id": "heldout_adapter_text_size_doubled",
+      "outcome": "KILLED",
+      "story": "the display text is drawn at size 2"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only"
+      ],
+      "id": "heldout_adapter_display_address_fixed",
+      "outcome": "KILLED",
+      "story": "the display is always initialised at 0x3C whatever address answered"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack"
+      ],
+      "id": "heldout_adapter_log_duplicated",
+      "outcome": "KILLED",
+      "story": "every serial line is written twice"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "heldout_adapter_bus_recovery_never_ends_bus",
+      "outcome": "KILLED",
+      "story": "bus recovery restarts Wire without ending it first, so the peripheral is never reset"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "SensorApp discards bus_recover()'s result at both call sites with (void), so its value is unobservable.",
+      "failing_scenarios": [],
+      "id": "heldout_adapter_recovery_result_inverted",
+      "outcome": "SURVIVED",
+      "story": "bus_recover reports failure whatever happened"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "heldout_bh_divisor_1_44",
+      "outcome": "KILLED",
+      "story": "the divisor is the datasheet's upper bound 1.44 instead of the typical 1.2"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "SensorApp reads only after a sensor_begin() of the same device succeeded: every take_reading() call site follows a successful probe and rebind, and after a failed re-begin the state is FAULT_SENSOR_READ, which probes again before reading. The driver is therefore never read while unconfigured. Valid for SensorApp as written.",
+      "failing_scenarios": [],
+      "id": "heldout_bh_read_without_configuration",
+      "outcome": "SURVIVED",
+      "story": "a read is attempted on a driver that never started a measurement"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "first_read_waits_for_conversion",
+        "sensor_0x5C_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x23_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "heldout_bh_low_byte_zero",
+      "outcome": "KILLED",
+      "story": "the second result byte is read but replaced by zero"
+    },
+    {
+      "blind_spot": "The model implements no resolution modes: H-resolution mode 2 (0.5 lx resolution) returns the same count as mode 1, so the mode choice cannot matter to it. Silicon scales the result differently.",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [],
+      "id": "heldout_bh_mode_two",
+      "outcome": "SURVIVED",
+      "story": "the chip is started in continuous H-resolution mode 2"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bh1750-driver",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_default_address_0x23_with_display_0x3C"
+      ],
+      "id": "heldout_bh_power_down_after_read",
+      "outcome": "KILLED",
+      "story": "the chip is powered down after every read, so it stops converting"
+    }
+  ],
+  "part": "adafruit-bh1750-stemma-qt",
+  "physical_correctness": "UNPROVEN",
+  "power_on_authorized": false,
+  "schema_version": "hardware_splicer.device_fault_matrix_benchmark.v1",
+  "summary": {
+    "by_bug_class": {
+      "addressing": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 1
+      },
+      "bh1750-driver": {
+        "core_lane": 0,
+        "total": 11,
+        "vendor_healthy": 9,
+        "vendor_matrix": 9,
+        "vendor_smoke": 9
+      },
+      "bh1750-timing": {
+        "core_lane": 0,
+        "total": 4,
+        "vendor_healthy": 2,
+        "vendor_matrix": 4,
+        "vendor_smoke": 2
+      },
+      "bus-errors": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 2
+      },
+      "display": {
+        "core_lane": 0,
+        "total": 4,
+        "vendor_healthy": 4,
+        "vendor_matrix": 4,
+        "vendor_smoke": 3
+      },
+      "grammar": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 2
+      },
+      "physical": {
+        "core_lane": 0,
+        "total": 1,
+        "vendor_healthy": 0,
+        "vendor_matrix": 1,
+        "vendor_smoke": 0
+      },
+      "pins": {
+        "core_lane": 0,
+        "total": 5,
+        "vendor_healthy": 0,
+        "vendor_matrix": 3,
+        "vendor_smoke": 0
+      },
+      "recovery": {
+        "core_lane": 0,
+        "total": 1,
+        "vendor_healthy": 0,
+        "vendor_matrix": 1,
+        "vendor_smoke": 0
+      }
+    },
+    "known_host_model_blind_spots": [
+      "bh_mode_low_resolution",
+      "heldout_bh_mode_two"
+    ],
+    "mutants_defined": 39,
+    "reviewed_equivalent": [
+      "adapter_setup_no_timeout",
+      "adapter_recovery_no_timeout",
+      "bh_failed_begin_stays_configured",
+      "bh_short_read_unchecked",
+      "heldout_adapter_fourth_line_dropped",
+      "heldout_adapter_recovery_result_inverted",
+      "heldout_bh_read_without_configuration"
+    ],
+    "scored_mutants": 32,
+    "stillborn_compile_errors": [],
+    "survivors_without_review": [
+      "adapter_display_reinitialises_bus",
+      "bh_wrong_wire_instance"
+    ],
+    "tiers": {
+      "core_lane": {
+        "killed": 0,
+        "of": 32,
+        "score": 0.0
+      },
+      "vendor_healthy": {
+        "killed": 21,
+        "of": 32,
+        "score": 0.656
+      },
+      "vendor_matrix": {
+        "killed": 28,
+        "of": 32,
+        "score": 0.875
+      },
+      "vendor_smoke": {
+        "killed": 19,
+        "of": 32,
+        "score": 0.594
+      }
+    }
+  },
+  "target": "adafruit-bh1750-stemma-qt Arduino adapter (src/main.cpp) against pinned Adafruit libraries and a modelled I2C bus",
+  "vendor_host_override": "vh_original"
+}

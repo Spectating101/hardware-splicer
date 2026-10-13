@@ -4,6 +4,7 @@
 // ADC and calibration bytes are labelled so. Not silicon.
 
 #include "Wire.h"
+#include "ssd1306_model.h"  // shared with every part's vendor-host harness
 #include <cstdint>
 #include <vector>
 
@@ -47,6 +48,8 @@ public:
     void unplug();
     void set_adc(int32_t adc_T, int32_t adc_P, int32_t adc_H);
     void set_im_update_stuck(bool stuck);
+    // A chip that answers at the address but is not a BME280 (e.g. a BMP280 answers 0x58).
+    void set_chip_id(uint8_t id);
     bool present() const override { return present_; }
     uint8_t address() const { return addr_; }
     Bme280Calib nvm() const { return nvm_; }
@@ -67,6 +70,7 @@ private:
     uint8_t addr_;
     bool present_ = false;
     bool im_update_stuck_ = false;
+    uint8_t chip_id_ = kChipId;
     uint32_t reset_ms_ = 0;
     bool reset_pending_ = false;
     uint8_t ptr_ = 0;
@@ -75,36 +79,6 @@ private:
     int32_t adc_T_ = 0;
     int32_t adc_P_ = 0;
     int32_t adc_H_ = 0;
-};
-
-class Ssd1306Model final : public I2cDevice {
-public:
-    static constexpr int kWidth = 128;
-    static constexpr int kHeight = 64;
-    static constexpr int kBuf = kWidth * (kHeight / 8);
-
-    explicit Ssd1306Model(uint8_t addr);
-    void plug();
-    void unplug();
-    bool present() const override { return present_; }
-    uint8_t address() const { return addr_; }
-    const std::vector<uint8_t> &commands() const { return commands_; }
-    const uint8_t *framebuffer() const { return fb_; }
-    bool saw_display_on() const;
-    bool saw_data_bytes() const { return data_bytes_ > 0; }
-    int data_bytes() const { return data_bytes_; }
-    bool pixel(int x, int y) const;
-
-    uint8_t on_write(const uint8_t *data, size_t len) override;
-    size_t on_read(uint8_t *data, size_t len) override;
-
-private:
-    uint8_t addr_;
-    bool present_ = false;
-    uint8_t fb_[kBuf]{};
-    size_t fb_index_ = 0;
-    std::vector<uint8_t> commands_;
-    int data_bytes_ = 0;
 };
 
 // Synthetic calibration / ADC sets. Not from a particular physical module.

@@ -1,0 +1,43 @@
+{
+  "schema_version": "hardware_splicer.part_descriptor.v1",
+  "library_id": "adafruit-bme280-stemma-qt",
+  "chip": "BME280",
+  "review_status": "UNREVIEWED_EXTRACT",
+  "addresses": ["0x77", "0x76"],
+  "identity": {
+    "register": "0xD0",
+    "value": "0x60",
+    "citation": "Bosch BST-BME280-DS001-24 section 5.4.1: the id register contains chip_id[7:0], which is 0x60."
+  },
+  "bounds_citation": "Bosch BME280 datasheet BST-BME280-DS001-24: \"Operating range -40…+85 °C, 0…100 % rel. humidity, 300…1100 hPa\"",
+  "channels": [
+    {"short": "temp", "field": "temp_c", "key": "TEMP_C", "label": "temperature", "unit": "C",
+     "serial_format": "%.2f", "display_format": "%.2f C", "display_marker": " C",
+     "min": -40.0, "max": 85.0, "min_const": "kTempMinC", "max_const": "kTempMaxC",
+     "good": 21.5, "out_of_range_probe": 100.0},
+    {"short": "hum", "field": "hum_pct", "key": "HUM_PCT", "label": "humidity", "unit": "%",
+     "serial_format": "%.1f", "display_format": "%.1f %%", "display_marker": " %",
+     "min": 0.0, "max": 100.0, "min_const": "kHumMinPct", "max_const": "kHumMaxPct",
+     "good": 45.0, "out_of_range_probe": 101.0},
+    {"short": "pres", "field": "pres_hpa", "key": "PRES_HPA", "label": "pressure", "unit": "hPa",
+     "serial_format": "%.1f", "display_format": "%.1f hPa", "display_marker": "hPa",
+     "min": 300.0, "max": 1100.0, "min_const": "kPresMinHpa", "max_const": "kPresMaxHpa",
+     "good": 1013.3, "out_of_range_probe": 200.0}
+  ],
+  "adapter": {
+    "template": "main.cpp.tmpl",
+    "driver": "Adafruit BME280 2.3.0 with a bounded initializer; the stock init() waits indefinitely for calibration",
+    "lib_deps": [
+      "adafruit/Adafruit BME280 Library @ 2.3.0",
+      "adafruit/Adafruit SSD1306 @ 2.5.17",
+      "adafruit/Adafruit GFX Library @ 1.12.6",
+      "adafruit/Adafruit BusIO @ 1.17.4",
+      "adafruit/Adafruit Unified Sensor @ 1.1.15"
+    ],
+    "vendor_host": true,
+    "vendor_profile": "bme280"
+  },
+  "software_choices": [
+    "Serial and display formats and the fixture reading are software choices, not datasheet values."
+  ]
+}

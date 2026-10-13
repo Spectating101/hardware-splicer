@@ -20,6 +20,7 @@ import zipfile
 # scripts/hardware_splicer.py would otherwise shadow the src package.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from hardware_splicer.device_application import build_device_application
+from hardware_splicer.device_parts import example_spec_for_part
 from hardware_splicer.device_plan import example_specs
 
 DEFAULT_CORE_DIR = Path(__file__).resolve().parents[1] / ".cache" / "hardware-splicer" / "device-firmware" / "platformio-core"
@@ -109,8 +110,14 @@ def verify(
     libs = vendor_libs
     if libs is None and platformio:
         libs = project / ".pio" / "libdeps" / "application"
-    if vendor_libs is not None or platformio:
-        vendor_report, vendor_log = _run_vendor_host(project, libs)
+    if not metadata["part"]["vendor_host_supported"]:
+        # Not applicable, not a failure: there is no register-level model for this part to run against.
+        vendor_report = {
+            "pass": None,
+            "reason": f"no vendor-host lane exists for the {metadata['part']['chip']}; its Arduino adapter was not tested against a modelled bus",
+        }
+    elif vendor_libs is not None or platformio:
+        vendor_report, vendor_log = _run_vendor_host(project, libs, metadata["part"]["vendor_profile"])
         vendor_report["core_sha256"] = metadata["files"]["src/app_core.h"]["sha256"]
         vendor_report["adapter_sha256"] = metadata["files"]["src/main.cpp"]["sha256"]
         (run / "vendor_host.log").write_bytes(vendor_log)
@@ -123,6 +130,7 @@ def main() -> int:
     inputs = parser.add_mutually_exclusive_group()
     inputs.add_argument("--example", choices=list(example_specs()), default=None)
     inputs.add_argument("--spec", type=Path)
+    inputs.add_argument("--part", choices=("bme280", "bh1750"), help="the example wired for this supported sensor")
     parser.add_argument("--output-root", type=Path, default=Path(".cache/hardware-splicer/device-application"))
     parser.add_argument("--platformio", default=None, help="Optional PlatformIO Core 6.1.18 binary")
     parser.add_argument(
@@ -136,6 +144,8 @@ def main() -> int:
         if args.spec.stat().st_size > 64 * 1024:
             parser.error("the spec may be at most 64 KiB")
         spec = json.loads(args.spec.read_text())
+    elif args.part:
+        spec = example_spec_for_part({"bme280": "adafruit-bme280-stemma-qt", "bh1750": "adafruit-bh1750-stemma-qt"}[args.part])
     else:
         spec = example_specs()[args.example or "esp32_oled_bme280_usb"]
     run, behaviour, compile_report, vendor_report = verify(
@@ -163,7 +173,7 @@ def main() -> int:
         return 1
     if compile_report is not None and not compile_report["compile_pass"]:
         return 1
-    if vendor_report is not None and not vendor_report["pass"]:
+    if vendor_report is not None and vendor_report["pass"] is False:
         return 1
     return 0
 

@@ -1,5 +1,9 @@
 # Run the generated device application off-hardware
 
+> **A tested engineering-software system with modeled execution — not physically validated hardware.**
+> It is suitable for an evaluator, developer or portfolio demonstration. It is not authorization to
+> fabricate, flash or power hardware.
+
 On **Build a device**, choose the ESP32/OLED/BME280 example, check the wiring,
 then select **Run modeled tests**. Open scenario rows to see synthetic serial
 readings, missing-device faults, stale data and recovery. Download the modeled
@@ -28,15 +32,20 @@ For vendor-host tests, first provision the pinned dependencies with the existing
 `HS_DEVICE_RUNTIME_VENDOR_LIBS` to that run's `project/.pio/libdeps/application`
 directory. Requests cannot choose library paths, tools, code or authority flags.
 Missing configuration produces `PARTIAL`, with vendor-host `NOT_RUN`, not a
-vendor pass. Configured libraries must match all five pinned version declarations;
+vendor pass. Configured libraries must match the pinned version declarations of the part's
+lane (five for the BME280, three for the BH1750, whose sensor is driven by the adapter's own code);
 the report includes source-member SHA-256 hashes of the libraries used.
 Libraries are copied into the private execution directory before hashing and
 compiling, so later changes to the dependency cache cannot change the recorded
 bytes. The declared versions/hashes identify inputs, not an independent attestation
 of vendor origin.
-The current vendor fixture requires BME280 plus SSD1306. A sensor-only export
-can run core scenarios but remains `PARTIAL`; its Arduino adapter is not credited
-as tested by that fixture.
+Each supported part has its own vendor-host lane (a bus model and an eleven-scenario
+harness, selected by the part descriptor) and each requires its sensor plus SSD1306.
+A sensor-only export can run core scenarios but remains `PARTIAL`; its Arduino adapter
+is not credited as tested by that fixture. The BME280 lane models the Bosch register map;
+the BH1750 lane is a model written from the Rohm datasheet, with the datasheet's worked
+examples as the oracle, and it does not model the resolution modes. See
+[part descriptors](DEVICE_PART_DESCRIPTORS.md).
 
 Set `HARDWARE_SPLICER_API_KEY` before exposing execution beyond loopback. The
 Next proxy forwards this existing app credential; the execution route checks it.
@@ -71,7 +80,20 @@ errors. These operations never create a project revision or persist bench facts.
 The browser aborts and clears results when the checked specification changes.
 Modeled serial traces are displayed separately from **Check a bench scan** and
 are never automatically submitted as physical evidence.
+The observation checker accepts each planned sensor's own serial grammar, retains
+later faults and recovery, and treats a BH1750 boot only as an acknowledgement,
+not a chip identity. Pasted output remains operator-supplied text and is not
+persisted or promoted into physical evidence.
 
 All results retain `physical_correctness=UNPROVEN`, `firmware_authorized=false`
 and `power_on_authorized=false`. No flashing, powering, fabrication or procurement
 occurs in this workflow.
+
+## Evidence
+
+- [Adding a part](DEVICE_PART_DESCRIPTORS.md): the descriptor each supported sensor is generated from, and its limits.
+- [Mutation benchmark of these tests](status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md): how many seeded bugs the
+  boot-only, healthy-bus and fault scenarios catch, for the application logic and the Arduino adapter.
+- [Running the compiled firmware in an emulator](status/DEVICE_EMULATOR_FEASIBILITY_2026-10-12.md): what is known,
+  what was not run, and the protocol to finish it.
+

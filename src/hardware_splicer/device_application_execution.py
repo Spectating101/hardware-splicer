@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from .bounded_process import BoundedProcessError, run_bounded
+from .device_vendor_profiles import VENDOR_PROFILES, vendor_profile
 
 
 def _execute(command: list[str], *, timeout: float, cwd=None, **_ignored):
@@ -22,21 +23,6 @@ VENDOR_HOST_CLAIM_BOUNDARY = (
     "Vendor-host compile of the real Arduino adapter and the pinned Adafruit sources "
     "against a modelled I2C bus. Not silicon, not ESP32 Wire timing, not electrical behaviour."
 )
-VENDOR_LIB_DIRS = (
-    "Adafruit BME280 Library",
-    "Adafruit SSD1306",
-    "Adafruit GFX Library",
-    "Adafruit BusIO",
-    "Adafruit Unified Sensor",
-)
-VENDOR_LIB_SOURCES = (
-    ("Adafruit BME280 Library", "Adafruit_BME280.cpp"),
-    ("Adafruit SSD1306", "Adafruit_SSD1306.cpp"),
-    ("Adafruit GFX Library", "Adafruit_GFX.cpp"),
-    ("Adafruit BusIO", "Adafruit_I2CDevice.cpp"),
-    ("Adafruit BusIO", "Adafruit_SPIDevice.cpp"),
-    ("Adafruit Unified Sensor", "Adafruit_Sensor.cpp"),
-)
 # The diagnostic verifier's toolchain cache, so one download serves both. Set PLATFORMIO_CORE_DIR to use another.
 HOST_SCENARIOS = (
     "boot_ok", "default_address_binding", "sensor_missing_at_boot", "display_missing",
@@ -44,11 +30,10 @@ HOST_SCENARIOS = (
     "ambiguous_during_read_fault", "second_read_fault_starts_at_one_second", "implausible_values",
     "clock_wrap", "read_period", "two_devices_answer", "first_read_fails", "serial_grammar",
 )
-VENDOR_SCENARIOS = (
-    "sensor_default_address_0x77_with_display_0x3C", "sensor_0x76_only", "display_at_0x3D_only",
-    "display_absent", "sensor_absent_then_appears", "unplug_replug_mid_run", "both_addresses_answer",
-    "transient_data_nack", "wire_pins_stay_explicit", "blocking_budget", "im_update_never_clears",
-)
+# The BME280 profile's names, kept for callers that predate per-part profiles.
+VENDOR_LIB_DIRS = VENDOR_PROFILES["bme280"]["lib_dirs"]
+VENDOR_LIB_SOURCES = VENDOR_PROFILES["bme280"]["lib_sources"]
+VENDOR_SCENARIOS = VENDOR_PROFILES["bme280"]["scenarios"]
 
 
 def _scenario_failure(rows: list, expected: tuple[str, ...], exit_code: int) -> str:
@@ -68,34 +53,39 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def vendor_libs_available(libdeps: Path | None) -> bool:
+def vendor_libs_available(libdeps: Path | None, profile: str = "bme280") -> bool:
     if libdeps is None or not libdeps.is_dir():
         return False
-    for name in VENDOR_LIB_DIRS:
+    chosen = vendor_profile(profile)
+    for name in chosen["lib_dirs"]:
         if not (libdeps / name).is_dir():
             return False
-    for folder, source in VENDOR_LIB_SOURCES:
+    for folder, source in chosen["lib_sources"]:
         if not (libdeps / folder / source).is_file():
             return False
     return True
 
 
-def vendor_host_compile_command(project: Path, libdeps: Path, output: Path) -> list[str]:
+def vendor_host_compile_command(project: Path, libdeps: Path, output: Path, profile: str = "bme280") -> list[str]:
     gxx = shutil.which("g++") or "g++"
+    chosen = vendor_profile(profile)
+    host = project / "test" / "vendor_host"
     includes = [
         "-I", str(project / "test" / "vendor_host"),
         "-I", str(project / "src"),
     ]
-    for name in VENDOR_LIB_DIRS:
+    for name in chosen["lib_dirs"]:
         includes += ["-I", str(libdeps / name)]
     sources = [
         str(project / "src" / "main.cpp"),
-        str(project / "test" / "vendor_host" / "arduino_core.cpp"),
-        str(project / "test" / "vendor_host" / "Wire.cpp"),
-        str(project / "test" / "vendor_host" / "models.cpp"),
-        str(project / "test" / "vendor_host" / "vendor_harness.cpp"),
+        str(host / "arduino_core.cpp"),
+        str(host / "Wire.cpp"),
+        # Earlier revisions kept the SSD1306 model inside models.cpp; the benchmark can still score those.
+        *([str(host / "ssd1306_model.cpp")] if (host / "ssd1306_model.cpp").is_file() else []),
+        *(str(host / name) for name in chosen["model_sources"]),
+        str(host / chosen["harness"]),
     ]
-    for folder, source in VENDOR_LIB_SOURCES:
+    for folder, source in chosen["lib_sources"]:
         sources.append(str(libdeps / folder / source))
     return [
         gxx, "-std=c++17", "-Wall", "-Wextra", "-Wno-macro-redefined",
@@ -119,8 +109,8 @@ def _not_run_vendor(reason: str) -> dict:
     }
 
 
-def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
-    if not vendor_libs_available(libdeps):
+def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280") -> tuple[dict, bytes]:
+    if not vendor_libs_available(libdeps, profile):
         return _not_run_vendor("not run: libraries not available"), b""
     gxx = shutil.which("g++")
     if not gxx:
@@ -131,7 +121,7 @@ def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
     version = _execute([gxx, "--version"], timeout=30)
     compiler = version.stdout.decode(errors="replace").splitlines()[0] if version.stdout else ""
     binary = project / "vendor_harness"
-    command = vendor_host_compile_command(project, libdeps, binary)
+    command = vendor_host_compile_command(project, libdeps, binary, profile)
     compiled = _execute(command, cwd=project, timeout=120)
     log = compiled.stdout + compiled.stderr
     if compiled.returncode != 0:
@@ -154,7 +144,7 @@ def _run_vendor_host(project: Path, libdeps: Path | None) -> tuple[dict, bytes]:
         report = _not_run_vendor(reason)
         report["compiler"] = compiler
         return report, log
-    reason = _scenario_failure(scenarios, VENDOR_SCENARIOS, ran.returncode)
+    reason = _scenario_failure(scenarios, vendor_profile(profile)["scenarios"], ran.returncode)
     findings = [row for row in scenarios if isinstance(row, dict) and row.get("finding")]
     passed = not reason
     return {

@@ -1,0 +1,781 @@
+{
+  "claim_boundary": "Mutation benchmark of host application-logic tests against a modelled bus. It is not silicon, ESP32 timing, vendor-library behaviour or electrical evidence, and it authorizes nothing.",
+  "detectors": {
+    "core_lane": "all 15 core scenarios (does not compile main.cpp)",
+    "vendor_healthy": [
+      "display_at_0x3D_only",
+      "sensor_0x76_only",
+      "sensor_default_address_0x77_with_display_0x3C"
+    ],
+    "vendor_matrix": "all 11 vendor-host scenarios",
+    "vendor_smoke": [
+      "sensor_default_address_0x77_with_display_0x3C"
+    ]
+  },
+  "firmware_authorized": false,
+  "lane": "adapter",
+  "mutant_set": "all",
+  "mutants": [
+    {
+      "blind_spot": "",
+      "bug_class": "identity",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_chip_id_wrong",
+      "outcome": "KILLED",
+      "story": "rejects a real BME280 by comparing against the BMP280 id"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "identity",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer"
+      ],
+      "id": "adapter_chip_id_unchecked",
+      "outcome": "KILLED",
+      "story": "accepts any chip that answers at the address"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "im_update_never_clears"
+      ],
+      "id": "adapter_init_wait_unbounded",
+      "outcome": "KILLED",
+      "story": "the status wait loses its 50 ms bound and can spin forever"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "im_update_never_clears"
+      ],
+      "id": "adapter_init_wait_too_long",
+      "outcome": "KILLED",
+      "story": "the status wait is bounded at 5 s instead of 50 ms"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "transient_data_nack"
+      ],
+      "id": "adapter_reset_write_failure_ignored",
+      "outcome": "KILLED",
+      "story": "a NACKed soft-reset write is ignored"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "transient_data_nack"
+      ],
+      "id": "adapter_status_read_failure_ignored",
+      "outcome": "KILLED",
+      "story": "a failed status read is treated as ready"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bus-errors",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "transient_data_nack"
+      ],
+      "id": "adapter_chip_id_read_failure_ignored",
+      "outcome": "KILLED",
+      "story": "a failed chip-id read is treated as a match"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "units",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "adapter_pressure_unit_wrong",
+      "outcome": "KILLED",
+      "story": "pressure is reported in pascal while the application expects hPa"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_absent",
+        "display_at_0x3D_only",
+        "transient_data_nack"
+      ],
+      "id": "adapter_display_presence_not_checked",
+      "outcome": "KILLED",
+      "story": "any address is treated as a display because begin() cannot detect one"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_display_reinitialises_bus",
+      "outcome": "KILLED",
+      "story": "the display library calls Wire.begin() again and resets the pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_recovery_loses_pins",
+      "outcome": "KILLED",
+      "story": "bus recovery restarts Wire on the default pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_setup_loses_pins",
+      "outcome": "KILLED",
+      "story": "setup starts Wire on the default pins"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "pins",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_setup_pins_swapped",
+      "outcome": "KILLED",
+      "story": "setup swaps SDA and SCL"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "In arduino-esp32 2.0.17 (espressif32@6.10.0) the TwoWire constructor sets _timeOutMillis(50) (Wire.cpp:48), so the explicit 50 ms restates the default. Valid only for that framework version.",
+      "failing_scenarios": [],
+      "id": "adapter_setup_no_timeout",
+      "outcome": "SURVIVED",
+      "story": "setup never sets the Wire timeout"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bounded-wait",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "TwoWire::end() in arduino-esp32 2.0.17 frees buffers and deinitialises the bus but never touches _timeOutMillis, so re-applying 50 ms after end() is redundant. Valid only for that framework version.",
+      "failing_scenarios": [],
+      "id": "adapter_recovery_no_timeout",
+      "outcome": "SURVIVED",
+      "story": "bus recovery never re-applies the Wire timeout"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x77_with_display_0x3C"
+      ],
+      "id": "adapter_display_never_flushed",
+      "outcome": "KILLED",
+      "story": "the frame is built but display() is never called"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x77_with_display_0x3C"
+      ],
+      "id": "adapter_display_not_cleared",
+      "outcome": "KILLED",
+      "story": "the previous frame is never cleared before drawing"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "adapter_log_without_newline",
+      "outcome": "KILLED",
+      "story": "serial lines are written without a terminator"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bme280-setup",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "adapter_sampling_never_configured",
+      "outcome": "KILLED",
+      "story": "the sampling mode is never set, leaving the sensor in sleep mode"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bme280-setup",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "adapter_coefficients_not_read",
+      "outcome": "KILLED",
+      "story": "calibration coefficients are never read"
+    },
+    {
+      "blind_spot": "The model has no start-up window in which the chip does not answer after a soft reset, so the settling delay cannot matter to it. The datasheet specifies a start-up time; silicon may enforce it.",
+      "bug_class": "bme280-setup",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [],
+      "id": "adapter_reset_settle_removed",
+      "outcome": "SURVIVED",
+      "story": "no settling delay after the soft reset"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "resources",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "sensor_absent_then_appears"
+      ],
+      "id": "adapter_old_device_leaked",
+      "outcome": "KILLED",
+      "story": "each begin leaks the previous I2C device object"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "physical",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "adapter_bus_speed_changed",
+      "outcome": "KILLED",
+      "story": "the bus runs at 400 kHz instead of 100 kHz"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "bme280-setup",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "transient_data_nack"
+      ],
+      "id": "heldout_adapter_humidity_before_temperature",
+      "outcome": "KILLED",
+      "story": "humidity and pressure are compensated before temperature, so they use a stale t_fine"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x77_with_display_0x3C"
+      ],
+      "id": "heldout_adapter_fourth_line_dropped",
+      "outcome": "KILLED",
+      "story": "the fourth display line is never printed"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "display",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only",
+        "sensor_default_address_0x77_with_display_0x3C"
+      ],
+      "id": "heldout_adapter_text_size_doubled",
+      "outcome": "KILLED",
+      "story": "the display text is drawn at size 2"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "display_at_0x3D_only"
+      ],
+      "id": "heldout_adapter_display_address_fixed",
+      "outcome": "KILLED",
+      "story": "the display is always initialised at 0x3C whatever address answered"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "addressing",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run",
+        "wire_pins_stay_explicit"
+      ],
+      "id": "heldout_adapter_sensor_address_fixed",
+      "outcome": "KILLED",
+      "story": "the sensor driver is always bound to 0x76 whatever address was probed"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "grammar",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_absent",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack"
+      ],
+      "id": "heldout_adapter_log_duplicated",
+      "outcome": "KILLED",
+      "story": "every serial line is written twice"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": true,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "wire_pins_stay_explicit"
+      ],
+      "id": "heldout_adapter_bus_recovery_never_ends_bus",
+      "outcome": "KILLED",
+      "story": "bus recovery restarts Wire without ending it first, so the peripheral is never reset"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "recovery",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": false,
+        "vendor_matrix": false,
+        "vendor_smoke": false
+      },
+      "equivalent_reason": "SensorApp discards bus_recover()'s result at both call sites with (void), so its value is unobservable.",
+      "failing_scenarios": [],
+      "id": "heldout_adapter_recovery_result_inverted",
+      "outcome": "SURVIVED",
+      "story": "bus_recover reports failure whatever happened"
+    },
+    {
+      "blind_spot": "",
+      "bug_class": "units",
+      "detail": "",
+      "detected_by": {
+        "core_lane": false,
+        "vendor_healthy": true,
+        "vendor_matrix": true,
+        "vendor_smoke": true
+      },
+      "equivalent_reason": "",
+      "failing_scenarios": [
+        "both_addresses_answer",
+        "display_at_0x3D_only",
+        "im_update_never_clears",
+        "sensor_0x76_only",
+        "sensor_absent_then_appears",
+        "sensor_default_address_0x77_with_display_0x3C",
+        "transient_data_nack",
+        "unplug_replug_mid_run"
+      ],
+      "id": "heldout_adapter_pressure_scale_wrong",
+      "outcome": "KILLED",
+      "story": "pressure is divided by 1000 instead of 100"
+    }
+  ],
+  "physical_correctness": "UNPROVEN",
+  "power_on_authorized": false,
+  "schema_version": "hardware_splicer.device_fault_matrix_benchmark.v1",
+  "summary": {
+    "by_bug_class": {
+      "addressing": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 1
+      },
+      "bme280-setup": {
+        "core_lane": 0,
+        "total": 4,
+        "vendor_healthy": 2,
+        "vendor_matrix": 3,
+        "vendor_smoke": 2
+      },
+      "bounded-wait": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 0,
+        "vendor_matrix": 2,
+        "vendor_smoke": 0
+      },
+      "bus-errors": {
+        "core_lane": 0,
+        "total": 3,
+        "vendor_healthy": 0,
+        "vendor_matrix": 3,
+        "vendor_smoke": 0
+      },
+      "display": {
+        "core_lane": 0,
+        "total": 5,
+        "vendor_healthy": 5,
+        "vendor_matrix": 5,
+        "vendor_smoke": 4
+      },
+      "grammar": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 2
+      },
+      "identity": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 1,
+        "vendor_matrix": 2,
+        "vendor_smoke": 1
+      },
+      "physical": {
+        "core_lane": 0,
+        "total": 1,
+        "vendor_healthy": 0,
+        "vendor_matrix": 1,
+        "vendor_smoke": 0
+      },
+      "pins": {
+        "core_lane": 0,
+        "total": 4,
+        "vendor_healthy": 0,
+        "vendor_matrix": 4,
+        "vendor_smoke": 0
+      },
+      "recovery": {
+        "core_lane": 0,
+        "total": 1,
+        "vendor_healthy": 0,
+        "vendor_matrix": 1,
+        "vendor_smoke": 0
+      },
+      "resources": {
+        "core_lane": 0,
+        "total": 1,
+        "vendor_healthy": 0,
+        "vendor_matrix": 1,
+        "vendor_smoke": 0
+      },
+      "units": {
+        "core_lane": 0,
+        "total": 2,
+        "vendor_healthy": 2,
+        "vendor_matrix": 2,
+        "vendor_smoke": 2
+      }
+    },
+    "known_host_model_blind_spots": [
+      "adapter_reset_settle_removed"
+    ],
+    "mutants_defined": 32,
+    "reviewed_equivalent": [
+      "adapter_setup_no_timeout",
+      "adapter_recovery_no_timeout",
+      "heldout_adapter_recovery_result_inverted"
+    ],
+    "scored_mutants": 29,
+    "stillborn_compile_errors": [],
+    "survivors_without_review": [],
+    "tiers": {
+      "core_lane": {
+        "killed": 0,
+        "of": 29,
+        "score": 0.0
+      },
+      "vendor_healthy": {
+        "killed": 14,
+        "of": 29,
+        "score": 0.483
+      },
+      "vendor_matrix": {
+        "killed": 28,
+        "of": 29,
+        "score": 0.966
+      },
+      "vendor_smoke": {
+        "killed": 12,
+        "of": 29,
+        "score": 0.414
+      }
+    }
+  },
+  "target": "esp32_oled_bme280_usb Arduino adapter (src/main.cpp) against pinned Adafruit libraries and a modelled I2C bus",
+  "vendor_host_override": null
+}

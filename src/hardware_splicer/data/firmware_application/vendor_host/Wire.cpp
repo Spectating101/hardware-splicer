@@ -121,6 +121,9 @@ uint8_t TwoWire::do_write(uint8_t address, const uint8_t *data, size_t len, bool
     if (g_i2c_bus.next_write_result >= 0) {
         result = static_cast<uint8_t>(g_i2c_bus.next_write_result);
         g_i2c_bus.next_write_result = -1;
+    } else if (g_i2c_bus.remaining_data_nacks > 0 && len > 0 && g_i2c_bus.data_nack_skip > 0) {
+        g_i2c_bus.data_nack_skip -= 1;
+        result = (!dev || !dev->present()) ? 2 : dev->on_write(data, len);
     } else if (g_i2c_bus.remaining_data_nacks > 0 && len > 0) {
         g_i2c_bus.remaining_data_nacks -= 1;
         result = 3;
@@ -158,6 +161,12 @@ size_t TwoWire::do_read(uint8_t address, uint8_t *data, size_t len) {
 }
 
 uint8_t TwoWire::endTransmission(bool sendStop) {
+    // Wire.cpp 2.0.17 endTransmission() 447-450: the buffers exist only between begin() and end(); without them
+    // "NULL TX buffer pointer" is logged and 4 returned. Nothing reaches the bus.
+    if (!inited_) {
+        tx_buffer_.clear();
+        return 4;
+    }
     // Wire.cpp 2.0.17: sendStop false marks nonStop and returns 0 without i2cWrite.
     if (!sendStop) {
         non_stop_ = true;
@@ -170,6 +179,11 @@ uint8_t TwoWire::endTransmission(bool sendStop) {
 
 size_t TwoWire::requestFrom(uint16_t address, size_t size, bool sendStop) {
     (void)sendStop;
+    // Wire.cpp 2.0.17 requestFrom() 480-483: no buffers (never begun, or ended) returns 0.
+    if (!inited_) {
+        rx_buffer_.clear();
+        return 0;
+    }
     rx_buffer_.assign(size, 0);
     rx_index_ = 0;
     size_t got = 0;
@@ -202,6 +216,7 @@ uint8_t TwoWire::requestFrom(int address, int size, int sendStop) {
 }
 
 size_t TwoWire::write(uint8_t data) {
+    if (!inited_) return 0;  // Wire.cpp 2.0.17 write() 525-528: NULL TX buffer pointer
     if (tx_buffer_.size() >= I2C_BUFFER_LENGTH) return 0;
     tx_buffer_.push_back(data);
     return 1;

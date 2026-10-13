@@ -11,12 +11,14 @@ from pathlib import Path
 from typing import Any
 
 from .device_firmware import PLATFORM, resolve_shared_i2c_bus, _json, _sha
+from .device_parts import available_parts, render_fixtures, render_traits
 from .device_plan import DevicePlanError, build_device_plan, module_library
+from .device_vendor_profiles import vendor_files, vendor_profile
 
 SCHEMA = "hardware_splicer.device_application_proposal.v1"
 BME280_ID = "adafruit-bme280-stemma-qt"
 SSD1306_ID = "ssd1306-096-i2c"
-SUPPORTED_I2C = {BME280_ID, SSD1306_ID}
+SUPPORTED_I2C = {BME280_ID, SSD1306_ID}  # kept for callers; sensors now come from the part descriptors
 TEMPLATE_DIR = Path(__file__).resolve().parent / "data" / "firmware_application"
 BOUNDARY = (
     "Host-testable application proposal. No flashing, powering, measurements or physical authorization. "
@@ -41,6 +43,38 @@ NON_CLAIMS = [
 ]
 
 
+NO_VENDOR_BOUNDARY = (
+    "No vendor-host lane exists for this part: there is no register-level bus model, so its Arduino adapter "
+    "was not tested against a modelled bus. The host scenarios cover application logic only."
+)
+
+
+def _boundary(part: dict[str, Any]) -> str:
+    """The claim boundary, without naming libraries this package does not use."""
+    if part["adapter"]["vendor_host"]:
+        return BOUNDARY
+    return BOUNDARY.replace("They do not test Adafruit libraries,", "They do not test the Arduino adapter,")
+
+
+def _non_claims(part: dict[str, Any]) -> list[str]:
+    claims = list(NON_CLAIMS)
+    if part["identity"] is None:
+        claims = [
+            c.replace("the chip-id match is reported", "the acknowledging address is reported") for c in claims
+        ]
+    if not part["adapter"]["vendor_host"]:
+        claims = [c for c in claims if not c.startswith("Vendor-host scenarios")]
+        claims = [c.replace("Does not test the Adafruit libraries, the Wire driver,", "Does not test the Arduino adapter, the Wire driver,") for c in claims]
+        claims.append(NO_VENDOR_BOUNDARY)
+    if part["identity"] is None:
+        claims.append(f"The {part['chip']} has no ID register: a chip that acknowledges a declared address cannot be told from one.")
+    note = vendor_profile(part["adapter"]["vendor_profile"]).get("model_note") if part["adapter"]["vendor_host"] else None
+    if note:
+        claims.append(note)
+    claims.append("The part descriptor is a cited extract and stays UNREVIEWED_EXTRACT until a person reviews it.")
+    return claims
+
+
 def _template(name: str) -> str:
     return (TEMPLATE_DIR / name).read_text(encoding="utf-8")
 
@@ -52,14 +86,9 @@ def _fill(template: str, mapping: dict[str, str]) -> str:
     return text
 
 
-def _vendor_host_files() -> dict[str, bytes]:
-    bundled: dict[str, bytes] = {}
+def _vendor_host_files(profile: str) -> dict[str, bytes]:
     root = TEMPLATE_DIR / "vendor_host"
-    for path in sorted(root.rglob("*")):
-        if path.is_file():
-            rel = path.relative_to(TEMPLATE_DIR).as_posix()
-            bundled[f"test/{rel}"] = path.read_bytes()
-    return bundled
+    return {f"test/vendor_host/{name}": (root / name).read_bytes() for name in vendor_files(profile)}
 
 
 def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
@@ -79,26 +108,34 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     if mcu["module"] != "esp32-devkitc-v4":
         raise DevicePlanError("application source supports only the catalog ESP32-DevKitC V4")
     library = {m["id"]: m for m in module_library()["modules"]}
+    parts = available_parts()
     i2c_placed = [m for m in plan["modules"] if library[m["module"]].get("i2c")]
-    bme = [m for m in i2c_placed if m["module"] == BME280_ID]
-    other = [m for m in i2c_placed if m["module"] not in SUPPORTED_I2C]
-    if not bme:
+    sensors = [m for m in i2c_placed if m["module"] in parts]
+    other = [m for m in i2c_placed if m["module"] not in parts and m["module"] != SSD1306_ID]
+    names = " or ".join(part["chip"] for part in parts.values())
+    if not sensors:
         raise DevicePlanError(
-            "application source supports ESP32 + BME280 + optionally SSD1306 and needs a BME280 "
-            "breakout (adafruit-bme280-stemma-qt); the diagnostic export remains available for other parts"
+            f"application source supports ESP32 + a sensor breakout ({names}) + optionally SSD1306 and needs one "
+            f"of: {', '.join(sorted(parts))}; the diagnostic export remains available for other parts"
         )
-    if len(bme) > 1:
-        raise DevicePlanError("application source supports only one BME280 breakout")
-    if other:
+    if len(sensors) > 1:
         raise DevicePlanError(
-            "application source supports ESP32 + BME280 + optionally SSD1306; "
+            f"application source supports only one sensor breakout ({names}) plus optionally SSD1306; "
             "the diagnostic export remains available for other parts"
         )
+    if other:
+        raise DevicePlanError(
+            f"application source supports ESP32 + one sensor ({names}) + optionally SSD1306; "
+            "the diagnostic export remains available for other parts"
+        )
+    part = parts[sensors[0]["module"]]
     bindings, declarations = resolve_shared_i2c_bus(
         plan,
         bus_error="application source requires exactly one shared SDA GPIO and one distinct SCL GPIO",
     )
-    sensor = next(d for d in declarations if d["library_id"] == BME280_ID)
+    sensor = next(d for d in declarations if d["library_id"] == part["library_id"])
+    if list(sensor["possible_addresses"]) != list(part["addresses"]):
+        raise DevicePlanError("the part descriptor's addresses disagree with the catalog; refusing to export")
     display = next((d for d in declarations if d["library_id"] == SSD1306_ID), None)
     sensor_addrs = ", ".join(sensor["possible_addresses"])
     if display:
@@ -109,8 +146,9 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         display_decl = ""
         display_ptr = "nullptr"
         display_count = "0"
+    descriptor_bytes = _json(part)
     main = _fill(
-        _template("main.cpp.tmpl"),
+        _template(part["adapter"]["template"]),
         {
             "SDA": str(bindings["sda"]["gpio"]),
             "SCL": str(bindings["scl"]["gpio"]),
@@ -122,18 +160,24 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     )
     files = {
         "src/app_core.h": _template("app_core.h").encode(),
+        "src/part_traits.h": render_traits(part).encode(),
         "src/main.cpp": main.encode(),
-        "platformio.ini": _template("platformio.ini.tmpl").encode(),
+        "platformio.ini": _fill(
+            _template("platformio.ini.tmpl"), {"LIB_DEPS": "\n".join("    " + lib for lib in part["adapter"]["lib_deps"])}
+        ).encode(),
         "test/host/harness.cpp": _template("host_harness.cpp").encode(),
+        "test/host/part_fixtures.h": render_fixtures(part).encode(),
         "test/host/README.md": _template("host_README.md").encode(),
+        "PART_DESCRIPTOR.json": descriptor_bytes,
     }
-    files.update(_vendor_host_files())
+    if part["adapter"]["vendor_host"]:
+        files.update(_vendor_host_files(part["adapter"]["vendor_profile"]))
     files.update({
         "DEVICE_SPEC.json": spec_bytes,
         "DEVICE_PLAN.json": _json(plan),
         "README.md": (
-            "# Host-testable BME280 application proposal\n\n"
-            + BOUNDARY
+            f"# Host-testable {part['chip']} application proposal\n\n"
+            + _boundary(part)
             + "\n\n"
             "This package is a proposal. firmware_authorized and power_on_authorized are false. "
             "physical_correctness is UNPROVEN.\n\n"
@@ -141,17 +185,25 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             "`g++ -std=c++17 -Wall -Wextra -Werror -I src test/host/harness.cpp -o harness && ./harness`\n\n"
             "Optional compile with PlatformIO Core 6.1.18: `pio run -e application`. Do not upload from this package.\n"
             "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n"
-            "Addresses are declared alternatives. The application reports the chip-id match; it does not assume 0x76 or 0x3C.\n"
-            "Review exact hardware, supplies, grounds and pull-ups separately before any physical operation.\n"
+            + (
+                "Addresses are declared alternatives. The application reports the chip-id match; it does not assume 0x76 or 0x3C.\n"
+                if part["identity"]
+                else f"Addresses are declared alternatives. The {part['chip']} has no ID register, so the application reports which "
+                "address acknowledged and cannot confirm the chip's identity.\n"
+            )
+            + "Review exact hardware, supplies, grounds and pull-ups separately before any physical operation.\n"
             "The diagnostic export remains available for other catalog parts.\n\n"
-            + VENDOR_HOST_BOUNDARY
-            + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
+            + (
+                VENDOR_HOST_BOUNDARY + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
+                if part["adapter"]["vendor_host"]
+                else NO_VENDOR_BOUNDARY + "\n"
+            )
         ).encode(),
     })
     metadata = {
         "schema_version": SCHEMA,
-        "claim_boundary": BOUNDARY,
-        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY,
+        "claim_boundary": _boundary(part),
+        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY if part["adapter"]["vendor_host"] else NO_VENDOR_BOUNDARY,
         "status": "HOST_TESTABLE_PROPOSAL",
         "compilation": "NOT_RUN",
         "behaviour_tests": "NOT_RUN",
@@ -161,7 +213,16 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "target": {"platform": PLATFORM, "board": "esp32dev", "framework": "arduino"},
         "pins": bindings,
         "declared_devices": declarations,
-        "non_claims": list(NON_CLAIMS),
+        "non_claims": _non_claims(part),
+        "part": {
+            "library_id": part["library_id"],
+            "chip": part["chip"],
+            "review_status": part["review_status"],
+            "descriptor_sha256": _sha(descriptor_bytes),
+            "identity_check": part["identity"] is not None,
+            "vendor_host_supported": part["adapter"]["vendor_host"],
+            "vendor_profile": part["adapter"].get("vendor_profile"),
+        },
         "spec_sha256": _sha(files["DEVICE_SPEC.json"]),
         "plan_sha256": _sha(files["DEVICE_PLAN.json"]),
         "files": {name: {"sha256": _sha(data), "size_bytes": len(data)} for name, data in sorted(files.items())},

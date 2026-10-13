@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -82,7 +83,8 @@ def test_runtime_http_auth_validation_and_no_project_mutation(monkeypatch, tmp_p
 
 def test_real_vendor_execution_when_server_pinned_libraries_are_available(monkeypatch):
     root = Path(__file__).resolve().parents[1] / ".cache/hardware-splicer/device-application"
-    choices = sorted(root.glob("*/project/.pio/libdeps/application"))
+    configured = os.environ.get("HS_VENDOR_LIBS", "").strip()
+    choices = [Path(configured)] if configured else sorted(root.glob("*/project/.pio/libdeps/application"))
     if not choices:
         pytest.skip("pinned vendor libraries not available")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
@@ -117,7 +119,7 @@ def test_sensor_only_export_does_not_claim_the_display_vendor_fixture_was_tested
     spec["connections"] = [row for row in spec["connections"] if not row["from"].startswith("display.")]
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_VENDOR_LIBS", "/operator-configured-path")
-    monkeypatch.setattr(runtime, "_vendor_manifest", lambda _: {})
+    monkeypatch.setattr(runtime, "_vendor_manifest", lambda *_: {})
     monkeypatch.setattr(runtime, "_run_vendor_host", lambda *_: pytest.fail("display fixture must not run"))
     monkeypatch.setattr(runtime, "_run_host", lambda _: ({"pass": True, "scenarios": []}, b""))
     result = runtime.run_device_application(spec)
@@ -143,7 +145,7 @@ def test_vendor_manifest_hashes_the_private_bytes_used_by_the_compiler(monkeypat
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_VENDOR_LIBS", str(tmp_path))
     monkeypatch.setattr(runtime, "_run_host", lambda _: ({"pass": True, "scenarios": []}, b""))
-    def vendor(project, frozen):
+    def vendor(project, frozen, profile):
         assert frozen != tmp_path
         for name in runtime.VENDOR_PINS:
             (tmp_path / name / "fixture.cpp").write_text("cache changed after capture")

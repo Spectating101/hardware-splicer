@@ -90,3 +90,26 @@ test('later faults and stale readings do not inherit an earlier boot success', a
   await compare(page, 'BOOT sensor=0x77 display=0x3C\nT=2000 STATE=FAULT_SENSOR_READ\nRECOVERED\nT=4000 STATE=OK TEMP_C=21.50 HUM_PCT=45.0 PRES_HPA=1013.3');
   await expect(sensor).toHaveAttribute('data-status', 'acknowledged');
 });
+
+test('BH1750 observations report presence, later faults and recovery without claiming identity', async ({ page }) => {
+  await open(page);
+  const spec = JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
+  spec.modules.find((module) => module.id === 'sensor').module = 'adafruit-bh1750-stemma-qt';
+  const rename = { 'sensor.Vin': 'sensor.VIN', 'sensor.SCK': 'sensor.SCL', 'sensor.SDI': 'sensor.SDA' };
+  spec.connections = spec.connections.map((wire) => ({
+    from: Object.entries(rename).reduce((value, [from, to]) => value.replace(from, to), wire.from),
+    to: Object.entries(rename).reduce((value, [from, to]) => value.replace(from, to), wire.to),
+  }));
+  await page.getByTestId('device-spec-editor').fill(JSON.stringify(spec));
+  await page.getByTestId('device-spec-apply').click();
+  await expect(page.getByTestId('device-application-download')).toBeEnabled({ timeout: 40000 });
+  const sensor = page.getByTestId('device-scan-module').filter({ hasText: 'BH1750' });
+  await compare(page, 'BOOT sensor=0x23 display=0x3C\nT=0 STATE=OK LUX=227.0');
+  await expect(sensor).toHaveAttribute('data-status', 'acknowledged');
+  await expect(sensor).toContainText('not a chip identity');
+  await expect(sensor).not.toContainText('chip-id check');
+  await compare(page, 'BOOT sensor=0x23 display=0x3C\nT=2000 STATE=FAULT_SENSOR_READ');
+  await expect(sensor).toHaveAttribute('data-status', 'sensor_read_fault');
+  await compare(page, 'BOOT sensor=0x23 display=0x3C\nT=2000 STATE=FAULT_SENSOR_READ\nRECOVERED\nT=4000 STATE=OK LUX=227.0');
+  await expect(sensor).toHaveAttribute('data-status', 'acknowledged');
+});

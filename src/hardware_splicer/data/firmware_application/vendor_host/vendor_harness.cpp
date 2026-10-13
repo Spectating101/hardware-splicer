@@ -1,23 +1,8 @@
 // Host compile of the real Arduino adapter + pinned Adafruit sources against a
 // modelled I2C bus. A pass is not silicon, not the ESP32 Wire driver's timing,
 // and not electrical behaviour.
-#include "Arduino.h"
-#include "Wire.h"
 #include "models.h"
-#include <Adafruit_GFX.h>
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-#include <regex>
-#include <string>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <vector>
-
-extern void setup();
-extern void loop();
+#include "vendor_common.h"
 
 // Adafruit_BME280.cpp init(): delay(10) after reset, optional delay(10) per
 // isReadingCalibration poll, delay(100) after setSampling. Two successful
@@ -31,63 +16,6 @@ static constexpr uint32_t kLoopBudgetMs = 2 * (10 + 100) + 2 * 10 + 10;  // 250
 static constexpr double kTempTolC = 0.05;
 static constexpr double kPresTolHpa = 0.2;
 static constexpr double kHumTolPct = 0.3;
-
-static std::string json_escape(const std::string &text) {
-    std::string out;
-    out.reserve(text.size() + 8);
-    for (char ch : text) {
-        if (ch == '\\') out += "\\\\";
-        else if (ch == '"') out += "\\\"";
-        else if (ch == '\n') out += "\\n";
-        else out += ch;
-    }
-    return out;
-}
-
-static int count_exact(const std::vector<std::string> &lines, const std::string &want) {
-    int n = 0;
-    for (const auto &line : lines)
-        if (line == want) n += 1;
-    return n;
-}
-
-static int count_contains(const std::vector<std::string> &lines, const std::string &part) {
-    int n = 0;
-    for (const auto &line : lines)
-        if (line.find(part) != std::string::npos) n += 1;
-    return n;
-}
-
-static bool call_loop(uint32_t *elapsed = nullptr) {
-    sim_begin_loop();
-    try {
-        loop();
-    } catch (const WatchdogAbort &) {
-    }
-    if (elapsed) *elapsed = sim_loop_elapsed_ms();
-    const bool hung = g_sim_clock.watchdog_fired;
-    sim_end_loop();
-    return !hung;
-}
-
-static uint32_t g_max_loop_ms = 0;
-
-static bool tracked_loop() {
-    uint32_t elapsed = 0;
-    const bool ok = call_loop(&elapsed);
-    if (elapsed > g_max_loop_ms) g_max_loop_ms = elapsed;
-    return ok;
-}
-
-static void pump_to(uint32_t t_ms) {
-    while (millis() < t_ms) {
-        const uint32_t now = millis();
-        const uint32_t step = (t_ms - now > 50) ? 50 : (t_ms - now);
-        if (step == 0) break;
-        sim_advance_ms(step);
-        if (!tracked_loop()) return;
-    }
-}
 
 struct OkReading {
     uint32_t t_ms = 0;
@@ -151,33 +79,6 @@ static bool last_ok_lines(std::string &l1, std::string &l2, std::string &l3, std
     return true;
 }
 
-static bool framebuffer_matches(const Ssd1306Model &oled, const std::string &l1, const std::string &l2,
-                                const std::string &l3, const std::string &l4, std::string &detail) {
-    // Pixel compare, not raw buffer: GFXcanvas1 packs horizontally MSB-first
-    // (Adafruit_GFX.cpp:2077); SSD1306 packs vertically by page
-    // (Adafruit_SSD1306.cpp:678). Same four println() calls must light the same
-    // pixels.
-    GFXcanvas1 canvas(128, 64);
-    canvas.fillScreen(0);
-    canvas.setTextSize(1);
-    canvas.setTextColor(1);
-    canvas.setCursor(0, 0);
-    canvas.println(l1.c_str());
-    canvas.println(l2.c_str());
-    canvas.println(l3.c_str());
-    canvas.println(l4.c_str());
-    for (int y = 0; y < 64; ++y) {
-        for (int x = 0; x < 128; ++x) {
-            if (oled.pixel(x, y) != canvas.getPixel(x, y)) {
-                detail = "framebuffer pixels differ from GFXcanvas1 at " + std::to_string(x) + "," +
-                         std::to_string(y);
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 static bool sensor_reads_go_to(uint8_t addr, std::string &detail) {
     bool any = false;
     for (const auto &tx : g_i2c_bus.log) {
@@ -195,20 +96,6 @@ static bool sensor_reads_go_to(uint8_t addr, std::string &detail) {
         return false;
     }
     return true;
-}
-
-static bool default_begin_inited_bus() {
-    for (const auto &c : Wire.begin_calls()) {
-        if (c.default_args && c.actually_inited) return true;
-    }
-    return false;
-}
-
-static int default_begin_count() {
-    int n = 0;
-    for (const auto &c : Wire.begin_calls())
-        if (c.default_args) n += 1;
-    return n;
 }
 
 struct World {
@@ -231,12 +118,6 @@ static void plug_sensor(Bme280Model &m, const Bme280Calib &c) {
     synthetic_adc_a(gAdcT, gAdcP, gAdcH);
     m.plug(c, gAdcT, gAdcP, gAdcH);
 }
-
-struct Result {
-    bool pass = false;
-    std::string detail;
-    bool finding = false;
-};
 
 static Result scenario_sensor_default_address() {
     World w;
@@ -370,6 +251,7 @@ static Result scenario_sensor_absent_then_appears() {
     }
     const uint32_t retry_at[] = {1000, 3000, 7000, 15000};
     int prev = sensor_tx_count();
+    long live_after_second_retry = 0;
     for (uint32_t t : retry_at) {
         pump_to(t - 1);
         if (sensor_tx_count() != prev)
@@ -380,6 +262,11 @@ static Result scenario_sensor_absent_then_appears() {
         if (sensor_tx_count() <= prev)
             return {false, "no probe at backoff t=" + std::to_string(t), false};
         prev = sensor_tx_count();
+        if (t == 3000) live_after_second_retry = g_live_allocs;
+        if (t == 7000 && g_live_allocs > live_after_second_retry) {
+            return {false, "each failed retry leaked a heap block (" + std::to_string(g_live_allocs - live_after_second_retry) +
+                               " more live after the next retry); the application retries forever", false};
+        }
     }
     Result r;
     if (count_exact(Serial.lines(), "RECOVERED") < 1) {
@@ -424,7 +311,7 @@ static Result scenario_unplug_replug() {
     return r;
 }
 
-static Result scenario_both_addresses() {
+static Result both_addresses_case(int) {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
@@ -450,7 +337,44 @@ static Result scenario_both_addresses() {
     return r;
 }
 
-static Result scenario_transient_nack() {
+// A chip that answers at 0x77 but identifies as something else (0x58 is a BMP280's id) is not a second BME280:
+// the real sensor at 0x76 must still be chosen, with no ambiguity.
+static Result decoy_chip_case(int) {
+    World w;
+    w.attach();
+    plug_sensor(w.bme77, synthetic_calib_a());
+    w.bme77.set_chip_id(0x58);
+    int32_t t, p, h;
+    synthetic_adc_b(t, p, h);
+    w.bme76.plug(synthetic_calib_b(), t, p, h);
+    w.oled3c.plug();
+    setup();
+    if (!tracked_loop()) return {false, "watchdog during boot", false};
+    pump_to(2500);
+    Result r;
+    if (count_contains(Serial.lines(), "FAULT_AMBIGUOUS_ADDRESS") != 0) {
+        r.detail = "a chip with the wrong identity was counted as a second BME280";
+        return r;
+    }
+    if (count_contains(Serial.lines(), "BOOT sensor=0x76 display=0x3C") != 1) {
+        r.detail = "the real BME280 at 0x76 was not chosen beside a wrong-identity chip at 0x77";
+        return r;
+    }
+    if (!readings_match_oracle(w.bme76, r.detail)) return r;
+    r.pass = true;
+    return r;
+}
+
+static Result scenario_both_addresses() {
+    Result r = run_isolated(both_addresses_case, 0);
+    if (!r.pass) return r;
+    const Result decoy = run_isolated(decoy_chip_case, 0);
+    if (!decoy.pass) return decoy;
+    r.detail += "; a wrong-identity chip at the other address is not a second sensor";
+    return r;
+}
+
+static Result transient_read_case(int) {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
@@ -478,12 +402,55 @@ static Result scenario_transient_nack() {
     return r;
 }
 
+// A NACK on one of the first three data writes of the sensor's init (chip-id pointer, soft reset, status pointer)
+// must fail that begin(), leave FAULT_SENSOR_MISSING at boot, and recover on the next retry. No display is
+// attached so the display's own init writes do not use up the NACK.
+static Result init_nack_case(int skip) {
+    static const char *const step[] = {"chip-id", "soft-reset", "status"};
+    World w;
+    w.attach();
+    plug_sensor(w.bme77, synthetic_calib_a());
+    g_i2c_bus.data_nack_skip = skip;
+    g_i2c_bus.remaining_data_nacks = 1;
+    setup();
+    if (!tracked_loop()) return {false, "watchdog during boot", false};
+    Result r;
+    if (count_exact(Serial.lines(), "T=0 STATE=FAULT_SENSOR_MISSING") != 1 || count_contains(Serial.lines(), "BOOT sensor=") != 0 ||
+        count_contains(Serial.lines(), "STATE=OK") != 0) {
+        r.detail = std::string("a NACK on the ") + step[skip] + " write must fail begin(), fault at boot and log no reading";
+        return r;
+    }
+    pump_to(3000);
+    if (count_exact(Serial.lines(), "RECOVERED") < 1) {
+        r.detail = std::string("the sensor did not recover after a transient ") + step[skip] + " NACK";
+        return r;
+    }
+    r.pass = true;
+    return r;
+}
+
+static Result scenario_transient_nack() {
+    Result r = run_isolated(transient_read_case, 0);
+    if (!r.pass) return r;
+    for (int skip = 0; skip < 3; ++skip) {
+        const Result c = run_isolated(init_nack_case, skip);
+        if (!c.pass) return c;
+    }
+    r.detail += "; a NACK on the chip-id, reset or status write at boot faults, then recovers";
+    return r;
+}
+
 static Result scenario_wire_pins() {
     World w;
     w.attach();
     plug_sensor(w.bme77, synthetic_calib_a());
     w.oled3c.plug();
     setup();
+    // Read before any loop: Adafruit_SSD1306 restores the clock to 100 kHz after its own init, which would hide
+    // a different frequency requested by setup().
+    if (Wire.getClock() != 100000) {
+        return {false, "setup() requested " + std::to_string(Wire.getClock()) + " Hz, not the planned 100000 Hz", false};
+    }
     if (!tracked_loop()) return {false, "watchdog during boot", false};
     const int sda_boot = Wire.sda_pin();
     const int scl_boot = Wire.scl_pin();
@@ -527,6 +494,16 @@ static Result scenario_wire_pins() {
     }
     if (Wire.sda_pin() != explicit_sda || Wire.scl_pin() != explicit_scl) {
         r.detail = "pins after recovery are not the planned pins";
+        return r;
+    }
+    // Recovery exists to reset a stuck peripheral: begin() on an already-initialised bus is a no-op, so the
+    // adapter must end() first. Boot plus recovery means at least two explicit begin() calls that really initialised it.
+    int explicit_inits = 0;
+    for (const auto &c : Wire.begin_calls()) {
+        if (c.actually_inited && !c.default_args) explicit_inits += 1;
+    }
+    if (explicit_inits < 2) {
+        r.detail = "bus recovery did not re-initialise the bus: Wire.begin() ran on a bus that was never ended";
         return r;
     }
     r.pass = true;
@@ -630,32 +607,5 @@ static const char *kScenarios[] = {
 };
 
 int main(int argc, char **argv) {
-    if (argc >= 2 && argv[1][0] != '\0') {
-        const Result r = run_named(argv[1]);
-            std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\"%s}\n", argv[1],
-                    r.pass ? "true" : "false", json_escape(r.detail).c_str(),
-                    r.finding ? ",\"finding\":true" : "");
-        std::fflush(stdout);
-        return r.finding ? 0 : (r.pass ? 0 : 1);
-    }
-    bool all = true;
-    for (const char *name : kScenarios) {
-        const pid_t pid = fork();
-        if (pid < 0) {
-            std::fprintf(stderr, "fork failed\n");
-            return 1;
-        }
-        if (pid == 0) {
-            const Result r = run_named(name);
-            std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\"%s}\n", name,
-                        r.pass ? "true" : "false", json_escape(r.detail).c_str(),
-                        r.finding ? ",\"finding\":true" : "");
-            std::fflush(stdout);
-            _exit(r.finding ? 0 : (r.pass ? 0 : 1));
-        }
-        int status = 0;
-        waitpid(pid, &status, 0);
-        if (!(WIFEXITED(status) && WEXITSTATUS(status) == 0)) all = false;
-    }
-    return all ? 0 : 1;
+    return vendor_main(argc, argv, kScenarios, sizeof kScenarios / sizeof kScenarios[0], run_named);
 }

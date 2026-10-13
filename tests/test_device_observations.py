@@ -260,7 +260,11 @@ def test_application_lines_with_other_modules_say_nothing_about_them(tmp_path):
 def test_the_parser_matches_the_lines_the_application_actually_prints():
     from pathlib import Path
 
+    from hardware_splicer.device_parts import load_part, render_traits
+
+    # The engine prints the state lines; the reading line's format comes from the part's generated traits.
     core = (Path(__file__).resolve().parents[1] / "src/hardware_splicer/data/firmware_application/app_core.h").read_text()
+    core += render_traits(load_part("adafruit-bme280-stemma-qt"))
     for fragment in ('"BOOT sensor=0x%02X display=0x%02X"', '"BOOT sensor=0x%02X display=NONE"', '"T=%u STATE=%s"',
                      '"T=%u STATE=OK TEMP_C=%.2f HUM_PCT=%.1f PRES_HPA=%.1f"', 'hal_.log("DISPLAY MISSING")',
                      'hal_.log("RECOVERED")'):
@@ -312,3 +316,85 @@ def test_more_than_fifty_scans_keep_the_latest_not_the_first():
     result = check_device_observations(SPEC, _scan(0x3C, 0x77) * 50 + _scan(0x3C))
     assert len(result["scans"]) == 50
     assert _status(result)["sensor"] == "no_acknowledge"
+
+
+def _bh_spec():
+    from hardware_splicer.device_parts import example_spec_for_part
+
+    return example_spec_for_part("adafruit-bh1750-stemma-qt")
+
+
+def test_bh1750_readings_are_recognised_without_claiming_chip_identity():
+    result = check_device_observations(_bh_spec(), _app("BOOT sensor=0x23 display=0x3C", "T=0 STATE=OK LUX=227.0"))
+    sensor = next(m for m in result["modules"] if m["id"] == "sensor")
+    assert sensor["status"] == "acknowledged"
+    assert sensor["evidence"] == "application_presence_check"
+    assert "not a chip identity" in sensor["note"]
+    assert result["application"]["readings"] == 1
+    assert result["application"]["latest_state"] == "OK"
+    assert result["unrecognised_lines"] == 0
+    assert result["physical_correctness"] == "UNPROVEN"
+    assert result["firmware_authorized"] is False and result["power_on_authorized"] is False
+
+
+@pytest.mark.parametrize("state,status", [
+    ("FAULT_AMBIGUOUS_ADDRESS", "ambiguous"), ("FAULT_SENSOR_MISSING", "sensor_init_fault"),
+    ("FAULT_SENSOR_READ", "sensor_read_fault"), ("STALE", "stale"),
+])
+def test_bh1750_faults_are_not_masked_by_a_good_boot_or_scan(state, status):
+    text = _app("BOOT sensor=0x23 display=0x3C", f"T=2000 STATE={state}")
+    result = check_device_observations(_bh_spec(), text)
+    assert _status(result)["sensor"] == status
+    assert result["summary"]["consistent_with_declared_addresses"] is False
+    before_boot = check_device_observations(_bh_spec(), f"T=0 STATE={state}")
+    assert _status(before_boot)["sensor"] == status
+    scanned = check_device_observations(_bh_spec(), _scan(0x23, 0x3C, header=False) + text)
+    sensor = next(m for m in scanned["modules"] if m["id"] == "sensor")
+    assert sensor["application"]["agrees"] is False
+    assert scanned["summary"]["consistent_with_declared_addresses"] is False
+
+
+def test_bh1750_recovery_replaces_the_latest_fault_without_erasing_history():
+    result = check_device_observations(_bh_spec(), _app("BOOT sensor=0x5C display=0x3C", "T=2000 STATE=FAULT_SENSOR_READ",
+                                                      "RECOVERED", "T=4000 STATE=OK LUX=28067.0"))
+    assert _status(result)["sensor"] == "acknowledged"
+    assert result["application"]["latest_state"] == "OK"
+    assert result["application"]["states"]["FAULT_SENSOR_READ"] == 1
+
+
+@pytest.mark.parametrize("spec,line", [
+    (SPEC, "T=0 STATE=OK LUX=227.0"),
+    (_bh_spec(), READING),
+    (_bh_spec(), "T=0 STATE=OK LUX=227"),
+    (_bh_spec(), "T=0 STATE=OK LUX=227.0 TEMP_C=21.50"),
+])
+def test_application_reading_grammar_is_bound_to_the_planned_part(spec, line):
+    result = check_device_observations(spec, line)
+    assert result["application"] is None
+    assert result["unrecognised_lines"] == 1
+
+
+def test_a_fault_is_not_attributed_to_another_sensor_in_a_mixed_plan():
+    spec = copy.deepcopy(SPEC)
+    spec["modules"].append({"id": "light", "module": "adafruit-bh1750-stemma-qt"})
+    spec["connections"] += [{"from": "light.VIN", "to": "mcu.3V3"}, {"from": "light.GND", "to": "mcu.GND"},
+                            {"from": "light.SCL", "to": "mcu.IO22"}, {"from": "light.SDA", "to": "mcu.IO21"}]
+    result = check_device_observations(spec, _app("BOOT sensor=0x77 display=0x3C", "T=2000 STATE=FAULT_SENSOR_READ"))
+    assert _status(result)["sensor"] == "sensor_read_fault"
+    assert _status(result)["light"] == "not_assessed"
+    unbound = check_device_observations(spec, "T=2000 STATE=FAULT_SENSOR_READ")
+    assert _status(unbound)["sensor"] == _status(unbound)["light"] == "not_assessed"
+
+
+def test_bh1750_http_observations_preserve_faults_without_persisting_evidence(api, tmp_path):
+    before = sorted(str(p) for p in tmp_path.rglob("*"))
+    response = api.post("/v1/devices/observations", json={"spec": _bh_spec(),
+        "transcript": "BOOT sensor=0x23 display=0x3C\nT=0 STATE=OK LUX=227.0\nT=2000 STATE=FAULT_SENSOR_READ"})
+    assert response.status_code == 200
+    result = response.json()["observation"]
+    assert _status(result)["sensor"] == "sensor_read_fault"
+    assert result["application"]["readings"] == 1
+    assert result["provenance"] == "operator_supplied_text"
+    assert result["physical_correctness"] == "UNPROVEN"
+    assert result["firmware_authorized"] is False and result["power_on_authorized"] is False
+    assert sorted(str(p) for p in tmp_path.rglob("*")) == before
