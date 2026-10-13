@@ -52,6 +52,98 @@ class DevicePlanError(ValueError):
 # --- library --------------------------------------------------------------------------------------------------------------
 
 
+
+def _text_field(value: Any, label: str, limit: int = 600) -> None:
+    if not isinstance(value, str) or not value.strip() or len(value) > limit or has_hidden_characters(value):
+        raise RuntimeError(f"{label} must be text of 1 to {limit} characters without control or invisible characters")
+
+
+def _number_field(value: Any, label: str, *, positive: bool = False) -> float:
+    number = finite_number(value)
+    if number is None or isinstance(value, bool) or number < 0 or (positive and number <= 0):
+        raise RuntimeError(f"{label} must be a finite number{' above zero' if positive else ' of zero or more'}")
+    return number
+
+
+def _check_engineering(module: dict[str, Any], source_urls: list[str]) -> None:
+    """The figures the engineering review reads. Each carries its locator and a source that is one of the module's own."""
+
+    label = f"module {module['id']}"
+    extra = module.get("engineering_sources", [])
+    if not isinstance(extra, list) or not all(isinstance(s, dict) and isinstance(s.get("url"), str) and isinstance(s.get("label"), str) for s in extra):
+        raise RuntimeError(f"{label} engineering_sources must be a list of objects with a label and a url")
+    # Sources the engineering figures cite beyond those the plan shows; kept apart so that adding a figure never changes a plan.
+    source_urls = list(source_urls) + [s["url"] for s in extra]
+    pullups = module.get("i2c", {}).get("pullups")
+    if pullups is not None:
+        if not isinstance(pullups, dict) or set(pullups) != {"ohm", "rail", "quote", "source"}:
+            raise RuntimeError(f"{label} i2c.pullups must have exactly ohm, rail, quote and source")
+        _number_field(pullups["ohm"], f"{label} i2c.pullups.ohm", positive=True)
+        if pullups["rail"] not in (None, "vin"):
+            raise RuntimeError(f"{label} i2c.pullups.rail must be null or \"vin\"")
+        _text_field(pullups["quote"], f"{label} i2c.pullups.quote")
+        if pullups["source"] not in source_urls:
+            raise RuntimeError(f"{label} i2c.pullups.source must equal one of this module's source urls")
+    engineering = module.get("engineering")
+    if engineering is None:
+        return
+    allowed = {"operating_temp_c", "supply_min_a", "loads", "antenna", "temperature_sensing", "power_stage", "gaps"}
+    if not isinstance(engineering, dict) or not set(engineering) <= allowed:
+        raise RuntimeError(f"{label} engineering may hold only {', '.join(sorted(allowed))}")
+
+    def cited(row: Any, name: str, fields: set[str]) -> dict[str, Any]:
+        if not isinstance(row, dict) or set(row) != fields:
+            raise RuntimeError(f"{label} engineering.{name} must have exactly {', '.join(sorted(fields))}")
+        _text_field(row["locator"], f"{label} engineering.{name}.locator")
+        if row["source"] not in source_urls:
+            raise RuntimeError(f"{label} engineering.{name}.source must equal one of this module's source urls")
+        return row
+
+    if "operating_temp_c" in engineering:
+        row = cited(engineering["operating_temp_c"], "operating_temp_c", {"min", "max", "kind", "locator", "source"})
+        low, high = finite_number(row["min"]), finite_number(row["max"])
+        if low is None or high is None or isinstance(row["min"], bool) or isinstance(row["max"], bool) or not -273 < low < high < 1000:
+            raise RuntimeError(f"{label} engineering.operating_temp_c needs a finite min below max")
+        if row["kind"] not in {"recommended", "absolute_maximum"}:
+            raise RuntimeError(f"{label} engineering.operating_temp_c.kind must be recommended or absolute_maximum")
+    if "supply_min_a" in engineering:
+        row = cited(engineering["supply_min_a"], "supply_min_a", {"value", "locator", "source"})
+        _number_field(row["value"], f"{label} engineering.supply_min_a.value", positive=True)
+    if "power_stage" in engineering:
+        row = cited(engineering["power_stage"], "power_stage", {"kind", "note", "locator", "source"})
+        if row["kind"] not in {"linear", "switching"}:
+            raise RuntimeError(f"{label} engineering.power_stage.kind must be linear or switching")
+        _text_field(row["note"], f"{label} engineering.power_stage.note")
+    if "antenna" in engineering:
+        row = cited(engineering["antenna"], "antenna", {"clearance_mm", "end", "quote", "locator", "source"})
+        _number_field(row["clearance_mm"], f"{label} engineering.antenna.clearance_mm", positive=True)
+        _text_field(row["quote"], f"{label} engineering.antenna.quote")
+        if row["end"] not in module.get("overhang_mm", {}):
+            raise RuntimeError(f"{label} engineering.antenna.end must name one of the module's overhang_mm keys")
+    if "temperature_sensing" in engineering:
+        row = cited(engineering["temperature_sensing"], "temperature_sensing", {"quote", "locator", "source"})
+        _text_field(row["quote"], f"{label} engineering.temperature_sensing.quote")
+    loads = engineering.get("loads", [])
+    if not isinstance(loads, list) or len(loads) > 12:
+        raise RuntimeError(f"{label} engineering.loads must be a list of at most 12 rows")
+    for index, row in enumerate(loads):
+        fields = {"mode", "kind", "typical_ma", "rail_v", "conditions", "locator", "source"} | ({"max_ma"} if isinstance(row, dict) and "max_ma" in row else set())
+        row = cited(row, f"loads[{index}]", fields)
+        _text_field(row["mode"], f"{label} engineering.loads[{index}].mode")
+        _text_field(row["conditions"], f"{label} engineering.loads[{index}].conditions")
+        if row["kind"] not in {"sustained", "peak"}:
+            raise RuntimeError(f"{label} engineering.loads[{index}].kind must be sustained or peak")
+        typical = _number_field(row["typical_ma"], f"{label} engineering.loads[{index}].typical_ma")
+        _number_field(row["rail_v"], f"{label} engineering.loads[{index}].rail_v", positive=True)
+        if "max_ma" in row and _number_field(row["max_ma"], f"{label} engineering.loads[{index}].max_ma") < typical:
+            raise RuntimeError(f"{label} engineering.loads[{index}].max_ma may not be below typical_ma")
+    gaps = engineering.get("gaps", [])
+    if not isinstance(gaps, list) or not all(isinstance(g, dict) and set(g) == {"field", "reason"} for g in gaps):
+        raise RuntimeError(f"{label} engineering.gaps must be a list of objects with field and reason")
+    for index, gap in enumerate(gaps):
+        _text_field(gap["field"], f"{label} engineering.gaps[{index}].field", 80)
+        _text_field(gap["reason"], f"{label} engineering.gaps[{index}].reason")
+
 @lru_cache(maxsize=1)
 def _library() -> dict[str, Any]:
     data = json.loads(LIBRARY_PATH.read_text(encoding="utf-8"))
@@ -115,6 +207,7 @@ def _library() -> dict[str, Any]:
                     raise RuntimeError(f"{quote_label}[{index}].{field} may not contain control or invisible characters")
             if quote["source"] not in source_urls:
                 raise RuntimeError(f"{quote_label}[{index}].source must equal one of this module's source urls")
+        _check_engineering(module, source_urls)
     return data
 
 

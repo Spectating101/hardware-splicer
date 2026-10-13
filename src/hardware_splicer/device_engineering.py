@@ -34,33 +34,17 @@ NOT_ASSESSED = "not_assessed"
 
 UM10204 = "NXP UM10204, I2C-bus specification and user manual"
 UM10204_URL = "https://www.nxp.com/docs/en/user-guide/UM10204.pdf"
-WROOM = "ESP32-WROOM-32E datasheet v2.1"
-WROOM_URL = "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
-LAYOUT_URL = "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html"
-BME280_URL = "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
 
-# Sourced figures, each with where it is.
-SOURCED = {
+# Facts about standards, not about any part. Facts about parts live in the module library (``engineering`` and
+# ``i2c.pullups``), each with the page or table it came from, so adding a part adds data and no code here.
+STANDARDS = {
     "i2c_tr_max_ns": (1000, "ns", f"{UM10204}, Table 10, Standard-mode tr maximum", UM10204_URL),
     "i2c_vol_max_v": (0.4, "V", f"{UM10204}, Table 10, VOL1 maximum at 3 mA sink", UM10204_URL),
     "i2c_iol_ma": (3.0, "mA", f"{UM10204}, Table 10, IOL minimum at VOL = 0.4 V", UM10204_URL),
     "i2c_cb_max_pf": (400, "pF", f"{UM10204}, Table 10, Cb maximum", UM10204_URL),
     "i2c_ci_max_pf": (10, "pF", f"{UM10204}, Table 10, Ci maximum per I/O pin", UM10204_URL),
     "i2c_rise_factor": (0.8473, "", f"{UM10204}, section 7.1, t2 - t1 = 0.8473 x RC", UM10204_URL),
-    "esp32_supply_min_a": (0.5, "A", f"{WROOM}, Table 14, current delivered by the external supply, minimum", WROOM_URL),
-    "esp32_wifi_tx_peak_ma": (379, "mA", f"{WROOM}, Table 16, 802.11b 20 MHz 1 Mbps at 19.5 dBm, peak, 3.3 V, 100 % duty", WROOM_URL),
-    "esp32_wifi_tx_avg_ma": (239, "mA", f"{WROOM}, Table 16, same row, average", WROOM_URL),
-    "esp32_wifi_rx_ma": (112, "mA", f"{WROOM}, Table 16, 802.11b/g/n 20 MHz receive", WROOM_URL),
-    "esp32_max_ambient_c": (85, "C", f"{WROOM}, Table 14, operating ambient temperature, 85 C version", WROOM_URL),
-    "bme280_max_ambient_c": (85, "C", "Bosch BME280 datasheet, operating range -40 to +85 C", BME280_URL),
-    "antenna_housing_clearance_mm": (
-        15, "mm", "Espressif ESP32 hardware design guidelines, PCB layout, module placement: "
-        "\"A clearance of at least 15 mm is recommended in all directions\" for the antenna inside a housing", LAYOUT_URL),
 }
-BME280_NOTE = (
-    "Bosch BME280 datasheet, note to the temperature figures: the value \"depends on the PCB temperature, sensor element "
-    "self-heating and ambient temperature and is typically above ambient temperature\""
-)
 GENERAL = "general practice, not from a datasheet"
 
 # Assumptions, with a range where the true value varies. All can be questioned and none is a measurement.
@@ -75,20 +59,22 @@ ASSUMED = {
     "bridge_limit_mm": (20.0, "mm", f"a span that prints cleanly without support on a tuned printer; {GENERAL}"),
     "pla_density_g_cm3": (1.24, "g/cm3", f"PLA; {GENERAL}"),
 }
-TEMPERATURE_SENSING = {"adafruit-bme280-stemma-qt": BME280_NOTE}
-SOURCED_LIMIT_C = {"esp32-devkitc-v4": "esp32_max_ambient_c", "adafruit-bme280-stemma-qt": "bme280_max_ambient_c"}
-PEAK_CURRENT_MA = {"esp32-devkitc-v4": "esp32_wifi_tx_peak_ma"}
-KNOWN_PULLUP = re.compile(r"(\d+)\s*k(?:Ω|ohm|Ohm)", re.IGNORECASE)
+SOURCED = STANDARDS  # kept so callers and tests can still list the fixed, sourced constants
 
 
 def _src(key: str) -> dict[str, Any]:
-    value, unit, basis, url = SOURCED[key]
+    value, unit, basis, url = STANDARDS[key]
     return {"name": key, "value": value, "unit": unit, "basis": "sourced", "source": basis, "url": url}
 
 
 def _asm(key: str) -> dict[str, Any]:
     value, unit, basis = ASSUMED[key]
     return {"name": key, "value": list(value) if isinstance(value, tuple) else value, "unit": unit, "basis": "assumed", "source": basis}
+
+
+def _fact(module: dict[str, Any], name: str, value: Any, unit: str, locator: str, url: str) -> dict[str, Any]:
+    """A figure read from a module's library entry, with where in which document it was read."""
+    return {"name": f"{module['id']}.{name}", "value": value, "unit": unit, "basis": "sourced", "source": f"{module['name']}: {locator}", "url": url}
 
 
 def _check(check_id: str, title: str, status: str, summary: str, quantities: dict[str, Any], inputs: list[dict[str, Any]],
@@ -101,14 +87,19 @@ def _r(value: float, digits: int = 2) -> float:
     return round(float(value), digits)
 
 
-def _far_x(module: dict[str, Any]) -> float:
-    """The module's +x extent including an antenna that overhangs its board, as the plan's own antenna finding measures it."""
+def _far_x(module: dict[str, Any], key: str = "antenna_end") -> float:
+    """The module's +x extent including an end that overhangs its board, as the plan's own antenna finding measures it."""
 
-    return module["box"]["x1"] + module.get("overhang_mm", {}).get("antenna_end", 0.0)
+    return module["box"]["x1"] + module.get("overhang_mm", {}).get(key, 0.0)
 
 
 def _roles(plan: dict[str, Any]) -> dict[tuple[str, str], list[str]]:
     return {(m["id"], p["id"]): p["roles"] for m in plan["modules"] for p in m["pins"]}
+
+
+def _entries(plan: dict[str, Any], library: dict[str, Any]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Each placed module with its library entry."""
+    return [(m, library[m["module"]]) for m in plan["modules"]]
 
 
 # --- electrical -------------------------------------------------------------------------------------------------------
@@ -123,39 +114,43 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
                 lines[line].append(wire)
     if not lines["sda"] or not lines["scl"]:
         return _check("i2c_bus", "I2C bus loading", NOT_ASSESSED, "No wired I2C bus in this plan.", {}, [])
-    i2c_modules = sorted({w[end]["module"] for line in lines.values() for w in line for end in ("from", "to")}
-                         - {m["id"] for m in plan["modules"] if m["kind"] == "mcu_board"})
+    mcu_ids = {m["id"] for m in plan["modules"] if m["kind"] == "mcu_board"}
+    i2c_modules = sorted({w[end]["module"] for line in lines.values() for w in line for end in ("from", "to")} - mcu_ids)
     by_id = {m["id"]: library[m["module"]] for m in plan["modules"]}
-    known, unknown = [], []
+    known, unknown, facts = [], [], []
     for ref in i2c_modules:
-        electrical = by_id[ref].get("electrical", {})
-        match = KNOWN_PULLUP.search(electrical.get("pullups_note", "")) if electrical.get("onboard_pullups") else None
-        (known if match else unknown).append((ref, int(match.group(1)) * 1000 if match else None))
+        pullups = by_id[ref].get("i2c", {}).get("pullups")
+        if pullups:
+            known.append((ref, int(pullups["ohm"])))
+            facts.append({"name": f"{ref}.pullups", "value": pullups["ohm"], "unit": "ohm", "basis": "sourced",
+                          "source": f"{by_id[ref]['name']}: \"{pullups['quote']}\"", "url": pullups["source"]})
+        else:
+            unknown.append(ref)
     wire_m = {line: sum(w["curve_mm"] for w in wires) / 1000 for line, wires in lines.items()}
-    ci = SOURCED["i2c_ci_max_pf"][0]
+    ci = STANDARDS["i2c_ci_max_pf"][0]
     pins_on_line = len(i2c_modules) + 1  # each module plus the controller
     low, high = ASSUMED["wire_pf_per_m"][0]
-    tr = SOURCED["i2c_tr_max_ns"][0] * 1e-9
-    k = SOURCED["i2c_rise_factor"][0]
-    vdd = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    vdd_v = library[vdd["module"]]["electrical"]["io_v"]
-    rp_min = (vdd_v - SOURCED["i2c_vol_max_v"][0]) / (SOURCED["i2c_iol_ma"][0] / 1000)
+    tr = STANDARDS["i2c_tr_max_ns"][0] * 1e-9
+    k = STANDARDS["i2c_rise_factor"][0]
+    mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
+    vdd_v = library[mcu["module"]]["electrical"]["io_v"]
+    rp_min = (vdd_v - STANDARDS["i2c_vol_max_v"][0]) / (STANDARDS["i2c_iol_ma"][0] / 1000)
     cb = {line: (_r(wire_m[line] * low + pins_on_line * ci, 1), _r(wire_m[line] * high + pins_on_line * ci, 1)) for line in lines}
     worst = max(cb[line][1] for line in lines)
     best = max(cb[line][0] for line in lines)
     inputs = [_src(key) for key in ("i2c_tr_max_ns", "i2c_vol_max_v", "i2c_iol_ma", "i2c_cb_max_pf", "i2c_ci_max_pf", "i2c_rise_factor")]
-    inputs += [_asm("wire_pf_per_m"), {"name": "io_v", "value": vdd_v, "unit": "V", "basis": "sourced", "source": "module library, ESP32-DevKitC V4 electrical.io_v"}]
+    inputs += [_asm("wire_pf_per_m"), {"name": "io_v", "value": vdd_v, "unit": "V", "basis": "sourced", "source": "module library, the controller's electrical.io_v"}, *facts]
     quantities: dict[str, Any] = {
         "wire_length_m": {line: _r(wire_m[line], 3) for line in lines},
-        "bus_capacitance_pf_estimate": {"low": _r(best, 1), "high": _r(worst, 1), "limit": SOURCED["i2c_cb_max_pf"][0]},
+        "bus_capacitance_pf_estimate": {"low": _r(best, 1), "high": _r(worst, 1), "limit": STANDARDS["i2c_cb_max_pf"][0]},
         "rp_min_ohm": _r(rp_min, 0),
         "pullups_known": [{"module": ref, "ohm": ohm} for ref, ohm in known],
-        "pullups_unknown": [ref for ref, _ in unknown],
+        "pullups_unknown": unknown,
     }
     if not known:
         return _check("i2c_bus", "I2C bus loading", NOT_ASSESSED,
                       f"No module on this bus states its pull-up value, so the rise time cannot be checked. Estimated bus capacitance is {best:g} to {worst:g} pF "
-                      f"against the {SOURCED['i2c_cb_max_pf'][0]} pF limit.", quantities, inputs,
+                      f"against the {STANDARDS['i2c_cb_max_pf'][0]} pF limit.", quantities, inputs,
                       ["Pull-ups on the modules that do not state them are unknown, and an unknown pull-up is not a pass."])
     rp_eff = 1 / sum(1 / ohm for _, ohm in known)
     tolerated = tr / (k * rp_eff) * 1e12
@@ -166,7 +161,7 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
               "Pull-ups on the modules that do not state a value are not included, so the real resistance is lower than shown."
               if unknown else "Only the stated pull-ups are counted; the controller's own are ignored."]
     if rp_eff < rp_min:
-        status, text = EXCEEDS, f"The stated pull-ups in parallel are {rp_eff:.0f} ohm, below the {rp_min:.0f} ohm a device can sink at {SOURCED['i2c_vol_max_v'][0]} V."
+        status, text = EXCEEDS, f"The stated pull-ups in parallel are {rp_eff:.0f} ohm, below the {rp_min:.0f} ohm a device can sink at {STANDARDS['i2c_vol_max_v'][0]} V."
     elif tolerated < best:
         status, text = EXCEEDS, f"The bus can carry {tolerated:.0f} pF at {rp_eff:.0f} ohm, but even the low estimate is {best:g} pF."
     elif tolerated < worst:
@@ -176,32 +171,73 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     return _check("i2c_bus", "I2C bus loading", status, text + " At 100 kHz (the rise time limit of Standard-mode).", quantities, inputs, limits)
 
 
+def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
+    """Currents from the rows the library sources. Sustained and peak mA are an upper bound on what a USB port supplies (every
+    row counted at 1:1, as a linear regulator would draw it); the watts are a floor on the heat (each row at the rail it was
+    measured on, with no conversion loss)."""
+
+    totals = {"sustained_ma": 0.0, "peak_ma": 0.0, "sustained_w": 0.0, "peak_w": 0.0}
+    missing: list[str] = []
+    facts: list[dict[str, Any]] = []
+    for module, entry in _entries(plan, library):
+        rows = entry.get("engineering", {}).get("loads", [])
+        if not rows:
+            missing.append(module["id"])
+            continue
+        sus = [r for r in rows if r["kind"] == "sustained"]
+        if sus:
+            top = max(sus, key=lambda r: r["typical_ma"])
+            totals["sustained_ma"] += top["typical_ma"]
+            totals["sustained_w"] += top["typical_ma"] * top["rail_v"] / 1000
+        hi = max(rows, key=lambda r: r.get("max_ma", r["typical_ma"]) * r["rail_v"])
+        totals["peak_ma"] += max(r.get("max_ma", r["typical_ma"]) for r in rows)
+        totals["peak_w"] += hi.get("max_ma", hi["typical_ma"]) * hi["rail_v"] / 1000
+        for row in rows:
+            facts.append(_fact(entry, f"load.{row['kind']}", row.get("max_ma", row["typical_ma"]), "mA",
+                               f"{row['mode']} at {row['rail_v']:g} V ({row['locator']}; {row['conditions']})", row["source"]))
+    return {**totals, "missing": missing, "facts": facts}
+
+
+def _power_stage(plan: dict[str, Any], library: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    mcu_entry = next(en for m, en in _entries(plan, library) if m["kind"] == "mcu_board")
+    return mcu_entry.get("engineering", {}).get("power_stage"), mcu_entry
+
+
 def _supply(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
-    known, unknown = [], []
-    for module in plan["modules"]:
-        key = PEAK_CURRENT_MA.get(module["module"])
-        (known if key else unknown).append((module["id"], key))
-    peak = sum(SOURCED[key][0] for _, key in known if key)
+    load = _loads(plan, library)
+    peak, missing = load["peak_ma"], load["missing"]
     budget = ASSUMED["usb_port_budget_ma"][0]
-    headroom = budget - peak
-    vin = ASSUMED["usb_input_v"][0]
-    quantities = {
-        "sourced_peak_ma": peak,
-        "usb_budget_ma": budget,
-        "headroom_for_unsourced_loads_ma": headroom,
-        "modules_without_a_sourced_current": [ref for ref, _ in unknown],
-        "if_linear_regulator_dissipation_w": _r((vin - 3.3) * peak / 1000, 2),
+    stage, mcu_entry = _power_stage(plan, library)
+    needs = mcu_entry.get("engineering", {}).get("supply_min_a")
+    inputs = [_asm("usb_port_budget_ma"), *load["facts"]]
+    if needs:
+        inputs.append(_fact(mcu_entry, "supply_min_a", needs["value"], "A", needs["locator"], needs["source"]))
+    if stage:
+        inputs.append(_fact(mcu_entry, "power_stage", stage["kind"], "", f"{stage['note']} ({stage['locator']})", stage["source"]))
+    quantities: dict[str, Any] = {
+        "sourced_peak_ma_upper_bound": _r(peak, 3), "sourced_sustained_ma_upper_bound": _r(load["sustained_ma"], 3), "usb_budget_ma": budget,
+        "headroom_for_unsourced_loads_ma_at_least": _r(budget - peak, 3),
+        "modules_without_a_sourced_current": missing,
+        "regulator": stage["kind"] if stage else "not stated",
     }
+    if needs:
+        quantities["controller_requires_supply_a"] = needs["value"]
     summary = (
-        f"The only sourced load is the ESP32 module's Wi-Fi transmit peak, {peak} mA. A {budget} mA port leaves {headroom} mA for everything "
-        f"without a sourced current ({', '.join(ref for ref, _ in unknown) or 'none'}), the USB bridge and the regulator's own draw."
+        f"The sourced loads total at most {peak:g} mA at the USB port at their peak. A {budget} mA port leaves at least {budget - peak:g} mA for everything without a sourced current "
+        f"({', '.join(missing) or 'none'}), the USB bridge and the regulator's own draw."
     )
     limits = [
-        "The module library holds no supply current for the display or the sensors, so they are not in the total.",
-        "The DevKitC user guide does not say whether its 3.3 V regulator is linear. If it is, it dissipates (5.0 - 3.3) V x the load current; the figure above is that case.",
+        "Each current is counted as it would be through a linear regulator, which is the most a port can be asked for; a switching regulator draws less.",
+        "Modules with no sourced supply current are not in the total; the module library says why under their data gaps.",
+        ("The controller board's regulator is switching (" + stage["note"] + ").") if stage and stage["kind"] == "switching"
+        else ("The controller board's regulator is linear (" + stage["note"] + ").") if stage
+        else "The controller board's regulator is not stated by its sources, so its losses are not modelled.",
     ]
-    return _check("supply_current", "USB supply current", ADVISORY, summary, quantities,
-                  [_src("esp32_supply_min_a"), _src("esp32_wifi_tx_peak_ma"), _asm("usb_port_budget_ma"), _asm("usb_input_v")], limits)
+    status = ADVISORY
+    if needs and needs["value"] * 1000 > budget:
+        status = EXCEEDS
+        summary = f"The controller needs a supply that can deliver {needs['value']:g} A and a standard port is assumed to give {budget} mA. " + summary
+    return _check("supply_current", "USB supply current", status, summary, quantities, inputs, limits)
 
 
 # --- thermal ----------------------------------------------------------------------------------------------------------
@@ -214,46 +250,59 @@ def _thermal(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, An
     h_low, h_high = ASSUMED["convection_w_per_m2k"][0]
     r_best, r_worst = 1 / (h_high * area_m2), 1 / (h_low * area_m2)
     vin = ASSUMED["usb_input_v"][0]
-    scenarios = {
-        "wifi_receive_continuous": SOURCED["esp32_wifi_rx_ma"][0],
-        "wifi_transmit_continuous_peak": SOURCED["esp32_wifi_tx_peak_ma"][0],
-    }
-    watts = {name: _r(vin * ma / 1000, 2) for name, ma in scenarios.items()}
+    load = _loads(plan, library)
+    missing, load_facts = load["missing"], load["facts"]
+    stage, mcu_entry = _power_stage(plan, library)
+    io_v = mcu_entry["electrical"]["io_v"]
+    limits_c, limit_facts, unknown_limit = [], [], []
+    for module, entry in _entries(plan, library):
+        row = entry.get("engineering", {}).get("operating_temp_c")
+        if row:
+            limits_c.append((module["id"], row["max"], row["kind"]))
+            limit_facts.append(_fact(entry, "operating_temp_max", row["max"], "C", row["locator"], row["source"]))
+        else:
+            unknown_limit.append(module["id"])
+    if not load_facts or not limits_c:
+        return [_check("enclosure_temperature", "Sealed-case temperature", NOT_ASSESSED,
+                       "Needs a sourced supply current and a sourced operating temperature for at least one module; the library has " + ("no current" if not load_facts else "no temperature limit") + " for this plan.",
+                       {"modules_without_a_sourced_current": missing, "modules_without_a_sourced_limit": unknown_limit}, [])]
+    # A floor: each current at the rail it was measured on. A known linear regulator adds its own drop; a switching or unstated one adds a loss that is not modelled.
+    linear_extra = {name: ((vin - io_v) * ma / 1000 if stage and stage["kind"] == "linear" else 0.0)
+                    for name, ma in (("sustained_load", load["sustained_ma"]), ("peak_load", load["peak_ma"]))}
+    watts = {"sustained_load": _r(load["sustained_w"] + linear_extra["sustained_load"], 3),
+             "peak_load": _r(load["peak_w"] + linear_extra["peak_load"], 3)}
     rises = {name: {"best_k": _r(w * r_best, 1), "worst_k": _r(w * r_worst, 1)} for name, w in watts.items()}
-    limits_c = []
-    for module in plan["modules"]:
-        key = SOURCED_LIMIT_C.get(module["module"])
-        if key:
-            limits_c.append((module["id"], SOURCED[key][0]))
-    lowest = min(limit for _, limit in limits_c)
+    lowest = min(limit for _, limit, _ in limits_c)
     hot = ASSUMED["ambient_c"][0][1]
-    worst_floor = hot + rises["wifi_transmit_continuous_peak"]["worst_k"]
+    worst_floor = hot + rises["peak_load"]["worst_k"]
     quantities = {
         "case_surface_area_m2": _r(area_m2, 4),
         "case_to_ambient_k_per_w": {"best": _r(r_best, 1), "worst": _r(r_worst, 1)},
-        "input_power_w": watts, "case_surface_rise_k": rises,
+        "load_ma": {"sustained": _r(load["sustained_ma"], 3), "peak": _r(load["peak_ma"], 3)},
+        "heat_floor_w": watts, "case_surface_rise_k": rises,
         "lowest_sourced_operating_limit_c": lowest,
-        "limits_by_module": [{"module": ref, "max_c": limit} for ref, limit in limits_c],
+        "limits_by_module": [{"module": ref, "max_c": limit, "kind": kind} for ref, limit, kind in limits_c],
+        "modules_without_a_sourced_limit": unknown_limit, "modules_without_a_sourced_current": missing,
         "worst_case_surface_floor_c": _r(worst_floor, 1),
     }
     status = EXCEEDS if worst_floor >= lowest else ADVISORY
     text = (
-        f"If every watt the board draws ends up inside this sealed case, its surface runs {rises['wifi_receive_continuous']['best_k']:g} to "
-        f"{rises['wifi_receive_continuous']['worst_k']:g} K above the room while receiving and {rises['wifi_transmit_continuous_peak']['best_k']:g} to "
-        f"{rises['wifi_transmit_continuous_peak']['worst_k']:g} K at the transmit peak. At {hot:g} C ambient that is a surface of at least "
+        f"If every watt the sourced loads consume, at the rail each was measured on, ends up inside this sealed case, its surface runs {rises['sustained_load']['best_k']:g} to "
+        f"{rises['sustained_load']['worst_k']:g} K above the room at the sourced sustained load and {rises['peak_load']['best_k']:g} to "
+        f"{rises['peak_load']['worst_k']:g} K at the sourced peak. At {hot:g} C ambient that is a surface of at least "
         f"{worst_floor:.0f} C against the lowest sourced limit of {lowest} C."
     )
     limits = ["This is the outside surface only. The air and the parts inside are hotter by an internal resistance this does not estimate, so a surface under the limit does not show the parts are.",
               "Input power is taken as heat in the case; a little leaves as radio, so this slightly overstates.",
-              "The input current is taken to equal the 3.3 V load current, as for a linear regulator. The DevKitC user guide does not say what its regulator is; a switching one would draw less.",
-              "The display and sensors are not in the power figure (no sourced current)."]
+              "The input current is taken to equal the load current, as for a linear regulator; a switching regulator would draw less.",
+              ("Modules with no sourced current are not in the power figure: " + ", ".join(missing) + ".") if missing else "Every module has a sourced current.",
+              ("Modules with no sourced temperature limit are not in the comparison: " + ", ".join(unknown_limit) + ".") if unknown_limit else "Every module has a sourced temperature limit."]
     checks = [_check("enclosure_temperature", "Sealed-case temperature", status, text, quantities,
-                     [_asm("convection_w_per_m2k"), _asm("ambient_c"), _asm("usb_input_v"), _src("esp32_wifi_rx_ma"), _src("esp32_wifi_tx_peak_ma"),
-                      _src("esp32_max_ambient_c")], limits)]
+                     [_asm("convection_w_per_m2k"), _asm("ambient_c"), _asm("usb_input_v"), *load_facts, *limit_facts], limits)]
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    for module in plan["modules"]:
-        note = TEMPERATURE_SENSING.get(module["module"])
-        if not note:
+    for module, entry in _entries(plan, library):
+        sensing = entry.get("engineering", {}).get("temperature_sensing")
+        if not sensing or module is mcu:
             continue
         box, other = module["box"], mcu["box"]
         gap_x = max(other["x0"] - box["x1"], box["x0"] - other["x1"], 0)
@@ -262,33 +311,36 @@ def _thermal(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, An
         checks.append(_check(
             f"temperature_bias_{module['id']}", f"Temperature reading of {module['id']}", ADVISORY,
             f"This sensor sits {gap:.1f} mm from the controller board inside a closed case, so its temperature reading will be above the room's; "
-            "the datasheet says as much for any mounting. Separate it, vent the case, or correct the reading against a reference.",
-            {"gap_to_controller_board_mm": _r(gap, 1)}, [{"name": "bosch_note", "basis": "sourced", "source": note, "url": BME280_URL}],
+            "its datasheet says as much for any mounting. Separate it, vent the case, or correct the reading against a reference.",
+            {"gap_to_controller_board_mm": _r(gap, 1)},
+            [_fact(entry, "temperature_sensing", sensing["quote"], "", sensing["locator"], sensing["source"])],
             ["No numeric offset is given: it depends on the load, the airflow and the layout."]))
     return checks
 
 
-# --- RF, mechanics and printing -----------------------------------------------------------------------------------------
+# --- radio, mechanics and printing ------------------------------------------------------------------------------------
 
 def _antenna(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
-    mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    keep = [k for k in library[mcu["module"]].get("keep_clear", []) if k["id"] == "antenna"]
-    if not keep:
-        return _check("antenna_clearance", "Antenna clearance", NOT_ASSESSED, "This controller lists no antenna keepout.", {}, [])
+    found = [(m, e, e["engineering"]["antenna"]) for m, e in _entries(plan, library) if e.get("engineering", {}).get("antenna")]
+    if not found:
+        return _check("antenna_clearance", "Antenna clearance", NOT_ASSESSED, "No module in this plan lists an antenna clearance.", {}, [])
+    module, entry, antenna = found[0]
     inner_x = plan["case"]["inner_mm"]["x"]
-    wall_gap = inner_x / 2 - _far_x(mcu)
-    need = SOURCED["antenna_housing_clearance_mm"][0]
-    others = [m for m in plan["modules"] if m is not mcu]
-    nearest = min((_far_x(mcu) - _far_x(m) for m in others), default=None)
+    wall_gap = inner_x / 2 - _far_x(module, antenna["end"])
+    need = antenna["clearance_mm"]
+    others = [m for m in plan["modules"] if m is not module]
+    nearest = min((_far_x(module, antenna["end"]) - _far_x(m, antenna["end"]) for m in others), default=None)
     quantities = {"gap_to_case_wall_mm": _r(wall_gap, 2), "recommended_clearance_mm": need,
                   "extra_case_length_needed_mm": _r(max(0.0, need - wall_gap), 2),
                   "antenna_end_to_nearest_other_module_mm": None if nearest is None else _r(nearest, 2)}
     status = EXCEEDS if wall_gap < need else WITHIN
-    text = (f"The antenna end of the board is {wall_gap:g} mm from the inside of the case wall; Espressif recommends at least {need} mm in all directions. "
+    text = (f"The antenna end of {module['id']} is {wall_gap:g} mm from the inside of the case wall; its source recommends at least {need:g} mm in all directions. "
             + (f"Lengthening the case by about {need - wall_gap:g} mm at that end would meet it." if wall_gap < need else "")).strip()
-    return _check("antenna_clearance", "Antenna clearance inside the case", status, text, quantities, [_src("antenna_housing_clearance_mm")],
+    return _check("antenna_clearance", "Antenna clearance inside the case", status, text, quantities,
+                  [_fact(entry, "antenna_clearance", antenna["clearance_mm"], "mm", f"\"{antenna['quote']}\" ({antenna['locator']})", antenna["source"])],
                   ["It is a recommendation, not a pass/fail rule, and it does not say how a plastic wall detunes the antenna. The guidelines advise testing range on the finished product.",
-                   "Clearance to the other modules is reported, not judged: the guidelines give no distance for them."])
+                   "Clearance to the other modules is reported, not judged: the guidelines give no distance for them.",
+                   "The plan lays the board lengthwise with the antenna end at +x; this measures along that axis only."])
 
 
 def _fit(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:
@@ -356,6 +408,20 @@ def _not_assessed() -> list[dict[str, str]]:
     ]
 
 
+def _coverage(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:
+    """For each placed module, which of the figures the review reads are in the library and which are missing, with the reason."""
+
+    rows = []
+    for module, entry in _entries(plan, library):
+        eng = entry.get("engineering", {})
+        have = [name for name, present in (
+            ("operating_temp_c", "operating_temp_c" in eng), ("supply_current", bool(eng.get("loads"))),
+            ("i2c_pullups", bool(entry.get("i2c", {}).get("pullups"))), ("antenna_clearance", "antenna" in eng),
+            ("temperature_sensing_note", "temperature_sensing" in eng)) if present]
+        rows.append({"module": module["id"], "library_id": entry["id"], "sourced": have, "gaps": eng.get("gaps", [])})
+    return rows
+
+
 def _json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2, allow_nan=False) + "\n").encode()
 
@@ -385,5 +451,6 @@ def build_engineering_review(spec: Any) -> dict[str, Any]:
         "domains": domains, "counts": counts,
         "sourced_inputs": sorted((i for i in used.values() if i["basis"] == "sourced"), key=lambda i: i["name"]),
         "assumptions": sorted((i for i in used.values() if i["basis"] == "assumed"), key=lambda i: i["name"]),
+        "coverage": _coverage(plan, library),
         "not_assessed": _not_assessed(),
     }

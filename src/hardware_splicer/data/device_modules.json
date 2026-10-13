@@ -635,6 +635,61 @@
         "Other boards sold as an 'ESP32 dev board' have different sizes and pin orders. This entry is only the Espressif DevKitC V4.",
         "GPIO6 to GPIO11 (D0 to D3, CMD, CLK) belong to the module's flash. Do not connect anything to them.",
         "IO34, IO35, VP (36) and VN (39) are inputs only."
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 85,
+          "kind": "recommended",
+          "locator": "ESP32-WROOM-32E datasheet v2.1, Table 14 Recommended Operating Conditions, 85 C version",
+          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+        },
+        "supply_min_a": {
+          "value": 0.5,
+          "locator": "ESP32-WROOM-32E datasheet v2.1, Table 14, current delivered by the external power supply, minimum",
+          "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
+        },
+        "loads": [
+          {
+            "mode": "Wi-Fi receive, 802.11b/g/n 20 MHz",
+            "kind": "sustained",
+            "typical_ma": 112,
+            "conditions": "3.3 V supply, 25 C, peripherals disabled, CPU idle",
+            "locator": "Table 16 Current Consumption Depending on RF Modes, RX",
+            "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+            "rail_v": 3.3
+          },
+          {
+            "mode": "Wi-Fi transmit, 802.11b 1 Mbps at 19.5 dBm",
+            "kind": "peak",
+            "typical_ma": 239,
+            "max_ma": 379,
+            "conditions": "3.3 V supply, 25 C, 100 % duty; typical is the table's average, max its peak",
+            "locator": "Table 16, TX",
+            "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
+            "rail_v": 3.3
+          }
+        ],
+        "antenna": {
+          "clearance_mm": 15,
+          "end": "antenna_end",
+          "quote": "A clearance of at least 15 mm is recommended in all directions.",
+          "locator": "PCB layout design, General Principles of PCB Layout for Modules, Positioning a Module on a Base Board (housing)",
+          "source": "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html"
+        },
+        "gaps": [
+          {
+            "field": "regulator",
+            "reason": "The DevKitC V4 user guide does not name its 3.3 V regulator or say whether it is linear."
+          }
+        ]
+      },
+      "engineering_sources": [
+        {
+          "label": "ESP32 hardware design guidelines, PCB layout design (module placement and the antenna inside a housing)",
+          "url": "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html",
+          "as_of": "2026-10-13"
+        }
       ]
     },
     {
@@ -794,7 +849,23 @@
           ],
           "source": "https://www.az-delivery.de/en/products/0-96zolldisplay"
         }
-      ]
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 85,
+          "kind": "absolute_maximum",
+          "locator": "SSD1306 datasheet, Maximum Ratings table, TA operating temperature (the controller chip, not the module)",
+          "source": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf"
+        },
+        "loads": [],
+        "gaps": [
+          {
+            "field": "loads",
+            "reason": "The module's current depends on its panel supply and what is drawn; none of this module's sources states it."
+          }
+        ]
+      }
     },
     {
       "id": "adafruit-bme280-stemma-qt",
@@ -992,7 +1063,43 @@
           "quote": "SDI is bi-directional with open drain to GND: it must be externally connected to VDDIO via a pull up resistor.",
           "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 85,
+          "kind": "recommended",
+          "locator": "Bosch BME280 datasheet, key features: operating range -40 to +85 C",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        },
+        "loads": [
+          {
+            "mode": "1 Hz forced mode, humidity, pressure and temperature",
+            "kind": "sustained",
+            "typical_ma": 0.0036,
+            "conditions": "datasheet condition for the typical figure",
+            "locator": "Section 1 key features, current consumption 3.6 uA at 1 Hz (humidity, pressure and temperature); the supply in Table 1 is typically 1.8 V",
+            "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
+            "rail_v": 1.8
+          },
+          {
+            "mode": "Pressure measurement",
+            "kind": "peak",
+            "typical_ma": 0.0036,
+            "max_ma": 0.714,
+            "conditions": "the maximum is the table's value at -40 C",
+            "locator": "Table 1 Electrical parameter specification, IDDP, current during pressure measurement",
+            "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
+            "rail_v": 1.8
+          }
+        ],
+        "temperature_sensing": {
+          "quote": "This temperature value depends on the PCB temperature, sensor element self-heating and ambient temperature and is typically above ambient temperature.",
+          "locator": "BME280 datasheet, note to the temperature measurement figures. Read from the document served at this URL on 2026-10-13, which is marked BST-BME280-DS001-23 revision 1.23; the library's source label names DS001-24",
+          "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+        },
+        "gaps": []
+      }
     },
     {
       "id": "adafruit-bh1750-stemma-qt",
@@ -1074,7 +1181,13 @@
           "0x23",
           "0x5C"
         ],
-        "address_basis": "Adafruit pinouts: 0x23, or 0x5C if ADDR is pulled high. Rohm datasheet: two slave addresses set by ADDR."
+        "address_basis": "Adafruit pinouts: 0x23, or 0x5C if ADDR is pulled high. Rohm datasheet: two slave addresses set by ADDR.",
+        "pullups": {
+          "ohm": 10000,
+          "rail": null,
+          "quote": "This pin is level shifted so you can use 3-5V logic, and there's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/adafruit-bh1750-ambient-light-sensor/pinouts"
+        }
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit describes a regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on VIN can put 5 V on SDA and SCL. The Rohm chip supply (2.4 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
@@ -1150,7 +1263,29 @@
           "quote": "VCC Voltage                              Vcc          2.4          3.0         3.6         V",
           "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 85,
+          "kind": "absolute_maximum",
+          "locator": "Rohm BH1750FVI datasheet, page 1, Absolute Maximum Ratings, Topr",
+          "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
+        },
+        "loads": [
+          {
+            "mode": "Measurement at 100 lx",
+            "kind": "sustained",
+            "typical_ma": 0.12,
+            "max_ma": 0.19,
+            "conditions": "VCC = 3.0 V, 25 C",
+            "locator": "page 2, Electrical Characteristics, Icc1",
+            "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf",
+            "rail_v": 3.0
+          }
+        ],
+        "gaps": []
+      }
     },
     {
       "id": "adafruit-ds3231-stemma-qt",
@@ -1255,7 +1390,13 @@
         "addresses": [
           "0x68"
         ],
-        "address_basis": "Adafruit Arduino usage: default 0x68 and cannot be changed. Maxim datasheet: 7-bit address 1101000."
+        "address_basis": "Adafruit Arduino usage: default 0x68 and cannot be changed. Maxim datasheet: 7-bit address 1101000.",
+        "pullups": {
+          "ohm": 10000,
+          "rail": "vin",
+          "quote": "This pin has a 10K pullup resistor to Vin",
+          "source": "https://learn.adafruit.com/adafruit-ds3231-precision-rtc-breakout/pinouts"
+        }
       },
       "electrical": {
         "supply_note": "Adafruit says this RTC can be powered from 2.3 V to 5.5 V and does not need a regulator or level shifter. That is not permission to treat 5 V Vin as safe for ESP32 I2C pins. Adafruit states 10 k\u03a9 pull-ups to Vin on SCL and SDA, so 5 V on Vin puts 5 V on the bus. Prefer the microcontroller's 3.3 V pin.",
@@ -1342,7 +1483,20 @@
           "quote": "VCC = 2.3V to 5.5V",
           "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "loads": [],
+        "gaps": [
+          {
+            "field": "operating_temp_c",
+            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no temperature range was read."
+          },
+          {
+            "field": "loads",
+            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no supply current was read."
+          }
+        ]
+      }
     },
     {
       "id": "adafruit-ina219-stemma-qt",
@@ -1432,7 +1586,13 @@
           "0x44",
           "0x45"
         ],
-        "address_basis": "Adafruit pinouts: default 0x40; A0 soldered 0x41; A1 soldered 0x44; A0 and A1 soldered 0x45. Adafruit product 904 lists those four 7-bit addresses."
+        "address_basis": "Adafruit pinouts: default 0x40; A0 soldered 0x41; A1 soldered 0x44; A0 and A1 soldered 0x45. Adafruit product 904 lists those four 7-bit addresses.",
+        "pullups": {
+          "ohm": 10000,
+          "rail": null,
+          "quote": "There's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout/pinouts"
+        }
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit says the sensor on the breakout requires between a 2.7V and 5.5V, and to give it the same power as the logic level. Adafruit states a 10 k\u03a9 pull-up on SCL and on SDA; which rail they join is not published. 5 V on VIN can put 5 V on the I2C pins. The TI chip supply (3 to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32. Vin+ and Vin- are the load-side shunt connection, not this board's logic supply.",
@@ -1549,7 +1709,29 @@
           "quote": "Senses Bus Voltages from 0 to 26 V",
           "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -25,
+          "max": 85,
+          "kind": "recommended",
+          "locator": "TI INA219 datasheet, 7.3 Recommended Operating Conditions, TA",
+          "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
+        },
+        "loads": [
+          {
+            "mode": "Quiescent",
+            "kind": "sustained",
+            "typical_ma": 0.7,
+            "max_ma": 1.0,
+            "conditions": "the chip's own supply, not the current it measures",
+            "locator": "Electrical Characteristics, power supply, quiescent current",
+            "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf",
+            "rail_v": 3.3
+          }
+        ],
+        "gaps": []
+      }
     },
     {
       "id": "adafruit-mpu-6050-stemma-qt",
@@ -1679,7 +1861,13 @@
           "0x68",
           "0x69"
         ],
-        "address_basis": "Adafruit pinouts: default 0x68, 0x69 if AD0 is pulled high or the back jumper is bridged. InvenSense datasheet: 7-bit address b110100X, AD0 low 1101000, AD0 high 1101001."
+        "address_basis": "Adafruit pinouts: default 0x68, 0x69 if AD0 is pulled high or the back jumper is bridged. InvenSense datasheet: 7-bit address b110100X, AD0 low 1101000, AD0 high 1101001.",
+        "pullups": {
+          "ohm": 10000,
+          "rail": null,
+          "quote": "This pin is level shifted so you can use 3-5V logic, and there's a 10K pullup on this pin.",
+          "source": "https://learn.adafruit.com/mpu6050-6-dof-accelerometer-and-gyro/pinouts"
+        }
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level-shifted I2C pins. 5 V on Vin can put 5 V on SDA and SCL. The InvenSense chip supply (2.375 V to 3.46 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
@@ -1765,7 +1953,20 @@
           "quote": "the MPU-60X0 operates from VDD power supply voltage range of 2.375V-3.46V.",
           "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "loads": [],
+        "gaps": [
+          {
+            "field": "operating_temp_c",
+            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no temperature range was read."
+          },
+          {
+            "field": "loads",
+            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no supply current was read."
+          }
+        ]
+      }
     },
     {
       "id": "adafruit-ads1115-stemma-qt",
@@ -1903,7 +2104,13 @@
           "0x4A",
           "0x4B"
         ],
-        "address_basis": "Adafruit pinouts: default 0x48; A0 jumper closed 0x49; four different addresses using the ADDR pin; base 7-bit address 0x48 (1001000). Adafruit product 1085: 7-bit addresses between 0x48-0x4B. TI datasheet ADDR table: GND 1001000b, VDD 1001001b, SDA 1001010b, SCL 1001011b."
+        "address_basis": "Adafruit pinouts: default 0x48; A0 jumper closed 0x49; four different addresses using the ADDR pin; base 7-bit address 0x48 (1001000). Adafruit product 1085: 7-bit addresses between 0x48-0x4B. TI datasheet ADDR table: GND 1001000b, VDD 1001001b, SDA 1001010b, SCL 1001011b.",
+        "pullups": {
+          "ohm": 10000,
+          "rail": "vin",
+          "quote": "This pin has a 10K pullup to VIN",
+          "source": "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts"
+        }
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit says the ADC requires between 2V to 5V power/logic, and states a 10 k\u03a9 pull-up to VIN on SCL and on SDA, so 5 V on VIN puts 5 V on the bus. The TI chip supply (2.0 V to 5.5 V) is the chip, not a VIN permit. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the ESP32.",
@@ -2035,7 +2242,29 @@
           "quote": "SCL                                         1001011b",
           "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
         }
-      ]
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 125,
+          "kind": "absolute_maximum",
+          "locator": "TI ADS1115 datasheet, 5.1 Absolute Maximum Ratings, operating ambient TA",
+          "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
+        },
+        "loads": [
+          {
+            "mode": "Operating, 8 SPS",
+            "kind": "sustained",
+            "typical_ma": 0.15,
+            "max_ma": 0.2,
+            "conditions": "VDD = 3.3 V, TA = 25 C",
+            "locator": "5.5 Electrical Characteristics, IVDD operating",
+            "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf",
+            "rail_v": 3.3
+          }
+        ],
+        "gaps": []
+      }
     }
   ]
 }
