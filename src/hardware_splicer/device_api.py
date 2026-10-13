@@ -18,6 +18,7 @@ from .device_plan import DevicePlanError, build_device_plan, example_specs, modu
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_application import build_device_application
 from .device_case import build_device_case
+from .device_engineering import build_engineering_review
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
 from .device_application_runtime import DeviceRuntimeError, run_device_application
@@ -126,6 +127,15 @@ def create_device_router() -> APIRouter:
             "Content-Disposition": 'attachment; filename="device-case-proposal.zip"',
             "Cache-Control": "no-store",
         })
+
+    @router.post("/engineering")
+    async def post_engineering(request: Request) -> Dict[str, Any]:
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+        try:
+            return {"ok": True, **build_engineering_review(spec)}
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
 
     @router.post("/observations")
     async def post_observations(request: Request) -> Dict[str, Any]:

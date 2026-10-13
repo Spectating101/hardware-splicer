@@ -25,6 +25,7 @@ passes the checks is not a wire that works, the case has not been printed, and e
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
 | `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
 | `POST /v1/devices/case` | a zip of printable case files for a spec: `case_base.stl` and `case_lid.stl` in print orientation, the same boxes as editable `.scad`, a README and `CASE_PROPOSAL.json`. 422 for a spec with errors |
+| `POST /v1/devices/engineering` | a quantified engineering review of the plan (I2C loading, USB current, case temperature, antenna clearance, fit, printing), every figure sourced or assumed; see [the review](DEVICE_ENGINEERING_REVIEW.md) |
 | `POST /v1/devices/reclaim-matches` | advisory exact/variant name matches for a reclaim list; 422 for invalid text or shape, 413 over 64 KB in both proxy and backend |
 
 From **Salvage a board**, matching reclaim rows link here to a small **Parts you may have on hand** list. It compares the markings
