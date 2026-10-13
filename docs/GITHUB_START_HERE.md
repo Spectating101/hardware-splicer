@@ -37,6 +37,7 @@ tests enforce.
 | Doc | Purpose |
 |-----|---------|
 | [DEVICE_MODELED_RUN.md](DEVICE_MODELED_RUN.md) | Plan, generate, test and report an ESP32 + OLED + BME280 application with modeled execution — not physically validated hardware |
+| [DEVICE_ADDING_PARTS.md](DEVICE_ADDING_PARTS.md) | How a controller board, sensor or display is added as cited data, and what each output needs from it |
 | [DEVICE_ENGINEERING_REVIEW.md](DEVICE_ENGINEERING_REVIEW.md) | What a device layout implies for the bus, supply, heat, antenna, fit and printing, with every number sourced or assumed |
 | [status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md](status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md) | How well its tests catch seeded bugs, and where they do not |
 
