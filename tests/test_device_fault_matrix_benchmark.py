@@ -94,6 +94,30 @@ def test_every_adapter_mutant_changes_exactly_one_place(bench, tmp_path):
     assert len(ids) == len(set(ids))
 
 
+def test_every_bh1750_adapter_mutant_changes_exactly_one_place_of_its_own_adapter(bench, tmp_path):
+    source = (bench.build_package(tmp_path, bench.BH1750) / "src" / "main.cpp").read_text(encoding="utf-8")
+    mutants = bench.adapter_mutants(bench.BH1750)
+    assert len(mutants) == 39
+    for mutant in mutants:
+        assert mutant.target == "src/main.cpp", mutant.id
+        assert bench.apply_mutant(source, mutant) != source, mutant.id
+    own = bench.BH1750_ADAPTER_MUTANTS + bench.BH1750_ADAPTER_HELDOUT_MUTANTS
+    assert all(m.part == bench.BH1750 for m in own)
+    pool = bench.MUTANTS + bench.HELDOUT_MUTANTS + bench.ADAPTER_MUTANTS + bench.ADAPTER_HELDOUT_MUTANTS + own
+    ids = [m.id for m in pool]
+    assert len(ids) == len(set(ids))
+
+
+def test_a_shared_adapter_mutant_is_excused_for_the_bh1750_only_with_a_reason_that_names_why(bench):
+    bme = {m.id: m for m in bench.adapter_mutants(bench.BME280)}
+    bh = {m.id: m for m in bench.adapter_mutants(bench.BH1750)}
+    for mutant_id, reason in bench.BH1750_SHARED_EQUIVALENTS.items():
+        assert bme[mutant_id].equivalent_reason == ""  # the same text is a real bug for the BME280's four-line display
+        assert bh[mutant_id].equivalent_reason == reason and "pixel-identical" in reason
+    for mutant in bench.BH1750_ADAPTER_MUTANTS + bench.BH1750_ADAPTER_HELDOUT_MUTANTS:
+        assert not (mutant.equivalent_reason and mutant.blind_spot), mutant.id  # a survivor is one or the other
+
+
 def _adapter_row(id, outcome, *, vendor_matrix, core_lane=False, equivalent="", blind_spot=""):
     return {
         "id": id, "bug_class": "c", "story": "", "outcome": outcome, "failing_scenarios": [],

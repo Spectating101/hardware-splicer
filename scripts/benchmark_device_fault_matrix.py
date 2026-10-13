@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import dataclasses
 import json
 import os
 import shutil
@@ -202,6 +203,15 @@ HELDOUT_MUTANTS: tuple[Mutant, ...] = (
 # lane does, against the pinned Adafruit sources and a modelled I2C bus.
 VENDOR_SMOKE = frozenset({"sensor_default_address_0x77_with_display_0x3C"})
 VENDOR_HEALTHY = frozenset({"sensor_default_address_0x77_with_display_0x3C", "sensor_0x76_only", "display_at_0x3D_only"})
+# Per part: the default-address scenario is the smoke test; the healthy bus adds the other sensor address and the
+# display's second address. Nothing here changes which scenarios exist.
+VENDOR_DETECTORS = {
+    "adafruit-bme280-stemma-qt": (VENDOR_SMOKE, VENDOR_HEALTHY),
+    "adafruit-bh1750-stemma-qt": (
+        frozenset({"sensor_default_address_0x23_with_display_0x3C"}),
+        frozenset({"sensor_default_address_0x23_with_display_0x3C", "sensor_0x5C_only", "display_at_0x3D_only"}),
+    ),
+}
 _A = "src/main.cpp"
 ADAPTER_MUTANTS: tuple[Mutant, ...] = (
     _m("adapter_chip_id_wrong", "identity", "rejects a real BME280 by comparing against the BMP280 id",
@@ -307,6 +317,107 @@ BH1750_TRAITS_MUTANTS: tuple[Mutant, ...] = (
 )
 
 
+_NEVER_READ_UNCONFIGURED = (
+    "SensorApp reads only after a sensor_begin() of the same device succeeded: every take_reading() call site follows a successful "
+    "probe and rebind, and after a failed re-begin the state is FAULT_SENSOR_READ, which probes again before reading. The driver is "
+    "therefore never read while unconfigured. Valid for SensorApp as written."
+)
+# Shared template text whose effect differs for the BH1750: its display has only one data line, so lines 3 and 4 are empty.
+BH1750_SHARED_EQUIVALENTS = {
+    "heldout_adapter_fourth_line_dropped": (
+        "The BH1750 has one channel, so display lines 3 and 4 are always empty strings; printing or omitting the empty fourth line "
+        "leaves the framebuffer pixel-identical."
+    ),
+}
+
+# Adapter mutants for the BH1750's direct Wire driver, written from the adapter template before the BH1750
+# vendor-host harness was ever scored against any of them, and not used to tune it.
+BH1750_ADAPTER_MUTANTS: tuple[Mutant, ...] = (
+    _m("bh_mode_one_time", "bh1750-driver", "the chip is started in one-time mode, so it powers down after the first measurement",
+       "static constexpr uint8_t kContinuousHighRes = 0x10;", "static constexpr uint8_t kContinuousHighRes = 0x20;", target=_A, part=BH1750),
+    _m("bh_mode_low_resolution", "bh1750-driver", "the chip is started in continuous L-resolution mode",
+       "static constexpr uint8_t kContinuousHighRes = 0x10;", "static constexpr uint8_t kContinuousHighRes = 0x13;", target=_A, part=BH1750,
+       blind_spot="The model implements no resolution modes: L-resolution (datasheet p.2, 4 lx resolution, 16 ms typical, 24 ms maximum) "
+                  "returns the same count as H-resolution, so the mode choice cannot matter to it. Silicon returns a coarser value."),
+    _m("bh_opcode_undefined", "bh1750-driver", "the measurement opcode is one the datasheet does not define",
+       "static constexpr uint8_t kContinuousHighRes = 0x10;", "static constexpr uint8_t kContinuousHighRes = 0x14;", target=_A, part=BH1750),
+    _m("bh_begin_ignores_nack", "bus-errors", "a NACKed measurement command still counts as a successful begin",
+       "        if (wire_->endTransmission() != 0) return false;\n        started_ms_", "        wire_->endTransmission();\n        started_ms_", target=_A, part=BH1750),
+    _m("bh_failed_begin_stays_configured", "bus-errors", "a failed begin leaves the driver marked as configured",
+       "        configured_ = false;\n        wire_->beginTransmission", "        wire_->beginTransmission", target=_A, part=BH1750,
+       equivalent_reason=_NEVER_READ_UNCONFIGURED),
+    _m("bh_conversion_wait_removed", "bh1750-timing", "the first read does not wait for the conversion, so it returns the reset value 0",
+       "        if (waited < kMaxMeasurementMs) delay(kMaxMeasurementMs - waited);\n", "", target=_A, part=BH1750),
+    _m("bh_conversion_wait_too_short", "bh1750-timing", "the conversion wait is 100 ms, below the datasheet's 180 ms maximum",
+       "static constexpr uint32_t kMaxMeasurementMs = 180;", "static constexpr uint32_t kMaxMeasurementMs = 100;", target=_A, part=BH1750),
+    _m("bh_conversion_wait_too_long", "bh1750-timing", "the conversion wait is a full second",
+       "static constexpr uint32_t kMaxMeasurementMs = 180;", "static constexpr uint32_t kMaxMeasurementMs = 1000;", target=_A, part=BH1750),
+    _m("bh_conversion_start_not_recorded", "bh1750-timing", "begin never records when the conversion started, so a replugged chip is read without waiting",
+       "        started_ms_ = millis();\n        configured_ = true;", "        configured_ = true;", target=_A, part=BH1750),
+    _m("bh_reads_one_byte", "bh1750-driver", "only one result byte is requested",
+       "requestFrom(int(addr_), 2) != 2", "requestFrom(int(addr_), 1) != 1", target=_A, part=BH1750),
+    _m("bh_short_read_unchecked", "bus-errors", "a failed read is not noticed and the empty buffer is used as a result",
+       "if (wire_->requestFrom(int(addr_), 2) != 2) return false;", "wire_->requestFrom(int(addr_), 2);", target=_A, part=BH1750,
+       equivalent_reason="After a failed requestFrom, read() returns -1, so the unchecked buffer is (0xFFFF << 8 | 0xFFFF) / 1.2, about 14 million lx. "
+                         "reading_is_plausible rejects that (kLuxMax is 65535), so the application behaves exactly as with the check. "
+                         "Defence in depth, valid only while the plausibility ceiling stays below that value."),
+    _m("bh_byte_order_swapped", "bh1750-driver", "the result bytes are combined low byte first",
+       "(high << 8) | low", "(low << 8) | high", target=_A, part=BH1750),
+    _m("bh_divisor_wrong", "bh1750-driver", "the raw count is not divided by 1.2",
+       "/ 1.2f", "/ 1.0f", target=_A, part=BH1750),
+    _m("bh_high_byte_only", "bh1750-driver", "the low byte is dropped from the result",
+       "float((high << 8) | low)", "float(high << 8)", target=_A, part=BH1750),
+    _m("bh_address_fixed", "addressing", "the driver is always bound to 0x23 whatever address was probed",
+       "        addr_ = addr;\n        configured_ = false;", "        addr_ = 0x23;\n        configured_ = false;", target=_A, part=BH1750),
+    _m("bh_hal_begin_result_ignored", "bus-errors", "the HAL reports every begin as successful",
+       "bool sensor_begin(uint8_t addr) override { return bh_.begin(addr, &Wire); }",
+       "bool sensor_begin(uint8_t addr) override { bh_.begin(addr, &Wire); return true; }", target=_A, part=BH1750),
+    _m("bh_wrong_wire_instance", "pins", "the driver is handed Wire1, which setup() never starts",
+       "return bh_.begin(addr, &Wire); }", "return bh_.begin(addr, &Wire1); }", target=_A, part=BH1750),
+)
+
+BH1750_ADAPTER_HELDOUT_MUTANTS: tuple[Mutant, ...] = (
+    _m("heldout_bh_divisor_1_44", "bh1750-driver", "the divisor is the datasheet's upper bound 1.44 instead of the typical 1.2",
+       "/ 1.2f", "/ 1.44f", target=_A, part=BH1750),
+    _m("heldout_bh_read_without_configuration", "bus-errors", "a read is attempted on a driver that never started a measurement",
+       "        if (!configured_) return false;\n", "", target=_A, part=BH1750,
+       equivalent_reason=_NEVER_READ_UNCONFIGURED),
+    _m("heldout_bh_low_byte_zero", "bh1750-driver", "the second result byte is read but replaced by zero",
+       "const uint16_t low = uint16_t(wire_->read());", "const uint16_t low = 0;", target=_A, part=BH1750),
+    _m("heldout_bh_mode_two", "bh1750-driver", "the chip is started in continuous H-resolution mode 2",
+       "static constexpr uint8_t kContinuousHighRes = 0x10;", "static constexpr uint8_t kContinuousHighRes = 0x11;", target=_A, part=BH1750,
+       blind_spot="The model implements no resolution modes: H-resolution mode 2 (0.5 lx resolution) returns the same count as mode 1, "
+                  "so the mode choice cannot matter to it. Silicon scales the result differently."),
+    _m("heldout_bh_power_down_after_read", "bh1750-driver", "the chip is powered down after every read, so it stops converting",
+       "        lux = float((high << 8) | low) / 1.2f;\n        return true;",
+       "        lux = float((high << 8) | low) / 1.2f;\n        wire_->beginTransmission(addr_);\n        wire_->write(uint8_t(0x00));\n        wire_->endTransmission();\n        return true;",
+       target=_A, part=BH1750),
+)
+
+# Bugs in the template text that the BME280 and BH1750 adapters share (display, pins, bus recovery, serial output).
+SHARED_ADAPTER_IDS = (
+    "adapter_display_presence_not_checked", "adapter_display_reinitialises_bus", "adapter_recovery_loses_pins",
+    "adapter_setup_loses_pins", "adapter_setup_pins_swapped", "adapter_setup_no_timeout", "adapter_recovery_no_timeout",
+    "adapter_display_never_flushed", "adapter_display_not_cleared", "adapter_log_without_newline", "adapter_bus_speed_changed",
+)
+SHARED_ADAPTER_HELDOUT_IDS = (
+    "heldout_adapter_fourth_line_dropped", "heldout_adapter_text_size_doubled", "heldout_adapter_display_address_fixed",
+    "heldout_adapter_log_duplicated", "heldout_adapter_bus_recovery_never_ends_bus", "heldout_adapter_recovery_result_inverted",
+)
+
+
+def adapter_mutants(part_id: str, which: str = "all") -> tuple[Mutant, ...]:
+    """The adapter mutants that apply to a part: its own, plus the shared template text for the BH1750."""
+    if part_id == BME280:
+        pools = {"primary": ADAPTER_MUTANTS, "heldout": ADAPTER_HELDOUT_MUTANTS, "all": ADAPTER_MUTANTS + ADAPTER_HELDOUT_MUTANTS}
+        return pools[which]
+    by_id = {m.id: dataclasses.replace(m, equivalent_reason=BH1750_SHARED_EQUIVALENTS.get(m.id, m.equivalent_reason))
+             for m in ADAPTER_MUTANTS + ADAPTER_HELDOUT_MUTANTS}
+    primary = tuple(by_id[i] for i in SHARED_ADAPTER_IDS) + BH1750_ADAPTER_MUTANTS
+    heldout = tuple(by_id[i] for i in SHARED_ADAPTER_HELDOUT_IDS) + BH1750_ADAPTER_HELDOUT_MUTANTS
+    return {"primary": primary, "heldout": heldout, "all": primary + heldout}[which]
+
+
 def apply_mutant(source: str, mutant: Mutant) -> str:
     """Return mutated source; refuse a mutant that matches zero or several places."""
     count = source.count(mutant.old)
@@ -318,28 +429,11 @@ def apply_mutant(source: str, mutant: Mutant) -> str:
     return mutated
 
 
-# Pin renames that turn the BME280 example's wiring into the same wiring for another catalogue breakout.
-PART_PIN_RENAMES = {
-    BH1750: {"sensor.Vin": "sensor.VIN", "sensor.SCK": "sensor.SCL", "sensor.SDI": "sensor.SDA"},
-}
-
-
 def spec_for_part(part_id: str) -> dict:
     """The ESP32 + OLED + sensor example wired for the given supported part."""
-    import copy
+    from hardware_splicer.device_parts import example_spec_for_part
 
-    from hardware_splicer.device_plan import example_specs
-
-    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
-    if part_id == BME280:
-        return spec
-    spec["name"] = f"ESP32 with an OLED display and a {part_id}, powered over USB"
-    spec["modules"][2]["module"] = part_id
-    for wire in spec["connections"]:
-        for end in ("from", "to"):
-            for old, new in PART_PIN_RENAMES[part_id].items():
-                wire[end] = wire[end].replace(old, new)
-    return spec
+    return example_spec_for_part(part_id)
 
 
 def build_package(directory: Path, part_id: str = BME280) -> Path:
@@ -455,9 +549,11 @@ def run_vendor_project(project: Path, libdeps: Path, *, compile_timeout: float =
     """Compile the adapter with the product's own vendor-host command and run its scenarios."""
     from hardware_splicer.device_application_execution import vendor_host_compile_command
 
+    descriptor = json.loads((project / "PART_DESCRIPTOR.json").read_text(encoding="utf-8"))
+    profile = descriptor["adapter"].get("vendor_profile") or "bme280"
     binary = project / "vendor_harness"
     try:
-        compiled = subprocess.run(vendor_host_compile_command(project, libdeps, binary), cwd=project,
+        compiled = subprocess.run(vendor_host_compile_command(project, libdeps, binary, profile), cwd=project,
                                   capture_output=True, timeout=compile_timeout, check=False)
     except subprocess.TimeoutExpired:
         return {"outcome": "STILLBORN", "failed": [], "detail": "compile timed out"}
@@ -472,7 +568,7 @@ def run_vendor_project(project: Path, libdeps: Path, *, compile_timeout: float =
     return {"outcome": "KILLED" if failed else "SURVIVED", "failed": failed, "detail": problem}
 
 
-def evaluate_adapter(mutant: Mutant, baseline: Path, workdir: Path, libdeps: Path) -> dict:
+def evaluate_adapter(mutant: Mutant, baseline: Path, workdir: Path, libdeps: Path, part_id: str = BME280) -> dict:
     project = workdir / mutant.id
     shutil.copytree(baseline, project)
     target = project / mutant.target
@@ -480,14 +576,15 @@ def evaluate_adapter(mutant: Mutant, baseline: Path, workdir: Path, libdeps: Pat
     vendor = run_vendor_project(project, libdeps)
     core = run_project(project)  # the core harness does not compile main.cpp; measured, not assumed
     failed = set(vendor["failed"])
+    smoke, healthy = VENDOR_DETECTORS[part_id]
     return {
         "id": mutant.id, "bug_class": mutant.bug_class, "story": mutant.story,
         "outcome": vendor["outcome"],
         "failing_scenarios": sorted(failed),
         "detected_by": {
             "core_lane": core["outcome"] == "KILLED",
-            "vendor_smoke": bool(failed & VENDOR_SMOKE),
-            "vendor_healthy": bool(failed & VENDOR_HEALTHY),
+            "vendor_smoke": bool(failed & smoke),
+            "vendor_healthy": bool(failed & healthy),
             "vendor_matrix": vendor["outcome"] == "KILLED",
         },
         "equivalent_reason": mutant.equivalent_reason, "blind_spot": mutant.blind_spot, "detail": vendor["detail"],
@@ -523,14 +620,16 @@ def summarize_adapter(rows: list[dict]) -> dict:
 def run_adapter_lane(args: argparse.Namespace) -> int:
     from hardware_splicer.device_application_execution import vendor_libs_available
 
+    part_id = {"bme280": BME280, "bh1750": BH1750}[args.part]
+    profile = args.part
     libdeps = args.libdeps or (Path(os.environ["HS_DEVICE_RUNTIME_VENDOR_LIBS"]) if os.environ.get("HS_DEVICE_RUNTIME_VENDOR_LIBS") else None)
-    if libdeps is None or not vendor_libs_available(libdeps):
+    if libdeps is None or not vendor_libs_available(libdeps, profile):
         print("The adapter lane needs the pinned libdeps (--libdeps or HS_DEVICE_RUNTIME_VENDOR_LIBS); see test/vendor_host/README.md.", file=sys.stderr)
         return 2
     libdeps = libdeps.resolve()
     with tempfile.TemporaryDirectory(prefix="hs-adapter-matrix-") as scratch:
         work = Path(scratch)
-        baseline = build_package(work)
+        baseline = build_package(work, part_id)
         if args.vendor_host:
             shutil.rmtree(baseline / "test" / "vendor_host")
             shutil.copytree(args.vendor_host, baseline / "test" / "vendor_host")
@@ -539,17 +638,18 @@ def run_adapter_lane(args: argparse.Namespace) -> int:
             print(f"Vendor baseline is not clean ({base['outcome']}: {base['failed']}); the benchmark is invalid.", file=sys.stderr)
             return 2
         with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
-            chosen = {"primary": ADAPTER_MUTANTS, "heldout": ADAPTER_HELDOUT_MUTANTS, "all": ADAPTER_MUTANTS + ADAPTER_HELDOUT_MUTANTS}[args.set]
-            rows = list(pool.map(lambda mutant: evaluate_adapter(mutant, baseline, work, libdeps), chosen))
+            chosen = adapter_mutants(part_id, args.set)
+            rows = list(pool.map(lambda mutant: evaluate_adapter(mutant, baseline, work, libdeps, part_id), chosen))
     report = {
         "schema_version": SCHEMA,
         "lane": "adapter",
         "mutant_set": args.set,
         "claim_boundary": CLAIM_BOUNDARY,
-        "target": "esp32_oled_bme280_usb Arduino adapter (src/main.cpp) against pinned Adafruit libraries and a modelled I2C bus",
+        "part": part_id,
+        "target": f"{part_id} Arduino adapter (src/main.cpp) against pinned Adafruit libraries and a modelled I2C bus",
         "vendor_host_override": args.vendor_host.name if args.vendor_host else None,
-        "detectors": {"core_lane": "all 15 core scenarios (does not compile main.cpp)", "vendor_smoke": sorted(VENDOR_SMOKE),
-                      "vendor_healthy": sorted(VENDOR_HEALTHY), "vendor_matrix": "all 11 vendor-host scenarios"},
+        "detectors": {"core_lane": "all 15 core scenarios (does not compile main.cpp)", "vendor_smoke": sorted(VENDOR_DETECTORS[part_id][0]),
+                      "vendor_healthy": sorted(VENDOR_DETECTORS[part_id][1]), "vendor_matrix": "all 11 vendor-host scenarios"},
         "summary": summarize_adapter(rows),
         "mutants": rows,
         "firmware_authorized": False,
@@ -591,9 +691,6 @@ def main(argv: list[str] | None = None) -> int:
                         help="use this host harness instead of the generated one, e.g. to score an earlier revision")
     args = parser.parse_args(argv)
     if args.lane == "adapter":
-        if args.part != "bme280":
-            print("The adapter lane has a vendor-host model only for the BME280.", file=sys.stderr)
-            return 2
         return run_adapter_lane(args)
 
     part_id = {"bme280": BME280, "bh1750": BH1750}[args.part]
