@@ -18,6 +18,7 @@ from .device_plan import DevicePlanError, build_device_plan, device_catalog, dev
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_application import build_device_application
 from .device_case import build_device_case
+from .device_draft import draft_device_spec
 from .device_engineering import build_engineering_review
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
@@ -81,6 +82,14 @@ def create_device_router() -> APIRouter:
         if example_id not in examples:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"type": "not_found", "message": "no such example"})
         return {"ok": True, "spec": examples[example_id], "plan": build_device_plan(examples[example_id])}
+
+    @router.post("/draft", summary="Draft a wired spec from a controller and a list of parts", description="Takes {\"controller\": id, \"parts\": [id, ...]} with ids from the module library and wires each part to the controller's power, ground and default I2C pins. Returns the spec, what was assumed and the planner's findings for it. A draft is a starting point and approves nothing.")
+    async def post_draft(request: Request) -> Dict[str, Any]:
+        body = await _read_body(request, error_type="invalid_device_draft", label="draft request")
+        try:
+            return {"ok": True, **draft_device_spec(body)}
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
 
     @router.post("/plan", summary="Plan a device", description="Wiring checks, a case, assembly steps and a shopping list for a spec. Errors in `plan.findings` say what is wrong and, where there is an obvious way out, carry `suggestions` of candidate pins. A plan is a proposal and a checklist and approves nothing.", openapi_extra=body)
     async def post_plan(request: Request) -> Dict[str, Any]:

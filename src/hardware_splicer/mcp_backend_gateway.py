@@ -28,6 +28,7 @@ _TASK_OPERATION_PATHS = {
     "device_design": (
         ("GET", "/v1/devices/spec-schema"),
         ("GET", "/v1/devices/examples"),
+        ("POST", "/v1/devices/draft"),
         ("POST", "/v1/devices/plan"),
         ("POST", "/v1/devices/engineering"),
         ("POST", "/v1/devices/case"),

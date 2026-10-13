@@ -109,7 +109,7 @@ def test_every_device_operation_is_described_and_those_taking_a_spec_carry_its_s
 def test_the_device_design_task_manifest_gives_an_agent_the_whole_workflow_in_one_call():
     manifest = task_operation_manifest("device_design", create_product_app())
     assert manifest["workflow_operation_ids"] == [
-        "get_spec_schema_v1_devices_spec_schema_get", "get_examples_v1_devices_examples_get", "post_plan_v1_devices_plan_post",
+        "get_spec_schema_v1_devices_spec_schema_get", "get_examples_v1_devices_examples_get", "post_draft_v1_devices_draft_post", "post_plan_v1_devices_plan_post",
         "post_engineering_v1_devices_engineering_post", "post_case_v1_devices_case_post", "post_application_v1_devices_application_post",
         "post_observations_v1_devices_observations_post",
     ]
