@@ -93,6 +93,7 @@ def vendor_host_compile_command(project: Path, libdeps: Path, output: Path) -> l
         str(project / "test" / "vendor_host" / "arduino_core.cpp"),
         str(project / "test" / "vendor_host" / "Wire.cpp"),
         str(project / "test" / "vendor_host" / "models.cpp"),
+        str(project / "test" / "vendor_host" / "ssd1306_model.cpp"),
         str(project / "test" / "vendor_host" / "vendor_harness.cpp"),
     ]
     for folder, source in VENDOR_LIB_SOURCES:
