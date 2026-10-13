@@ -18,5 +18,10 @@ def test_ci_runs_the_fail_closed_verifier_and_transcript_regressions():
     assert "tests/test_device_observations.py" in text
     # The application, its part descriptors and the benchmark that scores its tests run in this workflow too.
     for name in ("test_device_application.py", "test_device_application_vendor.py", "test_device_parts.py",
-                 "test_device_bh1750.py", "test_device_fault_matrix_benchmark.py"):
+                 "test_device_bh1750.py", "test_device_vendor_profiles.py", "test_device_fault_matrix_benchmark.py"):
         assert f"tests/{name}" in text
+
+
+def test_ci_runs_the_bh1750_vendor_host_lane_through_the_same_verifier():
+    text = (Path(__file__).resolve().parents[1] / ".github/workflows/device-plan-deliverables.yml").read_text()
+    assert "scripts/verify_device_application.py --part bh1750 --platformio" in text

@@ -20,6 +20,7 @@ import zipfile
 # scripts/hardware_splicer.py would otherwise shadow the src package.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from hardware_splicer.device_application import build_device_application
+from hardware_splicer.device_parts import example_spec_for_part
 from hardware_splicer.device_plan import example_specs
 
 DEFAULT_CORE_DIR = Path(__file__).resolve().parents[1] / ".cache" / "hardware-splicer" / "device-firmware" / "platformio-core"
@@ -129,6 +130,7 @@ def main() -> int:
     inputs = parser.add_mutually_exclusive_group()
     inputs.add_argument("--example", choices=list(example_specs()), default=None)
     inputs.add_argument("--spec", type=Path)
+    inputs.add_argument("--part", choices=("bme280", "bh1750"), help="the example wired for this supported sensor")
     parser.add_argument("--output-root", type=Path, default=Path(".cache/hardware-splicer/device-application"))
     parser.add_argument("--platformio", default=None, help="Optional PlatformIO Core 6.1.18 binary")
     parser.add_argument(
@@ -142,6 +144,8 @@ def main() -> int:
         if args.spec.stat().st_size > 64 * 1024:
             parser.error("the spec may be at most 64 KiB")
         spec = json.loads(args.spec.read_text())
+    elif args.part:
+        spec = example_spec_for_part({"bme280": "adafruit-bme280-stemma-qt", "bh1750": "adafruit-bh1750-stemma-qt"}[args.part])
     else:
         spec = example_specs()[args.example or "esp32_oled_bme280_usb"]
     run, behaviour, compile_report, vendor_report = verify(
