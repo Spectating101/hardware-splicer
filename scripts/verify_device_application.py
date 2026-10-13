@@ -116,7 +116,7 @@ def verify(
             "reason": f"no vendor-host lane exists for the {metadata['part']['chip']}; its Arduino adapter was not tested against a modelled bus",
         }
     elif vendor_libs is not None or platformio:
-        vendor_report, vendor_log = _run_vendor_host(project, libs)
+        vendor_report, vendor_log = _run_vendor_host(project, libs, metadata["part"]["vendor_profile"])
         vendor_report["core_sha256"] = metadata["files"]["src/app_core.h"]["sha256"]
         vendor_report["adapter_sha256"] = metadata["files"]["src/main.cpp"]["sha256"]
         (run / "vendor_host.log").write_bytes(vendor_log)

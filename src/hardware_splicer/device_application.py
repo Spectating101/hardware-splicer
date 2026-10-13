@@ -13,6 +13,7 @@ from typing import Any
 from .device_firmware import PLATFORM, resolve_shared_i2c_bus, _json, _sha
 from .device_parts import available_parts, render_fixtures, render_traits
 from .device_plan import DevicePlanError, build_device_plan, module_library
+from .device_vendor_profiles import vendor_files, vendor_profile
 
 SCHEMA = "hardware_splicer.device_application_proposal.v1"
 BME280_ID = "adafruit-bme280-stemma-qt"
@@ -67,6 +68,9 @@ def _non_claims(part: dict[str, Any]) -> list[str]:
         claims.append(NO_VENDOR_BOUNDARY)
     if part["identity"] is None:
         claims.append(f"The {part['chip']} has no ID register: a chip that acknowledges a declared address cannot be told from one.")
+    note = vendor_profile(part["adapter"]["vendor_profile"]).get("model_note") if part["adapter"]["vendor_host"] else None
+    if note:
+        claims.append(note)
     claims.append("The part descriptor is a cited extract and stays UNREVIEWED_EXTRACT until a person reviews it.")
     return claims
 
@@ -82,14 +86,9 @@ def _fill(template: str, mapping: dict[str, str]) -> str:
     return text
 
 
-def _vendor_host_files() -> dict[str, bytes]:
-    bundled: dict[str, bytes] = {}
+def _vendor_host_files(profile: str) -> dict[str, bytes]:
     root = TEMPLATE_DIR / "vendor_host"
-    for path in sorted(root.rglob("*")):
-        if path.is_file():
-            rel = path.relative_to(TEMPLATE_DIR).as_posix()
-            bundled[f"test/{rel}"] = path.read_bytes()
-    return bundled
+    return {f"test/vendor_host/{name}": (root / name).read_bytes() for name in vendor_files(profile)}
 
 
 def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
@@ -172,7 +171,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "PART_DESCRIPTOR.json": descriptor_bytes,
     }
     if part["adapter"]["vendor_host"]:
-        files.update(_vendor_host_files())
+        files.update(_vendor_host_files(part["adapter"]["vendor_profile"]))
     files.update({
         "DEVICE_SPEC.json": spec_bytes,
         "DEVICE_PLAN.json": _json(plan),
@@ -222,6 +221,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             "descriptor_sha256": _sha(descriptor_bytes),
             "identity_check": part["identity"] is not None,
             "vendor_host_supported": part["adapter"]["vendor_host"],
+            "vendor_profile": part["adapter"].get("vendor_profile"),
         },
         "spec_sha256": _sha(files["DEVICE_SPEC.json"]),
         "plan_sha256": _sha(files["DEVICE_PLAN.json"]),

@@ -14,6 +14,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .device_vendor_profiles import VENDOR_PROFILES
+
 SCHEMA = "hardware_splicer.part_descriptor.v1"
 PARTS_DIR = Path(__file__).resolve().parent / "data" / "parts"
 REVIEW_STATES = {"UNREVIEWED_EXTRACT"}
@@ -103,6 +105,11 @@ def validate_part(part: Any) -> dict[str, Any]:
     for lib in libs:
         _text(lib, "adapter.lib_deps entry", re.compile(r"^[A-Za-z0-9_./ -]{1,60} @ [0-9]+\.[0-9]+\.[0-9]+$"))
     _need(isinstance(adapter.get("vendor_host"), bool), "adapter.vendor_host must be a boolean")
+    profile = adapter.get("vendor_profile")
+    if adapter["vendor_host"]:
+        _need(isinstance(profile, str) and profile in VENDOR_PROFILES, "adapter.vendor_profile must name a known vendor-host profile")
+    else:
+        _need(profile is None, "adapter.vendor_profile is only allowed with a vendor-host lane")
     return part
 
 
@@ -249,3 +256,29 @@ def render_fixtures(part: dict[str, Any]) -> str:
         lines.append(f'    {{"{channel["label"]}", {_reading(channels, {index: _lit(probe)})}, "{marker}", "{detail}"}},')
     lines += ["};", ""]
     return "\n".join(lines)
+
+
+# Pin renames that turn the BME280 example's wiring into the same wiring for another catalogue breakout.
+_PIN_RENAMES = {
+    "adafruit-bh1750-stemma-qt": {"sensor.Vin": "sensor.VIN", "sensor.SCK": "sensor.SCL", "sensor.SDI": "sensor.SDA"},
+}
+
+
+def example_spec_for_part(library_id: str) -> dict[str, Any]:
+    """The ESP32 + OLED + sensor example, wired for the given supported part."""
+    import copy
+
+    from .device_plan import example_specs
+
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    if library_id == "adafruit-bme280-stemma-qt":
+        return spec
+    renames = _PIN_RENAMES.get(library_id)
+    _need(renames is not None and library_id in available_parts(), f"no example wiring for {library_id}")
+    spec["name"] = f"ESP32 with an OLED display and a {library_id}, powered over USB"
+    spec["modules"][2]["module"] = library_id
+    for wire in spec["connections"]:
+        for end in ("from", "to"):
+            for old, new in renames.items():
+                wire[end] = wire[end].replace(old, new)
+    return spec

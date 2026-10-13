@@ -13,6 +13,7 @@ import zipfile
 
 from .device_application import build_device_application
 from .device_application_execution import _run_host, _run_vendor_host
+from .device_vendor_profiles import vendor_profile
 from .bounded_process import BoundedProcessError
 
 _RUN_SLOT = threading.BoundedSemaphore(1)
@@ -34,9 +35,10 @@ def _phase(report: dict, log: bytes) -> dict:
             "output_sha256": hashlib.sha256(log).hexdigest()}
 
 
-def _vendor_manifest(root: Path) -> dict:
+def _vendor_manifest(root: Path, names) -> dict:
     manifest = {}
-    for name, version in VENDOR_PINS.items():
+    for name in names:
+        version = VENDOR_PINS[name]
         properties = root / name / "library.properties"
         if not properties.is_file() or f"version={version}" not in properties.read_text().splitlines():
             raise DeviceRuntimeError("Vendor libraries do not match the application's pinned versions.")
@@ -60,12 +62,14 @@ def run_device_application(spec: dict) -> dict:
     try:
         part = metadata["part"]
         vendor_lane_exists = bool(part["vendor_host_supported"])
+        profile = part["vendor_profile"] if vendor_lane_exists else "bme280"
+        pinned = vendor_profile(profile)["lib_dirs"]
         vendor = {"status": "NOT_RUN", "pass": None, "reason": "Pinned vendor libraries are not configured on this server.", "scenarios": []}
         if not vendor_lane_exists:
             vendor["reason"] = (f"No vendor-host lane exists for the {part['chip']}: there is no register-level bus model, "
                                 "so its Arduino adapter was not tested against a modelled bus.")
         configured = os.environ.get("HS_DEVICE_RUNTIME_VENDOR_LIBS", "").strip()
-        manifest = _vendor_manifest(Path(configured).resolve()) if configured and vendor_lane_exists else None
+        manifest = _vendor_manifest(Path(configured).resolve(), pinned) if configured and vendor_lane_exists else None
         # Only bytes freshly generated from HS templates enter this temporary directory.
         with tempfile.TemporaryDirectory(prefix="hs-device-modeled-") as temporary:
             project = Path(temporary)
@@ -75,15 +79,15 @@ def run_device_application(spec: dict) -> dict:
             frozen_libraries = project / "vendor-libraries"
             if configured and vendor_fixture_supported:
                 # The dependency cache may be mutable. Hash and compile the same private copy.
-                for name in VENDOR_PINS:
+                for name in pinned:
                     shutil.copytree(Path(configured).resolve() / name, frozen_libraries / name)
-                manifest = _vendor_manifest(frozen_libraries)
+                manifest = _vendor_manifest(frozen_libraries, pinned)
             host, log = _run_host(project)
             host = _phase(host, log)
             if configured and vendor_lane_exists and not vendor_fixture_supported:
-                vendor["reason"] = "This vendor-host fixture requires the BME280 and SSD1306 combination; the sensor-only adapter was not tested."
+                vendor["reason"] = f"This vendor-host fixture requires the {part['chip']} and SSD1306 combination; the sensor-only adapter was not tested."
             if configured and vendor_fixture_supported and host["pass"] is True:
-                report, vendor_log = _run_vendor_host(project, frozen_libraries)
+                report, vendor_log = _run_vendor_host(project, frozen_libraries, profile)
                 vendor = _phase(report, vendor_log)
                 vendor["library_manifest"] = manifest
         state = "FAILED" if host["pass"] is not True or vendor["status"] == "FAILED" else (

@@ -34,7 +34,8 @@
       "adafruit/Adafruit BusIO @ 1.17.4",
       "adafruit/Adafruit Unified Sensor @ 1.1.15"
     ],
-    "vendor_host": true
+    "vendor_host": true,
+    "vendor_profile": "bme280"
   },
   "software_choices": [
     "Serial and display formats and the fixture reading are software choices, not datasheet values."

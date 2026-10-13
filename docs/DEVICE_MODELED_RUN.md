@@ -32,17 +32,19 @@ For vendor-host tests, first provision the pinned dependencies with the existing
 `HS_DEVICE_RUNTIME_VENDOR_LIBS` to that run's `project/.pio/libdeps/application`
 directory. Requests cannot choose library paths, tools, code or authority flags.
 Missing configuration produces `PARTIAL`, with vendor-host `NOT_RUN`, not a
-vendor pass. Configured libraries must match all five pinned version declarations;
+vendor pass. Configured libraries must match the pinned version declarations of the part's
+lane (five for the BME280, three for the BH1750, whose sensor is driven by the adapter's own code);
 the report includes source-member SHA-256 hashes of the libraries used.
 Libraries are copied into the private execution directory before hashing and
 compiling, so later changes to the dependency cache cannot change the recorded
 bytes. The declared versions/hashes identify inputs, not an independent attestation
 of vendor origin.
-The current vendor fixture requires BME280 plus SSD1306. A sensor-only export
-can run core scenarios but remains `PARTIAL`; its Arduino adapter is not credited
-as tested by that fixture. A BH1750 build runs the same fifteen core scenarios
-and always reports the vendor-host lane as `NOT_RUN` with the reason that no
-register-level bus model exists for it; see
+Each supported part has its own vendor-host lane (a bus model and an eleven-scenario
+harness, selected by the part descriptor) and each requires its sensor plus SSD1306.
+A sensor-only export can run core scenarios but remains `PARTIAL`; its Arduino adapter
+is not credited as tested by that fixture. The BME280 lane models the Bosch register map;
+the BH1750 lane is a model written from the Rohm datasheet, with the datasheet's worked
+examples as the oracle, and it does not model the resolution modes. See
 [part descriptors](DEVICE_PART_DESCRIPTORS.md).
 
 Set `HARDWARE_SPLICER_API_KEY` before exposing execution beyond loopback. The

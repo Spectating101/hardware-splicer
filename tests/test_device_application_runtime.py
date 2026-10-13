@@ -117,7 +117,7 @@ def test_sensor_only_export_does_not_claim_the_display_vendor_fixture_was_tested
     spec["connections"] = [row for row in spec["connections"] if not row["from"].startswith("display.")]
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_VENDOR_LIBS", "/operator-configured-path")
-    monkeypatch.setattr(runtime, "_vendor_manifest", lambda _: {})
+    monkeypatch.setattr(runtime, "_vendor_manifest", lambda *_: {})
     monkeypatch.setattr(runtime, "_run_vendor_host", lambda *_: pytest.fail("display fixture must not run"))
     monkeypatch.setattr(runtime, "_run_host", lambda _: ({"pass": True, "scenarios": []}, b""))
     result = runtime.run_device_application(spec)
@@ -143,7 +143,7 @@ def test_vendor_manifest_hashes_the_private_bytes_used_by_the_compiler(monkeypat
     monkeypatch.setenv("HS_DEVICE_RUNTIME_ENABLED", "1")
     monkeypatch.setenv("HS_DEVICE_RUNTIME_VENDOR_LIBS", str(tmp_path))
     monkeypatch.setattr(runtime, "_run_host", lambda _: ({"pass": True, "scenarios": []}, b""))
-    def vendor(project, frozen):
+    def vendor(project, frozen, profile):
         assert frozen != tmp_path
         for name in runtime.VENDOR_PINS:
             (tmp_path / name / "fixture.cpp").write_text("cache changed after capture")

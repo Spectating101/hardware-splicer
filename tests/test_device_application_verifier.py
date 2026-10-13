@@ -39,7 +39,7 @@ def test_bad_harness_results_fail_closed(tmp_path, monkeypatch, lane, fault):
     output = ("\n".join(json.dumps(row) for row in rows) + "\n").encode()
     if fault == "json":
         output = b"not json\n"
-    monkeypatch.setattr(module, "vendor_libs_available", lambda _: True)
+    monkeypatch.setattr(module, "vendor_libs_available", lambda *_: True)
     monkeypatch.setattr(module.shutil, "which", lambda _: "/usr/bin/g++")
 
     def run(command, **kwargs):
@@ -70,7 +70,7 @@ def test_complete_results_pass_only_with_successful_exit():
 def test_relative_vendor_library_path_is_resolved_before_changing_compile_directory(tmp_path, monkeypatch):
     module = verifier()
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(module, "vendor_libs_available", lambda _: True)
+    monkeypatch.setattr(module, "vendor_libs_available", lambda *_: True)
     monkeypatch.setattr(module.shutil, "which", lambda _: "/usr/bin/g++")
     rows = [{"scenario": name, "pass": True} for name in module.VENDOR_SCENARIOS]
 

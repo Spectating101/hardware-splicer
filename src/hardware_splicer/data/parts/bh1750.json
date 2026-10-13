@@ -21,7 +21,8 @@
       "adafruit/Adafruit GFX Library @ 1.12.6",
       "adafruit/Adafruit BusIO @ 1.17.4"
     ],
-    "vendor_host": false
+    "vendor_host": true,
+    "vendor_profile": "bh1750"
   },
   "datasheet": {
     "document": "Rohm BH1750FVI, 2009.04 Rev.B, 17 pages",
