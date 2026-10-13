@@ -23,6 +23,7 @@ wrong — see [MACHINE_PROJECT_SPINE.md](MACHINE_PROJECT_SPINE.md).
 |------|-----------|---------------------|
 | 1 | `GET /v1/devices/spec-schema` | A JSON Schema for the spec, built from the module library, plus a catalogue of controllers and parts with their pins, roles and cited figures |
 | 2 | `GET /v1/devices/examples` | Complete example specs to start from (ESP32 and Raspberry Pi Pico) |
+| 2b | `POST /v1/devices/draft` | Optional. From `{"controller", "parts"}` (library ids) a spec wired the plain way: power, ground and the controller's default I2C bus. Returns the spec, what it assumed and the planner's findings for it |
 | 3 | `POST /v1/devices/plan` | The plan: placement, wires, findings, steps, bill of materials |
 | 4 | Repair | Each `error` finding may carry `suggestions`. Apply one, re-plan, repeat until no errors |
 | 5 | `POST /v1/devices/engineering` | Bus, supply, heat, antenna, fit and printing review. Every number is sourced or marked as an assumption |
@@ -32,6 +33,15 @@ wrong — see [MACHINE_PROJECT_SPINE.md](MACHINE_PROJECT_SPINE.md).
 | 9 | `POST /v1/devices/observations` | Compares serial output a human captured on a bench with what the plan predicts |
 
 Steps 5 to 8 are independent of each other once the plan has no errors.
+
+## Drafting from a parts list
+
+When a person says "an ESP32 with a BME280 and a display", the agent maps those words to library ids
+(`GET /v1/devices/spec-schema` lists them) and calls `draft`. The helper does no language processing and
+invents nothing: an unknown id, a non-controller board, or a part that is not a display or I2C breakout is
+refused with a reason. Two parts at one I2C address are not prevented; the planner reports
+`i2c_address_overlap`, and the agent should tell the person. A draft is a starting point, so it still goes
+through the plan, the repair loop and the engineering review.
 
 ## Suggestions
 
@@ -79,5 +89,5 @@ entries without them. An agent should not invent figures to get a plan through.
 ## Focused tests
 
 ```bash
-PYTHONPATH=src .venv/bin/python -m pytest tests/test_device_agent_surface.py -q -p no:cacheprovider
+PYTHONPATH=src .venv/bin/python -m pytest tests/test_device_agent_surface.py tests/test_device_draft.py -q -p no:cacheprovider
 ```
