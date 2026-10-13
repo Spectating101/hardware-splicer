@@ -80,6 +80,10 @@ errors. These operations never create a project revision or persist bench facts.
 The browser aborts and clears results when the checked specification changes.
 Modeled serial traces are displayed separately from **Check a bench scan** and
 are never automatically submitted as physical evidence.
+The observation checker accepts each planned sensor's own serial grammar, retains
+later faults and recovery, and treats a BH1750 boot only as an acknowledgement,
+not a chip identity. Pasted output remains operator-supplied text and is not
+persisted or promoted into physical evidence.
 
 All results retain `physical_correctness=UNPROVEN`, `firmware_authorized=false`
 and `power_on_authorized=false`. No flashing, powering, fabrication or procurement
