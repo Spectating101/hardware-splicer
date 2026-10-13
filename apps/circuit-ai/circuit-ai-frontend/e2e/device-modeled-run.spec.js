@@ -87,7 +87,7 @@ test('a late modeled response cannot attach itself to newly checked wiring', asy
   await expect(page.getByTestId('device-modeled-result')).toHaveCount(0);
 });
 
-test('a BH1750 build runs the same modeled tests and says its adapter has no bus model', async ({ page }, info) => {
+test('a BH1750 build runs the same modeled tests and stays partial without the pinned display libraries', async ({ page }, info) => {
   await open(page);
   const spec = JSON.parse(await page.getByTestId('device-spec-editor').inputValue());
   spec.modules.find((module) => module.id === 'sensor').module = 'adafruit-bh1750-stemma-qt';
@@ -103,7 +103,7 @@ test('a BH1750 build runs the same modeled tests and says its adapter has no bus
   const result = page.getByTestId('device-modeled-result');
   await expect(result).toBeVisible({ timeout: 90000 });
   await expect(result).toHaveAttribute('data-status', 'PARTIAL');
-  await expect(result).toContainText('No vendor-host lane exists for the BH1750');
+  await expect(result).toContainText('Pinned vendor libraries are not configured');
   await expect(result).toContainText('Core logic: PASSED (15/15 scenarios)');
   const boot = result.getByTestId('device-modeled-scenario').filter({ hasText: 'boot_ok:' });
   await boot.locator('summary').click();
