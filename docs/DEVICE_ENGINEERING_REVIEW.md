@@ -30,12 +30,20 @@ returns one of four statuses and never "pass":
 | Mechanical | What holds the board when a cable is plugged in | How far the board can travel before the antenna end meets the wall |
 | Printing | Wall thickness, the USB bridge, the lid orientation | Against a 0.4 mm nozzle and a 20 mm bridge limit, both assumed |
 
-## What it found in the generated case
+## What it found in the generated case, and what the case now does about it
 
-For the shipped ESP32 examples the antenna end of the board is **1 mm** from the inside wall, against a recommended 15 mm, so the
-case is about 14 mm too short at that end. The case itself is not changed by the review: lengthening it is a layout decision that
-moves every other dimension, and it is left for a person to make. The same layout lets the board travel only 1 mm before its antenna end
-meets the wall, so the USB plug's push goes through the antenna end; the exported case has no board stops.
+The review's first run on the shipped ESP32 examples found the antenna end of the board **1 mm** from the inside wall, against a recommended
+15 mm, and a board that could slide only 1 mm before that end met the wall, so a plug's push went through the antenna end. The case now
+answers both, as spec options that are on by default:
+
+- `case.antenna_clearance`: the case is lengthened at the antenna end until the gap meets the clearance the board's library entry sources
+  (15 mm for the ESP32 module, about 14 mm longer). Set it to `false` to get the old case, and the review reports `exceeds_limit` again.
+- `case.board_stops`: for any board with header pins below it, a low stop block sits 0.5 mm past the last pin of each row, so a plug pushed in is
+  taken by the pins. A board with no antenna, like the Pico, grows slightly to make room for them. The review reports the travel (0.5 mm)
+  and says plainly that the stops' strength and the insertion force are not assessed.
+
+The stops are small printed blocks at typical sizes and nothing else holds the board. With both options off the ESP32 plans are byte-identical
+to what they were before these options existed.
 
 ## What it does not assess
 

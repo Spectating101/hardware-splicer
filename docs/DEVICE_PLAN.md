@@ -61,6 +61,8 @@ device spec or wiring, and approves no building, powering or release. A recorded
 }
 ```
 
+`case` also takes `antenna_clearance` and `board_stops`, both true by default; see [the engineering review](DEVICE_ENGINEERING_REVIEW.md).
+
 A pin is `module.NAME` (the name printed on the module) or `module.ID` (for example `mcu.J3-6`). A name that several pins share,
 such as `GND`, takes the pin nearest the other end of the wire, and the plan says which it chose. Measured sizes can replace the
 library's typical ones with `"overrides": {"pcb_mm": {"x": 28.1}}`.

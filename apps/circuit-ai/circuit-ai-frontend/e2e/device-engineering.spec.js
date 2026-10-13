@@ -16,8 +16,9 @@ test('the engineering review is computed from the layout, shows sourced and assu
   await expect(result).toBeVisible({ timeout: 30000 });
   await expect(result).toContainText('Physical correctness: UNPROVEN');
   const antenna = result.locator('[data-check="antenna_clearance"]');
-  await expect(antenna).toHaveAttribute('data-status', 'exceeds_limit');
+  await expect(antenna).toHaveAttribute('data-status', 'within_limit_under_assumptions');
   await expect(antenna).toContainText('at least 15 mm');
+  await expect(result.locator('[data-check="usb_insertion_support"]')).toHaveAttribute('data-status', 'within_limit_under_assumptions');
   await expect(antenna.locator('a')).toHaveAttribute('href', /esp-hardware-design-guidelines/);
   await expect(result.locator('[data-check="i2c_bus"]')).toHaveAttribute('data-status', 'not_assessed');
   await expect(result.locator('[data-check="temperature_bias_sensor"]')).toHaveAttribute('data-status', 'advisory');
