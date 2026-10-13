@@ -343,6 +343,74 @@ def example_specs() -> dict[str, Any]:
     return json.loads(json.dumps(EXAMPLES))
 
 
+
+def device_spec_json_schema() -> dict[str, Any]:
+    """A JSON Schema for the device spec, built from the library so the module ids, wire colours and ranges are the ones the planner accepts.
+
+    It is meant for a person or a model writing a spec: constrained output that satisfies it still has to pass the planner's wiring
+    checks, and the planner's findings (with suggestions) say what to change.
+    """
+
+    ids = [m["id"] for m in _library()["modules"]]
+    endpoint = {"type": "string", "pattern": r"^[a-z][a-z0-9_]{0,23}\.[^.\s]{1,40}$",
+                "description": "module_id.PIN, for example display.SDA. A pin is named by its id or its printed name, case-insensitively."}
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Hardware Splicer device spec",
+        "description": "Which modules, which pin goes to which, and a case. A plan made from it is a proposal and a checklist; it approves nothing.",
+        "type": "object",
+        "additionalProperties": True,
+        "required": ["modules"],
+        "properties": {
+            "schema_version": {"const": DEVICE_SPEC_SCHEMA},
+            "name": {"type": "string", "minLength": 1, "maxLength": MAX_NAME},
+            "power": {"type": "object", "properties": {"source": {"enum": ["usb"]}}, "additionalProperties": False},
+            "modules": {
+                "type": "array", "minItems": 1, "maxItems": MAX_MODULES,
+                "description": "Exactly one microcontroller board and at most one display, plus any I2C breakouts.",
+                "items": {
+                    "type": "object", "required": ["id", "module"], "additionalProperties": False,
+                    "properties": {
+                        "id": {"type": "string", "pattern": _SLUG.pattern, "description": "Your name for this module in connections, for example mcu, display, sensor."},
+                        "module": {"enum": ids},
+                        "pin_order": {"type": "string", "description": "For a module whose pin order varies by seller: the id of the order printed on yours (see the module's pin_orders)."},
+                        "overrides": {"type": "object", "additionalProperties": False, "properties": {
+                            "pcb_mm": {"type": "object", "additionalProperties": False, "properties": {k: {"type": "number", "minimum": 0.5, "maximum": 300} for k in ("x", "y", "z")}},
+                            "above_board_mm": {"type": "number", "minimum": 0, "maximum": 100}}},
+                    },
+                },
+            },
+            "connections": {
+                "type": "array", "maxItems": MAX_CONNECTIONS,
+                "items": {"type": "object", "required": ["from", "to"], "additionalProperties": False,
+                          "properties": {"from": endpoint, "to": endpoint, "wire": {"enum": sorted(WIRE_COLORS)}}},
+            },
+            "case": {
+                "type": "object", "additionalProperties": True,
+                "properties": {
+                    "wall_mm": {"type": "number", "minimum": 1.2, "maximum": 5.0},
+                    "clearance_mm": {"type": "number", "minimum": 0.2, "maximum": 3.0},
+                    "antenna_clearance": {"type": "boolean", "description": "Lengthen the case so a board's antenna meets its sourced clearance. Default true."},
+                    "board_stops": {"type": "boolean", "description": "Add stop blocks past the last header pin of each row. Default true."},
+                },
+            },
+        },
+    }
+
+
+def device_catalog() -> list[dict[str, Any]]:
+    """What a model needs in order to wire modules: each module's id, kind, pins with their roles, and its pin orders."""
+
+    rows = []
+    for module in _library()["modules"]:
+        rows.append({
+            "id": module["id"], "name": module["name"], "kind": module["kind"], "summary": module.get("summary", ""),
+            "i2c_addresses": module.get("i2c", {}).get("addresses", []),
+            "pin_orders": [order["id"] for order in module.get("pin_orders", [])],
+            "pins": [{"id": pin["id"], "name": pin["name"], "roles": pin["roles"]} for pin in module["pins"]],
+        })
+    return rows
+
 # --- spec -----------------------------------------------------------------------------------------------------------------
 
 
@@ -794,8 +862,72 @@ def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_
             if module.entry.get("electrical", {}).get("i2c_pin_mux") == "fixed" and "i2c_controller" in pin:
                 selected["sda" if "i2c_sda" in roles else "scl"] = (f"{module.ref}.{pin['name']}", pin["i2c_controller"])
     if len(selected) == 2 and selected["sda"][1] != selected["scl"][1]:
-        findings.append(_finding("error", "i2c_mixed_controllers", f"SDA is on {selected['sda'][0]} (I2C{selected['sda'][1]}) and SCL on {selected['scl'][0]} (I2C{selected['scl'][1]}). One I2C bus uses both signals of the same controller.", "the controller's pinout: each I2C controller has its own SDA and SCL pins"))
+        finding = _finding("error", "i2c_mixed_controllers", f"SDA is on {selected['sda'][0]} (I2C{selected['sda'][1]}) and SCL on {selected['scl'][0]} (I2C{selected['scl'][1]}). One I2C bus uses both signals of the same controller.", "the controller's pinout: each I2C controller has its own SDA and SCL pins")
+        mcu_ref = selected["sda"][0].split(".")[0]
+        controller = placed[mcu_ref]
+        finding["suggestions"] = [{"action": "move_signal", "signal": signal, "to_one_of": [f"{mcu_ref}.{p['name']}" for p in controller.entry["pins"] if f"i2c_{signal}_capable" in p["roles"] and p.get("i2c_controller") == selected[other][1]]}
+                                  for signal, other in (("scl", "sda"), ("sda", "scl"))]
+        findings.append(finding)
     return findings
+
+
+def _candidates(mcu: _Placed, role: str, limit: int = 8) -> list[str]:
+    """Controller pins that could take a wire in the given role, best first, written as ``mcu.NAME`` so a spec can use them as they are."""
+
+    pins = mcu.entry["pins"]
+    names: list[str] = []
+
+    def add(pin: dict[str, Any]) -> None:
+        name = f"{mcu.ref}.{pin['name']}"
+        if name not in names:
+            names.append(name)
+
+    if role == "ground":
+        for pin in pins:
+            if "ground" in pin["roles"] and pin["name"].upper() == "GND":
+                add(pin)
+    elif role == "power":
+        for pin in pins:
+            if "power_3v3" in pin["roles"]:
+                add(pin)
+    elif role in {"i2c_sda", "i2c_scl"}:
+        default, capable = f"{role}_default", f"{role}_capable"
+        for pin in pins:
+            if default in pin["roles"]:
+                add(pin)
+        for pin in pins:
+            if capable in pin["roles"]:
+                add(pin)
+        if mcu.entry.get("electrical", {}).get("i2c_pin_mux") == "any":
+            for pin in pins:
+                if "gpio" in pin["roles"] and not set(pin["roles"]) & {"strapping", "usb_serial", "gpio_input_only", "do_not_use"}:
+                    add(pin)
+    return names[:limit] if role in {"i2c_sda", "i2c_scl"} and mcu.entry.get("electrical", {}).get("i2c_pin_mux") == "any" else names
+
+
+def _attach_suggestions(findings: list[dict[str, Any]], placed: dict[str, _Placed], mcu: _Placed, wires: list[dict[str, Any]]) -> None:
+    """Machine-usable ways out of the errors that have an obvious one. A suggestion is a candidate, never an applied change."""
+
+    label_role = {"ground": "ground", "power": "power", "SDA": "i2c_sda", "SCL": "i2c_scl"}
+    by_wire = {w["id"]: w for w in wires}
+    for finding in findings:
+        if finding["severity"] != "error":
+            continue
+        if finding["rule"] == "missing_connection":
+            match = re.match(r"(\w+) \(.*\) has no wire on its (\w+) pin", finding["message"])
+            role = label_role.get(match.group(2)) if match else None
+            if match and role and match.group(1) in placed:
+                module = placed[match.group(1)]
+                module_role = {"ground": "ground", "power": "power_in", "i2c_sda": "i2c_sda", "i2c_scl": "i2c_scl"}[role]
+                pin = next((p for p in module.entry["pins"] if module_role in p["roles"]), None)
+                options = _candidates(mcu, role)
+                if pin and options:
+                    finding["suggestions"] = [{"action": "add_connection", "from": f"{module.ref}.{pin['name']}", "to_one_of": options}]
+        elif finding["rule"] == "not_an_i2c_pin" and finding.get("wire") in by_wire:
+            wire = by_wire[finding["wire"]]
+            other, bad = (wire["from"], wire["to"]) if wire["to"]["module"] == mcu.ref else (wire["to"], wire["from"])
+            role = "i2c_sda" if other["pin"].upper().startswith("SD") else "i2c_scl"
+            finding["suggestions"] = [{"action": "replace_connection", "wire": finding["wire"], "from": f"{other['module']}.{other['pin']}", "to_one_of": _candidates(mcu, role)}]
 
 
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
@@ -1015,6 +1147,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             "; ".join(source["url"] for module in pulled for source in module.entry.get("sources", [])),
         ))
     findings.sort(key=lambda f: ({"error": 0, "warning": 1, "info": 2}[f["severity"]], f["rule"], f["message"]))
+    _attach_suggestions(findings, placed, mcu, wires)
 
     # Case.
     usb_cut = None
