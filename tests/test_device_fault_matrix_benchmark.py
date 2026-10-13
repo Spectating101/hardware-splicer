@@ -1,6 +1,8 @@
 """The mutation benchmark must stay honest: mutants really apply, and only reviewed equivalents are excused."""
 import importlib.util
 import shutil
+import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -166,3 +168,59 @@ def bench_libs_ok(libs):
     from hardware_splicer.device_application_execution import vendor_libs_available
 
     return vendor_libs_available(libs)
+
+
+@pytest.mark.parametrize("lane,part", [("core", "bme280"), ("vendor", "bme280"), ("vendor", "bh1750")])
+@pytest.mark.parametrize("corruption", ["empty", "partial", "duplicate", "unknown", "non_object", "truthy", "finding", "bad_json", "exit"])
+def test_benchmark_rejects_unsuccessful_or_incomplete_harness_runs(bench, tmp_path, monkeypatch, lane, part, corruption):
+    from hardware_splicer.device_application_execution import HOST_SCENARIOS
+    from hardware_splicer.device_vendor_profiles import vendor_profile
+
+    project = bench.build_package(tmp_path, {"bme280": bench.BME280, "bh1750": bench.BH1750}[part])
+    expected = HOST_SCENARIOS if lane == "core" else vendor_profile(part)["scenarios"]
+    rows = [{"scenario": name, "pass": True} for name in expected]
+    if corruption == "empty":
+        rows = []
+    elif corruption == "partial":
+        rows = rows[:1]
+    elif corruption == "duplicate":
+        rows[-1] = rows[0]
+    elif corruption == "unknown":
+        rows[-1]["scenario"] = "unknown"
+    elif corruption == "non_object":
+        rows[-1] = []
+    elif corruption == "truthy":
+        rows[-1]["pass"] = 1
+    elif corruption == "finding":
+        rows[-1]["finding"] = True
+    output = b"not JSON\n" if corruption == "bad_json" else b"".join((json.dumps(row) + "\n").encode() for row in rows)
+
+    def execute(command, **kwargs):
+        compiling = "-o" in command
+        return subprocess.CompletedProcess(command, 0 if compiling or corruption != "exit" else 1,
+                                           b"" if compiling else output, b"")
+
+    # Before the repair the benchmark used raw subprocess.run; both paths receive the same controlled output.
+    monkeypatch.setattr(bench.subprocess, "run", execute)
+    monkeypatch.setattr(bench, "_execute", execute, raising=False)
+    result = bench.run_project(project) if lane == "core" else bench.run_vendor_project(project, tmp_path)
+    assert result["outcome"] == "KILLED"
+    assert result["failed"] and result["detail"]
+
+
+@pytest.mark.parametrize("lane,part", [("core", "bme280"), ("vendor", "bme280"), ("vendor", "bh1750")])
+def test_complete_scenario_output_is_still_accepted_by_the_benchmark(bench, tmp_path, monkeypatch, lane, part):
+    from hardware_splicer.device_application_execution import HOST_SCENARIOS
+    from hardware_splicer.device_vendor_profiles import vendor_profile
+
+    project = bench.build_package(tmp_path, {"bme280": bench.BME280, "bh1750": bench.BH1750}[part])
+    expected = HOST_SCENARIOS if lane == "core" else vendor_profile(part)["scenarios"]
+    output = b"".join((json.dumps({"scenario": name, "pass": True}) + "\n").encode() for name in expected)
+
+    def execute(command, **kwargs):
+        return subprocess.CompletedProcess(command, 0, b"" if "-o" in command else output, b"")
+
+    monkeypatch.setattr(bench.subprocess, "run", execute)
+    monkeypatch.setattr(bench, "_execute", execute, raising=False)
+    result = bench.run_project(project) if lane == "core" else bench.run_vendor_project(project, tmp_path)
+    assert result["outcome"] == "SURVIVED"

@@ -35,6 +35,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from hardware_splicer.bounded_process import BoundedProcessError
+from hardware_splicer.device_application_execution import HOST_SCENARIOS, _execute, _scenario_failure
+from hardware_splicer.device_vendor_profiles import vendor_profile
+
 SCHEMA = "hardware_splicer.device_fault_matrix_benchmark.v1"
 SMOKE = frozenset({"boot_ok"})
 HEALTHY = frozenset({"boot_ok", "default_address_binding", "read_period"})
@@ -454,30 +458,21 @@ def run_project(project: Path, *, compile_timeout: float = 120, run_timeout: flo
     if not gxx:
         raise RuntimeError("g++ is required")
     try:
-        compiled = subprocess.run(
+        compiled = _execute(
             [gxx, "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", "src", "test/host/harness.cpp", "-o", "harness"],
             cwd=project, capture_output=True, timeout=compile_timeout, check=False,
         )
-    except subprocess.TimeoutExpired:
+    except (subprocess.TimeoutExpired, BoundedProcessError):
         return {"outcome": "STILLBORN", "failed": [], "detail": "compile timed out"}
     if compiled.returncode != 0:
         first = (compiled.stderr or b"").decode(errors="replace").strip().splitlines()[:1]
         return {"outcome": "STILLBORN", "failed": [], "detail": first[0] if first else "compile failed"}
     try:
-        ran = subprocess.run([str(project / "harness")], cwd=project, capture_output=True, timeout=run_timeout, check=False)
-    except subprocess.TimeoutExpired:
+        ran = _execute([str(project / "harness")], cwd=project, timeout=run_timeout)
+    except (subprocess.TimeoutExpired, BoundedProcessError):
         return {"outcome": "KILLED", "failed": ["<timeout>"], "detail": "harness did not finish"}
-    rows = []
-    for line in ran.stdout.decode(errors="replace").splitlines():
-        if line.strip():
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                return {"outcome": "KILLED", "failed": ["<malformed output>"], "detail": "harness output was not JSON"}
-    failed = [row.get("scenario") for row in rows if row.get("pass") is not True]
-    if ran.returncode != 0 and not failed:
-        failed = ["<exit code>"]
-    return {"outcome": "KILLED" if failed else "SURVIVED", "failed": failed, "scenarios": [row.get("scenario") for row in rows], "detail": ""}
+    failed, problem = _failed_rows(ran, HOST_SCENARIOS)
+    return {"outcome": "KILLED" if failed else "SURVIVED", "failed": failed, "detail": problem}
 
 
 def evaluate(mutant: Mutant, baseline: Path, workdir: Path) -> dict:
@@ -530,19 +525,18 @@ def summarize(rows: list[dict]) -> dict:
     }
 
 
-def _failed_rows(ran: subprocess.CompletedProcess) -> tuple[list[str], str]:
+def _failed_rows(ran: subprocess.CompletedProcess, expected: tuple[str, ...]) -> tuple[list[str], str]:
     """Return (failing scenario names, problem) for one harness run, as the product's verifier reads it."""
-    rows = []
-    for line in ran.stdout.decode(errors="replace").splitlines():
-        if line.strip():
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                return ["<malformed output>"], "harness output was not JSON"
-    failed = [str(row.get("scenario")) for row in rows if row.get("pass") is not True or row.get("finding", False) is not False]
-    if ran.returncode != 0 and not failed:
-        failed = ["<exit code>"]
-    return failed, ""
+    try:
+        rows = [json.loads(line) for line in ran.stdout.decode().splitlines() if line.strip()]
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return ["<malformed output>"], "harness output was not JSON"
+    problem = _scenario_failure(rows, expected, ran.returncode)
+    failed = [str(row.get("scenario")) for row in rows if isinstance(row, dict)
+              and (row.get("pass") is not True or row.get("finding", False) is not False)]
+    if problem and not failed:
+        failed = ["<exit code>" if ran.returncode != 0 else "<invalid scenario output>"]
+    return failed, problem
 
 
 def run_vendor_project(project: Path, libdeps: Path, *, compile_timeout: float = 240, run_timeout: float = 60) -> dict:
@@ -553,18 +547,18 @@ def run_vendor_project(project: Path, libdeps: Path, *, compile_timeout: float =
     profile = descriptor["adapter"].get("vendor_profile") or "bme280"
     binary = project / "vendor_harness"
     try:
-        compiled = subprocess.run(vendor_host_compile_command(project, libdeps, binary, profile), cwd=project,
+        compiled = _execute(vendor_host_compile_command(project, libdeps, binary, profile), cwd=project,
                                   capture_output=True, timeout=compile_timeout, check=False)
-    except subprocess.TimeoutExpired:
+    except (subprocess.TimeoutExpired, BoundedProcessError):
         return {"outcome": "STILLBORN", "failed": [], "detail": "compile timed out"}
     if compiled.returncode != 0:
         first = [line for line in (compiled.stderr or b"").decode(errors="replace").splitlines() if "error" in line][:1]
         return {"outcome": "STILLBORN", "failed": [], "detail": first[0] if first else "compile failed"}
     try:
-        ran = subprocess.run([str(binary)], cwd=project, capture_output=True, timeout=run_timeout, check=False)
-    except subprocess.TimeoutExpired:
+        ran = _execute([str(binary)], cwd=project, timeout=run_timeout)
+    except (subprocess.TimeoutExpired, BoundedProcessError):
         return {"outcome": "KILLED", "failed": ["<timeout>"], "detail": "vendor harness did not finish"}
-    failed, problem = _failed_rows(ran)
+    failed, problem = _failed_rows(ran, vendor_profile(profile)["scenarios"])
     return {"outcome": "KILLED" if failed else "SURVIVED", "failed": failed, "detail": problem}
 
 
