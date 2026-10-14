@@ -3,6 +3,7 @@
 // and after recovery, nothing on the other controller, and no core panic. Drafted by Gemini 4 Argon; made generic over
 // the sensor and integrated by Hardware-Splicer. Include it after the harness defines setup(), tracked_loop() and pump_to().
 
+#include <cstdio>
 #include <string>
 
 #include "Wire.h"
@@ -41,6 +42,7 @@ static Result scenario_wire_pins_rp2040(WorldT &w, Plug plug_sensor_now, Unplug 
     if (!tracked_loop()) return {false, "watchdog during boot", false};
     if (const std::string bad = other_bus("during boot"); !bad.empty()) return {false, bad, false};
 
+    const size_t begins_at_boot = HS_WIRE.begin_calls().size();
     unplug_sensor_now(w);
     pump_to(9000);
     plug_sensor_now(w);
@@ -53,17 +55,31 @@ static Result scenario_wire_pins_rp2040(WorldT &w, Plug plug_sensor_now, Unplug 
     if (!HS_WIRE.inited() || HS_WIRE.sda_pin() != HS_PLANNED_SDA || HS_WIRE.scl_pin() != HS_PLANNED_SCL) {
         return {false, at("after recovery"), false};
     }
-    // begin() on a running bus is a no-op on this core, so recovery must end() first: boot plus recovery is at least two
-    // begin() calls that really started the bus.
+    // begin() on a running bus is a no-op on this core, so recovery must end() first: at least one begin() after the
+    // unplug really started the bus. Counted from the unplug, so extra starts during boot cannot stand in for it.
+    const auto &calls = HS_WIRE.begin_calls();
     int started = 0;
-    for (const auto &c : HS_WIRE.begin_calls()) started += c.actually_inited ? 1 : 0;
-    if (started < 2) {
-        return {false, "bus recovery did not end and restart " + std::string(name) + ": " + std::to_string(started) +
-                           " begin() call(s) started it", false};
+    for (size_t i = begins_at_boot; i < calls.size(); ++i) started += calls[i].actually_inited ? 1 : 0;
+    if (started < 1) return {false, "bus recovery did not end and restart " + std::string(name), false};
+    for (const auto &c : calls) {
+        if (c.actually_inited && c.freq_arg != 100000) {
+            return {false, std::string(name) + ".begin() started the bus at " + std::to_string(c.freq_arg) +
+                               " Hz, not the planned 100000 Hz", false};
+        }
+    }
+    // The display library runs its own transfers at 400 kHz and restores 100 kHz after them; every other device must
+    // see the planned clock, before and after recovery.
+    for (const auto &tx : g_i2c_bus.log) {
+        if (tx.address != 0x3C && tx.address != 0x3D && tx.clock_hz != 100000) {
+            char hex[3];
+            std::snprintf(hex, sizeof hex, "%02X", tx.address);
+            return {false, std::string("a transaction with 0x") + hex + " ran at " + std::to_string(tx.clock_hz) +
+                               " Hz, not the planned 100000 Hz", false};
+        }
     }
     if (!wire_panics().empty()) return {false, "the core panicked: " + wire_panics().front(), false};
     return {true, std::string(name) + " on sda=" + std::to_string(HS_WIRE.sda_pin()) + " scl=" + std::to_string(HS_WIRE.scl_pin()) +
-                      " at 100000 Hz after boot and recovery; nothing on the other controller; " + std::to_string(started) +
-                      " begin() calls started the bus",
+                      " at 100000 Hz after boot and recovery; nothing on the other controller; recovery restarted the bus " +
+                      std::to_string(started) + " time(s)",
             false};
 }

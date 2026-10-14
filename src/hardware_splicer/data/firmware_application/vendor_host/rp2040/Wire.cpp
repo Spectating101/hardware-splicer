@@ -201,6 +201,7 @@ size_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool stopBit) {
     I2cTransaction tx;
     tx.address = address;
     tx.direction = I2cDir::Read;
+    tx.clock_hz = static_cast<uint32_t>(_clkHz);
     tx.stop = stopBit;
     I2cDevice *dev = b.at(address);
     if (b.remaining_read_fails > 0) {
@@ -233,6 +234,7 @@ uint8_t TwoWire::endTransmission(bool stopBit) {
     I2cTransaction tx;
     tx.address = _addr;
     tx.direction = I2cDir::Write;
+    tx.clock_hz = static_cast<uint32_t>(_clkHz);
     tx.bytes.assign(_buff, _buff + _buffLen);
     tx.stop = stopBit;
     tx.bare_probe = (_buffLen == 0);

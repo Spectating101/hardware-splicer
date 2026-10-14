@@ -73,6 +73,7 @@ struct I2cTransaction {
     uint8_t result = 0;  // endTransmission codes, or 0 for a completed read
     bool stop = true;
     bool bare_probe = false;  // beginTransmission + endTransmission with 0 payload
+    uint32_t clock_hz = 0;    // model-only: the clock the transaction ran at
 };
 
 struct WireBeginCall {
