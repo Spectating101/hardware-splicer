@@ -65,6 +65,11 @@ target:
   - Seeded adapter bugs on I2C1 are caught: the display or sensor on `Wire` instead of `Wire1`, recovery without `end()`,
     pins never set, and 400 kHz. Leaving the pins unset on I2C0 is not caught, because the core's defaults are GP4/GP5,
     the planned pins, so a real Pico behaves the same.
+  - An Argon review of the change found two holes in the pin scenario, both reproduced and closed. The display library
+    restores 100 kHz after its own transfers, which hid a recovery that restarted the bus at 400 kHz; the model now records
+    the clock of every transaction, and every device but the display must see 100 kHz. Restarts were counted over the whole
+    run, so two starts at boot hid a recovery that never restarted the bus; they are now counted from the unplug. It also
+    found that a core panic inside a forked sub-case reported that scenario twice.
   - Two host-only stand-ins are needed: an empty `util/delay.h` (the ARM compiler defines `__ARM_ARCH`, so the real build
     never includes it) and the core's `api/deprecated-avr-comp/avr/pgmspace.h`, which forwards to the shared host one.
   - It is still a model: not the RP2040 I2C peripheral, the pico-sdk or its timing, and not silicon.
