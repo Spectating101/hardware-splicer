@@ -78,3 +78,34 @@ test('an unsupported device says why instead of downloading, and a GPIO change r
   expect(main).toContain('constexpr int SCL_PIN = 26;');
   expect(main).not.toContain('constexpr int SDA_PIN = 21;');
 });
+
+test('the Pico example downloads a Pico package on its own I2C pins, with the same host tests and no ESP32 claims', async ({ page }, info) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await open(page, 'pico_oled_bme280_usb');
+  await expect(page.getByTestId('device-application-download')).toBeEnabled();
+  await expect(page.getByTestId('device-application')).toContainText('Raspberry Pi Pico');
+  const waiting = page.waitForEvent('download');
+  await page.getByTestId('device-application-download').click();
+  const file = info.outputPath('pico-application.zip');
+  await (await waiting).saveAs(file);
+  const dir = info.outputPath('pico');
+  fs.mkdirSync(dir, { recursive: true });
+  const names = JSON.parse(execFileSync(python, ['-c', 'import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; z.extractall(sys.argv[2]); print(json.dumps(z.namelist()))', file, dir], { encoding: 'utf8' }));
+  expect(names.filter((name) => name.startsWith('test/vendor_host/'))).toEqual([]);
+  const meta = JSON.parse(fs.readFileSync(path.join(dir, 'FIRMWARE_PROPOSAL.json'), 'utf8'));
+  expect(meta.target.board).toBe('pico');
+  expect([meta.pins.sda.printed_name, meta.pins.scl.printed_name]).toEqual(['GP4', 'GP5']);
+  expect(meta.firmware_authorized).toBe(false);
+  expect(meta.physical_correctness).toBe('UNPROVEN');
+  expect(fs.readFileSync(path.join(dir, 'platformio.ini'), 'utf8')).toContain('board_build.core = earlephilhower');
+  const main = fs.readFileSync(path.join(dir, 'src/main.cpp'), 'utf8');
+  expect(main).toContain('Wire.setSDA(SDA_PIN)');
+  expect(main).not.toContain('Wire.begin(SDA_PIN, SCL_PIN, 100000)');
+  const build = spawnSync('g++', ['-std=c++17', '-Wall', '-Wextra', '-Werror', '-I', 'src', 'test/host/harness.cpp', '-o', 'harness'], { cwd: dir, encoding: 'utf8' });
+  test.skip(build.error && build.error.code === 'ENOENT', 'g++ is not installed');
+  expect(build.status, build.stderr).toBe(0);
+  const run = spawnSync('./harness', [], { cwd: dir, encoding: 'utf8' });
+  expect(run.status, run.stdout).toBe(0);
+  expect(errors).toEqual([]);
+});
