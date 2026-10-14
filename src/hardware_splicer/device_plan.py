@@ -915,6 +915,22 @@ def _candidates(mcu: _Placed, role: str, limit: int = 8) -> list[str]:
     return names[:limit] if role in {"i2c_sda", "i2c_scl"} and mcu.entry.get("electrical", {}).get("i2c_pin_mux") == "any" else names
 
 
+def _wired_bus_pins(placed: dict[str, _Placed], mcu: _Placed, wires: list[dict[str, Any]], module_role: str, *, exclude: str) -> list[str]:
+    """Controller pins that another module has already wired to its own pin of this I2C role, in wiring order."""
+
+    pins: list[str] = []
+    for wire in wires:
+        for end, far in (("from", "to"), ("to", "from")):
+            near, other = wire[end], wire[far]
+            if other["module"] != mcu.ref or near["module"] in (mcu.ref, exclude) or near["module"] not in placed:
+                continue
+            entry_pin = next((p for p in placed[near["module"]].entry["pins"] if p["id"] == near["pin_id"]), None)
+            name = f"{mcu.ref}.{other['pin']}"
+            if entry_pin and module_role in entry_pin["roles"] and name not in pins:
+                pins.append(name)
+    return pins
+
+
 def _attach_suggestions(findings: list[dict[str, Any]], placed: dict[str, _Placed], mcu: _Placed, wires: list[dict[str, Any]]) -> None:
     """Machine-usable ways out of the errors that have an obvious one. A suggestion is a candidate, never an applied change."""
 
@@ -931,8 +947,16 @@ def _attach_suggestions(findings: list[dict[str, Any]], placed: dict[str, _Place
                 module_role = {"ground": "ground", "power": "power_in", "i2c_sda": "i2c_sda", "i2c_scl": "i2c_scl"}[role]
                 pin = next((p for p in module.entry["pins"] if module_role in p["roles"]), None)
                 options = _candidates(mcu, role)
+                suggestion: dict[str, Any] = {"action": "add_connection"}
+                joined = _wired_bus_pins(placed, mcu, wires, module_role, exclude=module.ref) if role in {"i2c_sda", "i2c_scl"} else []
+                if joined:
+                    # Another module already put this signal on a controller pin. Joining that pin is the one change that keeps a
+                    # single shared bus; any other pin would split it, and the planner would still accept the result.
+                    options = joined
+                    suggestion["joins_existing_bus"] = True
                 if pin and options:
-                    finding["suggestions"] = [{"action": "add_connection", "from": f"{module.ref}.{pin['name']}", "to_one_of": options}]
+                    suggestion.update({"from": f"{module.ref}.{pin['name']}", "to_one_of": options})
+                    finding["suggestions"] = [suggestion]
         elif finding["rule"] == "not_an_i2c_pin" and finding.get("wire") in by_wire:
             wire = by_wire[finding["wire"]]
             other, bad = (wire["from"], wire["to"]) if wire["to"]["module"] == mcu.ref else (wire["to"], wire["from"])

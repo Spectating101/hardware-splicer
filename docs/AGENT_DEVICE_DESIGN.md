@@ -50,7 +50,7 @@ the spec; the agent does, and the next plan call re-checks everything.
 
 | `action` | Fields | Meaning |
 |----------|--------|---------|
-| `add_connection` | `from`, `to_one_of` | A required pin has no wire. Connect `from` to one of the listed controller pins |
+| `add_connection` | `from`, `to_one_of`, optional `joins_existing_bus` | A required pin has no wire. Connect `from` to one of the listed controller pins. When `joins_existing_bus` is true another module already wired this I2C signal, so the list holds only that pin: any other pin would split the bus, and the planner would still accept the split design |
 | `replace_connection` | `wire`, `from`, `to_one_of` | A wire lands on a pin that cannot carry the signal. Replace its controller end |
 | `move_signal` | `signal`, `to_one_of` | Devices share a bus but sit on different controllers' pins. Move the signal to a pin of the controller already in use |
 

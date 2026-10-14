@@ -194,3 +194,47 @@ def test_the_mixed_controller_suggestion_offers_only_pins_of_the_controller_alre
 def test_a_plan_with_no_errors_carries_no_suggestions_and_changes_no_bytes():
     plan = build_device_plan(example_specs()["esp32_oled_usb"])
     assert not any("suggestions" in f for f in plan["findings"])
+
+
+# --- a suggestion must keep the design a design the rest of the product accepts -----------------------------------------
+
+
+def _without(spec, pin):
+    broken = copy.deepcopy(spec)
+    broken["connections"] = [w for w in broken["connections"] if not w["from"].startswith(pin)]
+    return broken
+
+
+def _missing(spec):
+    return next(f for f in build_device_plan(spec)["findings"] if f["rule"] == "missing_connection")
+
+
+@pytest.mark.parametrize("pin", ["sensor.SDI", "sensor.SCK", "display.SDA", "display.SCL"])
+def test_a_missing_bus_wire_is_suggested_onto_the_pin_the_other_module_already_uses(pin):
+    spec = _without(example_specs()["esp32_oled_bme280_usb"], pin)
+    suggestion = _missing(spec)["suggestions"][0]
+    expected = "mcu.IO21" if pin.endswith(("SDI", "SDA")) else "mcu.IO22"
+    assert suggestion["to_one_of"] == [expected]
+    assert suggestion["joins_existing_bus"] is True
+
+
+@pytest.mark.parametrize("pin", ["sensor.SDI", "sensor.SCK", "display.SDA", "display.SCL"])
+def test_applying_that_suggestion_gives_a_design_the_firmware_export_accepts(pin):
+    from hardware_splicer.device_firmware import build_device_firmware
+
+    spec = _without(example_specs()["esp32_oled_bme280_usb"], pin)
+    suggestion = _missing(spec)["suggestions"][0]
+    spec["connections"].append({"from": suggestion["from"], "to": suggestion["to_one_of"][0]})
+    plan = build_device_plan(spec)
+    assert not [f for f in plan["findings"] if f["severity"] in {"error", "warning"}]
+    metadata, _archive = build_device_firmware(spec)
+    assert (metadata["pins"]["sda"]["gpio"], metadata["pins"]["scl"]["gpio"]) == (21, 22)
+
+
+def test_with_no_bus_wired_yet_the_suggestion_is_still_a_choice_and_says_nothing_about_joining():
+    spec = example_specs()["esp32_oled_bme280_usb"]
+    spec = {**spec, "connections": [w for w in spec["connections"] if not w["from"].endswith((".SDA", ".SDI"))]}
+    for finding in build_device_plan(spec)["findings"]:
+        if finding["rule"] == "missing_connection" and "suggestions" in finding:
+            suggestion = finding["suggestions"][0]
+            assert len(suggestion["to_one_of"]) > 1 and "joins_existing_bus" not in suggestion
