@@ -49,6 +49,62 @@ NO_VENDOR_BOUNDARY = (
 )
 
 
+PICO_PLATFORM = "https://github.com/maxgerhardt/platform-raspberrypi.git#5d4561a05e3b212660ac6fdd3fbfb328d1988aa1"
+
+# What changes with the controller board: the compile target and how the adapter starts the I2C bus. Everything the
+# application does lives in app_core.h and is the same on both.
+_ESP32_START = "    Wire.setTimeOut(50);\n    Wire.begin(SDA_PIN, SCL_PIN, 100000);"
+_ESP32_RESTART = "        Wire.end();\n        Wire.setTimeOut(50);\n        return Wire.begin(SDA_PIN, SCL_PIN, 100000);"
+# arduino-pico (earlephilhower): pins are set before begin(), and setSDA/setSCL refuse a pin that this I2C controller
+# cannot use; begin() itself returns nothing (libraries/Wire/src/Wire.h in the core this platform commit pins).
+_PICO_START = (
+    "    if (!{w}.setSDA(SDA_PIN) || !{w}.setSCL(SCL_PIN)) {{\n"
+    "        // The planner only allows pins of one I2C controller; stop visibly rather than run on other pins.\n"
+    "        for (;;) {{ Serial.println(\"I2C pins rejected by the RP2040 core; no bus started.\"); delay(1000); }}\n"
+    "    }}\n"
+    "    {w}.setClock(100000);\n    {w}.setTimeout(50);\n    {w}.begin();"
+)
+_PICO_RESTART = (
+    "        {w}.end();\n"
+    "        if (!{w}.setSDA(SDA_PIN) || !{w}.setSCL(SCL_PIN)) return false;\n"
+    "        {w}.setClock(100000);\n        {w}.setTimeout(50);\n        {w}.begin();\n        return true;"
+)
+CONTROLLERS: dict[str, dict[str, Any]] = {
+    "esp32-devkitc-v4": {
+        "target": {"platform": PLATFORM, "board": "esp32dev", "framework": "arduino"},
+        "ini": f"platform = {PLATFORM}\nboard = esp32dev\nframework = arduino",
+        "board_note": "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n",
+        "vendor_host": True,
+    },
+    "raspberry-pi-pico": {
+        "target": {"platform": PICO_PLATFORM, "board": "pico", "framework": "arduino", "core": "earlephilhower"},
+        "ini": f"platform = {PICO_PLATFORM}\nboard = pico\nframework = arduino\nboard_build.core = earlephilhower",
+        "board_note": (
+            "Board profile pico with the earlephilhower arduino-pico core is a software compile target, not proof of "
+            "exact hardware identity. The platform is pinned to one commit of maxgerhardt/platform-raspberrypi.\n"
+        ),
+        # The vendor-host shim models arduino-esp32's TwoWire, not the RP2040 core's, so that lane is not run here.
+        "vendor_host": False,
+    },
+}
+NO_VENDOR_CONTROLLER_BOUNDARY = (
+    "No vendor-host lane exists for this controller: the host shim models the ESP32 Arduino core's Wire, not the "
+    "RP2040 core's, so the Arduino adapter was not tested against a modelled bus. The host scenarios cover "
+    "application logic only."
+)
+
+
+def _wiring(controller_id: str, bindings: dict[str, Any]) -> dict[str, str]:
+    """The adapter's I2C start and restart code for this controller and these pins."""
+    if controller_id == "esp32-devkitc-v4":
+        return {"WIRE": "Wire", "WIRE_START": _ESP32_START, "WIRE_RESTART": _ESP32_RESTART}
+    indices = {bindings[signal].get("i2c_controller") for signal in ("sda", "scl")}
+    if len(indices) != 1 or None in indices:
+        raise DevicePlanError("SDA and SCL must both be pins of the same RP2040 I2C controller")
+    wire = "Wire" if indices.pop() == 0 else "Wire1"
+    return {"WIRE": wire, "WIRE_START": _PICO_START.format(w=wire), "WIRE_RESTART": _PICO_RESTART.format(w=wire)}
+
+
 def _boundary(part: dict[str, Any]) -> str:
     """The claim boundary, without naming libraries this package does not use."""
     if part["adapter"]["vendor_host"]:
@@ -105,8 +161,9 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             + ", ".join(sorted({f["rule"] for f in blockers}))
         )
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    if mcu["module"] != "esp32-devkitc-v4":
-        raise DevicePlanError("application source supports only the catalog ESP32-DevKitC V4")
+    controller = CONTROLLERS.get(mcu["module"])
+    if controller is None:
+        raise DevicePlanError("application source supports only the catalog ESP32-DevKitC V4 and Raspberry Pi Pico")
     library = {m["id"]: m for m in module_library()["modules"]}
     parts = available_parts()
     i2c_placed = [m for m in plan["modules"] if library[m["module"]].get("i2c")]
@@ -115,7 +172,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     names = " or ".join(part["chip"] for part in parts.values())
     if not sensors:
         raise DevicePlanError(
-            f"application source supports ESP32 + a sensor breakout ({names}) + optionally SSD1306 and needs one "
+            f"application source supports a controller + a sensor breakout ({names}) + optionally SSD1306 and needs one "
             f"of: {', '.join(sorted(parts))}; the diagnostic export remains available for other parts"
         )
     if len(sensors) > 1:
@@ -125,10 +182,13 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         )
     if other:
         raise DevicePlanError(
-            f"application source supports ESP32 + one sensor ({names}) + optionally SSD1306; "
+            f"application source supports a controller + one sensor ({names}) + optionally SSD1306; "
             "the diagnostic export remains available for other parts"
         )
     part = parts[sensors[0]["module"]]
+    if not controller["vendor_host"] and part["adapter"]["vendor_host"]:
+        # Same descriptor, but no vendor-host lane on this controller: the package must not ship or claim one.
+        part = {**part, "adapter": {**part["adapter"], "vendor_host": False}}
     bindings, declarations = resolve_shared_i2c_bus(
         plan,
         bus_error="application source requires exactly one shared SDA GPIO and one distinct SCL GPIO",
@@ -156,6 +216,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             "DISPLAY_DECL": display_decl,
             "DISPLAY_PTR": display_ptr,
             "DISPLAY_COUNT": display_count,
+            **_wiring(mcu["module"], bindings),
         },
     )
     files = {
@@ -163,7 +224,8 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "src/part_traits.h": render_traits(part).encode(),
         "src/main.cpp": main.encode(),
         "platformio.ini": _fill(
-            _template("platformio.ini.tmpl"), {"LIB_DEPS": "\n".join("    " + lib for lib in part["adapter"]["lib_deps"])}
+            _template("platformio.ini.tmpl"),
+            {"TARGET": controller["ini"], "LIB_DEPS": "\n".join("    " + lib for lib in part["adapter"]["lib_deps"])},
         ).encode(),
         "test/host/harness.cpp": _template("host_harness.cpp").encode(),
         "test/host/part_fixtures.h": render_fixtures(part).encode(),
@@ -184,7 +246,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             "Host tests (no hardware): "
             "`g++ -std=c++17 -Wall -Wextra -Werror -I src test/host/harness.cpp -o harness && ./harness`\n\n"
             "Optional compile with PlatformIO Core 6.1.18: `pio run -e application`. Do not upload from this package.\n"
-            "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n"
+            + controller["board_note"]
             + (
                 "Addresses are declared alternatives. The application reports the chip-id match; it does not assume 0x76 or 0x3C.\n"
                 if part["identity"]
@@ -196,21 +258,22 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             + (
                 VENDOR_HOST_BOUNDARY + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
                 if part["adapter"]["vendor_host"]
-                else NO_VENDOR_BOUNDARY + "\n"
+                else (NO_VENDOR_BOUNDARY if controller["vendor_host"] else NO_VENDOR_CONTROLLER_BOUNDARY) + "\n"
             )
         ).encode(),
     })
     metadata = {
         "schema_version": SCHEMA,
         "claim_boundary": _boundary(part),
-        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY if part["adapter"]["vendor_host"] else NO_VENDOR_BOUNDARY,
+        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY if part["adapter"]["vendor_host"]
+        else NO_VENDOR_BOUNDARY if controller["vendor_host"] else NO_VENDOR_CONTROLLER_BOUNDARY,
         "status": "HOST_TESTABLE_PROPOSAL",
         "compilation": "NOT_RUN",
         "behaviour_tests": "NOT_RUN",
         "physical_correctness": "UNPROVEN",
         "firmware_authorized": False,
         "power_on_authorized": False,
-        "target": {"platform": PLATFORM, "board": "esp32dev", "framework": "arduino"},
+        "target": controller["target"],
         "pins": bindings,
         "declared_devices": declarations,
         "non_claims": _non_claims(part),

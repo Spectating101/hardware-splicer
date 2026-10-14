@@ -38,12 +38,36 @@ A deterministic ZIP with:
 `physical_correctness` is `UNPROVEN`. Declared devices keep their possible
 addresses and the library basis; no address is chosen in the proposal.
 
+## On the Raspberry Pi Pico
+
+The same package is generated for the Pico. `src/app_core.h`, which holds everything the application does, is the same
+file on both boards, so the host scenarios are the same scenarios. What differs is the adapter's I2C start and the compile
+target:
+
+- The RP2040 can put each of its two I2C controllers only on certain pins. The library marks each Pico pin with its
+  controller (`i2c_controller`), the planner refuses SDA and SCL on different controllers, and the adapter uses `Wire` for
+  I2C0 and `Wire1` for I2C1. It sets the pins with `setSDA`/`setSCL` before `begin()`, as the arduino-pico core requires;
+  if the core refuses a pin, the sketch stops and says so on serial instead of running on other pins.
+- The target is `board = pico` with the earlephilhower arduino-pico core, through
+  [maxgerhardt/platform-raspberrypi](https://github.com/maxgerhardt/platform-raspberrypi) pinned to one commit. That
+  platform is not in the PlatformIO registry; it is the usual way to build arduino-pico with PlatformIO. The registry's own
+  `raspberrypi` platform uses the Mbed core, which does not set I2C pins this way.
+- There is no vendor-host lane for the Pico. The host shim models the ESP32 Arduino core's `Wire`, so running it against a
+  Pico adapter would test the wrong driver. The package says so in its claim boundary and ships no `test/vendor_host/`.
+- The diagnostic address-probe sketch is still ESP32-only.
+
+Checked on 2026-10-14 with `scripts/verify_device_application.py --platformio` (PlatformIO Core 6.1.18, the pinned platform
+commit): the BME280 package on I2C0 (GP4/GP5) and on I2C1 (GP2/GP3, so `Wire1`), and the BH1750 package, each compiled
+with exit 0 and produced an ELF and a BIN, and each passed its host scenarios. The first run downloads the RP2040 core and
+toolchain (several minutes). A compile shows the adapter is valid C++ against that core; it is not a run on a Pico, and
+nothing here was flashed.
+
 ## What is refused
 
 Any planner error or warning blocks export, as with the diagnostic. Export
 also refuses when:
 
-- the MCU is not the catalog ESP32-DevKitC V4;
+- the MCU is neither the catalog ESP32-DevKitC V4 nor the Raspberry Pi Pico;
 - there is no BME280 breakout (`adafruit-bme280-stemma-qt`);
 - there is more than one BME280;
 - any I2C peripheral other than the BME280 and the SSD1306 is present;

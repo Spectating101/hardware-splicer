@@ -37,3 +37,9 @@ def test_every_device_browser_spec_is_in_the_script_default_and_in_the_mock_ci_l
     for name in specs:
         assert name in default.split(), f"{name} is not in the default spec list of scripts/verify_device_frontend.sh"
         assert name in mock.split(), f"{name} is not in the mock lane of the device workflow"
+
+
+def test_ci_compiles_the_pico_application_and_runs_its_tests():
+    text = (Path(__file__).resolve().parents[1] / ".github/workflows/device-plan-deliverables.yml").read_text()
+    assert "scripts/verify_device_application.py --example pico_oled_bme280_usb --platformio" in text
+    assert "tests/test_device_application_pico.py" in text

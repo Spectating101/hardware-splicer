@@ -81,10 +81,15 @@ def resolve_shared_i2c_bus(
     for signal, nodes in selected.items():
         node = next(iter(nodes))
         pin = pins[node]
-        match = re.fullmatch(r"IO(\d+)", pin["name"])
+        # ESP32 boards print IO21, the Pico prints GP4; both name the GPIO number the code needs.
+        match = re.fullmatch(r"(?:IO|GP)(\d+)", pin["name"])
         if not match:
             raise DevicePlanError("the chosen GPIO has no supported numeric binding")
         bindings[signal] = {"module": node[0], "pin_id": node[1], "printed_name": pin["name"], "gpio": int(match[1])}
+        board_pin = next((p for p in library[mcu["module"]]["pins"] if p["id"] == node[1]), {})
+        if "i2c_controller" in board_pin:
+            # A controller whose I2C is fixed to certain pins (the Pico) names which one this pin belongs to.
+            bindings[signal]["i2c_controller"] = board_pin["i2c_controller"]
     if bindings["sda"]["gpio"] == bindings["scl"]["gpio"]:
         raise DevicePlanError("data and clock must use distinct GPIOs")
     return bindings, declarations

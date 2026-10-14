@@ -153,10 +153,11 @@ def test_the_review_uses_each_boards_regulator_and_temperature_limit():
     assert any("RT6150" in text for text in checks["supply_current"]["limits"])
 
 
-def test_the_application_and_diagnostic_generators_refuse_a_board_they_have_no_firmware_for():
+def test_the_application_supports_the_pico_but_the_diagnostic_export_still_refuses_it():
     spec = example_specs()["pico_oled_bme280_usb"]
-    with pytest.raises(DevicePlanError, match="supports only the catalog ESP32-DevKitC V4"):
-        build_device_application(spec)
+    metadata, _archive = build_device_application(spec)
+    assert metadata["target"]["board"] == "pico"
+    # The address-probe sketch uses the ESP32's Wire.begin(sda, scl, freq) and has no Pico form yet.
     with pytest.raises(DevicePlanError, match="supports only the catalog ESP32-DevKitC V4"):
         build_device_firmware(spec)
 
