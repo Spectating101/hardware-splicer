@@ -135,7 +135,9 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
     vdd_v = library[mcu["module"]]["electrical"]["io_v"]
     rp_min = (vdd_v - STANDARDS["i2c_vol_max_v"][0]) / (STANDARDS["i2c_iol_ma"][0] / 1000)
-    cb = {line: (_r(wire_m[line] * low + pins_on_line * ci, 1), _r(wire_m[line] * high + pins_on_line * ci, 1)) for line in lines}
+    # UM10204 gives only a maximum for pin capacitance, so it is counted in the high estimate and not in the low one: the
+    # low estimate is the wire alone, which is the most that can be said is certainly on the bus.
+    cb = {line: (_r(wire_m[line] * low, 1), _r(wire_m[line] * high + pins_on_line * ci, 1)) for line in lines}
     worst = max(cb[line][1] for line in lines)
     best = max(cb[line][0] for line in lines)
     inputs = [_src(key) for key in ("i2c_tr_max_ns", "i2c_vol_max_v", "i2c_iol_ma", "i2c_cb_max_pf", "i2c_ci_max_pf", "i2c_rise_factor")]
@@ -162,6 +164,13 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
               if unknown else "Only the stated pull-ups are counted; the controller's own are ignored."]
     if rp_eff < rp_min:
         status, text = EXCEEDS, f"The stated pull-ups in parallel are {rp_eff:.0f} ohm, below the {rp_min:.0f} ohm a device can sink at {STANDARDS['i2c_vol_max_v'][0]} V."
+    elif unknown:
+        # Unstated pull-ups sit in parallel with the stated ones. That can only lower the resistance: the rise time gets
+        # better, but the sink limit can be broken, so neither verdict can be given from the stated values alone.
+        status, text = ADVISORY, (
+            f"The stated pull-ups alone are {rp_eff:.0f} ohm, which would carry {tolerated:.0f} pF against an estimate of {best:g} to {worst:g} pF. "
+            f"{', '.join(unknown)} {'does' if len(unknown) == 1 else 'do'} not state {'its' if len(unknown) == 1 else 'their'} pull-ups; any there lower the resistance further "
+            f"and could take it below the {rp_min:.0f} ohm a device can sink at {STANDARDS['i2c_vol_max_v'][0]} V. Measure the bus resistance.")
     elif tolerated < best:
         status, text = EXCEEDS, f"The bus can carry {tolerated:.0f} pF at {rp_eff:.0f} ohm, but even the low estimate is {best:g} pF."
     elif tolerated < worst:
@@ -183,6 +192,7 @@ def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
 
     totals = {"sustained_ma": 0.0, "peak_ma": 0.0, "sustained_w": 0.0, "peak_w": 0.0}
     missing: list[str] = []
+    peak_only: list[str] = []  # modules whose source gives only peak figures: in the peak sum, not in the sustained one
     facts: list[dict[str, Any]] = []
     for module, entry in _entries(plan, library):
         rows = entry.get("engineering", {}).get("loads", [])
@@ -190,6 +200,8 @@ def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
             missing.append(module["id"])
             continue
         sus = [r for r in rows if r["kind"] == "sustained"]
+        if not sus:
+            peak_only.append(module["id"])
         if sus:
             top = max(sus, key=lambda r: r["typical_ma"])
             totals["sustained_ma"] += top["typical_ma"]
@@ -202,7 +214,7 @@ def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
             # reader of the JSON and the page's list keys both rely on being unique.
             facts.append(_fact(entry, f"load[{index}].{row['kind']}", _top_ma(row), "mA",
                                f"{row['mode']} at {row['rail_v']:g} V ({row['locator']}; {row['conditions']})", row["source"]))
-    return {**totals, "missing": missing, "facts": facts}
+    return {**totals, "missing": missing, "peak_only": peak_only, "facts": facts}
 
 
 def _power_stage(plan: dict[str, Any], library: dict[str, Any]) -> tuple[dict[str, Any] | None, dict[str, Any]]:
@@ -222,17 +234,24 @@ def _supply(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     if stage:
         inputs.append(_fact(mcu_entry, "power_stage", stage["kind"], "", f"{stage['note']} ({stage['locator']})", stage["source"]))
     quantities: dict[str, Any] = {
-        "sourced_peak_ma_upper_bound": _r(peak, 3), "sourced_sustained_ma_upper_bound": _r(load["sustained_ma"], 3), "usb_budget_ma": budget,
-        "headroom_for_unsourced_loads_ma_at_least": _r(budget - peak, 3),
+        # Sums of the published figures. A typical figure is not a maximum, and peaks need not coincide, so neither sum is a bound.
+        "sourced_peak_ma_sum": _r(peak, 3), "sourced_sustained_ma_sum": _r(load["sustained_ma"], 3), "usb_budget_ma": budget,
+        "port_budget_left_after_sourced_peaks_ma": _r(budget - peak, 3),
         "modules_without_a_sourced_current": missing,
+        "modules_with_only_peak_figures": load["peak_only"],
         "regulator": stage["kind"] if stage else "not stated",
     }
     if needs:
         quantities["controller_requires_supply_a"] = needs["value"]
     summary = (
-        f"The sourced loads total at most {peak:g} mA at the USB port at their peak. A {budget} mA port leaves at least {budget - peak:g} mA for everything without a sourced current "
+        f"The sourced loads add up to {peak:g} mA at the USB port at their published peaks. A {budget} mA port has about {budget - peak:g} mA left over for everything without a sourced current "
         f"({', '.join(missing) or 'none'}), the USB bridge and the regulator's own draw."
     )
+    if load["peak_only"]:
+        summary += f" {', '.join(load['peak_only'])} publish{'es' if len(load['peak_only']) == 1 else ''} only peak figures, so they are in the peak sum and not in the sustained one."
+    if needs and needs["value"] * 1000 <= budget:
+        summary = (f"The controller's datasheet asks for a supply that can deliver at least {needs['value']:g} A for the controller alone; the "
+                   f"{budget} mA port assumed here is {'exactly that' if needs['value'] * 1000 == budget else 'just above it'}, with no margin by that measure for the rest of the device. ") + summary
     limits = [
         "Each current is counted as it would be through a linear regulator, which is the most a port can be asked for; a switching regulator draws less.",
         "Modules with no sourced supply current are not in the total; the module library says why under their data gaps.",
@@ -281,27 +300,31 @@ def _thermal(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, An
     rises = {name: {"best_k": _r(w * r_best, 1), "worst_k": _r(w * r_worst, 1)} for name, w in watts.items()}
     lowest = min(limit for _, limit, _ in limits_c)
     hot = ASSUMED["ambient_c"][0][1]
-    worst_floor = hot + rises["peak_load"]["worst_k"]
+    surface = {name: {"low": _r(hot + rise["best_k"], 1), "high": _r(hot + rise["worst_k"], 1)} for name, rise in rises.items()}
     quantities = {
         "case_surface_area_m2": _r(area_m2, 4),
         "case_to_ambient_k_per_w": {"best": _r(r_best, 1), "worst": _r(r_worst, 1)},
         "load_ma": {"sustained": _r(load["sustained_ma"], 3), "peak": _r(load["peak_ma"], 3)},
-        "heat_floor_w": watts, "case_surface_rise_k": rises,
+        "heat_w_at_measured_rails": watts, "case_surface_rise_k": rises,
         "lowest_sourced_operating_limit_c": lowest,
         "limits_by_module": [{"module": ref, "max_c": limit, "kind": kind} for ref, limit, kind in limits_c],
         "modules_without_a_sourced_limit": unknown_limit, "modules_without_a_sourced_current": missing,
-        "worst_case_surface_floor_c": _r(worst_floor, 1),
+        "surface_c_at_warm_ambient": surface,
     }
-    status = EXCEEDS if worst_floor >= lowest else ADVISORY
+    # Over a limit only when even the sustained load with the better convection reaches it; otherwise it needs checking.
+    status = EXCEEDS if surface["sustained_load"]["low"] >= lowest else ADVISORY
     text = (
         f"If every watt the sourced loads consume, at the rail each was measured on, ends up inside this sealed case, its surface runs {rises['sustained_load']['best_k']:g} to "
         f"{rises['sustained_load']['worst_k']:g} K above the room at the sourced sustained load and {rises['peak_load']['best_k']:g} to "
-        f"{rises['peak_load']['worst_k']:g} K at the sourced peak. At {hot:g} C ambient that is a surface of at least "
-        f"{worst_floor:.0f} C against the lowest sourced limit of {lowest} C."
+        f"{rises['peak_load']['worst_k']:g} K if the sourced peak ran without pause. At {hot:g} C ambient that is a surface of about "
+        f"{surface['sustained_load']['low']:.0f} to {surface['sustained_load']['high']:.0f} C, or {surface['peak_load']['low']:.0f} to "
+        f"{surface['peak_load']['high']:.0f} C at the peak, against the lowest sourced limit of {lowest} C. The range is the convection "
+        f"assumption, not a measurement."
     )
     limits = ["This is the outside surface only. The air and the parts inside are hotter by an internal resistance this does not estimate, so a surface under the limit does not show the parts are.",
               "Input power is taken as heat in the case; a little leaves as radio, so this slightly overstates.",
-              "The input current is taken to equal the load current, as for a linear regulator; a switching regulator would draw less.",
+              "Each figure is taken at the rail it was measured on, so a regulator's own loss is not in it unless the controller's regulator is sourced as linear.",
+              "A peak figure (a radio transmitting, for example) is not a steady draw; running it without pause overstates the heat.",
               ("Modules with no sourced current are not in the power figure: " + ", ".join(missing) + ".") if missing else "Every module has a sourced current.",
               ("Modules with no sourced temperature limit are not in the comparison: " + ", ".join(unknown_limit) + ".") if unknown_limit else "Every module has a sourced temperature limit."]
     checks = [_check("enclosure_temperature", "Sealed-case temperature", status, text, quantities,
@@ -332,22 +355,52 @@ def _antenna(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     if not found:
         return _check("antenna_clearance", "Antenna clearance", NOT_ASSESSED, "No module in this plan lists an antenna clearance.", {}, [])
     module, entry, antenna = found[0]
-    inner_x = plan["case"]["inner_mm"]["x"]
-    wall_gap = inner_x / 2 - _far_x(module, antenna["end"])
+    case = plan["case"]
+    inner_x, inner_z = case["inner_mm"]["x"], case["inner_mm"]["z"]
     need = antenna["clearance_mm"]
+    box = module["box"]
+    base, tip = box["x1"], _far_x(module, antenna["end"])  # the antenna end runs from the board's +x edge to its tip
+    wall_gap = inner_x / 2 - tip
+    # The antenna lies inside the board's width, so its own distance to a side wall is at least the board's.
+    side_gap = min(box["z0"] + inner_z / 2, inner_z / 2 - box["z1"])
+    below = module["base_y"] - case["floor_top_y"]
+    above = case["lid_underside_y"] - (module["base_y"] + module["pcb_mm"]["z"] + module["above_board_mm"])
+
+    def planar(other: dict[str, Any]) -> float:
+        """Distance in the plan from the antenna end's footprint to another module's, zero where they overlap."""
+        b = other["box"]
+        dx = max(b["x0"] - tip, base - b["x1"], 0.0)
+        dz = max(b["z0"] - box["z1"], box["z0"] - b["z1"], 0.0)
+        return (dx ** 2 + dz ** 2) ** 0.5
+
     others = [m for m in plan["modules"] if m is not module]
-    nearest = min((_far_x(module, antenna["end"]) - _far_x(m, antenna["end"]) for m in others), default=None)
+    nearest = min((planar(m) for m in others), default=None)
+    gaps = {"end_wall": _r(wall_gap, 2), "side_walls_at_least": _r(side_gap, 2), "floor": _r(below, 2), "lid": _r(above, 2)}
+    short = {name: value for name, value in gaps.items() if value + 0.01 < need}
     quantities = {"gap_to_case_wall_mm": _r(wall_gap, 2), "recommended_clearance_mm": need,
                   "extra_case_length_needed_mm": _r(max(0.0, need - wall_gap), 2),
+                  "gaps_by_direction_mm": gaps,
                   "antenna_end_to_nearest_other_module_mm": None if nearest is None else _r(nearest, 2)}
-    status = EXCEEDS if wall_gap + 0.01 < need else WITHIN
-    text = (f"The antenna end of {module['id']} is {wall_gap:g} mm from the inside of the case wall; its source recommends at least {need:g} mm in all directions. "
-            + (f"Lengthening the case by about {need - wall_gap:g} mm at that end would meet it." if wall_gap + 0.01 < need else "")).strip()
+    words = {"end_wall": "the end wall", "side_walls_at_least": "a side wall", "floor": "the floor", "lid": "the lid"}
+    if wall_gap + 0.01 < need:
+        status = EXCEEDS
+        text = (f"The antenna end of {module['id']} is {wall_gap:g} mm from the end wall; its source recommends at least {need:g} mm in all directions. "
+                f"Lengthening the case by about {need - wall_gap:g} mm at that end would meet it there.")
+    elif short:
+        # The case is only lengthened at the antenna end; across and up and down it is as tight as the boards.
+        status = ADVISORY
+        parts = [f"{words[name]} ({value:g} mm)" for name, value in short.items()]
+        listed = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+        text = (f"The antenna end of {module['id']} has {wall_gap:g} mm to the end wall, but its source recommends at least {need:g} mm "
+                f"in all directions and it has less to {listed}.")
+    else:
+        status = WITHIN
+        text = f"The antenna end of {module['id']} has at least {need:g} mm to every wall, the floor and the lid, as its source recommends."
     return _check("antenna_clearance", "Antenna clearance inside the case", status, text, quantities,
                   [_fact(entry, "antenna_clearance", antenna["clearance_mm"], "mm", f"\"{antenna['quote']}\" ({antenna['locator']})", antenna["source"])],
                   ["It is a recommendation, not a pass/fail rule, and it does not say how a plastic wall detunes the antenna. The guidelines advise testing range on the finished product.",
-                   "Clearance to the other modules is reported, not judged: the guidelines give no distance for them.",
-                   "The plan lays the board lengthwise with the antenna end at +x; this measures along that axis only."])
+                   "Clearance to the other modules is reported, not judged: the guidelines give no distance for them. It is measured in the plan, from the antenna end's footprint.",
+                   "The side-wall figure is to the board's edge; the antenna sits inside the board's width, so its own gap is at least that."])
 
 
 def _fit(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:

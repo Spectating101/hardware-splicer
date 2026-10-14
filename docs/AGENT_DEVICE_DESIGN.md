@@ -65,7 +65,7 @@ repair; the agent should read the `message` and ask the person.
 
 - Engineering statuses are `exceeds_limit`, `advisory`,
   `within_limit_under_assumptions` and `not_assessed`. There is no `pass`.
-  Heat is a floor, and the USB current figure is an upper bound.
+  Current totals are sums of published figures, not bounds; surface temperature is a range from an assumption, not a floor.
 - Assumed numbers are labelled as assumptions in the response. Report them as such.
 - A clean plan means the wiring is internally consistent against the library.
   It does not mean the circuit works.

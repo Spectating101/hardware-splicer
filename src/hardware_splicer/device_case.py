@@ -43,6 +43,10 @@ def _u(value: float) -> int:
     return round(float(value) * UNITS)
 
 
+def _r(value: float) -> float:
+    return round(float(value), 2)
+
+
 def _box(x0: float, x1: float, y0: float, y1: float, z0: float, z1: float) -> Box:
     return (_u(x0), _u(x1), _u(y0), _u(y1), _u(z0), _u(z1))
 
@@ -100,6 +104,30 @@ def _geometry(plan: dict[str, Any]) -> dict[str, Any]:
     _check(lip_in, "lid lip opening")
     lid_add = [at(-hx, hx, top, oy, -hz, hz), lip_out]
     lid_cut = [lip_in]
+    # The lip reaches LIP_HEIGHT_MM down inside the walls. Anything the plan puts in that band near a wall (a display just
+    # under the lid, a wire housing) would meet it, so the lip is notched there, with the fit gap all round.
+    lip_band = (top - LIP_HEIGHT_MM, top)
+    occupants = [(m["id"], m["box"], m["base_y"] - m["below_board_mm"], m["base_y"] + m["pcb_mm"]["z"] + m["above_board_mm"])
+                 for m in plan.get("modules", [])]
+    for wire in plan.get("wires", []):
+        for end in ("from", "to"):
+            housing = wire[end].get("housing")
+            if housing:
+                half = housing["size_mm"] / 2
+                occupants.append((f"{wire['id']} {end} plug", {"x0": housing["x"] - half, "x1": housing["x"] + half,
+                                  "z0": housing["z"] - half, "z1": housing["z"] + half}, housing["y0"], housing["y1"]))
+    notches: list[dict[str, Any]] = []
+    for name, footprint, y0, y1 in occupants:
+        if y1 <= lip_band[0] or y0 >= lip_band[1]:
+            continue
+        notch = at(footprint["x0"] - LIP_FIT_MM, footprint["x1"] + LIP_FIT_MM, lip_band[0] - 1, top,
+                   footprint["z0"] - LIP_FIT_MM, footprint["z1"] + LIP_FIT_MM)
+        frame_overlap = (notch[0] < lip_out[1] and lip_out[0] < notch[1] and notch[4] < lip_out[5] and lip_out[4] < notch[5]
+                         and not _inside((notch[0], notch[1], lip_in[2], lip_in[3], notch[4], notch[5]), lip_in))
+        if frame_overlap:
+            lid_cut.append(notch)
+            notches.append({"for": name, "x_mm": [_r(footprint["x0"] - LIP_FIT_MM), _r(footprint["x1"] + LIP_FIT_MM)],
+                            "z_mm": [_r(footprint["z0"] - LIP_FIT_MM), _r(footprint["z1"] + LIP_FIT_MM)]})
     window = case.get("window")
     if window:
         win = at(window["x"] - window["width_mm"] / 2, window["x"] + window["width_mm"] / 2, top - 1, oy + 1,
@@ -110,7 +138,7 @@ def _geometry(plan: dict[str, Any]) -> dict[str, Any]:
     for label, boxes in (("base", base_add), ("lid", lid_add)):
         for box in boxes:
             _check(box, f"{label} part")
-    return {"outer": (_u(ox), _u(oy), _u(oz)), "top": _u(top), "base": (base_add, base_cut), "lid": (lid_add, lid_cut)}
+    return {"outer": (_u(ox), _u(oy), _u(oz)), "top": _u(top), "base": (base_add, base_cut), "lid": (lid_add, lid_cut), "lip_notches": notches}
 
 
 def _map(box: Box, fn) -> Box:
@@ -273,6 +301,8 @@ def build_device_case(spec: Any) -> tuple[dict[str, Any], bytes]:
         f"clearance {case['clearance_mm']} mm. Both parts are in print orientation: the base on its floor, the lid turned over with its plate on the bed.\n\n"
         "What this export chose beyond the plan:\n"
         f"- The lid has a lip, {LIP_HEIGHT_MM} mm tall and {LIP_WALL_MM} mm thick, {LIP_FIT_MM} mm inside the walls. It holds the lid in place by friction.\n"
+        + ("".join(f"- The lip is notched for {n['for']}, which the plan puts within its reach.\n" for n in geometry["lip_notches"]))
+        + 
         "- There are no screw bosses, snap hooks, board standoffs, vents or cable strain relief. The plan assumes the board rests on its own header pins.\n"
         "- The USB cut-out and display window come from the plan; its notes say to measure your module before printing.\n"
         "- Thermal behaviour has not been assessed. Do not enclose a part that gets hot without checking.\n\n"
@@ -292,6 +322,7 @@ def build_device_case(spec: Any) -> tuple[dict[str, Any], bytes]:
         "power_on_authorized": False,
         "units": "mm",
         "assumptions": {"lip_fit_mm": LIP_FIT_MM, "lip_height_mm": LIP_HEIGHT_MM, "lip_wall_mm": LIP_WALL_MM},
+        "lip_notches": geometry["lip_notches"],
         "plan_sha256": hashlib.sha256(plan_bytes).hexdigest(),
         "meshes": reports,
         "files": {name: {"sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)} for name, data in sorted(files.items())},
