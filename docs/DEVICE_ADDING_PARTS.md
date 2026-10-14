@@ -14,8 +14,8 @@
 | Engineering review | an `engineering` block, and `i2c.pullups` for a breakout | the check says `not_assessed` and lists the module under `coverage` |
 | Application source and diagnostics | a part descriptor, an adapter and, for a vendor-host lane, a bus model ([part descriptors](DEVICE_PART_DESCRIPTORS.md)) | the generator refuses the board with a clear message |
 
-Today the firmware generators support the ESP32-DevKitC V4 with the BME280 and BH1750. The plan, case and review work for every
-entry in the library.
+Today the application generator supports the ESP32-DevKitC V4 and the Raspberry Pi Pico with the BME280 and BH1750; the
+diagnostic sketch supports the ESP32 only. The plan, case and review work for every entry in the library.
 
 ## A sensor, display or breakout
 

@@ -56,7 +56,7 @@ class ArduinoHal final : public Hal {
 public:
     uint32_t now_ms() override { return millis(); }
 
-    bool sensor_begin(uint8_t addr) override { return bh_.begin(addr, &Wire); }
+    bool sensor_begin(uint8_t addr) override { return bh_.begin(addr, &{{WIRE}}); }
 
     bool sensor_read(Reading& out) override { return bh_.read_lux(out.lux); }
 
@@ -64,8 +64,8 @@ public:
         // 128x64 is the catalog 0.96" SSD1306 listing, not a measurement of a particular module.
         // Adafruit_SSD1306.cpp, tag 2.5.17: "return true; // Success"
         // begin() does not detect the display; its only return false is a failed buffer allocation.
-        Wire.beginTransmission(addr);
-        if (Wire.endTransmission() != 0) return false;
+        {{WIRE}}.beginTransmission(addr);
+        if ({{WIRE}}.endTransmission() != 0) return false;
         // reset=true, periphBegin=false so the library does not call Wire.begin() again.
         return display_.begin(SSD1306_SWITCHCAPVCC, addr, true, false);
     }
@@ -85,14 +85,12 @@ public:
     void log(const char* line) override { Serial.println(line); }
 
     bool bus_recover() override {
-        Wire.end();
-        Wire.setTimeOut(50);
-        return Wire.begin(SDA_PIN, SCL_PIN, 100000);
+{{WIRE_RESTART}}
     }
 
 private:
     Bh1750 bh_;
-    Adafruit_SSD1306 display_{128, 64, &Wire, -1};
+    Adafruit_SSD1306 display_{128, 64, &{{WIRE}}, -1};
 };
 
 static ArduinoHal g_hal;
@@ -100,8 +98,7 @@ static SensorApp* g_app = nullptr;
 
 void setup() {
     Serial.begin(115200);
-    Wire.setTimeOut(50);
-    Wire.begin(SDA_PIN, SCL_PIN, 100000);
+{{WIRE_START}}
     static SensorApp app(g_hal, kSensorAddrs, sizeof kSensorAddrs / sizeof kSensorAddrs[0],
                          {{DISPLAY_PTR}}, {{DISPLAY_COUNT}});
     g_app = &app;
