@@ -197,8 +197,10 @@ def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
         hi = max(rows, key=lambda r: _top_ma(r) * r["rail_v"])
         totals["peak_ma"] += max(_top_ma(r) for r in rows)
         totals["peak_w"] += _top_ma(hi) * hi["rail_v"] / 1000
-        for row in rows:
-            facts.append(_fact(entry, f"load.{row['kind']}", _top_ma(row), "mA",
+        for index, row in enumerate(rows):
+            # The row's position keeps two rows of one kind (a clock has two peak currents) from sharing a name, which a
+            # reader of the JSON and the page's list keys both rely on being unique.
+            facts.append(_fact(entry, f"load[{index}].{row['kind']}", _top_ma(row), "mA",
                                f"{row['mode']} at {row['rail_v']:g} V ({row['locator']}; {row['conditions']})", row["source"]))
     return {**totals, "missing": missing, "facts": facts}
 

@@ -354,3 +354,17 @@ def test_every_shipped_engineering_figure_carries_the_words_it_was_read_from():
         rows += [(f"loads[{i}]", row) for i, row in enumerate(eng.get("loads", []))]
         missing += [f"{entry['id']}.{name}" for name, row in rows if not str(row.get("quote", "")).strip()]
     assert missing == []
+
+
+def test_no_check_lists_two_inputs_under_one_name_even_when_a_module_has_two_rows_of_a_kind():
+    import collections
+
+    from hardware_splicer.device_draft import draft_device_spec
+
+    specs = [example_specs()["esp32_oled_bme280_usb"],
+             draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["adafruit-ds3231-stemma-qt", "adafruit-mpu-6050-stemma-qt"]})["spec"],
+             draft_device_spec({"controller": "raspberry-pi-pico", "parts": ["adafruit-ds3231-stemma-qt"]})["spec"]]
+    for spec in specs:
+        for check in checks(build_engineering_review(spec)).values():
+            names = collections.Counter(item["name"] for item in check["inputs"])
+            assert [name for name, count in names.items() if count > 1] == [], check["id"]
