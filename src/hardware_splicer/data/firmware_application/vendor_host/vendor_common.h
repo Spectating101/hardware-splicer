@@ -161,7 +161,12 @@ struct Result {
     if (pid < 0) return {false, "could not fork an isolated case", false};
     if (pid == 0) {
         close(fds[0]);
-        const Result r = fn(arg);
+        Result r;
+        try {
+            r = fn(arg);
+        } catch (const std::exception &error) {
+            r.detail = std::string("the core halted: ") + error.what();
+        }
         const std::string wire = std::string(r.pass ? "1" : "0") + r.detail;
         const ssize_t sent = write(fds[1], wire.data(), wire.size());
         (void)sent;
