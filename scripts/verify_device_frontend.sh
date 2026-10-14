@@ -85,5 +85,5 @@ wait_for "http://127.0.0.1:$APP_PORT/engineering/device" "$frontend_pid"
 export NODE_PATH="$PLAYWRIGHT_ROOT/node_modules"
 export OUTSIDER_APP_URL="http://127.0.0.1:$APP_PORT"
 export HS_FRONTEND_VERIFY_DIR="$RUN_DIR"
-if [[ $# -eq 0 ]]; then set -- device-assembly device-firmware device-application device-observations device-modeled-run donor-device-handoff; fi
+if [[ $# -eq 0 ]]; then set -- device-assembly device-case device-engineering device-firmware device-application device-observations device-modeled-run donor-device-handoff; fi
 node "$PLAYWRIGHT_ROOT/node_modules/@playwright/test/cli.js" test -c "$FRONTEND/playwright.device.config.cjs" "$@"

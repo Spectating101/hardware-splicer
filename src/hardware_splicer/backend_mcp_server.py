@@ -188,6 +188,7 @@ async def hs_backend_task_manifest(
         "bounded_pre_fabrication",
         "document_grounded_pre_fabrication",
         "engineering_assurance",
+        "device_design",
     ],
 ) -> str:
     """Return one task-scoped canonical workflow contract in a single discovery call.
