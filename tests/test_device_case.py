@@ -77,8 +77,34 @@ def test_the_volumes_match_a_hand_calculation_from_the_plan(exported):
     lip_out_x, lip_out_z = ox - 2 * w - 2 * LIP_FIT_MM, oz - 2 * w - 2 * LIP_FIT_MM
     lip = (lip_out_x * lip_out_z - (lip_out_x - 2 * LIP_WALL_MM) * (lip_out_z - 2 * LIP_WALL_MM)) * LIP_HEIGHT_MM
     window = case["window"]
-    lid = ox * oz * (oy - top) + lip - window["width_mm"] * window["depth_mm"] * (oy - top)
+    # Each notch removes the part of the lip frame inside its x and z extent, over the lip's height.
+    outer_x, outer_z = (-ox / 2 + w + LIP_FIT_MM, ox / 2 - w - LIP_FIT_MM), (-oz / 2 + w + LIP_FIT_MM, oz / 2 - w - LIP_FIT_MM)
+    inner_x, inner_z = (outer_x[0] + LIP_WALL_MM, outer_x[1] - LIP_WALL_MM), (outer_z[0] + LIP_WALL_MM, outer_z[1] - LIP_WALL_MM)
+    span = lambda a, b: max(0.0, min(a[1], b[1]) - max(a[0], b[0]))
+    notched = sum((span(n["x_mm"], outer_x) * span(n["z_mm"], outer_z) - span(n["x_mm"], inner_x) * span(n["z_mm"], inner_z)) * LIP_HEIGHT_MM
+                  for n in meta["lip_notches"])
+    lid = ox * oz * (oy - top) + lip - notched - window["width_mm"] * window["depth_mm"] * (oy - top)
     assert meta["meshes"]["case_lid"]["volume_mm3"] == pytest.approx(lid, abs=0.5)
+
+
+def test_the_lid_lip_is_notched_wherever_the_plan_puts_a_module_within_its_reach(exported):
+    from hardware_splicer.device_case import LIP_FIT_MM, LIP_HEIGHT_MM, LIP_WALL_MM
+
+    _spec, plan, meta, _data, files = exported
+    case = plan["case"]
+    w, top = case["wall_mm"], case["lid_underside_y"]
+    hx, hz = case["outer_mm"]["x"] / 2 - w, case["outer_mm"]["z"] / 2 - w
+    reach = LIP_FIT_MM + LIP_WALL_MM
+    near = []
+    for m in plan["modules"]:
+        y0, y1 = m["base_y"] - m["below_board_mm"], m["base_y"] + m["pcb_mm"]["z"] + m["above_board_mm"]
+        b = m["box"]
+        if y1 > top - LIP_HEIGHT_MM and y0 < top and (b["x0"] < -hx + reach or b["x1"] > hx - reach or b["z0"] < -hz + reach or b["z1"] > hz - reach):
+            near.append(m["id"])
+    assert sorted(n["for"] for n in meta["lip_notches"] if " plug" not in n["for"]) == sorted(near)
+    for notch in meta["lip_notches"]:
+        readme = files["README.md"]
+        assert f"The lip is notched for {notch['for']}" in (readme.decode() if isinstance(readme, bytes) else readme)
 
 
 def test_the_parts_have_the_plans_outer_size_and_stand_on_a_flat_face(exported):
