@@ -117,7 +117,7 @@ def _vendor_libs():
     return Path(named) if named and Path(named).is_dir() else None
 
 
-def _vendor_run(tmp_path, spec, edit=None):
+def _vendor_run(tmp_path, spec, edits=()):
     from hardware_splicer.device_application_execution import _run_vendor_host
 
     libs = _vendor_libs()
@@ -126,8 +126,7 @@ def _vendor_run(tmp_path, spec, edit=None):
     _metadata, data = build_device_application(spec)
     project = tmp_path / "project"
     zipfile.ZipFile(io.BytesIO(data)).extractall(project)
-    if edit:
-        path, old, new = edit
+    for path, old, new in edits:
         text = (project / path).read_text()
         assert text.count(old) == 1, (path, old)
         (project / path).write_text(text.replace(old, new, 1))
@@ -150,18 +149,35 @@ def test_the_real_adafruit_sources_run_against_the_rp2040_wire_model(tmp_path, v
 
 
 PICO_MUTANTS = [
-    ("the display uses Wire though the plan wired I2C1", "Adafruit_SSD1306 display_{128, 64, &Wire1, -1};", "Adafruit_SSD1306 display_{128, 64, &Wire, -1};"),
-    ("recovery restarts the bus without ending it", "        Wire1.end();\n", ""),
-    ("setup never sets the planned I2C1 pins", "    if (!Wire1.setSDA(SDA_PIN) || !Wire1.setSCL(SCL_PIN)) {", "    if (false) {"),
-    ("setup sets 400 kHz", "    Wire1.setClock(100000);\n    Wire1.setTimeout(50);\n    Wire1.begin();", "    Wire1.setClock(400000);\n    Wire1.setTimeout(50);\n    Wire1.begin();"),
+    ("the display uses Wire though the plan wired I2C1", [("Adafruit_SSD1306 display_{128, 64, &Wire1, -1};", "Adafruit_SSD1306 display_{128, 64, &Wire, -1};")]),
+    ("recovery restarts the bus without ending it", [("        Wire1.end();\n", "")]),
+    ("setup never sets the planned I2C1 pins", [("    if (!Wire1.setSDA(SDA_PIN) || !Wire1.setSCL(SCL_PIN)) {", "    if (false) {")]),
+    ("setup sets 400 kHz", [("    Wire1.setClock(100000);\n    Wire1.setTimeout(50);\n    Wire1.begin();", "    Wire1.setClock(400000);\n    Wire1.setTimeout(50);\n    Wire1.begin();")]),
+    # Found by the Argon review of #117: the display library restores 100 kHz, which hid a recovery at another clock.
+    ("recovery restarts at 400 kHz", [("        Wire1.setClock(100000);", "        Wire1.setClock(400000);")]),
+    # Found by the same review: two starts at boot used to stand in for a recovery that never restarts the bus.
+    ("boot starts the bus twice and recovery does nothing", [
+        ("\n    Wire1.begin();\n", "\n    Wire1.begin();\n    Wire1.end();\n    Wire1.begin();\n"),
+        ("        Wire1.end();\n", "        return true;\n")]),
 ]
 
 
-@pytest.mark.parametrize("name,old,new", PICO_MUTANTS, ids=[m[0] for m in PICO_MUTANTS])
-def test_the_rp2040_lane_fails_a_broken_pico_adapter(tmp_path, name, old, new):
-    report, log = _vendor_run(tmp_path, _on_i2c1(example_specs()["pico_oled_bme280_usb"]), ("src/main.cpp", old, new))
+@pytest.mark.parametrize("name,edits", PICO_MUTANTS, ids=[m[0] for m in PICO_MUTANTS])
+def test_the_rp2040_lane_fails_a_broken_pico_adapter(tmp_path, name, edits):
+    edits = [("src/main.cpp", old, new) for old, new in edits]
+    report, log = _vendor_run(tmp_path, _on_i2c1(example_specs()["pico_oled_bme280_usb"]), edits)
     assert report["scenarios"], f"{name}: no scenario ran: {log.decode(errors='replace')[-1500:]}"
     assert [s for s in report["scenarios"] if not s["pass"] and not s.get("finding")], f"{name} was not caught"
+
+
+def test_a_core_panic_fails_each_scenario_once_with_its_message(tmp_path):
+    # An illegal pin panics in setup(); scenarios that fork isolated cases must still report exactly once each.
+    report, log = _vendor_run(tmp_path, _on_i2c1(example_specs()["pico_oled_bme280_usb"]),
+                              [("src/main.cpp", "constexpr int SDA_PIN = 2;", "constexpr int SDA_PIN = 4;")])
+    names = [s["scenario"] for s in report["scenarios"]]
+    assert names and len(names) == len(set(names)), log.decode(errors="replace")[-1500:]
+    assert all(not s["pass"] and "illegal pin 4" in s["detail"] for s in report["scenarios"])
+    assert "RP2040 Wire timing" in report["claim_boundary"] and "ESP32" not in report["claim_boundary"]
 
 
 @pytest.mark.parametrize("controller", sorted(CONTROLLERS))
