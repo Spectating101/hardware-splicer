@@ -55,11 +55,13 @@ PICO_PLATFORM = "https://github.com/maxgerhardt/platform-raspberrypi.git#5d4561a
 # application does lives in app_core.h and is the same on both.
 _ESP32_START = "    Wire.setTimeOut(50);\n    Wire.begin(SDA_PIN, SCL_PIN, 100000);"
 _ESP32_RESTART = "        Wire.end();\n        Wire.setTimeOut(50);\n        return Wire.begin(SDA_PIN, SCL_PIN, 100000);"
-# arduino-pico (earlephilhower): pins are set before begin(), and setSDA/setSCL refuse a pin that this I2C controller
-# cannot use; begin() itself returns nothing (libraries/Wire/src/Wire.h in the core this platform commit pins).
+# arduino-pico (earlephilhower): pins are set before begin(); begin() returns nothing. In the core this platform commit
+# pins, setSDA/setSCL return true for a pin this I2C controller can use and otherwise call panic(), which halts with a
+# FATAL message (libraries/Wire/src/Wire.cpp). The planner refuses such pins first, so the check below never fires in
+# a planned package; it is kept so a hand edit to SDA_PIN or SCL_PIN still cannot start the bus on other pins.
 _PICO_START = (
     "    if (!{w}.setSDA(SDA_PIN) || !{w}.setSCL(SCL_PIN)) {{\n"
-    "        // The planner only allows pins of one I2C controller; stop visibly rather than run on other pins.\n"
+    "        // Unreachable in practice: the core panics on an illegal pin before returning false.\n"
     "        for (;;) {{ Serial.println(\"I2C pins rejected by the RP2040 core; no bus started.\"); delay(1000); }}\n"
     "    }}\n"
     "    {w}.setClock(100000);\n    {w}.setTimeout(50);\n    {w}.begin();"
@@ -83,14 +85,13 @@ CONTROLLERS: dict[str, dict[str, Any]] = {
             "Board profile pico with the earlephilhower arduino-pico core is a software compile target, not proof of "
             "exact hardware identity. The platform is pinned to one commit of maxgerhardt/platform-raspberrypi.\n"
         ),
-        # The vendor-host shim models arduino-esp32's TwoWire, not the RP2040 core's, so that lane is not run here.
-        "vendor_host": False,
+        # The vendor-host lane swaps in a model of the arduino-pico TwoWire (vendor_host/rp2040/).
+        "vendor_host": True,
     },
 }
 NO_VENDOR_CONTROLLER_BOUNDARY = (
-    "No vendor-host lane exists for this controller: the host shim models the ESP32 Arduino core's Wire, not the "
-    "RP2040 core's, so the Arduino adapter was not tested against a modelled bus. The host scenarios cover "
-    "application logic only."
+    "No vendor-host lane exists for this controller: the host shim has no model of its Arduino core's Wire, so the "
+    "Arduino adapter was not tested against a modelled bus. The host scenarios cover application logic only."
 )
 
 
@@ -142,9 +143,41 @@ def _fill(template: str, mapping: dict[str, str]) -> str:
     return text
 
 
-def _vendor_host_files(profile: str) -> dict[str, bytes]:
+def _vendor_host_files(profile: str, controller_id: str = "esp32-devkitc-v4", bindings: dict[str, Any] | None = None) -> dict[str, bytes]:
     root = TEMPLATE_DIR / "vendor_host"
-    return {f"test/vendor_host/{name}": (root / name).read_bytes() for name in vendor_files(profile)}
+    files = {f"test/vendor_host/{name}": (root / name).read_bytes() for name in vendor_files(profile)}
+    if controller_id == "raspberry-pi-pico":
+        # The RP2040 core's Wire replaces the ESP32 one; the harness and device models are shared.
+        for name in ("Wire.h", "Wire.cpp", "wire_pins_rp2040.h", "util/delay.h", "api/deprecated-avr-comp/avr/pgmspace.h"):
+            files[f"test/vendor_host/{name}"] = (root / "rp2040" / name).read_bytes()
+        readme = files["test/vendor_host/README.md"].decode()
+        files["test/vendor_host/README.md"] = (
+            readme.replace("not the ESP32 Wire driver's real timing", "not the RP2040 Wire driver's real timing")
+            .replace("-DESP32 -DARDUINO_ARCH_ESP32", "-DHS_RP2040 -DARDUINO_ARCH_RP2040 -DARDUINO_RASPBERRY_PI_PICO")
+            .replace("The Wire model follows arduino-esp32 2.0.17:", "On the ESP32 the Wire model follows arduino-esp32 2.0.17:")
+            + "\nThis package is for the Raspberry Pi Pico. `Wire.h` and `Wire.cpp` here model the arduino-pico TwoWire at the "
+            "pinned core commit, not arduino-esp32, and `board_config.h` names the planned I2C controller and pins.\n"
+        ).encode()
+        assert bindings is not None
+        controller_index = bindings["sda"]["i2c_controller"]
+        files["test/vendor_host/board_config.h"] = (
+            "#pragma once\n"
+            "// Generated from this package's plan: the Raspberry Pi Pico, and the I2C controller and pins it wires.\n"
+            "#define HS_RP2040 1\n"
+            f"#define HS_PLANNED_I2C {controller_index}\n"
+            f"#define HS_WIRE {'Wire1' if controller_index == 1 else 'Wire'}\n"
+            f"#define HS_PLANNED_SDA {bindings['sda']['gpio']}\n"
+            f"#define HS_PLANNED_SCL {bindings['scl']['gpio']}\n"
+        ).encode()
+    return files
+
+
+def _for_board(text: str, controller_id: str) -> str:
+    """The vendor-host wording names the Arduino core whose Wire the host model stands in for."""
+    if controller_id == "raspberry-pi-pico":
+        return text.replace("the ESP32 Wire driver's real timing", "the RP2040 Wire driver's real timing").replace(
+            "not ESP32 Wire timing", "not RP2040 Wire timing")
+    return text
 
 
 def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
@@ -233,7 +266,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "PART_DESCRIPTOR.json": descriptor_bytes,
     }
     if part["adapter"]["vendor_host"]:
-        files.update(_vendor_host_files(part["adapter"]["vendor_profile"]))
+        files.update(_vendor_host_files(part["adapter"]["vendor_profile"], mcu["module"], bindings))
     files.update({
         "DEVICE_SPEC.json": spec_bytes,
         "DEVICE_PLAN.json": _json(plan),
@@ -256,7 +289,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
             + "Review exact hardware, supplies, grounds and pull-ups separately before any physical operation.\n"
             "The diagnostic export remains available for other catalog parts.\n\n"
             + (
-                VENDOR_HOST_BOUNDARY + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
+                _for_board(VENDOR_HOST_BOUNDARY, mcu["module"]) + "\nVendor-host tests need the pinned libdeps directory; see test/vendor_host/README.md.\n"
                 if part["adapter"]["vendor_host"]
                 else (NO_VENDOR_BOUNDARY if controller["vendor_host"] else NO_VENDOR_CONTROLLER_BOUNDARY) + "\n"
             )
@@ -265,7 +298,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     metadata = {
         "schema_version": SCHEMA,
         "claim_boundary": _boundary(part),
-        "vendor_host_claim_boundary": VENDOR_HOST_BOUNDARY if part["adapter"]["vendor_host"]
+        "vendor_host_claim_boundary": _for_board(VENDOR_HOST_BOUNDARY, mcu["module"]) if part["adapter"]["vendor_host"]
         else NO_VENDOR_BOUNDARY if controller["vendor_host"] else NO_VENDOR_CONTROLLER_BOUNDARY,
         "status": "HOST_TESTABLE_PROPOSAL",
         "compilation": "NOT_RUN",
@@ -276,7 +309,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "target": controller["target"],
         "pins": bindings,
         "declared_devices": declarations,
-        "non_claims": _non_claims(part),
+        "non_claims": [_for_board(claim, mcu["module"]) for claim in _non_claims(part)],
         "part": {
             "library_id": part["library_id"],
             "chip": part["chip"],

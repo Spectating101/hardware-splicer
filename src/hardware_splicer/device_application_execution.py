@@ -87,9 +87,14 @@ def vendor_host_compile_command(project: Path, libdeps: Path, output: Path, prof
     ]
     for folder, source in chosen["lib_sources"]:
         sources.append(str(libdeps / folder / source))
+    # A package for another board carries board_config.h, which the Arduino shim includes to select that board's core
+    # macros and Wire model; only an ESP32 package is compiled with the ESP32 macros.
+    # As PlatformIO passes them for board = pico; the libraries test these before they include Arduino.h.
+    board = (["-DHS_RP2040", "-DARDUINO_ARCH_RP2040", "-DARDUINO_RASPBERRY_PI_PICO"] if (host / "board_config.h").is_file()
+             else ["-DESP32", "-DARDUINO_ARCH_ESP32"])
     return [
         gxx, "-std=c++17", "-Wall", "-Wextra", "-Wno-macro-redefined",
-        "-DARDUINO=10812", "-DESP32", "-DARDUINO_ARCH_ESP32",
+        "-DARDUINO=10812", *board,
         *includes, *sources, "-o", str(output),
     ]
 

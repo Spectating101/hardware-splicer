@@ -113,7 +113,7 @@ def verify(
     if not metadata["part"]["vendor_host_supported"]:
         # Not applicable, not a failure: there is no register-level model for this part to run against.
         # The package says which is true: the part has no bus model, or this controller's Arduino core has no shim.
-        on_board = "RP2040 core" in metadata.get("vendor_host_claim_boundary", "")
+        on_board = "for this controller" in metadata.get("vendor_host_claim_boundary", "")
         vendor_report = {
             "pass": None,
             "reason": (f"no vendor-host lane exists on the {metadata['target']['board']} board: the host shim models the ESP32 "
