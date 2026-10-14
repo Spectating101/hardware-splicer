@@ -273,3 +273,84 @@ def test_every_shipped_module_with_figures_names_its_gaps_where_it_has_none():
             assert any(g["field"] == "operating_temp_c" for g in eng["gaps"]), entry["id"]
         if not eng.get("loads"):
             assert any(g["field"] == "loads" for g in eng["gaps"]), entry["id"]
+
+
+# --- figures that carry the words they were read from ------------------------------------------------------------------
+
+
+def _with_clock_and_imu():
+    from hardware_splicer.device_draft import draft_device_spec
+
+    return draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["adafruit-ds3231-stemma-qt", "adafruit-mpu-6050-stemma-qt"]})["spec"]
+
+
+def test_a_figure_may_carry_a_verbatim_quote_but_it_must_be_text():
+    from hardware_splicer.device_plan import _check_engineering, module_library
+
+    library = {m["id"]: m for m in module_library()["modules"]}
+    entry = copy.deepcopy(library["adafruit-bme280-stemma-qt"])
+    urls = [s["url"] for s in entry["sources"]]
+    assert entry["engineering"]["operating_temp_c"]["quote"].startswith("Operating range")
+    _check_engineering(entry, urls)
+    for edit in (lambda e: e["engineering"]["operating_temp_c"].update(quote=""),
+                 lambda e: e["engineering"]["operating_temp_c"].update(quote=5),
+                 lambda e: e["engineering"]["loads"][0].update(quote=None)):
+        broken = copy.deepcopy(entry)
+        edit(broken)
+        with pytest.raises(RuntimeError):
+            _check_engineering(broken, urls)
+
+
+def test_a_peak_row_may_state_only_the_maximum_a_datasheet_publishes_but_a_sustained_row_may_not():
+    from hardware_splicer.device_plan import _check_engineering, module_library
+
+    library = {m["id"]: m for m in module_library()["modules"]}
+    clock = copy.deepcopy(library["adafruit-ds3231-stemma-qt"])
+    urls = [s["url"] for s in clock["sources"]]
+    assert all("typical_ma" not in row and row["kind"] == "peak" for row in clock["engineering"]["loads"])
+    _check_engineering(clock, urls)
+    for edit in (lambda e: e["engineering"]["loads"][0].update(kind="sustained"),   # nothing typical to sustain on
+                 lambda e: e["engineering"]["loads"][0].pop("max_ma"),               # and no figure at all
+                 lambda e: e["engineering"]["loads"][0].update(max_ma=-1)):
+        broken = copy.deepcopy(clock)
+        edit(broken)
+        with pytest.raises(RuntimeError):
+            _check_engineering(broken, urls)
+
+
+def test_the_bme280_pressure_row_no_longer_borrows_the_one_hertz_average_as_a_typical():
+    from hardware_splicer.device_plan import module_library
+
+    rows = {m["id"]: m for m in module_library()["modules"]}["adafruit-bme280-stemma-qt"]["engineering"]["loads"]
+    pressure = next(r for r in rows if r["mode"] == "Pressure measurement")
+    assert "typical_ma" not in pressure and pressure["max_ma"] == 0.714
+    assert next(r for r in rows if r["kind"] == "sustained")["typical_ma"] == 0.0036
+
+
+def test_the_clock_and_the_motion_sensor_now_state_their_figures_and_the_supply_total_counts_them():
+    from hardware_splicer.device_plan import module_library
+
+    library = {m["id"]: m for m in module_library()["modules"]}
+    for module_id in ("adafruit-ds3231-stemma-qt", "adafruit-mpu-6050-stemma-qt"):
+        eng = library[module_id]["engineering"]
+        assert eng["gaps"] == [] and eng["loads"] and eng["operating_temp_c"]["quote"]
+    review = build_engineering_review(_with_clock_and_imu())
+    supply = checks(review)["supply_current"]["quantities"]
+    assert supply["modules_without_a_sourced_current"] == []
+    # Its worst published figure, 575 uA, is in the peak total beside the controller's.
+    sourced = [i for i in checks(review)["supply_current"]["inputs"] if i["name"].startswith("adafruit-ds3231")]
+    assert sourced and max(i["value"] for i in sourced) == pytest.approx(0.575)
+
+
+def test_every_shipped_engineering_figure_carries_the_words_it_was_read_from():
+    """A locator says where to look; only a quote can be checked. The words themselves are checked against the cited
+    document by scripts/verify_device_module_quotes.py, which needs the captured pages and so does not run here."""
+    from hardware_splicer.device_plan import module_library
+
+    missing = []
+    for entry in module_library()["modules"]:
+        eng = entry.get("engineering", {})
+        rows = [(name, eng[name]) for name in ("operating_temp_c", "supply_min_a", "power_stage") if name in eng]
+        rows += [(f"loads[{i}]", row) for i, row in enumerate(eng.get("loads", []))]
+        missing += [f"{entry['id']}.{name}" for name, row in rows if not str(row.get("quote", "")).strip()]
+    assert missing == []

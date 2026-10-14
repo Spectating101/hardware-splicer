@@ -657,11 +657,13 @@
           "min": -40,
           "max": 85,
           "kind": "recommended",
+          "quote": "Operating ambient temperature: \u2013 85 \u00b0C version: \u201340 ~ 85 \u00b0C",
           "locator": "ESP32-WROOM-32E datasheet v2.1, Table 14 Recommended Operating Conditions, 85 C version",
           "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
         },
         "supply_min_a": {
           "value": 0.5,
+          "quote": "Current delivered by external power supply 0.5 \u2014 \u2014 A",
           "locator": "ESP32-WROOM-32E datasheet v2.1, Table 14, current delivered by the external power supply, minimum",
           "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf"
         },
@@ -671,6 +673,7 @@
             "kind": "sustained",
             "typical_ma": 112,
             "conditions": "3.3 V supply, 25 C, peripherals disabled, CPU idle",
+            "quote": "802.11b/g/n, 20 MHz 112 112",
             "locator": "Table 16 Current Consumption Depending on RF Modes, RX",
             "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
             "rail_v": 3.3
@@ -681,6 +684,7 @@
             "typical_ma": 239,
             "max_ma": 379,
             "conditions": "3.3 V supply, 25 C, 100 % duty; typical is the table's average, max its peak",
+            "quote": "802.11b, 20 MHz, 1 Mbps, @19.5 dBm 239 379",
             "locator": "Table 16, TX",
             "source": "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf",
             "rail_v": 3.3
@@ -872,6 +876,7 @@
           "min": -40,
           "max": 85,
           "kind": "absolute_maximum",
+          "quote": "TA Operating Temperature -40 to +85 \u00baC",
           "locator": "SSD1306 datasheet, Maximum Ratings table, TA operating temperature (the controller chip, not the module)",
           "source": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf"
         },
@@ -1086,6 +1091,7 @@
           "min": -40,
           "max": 85,
           "kind": "recommended",
+          "quote": "Operating range -40\u2026+85 \u00b0C, 0\u2026100 % rel. humidity, 300\u20261100 hPa",
           "locator": "Bosch BME280 datasheet, key features: operating range -40 to +85 C",
           "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
         },
@@ -1095,6 +1101,7 @@
             "kind": "sustained",
             "typical_ma": 0.0036,
             "conditions": "datasheet condition for the typical figure",
+            "quote": "3.6 \u00b5A @ 1 Hz humidity, pressure and temperature",
             "locator": "Section 1 key features, current consumption 3.6 uA at 1 Hz (humidity, pressure and temperature); the supply in Table 1 is typically 1.8 V",
             "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
             "rail_v": 1.8
@@ -1102,9 +1109,9 @@
           {
             "mode": "Pressure measurement",
             "kind": "peak",
-            "typical_ma": 0.0036,
             "max_ma": 0.714,
-            "conditions": "the maximum is the table's value at -40 C",
+            "conditions": "the table gives only a maximum, at -40 C; it publishes no typical figure for this row",
+            "quote": "IDDP Max value at -40 \u00b0C 714 \u00b5A",
             "locator": "Table 1 Electrical parameter specification, IDDP, current during pressure measurement",
             "source": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf",
             "rail_v": 1.8
@@ -1286,6 +1293,7 @@
           "min": -40,
           "max": 85,
           "kind": "absolute_maximum",
+          "quote": "Operating Temperature Topr -40\uff5e85 \u2103",
           "locator": "Rohm BH1750FVI datasheet, page 1, Absolute Maximum Ratings, Topr",
           "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf"
         },
@@ -1296,6 +1304,7 @@
             "typical_ma": 0.12,
             "max_ma": 0.19,
             "conditions": "VCC = 3.0 V, 25 C",
+            "quote": "Supply Current Icc1 \uff0d 120 190 \u00b5A Ev = 100 lx",
             "locator": "page 2, Electrical Characteristics, Icc1",
             "source": "https://web.archive.org/web/20230104181611/http://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf",
             "rail_v": 3.0
@@ -1502,17 +1511,37 @@
         }
       ],
       "engineering": {
-        "loads": [],
-        "gaps": [
+        "operating_temp_c": {
+          "min": 0,
+          "max": 70,
+          "kind": "recommended",
+          "quote": "(0\u00b0C to +70\u00b0C) and Industrial (-40\u00b0C to +85\u00b0C)",
+          "locator": "Maxim DS3231 datasheet, general description: commercial 0 to +70 C and industrial -40 to +85 C. The module pages do not say which grade is fitted, so the narrower commercial range is used",
+          "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
+        },
+        "loads": [
           {
-            "field": "operating_temp_c",
-            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no temperature range was read."
+            "mode": "Temperature conversion",
+            "kind": "peak",
+            "max_ma": 0.575,
+            "rail_v": 3.63,
+            "conditions": "the table gives only a maximum, at VCC = 3.63 V (650 uA at 5.5 V); I2C bus inactive, 32 kHz output on, SQW output off",
+            "quote": "I2C bus inactive, 32kHz VCC = 3.63V 575",
+            "locator": "Electrical Characteristics, ICCSCONV, temperature conversion current",
+            "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
           },
           {
-            "field": "loads",
-            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no supply current was read."
+            "mode": "Active, SCL clocking at 400 kHz",
+            "kind": "peak",
+            "max_ma": 0.2,
+            "rail_v": 3.63,
+            "conditions": "the table gives only a maximum, at VCC = 3.63 V (300 uA at 5.5 V)",
+            "quote": "VCC = 3.63V 200",
+            "locator": "Electrical Characteristics, ICCA, active supply current (notes 4 and 5)",
+            "source": "https://web.archive.org/web/20201114123152id_/https://datasheets.maximintegrated.com/en/ds/DS3231.pdf"
           }
-        ]
+        ],
+        "gaps": []
       }
     },
     {
@@ -1732,6 +1761,7 @@
           "min": -25,
           "max": 85,
           "kind": "recommended",
+          "quote": "TA \u201325 85 \u00baC",
           "locator": "TI INA219 datasheet, 7.3 Recommended Operating Conditions, TA",
           "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf"
         },
@@ -1742,6 +1772,7 @@
             "typical_ma": 0.7,
             "max_ma": 1.0,
             "conditions": "the chip's own supply, not the current it measures",
+            "quote": "Quiescent current 0.7 1 0.7 1",
             "locator": "Electrical Characteristics, power supply, quiescent current",
             "source": "https://www.ti.com/lit/ds/symlink/ina219.pdf",
             "rail_v": 3.3
@@ -1972,17 +2003,27 @@
         }
       ],
       "engineering": {
-        "loads": [],
-        "gaps": [
+        "operating_temp_c": {
+          "min": -40,
+          "max": 105,
+          "kind": "absolute_maximum",
+          "quote": "Operating Temperature Range -40\u00b0C to +105\u00b0C",
+          "locator": "InvenSense MPU-6000/6050 datasheet, absolute maximum ratings: operating temperature range. The datasheet states no narrower recommended range in the text read",
+          "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
+        },
+        "loads": [
           {
-            "field": "operating_temp_c",
-            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no temperature range was read."
-          },
-          {
-            "field": "loads",
-            "reason": "The datasheet in this module's sources could not be retrieved on 2026-10-13, so no supply current was read."
+            "mode": "Gyroscope, accelerometer and DMP running",
+            "kind": "sustained",
+            "typical_ma": 3.9,
+            "rail_v": 3.3,
+            "conditions": "the datasheet gives a VDD range (2.375 to 3.46 V), not one measurement rail; 3.3 V is used because it is inside that range and is the regulator output the Adafruit page states. The column header was lost in text extraction, so the figure is taken as the datasheet's operating-current value",
+            "quote": "Normal Operating Current Gyroscope + Accelerometer + DMP 3.9 mA",
+            "locator": "Electrical Characteristics, VDD power supply, normal operating current (key features: 3.9 mA with all six axes and the DMP enabled)",
+            "source": "https://web.archive.org/web/20201112015226/https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf"
           }
-        ]
+        ],
+        "gaps": []
       }
     },
     {
@@ -2265,6 +2306,7 @@
           "min": -40,
           "max": 125,
           "kind": "absolute_maximum",
+          "quote": "TA Operating ambient temperature \u201340 125 \u00b0C",
           "locator": "TI ADS1115 datasheet, 5.1 Absolute Maximum Ratings, operating ambient TA",
           "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf"
         },
@@ -2275,6 +2317,7 @@
             "typical_ma": 0.15,
             "max_ma": 0.2,
             "conditions": "VDD = 3.3 V, TA = 25 C",
+            "quote": "TA = 25\u00b0C 150 200",
             "locator": "5.5 Electrical Characteristics, IVDD operating",
             "source": "https://www.ti.com/lit/ds/symlink/ads1115.pdf",
             "rail_v": 3.3
@@ -2985,6 +3028,7 @@
           "min": -20,
           "max": 70,
           "kind": "recommended",
+          "quote": "Recommended maximum ambient temperature of operation is 70\u00b0C",
           "locator": "Raspberry Pi Pico datasheet, 2.3 Recommended operating conditions: recommended maximum ambient temperature of operation is 70 C (85 C including self-heating), minimum -20 C",
           "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
         },
@@ -2995,6 +3039,7 @@
             "typical_ma": 86.5,
             "rail_v": 5.0,
             "conditions": "25 C mean of three boards; includes the VGA, SD card and I2S audio board attached, so it overstates a bare Pico",
+            "quote": "Mean 85.6 86.5 88.0 91.6 91.6 92.8",
             "locator": "Table 1",
             "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
           },
@@ -3005,6 +3050,7 @@
             "max_ma": 95.5,
             "rail_v": 5.0,
             "conditions": "mean of three boards at 25 C and 85 C; includes the VGA board",
+            "quote": "Mean 90.8 88.9 91.0 95.0 93.5 95.5",
             "locator": "Table 2",
             "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
           }
@@ -3012,6 +3058,7 @@
         "power_stage": {
           "kind": "switching",
           "note": "an RT6150 buck-boost converter makes the 3.3 V from VSYS",
+          "quote": "feeds the RT6150 buck-boost SMPS, which generates a fixed 3.3 V output",
           "locator": "Raspberry Pi Pico datasheet, 4.4 Powerchain",
           "source": "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf"
         },

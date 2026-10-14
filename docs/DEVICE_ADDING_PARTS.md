@@ -26,7 +26,10 @@ entry in the library.
    by the board in use.
 4. `engineering`:
    - `operating_temp_c` (min, max, `recommended` or `absolute_maximum`, the table it came from);
-   - `loads`: rows of `sustained` or `peak` current with `rail_v`, the conditions and the locator;
+   - `loads`: rows of `sustained` or `peak` current with `rail_v`, the conditions and the locator. A `sustained` row needs
+     `typical_ma`. A `peak` row may state only `max_ma` when the datasheet publishes no typical figure; do not fill the gap;
+   - every one of these figures carries a `quote`: the words of the datasheet that state the number, copied exactly (a test
+     refuses a shipped figure without one);
    - `temperature_sensing` when the part measures temperature and its datasheet says the reading depends on its surroundings;
    - `gaps`: for anything you could not read, say what and why. A part with no figures at all is still valid; the review will
      list it as missing.
@@ -54,7 +57,12 @@ regulator type is documented adds `engineering.power_stage`.
 
 - It does not extract anything from a datasheet. Reading the figure and writing its locator is a person's job; the loader only
   refuses an uncited or nonsensical one.
-- A figure that is cited is not thereby right. Entries stay unreviewed extracts until someone checks them against the source.
+- A figure that is cited is not thereby right. A `quote` makes it checkable: `scripts/verify_device_module_quotes.py --source-dir DIR`
+  looks for every quote in the module (the `quotes` list, `i2c.pullups` and each engineering figure) in the saved text of the
+  source it names. A quote that is not there fails the run. What it cannot do is say the quote supports the number written
+  beside it, or that the document is the right one for the part fitted. The saved pages are third-party text and are not
+  committed, so the check runs where they have been captured; `DIR` holds one text file per source, named in `SOURCE_FILES`
+  in that script. Add the mapping when you cite a new document.
 - Adding a controller does not give it firmware. That needs a descriptor, an adapter and tests of its own.
 
 ## Checking a new entry
