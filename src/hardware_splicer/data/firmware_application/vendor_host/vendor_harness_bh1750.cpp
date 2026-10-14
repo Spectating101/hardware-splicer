@@ -460,8 +460,16 @@ static Result scenario_transient_nack() {
     return r;
 }
 
+#ifdef HS_RP2040
+#include "wire_pins_rp2040.h"
+#endif
+
 static Result scenario_wire_pins() {
     World w;
+#ifdef HS_RP2040
+    // On the Pico the pins, the controller and the recovery path are checked the RP2040 core's way.
+    return scenario_wire_pins_rp2040(w, [](World &world) { world.bh23.plug(kRawBright); }, [](World &world) { world.bh23.unplug(); });
+#endif
     w.attach();
     w.bh23.plug(kRawBright);
     w.oled3c.plug();

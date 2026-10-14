@@ -4,6 +4,7 @@
 // A pass is not silicon, not the ESP32 Wire driver's real timing, and not electrical behaviour.
 #include "Arduino.h"
 #include "Wire.h"
+#include <stdexcept>
 #include "ssd1306_model.h"
 #include <Adafruit_GFX.h>
 #include <algorithm>
@@ -180,8 +181,18 @@ struct Result {
 // Runs the named scenario, or every scenario in its own forked child, printing one JSON line each.
 [[maybe_unused]] static int vendor_main(int argc, char **argv, const char *const *names, size_t count,
                                         Result (*run_named)(const char *)) {
+    // A modelled core panic (an illegal pin on the RP2040, for example) throws; it fails the scenario with its message.
+    auto guarded = [run_named](const char *name) -> Result {
+        try {
+            return run_named(name);
+        } catch (const std::exception &error) {
+            Result failed;
+            failed.detail = std::string("the core halted: ") + error.what();
+            return failed;
+        }
+    };
     if (argc >= 2 && argv[1][0] != '\0') {
-        const Result r = run_named(argv[1]);
+        const Result r = guarded(argv[1]);
         std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\"%s}\n", argv[1],
                     r.pass ? "true" : "false", json_escape(r.detail).c_str(),
                     r.finding ? ",\"finding\":true" : "");
@@ -197,7 +208,7 @@ struct Result {
             return 1;
         }
         if (pid == 0) {
-            const Result r = run_named(name);
+            const Result r = guarded(name);
             std::printf("{\"scenario\":\"%s\",\"pass\":%s,\"detail\":\"%s\"%s}\n", name,
                         r.pass ? "true" : "false", json_escape(r.detail).c_str(),
                         r.finding ? ",\"finding\":true" : "");

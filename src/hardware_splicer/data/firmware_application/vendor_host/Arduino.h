@@ -13,6 +13,22 @@
 #include <vector>
 
 #define ARDUINO 10812
+// A package for a board other than the ESP32 carries board_config.h (HS_RP2040, the planned I2C controller and pins).
+#if __has_include("board_config.h")
+#include "board_config.h"
+#endif
+#ifdef HS_RP2040
+// The Raspberry Pi Pico lane: the libraries see the RP2040 core's architecture macros, as under PlatformIO's board = pico.
+#ifndef ARDUINO_ARCH_RP2040
+#define ARDUINO_ARCH_RP2040
+#endif
+#ifndef ARDUINO_RASPBERRY_PI_PICO
+#define ARDUINO_RASPBERRY_PI_PICO
+#endif
+#define ARDUINO_BOARD "pico"
+// ArduinoCore-API api/Common.h, which the RP2040 core's Arduino.h includes.
+typedef enum { LSBFIRST = 0, MSBFIRST = 1 } BitOrder;
+#else
 #ifndef ESP32
 #define ESP32
 #endif
@@ -20,6 +36,7 @@
 #define ARDUINO_ARCH_ESP32
 #endif
 #define ARDUINO_BOARD "esp32dev"
+#endif
 
 #define HIGH 0x1
 #define LOW 0x0
@@ -27,7 +44,11 @@
 #define OUTPUT 0x1
 #define INPUT_PULLUP 0x2
 #define INPUT_PULLDOWN 0x3
+#ifdef HS_RP2040
+#define LED_BUILTIN 25  // variants/rpipico/pins_arduino.h PIN_LED
+#else
 #define LED_BUILTIN 2
+#endif
 
 #define PI 3.1415926535897932384626433832795
 #define DEG_TO_RAD 0.017453292519943295769236907684886
@@ -75,6 +96,15 @@ inline float degrees(float rad) { return rad * RAD_TO_DEG; }
 
 inline void yield() {}
 
+#ifdef HS_RP2040
+// variants/rpipico/pins_arduino.h in arduino-pico at commit fd65f6d4: PIN_WIRE0_* and PIN_SPI0_*
+static const uint8_t SDA = 4;
+static const uint8_t SCL = 5;
+static const uint8_t SS = 17;
+static const uint8_t MOSI = 19;
+static const uint8_t MISO = 16;
+static const uint8_t SCK = 18;
+#else
 // variants/esp32/pins_arduino.h in arduino-esp32 2.0.17
 static const uint8_t SDA = 21;
 static const uint8_t SCL = 22;
@@ -82,6 +112,7 @@ static const uint8_t SS = 5;
 static const uint8_t MOSI = 23;
 static const uint8_t MISO = 19;
 static const uint8_t SCK = 18;
+#endif
 
 unsigned long millis();
 unsigned long micros();
