@@ -116,8 +116,8 @@ def verify(
         on_board = "for this controller" in metadata.get("vendor_host_claim_boundary", "")
         vendor_report = {
             "pass": None,
-            "reason": (f"no vendor-host lane exists on the {metadata['target']['board']} board: the host shim models the ESP32 "
-                       "Arduino core's Wire, so the Arduino adapter was not tested against a modelled bus") if on_board else
+            "reason": (f"no vendor-host lane exists on the {metadata['target']['board']} board: the host shim models only the "
+                       "ESP32 and RP2040 Arduino cores' Wire, so the Arduino adapter was not tested against a modelled bus") if on_board else
                       f"no vendor-host lane exists for the {metadata['part']['chip']}; its Arduino adapter was not tested against a modelled bus",
         }
     elif vendor_libs is not None or platformio:
