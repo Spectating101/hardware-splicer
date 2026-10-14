@@ -49,15 +49,34 @@ def test_every_input_is_sourced_with_a_url_or_assumed_with_a_reason(bme):
         assert item["name"] in STANDARDS or "." in item["name"] or item["name"] == "io_v", item["name"]
 
 
-def test_the_case_is_sized_to_the_sourced_antenna_clearance_and_the_review_agrees_with_the_plans_own_finding(bme):
+def test_the_case_meets_the_antenna_clearance_at_its_end_but_the_review_still_checks_every_other_direction(bme):
     _spec, plan, review = bme
     finding = next(f for f in plan["findings"] if f["rule"] == "antenna_keepout")
     stated = float(re.search(r"in this layout is ([\d.]+) mm", finding["message"]).group(1))
     c = checks(review)["antenna_clearance"]
     assert stated == pytest.approx(15, abs=0.01)
     assert c["quantities"]["gap_to_case_wall_mm"] == pytest.approx(stated)
-    assert c["quantities"]["recommended_clearance_mm"] == 15 and c["status"] == WITHIN
+    assert c["quantities"]["recommended_clearance_mm"] == 15
     assert c["quantities"]["extra_case_length_needed_mm"] == 0
+    # The source says "in all directions". The case is lengthened at the antenna end only, so across it is as tight as the
+    # boards: that is not within the recommendation, and the review says so instead of judging one axis.
+    mcu = next(m for m in plan["modules"] if m["id"] == "mcu")
+    half_z = plan["case"]["inner_mm"]["z"] / 2
+    side = min(mcu["box"]["z0"] + half_z, half_z - mcu["box"]["z1"])
+    assert c["quantities"]["gaps_by_direction_mm"]["side_walls_at_least"] == pytest.approx(side, abs=0.01)
+    assert side < 15 and c["status"] == ADVISORY and "a side wall" in c["summary"]
+
+
+def test_the_nearest_module_is_measured_from_the_antenna_ends_footprint_not_from_its_tip(bme):
+    _spec, plan, review = bme
+    mcu = next(m for m in plan["modules"] if m["id"] == "mcu")
+    display = next(m for m in plan["modules"] if m["id"] == "display")
+    # The display lies on the -x side of the antenna end and across the same z band, so the gap is from the board's +x
+    # edge, where the antenna end starts, to the display's +x edge.
+    expected = mcu["box"]["x1"] - display["box"]["x1"]
+    got = checks(review)["antenna_clearance"]["quantities"]["antenna_end_to_nearest_other_module_mm"]
+    assert got == pytest.approx(expected, abs=0.01)
+    assert got < expected + mcu["overhang_mm"]["antenna_end"] - 1  # not inflated by the antenna's own length
 
 
 def test_a_case_that_opts_out_of_the_antenna_clearance_is_reported_as_too_short():
@@ -79,21 +98,36 @@ def test_the_case_temperature_matches_a_hand_calculation(bme):
     assert c["quantities"]["case_surface_area_m2"] == pytest.approx(area, abs=1e-4)
     # A floor: each peak current at the rail it was measured on (ESP32 transmit 379 mA at 3.3 V, BME280 pressure 0.714 mA at 1.8 V).
     watts = 3.3 * 0.379 + 1.8 * 0.000714
-    assert c["quantities"]["heat_floor_w"]["peak_load"] == pytest.approx(watts, abs=0.005)
+    assert c["quantities"]["heat_w_at_measured_rails"]["peak_load"] == pytest.approx(watts, abs=0.005)
     assert c["quantities"]["case_surface_rise_k"]["peak_load"]["worst_k"] == pytest.approx(watts / (5.0 * area), abs=0.1)
     assert c["quantities"]["case_surface_rise_k"]["peak_load"]["best_k"] == pytest.approx(watts / (10.0 * area), abs=0.1)
-    assert c["status"] in {ADVISORY, EXCEEDS}  # a surface floor can never clear the parts inside
+    assert c["status"] in {ADVISORY, EXCEEDS}  # a surface estimate can never clear the parts inside
+    # A range from the convection assumption, at the warm ambient: never called a floor or "at least".
+    hot = ASSUMED["ambient_c"][0][1]
+    surface = c["quantities"]["surface_c_at_warm_ambient"]["peak_load"]
+    assert surface["low"] == pytest.approx(hot + watts / (10.0 * area), abs=0.2)
+    assert surface["high"] == pytest.approx(hot + watts / (5.0 * area), abs=0.2)
+    assert "at least" not in c["summary"] and "floor" not in " ".join(c["quantities"])
     assert any("surface only" in text for text in c["limits"])
 
 
-def test_a_surface_floor_over_the_lowest_sourced_limit_is_reported_as_exceeded(monkeypatch):
+def test_the_case_is_over_its_limit_only_when_even_the_sustained_load_with_the_better_convection_reaches_it(monkeypatch):
     import hardware_splicer.device_engineering as module
 
-    hot = dict(ASSUMED)
-    hot["convection_w_per_m2k"] = ((0.5, 1.0), "W/m2K", "a sealed box with no airflow at all")
-    monkeypatch.setattr(module, "ASSUMED", hot)
-    review = module.build_engineering_review(example_specs()["esp32_oled_usb"])
-    assert checks(review)["enclosure_temperature"]["status"] == EXCEEDS
+    def review_with(h):
+        changed = dict(ASSUMED)
+        changed["convection_w_per_m2k"] = (h, "W/m2K", "a test value")
+        monkeypatch.setattr(module, "ASSUMED", changed)
+        c = checks(module.build_engineering_review(example_specs()["esp32_oled_usb"]))["enclosure_temperature"]
+        return c, c["quantities"]["surface_c_at_warm_ambient"], c["quantities"]["lowest_sourced_operating_limit_c"]
+
+    # Only the transmit peak with the worse convection reaches the limit: that needs checking, it is not "over a limit".
+    c, surface, limit = review_with((0.5, 1.0))
+    assert surface["peak_load"]["high"] >= limit and surface["sustained_load"]["low"] < limit
+    assert c["status"] == ADVISORY
+    # The steady load with the better convection reaches it as well: now it is over the limit.
+    c, surface, limit = review_with((0.2, 0.4))
+    assert surface["sustained_load"]["low"] >= limit and c["status"] == EXCEEDS
 
 
 def test_the_temperature_sensor_is_flagged_by_its_distance_to_the_controller_board(bme):
@@ -116,25 +150,54 @@ def test_unknown_pullups_are_not_assessed_and_stated_ones_follow_the_i2c_rise_ti
     assert c["quantities"]["rp_effective_ohm"] == 10000
     assert c["quantities"]["bus_capacitance_tolerated_pf"] == pytest.approx(1000e-9 / (0.8473 * 10000) * 1e12, abs=0.1)
     assert c["quantities"]["rp_min_ohm"] == pytest.approx((3.3 - 0.4) / 0.003, abs=1)
+    # The display on the same bus does not state its pull-ups. Any it has are in parallel: they help the rise time and
+    # can break the sink limit, so the stated values alone cannot close the check.
+    assert c["quantities"]["pullups_unknown"] == ["display"]
+    assert c["status"] == ADVISORY and "display does not state its pull-ups" in c["summary"]
+
+
+def test_a_bus_whose_every_module_states_its_pull_ups_is_judged_on_them():
+    from hardware_splicer.device_draft import draft_device_spec
+
+    spec = draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["adafruit-bh1750-stemma-qt"]})["spec"]
+    c = checks(build_engineering_review(spec))["i2c_bus"]
+    assert c["quantities"]["pullups_unknown"] == [] and c["quantities"]["rp_effective_ohm"] == 10000
     assert c["status"] == WITHIN
-    assert "unknown" in " ".join(c["limits"]).lower() or "do not state" in " ".join(c["limits"]).lower()
+
+
+def test_the_low_capacitance_estimate_is_the_wire_alone_because_pin_capacitance_has_only_a_maximum(bme):
+    _spec, plan, review = bme
+    c = checks(review)["i2c_bus"]
+    low_wire = ASSUMED["wire_pf_per_m"][0][0]
+    longest = max(c["quantities"]["wire_length_m"].values())
+    assert c["quantities"]["bus_capacitance_pf_estimate"]["low"] == pytest.approx(longest * low_wire, abs=0.15)
 
 
 def test_a_heavily_loaded_bus_is_reported_as_exceeded(monkeypatch):
     import hardware_splicer.device_engineering as module
 
     loaded = dict(ASSUMED)
-    loaded["wire_pf_per_m"] = ((3000.0, 6000.0), "pF/m", "an absurdly capacitive cable")
+    loaded["wire_pf_per_m"] = ((10000.0, 20000.0), "pF/m", "an absurdly capacitive cable")
     monkeypatch.setattr(module, "ASSUMED", loaded)
-    review = module.build_engineering_review(example_spec_for_part("adafruit-bh1750-stemma-qt"))
-    assert checks(review)["i2c_bus"]["status"] == EXCEEDS
+    from hardware_splicer.device_draft import draft_device_spec
+
+    # Every module on this bus states its pull-ups, so the stated resistance is the resistance and a verdict can be given.
+    review = module.build_engineering_review(draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["adafruit-bh1750-stemma-qt"]})["spec"])
+    c = checks(review)["i2c_bus"]
+    # Over the limit only because even the low estimate, the wire alone, is more than the pull-up can drive.
+    assert c["quantities"]["bus_capacitance_pf_estimate"]["low"] > c["quantities"]["bus_capacitance_tolerated_pf"]
+    assert c["status"] == EXCEEDS
 
 
 def test_the_supply_check_reports_what_is_unsourced_instead_of_guessing(bme):
     _spec, _plan, review = bme
     c = checks(review)["supply_current"]
-    assert c["quantities"]["sourced_peak_ma_upper_bound"] == pytest.approx(379.714)
-    assert c["quantities"]["headroom_for_unsourced_loads_ma_at_least"] == pytest.approx(500 - 379.714)
+    assert c["quantities"]["sourced_peak_ma_sum"] == pytest.approx(379.714)
+    assert c["quantities"]["port_budget_left_after_sourced_peaks_ma"] == pytest.approx(500 - 379.714)
+    # The ESP32's datasheet asks for a 0.5 A supply for the module alone: the summary says the port leaves no margin by that
+    # measure, before it says how much is "left over" from the published peaks.
+    assert c["summary"].startswith("The controller's datasheet asks for a supply that can deliver at least 0.5 A")
+    assert "at most" not in c["summary"] and "at least 120" not in c["summary"]
     assert c["quantities"]["modules_without_a_sourced_current"] == ["display"]
     assert c["quantities"]["regulator"] == "not stated"  # the DevKitC sources do not say, so nothing about it is assumed
     assert c["status"] == ADVISORY
@@ -206,7 +269,7 @@ def test_a_part_is_added_by_adding_data_and_the_review_reads_it_without_code(mon
 
     module = _with_library(monkeypatch, give_the_display_a_current)
     after = checks(module.build_engineering_review(spec))["supply_current"]["quantities"]
-    assert after["sourced_peak_ma_upper_bound"] == pytest.approx(before["sourced_peak_ma_upper_bound"] + 20.0)
+    assert after["sourced_peak_ma_sum"] == pytest.approx(before["sourced_peak_ma_sum"] + 20.0)
     assert after["modules_without_a_sourced_current"] == []
 
 
@@ -368,3 +431,12 @@ def test_no_check_lists_two_inputs_under_one_name_even_when_a_module_has_two_row
         for check in checks(build_engineering_review(spec)).values():
             names = collections.Counter(item["name"] for item in check["inputs"])
             assert [name for name, count in names.items() if count > 1] == [], check["id"]
+
+
+def test_a_module_that_publishes_only_peaks_is_named_and_not_silently_left_out_of_the_sustained_sum():
+    from hardware_splicer.device_draft import draft_device_spec
+
+    spec = draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["adafruit-ds3231-stemma-qt"]})["spec"]
+    c = checks(build_engineering_review(spec))["supply_current"]
+    assert c["quantities"]["modules_with_only_peak_figures"] == ["sensor"]
+    assert "only peak figures" in c["summary"]

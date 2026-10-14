@@ -134,7 +134,9 @@ def test_a_board_with_no_antenna_has_no_antenna_check_and_a_board_with_one_does(
     esp = build_engineering_review(example_specs()["esp32_oled_usb"])
     ids = lambda review: {c["id"]: c for d in review["domains"] for c in d["checks"]}
     assert ids(pico)["antenna_clearance"]["status"] == "not_assessed"
-    assert ids(esp)["antenna_clearance"]["status"] == "within_limit_under_assumptions"  # the case is sized to meet it
+    # The case is sized to meet the clearance at the antenna end; across it is as tight as the boards, which needs checking.
+    assert ids(esp)["antenna_clearance"]["status"] == "advisory"
+    assert ids(esp)["antenna_clearance"]["quantities"]["gaps_by_direction_mm"]["end_wall"] == pytest.approx(15, abs=0.01)
     assert "antenna" not in ids(pico)["usb_insertion_support"]["summary"] and "antenna end" in ids(esp)["usb_insertion_support"]["summary"]
     opted_out = copy.deepcopy(example_specs()["esp32_oled_usb"])
     opted_out["case"]["antenna_clearance"] = False
@@ -146,7 +148,7 @@ def test_the_review_uses_each_boards_regulator_and_temperature_limit():
     checks = {c["id"]: c for d in pico["domains"] for c in d["checks"]}
     assert checks["supply_current"]["quantities"]["regulator"] == "switching"
     assert checks["enclosure_temperature"]["quantities"]["lowest_sourced_operating_limit_c"] == 70  # the Pico's recommended ambient, below the sensors' 85
-    peak = checks["supply_current"]["quantities"]["sourced_peak_ma_upper_bound"]
+    peak = checks["supply_current"]["quantities"]["sourced_peak_ma_sum"]
     assert peak == pytest.approx(95.5 + 0.714)  # Pico demo maximum at 5 V and the BME280 maximum, nothing from the ESP32
     assert any("RT6150" in text for text in checks["supply_current"]["limits"])
 
