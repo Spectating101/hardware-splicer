@@ -171,6 +171,11 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     return _check("i2c_bus", "I2C bus loading", status, text + " At 100 kHz (the rise time limit of Standard-mode).", quantities, inputs, limits)
 
 
+def _top_ma(row: dict[str, Any]) -> float:
+    """The highest figure a row publishes: its maximum when it has one, otherwise its typical (a peak row may state only a maximum)."""
+    return row["max_ma"] if "max_ma" in row else row["typical_ma"]
+
+
 def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     """Currents from the rows the library sources. Sustained and peak mA are an upper bound on what a USB port supplies (every
     row counted at 1:1, as a linear regulator would draw it); the watts are a floor on the heat (each row at the rail it was
@@ -189,11 +194,11 @@ def _loads(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
             top = max(sus, key=lambda r: r["typical_ma"])
             totals["sustained_ma"] += top["typical_ma"]
             totals["sustained_w"] += top["typical_ma"] * top["rail_v"] / 1000
-        hi = max(rows, key=lambda r: r.get("max_ma", r["typical_ma"]) * r["rail_v"])
-        totals["peak_ma"] += max(r.get("max_ma", r["typical_ma"]) for r in rows)
-        totals["peak_w"] += hi.get("max_ma", hi["typical_ma"]) * hi["rail_v"] / 1000
+        hi = max(rows, key=lambda r: _top_ma(r) * r["rail_v"])
+        totals["peak_ma"] += max(_top_ma(r) for r in rows)
+        totals["peak_w"] += _top_ma(hi) * hi["rail_v"] / 1000
         for row in rows:
-            facts.append(_fact(entry, f"load.{row['kind']}", row.get("max_ma", row["typical_ma"]), "mA",
+            facts.append(_fact(entry, f"load.{row['kind']}", _top_ma(row), "mA",
                                f"{row['mode']} at {row['rail_v']:g} V ({row['locator']}; {row['conditions']})", row["source"]))
     return {**totals, "missing": missing, "facts": facts}
 

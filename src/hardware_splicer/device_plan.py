@@ -97,9 +97,15 @@ def _check_engineering(module: dict[str, Any], source_urls: list[str]) -> None:
     if not isinstance(engineering, dict) or not set(engineering) <= allowed:
         raise RuntimeError(f"{label} engineering may hold only {', '.join(sorted(allowed))}")
 
-    def cited(row: Any, name: str, fields: set[str]) -> dict[str, Any]:
-        if not isinstance(row, dict) or set(row) != fields:
-            raise RuntimeError(f"{label} engineering.{name} must have exactly {', '.join(sorted(fields))}")
+    def cited(row: Any, name: str, fields: set[str], *, optional: frozenset[str] = frozenset()) -> dict[str, Any]:
+        # A figure may also carry the verbatim words it was read from. Only a quote can be checked against the cited
+        # document, so the loader checks its shape and scripts/verify_device_module_quotes.py checks the words.
+        allowed_fields = fields | ({"quote"} if "quote" in row and "quote" not in fields else set()) if isinstance(row, dict) else fields
+        if not isinstance(row, dict) or not fields - optional <= set(row) <= allowed_fields:
+            raise RuntimeError(f"{label} engineering.{name} must have exactly {', '.join(sorted(fields - optional))}"
+                               f"{' (and optionally ' + ', '.join(sorted(optional)) + ')' if optional else ''}")
+        if "quote" in row and "quote" not in fields:
+            _text_field(row["quote"], f"{label} engineering.{name}.quote")
         _text_field(row["locator"], f"{label} engineering.{name}.locator")
         if row["source"] not in source_urls:
             raise RuntimeError(f"{label} engineering.{name}.source must equal one of this module's source urls")
@@ -133,16 +139,20 @@ def _check_engineering(module: dict[str, Any], source_urls: list[str]) -> None:
     if not isinstance(loads, list) or len(loads) > 12:
         raise RuntimeError(f"{label} engineering.loads must be a list of at most 12 rows")
     for index, row in enumerate(loads):
-        fields = {"mode", "kind", "typical_ma", "rail_v", "conditions", "locator", "source"} | ({"max_ma"} if isinstance(row, dict) and "max_ma" in row else set())
-        row = cited(row, f"loads[{index}]", fields)
+        has_max = isinstance(row, dict) and "max_ma" in row
+        # A datasheet that publishes only a maximum gives a peak row with max_ma and no typical_ma; nothing is invented to fill it.
+        fields = {"mode", "kind", "typical_ma", "rail_v", "conditions", "locator", "source"} | ({"max_ma"} if has_max else set())
+        row = cited(row, f"loads[{index}]", fields, optional=frozenset({"typical_ma"}) if has_max and row.get("kind") == "peak" else frozenset())
         _text_field(row["mode"], f"{label} engineering.loads[{index}].mode")
         _text_field(row["conditions"], f"{label} engineering.loads[{index}].conditions")
         if row["kind"] not in {"sustained", "peak"}:
             raise RuntimeError(f"{label} engineering.loads[{index}].kind must be sustained or peak")
-        typical = _number_field(row["typical_ma"], f"{label} engineering.loads[{index}].typical_ma")
+        typical = _number_field(row["typical_ma"], f"{label} engineering.loads[{index}].typical_ma") if "typical_ma" in row else None
         _number_field(row["rail_v"], f"{label} engineering.loads[{index}].rail_v", positive=True)
-        if "max_ma" in row and _number_field(row["max_ma"], f"{label} engineering.loads[{index}].max_ma") < typical:
-            raise RuntimeError(f"{label} engineering.loads[{index}].max_ma may not be below typical_ma")
+        if "max_ma" in row:
+            maximum = _number_field(row["max_ma"], f"{label} engineering.loads[{index}].max_ma")
+            if typical is not None and maximum < typical:
+                raise RuntimeError(f"{label} engineering.loads[{index}].max_ma may not be below typical_ma")
     gaps = engineering.get("gaps", [])
     if not isinstance(gaps, list) or not all(isinstance(g, dict) and set(g) == {"field", "reason"} for g in gaps):
         raise RuntimeError(f"{label} engineering.gaps must be a list of objects with field and reason")
