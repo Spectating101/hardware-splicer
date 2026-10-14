@@ -238,13 +238,15 @@ uint8_t TwoWire::endTransmission(bool stopBit) {
     tx.bare_probe = (_buffLen == 0);
     I2cDevice *dev = b.at(_addr);
     uint8_t result = 0;
-    const auto injected = [&b]() -> uint8_t {
+    const auto injected = [&b](bool probe) -> uint8_t {
         const int value = b.next_write_result;
         b.next_write_result = -1;
-        return value == 3 ? 4 : static_cast<uint8_t>(value);
+        if (value == 0) return 0;
+        if (probe) return 2;
+        return value == 5 ? 5 : 4;
     };
     if (!_buffLen) {
-        result = b.next_write_result >= 0 ? injected() : ((dev && dev->present()) ? 0 : 2);
+        result = b.next_write_result >= 0 ? injected(true) : ((dev && dev->present()) ? 0 : 2);
         tx.result = result;
         b.log.push_back(tx);
         return result;
@@ -256,7 +258,7 @@ uint8_t TwoWire::endTransmission(bool stopBit) {
         return r == 0 ? 0 : (r == 5 ? 5 : 4);
     };
     if (b.next_write_result >= 0) {
-        result = injected();
+        result = injected(false);
     } else if (b.remaining_data_nacks > 0 && b.data_nack_skip > 0) {
         b.data_nack_skip -= 1;
         result = device_write();
