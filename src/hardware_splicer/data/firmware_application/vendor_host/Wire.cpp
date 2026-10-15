@@ -113,6 +113,7 @@ uint8_t TwoWire::do_write(uint8_t address, const uint8_t *data, size_t len, bool
     I2cTransaction tx;
     tx.address = address;
     tx.direction = I2cDir::Write;
+    tx.clock_hz = clock_hz_;
     tx.bytes.assign(data, data + len);
     tx.stop = stop;
     tx.bare_probe = (len == 0);
@@ -141,6 +142,7 @@ size_t TwoWire::do_read(uint8_t address, uint8_t *data, size_t len) {
     I2cTransaction tx;
     tx.address = address;
     tx.direction = I2cDir::Read;
+    tx.clock_hz = clock_hz_;
     tx.stop = true;
     I2cDevice *dev = g_i2c_bus.at(address);
     size_t got = 0;
