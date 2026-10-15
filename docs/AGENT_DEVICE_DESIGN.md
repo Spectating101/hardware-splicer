@@ -1,5 +1,7 @@
 # Designing a device with an agent
 
+> **Scope note.** This document describes the current bounded **known-library device-design loop**. The broader mission-level integration target — including persistent mission state, donor/reclaim architectures, unknown-artifact intake, reverse-engineering operators, bounded multi-candidate comparison, and `READY_FOR_HUMAN_BUILD` termination — is defined in [FABRICATION_MISSION_RUNTIME_2026Q4.md](FABRICATION_MISSION_RUNTIME_2026Q4.md). The broader runtime is an implementation target, not a claim that those pieces are already unified.
+
 How an AI agent (or any script) drives the device pipeline end to end: write a
 spec, get a plan, repair it, review it, export a case, generate and run the
 application off-hardware, and compare bench output against the plan.
@@ -33,6 +35,8 @@ wrong — see [MACHINE_PROJECT_SPINE.md](MACHINE_PROJECT_SPINE.md).
 | 9 | `POST /v1/devices/observations` | Compares serial output a human captured on a bench with what the plan predicts |
 
 Steps 5 to 8 are independent of each other once the plan has no errors.
+
+**Known projection gap (2026-10-16):** the canonical HTTP operation for step 8 exists, and this guide correctly includes it, but the current `device_design` task projection in `mcp_backend_gateway.py` omits `/v1/devices/application/run`. An MCP agent can still discover the canonical operation through the general operation catalogue, but the bounded task manifest is incomplete until that route is admitted and pinned by `tests/test_device_agent_surface.py`. This is a wiring defect, not a missing modeled-execution capability.
 
 ## Drafting from a parts list
 
