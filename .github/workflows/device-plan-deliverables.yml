@@ -127,6 +127,8 @@ jobs:
         run: .venv/bin/python scripts/verify_device_application.py --part bh1750 --platformio .cache/firmware-tools/bin/pio
       - name: Run the Raspberry Pi Pico application's host tests and compile it
         run: .venv/bin/python scripts/verify_device_application.py --example pico_oled_bme280_usb --platformio .cache/firmware-tools/bin/pio
+      - name: Compile a freshly recomputed Raspberry Pi Pico diagnostic proposal
+        run: .venv/bin/python scripts/verify_device_firmware.py --example pico_oled_bme280_usb --platformio .cache/firmware-tools/bin/pio
       - name: Preserve the application source, host and compiler results
         if: always()
         uses: actions/upload-artifact@v4

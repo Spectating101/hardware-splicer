@@ -13,7 +13,7 @@ import zipfile
 from typing import Any
 
 from .device_plan import DevicePlanError, build_device_plan, module_library
-from .firmware_scaffold import generate_i2c_diagnostic_source
+from .firmware_scaffold import generate_i2c_diagnostic_source, generate_rp2040_i2c_diagnostic_source
 
 SCHEMA = "hardware_splicer.device_firmware_proposal.v1"
 PLATFORM = "espressif32@6.10.0"
@@ -106,20 +106,38 @@ def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
     if blockers:
         raise DevicePlanError("Resolve wiring checks before exporting diagnostic source: " + ", ".join(sorted({f["rule"] for f in blockers})))
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
-    if mcu["module"] != "esp32-devkitc-v4":
-        raise DevicePlanError("diagnostic source supports only the catalog ESP32-DevKitC V4")
-    bindings, declarations = resolve_shared_i2c_bus(plan)
-
-    source = generate_i2c_diagnostic_source(sda=bindings["sda"]["gpio"], scl=bindings["scl"]["gpio"],
-                                          declared_addresses=[a for d in declarations for a in d["possible_addresses"]])
+    if mcu["module"] == "esp32-devkitc-v4":
+        bindings, declarations = resolve_shared_i2c_bus(plan)
+        source = generate_i2c_diagnostic_source(sda=bindings["sda"]["gpio"], scl=bindings["scl"]["gpio"],
+                                              declared_addresses=[a for d in declarations for a in d["possible_addresses"]])
+        ini = f"[env:diagnostic]\nplatform = {PLATFORM}\nboard = esp32dev\nframework = arduino\nmonitor_speed = 115200\n"
+        board_line = "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n"
+        target = {"platform": PLATFORM, "board": "esp32dev", "framework": "arduino"}
+    elif mcu["module"] == "raspberry-pi-pico":
+        from .device_application import CONTROLLERS
+        pico = CONTROLLERS["raspberry-pi-pico"]
+        bindings, declarations = resolve_shared_i2c_bus(plan)
+        controllers = {bindings[signal].get("i2c_controller") for signal in ("sda", "scl")}
+        if len(controllers) != 1 or None in controllers:
+            raise DevicePlanError("SDA and SCL must both name the same RP2040 I2C controller")
+        source = generate_rp2040_i2c_diagnostic_source(
+            sda=bindings["sda"]["gpio"], scl=bindings["scl"]["gpio"],
+            controller=next(iter(controllers)),
+            declared_addresses=[a for d in declarations for a in d["possible_addresses"]],
+        )
+        ini = "[env:diagnostic]\n" + pico["ini"] + "\nmonitor_speed = 115200\n"
+        board_line = "Board profile pico is a software compile target, not proof of exact hardware identity.\n"
+        target = pico["target"]
+    else:
+        raise DevicePlanError("diagnostic source supports the catalog ESP32-DevKitC V4 and Raspberry Pi Pico")
     files = {
         "src/main.cpp": source.encode(),
-        "platformio.ini": f"[env:diagnostic]\nplatform = {PLATFORM}\nboard = esp32dev\nframework = arduino\nmonitor_speed = 115200\n".encode(),
+        "platformio.ini": ini.encode(),
         "DEVICE_SPEC.json": spec_bytes,
         "DEVICE_PLAN.json": _json(plan),
         "README.md": ("# Compile-only I2C diagnostic proposal\n\n" + BOUNDARY + "\n\n"
                       "Compile with PlatformIO Core 6.1.18: `pio run -e diagnostic`. Do not upload from this package.\n"
-                      "Board profile esp32dev is a software compile target, not proof of exact hardware identity.\n"
+                      + board_line +
                       "Review exact hardware, supplies, grounds and pull-ups separately before any physical operation.\n"
                       "No automatic scan: serial 's' requests a probe only after that separate review. This command is not an authorization gate.\n"
                       "Address probes drive the bus; they are not electrically inert or universally safe.\n"
@@ -129,7 +147,7 @@ def build_device_firmware(spec: Any) -> tuple[dict[str, Any], bytes]:
     metadata = {"schema_version": SCHEMA, "claim_boundary": BOUNDARY,
                 "status": "COMPILE_ONLY_PROPOSAL", "compilation": "NOT_RUN", "physical_correctness": "UNPROVEN",
                 "firmware_authorized": False, "power_on_authorized": False,
-                "target": {"platform": PLATFORM, "board": "esp32dev", "framework": "arduino"},
+                "target": target,
                 "pins": bindings, "declared_devices": declarations, "observations": [],
                 "spec_sha256": _sha(files["DEVICE_SPEC.json"]), "plan_sha256": _sha(files["DEVICE_PLAN.json"]),
                 "files": {name: {"sha256": _sha(data), "size_bytes": len(data)} for name, data in sorted(files.items())}}
