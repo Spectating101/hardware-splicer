@@ -184,6 +184,9 @@ inited, that returns true without changing pins. Otherwise `initPins` reuses the
 `sda`/`scl` if they were set, else the esp32dev defaults `SDA=21` `SCL=22`
 (`variants/esp32/pins_arduino.h`).
 
+Carried over from the Pico review, the ESP32 pin scenario now checks the clock of every non-display transaction.
+It counts the recovery restart from the unplug, so extra starts at boot cannot stand in for recovery.
+
 BME280 registers follow BST-BME280-DS001-24 §5. Compensation compared to the library is
 the datasheet §8.1 double-precision formulas, implemented independently. ADC and
 calibration bytes used in the scenarios are **synthetic** and labelled so. Tolerance:
