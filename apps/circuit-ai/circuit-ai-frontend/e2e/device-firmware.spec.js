@@ -78,6 +78,32 @@ test('wrong wiring blocks both the UI and a direct proxy export with forged find
   expect(body.error).toContain('flash_pin');
 });
 
+test('the Pico example downloads a Pico diagnostic that starts its own controller the arduino-pico way', async ({ page }, info) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await open(page);
+  await page.getByTestId('device-example').selectOption('pico_oled_bme280_usb');
+  await expect(page.getByTestId('device-spec-editor')).toHaveValue(/raspberry-pi-pico/);
+  await expect(page.getByTestId('device-firmware-download')).toBeEnabled();
+  const waiting = page.waitForEvent('download');
+  await page.getByTestId('device-firmware-download').click();
+  const file = info.outputPath('pico-diagnostic.zip');
+  await (await waiting).saveAs(file);
+  const zip = JSON.parse(execFileSync(python, ['-c', 'import json,sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); assert z.testzip() is None; print(json.dumps({n:z.read(n).decode() for n in z.namelist()}))', file], { encoding: 'utf8' }));
+  const meta = JSON.parse(zip['FIRMWARE_PROPOSAL.json']);
+  expect(meta.target.board).toBe('pico');
+  expect([meta.pins.sda.printed_name, meta.pins.scl.printed_name]).toEqual(['GP4', 'GP5']);
+  expect(meta.compilation).toBe('NOT_RUN');
+  expect(meta.firmware_authorized).toBe(false);
+  expect(meta.power_on_authorized).toBe(false);
+  expect(meta.physical_correctness).toBe('UNPROVEN');
+  expect(zip['platformio.ini']).toContain('board_build.core = earlephilhower');
+  expect(zip['src/main.cpp']).toContain('Wire.setSDA(SDA_PIN)');
+  expect(zip['src/main.cpp']).not.toContain('Wire.begin(SDA_PIN');
+  await expect(page.getByTestId('device-firmware-message')).toContainText('Compilation has not run');
+  expect(errors).toEqual([]);
+});
+
 test('an upstream refusal never becomes a successful download message', async ({ page }) => {
   await open(page);
   await page.route('**/api/proxy/engineering/devices/firmware', (route) => route.fulfill({
