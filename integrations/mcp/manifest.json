@@ -1,0 +1,14 @@
+{
+  "schema":"portfolio.mcp.manifest.v1",
+  "project":"hardware-splicer",
+  "repository":"Spectating101/hardware-splicer",
+  "mode":"native",
+  "argv":["$PYTHON","-m","hardware_splicer.backend_mcp_server"],
+  "required_files":["src/hardware_splicer/backend_mcp_server.py"],
+  "pythonpath":["src"],
+  "expected_tools":["hs_backend_status","hs_backend_list_operations","hs_backend_describe_operation","hs_backend_call"],
+  "env_passthrough":[],
+  "runner_source":"Spectating101/cite-refinery@c9559e4e217f9f266aa451008cda32c96eee544e:integrations/portfolio-mcp",
+  "engine_install":"Install the existing backend-mcp extra in a Python 3.12+ engine environment. Explicitly add any required deployment-specific variables to env_passthrough; no credential belongs in this file.",
+  "notes":"Executes the canonical whole-product MCP server unchanged, not the historical compile-only adapter. Native configuration and authorization govern its tools. Bridge --allow-writes is neither a filter nor an authority override for native mode. Protocol discovery does not establish physical correctness, provider competence, or remote deployment security."
+}
