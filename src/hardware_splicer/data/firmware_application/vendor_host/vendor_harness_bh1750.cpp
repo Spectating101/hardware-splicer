@@ -499,6 +499,7 @@ static Result scenario_wire_pins() {
     if (default_begin_count() != 0) {
         return {false, "Wire.begin() with default arguments ran during boot (display periphBegin not false)", false};
     }
+    const size_t begins_at_boot = Wire.begin_calls().size();
     w.bh23.unplug();
     pump_to(9000);
     w.bh23.plug(kRawBright);
@@ -516,13 +517,32 @@ static Result scenario_wire_pins() {
         r.detail = "pins after recovery are not the planned pins";
         return r;
     }
+    // Count restarts from the unplug so extra starts at boot cannot stand in for recovery. The display restores
+    // 100 kHz after its own transfers, so check initialisation frequencies and every non-display transaction.
+    const auto &calls = Wire.begin_calls();
     int explicit_inits = 0;
-    for (const auto &c : Wire.begin_calls()) {
+    for (size_t i = begins_at_boot; i < calls.size(); ++i) {
+        const auto &c = calls[i];
         if (c.actually_inited && !c.default_args) explicit_inits += 1;
     }
-    if (explicit_inits < 2) {
+    if (explicit_inits < 1) {
         r.detail = "bus recovery did not re-initialise the bus: Wire.begin() ran on a bus that was never ended";
         return r;
+    }
+    for (const auto &c : calls) {
+        if (c.actually_inited && !c.default_args && c.freq_arg != 100000) {
+            r.detail = "Wire.begin() started the bus at " + std::to_string(c.freq_arg) + " Hz, not the planned 100000 Hz";
+            return r;
+        }
+    }
+    for (const auto &tx : g_i2c_bus.log) {
+        if (tx.address != 0x3C && tx.address != 0x3D && tx.clock_hz != 100000) {
+            char hex[3];
+            std::snprintf(hex, sizeof hex, "%02X", tx.address);
+            r.detail = std::string("a transaction with 0x") + hex + " ran at " + std::to_string(tx.clock_hz) +
+                       " Hz, not the planned 100000 Hz";
+            return r;
+        }
     }
     r.pass = true;
     r.detail = "sda=" + std::to_string(explicit_sda) + " scl=" + std::to_string(explicit_scl) +
