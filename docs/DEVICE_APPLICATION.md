@@ -73,7 +73,7 @@ target:
   - Two host-only stand-ins are needed: an empty `util/delay.h` (the ARM compiler defines `__ARM_ARCH`, so the real build
     never includes it) and the core's `api/deprecated-avr-comp/avr/pgmspace.h`, which forwards to the shared host one.
   - It is still a model: not the RP2040 I2C peripheral, the pico-sdk or its timing, and not silicon.
-- The diagnostic address-probe sketch is still ESP32-only.
+- The diagnostic now has a Pico version that starts the bus the arduino-pico way on the planned controller (`Wire` or `Wire1`). It is compile-only and keeps the same review boundary.
 
 Checked on 2026-10-14 with `scripts/verify_device_application.py --platformio` (PlatformIO Core 6.1.18, the pinned platform
 commit): the BME280 package on I2C0 (GP4/GP5) and on I2C1 (GP2/GP3, so `Wire1`), and the BH1750 package, each compiled
