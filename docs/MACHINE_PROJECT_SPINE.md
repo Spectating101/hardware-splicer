@@ -265,6 +265,13 @@ terminal state in advance: `READY_FOR_HUMAN_BUILD` where everything checks out;
 `BLOCKED_NEEDS_PART_DATA` for parts HS has no data for, a different board, or an address clash it
 cannot repair; `BUDGET_EXHAUSTED` when the budget cannot pay for the review.
 
+`mission_delivery.py` turns a READY mission into a deterministic package
+(`hardware_splicer.mission_package.v1`, stored under `missions/<id>/packages/` by content hash) and stages its design
+as a staged project review: the candidate snapshot adds `deviceDesigns[<mission_id>]` with the spec, package hash,
+evaluations and repair chain, which the review flags as a required snapshot change. HS records `design_staged` on the
+mission once, after the terminal state, without changing the phase or the verdict. The package covers events up to
+the verdict, so staging never changes it.
+
 ## Verification
 
 ```bash
@@ -303,3 +310,4 @@ Frontend: `make splice-ui-build`.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
 11. A mission never writes a snapshot or revision and never carries an authority field, at any depth. Inventory readings and terminal grounding grant no physical, firmware or power-on authority.
 12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory and meets their structured requirements; a repair cannot newly uncover a listed line or break a requirement, and only the person's intake can supply measured sizes. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
+13. Staging a mission design opens a review; only a person's decision on that review makes it a revision. A mission package names what HS could not generate and never claims physical truth.
