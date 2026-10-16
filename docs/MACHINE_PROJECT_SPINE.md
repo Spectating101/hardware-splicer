@@ -132,6 +132,22 @@ API error contract — clients may rely on the shape.
 | `GET` | `/{project_id}/events` | Live change stream (SSE); information only — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
 | `GET`/`POST`/`DELETE` | `/{project_id}/presence` | Ephemeral presence; not an audit log — [`PROJECT_EVENTS.md`](PROJECT_EVENTS.md) |
 
+`/v1/projects/{project_id}/missions`
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `""` | Open a fabrication mission |
+| `GET` | `""` | List missions |
+| `GET` | `/{mission_id}` | Load a mission |
+| `POST` | `/{mission_id}/accept` | Accept a mission and its budgets |
+| `POST` | `/{mission_id}/events` | Propose a candidate, repair, evidence need, or terminal state |
+| `POST` | `/{mission_id}/candidates/{candidate_id}/run` | Run a software-only device check |
+| `GET` | `/{mission_id}/runs/{name}` | Read a hashed run file referenced by an evaluation |
+
+Acceptance (`POST /{mission_id}/accept`) requires a person's operator token in
+`X-HS-Operator-Token` — see [`OPERATOR_IDENTITY.md`](OPERATOR_IDENTITY.md). That
+route is not in the MCP `fabrication_mission` task.
+
 Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md). Rendered 3D GLB views of retained PCB bytes: [`MODEL3D.md`](MODEL3D.md). Parts intelligence for a retained schematic revision: [`PARTS_INTELLIGENCE.md`](PARTS_INTELLIGENCE.md). Candidate edit proposals (never a write to a revision): [`CANDIDATE_PROPOSALS.md`](CANDIDATE_PROPOSALS.md). Review packet of a revision, hash-bound and read-only: [`REVIEW_PACKET.md`](REVIEW_PACKET.md).
 
 `/v1/machine-projects`
