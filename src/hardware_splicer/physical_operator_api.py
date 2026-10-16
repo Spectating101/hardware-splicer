@@ -61,15 +61,17 @@ def _human(x_hs_operator_token: str | None) -> dict[str, str]:
 
 
 def _error(exc: Exception) -> HTTPException:
-    if isinstance(exc, FabricationAuthorityError):
-        return HTTPException(
-            status_code=http_status.HTTP_409_CONFLICT,
-            detail={"type": "physical_authority", "message": str(exc)},
-        )
+    # FabricationValidationError subclasses FabricationAuthorityError, so the
+    # narrower input/schema classification must be tested first.
     if isinstance(exc, FabricationValidationError):
         return HTTPException(
             status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"type": "invalid_request", "message": str(exc)},
+        )
+    if isinstance(exc, FabricationAuthorityError):
+        return HTTPException(
+            status_code=http_status.HTTP_409_CONFLICT,
+            detail={"type": "physical_authority", "message": str(exc)},
         )
     if isinstance(exc, HTTPException):
         return exc
