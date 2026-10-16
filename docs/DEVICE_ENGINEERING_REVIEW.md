@@ -30,6 +30,14 @@ returns one of four statuses and never "pass":
 | Mechanical | What holds the board when a cable is plugged in | How far the board can travel before the antenna end meets the wall |
 | Printing | Wall thickness, the USB bridge, the lid orientation | Against a 0.4 mm nozzle and a 20 mm bridge limit, both assumed |
 
+## Independent I2C buses
+
+I2C loading is assessed independently for each valid bus in the planner's `i2c_buses`, using only that bus's
+wire lengths, pins and pull-ups. A single-bus review preserves the existing `i2c_bus` check ID and exact field
+shape. Multiple buses return separate electrical checks (`i2c_bus:i2c-1`, `i2c_bus:i2c-2`, ...), each with a `bus`
+field referring to the planner's bus ID. Invalid topology is `not_assessed`, not a loading result. These checks
+remain estimates under the same assumptions, never measurements.
+
 ## What it found in the generated case, and what the case now does about it
 
 The review's first run on the shipped ESP32 examples found the antenna end of the board **1 mm** from the inside wall, against a recommended

@@ -104,6 +104,25 @@ def _entries(plan: dict[str, Any], library: dict[str, Any]) -> list[tuple[dict[s
 
 # --- electrical -------------------------------------------------------------------------------------------------------
 
+def _i2c_checks(plan: dict[str, Any], library: dict[str, Any]) -> list[dict[str, Any]]:
+    buses = plan["i2c_buses"]
+    if not buses:
+        return [_check("i2c_bus", "I2C bus loading", NOT_ASSESSED, "No wired I2C bus in this plan.", {}, [])]
+    checks = []
+    for bus in buses:
+        if not bus["valid"]:
+            result = _check("i2c_bus", "I2C bus loading", NOT_ASSESSED,
+                            "Resolve the I2C bus topology errors before estimating loading.", {}, [])
+        else:
+            wires = set(bus["sda"]["wires"]) | set(bus["scl"]["wires"])
+            result = _i2c_bus({**plan, "wires": [w for w in plan["wires"] if w["id"] in wires]}, library)
+        if len(buses) > 1:
+            result = {**result, "id": f"i2c_bus:{bus['id']}", "bus": bus["id"],
+                      "title": f"I2C bus loading ({bus['id']})"}
+        checks.append(result)
+    return checks
+
+
 def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     roles = _roles(plan)
     lines: dict[str, list[dict[str, Any]]] = {"sda": [], "scl": []}
@@ -507,7 +526,7 @@ def build_engineering_review(spec: Any) -> dict[str, Any]:
         raise DevicePlanError("Resolve the plan's errors before an engineering review.")
     library = {m["id"]: m for m in module_library()["modules"]}
     domains = [
-        {"id": "electrical", "title": "Electrical", "checks": [_i2c_bus(plan, library)]},
+        {"id": "electrical", "title": "Electrical", "checks": _i2c_checks(plan, library)},
         {"id": "power", "title": "Power", "checks": [_supply(plan, library)]},
         {"id": "thermal", "title": "Thermal", "checks": _thermal(plan, library)},
         {"id": "rf", "title": "Radio", "checks": [_antenna(plan, library)]},
