@@ -2,9 +2,9 @@
 
 Uses Raspberry Pi's ``picotool`` through a fixed argv/no-shell runner.  Target
 selection is server configuration, never agent input.  Firmware must already be
-a registered immutable artifact and must be staged before flash.  Flash runs
-``load -v`` followed by an independent ``verify``; it deliberately does not use
-``-x`` or reboot/execute the target automatically.
+a registered immutable UF2 artifact and must be staged before flash.  Flash
+runs ``load -v`` followed by an independent ``verify``; it deliberately does
+not use force/execute/reboot options.
 
 Reference command contract: https://github.com/raspberrypi/picotool
 """
@@ -40,6 +40,32 @@ def _default_runner(argv: Sequence[str], *, timeout: int) -> subprocess.Complete
     )
 
 
+def _safe_device_selector(value: Sequence[str]) -> tuple[str, ...]:
+    """Allow only explicit target-selection pairs in v0.
+
+    Force/execute/reboot behavior belongs to the adapter implementation, never
+    configuration.  Keeping v0 to a serial selector avoids accidentally
+    turning server configuration into a second command surface.
+    """
+
+    items = tuple(value)
+    if not items:
+        return ()
+    if len(items) != 2 or items[0] != "--ser":
+        raise FabricationValidationError("picotool v0 device selector must be exactly '--ser <serial>'")
+    serial = items[1]
+    if (
+        not isinstance(serial, str)
+        or not serial.strip()
+        or serial != serial.strip()
+        or len(serial) > 120
+        or any(ch in serial for ch in "\r\n\x00")
+        or serial.startswith("-")
+    ):
+        raise FabricationValidationError("picotool serial selector is invalid")
+    return ("--ser", serial)
+
+
 class PicotoolRunner:
     def __init__(
         self,
@@ -53,13 +79,8 @@ class PicotoolRunner:
             raise FabricationValidationError("picotool executable is required")
         if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 600:
             raise FabricationValidationError("picotool timeout must be an integer from 1 to 600 seconds")
-        clean_selector = []
-        for item in device_selector:
-            if not isinstance(item, str) or not item or any(ch in item for ch in "\r\n\x00"):
-                raise FabricationValidationError("picotool device selector contains invalid text")
-            clean_selector.append(item)
         self.executable = executable.strip()
-        self.device_selector = tuple(clean_selector)
+        self.device_selector = _safe_device_selector(device_selector)
         self.timeout_seconds = timeout_seconds
         self._runner = runner or _default_runner
 
@@ -82,10 +103,10 @@ class PicotoolRunner:
     def flash_and_verify(self, firmware: bytes, *, suffix: str = ".uf2") -> dict[str, Any]:
         if not isinstance(firmware, (bytes, bytearray)) or not firmware:
             raise FabricationValidationError("firmware must be non-empty bytes")
-        if suffix not in {".uf2", ".elf", ".bin"}:
-            raise FabricationValidationError("picotool firmware suffix must be .uf2, .elf or .bin")
+        if suffix != ".uf2":
+            raise FabricationValidationError("picotool v0 flashes UF2 artifacts only")
         with tempfile.TemporaryDirectory(prefix="hs-picotool-") as temp_dir:
-            path = Path(temp_dir) / f"firmware{suffix}"
+            path = Path(temp_dir) / "firmware.uf2"
             path.write_bytes(bytes(firmware))
             load = self._run(
                 [self.executable, "load", "-v", str(path), *self.device_selector]
@@ -117,8 +138,8 @@ class PicotoolProgrammerHandle:
             raise FabricationValidationError("programmer operator_id is required")
         if not isinstance(target_id, str) or not target_id.strip():
             raise FabricationValidationError("programmer target_id is required")
-        if firmware_suffix not in {".uf2", ".elf", ".bin"}:
-            raise FabricationValidationError("unsupported programmer firmware suffix")
+        if firmware_suffix != ".uf2":
+            raise FabricationValidationError("picotool v0 programmer accepts UF2 firmware only")
         self.operator_id = operator_id.strip()
         self.target_id = target_id.strip()
         self.artifacts = artifacts
