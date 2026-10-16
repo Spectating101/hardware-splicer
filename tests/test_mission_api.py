@@ -95,7 +95,9 @@ def test_a_proposal_cannot_record_an_evaluation_and_no_route_does(client):
     forged = _propose(client, mid, {"type": "evaluation_recorded", "candidate_id": "A", "operation": "device_plan",
                                     "result": {"errors": 0, "warnings": 0, "result_sha256": "0" * 64, "summary": "fine"}})
     assert forged.status_code == 422
-    paths = {route.path for route in client.app.routes}
+    paths = set(client.app.openapi()["paths"])
+    assert "/v1/projects/{project_id}/missions/{mission_id}/events" in paths
+    assert "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run" in paths
     assert not any("evaluation" in path for path in paths if "/missions" in path)
 
 
