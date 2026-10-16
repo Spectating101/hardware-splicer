@@ -55,6 +55,21 @@ def camera_observer_descriptor(*, operator_id: str, display_name: str) -> Physic
     )
 
 
+def serial_observer_descriptor(*, operator_id: str, display_name: str) -> PhysicalOperatorDescriptor:
+    """Read-only serial/console observer; no target writes are exposed."""
+
+    return PhysicalOperatorDescriptor(
+        operator_id=operator_id,
+        kind="instrument",
+        display_name=display_name,
+        capabilities=("serial_observation", "boot_log_capture", "status"),
+        actions=(
+            PhysicalActionDescriptor("status", "observe", "Read configured serial observer availability."),
+            PhysicalActionDescriptor("capture_log", "observe", "Capture and retain an immutable read-only serial transcript."),
+        ),
+    )
+
+
 def robot_descriptor(*, operator_id: str, display_name: str) -> PhysicalOperatorDescriptor:
     """Robot/workcell authority surface around immutable motion-plan artifacts."""
 
