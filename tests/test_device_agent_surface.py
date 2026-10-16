@@ -1,6 +1,7 @@
 """What an AI agent sees: the spec schema, the described operations, and suggestions that repair a broken spec."""
 import copy
 import re
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from hardware_splicer.device_plan import (
     WIRE_COLORS, DevicePlanError, build_device_plan, device_catalog, device_spec_json_schema, example_specs, module_library,
 )
+from hardware_splicer.device_suggestions import apply_first_suggestions as _apply_first_suggestions
 from hardware_splicer.mcp_backend_gateway import task_operation_manifest
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
@@ -111,41 +113,27 @@ def test_the_device_design_task_manifest_gives_an_agent_the_whole_workflow_in_on
     assert manifest["workflow_operation_ids"] == [
         "get_spec_schema_v1_devices_spec_schema_get", "get_examples_v1_devices_examples_get", "post_draft_v1_devices_draft_post", "post_plan_v1_devices_plan_post",
         "post_engineering_v1_devices_engineering_post", "post_case_v1_devices_case_post", "post_application_v1_devices_application_post",
-        "post_observations_v1_devices_observations_post",
+        "post_application_run_v1_devices_application_run_post", "post_observations_v1_devices_observations_post",
     ]
     assert manifest["authority_contract"] == {"projection_grants_physical_authority": False, "backend_gates_bypassed": False, "automatic_execution": False}
     plan = next(op for op in manifest["operations"] if op["operation_id"].startswith("post_plan"))
     assert "modules" in plan["operation"]["requestBody"]["content"]["application/json"]["schema"]["properties"]
 
 
+def test_the_task_manifest_offers_every_operation_the_agent_guide_lists_in_its_order():
+    # The guide's loop table and the projection drifted once: application/run was documented but not offered.
+    guide = (Path(__file__).resolve().parents[1] / "docs" / "AGENT_DEVICE_DESIGN.md").read_text()
+    listed = re.findall(r"^\| \d+b? \| `(GET|POST) (/v1/devices/[a-z/-]+)` \|", guide, flags=re.MULTILINE)
+    manifest = task_operation_manifest("device_design", create_product_app())
+    offered = [(op["method"], op["path"]) for op in manifest["operations"]]
+    assert listed and offered == listed
+
+
 def apply_first_suggestions(spec, plan):
     """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything."""
-    changed = False
-    wires_by_id = {w["id"]: w for w in plan["wires"]}
-    for finding in plan["findings"]:
-        for suggestion in finding.get("suggestions", []):
-            if suggestion["action"] == "add_connection":
-                spec["connections"].append({"from": suggestion["from"], "to": suggestion["to_one_of"][0]})
-                changed = True
-            elif suggestion["action"] == "replace_connection":
-                wire = wires_by_id[suggestion["wire"]]
-                for row in spec["connections"]:
-                    if suggestion["from"] in (row["from"], row["to"]) and f"{wire['to']['module']}.{wire['to']['pin']}" in (row["from"], row["to"]):
-                        key = "to" if row["from"] == suggestion["from"] else "from"
-                        row[key] = suggestion["to_one_of"][0]
-                        changed = True
-            elif suggestion["action"] == "move_signal":
-                signal = "SCL" if suggestion["signal"] == "scl" else "SDA"
-                if not suggestion["to_one_of"]:
-                    continue
-                for row in spec["connections"]:
-                    if row["from"].upper().endswith("." + signal):
-                        row["to"] = suggestion["to_one_of"][0]
-                        changed = True
-                        break
-                else:
-                    continue
-                return changed  # one move at a time, then re-plan
+    new_spec, changed = _apply_first_suggestions(spec, plan)
+    spec.clear()
+    spec.update(new_spec)
     return changed
 
 

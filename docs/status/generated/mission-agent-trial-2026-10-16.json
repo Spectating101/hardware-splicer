@@ -1,0 +1,256 @@
+{
+ "schema": "hardware_splicer.mission_agent_trial.v1",
+ "date": "2026-10-16",
+ "agents": {
+  "grok": "grok-4.7-high-fast",
+  "composer": "composer-2.5"
+ },
+ "harness": "cursor agent CLI 2026.10.14, print mode, one mission per run",
+ "source": "terminal states read from the server's mission record, not from the agents' replies",
+ "rows": [
+  {
+   "agent": "grok",
+   "scenario": "clean_esp32",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan device_engineering",
+   "tool_calls": 9,
+   "cites": [
+    4,
+    5
+   ],
+   "reason": "Candidate A keeps every inventory part (ESP32-DevKitC V4, Adafruit BME280, 0.96 inch SSD1306 OLED). Since it was proposed, device_plan recorded 0 errors and 0 w"
+  },
+  {
+   "agent": "grok",
+   "scenario": "clean_pico",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan device_engineering",
+   "tool_calls": 10,
+   "cites": [
+    4,
+    5
+   ],
+   "reason": "Candidate A keeps every inventory part. Its device_plan (seq 4) has 0 errors and 0 warnings, and the following device_engineering (seq 5) has 0 exceeds_limit. T"
+  },
+  {
+   "agent": "grok",
+   "scenario": "unknown_part",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 0,
+   "repairs": 0,
+   "needs": 1,
+   "checks": "",
+   "tool_calls": 6,
+   "cites": [
+    3
+   ],
+   "reason": "The person asked for a small sensor device built from the parts they have: ESP32, BME280, and HC-SR04 ultrasonic. The draft matched the ESP32 to esp32-devkitc-v"
+  },
+  {
+   "agent": "grok",
+   "scenario": "unknown_controller",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 0,
+   "repairs": 0,
+   "needs": 1,
+   "checks": "",
+   "tool_calls": 16,
+   "cites": [
+    3
+   ],
+   "reason": "The person asked for a sensor device from ESP32-S3 and BME280. BME280 matches the Adafruit BME280 STEMMA QT module by chip, but ESP32-S3 is not a library contro"
+  },
+  {
+   "agent": "grok",
+   "scenario": "address_clash",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 3,
+   "needs": 1,
+   "checks": "device_plan device_plan! device_plan! device_plan",
+   "tool_calls": 21,
+   "cites": [
+    6,
+    8,
+    10,
+    11
+   ],
+   "reason": "Both listed BME280s must be kept. On the only bus the planner accepts they overlap at 0x76 and 0x77, and the plan does not predict which address a scan will sho"
+  },
+  {
+   "agent": "grok",
+   "scenario": "repairable",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 1,
+   "needs": 0,
+   "checks": "device_plan! device_plan device_engineering",
+   "tool_calls": 13,
+   "cites": [
+    5,
+    6,
+    7
+   ],
+   "reason": "After the repair that added sensor.SDI to mcu.IO21, device_plan recorded 0 errors and 0 warnings, and device_engineering recorded 0 exceeds_limit. No evidence n"
+  },
+  {
+   "agent": "grok",
+   "scenario": "budget",
+   "expected": "BUDGET_EXHAUSTED",
+   "got": "BUDGET_EXHAUSTED",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan",
+   "tool_calls": 7,
+   "cites": [
+    2,
+    4
+   ],
+   "reason": "The accepted budget allows one operator job (event 2). That job was spent on candidate A device_plan, which returned 0 errors and 0 warnings (event 4). READY_FO"
+  },
+  {
+   "agent": "composer",
+   "scenario": "clean_esp32",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan device_engineering",
+   "tool_calls": 9,
+   "cites": [
+    3,
+    4,
+    5
+   ],
+   "reason": "Inventory drafted to candidate A (ESP32 DevKitC + Adafruit BME280 STEMMA QT + 0.96\" SSD1306 I2C OLED on shared I2C). Since proposal with no repairs: device_plan"
+  },
+  {
+   "agent": "composer",
+   "scenario": "clean_pico",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan device_engineering",
+   "tool_calls": 10,
+   "cites": [
+    3,
+    4,
+    5
+   ],
+   "reason": "Candidate A uses all four inventory parts on Pico shared I2C at 3V3. device_plan reports 0 errors and 0 warnings; device_engineering reports 0 exceeds_limit (3 "
+  },
+  {
+   "agent": "composer",
+   "scenario": "unknown_part",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 0,
+   "repairs": 0,
+   "needs": 1,
+   "checks": "",
+   "tool_calls": 5,
+   "cites": [
+    3
+   ],
+   "reason": "The accepted inventory lists HC-SR04 ultrasonic alongside ESP32 and BME280. POST /v1/devices/draft matched ESP32 and BME280 but left_out HC-SR04 with no library"
+  },
+  {
+   "agent": "composer",
+   "scenario": "unknown_controller",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 0,
+   "repairs": 0,
+   "needs": 1,
+   "checks": "",
+   "tool_calls": 8,
+   "cites": [
+    3
+   ],
+   "reason": "POST /v1/devices/draft with inventory lines ESP32-S3 and BME280 fails: HS cannot name a controller from the library for ESP32-S3. BME280 matches adafruit-bme280"
+  },
+  {
+   "agent": "composer",
+   "scenario": "address_clash",
+   "expected": "BLOCKED_NEEDS_PART_DATA",
+   "got": "BLOCKED_NEEDS_PART_DATA",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 3,
+   "needs": 1,
+   "checks": "device_plan device_plan! device_plan! device_plan",
+   "tool_calls": 26,
+   "cites": [
+    11,
+    10,
+    6,
+    4
+   ],
+   "reason": "Candidate A wires both BME280s on one Pico I2C bus. Latest device_plan (seq 10) stays at 0 errors but warns i2c_address_overlap with no suggested repair. SDO-to"
+  },
+  {
+   "agent": "composer",
+   "scenario": "repairable",
+   "expected": "READY_FOR_HUMAN_BUILD",
+   "got": "READY_FOR_HUMAN_BUILD",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 1,
+   "needs": 0,
+   "checks": "device_plan! device_plan device_engineering",
+   "tool_calls": 14,
+   "cites": [
+    3,
+    5,
+    6,
+    7
+   ],
+   "reason": "After repair (seq 5), device_plan has 0 errors and 0 warnings (seq 6 evaluation), and device_engineering has 0 exceeds_limit errors (seq 7 evaluation). No stand"
+  },
+  {
+   "agent": "composer",
+   "scenario": "budget",
+   "expected": "BUDGET_EXHAUSTED",
+   "got": "BUDGET_EXHAUSTED",
+   "correct": true,
+   "candidates": 1,
+   "repairs": 0,
+   "needs": 0,
+   "checks": "device_plan",
+   "tool_calls": 9,
+   "cites": [
+    2,
+    3,
+    4
+   ],
+   "reason": "Mission acceptance allowed only one operator job. Candidate A received a clean device_plan (0 errors, 0 warnings), but READY_FOR_HUMAN_BUILD requires a subseque"
+  }
+ ]
+}

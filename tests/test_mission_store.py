@@ -1,0 +1,816 @@
+"""A fabrication mission is an append-only event log beside a project, replayed into a state machine.
+
+The agent proposes; HS code decides. Evaluations are recorded only by HS itself, never through a proposal. Success is
+reaching the correct terminal state with an evidence trail: READY_FOR_HUMAN_BUILD is refused until HS's own evaluations
+support it, and every BLOCKED_* state must cite the evidence that blocks it. A mission never changes a project
+snapshot or revision and never grants physical authority.
+"""
+from __future__ import annotations
+
+import json
+import copy
+import hashlib
+from pathlib import Path
+
+import pytest
+
+from hardware_splicer.mission_store import (
+    PHASES,
+    TERMINAL_STATES,
+    MissionConflict,
+    MissionNotFound,
+    MissionStateError,
+    MissionStore,
+    MissionValidationError,
+)
+from hardware_splicer.project_store import ProjectNotFound, ProjectStore
+from hardware_splicer.device_draft import draft_from_parts_text, parse_parts_text
+from hardware_splicer.device_plan import example_specs
+
+AGENT = {"kind": "agent", "id": "planner-model"}
+HUMAN = {"kind": "human", "id": "bench-lead"}
+SPEC = draft_from_parts_text({"text": "Raspberry Pi Pico\nBME280 breakout\n0.96 inch OLED"})["spec"]
+
+
+def snapshot() -> dict:
+    return {"projectId": "monitor", "projectName": "Field monitor", "currentStage": "design", "mode": "greenfield",
+            "graph": {"nodes": [], "edges": []},
+            "machineProject": {"project_id": "monitor", "name": "Field monitor", "purpose": "Portable environmental monitor"}}
+
+
+def _store(tmp_path: Path) -> tuple[ProjectStore, MissionStore]:
+    projects = ProjectStore(tmp_path)
+    projects.save("monitor", snapshot(), expected_revision=0)
+    return projects, MissionStore(projects)
+
+
+def _open(missions: MissionStore, accepted: bool = True, **budgets) -> dict:
+    intake = {"goal": "A portable environmental monitor", "constraints": ["USB powered", "under NT$2000"],
+              "inventory": ["Raspberry Pi Pico", "BME280 breakout", "0.96 inch OLED"]}
+    if budgets:
+        intake["budgets"] = budgets
+    mission = missions.open_mission("monitor", intake=intake, author=AGENT)
+    if accepted:
+        # A person accepts the mission and its budgets once; that is what lets HS record its own checks.
+        mission = missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    return mission
+
+
+def _candidate(missions, mission, cid="A", kind="clean_sheet"):
+    view = missions.get_mission("monitor", mission["mission_id"])
+    return missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
+        "id": cid, "kind": kind, "label": f"Candidate {cid}", "spec": SPEC, "rationale": "fits the inventory"}},
+        author=AGENT, expected_event_seq=view["last_event_seq"])
+
+
+def _evaluate(missions, mission, cid="A", operation="device_plan", errors=0, warnings=0):
+    return missions.record_evaluation("monitor", mission["mission_id"], candidate_id=cid, operation=operation,
+                                      result={"errors": errors, "warnings": warnings, "result_sha256": "0" * 64,
+                                              "summary": f"{operation}: {errors} errors, {warnings} warnings"})
+
+
+def _propose(missions, mission, event):
+    view = missions.get_mission("monitor", mission["mission_id"])
+    return missions.propose("monitor", mission["mission_id"], event, author=AGENT, expected_event_seq=view["last_event_seq"])
+
+
+def test_a_new_mission_is_anchored_to_the_latest_revision_and_claims_nothing(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    assert mission["project_id"] == "monitor" and mission["revision"] == 1
+    assert mission["phase"] == "INTAKE" == PHASES[0]
+    assert mission["terminal"] is None and mission["candidates"] == []
+    assert mission["budgets"]["max_candidates"] == 3
+    assert mission["last_event_seq"] == 1 and mission["events"][0]["type"] == "opened"
+    assert mission["physical_correctness"] == "UNPROVEN"
+    assert mission["firmware_authorized"] is False and mission["power_on_authorized"] is False
+
+
+def test_the_log_is_append_only_files_and_the_state_is_derived_from_it(tmp_path):
+    projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission)
+    events_dir = projects.root / "monitor" / "missions" / mission["mission_id"] / "events"
+    assert sorted(p.name for p in events_dir.iterdir()) == [f"{seq:08d}.json" for seq in range(1, 6)]
+    stored = json.loads((projects.root / "monitor" / "missions" / mission["mission_id"] / "mission.json").read_text())
+    assert "phase" not in stored and "terminal" not in stored, "state is replayed from events, never stored"
+    view = missions.get_mission("monitor", mission["mission_id"])
+    assert view["phase"] == "EVALUATING"
+    assert missions.get_mission("monitor", mission["mission_id"]) == view
+
+
+def test_a_mission_never_changes_the_project(tmp_path):
+    projects, missions = _store(tmp_path)
+    before = projects.load("monitor")
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission)
+    after = projects.load("monitor")
+    assert after["revision"] == before["revision"] == 1
+    assert after["snapshot"] == before["snapshot"]
+
+
+def test_at_most_the_budgeted_candidates_with_known_kinds_and_unique_ids(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    for cid, kind in (("A", "clean_sheet"), ("B", "reclaim_heavy"), ("C", "hybrid")):
+        _candidate(missions, mission, cid, kind)
+    assert missions.get_mission("monitor", mission["mission_id"])["phase"] == "ARCHITECTING"
+    with pytest.raises(MissionStateError, match="candidates"):
+        _candidate(missions, mission, "D", "hybrid")
+    other = _open(missions)
+    with pytest.raises(MissionValidationError):
+        _candidate(missions, other, "A", "magic")
+    _candidate(missions, other, "A")
+    with pytest.raises(MissionValidationError, match="already"):
+        _candidate(missions, other, "A")
+
+
+def test_a_proposal_cannot_record_an_evaluation(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    with pytest.raises(MissionValidationError):
+        _propose(missions, mission, {"type": "evaluation_recorded", "candidate_id": "A", "operation": "device_plan",
+                                     "result": {"errors": 0, "warnings": 0}})
+
+
+def test_ready_for_human_build_is_refused_until_hs_evaluations_support_it(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    ready = {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "looks done"}
+    with pytest.raises(MissionStateError, match="plan"):
+        _propose(missions, mission, ready)
+    _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionStateError, match="plan"):
+        _propose(missions, mission, ready)
+    _evaluate(missions, mission, warnings=0, errors=0)
+    with pytest.raises(MissionStateError, match="engineering"):
+        _propose(missions, mission, ready)
+    _evaluate(missions, mission, operation="device_engineering")
+    done = _propose(missions, mission, ready)
+    assert done["phase"] == "TERMINAL" and done["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+    assert done["terminal"]["physical_evidence_required"], "ready still lists what only a person can establish"
+    assert done["physical_correctness"] == "UNPROVEN" and done["power_on_authorized"] is False
+
+
+def test_nothing_is_appended_after_a_terminal_state(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    _propose(missions, mission, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "checks pass"})
+    with pytest.raises(MissionStateError, match="terminal"):
+        _candidate(missions, mission, "B")
+    with pytest.raises(MissionStateError, match="terminal"):
+        _evaluate(missions, mission)
+
+
+def test_a_repair_needs_a_failing_evaluation_resets_readiness_and_has_a_budget(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, max_repairs_per_candidate=1)
+    _candidate(missions, mission)
+    repair = {"type": "repair_proposed", "candidate_id": "A", "spec": SPEC, "rationale": "apply the planner's suggestion"}
+    with pytest.raises(MissionStateError, match="failing"):
+        _propose(missions, mission, repair)
+    _evaluate(missions, mission, errors=2)
+    view = _propose(missions, mission, repair)
+    assert view["phase"] == "REPAIRING"
+    assert view["budgets"]["repairs_used"] == {"A": 1}
+    _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionStateError, match="repair"):
+        _propose(missions, mission, repair)
+
+
+def test_a_clean_plan_before_a_repair_does_not_count_after_it(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    _evaluate(missions, mission, warnings=1)
+    _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": SPEC, "rationale": "fix the warning"})
+    with pytest.raises(MissionStateError, match="plan"):
+        _propose(missions, mission, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "x"})
+
+
+def test_a_blocked_state_must_cite_the_evidence_need_that_blocks_it(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission, "B", "reclaim_heavy")
+    blocked = {"type": "terminal_proposed", "state": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT", "reason": "donor rail unknown", "cites": []}
+    with pytest.raises(MissionStateError, match="cite"):
+        _propose(missions, mission, blocked)
+    need = _propose(missions, mission, {"type": "evidence_required", "candidate_id": "B", "blocker": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+                                         "need": "Measure the donor's 3.3 V rail under load"})
+    assert need["phase"] == "EVIDENCE_REQUIRED"
+    wrong = dict(blocked, state="BLOCKED_UNSAFE", cites=[need["last_event_seq"]])
+    with pytest.raises(MissionStateError, match="cite"):
+        _propose(missions, mission, wrong)
+    done = _propose(missions, mission, dict(blocked, cites=[need["last_event_seq"]]))
+    assert done["terminal"]["state"] == "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT"
+    assert done["terminal"]["cites"] == [need["last_event_seq"]]
+
+
+def test_no_feasible_architecture_needs_every_candidate_failing_with_repairs_spent(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "2x BME280"], max_candidates=2, max_repairs_per_candidate=1)
+    specs = {}
+    for cid in ("A", "B"):
+        specs[cid] = draft_from_parts_text({"text": "ESP32\n2x BME280"})["spec"]
+        specs[cid]["name"] = cid
+        specs[cid].setdefault("case", {})["wall_mm"] = 2.0 if cid == "A" else 2.5
+        _spec_candidate(missions, mission, specs[cid], cid)
+    nope = {"type": "terminal_proposed", "state": "NO_FEASIBLE_ARCHITECTURE", "reason": "nothing passes"}
+    _evaluate(missions, mission, "A", errors=1)
+    with pytest.raises(MissionStateError):
+        _propose(missions, mission, nope)
+    for cid in ("A", "B"):
+        if cid == "B":
+            _evaluate(missions, mission, "B", errors=1)
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": cid, "spec": specs[cid], "rationale": "try"})
+        _evaluate(missions, mission, cid, errors=1)
+    assert _propose(missions, mission, nope)["terminal"]["state"] == "NO_FEASIBLE_ARCHITECTURE"
+
+
+def test_budget_exhausted_needs_the_operator_budget_spent_and_the_budget_is_enforced(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, max_operator_jobs=2)
+    _candidate(missions, mission)
+    spent = {"type": "terminal_proposed", "state": "BUDGET_EXHAUSTED", "reason": "out of jobs"}
+    _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionStateError, match="budget"):
+        _propose(missions, mission, spent)
+    _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionStateError, match="budget"):
+        _evaluate(missions, mission)
+    assert _propose(missions, mission, spent)["terminal"]["state"] == "BUDGET_EXHAUSTED"
+
+
+@pytest.mark.parametrize("key", ["physical_correctness", "firmware_authorized", "power_on_authorized", "authority"])
+def test_authority_keys_are_refused_in_intake_and_events(tmp_path, key):
+    _projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError):
+        missions.open_mission("monitor", intake={"goal": "x", key: True}, author=AGENT)
+    mission = _open(missions)
+    with pytest.raises(MissionValidationError):
+        _propose(missions, mission, {"type": "candidate_proposed", key: True,
+                                     "candidate": {"id": "A", "kind": "clean_sheet", "label": "A", "spec": SPEC, "rationale": "r"}})
+
+
+def test_stale_writes_conflict_and_missing_things_are_named(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    with pytest.raises(MissionConflict):
+        missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
+            "id": "A", "kind": "clean_sheet", "label": "A", "spec": SPEC, "rationale": "r"}}, author=AGENT, expected_event_seq=5)
+    with pytest.raises(MissionNotFound):
+        missions.get_mission("monitor", "mission-0000000000000000")
+    with pytest.raises(ProjectNotFound):
+        missions.open_mission("nope", intake={"goal": "x"}, author=AGENT)
+    with pytest.raises(MissionValidationError):
+        missions.open_mission("monitor", intake={"goal": ""}, author=AGENT)
+    assert [m["mission_id"] for m in missions.list_missions("monitor")] == [mission["mission_id"]]
+
+
+def test_the_terminal_states_are_the_documented_set():
+    assert set(TERMINAL_STATES) == {"READY_FOR_HUMAN_BUILD", "BLOCKED_NEEDS_PART_DATA", "BLOCKED_NEEDS_REVERSE_ENGINEERING",
+                                    "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT", "BLOCKED_NEEDS_PROCUREMENT_EVIDENCE", "BLOCKED_UNSAFE",
+                                    "NO_FEASIBLE_ARCHITECTURE", "BUDGET_EXHAUSTED"}
+    assert PHASES == ("INTAKE", "ARCHITECTING", "EVALUATING", "REPAIRING", "EVIDENCE_REQUIRED", "TERMINAL")
+
+
+def test_no_feasible_architecture_needs_a_verdict_since_each_candidates_latest_repair(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "2x BME280"], max_candidates=1, max_repairs_per_candidate=1)
+    spec = draft_from_parts_text({"text": "ESP32\n2x BME280"})["spec"]
+    _spec_candidate(missions, mission, spec)
+    _evaluate(missions, mission, "A", errors=1)
+    _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "try"})
+    nope = {"type": "terminal_proposed", "state": "NO_FEASIBLE_ARCHITECTURE", "reason": "nothing passes"}
+    with pytest.raises(MissionStateError, match="since"):
+        _propose(missions, mission, nope)
+    _evaluate(missions, mission, "A", errors=1)
+    assert _propose(missions, mission, nope)["terminal"]["state"] == "NO_FEASIBLE_ARCHITECTURE"
+
+
+@pytest.mark.parametrize("named", ["A", None])
+def test_ready_is_refused_while_an_evidence_need_stands_for_that_candidate_or_the_mission(tmp_path, named):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission, "A")
+    need = {"type": "evidence_required", "blocker": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT", "need": "Measure the donor rail"}
+    if named:
+        need["candidate_id"] = named
+    _propose(missions, mission, need)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    with pytest.raises(MissionStateError, match="evidence"):
+        _propose(missions, mission, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "x"})
+
+
+def test_a_need_for_another_candidate_does_not_block_this_one(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission, "A")
+    _candidate(missions, mission, "B", "reclaim_heavy")
+    _propose(missions, mission, {"type": "evidence_required", "candidate_id": "B", "blocker": "BLOCKED_NEEDS_REVERSE_ENGINEERING", "need": "Identify the donor board"})
+    _evaluate(missions, mission, "A")
+    _evaluate(missions, mission, "A", operation="device_engineering")
+    done = _propose(missions, mission, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "A passes"})
+    assert done["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+
+
+def test_a_second_repair_needs_a_failing_verdict_on_the_repaired_spec(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission, errors=1)
+    repair = {"type": "repair_proposed", "candidate_id": "A", "spec": SPEC, "rationale": "apply the suggestion"}
+    _propose(missions, mission, repair)
+    with pytest.raises(MissionStateError, match="current spec"):
+        _propose(missions, mission, repair)
+    _evaluate(missions, mission, errors=1)
+    assert _propose(missions, mission, repair)["budgets"]["repairs_used"] == {"A": 2}
+
+
+def test_a_terminal_proposal_cannot_name_a_candidate_that_does_not_exist(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission, "A")
+    need = _propose(missions, mission, {"type": "evidence_required", "blocker": "BLOCKED_UNSAFE", "need": "Mains-powered donor"})
+    with pytest.raises(MissionValidationError, match="does not exist"):
+        _propose(missions, mission, {"type": "terminal_proposed", "state": "BLOCKED_UNSAFE", "candidate_id": "Z",
+                                     "reason": "unsafe", "cites": [need["last_event_seq"]]})
+
+
+
+# Found by the Gemini 4 Argon review of the first mission store, each reproduced before it was fixed.
+
+
+def test_ready_needs_an_engineering_review_without_errors(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    _candidate(missions, mission)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering", errors=5)
+    with pytest.raises(MissionStateError, match="no errors"):
+        _propose(missions, mission, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "x"})
+
+
+def test_a_blocked_state_cannot_borrow_another_candidates_need_or_cite_unrelated_events(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "HC-SR04 ultrasonic"])
+    _candidate(missions, mission, "A")
+    _candidate(missions, mission, "B", "reclaim_heavy")
+    need = _propose(missions, mission, {"type": "evidence_required", "candidate_id": "B", "blocker": "BLOCKED_NEEDS_PART_DATA", "need": "B datasheet"})
+    seq = need["last_event_seq"]
+    blocked = {"type": "terminal_proposed", "state": "BLOCKED_NEEDS_PART_DATA", "candidate_id": "A", "reason": "x"}
+    with pytest.raises(MissionStateError, match="this candidate"):
+        _propose(missions, mission, dict(blocked, cites=[seq]))
+    with pytest.raises(MissionStateError, match="only existing"):
+        _propose(missions, mission, dict(blocked, candidate_id="B", cites=[seq, 999]))
+    with pytest.raises(MissionStateError, match="only existing"):
+        _propose(missions, mission, dict(blocked, candidate_id="B", cites=[1, seq]))
+    assert _propose(missions, mission, dict(blocked, candidate_id="B", cites=[seq]))["terminal"]["candidate_id"] == "B"
+
+
+def test_a_mission_cannot_stop_short_of_a_candidate_that_is_already_ready(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, max_operator_jobs=2)
+    _candidate(missions, mission)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    with pytest.raises(MissionStateError, match="ready for a human build"):
+        _propose(missions, mission, {"type": "terminal_proposed", "state": "BUDGET_EXHAUSTED", "reason": "jobs used up"})
+
+
+def test_an_agent_cannot_write_as_hardware_splicer(tmp_path):
+    _projects, missions = _store(tmp_path)
+    system = {"kind": "system", "id": "hardware-splicer"}
+    with pytest.raises(MissionValidationError, match="system"):
+        missions.open_mission("monitor", intake={"goal": "x"}, author=system)
+    mission = _open(missions)
+    with pytest.raises(MissionValidationError, match="system"):
+        missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
+            "id": "A", "kind": "clean_sheet", "label": "A", "spec": SPEC, "rationale": "r"}}, author=system)
+
+
+@pytest.mark.parametrize("container", ["list", "tuple"])
+def test_authority_fields_are_refused_inside_lists_too(tmp_path, container):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    rows = [{"id": "m1", "power_on_authorized": True}]
+    spec = {"modules": rows if container == "list" else tuple(rows)}
+    with pytest.raises(MissionValidationError, match="authority"):
+        _candidate_with_spec = missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
+            "id": "A", "kind": "clean_sheet", "label": "A", "spec": spec, "rationale": "r"}}, author=AGENT)
+
+
+def test_a_bad_author_id_is_refused_before_anything_is_written(tmp_path):
+    projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError, match="surrogate"):
+        missions.open_mission("monitor", intake={"goal": "x"}, author={"kind": "agent", "id": "planner-\ud800"})
+    assert not (projects.root / "monitor" / "missions").exists() or not any((projects.root / "monitor" / "missions").iterdir())
+
+
+@pytest.mark.parametrize("spec", [{"x": float("nan")}, {"pins": {1: "VCC"}}, {"pins": {1: "VCC", "gnd": "GND"}}, {"rows": (1, 2)}])
+def test_a_spec_must_come_back_from_the_log_exactly_as_given(tmp_path, spec):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    with pytest.raises(MissionValidationError, match="plain JSON"):
+        missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
+            "id": "A", "kind": "clean_sheet", "label": "A", "spec": spec, "rationale": "r"}}, author=AGENT)
+
+
+# Mission-level acceptance (P2): one human acceptance of the mission and its budgets covers HS's software checks.
+
+
+def test_hs_records_no_evaluation_until_a_person_accepts_the_mission(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    assert mission["accepted"] is None
+    _candidate(missions, mission)
+    with pytest.raises(MissionStateError, match="accepted"):
+        _evaluate(missions, mission)
+    accepted = missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    assert accepted["accepted"]["by"] == HUMAN and accepted["accepted"]["budgets"] == accepted["budgets"]
+    assert accepted["phase"] == "ARCHITECTING", "acceptance changes no phase"
+    _evaluate(missions, mission)
+
+
+@pytest.mark.parametrize("author", [AGENT, {"kind": "system", "id": "hardware-splicer"}])
+def test_only_a_person_can_accept_a_mission(tmp_path, author):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    with pytest.raises(MissionValidationError, match="person"):
+        missions.accept_mission("monitor", mission["mission_id"], author=author)
+
+
+def test_a_mission_is_accepted_once_and_never_after_it_ends(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    with pytest.raises(MissionStateError, match="already accepted"):
+        missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    other = _open(missions, accepted=False)
+    _candidate(missions, other)
+    need = _propose(missions, other, {"type": "evidence_required", "blocker": "BLOCKED_UNSAFE", "need": "Mains donor"})
+    _propose(missions, other, {"type": "terminal_proposed", "state": "BLOCKED_UNSAFE", "reason": "mains", "cites": [need["last_event_seq"]]})
+    with pytest.raises(MissionStateError, match="terminal"):
+        missions.accept_mission("monitor", other["mission_id"], author=HUMAN)
+
+
+def test_an_agent_cannot_propose_an_acceptance(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    with pytest.raises(MissionValidationError):
+        _propose(missions, mission, {"type": "accepted"})
+
+
+def _inventory_mission(missions, inventory, intake=None, **budgets):
+    mission = missions.open_mission("monitor", intake={"goal": "Use every listed part", "inventory": inventory,
+                                                    "budgets": budgets, **(intake or {})}, author=AGENT)
+    return missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+
+
+def _spec_candidate(missions, mission, spec, cid="A"):
+    return _propose(missions, mission, {"type": "candidate_proposed", "candidate": {
+        "id": cid, "kind": "clean_sheet", "label": cid, "spec": spec, "rationale": "test the listed parts"}})
+
+
+def _terminal(state, **fields):
+    return {"type": "terminal_proposed", "state": state, "reason": "the recorded evidence", **fields}
+
+
+@pytest.mark.parametrize("inventory, ok, errors, missing", [
+    (["ESP32", "BME280"], True, 0, []),
+    (["ESP32", "2x BME280"], True, 0, []),
+    (["ESP32-S3", "BME280"], False, 0, ["ESP32-S3"]),
+    (["ESP32", "BME280", "HC-SR04 ultrasonic"], True, 0, ["HC-SR04 ultrasonic"]),
+])
+def test_acceptance_records_hs_inventory_reading_and_canonical_draft(tmp_path, inventory, ok, errors, missing):
+    projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, inventory)
+    event = mission["events"][-2]
+    assert event["type"] == "inventory_read" and mission["events"][-1]["type"] == "accepted"
+    assert event["author"] == {"kind": "system", "id": "hardware-splicer"}
+    assert event["reading"] == parse_parts_text("\n".join(inventory))
+    assert event["reading"]["left_out"] == missing
+    assert event["draft"]["ok"] is ok
+    assert event["draft"]["plan_errors"] >= errors
+    if "2x BME280" in inventory:
+        assert event["draft"]["plan_errors"] + event["draft"]["plan_warnings"] > 0
+    assert (event["draft"]["error"] is None) is ok
+    payload = {"reading": event["reading"], "draft": event["draft"]}
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False,
+                                       separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    assert event["result_sha256"] == digest
+    assert mission["inventory"] == payload | {"result_sha256": digest}
+    assert MissionStore(projects).get_mission("monitor", mission["mission_id"])["inventory"] == mission["inventory"]
+    assert mission["budgets"]["operator_jobs_used"] == 0
+
+
+@pytest.mark.parametrize("inventory", [[], ["unknown" * 40] * 10])
+def test_unparseable_inventory_is_recorded_as_a_failed_draft(tmp_path, inventory):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, inventory)
+    assert mission["inventory"]["draft"]["ok"] is False
+    assert mission["inventory"]["draft"]["error"]
+    assert mission["inventory"]["reading"]["left_out"] == inventory
+
+
+def test_an_agent_cannot_propose_inventory_read_or_unknown_events(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    before = missions.get_mission("monitor", mission["mission_id"])
+    for event_type in ("inventory_read", "invented_event"):
+        with pytest.raises(MissionValidationError, match="event type"):
+            _propose(missions, mission, {"type": event_type, "reading": {}, "draft": {"ok": True}})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+@pytest.mark.parametrize("inventory, modules, uncovered, extra", [
+    (["ESP32", "BME280", "HC-SR04 ultrasonic"], ["esp32-devkitc-v4", "adafruit-bme280-stemma-qt"], ["HC-SR04 ultrasonic"], []),
+    (["ESP32-S3", "BME280"], ["esp32-devkitc-v4", "adafruit-bme280-stemma-qt"], ["ESP32-S3"], ["esp32-devkitc-v4"]),
+    (["ESP32", "2x BME280"], ["esp32-devkitc-v4", "adafruit-bme280-stemma-qt"], ["2x BME280"], []),
+    (["ESP32", "BME280", "BME280"], ["esp32-devkitc-v4", "adafruit-bme280-stemma-qt"], ["BME280"], []),
+    (["ESP32", "BME280"], ["esp32-devkitc-v4", "adafruit-bme280-stemma-qt", "ssd1306-096-i2c"], [], ["ssd1306-096-i2c"]),
+    (["ESP32 BME280"], ["esp32-devkitc-v4"], ["ESP32 BME280"], []),
+])
+def test_candidate_view_consumes_inventory_counts_and_lists_extras(tmp_path, inventory, modules, uncovered, extra):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, inventory)
+    spec = {"modules": [{"id": f"m{i}", "module": module} for i, module in enumerate(modules)]}
+    candidate = _spec_candidate(missions, mission, spec)["candidates"][0]
+    assert candidate["uncovered_inventory"] == uncovered
+    assert candidate["covers_inventory"] is (not uncovered)
+    assert candidate["not_in_inventory"] == extra
+
+
+@pytest.mark.parametrize("inventory, missing", [
+    (["ESP32", "BME280", "HC-SR04 ultrasonic"], "HC-SR04 ultrasonic"),
+    (["ESP32-S3", "BME280"], "ESP32-S3"),
+    (["ESP32", "BME280", "OLED"], "OLED"),
+])
+def test_ready_refuses_dropped_or_swapped_inventory_even_with_clean_evaluations(tmp_path, inventory, missing):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, inventory)
+    spec = draft_from_parts_text({"text": "ESP32\nBME280"})["spec"]
+    _spec_candidate(missions, mission, spec)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    with pytest.raises(MissionStateError, match=missing):
+        _propose(missions, mission, _terminal("READY_FOR_HUMAN_BUILD", candidate_id="A"))
+
+
+def test_ready_refuses_legacy_acceptance_without_inventory_read(tmp_path):
+    projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    # A pre-change log has only opened + accepted; no inventory event is backfilled.
+    missions._write_event("monitor", mission["mission_id"], 2,
+                         {"type": "accepted", "author": HUMAN, "budgets": mission["budgets"]})
+    spec = draft_from_parts_text({"text": "\n".join(mission["intake"]["inventory"])})["spec"]
+    _spec_candidate(missions, mission, spec)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    with pytest.raises(MissionStateError, match="inventory_read"):
+        _propose(missions, mission, _terminal("READY_FOR_HUMAN_BUILD", candidate_id="A"))
+
+
+def test_repairs_cannot_drop_inventory_and_a_refusal_appends_nothing(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    _spec_candidate(missions, mission, spec)
+    before = _evaluate(missions, mission, errors=1)
+    spec["modules"] = [m for m in spec["modules"] if m["module"] != "ssd1306-096-i2c"]
+    with pytest.raises(MissionStateError, match="OLED"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "drop it"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+def test_a_repair_may_not_cover_one_listed_part_by_dropping_another(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    without_oled = copy.deepcopy(spec)
+    without_oled["modules"] = [m for m in spec["modules"] if m["module"] != "ssd1306-096-i2c"]
+    _spec_candidate(missions, mission, without_oled)
+    before = _evaluate(missions, mission, errors=1)
+    swapped = copy.deepcopy(spec)
+    swapped["modules"] = [m for m in spec["modules"] if m["module"] != "adafruit-bme280-stemma-qt"]
+    with pytest.raises(MissionStateError, match="drops inventory: BME280"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": swapped, "rationale": "swap"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+def _blocked(missions, mission, state="BLOCKED_NEEDS_PART_DATA", cid=None, cites=()):
+    need = {"type": "evidence_required", "blocker": state, "need": "agent says a need exists"}
+    if cid:
+        need["candidate_id"] = cid
+    view = _propose(missions, mission, need)
+    return _terminal(state, **({"candidate_id": cid} if cid else {}), cites=[view["last_event_seq"], *cites])
+
+
+def test_part_data_blocker_cannot_be_manufactured_on_a_clean_inventory(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280"])
+    terminal = _blocked(missions, mission)
+    with pytest.raises(MissionStateError, match="HS has data for every part listed.*plans clean"):
+        _propose(missions, mission, terminal)
+
+
+@pytest.mark.parametrize("state", [s for s in TERMINAL_STATES if s.startswith("BLOCKED_")])
+def test_every_blocker_refuses_to_stop_short_of_another_ready_candidate(tmp_path, state):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280"])
+    spec = draft_from_parts_text({"text": "ESP32\nBME280"})["spec"]
+    _spec_candidate(missions, mission, spec, "A")
+    _spec_candidate(missions, mission, spec, "B")
+    _evaluate(missions, mission, "A")
+    _evaluate(missions, mission, "A", operation="device_engineering")
+    terminal = _blocked(missions, mission, state, "B")
+    with pytest.raises(MissionStateError, match="ready for a human build"):
+        _propose(missions, mission, terminal)
+
+
+@pytest.mark.parametrize("inventory", [["ESP32-S3", "BME280"], ["ESP32", "BME280", "HC-SR04"],
+                                       ["ESP32", "2x BME280"]])
+def test_part_data_blocker_has_hs_inventory_grounding(tmp_path, inventory):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, inventory)
+    done = _propose(missions, mission, _blocked(missions, mission))
+    assert done["terminal"]["grounding"] == "hs_inventory_reading"
+    assert done["events"][-1]["grounding"] == "hs_inventory_reading"
+
+
+@pytest.mark.parametrize("state", [s for s in TERMINAL_STATES if s.startswith("BLOCKED_") and s != "BLOCKED_NEEDS_PART_DATA"])
+def test_uncheckable_blockers_remain_allowed_as_agent_assertions(tmp_path, state):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280"])
+    done = _propose(missions, mission, _blocked(missions, mission, state))
+    assert done["terminal"]["grounding"] == "agent_assertion"
+
+
+def test_a_cited_failing_plan_does_not_ground_a_part_data_blocker(tmp_path):
+    # An agent can break its own wiring to get plan errors; they say nothing about missing part data.
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280"])
+    _spec_candidate(missions, mission, draft_from_parts_text({"text": "ESP32\nBME280"})["spec"])
+    seq = _evaluate(missions, mission, errors=3)["last_event_seq"]
+    with pytest.raises(MissionStateError, match="plans clean"):
+        _propose(missions, mission, _blocked(missions, mission, cid="A", cites=[seq]))
+
+
+def _spent_candidate(missions, mission, spec, cid):
+    _spec_candidate(missions, mission, spec, cid)
+    _evaluate(missions, mission, cid, errors=1)
+    _propose(missions, mission, {"type": "repair_proposed", "candidate_id": cid, "spec": spec, "rationale": "try"})
+    _evaluate(missions, mission, cid, errors=1)
+
+
+@pytest.mark.parametrize("case, message", [("slots", "all.*candidate"), ("duplicate", "distinct"), ("renamed", "distinct"),
+                                           ("coverage", "2x BME280"), ("clean_draft", "own draft.*plans clean")])
+def test_no_feasible_requires_a_full_distinct_inventory_covering_search_and_no_clean_hs_draft(tmp_path, case, message):
+    _projects, missions = _store(tmp_path)
+    inventory = ["ESP32", "BME280" if case == "clean_draft" else "2x BME280"]
+    mission = _inventory_mission(missions, inventory, max_candidates=2, max_repairs_per_candidate=1)
+    spec = draft_from_parts_text({"text": "\n".join(inventory)})["spec"]
+    for i in range(1 if case == "slots" else 2):
+        current = copy.deepcopy(spec)
+        if case not in ("duplicate", "renamed"):
+            current["name"] = f"Design {i}"
+            current.setdefault("case", {})["wall_mm"] = 2.0 + 0.5 * i
+        elif i and case == "duplicate":
+            current = dict(reversed(list(current.items())))
+        elif i:
+            # A new name, recoloured wires and reordered connections are still the same design.
+            current["name"] = "A different name"
+            current["connections"] = [{**row, "wire": "white"} for row in reversed(current["connections"])]
+        if case == "coverage":
+            current["modules"] = current["modules"][:2]
+        _spent_candidate(missions, mission, current, chr(65 + i))
+    with pytest.raises(MissionStateError, match=message):
+        _propose(missions, mission, _terminal("NO_FEASIBLE_ARCHITECTURE"))
+
+
+def test_no_feasible_full_search_is_grounded_in_hs_evaluations(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "2x BME280"], max_candidates=2, max_repairs_per_candidate=1)
+    for cid in ("A", "B"):
+        spec = draft_from_parts_text({"text": "ESP32\n2x BME280"})["spec"]
+        spec["name"] = cid
+        spec.setdefault("case", {})["wall_mm"] = 2.0 if cid == "A" else 2.5
+        _spent_candidate(missions, mission, spec, cid)
+    done = _propose(missions, mission, _terminal("NO_FEASIBLE_ARCHITECTURE"))
+    assert done["terminal"]["grounding"] == "hs_evaluation"
+
+
+
+# Red-team findings, 2026-10-16: an agent forged a measured board size to pass the antenna check, and another
+# dropped the person's case setting (stated only in prose) so the default returned and the limit disappeared.
+
+ESP32_ID = "esp32-devkitc-v4"
+NO_ANTENNA_CLEARANCE = [{"path": "case.antenna_clearance", "equals": False}]
+
+
+def _ready_esp32(missions, mission, spec):
+    _spec_candidate(missions, mission, spec)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    return _terminal("READY_FOR_HUMAN_BUILD", candidate_id="A")
+
+
+@pytest.mark.parametrize("event", ["candidate", "repair"])
+def test_measured_sizes_in_an_agent_spec_are_refused(tmp_path, event):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    forged = copy.deepcopy(spec)
+    forged["modules"][0]["overrides"] = {"pcb_mm": {"x": 10, "y": 10, "z": 1}, "above_board_mm": 0}
+    if event == "candidate":
+        with pytest.raises(MissionValidationError, match="physical evidence"):
+            _spec_candidate(missions, mission, forged)
+        return
+    broken = copy.deepcopy(spec)
+    broken["connections"] = [c for c in broken["connections"] if c["from"] != "display.SDA"]
+    _spec_candidate(missions, mission, broken)
+    before = _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionValidationError, match="physical evidence"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": forged, "rationale": "smaller"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+def test_the_persons_own_measurements_may_be_used_exactly(tmp_path):
+    _projects, missions = _store(tmp_path)
+    measured = {"pcb_mm": {"x": 28.1}}
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"measurements": {ESP32_ID: measured}})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["modules"][0]["overrides"] = dict(measured)
+    assert _spec_candidate(missions, mission, spec)["candidates"][0]["spec"]["modules"][0]["overrides"] == measured
+    other = copy.deepcopy(spec)
+    other["modules"][0]["overrides"] = {"pcb_mm": {"x": 20}}
+    with pytest.raises(MissionValidationError, match="physical evidence"):
+        _spec_candidate(missions, mission, other, "B")
+
+
+@pytest.mark.parametrize("measurements, message", [
+    ({"not-a-module": {"pcb_mm": {"x": 20}}}, "measurements"),
+    ({ESP32_ID: {"pcb_mm": {"x": 0.01}}}, "between"),
+    ({ESP32_ID: {"colour": "red"}}, "may hold"),
+])
+def test_intake_measurements_are_validated_like_spec_overrides(tmp_path, measurements, message):
+    _projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError, match=message):
+        missions.open_mission("monitor", intake={"goal": "g", "inventory": ["ESP32"], "measurements": measurements}, author=AGENT)
+
+
+def test_a_dropped_case_block_breaks_the_persons_requirement_and_cannot_be_ready(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec.pop("case", None)  # the planner's default restores antenna clearance
+    ready = _ready_esp32(missions, mission, spec)
+    view = missions.get_mission("monitor", mission["mission_id"])
+    assert view["candidates"][0]["violated_requirements"] == ["case.antenna_clearance must be false"]
+    with pytest.raises(MissionStateError, match="requirements: case.antenna_clearance must be false"):
+        _propose(missions, mission, ready)
+
+
+def test_a_candidate_meeting_the_requirement_can_be_ready(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["case"]["antenna_clearance"] = False
+    done = _propose(missions, mission, _ready_esp32(missions, mission, spec))
+    assert done["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+    assert done["candidates"][0]["violated_requirements"] == []
+
+
+def test_a_repair_may_not_break_a_requirement(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["case"]["antenna_clearance"] = False
+    _spec_candidate(missions, mission, spec)
+    before = _evaluate(missions, mission, errors=1)
+    repaired = copy.deepcopy(spec)
+    repaired["case"]["antenna_clearance"] = True
+    with pytest.raises(MissionStateError, match="breaks the person's requirements"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": repaired, "rationale": "clear it"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+@pytest.mark.parametrize("requirements, message", [
+    ([{"path": "case.colour", "equals": "red"}], "path must be one of"),
+    ([{"path": "case.antenna_clearance", "equals": "no"}], "wrong type"),
+    ([{"path": "case.wall_mm", "equals": True}], "wrong type"),
+    ([{"path": "power.source", "equals": "usb", "note": "x"}], "exactly path and equals"),
+    ("case.antenna_clearance=false", "list"),
+])
+def test_requirements_are_validated_when_the_mission_opens(tmp_path, requirements, message):
+    _projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError, match=message):
+        missions.open_mission("monitor", intake={"goal": "g", "inventory": ["ESP32"], "requirements": requirements}, author=AGENT)

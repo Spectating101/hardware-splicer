@@ -33,6 +33,7 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/devices/engineering"),
         ("POST", "/v1/devices/case"),
         ("POST", "/v1/devices/application"),
+        ("POST", "/v1/devices/application/run"),
         ("POST", "/v1/devices/observations"),
     ),
     "bounded_pre_fabrication": (
@@ -90,6 +91,20 @@ _TASK_OPERATION_PATHS = {
         ("GET", "/v1/projects/{project_id}/engineering/assurance"),
         ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
         ("POST", "/v1/projects/{project_id}/engineering-packages"),
+    ),
+    "fabrication_mission": (
+        ("GET", "/v1/devices/spec-schema"),
+        ("GET", "/v1/devices/examples"),
+        ("POST", "/v1/devices/draft"),
+        ("POST", "/v1/projects/{project_id}/missions"),
+        ("GET", "/v1/projects/{project_id}/missions"),
+        ("GET", "/v1/projects/{project_id}/missions/{mission_id}"),
+        ("POST", "/v1/projects/{project_id}/missions/{mission_id}/events"),
+        (
+            "POST",
+            "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run",
+        ),
+        ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}"),
     ),
 }
 
