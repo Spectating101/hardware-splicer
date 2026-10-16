@@ -38,6 +38,10 @@ const SCAN_STATUS: Record<ScanModule['status'], { label: string; className: stri
   stale: { label: 'Readings stale', className: 'border-amber-400/40 bg-amber-950/30 text-amber-100' },
   not_assessed: { label: 'Not assessed', className: 'border-stone-700 bg-stone-900/60 text-stone-300' },
 };
+type DraftMatch = { module: string; name: string; matched_on: string; basis: 'chip' | 'name' | 'generic_word'; quantity: number };
+type DraftFragment = { text: string; matches: DraftMatch[]; note?: string };
+type DraftResult = { fragments: DraftFragment[]; leftOut: string[]; assumptions: string[] };
+const DRAFT_BASIS: Record<DraftMatch['basis'], string> = { chip: 'chip name', name: 'board name', generic_word: 'generic word' };
 type ModuleInfo = { id: string; name: string; sources: { label: string; url: string; as_of: string }[]; dimension_basis?: Record<string, string>; notes?: string[]; pin_orders?: { id: string; label: string; signals: string[]; source: string }[] };
 
 const BASIS_LABELS: Record<string, string> = {
@@ -78,6 +82,10 @@ export default function DevicePage() {
   const [scanResult, setScanResult] = useState<ScanObservation | null>(null);
   const [onHand, setOnHand] = useState<DeviceReclaimResult | null>(null);
   const [onHandError, setOnHandError] = useState('');
+  const [partsText, setPartsText] = useState('');
+  const [draftBusy, setDraftBusy] = useState(false);
+  const [draftError, setDraftError] = useState('');
+  const [draft, setDraft] = useState<DraftResult | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('from') !== 'donor') return;
@@ -232,6 +240,28 @@ export default function DevicePage() {
     void planFrom(text);
   };
 
+  const draftFromParts = async () => {
+    setDraftBusy(true);
+    setDraftError('');
+    try {
+      const response = await fetch('/api/proxy/engineering/devices/draft', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: partsText }), cache: 'no-store' });
+      const body = await readJsonPayload<unknown>(response);
+      if (!body || isProxyFailure(body)) throw new Error(getProxyErrorMessage(body, 'The parts list could not be drafted.'));
+      const drafted = body as { spec?: Spec; parsed?: { fragments?: DraftFragment[]; left_out?: string[] }; assumptions?: string[] };
+      if (!drafted.spec || !drafted.parsed?.fragments) throw new Error('The parts list could not be drafted.');
+      const text = JSON.stringify(drafted.spec, null, 2);
+      setDraft({ fragments: drafted.parsed.fragments, leftOut: drafted.parsed.left_out ?? [], assumptions: drafted.assumptions ?? [] });
+      setSelectedExample('');
+      setSpecText(text);
+      setExampleText(text);
+      await planFrom(text);
+    } catch (caught) {
+      setDraftError(caught instanceof Error ? caught.message : 'The parts list could not be drafted.');
+    } finally {
+      setDraftBusy(false);
+    }
+  };
+
   const choosePinOrder = (moduleRef: string, pinOrder: string) => {
     try {
       const spec = JSON.parse(specText);
@@ -256,12 +286,64 @@ export default function DevicePage() {
             Watch a whole gadget go together: the boards into their case, each wire from the pin it starts on to the pin it ends on, then the display, the lid and USB.
             It is a plan to follow and check, not proof that the device works.
           </p>
-          {Object.keys(examples).length > 1 ? <div className="mt-3 max-w-xl">
-            <label htmlFor="device-example" className="text-xs font-medium text-stone-300">Try an example</label>
-            <select id="device-example" data-testid="device-example" value={selectedExample} disabled={busy || loading} onChange={(event) => chooseExample(event.target.value)} className="mt-1 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
-              {Object.entries(examples).map(([key, example]) => <option key={key} value={key}>{typeof example.name === 'string' ? example.name : key}</option>)}
-            </select>
-          </div> : null}
+          <div className="mt-3 grid max-w-5xl gap-3 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+            {Object.keys(examples).length > 1 ? <div>
+              <label htmlFor="device-example" className="text-xs font-medium text-stone-300">Try an example</label>
+              <select id="device-example" data-testid="device-example" value={selectedExample} disabled={busy || loading} onChange={(event) => chooseExample(event.target.value)} className="mt-1 w-full rounded-md border border-stone-700 bg-stone-950 p-2 text-xs text-stone-200">
+                {selectedExample === '' ? <option value="">Your parts list</option> : null}
+                {Object.entries(examples).map(([key, example]) => <option key={key} value={key}>{typeof example.name === 'string' ? example.name : key}</option>)}
+              </select>
+            </div> : null}
+            <form data-testid="device-parts-form" aria-label="Draft from a parts list" onSubmit={(event) => { event.preventDefault(); void draftFromParts(); }}>
+              <label htmlFor="device-parts-text" className="text-xs font-medium text-stone-300">Or list the parts you have</label>
+              <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-start">
+                <textarea
+                  id="device-parts-text"
+                  data-testid="device-parts-text"
+                  value={partsText}
+                  onChange={(event) => setPartsText(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void draftFromParts(); } }}
+                  rows={Math.min(6, Math.max(2, partsText.split('\n').length))}
+                  maxLength={2000}
+                  spellCheck={false}
+                  placeholder={'ESP32, BME280, 0.96 inch OLED'}
+                  className="min-h-[2.25rem] min-w-0 flex-1 resize-y rounded-md border border-stone-700 bg-stone-950 p-2 font-mono text-xs leading-5 text-stone-200 placeholder:text-stone-600"
+                />
+                <button type="submit" data-testid="device-parts-draft" disabled={draftBusy || busy || loading || !partsText.trim()} className="inline-flex h-9 shrink-0 items-center gap-1.5 self-start rounded-md bg-stone-800 px-3 text-xs font-medium text-stone-100 hover:bg-stone-700 disabled:opacity-50">
+                  {draftBusy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
+                  {draftBusy ? 'Drafting…' : 'Draft wiring'}
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] leading-4 text-stone-500">One controller and its parts, by line or comma. Only parts in the device library are used; nothing else is guessed.</p>
+            </form>
+          </div>
+          {draftError ? <p role="alert" data-testid="device-parts-error" className="mt-2 max-w-5xl text-xs text-amber-200">{draftError}</p> : null}
+          {draft ? <section data-testid="device-draft" aria-label="What your parts list was read as" className="mt-3 max-w-5xl rounded-xl border border-stone-800 bg-stone-900/50 p-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-sm font-semibold text-stone-100">Read from your list</h2>
+              <button type="button" onClick={() => setDraft(null)} className="text-xs text-stone-400 hover:text-stone-200">Hide</button>
+            </div>
+            <ul className="mt-2 grid list-none gap-1.5 pl-0 text-xs leading-5 sm:grid-cols-2">
+              {draft.fragments.map((fragment, index) => {
+                const generic = fragment.matches.some((match) => match.basis === 'generic_word');
+                const status = fragment.matches.length === 0 ? 'left_out' : generic ? 'generic' : 'matched';
+                return <li key={`${index}:${fragment.text}`} data-testid="device-draft-line" data-status={status} className={`flex min-w-0 gap-2 rounded-md border px-2.5 py-1.5 ${status === 'left_out' ? 'border-stone-800 bg-stone-950/60 text-stone-400' : status === 'generic' ? 'border-amber-400/30 bg-amber-950/20 text-stone-200' : 'border-stone-800 bg-stone-950/60 text-stone-200'}`}>
+                  {status === 'matched' ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden="true" /> : status === 'generic' ? <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" aria-hidden="true" /> : <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />}
+                  <span className="min-w-0">
+                    <span className="font-mono text-stone-400">{fragment.text}</span>
+                    {fragment.matches.length ? fragment.matches.map((match, matchIndex) => <span key={`${match.module}:${matchIndex}`} className="block">
+                      → {match.name}{match.quantity > 1 ? ` ×${match.quantity}` : ''} <span className={match.basis === 'generic_word' ? 'text-amber-200' : 'text-stone-500'}>({DRAFT_BASIS[match.basis]}{match.basis === 'generic_word' ? ': check this is your part' : ''})</span>
+                    </span>) : <span className="block">{fragment.note ?? 'Not in the device library, so it was left out.'}</span>}
+                  </span>
+                </li>;
+              })}
+            </ul>
+            <p className="mt-3 text-xs leading-5 text-stone-400">The draft is loaded below. It wires every part to the controller&apos;s power, ground and default I2C pins and approves nothing: the wiring check gives the planner&apos;s verdict.</p>
+            {draft.assumptions.length ? <details className="mt-2 text-xs leading-5 text-stone-400">
+              <summary className="cursor-pointer text-stone-300 hover:text-stone-100">What the draft assumed</summary>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">{draft.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul>
+            </details> : null}
+          </section> : null}
         </header>
 
         {onHand ? <section className="mb-4 rounded-xl border border-stone-800 bg-stone-900/50 p-4" data-testid="device-on-hand" aria-label="Parts you may have on hand">
