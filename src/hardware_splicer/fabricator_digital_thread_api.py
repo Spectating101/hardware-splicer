@@ -84,6 +84,27 @@ def create_fabricator_digital_thread_router() -> APIRouter:
             raise _error(exc) from exc
         return {"ok": True, "result": result}
 
+    @router.get("/freecad/models")
+    def list_freecad_models(request: Request) -> Dict[str, Any]:
+        try:
+            values = _runtime(request).list_freecad_models()
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, "models": values}
+
+    @router.post("/freecad/exports", status_code=http_status.HTTP_201_CREATED)
+    def export_freecad_model(request: Request, body: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            value = _body(body)
+            result = _runtime(request).export_freecad_model(
+                model_id=value.get("model_id"),
+                output_format=value.get("output_format"),
+                artifact_id=value.get("artifact_id"),
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, "result": result}
+
     @router.get("/opcua/{source_id}/measurements")
     def list_opcua_measurements(source_id: str, request: Request) -> Dict[str, Any]:
         try:
