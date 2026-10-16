@@ -80,6 +80,7 @@ _MAX_REASON = 2000
 _MAX_SUMMARY = 4000
 _SLUG_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,31}$")
 _SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+_RUN_ARTIFACT_RE = re.compile(r"^runs/[A-Za-z0-9._-]{1,128}\.json$")
 _SYSTEM_AUTHOR = {"kind": "system", "id": "hardware-splicer"}
 # The thread store's authority keys plus physical_correctness, checked at every depth, inside lists too.
 _MISSION_FORBIDDEN_KEYS = frozenset(
@@ -870,6 +871,17 @@ class MissionStore:
         if replayed.get("phase") == "TERMINAL" or replayed.get("terminal") is not None:
             raise MissionStateError(f"mission {mission_id!r} is terminal and cannot accept new events")
 
+    def _run_file_path(self, project_id: str, mission_id: str, filename: str) -> Path:
+        project_dir = self._project_dir(project_id)
+        mission_dir = self._mission_dir(project_id, mission_id)
+        runs_dir = mission_dir / "runs"
+        self._assert_inside_project(runs_dir, project_dir, label="runs directory")
+        path = runs_dir / filename
+        self._assert_inside_project(path, project_dir, label="run file")
+        if path.exists() and not _path_inside(path, mission_dir):
+            raise MissionError("run file resolves outside the mission directory")
+        return path
+
     def _write_run_artifact(
         self,
         project_id: str,
@@ -878,10 +890,6 @@ class MissionStore:
         operation: str,
         artifact: Mapping[str, Any],
     ) -> tuple[str, str]:
-        project_dir = self._project_dir(project_id)
-        mission_dir = self._mission_dir(project_id, mission_id)
-        runs_dir = mission_dir / "runs"
-        self._assert_inside_project(runs_dir, project_dir, label="runs directory")
         payload = artifact if isinstance(artifact, dict) else dict(artifact)
         try:
             encoded = _json_payload(payload).encode("utf-8")
@@ -891,10 +899,7 @@ class MissionStore:
         # Named by content, not by event number: a file left by an interrupted write is never in the way of the
         # next evaluation, and identical output is stored once.
         filename = f"{operation}-{digest[:16]}.json"
-        path = runs_dir / filename
-        self._assert_inside_project(path, project_dir, label="run file")
-        if path.exists() and not _path_inside(path, mission_dir):
-            raise MissionError("run file resolves outside the mission directory")
+        path = self._run_file_path(project_id, mission_id, filename)
         if path.is_file():
             if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
                 raise MissionError(f"run file {filename} does not match its content hash")
@@ -906,6 +911,32 @@ class MissionStore:
             if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
                 raise MissionError(f"run file {filename} does not match its content hash")
         return f"runs/{filename}", digest
+
+    def read_run(self, project_id: str, mission_id: str, artifact: str) -> Dict[str, Any]:
+        """Return a hashed run file this mission's own evaluations reference. Read-only."""
+
+        if not isinstance(artifact, str) or _RUN_ARTIFACT_RE.fullmatch(artifact) is None:
+            raise MissionValidationError("artifact must be a runs/<name>.json path")
+        view = self.get_mission(project_id, mission_id)
+        recorded = None
+        for candidate in view.get("candidates") or []:
+            for evaluation in candidate.get("evaluations") or []:
+                if evaluation.get("artifact") == artifact:
+                    recorded = evaluation
+                    break
+            if recorded is not None:
+                break
+        if recorded is None:
+            raise MissionError(f"run artifact {artifact!r} is not referenced by this mission's evaluations")
+        filename = artifact.split("/", 1)[1]
+        path = self._run_file_path(project_id, mission_id, filename)
+        if not path.is_file():
+            raise MissionError(f"run file {artifact} is missing")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        expected = (recorded.get("result") or {}).get("result_sha256")
+        if not isinstance(expected, str) or digest.lower() != expected.lower():
+            raise MissionError(f"run file {artifact} does not match its recorded result_sha256")
+        return _read_json(path)
 
     def accept_mission(
         self,
