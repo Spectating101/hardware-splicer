@@ -1269,6 +1269,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 role in set(p["roles"]) and m.ref == module.ref
                 for wire_id, a, b in resolved_pairs
                 if wire_id not in rejected
+                if role != "ground" or all("ground" in pin["roles"] for _owner, pin in (a, b))
                 for m, p in (a, b)
             )
             if not connected:

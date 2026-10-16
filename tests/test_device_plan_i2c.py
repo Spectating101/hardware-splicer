@@ -152,3 +152,11 @@ def test_a_clean_multi_sensor_plan_does_not_silently_export_single_sensor_firmwa
     assert not [f for f in build_device_plan(spec)["findings"] if f["severity"] in {"error", "warning"}]
     with pytest.raises(DevicePlanError, match="only one sensor breakout"):
         build_device_application(spec)
+
+
+def test_an_address_strap_is_not_a_modules_missing_ground_return():
+    spec = two_sensors()
+    spec["connections"] = [w for w in spec["connections"] if w["from"] != "sensor_2.GND"]
+    spec["connections"].append({"from": "sensor_2.SDO", "to": "sensor_2.GND"})
+    assert any(f["rule"] == "missing_connection" and "sensor_2" in f["message"] and "ground" in f["message"]
+               for f in build_device_plan(spec)["findings"])
