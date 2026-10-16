@@ -10,6 +10,7 @@ from typing import Any, Mapping, Sequence
 from .engineering_artifact_store import EngineeringArtifactStore
 from .fabrication_digital_thread import FabricationDigitalThread
 from .fabrication_operator import FabricationValidationError
+from .freecad_export_operator import FreeCadExportOperator
 from .kicad_fabrication_pipeline import KicadFabricationPipeline
 from .mechanical_fabrication_pipeline import MechanicalFabricationPipeline
 from .motion_plan_dry_run import MotionPlanDryRun
@@ -25,6 +26,7 @@ class FabricatorDigitalThreadWorkbench:
         *,
         artifacts: EngineeringArtifactStore,
         mechanical: MechanicalFabricationPipeline | None = None,
+        freecad: FreeCadExportOperator | None = None,
         pcb: KicadFabricationPipeline | None = None,
         opcua_sources: Mapping[str, OpcUaObserver] | None = None,
         ros2_sources: Mapping[str, Ros2GraphObserver] | None = None,
@@ -34,6 +36,7 @@ class FabricatorDigitalThreadWorkbench:
     ) -> None:
         self.artifacts = artifacts
         self.mechanical = mechanical
+        self.freecad = freecad
         self.pcb = pcb
         self.opcua_sources = dict(opcua_sources or {})
         self.ros2_sources = dict(ros2_sources or {})
@@ -69,6 +72,26 @@ class FabricatorDigitalThreadWorkbench:
             profile_id=profile_id,
             artifact_id=artifact_id,
             output_format=output_format,
+        )
+
+    def list_freecad_models(self) -> list[dict[str, Any]]:
+        if self.freecad is None:
+            raise FabricationValidationError("FreeCAD integration is not configured")
+        return self.freecad.models.list_public()
+
+    def export_freecad_model(
+        self,
+        *,
+        model_id: str,
+        output_format: str,
+        artifact_id: str,
+    ) -> dict[str, Any]:
+        if self.freecad is None:
+            raise FabricationValidationError("FreeCAD integration is not configured")
+        return self.freecad.export(
+            model_id=model_id,
+            output_format=output_format,
+            artifact_id=artifact_id,
         )
 
     def opcua_measurements(self, source_id: str) -> list[dict[str, Any]]:
