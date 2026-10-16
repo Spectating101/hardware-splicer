@@ -13,9 +13,15 @@ import json
 import os
 import tempfile
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover
+    fcntl = None
 
 from .fabrication_operator import FabricationAuthorityError, FabricationValidationError
 from .physical_authority import PhysicalPlanGrantStore, execution_plan_sha256
@@ -55,6 +61,19 @@ class PhysicalApprovalStore:
         self.root.mkdir(parents=True, exist_ok=True)
         self.operators = operators
         self.grants = grants
+        self._lock_path = self.root / ".physical-approvals.lock"
+
+    @contextmanager
+    def _locked(self) -> Iterator[None]:
+        self._lock_path.touch(exist_ok=True)
+        with self._lock_path.open("r+") as handle:
+            if fcntl is not None:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                if fcntl is not None:
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     def request(self, plan: PhysicalExecutionPlan, *, requested_by: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(plan, PhysicalExecutionPlan) or not plan.requires_human_grant:
@@ -65,7 +84,6 @@ class PhysicalApprovalStore:
         if not isinstance(requester_id, str) or not requester_id.strip():
             raise FabricationValidationError("approval requester id is required")
 
-        # Revalidate the current registry before persisting the request.
         canonical = self.operators.plan(
             operator_id=plan.operator_id,
             project_id=plan.project_id,
@@ -89,7 +107,11 @@ class PhysicalApprovalStore:
             "approved_at": None,
             "grant_id": None,
         }
-        _atomic_write(self._path(request_id), record)
+        with self._locked():
+            path = self._path(request_id)
+            if path.exists():
+                raise FabricationAuthorityError("physical approval request id collision")
+            _atomic_write(path, record)
         return json.loads(json.dumps(record))
 
     def get(self, request_id: str) -> dict[str, Any]:
@@ -128,16 +150,21 @@ class PhysicalApprovalStore:
         if not isinstance(human_id, str) or not human_id.strip():
             raise FabricationValidationError("human author id is required")
 
-        record = self.get(request_id)
-        if record.get("status") != "pending":
-            raise FabricationAuthorityError("physical approval request is no longer pending")
-        plan = self._revalidate_plan(record)
-        grant = self.grants.issue(plan, author={"kind": "human", "id": human_id.strip()}, ttl_seconds=ttl_seconds)
-        record["status"] = "approved"
-        record["approved_by"] = {"kind": "human", "id": human_id.strip()}
-        record["approved_at"] = _iso_now()
-        record["grant_id"] = grant["grant_id"]
-        _atomic_write(self._path(request_id), record)
+        with self._locked():
+            record = self.get(request_id)
+            if record.get("status") != "pending":
+                raise FabricationAuthorityError("physical approval request is no longer pending")
+            plan = self._revalidate_plan(record)
+            grant = self.grants.issue(
+                plan,
+                author={"kind": "human", "id": human_id.strip()},
+                ttl_seconds=ttl_seconds,
+            )
+            record["status"] = "approved"
+            record["approved_by"] = {"kind": "human", "id": human_id.strip()}
+            record["approved_at"] = _iso_now()
+            record["grant_id"] = grant["grant_id"]
+            _atomic_write(self._path(request_id), record)
         return json.loads(json.dumps(record))
 
     def reject(self, request_id: str, *, author: Mapping[str, Any], reason: str) -> dict[str, Any]:
@@ -148,14 +175,16 @@ class PhysicalApprovalStore:
             raise FabricationValidationError("human author id is required")
         if not isinstance(reason, str) or not reason.strip() or len(reason.strip()) > 500:
             raise FabricationValidationError("rejection reason must be a bounded string")
-        record = self.get(request_id)
-        if record.get("status") != "pending":
-            raise FabricationAuthorityError("physical approval request is no longer pending")
-        record["status"] = "rejected"
-        record["approved_by"] = {"kind": "human", "id": human_id.strip()}
-        record["approved_at"] = _iso_now()
-        record["rejection_reason"] = reason.strip()
-        _atomic_write(self._path(request_id), record)
+
+        with self._locked():
+            record = self.get(request_id)
+            if record.get("status") != "pending":
+                raise FabricationAuthorityError("physical approval request is no longer pending")
+            record["status"] = "rejected"
+            record["approved_by"] = {"kind": "human", "id": human_id.strip()}
+            record["approved_at"] = _iso_now()
+            record["rejection_reason"] = reason.strip()
+            _atomic_write(self._path(request_id), record)
         return json.loads(json.dumps(record))
 
     def _revalidate_plan(self, record: Mapping[str, Any]) -> PhysicalExecutionPlan:
