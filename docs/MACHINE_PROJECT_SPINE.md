@@ -62,6 +62,7 @@ shared by API, UI and CI.
 | `project_review_store.py` | Staged review workflow (`hardware_splicer.project_review.v1`) |
 | `project_thread_store.py` | Append-only review threads (`hardware_splicer.review_thread.v1`) |
 | `mission_store.py` | Fabrication missions: append-only event log replayed into a state machine (`hardware_splicer.fabrication_mission.v1`) |
+| `mission_executor.py` | Software-only device checks for an accepted fabrication mission; never physical, never authority |
 | `project_api.py` | `/v1/projects` — persistence and review |
 | `machine_project_api.py` | `/v1/machine-projects` — model, seed, diff, release |
 
@@ -194,6 +195,12 @@ Success is the **correct** terminal state, not reaching "ready":
 - `NO_FEASIBLE_ARCHITECTURE` needs every candidate failing since its latest repair with its repairs spent;
   `BUDGET_EXHAUSTED` needs the operator budget spent. Neither may stop short of a candidate that is already ready.
 
+A person accepts the mission and its budgets once. That acceptance covers HS's software-only checks within budget;
+anything physical still stops for a human. The executor (`mission_executor.py`) runs only those checks on an accepted
+mission: it calls the canonical device functions, maps their verdicts onto evaluation errors and warnings, and stores
+the full output as a hashed run file. A check that refuses or cannot run is recorded as a failure, never as a pass.
+The executor never writes a project snapshot and never grants physical authority.
+
 ## Verification
 
 ```bash
@@ -209,7 +216,8 @@ pytest -q \
   tests/test_machine_project_diff.py \
   tests/test_machine_project_diff_review_flags.py \
   tests/test_machine_release.py \
-  tests/test_mission_store.py
+  tests/test_mission_store.py \
+  tests/test_mission_executor.py
 ```
 
 Frontend: `make splice-ui-build`.
