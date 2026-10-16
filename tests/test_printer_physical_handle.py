@@ -64,8 +64,7 @@ def test_generic_printer_requires_non_actuating_stage_before_start(tmp_path):
     approved = approvals.approve(request["request_id"], author=HUMAN)
     with pytest.raises(FabricationValidationError, match="staged before actuation"):
         dispatcher.dispatch(start, grant_id=approved["grant_id"])
-    # Authority was correctly spent even though the private handle refused to start.
-    assert not any(call[0] == "request" and call[2] == "/api/job" for call in transport.calls)
+    assert not any(call[0] == "request" for call in transport.calls)
 
 
 def test_stage_then_human_approved_start_uses_generic_dispatcher(tmp_path):
@@ -79,7 +78,13 @@ def test_stage_then_human_approved_start_uses_generic_dispatcher(tmp_path):
     )
     staged_receipt = dispatcher.dispatch(stage)
     assert staged_receipt["authority"] == "not_required"
-    assert transport.calls[0][0] == "upload"
+    assert transport.calls[0] == (
+        "upload",
+        "/api/files/local",
+        "case-v1.gcode",
+        GCODE,
+        {"select": "false", "print": "false"},
+    )
 
     start = artifacts.build_actuation_plan(
         operators=operators,
@@ -93,7 +98,12 @@ def test_stage_then_human_approved_start_uses_generic_dispatcher(tmp_path):
     approved = approvals.approve(request["request_id"], author=HUMAN)
     receipt = dispatcher.dispatch(start, grant_id=approved["grant_id"])
     assert receipt["authority"] == "human_grant_consumed"
-    assert transport.calls[-1] == ("request", "POST", "/api/job", {"command": "start"})
+    assert transport.calls[-1] == (
+        "request",
+        "POST",
+        "/api/files/local/case-v1.gcode",
+        {"command": "select", "print": True},
+    )
 
 
 def test_stage_rejects_non_gcode_artifact(tmp_path):
