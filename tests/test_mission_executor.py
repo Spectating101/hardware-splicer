@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from hardware_splicer.device_plan import example_specs
+from hardware_splicer.device_draft import draft_from_parts_text
 from hardware_splicer.mission_executor import MISSION_OPERATIONS, run_mission_operation
 from hardware_splicer.mission_store import MissionStateError, MissionStore, MissionValidationError
 from hardware_splicer.project_store import ProjectStore
@@ -55,6 +56,29 @@ def _broken_spec():
     spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
     spec["connections"] = [c for c in spec["connections"] if not c["from"].endswith("SDA")]
     return spec
+
+
+def test_clean_hs_checks_cannot_make_an_incomplete_inventory_ready(tmp_path):
+    spec = draft_from_parts_text({"text": "ESP32\nBME280"})["spec"]
+    _projects, missions, mid = _mission(tmp_path, spec)
+    for operation in ("device_plan", "device_engineering"):
+        view = _run(missions, mid, operation)
+        assert _last_evaluation(view)["result"]["errors"] == 0
+    with pytest.raises(MissionStateError, match="OLED"):
+        missions.propose("monitor", mid, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD",
+                                          "candidate_id": "A", "reason": "HS checks are clean"}, author=AGENT)
+
+
+def test_acceptance_draft_counts_match_the_canonical_executor_plan(tmp_path):
+    spec = example_specs()["esp32_oled_bme280_usb"]
+    _projects, missions, mid = _mission(tmp_path, spec)
+    draft_spec = draft_from_parts_text({"text": "ESP32\nBME280\nOLED"})["spec"]
+    missions.propose("monitor", mid, {"type": "candidate_proposed", "candidate": {
+        "id": "B", "kind": "clean_sheet", "label": "HS draft", "spec": draft_spec, "rationale": "compare planners"}}, author=AGENT)
+    view = run_mission_operation(missions, "monitor", mid, candidate_id="B", operation="device_plan")
+    result = view["candidates"][1]["evaluations"][-1]["result"]
+    assert view["inventory"]["draft"]["plan_errors"] == result["errors"]
+    assert view["inventory"]["draft"]["plan_warnings"] == result["warnings"]
 
 
 def test_the_operations_are_the_software_only_device_checks():

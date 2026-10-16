@@ -153,3 +153,33 @@ def test_the_mission_task_manifest_offers_the_agent_routes_and_never_acceptance(
     assert ("POST", "/v1/devices/draft") in offered
     assert not any(path.endswith("/accept") for _method, path in offered)
     assert manifest["authority_contract"]["projection_grants_physical_authority"] is False
+
+
+def test_inventory_reading_is_system_only_over_http(client):
+    mid = _open(client)["mission_id"]
+    mission = _accept(client, mid).json()["mission"]
+    assert mission["inventory"]["draft"]["ok"] is True
+    forged = _propose(client, mid, {"type": "inventory_read", "reading": {}, "draft": {"ok": True}})
+    assert forged.status_code == 422
+
+
+def test_http_refuses_ready_and_repair_that_drop_a_persons_part(client):
+    mid = _open(client)["mission_id"]
+    _accept(client, mid)
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["modules"] = [m for m in spec["modules"] if m["module"] != "ssd1306-096-i2c"]
+    spec["connections"] = [c for c in spec["connections"] if not c["from"].startswith("display.")]
+    assert _candidate(client, mid, spec).status_code == 201
+    for operation in ("device_plan", "device_engineering"):
+        assert client.post(f"{BASE}/{mid}/candidates/A/run", json={"operation": operation}).status_code == 200
+    refused = _propose(client, mid, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "done"})
+    assert refused.status_code == 409 and "OLED" in refused.text
+
+    other = _open(client)["mission_id"]
+    _accept(client, other)
+    broken = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    broken["connections"] = [c for c in broken["connections"] if c["from"] != "display.SDA"]
+    assert _candidate(client, other, broken).status_code == 201
+    client.post(f"{BASE}/{other}/candidates/A/run", json={"operation": "device_plan"})
+    refused = _propose(client, other, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "drop display"})
+    assert refused.status_code == 409 and "OLED" in refused.text

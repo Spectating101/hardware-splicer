@@ -15,10 +15,13 @@ import re
 import tempfile
 import unicodedata
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .device_draft import draft_from_parts_text, parse_parts_text
+from .device_plan import DevicePlanError, build_device_plan
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -45,7 +48,7 @@ _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
     {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -376,6 +379,61 @@ def _plan_is_failing(result: Mapping[str, Any] | None) -> bool:
     return int(result.get("errors") or 0) > 0 or int(result.get("warnings") or 0) > 0
 
 
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+
+def _read_inventory(inventory: list[str]) -> Dict[str, Any]:
+    text = "\n".join(inventory)
+    try:
+        reading = parse_parts_text(text)
+    except DevicePlanError as exc:
+        # Intake permits empty and longer lists than the drafter. Preserve all lines as unknown
+        # when parsing refuses, rather than losing the acceptance or treating them as covered.
+        reading = {"fragments": [{"text": line, "matches": []} for line in inventory],
+                   "controller": None, "parts": [], "left_out": list(inventory)}
+        draft = {"ok": False, "error": str(exc), "plan_errors": 0, "plan_warnings": 0}
+    else:
+        try:
+            spec = draft_from_parts_text({"text": text})["spec"]
+            findings = build_device_plan(spec).get("findings") or []
+            draft = {"ok": True, "error": None,
+                     "plan_errors": sum(item.get("severity") == "error" for item in findings),
+                     "plan_warnings": sum(item.get("severity") == "warning" for item in findings)}
+        except DevicePlanError as exc:
+            draft = {"ok": False, "error": str(exc), "plan_errors": 0, "plan_warnings": 0}
+    result = {"reading": reading, "draft": draft}
+    return {**result, "result_sha256": hashlib.sha256(_canonical_json(result).encode("utf-8")).hexdigest()}
+
+
+def _inventory_coverage(reading: Mapping[str, Any], spec: Mapping[str, Any]) -> tuple[list[str], Counter]:
+    modules = spec.get("modules")
+    counts = Counter(item["module"] for item in modules
+                     if isinstance(item, Mapping) and isinstance(item.get("module"), str)) if isinstance(modules, list) else Counter()
+    uncovered = []
+    for fragment in reading["fragments"]:
+        matches = fragment["matches"]
+        covered = bool(matches)
+        for match in matches:
+            module = match["module"]
+            quantity = int(match.get("quantity", 1))
+            available = min(quantity, counts[module])
+            counts[module] -= available
+            if available < quantity:
+                covered = False
+        if not covered:
+            uncovered.append(fragment["text"])
+    # left_out is normally also in fragments; preserve independent entries without doubling them.
+    missing_left_out = Counter(reading["left_out"]) - Counter(uncovered)
+    uncovered.extend(line for line, count in missing_left_out.items() for _ in range(count))
+    return uncovered, counts
+
+
+def _uncovered_inventory(reading: Mapping[str, Any], spec: Mapping[str, Any]) -> list[str]:
+    """Consume module counts in inventory order; an instance cannot cover two fragments."""
+    return _inventory_coverage(reading, spec)[0]
+
+
 def _plan_is_clean(result: Mapping[str, Any] | None) -> bool:
     if result is None:
         return False
@@ -398,7 +456,8 @@ def _latest_operation(
     return latest
 
 
-def _public_candidate(state: Mapping[str, Any]) -> Dict[str, Any]:
+def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None) -> Dict[str, Any]:
+    uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
         "kind": state["kind"],
@@ -406,6 +465,9 @@ def _public_candidate(state: Mapping[str, Any]) -> Dict[str, Any]:
         "rationale": state["rationale"],
         "spec": state["spec"],
         "repairs": state["repairs"],
+        "covers_inventory": inventory is not None and not uncovered,
+        "uncovered_inventory": uncovered,
+        "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
         "evaluations": [
             {
                 "operation": item["operation"],
@@ -422,6 +484,7 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
     candidates: Dict[str, Dict[str, Any]] = {}
     terminal: Dict[str, Any] | None = None
     accepted: Dict[str, Any] | None = None
+    inventory: Dict[str, Any] | None = None
     operator_jobs_used = 0
     for event in events:
         event_type = event.get("type")
@@ -449,6 +512,8 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
                 "last_repair_seq": None,
             }
             phase = "ARCHITECTING"
+        elif event_type == "inventory_read":
+            inventory = {key: event[key] for key in ("reading", "draft", "result_sha256")}
         elif event_type == "repair_proposed":
             candidate_id = event["candidate_id"]
             state = candidates[candidate_id]
@@ -464,6 +529,8 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
                     "operation": event["operation"],
                     "result": event["result"],
                     "artifact": event.get("artifact"),
+                    "covers_inventory": inventory is not None and not _uncovered_inventory(
+                        inventory["reading"], candidates[candidate_id]["spec"]),
                 }
             )
             operator_jobs_used += 1
@@ -477,6 +544,7 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
                 "reason": event["reason"],
                 "candidate_id": event.get("candidate_id"),
                 "cites": list(event.get("cites") or []),
+                "grounding": event.get("grounding"),
             }
             if event["state"] == "READY_FOR_HUMAN_BUILD":
                 terminal["physical_evidence_required"] = list(_PHYSICAL_EVIDENCE_REQUIRED)
@@ -484,6 +552,7 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
     last_event_seq = int(events[-1]["seq"]) if events else 0
     return {
         "phase": phase,
+        "inventory": inventory,
         "candidates": candidates,
         "repairs_used": repairs_used,
         "operator_jobs_used": operator_jobs_used,
@@ -518,6 +587,13 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if not isinstance(candidate_id, str) or candidate_id not in candidates:
         return "READY_FOR_HUMAN_BUILD requires a candidate with a passing device_plan"
     candidate = candidates[candidate_id]
+    inventory = replayed.get("inventory")
+    if inventory is None:
+        return "READY_FOR_HUMAN_BUILD requires an HS inventory_read event"
+    uncovered = _uncovered_inventory(inventory["reading"], candidate["spec"])
+    if uncovered:
+        return ("READY_FOR_HUMAN_BUILD is refused: the candidate does not contain "
+                + ", ".join(uncovered) + " from the person's inventory")
     plan = _latest_operation(candidate["evaluations"], "device_plan", after_seq=_since_seq(candidate))
     if plan is None or not _plan_is_clean(plan.get("result")):
         return "READY_FOR_HUMAN_BUILD requires a passing device_plan after the latest repair"
@@ -592,6 +668,39 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
                 "NO_FEASIBLE_ARCHITECTURE requires every candidate's latest device_plan to be failing "
                 f"with repairs spent ({candidate_id})"
             )
+    if len(candidates) != int(budgets["max_candidates"]):
+        raise MissionStateError("NO_FEASIBLE_ARCHITECTURE requires all budgeted candidate slots to be used")
+    specs = [_canonical_json(candidate["spec"]) for candidate in candidates.values()]
+    if len(set(specs)) != len(specs):
+        raise MissionStateError("NO_FEASIBLE_ARCHITECTURE requires pairwise distinct current candidate specs")
+    inventory = replayed.get("inventory")
+    if inventory is None:
+        raise MissionStateError("NO_FEASIBLE_ARCHITECTURE requires an HS inventory_read event to check coverage")
+    for candidate_id, candidate in candidates.items():
+        uncovered = _uncovered_inventory(inventory["reading"], candidate["spec"])
+        if uncovered:
+            raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} does not contain "
+                                    + ", ".join(uncovered) + " from the person's inventory")
+    draft = inventory["draft"]
+    if draft["ok"] and draft["plan_errors"] == 0 and draft["plan_warnings"] == 0:
+        raise MissionStateError("NO_FEASIBLE_ARCHITECTURE is refused: HS's own draft of the inventory plans clean; "
+                                "the agent should propose it")
+
+
+def _part_data_grounding(replayed: Mapping[str, Any], cites: list[int]) -> str:
+    inventory = replayed.get("inventory")
+    if inventory is not None:
+        draft = inventory["draft"]
+        if (inventory["reading"]["left_out"] or not draft["ok"]
+                or draft["plan_errors"] + draft["plan_warnings"] > 0):
+            return "hs_inventory_reading"
+    for candidate in replayed["candidates"].values():
+        for evaluation in candidate["evaluations"]:
+            if (evaluation["seq"] in cites and evaluation["operation"] == "device_plan"
+                    and evaluation["result"]["errors"] > 0 and evaluation["covers_inventory"]):
+                return "hs_evaluation"
+    raise MissionStateError("BLOCKED_NEEDS_PART_DATA is refused: HS has data for every part listed "
+                            "and its own draft of them plans clean")
 
 
 def _assert_budget_exhausted(replayed: Mapping[str, Any], budgets: Mapping[str, int]) -> None:
@@ -797,7 +906,8 @@ class MissionStore:
             "created_at": meta["created_at"],
             "phase": replayed["phase"],
             "accepted": replayed["accepted"],
-            "candidates": [_public_candidate(item) for item in replayed["candidates"].values()],
+            "inventory": replayed["inventory"],
+            "candidates": [_public_candidate(item, replayed["inventory"]) for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
@@ -961,6 +1071,10 @@ class MissionStore:
             last_seq + 1,
             {"type": "accepted", "author": normalized_author, "budgets": budgets},
         )
+        self._write_event(
+            project_id, mission_id, last_seq + 2,
+            {"type": "inventory_read", "author": dict(_SYSTEM_AUTHOR), **_read_inventory(view["intake"]["inventory"])},
+        )
         return self.get_mission(project_id, mission_id)
 
     def propose(
@@ -1013,6 +1127,12 @@ class MissionStore:
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
+            inventory = replayed.get("inventory")
+            if inventory is not None:
+                uncovered = _uncovered_inventory(inventory["reading"], record["spec"])
+                previous = _uncovered_inventory(inventory["reading"], candidate["spec"])
+                if len(uncovered) > len(previous):
+                    raise MissionStateError("repair_proposed is refused: the repair drops inventory: " + ", ".join(uncovered))
             record["rationale"] = _require_text(
                 raw_event.get("rationale"), field="rationale", max_len=_MAX_RATIONALE
             )
@@ -1040,14 +1160,20 @@ class MissionStore:
                 record["candidate_id"] = candidate_id
             if state == "READY_FOR_HUMAN_BUILD":
                 _assert_ready_for_human_build(replayed, raw_event, events)
+                record["grounding"] = "hs_evaluation"
             elif state in _BLOCKED_STATES:
+                _assert_no_ready_candidate(replayed, events, state)
                 record["cites"] = _assert_blocked_cites(events, raw_event)
+                record["grounding"] = (_part_data_grounding(replayed, record["cites"])
+                                       if state == "BLOCKED_NEEDS_PART_DATA" else "agent_assertion")
             elif state == "NO_FEASIBLE_ARCHITECTURE":
                 _assert_no_feasible_architecture(replayed, budgets)
                 _assert_no_ready_candidate(replayed, events, state)
+                record["grounding"] = "hs_evaluation"
             elif state == "BUDGET_EXHAUSTED":
                 _assert_budget_exhausted(replayed, budgets)
                 _assert_no_ready_candidate(replayed, events, state)
+                record["grounding"] = "hs_budget"
             if "cites" in raw_event and "cites" not in record:
                 cites = raw_event.get("cites")
                 if cites is None:
