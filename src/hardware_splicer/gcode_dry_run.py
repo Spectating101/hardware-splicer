@@ -1,6 +1,6 @@
 """Simulation-only G-code analysis for CNC/laser machine-job artifacts.
 
-This module never opens a device or emits machine commands.  It parses a narrow
+This module never opens a device or emits machine commands. It parses a narrow
 linear-motion subset to estimate bounds and flags hazardous/opaque constructs.
 Unknown semantics are blockers for live execution rather than silently accepted.
 """
@@ -35,12 +35,22 @@ class MachineEnvelope:
             (self.min_y_mm, self.max_y_mm, "y"),
             (self.min_z_mm, self.max_z_mm, "z"),
         ):
-            if not all(isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value)) for value in (low, high)):
+            if not all(
+                isinstance(value, (int, float))
+                and not isinstance(value, bool)
+                and math.isfinite(float(value))
+                for value in (low, high)
+            ):
                 raise FabricationValidationError(f"machine {label} envelope must be finite")
             if float(low) > float(high):
                 raise FabricationValidationError(f"machine {label} envelope is inverted")
         if self.max_feed_mm_min is not None:
-            if not isinstance(self.max_feed_mm_min, (int, float)) or isinstance(self.max_feed_mm_min, bool) or not math.isfinite(float(self.max_feed_mm_min)) or self.max_feed_mm_min <= 0:
+            if (
+                not isinstance(self.max_feed_mm_min, (int, float))
+                or isinstance(self.max_feed_mm_min, bool)
+                or not math.isfinite(float(self.max_feed_mm_min))
+                or self.max_feed_mm_min <= 0
+            ):
                 raise FabricationValidationError("machine max feed must be a positive finite number")
 
 
@@ -70,6 +80,7 @@ class GcodeDryRunAnalyzer:
         maxs = dict(position)
         unit_scale = 1.0
         absolute = True
+        modal_motion: int | None = None
         motion_lines = 0
         max_feed = 0.0
         hazards: list[dict[str, Any]] = []
@@ -82,19 +93,38 @@ class GcodeDryRunAnalyzer:
             upper = line.upper()
             if any(marker in upper for marker in ("#", "[", "]")) or re.search(r"(^|\s)O\d+", upper):
                 blockers.append({"line": line_number, "type": "opaque_macro_or_expression", "text": line[:200]})
+                modal_motion = None
                 continue
             tokens = [(letter.upper(), float(number)) for letter, number in _TOKEN_RE.findall(line)]
             if not tokens:
                 blockers.append({"line": line_number, "type": "unparsed_line", "text": line[:200]})
+                modal_motion = None
                 continue
 
-            g_codes = [int(value) for letter, value in tokens if letter == "G" and float(value).is_integer()]
-            m_codes = [int(value) for letter, value in tokens if letter == "M" and float(value).is_integer()]
+            non_integer_control = [
+                f"{letter}{value:g}"
+                for letter, value in tokens
+                if letter in {"G", "M"} and not float(value).is_integer()
+            ]
+            if non_integer_control:
+                blockers.append({
+                    "line": line_number,
+                    "type": "non_integer_or_unsupported_control_code",
+                    "codes": non_integer_control,
+                })
+                modal_motion = None
+                continue
+
+            g_codes = [int(value) for letter, value in tokens if letter == "G"]
+            m_codes = [int(value) for letter, value in tokens if letter == "M"]
             for code in m_codes:
-                if code in {3, 4, 7, 8, 6, 98, 99}:
+                if code in {3, 4, 6, 7, 8}:
                     hazards.append({"line": line_number, "code": f"M{code}", "text": line[:200]})
-                elif code not in {5, 2, 30}:
+                elif code in {98, 99}:
+                    blockers.append({"line": line_number, "type": "opaque_subprogram_control", "code": f"M{code}"})
+                elif code not in {2, 5, 30}:
                     blockers.append({"line": line_number, "type": "unsupported_m_code", "code": f"M{code}"})
+
             if 20 in g_codes:
                 unit_scale = 25.4
             if 21 in g_codes:
@@ -103,30 +133,58 @@ class GcodeDryRunAnalyzer:
                 absolute = True
             if 91 in g_codes:
                 absolute = False
-            if any(code in {2, 3, 38, 81, 82, 83, 84, 85, 86, 87, 88, 89} for code in g_codes):
-                blockers.append({"line": line_number, "type": "unsupported_motion_semantics", "codes": [f"G{code}" for code in g_codes]})
+
+            unsupported_motion = [code for code in g_codes if code in {2, 3, 38, 81, 82, 83, 84, 85, 86, 87, 88, 89}]
+            if unsupported_motion:
+                blockers.append({
+                    "line": line_number,
+                    "type": "unsupported_motion_semantics",
+                    "codes": [f"G{code}" for code in unsupported_motion],
+                })
+                modal_motion = None
                 continue
-            unknown_g = [code for code in g_codes if code not in {0, 1, 4, 17, 18, 19, 20, 21, 40, 49, 54, 55, 56, 57, 58, 59, 80, 90, 91, 94}]
+
+            unknown_g = [
+                code
+                for code in g_codes
+                if code not in {0, 1, 4, 17, 18, 19, 20, 21, 40, 49, 54, 55, 56, 57, 58, 59, 80, 90, 91, 94}
+            ]
             if unknown_g:
                 blockers.append({"line": line_number, "type": "unsupported_g_code", "codes": [f"G{code}" for code in unknown_g]})
+                modal_motion = None
                 continue
+
+            if 0 in g_codes:
+                modal_motion = 0
+            if 1 in g_codes:
+                modal_motion = 1
 
             feed_values = [value * unit_scale for letter, value in tokens if letter == "F"]
             if feed_values:
                 max_feed = max(max_feed, max(feed_values))
-            if 0 not in g_codes and 1 not in g_codes:
+
+            axis_words = {
+                axis: [value * unit_scale for letter, value in tokens if letter == axis]
+                for axis in ("X", "Y", "Z")
+            }
+            has_axes = any(axis_words[axis] for axis in axis_words)
+            if not has_axes:
                 continue
+            if modal_motion not in {0, 1}:
+                blockers.append({
+                    "line": line_number,
+                    "type": "coordinate_words_without_supported_motion_mode",
+                    "text": line[:200],
+                })
+                continue
+
             target = dict(position)
-            moved = False
             for axis in ("X", "Y", "Z"):
-                values = [value * unit_scale for letter, value in tokens if letter == axis]
+                values = axis_words[axis]
                 if not values:
                     continue
-                moved = True
                 value = values[-1]
                 target[axis] = value if absolute else target[axis] + value
-            if not moved:
-                continue
             motion_lines += 1
             position = target
             for axis in ("X", "Y", "Z"):
@@ -172,7 +230,7 @@ class GcodeDryRunAnalyzer:
             "envelope_violations": envelope_violations,
             "ready_for_live_execution": False,
             "live_execution_blockers": [
-                *(["dry-run analyzer never grants live execution"]),
+                "dry-run analyzer never grants live execution",
                 *(["unsupported or opaque G-code present"] if blockers else []),
                 *(["configured machine envelope exceeded"] if envelope_violations else []),
                 *(["hazardous machine commands require machine-specific review"] if hazards else []),
