@@ -35,6 +35,41 @@ def bench_instrument_descriptor(*, operator_id: str, display_name: str) -> Physi
     )
 
 
+def camera_observer_descriptor(*, operator_id: str, display_name: str) -> PhysicalOperatorDescriptor:
+    """Observation-only camera whose captures are retained as raw evidence inputs.
+
+    Capturing an image is read-only with respect to the workpiece.  The resulting
+    frame remains UNPROVEN and requires an explicit evidence-promotion step before
+    it can establish or clear an engineering finding.
+    """
+
+    return PhysicalOperatorDescriptor(
+        operator_id=operator_id,
+        kind="instrument",
+        display_name=display_name,
+        capabilities=("vision_observation", "image_capture", "status"),
+        actions=(
+            PhysicalActionDescriptor("status", "observe", "Read configured camera availability."),
+            PhysicalActionDescriptor("capture", "observe", "Capture and retain one immutable image observation."),
+        ),
+    )
+
+
+def serial_observer_descriptor(*, operator_id: str, display_name: str) -> PhysicalOperatorDescriptor:
+    """Read-only serial/console observer; no target writes are exposed."""
+
+    return PhysicalOperatorDescriptor(
+        operator_id=operator_id,
+        kind="instrument",
+        display_name=display_name,
+        capabilities=("serial_observation", "boot_log_capture", "status"),
+        actions=(
+            PhysicalActionDescriptor("status", "observe", "Read configured serial observer availability."),
+            PhysicalActionDescriptor("capture_log", "observe", "Capture and retain an immutable read-only serial transcript."),
+        ),
+    )
+
+
 def robot_descriptor(*, operator_id: str, display_name: str) -> PhysicalOperatorDescriptor:
     """Robot/workcell authority surface around immutable motion-plan artifacts."""
 
