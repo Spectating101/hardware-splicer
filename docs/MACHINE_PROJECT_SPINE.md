@@ -209,7 +209,13 @@ inventory and plans its own draft with the canonical device planner. The mission
 `result_sha256` of their canonical JSON. A parser refusal leaves the original lines uncovered and the draft not ok.
 Each candidate reports `covers_inventory`, `uncovered_inventory` and extra module ids in `not_in_inventory`.
 Module counts are consumed in inventory order; no instance covers two fragments, quantities must be met, and every
-left_out line stays uncovered. Extra modules are allowed. A repair cannot increase the number of uncovered lines.
+left_out line stays uncovered. Extra modules are allowed. A repair may not newly uncover a listed line.
+
+The intake may also carry the person's `measurements` (measured sizes per library module) and structured
+`requirements` (`{path, equals}` over the case settings and power source). A mission spec's module overrides must
+equal the person's measurement exactly, so an agent cannot supply a measured size. Requirements are resolved through
+the planner's own validated spec, so an absent key takes its default; READY and NO_FEASIBLE need every candidate
+concerned to meet them, and a repair may not newly break one. Free-text constraints are reported, never enforced.
 Missions accepted before this event was added have no inventory reading and cannot newly reach READY. Existing
 terminal events are replayed as recorded; old records do not acquire a grounding claim.
 
@@ -296,4 +302,4 @@ Frontend: `make splice-ui-build`.
 9. Review threads are discussion only; they never alter a snapshot, revision, review decision, or authority state.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
 11. A mission never writes a snapshot or revision and never carries an authority field, at any depth. Inventory readings and terminal grounding grant no physical, firmware or power-on authority.
-12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory; a repair cannot leave a listed line uncovered that was covered. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
+12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory and meets their structured requirements; a repair cannot newly uncover a listed line or break a requirement, and only the person's intake can supply measured sizes. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.

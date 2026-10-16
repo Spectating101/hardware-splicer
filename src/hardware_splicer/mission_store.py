@@ -29,7 +29,7 @@ except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
     fcntl = None
 
 from .device_draft import draft_from_parts_text, parse_parts_text
-from .device_plan import DevicePlanError, build_device_plan
+from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -70,7 +70,16 @@ _EVAL_OPERATIONS = frozenset(
 )
 _AUTHOR_KEYS = frozenset({"kind", "id"})
 _AUTHOR_KINDS = frozenset({"human", "agent", "system"})
-_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets"})
+_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets", "measurements", "requirements"})
+# Spec values a person can require, and where the planner's validated spec holds each one with its default applied.
+_REQUIREMENT_PATHS = {
+    "case.wall_mm": ("wall", (int, float)),
+    "case.clearance_mm": ("clearance", (int, float)),
+    "case.antenna_clearance": ("antenna_clearance", bool),
+    "case.board_stops": ("board_stops", bool),
+    "power.source": ("power.source", str),
+}
+_MAX_REQUIREMENTS = 10
 _BUDGET_KEYS = frozenset({"max_candidates", "max_repairs_per_candidate", "max_operator_jobs"})
 _CANDIDATE_KEYS = frozenset({"id", "kind", "label", "spec", "rationale"})
 _RESULT_KEYS = frozenset({"errors", "warnings", "result_sha256", "summary"})
@@ -321,7 +330,84 @@ def _normalize_intake(intake: Any) -> tuple[Dict[str, Any], Dict[str, int]]:
     constraints = _normalize_string_list(raw.get("constraints"), field="constraints")
     inventory = _normalize_string_list(raw.get("inventory"), field="inventory")
     budgets = _normalize_budgets(raw.get("budgets"))
-    return {"goal": goal, "constraints": constraints, "inventory": inventory}, budgets
+    normalized = {"goal": goal, "constraints": constraints, "inventory": inventory}
+    if raw.get("measurements") is not None:
+        normalized["measurements"] = _normalize_measurements(raw["measurements"])
+    if raw.get("requirements") is not None:
+        normalized["requirements"] = _normalize_requirements(raw["requirements"])
+    return normalized, budgets
+
+
+def _normalize_measurements(value: Any) -> Dict[str, Any]:
+    """The person's measured sizes, per library module. Validated as the planner validates spec overrides."""
+    raw = _require_mapping(value, label="measurements")
+    measured: Dict[str, Any] = {}
+    for module_id, sizes in raw.items():
+        try:
+            _module(str(module_id))
+        except DevicePlanError as exc:
+            raise MissionValidationError(f"measurements: {exc}") from exc
+        sizes = _require_mapping(sizes, label=f"measurements.{module_id}")
+        if not sizes or not set(sizes) <= set(_OVERRIDE_KEYS):
+            raise MissionValidationError(f"measurements.{module_id} may hold {', '.join(sorted(_OVERRIDE_KEYS))}")
+        probe = {"modules": [{"id": "m", "module": module_id, "overrides": dict(sizes)}]}
+        try:
+            _validate_spec(probe)
+        except DevicePlanError as exc:
+            raise MissionValidationError(f"measurements.{module_id}: {exc}") from exc
+        measured[str(module_id)] = json.loads(json.dumps(sizes))
+    return measured
+
+
+def _normalize_requirements(value: Any) -> list[Dict[str, Any]]:
+    if not isinstance(value, list) or len(value) > _MAX_REQUIREMENTS:
+        raise MissionValidationError(f"requirements must be a list of at most {_MAX_REQUIREMENTS}")
+    rows = []
+    for index, item in enumerate(value):
+        row = _require_mapping(item, label=f"requirements[{index}]")
+        if set(row) != {"path", "equals"}:
+            raise MissionValidationError(f"requirements[{index}] must hold exactly path and equals")
+        path, equals = row["path"], row["equals"]
+        if path not in _REQUIREMENT_PATHS:
+            raise MissionValidationError(f"requirements[{index}].path must be one of {', '.join(sorted(_REQUIREMENT_PATHS))}")
+        kind = _REQUIREMENT_PATHS[path][1]
+        if (kind is not bool and isinstance(equals, bool)) or not isinstance(equals, kind):
+            raise MissionValidationError(f"requirements[{index}].equals has the wrong type for {path}")
+        if isinstance(equals, float) and equals != equals:
+            raise MissionValidationError(f"requirements[{index}].equals must be finite")
+        rows.append({"path": path, "equals": equals})
+    return rows
+
+
+def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any]) -> list[str]:
+    """Requirements the spec breaks, read from the planner's own validated spec so absent keys take its defaults."""
+    if not requirements:
+        return []
+    try:
+        clean = _validate_spec(json.loads(json.dumps(spec)))
+    except DevicePlanError:
+        return [f"{row['path']} (the spec does not validate)" for row in requirements]
+    broken = []
+    for row in requirements:
+        value: Any = clean
+        for key in _REQUIREMENT_PATHS[row["path"]][0].split("."):
+            value = value.get(key) if isinstance(value, Mapping) else None
+        if value != row["equals"] or isinstance(value, bool) != isinstance(row["equals"], bool):
+            broken.append(f"{row['path']} must be {json.dumps(row['equals'])}")
+    return broken
+
+
+def _assert_measurements_are_the_persons(intake: Mapping[str, Any], spec: Mapping[str, Any], *, field: str) -> None:
+    """Measured sizes are physical evidence. An agent cannot have measured anything; only the person's intake can say."""
+    measured = intake.get("measurements") or {}
+    modules = spec.get("modules")
+    for index, row in enumerate(modules if isinstance(modules, list) else []):
+        if not isinstance(row, Mapping) or not row.get("overrides"):
+            continue
+        if row["overrides"] != measured.get(row.get("module")):
+            raise MissionValidationError(
+                f"{field}.modules[{index}].overrides are refused: measured sizes are physical evidence that only the "
+                "person supplies, in the mission intake's measurements")
 
 
 def _normalize_slug(value: Any, *, field: str) -> str:
@@ -485,7 +571,8 @@ def _latest_operation(
     return latest
 
 
-def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None) -> Dict[str, Any]:
+def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None,
+                      requirements: list[Mapping[str, Any]]) -> Dict[str, Any]:
     uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
@@ -497,6 +584,7 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "covers_inventory": inventory is not None and not uncovered,
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
+        "violated_requirements": _violated_requirements(requirements, state["spec"]),
         "evaluations": [
             {
                 "operation": item["operation"],
@@ -508,7 +596,7 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
     }
 
 
-def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
+def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = None) -> Dict[str, Any]:
     phase = "INTAKE"
     candidates: Dict[str, Dict[str, Any]] = {}
     terminal: Dict[str, Any] | None = None
@@ -587,6 +675,7 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
         "operator_jobs_used": operator_jobs_used,
         "terminal": terminal,
         "accepted": accepted,
+        "requirements": list((intake or {}).get("requirements") or []),
         "last_event_seq": last_event_seq,
         "last_event_at": events[-1]["created_at"] if events else "",
     }
@@ -623,6 +712,9 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if uncovered:
         return ("READY_FOR_HUMAN_BUILD is refused: the candidate does not contain "
                 + ", ".join(uncovered) + " from the person's inventory")
+    broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+    if broken:
+        return "READY_FOR_HUMAN_BUILD is refused: the candidate breaks the person's requirements: " + "; ".join(broken)
     plan = _latest_operation(candidate["evaluations"], "device_plan", after_seq=_since_seq(candidate))
     if plan is None or not _plan_is_clean(plan.get("result")):
         return "READY_FOR_HUMAN_BUILD requires a passing device_plan after the latest repair"
@@ -710,6 +802,11 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
         if uncovered:
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} does not contain "
                                     + ", ".join(uncovered) + " from the person's inventory")
+        broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+        if broken:
+            # A design that ignores what the person required says nothing about whether their device is feasible.
+            raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} breaks the "
+                                    "person's requirements: " + "; ".join(broken))
     draft = inventory["draft"]
     if draft["ok"] and draft["plan_errors"] == 0 and draft["plan_warnings"] == 0:
         raise MissionStateError("NO_FEASIBLE_ARCHITECTURE is refused: HS's own draft of the inventory plans clean; "
@@ -951,7 +1048,7 @@ class MissionStore:
             events = self._events(project_id, mission_id)
             if not events or events[0].get("seq") != 1:
                 raise MissionError("committed mission is missing event 1")
-            replayed = _replay(events)
+            replayed = _replay(events, meta["intake"])
         except MissionError:
             raise
         except (KeyError, TypeError, ValueError) as exc:
@@ -970,7 +1067,8 @@ class MissionStore:
             "phase": replayed["phase"],
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
-            "candidates": [_public_candidate(item, replayed["inventory"]) for item in replayed["candidates"].values()],
+            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"])
+                           for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
@@ -1037,7 +1135,7 @@ class MissionStore:
     def _current(self, project_id: str, mission_id: str) -> tuple[Dict[str, Any], list[Dict[str, Any]], Dict[str, Any]]:
         view = self.get_mission(project_id, mission_id)
         events = list(view["events"])
-        replayed = _replay(events)
+        replayed = _replay(events, view["intake"])
         return view, events, replayed
 
     def _assert_not_terminal(self, replayed: Mapping[str, Any], mission_id: str) -> None:
@@ -1182,6 +1280,7 @@ class MissionStore:
                 raise MissionValidationError(f"candidate {candidate['id']!r} already exists")
             if len(replayed["candidates"]) >= int(budgets["max_candidates"]):
                 raise MissionStateError("candidate budget is exhausted; no more candidates may be proposed")
+            _assert_measurements_are_the_persons(view["intake"], candidate["spec"], field="candidate.spec")
             record["candidate"] = candidate
         elif event_type == "repair_proposed":
             candidate_id = _normalize_slug(raw_event.get("candidate_id"), field="candidate_id")
@@ -1196,6 +1295,12 @@ class MissionStore:
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
+            _assert_measurements_are_the_persons(view["intake"], record["spec"], field="spec")
+            newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"]))
+                            - set(_violated_requirements(replayed["requirements"], candidate["spec"])))
+            if newly_broken:
+                raise MissionStateError("repair_proposed is refused: the repair breaks the person's requirements: "
+                                        + "; ".join(sorted(newly_broken)))
             inventory = replayed.get("inventory")
             if inventory is not None:
                 # Compare lines, not counts: a repair may not cover one listed part by dropping another.

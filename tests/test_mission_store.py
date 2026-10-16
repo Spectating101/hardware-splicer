@@ -469,9 +469,9 @@ def test_an_agent_cannot_propose_an_acceptance(tmp_path):
         _propose(missions, mission, {"type": "accepted"})
 
 
-def _inventory_mission(missions, inventory, **budgets):
+def _inventory_mission(missions, inventory, intake=None, **budgets):
     mission = missions.open_mission("monitor", intake={"goal": "Use every listed part", "inventory": inventory,
-                                                    "budgets": budgets}, author=AGENT)
+                                                    "budgets": budgets, **(intake or {})}, author=AGENT)
     return missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
 
 
@@ -707,3 +707,110 @@ def test_no_feasible_full_search_is_grounded_in_hs_evaluations(tmp_path):
     done = _propose(missions, mission, _terminal("NO_FEASIBLE_ARCHITECTURE"))
     assert done["terminal"]["grounding"] == "hs_evaluation"
 
+
+
+# Red-team findings, 2026-10-16: an agent forged a measured board size to pass the antenna check, and another
+# dropped the person's case setting (stated only in prose) so the default returned and the limit disappeared.
+
+ESP32_ID = "esp32-devkitc-v4"
+NO_ANTENNA_CLEARANCE = [{"path": "case.antenna_clearance", "equals": False}]
+
+
+def _ready_esp32(missions, mission, spec):
+    _spec_candidate(missions, mission, spec)
+    _evaluate(missions, mission)
+    _evaluate(missions, mission, operation="device_engineering")
+    return _terminal("READY_FOR_HUMAN_BUILD", candidate_id="A")
+
+
+@pytest.mark.parametrize("event", ["candidate", "repair"])
+def test_measured_sizes_in_an_agent_spec_are_refused(tmp_path, event):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    forged = copy.deepcopy(spec)
+    forged["modules"][0]["overrides"] = {"pcb_mm": {"x": 10, "y": 10, "z": 1}, "above_board_mm": 0}
+    if event == "candidate":
+        with pytest.raises(MissionValidationError, match="physical evidence"):
+            _spec_candidate(missions, mission, forged)
+        return
+    broken = copy.deepcopy(spec)
+    broken["connections"] = [c for c in broken["connections"] if c["from"] != "display.SDA"]
+    _spec_candidate(missions, mission, broken)
+    before = _evaluate(missions, mission, errors=1)
+    with pytest.raises(MissionValidationError, match="physical evidence"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": forged, "rationale": "smaller"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+def test_the_persons_own_measurements_may_be_used_exactly(tmp_path):
+    _projects, missions = _store(tmp_path)
+    measured = {"pcb_mm": {"x": 28.1}}
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"measurements": {ESP32_ID: measured}})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["modules"][0]["overrides"] = dict(measured)
+    assert _spec_candidate(missions, mission, spec)["candidates"][0]["spec"]["modules"][0]["overrides"] == measured
+    other = copy.deepcopy(spec)
+    other["modules"][0]["overrides"] = {"pcb_mm": {"x": 20}}
+    with pytest.raises(MissionValidationError, match="physical evidence"):
+        _spec_candidate(missions, mission, other, "B")
+
+
+@pytest.mark.parametrize("measurements, message", [
+    ({"not-a-module": {"pcb_mm": {"x": 20}}}, "measurements"),
+    ({ESP32_ID: {"pcb_mm": {"x": 0.01}}}, "between"),
+    ({ESP32_ID: {"colour": "red"}}, "may hold"),
+])
+def test_intake_measurements_are_validated_like_spec_overrides(tmp_path, measurements, message):
+    _projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError, match=message):
+        missions.open_mission("monitor", intake={"goal": "g", "inventory": ["ESP32"], "measurements": measurements}, author=AGENT)
+
+
+def test_a_dropped_case_block_breaks_the_persons_requirement_and_cannot_be_ready(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec.pop("case", None)  # the planner's default restores antenna clearance
+    ready = _ready_esp32(missions, mission, spec)
+    view = missions.get_mission("monitor", mission["mission_id"])
+    assert view["candidates"][0]["violated_requirements"] == ["case.antenna_clearance must be false"]
+    with pytest.raises(MissionStateError, match="requirements: case.antenna_clearance must be false"):
+        _propose(missions, mission, ready)
+
+
+def test_a_candidate_meeting_the_requirement_can_be_ready(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["case"]["antenna_clearance"] = False
+    done = _propose(missions, mission, _ready_esp32(missions, mission, spec))
+    assert done["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+    assert done["candidates"][0]["violated_requirements"] == []
+
+
+def test_a_repair_may_not_break_a_requirement(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"], intake={"requirements": NO_ANTENNA_CLEARANCE})
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["case"]["antenna_clearance"] = False
+    _spec_candidate(missions, mission, spec)
+    before = _evaluate(missions, mission, errors=1)
+    repaired = copy.deepcopy(spec)
+    repaired["case"]["antenna_clearance"] = True
+    with pytest.raises(MissionStateError, match="breaks the person's requirements"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": repaired, "rationale": "clear it"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
+@pytest.mark.parametrize("requirements, message", [
+    ([{"path": "case.colour", "equals": "red"}], "path must be one of"),
+    ([{"path": "case.antenna_clearance", "equals": "no"}], "wrong type"),
+    ([{"path": "case.wall_mm", "equals": True}], "wrong type"),
+    ([{"path": "power.source", "equals": "usb", "note": "x"}], "exactly path and equals"),
+    ("case.antenna_clearance=false", "list"),
+])
+def test_requirements_are_validated_when_the_mission_opens(tmp_path, requirements, message):
+    _projects, missions = _store(tmp_path)
+    with pytest.raises(MissionValidationError, match=message):
+        missions.open_mission("monitor", intake={"goal": "g", "inventory": ["ESP32"], "requirements": requirements}, author=AGENT)

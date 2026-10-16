@@ -46,10 +46,23 @@ Each candidate shows `covers_inventory`, `uncovered_inventory` (the lines it lac
 module ids). Quantities count, and an instance cannot cover two inventory lines. Unknown lines are always uncovered.
 Extra parts are allowed; they still face the same planner and engineering checks.
 
+Two intake fields hold what only the person can say, and a person's acceptance endorses them:
+
+- `measurements`: `{"<library module id>": {"pcb_mm": {"x": 28.1}, "above_board_mm": 4}}`, sizes the person measured.
+  A candidate or repair spec may carry `modules[].overrides` only when they equal the intake's measurement for that
+  module exactly. Any other override is refused (422): a measured size is physical evidence, and you have measured
+  nothing.
+- `requirements`: `[{"path": "case.antenna_clearance", "equals": false}]`, over `case.wall_mm`,
+  `case.clearance_mm`, `case.antenna_clearance`, `case.board_stops` and `power.source`. A key you leave out takes
+  the planner's default, so deleting a block does not escape a requirement. Each candidate shows
+  `violated_requirements`; READY is refused while any is violated, and a repair may not violate a new one.
+
+Free-text `constraints` are reported to you and to the person; HS does not enforce them.
+
 ## Events you can propose
 
 - `candidate_proposed`: `{"candidate": {"id": "A", "kind": "clean_sheet" | "reclaim_heavy" | "hybrid", "label": "...", "spec": {...}, "rationale": "..."}}`. At most the budgeted number of candidates.
-- `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. Once HS has read the inventory, a repair cannot increase the number of uncovered inventory lines. A repair resets the candidate: earlier checks no longer count.
+- `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. Once HS has read the inventory, a repair may not leave a listed line uncovered that the current spec covers, or break a requirement the current spec meets. A repair resets the candidate: earlier checks no longer count.
 - `evidence_required`: `{"blocker": "<a BLOCKED_* state>", "need": "<what is missing>", "candidate_id": "A" (optional; omit for a need about the whole mission)}`.
 - `terminal_proposed`: `{"state": "...", "reason": "...", "candidate_id": "..." (when it concerns one), "cites": [<event seqs>]}`.
 
@@ -57,7 +70,7 @@ Extra parts are allowed; they still face the same planner and engineering checks
 
 | State | HS accepts it when |
 |-------|--------------------|
-| `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading and the current spec covers every line. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
+| `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading, and the current spec covers every line and meets every requirement. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
 | `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's own reading of the inventory shows the gap: a left_out line, or its draft refuses or has planner errors or warnings. A failing plan of your own candidate does not count: it shows a wiring fault, not missing data |
 | `BLOCKED_NEEDS_PHYSICAL_MEASUREMENT`, `BLOCKED_NEEDS_REVERSE_ENGINEERING`, `BLOCKED_NEEDS_PROCUREMENT_EVIDENCE`, `BLOCKED_UNSAFE` | You cite an `evidence_required` with that blocker, for that candidate or the mission |
 | `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct designs (a new name, wire colours or order do not count) and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
