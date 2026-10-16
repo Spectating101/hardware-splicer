@@ -40,6 +40,8 @@ from .engineering_source_ingestion_api import create_engineering_source_ingestio
 from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
+from .fabricator_integration_api import create_fabricator_integration_router
+from .fabricator_integration_workbench import FabricatorIntegrationWorkbench
 from .machine_project_api import create_machine_project_router
 from .manufacturing_api import create_manufacturing_router
 from .mechanical_api import create_mechanical_router
@@ -112,6 +114,7 @@ def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> No
 def create_product_app(
     project_store: ProjectStore | None = None,
     physical_workbench: AgentPhysicalWorkbench | None = None,
+    fabricator_workbench: FabricatorIntegrationWorkbench | None = None,
 ) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
@@ -119,9 +122,12 @@ def create_product_app(
     app = create_engine_app()
     app.state.project_store = resolved_store
     # Physical routes are always discoverable, but fail closed with 503 until a
-    # server-owned runtime is configured.  No machine endpoint/credential is
+    # server-owned runtime is configured. No machine endpoint/credential is
     # inferred from mission or agent input.
     app.state.physical_workbench = physical_workbench
+    # Fabricator integration routes follow the same fail-closed rule. Tool paths,
+    # machine URLs and registered project/job roots live only in server runtime.
+    app.state.fabricator_workbench = fabricator_workbench
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -135,6 +141,7 @@ def create_product_app(
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
     app.include_router(create_mission_router(MissionStore(resolved_store)))
     app.include_router(create_physical_operator_router())
+    app.include_router(create_fabricator_integration_router())
     app.include_router(create_project_events_router(resolved_store))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())
