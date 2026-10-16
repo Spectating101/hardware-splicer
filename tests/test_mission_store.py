@@ -653,7 +653,7 @@ def test_every_blocker_refuses_to_stop_short_of_another_ready_candidate(tmp_path
 
 
 @pytest.mark.parametrize("inventory", [["ESP32-S3", "BME280"], ["ESP32", "BME280", "HC-SR04"],
-                                       ["ESP32", "2x BME280"]])
+                                       ["ESP32", "2x MPU-6050"]])
 def test_part_data_blocker_has_hs_inventory_grounding(tmp_path, inventory):
     _projects, missions = _store(tmp_path)
     mission = _inventory_mission(missions, inventory)
