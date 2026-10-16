@@ -139,6 +139,30 @@ def test_firmware_testing_is_reported_from_recorded_runs_only(tmp_path):
     assert manifest["deliverables"]["firmware_test"]["status"] == "not_run"
 
 
+def test_a_strap_repaired_mission_delivers_its_design_without_inventing_multi_sensor_firmware(tmp_path):
+    projects, missions, mid, view = _mission(tmp_path, ["Raspberry Pi Pico", "2x BME280"])
+    assert view["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+    manifest = build_mission_package(missions, "monitor", mid)
+    files = _zip(read_mission_package(missions, "monitor", mid))
+    spec = json.loads(files["02_design/spec.json"])
+    assert {"from": "sensor_2.SDO", "to": "mcu.GND"} in spec["connections"]
+    plan = json.loads(files["02_design/plan.json"])
+    assert {m["i2c_address"]["effective"] for m in plan["modules"] if "i2c_address" in m} == {"0x76", "0x77"}
+    assert len(plan["i2c_buses"]) == 1
+    assert manifest["deliverables"]["firmware"]["status"] == "blocked"
+    assert "only one sensor breakout" in manifest["deliverables"]["firmware"]["reason"]
+    assert manifest["deliverables"]["firmware_test"]["status"] == "not_run"
+    assert manifest["deliverables"]["enclosure"]["status"] == "generated"
+    assert manifest == build_mission_package(missions, "monitor", mid)
+    staged = stage_mission_design(missions, "monitor", mid, author=AGENT)
+    review = ProjectReviewStore(projects).get("monitor", staged["review_id"])
+    assert review["status"] == "pending"
+    assert review["candidate_snapshot"]["deviceDesigns"][mid]["repairs"]
+    assert projects.load("monitor")["revision"] == 1
+    assert manifest["physical_correctness"] == "UNPROVEN"
+    assert manifest["power_on_authorized"] is False
+
+
 def test_staging_opens_a_review_and_promotes_nothing(tmp_path):
     projects, missions, mid, view = _mission(tmp_path, ["ESP32", "BME280", "OLED"])
     revision_before = projects.load_latest_with_recovery("monitor")["revision"]
