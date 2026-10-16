@@ -493,8 +493,8 @@ def _terminal(state, **fields):
 def test_acceptance_records_hs_inventory_reading_and_canonical_draft(tmp_path, inventory, ok, errors, missing):
     projects, missions = _store(tmp_path)
     mission = _inventory_mission(missions, inventory)
-    event = mission["events"][-1]
-    assert event["type"] == "inventory_read" and mission["events"][-2]["type"] == "accepted"
+    event = mission["events"][-2]
+    assert event["type"] == "inventory_read" and mission["events"][-1]["type"] == "accepted"
     assert event["author"] == {"kind": "system", "id": "hardware-splicer"}
     assert event["reading"] == parse_parts_text("\n".join(inventory))
     assert event["reading"]["left_out"] == missing

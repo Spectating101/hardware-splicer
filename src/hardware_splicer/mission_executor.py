@@ -124,6 +124,23 @@ def run_mission_operation(
     candidate_id: str,
     operation: str,
 ) -> dict[str, Any]:
+    # Lock BEFORE reading the spec and checking the budget, through recording
+    # the result. No repair/terminal/second run can interleave and cause old
+    # work to be credited to a new spec, or spend the same remaining job twice.
+    with missions.mutation(project_id, mission_id):
+        return _run_locked_mission_operation(
+            missions, project_id, mission_id, candidate_id=candidate_id, operation=operation
+        )
+
+
+def _run_locked_mission_operation(
+    missions: MissionStore,
+    project_id: str,
+    mission_id: str,
+    *,
+    candidate_id: str,
+    operation: str,
+) -> dict[str, Any]:
     if operation not in MISSION_OPERATIONS:
         raise MissionValidationError(
             "operation must be one of device_plan, device_engineering, device_case, "

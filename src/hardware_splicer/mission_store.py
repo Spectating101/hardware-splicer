@@ -13,12 +13,20 @@ import json
 import os
 import re
 import tempfile
+import threading
 import unicodedata
 import uuid
 from collections import Counter
+from contextlib import contextmanager
 from datetime import datetime, timezone
+from functools import wraps
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Iterator, Mapping
+
+try:
+    import fcntl
+except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
+    fcntl = None
 
 from .device_draft import draft_from_parts_text, parse_parts_text
 from .device_plan import DevicePlanError, build_device_plan
@@ -114,6 +122,15 @@ class MissionStateError(MissionError):
 
 class MissionValidationError(MissionError, ValueError):
     pass
+
+
+def _serialized_mutation(method):
+    @wraps(method)
+    def serialized(self, project_id, mission_id, *args, **kwargs):
+        with self.mutation(project_id, mission_id):
+            return method(self, project_id, mission_id, *args, **kwargs)
+
+    return serialized
 
 
 def _utc_now() -> str:
@@ -781,6 +798,43 @@ class MissionStore:
             self.project_store = root
         else:
             self.project_store = ProjectStore(root)
+        self._mutation_local = threading.local()
+
+    @contextmanager
+    def mutation(self, project_id: str, mission_id: str) -> Iterator[None]:
+        """Exclude competing writers/runs, including other processes, without blocking readers.
+
+        The immutable mission marker supplies a stable lock inode. Conflicts are
+        immediate (HTTP 409), rather than queuing another expensive operation.
+        Re-entry on this store/thread lets an executor commit under its run lock.
+        The OS releases the lock if a worker exits; this is not a durable run queue.
+        """
+        if fcntl is None:
+            raise MissionError("mission mutations require POSIX advisory locking")
+        marker = self._mission_dir(project_id, mission_id) / "mission.json"
+        _reject_symlink(marker, label="mission.json")
+        held = getattr(self._mutation_local, "held", set())
+        if marker in held:
+            yield
+            return
+        try:
+            fd = os.open(marker, os.O_RDONLY | os.O_NOFOLLOW)
+        except FileNotFoundError as exc:
+            raise MissionNotFound(mission_id) from exc
+        try:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                raise MissionConflict("mission is busy; retry after the current operation finishes") from exc
+            self._mutation_local.held = held
+            held.add(marker)
+            try:
+                yield
+            finally:
+                held.remove(marker)
+                fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
 
     def _project_dir(self, project_id: str) -> Path:
         safe_id = validate_project_id(project_id)
@@ -1057,6 +1111,7 @@ class MissionStore:
             raise MissionError(f"run file {artifact} does not match its recorded result_sha256")
         return _read_json(path)
 
+    @_serialized_mutation
     def accept_mission(
         self,
         project_id: str,
@@ -1074,18 +1129,23 @@ class MissionStore:
         budgets = dict(view["budgets"])
         budgets["repairs_used"] = dict(budgets.get("repairs_used") or {})
         last_seq = int(replayed["last_event_seq"])
+        # Inventory has no authority effect. Persist it BEFORE acceptance so an
+        # interrupted write cannot enable runs without their frozen grounding.
+        # A retry after that first write reuses the reading, not a newer parser.
+        if replayed.get("inventory") is None:
+            inventory = _read_inventory(view["intake"]["inventory"])
+            self._write_event(
+                project_id, mission_id, last_seq + 1,
+                {"type": "inventory_read", "author": dict(_SYSTEM_AUTHOR), **inventory},
+            )
+            last_seq += 1
         self._write_event(
-            project_id,
-            mission_id,
-            last_seq + 1,
+            project_id, mission_id, last_seq + 1,
             {"type": "accepted", "author": normalized_author, "budgets": budgets},
-        )
-        self._write_event(
-            project_id, mission_id, last_seq + 2,
-            {"type": "inventory_read", "author": dict(_SYSTEM_AUTHOR), **_read_inventory(view["intake"]["inventory"])},
         )
         return self.get_mission(project_id, mission_id)
 
+    @_serialized_mutation
     def propose(
         self,
         project_id: str,
@@ -1196,6 +1256,7 @@ class MissionStore:
         self._write_event(project_id, mission_id, last_seq + 1, record)
         return self.get_mission(project_id, mission_id)
 
+    @_serialized_mutation
     def record_evaluation(
         self,
         project_id: str,

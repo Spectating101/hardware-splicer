@@ -203,7 +203,7 @@ Phases run `INTAKE → ARCHITECTING → EVALUATING → REPAIRING / EVIDENCE_REQU
 propose: up to three candidates (`clean_sheet`, `reclaim_heavy`, `hybrid`), repairs, evidence needs and a terminal
 state. Evaluations are written only by Hardware Splicer itself, and an agent cannot sign as the system author.
 
-Immediately after acceptance, HS appends its own `inventory_read`, at no operator-job cost. It parses the intake
+Immediately before acceptance, HS appends its own `inventory_read`, at no operator-job cost. It parses the intake
 inventory and plans its own draft with the canonical device planner. The mission view exposes this as `inventory`:
 `reading` (fragments, controller, parts, left_out), `draft` (ok, error, plan_errors, plan_warnings), and a
 `result_sha256` of their canonical JSON. A parser refusal leaves the original lines uncovered and the draft not ok.
@@ -212,6 +212,10 @@ Module counts are consumed in inventory order; no instance covers two fragments,
 left_out line stays uncovered. Extra modules are allowed. A repair cannot increase the number of uncovered lines.
 Missions accepted before this event was added have no inventory reading and cannot newly reach READY. Existing
 terminal events are replayed as recorded; old records do not acquire a grounding claim.
+
+The inventory reading precedes the acceptance event deliberately: interruption cannot leave a new mission accepted
+without inventory. Retrying acceptance reuses a stored reading and completes the human acceptance; a reading alone
+never permits execution. Historical accepted-without-inventory logs are not backfilled.
 
 Success is the **correct** terminal state, not reaching "ready":
 
@@ -239,6 +243,13 @@ anything physical still stops for a human. The executor (`mission_executor.py`) 
 mission: it calls the canonical device functions, maps their verdicts onto evaluation errors and warnings, and stores
 the full output as a hashed run file. A check that refuses or cannot run is recorded as a failure, never as a pass.
 The executor never writes a project snapshot and never grants physical authority.
+
+Mission mutations use a nonblocking POSIX advisory lock on the immutable `mission.json` marker, shared across
+threads, store instances and worker processes. The executor holds it from budget/spec selection through result
+recording. Proposals, acceptance and direct internal evaluation writes use the same lock. Contention returns
+`MissionConflict` / HTTP 409 (`busy`), before executing another check; reads and other missions are not locked.
+Locks are reentrant only on the same store/thread, and the OS releases them on worker exit. This is serialization,
+not a durable execution queue: the existing budget counts recorded evaluations, not interrupted/unrecorded attempts.
 
 The runner (`mission_runner.py`) is an agent with no privileged path: it may only read the mission
 (`get_mission`, `read_run`), propose events with the given agent author and the current

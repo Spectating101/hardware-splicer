@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from hardware_splicer.device_plan import example_specs
 from hardware_splicer.mcp_backend_gateway import task_operation_manifest
 from hardware_splicer.operator_identity import hash_operator_token
+from hardware_splicer.mission_store import MissionStore
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
 
@@ -161,6 +162,29 @@ def test_inventory_reading_is_system_only_over_http(client):
     assert mission["inventory"]["draft"]["ok"] is True
     forged = _propose(client, mid, {"type": "inventory_read", "reading": {}, "draft": {"ok": True}})
     assert forged.status_code == 422
+
+
+def test_busy_mission_returns_409_without_blocking_readers_or_spending_budget(client):
+    mid = _open(client)["mission_id"]
+    assert _accept(client, mid).status_code == 200
+    assert _candidate(client, mid).status_code == 201
+    peer = MissionStore(client.app.state.project_store)
+    with peer.mutation("monitor", mid):
+        read = client.get(f"{BASE}/{mid}")
+        assert read.status_code == 200
+        assert read.json()["mission"]["budgets"]["operator_jobs_used"] == 0
+        for path, payload in (
+            (f"{BASE}/{mid}/candidates/A/run", {"operation": "device_plan"}),
+            (f"{BASE}/{mid}/events", {"author": AGENT, "event": {
+                "type": "evidence_required", "blocker": "BLOCKED_UNSAFE", "need": "Inspect wiring"}}),
+            (f"{BASE}/{mid}/accept", None),
+        ):
+            response = client.post(path, json=payload, headers={"X-HS-Operator-Token": PERSON_TOKEN})
+            assert response.status_code == 409, response.text
+            assert "busy" in response.text
+    ran = client.post(f"{BASE}/{mid}/candidates/A/run", json={"operation": "device_plan"})
+    assert ran.status_code == 200, ran.text
+    assert ran.json()["mission"]["budgets"]["operator_jobs_used"] == 1
 
 
 def test_http_refuses_ready_and_repair_that_drop_a_persons_part(client):
