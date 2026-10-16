@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from hardware_splicer.device_plan import (
     WIRE_COLORS, DevicePlanError, build_device_plan, device_catalog, device_spec_json_schema, example_specs, module_library,
 )
+from hardware_splicer.device_suggestions import apply_first_suggestions as _apply_first_suggestions
 from hardware_splicer.mcp_backend_gateway import task_operation_manifest
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
@@ -130,32 +131,9 @@ def test_the_task_manifest_offers_every_operation_the_agent_guide_lists_in_its_o
 
 def apply_first_suggestions(spec, plan):
     """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything."""
-    changed = False
-    wires_by_id = {w["id"]: w for w in plan["wires"]}
-    for finding in plan["findings"]:
-        for suggestion in finding.get("suggestions", []):
-            if suggestion["action"] == "add_connection":
-                spec["connections"].append({"from": suggestion["from"], "to": suggestion["to_one_of"][0]})
-                changed = True
-            elif suggestion["action"] == "replace_connection":
-                wire = wires_by_id[suggestion["wire"]]
-                for row in spec["connections"]:
-                    if suggestion["from"] in (row["from"], row["to"]) and f"{wire['to']['module']}.{wire['to']['pin']}" in (row["from"], row["to"]):
-                        key = "to" if row["from"] == suggestion["from"] else "from"
-                        row[key] = suggestion["to_one_of"][0]
-                        changed = True
-            elif suggestion["action"] == "move_signal":
-                signal = "SCL" if suggestion["signal"] == "scl" else "SDA"
-                if not suggestion["to_one_of"]:
-                    continue
-                for row in spec["connections"]:
-                    if row["from"].upper().endswith("." + signal):
-                        row["to"] = suggestion["to_one_of"][0]
-                        changed = True
-                        break
-                else:
-                    continue
-                return changed  # one move at a time, then re-plan
+    new_spec, changed = _apply_first_suggestions(spec, plan)
+    spec.clear()
+    spec.update(new_spec)
     return changed
 
 
