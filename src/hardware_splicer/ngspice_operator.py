@@ -1,6 +1,6 @@
 """Server-owned ngspice batch simulations with immutable-style receipts.
 
-Simulation output is model evidence, never physical evidence.  Agents select a
+Simulation output is model evidence, never physical evidence. Agents select a
 registered circuit id and a bounded output mode; argv and filesystem paths are
 constructed by the server and executed without a shell.
 """
@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -46,7 +47,10 @@ class NgspiceCircuit:
 
 class NgspiceCircuitRegistry:
     def __init__(self, root: str | Path):
-        self.root = Path(root).resolve()
+        root_path = Path(root)
+        if root_path.is_symlink():
+            raise FabricationValidationError("ngspice circuit root must not be a symlink")
+        self.root = root_path.resolve()
         if not self.root.is_dir():
             raise FabricationValidationError("ngspice circuit root must be an existing directory")
         self._circuits: dict[str, NgspiceCircuit] = {}
@@ -55,7 +59,11 @@ class NgspiceCircuitRegistry:
         cid = _id(circuit_id, "circuit_id")
         if cid in self._circuits:
             raise FabricationValidationError("ngspice circuit id is already registered")
-        candidate = (self.root / path).resolve() if not Path(path).is_absolute() else Path(path).resolve()
+        raw = Path(path)
+        literal = raw if raw.is_absolute() else self.root / raw
+        if literal.is_symlink():
+            raise FabricationValidationError("ngspice circuit must not be a symlink")
+        candidate = literal.resolve()
         try:
             candidate.relative_to(self.root)
         except ValueError as exc:
@@ -96,8 +104,7 @@ class NgspiceOperator:
         if mode not in {"report", "raw"}:
             raise FabricationValidationError("ngspice mode must be report or raw")
         circuit = self.circuits.get(circuit_id)
-        output_dir = circuit.path.parent / ".hs-ngspice" / circuit.circuit_id
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir = _safe_run_dir(self.circuits.root, circuit.circuit_id)
         log_path = output_dir / "simulation.log"
         argv = [self.executable, "-b", "-o", str(log_path)]
         raw_path: Path | None = None
@@ -133,6 +140,22 @@ class NgspiceOperator:
             json.dumps(receipt, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         ).hexdigest()
         return receipt
+
+
+def _safe_run_dir(root: Path, circuit_id: str) -> Path:
+    base_literal = root / ".hs-ngspice"
+    if base_literal.exists() and base_literal.is_symlink():
+        raise FabricationValidationError("ngspice output root must not be a symlink")
+    base = base_literal.resolve()
+    try:
+        base.relative_to(root)
+    except ValueError as exc:
+        raise FabricationValidationError("ngspice output root escapes registered circuit root") from exc
+    base.mkdir(parents=True, exist_ok=True)
+    path = Path(tempfile.mkdtemp(prefix=f"{circuit_id}-", dir=base))
+    if path.is_symlink() or path.resolve().parent != base.resolve():
+        raise FabricationValidationError("ngspice output directory is invalid")
+    return path
 
 
 def _id(value: Any, field: str) -> str:
