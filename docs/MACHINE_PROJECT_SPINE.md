@@ -63,6 +63,8 @@ shared by API, UI and CI.
 | `project_thread_store.py` | Append-only review threads (`hardware_splicer.review_thread.v1`) |
 | `mission_store.py` | Fabrication missions: append-only event log replayed into a state machine (`hardware_splicer.fabrication_mission.v1`) |
 | `mission_executor.py` | Software-only device checks for an accepted fabrication mission; never physical, never authority |
+| `mission_runner.py` | Deterministic agent that drives one accepted mission to a terminal state via the public mission API only |
+| `device_suggestions.py` | Pure first-suggestion repairs from a device plan; copies the spec and never mutates its arguments |
 | `project_api.py` | `/v1/projects` — persistence and review |
 | `machine_project_api.py` | `/v1/machine-projects` — model, seed, diff, release |
 
@@ -201,6 +203,14 @@ mission: it calls the canonical device functions, maps their verdicts onto evalu
 the full output as a hashed run file. A check that refuses or cannot run is recorded as a failure, never as a pass.
 The executor never writes a project snapshot and never grants physical authority.
 
+The runner (`mission_runner.py`) is an agent with no privileged path: it may only read the mission
+(`get_mission`, `read_run`), propose events with the given agent author and the current
+`expected_event_seq`, and ask the executor to run checks. It must not call `record_evaluation` or
+`accept_mission` or write files. `tests/test_mission_gate.py` declares each scenario's correct
+terminal state in advance: `READY_FOR_HUMAN_BUILD` where everything checks out;
+`BLOCKED_NEEDS_PART_DATA` for parts HS has no data for, a different board, or an address clash it
+cannot repair; `BUDGET_EXHAUSTED` when the budget cannot pay for the review.
+
 ## Verification
 
 ```bash
@@ -217,7 +227,8 @@ pytest -q \
   tests/test_machine_project_diff_review_flags.py \
   tests/test_machine_release.py \
   tests/test_mission_store.py \
-  tests/test_mission_executor.py
+  tests/test_mission_executor.py \
+  tests/test_mission_gate.py
 ```
 
 Frontend: `make splice-ui-build`.
