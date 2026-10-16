@@ -1,6 +1,7 @@
 """What an AI agent sees: the spec schema, the described operations, and suggestions that repair a broken spec."""
 import copy
 import re
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -111,11 +112,20 @@ def test_the_device_design_task_manifest_gives_an_agent_the_whole_workflow_in_on
     assert manifest["workflow_operation_ids"] == [
         "get_spec_schema_v1_devices_spec_schema_get", "get_examples_v1_devices_examples_get", "post_draft_v1_devices_draft_post", "post_plan_v1_devices_plan_post",
         "post_engineering_v1_devices_engineering_post", "post_case_v1_devices_case_post", "post_application_v1_devices_application_post",
-        "post_observations_v1_devices_observations_post",
+        "post_application_run_v1_devices_application_run_post", "post_observations_v1_devices_observations_post",
     ]
     assert manifest["authority_contract"] == {"projection_grants_physical_authority": False, "backend_gates_bypassed": False, "automatic_execution": False}
     plan = next(op for op in manifest["operations"] if op["operation_id"].startswith("post_plan"))
     assert "modules" in plan["operation"]["requestBody"]["content"]["application/json"]["schema"]["properties"]
+
+
+def test_the_task_manifest_offers_every_operation_the_agent_guide_lists_in_its_order():
+    # The guide's loop table and the projection drifted once: application/run was documented but not offered.
+    guide = (Path(__file__).resolve().parents[1] / "docs" / "AGENT_DEVICE_DESIGN.md").read_text()
+    listed = re.findall(r"^\| \d+b? \| `(GET|POST) (/v1/devices/[a-z/-]+)` \|", guide, flags=re.MULTILINE)
+    manifest = task_operation_manifest("device_design", create_product_app())
+    offered = [(op["method"], op["path"]) for op in manifest["operations"]]
+    assert listed and offered == listed
 
 
 def apply_first_suggestions(spec, plan):
