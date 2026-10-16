@@ -33,6 +33,7 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/devices/engineering"),
         ("POST", "/v1/devices/case"),
         ("POST", "/v1/devices/application"),
+        ("POST", "/v1/devices/application/run"),
         ("POST", "/v1/devices/observations"),
     ),
     "bounded_pre_fabrication": (
