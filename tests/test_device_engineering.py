@@ -16,6 +16,36 @@ def checks(review):
     return {c["id"]: c for d in review["domains"] for c in d["checks"]}
 
 
+def test_i2c_loading_is_reported_for_each_independent_bus():
+    from hardware_splicer.device_draft import draft_from_parts_text
+    spec = draft_from_parts_text({"text": "Raspberry Pi Pico\nBME280\nBH1750"})["spec"]
+    for wire in spec["connections"]:
+        if wire["from"] == "sensor_2.SDA":
+            wire["to"] = "mcu.GP6"
+        if wire["from"] == "sensor_2.SCL":
+            wire["to"] = "mcu.GP7"
+    plan = build_device_plan(spec)
+    review = build_engineering_review(spec)
+    electrical = next(d for d in review["domains"] if d["id"] == "electrical")["checks"]
+    assert len(electrical) == 2
+    assert {c["id"] for c in electrical} == {"i2c_bus:i2c-1", "i2c_bus:i2c-2"}
+    for result in electrical:
+        bus = next(b for b in plan["i2c_buses"] if b["id"] == result["bus"])
+        q = result["quantities"]
+        assert sorted([p["module"] for p in q["pullups_known"]] + q["pullups_unknown"]) == bus["modules"]
+        for line in ("sda", "scl"):
+            length = sum(w["curve_mm"] for w in plan["wires"] if w["id"] in bus[line]["wires"]) / 1000
+            assert q["wire_length_m"][line] == pytest.approx(length, abs=0.0005)
+        assert q["bus_capacitance_pf_estimate"]["high"] < 40
+    assert review["physical_correctness"] == "UNPROVEN"
+
+
+def test_one_bus_keeps_the_existing_engineering_shape():
+    result = checks(build_engineering_review(example_specs()["pico_oled_bme280_usb"]))["i2c_bus"]
+    assert set(result) == {"id", "title", "status", "summary", "quantities", "inputs", "limits"}
+    assert "bus" not in result
+
+
 @pytest.fixture(scope="module")
 def bme():
     spec = example_specs()["esp32_oled_bme280_usb"]

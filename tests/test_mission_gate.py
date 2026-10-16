@@ -37,8 +37,8 @@ SCENARIOS = [
      "the person listed a part HS has no data for; dropping it silently would be a different device"),
     ("unknown_controller", ["ESP32-S3", "BME280"], {}, None, "BLOCKED_NEEDS_PART_DATA",
      "ESP32-S3 is a different board from the library's ESP32-DevKitC; nothing can be planned without data for it"),
-    ("address_clash", ["Raspberry Pi Pico", "2x BME280"], {}, None, "BLOCKED_NEEDS_PART_DATA",
-     "two BME280 answer at the same address and the planner offers no repair HS can express"),
+    ("address_clash", ["Raspberry Pi Pico", "2x BME280"], {}, None, "READY_FOR_HUMAN_BUILD",
+     "the planner's strap suggestion repairs the address clash before a clean plan and engineering review"),
     ("repairable", ["ESP32", "BME280", "OLED"], {}, _missing_sda(), "READY_FOR_HUMAN_BUILD",
      "the starting wiring misses a wire; the planner's own suggestion repairs it"),
     ("budget", ["ESP32", "BME280", "OLED"], {"max_operator_jobs": 1}, None, "BUDGET_EXHAUSTED",
@@ -79,6 +79,20 @@ def test_a_ready_mission_carries_its_evidence_trail(tmp_path):
     assert operations[-2:] == ["device_plan", "device_engineering"]
     assert all(e["artifact"] and e["artifact"].startswith("runs/") for e in candidate["evaluations"])
     assert view["terminal"]["physical_evidence_required"]
+
+
+def test_address_clash_reaches_ready_through_a_recorded_strap_repair(tmp_path):
+    _projects, missions, mid, view = _run(tmp_path, ["Raspberry Pi Pico", "2x BME280"], {}, None)
+    assert view["terminal"]["state"] == "READY_FOR_HUMAN_BUILD"
+    candidate = view["candidates"][0]
+    assert candidate["repairs"] == 1
+    repair = next(e for e in view["events"] if e["type"] == "repair_proposed")
+    assert {"from": "sensor_2.SDO", "to": "mcu.GND"} in repair["spec"]["connections"]
+    plans = [e for e in candidate["evaluations"] if e["operation"] == "device_plan"]
+    first = missions.read_run("monitor", mid, plans[0]["artifact"])
+    clash = next(f for f in first["findings"] if f["rule"] == "i2c_address_overlap")
+    assert clash["suggestions"][0]["action"] == "strap_address"
+    assert plans[-1]["result"]["errors"] == plans[-1]["result"]["warnings"] == 0
 
 
 def test_a_blocked_mission_says_what_is_missing(tmp_path):
