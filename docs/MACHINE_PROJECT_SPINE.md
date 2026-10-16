@@ -61,6 +61,7 @@ shared by API, UI and CI.
 | `project_store.py` | Durable revisions (`hardware_splicer.project_snapshot.v1`) |
 | `project_review_store.py` | Staged review workflow (`hardware_splicer.project_review.v1`) |
 | `project_thread_store.py` | Append-only review threads (`hardware_splicer.review_thread.v1`) |
+| `mission_store.py` | Fabrication missions: append-only event log replayed into a state machine (`hardware_splicer.fabrication_mission.v1`) |
 | `project_api.py` | `/v1/projects` — persistence and review |
 | `machine_project_api.py` | `/v1/machine-projects` — model, seed, diff, release |
 
@@ -172,6 +173,27 @@ verified comment is still only a comment: it does not authenticate the operator
 beyond possession of that token, and it never upgrades authority. See
 [`OPERATOR_IDENTITY.md`](OPERATOR_IDENTITY.md). Mentions are plain text.
 
+## Fabrication missions
+
+A mission is the persistent record of one attempt to turn a goal, constraints and an inventory into a buildable
+plan. It lives beside the project tree (`missions/<mission_id>/`): an immutable `mission.json` holding the intake,
+budgets and the revision it is anchored to, and `events/00000001.json…`, never rewritten. Phase, candidates, budgets
+used and the terminal state are not stored; they are replayed from the events every time.
+
+Phases run `INTAKE → ARCHITECTING → EVALUATING → REPAIRING / EVIDENCE_REQUIRED → TERMINAL`. An agent can only
+propose: up to three candidates (`clean_sheet`, `reclaim_heavy`, `hybrid`), repairs, evidence needs and a terminal
+state. Evaluations are written only by Hardware Splicer itself, and an agent cannot sign as the system author.
+
+Success is the **correct** terminal state, not reaching "ready":
+
+- `READY_FOR_HUMAN_BUILD` needs HS's own latest plan evaluation since the candidate's latest repair to be clean, an
+  engineering review without errors after it, and no evidence need standing for that candidate or the mission. It
+  still lists the physical evidence only a person can establish.
+- Every `BLOCKED_*` state must cite an evidence need with that blocker for that candidate (or the whole mission), and
+  may cite only real evidence or evaluation events.
+- `NO_FEASIBLE_ARCHITECTURE` needs every candidate failing since its latest repair with its repairs spent;
+  `BUDGET_EXHAUSTED` needs the operator budget spent. Neither may stop short of a candidate that is already ready.
+
 ## Verification
 
 ```bash
@@ -186,7 +208,8 @@ pytest -q \
   tests/test_machine_project.py \
   tests/test_machine_project_diff.py \
   tests/test_machine_project_diff_review_flags.py \
-  tests/test_machine_release.py
+  tests/test_machine_release.py \
+  tests/test_mission_store.py
 ```
 
 Frontend: `make splice-ui-build`.
@@ -205,3 +228,5 @@ Frontend: `make splice-ui-build`.
 8. Revision and review conflicts raise a stable, documented error contract.
 9. Review threads are discussion only; they never alter a snapshot, revision, review decision, or authority state.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
+11. A mission never writes a snapshot or revision and never carries an authority field, at any depth.
+12. A mission's terminal state is checked against HS's own recorded evaluations and cited evidence; a proposal alone never reaches it.
