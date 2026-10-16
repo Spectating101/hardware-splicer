@@ -62,9 +62,12 @@ class KicadProjectRegistry:
         pid = _id(project_id, "project_id")
         if pid in self._projects:
             raise FabricationValidationError("KiCad project id is already registered")
-        root_path = Path(root).resolve()
-        if not root_path.is_dir() or root_path.is_symlink():
-            raise FabricationValidationError("KiCad project root must be an existing non-symlink directory")
+        root_literal = Path(root)
+        if root_literal.is_symlink():
+            raise FabricationValidationError("KiCad project root must not be a symlink")
+        root_path = root_literal.resolve()
+        if not root_path.is_dir():
+            raise FabricationValidationError("KiCad project root must be an existing directory")
         sch = self._file(root_path, schematic, ".kicad_sch", "schematic") if schematic is not None else None
         pcb = self._file(root_path, board, ".kicad_pcb", "board") if board is not None else None
         if sch is None and pcb is None:
