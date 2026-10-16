@@ -24,6 +24,7 @@ from hardware_splicer.mission_store import (
 from hardware_splicer.project_store import ProjectNotFound, ProjectStore
 
 AGENT = {"kind": "agent", "id": "planner-model"}
+HUMAN = {"kind": "human", "id": "bench-lead"}
 SPEC = {"schema_version": "x", "modules": [], "connections": []}
 
 
@@ -39,12 +40,16 @@ def _store(tmp_path: Path) -> tuple[ProjectStore, MissionStore]:
     return projects, MissionStore(projects)
 
 
-def _open(missions: MissionStore, **budgets) -> dict:
+def _open(missions: MissionStore, accepted: bool = True, **budgets) -> dict:
     intake = {"goal": "A portable environmental monitor", "constraints": ["USB powered", "under NT$2000"],
               "inventory": ["Raspberry Pi Pico", "BME280 breakout", "0.96 inch OLED"]}
     if budgets:
         intake["budgets"] = budgets
-    return missions.open_mission("monitor", intake=intake, author=AGENT)
+    mission = missions.open_mission("monitor", intake=intake, author=AGENT)
+    if accepted:
+        # A person accepts the mission and its budgets once; that is what lets HS record its own checks.
+        mission = missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    return mission
 
 
 def _candidate(missions, mission, cid="A", kind="clean_sheet"):
@@ -67,7 +72,7 @@ def _propose(missions, mission, event):
 
 def test_a_new_mission_is_anchored_to_the_latest_revision_and_claims_nothing(tmp_path):
     _projects, missions = _store(tmp_path)
-    mission = _open(missions)
+    mission = _open(missions, accepted=False)
     assert mission["project_id"] == "monitor" and mission["revision"] == 1
     assert mission["phase"] == "INTAKE" == PHASES[0]
     assert mission["terminal"] is None and mission["candidates"] == []
@@ -83,7 +88,7 @@ def test_the_log_is_append_only_files_and_the_state_is_derived_from_it(tmp_path)
     _candidate(missions, mission)
     _evaluate(missions, mission)
     events_dir = projects.root / "monitor" / "missions" / mission["mission_id"] / "events"
-    assert sorted(p.name for p in events_dir.iterdir()) == ["00000001.json", "00000002.json", "00000003.json"]
+    assert sorted(p.name for p in events_dir.iterdir()) == ["00000001.json", "00000002.json", "00000003.json", "00000004.json"]
     stored = json.loads((projects.root / "monitor" / "missions" / mission["mission_id"] / "mission.json").read_text())
     assert "phase" not in stored and "terminal" not in stored, "state is replayed from events, never stored"
     view = missions.get_mission("monitor", mission["mission_id"])
@@ -409,3 +414,48 @@ def test_a_spec_must_come_back_from_the_log_exactly_as_given(tmp_path, spec):
     with pytest.raises(MissionValidationError, match="plain JSON"):
         missions.propose("monitor", mission["mission_id"], {"type": "candidate_proposed", "candidate": {
             "id": "A", "kind": "clean_sheet", "label": "A", "spec": spec, "rationale": "r"}}, author=AGENT)
+
+
+# Mission-level acceptance (P2): one human acceptance of the mission and its budgets covers HS's software checks.
+
+
+def test_hs_records_no_evaluation_until_a_person_accepts_the_mission(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    assert mission["accepted"] is None
+    _candidate(missions, mission)
+    with pytest.raises(MissionStateError, match="accepted"):
+        _evaluate(missions, mission)
+    accepted = missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    assert accepted["accepted"]["by"] == HUMAN and accepted["accepted"]["budgets"] == accepted["budgets"]
+    assert accepted["phase"] == "ARCHITECTING", "acceptance changes no phase"
+    _evaluate(missions, mission)
+
+
+@pytest.mark.parametrize("author", [AGENT, {"kind": "system", "id": "hardware-splicer"}])
+def test_only_a_person_can_accept_a_mission(tmp_path, author):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    with pytest.raises(MissionValidationError, match="person"):
+        missions.accept_mission("monitor", mission["mission_id"], author=author)
+
+
+def test_a_mission_is_accepted_once_and_never_after_it_ends(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions)
+    with pytest.raises(MissionStateError, match="already accepted"):
+        missions.accept_mission("monitor", mission["mission_id"], author=HUMAN)
+    other = _open(missions, accepted=False)
+    _candidate(missions, other)
+    need = _propose(missions, other, {"type": "evidence_required", "blocker": "BLOCKED_UNSAFE", "need": "Mains donor"})
+    _propose(missions, other, {"type": "terminal_proposed", "state": "BLOCKED_UNSAFE", "reason": "mains", "cites": [need["last_event_seq"]]})
+    with pytest.raises(MissionStateError, match="terminal"):
+        missions.accept_mission("monitor", other["mission_id"], author=HUMAN)
+
+
+def test_an_agent_cannot_propose_an_acceptance(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _open(missions, accepted=False)
+    with pytest.raises(MissionValidationError):
+        _propose(missions, mission, {"type": "accepted"})
+
