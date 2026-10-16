@@ -106,10 +106,13 @@ def _mapping(value: Any) -> Mapping[str, Any]:
 
 
 class OctoPrintBackend:
-    """OctoPrint REST request mapping.
+    """OctoPrint REST request mapping with file-specific actuation.
 
-    Upload explicitly selects but does not print the file. The later `/api/job`
-    start command is the physical boundary guarded by a human grant.
+    Staging uploads but deliberately does not select or print.  At the physical
+    boundary, ``start`` uses OctoPrint's file-specific ``select`` + ``print``
+    command for the exact staged remote path.  This avoids a selected-file
+    TOCTOU where another client could change the current selection between
+    approval and `/api/job start`.
     """
 
     name = "octoprint"
@@ -119,7 +122,7 @@ class OctoPrintBackend:
             "/api/files/local",
             filename=filename,
             data=data,
-            fields={"select": "true", "print": "false"},
+            fields={"select": "false", "print": "false"},
         )
         files = _mapping(response.get("files"))
         local = _mapping(files.get("local"))
@@ -134,7 +137,12 @@ class OctoPrintBackend:
         }
 
     def start(self, transport: PrinterTransport, prepared: PreparedPrint) -> Mapping[str, Any]:
-        return transport.request("POST", "/api/job", json_body={"command": "start"})
+        remote = quote(prepared.remote_path, safe="/")
+        return transport.request(
+            "POST",
+            f"/api/files/local/{remote}",
+            json_body={"command": "select", "print": True},
+        )
 
     def pause(self, transport: PrinterTransport) -> Mapping[str, Any]:
         return transport.request("POST", "/api/job", json_body={"command": "pause", "action": "pause"})
@@ -199,7 +207,7 @@ class FabricationPrinter:
         self.grants = grants
 
     def stage_gcode(self, *, filename: str, data: bytes | bytearray) -> PreparedPrint:
-        """Upload/select G-code without starting physical fabrication."""
+        """Upload G-code without starting physical fabrication."""
 
         safe_name = _filename(filename)
         payload = _bytes(data)
@@ -233,8 +241,6 @@ class FabricationPrinter:
         grant_id: str,
     ) -> PrintRun:
         self._prepared_for_this_printer(prepared)
-        # Consume before sending the command. Ambiguous transport failure cannot
-        # be retried without a fresh human approval.
         self.grants.consume(
             grant_id,
             project_id=project_id,
