@@ -23,10 +23,13 @@ passes the checks is not a wire that works, the case has not been printed, and e
 | `GET /v1/devices/modules` | the module library, with each module's sources, dimension basis and optional sourced `chips` roles |
 | `GET /v1/devices/examples` | example device specs |
 | `GET /v1/devices/examples/{id}/plan` | an example's plan |
+| `POST /v1/devices/draft` | a wired spec from `{"controller", "parts"}` library ids, or from `{"text"}` a typed parts list; 422 when the list cannot make a draft. Approves nothing |
 | `POST /v1/devices/plan` | a plan for a spec; 422 with a reason when the spec cannot make one, 413 over 64 KB (the body is read a piece at a time and refused as soon as it is too big, in the page's proxy and in the backend) |
 | `POST /v1/devices/case` | a zip of printable case files for a spec: `case_base.stl` and `case_lid.stl` in print orientation, the same boxes as editable `.scad`, a README and `CASE_PROPOSAL.json`. 422 for a spec with errors |
 | `POST /v1/devices/engineering` | a quantified engineering review of the plan (I2C loading, USB current, case temperature, antenna clearance, fit, printing), every figure sourced or assumed; see [the review](DEVICE_ENGINEERING_REVIEW.md) |
 | `POST /v1/devices/reclaim-matches` | advisory exact/variant name matches for a reclaim list; 422 for invalid text or shape, 413 over 64 KB in both proxy and backend |
+
+`POST /v1/devices/draft` also accepts `{"text"}`: a typed list split on lines, commas and joining words, matched only to an explicit alias table (chip, board name, or a generic word such as "OLED", which is labelled as one). Known variants (ESP32-S2/S3/C3…, Pico W, Pico 2, RP2350) are named as different boards and left out. Quantity is only a leading `2x` or a trailing `x2` (1–8); sizes such as `128x64` are not counts. Unmatched lines are named in `left_out` and never guessed. The draft still approves nothing: findings stay with the planner.
 
 From **Salvage a board**, matching reclaim rows link here to a small **Parts you may have on hand** list. It compares the markings
 and kinds reported in that plan with whole `name`, explicit `mpn` fields or explicit `chips[].marking` entries in the device library,
