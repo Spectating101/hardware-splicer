@@ -126,7 +126,9 @@ def test_unrelated_lines_are_counted_not_trusted():
 
 def test_a_shared_address_cannot_be_attributed(tmp_path, monkeypatch):
     original = copy.deepcopy(module_library())
-    original["modules"][2]["i2c"]["addresses"] = ["0x3C", "0x76"]
+    bme = original["modules"][2]
+    bme["i2c"].update(addresses=["0x3C", "0x76"], default_address="0x3C")
+    next(p for p in bme["pins"] if p["name"] == "SDO")["address_select"]["open"] = "0x3C"
     path = tmp_path / "device_modules.json"
     path.write_text(json.dumps(original), encoding="utf-8")
     monkeypatch.setattr(device_plan, "LIBRARY_PATH", path)
