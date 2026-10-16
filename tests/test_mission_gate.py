@@ -100,7 +100,7 @@ def test_the_repairable_mission_repaired_from_the_planners_suggestion_and_re_pla
 def test_the_runner_only_proposes_and_asks_for_checks(tmp_path):
     _projects, _missions, _mid, view = _run(tmp_path, ["ESP32", "BME280", "OLED"], {}, None)
     for event in view["events"]:
-        if event["type"] == "evaluation_recorded":
+        if event["type"] in {"evaluation_recorded", "inventory_read"}:
             assert event["author"] == {"kind": "system", "id": "hardware-splicer"}
         elif event["type"] == "accepted":
             assert event["author"] == HUMAN
@@ -118,3 +118,36 @@ def test_the_runner_never_runs_an_unaccepted_mission(tmp_path):
     from hardware_splicer.mission_store import MissionStateError
     with pytest.raises(MissionStateError, match="accepted"):
         run_mission(missions, "monitor", mission["mission_id"], author=AGENT)
+
+
+@pytest.mark.parametrize("inventory, budgets, expected", [
+    (["ESP32", "BME280", "OLED"], {}, "hs_evaluation"),
+    (["ESP32", "BME280", "HC-SR04"], {}, "hs_inventory_reading"),
+    (["ESP32", "BME280", "OLED"], {"max_operator_jobs": 1}, "hs_budget"),
+])
+def test_runner_terminals_expose_hs_grounding(tmp_path, inventory, budgets, expected):
+    _projects, _missions, _mid, view = _run(tmp_path, inventory, budgets, None)
+    assert view["terminal"]["grounding"] == expected
+    assert view["inventory"]
+
+
+def test_runner_cites_hs_plan_errors_when_inventory_draft_is_clean(tmp_path):
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["connections"].append({"from": "sensor.UNKNOWN", "to": "mcu.IO21"})
+    _projects, _missions, _mid, view = _run(tmp_path, ["ESP32", "BME280", "OLED"], {}, spec)
+    assert view["terminal"]["state"] == "BLOCKED_NEEDS_PART_DATA"
+    assert view["terminal"]["grounding"] == "hs_evaluation"
+    cited = [e for e in view["events"] if e["seq"] in view["terminal"]["cites"]]
+    assert any(e["type"] == "evaluation_recorded" and e["operation"] == "device_plan"
+               and e["result"]["errors"] > 0 for e in cited)
+
+
+def test_runner_does_not_claim_an_exhaustive_search_after_wasting_one_candidates_repairs(tmp_path, monkeypatch):
+    # An ineffective suggestion can consume the repair budget, but establishes nothing
+    # about candidate slots the runner has never explored.
+    monkeypatch.setattr("hardware_splicer.mission_runner.apply_first_suggestions", lambda spec, plan: (copy.deepcopy(spec), True))
+    _projects, _missions, _mid, view = _run(tmp_path, ["ESP32", "BME280", "OLED"],
+                                         {"max_repairs_per_candidate": 1}, _missing_sda())
+    assert view["terminal"]["state"] == "BLOCKED_NEEDS_PART_DATA"
+    assert view["terminal"]["grounding"] == "hs_evaluation"
+    assert len(view["candidates"]) == 1

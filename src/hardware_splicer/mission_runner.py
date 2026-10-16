@@ -102,6 +102,15 @@ def _block(
         "reason": reason,
         "cites": [view["last_event_seq"]],
     }
+    if blocker == "BLOCKED_NEEDS_PART_DATA" and candidate_id is not None:
+        # HS checks coverage at evaluation time. Cite its verdict, not just our assertion
+        # of a need, when a candidate failed despite a clean inventory draft.
+        for event in reversed(view["events"]):
+            if (event["type"] == "evaluation_recorded" and event.get("candidate_id") == candidate_id
+                    and event.get("operation") == "device_plan"):
+                if event["result"]["errors"] > 0:
+                    terminal["cites"].append(event["seq"])
+                break
     if candidate_id is not None:
         terminal["candidate_id"] = candidate_id
     return _propose(missions, project_id, mission_id, author, terminal)
@@ -240,16 +249,16 @@ def run_mission(
         if errors == 0 and warnings == 0:
             break
         if int(candidate["repairs"]) >= max_repairs:
-            return _propose(
+            need = "The latest plan still has findings after this candidate's repairs are spent"
+            return _block(
                 missions,
                 project_id,
                 mission_id,
                 author,
-                {
-                    "type": "terminal_proposed",
-                    "state": "NO_FEASIBLE_ARCHITECTURE",
-                    "reason": "repairs are spent and the latest plan still has findings",
-                },
+                blocker="BLOCKED_NEEDS_PART_DATA",
+                need=need,
+                reason=need,
+                candidate_id=_CANDIDATE_ID,
             )
         rules = _finding_rules(plan)
         named = ", ".join(rules) if rules else "findings"

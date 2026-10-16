@@ -203,15 +203,35 @@ Phases run `INTAKE → ARCHITECTING → EVALUATING → REPAIRING / EVIDENCE_REQU
 propose: up to three candidates (`clean_sheet`, `reclaim_heavy`, `hybrid`), repairs, evidence needs and a terminal
 state. Evaluations are written only by Hardware Splicer itself, and an agent cannot sign as the system author.
 
+Immediately after acceptance, HS appends its own `inventory_read`, at no operator-job cost. It parses the intake
+inventory and plans its own draft with the canonical device planner. The mission view exposes this as `inventory`:
+`reading` (fragments, controller, parts, left_out), `draft` (ok, error, plan_errors, plan_warnings), and a
+`result_sha256` of their canonical JSON. A parser refusal leaves the original lines uncovered and the draft not ok.
+Each candidate reports `covers_inventory`, `uncovered_inventory` and extra module ids in `not_in_inventory`.
+Module counts are consumed in inventory order; no instance covers two fragments, quantities must be met, and every
+left_out line stays uncovered. Extra modules are allowed. A repair cannot increase the number of uncovered lines.
+Missions accepted before this event was added have no inventory reading and cannot newly reach READY. Existing
+terminal events are replayed as recorded; old records do not acquire a grounding claim.
+
 Success is the **correct** terminal state, not reaching "ready":
 
-- `READY_FOR_HUMAN_BUILD` needs HS's own latest plan evaluation since the candidate's latest repair to be clean, an
+- `READY_FOR_HUMAN_BUILD` needs an HS inventory reading and full inventory coverage, HS's own latest plan evaluation since the candidate's latest repair to be clean, an
   engineering review without errors after it, and no evidence need standing for that candidate or the mission. It
   still lists the physical evidence only a person can establish.
 - Every `BLOCKED_*` state must cite an evidence need with that blocker for that candidate (or the whole mission), and
-  may cite only real evidence or evaluation events.
-- `NO_FEASIBLE_ARCHITECTURE` needs every candidate failing since its latest repair with its repairs spent;
-  `BUDGET_EXHAUSTED` needs the operator budget spent. Neither may stop short of a candidate that is already ready.
+  may cite only real evidence or evaluation events. A part-data blocker also needs HS grounding: a left_out line,
+  a draft that refuses or has planner errors or warnings, or a cited HS plan with errors on a spec covering the
+  inventory at the time of that evaluation. Later repairs cannot lend coverage to earlier evaluations.
+- `NO_FEASIBLE_ARCHITECTURE` needs all candidate slots used, pairwise distinct current specs covering the inventory,
+  and every candidate failing since its latest repair with its repairs spent. If HS's own inventory draft plans
+  clean with zero errors and warnings, HS refuses and tells the agent to propose it.
+- `BUDGET_EXHAUSTED` needs the operator budget spent. No blocked, no-feasible or budget terminal may stop short of
+  a candidate that is already ready.
+
+New terminal records carry `grounding`: `hs_inventory_reading` or `hs_evaluation` for part-data blockers,
+`agent_assertion` for the physical measurement, reverse engineering, procurement and unsafe blockers,
+`hs_evaluation` for READY and NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. The other blockers remain allowed:
+HS labels the agent's concern without claiming to have measured or established it. Grounding never grants authority.
 
 A person accepts the mission and its budgets once. That acceptance covers HS's software-only checks within budget;
 anything physical still stops for a human. The executor (`mission_executor.py`) runs only those checks on an accepted
@@ -263,5 +283,5 @@ Frontend: `make splice-ui-build`.
 8. Revision and review conflicts raise a stable, documented error contract.
 9. Review threads are discussion only; they never alter a snapshot, revision, review decision, or authority state.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
-11. A mission never writes a snapshot or revision and never carries an authority field, at any depth.
-12. A mission's terminal state is checked against HS's own recorded evaluations and cited evidence; a proposal alone never reaches it.
+11. A mission never writes a snapshot or revision and never carries an authority field, at any depth. Inventory readings and terminal grounding grant no physical, firmware or power-on authority.
+12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory; repairs cannot increase uncovered lines. Part-data blockers need HS grounding, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
