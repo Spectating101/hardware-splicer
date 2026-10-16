@@ -102,15 +102,6 @@ def _block(
         "reason": reason,
         "cites": [view["last_event_seq"]],
     }
-    if blocker == "BLOCKED_NEEDS_PART_DATA" and candidate_id is not None:
-        # HS checks coverage at evaluation time. Cite its verdict, not just our assertion
-        # of a need, when a candidate failed despite a clean inventory draft.
-        for event in reversed(view["events"]):
-            if (event["type"] == "evaluation_recorded" and event.get("candidate_id") == candidate_id
-                    and event.get("operation") == "device_plan"):
-                if event["result"]["errors"] > 0:
-                    terminal["cites"].append(event["seq"])
-                break
     if candidate_id is not None:
         terminal["candidate_id"] = candidate_id
     return _propose(missions, project_id, mission_id, author, terminal)
@@ -150,6 +141,14 @@ def _run_check(
         if "budget" in str(exc).lower():
             return None
         raise
+
+
+def _inventory_grounds_part_data(view: Mapping[str, Any]) -> bool:
+    """Whether HS's reading of the person's list shows missing part data, the only grounding the store accepts."""
+    inventory = view.get("inventory") or {}
+    reading, draft = inventory.get("reading") or {}, inventory.get("draft") or {}
+    return bool(reading.get("left_out") or not draft.get("ok")
+                or int(draft.get("plan_errors") or 0) + int(draft.get("plan_warnings") or 0))
 
 
 def _candidate_spec(
@@ -249,6 +248,10 @@ def run_mission(
         if errors == 0 and warnings == 0:
             break
         if int(candidate["repairs"]) >= max_repairs:
+            # The runner has no second architecture to propose, so it never claims the search is exhausted. Without
+            # HS grounding for a part-data blocker it leaves the mission open: honest, unlike an invented blocker.
+            if not _inventory_grounds_part_data(view):
+                return view
             need = "The latest plan still has findings after this candidate's repairs are spent"
             return _block(
                 missions,
@@ -280,6 +283,9 @@ def run_mission(
                 },
             )
             continue
+        if not _inventory_grounds_part_data(view):
+            # HS's own draft of the listed parts plans clean, so part data is not what is missing. Leave it open.
+            return view
         need = f"The planner reports {named} and offers no repair HS can express"
         return _block(
             missions,
@@ -292,6 +298,9 @@ def run_mission(
             candidate_id=_CANDIDATE_ID,
         )
     else:
+        if not _inventory_grounds_part_data(view):
+            # HS's own draft of the listed parts plans clean, so part data is not what is missing. Leave it open.
+            return view
         need = "The planner did not reach a clean plan within the repair bound"
         return _block(
             missions,

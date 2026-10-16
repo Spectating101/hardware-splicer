@@ -131,15 +131,13 @@ def test_runner_terminals_expose_hs_grounding(tmp_path, inventory, budgets, expe
     assert view["inventory"]
 
 
-def test_runner_cites_hs_plan_errors_when_inventory_draft_is_clean(tmp_path):
+def test_runner_leaves_a_mission_open_rather_than_invent_a_part_data_blocker(tmp_path):
+    # HS's draft of these parts plans clean, so a wiring fault the planner cannot repair is not missing part data.
     spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
     spec["connections"].append({"from": "sensor.UNKNOWN", "to": "mcu.IO21"})
     _projects, _missions, _mid, view = _run(tmp_path, ["ESP32", "BME280", "OLED"], {}, spec)
-    assert view["terminal"]["state"] == "BLOCKED_NEEDS_PART_DATA"
-    assert view["terminal"]["grounding"] == "hs_evaluation"
-    cited = [e for e in view["events"] if e["seq"] in view["terminal"]["cites"]]
-    assert any(e["type"] == "evaluation_recorded" and e["operation"] == "device_plan"
-               and e["result"]["errors"] > 0 for e in cited)
+    assert view["terminal"] is None and view["phase"] != "TERMINAL"
+    assert not [e for e in view["events"] if e["type"] == "evidence_required"]
 
 
 def test_runner_does_not_claim_an_exhaustive_search_after_wasting_one_candidates_repairs(tmp_path, monkeypatch):
@@ -148,6 +146,5 @@ def test_runner_does_not_claim_an_exhaustive_search_after_wasting_one_candidates
     monkeypatch.setattr("hardware_splicer.mission_runner.apply_first_suggestions", lambda spec, plan: (copy.deepcopy(spec), True))
     _projects, _missions, _mid, view = _run(tmp_path, ["ESP32", "BME280", "OLED"],
                                          {"max_repairs_per_candidate": 1}, _missing_sda())
-    assert view["terminal"]["state"] == "BLOCKED_NEEDS_PART_DATA"
-    assert view["terminal"]["grounding"] == "hs_evaluation"
+    assert view["terminal"] is None, "one candidate's spent repairs establish neither a blocker nor an exhausted search"
     assert len(view["candidates"]) == 1
