@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 
 from .fabrication_operator import FabricationValidationError
+from .fabrication_option_tradeoff import FabricationOptionTradeoff
 from .procurement_quotes import ProcurementQuoteBook
 from .vision_inspection import VisionInspectionService
 
@@ -17,6 +18,7 @@ class FabricatorIntelligenceWorkbench:
     ) -> None:
         self.vision = vision
         self.procurement = procurement or ProcurementQuoteBook()
+        self.tradeoffs = FabricationOptionTradeoff(procurement=self.procurement)
 
     def inspect_image(
         self,
@@ -51,6 +53,21 @@ class FabricatorIntelligenceWorkbench:
     ) -> dict[str, Any]:
         return self.procurement.cost_bom(
             lines=lines,
+            currency=currency,
+            as_of=as_of,
+            require_known_stock=require_known_stock,
+        )
+
+    def compare_options(
+        self,
+        *,
+        options: Sequence[Mapping[str, Any]],
+        currency: str,
+        as_of: str | None = None,
+        require_known_stock: bool = False,
+    ) -> dict[str, Any]:
+        return self.tradeoffs.compare(
+            options=options,
             currency=currency,
             as_of=as_of,
             require_known_stock=require_known_stock,
