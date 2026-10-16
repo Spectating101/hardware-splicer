@@ -39,8 +39,11 @@ NOT_THE_LISTED_BOARD: dict[str, tuple[str, ...]] = {
 }
 
 _SPLIT = re.compile(r"(?:\n|,|;|\+|&|\s+and\s+|\s+with\s+|\s+plus\s+)", re.IGNORECASE)
-_QTY_PREFIX = re.compile(r"^\s*([1-8])\s*[x×]\s+")
+_QTY_PREFIX = re.compile(r"^\s*([1-8])(?!\d)(?:\s*[x×]\s+|\s+)")
 _QTY_SUFFIX = re.compile(r"\s[x×]\s*([1-8])\s*$")
+# Sizes, resolutions and ratings describe a part rather than name another one: 0.96", 128x64, 3.3V, 1.3in, 500mA.
+_SIZE_OR_RES = re.compile(r'(?i)^(?:\d+\.\d+["\']?|\d+[x×]\d+|\d+(?:\.\d+)?(?:v|mv|ma|mah|a|w|mm|cm|in|hz|khz|mhz|ghz))$')
+_EDGE_PUNCT = re.compile(r"^[\(\[\{,;:\"']+|[\)\]\},;:\"']+$")
 _VARIANT_TAIL = r"(?![A-Za-z0-9])(?!-?[A-Za-z]{0,2}\d)"
 
 
@@ -144,12 +147,50 @@ _VARIANT_INDEX = tuple(
 )
 
 
+def _quantity_hit(text: str) -> re.Match[str] | None:
+    return _QTY_PREFIX.match(text) or _QTY_SUFFIX.search(text)
+
+
 def _fragment_quantity(text: str) -> int:
-    prefix = _QTY_PREFIX.match(text)
-    if prefix:
-        return int(prefix.group(1))
-    suffix = _QTY_SUFFIX.search(text)
-    return int(suffix.group(1)) if suffix else 1
+    hit = _quantity_hit(text)
+    return int(hit.group(1)) if hit else 1
+
+
+def _token_core(token: str) -> str:
+    return _EDGE_PUNCT.sub("", token)
+
+
+def _name_tokens(name: str) -> set[str]:
+    return {_token_core(token).casefold() for token in name.split() if _token_core(token)}
+
+
+def _looks_like_part_number(token: str) -> bool:
+    return any(c.isalpha() for c in token) and any(c.isdigit() for c in token)
+
+
+def _unread_tokens(text: str, hits: list[tuple[int, int, dict[str, Any]]]) -> list[str]:
+    if not hits:
+        return []
+    chars = list(text)
+    spans = [(start, end) for start, end, _match in hits]
+    qty = _quantity_hit(text)
+    if qty:
+        spans.append(qty.span())
+    for start, end in spans:
+        for index in range(start, end):
+            chars[index] = " "
+    allowed: set[str] = set()
+    for _start, _end, match in hits:
+        allowed |= _name_tokens(_module(match["module"])["name"])
+    unread: list[str] = []
+    for token in "".join(chars).split():
+        core = _token_core(token)
+        if not core or not _looks_like_part_number(core):
+            continue
+        if _SIZE_OR_RES.fullmatch(core) or core.casefold() in allowed:
+            continue
+        unread.append(core)
+    return unread
 
 
 def _other_board(text: str) -> tuple[set[str], str | None]:
@@ -165,23 +206,25 @@ def _other_board(text: str) -> tuple[set[str], str | None]:
     return dropped, note
 
 
-def _match_fragment(text: str) -> list[dict[str, Any]]:
+def _match_fragment(text: str) -> list[tuple[int, int, dict[str, Any]]]:
     found: list[tuple[int, int, dict[str, Any]]] = []
     for pattern, module_id, name, alias, basis in _ALIAS_INDEX:
         for hit in pattern.finditer(text):
             found.append((hit.start(), hit.end(), {"module": module_id, "name": name, "matched_on": alias, "basis": basis}))
     found.sort(key=lambda row: (row[0], row[0] - row[1], -len(row[2]["matched_on"])))
-    matches: list[dict[str, Any]] = []
+    hits: list[tuple[int, int, dict[str, Any]]] = []
     cursor = 0
+    seen: set[str] = set()
     for start, end, match in found:
-        if start < cursor:
+        if start < cursor or match["module"] in seen:
             continue
-        matches.append(match)
+        seen.add(match["module"])
+        hits.append((start, end, match))
         cursor = end
     quantity = _fragment_quantity(text)
-    for index, match in enumerate(matches):
+    for index, (_start, _end, match) in enumerate(hits):
         match["quantity"] = quantity if index == 0 else 1
-    return matches
+    return hits
 
 
 def parse_parts_text(text: str) -> dict[str, Any]:
@@ -203,13 +246,17 @@ def parse_parts_text(text: str) -> dict[str, Any]:
     parts: list[str] = []
     controllers: list[str] = []
     for piece in pieces:
-        matches = _match_fragment(piece)
+        hits = _match_fragment(piece)
         dropped, note = _other_board(piece)
         if dropped:
-            matches = [match for match in matches if match["module"] not in dropped]
+            hits = [hit for hit in hits if hit[2]["module"] not in dropped]
+        matches = [match for _start, _end, match in hits]
         fragment: dict[str, Any] = {"text": piece, "matches": matches}
         if note:
             fragment["note"] = note
+        unread = _unread_tokens(piece, hits)
+        if unread:
+            fragment["unread"] = unread
         fragments.append(fragment)
         for match in matches:
             if _module(match["module"])["kind"] == "mcu_board":
@@ -220,7 +267,7 @@ def parse_parts_text(text: str) -> dict[str, Any]:
         "fragments": fragments,
         "controller": controllers[0] if len(controllers) == 1 else None,
         "parts": parts,
-        "left_out": [fragment["text"] for fragment in fragments if not fragment["matches"]],
+        "left_out": [fragment["text"] for fragment in fragments if not fragment["matches"] or fragment.get("unread")],
     }
 
 
