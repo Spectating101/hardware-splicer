@@ -8,6 +8,7 @@ project snapshot or revision and never grants physical authority.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -44,7 +45,7 @@ _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
     {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -342,9 +343,11 @@ def _normalize_candidate(value: Any) -> Dict[str, Any]:
     }
 
 
-def _normalize_result(value: Any) -> Dict[str, Any]:
-    raw = _require_mapping(value, label="result")
+def _normalize_result(value: Any, *, result_sha256: str | None = None) -> Dict[str, Any]:
+    raw = dict(_require_mapping(value, label="result"))
     _reject_authority(raw, label="result")
+    if result_sha256 is not None:
+        raw["result_sha256"] = result_sha256
     extra = set(raw) - _RESULT_KEYS
     if extra:
         raise MissionValidationError(f"result contains unknown fields: {sorted(extra)}")
@@ -403,7 +406,12 @@ def _public_candidate(state: Mapping[str, Any]) -> Dict[str, Any]:
         "spec": state["spec"],
         "repairs": state["repairs"],
         "evaluations": [
-            {"operation": item["operation"], "result": item["result"]} for item in state["evaluations"]
+            {
+                "operation": item["operation"],
+                "result": item["result"],
+                "artifact": item.get("artifact"),
+            }
+            for item in state["evaluations"]
         ],
     }
 
@@ -412,12 +420,19 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
     phase = "INTAKE"
     candidates: Dict[str, Dict[str, Any]] = {}
     terminal: Dict[str, Any] | None = None
+    accepted: Dict[str, Any] | None = None
     operator_jobs_used = 0
     for event in events:
         event_type = event.get("type")
         seq = int(event.get("seq") or 0)
         if event_type == "opened":
             phase = "INTAKE"
+        elif event_type == "accepted":
+            accepted = {
+                "by": dict(event["author"]),
+                "at": event["created_at"],
+                "budgets": dict(event["budgets"]),
+            }
         elif event_type == "candidate_proposed":
             candidate = dict(event["candidate"])
             candidate_id = candidate["id"]
@@ -443,7 +458,12 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
         elif event_type == "evaluation_recorded":
             candidate_id = event["candidate_id"]
             candidates[candidate_id]["evaluations"].append(
-                {"seq": seq, "operation": event["operation"], "result": event["result"]}
+                {
+                    "seq": seq,
+                    "operation": event["operation"],
+                    "result": event["result"],
+                    "artifact": event.get("artifact"),
+                }
             )
             operator_jobs_used += 1
             phase = "EVALUATING"
@@ -467,6 +487,7 @@ def _replay(events: list[Mapping[str, Any]]) -> Dict[str, Any]:
         "repairs_used": repairs_used,
         "operator_jobs_used": operator_jobs_used,
         "terminal": terminal,
+        "accepted": accepted,
         "last_event_seq": last_event_seq,
         "last_event_at": events[-1]["created_at"] if events else "",
     }
@@ -672,6 +693,11 @@ class MissionStore:
             if events_dir.is_dir():
                 for event_path in events_dir.iterdir():
                     _reject_symlink(event_path, label="event file")
+            runs_dir = mission_dir / "runs"
+            _reject_symlink(runs_dir, label="runs directory")
+            if runs_dir.is_dir():
+                for run_path in runs_dir.iterdir():
+                    _reject_symlink(run_path, label="run file")
 
     def _missions_root(self, project_id: str) -> Path:
         project_dir = self._project_dir(project_id)
@@ -769,6 +795,7 @@ class MissionStore:
             "budgets": budgets,
             "created_at": meta["created_at"],
             "phase": replayed["phase"],
+            "accepted": replayed["accepted"],
             "candidates": [_public_candidate(item) for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "last_event_seq": replayed["last_event_seq"],
@@ -842,6 +869,68 @@ class MissionStore:
     def _assert_not_terminal(self, replayed: Mapping[str, Any], mission_id: str) -> None:
         if replayed.get("phase") == "TERMINAL" or replayed.get("terminal") is not None:
             raise MissionStateError(f"mission {mission_id!r} is terminal and cannot accept new events")
+
+    def _write_run_artifact(
+        self,
+        project_id: str,
+        mission_id: str,
+        sequence: int,
+        operation: str,
+        artifact: Mapping[str, Any],
+    ) -> tuple[str, str]:
+        project_dir = self._project_dir(project_id)
+        mission_dir = self._mission_dir(project_id, mission_id)
+        runs_dir = mission_dir / "runs"
+        self._assert_inside_project(runs_dir, project_dir, label="runs directory")
+        payload = artifact if isinstance(artifact, dict) else dict(artifact)
+        try:
+            encoded = _json_payload(payload).encode("utf-8")
+        except (TypeError, ValueError) as exc:
+            raise MissionValidationError("artifact must be JSON-serializable") from exc
+        digest = hashlib.sha256(encoded).hexdigest()
+        # Named by content, not by event number: a file left by an interrupted write is never in the way of the
+        # next evaluation, and identical output is stored once.
+        filename = f"{operation}-{digest[:16]}.json"
+        path = runs_dir / filename
+        self._assert_inside_project(path, project_dir, label="run file")
+        if path.exists() and not _path_inside(path, mission_dir):
+            raise MissionError("run file resolves outside the mission directory")
+        if path.is_file():
+            if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise MissionError(f"run file {filename} does not match its content hash")
+        else:
+            try:
+                _atomic_create_json(path, payload)
+            except MissionConflict:
+                pass  # a concurrent writer stored the same bytes under the same content name
+            if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise MissionError(f"run file {filename} does not match its content hash")
+        return f"runs/{filename}", digest
+
+    def accept_mission(
+        self,
+        project_id: str,
+        mission_id: str,
+        *,
+        author: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        normalized_author = _normalize_author(author, allow_system=True)
+        if normalized_author["kind"] != "human":
+            raise MissionValidationError("only a person can accept a mission and its budgets")
+        view, _events, replayed = self._current(project_id, mission_id)
+        self._assert_not_terminal(replayed, mission_id)
+        if replayed.get("accepted") is not None:
+            raise MissionStateError("mission is already accepted")
+        budgets = dict(view["budgets"])
+        budgets["repairs_used"] = dict(budgets.get("repairs_used") or {})
+        last_seq = int(replayed["last_event_seq"])
+        self._write_event(
+            project_id,
+            mission_id,
+            last_seq + 1,
+            {"type": "accepted", "author": normalized_author, "budgets": budgets},
+        )
+        return self.get_mission(project_id, mission_id)
 
     def propose(
         self,
@@ -947,8 +1036,11 @@ class MissionStore:
         candidate_id: str,
         operation: str,
         result: Mapping[str, Any],
+        artifact: Mapping | None = None,
     ) -> Dict[str, Any]:
         _view, _events, replayed = self._current(project_id, mission_id)
+        if replayed.get("accepted") is None:
+            raise MissionStateError("mission has not been accepted")
         self._assert_not_terminal(replayed, mission_id)
         budgets = _view["budgets"]
         if int(replayed["operator_jobs_used"]) >= int(budgets["max_operator_jobs"]):
@@ -961,18 +1053,26 @@ class MissionStore:
                 "operation must be one of device_draft, device_plan, device_engineering, "
                 "device_case, device_application, device_application_run, device_reclaim_match"
             )
-        normalized_result = _normalize_result(result)
         last_seq = int(replayed["last_event_seq"])
-        self._write_event(
-            project_id,
-            mission_id,
-            last_seq + 1,
-            {
-                "type": "evaluation_recorded",
-                "author": dict(_SYSTEM_AUTHOR),
-                "candidate_id": safe_candidate,
-                "operation": operation,
-                "result": normalized_result,
-            },
-        )
+        next_seq = last_seq + 1
+        sha_override = None
+        artifact_path = None
+        if artifact is not None:
+            # Validate everything before anything is written, so a refused result leaves no file behind.
+            raw_artifact = _require_mapping(artifact, label="artifact")
+            _normalize_result(result, result_sha256="0" * 64)
+            artifact_path, sha_override = self._write_run_artifact(
+                project_id, mission_id, next_seq, operation, raw_artifact
+            )
+        normalized_result = _normalize_result(result, result_sha256=sha_override)
+        record: Dict[str, Any] = {
+            "type": "evaluation_recorded",
+            "author": dict(_SYSTEM_AUTHOR),
+            "candidate_id": safe_candidate,
+            "operation": operation,
+            "result": normalized_result,
+        }
+        if artifact_path is not None:
+            record["artifact"] = artifact_path
+        self._write_event(project_id, mission_id, next_seq, record)
         return self.get_mission(project_id, mission_id)
