@@ -139,6 +139,8 @@ HTTP 301). The 2026-10-10 date is when the link was updated, not a new claim abo
 
 Ground to power or signal (including input-only pins), power onto a signal pin, SDA joined to SCL, a pin wired to two things,
 a missing wire on a required pin, the module's flash pins, input-only I2C pins and the reset pin are errors.
+Required ground returns must reach the controller through ground-to-ground wires; a daisy chain is allowed,
+but floating peripheral grounds and address-select jumpers do not supply that return.
 Display GND on IO34, IO35, VP or VN is an error and does not count as a ground return. The isolation check names the board's
 GND label rather than treating that signal endpoint as ground.
 
