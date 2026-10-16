@@ -1,7 +1,7 @@
 """OpenPnP job-package inspection for simulation-first PCB assembly.
 
 OpenPnP's simulator is useful before a real pick-and-place machine is connected.
-This module does not start OpenPnP or move hardware.  It validates a server-
+This module does not start OpenPnP or move hardware. It validates a server-
 registered job XML, retains hashes for the job and referenced local XML files,
 and emits a simulation package that can be handed to a reviewed simulator or
 human operator.
@@ -35,11 +35,17 @@ class OpenPnpJobRegistry:
         jid = _id(job_id, "job_id")
         if jid in self._jobs:
             raise FabricationValidationError("OpenPnP job id is already registered")
-        root_path = Path(root).resolve()
+        root_literal = Path(root)
+        if root_literal.is_symlink():
+            raise FabricationValidationError("OpenPnP root must not be a symlink")
+        root_path = root_literal.resolve()
         if not root_path.is_dir():
             raise FabricationValidationError("OpenPnP root must be an existing directory")
         raw = Path(job_file)
-        path = raw.resolve() if raw.is_absolute() else (root_path / raw).resolve()
+        literal = raw if raw.is_absolute() else root_path / raw
+        if literal.is_symlink():
+            raise FabricationValidationError("OpenPnP job must not be a symlink")
+        path = literal.resolve()
         try:
             path.relative_to(root_path)
         except ValueError as exc:
@@ -64,13 +70,8 @@ class OpenPnpSimulationInspector:
 
     def inspect(self, job_id: str) -> dict[str, Any]:
         job = self.jobs.get(job_id)
-        data = job.job_file.read_bytes()
-        if not data or len(data) > _MAX_XML_BYTES:
-            raise FabricationValidationError("OpenPnP job XML size is invalid")
-        try:
-            root = ET.fromstring(data)
-        except ET.ParseError as exc:
-            raise FabricationValidationError("OpenPnP job XML is malformed") from exc
+        data = _safe_xml_bytes(job.job_file)
+        root = _parse_xml(data, label="OpenPnP job")
 
         local_names: dict[str, int] = {}
         referenced_paths: set[Path] = set()
@@ -83,12 +84,18 @@ class OpenPnpSimulationInspector:
                 lowered = value.lower().strip()
                 if not lowered.endswith((".board.xml", ".job.xml", ".xml")):
                     continue
-                candidate = (job.job_file.parent / value).resolve()
+                literal = job.job_file.parent / value
+                if literal.is_symlink():
+                    continue
+                candidate = literal.resolve()
                 try:
                     candidate.relative_to(job.root)
                 except ValueError:
                     continue
                 if candidate.is_file() and candidate != job.job_file:
+                    # Parse referenced XML too so malformed/DTD-bearing package
+                    # members do not get blessed merely because their bytes hash.
+                    _parse_xml(_safe_xml_bytes(candidate), label="OpenPnP referenced XML")
                     referenced_paths.add(candidate)
 
         artifacts = {job.job_file.relative_to(job.root).as_posix(): _sha(job.job_file)}
@@ -119,6 +126,25 @@ class OpenPnpSimulationInspector:
                 "Live OpenPnP machine power/play remains outside this adapter.",
             ],
         }
+
+
+def _safe_xml_bytes(path: Path) -> bytes:
+    if path.is_symlink() or not path.is_file():
+        raise FabricationValidationError("OpenPnP XML member must be a regular non-symlink file")
+    data = path.read_bytes()
+    if not data or len(data) > _MAX_XML_BYTES:
+        raise FabricationValidationError("OpenPnP XML size is invalid")
+    return data
+
+
+def _parse_xml(data: bytes, *, label: str) -> ET.Element:
+    prefix = data[:8192].upper()
+    if b"<!DOCTYPE" in prefix or b"<!ENTITY" in prefix:
+        raise FabricationValidationError(f"{label} must not contain DTD/entity declarations")
+    try:
+        return ET.fromstring(data)
+    except ET.ParseError as exc:
+        raise FabricationValidationError(f"{label} is malformed") from exc
 
 
 def _sha(path: Path) -> str:
