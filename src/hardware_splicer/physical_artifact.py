@@ -2,9 +2,10 @@
 
 Physical operators act on immutable generated artifacts, never on raw commands
 supplied at dispatch time.  A printer consumes G-code, a CNC/laser consumes a
-machine-job/toolpath artifact, a programmer consumes firmware, and a robot
-consumes a motion-plan artifact.  The registry keeps bytes private and exposes
-only stable ids, hashes and bounded metadata to the agent layer.
+machine-job/toolpath artifact, a programmer consumes firmware, an instrument
+consumes a bounded server-generated recipe, and a robot consumes a motion-plan
+artifact.  The registry keeps bytes private and exposes only stable ids, hashes
+and bounded metadata to the agent layer.
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ _COMPATIBILITY = {
     ("laser", "start"): frozenset({"machine_job"}),
     ("laser", "resume"): frozenset({"machine_job"}),
     ("programmer", "flash"): frozenset({"firmware"}),
+    ("instrument", "enable_output"): frozenset({"measurement_recipe"}),
     ("robot", "execute_motion"): frozenset({"motion_plan"}),
     ("robot", "resume_motion"): frozenset({"motion_plan"}),
 }
