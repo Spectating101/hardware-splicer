@@ -54,15 +54,15 @@ Extra parts are allowed; they still face the same planner and engineering checks
 | State | HS accepts it when |
 |-------|--------------------|
 | `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading and the current spec covers every line. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
-| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's reading has a left_out line, its own draft refuses or has planner errors or warnings, or you cite an HS `device_plan` evaluation with errors on a spec that covered the inventory when evaluated |
+| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's own reading of the inventory shows the gap: a left_out line, or its draft refuses or has planner errors or warnings. A failing plan of your own candidate does not count: it shows a wiring fault, not missing data |
 | `BLOCKED_NEEDS_PHYSICAL_MEASUREMENT`, `BLOCKED_NEEDS_REVERSE_ENGINEERING`, `BLOCKED_NEEDS_PROCUREMENT_EVIDENCE`, `BLOCKED_UNSAFE` | You cite an `evidence_required` with that blocker, for that candidate or the mission |
-| `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
+| `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct designs (a new name, wire colours or order do not count) and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
 | `BUDGET_EXHAUSTED` | The operator-job budget is spent and no candidate is already ready |
 
 Every `BLOCKED_*` state and `NO_FEASIBLE_ARCHITECTURE` also refuses to stop short of a candidate already ready.
 Uncheckable physical, reverse engineering, procurement and safety needs remain allowed assertions; HS labels them,
 and does not claim to have established them. New terminal records expose `grounding`: `hs_inventory_reading` or
-`hs_evaluation` for a part-data blocker, `agent_assertion` for the other blockers, `hs_evaluation` for READY and
+`hs_inventory_reading` for a part-data blocker, `agent_assertion` for the other blockers, `hs_evaluation` for READY and
 NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. These labels grant no authority.
 
 A refused proposal returns 409 or 422 with the reason. Read it; do not retry the same thing.

@@ -219,16 +219,17 @@ Success is the **correct** terminal state, not reaching "ready":
   engineering review without errors after it, and no evidence need standing for that candidate or the mission. It
   still lists the physical evidence only a person can establish.
 - Every `BLOCKED_*` state must cite an evidence need with that blocker for that candidate (or the whole mission), and
-  may cite only real evidence or evaluation events. A part-data blocker also needs HS grounding: a left_out line,
-  a draft that refuses or has planner errors or warnings, or a cited HS plan with errors on a spec covering the
-  inventory at the time of that evaluation. Later repairs cannot lend coverage to earlier evaluations.
-- `NO_FEASIBLE_ARCHITECTURE` needs all candidate slots used, pairwise distinct current specs covering the inventory,
+  may cite only real evidence or evaluation events. A part-data blocker also needs HS grounding in its own reading
+  of the inventory: a left_out line, or a draft that refuses or has planner errors or warnings. A cited failing plan
+  is not grounding, since an agent can break its own wiring to get one.
+- `NO_FEASIBLE_ARCHITECTURE` needs all candidate slots used, current specs that are distinct designs (ignoring names, wire colours and order)
+  and cover the inventory,
   and every candidate failing since its latest repair with its repairs spent. If HS's own inventory draft plans
   clean with zero errors and warnings, HS refuses and tells the agent to propose it.
 - `BUDGET_EXHAUSTED` needs the operator budget spent. No blocked, no-feasible or budget terminal may stop short of
   a candidate that is already ready.
 
-New terminal records carry `grounding`: `hs_inventory_reading` or `hs_evaluation` for part-data blockers,
+New terminal records carry `grounding`: `hs_inventory_reading` for part-data blockers,
 `agent_assertion` for the physical measurement, reverse engineering, procurement and unsafe blockers,
 `hs_evaluation` for READY and NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. The other blockers remain allowed:
 HS labels the agent's concern without claiming to have measured or established it. Grounding never grants authority.
@@ -284,4 +285,4 @@ Frontend: `make splice-ui-build`.
 9. Review threads are discussion only; they never alter a snapshot, revision, review decision, or authority state.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
 11. A mission never writes a snapshot or revision and never carries an authority field, at any depth. Inventory readings and terminal grounding grant no physical, firmware or power-on authority.
-12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory; repairs cannot increase uncovered lines. Part-data blockers need HS grounding, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
+12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory; a repair cannot leave a listed line uncovered that was covered. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.

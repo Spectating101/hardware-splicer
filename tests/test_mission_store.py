@@ -221,6 +221,7 @@ def test_no_feasible_architecture_needs_every_candidate_failing_with_repairs_spe
     for cid in ("A", "B"):
         specs[cid] = draft_from_parts_text({"text": "ESP32\n2x BME280"})["spec"]
         specs[cid]["name"] = cid
+        specs[cid].setdefault("case", {})["wall_mm"] = 2.0 if cid == "A" else 2.5
         _spec_candidate(missions, mission, specs[cid], cid)
     nope = {"type": "terminal_proposed", "state": "NO_FEASIBLE_ARCHITECTURE", "reason": "nothing passes"}
     _evaluate(missions, mission, "A", errors=1)
@@ -590,6 +591,21 @@ def test_repairs_cannot_drop_inventory_and_a_refusal_appends_nothing(tmp_path):
     assert missions.get_mission("monitor", mission["mission_id"]) == before
 
 
+def test_a_repair_may_not_cover_one_listed_part_by_dropping_another(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["ESP32", "BME280", "OLED"])
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    without_oled = copy.deepcopy(spec)
+    without_oled["modules"] = [m for m in spec["modules"] if m["module"] != "ssd1306-096-i2c"]
+    _spec_candidate(missions, mission, without_oled)
+    before = _evaluate(missions, mission, errors=1)
+    swapped = copy.deepcopy(spec)
+    swapped["modules"] = [m for m in spec["modules"] if m["module"] != "adafruit-bme280-stemma-qt"]
+    with pytest.raises(MissionStateError, match="drops inventory: BME280"):
+        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": swapped, "rationale": "swap"})
+    assert missions.get_mission("monitor", mission["mission_id"]) == before
+
+
 def _blocked(missions, mission, state="BLOCKED_NEEDS_PART_DATA", cid=None, cites=()):
     need = {"type": "evidence_required", "blocker": state, "need": "agent says a need exists"}
     if cid:
@@ -638,28 +654,14 @@ def test_uncheckable_blockers_remain_allowed_as_agent_assertions(tmp_path, state
     assert done["terminal"]["grounding"] == "agent_assertion"
 
 
-@pytest.mark.parametrize("coverage_at_evaluation, errors, warnings, accepted", [
-    (True, 1, 0, True), (False, 1, 0, False), (True, 0, 1, False), (True, 0, 0, False),
-])
-def test_part_data_grounding_requires_cited_errors_on_inventory_covering_spec(tmp_path, coverage_at_evaluation, errors, warnings, accepted):
+def test_a_cited_failing_plan_does_not_ground_a_part_data_blocker(tmp_path):
+    # An agent can break its own wiring to get plan errors; they say nothing about missing part data.
     _projects, missions = _store(tmp_path)
     mission = _inventory_mission(missions, ["ESP32", "BME280"])
-    spec = draft_from_parts_text({"text": "ESP32\nBME280"})["spec"]
-    incomplete = copy.deepcopy(spec)
-    incomplete["modules"] = incomplete["modules"][:1]
-    _spec_candidate(missions, mission, spec if coverage_at_evaluation else incomplete)
-    evaluation = _evaluate(missions, mission, errors=errors, warnings=warnings)
-    seq = evaluation["last_event_seq"]
-    if errors or warnings:
-        # Improving coverage later cannot lend coverage to the earlier evaluation.
-        _propose(missions, mission, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "repair"})
-    terminal = _blocked(missions, mission, cid="A", cites=[seq])
-    if accepted:
-        done = _propose(missions, mission, terminal)
-        assert done["terminal"]["grounding"] == "hs_evaluation"
-    else:
-        with pytest.raises(MissionStateError, match="plans clean"):
-            _propose(missions, mission, terminal)
+    _spec_candidate(missions, mission, draft_from_parts_text({"text": "ESP32\nBME280"})["spec"])
+    seq = _evaluate(missions, mission, errors=3)["last_event_seq"]
+    with pytest.raises(MissionStateError, match="plans clean"):
+        _propose(missions, mission, _blocked(missions, mission, cid="A", cites=[seq]))
 
 
 def _spent_candidate(missions, mission, spec, cid):
@@ -669,7 +671,7 @@ def _spent_candidate(missions, mission, spec, cid):
     _evaluate(missions, mission, cid, errors=1)
 
 
-@pytest.mark.parametrize("case, message", [("slots", "all.*candidate"), ("duplicate", "distinct"),
+@pytest.mark.parametrize("case, message", [("slots", "all.*candidate"), ("duplicate", "distinct"), ("renamed", "distinct"),
                                            ("coverage", "2x BME280"), ("clean_draft", "own draft.*plans clean")])
 def test_no_feasible_requires_a_full_distinct_inventory_covering_search_and_no_clean_hs_draft(tmp_path, case, message):
     _projects, missions = _store(tmp_path)
@@ -678,10 +680,15 @@ def test_no_feasible_requires_a_full_distinct_inventory_covering_search_and_no_c
     spec = draft_from_parts_text({"text": "\n".join(inventory)})["spec"]
     for i in range(1 if case == "slots" else 2):
         current = copy.deepcopy(spec)
-        if case != "duplicate":
+        if case not in ("duplicate", "renamed"):
             current["name"] = f"Design {i}"
-        elif i:
+            current.setdefault("case", {})["wall_mm"] = 2.0 + 0.5 * i
+        elif i and case == "duplicate":
             current = dict(reversed(list(current.items())))
+        elif i:
+            # A new name, recoloured wires and reordered connections are still the same design.
+            current["name"] = "A different name"
+            current["connections"] = [{**row, "wire": "white"} for row in reversed(current["connections"])]
         if case == "coverage":
             current["modules"] = current["modules"][:2]
         _spent_candidate(missions, mission, current, chr(65 + i))
@@ -695,6 +702,7 @@ def test_no_feasible_full_search_is_grounded_in_hs_evaluations(tmp_path):
     for cid in ("A", "B"):
         spec = draft_from_parts_text({"text": "ESP32\n2x BME280"})["spec"]
         spec["name"] = cid
+        spec.setdefault("case", {})["wall_mm"] = 2.0 if cid == "A" else 2.5
         _spent_candidate(missions, mission, spec, cid)
     done = _propose(missions, mission, _terminal("NO_FEASIBLE_ARCHITECTURE"))
     assert done["terminal"]["grounding"] == "hs_evaluation"

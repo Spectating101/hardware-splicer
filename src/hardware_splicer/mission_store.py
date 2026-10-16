@@ -383,6 +383,18 @@ def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
+def _engineering_content(spec: Mapping[str, Any]) -> Dict[str, Any]:
+    """What makes two candidates different designs: not their name, wire colours or the order things are listed in."""
+    content = {key: value for key, value in spec.items() if key != "name"}
+    if isinstance(content.get("modules"), list):
+        content["modules"] = sorted(content["modules"], key=_canonical_json)
+    if isinstance(content.get("connections"), list):
+        content["connections"] = sorted(
+            ({k: v for k, v in row.items() if k != "wire"} if isinstance(row, Mapping) else row
+             for row in content["connections"]), key=_canonical_json)
+    return content
+
+
 def _read_inventory(inventory: list[str]) -> Dict[str, Any]:
     text = "\n".join(inventory)
     try:
@@ -670,7 +682,7 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
             )
     if len(candidates) != int(budgets["max_candidates"]):
         raise MissionStateError("NO_FEASIBLE_ARCHITECTURE requires all budgeted candidate slots to be used")
-    specs = [_canonical_json(candidate["spec"]) for candidate in candidates.values()]
+    specs = [_canonical_json(_engineering_content(candidate["spec"])) for candidate in candidates.values()]
     if len(set(specs)) != len(specs):
         raise MissionStateError("NO_FEASIBLE_ARCHITECTURE requires pairwise distinct current candidate specs")
     inventory = replayed.get("inventory")
@@ -687,18 +699,15 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
                                 "the agent should propose it")
 
 
-def _part_data_grounding(replayed: Mapping[str, Any], cites: list[int]) -> str:
+def _part_data_grounding(replayed: Mapping[str, Any]) -> str:
+    # Only HS's own reading of the person's list can show that part data is missing. A failing plan the agent cites
+    # proves nothing: an agent can break its own wiring to get one.
     inventory = replayed.get("inventory")
     if inventory is not None:
         draft = inventory["draft"]
         if (inventory["reading"]["left_out"] or not draft["ok"]
                 or draft["plan_errors"] + draft["plan_warnings"] > 0):
             return "hs_inventory_reading"
-    for candidate in replayed["candidates"].values():
-        for evaluation in candidate["evaluations"]:
-            if (evaluation["seq"] in cites and evaluation["operation"] == "device_plan"
-                    and evaluation["result"]["errors"] > 0 and evaluation["covers_inventory"]):
-                return "hs_evaluation"
     raise MissionStateError("BLOCKED_NEEDS_PART_DATA is refused: HS has data for every part listed "
                             "and its own draft of them plans clean")
 
@@ -1129,10 +1138,12 @@ class MissionStore:
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
             inventory = replayed.get("inventory")
             if inventory is not None:
-                uncovered = _uncovered_inventory(inventory["reading"], record["spec"])
-                previous = _uncovered_inventory(inventory["reading"], candidate["spec"])
-                if len(uncovered) > len(previous):
-                    raise MissionStateError("repair_proposed is refused: the repair drops inventory: " + ", ".join(uncovered))
+                # Compare lines, not counts: a repair may not cover one listed part by dropping another.
+                dropped = (Counter(_uncovered_inventory(inventory["reading"], record["spec"]))
+                           - Counter(_uncovered_inventory(inventory["reading"], candidate["spec"])))
+                if dropped:
+                    raise MissionStateError("repair_proposed is refused: the repair drops inventory: "
+                                            + ", ".join(dropped.elements()))
             record["rationale"] = _require_text(
                 raw_event.get("rationale"), field="rationale", max_len=_MAX_RATIONALE
             )
@@ -1164,7 +1175,7 @@ class MissionStore:
             elif state in _BLOCKED_STATES:
                 _assert_no_ready_candidate(replayed, events, state)
                 record["cites"] = _assert_blocked_cites(events, raw_event)
-                record["grounding"] = (_part_data_grounding(replayed, record["cites"])
+                record["grounding"] = (_part_data_grounding(replayed)
                                        if state == "BLOCKED_NEEDS_PART_DATA" else "agent_assertion")
             elif state == "NO_FEASIBLE_ARCHITECTURE":
                 _assert_no_feasible_architecture(replayed, budgets)
