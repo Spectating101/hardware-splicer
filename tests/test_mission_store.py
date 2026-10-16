@@ -622,6 +622,22 @@ def test_part_data_blocker_cannot_be_manufactured_on_a_clean_inventory(tmp_path)
         _propose(missions, mission, terminal)
 
 
+def test_strap_repairable_inventory_does_not_ground_missing_part_data(tmp_path):
+    _projects, missions = _store(tmp_path)
+    mission = _inventory_mission(missions, ["Raspberry Pi Pico", "2x BME280"])
+    draft = mission["inventory"]["draft"]
+    assert draft["plan_warnings"] == 1 and draft["plan_unrepairable"] == 0
+    terminal = _blocked(missions, mission)
+    with pytest.raises(MissionStateError, match="HS has data for every part listed"):
+        _propose(missions, mission, terminal)
+
+
+def test_old_inventory_drafts_keep_their_part_data_grounding():
+    from hardware_splicer.mission_store import _part_data_grounding
+    old = {"reading": {"left_out": []}, "draft": {"ok": True, "plan_errors": 0, "plan_warnings": 1}}
+    assert _part_data_grounding({"inventory": old}) == "hs_inventory_reading"
+
+
 @pytest.mark.parametrize("state", [s for s in TERMINAL_STATES if s.startswith("BLOCKED_")])
 def test_every_blocker_refuses_to_stop_short_of_another_ready_candidate(tmp_path, state):
     _projects, missions = _store(tmp_path)

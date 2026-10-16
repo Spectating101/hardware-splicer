@@ -613,7 +613,10 @@
         "supply_current_basis": "ESP32-WROOM-32E datasheet v2.1, Table 14, IVDD: minimum 0.5 A",
         "supply_check_step": "The DevKitC takes one and only one supply; do not combine USB with an external supply on 5V or 3V3.",
         "supply_power_step": "Use one and only one DevKitC supply: do not add an external supply on 5V or 3V3 while using USB.",
-        "supply_current_practice": "General practice, not from the datasheet: a weak charger, a long or thin cable, or an unpowered hub may not deliver this; the usual symptom is resets when Wi-Fi starts."
+        "supply_current_practice": "General practice, not from the datasheet: a weak charger, a long or thin cable, or an unpowered hub may not deliver this; the usual symptom is resets when Wi-Fi starts.",
+        "i2c_controller_count": 2,
+        "i2c_controller_count_source": "https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf",
+        "i2c_controller_count_basis": "ESP32 Series Datasheet v5.3, section 4.8.4, page 37: two I2C bus interfaces"
       },
       "dimension_basis": {
         "pcb": "Espressif drawing, unit mm: 27.94 x 48.26, rows 25.40 apart, 2.54 pitch, 6.04 antenna overhang (exact)",
@@ -645,6 +648,11 @@
           "label": "ESP-IDF ADC docs v4.2.5 (ADC2 and Wi-Fi; DevKitC GPIO0 auto-program circuit)",
           "url": "https://docs.espressif.com/projects/esp-idf/en/v4.2.5/esp32/api-reference/peripherals/adc.html",
           "as_of": "2026-10-10"
+        },
+        {
+          "label": "ESP32 Series Datasheet v5.3, section 4.8.4 I2C Interface, page 37 (two I2C bus interfaces)",
+          "url": "https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf",
+          "as_of": "2026-10-16"
         }
       ],
       "notes": [
@@ -965,10 +973,17 @@
         {
           "id": "SDO",
           "name": "SDO",
-          "roles": [],
+          "roles": [
+            "i2c_address_select"
+          ],
           "x": 12.6,
           "y": 1.5,
-          "side": "top"
+          "side": "top",
+          "address_select": {
+            "ground": "0x76",
+            "open": "0x77"
+          },
+          "address_select_source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
         },
         {
           "id": "CS",
@@ -985,7 +1000,9 @@
           "0x77",
           "0x76"
         ],
-        "address_basis": "Adafruit pinouts: default 0x77, 0x76 if ADDR/SDO is tied to ground. Bosch datasheet: 7-bit address 111011x (0x76 or 0x77)."
+        "address_basis": "Adafruit pinouts: default 0x77, 0x76 if ADDR/SDO is tied to ground. Bosch datasheet: 7-bit address 111011x (0x76 or 0x77).",
+        "default_address": "0x77",
+        "default_address_source": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
       },
       "electrical": {
         "supply_note": "Check this board's supply. Adafruit describes an on-board regulator that takes 3-5VDC and converts it down, and level shifting that follows Vin. 5 V on Vin can put 5 V on the I2C pins. The Bosch chip supply (1.71 V to 3.6 V) is the chip, not the header VIN contract. Prefer the microcontroller's 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",

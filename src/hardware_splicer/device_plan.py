@@ -168,6 +168,23 @@ _CONTROLLER_TEXT = (
 )
 
 
+def _check_i2c_addresses(module: dict[str, Any], source_urls: list[str]) -> None:
+    """A chosen address is a library claim with a source, never an inferred GPIO setting."""
+    i2c = module.get("i2c", {})
+    addresses = i2c.get("addresses", [])
+    if "default_address" in i2c:
+        if i2c["default_address"] not in addresses or i2c.get("default_address_source") not in source_urls:
+            raise RuntimeError(f"{module['id']} default_address needs a possible address and module source")
+    for pin in module["pins"]:
+        select = pin.get("address_select")
+        if "i2c_address_select" not in pin["roles"] and select is None:
+            continue
+        if ("i2c_address_select" not in pin["roles"] or not isinstance(select, dict) or not select
+                or not set(select) <= {"ground", "open"} or any(a not in addresses for a in select.values())
+                or pin.get("address_select_source") not in source_urls):
+            raise RuntimeError(f"{module['id']} address_select needs supported settings, possible addresses and a module source")
+
+
 def _check_controller(module: dict[str, Any]) -> None:
     """A microcontroller board carries the wording and sources the planner quotes, so no board's text lives in code."""
 
@@ -181,6 +198,13 @@ def _check_controller(module: dict[str, Any]) -> None:
     mux = electrical.get("i2c_pin_mux")
     if mux not in {"any", "fixed"}:
         raise RuntimeError(f"{label} electrical.i2c_pin_mux must be any or fixed")
+    if "i2c_controller_count" in electrical:
+        count = electrical["i2c_controller_count"]
+        if type(count) is not int or count < 1:
+            raise RuntimeError(f"{label} electrical.i2c_controller_count must be a positive integer")
+        if electrical.get("i2c_controller_count_source") not in {s["url"] for s in module["sources"]}:
+            raise RuntimeError(f"{label} I2C controller count needs a module source")
+        _text_field(electrical.get("i2c_controller_count_basis"), f"{label} I2C controller count basis")
     if mux == "fixed":
         _text_field(electrical.get("i2c_pin_note"), f"{label} electrical.i2c_pin_note", 800)
         for pin in module["pins"]:
@@ -251,6 +275,7 @@ def _library() -> dict[str, Any]:
                     raise RuntimeError(f"{quote_label}[{index}].{field} may not contain control or invisible characters")
             if quote["source"] not in source_urls:
                 raise RuntimeError(f"{quote_label}[{index}].source must equal one of this module's source urls")
+        _check_i2c_addresses(module, source_urls)
         _check_engineering(module, source_urls)
         _check_controller(module)
     return data
@@ -1061,7 +1086,9 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             continue
         first = _resolve_pin(placed, row["from"], second[2], errors) or first
         (ma, pa, point_a, multi_a), (mb, pb, point_b, multi_b) = first, second
-        if ma.ref == mb.ref:
+        own_ground_strap = any("i2c_address_select" in a["roles"] and "ground" in b["roles"]
+                               for a, b in ((pa, pb), (pb, pa)))
+        if ma.ref == mb.ref and not own_ground_strap:
             errors.append(f"{row['from']} to {row['to']}: both ends are on the same module")
             continue
         wire_id = f"wire-{index:02d}"
