@@ -230,7 +230,8 @@ Success is the **correct** terminal state, not reaching "ready":
   still lists the physical evidence only a person can establish.
 - Every `BLOCKED_*` state must cite an evidence need with that blocker for that candidate (or the whole mission), and
   may cite only real evidence or evaluation events. A part-data blocker also needs HS grounding in its own reading
-  of the inventory: a left_out line, or a draft that refuses or has planner errors or warnings. A cited failing plan
+  of the inventory: a left_out line, a refused draft, or error/warning findings without planner suggestions
+  (`plan_unrepairable`). Historical readings without this field retain their former error/warning rule. A cited failing plan
   is not grounding, since an agent can break its own wiring to get one.
 - `NO_FEASIBLE_ARCHITECTURE` needs all candidate slots used, current specs that are distinct designs (ignoring names, wire colours and order)
   and cover the inventory,
@@ -262,8 +263,8 @@ The runner (`mission_runner.py`) is an agent with no privileged path: it may onl
 `expected_event_seq`, and ask the executor to run checks. It must not call `record_evaluation` or
 `accept_mission` or write files. `tests/test_mission_gate.py` declares each scenario's correct
 terminal state in advance: `READY_FOR_HUMAN_BUILD` where everything checks out;
-`BLOCKED_NEEDS_PART_DATA` for parts HS has no data for, a different board, or an address clash it
-cannot repair; `BUDGET_EXHAUSTED` when the budget cannot pay for the review.
+`BLOCKED_NEEDS_PART_DATA` for parts HS has no data for or a different board; the BME280 address-clash case reaches
+READY through a recorded strap repair. `BUDGET_EXHAUSTED` applies when the budget cannot pay for the review.
 
 `mission_delivery.py` turns a READY mission into a deterministic package
 (`hardware_splicer.mission_package.v1`, stored under `missions/<id>/packages/` by content hash) and stages its design

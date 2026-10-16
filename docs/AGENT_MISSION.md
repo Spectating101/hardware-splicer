@@ -39,7 +39,8 @@ read the mission and retry after that operation completes. Reads and unrelated m
 
 When a person accepts, HS records `inventory_read` immediately before `accepted`. If acceptance is interrupted,
 the reading grants no permission to run; a retry reuses it and completes acceptance. The mission's `inventory` holds
-`reading` (fragments, controller, parts and left_out), `draft` (`ok`, `error`, `plan_errors`, `plan_warnings`), and
+`reading` (fragments, controller, parts and left_out), `draft` (`ok`, `error`, `plan_errors`, `plan_warnings`,
+`plan_unrepairable`: error/warning findings without a planner suggestion), and
 `result_sha256` of their canonical JSON. HS parses the person's inventory and plans its own draft with the same
 planner used for candidate checks. This costs no operator job. If parsing or drafting refuses, HS records the error;
 unparseable lines stay uncovered. Missions accepted before inventory readings were added have `inventory: null` and
@@ -75,7 +76,7 @@ Free-text `constraints` are reported to you and to the person; HS does not enfor
 | State | HS accepts it when |
 |-------|--------------------|
 | `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading, and the current spec covers every line and meets every requirement. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
-| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's own reading of the inventory shows the gap: a left_out line, or its draft refuses or has planner errors or warnings. A failing plan of your own candidate does not count: it shows a wiring fault, not missing data |
+| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's own reading shows a left_out line, a refused draft, or `plan_unrepairable > 0`. Repairable findings such as a BME280 address strap do not establish missing part data. Historical readings without this field keep their former error/warning rule. A failing plan of your own candidate does not count: it shows a wiring fault, not missing data |
 | `BLOCKED_NEEDS_PHYSICAL_MEASUREMENT`, `BLOCKED_NEEDS_REVERSE_ENGINEERING`, `BLOCKED_NEEDS_PROCUREMENT_EVIDENCE`, `BLOCKED_UNSAFE` | You cite an `evidence_required` with that blocker, for that candidate or the mission |
 | `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct designs (a new name, wire colours or order do not count) and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
 | `BUDGET_EXHAUSTED` | The operator-job budget is spent and no candidate is already ready |

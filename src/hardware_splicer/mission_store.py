@@ -630,7 +630,9 @@ def _read_inventory(inventory: list[str]) -> Dict[str, Any]:
             findings = build_device_plan(spec).get("findings") or []
             draft = {"ok": True, "error": None,
                      "plan_errors": sum(item.get("severity") == "error" for item in findings),
-                     "plan_warnings": sum(item.get("severity") == "warning" for item in findings)}
+                     "plan_warnings": sum(item.get("severity") == "warning" for item in findings),
+                     "plan_unrepairable": sum(item.get("severity") in {"error", "warning"} and not item.get("suggestions")
+                                              for item in findings)}
         except DevicePlanError as exc:
             draft = {"ok": False, "error": str(exc), "plan_errors": 0, "plan_warnings": 0}
     result = {"reading": reading, "draft": draft}
@@ -972,10 +974,10 @@ def _part_data_grounding(replayed: Mapping[str, Any]) -> str:
     if inventory is not None:
         draft = inventory["draft"]
         if (inventory["reading"]["left_out"] or not draft["ok"]
-                or draft["plan_errors"] + draft["plan_warnings"] > 0):
+                or draft.get("plan_unrepairable", draft["plan_errors"] + draft["plan_warnings"]) > 0):
             return "hs_inventory_reading"
     raise MissionStateError("BLOCKED_NEEDS_PART_DATA is refused: HS has data for every part listed "
-                            "and its own draft of them plans clean")
+                            "and its own draft of them plans clean or has only repairable findings")
 
 
 def _assert_budget_exhausted(replayed: Mapping[str, Any], budgets: Mapping[str, int]) -> None:
