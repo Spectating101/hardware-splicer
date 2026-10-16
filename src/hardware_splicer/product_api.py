@@ -67,6 +67,8 @@ from .project_store import ProjectStore
 from .project_events_api import create_project_events_router
 from .mission_api import create_mission_router
 from .mission_store import MissionStore
+from .physical_operator_api import create_physical_operator_router
+from .physical_workbench import AgentPhysicalWorkbench
 from .project_thread_api import create_project_thread_router
 from .project_thread_store import ProjectThreadStore
 from .semantic_circuit_api import create_semantic_circuit_router
@@ -107,12 +109,19 @@ def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> No
     )
 
 
-def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
+def create_product_app(
+    project_store: ProjectStore | None = None,
+    physical_workbench: AgentPhysicalWorkbench | None = None,
+) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
     resolved_store = install_at_save_retention(project_store or CompatibleProjectStore())
     app = create_engine_app()
     app.state.project_store = resolved_store
+    # Physical routes are always discoverable, but fail closed with 503 until a
+    # server-owned runtime is configured.  No machine endpoint/credential is
+    # inferred from mission or agent input.
+    app.state.physical_workbench = physical_workbench
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -125,6 +134,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_project_review_packet_router(resolved_store))
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
     app.include_router(create_mission_router(MissionStore(resolved_store)))
+    app.include_router(create_physical_operator_router())
     app.include_router(create_project_events_router(resolved_store))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())
