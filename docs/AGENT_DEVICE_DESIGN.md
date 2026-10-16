@@ -23,7 +23,7 @@ wrong — see [MACHINE_PROJECT_SPINE.md](MACHINE_PROJECT_SPINE.md).
 |------|-----------|---------------------|
 | 1 | `GET /v1/devices/spec-schema` | A JSON Schema for the spec, built from the module library, plus a catalogue of controllers and parts with their pins, roles and cited figures |
 | 2 | `GET /v1/devices/examples` | Complete example specs to start from (ESP32 and Raspberry Pi Pico) |
-| 2b | `POST /v1/devices/draft` | Optional. From `{"controller", "parts"}` (library ids) a spec wired the plain way: power, ground and the controller's default I2C bus. Returns the spec, what it assumed and the planner's findings for it |
+| 2b | `POST /v1/devices/draft` | Optional. From `{"controller", "parts"}` (library ids) or `{"text"}` (a typed parts list) a spec wired the plain way: power, ground and the controller's default I2C bus. Returns the spec, what it assumed and the planner's findings for it |
 | 3 | `POST /v1/devices/plan` | The plan: placement, wires, findings, steps, bill of materials |
 | 4 | Repair | Each `error` finding may carry `suggestions`. Apply one, re-plan, repeat until no errors |
 | 5 | `POST /v1/devices/engineering` | Bus, supply, heat, antenna, fit and printing review. Every number is sourced or marked as an assumption |
@@ -36,12 +36,13 @@ Steps 5 to 8 are independent of each other once the plan has no errors.
 
 ## Drafting from a parts list
 
-When a person says "an ESP32 with a BME280 and a display", the agent maps those words to library ids
-(`GET /v1/devices/spec-schema` lists them) and calls `draft`. The helper does no language processing and
-invents nothing: an unknown id, a non-controller board, or a part that is not a display or I2C breakout is
-refused with a reason. Two parts at one I2C address are not prevented; the planner reports
-`i2c_address_overlap`, and the agent should tell the person. A draft is a starting point, so it still goes
-through the plan, the repair loop and the engineering review.
+When a person says "an ESP32 with a BME280 and a display", the agent can send that text as `{"text"}` or
+map the words to library ids (`GET /v1/devices/spec-schema` lists them) and call `draft` with
+`{"controller", "parts"}`. The text form names only aliases the library holds; it does not guess a missing
+part. An unknown id, a non-controller board, or a part that is not a display or I2C breakout is refused
+with a reason. Two parts at one I2C address are not prevented; the planner reports `i2c_address_overlap`,
+and the agent should tell the person. A draft is a starting point, so it still goes through the plan, the
+repair loop and the engineering review.
 
 ## Suggestions
 

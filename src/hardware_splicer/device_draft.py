@@ -8,12 +8,40 @@ as to a spec written by hand.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
-from .device_plan import DEVICE_SPEC_SCHEMA, DevicePlanError, _module, build_device_plan
+from .device_plan import DEVICE_SPEC_SCHEMA, DevicePlanError, _module, build_device_plan, module_library
+from .text_safety import has_hidden_characters
 
 MAX_PARTS = 8
+MAX_TEXT = 2000
+MAX_FRAGMENTS = 40
 _WIRED_KINDS = {"display", "i2c_breakout"}
+
+# Explicit typed names only. A variant (ESP32-S3) is not the listed board; a generic word is labelled as one.
+TYPED_NAMES: dict[str, tuple[tuple[str, str], ...]] = {
+    "esp32-devkitc-v4": (("esp32", "name"), ("esp32 devkitc", "name"), ("devkitc", "name"), ("esp32 wroom 32e", "chip")),
+    "raspberry-pi-pico": (("raspberry pi pico", "name"), ("pico", "name"), ("rp2040", "chip")),
+    "ssd1306-096-i2c": (("ssd1306", "chip"), ("oled", "generic_word")),
+    "adafruit-bme280-stemma-qt": (("bme280", "chip"),),
+    "adafruit-bh1750-stemma-qt": (("bh1750fvi", "chip"), ("bh1750", "chip")),
+    "adafruit-ds3231-stemma-qt": (("ds3231", "chip"),),
+    "adafruit-ina219-stemma-qt": (("ina219", "chip"),),
+    "adafruit-mpu-6050-stemma-qt": (("mpu 6050", "chip"),),
+    "adafruit-ads1115-stemma-qt": (("ads1115", "chip"),),
+}
+
+# Known different boards. A space-separated variant is still that other board, not the library entry.
+NOT_THE_LISTED_BOARD: dict[str, tuple[str, ...]] = {
+    "esp32-devkitc-v4": (r"\besp32[\s\-]*(?:s2|s3|c2|c3|c5|c6|h2|p4)\b",),
+    "raspberry-pi-pico": (r"\bpico[\s\-]*(?:2|w)\b", r"\brp2350\b"),
+}
+
+_SPLIT = re.compile(r"(?:\n|,|;|\+|&|\s+and\s+|\s+with\s+|\s+plus\s+)", re.IGNORECASE)
+_QTY_PREFIX = re.compile(r"^\s*([1-8])\s*[x×]\s+")
+_QTY_SUFFIX = re.compile(r"\s[x×]\s*([1-8])\s*$")
+_VARIANT_TAIL = r"(?![A-Za-z0-9])(?!-?[A-Za-z]{0,2}\d)"
 
 
 def _pin(entry: dict[str, Any], role: str) -> dict[str, Any] | None:
@@ -80,3 +108,136 @@ def draft_device_spec(request: Any) -> dict[str, Any]:
         "findings": plan["findings"],
         "next": "POST the spec to /v1/devices/plan, then /v1/devices/engineering, to see the complete plan and review.",
     }
+
+
+def _alias_body(alias: str) -> str:
+    chunks: list[str] = []
+    i = 0
+    while i < len(alias):
+        if alias[i] in " -":
+            while i < len(alias) and alias[i] in " -":
+                i += 1
+            chunks.append(r"[\s\-]*" if chunks and i < len(alias) else r"[\s\-]+")
+        else:
+            j = i
+            while j < len(alias) and alias[j] not in " -":
+                j += 1
+            chunks.append(re.escape(alias[i:j]))
+            i = j
+    return "".join(chunks)
+
+
+def _compile_aliases() -> tuple[tuple[re.Pattern[str], str, str, str, str], ...]:
+    rows = []
+    for module_id, aliases in TYPED_NAMES.items():
+        name = _module(module_id)["name"]
+        for alias, basis in aliases:
+            pattern = re.compile(rf"\b{_alias_body(alias)}{_VARIANT_TAIL}", re.IGNORECASE)
+            rows.append((pattern, module_id, name, alias, basis))
+    return tuple(rows)
+
+
+_ALIAS_INDEX = _compile_aliases()
+_VARIANT_INDEX = tuple(
+    (module_id, _module(module_id)["name"], tuple(re.compile(pattern, re.IGNORECASE) for pattern in patterns))
+    for module_id, patterns in NOT_THE_LISTED_BOARD.items()
+)
+
+
+def _fragment_quantity(text: str) -> int:
+    prefix = _QTY_PREFIX.match(text)
+    if prefix:
+        return int(prefix.group(1))
+    suffix = _QTY_SUFFIX.search(text)
+    return int(suffix.group(1)) if suffix else 1
+
+
+def _other_board(text: str) -> tuple[set[str], str | None]:
+    dropped: set[str] = set()
+    note: str | None = None
+    for module_id, name, patterns in _VARIANT_INDEX:
+        for pattern in patterns:
+            hit = pattern.search(text)
+            if hit:
+                dropped.add(module_id)
+                if note is None:
+                    note = f"{hit.group(0)} is a different board from the library's {name}; it was not used."
+    return dropped, note
+
+
+def _match_fragment(text: str) -> list[dict[str, Any]]:
+    found: list[tuple[int, int, dict[str, Any]]] = []
+    for pattern, module_id, name, alias, basis in _ALIAS_INDEX:
+        for hit in pattern.finditer(text):
+            found.append((hit.start(), hit.end(), {"module": module_id, "name": name, "matched_on": alias, "basis": basis}))
+    found.sort(key=lambda row: (row[0], row[0] - row[1], -len(row[2]["matched_on"])))
+    matches: list[dict[str, Any]] = []
+    cursor = 0
+    for start, end, match in found:
+        if start < cursor:
+            continue
+        matches.append(match)
+        cursor = end
+    quantity = _fragment_quantity(text)
+    for index, match in enumerate(matches):
+        match["quantity"] = quantity if index == 0 else 1
+    return matches
+
+
+def parse_parts_text(text: str) -> dict[str, Any]:
+    """Split a typed list into fragments and name the library modules each one matches, or that nothing matched."""
+
+    if not isinstance(text, str) or not text.strip():
+        raise DevicePlanError("text must be a non-empty string")
+    text = text.strip()
+    if len(text) > MAX_TEXT:
+        raise DevicePlanError(f"text may be at most {MAX_TEXT} characters")
+    text = text.replace("\r\n", "\n").replace("\r", "\n").replace("\t", " ")
+    if has_hidden_characters(text.replace("\n", "")):
+        raise DevicePlanError("the text may not contain invisible characters")
+    pieces = [piece.strip() for piece in _SPLIT.split(text) if piece.strip()]
+    if len(pieces) > MAX_FRAGMENTS:
+        raise DevicePlanError(f"the list may name at most {MAX_FRAGMENTS} fragments")
+
+    fragments: list[dict[str, Any]] = []
+    parts: list[str] = []
+    controllers: list[str] = []
+    for piece in pieces:
+        matches = _match_fragment(piece)
+        dropped, note = _other_board(piece)
+        if dropped:
+            matches = [match for match in matches if match["module"] not in dropped]
+        fragment: dict[str, Any] = {"text": piece, "matches": matches}
+        if note:
+            fragment["note"] = note
+        fragments.append(fragment)
+        for match in matches:
+            if _module(match["module"])["kind"] == "mcu_board":
+                controllers.append(match["module"])
+            else:
+                parts.extend([match["module"]] * match["quantity"])
+    return {
+        "fragments": fragments,
+        "controller": controllers[0] if len(controllers) == 1 else None,
+        "parts": parts,
+        "left_out": [fragment["text"] for fragment in fragments if not fragment["matches"]],
+    }
+
+
+def draft_from_parts_text(body: dict[str, Any]) -> dict[str, Any]:
+    """Parse a typed parts list and hand the named controller and parts to the existing drafter. Approves nothing."""
+
+    if not isinstance(body, dict) or "text" not in body:
+        raise DevicePlanError("text is required")
+    parsed = parse_parts_text(body["text"])
+    named = [match["module"] for fragment in parsed["fragments"] for match in fragment["matches"] if _module(match["module"])["kind"] == "mcu_board"]
+    if not named:
+        names = ", ".join(entry["name"] for entry in module_library()["modules"] if entry["kind"] == "mcu_board")
+        raise DevicePlanError(f"name a controller from the library: {names}")
+    if len(named) > 1:
+        raise DevicePlanError("name one controller")
+    if not parsed["parts"]:
+        raise DevicePlanError("name a display or I2C breakout part from the library")
+    if len(parsed["parts"]) > MAX_PARTS:
+        raise DevicePlanError(f"parts may be at most {MAX_PARTS}")
+    return {"parsed": parsed, **draft_device_spec({"controller": parsed["controller"], "parts": parsed["parts"], "power": body.get("power", "usb")})}
