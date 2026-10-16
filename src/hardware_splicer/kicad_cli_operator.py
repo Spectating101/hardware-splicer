@@ -1,16 +1,16 @@
 """Bounded KiCad CLI integration for deterministic EDA verification and export.
 
 Agents select a server-registered KiCad project id and one of a small fixed set
-of operations.  They never provide argv, executable paths, arbitrary filesystem
-paths, or shell text.  KiCad remains authoritative for ERC/DRC results.
+of operations. They never provide argv, executable paths, arbitrary filesystem
+paths, or shell text. KiCad remains authoritative for ERC/DRC results.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Protocol
@@ -63,8 +63,8 @@ class KicadProjectRegistry:
         if pid in self._projects:
             raise FabricationValidationError("KiCad project id is already registered")
         root_path = Path(root).resolve()
-        if not root_path.is_dir():
-            raise FabricationValidationError("KiCad project root must be an existing directory")
+        if not root_path.is_dir() or root_path.is_symlink():
+            raise FabricationValidationError("KiCad project root must be an existing non-symlink directory")
         sch = self._file(root_path, schematic, ".kicad_sch", "schematic") if schematic is not None else None
         pcb = self._file(root_path, board, ".kicad_pcb", "board") if board is not None else None
         if sch is None and pcb is None:
@@ -94,7 +94,10 @@ class KicadProjectRegistry:
     @staticmethod
     def _file(root: Path, value: str | Path, suffix: str, field: str) -> Path:
         raw = Path(value)
-        path = raw.resolve() if raw.is_absolute() else (root / raw).resolve()
+        candidate = raw if raw.is_absolute() else root / raw
+        if candidate.is_symlink():
+            raise FabricationValidationError(f"KiCad {field} must not be a symlink")
+        path = candidate.resolve()
         try:
             path.relative_to(root)
         except ValueError as exc:
@@ -130,8 +133,7 @@ class KicadCliOperator:
 
     def verify(self, project_id: str) -> dict[str, Any]:
         project = self.projects.get(project_id)
-        reports = project.root / ".hs-kicad"
-        reports.mkdir(parents=True, exist_ok=True)
+        reports = _safe_run_dir(project.root, "verify")
         receipts: list[dict[str, Any]] = []
         if project.schematic is not None:
             output = reports / "erc.json"
@@ -160,9 +162,7 @@ class KicadCliOperator:
         project = self.projects.get(project_id)
         if project.board is None:
             raise FabricationValidationError("KiCad manufacturing export requires a board")
-        output = project.root / ".hs-kicad" / "manufacturing"
-        output.mkdir(parents=True, exist_ok=True)
-        before = {path.resolve() for path in output.rglob("*") if path.is_file()}
+        output = _safe_run_dir(project.root, "manufacturing")
         commands = [
             [self.executable, "pcb", "export", "gerbers", "--output", str(output), str(project.board)],
             [self.executable, "pcb", "export", "drill", "--output", str(output), str(project.board)],
@@ -173,10 +173,7 @@ class KicadCliOperator:
         for argv in commands:
             completed = self._run(argv, cwd=project.root)
             command_receipts.append(self._receipt("export", completed, artifacts={}))
-        after = sorted(path for path in output.rglob("*") if path.is_file() and path.resolve() not in before)
-        if not after:
-            after = sorted(path for path in output.rglob("*") if path.is_file())
-        artifacts = self._hash_files(after)
+        artifacts = self._hash_files(sorted(path for path in output.rglob("*") if path.is_file()))
         return {
             "schema": "hardware_splicer.kicad_manufacturing_bundle.v1",
             "project_id": project.project_id,
@@ -227,6 +224,22 @@ class KicadCliOperator:
                 continue
             result[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
         return dict(sorted(result.items()))
+
+
+def _safe_run_dir(root: Path, label: str) -> Path:
+    base_literal = root / ".hs-kicad"
+    if base_literal.exists() and base_literal.is_symlink():
+        raise FabricationValidationError("KiCad output root must not be a symlink")
+    base = base_literal.resolve()
+    try:
+        base.relative_to(root)
+    except ValueError as exc:
+        raise FabricationValidationError("KiCad output root escapes registered project") from exc
+    base.mkdir(parents=True, exist_ok=True)
+    path = Path(tempfile.mkdtemp(prefix=f"{label}-", dir=base))
+    if path.is_symlink() or path.resolve().parent != base.resolve():
+        raise FabricationValidationError("KiCad output directory is invalid")
+    return path
 
 
 def _id(value: Any, field: str) -> str:
