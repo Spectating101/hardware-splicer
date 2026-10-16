@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 import uuid
 from contextlib import contextmanager
@@ -27,6 +28,7 @@ from .fabrication_operator import FabricationAuthorityError, FabricationValidati
 from .physical_operator import PhysicalExecutionPlan, canonical_payload_sha256
 
 _SCHEMA = "hardware_splicer.physical_plan_grant.v1"
+_GRANT_ID_RE = re.compile(r"^pg-[0-9a-f]{32}$")
 
 
 def _utc_now() -> datetime:
@@ -50,8 +52,19 @@ def _parse(value: Any) -> datetime:
 
 
 def execution_plan_sha256(plan: PhysicalExecutionPlan) -> str:
+    """Hash one internally consistent server-created execution plan.
+
+    ``PhysicalExecutionPlan`` is frozen, but its nested payload is a mapping and
+    could otherwise be mutated after construction.  Every authority/dispatch
+    path that calls this helper therefore re-hashes the payload and refuses a
+    plan whose stored payload digest no longer matches its actual contents.
+    """
+
     if not isinstance(plan, PhysicalExecutionPlan):
         raise FabricationValidationError("physical authority requires a server-created execution plan")
+    actual_payload_sha256 = canonical_payload_sha256(plan.payload)
+    if actual_payload_sha256 != plan.payload_sha256:
+        raise FabricationValidationError("physical execution plan payload hash does not match payload")
     return canonical_payload_sha256(plan.to_dict())
 
 
@@ -91,7 +104,7 @@ class PhysicalPlanGrantStore:
                     fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     def _path(self, grant_id: str) -> Path:
-        if not isinstance(grant_id, str) or not grant_id.startswith("pg-"):
+        if not isinstance(grant_id, str) or not _GRANT_ID_RE.fullmatch(grant_id):
             raise FabricationValidationError("physical plan grant id is invalid")
         return self.root / f"{grant_id}.json"
 
@@ -112,6 +125,7 @@ class PhysicalPlanGrantStore:
         if type(ttl_seconds) is not int or not 1 <= ttl_seconds <= 3600:
             raise FabricationValidationError("ttl_seconds must be an integer from 1 to 3600")
 
+        plan_sha256 = execution_plan_sha256(plan)
         now = _utc_now()
         record = {
             "schema": _SCHEMA,
@@ -121,7 +135,7 @@ class PhysicalPlanGrantStore:
             "operator_id": plan.operator_id,
             "operator_kind": plan.operator_kind,
             "action": plan.action,
-            "execution_plan_sha256": execution_plan_sha256(plan),
+            "execution_plan_sha256": plan_sha256,
             "payload_sha256": plan.payload_sha256,
             "issued_by": {"kind": "human", "id": human_id.strip()},
             "issued_at": _iso(now),
@@ -150,13 +164,14 @@ class PhysicalPlanGrantStore:
     def consume(self, grant_id: str, plan: PhysicalExecutionPlan) -> dict[str, Any]:
         if not isinstance(plan, PhysicalExecutionPlan) or not plan.requires_human_grant:
             raise FabricationAuthorityError("grant consumption requires an actuation plan")
+        plan_sha256 = execution_plan_sha256(plan)
         expected = {
             "project_id": plan.project_id,
             "mission_id": plan.mission_id,
             "operator_id": plan.operator_id,
             "operator_kind": plan.operator_kind,
             "action": plan.action,
-            "execution_plan_sha256": execution_plan_sha256(plan),
+            "execution_plan_sha256": plan_sha256,
             "payload_sha256": plan.payload_sha256,
         }
         with self._locked():
