@@ -88,4 +88,21 @@ def create_fabricator_intelligence_router() -> APIRouter:
             raise _error(exc) from exc
         return {"ok": True, "estimate": estimate}
 
+    @router.post("/architecture/tradeoffs")
+    def compare_fabrication_options(request: Request, body: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            value = _body(body)
+            options = value.get("options")
+            if not isinstance(options, list):
+                raise FabricationValidationError("options must be a list")
+            comparison = _runtime(request).compare_options(
+                options=options,
+                currency=value.get("currency"),
+                as_of=value.get("as_of"),
+                require_known_stock=bool(value.get("require_known_stock", False)),
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, "comparison": comparison}
+
     return router
