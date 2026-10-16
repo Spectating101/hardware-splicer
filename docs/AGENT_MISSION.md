@@ -23,6 +23,9 @@ All routes are under `/v1/projects/{project_id}/missions` unless noted. Send JSO
 | `POST /{mission_id}/events` | Propose one event (below). Send `{"event": {...}, "author": {...}, "expected_event_seq": <the mission's last_event_seq>}` |
 | `POST /{mission_id}/candidates/{candidate_id}/run` with `{"operation": "..."}` | Ask HS to run one check on the candidate's current spec. Returns the mission and the new evaluation |
 | `GET /{mission_id}/runs/{name}` | The full output of a check (the evaluation's `artifact` is `runs/<name>`) |
+| `POST /{mission_id}/package` | After READY: build the mission's package and return its manifest |
+| `GET /{mission_id}/package` | After READY: download the package (a ZIP) |
+| `POST /{mission_id}/stage` with `{"author": {...}}` | After READY: open a project review of the design, once |
 
 Operations HS can run: `device_plan` (wiring checks; its `findings` carry `severity` and, for some errors,
 `suggestions`), `device_engineering` (bus, supply, heat, antenna, fit and printing review; `counts.exceeds_limit`
@@ -97,3 +100,25 @@ A refused proposal returns 409 or 422 with the reason. Read it; do not retry the
 
 Keep within the budgets: each check costs a job, and running out before the engineering review is itself an
 honest outcome.
+
+## Delivery after READY
+
+READY says HS's software checks support the design. The package is what the person builds from. It is
+deterministic (the same mission gives the same bytes) and stored by its content hash:
+
+- `01_requirements/`: the intake, the person's acceptance, and HS's inventory reading;
+- `02_design/`: the spec, and the exact plan and engineering run files READY rests on;
+- `03_firmware/`, `04_enclosure/`: what HS generates, or `BLOCKED.md` with the reason when it cannot (for example,
+  the application source supports one sensor breakout);
+- `05_validation/`: every software check recorded for the candidate, and the physical checks still required;
+- `06_provenance/events.jsonl`: the mission's events up to its verdict;
+- `MISSION_PACKAGE.json`: the manifest, hashing every file.
+
+Deliverable statuses are `generated`, `blocked`, `not_run`, `modeled_passed`, `modeled_partial`, `modeled_failed`
+and, for physical work, `required`. A firmware test status comes only from a recorded `device_application_run`; ask
+HS for one before READY if you want it in the package. The manifest keeps `physical_correctness: UNPROVEN` and
+both authorizations false.
+
+Staging opens a project review holding the design, the package hash, the evaluations and the chain of repairs that
+produced it. It promotes nothing: the design becomes a project revision only if a person accepts that review in the
+existing review workflow. You cannot decide a review.

@@ -56,7 +56,7 @@ _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
     {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "design_staged"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -587,6 +587,7 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "violated_requirements": _violated_requirements(requirements, state["spec"]),
         "evaluations": [
             {
+                "seq": item["seq"],
                 "operation": item["operation"],
                 "result": item["result"],
                 "artifact": item.get("artifact"),
@@ -602,6 +603,7 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     terminal: Dict[str, Any] | None = None
     accepted: Dict[str, Any] | None = None
     inventory: Dict[str, Any] | None = None
+    staged: Dict[str, Any] | None = None
     operator_jobs_used = 0
     for event in events:
         event_type = event.get("type")
@@ -631,6 +633,9 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             phase = "ARCHITECTING"
         elif event_type == "inventory_read":
             inventory = {key: event[key] for key in ("reading", "draft", "result_sha256")}
+        elif event_type == "design_staged":
+            # Delivery after READY: it opens a review and changes neither the phase nor the verdict.
+            staged = {"review_id": event["review_id"], "package_sha256": event["package_sha256"], "seq": seq}
         elif event_type == "repair_proposed":
             candidate_id = event["candidate_id"]
             state = candidates[candidate_id]
@@ -675,6 +680,7 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
         "operator_jobs_used": operator_jobs_used,
         "terminal": terminal,
         "accepted": accepted,
+        "staged": staged,
         "requirements": list((intake or {}).get("requirements") or []),
         "last_event_seq": last_event_seq,
         "last_event_at": events[-1]["created_at"] if events else "",
@@ -1070,6 +1076,7 @@ class MissionStore:
             "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
+            "staged": replayed["staged"],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
             "firmware_authorized": False,
@@ -1186,6 +1193,11 @@ class MissionStore:
     def read_run(self, project_id: str, mission_id: str, artifact: str) -> Dict[str, Any]:
         """Return a hashed run file this mission's own evaluations reference. Read-only."""
 
+        return json.loads(self.read_run_bytes(project_id, mission_id, artifact).decode("utf-8"))
+
+    def read_run_bytes(self, project_id: str, mission_id: str, artifact: str) -> bytes:
+        """The exact stored bytes of a run file, whose sha256 is the evaluation's recorded result_sha256."""
+
         if not isinstance(artifact, str) or _RUN_ARTIFACT_RE.fullmatch(artifact) is None:
             raise MissionValidationError("artifact must be a runs/<name>.json path")
         view = self.get_mission(project_id, mission_id)
@@ -1203,11 +1215,69 @@ class MissionStore:
         path = self._run_file_path(project_id, mission_id, filename)
         if not path.is_file():
             raise MissionError(f"run file {artifact} is missing")
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        data = path.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
         expected = (recorded.get("result") or {}).get("result_sha256")
         if not isinstance(expected, str) or digest.lower() != expected.lower():
             raise MissionError(f"run file {artifact} does not match its recorded result_sha256")
-        return _read_json(path)
+        return data
+
+    def _package_path(self, project_id: str, mission_id: str, package_sha256: str) -> Path:
+        if not re.fullmatch(r"[0-9a-f]{64}", package_sha256 or ""):
+            raise MissionValidationError("package_sha256 must be 64 lowercase hex characters")
+        project_dir = self._project_dir(project_id)
+        mission_dir = self._mission_dir(project_id, mission_id)
+        path = mission_dir / "packages" / f"{package_sha256[:16]}.zip"
+        self._assert_inside_project(path, project_dir, label="package file")
+        _reject_symlink(path, label="package file")
+        return path
+
+    def store_package(self, project_id: str, mission_id: str, data: bytes) -> str:
+        """Keep a delivery package by its content hash. Writing the same bytes again is a no-op."""
+
+        digest = hashlib.sha256(data).hexdigest()
+        path = self._package_path(project_id, mission_id, digest)
+        if path.is_file():
+            if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise MissionError(f"package {path.name} does not match its content hash")
+            return digest
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+        try:
+            tmp.write_bytes(data)
+            os.replace(tmp, path)
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+        return digest
+
+    def read_package(self, project_id: str, mission_id: str, package_sha256: str) -> bytes | None:
+        path = self._package_path(project_id, mission_id, package_sha256)
+        if not path.is_file():
+            return None
+        data = path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != package_sha256:
+            raise MissionError(f"package {path.name} does not match its content hash")
+        return data
+
+    @_serialized_mutation
+    def record_design_staged(
+        self, project_id: str, mission_id: str, *, review_id: str, package_sha256: str
+    ) -> Dict[str, Any]:
+        """HS records, once, that a READY mission's design was staged for a person's review."""
+
+        view, events, replayed = self._current(project_id, mission_id)
+        terminal = replayed.get("terminal") or {}
+        if terminal.get("state") != "READY_FOR_HUMAN_BUILD":
+            raise MissionStateError("only a READY_FOR_HUMAN_BUILD mission can stage its design")
+        if replayed.get("staged") is not None:
+            return self.get_mission(project_id, mission_id)
+        self._write_event(project_id, mission_id, int(replayed["last_event_seq"]) + 1, {
+            "type": "design_staged", "author": dict(_SYSTEM_AUTHOR),
+            "review_id": _require_text(review_id, field="review_id", max_len=64),
+            "package_sha256": package_sha256,
+        })
+        return self.get_mission(project_id, mission_id)
 
     @_serialized_mutation
     def accept_mission(
