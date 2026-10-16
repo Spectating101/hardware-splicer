@@ -40,6 +40,8 @@ from .engineering_source_ingestion_api import create_engineering_source_ingestio
 from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
+from .fabricator_digital_thread_api import create_fabricator_digital_thread_router
+from .fabricator_digital_thread_workbench import FabricatorDigitalThreadWorkbench
 from .fabricator_integration_api import create_fabricator_integration_router
 from .fabricator_integration_workbench import FabricatorIntegrationWorkbench
 from .machine_project_api import create_machine_project_router
@@ -115,6 +117,7 @@ def create_product_app(
     project_store: ProjectStore | None = None,
     physical_workbench: AgentPhysicalWorkbench | None = None,
     fabricator_workbench: FabricatorIntegrationWorkbench | None = None,
+    fabricator_digital_thread_workbench: FabricatorDigitalThreadWorkbench | None = None,
 ) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
@@ -128,6 +131,9 @@ def create_product_app(
     # Fabricator integration routes follow the same fail-closed rule. Tool paths,
     # machine URLs and registered project/job roots live only in server runtime.
     app.state.fabricator_workbench = fabricator_workbench
+    # Digital-thread routes expose retained artifact ids and bounded transforms,
+    # never raw paths/endpoints/credentials. They also fail closed until injected.
+    app.state.fabricator_digital_thread_workbench = fabricator_digital_thread_workbench
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -142,6 +148,7 @@ def create_product_app(
     app.include_router(create_mission_router(MissionStore(resolved_store)))
     app.include_router(create_physical_operator_router())
     app.include_router(create_fabricator_integration_router())
+    app.include_router(create_fabricator_digital_thread_router())
     app.include_router(create_project_events_router(resolved_store))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())
