@@ -34,7 +34,10 @@ class FakeTransport:
     def request(self, method, path, *, json_body=None):
         self.calls.append(("request", method, path, json_body))
         is_start = (
-            (path == "/api/job" and json_body == {"command": "start"})
+            (
+                path.startswith("/api/files/local/")
+                and json_body == {"command": "select", "print": True}
+            )
             or path.startswith("/printer/print/start?")
         )
         if self.fail_start and is_start:
@@ -116,7 +119,7 @@ def test_grant_is_one_shot_and_bound_to_exact_artifact(tmp_path):
         )
 
 
-def test_octoprint_stage_never_autostarts_and_start_needs_human_grant(tmp_path):
+def test_octoprint_stage_never_selects_or_autostarts_and_start_needs_human_grant(tmp_path):
     printer, grants, transport = _printer(tmp_path, OctoPrintBackend())
     prepared = printer.stage_gcode(filename="field case.gcode", data=GCODE)
     assert prepared.artifact_sha256 == SHA
@@ -125,16 +128,39 @@ def test_octoprint_stage_never_autostarts_and_start_needs_human_grant(tmp_path):
         "/api/files/local",
         "field case.gcode",
         GCODE,
-        {"select": "true", "print": "false"},
+        {"select": "false", "print": "false"},
     )
     with pytest.raises(FabricationAuthorityError):
         printer.start(prepared, project_id=PROJECT, mission_id=MISSION, grant_id="fg-missing")
-    assert not any(call[0] == "request" and call[2] == "/api/job" for call in transport.calls)
+    assert not any(call[0] == "request" for call in transport.calls)
 
     grant = _grant(grants)
     run = printer.start(prepared, project_id=PROJECT, mission_id=MISSION, grant_id=grant["grant_id"])
     assert run.artifact_sha256 == SHA
-    assert transport.calls[-1] == ("request", "POST", "/api/job", {"command": "start"})
+    assert transport.calls[-1] == (
+        "request",
+        "POST",
+        "/api/files/local/field%20case.gcode",
+        {"command": "select", "print": True},
+    )
+
+
+def test_octoprint_start_is_bound_to_exact_staged_remote_path(tmp_path):
+    printer, grants, transport = _printer(tmp_path, OctoPrintBackend())
+    prepared = printer.stage_gcode(filename="approved case.gcode", data=GCODE)
+    printer.start(
+        prepared,
+        project_id=PROJECT,
+        mission_id=MISSION,
+        grant_id=_grant(grants)["grant_id"],
+    )
+    start_call = transport.calls[-1]
+    assert start_call[2] == "/api/files/local/approved%20case.gcode"
+    assert start_call[3] == {"command": "select", "print": True}
+    assert not any(
+        call[0] == "request" and call[2] == "/api/job" and call[3] == {"command": "start"}
+        for call in transport.calls
+    )
 
 
 def test_pause_and_cancel_reduce_risk_without_new_authority_but_resume_needs_a_new_grant(tmp_path):
