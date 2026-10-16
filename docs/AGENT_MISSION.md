@@ -17,7 +17,7 @@ All routes are under `/v1/projects/{project_id}/missions` unless noted. Send JSO
 
 | Call | What it does |
 |------|--------------|
-| `GET /{mission_id}` | The mission: intake (goal, constraints, inventory), budgets, phase, candidates with their evaluations, events, terminal state |
+| `GET /{mission_id}` | The mission: intake (goal, constraints, inventory), HS's `inventory` reading and draft verdict, budgets, phase, candidates with their evaluations and inventory coverage, events, terminal state |
 | `POST /v1/devices/draft` with `{"text": "<parts, one per line>"}` | HS's draft from a typed parts list: a wired spec, what each line matched (`parsed.fragments`), what matched nothing (`parsed.left_out`), and the planner's findings. A draft approves nothing |
 | `GET /v1/devices/spec-schema` | The spec format and the module library (controllers and parts, with their pins) |
 | `POST /{mission_id}/events` | Propose one event (below). Send `{"event": {...}, "author": {...}, "expected_event_seq": <the mission's last_event_seq>}` |
@@ -29,12 +29,23 @@ Operations HS can run: `device_plan` (wiring checks; its `findings` carry `sever
 are errors, `counts.advisory` are warnings; it never "passes" anything), `device_case`, `device_application`,
 `device_application_run`. Each run costs one job from the mission's `max_operator_jobs` budget.
 
-You cannot accept a mission, record an evaluation, or write as Hardware Splicer. Those are refused.
+You cannot accept a mission, record an evaluation or inventory reading, or write as Hardware Splicer. Those are refused.
+
+When a person accepts, HS records `inventory_read` immediately after `accepted`. The mission's `inventory` holds
+`reading` (fragments, controller, parts and left_out), `draft` (`ok`, `error`, `plan_errors`, `plan_warnings`), and
+`result_sha256` of their canonical JSON. HS parses the person's inventory and plans its own draft with the same
+planner used for candidate checks. This costs no operator job. If parsing or drafting refuses, HS records the error;
+unparseable lines stay uncovered. Missions accepted before inventory readings were added have `inventory: null` and
+cannot reach READY. Old terminal records are replayed as recorded, with no new grounding claimed.
+
+Each candidate shows `covers_inventory`, `uncovered_inventory` (the lines it lacks), and `not_in_inventory` (extra
+module ids). Quantities count, and an instance cannot cover two inventory lines. Unknown lines are always uncovered.
+Extra parts are allowed; they still face the same planner and engineering checks.
 
 ## Events you can propose
 
 - `candidate_proposed`: `{"candidate": {"id": "A", "kind": "clean_sheet" | "reclaim_heavy" | "hybrid", "label": "...", "spec": {...}, "rationale": "..."}}`. At most the budgeted number of candidates.
-- `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. A repair resets the candidate: earlier checks no longer count.
+- `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. Once HS has read the inventory, a repair cannot increase the number of uncovered inventory lines. A repair resets the candidate: earlier checks no longer count.
 - `evidence_required`: `{"blocker": "<a BLOCKED_* state>", "need": "<what is missing>", "candidate_id": "A" (optional; omit for a need about the whole mission)}`.
 - `terminal_proposed`: `{"state": "...", "reason": "...", "candidate_id": "..." (when it concerns one), "cites": [<event seqs>]}`.
 
@@ -42,11 +53,17 @@ You cannot accept a mission, record an evaluation, or write as Hardware Splicer.
 
 | State | HS accepts it when |
 |-------|--------------------|
-| `READY_FOR_HUMAN_BUILD` | Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
-| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker: HS has no data for something the person needs (a part not in the library, a board that is a different board, a clash HS cannot express a repair for) |
+| `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading and the current spec covers every line. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
+| `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's reading has a left_out line, its own draft refuses or has planner errors or warnings, or you cite an HS `device_plan` evaluation with errors on a spec that covered the inventory when evaluated |
 | `BLOCKED_NEEDS_PHYSICAL_MEASUREMENT`, `BLOCKED_NEEDS_REVERSE_ENGINEERING`, `BLOCKED_NEEDS_PROCUREMENT_EVIDENCE`, `BLOCKED_UNSAFE` | You cite an `evidence_required` with that blocker, for that candidate or the mission |
-| `NO_FEASIBLE_ARCHITECTURE` | Every candidate's latest plan fails and its repairs are spent |
+| `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
 | `BUDGET_EXHAUSTED` | The operator-job budget is spent and no candidate is already ready |
+
+Every `BLOCKED_*` state and `NO_FEASIBLE_ARCHITECTURE` also refuses to stop short of a candidate already ready.
+Uncheckable physical, reverse engineering, procurement and safety needs remain allowed assertions; HS labels them,
+and does not claim to have established them. New terminal records expose `grounding`: `hs_inventory_reading` or
+`hs_evaluation` for a part-data blocker, `agent_assertion` for the other blockers, `hs_evaluation` for READY and
+NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. These labels grant no authority.
 
 A refused proposal returns 409 or 422 with the reason. Read it; do not retry the same thing.
 
