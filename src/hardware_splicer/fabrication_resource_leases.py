@@ -7,6 +7,8 @@ a resource after crashing.
 """
 from __future__ import annotations
 
+import hashlib
+import secrets
 import threading
 import uuid
 from dataclasses import asdict, dataclass
@@ -49,6 +51,10 @@ class WorkflowPlanRegistry:
         digest = plan.get("plan_sha256")
         if not isinstance(digest, str) or len(digest) != 64:
             raise FabricationValidationError("workflow plan is missing SHA-256")
+        try:
+            int(digest, 16)
+        except ValueError as exc:
+            raise FabricationValidationError("workflow plan SHA-256 is invalid") from exc
         normalized = _copy(plan)
         with self._lock:
             existing = self._plans.get(plan_id)
@@ -70,6 +76,7 @@ class ResourceLeaseStore:
     def __init__(self, *, plans: WorkflowPlanRegistry) -> None:
         self.plans = plans
         self._leases: dict[str, ResourceLease] = {}
+        self._token_hashes: dict[str, str] = {}
         self._lock = threading.RLock()
 
     def acquire(
@@ -110,20 +117,28 @@ class ResourceLeaseStore:
                 acquired_at=stamp.isoformat(),
                 expires_at=(stamp + timedelta(seconds=ttl_seconds)).isoformat(),
             )
+            token = "lt-" + secrets.token_urlsafe(32)
             self._leases[lease.lease_id] = lease
-            return lease.public_dict()
+            self._token_hashes[lease.lease_id] = _token_hash(token)
+            return {
+                "lease": lease.public_dict(),
+                "lease_token": token,
+                "lease_token_recoverable": False,
+                "grants_physical_authority": False,
+            }
 
-    def release(self, lease_id: str, *, holder_id: str) -> dict[str, Any]:
+    def release(self, lease_id: str, *, lease_token: str) -> dict[str, Any]:
         key = _id(lease_id, "lease_id")
-        holder = _id(holder_id, "holder_id")
+        if not isinstance(lease_token, str) or not lease_token.startswith("lt-") or len(lease_token) > 256:
+            raise FabricationValidationError("resource lease token is invalid")
         with self._lock:
-            try:
-                lease = self._leases[key]
-            except KeyError as exc:
-                raise FabricationValidationError("unknown resource lease") from exc
-            if lease.holder_id != holder:
-                raise FabricationValidationError("resource lease belongs to a different holder")
+            if key not in self._leases:
+                raise FabricationValidationError("unknown resource lease")
+            expected = self._token_hashes.get(key)
+            if expected is None or not secrets.compare_digest(expected, _token_hash(lease_token)):
+                raise FabricationValidationError("resource lease token is invalid")
             del self._leases[key]
+            self._token_hashes.pop(key, None)
             return {"ok": True, "lease_id": key, "released": True, "grants_physical_authority": False}
 
     def list_public(self, *, now: datetime | None = None) -> list[dict[str, Any]]:
@@ -140,6 +155,11 @@ class ResourceLeaseStore:
         ]
         for lease_id in expired:
             del self._leases[lease_id]
+            self._token_hashes.pop(lease_id, None)
+
+
+def _token_hash(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def _copy(value: Mapping[str, Any]) -> dict[str, Any]:
