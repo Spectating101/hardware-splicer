@@ -33,6 +33,8 @@ _SOURCE_SCHEMAS = {
             "hardware_splicer.camera_observation.v1",
             "hardware_splicer.instrument_observation.v1",
             "hardware_splicer.camera_status.v1",
+            "hardware_splicer.serial_observation.v1",
+            "hardware_splicer.serial_status.v1",
         }
     ),
     "evidence": frozenset({"hardware_splicer.physical_evidence.v1"}),
