@@ -31,7 +31,11 @@ are errors, `counts.advisory` are warnings; it never "passes" anything), `device
 
 You cannot accept a mission, record an evaluation or inventory reading, or write as Hardware Splicer. Those are refused.
 
-When a person accepts, HS records `inventory_read` immediately after `accepted`. The mission's `inventory` holds
+Only one mutation or check may run per mission at a time. A competing request returns `409` with `busy`;
+read the mission and retry after that operation completes. Reads and unrelated missions remain available.
+
+When a person accepts, HS records `inventory_read` immediately before `accepted`. If acceptance is interrupted,
+the reading grants no permission to run; a retry reuses it and completes acceptance. The mission's `inventory` holds
 `reading` (fragments, controller, parts and left_out), `draft` (`ok`, `error`, `plan_errors`, `plan_warnings`), and
 `result_sha256` of their canonical JSON. HS parses the person's inventory and plans its own draft with the same
 planner used for candidate checks. This costs no operator job. If parsing or drafting refuses, HS records the error;
