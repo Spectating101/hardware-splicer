@@ -1113,6 +1113,26 @@ def _required_roles(module: _Placed) -> list[tuple[str, str]]:
     return []
 
 
+def _grounded_modules(mcu: _Placed, pairs) -> set[str]:
+    """Follow ground-to-ground wires back to the controller, including daisy chains.
+
+    Selector pins are not ground returns. A floating group of peripheral grounds
+    does not become grounded by connecting one of its address selectors to GND.
+    """
+    neighbors: dict[str, set[str]] = {}
+    for _wire, (ma, pa), (mb, pb) in pairs:
+        if "ground" in pa["roles"] and "ground" in pb["roles"]:
+            neighbors.setdefault(ma.ref, set()).add(mb.ref)
+            neighbors.setdefault(mb.ref, set()).add(ma.ref)
+    grounded, pending = set(), [mcu.ref]
+    while pending:
+        ref = pending.pop()
+        if ref not in grounded:
+            grounded.add(ref)
+            pending.extend(neighbors.get(ref, set()) - grounded)
+    return grounded
+
+
 # --- the plan -------------------------------------------------------------------------------------------------------------
 
 
@@ -1263,6 +1283,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     findings.extend(bus_findings)
     i2c_addresses = _i2c_addresses(placed, resolved_pairs, rejected)
     # Everything a module needs to work is wired, by a wire that the checks did not reject.
+    grounded = _grounded_modules(mcu, [pair for pair in resolved_pairs if pair[0] not in rejected])
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
             connected = any(
@@ -1272,6 +1293,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 if role != "ground" or all("ground" in pin["roles"] for _owner, pin in (a, b))
                 for m, p in (a, b)
             )
+            if role == "ground":
+                connected = module.ref in grounded
             if not connected:
                 findings.append(_finding("error", "missing_connection", f"{module.ref} ({module.entry['name']}) has no wire on its {label} pin.", "module library: required pins"))
     # DevKitC user guide: "The power supply must be provided using one and only one of the options above".

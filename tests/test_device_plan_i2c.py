@@ -160,3 +160,14 @@ def test_an_address_strap_is_not_a_modules_missing_ground_return():
     spec["connections"].append({"from": "sensor_2.SDO", "to": "sensor_2.GND"})
     assert any(f["rule"] == "missing_connection" and "sensor_2" in f["message"] and "ground" in f["message"]
                for f in build_device_plan(spec)["findings"])
+
+
+def test_floating_module_grounds_are_not_a_controller_ground_return():
+    spec = two_sensors()
+    spec["connections"] = [w for w in spec["connections"] if not w["from"].endswith(".GND")]
+    spec["connections"] += [{"from": "sensor.GND", "to": "sensor_2.GND"},
+                            {"from": "sensor_2.SDO", "to": "mcu.GND"}]
+    missing = [f for f in build_device_plan(spec)["findings"] if f["rule"] == "missing_connection" and "ground" in f["message"]]
+    assert len(missing) == 2
+    spec["connections"].append({"from": "sensor.GND", "to": "mcu.GND"})
+    assert not [f for f in build_device_plan(spec)["findings"] if f["severity"] in {"error", "warning"}]
