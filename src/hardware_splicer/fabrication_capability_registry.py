@@ -1,7 +1,7 @@
 """Capability-driven selection for fabrication and lab operators.
 
-This registry is intentionally descriptive.  It does not contain credentials,
-network endpoints, raw commands or authorization.  Agents may ask for a
+This registry is intentionally descriptive. It does not contain credentials,
+network endpoints, raw commands or authorization. Agents may ask for a
 capability envelope; server configuration decides which concrete operator ids
 exist and whether they are available.
 """
@@ -89,6 +89,8 @@ class FabricationCapabilityRegistry:
         numeric_minimums: Mapping[str, float | int] | None = None,
         allow_simulated: bool = True,
     ) -> list[dict[str, Any]]:
+        if isinstance(required_capabilities, (str, bytes)) or not isinstance(required_capabilities, Iterable):
+            raise FabricationValidationError("required_capabilities must be a collection of capability ids")
         required = {self._identifier(item, "required capability") for item in required_capabilities}
         if not required:
             raise FabricationValidationError("at least one required capability is needed")
@@ -154,6 +156,8 @@ class FabricationCapabilityRegistry:
 
     @classmethod
     def _numeric_minimums(cls, value: Mapping[str, Any]) -> dict[str, float | int]:
+        if not isinstance(value, Mapping):
+            raise FabricationValidationError("numeric_minimums must be an object")
         result: dict[str, float | int] = {}
         for key, raw in value.items():
             name = cls._identifier(key, "numeric minimum key")
