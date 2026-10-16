@@ -46,6 +46,8 @@ from .fabricator_integration_api import create_fabricator_integration_router
 from .fabricator_integration_workbench import FabricatorIntegrationWorkbench
 from .fabricator_intelligence_api import create_fabricator_intelligence_router
 from .fabricator_intelligence_workbench import FabricatorIntelligenceWorkbench
+from .fabricator_lab_api import create_fabricator_lab_router
+from .fabricator_lab_workbench import FabricatorLabWorkbench
 from .fabricator_validation_api import create_fabricator_validation_router
 from .fabricator_validation_workbench import FabricatorValidationWorkbench
 from .machine_project_api import create_machine_project_router
@@ -124,6 +126,7 @@ def create_product_app(
     fabricator_digital_thread_workbench: FabricatorDigitalThreadWorkbench | None = None,
     fabricator_intelligence_workbench: FabricatorIntelligenceWorkbench | None = None,
     fabricator_validation_workbench: FabricatorValidationWorkbench | None = None,
+    fabricator_lab_workbench: FabricatorLabWorkbench | None = None,
 ) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
@@ -146,6 +149,9 @@ def create_product_app(
     # Validation procedures/criteria and evidence resolution are server-owned;
     # agents can list frozen procedures and evaluate retained evidence ids only.
     app.state.fabricator_validation_workbench = fabricator_validation_workbench
+    # Lab orchestration allocates capabilities/resources and plan-bound leases;
+    # reservations never substitute for the separate physical action grant.
+    app.state.fabricator_lab_workbench = fabricator_lab_workbench
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -163,6 +169,7 @@ def create_product_app(
     app.include_router(create_fabricator_digital_thread_router())
     app.include_router(create_fabricator_intelligence_router())
     app.include_router(create_fabricator_validation_router())
+    app.include_router(create_fabricator_lab_router())
     app.include_router(create_project_events_router(resolved_store))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())
