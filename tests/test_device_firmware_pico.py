@@ -22,17 +22,28 @@ def _package(spec):
     return metadata, data, files
 
 
-# Hashes of the ESP32 diagnostic packages before the Pico diagnostic existed: the ESP32 output must not move.
+# Step 4 adds plan metadata and therefore changes package/manifest hashes only.
 ESP32_PACKAGES = {
-    "esp32_oled_bme280_usb": "f9d5eefe75453894827ef7f4bc2cc8728fe05b57f4b92d90c088a8ef7a6419b1",
-    "esp32_oled_usb": "bca8efef8c6720cb05ee3da3c6f4dcf4b511206847924860d95af1da2536265b",
+    "esp32_oled_bme280_usb": "eca4ea8a60ed6d05d3c29f40d4d87e6e0420175d79ff3a130752c273a3c38780",
+    "esp32_oled_usb": "e630ecb67fd5d33236d9639b4ccfd42202c6743f180521b3adde2e1c3be4db3d",
+}
+ESP32_SOURCE_SHA256 = {
+    "esp32_oled_bme280_usb": "084b9c5dc2a4810f7b792d2b15a8b8cbe54bfb7abdac807002c1f5f913414c98",
+    "esp32_oled_usb": "e96900f4f97c6d09b1d7e9150e4ebf14a36f875cc781df3d23b3a40543c33528",
 }
 
 
 @pytest.mark.parametrize("example", sorted(ESP32_PACKAGES))
-def test_the_esp32_diagnostic_package_is_byte_for_byte_unchanged(example):
+def test_the_esp32_diagnostic_package_is_pinned_and_its_source_is_unchanged(example):
     _metadata, data = build_device_firmware(example_specs()[example])
     assert hashlib.sha256(data).hexdigest() == ESP32_PACKAGES[example]
+    archive = zipfile.ZipFile(io.BytesIO(data))
+    for member, expected in {
+        "src/main.cpp": ESP32_SOURCE_SHA256[example],
+        "platformio.ini": "2cad0ef43ec703be725ac0928ecdeece88a708ab8caed32a49f3e02d26016b7f",
+        "README.md": "80f24a3e5aa40d58b577cc2e1c31854c636956a776608b3f22f7e109557df003",
+    }.items():
+        assert hashlib.sha256(archive.read(member)).hexdigest() == expected
 
 
 def test_the_pico_diagnostic_targets_the_pinned_rp2040_core_on_i2c0():

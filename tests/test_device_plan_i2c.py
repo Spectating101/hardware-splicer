@@ -129,3 +129,26 @@ def test_new_library_facts_are_sourced_and_do_not_invent_a_3v3_strap():
     esp = entries["esp32-devkitc-v4"]
     assert esp["electrical"]["i2c_controller_count"] == 2
     assert esp["electrical"]["i2c_controller_count_source"] in {s["url"] for s in esp["sources"]}
+
+
+def test_pullups_on_independent_buses_are_not_reported_as_stacked():
+    spec = draft_from_parts_text({"text": "Raspberry Pi Pico\nBH1750\nDS3231"})["spec"]
+    for wire in spec["connections"]:
+        if wire["from"] == "sensor_2.SDA":
+            wire["to"] = "mcu.GP6"
+        elif wire["from"] == "sensor_2.SCL":
+            wire["to"] = "mcu.GP7"
+    assert "i2c_pullup_stack" not in rules(build_device_plan(spec))
+
+
+@pytest.mark.parametrize("second", [None, ("GP6", "GP7")])
+def test_a_clean_multi_sensor_plan_does_not_silently_export_single_sensor_firmware(second):
+    from hardware_splicer.device_application import build_device_application
+    from hardware_splicer.device_plan import DevicePlanError
+
+    spec = two_sensors(second)
+    if second is None:
+        spec["connections"].append({"from": "sensor_2.SDO", "to": "mcu.GND"})
+    assert not [f for f in build_device_plan(spec)["findings"] if f["severity"] in {"error", "warning"}]
+    with pytest.raises(DevicePlanError, match="only one sensor breakout"):
+        build_device_application(spec)

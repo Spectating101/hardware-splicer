@@ -48,11 +48,10 @@ PACKAGE_MEMBERS = {
     "README.md",
 }
 
-# Frozen before the I2C helper extract. The diagnostic ZIP must stay byte-identical.
-# The diagnostic zip for the example spec. It changed once, deliberately, when the case began to meet Espressif's 15 mm antenna
-# clearance and gained two board stops (the previous value was e26a56bc...). The ESP32 plans themselves are still pinned to their
-# original bytes, under the options that restore the old case, in test_device_controllers.py.
-DIAGNOSTIC_EXAMPLE_ZIP_SHA256 = "f9d5eefe75453894827ef7f4bc2cc8728fe05b57f4b92d90c088a8ef7a6419b1"
+# Step 4 deliberately adds bus/address metadata to DEVICE_PLAN.json and its
+# hash-bound manifest. Firmware source/config/README/spec bytes are unchanged;
+# their pre-Step-4 hashes are pinned in test_device_firmware_pico.py.
+DIAGNOSTIC_EXAMPLE_ZIP_SHA256 = "eca4ea8a60ed6d05d3c29f40d4d87e6e0420175d79ff3a130752c273a3c38780"
 
 SCENARIOS = (
     "boot_ok",

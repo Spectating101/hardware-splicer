@@ -1031,7 +1031,11 @@ def test_address_overlap_and_pullup_stack_fire_only_when_true(write_library) -> 
     assert "i2c_address_overlap" not in _rules(clean)
     assert "i2c_pullup_stack" not in _rules(clean)
 
-    write_library(lambda data: data["modules"][2]["i2c"].__setitem__("addresses", ["0x3C", "0x76"]))
+    def overlap_with_display(data):
+        bme = data["modules"][2]
+        bme["i2c"].update(addresses=["0x3C", "0x76"], default_address="0x3C")
+        next(p for p in bme["pins"] if p["name"] == "SDO")["address_select"]["open"] = "0x3C"
+    write_library(overlap_with_display)
     overlapped = build_device_plan(_oled_plus_bme())
     finding = next(f for f in overlapped["findings"] if f["rule"] == "i2c_address_overlap")
     assert finding["severity"] in {"info", "warning"}
