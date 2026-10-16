@@ -30,6 +30,9 @@ except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
 
 from .device_draft import draft_from_parts_text, parse_parts_text
 from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
+from pydantic import ValidationError
+
+from .physical_evidence_ledger import PhysicalEvidenceEnvelope, physical_evidence_envelope_hash
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -56,7 +59,7 @@ _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
     {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "design_staged"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "design_staged", "evidence_supplied"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -80,6 +83,17 @@ _REQUIREMENT_PATHS = {
     "power.source": ("power.source", str),
 }
 _MAX_REQUIREMENTS = 10
+# What a person can be asked to measure, and the physical-evidence record kind that must carry the answer.
+_REQUEST_KINDS = {
+    "dimensional": "dimensional_measurement",
+    "electrical": "electrical_measurement",
+    "continuity": "electrical_measurement",
+    "boot_log": "inspection",
+}
+_REQUEST_KEYS = frozenset({"kind", "target", "quantity", "expected", "instructions"})
+_DIMENSIONAL_QUANTITIES = frozenset({"pcb_mm.x", "pcb_mm.y", "pcb_mm.z", "above_board_mm"})
+_MAX_LOG_BYTES = 64 * 1024
+_MAX_READINGS = 10
 _BUDGET_KEYS = frozenset({"max_candidates", "max_repairs_per_candidate", "max_operator_jobs"})
 _CANDIDATE_KEYS = frozenset({"id", "kind", "label", "spec", "rationale"})
 _RESULT_KEYS = frozenset({"errors", "warnings", "result_sha256", "summary"})
@@ -379,6 +393,108 @@ def _normalize_requirements(value: Any) -> list[Dict[str, Any]]:
     return rows
 
 
+def _finite(value: Any, *, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value or value in (float("inf"), float("-inf")):
+        raise MissionValidationError(f"{field} must be a finite number")
+    return float(value)
+
+
+def _normalize_request(value: Any) -> Dict[str, Any]:
+    """What the agent asks a person to measure. HS validates the shape; the person decides whether to answer."""
+    raw = _require_mapping(value, label="request")
+    extra = set(raw) - _REQUEST_KEYS
+    if extra:
+        raise MissionValidationError(f"request contains unknown fields: {sorted(extra)}")
+    kind = raw.get("kind")
+    if kind not in _REQUEST_KINDS:
+        raise MissionValidationError(f"request.kind must be one of {', '.join(sorted(_REQUEST_KINDS))}")
+    request: Dict[str, Any] = {
+        "kind": kind,
+        "target": _require_text(raw.get("target"), field="request.target", max_len=200),
+        "instructions": _require_text(raw.get("instructions"), field="request.instructions", max_len=_MAX_NEED),
+    }
+    quantity = raw.get("quantity")
+    if kind == "dimensional":
+        try:
+            _module(request["target"])
+        except DevicePlanError as exc:
+            raise MissionValidationError(f"a dimensional request's target must be a library module id: {exc}") from exc
+        if quantity not in _DIMENSIONAL_QUANTITIES:
+            raise MissionValidationError(f"a dimensional request's quantity must be one of {', '.join(sorted(_DIMENSIONAL_QUANTITIES))}")
+    if kind in {"dimensional", "electrical", "continuity"}:
+        request["quantity"] = _normalize_slug(quantity, field="request.quantity") if kind != "dimensional" else quantity
+    elif quantity is not None:
+        raise MissionValidationError("a boot_log request has no quantity")
+    expected = raw.get("expected")
+    if expected is not None:
+        expected = _require_mapping(expected, label="request.expected")
+        if set(expected) != {"min", "max", "unit"}:
+            raise MissionValidationError("request.expected must hold exactly min, max and unit")
+        low = _finite(expected["min"], field="request.expected.min")
+        high = _finite(expected["max"], field="request.expected.max")
+        if low > high:
+            raise MissionValidationError("request.expected.min must not exceed max")
+        request["expected"] = {"min": low, "max": high,
+                               "unit": _require_text(expected["unit"], field="request.expected.unit", max_len=10)}
+    return request
+
+
+def _normalize_readings(request: Mapping[str, Any], values: Any) -> Any:
+    if request["kind"] == "boot_log":
+        raw = _require_mapping(values, label="values")
+        if set(raw) != {"log"} or not isinstance(raw["log"], str):
+            raise MissionValidationError("a boot log answer is {\"log\": \"<text>\"}")
+        if len(raw["log"].encode("utf-8")) > _MAX_LOG_BYTES:
+            raise MissionValidationError("a boot log may be at most 64 KB")
+        return {"log": raw["log"]}
+    if not isinstance(values, list) or not 1 <= len(values) <= _MAX_READINGS:
+        raise MissionValidationError(f"values must be a list of 1 to {_MAX_READINGS} readings")
+    readings = []
+    for index, item in enumerate(values):
+        row = _require_mapping(item, label=f"values[{index}]")
+        if set(row) != {"quantity", "value", "unit"}:
+            raise MissionValidationError(f"values[{index}] must hold exactly quantity, value and unit")
+        if row["quantity"] != request.get("quantity"):
+            raise MissionValidationError(f"values[{index}].quantity must be {request.get('quantity')!r}, as the need asked")
+        readings.append({"quantity": row["quantity"], "value": _finite(row["value"], field=f"values[{index}].value"),
+                         "unit": _require_text(row["unit"], field=f"values[{index}].unit", max_len=10)})
+    return readings
+
+
+def _compare(request: Mapping[str, Any], readings: Any) -> str:
+    expected = request.get("expected")
+    if not expected or not isinstance(readings, list):
+        return "not_comparable"
+    if any(row["unit"] != expected["unit"] for row in readings):
+        return "not_comparable"
+    inside = all(expected["min"] <= row["value"] <= expected["max"] for row in readings)
+    return "within" if inside else "outside"
+
+
+def _dimensional_override(request: Mapping[str, Any], readings: list[Mapping[str, Any]]) -> Dict[str, Any]:
+    value = readings[-1]["value"]
+    quantity = request["quantity"]
+    if quantity.startswith("pcb_mm."):
+        return {"pcb_mm": {quantity.split(".", 1)[1]: value}}
+    return {quantity: value}
+
+
+def _merge_measurements(base: Mapping[str, Any], extra: Mapping[str, Any]) -> Dict[str, Any]:
+    merged = json.loads(json.dumps(dict(base)))
+    for module_id, sizes in extra.items():
+        entry = merged.setdefault(module_id, {})
+        for key, value in sizes.items():
+            if isinstance(value, Mapping):
+                entry.setdefault(key, {}).update(value)
+            else:
+                entry[key] = value
+    return merged
+
+
+def _person_measurements(intake: Mapping[str, Any], replayed: Mapping[str, Any]) -> Dict[str, Any]:
+    return _merge_measurements(intake.get("measurements") or {}, replayed.get("supplied_measurements") or {})
+
+
 def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any]) -> list[str]:
     """Requirements the spec breaks, read from the planner's own validated spec so absent keys take its defaults."""
     if not requirements:
@@ -397,9 +513,9 @@ def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[
     return broken
 
 
-def _assert_measurements_are_the_persons(intake: Mapping[str, Any], spec: Mapping[str, Any], *, field: str) -> None:
-    """Measured sizes are physical evidence. An agent cannot have measured anything; only the person's intake can say."""
-    measured = intake.get("measurements") or {}
+def _assert_measurements_are_the_persons(measured: Mapping[str, Any], spec: Mapping[str, Any], *, field: str) -> None:
+    """Measured sizes are physical evidence. An agent cannot have measured anything; only the person can say, in the
+    intake or by answering a measurement need."""
     modules = spec.get("modules")
     for index, row in enumerate(modules if isinstance(modules, list) else []):
         if not isinstance(row, Mapping) or not row.get("overrides"):
@@ -407,7 +523,7 @@ def _assert_measurements_are_the_persons(intake: Mapping[str, Any], spec: Mappin
         if row["overrides"] != measured.get(row.get("module")):
             raise MissionValidationError(
                 f"{field}.modules[{index}].overrides are refused: measured sizes are physical evidence that only the "
-                "person supplies, in the mission intake's measurements")
+                "person supplies, in the mission intake's measurements or by answering a measurement need")
 
 
 def _normalize_slug(value: Any, *, field: str) -> str:
@@ -604,6 +720,8 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     accepted: Dict[str, Any] | None = None
     inventory: Dict[str, Any] | None = None
     staged: Dict[str, Any] | None = None
+    needs: Dict[int, Dict[str, Any]] = {}
+    supplied_measurements: Dict[str, Any] = {}
     operator_jobs_used = 0
     for event in events:
         event_type = event.get("type")
@@ -629,6 +747,7 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
                 "evaluations": [],
                 "proposal_seq": seq,
                 "last_repair_seq": None,
+                "last_evidence_seq": None,
             }
             phase = "ARCHITECTING"
         elif event_type == "inventory_read":
@@ -658,7 +777,23 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             operator_jobs_used += 1
             phase = "EVALUATING"
         elif event_type == "evidence_required":
+            needs[seq] = {"seq": seq, "blocker": event["blocker"], "need": event["need"],
+                          "candidate_id": event.get("candidate_id"), "request": event.get("request"),
+                          "need_state": "open", "answered_by": None}
             phase = "EVIDENCE_REQUIRED"
+        elif event_type == "evidence_supplied":
+            need = needs[int(event["need_seq"])]
+            need["need_state"] = "contradicted" if event["comparison"] == "outside" else "resolved"
+            need["answered_by"] = seq
+            # A new physical fact invalidates checks that came before it, as a repair does.
+            for candidate_id, state in candidates.items():
+                if need["candidate_id"] in (None, candidate_id):
+                    state["last_evidence_seq"] = seq
+            override = event.get("override")
+            if override:
+                supplied_measurements = _merge_measurements(supplied_measurements, override)
+            standing = any(item["need_state"] != "resolved" for item in needs.values())
+            phase = "EVIDENCE_REQUIRED" if standing else "EVALUATING"
         elif event_type == "terminal_proposed":
             phase = "TERMINAL"
             terminal = {
@@ -681,6 +816,8 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
         "terminal": terminal,
         "accepted": accepted,
         "staged": staged,
+        "needs": list(needs.values()),
+        "supplied_measurements": supplied_measurements,
         "requirements": list((intake or {}).get("requirements") or []),
         "last_event_seq": last_event_seq,
         "last_event_at": events[-1]["created_at"] if events else "",
@@ -688,15 +825,21 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
 
 
 def _since_seq(candidate: Mapping[str, Any]) -> int:
+    """Checks count only after the candidate's latest repair and the latest physical fact that concerns it."""
     last_repair = candidate.get("last_repair_seq")
-    if last_repair is not None:
-        return int(last_repair)
-    return int(candidate.get("proposal_seq") or 0)
+    base = int(last_repair) if last_repair is not None else int(candidate.get("proposal_seq") or 0)
+    return max(base, int(candidate.get("last_evidence_seq") or 0))
+
+
+def _resolved_needs(events: list[Mapping[str, Any]]) -> set[int]:
+    return {int(item["need_seq"]) for item in events
+            if item.get("type") == "evidence_supplied" and item.get("comparison") != "outside"}
 
 
 def _open_evidence_need_blocks(events: list[Mapping[str, Any]], candidate_id: str) -> bool:
+    resolved = _resolved_needs(events)
     for item in events:
-        if item.get("type") != "evidence_required":
+        if item.get("type") != "evidence_required" or int(item["seq"]) in resolved:
             continue
         named = item.get("candidate_id")
         if named is None or named == candidate_id:
@@ -760,6 +903,7 @@ def _assert_blocked_cites(events: list[Mapping[str, Any]], event: Mapping[str, A
         raise MissionValidationError("cites must be a list of event sequence numbers")
     normalized: list[int] = []
     by_seq = {int(item["seq"]): item for item in events}
+    resolved = _resolved_needs(events)
     target = event.get("candidate_id")
     matched = False
     for item in cites:
@@ -767,6 +911,8 @@ def _assert_blocked_cites(events: list[Mapping[str, Any]], event: Mapping[str, A
         named = by_seq.get(seq)
         if named is None or named.get("type") not in {"evidence_required", "evaluation_recorded"}:
             raise MissionStateError(f"{state} may cite only existing evidence_required or evaluation_recorded events ({seq})")
+        if seq in resolved:
+            raise MissionStateError(f"{state} may not cite need {seq}: a person's evidence resolved it")
         if (named.get("type") == "evidence_required" and named.get("blocker") == state
                 and (named.get("candidate_id") is None or target is None or named.get("candidate_id") == target)):
             matched = True
@@ -1077,6 +1223,7 @@ class MissionStore:
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "staged": replayed["staged"],
+            "needs": replayed["needs"],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
             "firmware_authorized": False,
@@ -1260,6 +1407,98 @@ class MissionStore:
             raise MissionError(f"package {path.name} does not match its content hash")
         return data
 
+    def _envelope_used(self, project_id: str, envelope_hash: str) -> bool:
+        root = self._missions_root(project_id)
+        if not root.is_dir():
+            return False
+        for mission_dir in sorted(root.iterdir()):
+            if not (mission_dir / "mission.json").is_file():
+                continue
+            for event in self._events(project_id, mission_dir.name):
+                if event.get("type") == "evidence_supplied" and event.get("envelope_hash") == envelope_hash:
+                    return True
+        return False
+
+    @_serialized_mutation
+    def supply_evidence(
+        self,
+        project_id: str,
+        mission_id: str,
+        need_seq: int,
+        *,
+        envelope: Mapping[str, Any],
+        values: Any,
+        author: Mapping[str, Any],
+        expected_event_seq: int | None = None,
+    ) -> Dict[str, Any]:
+        """A person answers an evidence need with a physical-evidence envelope bound to this mission and need.
+
+        HS checks the envelope's hash and binding and compares numbers with the requested range. It grants nothing:
+        the mission stays UNPROVEN and no flashing or power-on is authorized by an answer.
+        """
+
+        person = _normalize_author(author)
+        if person["kind"] != "human":
+            raise MissionValidationError("only a person can supply physical evidence")
+        view, events, replayed = self._current(project_id, mission_id)
+        last_seq = int(replayed["last_event_seq"])
+        if expected_event_seq is not None and (expected_event_seq.__class__ is not int or expected_event_seq != last_seq):
+            raise MissionConflict(f"mission {mission_id!r} is at event {last_seq}, expected {expected_event_seq}")
+        self._assert_not_terminal(replayed, mission_id)
+        need = next((item for item in replayed["needs"] if item["seq"] == need_seq), None)
+        if need is None:
+            raise MissionValidationError(f"event {need_seq} is not an evidence need of this mission")
+        request = need.get("request")
+        if not request:
+            raise MissionStateError(f"need {need_seq} has no structured request a person can answer")
+        if need["need_state"] == "resolved":
+            raise MissionStateError(f"need {need_seq} is already resolved")
+        readings = _normalize_readings(request, values)
+        try:
+            parsed = PhysicalEvidenceEnvelope.model_validate(dict(_require_mapping(envelope, label="envelope")))
+        except ValidationError as exc:
+            raise MissionValidationError(f"envelope is not a valid physical-evidence envelope: {exc.errors()[0]['msg']}") from exc
+        recomputed = physical_evidence_envelope_hash(
+            envelope_id=parsed.envelope_id, record=parsed.record, raw_files=parsed.raw_files,
+            created_at=parsed.created_at, created_by=parsed.created_by, metadata=parsed.metadata,
+        )
+        if recomputed != parsed.envelope_hash:
+            raise MissionValidationError("envelope_hash does not match the envelope's contents")
+        if self._envelope_used(project_id, parsed.envelope_hash):
+            raise MissionValidationError("this envelope was already used in this project")
+        binding = parsed.metadata.get("mission")
+        expected_binding = {"project_id": project_id, "mission_id": mission_id, "need_seq": need_seq, "values": readings}
+        if not isinstance(binding, Mapping) or json.loads(json.dumps(dict(binding))) != json.loads(json.dumps(expected_binding)):
+            raise MissionValidationError(
+                "the envelope must be bound to this project, mission and need, and carry the same values, in metadata.mission")
+        if parsed.record.project_id != project_id:
+            raise MissionValidationError("the envelope's record belongs to another project")
+        if parsed.record.kind.value != _REQUEST_KINDS[request["kind"]]:
+            raise MissionValidationError(f"a {request['kind']} need is answered by a {_REQUEST_KINDS[request['kind']]} record")
+        record: Dict[str, Any] = {
+            "type": "evidence_supplied",
+            "author": person,
+            "need_seq": need_seq,
+            "envelope_id": parsed.envelope_id,
+            "envelope_hash": parsed.envelope_hash,
+            "evidence_id": parsed.record.evidence_id,
+            "values": readings,
+            "comparison": _compare(request, readings),
+        }
+        if request["kind"] == "dimensional":
+            override = {request["target"]: _dimensional_override(request, readings)}
+            intake_sizes = (view["intake"].get("measurements") or {}).get(request["target"]) or {}
+            for key, value in override[request["target"]].items():
+                known = intake_sizes.get(key)
+                clash = (isinstance(value, Mapping) and isinstance(known, Mapping)
+                         and any(k in known and known[k] != v for k, v in value.items())) or (
+                    not isinstance(value, Mapping) and known is not None and known != value)
+                if clash:
+                    raise MissionValidationError(f"this measurement contradicts the intake measurement of {request['target']} {key}")
+            record["override"] = override
+        self._write_event(project_id, mission_id, last_seq + 1, record)
+        return self.get_mission(project_id, mission_id)
+
     @_serialized_mutation
     def record_design_staged(
         self, project_id: str, mission_id: str, *, review_id: str, package_sha256: str
@@ -1350,7 +1589,8 @@ class MissionStore:
                 raise MissionValidationError(f"candidate {candidate['id']!r} already exists")
             if len(replayed["candidates"]) >= int(budgets["max_candidates"]):
                 raise MissionStateError("candidate budget is exhausted; no more candidates may be proposed")
-            _assert_measurements_are_the_persons(view["intake"], candidate["spec"], field="candidate.spec")
+            _assert_measurements_are_the_persons(_person_measurements(view["intake"], replayed), candidate["spec"],
+                                                field="candidate.spec")
             record["candidate"] = candidate
         elif event_type == "repair_proposed":
             candidate_id = _normalize_slug(raw_event.get("candidate_id"), field="candidate_id")
@@ -1359,13 +1599,21 @@ class MissionStore:
                 raise MissionValidationError(f"candidate {candidate_id!r} does not exist")
             # Only a verdict on the current spec counts: a repair is not stacked on a failure of the spec it replaced.
             plan = _latest_operation(candidate["evaluations"], "device_plan", after_seq=_since_seq(candidate))
-            if plan is None or not _plan_is_failing(plan.get("result")):
-                raise MissionStateError("repair_proposed requires a failing device_plan evaluation of the current spec")
+            review = (_latest_operation(candidate["evaluations"], "device_engineering", after_seq=int(plan["seq"]))
+                      if plan is not None else None)
+            base = (int(candidate["last_repair_seq"]) if candidate.get("last_repair_seq") is not None
+                    else int(candidate.get("proposal_seq") or 0))
+            new_fact = int(candidate.get("last_evidence_seq") or 0) > base
+            failing = plan is not None and _plan_is_failing(plan.get("result"))
+            review_failed = review is not None and int(review["result"].get("errors") or 0) > 0
+            if not (failing or review_failed or new_fact):
+                raise MissionStateError("repair_proposed requires a failing device_plan or device_engineering evaluation "
+                                        "of the current spec, or a person's evidence since the latest repair")
             if int(candidate["repairs"]) >= int(budgets["max_repairs_per_candidate"]):
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
-            _assert_measurements_are_the_persons(view["intake"], record["spec"], field="spec")
+            _assert_measurements_are_the_persons(_person_measurements(view["intake"], replayed), record["spec"], field="spec")
             newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"]))
                             - set(_violated_requirements(replayed["requirements"], candidate["spec"])))
             if newly_broken:
@@ -1393,6 +1641,8 @@ class MissionStore:
                 record["candidate_id"] = candidate_id
             record["blocker"] = blocker
             record["need"] = _require_text(raw_event.get("need"), field="need", max_len=_MAX_NEED)
+            if raw_event.get("request") is not None:
+                record["request"] = _normalize_request(raw_event["request"])
         else:
             state = raw_event.get("state")
             if state not in TERMINAL_STATES:

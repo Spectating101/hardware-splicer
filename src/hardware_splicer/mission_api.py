@@ -231,6 +231,35 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             raise _mission_error(exc) from exc
         return {"ok": True, "run": run}
 
+    @router.post("/{mission_id}/needs/{need_seq}/evidence", status_code=http_status.HTTP_201_CREATED)
+    def supply_project_mission_evidence(
+        project_id: str,
+        mission_id: str,
+        need_seq: int,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
+        # A person answers a measurement need. The author comes only from the operator token, never from the body.
+        try:
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is None or identity.kind != "human":
+                raise _human_operator_required()
+            payload = _as_request_object(request, label="request")
+            mission = mission_store.supply_evidence(
+                project_id,
+                mission_id,
+                need_seq,
+                envelope=payload.get("envelope"),
+                values=payload.get("values"),
+                author={"kind": identity.kind, "id": identity.id},
+                expected_event_seq=payload.get("expected_event_seq"),
+            )
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, "mission": mission}
+
     @router.post("/{mission_id}/package")
     async def build_project_mission_package(project_id: str, mission_id: str) -> Dict[str, Any]:
         try:

@@ -67,6 +67,7 @@ Free-text `constraints` are reported to you and to the person; HS does not enfor
 - `candidate_proposed`: `{"candidate": {"id": "A", "kind": "clean_sheet" | "reclaim_heavy" | "hybrid", "label": "...", "spec": {...}, "rationale": "..."}}`. At most the budgeted number of candidates.
 - `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. Once HS has read the inventory, a repair may not leave a listed line uncovered that the current spec covers, or break a requirement the current spec meets. A repair resets the candidate: earlier checks no longer count.
 - `evidence_required`: `{"blocker": "<a BLOCKED_* state>", "need": "<what is missing>", "candidate_id": "A" (optional; omit for a need about the whole mission)}`.
+  Add a `request` when a person could answer it: `{"kind": "dimensional | electrical | continuity | boot_log", "target": "<library module id for dimensional; otherwise what to measure>", "quantity": "pcb_mm.x | pcb_mm.y | pcb_mm.z | above_board_mm" (dimensional) or a short name such as "voltage", "expected": {"min": 3.2, "max": 3.4, "unit": "V"} (optional), "instructions": "<what the person does>"}`.
 - `terminal_proposed`: `{"state": "...", "reason": "...", "candidate_id": "..." (when it concerns one), "cites": [<event seqs>]}`.
 
 ## Terminal states and when HS accepts them
@@ -122,3 +123,22 @@ both authorizations false.
 Staging opens a project review holding the design, the package hash, the evaluations and the chain of repairs that
 produced it. It promotes nothing: the design becomes a project revision only if a person accepts that review in the
 existing review workflow. You cannot decide a review.
+
+## Waiting for a person
+
+When the design needs a physical fact, propose an `evidence_required` with a `request` and **stop without a terminal
+state**. The mission waits in `EVIDENCE_REQUIRED`; a terminal blocker would end it.
+
+A person answers at `POST /{mission_id}/needs/{need_seq}/evidence` with their operator token, a physical-evidence
+envelope bound to this project, mission and need (`metadata.mission`), and the values. You cannot answer for them.
+HS checks the envelope's hash, that it is bound to this need, that it was not used before, and that the values match
+what was asked. The mission's `needs` then show each need's `need_state`:
+
+- `resolved`: the need no longer blocks READY. Checks recorded before the answer no longer count, so run
+  `device_plan` and `device_engineering` again. You may also repair after a person's answer.
+- `contradicted`: the reading is outside the expected range. The need still stands; read the values and decide
+  what to change.
+
+A dimensional answer for a library module becomes usable as that module's `overrides`, like an intake measurement. A
+boot log is kept as text; HS does not interpret it. A resolved need can no longer be cited for a blocker. None of
+this authorizes flashing or power-on.
