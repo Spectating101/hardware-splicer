@@ -1,14 +1,13 @@
 """Read-only MTConnect observer for manufacturing equipment.
 
-MTConnect is used as an observation protocol only.  The adapter supports the
+MTConnect is used as an observation protocol only. The adapter supports the
 standard probe/current/sample GET flows, retains exact XML bytes in the physical
-observation store, and exposes a small parsed summary.  It has no command or
+observation store, and exposes a small parsed summary. It has no command or
 write path and therefore cannot control the observed equipment.
 """
 
 from __future__ import annotations
 
-import io
 from typing import Any, Mapping
 from urllib.parse import urlparse
 from xml.etree import ElementTree as ET
@@ -38,6 +37,8 @@ class MtconnectObserver:
     ):
         if not isinstance(source_id, str) or not source_id.strip() or len(source_id.strip()) > 128:
             raise FabricationValidationError("MTConnect source_id must be bounded text")
+        if any(ord(ch) < 32 for ch in source_id):
+            raise FabricationValidationError("MTConnect source_id must be printable text")
         parsed = urlparse(base_url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.username or parsed.password:
             raise FabricationValidationError("MTConnect base_url must be server-configured http(s) without credentials")
@@ -91,17 +92,31 @@ class MtconnectObserver:
         params: Mapping[str, str] | None,
         kind: str,
     ) -> dict[str, Any]:
+        chunks: list[bytes] = []
+        total = 0
         try:
-            response = self.client.get(f"{self.base_url}{path}", params=dict(params or {}))
-            response.raise_for_status()
+            with self.client.stream(
+                "GET",
+                f"{self.base_url}{path}",
+                params=dict(params or {}),
+            ) as response:
+                response.raise_for_status()
+                content_type = response.headers.get("content-type", "application/xml").split(";", 1)[0].strip()
+                if "xml" not in content_type.lower():
+                    raise MtconnectExecutionError("MTConnect response is not XML")
+                for chunk in response.iter_bytes():
+                    total += len(chunk)
+                    if total > _MAX_XML_BYTES:
+                        raise MtconnectExecutionError("MTConnect response exceeded configured size limit")
+                    chunks.append(chunk)
+                status_code = response.status_code
+        except MtconnectExecutionError:
+            raise
         except httpx.HTTPError as exc:
             raise MtconnectExecutionError(f"MTConnect {operation} failed") from exc
-        data = bytes(response.content)
-        if not data or len(data) > _MAX_XML_BYTES:
-            raise MtconnectExecutionError("MTConnect response size is invalid")
-        content_type = response.headers.get("content-type", "application/xml").split(";", 1)[0].strip()
-        if "xml" not in content_type.lower():
-            raise MtconnectExecutionError("MTConnect response is not XML")
+        data = b"".join(chunks)
+        if not data:
+            raise MtconnectExecutionError("MTConnect response is empty")
         summary = _xml_summary(data)
         record = self.observations.put(
             kind=kind,
@@ -111,7 +126,7 @@ class MtconnectObserver:
             metadata={
                 "protocol": "mtconnect",
                 "operation": operation,
-                "http_status": response.status_code,
+                "http_status": status_code,
                 "root_element": summary["root_element"],
                 "header": summary["header"],
                 "device_count": summary["device_count"],
@@ -135,8 +150,9 @@ def _local(tag: str) -> str:
 
 
 def _xml_summary(data: bytes) -> dict[str, Any]:
-    # ElementTree does not resolve external entities. iterparse keeps the
-    # implementation small while avoiding XPath supplied by a caller.
+    prefix = data[:8192].upper()
+    if b"<!DOCTYPE" in prefix or b"<!ENTITY" in prefix:
+        raise MtconnectExecutionError("MTConnect XML must not contain DTD/entity declarations")
     try:
         root = ET.fromstring(data)
     except ET.ParseError as exc:
