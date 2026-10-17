@@ -278,12 +278,22 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                         headers={"Content-Disposition": f'attachment; filename="{mission_id}-package.zip"'})
 
     @router.post("/{mission_id}/stage", status_code=http_status.HTTP_201_CREATED)
-    async def stage_project_mission_design(project_id: str, mission_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def stage_project_mission_design(
+        project_id: str,
+        mission_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
         # Opens a review of the READY design. No route here decides a review: that stays a person's review decision.
         try:
             payload = _as_request_object(request, label="request")
+            author = payload.get("author")
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is not None:
+                # A verified operator is who they are; the body cannot claim a different name.
+                author = {"kind": identity.kind, "id": identity.id}
             staged = await run_in_threadpool(
-                stage_mission_design, mission_store, project_id, mission_id, author=payload.get("author")
+                stage_mission_design, mission_store, project_id, mission_id, author=author
             )
         except Exception as exc:
             raise _mission_error(exc) from exc

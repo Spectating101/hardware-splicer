@@ -257,3 +257,17 @@ def test_hardware_splicer_cannot_be_named_as_the_stager(tmp_path):
     _projects, missions, mid, _ = _mission(tmp_path, ["ESP32", "BME280", "OLED"])
     with pytest.raises(MissionValidationError):
         stage_mission_design(missions, "monitor", mid, author={"kind": "system", "id": "hardware-splicer"})
+
+
+def test_a_verified_operator_stages_as_themselves_and_the_body_cannot_rename_them(client):
+    mid = _ready_over_http(client)
+    seq = client.get(f"{BASE}/{mid}").json()["mission"]["last_event_seq"]
+    assert client.post(f"{BASE}/{mid}/events", json={"event": {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD",
+                                                               "candidate_id": "A", "reason": "checks"},
+                                                     "author": AGENT, "expected_event_seq": seq}).status_code == 201
+    staged = client.post(f"{BASE}/{mid}/stage", json={"author": {"kind": "agent", "id": "someone-else"}},
+                         headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert staged.status_code == 201, staged.text
+    review = client.get(f"/v1/projects/monitor/reviews/{staged.json()['review_id']}").json()
+    assert "bench-lead" in str(review) and "someone-else" not in str(review)
+    assert client.post(f"{BASE}/{mid}/stage", json={}, headers={"X-HS-Operator-Token": "unknown-" + "c" * 48}).status_code == 401
