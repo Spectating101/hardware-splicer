@@ -173,6 +173,7 @@ class ProjectReviewStore:
         created_by: str,
         note: str = "",
         include_metadata: bool = False,
+        requires_verified_operator: bool = False,
     ) -> Dict[str, Any]:
         safe_id = validate_project_id(project_id)
         if not str(created_by or "").strip():
@@ -240,6 +241,10 @@ class ProjectReviewStore:
             "review_flags": snapshot_flags,
             "summary": summary,
         }
+        if requires_verified_operator:
+            # Set only by code that stages a design for a person (never by a request): the API then refuses to
+            # decide this review without a verified human operator, whatever name the request carries.
+            proposal["requires_verified_operator"] = True
         _atomic_write_json(review_dir / "proposal.json", proposal)
         return self.get(safe_id, review_id)
 

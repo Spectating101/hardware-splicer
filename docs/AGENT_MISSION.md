@@ -126,7 +126,8 @@ both authorizations false.
 
 Staging opens a project review holding the design, the package hash, the evaluations and the chain of repairs that
 produced it. It promotes nothing: the design becomes a project revision only if a person accepts that review in the
-existing review workflow. You cannot decide a review.
+existing review workflow, where deciding it needs a verified person's operator token: the decider named on the
+decision is the token's, never a name in the request. You cannot decide a review.
 
 ## Waiting for a person
 

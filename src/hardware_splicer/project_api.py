@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Header, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from .artifact_retention import (
@@ -10,6 +10,7 @@ from .artifact_retention import (
     ArtifactPinConflict,
     retention_after_save,
 )
+from .operator_identity import OperatorRegistryError, OperatorTokenInvalid, resolve_operator
 from .project_review_store import (
     InvalidReviewId,
     ProjectReviewStore,
@@ -177,15 +178,45 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
         project_id: str,
         review_id: str,
         request: ProjectReviewDecisionRequest,
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
     ) -> Dict[str, Any]:
         try:
+            actor = request.actor
+            if review_store.get(project_id, review_id).get("requires_verified_operator"):
+                # A design staged from a mission becomes part of the project only by a person's decision, so this
+                # review takes its decider from a verified operator token, never from a name in the request.
+                identity = resolve_operator(x_hs_operator_token or None)
+                if identity is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail={"type": "operator_token_required",
+                                "message": "an operator token is required to decide a design staged from a mission"},
+                    )
+                if identity.kind != "human":
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail={"type": "operator_required", "message": "only a person can decide a design staged from a mission"},
+                    )
+                actor = identity.id
             review = review_store.decide(
                 project_id,
                 review_id,
                 decision=request.decision,
-                actor=request.actor,
+                actor=actor,
                 note=request.note,
             )
+        except HTTPException:
+            raise
+        except OperatorTokenInvalid as exc:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"type": "operator_token_invalid", "message": str(exc)},
+            ) from exc
+        except OperatorRegistryError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"type": "operator_registry_error", "message": str(exc)},
+            ) from exc
         except Exception as exc:
             raise _project_error(exc) from exc
         return {"ok": True, "review": review}
