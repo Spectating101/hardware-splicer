@@ -67,3 +67,24 @@ def test_one_line_naming_one_module_twice_counts_it_once():
     parsed = parse_parts_text("ESP32-DevKitC V4 (ESP32-WROOM-32E)\nBME280")
     assert parsed["fragments"][0]["matches"] == [parsed["fragments"][0]["matches"][0]]
     assert parsed["controller"] == ESP32 and parsed["parts"] == [BME]
+
+
+def test_the_reading_route_says_how_each_line_was_read_even_when_no_design_can_be_drafted():
+    from fastapi.testclient import TestClient
+    from hardware_splicer.product_api import create_product_app
+
+    client = TestClient(create_product_app())
+    # The draft route refuses a list with no usable controller and returns only a message...
+    assert client.post("/v1/devices/draft", json={"text": "ESP32-S3\nBME280"}).status_code == 422
+    # ...while the reading route still reports each line, so a person sees why before opening a mission.
+    reading = client.post("/v1/devices/parts-reading", json={"text": "ESP32-S3\nBME280\nHC-SR04 ultrasonic"})
+    assert reading.status_code == 200
+    parsed = reading.json()["parsed"]
+    assert [f["text"] for f in parsed["fragments"]] == ["ESP32-S3", "BME280", "HC-SR04 ultrasonic"]
+    assert "different board" in parsed["fragments"][0]["note"]
+    assert parsed["left_out"] == ["ESP32-S3", "HC-SR04 ultrasonic"]
+    assert parsed["parts"] == ["adafruit-bme280-stemma-qt"]
+    # It reads and nothing else: no spec, no plan, no approval.
+    assert set(reading.json()) == {"ok", "parsed"}
+    for bad in ({}, {"text": ""}, {"text": 5}):
+        assert client.post("/v1/devices/parts-reading", json=bad).status_code == 422
