@@ -82,6 +82,7 @@ def build_salvage_fabrication_context(
             "persists_independent_truth": False,
             "mission_truth_owner": "mission_store_event_replay",
             "donor_truth_owner": "mission_frozen_donor_read_after_acceptance",
+            "finding_artifact_hashes_are_verified_evidence": False,
             "hypotheses_promote_physical_truth": False,
             "resource_availability_grants_physical_authority": False,
             "agent_can_accept_mission": False,
@@ -143,7 +144,7 @@ def _hypotheses(donors: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             if not isinstance(finding, Mapping):
                 continue
             artifacts = finding.get("artifacts") or []
-            retained = [
+            references = [
                 {"name": item.get("name"), "sha256": item.get("sha256")}
                 for item in artifacts
                 if isinstance(item, Mapping)
@@ -156,8 +157,9 @@ def _hypotheses(donors: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
                 "method": finding.get("method"),
                 "source": finding.get("source"),
                 "grade": finding.get("grade"),
-                "retained_artifacts": retained,
-                "support_state": "retained_artifact_reference" if retained else "unsupported_hypothesis",
+                "artifact_hash_references": references,
+                "support_state": "unverified_artifact_reference" if references else "unsupported_hypothesis",
+                "artifact_reference_verified": False,
                 "promotes_contract_truth": False,
                 "physical_fact": False,
             })
