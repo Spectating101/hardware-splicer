@@ -43,12 +43,22 @@ def rules(plan, severity="error"):
     return sorted(f["rule"] for f in plan["findings"] if f["severity"] == severity)
 
 
-def test_the_esp32_plans_are_byte_identical_to_before_the_planner_was_generalised():
+def test_the_legacy_esp32_plan_projection_is_unchanged():
     # With the later case options (antenna clearance and board stops) switched off, which is how the case used to be sized.
     for name, expected in ESP32_PLAN_SHA256.items():
         spec = copy.deepcopy(example_specs()[name])
         spec["case"].update(antenna_clearance=False, board_stops=False)
-        plan = build_device_plan(spec)
+        plan = copy.deepcopy(build_device_plan(spec))
+        # Step 4's explicit buses, address decisions, SDO role and sourced ESP32
+        # controller count are intentional additions. Preserve every other byte
+        # of the original geometry/wiring/findings/steps projection.
+        plan.pop("i2c_buses")
+        for module in plan["modules"]:
+            module.pop("i2c_address", None)
+            module["sources"] = [s for s in module["sources"] if s["url"] !=
+                                 "https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf"]
+            for pin in module["pins"]:
+                pin["roles"][:] = [role for role in pin["roles"] if role != "i2c_address_select"]
         assert hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest() == expected, name
 
 

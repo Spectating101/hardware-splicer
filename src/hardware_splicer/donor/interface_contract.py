@@ -106,6 +106,7 @@ class InterfaceContract:
     status: InterfaceStatus = InterfaceStatus.UNKNOWN
     blockers: List[str] = field(default_factory=list)
     schema_version: str = SCHEMA_VERSION
+    planner_geometry: EvidenceValue = field(default_factory=EvidenceValue)
 
     @property
     def virtual_module_id(self) -> str:
@@ -207,6 +208,8 @@ class InterfaceContract:
             "blockers": list(self.blockers),
             "unresolved_fields": self.unresolved_fields(),
             "firmware_authorized": self.can_generate_firmware(),
+            **({"planner_geometry": self.planner_geometry.to_dict()}
+               if self.planner_geometry.value is not None else {}),
         }
 
 

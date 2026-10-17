@@ -9,10 +9,11 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Response
 from fastapi import status as http_status
 from fastapi.concurrency import run_in_threadpool
 
+from .mission_delivery import build_mission_package, read_mission_package, stage_mission_design
 from .mission_executor import run_mission_operation
 from .mission_store import (
     MissionConflict,
@@ -229,5 +230,73 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                 ) from exc
             raise _mission_error(exc) from exc
         return {"ok": True, "run": run}
+
+    @router.post("/{mission_id}/needs/{need_seq}/evidence", status_code=http_status.HTTP_201_CREATED)
+    def supply_project_mission_evidence(
+        project_id: str,
+        mission_id: str,
+        need_seq: int,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
+        # A person answers a measurement need. The author comes only from the operator token, never from the body.
+        try:
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is None or identity.kind != "human":
+                raise _human_operator_required()
+            payload = _as_request_object(request, label="request")
+            mission = mission_store.supply_evidence(
+                project_id,
+                mission_id,
+                need_seq,
+                envelope=payload.get("envelope"),
+                values=payload.get("values"),
+                author={"kind": identity.kind, "id": identity.id},
+                expected_event_seq=payload.get("expected_event_seq"),
+            )
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, "mission": mission}
+
+    @router.post("/{mission_id}/package")
+    async def build_project_mission_package(project_id: str, mission_id: str) -> Dict[str, Any]:
+        try:
+            package = await run_in_threadpool(build_mission_package, mission_store, project_id, mission_id)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, "package": package}
+
+    @router.get("/{mission_id}/package")
+    async def download_project_mission_package(project_id: str, mission_id: str) -> Response:
+        try:
+            data = await run_in_threadpool(read_mission_package, mission_store, project_id, mission_id)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return Response(content=data, media_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{mission_id}-package.zip"'})
+
+    @router.post("/{mission_id}/stage", status_code=http_status.HTTP_201_CREATED)
+    async def stage_project_mission_design(
+        project_id: str,
+        mission_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
+        # Opens a review of the READY design. No route here decides a review: that stays a person's review decision.
+        try:
+            payload = _as_request_object(request, label="request")
+            author = payload.get("author")
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is not None:
+                # A verified operator is who they are; the body cannot claim a different name.
+                author = {"kind": identity.kind, "id": identity.id}
+            staged = await run_in_threadpool(
+                stage_mission_design, mission_store, project_id, mission_id, author=author
+            )
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, **staged}
 
     return router
