@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -91,17 +92,25 @@ def resolve_donor_contract(project_store: ProjectStore, project_id: str, ident: 
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or raw.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("donor contract has an unsupported schema")
+    for key in ("contacts", "signals", "power_domains"):
+        rows = raw.get(key, [])
+        if not isinstance(rows, list) or any(not isinstance(row, Mapping) for row in rows):
+            raise ValueError(f"donor contract contains malformed {key} rows")
     contract = _contract_from_dict(raw)
+    if len(contract.contacts) != len(raw.get("contacts", [])) or len(contract.signals) != len(raw.get("signals", [])):
+        raise ValueError("donor contract contains unnamed contacts or signals")
     if contract.virtual_module_id != ident or f"donor:{contract.board_id}:{contract.block_id}" != ident:
         raise ValueError("donor contract identity does not match its reference")
     if len({s.signal_id for s in contract.signals}) != len(contract.signals):
         raise ValueError("donor contract contains duplicate signals")
+    if len({c.contact_id for c in contract.contacts}) != len(contract.contacts):
+        raise ValueError("donor contract contains duplicate contacts")
     contract.recompute_status()  # Never trust the persisted status/firmware label.
     return contract
 
 
-def _physical_records(store: ProjectStore, project: str) -> dict:
-    snapshot = store.load(project)["snapshot"]
+def _physical_records(store: ProjectStore, project: str, *, kind="electrical_measurement", snapshot=None) -> dict:
+    snapshot = store.load(project)["snapshot"] if snapshot is None else snapshot
     validation = snapshot.get("physicalValidation") or {}
     audit = (validation.get("audited_physical_evidence") or {}) if isinstance(validation, Mapping) else {}
     envelopes = audit.get("envelopes") if isinstance(audit, Mapping) else None
@@ -121,7 +130,7 @@ def _physical_records(store: ProjectStore, project: str) -> dict:
         seen.add(ident)
         if (validate_physical_evidence_envelope(env) or record.project_id != project
                 or not record.passed or record.metadata.get("simulated")
-                or record.kind.value != "electrical_measurement"):
+                or record.kind.value != kind):
             continue
         records[ident] = record
     return records
@@ -142,7 +151,9 @@ def _fact(value, records: dict, ident: str) -> dict:
 
 
 def read_donors(store: ProjectStore, project: str, references: list[Mapping]) -> list[dict]:
-    records = _physical_records(store, project)
+    snapshot = store.load(project)["snapshot"]
+    records = _physical_records(store, project, snapshot=snapshot)
+    dimensions = _physical_records(store, project, snapshot=snapshot, kind="dimensional_measurement")
     result = []
     for ref in references:
         ident = ref["donor_id"]
@@ -150,6 +161,7 @@ def read_donors(store: ProjectStore, project: str, references: list[Mapping]) ->
         row = {**ref, "contract_state": "unknown", "can_generate_firmware": False, "signals": [],
                "capabilities": [], "missing_facts": ["contract"]}
         if contract:
+            row["has_power_domains"] = bool(contract.power_domains)
             missing, grades, signals = [], [], []
             contact_ids = {c.contact_id for c in contract.contacts}
             for s in contract.signals:
@@ -166,7 +178,8 @@ def read_donors(store: ProjectStore, project: str, references: list[Mapping]) ->
                 if s.contact_id not in contact_ids:
                     missing.append(f"signals.{s.signal_id}.contact")
                     grades.append(None)
-                signals.append({"name": s.signal_id, "direction": s.direction.value, **facts})
+                signals.append({"name": s.signal_id, "contact_id": s.contact_id, "direction": s.direction.value,
+                                "protocol": _fact(s.protocol, records, ident), **facts})
             complete = _fact(contract.interface_complete, records, ident)
             grades.append(complete["grade"])
             if complete["grade"] != "person_measurement" or complete["value"] is not True:
@@ -186,6 +199,10 @@ def read_donors(store: ProjectStore, project: str, references: list[Mapping]) ->
                        signals=signals, interface_complete=complete, missing_facts=missing + list(contract.blockers),
                        capabilities=[{"role": contract.functional_role,
                            "grade": min(grades, key=_GRADES.index) if grades else None}])
+            if contract.planner_geometry.value is not None:
+                geometry = _fact(replace(contract.planner_geometry, value=True), dimensions, ident)
+                geometry["value"] = json.loads(json.dumps(contract.planner_geometry.value, allow_nan=False))
+                row["planner_geometry"] = geometry
         result.append(row)
     return result
 

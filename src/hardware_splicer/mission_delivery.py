@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import zipfile
+from functools import partial
 from typing import Any, Mapping
 
 from .device_application import build_device_application
@@ -22,6 +23,7 @@ from .device_case import build_device_case
 from .device_plan import DevicePlanError
 from .mission_store import MissionStateError, MissionStore, _normalize_author
 from .project_review_store import ProjectReviewStore
+from .donor_device_plan import mission_donor_modules
 
 MISSION_PACKAGE_SCHEMA = "hardware_splicer.mission_package.v1"
 _ZIP_DATE = (1980, 1, 1, 0, 0, 0)
@@ -94,6 +96,7 @@ def _checklist(checks: list[str]) -> bytes:
 def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple[dict[str, Any], bytes]:
     view, candidate = _ready(missions, project_id, mission_id)
     spec = candidate["spec"]
+    donor_modules = mission_donor_modules(view, spec)
     since = _since_latest_repair(view, candidate)
     plan_eval = _latest(candidate, "device_plan", since)
     review_eval = _latest(candidate, "device_engineering", plan_eval["seq"] if plan_eval else since)
@@ -105,8 +108,12 @@ def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple
     by_type = {e["type"]: e for e in events if e["type"] in {"accepted", "inventory_read"}}
     checks = list(view["terminal"].get("physical_evidence_required") or [])
 
-    firmware, firmware_files = _deliverable(build_device_application, spec, "03_firmware", "Firmware")
-    enclosure, enclosure_files = _deliverable(build_device_case, spec, "04_enclosure", "Enclosure")
+    def donor_firmware(_spec):
+        raise DevicePlanError("Donor firmware is not implemented; a library-only application would omit donor behavior")
+    firmware, firmware_files = _deliverable(donor_firmware if donor_modules else build_device_application,
+                                           spec, "03_firmware", "Firmware")
+    case_builder = partial(build_device_case, donor_modules=donor_modules) if donor_modules else build_device_case
+    enclosure, enclosure_files = _deliverable(case_builder, spec, "04_enclosure", "Enclosure")
     files: dict[str, bytes] = {
         "01_requirements/intake.json": _canonical(view["intake"]),
         "01_requirements/accepted.json": _canonical(by_type.get("accepted")),
@@ -123,6 +130,10 @@ def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple
         "05_validation/physical_checks_required.md": _checklist(checks),
         "06_provenance/events.jsonl": b"".join(_canonical(e) + b"\n" for e in events),
     }
+    if donor_modules:
+        files["01_requirements/donor_read.json"] = _canonical(next(e for e in events if e["type"] == "donor_read"))
+        files["02_design/donor_scope.json"] = _canonical({"implementation": "passive_switch_topology_and_geometry",
+            "donors": sorted(donor_modules), "firmware_implemented": False, "physical_correctness": "UNPROVEN"})
     manifest = {
         "schema_version": MISSION_PACKAGE_SCHEMA,
         "project_id": project_id,

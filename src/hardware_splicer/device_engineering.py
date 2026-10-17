@@ -518,13 +518,14 @@ def _json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2, allow_nan=False) + "\n").encode()
 
 
-def build_engineering_review(spec: Any) -> dict[str, Any]:
+def build_engineering_review(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     """Recompute the plan from the spec and review it; a caller's own plan or findings are never used."""
 
-    plan = build_device_plan(spec)
+    plan = build_device_plan(spec, donor_modules=donor_modules) if donor_modules else build_device_plan(spec)
     if plan["counts"]["errors"]:
         raise DevicePlanError("Resolve the plan's errors before an engineering review.")
     library = {m["id"]: m for m in module_library()["modules"]}
+    library.update(donor_modules or {})
     domains = [
         {"id": "electrical", "title": "Electrical", "checks": _i2c_checks(plan, library)},
         {"id": "power", "title": "Power", "checks": [_supply(plan, library)]},
@@ -544,5 +545,7 @@ def build_engineering_review(spec: Any) -> dict[str, Any]:
         "sourced_inputs": sorted((i for i in used.values() if i["basis"] == "sourced"), key=lambda i: i["name"]),
         "assumptions": sorted((i for i in used.values() if i["basis"] == "assumed"), key=lambda i: i["name"]),
         "coverage": _coverage(plan, library),
-        "not_assessed": _not_assessed(),
+        "not_assessed": _not_assessed() + ([{"domain": "Donor firmware and physical input behavior",
+            "why": "Passive contact topology only; pull-up configuration, debounce, contact life and actual operation are not verified."}]
+            if donor_modules else []),
     }

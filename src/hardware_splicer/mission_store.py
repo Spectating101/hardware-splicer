@@ -36,6 +36,7 @@ from .physical_evidence_ledger import (PhysicalEvidenceEnvelope, physical_eviden
                                        validate_physical_evidence_envelope)
 from .mission_donors import (normalize_donors, normalize_used, normalize_finding, read_donors,
                              donor_problem, donor_grounding)
+from .donor_device_plan import mission_donor_modules
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -511,12 +512,13 @@ def _person_measurements(intake: Mapping[str, Any], replayed: Mapping[str, Any])
     return _merge_measurements(intake.get("measurements") or {}, replayed.get("supplied_measurements") or {})
 
 
-def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any]) -> list[str]:
+def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any], donors=None) -> list[str]:
     """Requirements the spec breaks, read from the planner's own validated spec so absent keys take its defaults."""
     if not requirements:
         return []
     try:
-        clean = _validate_spec(json.loads(json.dumps(spec)))
+        context = mission_donor_modules({"donors": donors or []}, spec)
+        clean = _validate_spec(json.loads(json.dumps(spec)), donor_modules=context)
     except DevicePlanError:
         return [f"{row['path']} (the spec does not validate)" for row in requirements]
     broken = []
@@ -580,6 +582,21 @@ def _normalize_candidate(value: Any) -> Dict[str, Any]:
         "spec": _normalize_spec(raw.get("spec"), field="candidate.spec"),
         "rationale": _require_text(raw.get("rationale"), field="candidate.rationale", max_len=_MAX_RATIONALE),
     }
+
+
+def _native_donors(spec: Mapping[str, Any]) -> list[str]:
+    modules = spec.get("modules")
+    return [m["module"] for m in (modules if isinstance(modules, list) else []) if isinstance(m, Mapping)
+            and isinstance(m.get("module"), str) and m["module"].startswith("donor:")]
+
+
+def _assert_native_references(spec, references):
+    native = _native_donors(spec)
+    normalized = _donor_call(normalize_used, native, references)
+    if len(native) != len(normalized):
+        raise MissionValidationError("a physical donor block may not be placed more than once")
+    if native and set(normalized) != set(spec.get("donors_used") or []):
+        raise MissionValidationError("wired donor modules must cover exactly donors_used")
 
 
 def _normalize_result(value: Any, *, result_sha256: str | None = None) -> Dict[str, Any]:
@@ -710,7 +727,7 @@ def _latest_operation(
 
 
 def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None,
-                      requirements: list[Mapping[str, Any]]) -> Dict[str, Any]:
+                      requirements: list[Mapping[str, Any]], donors=None) -> Dict[str, Any]:
     uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
@@ -722,7 +739,7 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "covers_inventory": inventory is not None and not uncovered,
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
-        "violated_requirements": _violated_requirements(requirements, state["spec"]),
+        "violated_requirements": _violated_requirements(requirements, state["spec"], donors),
         "evaluations": [
             {
                 "seq": item["seq"],
@@ -899,6 +916,10 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     problem = donor_problem(replayed, candidate["spec"], ready=True)
     if problem:
         return "READY_FOR_HUMAN_BUILD is refused: " + problem
+    try:
+        mission_donor_modules(replayed, candidate["spec"])
+    except DevicePlanError as exc:
+        return "READY_FOR_HUMAN_BUILD is refused: " + str(exc)
     inventory = replayed.get("inventory")
     if inventory is None:
         return "READY_FOR_HUMAN_BUILD requires an HS inventory_read event"
@@ -906,7 +927,7 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if uncovered:
         return ("READY_FOR_HUMAN_BUILD is refused: the candidate does not contain "
                 + ", ".join(uncovered) + " from the person's inventory")
-    broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+    broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"], replayed.get("donors"))
     if broken:
         return "READY_FOR_HUMAN_BUILD is refused: the candidate breaks the person's requirements: " + "; ".join(broken)
     plan = _latest_operation(candidate["evaluations"], "device_plan", after_seq=_since_seq(candidate))
@@ -1002,7 +1023,7 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
         donor_error = donor_problem(replayed, candidate["spec"], ready=False)
         if donor_error:
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id}: {donor_error}")
-        broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+        broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"], replayed.get("donors"))
         if broken:
             # A design that ignores what the person required says nothing about whether their device is feasible.
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} breaks the "
@@ -1268,7 +1289,7 @@ class MissionStore:
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
             "donors": replayed["donors"],
-            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"])
+            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "staged": replayed["staged"],
@@ -1649,6 +1670,7 @@ class MissionStore:
             candidate = _normalize_candidate(raw_event.get("candidate"))
             if "donors_used" in candidate["spec"]:
                 candidate["spec"]["donors_used"] = _donor_call(normalize_used, candidate["spec"]["donors_used"], references)
+            _assert_native_references(candidate["spec"], references)
             if candidate["id"] in replayed["candidates"]:
                 raise MissionValidationError(f"candidate {candidate['id']!r} already exists")
             if len(replayed["candidates"]) >= int(budgets["max_candidates"]):
@@ -1679,12 +1701,16 @@ class MissionStore:
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
             if "donors_used" in record["spec"]:
                 record["spec"]["donors_used"] = _donor_call(normalize_used, record["spec"]["donors_used"], references)
+            _assert_native_references(record["spec"], references)
             dropped_donors = set(candidate["spec"].get("donors_used") or []) - set(record["spec"].get("donors_used") or [])
             if dropped_donors:
                 raise MissionStateError("repair_proposed drops used donors: " + ", ".join(sorted(dropped_donors)))
+            removed = set(_native_donors(candidate["spec"])) - set(_native_donors(record["spec"]))
+            if removed:
+                raise MissionStateError("repair_proposed drops wired donor modules: " + ", ".join(sorted(removed)))
             _assert_measurements_are_the_persons(_person_measurements(view["intake"], replayed), record["spec"], field="spec")
-            newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"]))
-                            - set(_violated_requirements(replayed["requirements"], candidate["spec"])))
+            newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"], replayed["donors"]))
+                            - set(_violated_requirements(replayed["requirements"], candidate["spec"], replayed["donors"])))
             if newly_broken:
                 raise MissionStateError("repair_proposed is refused: the repair breaks the person's requirements: "
                                         + "; ".join(sorted(newly_broken)))
