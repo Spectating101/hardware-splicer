@@ -9,6 +9,7 @@ from .procurement_quotes import ProcurementQuoteBook
 from .project_store import ProjectStore
 from .salvage_resource_graph import build_salvage_resource_graph
 from .vision_inspection import VisionInspectionService
+from .visual_donor_intake import VisualDonorIntakeService
 
 
 class FabricatorIntelligenceWorkbench:
@@ -35,6 +36,40 @@ class FabricatorIntelligenceWorkbench:
             observation_id=observation_id,
             task_id=task_id,
             output_artifact_id=output_artifact_id,
+        )
+
+    def draft_donor_from_inspections(
+        self,
+        *,
+        donor_id: str,
+        label: str,
+        inspection_artifact_ids: Sequence[str],
+        facts: Sequence[Mapping[str, Any]],
+        output_artifact_id: str,
+    ) -> dict[str, Any]:
+        return self._visual_donor_intake().create_draft(
+            donor_id=donor_id,
+            label=label,
+            inspection_artifact_ids=inspection_artifact_ids,
+            facts=facts,
+            output_artifact_id=output_artifact_id,
+        )
+
+    def confirm_visual_donor_capture(
+        self,
+        *,
+        draft_artifact_id: str,
+        output_artifact_id: str,
+        human_id: str,
+        capture: Mapping[str, Any],
+        decisions: Sequence[Mapping[str, Any]],
+    ) -> dict[str, Any]:
+        return self._visual_donor_intake().confirm_capture(
+            draft_artifact_id=draft_artifact_id,
+            output_artifact_id=output_artifact_id,
+            human_id=human_id,
+            capture=capture,
+            decisions=decisions,
         )
 
     def list_quotes(
@@ -91,3 +126,8 @@ class FabricatorIntelligenceWorkbench:
             require_known_stock=require_known_stock,
             resource_graph=resource_graph,
         )
+
+    def _visual_donor_intake(self) -> VisualDonorIntakeService:
+        if self.vision is None:
+            raise FabricationValidationError("vision inspection integration is not configured")
+        return VisualDonorIntakeService(artifacts=self.vision.artifacts)
