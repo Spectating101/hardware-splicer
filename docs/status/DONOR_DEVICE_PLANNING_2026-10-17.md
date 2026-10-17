@@ -63,6 +63,9 @@ and this implementation and match exactly:
 
 ## Verification not performed
 
+Historical scope at handover time: a later full-suite rerun is recorded separately in
+[DONOR_DEVICE_PLANNING_RERUN_2026-10-17.md](DONOR_DEVICE_PLANNING_RERUN_2026-10-17.md).
+
 The remote health probe reported zero healthy workers, below the required minimum of two: all three workers were
 SSH-unreachable or unauthenticated. That offload path was stopped and reported; only focused local checks were run.
 The full Python suite was **not rerun** for these commits. The previous P4/P5 full result is historical evidence,
