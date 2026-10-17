@@ -257,3 +257,134 @@ def test_hardware_splicer_cannot_be_named_as_the_stager(tmp_path):
     _projects, missions, mid, _ = _mission(tmp_path, ["ESP32", "BME280", "OLED"])
     with pytest.raises(MissionValidationError):
         stage_mission_design(missions, "monitor", mid, author={"kind": "system", "id": "hardware-splicer"})
+
+
+def test_a_verified_operator_stages_as_themselves_and_the_body_cannot_rename_them(client):
+    mid = _ready_over_http(client)
+    seq = client.get(f"{BASE}/{mid}").json()["mission"]["last_event_seq"]
+    assert client.post(f"{BASE}/{mid}/events", json={"event": {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD",
+                                                               "candidate_id": "A", "reason": "checks"},
+                                                     "author": AGENT, "expected_event_seq": seq}).status_code == 201
+    staged = client.post(f"{BASE}/{mid}/stage", json={"author": {"kind": "agent", "id": "someone-else"}},
+                         headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert staged.status_code == 201, staged.text
+    review = client.get(f"/v1/projects/monitor/reviews/{staged.json()['review_id']}").json()
+    assert "bench-lead" in str(review) and "someone-else" not in str(review)
+    assert client.post(f"{BASE}/{mid}/stage", json={}, headers={"X-HS-Operator-Token": "unknown-" + "c" * 48}).status_code == 401
+
+
+# Found while building the mission page: the review decision route trusted an `actor` name in the body, so anyone
+# could accept a staged mission design and promote it to a project revision. Reviews staged from a mission now need
+# a verified human operator; every other review keeps its existing behaviour.
+
+AGENT_TOKEN = "agent-token-" + "b" * 48
+
+
+@pytest.fixture()
+def gated_client(tmp_path, monkeypatch):
+    monkeypatch.setenv("HARDWARE_SPLICER_OPERATOR_TOKENS", (
+        '{"%s": {"id": "bench-lead", "kind": "human"}, "%s": {"id": "some-agent", "kind": "agent"}}'
+        % (hash_operator_token(PERSON_TOKEN), hash_operator_token(AGENT_TOKEN))))
+    store = ProjectStore(tmp_path)
+    store.save("monitor", _snapshot(), expected_revision=0)
+    return TestClient(create_product_app(store))
+
+
+def _staged_review(client):
+    mid = _ready_over_http(client)
+    seq = client.get(f"{BASE}/{mid}").json()["mission"]["last_event_seq"]
+    client.post(f"{BASE}/{mid}/events", json={"event": {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD",
+                                                        "candidate_id": "A", "reason": "checks"},
+                                              "author": AGENT, "expected_event_seq": seq})
+    return client.post(f"{BASE}/{mid}/stage", json={}, headers={"X-HS-Operator-Token": PERSON_TOKEN}).json()["review_id"]
+
+
+def _revision(client):
+    body = client.get("/v1/projects/monitor").json()
+    return (body.get("project") or body)["revision"]
+
+
+def test_a_staged_mission_design_is_decided_only_by_a_verified_person(gated_client):
+    client = gated_client
+    review = _staged_review(client)
+    before = _revision(client)
+    route = f"/v1/projects/monitor/reviews/{review}/decision"
+    body = {"decision": "accepted", "actor": "anyone-at-all"}
+    assert client.post(route, json=body).status_code in (401, 403)
+    assert client.post(route, json=body, headers={"X-HS-Operator-Token": AGENT_TOKEN}).status_code in (401, 403)
+    assert client.post(route, json=body, headers={"X-HS-Operator-Token": "unknown-" + "c" * 48}).status_code == 401
+    assert _revision(client) == before
+    assert client.get(f"/v1/projects/monitor/reviews/{review}").json()["review"]["status"] == "pending"
+    decided = client.post(route, json=body, headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert decided.status_code == 200, decided.text
+    assert decided.json()["review"]["status"] == "accepted"
+    # The name on the decision is the verified person's, never the one in the body.
+    assert "bench-lead" in str(decided.json()["review"]["decision"]) and "anyone-at-all" not in str(decided.json()["review"]["decision"])
+    assert _revision(client) == before + 1
+
+
+def test_a_verified_person_can_reject_a_staged_design_too(gated_client):
+    client = gated_client
+    review = _staged_review(client)
+    before = _revision(client)
+    rejected = client.post(f"/v1/projects/monitor/reviews/{review}/decision", json={"decision": "rejected", "actor": "x"},
+                           headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert rejected.status_code == 200 and rejected.json()["review"]["status"] == "rejected"
+    assert _revision(client) == before
+
+
+def test_other_reviews_keep_their_existing_behaviour(gated_client):
+    client = gated_client
+    candidate = _snapshot()
+    candidate["projectName"] = "Renamed"
+    opened = client.post("/v1/projects/monitor/reviews", json={"candidate_snapshot": candidate, "created_by": "someone"})
+    assert opened.status_code == 201
+    review = opened.json()["review"]["review_id"]
+    assert "requires_verified_operator" not in opened.json()["review"]
+    assert client.post(f"/v1/projects/monitor/reviews/{review}/decision", json={"decision": "accepted", "actor": "reviewer"}).status_code == 200
+
+
+def test_an_open_review_request_cannot_set_the_verified_operator_gate(gated_client):
+    # Only mission staging sets the gate. Naming it in a request neither sets it nor breaks the request.
+    client = gated_client
+    candidate = _snapshot()
+    candidate["projectName"] = "Renamed again"
+    opened = client.post("/v1/projects/monitor/reviews", json={"candidate_snapshot": candidate, "created_by": "someone",
+                                                               "requires_verified_operator": True})
+    assert opened.status_code in (201, 422)
+    if opened.status_code == 201:
+        review = opened.json()["review"]["review_id"]
+        assert client.post(f"/v1/projects/monitor/reviews/{review}/decision", json={"decision": "accepted", "actor": "reviewer"}).status_code == 200
+
+
+def test_the_gate_follows_the_content_so_opening_the_review_another_way_does_not_skip_it(gated_client):
+    # An agent that skips mission staging and opens its own review adding a design record gets the same gate.
+    client = gated_client
+    snapshot = _snapshot()
+    snapshot["deviceDesigns"] = {"mission-invented": {"spec": {}, "physical_correctness": "UNPROVEN"}}
+    opened = client.post("/v1/projects/monitor/reviews", json={"candidate_snapshot": snapshot, "created_by": "an-agent"})
+    assert opened.status_code == 201
+    review = opened.json()["review"]["review_id"]
+    before = _revision(client)
+    route = f"/v1/projects/monitor/reviews/{review}/decision"
+    assert client.post(route, json={"decision": "accepted", "actor": "anyone-at-all"}).status_code in (401, 403)
+    assert client.post(route, json={"decision": "accepted", "actor": "x"}, headers={"X-HS-Operator-Token": AGENT_TOKEN}).status_code in (401, 403)
+    assert _revision(client) == before
+    assert client.post(route, json={"decision": "accepted", "actor": "x"}, headers={"X-HS-Operator-Token": PERSON_TOKEN}).status_code == 200
+    assert _revision(client) == before + 1
+
+
+def test_the_review_store_itself_refuses_a_gated_review_unless_a_person_was_verified(tmp_path):
+    # Defence in depth: a caller that reaches the store without going through the API gate cannot skip it.
+    from hardware_splicer.project_review_store import ProjectReviewStore, ReviewConflict
+
+    projects = ProjectStore(tmp_path)
+    projects.save("monitor", _snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(projects)
+    snapshot = _snapshot()
+    snapshot["deviceDesigns"] = {"mission-x": {"spec": {}}}
+    review = reviews.create("monitor", snapshot, created_by="an-agent")["review_id"]
+    with pytest.raises(ReviewConflict, match="verified"):
+        reviews.decide("monitor", review, decision="accepted", actor="anyone")
+    assert reviews.get("monitor", review)["status"] == "pending"
+    assert reviews.decide("monitor", review, decision="accepted", actor="bench-lead", verified_human=True)["status"] == "accepted"
