@@ -101,7 +101,7 @@ def test_context_resumes_from_canonical_mission_state_across_turns(client):
     assert donor["unresolved_facts"] == ["contract"]
 
 
-def test_nonpromoting_findings_are_visible_as_supported_or_unsupported_hypotheses(client):
+def test_nonpromoting_findings_keep_artifact_hashes_explicitly_unverified(client):
     mission = _open(client)
     _accept(client, mission["mission_id"])
     _propose(
@@ -132,7 +132,7 @@ def test_nonpromoting_findings_are_visible_as_supported_or_unsupported_hypothese
             "finding": {
                 "donor_id": DONOR,
                 "signal": "SW1",
-                "claim": "A retained closeup shows the switch marking.",
+                "claim": "A closeup reference claims to show the switch marking.",
                 "method": "marking",
                 "artifacts": [{"name": "switch-closeup.jpg", "sha256": "a" * 64}],
                 "source": "closeup image",
@@ -142,8 +142,12 @@ def test_nonpromoting_findings_are_visible_as_supported_or_unsupported_hypothese
     second = _context(client, mission["mission_id"])
     assert [row["support_state"] for row in second["hypotheses"]] == [
         "unsupported_hypothesis",
-        "retained_artifact_reference",
+        "unverified_artifact_reference",
     ]
+    referenced = second["hypotheses"][1]
+    assert referenced["artifact_reference_verified"] is False
+    assert referenced["artifact_hash_references"] == [{"name": "switch-closeup.jpg", "sha256": "a" * 64}]
+    assert second["truth_contract"]["finding_artifact_hashes_are_verified_evidence"] is False
     assert all(row["physical_fact"] is False for row in second["hypotheses"])
 
 
