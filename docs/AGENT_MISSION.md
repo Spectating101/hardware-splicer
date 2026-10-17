@@ -65,6 +65,8 @@ Free-text `constraints` are reported to you and to the person; HS does not enfor
 
 ## Events you can propose
 
+Donor references and the `finding_offered` event are described under "Donors and findings" below.
+
 - `candidate_proposed`: `{"candidate": {"id": "A", "kind": "clean_sheet" | "reclaim_heavy" | "hybrid", "label": "...", "spec": {...}, "rationale": "..."}}`. At most the budgeted number of candidates.
 - `repair_proposed`: `{"candidate_id": "A", "spec": {...}, "rationale": "..."}`. Allowed only after HS's latest plan of that candidate failed, and only within the repair budget. Once HS has read the inventory, a repair may not leave a listed line uncovered that the current spec covers, or break a requirement the current spec meets. A repair resets the candidate: earlier checks no longer count.
 - `evidence_required`: `{"blocker": "<a BLOCKED_* state>", "need": "<what is missing>", "candidate_id": "A" (optional; omit for a need about the whole mission)}`.
@@ -75,17 +77,18 @@ Free-text `constraints` are reported to you and to the person; HS does not enfor
 
 | State | HS accepts it when |
 |-------|--------------------|
-| `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading, and the current spec covers every line and meets every requirement. Since the candidate's latest repair: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
+| `READY_FOR_HUMAN_BUILD` | HS has recorded its inventory reading, and the current spec covers every line, every required donor and every requirement; all used donors are verified. Since the candidate's latest repair or physical feedback: a `device_plan` with 0 errors and 0 warnings, then a `device_engineering` with 0 errors, and no evidence need standing for that candidate or the mission |
 | `BLOCKED_NEEDS_PART_DATA` | You cite an `evidence_required` with this blocker, and HS's own reading shows a left_out line, a refused draft, or `plan_unrepairable > 0`. Repairable findings such as a BME280 address strap do not establish missing part data. Historical readings without this field keep their former error/warning rule. A failing plan of your own candidate does not count: it shows a wiring fault, not missing data |
 | `BLOCKED_NEEDS_PHYSICAL_MEASUREMENT`, `BLOCKED_NEEDS_REVERSE_ENGINEERING`, `BLOCKED_NEEDS_PROCUREMENT_EVIDENCE`, `BLOCKED_UNSAFE` | You cite an `evidence_required` with that blocker, for that candidate or the mission |
-| `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct designs (a new name, wire colours or order do not count) and cover the inventory, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
+| `NO_FEASIBLE_ARCHITECTURE` | All candidate slots are used, current specs are pairwise distinct designs (a new name, wire colours or order do not count) and cover the inventory and required donors, every candidate's latest plan fails and its repairs are spent, and HS's own inventory draft does not plan clean. If it does, propose that draft |
 | `BUDGET_EXHAUSTED` | The operator-job budget is spent and no candidate is already ready |
 
 Every `BLOCKED_*` state and `NO_FEASIBLE_ARCHITECTURE` also refuses to stop short of a candidate already ready.
 Uncheckable physical, reverse engineering, procurement and safety needs remain allowed assertions; HS labels them,
-and does not claim to have established them. New terminal records expose `grounding`: `hs_inventory_reading` or
-`hs_inventory_reading` for a part-data blocker, `agent_assertion` for the other blockers, `hs_evaluation` for READY and
-NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. These labels grant no authority.
+and does not claim to have established them. New terminal records expose `grounding`: `hs_inventory_reading` for a
+part-data blocker; `hs_donor_contract` or `hs_donor_reading` only for the checked donor-specific cases below;
+`agent_assertion` for other blocker concerns; `hs_evaluation` for READY and NO_FEASIBLE; and `hs_budget` for
+BUDGET_EXHAUSTED. These labels grant no authority.
 
 A refused proposal returns 409 or 422 with the reason. Read it; do not retry the same thing.
 
@@ -143,3 +146,61 @@ what was asked. The mission's `needs` then show each need's `need_state`:
 A dimensional answer for a library module becomes usable as that module's `overrides`, like an intake measurement. A
 boot log is kept as text; HS does not interpret it. A resolved need can no longer be cited for a blocker. None of
 this authorizes flashing or power-on.
+
+## Donors and findings
+
+Intake may include `donors: [{"donor_id": "donor:radio:buttons", "label": "Buttons", "optional": false}]`.
+These are references, not contracts. Embedded facts, grades and contracts are refused. Keep donor references out of
+the free-text inventory, which is still parsed as library parts. At acceptance HS freezes its own `donor_read`
+before `accepted`; a retry reuses that exact reading. The mission view's `donors` contains those facts plus later
+findings and person measurements. A missing contract reads `unknown`, not guessed from a similar library module.
+
+The read-only `mission_donors.resolve_donor_contract` resolves existing InterfaceContract JSON at
+`<project-store-root>/<project-id>/donors/contracts/donor__<board>__<block>.json` (colons replaced with `__`).
+IDs use lowercase alphanumeric/hyphen board and block segments. It refuses symlinks and identity mismatches and
+never writes a contract. Existing standalone salvage evidence packages are not searched across projects or imported
+automatically. A reviewed contract must be placed in that project-local location by its owning evidence workflow.
+
+Each fact reports `epistemic_state`, `review_state`, `evidence_ids` and `grade`, never the forbidden mission key
+`status`. `observed` maps to `re_observation`, `reference_only` to `document`, `inferred`/`assumed` to
+`agent_assertion`, and `unknown` to no grade. `measured` plus `accepted` maps to `person_measurement` only when every
+referenced ID resolves to a valid, hash-checked, non-simulated, passing electrical envelope for that project and donor.
+HS reads those envelopes from the latest stored snapshot's `physicalValidation.audited_physical_evidence.envelopes`,
+not arbitrary nested dictionaries, contract labels or agent artifact hashes. Duplicate evidence IDs are ambiguous
+and receive no credit. Capability grades take the weakest required fact, never an average or vote.
+
+A candidate spec can carry `donors_used: ["donor:radio:buttons"]`. Every ID must be in intake; HS deduplicates and
+sorts the list. Its order, duplicates, or an empty list versus an absent list cannot create distinct architectures.
+READY and NO_FEASIBLE must cover every non-optional donor. Repairs cannot drop any used donor, even an optional one.
+READY also requires every used donor to be `verified`; a refusal names missing signal facts. Verification here needs
+accepted measured Vmax, polarity and controller pin, interface completeness and contact linkage. It is not physical
+build authority. The planner still wires only library modules; donor wiring remains future work.
+
+Offer an RE finding through `/events`:
+
+```json
+{"type":"finding_offered","finding":{"donor_id":"donor:radio:buttons","signal":"KEY",
+ "claim":"The marking suggests an active-low input","method":"marking","artifacts":[],"source":"RE agent"}}
+```
+
+Only an agent may offer a finding, after acceptance. Methods are `marking`, `document`, `firmware_analysis`,
+`signal_capture`, `vision`, and `continuity`. A signal may be null. At most 20 artifacts, each exactly
+`{name, sha256}` with a 64-hex digest, are references only; HS neither opens paths nor stores binaries. Claims are
+limited to 4000 characters, sources and artifact names to 200, signal names to 120. Every offered finding is
+`re_observation`, including method `document`; grade, accepted/measured and author overrides are refused.
+
+An evidence need may cite existing finding sequence numbers in `cites`. A donor request names its ID in `target`
+and optionally a particular `signal` (electrical/continuity only). Cross-donor finding citations are refused.
+Findings never satisfy READY, alter contracts, or ground terminal blockers. RE grounding is `hs_donor_reading` only
+when the frozen HS reading shows the cited donor unknown, or the named signal has unknown facts. Physical grounding
+is `hs_donor_contract` only for a cited electrical request naming a used donor signal still missing an accepted
+measurement. Other concerns retain `agent_assertion`; an invented signal is not HS grounding.
+
+Human electrical answers for donor signals appear in `person_measurements` with grade `person_measurement`, including
+outside-range answers as facts, not successes. The envelope must name the donor in `target_ids` and be non-simulated.
+An answer does not promote the frozen contract or change its file; existing evidence review owns promotion.
+
+Trust limit: this resolver checks retained evidence identity and envelope integrity, not instrument truth, raw-byte
+attestation, or whether a contract paraphrases a measurement correctly. Someone with snapshot-PUT or filesystem
+write access can supply records; hashes are not signatures. Those pre-existing persistence permissions remain a
+trust boundary. Mission-level firmware/power authority flags remain false and physical correctness stays UNPROVEN.

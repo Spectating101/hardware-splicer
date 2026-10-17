@@ -1,7 +1,9 @@
 # Missions over donors, reverse-engineering evidence and physical feedback
 
 Status: **physical feedback is implemented** (`MissionStore.supply_evidence`, `tests/test_mission_feedback.py`);
-**P4 and P5 are designed, not yet built.** A Gemini 4 Argon review found eight ways the first draft could launder
+**P4 and P5 are implemented** (`mission_donors.py`, `tests/test_mission_donors.py`), including read-only project-local
+resolution, frozen donor reads, coverage and non-promoting findings. See `AGENT_MISSION.md` for persistence and
+trust boundaries. A Gemini 4 Argon review found eight ways the first draft could launder
 grades or replay evidence; each was checked against the store and the fixes are folded in below.
 
 Design for steps P4, P5 and physical feedback of the Fabrication Mission Runtime. It extends `docs/AGENT_MISSION.md`

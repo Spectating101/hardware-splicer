@@ -240,8 +240,9 @@ Success is the **correct** terminal state, not reaching "ready":
 - `BUDGET_EXHAUSTED` needs the operator budget spent. No blocked, no-feasible or budget terminal may stop short of
   a candidate that is already ready.
 
-New terminal records carry `grounding`: `hs_inventory_reading` for part-data blockers,
-`agent_assertion` for the physical measurement, reverse engineering, procurement and unsafe blockers,
+New terminal records carry `grounding`: `hs_inventory_reading` for part-data blockers;
+`hs_donor_contract` or `hs_donor_reading` for the checked donor cases below; otherwise
+`agent_assertion` for physical measurement, reverse engineering, procurement and unsafe blockers;
 `hs_evaluation` for READY and NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. The other blockers remain allowed:
 HS labels the agent's concern without claiming to have measured or established it. Grounding never grants authority.
 
@@ -280,6 +281,17 @@ project. HS records `evidence_supplied` (`within`, `outside` or `not_comparable`
 `resolved` need stops blocking READY, `outside` leaves it `contradicted`, and either way earlier checks no longer count.
 Dimensional answers become usable module overrides. The design for donors and reverse-engineering findings built on
 the same evidence grades is in [`MISSION_DONORS_EVIDENCE_FEEDBACK.md`](MISSION_DONORS_EVIDENCE_FEEDBACK.md).
+
+Donor intake is references only. For missions naming donors, HS freezes a project-scoped `donor_read` before
+acceptance and reuses it on retry. Candidate `donors_used` is normalized and checked for required donor coverage;
+repairs cannot drop a used donor. READY requires verified contracts and names missing facts otherwise. Facts carry
+separate epistemic, review and grade fields; accepted measurement IDs alone are insufficient without matching,
+hash-checked physical records. The resolver is read-only and adds no contract-write API or parallel evidence store.
+
+Agents may offer hash-referenced RE findings via the existing events route. Findings always remain
+`re_observation`, can be cited by needs, and never establish measurement or terminal grounding. Only the frozen
+HS reading can ground `hs_donor_reading` or `hs_donor_contract`. Human donor measurements are shown separately and
+never rewrite or promote that contract. Persistence location and trust limits: [`AGENT_MISSION.md`](AGENT_MISSION.md).
 
 ## Verification
 
@@ -321,3 +333,4 @@ Frontend: `make splice-ui-build`.
 12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory and meets their structured requirements; a repair cannot newly uncover a listed line or break a requirement, and only the person's intake can supply measured sizes. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
 13. Staging a mission design opens a review; only a person's decision on that review makes it a revision. A mission package names what HS could not generate and never claims physical truth.
 14. Only a person answers a mission's evidence need, with an envelope HS can verify, bound to that mission and need and used once. An answer resolves a need or records a contradiction; it never authorizes anything physical, and checks made before it no longer count towards READY.
+15. Donor references, RE findings and person measurements remain distinct. No agent finding or claimed measurement ID promotes a donor fact; donor coverage and verified contracts are required for READY, and only HS's frozen donor reading can ground a donor-specific blocker. Resolving or replaying donors never writes contracts, snapshots, revisions or authority.
