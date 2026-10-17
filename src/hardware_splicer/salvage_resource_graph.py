@@ -12,6 +12,7 @@ import hashlib
 import re
 from typing import Any, Mapping, Sequence
 
+from .donor_capability_families import project_donor_families, project_family_capability
 from .fabrication_operator import FabricationValidationError
 from .mission_donors import normalize_donors, read_donors
 from .project_store import ProjectStore, validate_project_id
@@ -76,6 +77,8 @@ def project_salvage_resource_graph(
             "persists_independent_truth": False,
             "donor_truth_owner": "project_donor_contract_plus_canonical_physical_evidence",
             "lab_truth_owner": "server_fabrication_capability_registry",
+            "capability_family_policy_is_evidence": False,
+            "capability_family_policy_may_promote_evidence": False,
             "model_inference_is_physical_truth": False,
             "availability_grants_physical_authority": False,
         },
@@ -118,6 +121,14 @@ def _donor_resource(raw: Mapping[str, Any], *, index: int) -> dict[str, Any]:
     capabilities = raw.get("capabilities") or []
     if not isinstance(capabilities, list) or len(capabilities) > 128:
         raise FabricationValidationError("donor capabilities must be a bounded list")
+    unresolved = raw.get("missing_facts") or []
+    if not isinstance(unresolved, list) or len(unresolved) > 10000 or any(not isinstance(value, str) for value in unresolved):
+        raise FabricationValidationError("donor missing_facts must be a bounded string list")
+    unresolved = sorted(set(unresolved))
+    contract_state = raw.get("contract_state")
+    if contract_state not in {"unknown", "partial", "verified"}:
+        raise FabricationValidationError("donor contract_state is unsupported")
+
     projected: list[dict[str, Any]] = []
     grades: list[str | None] = []
     for capability_index, capability in enumerate(capabilities):
@@ -130,27 +141,36 @@ def _donor_resource(raw: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         if grade not in _DONOR_GRADES:
             raise FabricationValidationError("donor capability has unsupported evidence grade")
         grades.append(grade)
-        projected.append({
+        entry: dict[str, Any] = {
             "capability_id": _semantic_capability_id(role),
             "role": role.strip(),
             "support": {"kind": "donor_evidence", "grade": grade},
-        })
-    unresolved = raw.get("missing_facts") or []
-    if not isinstance(unresolved, list) or len(unresolved) > 10000 or any(not isinstance(value, str) for value in unresolved):
-        raise FabricationValidationError("donor missing_facts must be a bounded string list")
-    unresolved = sorted(set(unresolved))
-    contract_state = raw.get("contract_state")
-    if contract_state not in {"unknown", "partial", "verified"}:
-        raise FabricationValidationError("donor contract_state is unsupported")
+        }
+        family = project_family_capability(
+            role=role,
+            evidence_grade=grade,
+            contract_state=contract_state,
+            unresolved_facts=unresolved,
+        )
+        if family is not None:
+            entry.update(
+                family_id=family["family_id"],
+                family_qualification=family["qualification"],
+                planner_interface=family["planner_interface"],
+            )
+        projected.append(entry)
+
     weakest = min(grades, key=_DONOR_GRADES.index) if grades else None
     geometry = raw.get("planner_geometry")
     if geometry is not None and not isinstance(geometry, Mapping):
         raise FabricationValidationError("donor planner_geometry must be an object when present")
+    family_projection = project_donor_families(raw)
     return {
         "resource_id": ident,
         "kind": "donor",
         "display_name": label.strip(),
         "capabilities": projected,
+        "capability_families": family_projection,
         "support": {"kind": "donor_evidence", "weakest_grade": weakest},
         "contract_state": contract_state,
         "unresolved_facts": unresolved,
