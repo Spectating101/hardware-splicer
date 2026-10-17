@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi import status as http_status
 
 from .fabrication_operator import FabricationValidationError
 from .fabricator_intelligence_workbench import FabricatorIntelligenceWorkbench
 from .fabricator_lab_workbench import FabricatorLabWorkbench
+from .operator_identity import OperatorRegistryError, OperatorTokenInvalid, resolve_operator
 from .project_store import ProjectStore
 
 
@@ -29,6 +30,27 @@ def _body(value: Any) -> Dict[str, Any]:
     if not isinstance(value, Mapping):
         raise FabricationValidationError("request must be an object")
     return dict(value)
+
+
+def _human(token: str | None) -> str:
+    try:
+        identity = resolve_operator(token if token else None)
+    except OperatorTokenInvalid as exc:
+        raise HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED,
+            detail={"type": "operator_token_invalid", "message": str(exc)},
+        ) from exc
+    except OperatorRegistryError as exc:
+        raise HTTPException(
+            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"type": "operator_registry_error", "message": str(exc)},
+        ) from exc
+    if identity is None or identity.kind != "human":
+        raise HTTPException(
+            status_code=http_status.HTTP_403_FORBIDDEN,
+            detail={"type": "operator_required", "message": "a person's operator token is required"},
+        )
+    return identity.id
 
 
 def _error(exc: Exception) -> HTTPException:
@@ -60,6 +82,54 @@ def create_fabricator_intelligence_router() -> APIRouter:
         except Exception as exc:
             raise _error(exc) from exc
         return {"ok": True, "inspection": result}
+
+    @router.post("/vision/donor-drafts", status_code=http_status.HTTP_201_CREATED)
+    def create_visual_donor_draft(request: Request, body: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            value = _body(body)
+            inspection_ids = value.get("inspection_artifact_ids")
+            facts = value.get("facts")
+            if not isinstance(inspection_ids, list):
+                raise FabricationValidationError("inspection_artifact_ids must be a list")
+            if not isinstance(facts, list):
+                raise FabricationValidationError("facts must be a list")
+            result = _runtime(request).draft_donor_from_inspections(
+                donor_id=value.get("donor_id"),
+                label=value.get("label"),
+                inspection_artifact_ids=inspection_ids,
+                facts=facts,
+                output_artifact_id=value.get("output_artifact_id"),
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, **result}
+
+    @router.post("/vision/donor-drafts/{draft_artifact_id}/confirm", status_code=http_status.HTTP_201_CREATED)
+    def confirm_visual_donor_draft(
+        draft_artifact_id: str,
+        request: Request,
+        body: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
+        try:
+            human_id = _human(x_hs_operator_token)
+            value = _body(body)
+            capture = value.get("capture")
+            decisions = value.get("decisions")
+            if not isinstance(capture, Mapping):
+                raise FabricationValidationError("capture must be an object")
+            if not isinstance(decisions, list):
+                raise FabricationValidationError("decisions must be a list")
+            result = _runtime(request).confirm_visual_donor_capture(
+                draft_artifact_id=draft_artifact_id,
+                output_artifact_id=value.get("output_artifact_id"),
+                human_id=human_id,
+                capture=capture,
+                decisions=decisions,
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, **result}
 
     @router.get("/procurement/quotes")
     def list_procurement_quotes(
