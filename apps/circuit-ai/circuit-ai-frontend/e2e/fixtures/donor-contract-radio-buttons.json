@@ -1,0 +1,126 @@
+{
+ "block_id": "buttons",
+ "blockers": [],
+ "board_id": "radio",
+ "contacts": [
+  {
+   "connector_ref": "",
+   "contact_id": "J1.1",
+   "evidence_ids": [],
+   "label": "",
+   "pin_number": "",
+   "side": "unknown",
+   "x_mm": null,
+   "y_mm": null
+  },
+  {
+   "connector_ref": "",
+   "contact_id": "J1.2",
+   "evidence_ids": [],
+   "label": "",
+   "pin_number": "",
+   "side": "unknown",
+   "x_mm": null,
+   "y_mm": null
+  }
+ ],
+ "firmware_authorized": false,
+ "functional_role": "button_input",
+ "interface_complete": {
+  "confidence": 0.0,
+  "evidence_ids": [],
+  "method": "",
+  "producer": "unknown",
+  "review_status": "unreviewed",
+  "status": "reference_only",
+  "supersedes": [],
+  "unit": null,
+  "value": true
+ },
+ "interface_id": "if:radio:buttons",
+ "power_domains": [],
+ "reference_equivalents": [],
+ "schema_version": "hardware_splicer.interface_contract.v1",
+ "signals": [
+  {
+   "active_level": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "reference_only",
+    "supersedes": [],
+    "unit": null,
+    "value": "low"
+   },
+   "contact_id": "J1.1",
+   "controller_pin": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "reference_only",
+    "supersedes": [],
+    "unit": null,
+    "value": "GP4"
+   },
+   "direction": "input",
+   "idle_level": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "unknown",
+    "supersedes": [],
+    "unit": null,
+    "value": null
+   },
+   "notes": "",
+   "protocol": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "unknown",
+    "supersedes": [],
+    "unit": null,
+    "value": null
+   },
+   "signal_id": "KEY",
+   "voltage_max_v": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "reference_only",
+    "supersedes": [],
+    "unit": null,
+    "value": 3.3
+   },
+   "voltage_min_v": {
+    "confidence": 0.0,
+    "evidence_ids": [],
+    "method": "",
+    "producer": "unknown",
+    "review_status": "unreviewed",
+    "status": "unknown",
+    "supersedes": [],
+    "unit": null,
+    "value": null
+   }
+  }
+ ],
+ "status": "partial",
+ "unresolved_fields": [
+  "signals.KEY.voltage_max_v",
+  "signals.KEY.active_level",
+  "signals.KEY.controller_pin",
+  "interface_complete"
+ ],
+ "virtual_module_id": "donor:radio:buttons"
+}
