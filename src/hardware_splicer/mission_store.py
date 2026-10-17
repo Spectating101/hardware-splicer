@@ -32,7 +32,10 @@ from .device_draft import draft_from_parts_text, parse_parts_text
 from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
 from pydantic import ValidationError
 
-from .physical_evidence_ledger import PhysicalEvidenceEnvelope, physical_evidence_envelope_hash
+from .physical_evidence_ledger import (PhysicalEvidenceEnvelope, physical_evidence_envelope_hash,
+                                       validate_physical_evidence_envelope)
+from .mission_donors import (normalize_donors, normalize_used, normalize_finding, read_donors,
+                             donor_problem, donor_grounding)
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -57,9 +60,9 @@ TERMINAL_STATES = (
 _BLOCKED_STATES = frozenset(state for state in TERMINAL_STATES if state.startswith("BLOCKED_"))
 _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
-    {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
+    {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed", "finding_offered"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "design_staged", "evidence_supplied"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "donor_read", "design_staged", "evidence_supplied"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -73,7 +76,7 @@ _EVAL_OPERATIONS = frozenset(
 )
 _AUTHOR_KEYS = frozenset({"kind", "id"})
 _AUTHOR_KINDS = frozenset({"human", "agent", "system"})
-_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets", "measurements", "requirements"})
+_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets", "measurements", "requirements", "donors"})
 # Spec values a person can require, and where the planner's validated spec holds each one with its default applied.
 _REQUIREMENT_PATHS = {
     "case.wall_mm": ("wall", (int, float)),
@@ -90,7 +93,7 @@ _REQUEST_KINDS = {
     "continuity": "electrical_measurement",
     "boot_log": "inspection",
 }
-_REQUEST_KEYS = frozenset({"kind", "target", "quantity", "expected", "instructions"})
+_REQUEST_KEYS = frozenset({"kind", "target", "quantity", "expected", "instructions", "signal"})
 _DIMENSIONAL_QUANTITIES = frozenset({"pcb_mm.x", "pcb_mm.y", "pcb_mm.z", "above_board_mm"})
 _MAX_LOG_BYTES = 64 * 1024
 _MAX_READINGS = 10
@@ -145,6 +148,13 @@ class MissionStateError(MissionError):
 
 class MissionValidationError(MissionError, ValueError):
     pass
+
+
+def _donor_call(function, *args, **kwargs):
+    try:
+        return function(*args, **kwargs)
+    except (ValueError, TypeError, KeyError) as exc:
+        raise MissionValidationError(str(exc)) from exc
 
 
 def _serialized_mutation(method):
@@ -349,6 +359,8 @@ def _normalize_intake(intake: Any) -> tuple[Dict[str, Any], Dict[str, int]]:
         normalized["measurements"] = _normalize_measurements(raw["measurements"])
     if raw.get("requirements") is not None:
         normalized["requirements"] = _normalize_requirements(raw["requirements"])
+    if "donors" in raw:
+        normalized["donors"] = _donor_call(normalize_donors, raw["donors"])
     return normalized, budgets
 
 
@@ -413,6 +425,10 @@ def _normalize_request(value: Any) -> Dict[str, Any]:
         "target": _require_text(raw.get("target"), field="request.target", max_len=200),
         "instructions": _require_text(raw.get("instructions"), field="request.instructions", max_len=_MAX_NEED),
     }
+    if raw.get("signal") is not None:
+        if not request["target"].startswith("donor:") or kind not in {"electrical", "continuity"}:
+            raise MissionValidationError("request.signal requires an electrical/continuity donor target")
+        request["signal"] = _require_text(raw["signal"], field="request.signal", max_len=120)
     quantity = raw.get("quantity")
     if kind == "dimensional":
         try:
@@ -605,6 +621,10 @@ def _canonical_json(value: Any) -> str:
 def _engineering_content(spec: Mapping[str, Any]) -> Dict[str, Any]:
     """What makes two candidates different designs: not their name, wire colours or the order things are listed in."""
     content = {key: value for key, value in spec.items() if key != "name"}
+    if "donors_used" in content:
+        content["donors_used"] = _donor_call(normalize_used, content["donors_used"])
+        if not content["donors_used"]:
+            content.pop("donors_used")
     if isinstance(content.get("modules"), list):
         content["modules"] = sorted(content["modules"], key=_canonical_json)
     if isinstance(content.get("connections"), list):
@@ -721,6 +741,8 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     terminal: Dict[str, Any] | None = None
     accepted: Dict[str, Any] | None = None
     inventory: Dict[str, Any] | None = None
+    donors: list[Dict[str, Any]] = []
+    donor_read = False
     staged: Dict[str, Any] | None = None
     needs: Dict[int, Dict[str, Any]] = {}
     supplied_measurements: Dict[str, Any] = {}
@@ -754,6 +776,13 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             phase = "ARCHITECTING"
         elif event_type == "inventory_read":
             inventory = {key: event[key] for key in ("reading", "draft", "result_sha256")}
+        elif event_type == "donor_read":
+            donor_read = True
+            donors = [{**d, "findings": [], "person_measurements": []} for d in event["donors"]]
+        elif event_type == "finding_offered":
+            for donor in donors:
+                if donor["donor_id"] == event["finding"]["donor_id"]:
+                    donor["findings"].append({**event["finding"], "seq": seq, "author": event["author"]})
         elif event_type == "design_staged":
             # Delivery after READY: it opens a review and changes neither the phase nor the verdict.
             staged = {"review_id": event["review_id"], "package_sha256": event["package_sha256"], "seq": seq}
@@ -782,6 +811,7 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             needs[seq] = {"seq": seq, "blocker": event["blocker"], "need": event["need"],
                           "candidate_id": event.get("candidate_id"), "request": event.get("request"),
                           "need_state": "open", "answered_by": None}
+            needs[seq]["cites"] = list(event.get("cites") or [])
             phase = "EVIDENCE_REQUIRED"
         elif event_type == "evidence_supplied":
             need = needs[int(event["need_seq"])]
@@ -794,6 +824,13 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             override = event.get("override")
             if override:
                 supplied_measurements = _merge_measurements(supplied_measurements, override)
+            request = need.get("request") or {}
+            if request.get("kind") == "electrical" and request.get("signal"):
+                for donor in donors:
+                    if donor["donor_id"] == request.get("target"):
+                        donor["person_measurements"].append({"signal": request["signal"], "values": event["values"],
+                            "evidence_id": event["evidence_id"], "envelope_hash": event["envelope_hash"],
+                            "seq": seq, "grade": "person_measurement", "comparison": event["comparison"]})
             standing = any(item["need_state"] != "resolved" for item in needs.values())
             phase = "EVIDENCE_REQUIRED" if standing else "EVALUATING"
         elif event_type == "terminal_proposed":
@@ -812,6 +849,9 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     return {
         "phase": phase,
         "inventory": inventory,
+        "donors": donors,
+        "donor_read": donor_read,
+        "donor_references": list((intake or {}).get("donors") or []),
         "candidates": candidates,
         "repairs_used": repairs_used,
         "operator_jobs_used": operator_jobs_used,
@@ -856,6 +896,9 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if not isinstance(candidate_id, str) or candidate_id not in candidates:
         return "READY_FOR_HUMAN_BUILD requires a candidate with a passing device_plan"
     candidate = candidates[candidate_id]
+    problem = donor_problem(replayed, candidate["spec"], ready=True)
+    if problem:
+        return "READY_FOR_HUMAN_BUILD is refused: " + problem
     inventory = replayed.get("inventory")
     if inventory is None:
         return "READY_FOR_HUMAN_BUILD requires an HS inventory_read event"
@@ -956,6 +999,9 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
         if uncovered:
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} does not contain "
                                     + ", ".join(uncovered) + " from the person's inventory")
+        donor_error = donor_problem(replayed, candidate["spec"], ready=False)
+        if donor_error:
+            raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id}: {donor_error}")
         broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
         if broken:
             # A design that ignores what the person required says nothing about whether their device is feasible.
@@ -1221,6 +1267,7 @@ class MissionStore:
             "phase": replayed["phase"],
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
+            "donors": replayed["donors"],
             "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
@@ -1477,6 +1524,10 @@ class MissionStore:
             raise MissionValidationError("the envelope's record belongs to another project")
         if parsed.record.kind.value != _REQUEST_KINDS[request["kind"]]:
             raise MissionValidationError(f"a {request['kind']} need is answered by a {_REQUEST_KINDS[request['kind']]} record")
+        if request["target"].startswith("donor:"):
+            if (request["target"] not in parsed.record.target_ids or parsed.record.metadata.get("simulated")
+                    or validate_physical_evidence_envelope(parsed)):
+                raise MissionValidationError("donor evidence requires a matching target and a valid nonsimulated envelope")
         record: Dict[str, Any] = {
             "type": "evidence_supplied",
             "author": person,
@@ -1548,6 +1599,14 @@ class MissionStore:
                 {"type": "inventory_read", "author": dict(_SYSTEM_AUTHOR), **inventory},
             )
             last_seq += 1
+        if view["intake"].get("donors") and not replayed.get("donor_read"):
+            donors = _donor_call(read_donors, self.project_store, project_id, view["intake"]["donors"])
+            _reject_authority(donors, label="donor_read")
+            digest = hashlib.sha256(_canonical_json(donors).encode("utf-8")).hexdigest()
+            self._write_event(project_id, mission_id, last_seq + 1,
+                             {"type": "donor_read", "author": dict(_SYSTEM_AUTHOR),
+                              "donors": donors, "result_sha256": digest})
+            last_seq += 1
         self._write_event(
             project_id, mission_id, last_seq + 1,
             {"type": "accepted", "author": normalized_author, "budgets": budgets},
@@ -1581,12 +1640,15 @@ class MissionStore:
         if not isinstance(event_type, str) or event_type not in _PROPOSE_TYPES:
             raise MissionValidationError(
                 "event type must be 'candidate_proposed', 'repair_proposed', "
-                "'evidence_required', or 'terminal_proposed'"
+                "'evidence_required', 'finding_offered', or 'terminal_proposed'"
             )
         budgets = view["budgets"]
         record: Dict[str, Any] = {"type": event_type, "author": normalized_author}
+        references = list(view["intake"].get("donors") or [])
         if event_type == "candidate_proposed":
             candidate = _normalize_candidate(raw_event.get("candidate"))
+            if "donors_used" in candidate["spec"]:
+                candidate["spec"]["donors_used"] = _donor_call(normalize_used, candidate["spec"]["donors_used"], references)
             if candidate["id"] in replayed["candidates"]:
                 raise MissionValidationError(f"candidate {candidate['id']!r} already exists")
             if len(replayed["candidates"]) >= int(budgets["max_candidates"]):
@@ -1615,6 +1677,11 @@ class MissionStore:
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
+            if "donors_used" in record["spec"]:
+                record["spec"]["donors_used"] = _donor_call(normalize_used, record["spec"]["donors_used"], references)
+            dropped_donors = set(candidate["spec"].get("donors_used") or []) - set(record["spec"].get("donors_used") or [])
+            if dropped_donors:
+                raise MissionStateError("repair_proposed drops used donors: " + ", ".join(sorted(dropped_donors)))
             _assert_measurements_are_the_persons(_person_measurements(view["intake"], replayed), record["spec"], field="spec")
             newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"]))
                             - set(_violated_requirements(replayed["requirements"], candidate["spec"])))
@@ -1645,6 +1712,31 @@ class MissionStore:
             record["need"] = _require_text(raw_event.get("need"), field="need", max_len=_MAX_NEED)
             if raw_event.get("request") is not None:
                 record["request"] = _normalize_request(raw_event["request"])
+                target = record["request"]["target"]
+                if target.startswith("donor:") and target not in {r["donor_id"] for r in references}:
+                    raise MissionValidationError("request donor target must be in intake")
+            if "cites" in raw_event:
+                cites = raw_event["cites"]
+                if not isinstance(cites, list) or len(cites) > 40:
+                    raise MissionValidationError("need.cites must be a list of at most 40 finding sequences")
+                by_seq = {e["seq"]: e for e in events}
+                record["cites"] = []
+                for cite in cites:
+                    cite = _require_int(cite, field="need.cites item", min_value=1)
+                    if by_seq.get(cite, {}).get("type") != "finding_offered":
+                        raise MissionValidationError("need.cites may reference only existing findings")
+                    target = (record.get("request") or {}).get("target")
+                    if target and target.startswith("donor:") and by_seq[cite]["finding"]["donor_id"] != target:
+                        raise MissionValidationError("cited finding belongs to another donor")
+                    record["cites"].append(cite)
+        elif event_type == "finding_offered":
+            if normalized_author["kind"] != "agent":
+                raise MissionValidationError("only agents may offer findings")
+            if set(raw_event) != {"type", "finding"}:
+                raise MissionValidationError("finding_offered accepts only type and finding; no author or grade override")
+            if replayed.get("accepted") is None:
+                raise MissionStateError("findings require an accepted mission with a frozen donor_read")
+            record["finding"] = _donor_call(normalize_finding, raw_event.get("finding"), references)
         else:
             state = raw_event.get("state")
             if state not in TERMINAL_STATES:
@@ -1663,7 +1755,8 @@ class MissionStore:
                 _assert_no_ready_candidate(replayed, events, state)
                 record["cites"] = _assert_blocked_cites(events, raw_event)
                 record["grounding"] = (_part_data_grounding(replayed)
-                                       if state == "BLOCKED_NEEDS_PART_DATA" else "agent_assertion")
+                                       if state == "BLOCKED_NEEDS_PART_DATA" else
+                                       donor_grounding(replayed, events, raw_event, record["cites"]))
             elif state == "NO_FEASIBLE_ARCHITECTURE":
                 _assert_no_feasible_architecture(replayed, budgets)
                 _assert_no_ready_candidate(replayed, events, state)
