@@ -8,6 +8,8 @@ from fastapi import status as http_status
 
 from .fabrication_operator import FabricationValidationError
 from .fabricator_intelligence_workbench import FabricatorIntelligenceWorkbench
+from .fabricator_lab_workbench import FabricatorLabWorkbench
+from .project_store import ProjectStore
 
 
 def _runtime(request: Request) -> FabricatorIntelligenceWorkbench:
@@ -88,6 +90,28 @@ def create_fabricator_intelligence_router() -> APIRouter:
             raise _error(exc) from exc
         return {"ok": True, "estimate": estimate}
 
+    @router.post("/resources/project")
+    def project_salvage_resources(request: Request, body: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            value = _body(body)
+            references = value.get("donor_references")
+            if not isinstance(references, list):
+                raise FabricationValidationError("donor_references must be a list")
+            store = getattr(request.app.state, "project_store", None)
+            if not isinstance(store, ProjectStore):
+                raise FabricationValidationError("canonical project store is unavailable")
+            lab = getattr(request.app.state, "fabricator_lab_workbench", None)
+            fabrication_resources = lab.list_resources() if isinstance(lab, FabricatorLabWorkbench) else []
+            graph = _runtime(request).project_resources(
+                project_store=store,
+                project_id=value.get("project_id"),
+                donor_references=references,
+                fabrication_resources=fabrication_resources,
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {"ok": True, "resource_graph": graph}
+
     @router.post("/architecture/tradeoffs")
     def compare_fabrication_options(request: Request, body: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -95,11 +119,15 @@ def create_fabricator_intelligence_router() -> APIRouter:
             options = value.get("options")
             if not isinstance(options, list):
                 raise FabricationValidationError("options must be a list")
+            graph = value.get("resource_graph")
+            if graph is not None and not isinstance(graph, Mapping):
+                raise FabricationValidationError("resource_graph must be an object")
             comparison = _runtime(request).compare_options(
                 options=options,
                 currency=value.get("currency"),
                 as_of=value.get("as_of"),
                 require_known_stock=bool(value.get("require_known_stock", False)),
+                resource_graph=graph,
             )
         except Exception as exc:
             raise _error(exc) from exc
