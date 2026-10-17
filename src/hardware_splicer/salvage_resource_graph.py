@@ -13,6 +13,7 @@ import re
 from typing import Any, Mapping, Sequence
 
 from .donor_capability_families import project_donor_families, project_family_capability
+from .donor_capability_quarantine import quarantine_policy_for_role
 from .fabrication_operator import FabricationValidationError
 from .mission_donors import normalize_donors, read_donors
 from .project_store import ProjectStore, validate_project_id
@@ -79,6 +80,8 @@ def project_salvage_resource_graph(
             "lab_truth_owner": "server_fabrication_capability_registry",
             "capability_family_policy_is_evidence": False,
             "capability_family_policy_may_promote_evidence": False,
+            "quarantine_policy_is_evidence": False,
+            "agent_can_release_quarantine": False,
             "model_inference_is_physical_truth": False,
             "availability_grants_physical_authority": False,
         },
@@ -141,10 +144,12 @@ def _donor_resource(raw: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         if grade not in _DONOR_GRADES:
             raise FabricationValidationError("donor capability has unsupported evidence grade")
         grades.append(grade)
+        quarantine = quarantine_policy_for_role(role)
         entry: dict[str, Any] = {
             "capability_id": _semantic_capability_id(role),
             "role": role.strip(),
             "support": {"kind": "donor_evidence", "grade": grade},
+            "architecture_usable": contract_state != "unknown" and quarantine is None,
         }
         family = project_family_capability(
             role=role,
@@ -158,6 +163,8 @@ def _donor_resource(raw: Mapping[str, Any], *, index: int) -> dict[str, Any]:
                 family_qualification=family["qualification"],
                 planner_interface=family["planner_interface"],
             )
+        if quarantine is not None:
+            entry["quarantine"] = quarantine
         projected.append(entry)
 
     weakest = min(grades, key=_DONOR_GRADES.index) if grades else None
@@ -165,18 +172,29 @@ def _donor_resource(raw: Mapping[str, Any], *, index: int) -> dict[str, Any]:
     if geometry is not None and not isinstance(geometry, Mapping):
         raise FabricationValidationError("donor planner_geometry must be an object when present")
     family_projection = project_donor_families(raw)
+    usable_capabilities = [row for row in projected if row.get("architecture_usable") is True]
+    quarantined_capabilities = [
+        {
+            "capability_id": row["capability_id"],
+            "role": row["role"],
+            "quarantine": row["quarantine"],
+        }
+        for row in projected
+        if "quarantine" in row
+    ]
     return {
         "resource_id": ident,
         "kind": "donor",
         "display_name": label.strip(),
         "capabilities": projected,
         "capability_families": family_projection,
+        "quarantined_capabilities": quarantined_capabilities,
         "support": {"kind": "donor_evidence", "weakest_grade": weakest},
         "contract_state": contract_state,
         "unresolved_facts": unresolved,
         "available": True,
-        "usable_for_architecture": bool(projected) and contract_state != "unknown",
-        "verified_for_ready": bool(projected) and contract_state == "verified" and not unresolved,
+        "usable_for_architecture": bool(usable_capabilities),
+        "verified_for_ready": bool(usable_capabilities) and contract_state == "verified" and not unresolved,
         "planner_geometry": dict(geometry) if geometry is not None else None,
         "source": {"kind": "mission_donor_projection", "donor_id": ident},
         "grants_physical_authority": False,
