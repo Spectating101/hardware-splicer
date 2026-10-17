@@ -296,8 +296,10 @@ never rewrite or promote that contract. Persistence location and trust limits: [
 Native passive-switch donor modules can now enter the device planner with measured contact geometry and explicit
 electrical protocols. The mission executor injects only the frozen donor context; standalone JSON cannot supply it.
 Native donor modules cannot be duplicated or dropped into mere tracking references by a repair. Plans, engineering
-reviews and enclosure exports include those modules. Packages explicitly block donor firmware rather than silently
-omitting its behavior. Scope and trust limits: [`DONOR_DEVICE_PLANNING.md`](DONOR_DEVICE_PLANNING.md).
+reviews and enclosure exports include those modules. Supported sensor applications may include a separate passive
+input firmware proposal and GPIO/clock modeled phase; unsupported combinations stay explicitly blocked rather than
+silently omitting donor behavior. Scope and trust limits: [`DONOR_DEVICE_PLANNING.md`](DONOR_DEVICE_PLANNING.md)
+and [`DONOR_INPUT_FIRMWARE.md`](DONOR_INPUT_FIRMWARE.md).
 
 ## Verification
 

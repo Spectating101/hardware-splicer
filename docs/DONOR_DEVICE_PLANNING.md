@@ -73,17 +73,21 @@ responsible for these records. Mission-supplied electrical feedback does not cre
 ## Deliverables and readiness
 
 Native planning produces real module boxes, contact coordinates, wiring curves, topology findings, assembly-step
-proposals and case geometry. Engineering coverage includes the donor as a separate module, with missing current,
-thermal, input configuration, debounce and contact-life information explicitly unassessed.
+proposals and case geometry. Engineering coverage includes the donor as a separate module, with physical current,
+thermal, input suitability, debounce and contact-life information explicitly unassessed.
 
 The deterministic mission package retains `donor_read.json`, a `donor_scope.json` limitation record, the actual
-native plan and generated enclosure STL/OpenSCAD. Donor firmware is **blocked**, not silently replaced by a
-library-only sketch. Application generation/runtime requests record a refusal. Package generation still follows
-the existing READY contract, which can contain explicitly blocked deliverables; READY is not physical validation.
+native plan and generated enclosure STL/OpenSCAD. A separate bounded [input firmware proposal](DONOR_INPUT_FIRMWARE.md)
+can now accompany the existing sensor-monitor application. It reports passive contact states and carries a distinct
+GPIO/clock host-model phase. Unsupported application combinations remain blocked, never silently replaced by a
+library-only sketch. Package generation still follows the existing READY contract, which can contain explicitly
+blocked deliverables; READY is not physical validation.
 
 Wiring validation is topology-only for declared nominal 3.3 V passive contacts. Rail tolerance, leakage, transient
-limits, pull-up implementation, debounce and actual device function are not established. No GPIO is configured,
-firmware flashed, switch actuated, enclosure printed or board powered by this code.
+limits, pull-up suitability, physical debounce and actual device function are not established. This code generates
+proposed GPIO configuration but does not configure real hardware, flash firmware, actuate a switch, print an
+enclosure or power a board. The plan's `donor_scope` describes topology only; the application/package records its
+separate firmware scope and whether modeled checks actually ran.
 
 ## Trust and verification
 
