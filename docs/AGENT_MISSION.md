@@ -144,6 +144,11 @@ what was asked. The mission's `needs` then show each need's `need_state`:
 - `contradicted`: the reading is outside the expected range. The need still stands; read the values and decide
   what to change.
 
+A person can also just type the reading: `POST /{mission_id}/needs/{need_seq}/answer` with `{"values": [...]}` and their
+operator token. HS builds the evidence envelope itself from what they typed, then applies every check above, so a browser
+never has to reproduce a hash. A typed reading is the person's own report; no instrument or calibration is recorded. This
+route, like the evidence route, is not offered to agents.
+
 A dimensional answer for a library module becomes usable as that module's `overrides`, like an intake measurement. A
 boot log is kept as text; HS does not interpret it. A resolved need can no longer be cited for a blocker. None of
 this authorizes flashing or power-on.
