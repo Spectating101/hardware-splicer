@@ -241,9 +241,11 @@ class ProjectReviewStore:
             "review_flags": snapshot_flags,
             "summary": summary,
         }
-        if requires_verified_operator:
-            # Set only by code that stages a design for a person (never by a request): the API then refuses to
-            # decide this review without a verified human operator, whatever name the request carries.
+        # Mission designs live under `deviceDesigns`. Whoever opened the review and however they opened it, a
+        # review that adds or changes one is a design waiting for a person, so it needs a verified human to decide.
+        if requires_verified_operator or any(change["path"] == "deviceDesigns" for change in snapshot_changes):
+            # Never taken from a request: the API then refuses to decide this review without a verified human
+            # operator, whatever name the request carries.
             proposal["requires_verified_operator"] = True
         _atomic_write_json(review_dir / "proposal.json", proposal)
         return self.get(safe_id, review_id)
@@ -440,6 +442,7 @@ class ProjectReviewStore:
         decision: str,
         actor: str,
         note: str = "",
+        verified_human: bool = False,
     ) -> Dict[str, Any]:
         normalized = str(decision or "").strip().lower()
         if normalized not in {"accepted", "rejected"}:
@@ -449,6 +452,10 @@ class ProjectReviewStore:
             raise ValueError("actor is required")
 
         review = self.get(project_id, review_id)
+        if review.get("requires_verified_operator") and not verified_human:
+            # The caller must have checked a human operator's token itself and say so. Refusing by default means a
+            # new caller cannot decide a design waiting for a person by forgetting to check.
+            raise ReviewConflict(f"review {review_id!r} may be decided only by a verified human operator")
         status = review["status"]
         if status == "accepting":
             if normalized != "accepted":

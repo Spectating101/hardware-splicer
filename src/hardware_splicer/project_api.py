@@ -198,12 +198,14 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
                         detail={"type": "operator_required", "message": "only a person can decide a design staged from a mission"},
                     )
                 actor = identity.id
+            gated = bool(review_store.get(project_id, review_id).get("requires_verified_operator"))
             review = review_store.decide(
                 project_id,
                 review_id,
                 decision=request.decision,
                 actor=actor,
                 note=request.note,
+                verified_human=gated,
             )
         except HTTPException:
             raise

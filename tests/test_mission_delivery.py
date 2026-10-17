@@ -355,3 +355,36 @@ def test_an_open_review_request_cannot_set_the_verified_operator_gate(gated_clie
     if opened.status_code == 201:
         review = opened.json()["review"]["review_id"]
         assert client.post(f"/v1/projects/monitor/reviews/{review}/decision", json={"decision": "accepted", "actor": "reviewer"}).status_code == 200
+
+
+def test_the_gate_follows_the_content_so_opening_the_review_another_way_does_not_skip_it(gated_client):
+    # An agent that skips mission staging and opens its own review adding a design record gets the same gate.
+    client = gated_client
+    snapshot = _snapshot()
+    snapshot["deviceDesigns"] = {"mission-invented": {"spec": {}, "physical_correctness": "UNPROVEN"}}
+    opened = client.post("/v1/projects/monitor/reviews", json={"candidate_snapshot": snapshot, "created_by": "an-agent"})
+    assert opened.status_code == 201
+    review = opened.json()["review"]["review_id"]
+    before = _revision(client)
+    route = f"/v1/projects/monitor/reviews/{review}/decision"
+    assert client.post(route, json={"decision": "accepted", "actor": "anyone-at-all"}).status_code in (401, 403)
+    assert client.post(route, json={"decision": "accepted", "actor": "x"}, headers={"X-HS-Operator-Token": AGENT_TOKEN}).status_code in (401, 403)
+    assert _revision(client) == before
+    assert client.post(route, json={"decision": "accepted", "actor": "x"}, headers={"X-HS-Operator-Token": PERSON_TOKEN}).status_code == 200
+    assert _revision(client) == before + 1
+
+
+def test_the_review_store_itself_refuses_a_gated_review_unless_a_person_was_verified(tmp_path):
+    # Defence in depth: a caller that reaches the store without going through the API gate cannot skip it.
+    from hardware_splicer.project_review_store import ProjectReviewStore, ReviewConflict
+
+    projects = ProjectStore(tmp_path)
+    projects.save("monitor", _snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(projects)
+    snapshot = _snapshot()
+    snapshot["deviceDesigns"] = {"mission-x": {"spec": {}}}
+    review = reviews.create("monitor", snapshot, created_by="an-agent")["review_id"]
+    with pytest.raises(ReviewConflict, match="verified"):
+        reviews.decide("monitor", review, decision="accepted", actor="anyone")
+    assert reviews.get("monitor", review)["status"] == "pending"
+    assert reviews.decide("monitor", review, decision="accepted", actor="bench-lead", verified_human=True)["status"] == "accepted"
