@@ -298,7 +298,7 @@ def _capture_prefill(label: str, facts: Sequence[Mapping[str, Any]]) -> dict[str
             if value.get(field) is not None:
                 row[field] = value[field]
         if row.get("ref") in markings:
-            row["marking"] = markings[row["ref"])]
+            row["marking"] = markings[row["ref"]]
         parts.append(row)
     return {
         "schema_version": "hardware_splicer.donor_capture.v1",
