@@ -1,0 +1,352 @@
+'use client';
+
+import { useState } from 'react';
+import { AlertTriangle, Check, CircleDashed, Hourglass, KeyRound, LoaderCircle, Minus, X } from 'lucide-react';
+import { useOperatorToken } from '@/lib/operator-token';
+import {
+  acceptMission,
+  groundingOf,
+  operationName,
+  resultWords,
+  TONE,
+  verdictOf,
+  WHO,
+  type AuthorKind,
+  type Mission,
+  type MissionCandidate,
+  type MissionNeed,
+} from '@/lib/missions';
+
+export function WhoChip({ who, label }: { who: AuthorKind; label?: string }) {
+  return (
+    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium ${WHO[who].chip}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${WHO[who].dot}`} />
+      {label || WHO[who].label}
+    </span>
+  );
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-[#07111f]/70 p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-300">{title}</h3>
+        {hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
+      </div>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+/** What is and is not established about the physical world. Read from the mission, never assumed. */
+function AuthorityStrip({ mission }: { mission: Mission }) {
+  const items = [
+    { label: 'Works on real hardware', value: mission.physical_correctness === 'UNPROVEN' ? 'Not proven' : mission.physical_correctness, ok: false },
+    { label: 'Flashing firmware', value: mission.firmware_authorized ? 'Authorized' : 'Not authorized', ok: mission.firmware_authorized },
+    { label: 'Powering the device', value: mission.power_on_authorized ? 'Authorized' : 'Not authorized', ok: mission.power_on_authorized },
+  ];
+  return (
+    <ul aria-label="What is established about the physical world" className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
+      {items.map((item) => (
+        <li key={item.label} className="rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs">
+          <span className="text-slate-400">{item.label}: </span>
+          <span className={item.ok ? 'font-semibold text-emerald-200' : 'font-semibold text-slate-200'}>{item.value}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function VerdictPanel({ mission }: { mission: Mission }) {
+  const verdict = verdictOf(mission);
+  const tone = TONE[verdict.tone];
+  const terminal = mission.terminal;
+  const grounding = terminal ? groundingOf(terminal) : null;
+  return (
+    <section aria-label="Where this mission stands" className={`rounded-2xl border p-5 ${tone.panel}`}>
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Where this stands</p>
+      <h2 data-testid="verdict-title" className={`mt-1 text-2xl font-semibold leading-tight ${tone.label}`}>{verdict.title}</h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{verdict.meaning}</p>
+
+      {terminal && grounding ? (
+        <div className="mt-4 rounded-xl border border-white/10 bg-black/25 p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate-400">Established by</span>
+            <WhoChip who={grounding.who} label={grounding.label} />
+          </div>
+          <p className="mt-2 text-xs leading-5 text-slate-400">{grounding.detail}</p>
+        </div>
+      ) : null}
+      {terminal?.reason ? (
+        <div className="mt-3 text-sm leading-6">
+          <span className="mr-2 align-middle"><WhoChip who="agent" label="The agent wrote" /></span>
+          <span className="text-slate-300">“{terminal.reason}”</span>
+        </div>
+      ) : null}
+
+      {terminal?.state === 'READY_FOR_HUMAN_BUILD' && terminal.physical_evidence_required?.length ? (
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-200/80">Still yours to do</p>
+          <ul className="mt-2 space-y-1.5">
+            {terminal.physical_evidence_required.map((step) => (
+              <li key={step} className="flex gap-2 text-sm leading-6 text-slate-300">
+                <CircleDashed className="mt-1 h-3.5 w-3.5 shrink-0 text-emerald-300/70" /> {step}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <AuthorityStrip mission={mission} />
+    </section>
+  );
+}
+
+/** The person's operator token: held for this browser tab only, sent only in its own header, never shown back. */
+export function OperatorTokenField({ token, setToken }: { token: string; setToken: (value: string) => void }) {
+  return (
+    <label className="min-w-[16rem] flex-1 text-xs text-slate-400">
+      <span className="flex items-center gap-1.5"><KeyRound className="h-3.5 w-3.5" /> Your operator token (kept in this tab only)</span>
+      <input
+        type="password"
+        value={token}
+        onChange={(event) => setToken(event.target.value)}
+        autoComplete="off"
+        spellCheck={false}
+        className="mt-1 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-300/60"
+        placeholder="Paste the token you were given"
+      />
+    </label>
+  );
+}
+
+export function AcceptPanel({ mission, onAccepted }: { mission: Mission; onAccepted: (mission: Mission) => void }) {
+  const { token, setToken } = useOperatorToken();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  if (mission.accepted) return null;
+
+  async function accept() {
+    setBusy(true);
+    setError('');
+    try {
+      onAccepted(await acceptMission(mission.project_id, mission.mission_id, token));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not accept the mission');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const { budgets } = mission;
+  return (
+    <Section title="Your decision">
+      <p className="max-w-3xl text-sm leading-6 text-slate-300">
+        Accepting says the goal and parts below are what you want. It lets Hardware Splicer run its{' '}
+        <strong className="font-semibold text-slate-100">software-only</strong> checks for the agent, up to{' '}
+        {budgets.max_operator_jobs} checks and {budgets.max_candidates} designs. It does not power, flash or build anything,
+        and you can only do it once.
+      </p>
+      <div className="mt-4 flex flex-wrap items-end gap-3">
+        <OperatorTokenField token={token} setToken={setToken} />
+        <button
+          type="button"
+          onClick={accept}
+          disabled={busy || !token}
+          className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Accept this mission
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm text-red-100">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </p>
+      ) : null}
+    </Section>
+  );
+}
+
+const NEED_STATE: Record<MissionNeed['need_state'], { label: string; className: string }> = {
+  open: { label: 'Waiting for you', className: 'border-amber-300/50 bg-amber-300/10 text-amber-100' },
+  resolved: { label: 'Answered', className: 'border-emerald-300/40 bg-emerald-400/10 text-emerald-100' },
+  contradicted: { label: 'Reading out of range', className: 'border-red-400/50 bg-red-950/40 text-red-100' },
+};
+
+export function NeedsPanel({ mission }: { mission: Mission }) {
+  const ended = Boolean(mission.terminal);
+  // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
+  const requests = mission.needs.filter((need) => need.request);
+  const notes = mission.needs.filter((need) => !need.request);
+  if (!requests.length && !notes.length) return null;
+  return (
+    <>
+    {requests.length ? (
+    <Section title="Asked of you" hint={ended ? 'This mission has ended' : 'Only a person can answer these, with their operator token'}>
+      <ul className="space-y-3">
+        {requests.map((need) => (
+          <li key={need.seq} className="rounded-xl border border-white/10 bg-black/20 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <WhoChip who="agent" label="Asked by the agent" />
+              <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${NEED_STATE[need.need_state].className}`}>
+                {ended && need.need_state !== 'resolved' ? 'Never answered' : NEED_STATE[need.need_state].label}
+              </span>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-100">{need.request?.instructions || need.need}</p>
+            {need.request ? (
+              <dl className="mt-2 grid gap-x-6 gap-y-1 text-xs text-slate-400 sm:grid-cols-3">
+                <div><dt className="inline">Measure: </dt><dd className="inline text-slate-200">{need.request.target}</dd></div>
+                {need.request.quantity ? <div><dt className="inline">Quantity: </dt><dd className="inline text-slate-200">{need.request.quantity}</dd></div> : null}
+                {need.request.expected ? (
+                  <div><dt className="inline">Expect: </dt><dd className="inline text-slate-200">{need.request.expected.min} to {need.request.expected.max} {need.request.expected.unit}</dd></div>
+                ) : null}
+              </dl>
+            ) : null}
+            {need.need_state !== 'resolved' && !ended ? (
+              <p className="mt-3 text-xs leading-5 text-slate-500">
+                Answering from this page is not built yet. For now send the reading to{' '}
+                <code className="rounded bg-black/40 px-1 py-0.5 text-slate-300">POST …/missions/{mission.mission_id}/needs/{need.seq}/evidence</code>{' '}
+                with your token.
+              </p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </Section>
+    ) : null}
+    {notes.length ? (
+      <Section title="Concerns the agent recorded" hint="Notes, not requests. HS did not check them.">
+        <ul className="space-y-2">
+          {notes.map((need) => (
+            <li key={need.seq} className="flex items-start gap-3 rounded-xl border border-dashed border-white/15 bg-black/20 p-3 text-sm leading-6 text-slate-200">
+              <WhoChip who="agent" />
+              <span>{need.need}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+    ) : null}
+    </>
+  );
+}
+
+function focusCandidate(mission: Mission): MissionCandidate | null {
+  if (!mission.candidates.length) return null;
+  return mission.candidates.find((candidate) => candidate.id === mission.terminal?.candidate_id) || mission.candidates[mission.candidates.length - 1];
+}
+
+export function AskedForPanel({ mission }: { mission: Mission }) {
+  const focus = focusCandidate(mission);
+  const { intake, budgets } = mission;
+  const left = new Set(focus?.uncovered_inventory || []);
+  const requirements = intake.requirements || [];
+  return (
+    <Section title="What you asked for" hint="Written by you. The agent cannot change it.">
+      <p data-testid="goal" className="text-base leading-7 text-slate-100">{intake.goal}</p>
+
+      <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Your parts</h4>
+      <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+        {intake.inventory.map((line, index) => {
+          const state = !focus ? 'unknown' : left.has(line) ? 'missing' : 'present';
+          return (
+            <li key={`${line}-${index}`} className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-slate-200">
+              {state === 'present' ? <Check className="h-4 w-4 shrink-0 text-emerald-300" aria-label="In the design" />
+                : state === 'missing' ? <X className="h-4 w-4 shrink-0 text-red-300" aria-label="Not in the design" />
+                : <Minus className="h-4 w-4 shrink-0 text-slate-500" aria-label="No design yet" />}
+              <span>{line}</span>
+              {state === 'missing' ? <span className="ml-auto text-[11px] text-red-200">not in the design</span> : null}
+            </li>
+          );
+        })}
+      </ul>
+      {mission.inventory?.reading?.left_out?.length ? (
+        <p className="mt-2 text-xs leading-5 text-sky-200/90">
+          <WhoChip who="system" /> could not match: {mission.inventory.reading.left_out.join('; ')}. It has no data for {mission.inventory.reading.left_out.length === 1 ? 'that part' : 'those parts'}.
+        </p>
+      ) : null}
+
+      {requirements.length ? (
+        <>
+          <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Requirements HS enforces</h4>
+          <ul className="mt-2 space-y-1 text-sm text-slate-200">
+            {requirements.map((row) => (
+              <li key={row.path}><code className="rounded bg-black/40 px-1.5 py-0.5 text-xs text-slate-300">{row.path}</code> must be {JSON.stringify(row.equals)}</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {intake.constraints.length ? (
+        <>
+          <h4 className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Your constraints <span className="font-normal normal-case tracking-normal text-slate-500">— noted, not enforced by HS</span></h4>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-300">
+            {intake.constraints.map((line) => <li key={line}>{line}</li>)}
+          </ul>
+        </>
+      ) : null}
+
+      <dl className="mt-5 grid gap-3 border-t border-white/10 pt-4 text-xs sm:grid-cols-3">
+        <div><dt className="text-slate-500">Checks used</dt><dd className="mt-0.5 text-sm text-slate-200">{budgets.operator_jobs_used} of {budgets.max_operator_jobs}</dd></div>
+        <div><dt className="text-slate-500">Designs allowed</dt><dd className="mt-0.5 text-sm text-slate-200">{budgets.max_candidates}</dd></div>
+        <div><dt className="text-slate-500">Repairs per design</dt><dd className="mt-0.5 text-sm text-slate-200">{budgets.max_repairs_per_candidate}</dd></div>
+      </dl>
+    </Section>
+  );
+}
+
+function CheckIcon({ errors, warnings }: { errors: number; warnings: number }) {
+  if (errors) return <X className="h-4 w-4 shrink-0 text-red-300" aria-label="Problem" />;
+  if (warnings) return <AlertTriangle className="h-4 w-4 shrink-0 text-amber-300" aria-label="Look at this" />;
+  return <Check className="h-4 w-4 shrink-0 text-emerald-300" aria-label="Clean" />;
+}
+
+export function CandidatesPanel({ mission }: { mission: Mission }) {
+  if (!mission.candidates.length) {
+    return (
+      <Section title="Designs tried">
+        <p className="flex items-center gap-2 text-sm text-slate-400"><Hourglass className="h-4 w-4" /> No design has been proposed yet.</p>
+      </Section>
+    );
+  }
+  return (
+    <Section title="Designs tried" hint="HS runs every check itself; the agent cannot record a result">
+      <ul className="space-y-3">
+        {mission.candidates.map((candidate) => {
+          const decisive = candidate.id === mission.terminal?.candidate_id;
+          return (
+            <li key={candidate.id} className={`rounded-xl border p-4 ${decisive ? 'border-white/30 bg-white/[0.04]' : 'border-white/10 bg-black/20'}`}>
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-100">Design {candidate.id}: {candidate.label}</h4>
+                <WhoChip who="agent" label="Proposed by the agent" />
+                {decisive ? <span className="rounded-full border border-white/25 px-2 py-0.5 text-[11px] text-slate-200">The verdict rests on this</span> : null}
+              </div>
+              <p className="mt-1 text-xs leading-5 text-slate-400">{candidate.rationale}</p>
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                <span className={`rounded-full border px-2 py-0.5 ${candidate.covers_inventory ? 'border-emerald-300/40 text-emerald-100' : 'border-red-400/50 bg-red-950/30 text-red-100'}`}>
+                  {candidate.covers_inventory ? 'Uses every part you listed' : `Missing: ${candidate.uncovered_inventory.join(', ') || 'a listed part'}`}
+                </span>
+                {candidate.violated_requirements.map((line) => (
+                  <span key={line} className="rounded-full border border-red-400/50 bg-red-950/30 px-2 py-0.5 text-red-100">Breaks: {line}</span>
+                ))}
+                {candidate.repairs ? <span className="rounded-full border border-white/15 px-2 py-0.5 text-slate-300">{candidate.repairs} {candidate.repairs === 1 ? 'repair' : 'repairs'}</span> : null}
+              </div>
+              {candidate.evaluations.length ? (
+                <ol className="mt-3 space-y-1.5 border-t border-white/10 pt-3">
+                  {candidate.evaluations.map((evaluation) => (
+                    <li key={evaluation.seq} className="flex items-center gap-2 text-sm text-slate-200">
+                      <CheckIcon errors={evaluation.result.errors} warnings={evaluation.result.warnings} />
+                      <span>{operationName(evaluation.operation)}</span>
+                      <span className="text-slate-400">— {resultWords(evaluation)}</span>
+                      <WhoChip who="system" label="HS" />
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="mt-3 text-xs text-slate-500">No checks have run on this design.</p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
