@@ -122,13 +122,22 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
     )
 
     @router.post("", status_code=http_status.HTTP_201_CREATED)
-    def open_project_mission(project_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    def open_project_mission(
+        project_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
         try:
             payload = _as_request_object(request, label="request")
+            author = payload.get("author")
+            identity = resolve_operator(_operator_token(x_hs_operator_token))
+            if identity is not None:
+                # A verified operator is who they are; the body cannot claim a different name.
+                author = {"kind": identity.kind, "id": identity.id}
             mission = mission_store.open_mission(
                 project_id,
                 intake=payload.get("intake"),
-                author=payload.get("author"),
+                author=author,
             )
         except Exception as exc:
             raise _mission_error(exc) from exc
