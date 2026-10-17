@@ -183,22 +183,26 @@ def test_real_mission_executes_native_plan_review_and_deterministic_enclosure_pa
         result = run_mission_operation(missions, "monitor", mid, candidate_id="A", operation=operation)
         evaluation = result["candidates"][0]["evaluations"][-1]
         assert evaluation["result"]["errors"] == 0, evaluation
-    # No implementation of switch input behavior may be credited as a library firmware pass.
+    # The bounded input adapter is generated explicitly, never omitted behind a library-only pass.
     result = run_mission_operation(missions, "monitor", mid, candidate_id="A", operation="device_application")
-    assert result["candidates"][0]["evaluations"][-1]["result"]["errors"] > 0
+    assert result["candidates"][0]["evaluations"][-1]["result"]["errors"] == 0
     _propose(missions, mid, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "bounded software checks"})
     first = build_mission_package(missions, "monitor", mid)
     second = build_mission_package(missions, "monitor", mid)
     assert first["package_sha256"] == second["package_sha256"]
     assert first["deliverables"]["enclosure"]["status"] == "generated"
-    assert first["deliverables"]["firmware"]["status"] == "blocked"
+    assert first["deliverables"]["firmware"]["status"] == "generated"
+    assert first["deliverables"]["firmware_test"]["status"] == "not_run"
     with zipfile.ZipFile(io.BytesIO(read_mission_package(missions, "monitor", mid))) as archive:
         assert archive.testzip() is None
         assert "01_requirements/donor_read.json" in archive.namelist()
         plan = json.loads(archive.read("02_design/plan.json"))
         assert any(m["module"] == DONOR for m in plan["modules"])
         assert "04_enclosure/case_base.stl" in archive.namelist()
-        assert "03_firmware/BLOCKED.md" in archive.namelist()
+        assert "03_firmware/src/donor_inputs.h" in archive.namelist()
+        proposal = json.loads(archive.read("03_firmware/FIRMWARE_PROPOSAL.json"))
+        assert proposal["donor_behaviour_tests"] == "NOT_RUN"
+        assert not proposal["firmware_authorized"] and not proposal["power_on_authorized"]
     assert missions.project_store.load("monitor")["revision"] == 3
 
 

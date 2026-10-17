@@ -108,9 +108,8 @@ def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple
     by_type = {e["type"]: e for e in events if e["type"] in {"accepted", "inventory_read"}}
     checks = list(view["terminal"].get("physical_evidence_required") or [])
 
-    def donor_firmware(_spec):
-        raise DevicePlanError("Donor firmware is not implemented; a library-only application would omit donor behavior")
-    firmware, firmware_files = _deliverable(donor_firmware if donor_modules else build_device_application,
+    firmware_builder = partial(build_device_application, donor_modules=donor_modules) if donor_modules else build_device_application
+    firmware, firmware_files = _deliverable(firmware_builder,
                                            spec, "03_firmware", "Firmware")
     case_builder = partial(build_device_case, donor_modules=donor_modules) if donor_modules else build_device_case
     enclosure, enclosure_files = _deliverable(case_builder, spec, "04_enclosure", "Enclosure")
@@ -133,7 +132,8 @@ def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple
     if donor_modules:
         files["01_requirements/donor_read.json"] = _canonical(next(e for e in events if e["type"] == "donor_read"))
         files["02_design/donor_scope.json"] = _canonical({"implementation": "passive_switch_topology_and_geometry",
-            "donors": sorted(donor_modules), "firmware_implemented": False, "physical_correctness": "UNPROVEN"})
+            "donors": sorted(donor_modules), "firmware_implemented": firmware["status"] == "generated",
+            "firmware_scope": "proposed_passive_input_serial_monitor", "physical_correctness": "UNPROVEN"})
     manifest = {
         "schema_version": MISSION_PACKAGE_SCHEMA,
         "project_id": project_id,

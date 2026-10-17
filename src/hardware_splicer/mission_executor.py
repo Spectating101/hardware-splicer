@@ -78,8 +78,6 @@ def _not_run(reason: str) -> tuple[int, int, str, dict[str, Any]]:
 
 
 def _run_operation(operation: str, spec: Mapping[str, Any], *, donor_modules=None) -> tuple[int, int, str, Any]:
-    if donor_modules and operation in {"device_application", "device_application_run"}:
-        raise DevicePlanError("Donor firmware and its runtime are not implemented; library-only firmware would omit donor behavior")
     if operation == "device_plan":
         plan = build_device_plan(spec, donor_modules=donor_modules) if donor_modules else build_device_plan(spec)
         findings = plan.get("findings") or []
@@ -100,10 +98,10 @@ def _run_operation(operation: str, spec: Mapping[str, Any], *, donor_modules=Non
         metadata, _package = (build_device_case(spec, donor_modules=donor_modules) if donor_modules else build_device_case(spec))
         return 0, 0, "device_case: 0 errors, 0 warnings", metadata
     if operation == "device_application":
-        metadata, _package = build_device_application(spec)
+        metadata, _package = (build_device_application(spec, donor_modules=donor_modules) if donor_modules else build_device_application(spec))
         return 0, 0, "device_application: 0 errors, 0 warnings", metadata
-    result = run_device_application(spec)
-    errors = _failing_scenarios(result.get("host")) + _failing_scenarios(result.get("vendor_host"))
+    result = run_device_application(spec, donor_modules=donor_modules) if donor_modules else run_device_application(spec)
+    errors = sum(_failing_scenarios(result.get(phase)) for phase in ("host", "vendor_host", "donor_host"))
     status = result.get("status")
     warnings = 0
     notes = []

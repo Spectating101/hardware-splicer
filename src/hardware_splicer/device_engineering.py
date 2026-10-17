@@ -545,7 +545,7 @@ def build_engineering_review(spec: Any, *, donor_modules=None) -> dict[str, Any]
         "sourced_inputs": sorted((i for i in used.values() if i["basis"] == "sourced"), key=lambda i: i["name"]),
         "assumptions": sorted((i for i in used.values() if i["basis"] == "assumed"), key=lambda i: i["name"]),
         "coverage": _coverage(plan, library),
-        "not_assessed": _not_assessed() + ([{"domain": "Donor firmware and physical input behavior",
-            "why": "Passive contact topology only; pull-up configuration, debounce, contact life and actual operation are not verified."}]
+        "not_assessed": _not_assessed() + ([{"domain": "Donor physical input behavior",
+            "why": "Input firmware may be proposed separately; physical pull-up suitability, debounce, contact life and actual operation are not verified."}]
             if donor_modules else []),
     }

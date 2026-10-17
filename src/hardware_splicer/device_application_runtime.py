@@ -12,7 +12,7 @@ import threading
 import zipfile
 
 from .device_application import build_device_application
-from .device_application_execution import _run_host, _run_vendor_host
+from .device_application_execution import _run_host, _run_vendor_host, _run_donor_host
 from .device_vendor_profiles import vendor_profile
 from .bounded_process import BoundedProcessError
 
@@ -50,9 +50,9 @@ def _vendor_manifest(root: Path, names) -> dict:
     return manifest
 
 
-def run_device_application(spec: dict) -> dict:
+def run_device_application(spec: dict, *, donor_modules=None) -> dict:
     # Admission and export checks happen before any compiler is launched.
-    metadata, package = build_device_application(spec)
+    metadata, package = (build_device_application(spec, donor_modules=donor_modules) if donor_modules else build_device_application(spec))
     if os.environ.get("HS_DEVICE_RUNTIME_ENABLED") != "1":
         raise DeviceRuntimeError("Modeled execution is disabled on this server; enable HS_DEVICE_RUNTIME_ENABLED=1.")
     if not shutil.which("g++"):
@@ -84,14 +84,19 @@ def run_device_application(spec: dict) -> dict:
                 manifest = _vendor_manifest(frozen_libraries, pinned)
             host, log = _run_host(project)
             host = _phase(host, log)
+            donor_host = None
+            if donor_modules:
+                donor_report, donor_log = _run_donor_host(project)
+                donor_host = _phase(donor_report, donor_log)
             if configured and vendor_lane_exists and not vendor_fixture_supported:
                 vendor["reason"] = f"This vendor-host fixture requires the {part['chip']} and SSD1306 combination; the sensor-only adapter was not tested."
             if configured and vendor_fixture_supported and host["pass"] is True:
                 report, vendor_log = _run_vendor_host(project, frozen_libraries, profile)
                 vendor = _phase(report, vendor_log)
                 vendor["library_manifest"] = manifest
-        state = "FAILED" if host["pass"] is not True or vendor["status"] == "FAILED" else (
-            "PASSED" if vendor["status"] == "PASSED" else "PARTIAL")
+        failed = (host["pass"] is not True or vendor["status"] == "FAILED"
+                  or (donor_host is not None and donor_host["pass"] is not True))
+        state = "FAILED" if failed else "PASSED" if vendor["status"] == "PASSED" else "PARTIAL"
         return {
             "schema_version": "hardware_splicer.device_application_modeled_run.v1",
             "status": state, "claim_boundary": BOUNDARY,
@@ -99,6 +104,7 @@ def run_device_application(spec: dict) -> dict:
             "spec_sha256": metadata["spec_sha256"], "plan_sha256": metadata["plan_sha256"],
             "proposal_sha256": hashlib.sha256(package).hexdigest(), "files": metadata["files"],
             "host": host, "vendor_host": vendor,
+            **({"donor_host": donor_host} if donor_host is not None else {}),
             "esp32_compilation": "NOT_RUN", "physical_correctness": "UNPROVEN",
             "firmware_authorized": False, "power_on_authorized": False,
         }

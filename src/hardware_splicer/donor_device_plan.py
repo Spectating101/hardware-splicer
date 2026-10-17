@@ -99,8 +99,8 @@ def project_donor_module(donor: Mapping[str, Any]) -> dict:
             "sources": [{"label": "Frozen project donor contract", "url": "donor-contract:" + ident}],
             "dimension_basis": {"source": "project dimensional evidence", "evidence_ids": geometry_fact["evidence_ids"]},
             "donor_evidence": copy.deepcopy(donor),
-            "engineering": {"gaps": ["Donor contact ratings, actuation life, debounce and MCU input configuration are not modeled."]},
-            "notes": ["Passive contact topology proposal only; no donor firmware, actuation or power-on authority is generated."]}
+            "engineering": {"gaps": ["Physical contact ratings, actuation life, electrical debounce and MCU input suitability are not modeled."]},
+            "notes": ["Passive contact topology proposal only; input firmware is a separate proposal, never actuation or power-on authority."]}
 
 
 def mission_donor_modules(view: Mapping, spec: Mapping) -> dict:
