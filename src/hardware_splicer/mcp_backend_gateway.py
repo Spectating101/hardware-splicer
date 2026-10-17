@@ -105,6 +105,8 @@ _TASK_OPERATION_PATHS = {
             "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run",
         ),
         ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}"),
+        ("POST", "/v1/projects/{project_id}/missions/{mission_id}/package"),
+        ("POST", "/v1/projects/{project_id}/missions/{mission_id}/stage"),
     ),
 }
 

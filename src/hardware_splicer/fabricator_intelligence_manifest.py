@@ -1,4 +1,4 @@
-"""Bounded MCP/OpenAPI projection for inspection, procurement and tradeoffs."""
+"""Bounded MCP/OpenAPI projection for inspection, resources, procurement and tradeoffs."""
 from __future__ import annotations
 
 from typing import Any
@@ -12,6 +12,7 @@ _ROUTES = (
     ("POST", "/v1/fabricator/intelligence/vision/inspect"),
     ("GET", "/v1/fabricator/intelligence/procurement/quotes"),
     ("POST", "/v1/fabricator/intelligence/procurement/estimate"),
+    ("POST", "/v1/fabricator/intelligence/resources/project"),
     ("POST", "/v1/fabricator/intelligence/architecture/tradeoffs"),
 )
 
@@ -30,7 +31,8 @@ def fabricator_intelligence_manifest(app: FastAPI | None = None) -> dict[str, An
             "inspect an already-retained image observation and persist model-derived claims as hypotheses",
             "read server/provider-ingested supplier quote snapshots",
             "estimate a BOM in one currency without purchasing anything",
-            "compare clean-sheet, reclaim-heavy and hybrid options on currently known Pareto dimensions",
+            "project canonical donor truth and configured lab capabilities into one read-only salvage resource graph",
+            "compare clean-sheet, reclaim-heavy and hybrid options using referenced resource burden and procurement evidence",
             "send physical measurements and human decisions through the separate physical-evidence workflow",
         ],
         "operation_ids": [row["operation_id"] for row in rows],
@@ -38,6 +40,8 @@ def fabricator_intelligence_manifest(app: FastAPI | None = None) -> dict[str, An
         "authority_contract": {
             "vision_model_can_pass_physical_validation": False,
             "vision_inference_auto_promotes_evidence": False,
+            "resource_graph_persists_independent_truth": False,
+            "resource_availability_grants_physical_authority": False,
             "agent_can_ingest_supplier_quotes": False,
             "agent_can_purchase": False,
             "agent_can_select_payment_or_shipping": False,

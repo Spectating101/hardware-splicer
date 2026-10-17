@@ -139,6 +139,8 @@ HTTP 301). The 2026-10-10 date is when the link was updated, not a new claim abo
 
 Ground to power or signal (including input-only pins), power onto a signal pin, SDA joined to SCL, a pin wired to two things,
 a missing wire on a required pin, the module's flash pins, input-only I2C pins and the reset pin are errors.
+Required ground returns must reach the controller through ground-to-ground wires; a daisy chain is allowed,
+but floating peripheral grounds and address-select jumpers do not supply that return.
 Display GND on IO34, IO35, VP or VN is an error and does not count as a ground return. The isolation check names the board's
 GND label rather than treating that signal endpoint as ground.
 
@@ -155,9 +157,30 @@ Any warning or error replaces the USB action with a review step:
 "Do not plug in until you have checked the warnings above and resolved the errors."
 
 Overlapping I2C address sets are a warning. MPU-6050 and DS3231 both list 0x68 by default, so that warning fires
-when both are wired. Two or more modules that state onboard pull-ups get an information note
+when both are wired on the same bus. Two or more modules on one bus that state onboard pull-ups get an information note
 about stacked resistors. The DS3231 coin cell is backup only and is not a power source; wiring BAT to 3V3 or 5V is
 an error.
+
+Each module with I2C addresses reports `i2c_address`: its effective address (or null), the decision
+(`strap`, `default` or `unknown`), possible addresses and their source basis. The Adafruit BME280 defaults to 0x77;
+an explicit wire from SDO to a ground pin selects 0x76. Its own GND and the controller's GND are supported targets,
+in either wire direction. Leaving SDO open keeps the default. GPIO, 3V3, 5V and other signal targets are refused as
+`address_select_wiring`; no high-rail setting is inferred from the bare chip. CS remains unsupported.
+An address-overlap finding offers `strap_address` only when an unwired selector's sourced ground setting clears
+the other modules' addresses on that bus. The pure suggestion helper adds one strap and requires a re-plan.
+For modules without a sourced default or supported selector, the full declared address set remains uncertain.
+
+`i2c_buses` lists each SDA/SCL net pair, its modules, selected controller pins and wire IDs, controller index
+(null when not fixed by the pin mux) and topology validity. Buses are paired by the peripherals wired to both
+signals, independently of input connection order. A shared data net with separate clocks, or vice versa, is
+`i2c_split_bus`. On the Pico, each pair must use one I2C controller (`i2c_mixed_controllers`), and independent pairs
+cannot reuse that controller (`i2c_controller_shared`). On the ESP32, the sourced two-controller count limits
+independent buses (`i2c_controller_count`); a controller without a sourced count is limited to one. Overlap and
+stacked pull-ups are checked per bus. These are declared wiring decisions, not scan or physical results.
+
+The drafter still puts all peripherals on the default bus; it does not choose straps or alternate buses.
+Application export still refuses multiple sensor breakouts and multiple buses. A single shared bus on Pico
+I2C1 uses the existing `Wire1` generator; a valid planner topology alone does not imply firmware support.
 The BME280, BH1750 and MPU-6050 `3Vo` pins are regulator outputs, so supply-to-signal,
 ground shorts and parallel supply-output connections are also checked there.
 INA219 `Vin+` and `Vin-` have no supported electrical role: they are the measured load's shunt connection, not a

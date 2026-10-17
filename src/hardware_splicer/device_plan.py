@@ -168,6 +168,23 @@ _CONTROLLER_TEXT = (
 )
 
 
+def _check_i2c_addresses(module: dict[str, Any], source_urls: list[str]) -> None:
+    """A chosen address is a library claim with a source, never an inferred GPIO setting."""
+    i2c = module.get("i2c", {})
+    addresses = i2c.get("addresses", [])
+    if "default_address" in i2c:
+        if i2c["default_address"] not in addresses or i2c.get("default_address_source") not in source_urls:
+            raise RuntimeError(f"{module['id']} default_address needs a possible address and module source")
+    for pin in module["pins"]:
+        select = pin.get("address_select")
+        if "i2c_address_select" not in pin["roles"] and select is None:
+            continue
+        if ("i2c_address_select" not in pin["roles"] or not isinstance(select, dict) or not select
+                or not set(select) <= {"ground", "open"} or any(a not in addresses for a in select.values())
+                or pin.get("address_select_source") not in source_urls):
+            raise RuntimeError(f"{module['id']} address_select needs supported settings, possible addresses and a module source")
+
+
 def _check_controller(module: dict[str, Any]) -> None:
     """A microcontroller board carries the wording and sources the planner quotes, so no board's text lives in code."""
 
@@ -181,6 +198,13 @@ def _check_controller(module: dict[str, Any]) -> None:
     mux = electrical.get("i2c_pin_mux")
     if mux not in {"any", "fixed"}:
         raise RuntimeError(f"{label} electrical.i2c_pin_mux must be any or fixed")
+    if "i2c_controller_count" in electrical:
+        count = electrical["i2c_controller_count"]
+        if type(count) is not int or count < 1:
+            raise RuntimeError(f"{label} electrical.i2c_controller_count must be a positive integer")
+        if electrical.get("i2c_controller_count_source") not in {s["url"] for s in module["sources"]}:
+            raise RuntimeError(f"{label} I2C controller count needs a module source")
+        _text_field(electrical.get("i2c_controller_count_basis"), f"{label} I2C controller count basis")
     if mux == "fixed":
         _text_field(electrical.get("i2c_pin_note"), f"{label} electrical.i2c_pin_note", 800)
         for pin in module["pins"]:
@@ -251,6 +275,7 @@ def _library() -> dict[str, Any]:
                     raise RuntimeError(f"{quote_label}[{index}].{field} may not contain control or invisible characters")
             if quote["source"] not in source_urls:
                 raise RuntimeError(f"{quote_label}[{index}].source must equal one of this module's source urls")
+        _check_i2c_addresses(module, source_urls)
         _check_engineering(module, source_urls)
         _check_controller(module)
     return data
@@ -262,7 +287,11 @@ def module_library() -> dict[str, Any]:
     return json.loads(json.dumps(_library()))
 
 
-def _module(module_id: str) -> dict[str, Any]:
+def _module(module_id: str, donor_modules=None) -> dict[str, Any]:
+    if module_id.startswith("donor:"):
+        if donor_modules is not None and module_id in donor_modules:
+            return donor_modules[module_id]
+        raise DevicePlanError(f"donor {module_id} requires HS-frozen project context, not an embedded contract")
     for module in _library()["modules"]:
         if module["id"] == module_id:
             return module
@@ -354,7 +383,7 @@ def example_specs() -> dict[str, Any]:
 
 
 
-def device_spec_json_schema() -> dict[str, Any]:
+def device_spec_json_schema(*, include_project_donors: bool = False) -> dict[str, Any]:
     """A JSON Schema for the device spec, built from the library so the module ids, wire colours and ranges are the ones the planner accepts.
 
     It is meant for a person or a model writing a spec: constrained output that satisfies it still has to pass the planner's wiring
@@ -362,6 +391,10 @@ def device_spec_json_schema() -> dict[str, Any]:
     """
 
     ids = [m["id"] for m in _library()["modules"]]
+    module_schema = {"enum": ids}
+    if include_project_donors:
+        module_schema = {"anyOf": [{"enum": ids}, {"type": "string", "pattern": r"^donor:[a-z0-9][a-z0-9-]{0,63}:[a-z0-9][a-z0-9-]{0,63}$"}],
+                         "description": "Donor IDs require an accepted mission's frozen project context; the standalone device API cannot resolve them."}
     endpoint = {"type": "string", "pattern": r"^[a-z][a-z0-9_]{0,23}\.[^.\s]{1,40}$",
                 "description": "module_id.PIN, for example display.SDA. A pin is named by its id or its printed name, case-insensitively."}
     return {
@@ -382,7 +415,7 @@ def device_spec_json_schema() -> dict[str, Any]:
                     "type": "object", "required": ["id", "module"], "additionalProperties": False,
                     "properties": {
                         "id": {"type": "string", "pattern": _SLUG.pattern, "description": "Your name for this module in connections, for example mcu, display, sensor."},
-                        "module": {"enum": ids},
+                        "module": module_schema,
                         "pin_order": {"type": "string", "description": "For a module whose pin order varies by seller: the id of the order printed on yours (see the module's pin_orders)."},
                         "overrides": {"type": "object", "additionalProperties": False, "properties": {
                             "pcb_mm": {"type": "object", "additionalProperties": False, "properties": {k: {"type": "number", "minimum": 0.5, "maximum": 300} for k in ("x", "y", "z")}},
@@ -433,7 +466,7 @@ def _number(value: Any, label: str, low: float, high: float) -> float:
     return number
 
 
-def _validate_spec(spec: Any) -> dict[str, Any]:
+def _validate_spec(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     if not isinstance(spec, dict):
         raise DevicePlanError("the spec must be an object")
     if spec.get("schema_version", DEVICE_SPEC_SCHEMA) != DEVICE_SPEC_SCHEMA:
@@ -460,7 +493,9 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
         if mid in seen:
             raise DevicePlanError(f"module id {mid!r} is used twice")
         seen.add(mid)
-        library_entry = _module(str(row.get("module")))
+        library_entry = _module(str(row.get("module")), donor_modules)
+        if library_entry["kind"] == "donor_passive" and (row.get("overrides") or "pin_order" in row):
+            raise DevicePlanError("donor geometry and contact order come only from the frozen contract")
         order_ids = [order["id"] for order in library_entry.get("pin_orders", [])]
         if "pin_order" in row and (not isinstance(row["pin_order"], str) or row["pin_order"] not in order_ids):
             raise DevicePlanError(f"modules[{index}].pin_order must be text naming one of the valid ids: {', '.join(order_ids) or '(none for this module)'}")
@@ -581,7 +616,7 @@ def _resolve_pin(placed: dict[str, _Placed], endpoint: str, other: dict[str, flo
     if not matches:
         errors.append(f"{endpoint!r}: {module.entry['name']} has no pin named {name!r}")
         return None
-    points = [(p, module.point(p["x"], p["y"], _pin_tip(module))) for p in matches]
+    points = [(p, module.point(p["x"], p["y"], _pin_tip(module, p))) for p in matches]
     if len(points) > 1 and other is not None:
         points.sort(key=lambda row: (math.dist((row[1]["x"], row[1]["y"], row[1]["z"]), (other["x"], other["y"], other["z"])), row[0]["id"]))
     elif len(points) > 1:
@@ -601,9 +636,11 @@ def _pins_up(module: _Placed) -> bool:
     return module.entry["kind"] != "display"
 
 
-def _pin_tip(module: _Placed) -> float:
+def _pin_tip(module: _Placed, pin=None) -> float:
     """How far above the module's PCB a connected wire reaches: the pin tips on a board with headers; the board's face for the rest."""
 
+    if module.entry["kind"] == "donor_passive":
+        return pin["tip_mm"] if pin is not None else max(p["tip_mm"] for p in module.entry["pins"])
     if not _pins_up(module):
         return -0.0  # the header is on the back, so the wire meets the underside
     return module.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM
@@ -663,6 +700,14 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
     controller = _controller_of(ma, mb)
     datasheet = _ctl(controller.entry, "datasheet_basis", "the controller's datasheet") if controller else "the controller's datasheet"
 
+    for owner, pin, other in ((ma, pa, pb), (mb, pb, pa)):
+        if "i2c_address_select" in pin["roles"]:
+            if "ground" not in other["roles"] or "ground" not in pin["address_select"]:
+                return [_finding("error", "address_select_wiring",
+                                 f"{name}: {owner.ref}.{pin['name']} only supports a wire to ground, or being left open in this plan.",
+                                 pin["address_select_source"], wire_id)]
+            return out
+
     def has(roles: set[str], *wanted: str) -> bool:
         return bool(roles & set(wanted))
 
@@ -682,6 +727,16 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
         elif "reset" in pin_roles:
             out.append(_finding("error", "reset_pin", f"{name} uses the reset pin ({owner.ref}.{pin['name']}). Holding it low stops the board; nothing belongs on it here.", datasheet, wire_id))
     if any(f["severity"] == "error" for f in out):
+        return out
+
+    for owner, pin, other_owner, other in ((ma, pa, mb, pb), (mb, pb, ma, pa)):
+        if "donor_switch" not in pin["roles"]:
+            continue
+        bad = set(other["roles"]) & {"strapping", "usb_serial", "do_not_use", "reset", "gpio_input_only"}
+        if (other_owner.entry["kind"] != "mcu_board" or other_owner.entry["id"] not in {"esp32-devkitc-v4", "raspberry-pi-pico"}
+                or "gpio" not in other["roles"]
+                or bad or pin["controller_pin"] not in {other["id"], other["name"]}):
+            return [_finding("error", "donor_controller_pin", f"{name}: donor {pin['name']} requires its measured controller pin {pin['controller_pin']} on an unreserved GPIO.", "frozen donor contract plus controller pin roles", wire_id)]
         return out
 
     ground_a, ground_b = has(ra, "ground"), has(rb, "ground")
@@ -850,18 +905,19 @@ def _signal_nets(pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_P
         yield members, pins
 
 
-def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]]) -> list[dict[str, Any]]:
-    """Check shared signal paths introduced by multiple breakout modules, and that one bus uses one I2C controller."""
-
-    findings = []
-    selected: dict[str, tuple[str, Any]] = {}  # signal -> (controller pin name, I2C controller index)
+def _i2c_bus_topology(
+    placed: dict[str, _Placed],
+    pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Pair signal nets by peripheral membership, not by the order nets were visited."""
+    findings, nets, selected = [], {}, {}
     check_nets = any(module.entry["kind"] == "i2c_breakout" for module in placed.values())
     for members, pins in _signal_nets(pairs):
         roles = {role for node in members for role in pins[node][1]["roles"]}
         if not roles & {"i2c_sda", "i2c_scl"}:
             continue
         names = ", ".join(sorted(f"{pins[node][0].ref}.{pins[node][1]['name']}" for node in members))
-        controllers = [node for node in members if pins[node][0].entry["kind"] == "mcu_board" and "gpio" in pins[node][1]["roles"]]
+        controllers = sorted(node for node in members if pins[node][0].entry["kind"] == "mcu_board" and "gpio" in pins[node][1]["roles"])
         if check_nets and {"i2c_sda", "i2c_scl"} <= roles:
             findings.append(_finding("error", "i2c_signals_joined", f"These wires together join SDA to SCL ({names}).", "I2C signal roles from the module library"))
         elif check_nets and len(controllers) != 1:
@@ -869,15 +925,124 @@ def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_
             findings.append(_finding("error", "i2c_controller_connection", f"This I2C signal {message} ({names}).", "each I2C signal needs one selected microcontroller pin in this plan"))
         elif len(controllers) == 1:
             module, pin = pins[controllers[0]]
-            if module.entry.get("electrical", {}).get("i2c_pin_mux") == "fixed" and "i2c_controller" in pin:
-                selected["sda" if "i2c_sda" in roles else "scl"] = (f"{module.ref}.{pin['name']}", pin["i2c_controller"])
-    if len(selected) == 2 and selected["sda"][1] != selected["scl"][1]:
-        finding = _finding("error", "i2c_mixed_controllers", f"SDA is on {selected['sda'][0]} (I2C{selected['sda'][1]}) and SCL on {selected['scl'][0]} (I2C{selected['scl'][1]}). One I2C bus uses both signals of the same controller.", "the controller's pinout: each I2C controller has its own SDA and SCL pins")
-        mcu_ref = selected["sda"][0].split(".")[0]
-        controller = placed[mcu_ref]
-        finding["suggestions"] = [{"action": "move_signal", "signal": signal, "to_one_of": [f"{mcu_ref}.{p['name']}" for p in controller.entry["pins"] if f"i2c_{signal}_capable" in p["roles"] and p.get("i2c_controller") == selected[other][1]]}
-                                  for signal, other in (("scl", "sda"), ("sda", "scl"))]
-        findings.append(finding)
+            signal = "sda" if "i2c_sda" in roles else "scl"
+            key = tuple(sorted(members))
+            nets[key] = {"module": module.ref, "pin": pin["name"], "pin_id": pin["id"],
+                         "controller": pin.get("i2c_controller"),
+                         "wires": sorted(w for w, a, b in pairs
+                                         if (a[0].ref, a[1]["id"]) in members and (b[0].ref, b[1]["id"]) in members)}
+            for node in sorted(members):
+                if pins[node][0].entry.get("i2c") and f"i2c_{signal}" in pins[node][1]["roles"]:
+                    selected.setdefault(node[0], {})[signal] = key
+    grouped = {}
+    partners = {}
+    for ref, lines in sorted(selected.items()):
+        if set(lines) != {"sda", "scl"}:
+            continue  # missing/disconnected signals already carry wiring findings
+        pair = lines["sda"], lines["scl"]
+        grouped.setdefault(pair, []).append(ref)
+        for signal, other in (("sda", "scl"), ("scl", "sda")):
+            partners.setdefault((signal, lines[signal]), set()).add(lines[other])
+    buses = []
+    for index, (pair, refs) in enumerate(sorted(grouped.items()), 1):
+        lines = {signal: dict(nets[key]) for signal, key in zip(("sda", "scl"), pair)}
+        controller = placed[lines["sda"]["module"]]
+        fixed = controller.entry["electrical"]["i2c_pin_mux"] == "fixed"
+        valid = True
+        if any(len(partners[(signal, key)]) != 1 for signal, key in zip(("sda", "scl"), pair)):
+            findings.append(_finding("error", "i2c_split_bus", f"{', '.join(refs)} shares one I2C signal with a different bus but not the other.",
+                                     "one I2C bus is a paired SDA net and SCL net"))
+            valid = False
+        if fixed and (lines["sda"]["controller"] is None or lines["scl"]["controller"] is None
+                      or lines["sda"]["controller"] != lines["scl"]["controller"]):
+            finding = _finding("error", "i2c_mixed_controllers",
+                               f"SDA is on {controller.ref}.{lines['sda']['pin']} (I2C{lines['sda']['controller']}) and SCL on {controller.ref}.{lines['scl']['pin']} (I2C{lines['scl']['controller']}). One I2C bus uses both signals of the same controller.",
+                               "the controller's pinout: each I2C controller has its own SDA and SCL pins")
+            finding["suggestions"] = [{"action": "move_signal", "signal": signal,
+                                       "from": f"{controller.ref}.{lines[signal]['pin']}",
+                                       "to_one_of": [f"{controller.ref}.{p['name']}" for p in controller.entry["pins"]
+                                                     if f"i2c_{signal}_capable" in p["roles"] and p.get("i2c_controller") == lines[other]["controller"]]}
+                                      for signal, other in (("scl", "sda"), ("sda", "scl"))]
+            findings.append(finding)
+            valid = False
+        buses.append({"id": f"i2c-{index}", "controller": lines["sda"]["controller"] if fixed else None,
+                      "modules": refs, "sda": lines["sda"], "scl": lines["scl"], "valid": valid})
+    mcu = next(m for m in placed.values() if m.entry["kind"] == "mcu_board")
+    electrical = mcu.entry["electrical"]
+    if electrical["i2c_pin_mux"] == "fixed":
+        for controller_index in sorted({b["controller"] for b in buses if b["valid"]}):
+            sharing = [b for b in buses if b["valid"] and b["controller"] == controller_index]
+            if len(sharing) > 1:
+                findings.append(_finding("error", "i2c_controller_shared",
+                                         f"Separate buses {', '.join(b['id'] for b in sharing)} use I2C{controller_index}. One controller cannot drive independent buses simultaneously.",
+                                         "the controller's pinout: alternate pin pairs name the same hardware controller"))
+                for bus in sharing:
+                    bus["valid"] = False
+    elif len(buses) > electrical.get("i2c_controller_count", 1):
+        findings.append(_finding("error", "i2c_controller_count", f"This plan needs {len(buses)} independent I2C buses; the sourced controller count supports only {electrical.get('i2c_controller_count', 1)}.",
+                                 electrical.get("i2c_controller_count_basis", "no sourced count for multiple buses; this planner supports one")))
+        for bus in buses:
+            bus["valid"] = False
+    return buses, findings
+
+
+def _i2c_addresses(
+    placed: dict[str, _Placed],
+    pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]],
+    rejected: set[str],
+) -> dict[str, dict[str, Any]]:
+    addresses = {}
+    for ref, module in sorted(placed.items()):
+        i2c = module.entry.get("i2c")
+        if not i2c:
+            continue
+        effective, decision = i2c.get("default_address"), "default"
+        for pin in module.entry["pins"]:
+            if "i2c_address_select" not in pin["roles"]:
+                continue
+            connected = [(wire, other) for wire, a, b in pairs for own, other in ((a, b), (b, a))
+                         if own[0].ref == ref and own[1]["id"] == pin["id"]]
+            if connected:
+                legal = all(wire not in rejected and "ground" in other[1]["roles"] for wire, other in connected)
+                effective, decision = (pin["address_select"].get("ground"), "strap") if legal else (None, "unknown")
+        addresses[ref] = {"effective": effective, "decision": decision if effective else "unknown",
+                          "possible_addresses": [effective] if effective else list(i2c["addresses"]),
+                          "basis": i2c.get("address_basis", "")}
+    return addresses
+
+
+def _i2c_address_findings(
+    placed: dict[str, _Placed], buses: list[dict[str, Any]], addresses: dict[str, dict[str, Any]],
+    pairs: list[tuple[str, tuple[_Placed, dict[str, Any]], tuple[_Placed, dict[str, Any]]]],
+) -> list[dict[str, Any]]:
+    findings = []
+    for bus in buses:
+        for index, left_ref in enumerate(bus["modules"]):
+            left = placed[left_ref]
+            for right_ref in bus["modules"][index + 1:]:
+                right = placed[right_ref]
+                shared = set(addresses[left_ref]["possible_addresses"]) & set(addresses[right_ref]["possible_addresses"])
+                if not shared:
+                    continue
+                finding = _finding("warning", "i2c_address_overlap",
+                                   f"{left.ref} ({left.entry['name']}) and {right.ref} ({right.entry['name']}) list overlapping I2C addresses ({', '.join(sorted(shared))}). This plan does not predict which address a scan will show.",
+                                   f"{left.entry['name']}: {left.entry['i2c'].get('address_basis', '')}; {right.entry['name']}: {right.entry['i2c'].get('address_basis', '')}")
+                for module in (right, left):  # keep the first module's default when one strap suffices
+                    others = set().union(*(set(addresses[ref]["possible_addresses"]) for ref in bus["modules"] if ref != module.ref))
+                    for pin in module.entry["pins"]:
+                        if ("i2c_address_select" not in pin["roles"] or pin["address_select"].get("ground") in others
+                                or "ground" not in pin["address_select"]):
+                            continue
+                        wired = any(own[0].ref == module.ref and own[1]["id"] == pin["id"]
+                                    for _, a, b in pairs for own in (a, b))
+                        if not wired:
+                            mcu = next(m for m in placed.values() if m.entry["kind"] == "mcu_board")
+                            finding["suggestions"] = [{"action": "strap_address", "module": module.ref,
+                                                       "pin": pin["name"], "to_one_of": _candidates(mcu, "ground")}]
+                            break
+                    if finding.get("suggestions"):
+                        break
+                findings.append(finding)
     return findings
 
 
@@ -965,22 +1130,44 @@ def _attach_suggestions(findings: list[dict[str, Any]], placed: dict[str, _Place
 
 
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
+    if module.entry["kind"] == "donor_passive":
+        return [("ground", "ground")]
     if module.entry["kind"] in {"display", "i2c_breakout"}:
         return [("ground", "ground"), ("power_in", "power"), ("i2c_sda", "SDA"), ("i2c_scl", "SCL")]
     return []
 
 
+def _grounded_modules(mcu: _Placed, pairs) -> set[str]:
+    """Follow ground-to-ground wires back to the controller, including daisy chains.
+
+    Selector pins are not ground returns. A floating group of peripheral grounds
+    does not become grounded by connecting one of its address selectors to GND.
+    """
+    neighbors: dict[str, set[str]] = {}
+    for _wire, (ma, pa), (mb, pb) in pairs:
+        if "ground" in pa["roles"] and "ground" in pb["roles"]:
+            neighbors.setdefault(ma.ref, set()).add(mb.ref)
+            neighbors.setdefault(mb.ref, set()).add(ma.ref)
+    grounded, pending = set(), [mcu.ref]
+    while pending:
+        ref = pending.pop()
+        if ref not in grounded:
+            grounded.add(ref)
+            pending.extend(neighbors.get(ref, set()) - grounded)
+    return grounded
+
+
 # --- the plan -------------------------------------------------------------------------------------------------------------
 
 
-def build_device_plan(spec: Any) -> dict[str, Any]:
+def build_device_plan(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     """The plan for a device spec. Pure: no I/O, deterministic for the same spec."""
 
-    clean = _validate_spec(spec)
+    clean = _validate_spec(spec, donor_modules=donor_modules)
     placed: dict[str, _Placed] = {}
     for row in clean["modules"]:
-        entry = _module(row["module"])
-        if entry["kind"] not in _MODULE_KINDS:
+        entry = _module(row["module"], donor_modules)
+        if entry["kind"] not in _MODULE_KINDS | {"donor_passive"}:
             raise DevicePlanError(f"module kind {entry['kind']!r} cannot be placed in a case yet")
         placed[row["id"]] = _Placed(row["id"], entry, row["overrides"], row.get("pin_order"))
     boards = [m for m in placed.values() if m.entry["kind"] == "mcu_board"]
@@ -1029,7 +1216,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     else:
         lid_underside = mcu_top + c
     cursor_z = c + mcu.pcb["x"] + c
-    for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
+    for breakout in sorted((m for m in placed.values() if m.entry["kind"] in {"i2c_breakout", "donor_passive"}), key=lambda m: m.ref):
         breakout.base_y = wall + breakout.below
         # USB-side of the antenna, on the case floor, beside the board so the case grows from every module.
         breakout.origin = (c + usb_over + 4.0, cursor_z)
@@ -1037,6 +1224,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         extent_z = max(extent_z, breakout.origin[1] + breakout.pcb["y"])
         cursor_z = breakout.origin[1] + breakout.pcb["y"] + c
         housing_top = breakout.base_y + breakout.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
+        if breakout.entry["kind"] == "donor_passive":
+            housing_top = breakout.base_y + _pin_tip(breakout) + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
         component_top = breakout.base_y + breakout.pcb["z"] + breakout.above
         lid_underside = max(lid_underside, housing_top + c, component_top + c)
     inner_x = extent_x + c
@@ -1061,7 +1250,9 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
             continue
         first = _resolve_pin(placed, row["from"], second[2], errors) or first
         (ma, pa, point_a, multi_a), (mb, pb, point_b, multi_b) = first, second
-        if ma.ref == mb.ref:
+        own_ground_strap = any("i2c_address_select" in a["roles"] and "ground" in b["roles"]
+                               for a, b in ((pa, pb), (pb, pa)))
+        if ma.ref == mb.ref and not own_ground_strap:
             errors.append(f"{row['from']} to {row['to']}: both ends are on the same module")
             continue
         wire_id = f"wire-{index:02d}"
@@ -1114,16 +1305,29 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
 
     rejected = {f["wire"] for f in findings if f["severity"] == "error" and f["wire"]}
     findings.extend(_net_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
-    findings.extend(_i2c_bus_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
+    i2c_buses, bus_findings = _i2c_bus_topology(placed, [pair for pair in resolved_pairs if pair[0] not in rejected])
+    findings.extend(bus_findings)
+    i2c_addresses = _i2c_addresses(placed, resolved_pairs, rejected)
     # Everything a module needs to work is wired, by a wire that the checks did not reject.
+    grounded = _grounded_modules(mcu, [pair for pair in resolved_pairs if pair[0] not in rejected])
+    for module in placed.values():
+        if module.entry["kind"] == "donor_passive":
+            for pin in module.entry["pins"]:
+                if "donor_switch" in pin["roles"] and not any(
+                    w not in rejected and any(m.ref == module.ref and p["id"] == pin["id"] for m, p in (a, b))
+                    for w, a, b in resolved_pairs):
+                    findings.append(_finding("error", "donor_signal_unwired", f"{module.ref}.{pin['name']} is not wired to its declared controller pin.", "every declared donor switch contact must be implemented"))
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
             connected = any(
                 role in set(p["roles"]) and m.ref == module.ref
                 for wire_id, a, b in resolved_pairs
                 if wire_id not in rejected
+                if role != "ground" or all("ground" in pin["roles"] for _owner, pin in (a, b))
                 for m, p in (a, b)
             )
+            if role == "ground":
+                connected = module.ref in grounded
             if not connected:
                 findings.append(_finding("error", "missing_connection", f"{module.ref} ({module.entry['name']}) has no wire on its {label} pin.", "module library: required pins"))
     # DevKitC user guide: "The power supply must be provided using one and only one of the options above".
@@ -1159,27 +1363,17 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 findings.append(_finding("info", rule, f"{module.ref}: {electrical[key]}", source_basis))
         if electrical.get("backup_note"):
             findings.append(_finding("info", "coin_cell_backup", f"{module.ref}: {electrical['backup_note']}", source_basis))
-    i2c_modules = [module for module in placed.values() if module.entry.get("i2c", {}).get("addresses")]
-    for index, left in enumerate(i2c_modules):
-        left_addrs = set(left.entry["i2c"]["addresses"])
-        for right in i2c_modules[index + 1:]:
-            shared = left_addrs & set(right.entry["i2c"]["addresses"])
-            if shared:
-                findings.append(_finding(
-                    "warning",
-                    "i2c_address_overlap",
-                    f"{left.ref} ({left.entry['name']}) and {right.ref} ({right.entry['name']}) list overlapping I2C addresses ({', '.join(sorted(shared))}). This plan does not predict which address a scan will show.",
-                    f"{left.entry['name']}: {left.entry['i2c'].get('address_basis', '')}; {right.entry['name']}: {right.entry['i2c'].get('address_basis', '')}",
-                ))
-    pulled = [module for module in placed.values() if module.entry.get("electrical", {}).get("onboard_pullups") is True]
-    if len(pulled) >= 2:
-        names = ", ".join(f"{module.ref} ({module.entry['name']})" for module in sorted(pulled, key=lambda m: m.ref))
-        findings.append(_finding(
-            "info",
-            "i2c_pullup_stack",
-            f"Two or more modules state that they already have pull-up resistors ({names}). Stacked pull-ups change the bus resistance. Check each board.",
-            "; ".join(source["url"] for module in pulled for source in module.entry.get("sources", [])),
-        ))
+    findings.extend(_i2c_address_findings(placed, i2c_buses, i2c_addresses, resolved_pairs))
+    for bus in i2c_buses:
+        pulled = [placed[ref] for ref in bus["modules"] if placed[ref].entry.get("electrical", {}).get("onboard_pullups") is True]
+        if len(pulled) >= 2:
+            names = ", ".join(f"{module.ref} ({module.entry['name']})" for module in sorted(pulled, key=lambda m: m.ref))
+            findings.append(_finding(
+                "info",
+                "i2c_pullup_stack",
+                f"Two or more modules state that they already have pull-up resistors ({names}). Stacked pull-ups change the bus resistance. Check each board.",
+                "; ".join(source["url"] for module in pulled for source in module.entry.get("sources", [])),
+            ))
     findings.sort(key=lambda f: ({"error": 0, "warning": 1, "info": 2}[f["severity"]], f["rule"], f["message"]))
     _attach_suggestions(findings, placed, mcu, wires)
 
@@ -1207,7 +1401,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     for module in placed.values():
         pins = []
         for pin in module.entry["pins"]:
-            point = module.point(pin["x"], pin["y"], _pin_tip(module))
+            point = module.point(pin["x"], pin["y"], _pin_tip(module, pin))
             pins.append({"id": pin["id"], "name": pin["name"], "roles": pin["roles"], "point": point, "label": _label(module, pin)})
         corner_a, corner_b = module.point(0, 0), module.point(module.pcb["x"], module.pcb["y"])
         modules_out.append(
@@ -1221,6 +1415,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
                 "pins": pins,
                 "logical_pins": pins,
                 "pin_order": module.pin_order["id"] if module.pin_order else None,
+                **({"i2c_address": i2c_addresses[module.ref]} if module.ref in i2c_addresses else {}),
                 "dimension_basis": module.entry.get("dimension_basis", {}),
                 "sources": module.entry["sources"],
                 "notes": [*module.entry.get("notes", []),
@@ -1261,10 +1456,13 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     steps = _steps(placed, mcu, display, wires, usb, window, findings)
     return {
         "schema_version": DEVICE_PLAN_SCHEMA,
+        **({"donor_scope": {"implementation": "passive_switch_topology_and_geometry", "firmware_implemented": False,
+                           "physical_correctness": "UNPROVEN"}} if any(m.entry["kind"] == "donor_passive" for m in placed.values()) else {}),
         "authority": AUTHORITY_STATEMENT,
         "name": clean["name"],
         "power": clean["power"],
         "modules": modules_out,
+        "i2c_buses": i2c_buses,
         "wires": wires,
         "case": case,
         "findings": findings,
@@ -1306,6 +1504,11 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": "your spec's dimension override", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     add("place", f"Lay the {mcu.entry['name'].split(' (')[0]} in the case", f"Lower the board into the base with the USB socket at the cut-out{' and the antenna end clear of the wall' if antenna else ''}. {'It rests on its header pins.' if mcu.below else ''}", parts=[mcu.ref], motion="drop")
+    for donor in sorted((m for m in placed.values() if m.entry["kind"] == "donor_passive"), key=lambda m: m.ref):
+        add("place", f"Place donor {donor.entry['name']} in its proposed position",
+            "Keep all power disconnected. Match the frozen measured donor outline and contact identities, with the measured header tips facing up. "
+            "The outline is placed on the case floor; retention, switch actuation and mounting strength are not designed or verified here.",
+            parts=[donor.ref], motion="drop")
     for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
         add(
             "place",
