@@ -42,8 +42,12 @@ class VisualDonorIntakeService:
         display = _text(label, "label", 200)
         inspections = self._inspections(inspection_artifact_ids)
         by_id = {row["artifact_id"]: row for row in inspections}
-        if isinstance(facts, (str, bytes, bytearray)) or not isinstance(facts, Sequence) or len(facts) > 512:
-            raise FabricationValidationError("facts must be a bounded list")
+        if (
+            isinstance(facts, (str, bytes, bytearray))
+            or not isinstance(facts, Sequence)
+            or not 1 <= len(facts) <= 512
+        ):
+            raise FabricationValidationError("facts must contain 1..512 entries")
         projected = [_fact(value, index=index, inspections=by_id) for index, value in enumerate(facts)]
         ids = [row["fact_id"] for row in projected]
         if len(ids) != len(set(ids)):
@@ -111,6 +115,8 @@ class VisualDonorIntakeService:
             },
             "reviewed_by": {"kind": "human", "id": human},
             "decisions": reviewed,
+            "reviewed_fact_count": len(reviewed),
+            "all_draft_facts_reviewed": True,
             "donor_capture": _canonical(dict(capture)),
             "ready_for_donor_capture": True,
             "evidence_class": "human_confirmation",
@@ -129,6 +135,7 @@ class VisualDonorIntakeService:
                 "source_draft_artifact_id": draft_record["artifact_id"],
                 "source_draft_sha256": draft_record["sha256"],
                 "reviewed_by": human,
+                "reviewed_fact_count": len(reviewed),
             },
         )
         return {"confirmed": result, "artifact": stored, "physical_correctness": "UNPROVEN"}
@@ -247,6 +254,7 @@ def _validate_fact_value(kind: str, value: Mapping[str, Any], *, index: int) -> 
     if kind == "board_outline":
         _optional_positive(value.get("width_mm"), f"fact {index} board width_mm", 5000)
         _optional_positive(value.get("length_mm"), f"fact {index} board length_mm", 5000)
+        _optional_positive(value.get("thickness_mm"), f"fact {index} board thickness_mm", 100)
         if value.get("width_mm") is None and value.get("length_mm") is None and not value.get("outline"):
             raise FabricationValidationError("board_outline requires dimensions or an outline")
     elif kind in {"package", "connector"}:
@@ -290,7 +298,7 @@ def _capture_prefill(label: str, facts: Sequence[Mapping[str, Any]]) -> dict[str
             if value.get(field) is not None:
                 row[field] = value[field]
         if row.get("ref") in markings:
-            row["marking"] = markings[row["ref"]]
+            row["marking"] = markings[row["ref"])]
         parts.append(row)
     return {
         "schema_version": "hardware_splicer.donor_capture.v1",
@@ -310,8 +318,12 @@ def _review_decisions(
     decisions: Sequence[Mapping[str, Any]],
     facts: Mapping[str, Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    if isinstance(decisions, (str, bytes, bytearray)) or not isinstance(decisions, Sequence) or len(decisions) > len(facts):
-        raise FabricationValidationError("decisions must be a bounded list")
+    if (
+        isinstance(decisions, (str, bytes, bytearray))
+        or not isinstance(decisions, Sequence)
+        or len(decisions) != len(facts)
+    ):
+        raise FabricationValidationError("decisions must explicitly review every draft fact")
     result: list[dict[str, Any]] = []
     seen: set[str] = set()
     for index, raw in enumerate(decisions):
@@ -324,6 +336,7 @@ def _review_decisions(
         if fact_id in seen or fact_id not in facts:
             raise FabricationValidationError("decision fact ids must be unique and refer to the source draft")
         seen.add(fact_id)
+        source_fact = facts[fact_id]
         decision = raw.get("decision")
         if decision not in _DECISIONS:
             raise FabricationValidationError("decision must be confirm, correct or reject")
@@ -334,15 +347,21 @@ def _review_decisions(
             raise FabricationValidationError("corrected_value is only valid for a correction")
         if corrected is not None:
             corrected = _canonical(dict(corrected))
-            _validate_fact_value(str(facts[fact_id]["kind"]), corrected, index=index)
+            _validate_fact_value(str(source_fact["kind"]), corrected, index=index)
         result.append({
             "fact_id": fact_id,
+            "kind": source_fact["kind"],
             "decision": decision,
             "state": "human_confirmed" if decision in {"confirm", "correct"} else "human_rejected",
+            "model_value": source_fact["value"],
+            "model_confidence": source_fact["confidence"],
+            "source": dict(source_fact["source"]),
             "corrected_value": corrected,
             "note": _optional_text(raw.get("note"), f"decision {index} note", 500),
             "measured": False,
         })
+    if seen != set(facts):
+        raise FabricationValidationError("decisions must explicitly review every draft fact")
     return result
 
 
