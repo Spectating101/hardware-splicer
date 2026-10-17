@@ -77,6 +77,7 @@ from .project_store import ProjectStore
 from .project_events_api import create_project_events_router
 from .mission_api import create_mission_router
 from .mission_store import MissionStore
+from .salvage_fabrication_api import create_salvage_fabrication_router
 from .physical_operator_api import create_physical_operator_router
 from .physical_workbench import AgentPhysicalWorkbench
 from .project_thread_api import create_project_thread_router
@@ -164,6 +165,7 @@ def create_product_app(
     app.include_router(create_project_review_packet_router(resolved_store))
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
     app.include_router(create_mission_router(MissionStore(resolved_store)))
+    app.include_router(create_salvage_fabrication_router(resolved_store))
     app.include_router(create_physical_operator_router())
     app.include_router(create_fabricator_integration_router())
     app.include_router(create_fabricator_digital_thread_router())
