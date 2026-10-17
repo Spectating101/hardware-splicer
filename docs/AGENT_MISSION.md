@@ -174,7 +174,8 @@ sorts the list. Its order, duplicates, or an empty list versus an absent list ca
 READY and NO_FEASIBLE must cover every non-optional donor. Repairs cannot drop any used donor, even an optional one.
 READY also requires every used donor to be `verified`; a refusal names missing signal facts. Verification here needs
 accepted measured Vmax, polarity and controller pin, interface completeness and contact linkage. It is not physical
-build authority. The planner still wires only library modules; donor wiring remains future work.
+build authority. Native measured passive switch modules now have a bounded mission-only wiring path; see
+[`DONOR_DEVICE_PLANNING.md`](DONOR_DEVICE_PLANNING.md). Tracking references alone do not implement donor hardware.
 
 Offer an RE finding through `/events`:
 

@@ -293,6 +293,12 @@ Agents may offer hash-referenced RE findings via the existing events route. Find
 HS reading can ground `hs_donor_reading` or `hs_donor_contract`. Human donor measurements are shown separately and
 never rewrite or promote that contract. Persistence location and trust limits: [`AGENT_MISSION.md`](AGENT_MISSION.md).
 
+Native passive-switch donor modules can now enter the device planner with measured contact geometry and explicit
+electrical protocols. The mission executor injects only the frozen donor context; standalone JSON cannot supply it.
+Native donor modules cannot be duplicated or dropped into mere tracking references by a repair. Plans, engineering
+reviews and enclosure exports include those modules. Packages explicitly block donor firmware rather than silently
+omitting its behavior. Scope and trust limits: [`DONOR_DEVICE_PLANNING.md`](DONOR_DEVICE_PLANNING.md).
+
 ## Verification
 
 ```bash
@@ -334,3 +340,4 @@ Frontend: `make splice-ui-build`.
 13. Staging a mission design opens a review; only a person's decision on that review makes it a revision. A mission package names what HS could not generate and never claims physical truth.
 14. Only a person answers a mission's evidence need, with an envelope HS can verify, bound to that mission and need and used once. An answer resolves a need or records a contradiction; it never authorizes anything physical, and checks made before it no longer count towards READY.
 15. Donor references, RE findings and person measurements remain distinct. No agent finding or claimed measurement ID promotes a donor fact; donor coverage and verified contracts are required for READY, and only HS's frozen donor reading can ground a donor-specific blocker. Resolving or replaying donors never writes contracts, snapshots, revisions or authority.
+16. Native donor implementation uses frozen electrical and dimensional evidence, not catalogue inheritance or caller-supplied module definitions. Generating a donor topology or enclosure never implies donor firmware, physical operation or authorization, and a repair cannot erase a placed donor while retaining only its reference.

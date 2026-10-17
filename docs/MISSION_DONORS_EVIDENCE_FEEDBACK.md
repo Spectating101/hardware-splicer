@@ -209,7 +209,8 @@ A resolved need can no longer be cited for a `BLOCKED_*` terminal.
 
 ## Frozen for later
 
-- Wiring donor blocks into the device planner as first-class modules (needs donor pin geometry and electrical
-  contracts in planner form).
+- General donor wiring remains deferred. A bounded native passive-switch profile with measured contact geometry
+  is implemented in `donor_device_plan.py`; see `DONOR_DEVICE_PLANNING.md`. This does not implement active drivers,
+  arbitrary supplies, donor firmware or automatic promotion of new physical facts.
 - Running RE tools from HS (the operator integration itself). This design only receives their findings.
 - Promoting mission-supplied measurements into the shared donor contract (the existing evidence review owns that).

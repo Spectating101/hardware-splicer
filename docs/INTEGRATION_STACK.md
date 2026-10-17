@@ -85,3 +85,4 @@ Canonical interface contracts are translated into the existing splice Bench sess
 6. KiBot readiness means a manufacturing backend is available, not that fabrication has been authorized.
 7. Physical power-on remains a separate Bench authority transition.
 8. Legacy catalog modules remain available only as a compatibility graph projection; `authority_resolved_modules` contains canonical `donor:*` identities.
+9. Native device-planner donors consume frozen project evidence and measured geometry, never embedded agent contracts or catalogue analogies. The passive-switch profile generates topology and case proposals, not donor firmware or physical authority; see `DONOR_DEVICE_PLANNING.md`.
