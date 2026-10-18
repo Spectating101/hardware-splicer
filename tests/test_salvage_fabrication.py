@@ -189,3 +189,15 @@ def test_salvage_manifest_is_bounded_and_excludes_human_authority_operations(cli
     assert manifest["authority_contract"]["agent_can_accept_mission"] is False
     assert manifest["authority_contract"]["agent_can_supply_human_measurement"] is False
     assert manifest["authority_contract"]["agent_can_approve_physical_actuation"] is False
+
+
+def test_context_exposes_non_authoritative_investigation_queue(client):
+    mission = _open(client)
+    _accept(client, mission["mission_id"])
+    context = _context(client, mission["mission_id"])
+    queue = context["investigation_queue"]
+    assert queue["schema"] == "hardware_splicer.salvage_investigation_queue.v1"
+    assert queue["total_unresolved"] >= 1
+    assert all(not item["verified"] and not item["physical_authority_granted"]
+               for item in queue["items"])
+    assert queue["truth_contract"]["suggested_measurements_are_preapproved"] is False
