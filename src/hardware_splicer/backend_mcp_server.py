@@ -40,6 +40,7 @@ from .mcp_backend_gateway import (
     task_operation_manifest,
 )
 from .product_api import create_product_app
+from .salvage_fabrication_manifest import salvage_fabrication_manifest
 
 mcp = MCPServer(
     "hardware-splicer-canonical-backend",
@@ -189,6 +190,8 @@ async def hs_backend_task_manifest(
         "document_grounded_pre_fabrication",
         "engineering_assurance",
         "device_design",
+        "fabrication_mission",
+        "salvage_fabrication",
     ],
 ) -> str:
     """Return one task-scoped canonical workflow contract in a single discovery call.
@@ -198,6 +201,8 @@ async def hs_backend_task_manifest(
     grant physical authority.
     """
 
+    if task == "salvage_fabrication":
+        return _render(salvage_fabrication_manifest(_product_app))
     return _render(task_operation_manifest(task, _product_app))
 
 
