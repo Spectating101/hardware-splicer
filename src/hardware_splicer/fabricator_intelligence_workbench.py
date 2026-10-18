@@ -1,4 +1,4 @@
-"""Bounded agent facade for fabricator inspection and procurement intelligence."""
+"""Bounded agent facade for fabricator inspection, procurement and convergence intelligence."""
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
@@ -6,6 +6,8 @@ from typing import Any, Mapping, Sequence
 from .fabrication_operator import FabricationValidationError
 from .fabrication_option_tradeoff import FabricationOptionTradeoff
 from .procurement_quotes import ProcurementQuoteBook
+from .project_store import ProjectStore
+from .salvage_resource_graph import build_salvage_resource_graph
 from .vision_inspection import VisionInspectionService
 
 
@@ -58,6 +60,21 @@ class FabricatorIntelligenceWorkbench:
             require_known_stock=require_known_stock,
         )
 
+    def project_resources(
+        self,
+        *,
+        project_store: ProjectStore,
+        project_id: str,
+        donor_references: Sequence[Mapping[str, Any]],
+        fabrication_resources: Sequence[Mapping[str, Any]] = (),
+    ) -> dict[str, Any]:
+        return build_salvage_resource_graph(
+            project_store=project_store,
+            project_id=project_id,
+            donor_references=donor_references,
+            fabrication_resources=fabrication_resources,
+        )
+
     def compare_options(
         self,
         *,
@@ -65,10 +82,12 @@ class FabricatorIntelligenceWorkbench:
         currency: str,
         as_of: str | None = None,
         require_known_stock: bool = False,
+        resource_graph: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         return self.tradeoffs.compare(
             options=options,
             currency=currency,
             as_of=as_of,
             require_known_stock=require_known_stock,
+            resource_graph=resource_graph,
         )

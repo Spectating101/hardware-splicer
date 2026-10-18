@@ -60,6 +60,15 @@ export HARDWARE_SPLICER_TMP_ROOT="$RUN_DIR/scratch"
 export HARDWARE_SPLICER_OFFLINE_LLM=1
 export HS_DEVICE_RUNTIME_ENABLED=1
 if [[ "$MODE" == real ]]; then
+  # A person's operator token for this run only: the registry holds its hash, the spec gets the plain value.
+  export HS_E2E_OPERATOR_TOKEN="e2e-$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  HARDWARE_SPLICER_OPERATOR_TOKENS=$("$ROOT/.venv/bin/python" -c 'import json, os
+from hardware_splicer.operator_identity import hash_operator_token
+print(json.dumps({hash_operator_token(os.environ["HS_E2E_OPERATOR_TOKEN"]): {"id": "e2e-owner", "kind": "human"}}))')
+  export HARDWARE_SPLICER_OPERATOR_TOKENS
+fi
+export HS_BACKEND_URL="http://127.0.0.1:$BACKEND_PORT"
+if [[ "$MODE" == real ]]; then
   "$ROOT/.venv/bin/python" -m uvicorn hardware_splicer.product_api:create_product_app --factory --host 127.0.0.1 --port "$BACKEND_PORT" > "$RUN_DIR/backend.log" 2>&1 &
 else
   "$ROOT/.venv/bin/python" -m uvicorn mock_canonical_project_studio_backend:app --app-dir "$ROOT/scripts" --host 127.0.0.1 --port "$BACKEND_PORT" > "$RUN_DIR/backend.log" 2>&1 &
@@ -85,5 +94,5 @@ wait_for "http://127.0.0.1:$APP_PORT/engineering/device" "$frontend_pid"
 export NODE_PATH="$PLAYWRIGHT_ROOT/node_modules"
 export OUTSIDER_APP_URL="http://127.0.0.1:$APP_PORT"
 export HS_FRONTEND_VERIFY_DIR="$RUN_DIR"
-if [[ $# -eq 0 ]]; then set -- device-assembly device-case device-engineering device-firmware device-draft device-application device-observations device-modeled-run donor-device-handoff; fi
+if [[ $# -eq 0 ]]; then set -- device-assembly device-case device-engineering device-firmware device-draft device-application device-observations device-modeled-run donor-device-handoff missions; fi
 node "$PLAYWRIGHT_ROOT/node_modules/@playwright/test/cli.js" test -c "$FRONTEND/playwright.device.config.cjs" "$@"

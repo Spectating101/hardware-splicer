@@ -207,3 +207,25 @@ def test_http_refuses_ready_and_repair_that_drop_a_persons_part(client):
     client.post(f"{BASE}/{other}/candidates/A/run", json={"operation": "device_plan"})
     refused = _propose(client, other, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "drop display"})
     assert refused.status_code == 409 and "OLED" in refused.text
+
+
+def test_a_verified_person_opens_a_mission_as_themselves_and_agents_keep_working(client):
+    intake = {"goal": "A small sensor device from my parts", "inventory": ["ESP32", "BME280", "OLED"]}
+    # An agent, with no token, opens a mission under the name it gives. That path is unchanged.
+    agent = client.post(BASE, json={"intake": intake, "author": AGENT})
+    assert agent.status_code == 201
+    first = client.get(f"{BASE}/{agent.json()['mission']['mission_id']}").json()["mission"]["events"][0]
+    assert first["type"] == "opened" and first["author"] == AGENT
+    # A person's token decides the name: the body cannot claim another one, and needs no author at all.
+    person = client.post(BASE, json={"intake": intake, "author": {"kind": "agent", "id": "someone-else"}},
+                         headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert person.status_code == 201, person.text
+    event = client.get(f"{BASE}/{person.json()['mission']['mission_id']}").json()["mission"]["events"][0]
+    assert event["author"] == {"kind": "human", "id": "bench-lead"}
+    assert client.post(BASE, json={"intake": intake}, headers={"X-HS-Operator-Token": PERSON_TOKEN}).status_code == 201
+    assert client.post(BASE, json={"intake": intake}).status_code == 422  # no token and no author: still refused
+    assert client.post(BASE, json={"intake": intake}, headers={"X-HS-Operator-Token": "unknown-" + "c" * 48}).status_code == 401
+    # An agent's registered token opens as that agent, not as a person.
+    registered = client.post(BASE, json={"intake": intake}, headers={"X-HS-Operator-Token": AGENT_TOKEN})
+    assert registered.status_code == 201
+    assert client.get(f"{BASE}/{registered.json()['mission']['mission_id']}").json()["mission"]["events"][0]["author"] == {"kind": "agent", "id": "some-agent"}

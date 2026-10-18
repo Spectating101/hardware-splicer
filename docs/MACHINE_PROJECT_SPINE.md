@@ -230,7 +230,8 @@ Success is the **correct** terminal state, not reaching "ready":
   still lists the physical evidence only a person can establish.
 - Every `BLOCKED_*` state must cite an evidence need with that blocker for that candidate (or the whole mission), and
   may cite only real evidence or evaluation events. A part-data blocker also needs HS grounding in its own reading
-  of the inventory: a left_out line, or a draft that refuses or has planner errors or warnings. A cited failing plan
+  of the inventory: a left_out line, a refused draft, or error/warning findings without planner suggestions
+  (`plan_unrepairable`). Historical readings without this field retain their former error/warning rule. A cited failing plan
   is not grounding, since an agent can break its own wiring to get one.
 - `NO_FEASIBLE_ARCHITECTURE` needs all candidate slots used, current specs that are distinct designs (ignoring names, wire colours and order)
   and cover the inventory,
@@ -239,8 +240,9 @@ Success is the **correct** terminal state, not reaching "ready":
 - `BUDGET_EXHAUSTED` needs the operator budget spent. No blocked, no-feasible or budget terminal may stop short of
   a candidate that is already ready.
 
-New terminal records carry `grounding`: `hs_inventory_reading` for part-data blockers,
-`agent_assertion` for the physical measurement, reverse engineering, procurement and unsafe blockers,
+New terminal records carry `grounding`: `hs_inventory_reading` for part-data blockers;
+`hs_donor_contract` or `hs_donor_reading` for the checked donor cases below; otherwise
+`agent_assertion` for physical measurement, reverse engineering, procurement and unsafe blockers;
 `hs_evaluation` for READY and NO_FEASIBLE, and `hs_budget` for BUDGET_EXHAUSTED. The other blockers remain allowed:
 HS labels the agent's concern without claiming to have measured or established it. Grounding never grants authority.
 
@@ -262,8 +264,42 @@ The runner (`mission_runner.py`) is an agent with no privileged path: it may onl
 `expected_event_seq`, and ask the executor to run checks. It must not call `record_evaluation` or
 `accept_mission` or write files. `tests/test_mission_gate.py` declares each scenario's correct
 terminal state in advance: `READY_FOR_HUMAN_BUILD` where everything checks out;
-`BLOCKED_NEEDS_PART_DATA` for parts HS has no data for, a different board, or an address clash it
-cannot repair; `BUDGET_EXHAUSTED` when the budget cannot pay for the review.
+`BLOCKED_NEEDS_PART_DATA` for parts HS has no data for or a different board; the BME280 address-clash case reaches
+READY through a recorded strap repair. `BUDGET_EXHAUSTED` applies when the budget cannot pay for the review.
+
+`mission_delivery.py` turns a READY mission into a deterministic package
+(`hardware_splicer.mission_package.v1`, stored under `missions/<id>/packages/` by content hash) and stages its design
+as a staged project review: the candidate snapshot adds `deviceDesigns[<mission_id>]` with the spec, package hash,
+evaluations and repair chain, which the review flags as a required snapshot change. HS records `design_staged` on the
+mission once, after the terminal state, without changing the phase or the verdict. The package covers events up to
+the verdict, so staging never changes it.
+
+A mission can wait for a person. An `evidence_required` may carry a structured `request` (dimensional, electrical,
+continuity or boot log). A person answers it with `supply_evidence`: a `PhysicalEvidenceEnvelope` whose hash HS
+recomputes, bound in `metadata.mission` to the project, mission, need and values, and never used before in the
+project. HS records `evidence_supplied` (`within`, `outside` or `not_comparable` against the requested range). A
+`resolved` need stops blocking READY, `outside` leaves it `contradicted`, and either way earlier checks no longer count.
+Dimensional answers become usable module overrides. The design for donors and reverse-engineering findings built on
+the same evidence grades is in [`MISSION_DONORS_EVIDENCE_FEEDBACK.md`](MISSION_DONORS_EVIDENCE_FEEDBACK.md).
+
+Donor intake is references only. For missions naming donors, HS freezes a project-scoped `donor_read` before
+acceptance and reuses it on retry. Candidate `donors_used` is normalized and checked for required donor coverage;
+repairs cannot drop a used donor. READY requires verified contracts and names missing facts otherwise. Facts carry
+separate epistemic, review and grade fields; accepted measurement IDs alone are insufficient without matching,
+hash-checked physical records. The resolver is read-only and adds no contract-write API or parallel evidence store.
+
+Agents may offer hash-referenced RE findings via the existing events route. Findings always remain
+`re_observation`, can be cited by needs, and never establish measurement or terminal grounding. Only the frozen
+HS reading can ground `hs_donor_reading` or `hs_donor_contract`. Human donor measurements are shown separately and
+never rewrite or promote that contract. Persistence location and trust limits: [`AGENT_MISSION.md`](AGENT_MISSION.md).
+
+Native passive-switch donor modules can now enter the device planner with measured contact geometry and explicit
+electrical protocols. The mission executor injects only the frozen donor context; standalone JSON cannot supply it.
+Native donor modules cannot be duplicated or dropped into mere tracking references by a repair. Plans, engineering
+reviews and enclosure exports include those modules. Supported sensor applications may include a separate passive
+input firmware proposal and GPIO/clock modeled phase; unsupported combinations stay explicitly blocked rather than
+silently omitting donor behavior. Scope and trust limits: [`DONOR_DEVICE_PLANNING.md`](DONOR_DEVICE_PLANNING.md)
+and [`DONOR_INPUT_FIRMWARE.md`](DONOR_INPUT_FIRMWARE.md).
 
 ## Verification
 
@@ -303,3 +339,7 @@ Frontend: `make splice-ui-build`.
 10. The thread event log is append-only; resolve/reopen are events, not edits.
 11. A mission never writes a snapshot or revision and never carries an authority field, at any depth. Inventory readings and terminal grounding grant no physical, firmware or power-on authority.
 12. A mission's terminal state is checked against HS's inventory reading, recorded evaluations and cited evidence. READY covers the person's inventory and meets their structured requirements; a repair cannot newly uncover a listed line or break a requirement, and only the person's intake can supply measured sizes. Part-data blockers need grounding in HS's own reading of the inventory, uncheckable concerns are labelled agent assertions, and NO_FEASIBLE needs a full distinct search covering the inventory with no clean HS draft available. A proposal alone never establishes evidence.
+13. Staging a mission design opens a review; only a person's decision on that review makes it a revision, and that review is decided only with a verified human operator token (the decider is the token's identity, not a name in the request). Other reviews keep the older rule, where the request names its actor. A mission package names what HS could not generate and never claims physical truth.
+14. Only a person answers a mission's evidence need, with an envelope HS can verify, bound to that mission and need and used once. An answer resolves a need or records a contradiction; it never authorizes anything physical, and checks made before it no longer count towards READY.
+15. Donor references, RE findings and person measurements remain distinct. No agent finding or claimed measurement ID promotes a donor fact; donor coverage and verified contracts are required for READY, and only HS's frozen donor reading can ground a donor-specific blocker. Resolving or replaying donors never writes contracts, snapshots, revisions or authority.
+16. Native donor implementation uses frozen electrical and dimensional evidence, not catalogue inheritance or caller-supplied module definitions. Generating a donor topology or enclosure never implies donor firmware, physical operation or authorization, and a repair cannot erase a placed donor while retaining only its reference.

@@ -32,6 +32,7 @@ def resolve_shared_i2c_bus(
     plan: dict[str, Any],
     *,
     bus_error: str = "diagnostic source requires exactly one explicitly wired shared I2C bus",
+    donor_modules=None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Trace I2C peripherals onto controller GPIOs and list declared address alternatives.
 
@@ -41,6 +42,8 @@ def resolve_shared_i2c_bus(
     """
     mcu = next(m for m in plan["modules"] if m["kind"] == "mcu_board")
     library = {m["id"]: m for m in module_library()["modules"]}
+    if donor_modules:
+        library.update(donor_modules)
     pins = {(m["id"], p["id"]): p for m in plan["modules"] for p in m["logical_pins"]}
     adjacency: dict[tuple[str, str], set[tuple[str, str]]] = {}
     for wire in plan["wires"]:

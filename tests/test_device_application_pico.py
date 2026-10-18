@@ -52,12 +52,15 @@ def test_the_pico_package_targets_the_pinned_rp2040_core_and_uses_i2c0_on_its_de
     assert metadata["pins"]["sda"]["i2c_controller"] == metadata["pins"]["scl"]["i2c_controller"] == 0
 
 
-def test_pins_of_the_second_i2c_controller_use_wire1_everywhere():
+@pytest.mark.parametrize("sda,scl", [(2, 3), (6, 7), (18, 19)])
+def test_pins_of_the_second_i2c_controller_use_wire1_everywhere(sda, scl):
     spec = _on_i2c1(example_specs()["pico_oled_bme280_usb"])
+    for wire in spec["connections"]:
+        wire["to"] = wire["to"].replace("mcu.GP2", f"mcu.GP{sda}").replace("mcu.GP3", f"mcu.GP{scl}")
     assert not [f for f in build_device_plan(spec)["findings"] if f["severity"] in {"error", "warning"}]
     metadata, files = _files(spec)
     main = files["src/main.cpp"]
-    assert "constexpr int SDA_PIN = 2;" in main and "constexpr int SCL_PIN = 3;" in main
+    assert f"constexpr int SDA_PIN = {sda};" in main and f"constexpr int SCL_PIN = {scl};" in main
     assert "Wire1.setSDA(SDA_PIN)" in main and "&Wire1" in main and "Wire1.beginTransmission" in main
     # Every use of the bus is the second controller; a stray Wire would talk on I2C0. Comments are not code.
     code = "\n".join(line.split("//", 1)[0] for line in main.splitlines())
