@@ -17,6 +17,7 @@ _ROUTES = (
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/package"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/stage"),
     ("POST", "/v1/fabricator/intelligence/vision/inspect"),
+    ("POST", "/v1/fabricator/intelligence/vision/donor-drafts"),
     ("GET", "/v1/fabricator/intelligence/procurement/quotes"),
     ("POST", "/v1/fabricator/intelligence/procurement/estimate"),
     ("POST", "/v1/fabricator/intelligence/architecture/tradeoffs"),
@@ -35,8 +36,8 @@ _ROUTES = (
 def salvage_fabrication_manifest(app: FastAPI | None = None) -> dict[str, Any]:
     """Expose only canonical operations needed to progress a salvage mission.
 
-    Human acceptance, human evidence submission, physical approval decisions and
-    raw/unchecked actuation are intentionally absent.
+    Human acceptance, human evidence submission, donor-draft confirmation,
+    physical approval decisions and raw/unchecked actuation are intentionally absent.
     """
     catalog = operation_catalog(app)
     by_route = {(row["method"], row["path"]): row for row in catalog}
@@ -49,6 +50,8 @@ def salvage_fabrication_manifest(app: FastAPI | None = None) -> dict[str, Any]:
         "task": _TASK,
         "workflow": [
             "reload the canonical mission-scoped salvage context at the start of every turn",
+            "inspect retained images and prefill typed donor drafts while preserving model-inference provenance",
+            "stop for human confirmation/correction before a visual draft becomes a donor capture",
             "inspect retained hypotheses/resources and propose findings or a bounded evidence need when uncertain",
             "propose and deterministically evaluate multiple architecture candidates",
             "compare clean-sheet, reclaim-heavy and hybrid options against the canonical resource graph",
@@ -63,6 +66,7 @@ def salvage_fabrication_manifest(app: FastAPI | None = None) -> dict[str, Any]:
         "excluded_human_or_authority_routes": [
             "POST /v1/projects/{project_id}/missions/{mission_id}/accept",
             "POST /v1/projects/{project_id}/missions/{mission_id}/needs/{need_seq}/evidence",
+            "POST /v1/fabricator/intelligence/vision/donor-drafts/{draft_artifact_id}/confirm",
             "POST /v1/fabrication/approval-requests/{request_id}/approve",
             "POST /v1/fabrication/approval-requests/{request_id}/reject",
             "POST /v1/fabrication/approval-requests/{request_id}/execute",
@@ -70,6 +74,10 @@ def salvage_fabrication_manifest(app: FastAPI | None = None) -> dict[str, Any]:
         "authority_contract": {
             "projection_grants_physical_authority": False,
             "context_persists_independent_truth": False,
+            "visual_draft_is_donor_contract_truth": False,
+            "visual_draft_geometry_is_measured": False,
+            "marking_text_establishes_part_identity": False,
+            "agent_can_confirm_visual_donor_draft": False,
             "agent_can_accept_mission": False,
             "agent_can_supply_human_measurement": False,
             "agent_can_approve_physical_actuation": False,
