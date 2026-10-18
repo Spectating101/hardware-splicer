@@ -31,26 +31,37 @@ established it, so the page never shows a verdict without it:
 | Action | How it is protected |
 |---|---|
 | Read any mission and its full evidence trail | read-only; refreshes itself every few seconds while an agent works |
-| Accept a mission (once) | needs the person's operator token; sent only in `X-HS-Operator-Token`, held in this tab's session storage; the identity on the record comes from the token, never from anything typed |
+| **Start a mission** from a goal and a typed parts list | needs the operator token; the backend names the token's owner as the opener, never a name in the request. Before it opens, the page shows how HS reads each line (matched, a different board, a generic word, a part number it cannot place, no data) through `POST /v1/devices/parts-reading`, which reads and nothing else |
+| Accept a mission (once) | needs the token; the identity on the record comes from the token |
+| **Answer a measurement request** by typing the reading | needs the token. HS builds the evidence envelope itself from what was typed, then applies every check `supply_evidence` applies: bound to this mission and need, used once, compared with the requested range. A reading out of range is recorded, shown, and leaves the request open. A typed reading is the person's own report; no instrument is recorded |
 | Build and download the package | deterministic; the page shows the package's sha256, which is the hash of the downloaded ZIP |
-| Open a review of the READY design | needs the token; the backend takes the author from the token. It opens a review only; it changes nothing in the project until a person accepts that review |
+| Open a review of the READY design, and **accept or reject it** | needs the token. A review that adds or changes a mission design can be decided only by a verified person, however it was opened; the decider on the record is the token's owner. It adds the design to the project's record as a new revision and authorizes nothing physical |
 
-Refusals come back as text on the page, and a refused action changes nothing.
+An accepted mission with no design yet shows how to point an agent at it. A mission's donor hardware is shown with each
+fact's grade (measured by a person, from a document, observed, the agent's claim), what is still missing, and the
+agent's findings, which are labelled as observations and never as measurements.
+
+Refusals come back as text on the page, and a refused action changes nothing. The token field stays put while you type,
+so a mistyped token can be corrected, and only collapses to "Token set · Change · Forget" when a token was already set
+before the panel appeared.
 
 ## Not built yet
 
-- **Answering a measurement request from the page.** The request, expected range and instructions are shown, with
-  how to answer through the API. A form needs a backend step that builds the physical-evidence envelope from a
-  reading, so that the browser never has to reproduce the hash.
-- **Opening a mission from the page.** Today an agent opens one from a goal and parts list. Starting from a typed
-  parts list on the device page would connect the two.
-- **Deciding the staged review on this page.** It happens in Project review.
-- **Donor evidence and findings** have no view yet; the page ignores `donors` and `finding_offered` events beyond a
-  timeline line.
+- A view of what accepting the staged review will change (the review's diff). The page says what accepting does in words.
+- Editing a mission's structured requirements and measurements when starting it; today those come through the API.
+- Deciding other kinds of reviews here. They stay in Project review.
+
+## Known gap outside this page
+
+The older review decision route (`POST /v1/projects/{id}/reviews/{id}/decision`) takes the decider's name from the
+request body for reviews that are not mission designs. That is how the Project review console works today and this
+page does not change it, but it means such a review is not decided by a *verified* person. Mission designs are
+protected; the rest are not.
 
 ## Checks
 
-`e2e/missions.spec.js`, run with `bash scripts/verify_device_frontend.sh real missions`. The script registers a
-throwaway operator token for the run. The spec accepts a mission as that person (and checks a wrong token is
-refused), lets an agent finish it over the API while the page follows, downloads the package and compares its hash,
-and opens a review.
+`e2e/missions.spec.js`, run with `bash scripts/verify_device_frontend.sh real missions` against a production build and
+the real backend, with a throwaway operator token registered for the run. It covers: accepting (a wrong token is
+refused), an agent finishing a mission while the page follows, the package's hash, opening and deciding the review
+(refused with no token or an unknown one), starting a mission from an awkward parts list, answering a measurement out of
+range and then in range, and the donor view.

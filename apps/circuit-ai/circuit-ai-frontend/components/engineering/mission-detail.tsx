@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Check, CircleDashed, Hourglass, KeyRound, LoaderCircle, Minus, X } from 'lucide-react';
+import { AlertTriangle, Check, CircleDashed, Clipboard, Hourglass, KeyRound, LoaderCircle, Minus, X } from 'lucide-react';
 import { useOperatorToken } from '@/lib/operator-token';
 import {
   acceptMission,
+  answerNeed,
   groundingOf,
   operationName,
   resultWords,
@@ -101,15 +102,31 @@ export function VerdictPanel({ mission }: { mission: Mission }) {
   );
 }
 
-/** The person's operator token: held for this browser tab only, sent only in its own header, never shown back. */
-export function OperatorTokenField({ token, setToken }: { token: string; setToken: (value: string) => void }) {
+/**
+ * The person's operator token: held for this browser tab only, sent only in its own header, never shown back.
+ * Where it is a side detail and a token was already set when the panel appeared, it shows as "Token set" with Change and
+ * Forget. Once the person types in it, it stays put: collapsing under the pointer would shift the buttons beside it and
+ * swallow the click, and a mistyped token has to stay correctable.
+ */
+export function OperatorTokenField({ token, setToken, always = false }: { token: string; setToken: (value: string) => void; always?: boolean }) {
+  const [editing, setEditing] = useState(false);
+  if (token && !editing && !always) {
+    return (
+      <p className="flex items-center gap-2 text-xs text-slate-400">
+        <KeyRound className="h-3.5 w-3.5" /> Your token is set for this tab.
+        <button type="button" onClick={() => setEditing(true)} className="text-cyan-200 underline underline-offset-2 hover:text-white">Change</button>
+        <button type="button" onClick={() => setToken('')} className="text-slate-400 underline underline-offset-2 hover:text-white">Forget</button>
+      </p>
+    );
+  }
   return (
     <label className="min-w-[16rem] flex-1 text-xs text-slate-400">
       <span className="flex items-center gap-1.5"><KeyRound className="h-3.5 w-3.5" /> Your operator token (kept in this tab only)</span>
       <input
         type="password"
         value={token}
-        onChange={(event) => setToken(event.target.value)}
+        onChange={(event) => { setEditing(true); setToken(event.target.value); }}
+        autoFocus={editing}
         autoComplete="off"
         spellCheck={false}
         className="mt-1 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-300/60"
@@ -147,7 +164,7 @@ export function AcceptPanel({ mission, onAccepted }: { mission: Mission; onAccep
         and you can only do it once.
       </p>
       <div className="mt-4 flex flex-wrap items-end gap-3">
-        <OperatorTokenField token={token} setToken={setToken} />
+        <OperatorTokenField token={token} setToken={setToken} always />
         <button
           type="button"
           onClick={accept}
@@ -166,13 +183,92 @@ export function AcceptPanel({ mission, onAccepted }: { mission: Mission; onAccep
   );
 }
 
+function lastReading(mission: Mission, need: MissionNeed) {
+  const event = (mission.events || []).find((item) => item.seq === need.answered_by);
+  const values = event?.values;
+  if (!Array.isArray(values) || !values.length) return null;
+  const row = values[values.length - 1] as { value?: number; unit?: string };
+  return typeof row.value === 'number' ? `${row.value} ${row.unit || ''}`.trim() : null;
+}
+
+/** The person's answer to one request. They type what they measured; HS builds and checks the evidence. */
+function AnswerForm({ mission, need, onChanged }: { mission: Mission; need: MissionNeed; onChanged: () => void }) {
+  const { token, setToken } = useOperatorToken();
+  const request = need.request!;
+  const isLog = request.kind === 'boot_log';
+  const [value, setValue] = useState('');
+  const [unit, setUnit] = useState(request.expected?.unit || (request.kind === 'dimensional' ? 'mm' : ''));
+  const [log, setLog] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const number = Number(value);
+  const ready = Boolean(token) && !busy && (isLog ? log.trim().length > 0 : value.trim() !== '' && Number.isFinite(number) && unit.trim() !== '');
+
+  async function submit() {
+    setBusy(true);
+    setError('');
+    try {
+      await answerNeed(
+        mission.project_id, mission.mission_id, need.seq,
+        isLog ? { log } : [{ quantity: request.quantity || '', value: number, unit: unit.trim() }],
+        token, mission.last_event_seq,
+      );
+      setValue('');
+      setLog('');
+      onChanged();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not record the reading');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const input = 'mt-1 rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-300/60';
+  return (
+    <div className="mt-4 rounded-lg border border-amber-300/25 bg-amber-950/10 p-3" data-testid={`answer-${need.seq}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-200/90">Your reading</p>
+      <div className="mt-2 flex flex-wrap items-end gap-3">
+        {isLog ? (
+          <label className="min-w-[18rem] flex-1 text-xs text-slate-400">What the board printed
+            <textarea data-testid="answer-log" value={log} onChange={(event) => setLog(event.target.value)} rows={5} spellCheck={false}
+              className={`${input} block w-full font-mono`} placeholder="Paste the serial output" />
+          </label>
+        ) : (
+          <>
+            <label className="text-xs text-slate-400">{request.quantity?.replace(/_/g, ' ')}
+              <input data-testid="answer-value" type="number" step="any" inputMode="decimal" value={value} onChange={(event) => setValue(event.target.value)}
+                className={`${input} block w-36`} placeholder="3.29" />
+            </label>
+            <label className="text-xs text-slate-400">unit
+              <input data-testid="answer-unit" value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={10} className={`${input} block w-24`} />
+            </label>
+          </>
+        )}
+        <OperatorTokenField token={token} setToken={setToken} />
+        <button type="button" onClick={submit} disabled={!ready}
+          className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-stone-900 hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40">
+          {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Record my reading
+        </button>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-slate-500">
+        This is your own report; HS records no instrument for it. It never authorizes building, flashing or powering anything.
+      </p>
+      {error ? (
+        <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm text-red-100">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 const NEED_STATE: Record<MissionNeed['need_state'], { label: string; className: string }> = {
   open: { label: 'Waiting for you', className: 'border-amber-300/50 bg-amber-300/10 text-amber-100' },
   resolved: { label: 'Answered', className: 'border-emerald-300/40 bg-emerald-400/10 text-emerald-100' },
   contradicted: { label: 'Reading out of range', className: 'border-red-400/50 bg-red-950/40 text-red-100' },
 };
 
-export function NeedsPanel({ mission }: { mission: Mission }) {
+export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged: () => void }) {
   const ended = Boolean(mission.terminal);
   // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
   const requests = mission.needs.filter((need) => need.request);
@@ -201,13 +297,17 @@ export function NeedsPanel({ mission }: { mission: Mission }) {
                 ) : null}
               </dl>
             ) : null}
-            {need.need_state !== 'resolved' && !ended ? (
-              <p className="mt-3 text-xs leading-5 text-slate-500">
-                Answering from this page is not built yet. For now send the reading to{' '}
-                <code className="rounded bg-black/40 px-1 py-0.5 text-slate-300">POST …/missions/{mission.mission_id}/needs/{need.seq}/evidence</code>{' '}
-                with your token.
+            {need.need_state === 'contradicted' && lastReading(mission, need) ? (
+              <p data-testid="contradicted-note" className="mt-3 rounded-lg border border-red-400/40 bg-red-950/30 px-3 py-2 text-sm leading-6 text-red-100">
+                Your last reading, {lastReading(mission, need)}, is outside what was expected
+                {need.request?.expected ? ` (${need.request.expected.min} to ${need.request.expected.max} ${need.request.expected.unit})` : ''}.
+                The agent can see it and may change the design. You can measure again.
               </p>
             ) : null}
+            {need.need_state === 'resolved' && lastReading(mission, need) ? (
+              <p className="mt-3 text-sm text-emerald-200">You answered {lastReading(mission, need)}.</p>
+            ) : null}
+            {need.request && need.need_state !== 'resolved' && !ended ? <AnswerForm mission={mission} need={need} onChanged={onChanged} /> : null}
           </li>
         ))}
       </ul>
@@ -226,6 +326,34 @@ export function NeedsPanel({ mission }: { mission: Mission }) {
       </Section>
     ) : null}
     </>
+  );
+}
+
+/** An accepted mission with no design yet is waiting on an agent. Say how to point one at it. */
+export function AgentHandoff({ mission }: { mission: Mission }) {
+  const [copied, setCopied] = useState(false);
+  if (!mission.accepted || mission.terminal || mission.candidates.length) return null;
+  const text = `Fabrication mission ${mission.mission_id} in project ${mission.project_id}.\n`
+    + 'Use the fabrication_mission task (MCP) or the routes in docs/AGENT_MISSION.md. Draft from the parts list, propose a design, '
+    + 'ask HS to run its checks, and propose the terminal state the evidence supports. You cannot accept the mission or record a result.';
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch { /* the text is selectable on the page */ }
+  }
+  return (
+    <Section title="Waiting for an agent" hint="Accepted, nothing proposed yet">
+      <p className="max-w-3xl text-sm leading-6 text-slate-300">
+        You have accepted this mission, so HS will run its software checks for an agent. Point an agent at it. It can propose designs and
+        ask for checks; it cannot change what you asked for, accept anything or record a result.
+      </p>
+      <pre data-testid="agent-handoff" className="mt-3 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/30 p-3 text-xs leading-5 text-slate-300">{text}</pre>
+      <button type="button" onClick={copy} className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/25 px-4 py-2 text-xs font-semibold text-slate-100 hover:bg-white/5">
+        <Clipboard className="h-3.5 w-3.5" /> {copied ? 'Copied' : 'Copy for the agent'}
+      </button>
+    </Section>
   );
 }
 
