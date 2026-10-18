@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 from .fabrication_operator import FabricationValidationError
 from .mission_donors import read_donors
 from .mission_store import MissionStore
+from .salvage_investigation import project_investigation_queue
 from .salvage_resource_graph import project_salvage_resource_graph
 
 _SCHEMA = "hardware_splicer.salvage_fabrication_context.v1"
@@ -71,6 +72,7 @@ def build_salvage_fabrication_context(
         "constraints": list(mission.get("intake", {}).get("constraints") or []),
         "budgets": dict(mission.get("budgets") or {}),
         "resource_graph": graph,
+        "investigation_queue": project_investigation_queue(graph),
         "donor_snapshot": donor_snapshot,
         "donor_snapshot_frozen": donor_snapshot_frozen,
         "hypotheses": hypotheses,
