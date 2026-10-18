@@ -4,7 +4,7 @@ import hashlib
 
 import pytest
 
-from hardware_splicer.fabrication_operator import FabricationGrantStore, FabricationValidationError
+from hardware_splicer.fabrication_operator import FabricationAuthorityError, FabricationGrantStore, FabricationValidationError
 from hardware_splicer.fabrication_pipeline import FabricationPipeline
 from hardware_splicer.printer_operator import FabricationPrinter, OctoPrintBackend
 from hardware_splicer.slicer_operator import SlicedArtifact, SlicerOperator, SlicerProfile
@@ -95,7 +95,7 @@ def test_pipeline_stages_only_exact_gcode_from_matching_slicer_receipt(tmp_path)
             "/api/files/local",
             "fielddeck-case.gcode",
             GCODE,
-            {"select": "true", "print": "false"},
+            {"select": "false", "print": "false"},
         )
     ]
 
@@ -120,6 +120,10 @@ def test_pipeline_rejects_receipt_for_other_printer(tmp_path):
 def test_pipeline_start_still_requires_exact_one_shot_human_grant(tmp_path):
     pipeline, grants, transport = _pipeline(tmp_path)
     staged = pipeline.stage_sliced(_slice())
+    # Staging neither selects nor starts a job, and a missing grant sends no request.
+    with pytest.raises(FabricationAuthorityError):
+        pipeline.start(staged, project_id=PROJECT, mission_id=MISSION, grant_id="fg-missing")
+    assert not any(call[0] == "request" for call in transport.calls)
     grant = grants.issue(
         project_id=PROJECT,
         mission_id=MISSION,
@@ -135,4 +139,11 @@ def test_pipeline_start_still_requires_exact_one_shot_human_grant(tmp_path):
         grant_id=grant["grant_id"],
     )
     assert run.artifact_sha256 == staged.slicer_receipt.output_gcode_sha256
-    assert transport.calls[-1] == ("request", "POST", "/api/job", {"command": "start"})
+    assert transport.calls[-1] == (
+        "request", "POST", "/api/files/local/fielddeck-case.gcode", {"command": "select", "print": True},
+    )
+    assert grants.get(grant["grant_id"])["consumed_at"] is not None
+    calls = list(transport.calls)
+    with pytest.raises(FabricationAuthorityError, match="already been consumed"):
+        pipeline.start(staged, project_id=PROJECT, mission_id=MISSION, grant_id=grant["grant_id"])
+    assert transport.calls == calls
