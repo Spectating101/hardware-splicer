@@ -81,7 +81,7 @@ export type Mission = {
   phase: string;
   accepted: { by: Author; at: string } | null;
   inventory: { reading?: { left_out?: string[] }; draft?: { ok: boolean; plan_errors: number; plan_warnings: number } } | null;
-  donors?: unknown[];
+  donors?: MissionDonor[];
   candidates: MissionCandidate[];
   terminal: MissionTerminal | null;
   staged: { review_id: string; package_sha256: string } | null;
@@ -91,6 +91,39 @@ export type Mission = {
   firmware_authorized: boolean;
   power_on_authorized: boolean;
   events?: MissionEvent[];
+};
+
+export type DonorFact = {
+  value: unknown;
+  grade: string | null;
+  epistemic_state: string;
+  review_state: string;
+  evidence_ids: string[];
+  unit: string | null;
+};
+
+export type DonorFinding = {
+  seq: number;
+  claim: string;
+  method: string;
+  source: string;
+  signal: string | null;
+  grade: string;
+  artifacts: { name: string; sha256: string }[];
+  author: Author;
+};
+
+export type MissionDonor = {
+  donor_id: string;
+  label: string;
+  optional: boolean;
+  contract_state: 'unknown' | 'partial' | 'verified' | 'rejected' | string;
+  can_generate_firmware: boolean;
+  missing_facts: string[];
+  capabilities: { role: string; grade: string | null }[];
+  signals: { name: string; direction: string; contact_id: string; voltage_max_v: DonorFact; active_level: DonorFact; controller_pin: DonorFact; protocol: DonorFact }[];
+  findings: DonorFinding[];
+  person_measurements: unknown[];
 };
 
 export type PackageManifest = {
@@ -271,8 +304,17 @@ export function describeEvent(event: MissionEvent): string {
       return `Asked for evidence (${text('blocker').replace('BLOCKED_NEEDS_', '').replace('BLOCKED_', '').toLowerCase().replace(/_/g, ' ')}): ${text('need')}`;
     case 'evidence_supplied':
       return `Answered a measurement request: reading ${text('comparison').replace('_', ' ')} the expected range.`;
-    case 'finding_offered':
-      return `Offered a finding about donor hardware: ${text('claim') || 'see details'}. Recorded as an observation, not a measurement.`;
+    case 'donor_read': {
+      const donors = event.donors as unknown[] | undefined;
+      const count = Array.isArray(donors) ? donors.length : 0;
+      return count
+        ? `HS read the record for ${count} ${count === 1 ? 'donor' : 'donors'} you named, as it stood before you accepted.`
+        : 'HS looked for donor records and found none named.';
+    }
+    case 'finding_offered': {
+      const finding = event.finding as { claim?: string } | undefined;
+      return `Offered a finding about donor hardware: “${finding?.claim || 'see details'}” Recorded as an observation, not a measurement.`;
+    }
     case 'terminal_proposed':
       return `Ended the mission: ${text('state').replace(/_/g, ' ').toLowerCase()}. ${text('reason')}`;
     case 'design_staged':
@@ -352,3 +394,88 @@ export async function stageDesign(projectId: string, missionId: string, token: s
 }
 
 export const packageUrl = (projectId: string, missionId: string) => `${base(projectId)}/${encodeURIComponent(missionId)}/package`;
+
+// --- opening a mission --------------------------------------------------------------------------------------------
+
+export type PartsReading = {
+  fragments: {
+    text: string;
+    matches: { module: string; name: string; matched_on: string; basis: string; quantity: number }[];
+    note?: string;
+    unread?: string[];
+  }[];
+  controller: string | null;
+  parts: string[];
+  left_out: string[];
+};
+
+export async function readParts(text: string): Promise<PartsReading> {
+  const payload = await call<{ parsed: PartsReading }>(
+    '/api/proxy/engineering/devices/parts-reading',
+    { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) },
+    'Could not read the parts list',
+  );
+  return payload.parsed;
+}
+
+export type MissionIntakeDraft = {
+  goal: string;
+  inventory: string[];
+  constraints: string[];
+  budgets?: { max_operator_jobs?: number; max_candidates?: number; max_repairs_per_candidate?: number };
+};
+
+/** Open a mission as the person: no author is sent, because the backend names the verified token's owner. */
+export async function openMission(projectId: string, intake: MissionIntakeDraft, token: string): Promise<Mission> {
+  const payload = await call<{ mission: Mission }>(
+    base(projectId),
+    { method: 'POST', headers: { 'content-type': 'application/json', 'x-hs-operator-token': token }, body: JSON.stringify({ intake }) },
+    'Could not open the mission',
+  );
+  return payload.mission;
+}
+
+// --- the staged review --------------------------------------------------------------------------------------------
+
+export type StagedReview = {
+  review_id: string;
+  status: string;
+  base_revision: number;
+  summary?: { snapshot_fields_changed?: number };
+  decision?: { actor?: string; accepted_revision?: number | null; decided_at?: string } | null;
+};
+
+const reviewBase = (projectId: string, reviewId: string) =>
+  `/api/proxy/engineering/projects/${encodeURIComponent(projectId)}/reviews/${encodeURIComponent(reviewId)}`;
+
+export async function fetchReview(projectId: string, reviewId: string): Promise<StagedReview> {
+  const payload = await call<{ review: StagedReview }>(reviewBase(projectId, reviewId), undefined, 'Could not load the review');
+  return payload.review;
+}
+
+export async function decideReview(projectId: string, reviewId: string, decision: 'accepted' | 'rejected', token: string): Promise<StagedReview> {
+  const payload = await call<{ review: StagedReview }>(
+    `${reviewBase(projectId, reviewId)}/decision`,
+    // `actor` is required by the route's schema but ignored: a design staged from a mission takes its decider from the token.
+    { method: 'POST', headers: { 'content-type': 'application/json', 'x-hs-operator-token': token }, body: JSON.stringify({ decision, actor: 'operator-token', note: '' }) },
+    'Could not record the decision',
+  );
+  return payload.review;
+}
+
+// --- answering a measurement request -----------------------------------------------------------------------------
+
+export type Reading = { quantity: string; value: number; unit: string };
+
+/** The person types the reading; the backend builds the evidence envelope, so no hash is computed here. */
+export async function answerNeed(
+  projectId: string, missionId: string, needSeq: number, values: Reading[] | { log: string }, token: string, expectedEventSeq: number,
+): Promise<Mission> {
+  const payload = await call<{ mission: Mission }>(
+    `${base(projectId)}/${encodeURIComponent(missionId)}/needs/${needSeq}/answer`,
+    { method: 'POST', headers: { 'content-type': 'application/json', 'x-hs-operator-token': token },
+      body: JSON.stringify({ values, expected_event_seq: expectedEventSeq }) },
+    'Could not record the reading',
+  );
+  return payload.mission;
+}

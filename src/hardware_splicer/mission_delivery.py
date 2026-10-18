@@ -220,6 +220,7 @@ def stage_mission_design(missions: MissionStore, project_id: str, mission_id: st
         review = ProjectReviewStore(projects).create(
             project_id, snapshot, base_revision=int(latest["revision"]), created_by=author_id,
             note=f"Design from fabrication mission {mission_id} (READY_FOR_HUMAN_BUILD). A person decides this review.",
+            requires_verified_operator=True,
         )
         recorded = missions.record_design_staged(project_id, mission_id, review_id=review["review_id"],
                                                  package_sha256=package["package_sha256"])

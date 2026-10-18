@@ -18,7 +18,7 @@ from .device_plan import DevicePlanError, build_device_plan, device_catalog, dev
 from .device_reclaim import DeviceReclaimError, match_reclaimed_parts
 from .device_application import build_device_application
 from .device_case import build_device_case
-from .device_draft import draft_device_spec, draft_from_parts_text
+from .device_draft import draft_device_spec, draft_from_parts_text, parse_parts_text
 from .device_engineering import build_engineering_review
 from .device_firmware import build_device_firmware
 from .device_observations import check_device_observations
@@ -90,6 +90,16 @@ def create_device_router() -> APIRouter:
             if isinstance(body, dict) and "text" in body:
                 return {"ok": True, **draft_from_parts_text(body)}
             return {"ok": True, **draft_device_spec(body)}
+        except DevicePlanError as exc:
+            raise _unprocessable(str(exc)) from None
+
+    @router.post("/parts-reading", summary="Say how a typed parts list is read", description="Takes {\"text\": a typed parts list} and returns how each line was read: which library module it matched and on what basis, what matched nothing, and any part number left unread on a matched line. It reads and nothing else: no wiring, no plan, no approval. Unlike /draft it answers even when the list names no usable controller, which is when a person most needs to see why.")
+    async def post_parts_reading(request: Request) -> Dict[str, Any]:
+        body = await _read_body(request, error_type="invalid_device_draft", label="parts-reading request")
+        try:
+            if not isinstance(body, dict) or "text" not in body:
+                raise DevicePlanError("text is required")
+            return {"ok": True, "parsed": parse_parts_text(body["text"])}
         except DevicePlanError as exc:
             raise _unprocessable(str(exc)) from None
 
