@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ChevronRight, LoaderCircle } from 'lucide-react';
+import { AlertTriangle, ChevronRight, LoaderCircle, Plus } from 'lucide-react';
 import { usePageTitle } from '@/components/use-page-title';
 import {
   AcceptPanel,
+  AgentHandoff,
   AskedForPanel,
   CandidatesPanel,
   NeedsPanel,
@@ -12,6 +13,8 @@ import {
   WhoChip,
 } from '@/components/engineering/mission-detail';
 import { DeliveryPanel } from '@/components/engineering/mission-delivery';
+import { DonorsPanel } from '@/components/engineering/mission-donors';
+import { MissionStart } from '@/components/engineering/mission-start';
 import { TimelinePanel } from '@/components/engineering/mission-timeline';
 import { fetchMission, fetchMissions, fetchProjects, TONE, verdictOf, type Mission } from '@/lib/missions';
 
@@ -42,6 +45,7 @@ export default function MissionsPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   // First paint: which project, which mission. The URL wins over what this browser remembers.
   useEffect(() => {
@@ -111,6 +115,12 @@ export default function MissionsPage() {
     } catch { /* the address bar just does not follow */ }
   }
 
+  function opened(mission: Mission) {
+    setCreating(false);
+    setMissions((rows) => [mission, ...rows.filter((row) => row.mission_id !== mission.mission_id)]);
+    choose(mission.mission_id);
+  }
+
   function updated(mission: Mission) {
     setMissions((rows) => rows.map((row) => (row.mission_id === mission.mission_id ? mission : row)));
     loadDetail();
@@ -127,7 +137,17 @@ export default function MissionsPage() {
           <WhoChip who="human" label="You decide" /> <WhoChip who="agent" label="Agent proposes" /> <WhoChip who="system" label="HS checks" />
         </div>
 
-        <label className="mt-5 block text-xs text-slate-400">
+        <button
+          type="button"
+          onClick={() => { setCreating(true); setListOpen(false); }}
+          disabled={!project}
+          data-testid="new-mission"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-stone-900 transition hover:bg-amber-200 disabled:opacity-40"
+        >
+          <Plus className="h-4 w-4" /> New mission
+        </button>
+
+        <label className="mt-4 block text-xs text-slate-400">
           Project
           <select
             value={project}
@@ -154,12 +174,12 @@ export default function MissionsPage() {
           {missions.map((row) => {
             const verdict = verdictOf(row);
             const tone = TONE[verdict.tone];
-            const active = row.mission_id === selected;
+            const active = !creating && row.mission_id === selected;
             return (
               <li key={row.mission_id}>
                 <button
                   type="button"
-                  onClick={() => choose(row.mission_id)}
+                  onClick={() => { setCreating(false); choose(row.mission_id); }}
                   aria-current={active ? 'true' : undefined}
                   className={`group w-full rounded-xl border border-l-4 p-3 text-left transition ${tone.bar} ${active ? 'border-white/40 bg-white/[0.07]' : 'border-white/10 bg-[#07111f]/60 hover:border-white/25'}`}
                 >
@@ -187,10 +207,11 @@ export default function MissionsPage() {
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
           </p>
         ) : null}
-        {!detail && (loading || selected) && !error ? (
+        {creating && project ? <MissionStart projectId={project} onOpened={opened} onCancel={() => setCreating(false)} /> : null}
+        {!creating && !detail && (loading || selected) && !error ? (
           <p className="flex items-center gap-2 text-sm text-slate-400"><LoaderCircle className="h-4 w-4 animate-spin" /> Loading…</p>
         ) : null}
-        {detail ? (
+        {detail && !creating ? (
           <>
             <header>
               <h2 data-testid="mission-goal" className="text-2xl font-semibold leading-snug text-white">{detail.intake.goal}</h2>
@@ -198,9 +219,11 @@ export default function MissionsPage() {
             </header>
             <VerdictPanel mission={detail} />
             <AcceptPanel mission={detail} onAccepted={updated} />
-            <NeedsPanel mission={detail} />
+            <AgentHandoff mission={detail} />
+            <NeedsPanel mission={detail} onChanged={loadDetail} />
             <DeliveryPanel mission={detail} onChanged={loadDetail} />
             <AskedForPanel mission={detail} />
+            <DonorsPanel mission={detail} />
             <CandidatesPanel mission={detail} />
             <TimelinePanel mission={detail} />
           </>

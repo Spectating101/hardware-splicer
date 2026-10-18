@@ -200,10 +200,11 @@ test('wiring that is wrong is caught and explained, and the example comes back',
 test('every number says where it came from, and what is only typical says so', async ({ page }) => {
   await open(page);
   const sources = page.getByTestId('device-sources');
-  await expect(sources.locator('a')).toHaveCount(8);
+  await expect(sources.locator('a')).toHaveCount(9);
   for (const link of await sources.locator('a').all()) expect(await link.getAttribute('href')).toMatch(/^https:\/\//);
   await expect(sources).toContainText('read 2026-10-09');
   await expect(sources).toContainText('ESP32-DevKitC V4 dimensions drawing');
+  await expect(sources).toContainText('ESP32 Series Datasheet v5.3');
   const measure = page.getByTestId('device-measure');
   await expect(measure).toContainText('has not been printed or test-fitted');
   await expect(measure).toContainText('Measure yours');
@@ -290,9 +291,9 @@ async function sensorExample(page, viewer) {
 }
 
 for (const sensor of [
-  { id: 'adafruit-bme280-stemma-qt', name: 'BME280', power: 'Vin', clock: 'SCK', data: 'SDI', address: '0x77', sources: 11 },
-  { id: 'adafruit-bh1750-stemma-qt', name: 'BH1750', power: 'VIN', clock: 'SCL', data: 'SDA', address: '0x23', sources: 11 },
-  { id: 'adafruit-ds3231-stemma-qt', name: 'DS3231', power: 'Vin', clock: 'SCL', data: 'SDA', address: '0x68', sources: 12 },
+  { id: 'adafruit-bme280-stemma-qt', name: 'BME280', power: 'Vin', clock: 'SCK', data: 'SDI', address: '0x77', sources: 12 },
+  { id: 'adafruit-bh1750-stemma-qt', name: 'BH1750', power: 'VIN', clock: 'SCL', data: 'SDA', address: '0x23', sources: 12 },
+  { id: 'adafruit-ds3231-stemma-qt', name: 'DS3231', power: 'Vin', clock: 'SCL', data: 'SDA', address: '0x68', sources: 13 },
 ]) {
   test(`${sensor.name} is a third drawn part, its wires follow its own group, and its scan remains an observation`, async ({ page }, testInfo) => {
     const errors = [];
@@ -411,5 +412,5 @@ test('the sensor example fits a phone and can return to the unchanged OLED examp
   await page.getByTestId('device-example').selectOption('esp32_oled_usb');
   await expect(viewer).toHaveAttribute('data-step-count', '12');
   await expect(viewer).toHaveAttribute('data-rendered-modules', JSON.stringify(['mcu', 'display']));
-  await expect(page.getByTestId('device-sources').locator('a')).toHaveCount(8);
+  await expect(page.getByTestId('device-sources').locator('a')).toHaveCount(9);
 });

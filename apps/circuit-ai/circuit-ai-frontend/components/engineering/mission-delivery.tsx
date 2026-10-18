@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { AlertTriangle, Download, FileArchive, LoaderCircle, PackageCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, Check, Download, FileArchive, LoaderCircle, PackageCheck, X } from 'lucide-react';
 import { OperatorTokenField } from '@/components/engineering/mission-detail';
 import { useOperatorToken } from '@/lib/operator-token';
-import { buildPackage, packageUrl, stageDesign, type Mission, type PackageManifest } from '@/lib/missions';
+import { buildPackage, decideReview, fetchReview, packageUrl, stageDesign, type Mission, type PackageManifest, type StagedReview } from '@/lib/missions';
 
 const DELIVERABLES: Record<string, string> = {
   firmware: 'Firmware',
@@ -23,6 +22,74 @@ const STATUS_WORDS: Record<string, { label: string; className: string }> = {
   modeled_failed: { label: 'Failed in a software model', className: 'border-red-400/50 bg-red-950/40 text-red-100' },
   required: { label: 'Still required', className: 'border-amber-300/50 bg-amber-950/30 text-amber-100' },
 };
+
+/** The staged review: what it is, and the person's decision on it. Accepting is the only step that touches the project. */
+function StagedReviewBox({ mission, reviewId }: { mission: Mission; reviewId: string }) {
+  const { token, setToken } = useOperatorToken();
+  const [review, setReview] = useState<StagedReview | null>(null);
+  const [busy, setBusy] = useState<'accepted' | 'rejected' | ''>('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    fetchReview(mission.project_id, reviewId).then((row) => { if (live) setReview(row); }).catch(() => { /* shown as unknown below */ });
+    return () => { live = false; };
+  }, [mission.project_id, reviewId]);
+
+  async function decide(decision: 'accepted' | 'rejected') {
+    setBusy(decision);
+    setError('');
+    try {
+      setReview(await decideReview(mission.project_id, reviewId, decision, token));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not record the decision');
+    } finally {
+      setBusy('');
+    }
+  }
+
+  const status = review?.status;
+  return (
+    <div data-testid="staged-review" data-status={status || 'unknown'} className="mt-2 rounded-xl border border-white/10 bg-black/25 p-4">
+      <p className="text-sm leading-6 text-slate-200">
+        Review <code className="rounded bg-black/40 px-1 py-0.5 text-xs">{reviewId}</code>:{' '}
+        {status === 'accepted' ? (
+          <strong className="font-semibold text-emerald-200">accepted by {review?.decision?.actor}, now revision {review?.decision?.accepted_revision} of the project</strong>
+        ) : status === 'rejected' ? (
+          <strong className="font-semibold text-slate-100">rejected by {review?.decision?.actor}; the project was not changed</strong>
+        ) : status === 'pending' ? (
+          <strong className="font-semibold text-amber-200">waiting for your decision</strong>
+        ) : (
+          <span className="text-slate-400">status unknown</span>
+        )}
+      </p>
+      {status === 'pending' ? (
+        <>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">
+            Accepting adds this design, its checks and its repair history to the project’s record as a new revision. It does not
+            authorize building, flashing or powering anything. Rejecting leaves the project as it is.
+          </p>
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            <OperatorTokenField token={token} setToken={setToken} />
+            <button type="button" onClick={() => decide('accepted')} disabled={Boolean(busy) || !token}
+              className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-stone-900 hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40">
+              {busy === 'accepted' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Accept into the project
+            </button>
+            <button type="button" onClick={() => decide('rejected')} disabled={Boolean(busy) || !token}
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40">
+              {busy === 'rejected' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />} Reject
+            </button>
+          </div>
+        </>
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm text-red-100">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /** After READY: the package a person builds from, and the step that puts the design in front of a reviewer. */
 export function DeliveryPanel({ mission, onChanged }: { mission: Mission; onChanged: () => void }) {
@@ -86,19 +153,16 @@ export function DeliveryPanel({ mission, onChanged }: { mission: Mission; onChan
       ) : null}
 
       <div className="mt-5 border-t border-white/10 pt-4">
-        <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Put the design up for review</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Add the design to your project</h4>
         {mission.staged ? (
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            Opened as review <code className="rounded bg-black/40 px-1 py-0.5 text-xs">{mission.staged.review_id}</code>. It becomes part of the project only if you accept that review in{' '}
-            <Link href="/engineering/evidence" className="text-cyan-200 underline underline-offset-2 hover:text-white">Project review</Link>.
-          </p>
+          <StagedReviewBox mission={mission} reviewId={mission.staged.review_id} />
         ) : (
           <>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-              This opens a review of the design and the repairs that produced it. Nothing changes in your project until a person accepts that review.
+              First this opens a review of the design and the repairs that produced it. Nothing changes in your project until you accept that review.
             </p>
             <div className="mt-3 flex flex-wrap items-end gap-3">
-              {!token ? <OperatorTokenField token={token} setToken={setToken} /> : null}
+              <OperatorTokenField token={token} setToken={setToken} />
               <button type="button" onClick={() => run('stage')} disabled={Boolean(busy) || !token} className="inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-5 py-2.5 text-sm font-semibold text-amber-100 hover:bg-amber-300/10 disabled:cursor-not-allowed disabled:opacity-40">
                 {busy === 'stage' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null} Open a review
               </button>

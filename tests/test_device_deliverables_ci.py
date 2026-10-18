@@ -1,5 +1,16 @@
-"""Keep the CLI that renders 3D fixtures installed in the mock browser lane."""
+"""Keep device checks and their dependencies installed across CI lanes."""
 from pathlib import Path
+import tomllib
+
+
+def test_donor_schema_dependency_is_installed_by_both_ci_setup_paths():
+    root = Path(__file__).resolve().parents[1]
+    project = tomllib.loads((root / "pyproject.toml").read_text())
+    development = project["project"]["optional-dependencies"]["dev"]
+    setup_requirements = (root / "requirements.txt").read_text().splitlines()
+    # Core diagnostics uses the dev extra, while verify/diagnose use make setup.
+    for requirements in (development, setup_requirements):
+        assert any(line.strip().startswith("jsonschema>=") for line in requirements)
 
 def test_mock_browser_ci_installs_kicad_cli_as_well_as_lookup_libraries():
     path = Path(__file__).resolve().parents[1] / ".github/workflows/device-plan-deliverables.yml"
