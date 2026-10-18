@@ -736,6 +736,7 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "rationale": state["rationale"],
         "spec": state["spec"],
         "repairs": state["repairs"],
+        "evaluation_base_seq": _since_seq(state),
         "covers_inventory": inventory is not None and not uncovered,
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),

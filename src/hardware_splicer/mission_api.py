@@ -16,6 +16,7 @@ from fastapi.concurrency import run_in_threadpool
 from .mission_answer import answer_need
 from .mission_delivery import build_mission_package, read_mission_package, stage_mission_design
 from .mission_executor import run_mission_operation
+from .mission_agent_contract import mission_event_openapi, mission_run_openapi
 from .mission_store import (
     MissionConflict,
     MissionError,
@@ -181,7 +182,9 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
 
-    @router.post("/{mission_id}/events", status_code=http_status.HTTP_201_CREATED)
+    @router.post("/{mission_id}/events", status_code=http_status.HTTP_201_CREATED,
+                 summary="Propose a candidate, repair, finding, evidence need or terminal state",
+                 openapi_extra=mission_event_openapi())
     def propose_project_mission_event(
         project_id: str,
         mission_id: str,
@@ -200,7 +203,8 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
 
-    @router.post("/{mission_id}/candidates/{candidate_id}/run")
+    @router.post("/{mission_id}/candidates/{candidate_id}/run", summary="Run a bounded software check on a stored candidate",
+                 openapi_extra=mission_run_openapi())
     async def run_project_mission_operation(
         project_id: str,
         mission_id: str,

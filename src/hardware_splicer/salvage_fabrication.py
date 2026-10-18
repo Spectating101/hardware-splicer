@@ -69,6 +69,9 @@ def build_salvage_fabrication_context(
         "terminal": mission.get("terminal"),
         "staged": mission.get("staged"),
         "goal": mission.get("intake", {}).get("goal"),
+        "inventory": list(mission.get("intake", {}).get("inventory") or []),
+        "inventory_reading": mission.get("inventory"),
+        "requirements": list(mission.get("intake", {}).get("requirements") or []),
         "constraints": list(mission.get("intake", {}).get("constraints") or []),
         "budgets": dict(mission.get("budgets") or {}),
         "resource_graph": graph,
@@ -101,14 +104,27 @@ def _candidate_summary(row: Mapping[str, Any]) -> dict[str, Any]:
         raise FabricationValidationError("mission candidate must be an object")
     evaluations = row.get("evaluations") or []
     latest = evaluations[-1] if isinstance(evaluations, list) and evaluations else None
+    # Freshness uses the same lineage boundary as the canonical readiness gate;
+    # it does not independently decide readiness or grant authority.
+    base_seq = row.get("evaluation_base_seq")
+    checks = {
+        item["operation"]: {
+            **{key: item.get(key) for key in ("seq", "operation", "result", "artifact")},
+            "current": type(base_seq) is int and type(item.get("seq")) is int and item["seq"] > base_seq,
+        }
+        for item in evaluations
+        if isinstance(item, Mapping) and isinstance(item.get("operation"), str)
+    }
     return {
         "candidate_id": row.get("id"),
         "kind": row.get("kind"),
         "label": row.get("label"),
         "repairs": row.get("repairs"),
+        "evaluation_base_seq": base_seq,
         "covers_inventory": row.get("covers_inventory"),
         "uncovered_inventory": list(row.get("uncovered_inventory") or []),
         "violated_requirements": list(row.get("violated_requirements") or []),
+        "recorded_checks": checks,
         "latest_evaluation": (
             {
                 "seq": latest.get("seq"),
@@ -195,6 +211,7 @@ def _next_state(
             "agent_may_mutate_mission": True,
             "recommended_intents": [
                 "inspect_existing_hypotheses",
+                "continue_independent_research_or_design",
                 "await_human_physical_evidence" if physical else "resolve_nonphysical_evidence_need",
                 "propose_repair_after_new_fact",
             ],

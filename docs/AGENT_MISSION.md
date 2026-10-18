@@ -1,5 +1,9 @@
 # Driving a fabrication mission (for agents)
 
+For salvage onboarding, start with [AGENT_QUICKSTART.md](AGENT_QUICKSTART.md).
+This document explains admission/readiness gates, not the demo's productivity
+score: a correctly bounded blocker alone is not a useful salvage demonstration.
+
 A fabrication mission turns a person's goal, constraints and parts list into either a plan a person can build or
 an honest reason it cannot be built yet. You are the agent: you reason and propose. Hardware Splicer (HS) runs the
 checks and decides. A person accepted the mission before you started; that acceptance lets HS run its
