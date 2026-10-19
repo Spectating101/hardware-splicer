@@ -268,12 +268,28 @@ const NEED_STATE: Record<MissionNeed['need_state'], { label: string; className: 
   contradicted: { label: 'Reading out of range', className: 'border-red-400/50 bg-red-950/40 text-red-100' },
 };
 
+/** Show "(1) a (2) b" as a list. Display only: every word of the agent's text is kept, in order. */
+export function splitNumbered(text: string): { lead: string; items: string[] } {
+  const marks = [...text.matchAll(/\((\d{1,2})\)\s+/g)];
+  if (marks.length < 2 || marks[0][1] !== '1') return { lead: text.trim(), items: [] };
+  const lead = text.slice(0, marks[0].index).trim();
+  const items = marks.map((mark, index) => {
+    const start = (mark.index ?? 0) + mark[0].length;
+    const end = index + 1 < marks.length ? marks[index + 1].index : text.length;
+    return text.slice(start, end).trim().replace(/[;,]$/, '');
+  });
+  return { lead, items };
+}
+
 export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged: () => void }) {
   const ended = Boolean(mission.terminal);
   // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
   const requests = mission.needs.filter((need) => need.request);
-  const notes = mission.needs.filter((need) => !need.request);
-  if (!requests.length && !notes.length) return null;
+  const plain = mission.needs.filter((need) => !need.request);
+  // A free-text need on a running mission is the agent asking for something. It is not a side note.
+  const asks = ended || !mission.accepted ? [] : plain.filter((need) => need.need_state === 'open');
+  const notes = plain.filter((need) => !asks.includes(need));
+  if (!requests.length && !notes.length && !asks.length) return null;
   return (
     <>
     {requests.length ? (
@@ -313,6 +329,29 @@ export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged
       </ul>
     </Section>
     ) : null}
+    {asks.length ? (
+      <Section title="What the agent says it still needs" hint="In the agent’s own words. HS did not check this, and this page cannot take an answer to it yet.">
+        <ul className="space-y-3">
+          {asks.map((need) => {
+            const { lead, items } = splitNumbered(need.need);
+            return (
+              <li key={need.seq} data-testid="agent-ask" className="rounded-xl border border-amber-300/40 bg-amber-300/5 p-4 text-sm leading-6 text-slate-100">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <WhoChip who="agent" label="Asked by the agent" />
+                  <span className="rounded-full border border-amber-300/50 bg-amber-300/10 px-2 py-0.5 text-[11px] font-medium text-amber-100">Waiting for you</span>
+                </div>
+                {lead ? <p>{lead}</p> : null}
+                {items.length ? (
+                  <ol className="hs-reset mt-2 list-decimal space-y-1.5 pl-5 marker:text-amber-200">
+                    {items.map((item, index) => <li key={index}>{item}</li>)}
+                  </ol>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
+    ) : null}
     {notes.length ? (
       <Section title="Concerns the agent recorded" hint="Notes, not requests. HS did not check them.">
         <ul className="space-y-2">
@@ -332,7 +371,8 @@ export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged
 /** An accepted mission with no design yet is waiting on an agent. Say how to point one at it. */
 export function AgentHandoff({ mission }: { mission: Mission }) {
   const [copied, setCopied] = useState(false);
-  if (!mission.accepted || mission.terminal || mission.candidates.length) return null;
+  const agentActed = (mission.events ?? []).some((event) => event.author.kind === 'agent' && event.type !== 'opened');
+  if (!mission.accepted || mission.terminal || mission.candidates.length || agentActed) return null;
   const text = `Fabrication mission ${mission.mission_id} in project ${mission.project_id}.\n`
     + 'Use the fabrication_mission task (MCP) or the routes in docs/AGENT_MISSION.md. Draft from the parts list, propose a design, '
     + 'ask HS to run its checks, and propose the terminal state the evidence supports. You cannot accept the mission or record a result.';

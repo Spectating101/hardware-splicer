@@ -118,6 +118,26 @@ test('an agent\'s own claim is shown as the agent\'s word, never as something HS
 });
 
 
+test('an agent asking in plain words is shown as a request, with its items listed, not as a side note', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the operator token the verify script registers');
+  const id = await openMission(request, { goal: 'Reuse a donor part in an ESP32 project', inventory: ['ESP32'] });
+  await post(request, `/v1/projects/${project}/missions/${id}/accept`, {}, { 'X-HS-Operator-Token': TOKEN });
+  await propose(request, id, { type: 'evidence_required', blocker: 'BLOCKED_NEEDS_PART_DATA',
+    need: 'No design can be checked yet. Needed from a person: (1) the model and rating label; (2) photos of the transformer terminals; (3) the service manual. Mains-side parts cannot be sized until then.' });
+
+  await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
+  // The headline does not call it a measurement, and says the page has no form for it.
+  await expect(page.getByTestId('verdict-title')).toHaveText('Waiting for information from you');
+  await expect(page.getByText('What the agent says it still needs')).toBeVisible();
+  await expect(page.getByText('Concerns the agent recorded')).toHaveCount(0);
+  await expect(page.getByTestId('agent-ask').locator('ol > li')).toHaveCount(3);
+  await expect(page.getByTestId('agent-ask').locator('ol > li').nth(1)).toContainText('photos of the transformer terminals');
+  // It still is not a form: nothing here records a reading, and an agent that has acted is not "waited for".
+  await expect(page.getByRole('button', { name: /Record my reading/ })).toHaveCount(0);
+  await expect(page.getByText('Waiting for an agent')).toHaveCount(0);
+});
+
+
 test('a mission is started from a typed parts list, and the page says how each line was read first', async ({ page }) => {
   test.skip(!TOKEN, 'needs the operator token the verify script registers');
   await page.goto(`${APP}/engineering/missions?project=${project}`);
