@@ -1,0 +1,61 @@
+{
+  "author": {
+    "id": "cold-mouse-phase1",
+    "kind": "agent"
+  },
+  "candidate": {
+    "id": "intact_pedal",
+    "kind": "reclaim_heavy",
+    "label": "Intact mouse in a load-bearing pedal cradle",
+    "rationale": "Preferred first investigation: retains original USB implementation and avoids all switch pinout assumptions. S1 describes buttons and USB use only for an exemplar. Mechanical fit and performance remain unmeasured.",
+    "spec": {
+      "approach": "An external hinged treadle presses exactly one existing button through a compliant adjustable pusher; original mouse remains intact.",
+      "decision_metrics": {
+        "advance_if": "Actual donor works, chosen action can bind, mechanical force/travel evidence supports safe load bypass.",
+        "electrical_intrusion": "None proposed",
+        "footprint": "Larger; unknown until actual donor fit",
+        "main_risks": [
+          "Housing creep or button overtravel",
+          "Foot load bypass failure",
+          "Unwanted mouse motion or clicks"
+        ],
+        "reversibility": "High"
+      },
+      "donor_identity": "Unknown discarded wired USB mouse; B100 is exemplar only",
+      "donor_resource": "donor:usb-mouse:controller",
+      "evidence_packet": {
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "kind": "host_transcribed_document_paraphrases",
+        "limitation": "No specimen exists; original HTML hashes are locator provenance only; HS page-addressed document inspection rejected Markdown with 422 PDF signature requirement.",
+        "sections": [
+          "S1: Logitech B100 product exemplar",
+          "S2: USB-IF HID specification overview"
+        ],
+        "source_id": "upload-b98f9a76a04dc4a97add"
+      },
+      "evidence_status": "Document-only design proposal; physical correctness remains unproven. No physical actions permitted in this trial.",
+      "host_behavior": {
+        "mapping": "Use native application mouse-button binding if available. A keyboard-only target requires device-specific host remapping, subject to later OS/application evidence.",
+        "single_action": "One target application action on the chosen button down transition; suppress repeat while held; re-arm after release.",
+        "unwanted_inputs": "Mount against translation; shield unused buttons and wheel; verify zero unwanted pointer/wheel/other button actions in target use."
+      },
+      "mechanical_design": {
+        "adjustment": "Adjust mouse locating blocks, pusher position and stop only after actual envelope, button travel and allowable force are established. No dimensions are fabricated.",
+        "load_path": "Foot load goes through treadle, hinge and positive hard stop into a broad nonslip base; mouse shell/button is not the structural end stop.",
+        "protection": "Guard wheel and other buttons, retain cable strain relief, avoid pinch points; removal should restore ordinary mouse use.",
+        "return": "Independent treadle return bias must release the pusher; do not rely on the mouse switch to lift the pedal."
+      },
+      "proposal_only": true,
+      "system_boundary": "Reuse original mouse USB cable/controller/firmware; no purchased development board and no firmware modification.",
+      "unknowns": [
+        "Actual donor identity and functional state",
+        "Actual USB enumeration and button reports",
+        "Available reclaimed mechanical material",
+        "Foot force, travel, return, slip resistance and useful service life"
+      ]
+    }
+  },
+  "created_at": "2026-10-18T18:03:52.030705+00:00",
+  "seq": 5,
+  "type": "candidate_proposed"
+}

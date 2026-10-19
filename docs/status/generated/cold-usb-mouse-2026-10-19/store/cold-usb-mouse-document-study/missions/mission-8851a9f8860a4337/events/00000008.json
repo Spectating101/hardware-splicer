@@ -1,0 +1,12 @@
+{
+  "author": {
+    "id": "cold-mouse-phase1",
+    "kind": "agent"
+  },
+  "blocker": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+  "candidate_id": "intact_pedal",
+  "created_at": "2026-10-18T18:04:36.175374+00:00",
+  "need": "Resume from canonical project revision 3 pre_fabrication_plan and candidates intact_pedal / remote_contact. Source upload-b98f9a76a04dc4a97add is a retained host paraphrase packet, not original HTML or measured donor truth. Need actual donor identity/condition and dimensions, button force/travel and available reclaimed pedal materials; target OS/application/action and binding support; later authorized enumeration/button-down/up report evidence. Only remote_contact additionally requires unpowered switch-node topology/continuity and a suitable reclaimed passive switch/wire/enclosure. Proposed later acceptance: 100 presses =100 actions, 10-second hold =1 action, clean release, zero unintended motion/wheel/other-button input, load carried by pedal stop/base. None performed. HS device_plan refused noncatalog mouse spec (artifact runs/device_plan-eb9b0ce4ebfff18f.json); Markdown page-claim inspection is PDF-only. Keep this mission resumable; no terminal outcome or physical activity requested.",
+  "seq": 8,
+  "type": "evidence_required"
+}

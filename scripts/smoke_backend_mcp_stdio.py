@@ -161,6 +161,49 @@ async def run() -> None:
             if (loaded_project.get("snapshot") or {}).get("name") != "MCP contract smoke":
                 raise AssertionError(f"MCP readback did not preserve canonical state: {load_result}")
 
+            # Scripted wire-level onboarding control, not a live model trial.
+            salvage = _json_text(await client.call_tool(
+                "hs_backend_task_manifest", {"task": "salvage_fabrication"},
+            ))
+            assert salvage["detail"] == "compact"
+            assert len(json.dumps(salvage, indent=2, sort_keys=True).encode()) < 16000
+            assert "/v1/fabricator/intelligence/vision/donor-drafts" in {
+                op["path"] for op in salvage["operations"]
+            }
+            events_id = _operation_id(salvage["operations"], "POST",
+                                     "/v1/projects/{project_id}/missions/{mission_id}/events")
+            event_contract = _json_text(await client.call_tool(
+                "hs_backend_describe_operation", {"operation_id": events_id},
+            ))
+            event_content = event_contract["operation"]["requestBody"]["content"]["application/json"]
+            assert len(event_content["schema"]["properties"]["event"]["oneOf"]) == 5
+            assert "finding_offered" in event_content["examples"]
+            mission_ops = _json_text(await client.call_tool(
+                "hs_backend_list_operations",
+                {"path_prefix": "/v1/projects/{project_id}/missions", "method": "POST"},
+            ))["operations"]
+            opened = _json_text(await client.call_tool("hs_backend_call", {
+                "operation_id": _operation_id(mission_ops, "POST", "/v1/projects/{project_id}/missions"),
+                "path_params": {"project_id": project_id},
+                "json_body": {"author": {"kind": "agent", "id": "protocol-control"},
+                              "intake": {"goal": "Read an unidentified toy-board intake; no physical claim",
+                                         "inventory": ["unidentified battery toy board"]}},
+            }))
+            assert opened["ok"], opened
+            mid = opened["body"]["mission"]["mission_id"]
+            context = _json_text(await client.call_tool("hs_backend_call", {
+                "operation_id": salvage["start_here"]["operation_id"],
+                "path_params": {"project_id": project_id, "mission_id": mid},
+            }))
+            assert context["ok"], context
+            assert context["body"]["context"]["inventory"] == ["unidentified battery toy board"]
+            assert context["body"]["context"]["next_state"]["state"] == "awaiting_human_acceptance"
+            reading = _json_text(await client.call_tool("hs_backend_call", {
+                "operation_id": _operation_id(salvage["operations"], "POST", "/v1/devices/parts-reading"),
+                "json_body": {"text": "unidentified battery toy board"},
+            }))
+            assert reading["ok"] and reading["body"]["parsed"]["left_out"]
+
             delete_result = _json_text(
                 await client.call_tool(
                     "hs_backend_call",
@@ -185,6 +228,10 @@ async def run() -> None:
                         "operation_description": "pass",
                         "canonical_read_invocation": "pass",
                         "canonical_stateful_write_read_delete": "pass",
+                        "salvage_compact_manifest": "pass",
+                        "salvage_event_contracts": "pass",
+                        "salvage_context_readback": "pass",
+                        "salvage_unknown_parts_reading": "pass",
                         "physical_authority_granted": False,
                     },
                     indent=2,

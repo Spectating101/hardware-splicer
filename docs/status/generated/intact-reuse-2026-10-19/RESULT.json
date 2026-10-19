@@ -1,0 +1,2484 @@
+{
+  "delivered_checks_replayed": true,
+  "implementation_commit": "aa715807fc6b355c0e46bbadbf0b5dac5d225fed",
+  "implementation_file_sha256": {
+    "scripts/smoke_intact_reuse_mcp.py": "ed23899c09593d3e1dc82c2618366dc2be39f23affff56a17ff59507e81be469",
+    "src/hardware_splicer/intact_reuse.py": "f8805c889bebcc475864ebe57dd4c343bc407dcdaa24c8bbee00ac995c801074",
+    "src/hardware_splicer/intact_reuse_adapter.py": "e30fb3f2df289e95f2ec4fd6969ae9279576422207ffaa5fe8cfd6e4d3389e27",
+    "src/hardware_splicer/mission_executor.py": "6a9d34587806909c8c25d734da14223042bedd9aa3c025b1ffc8ed9a7114df0f"
+  },
+  "kind": "scripted_real_mcp_control_not_live_agent",
+  "mcp_calls": 9,
+  "mission_id": "mission-249cc994393645cb",
+  "package_bytes": 4830,
+  "package_sha256": "0751000fb19909800564e3a84c8bd9f0887abeda4e40392f43ba4b772ea7cc29",
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "project_id": "mouse-reuse",
+  "project_revision_unchanged_by_checks": true,
+  "recorded_artifact": "runs/intact_reuse-1062d15a5f6b26fb.json",
+  "scenario_count": 7,
+  "source_packet_sha256": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+  "trace": [
+    {
+      "arguments": {},
+      "response": {
+        "authority_contract": {
+          "adapter_bypasses_backend_gates": false,
+          "mcp_grants_physical_authority": false,
+          "statement": "MCP dispatch re-enters the canonical ASGI handlers. Existing revision, evidence, deterministic-verification and human-authorization rules remain authoritative."
+        },
+        "discovery_source": "FastAPI OpenAPI generated from hardware_splicer.product_api",
+        "method_counts": {
+          "DELETE": 3,
+          "GET": 113,
+          "PATCH": 2,
+          "POST": 197,
+          "PUT": 2
+        },
+        "mutation_operation_count": 204,
+        "operation_count": 317,
+        "parameter_locations": [
+          "header",
+          "path",
+          "query"
+        ],
+        "read_operation_count": 113,
+        "request_transport": {
+          "cookies": true,
+          "form": true,
+          "headers": true,
+          "json": true,
+          "multipart_base64_files": true,
+          "path": true,
+          "query": true,
+          "raw_body_base64": true
+        },
+        "surface": "canonical_product_api",
+        "tag_counts": {
+          "actions": 2,
+          "ai-project-conversation": 2,
+          "ai-project-orchestrator": 4,
+          "ai-project-repair": 2,
+          "ai-project-tool-executor": 2,
+          "artifacts": 4,
+          "assembly": 3,
+          "attestation": 4,
+          "candidates": 7,
+          "capabilities": 6,
+          "circuit-json": 2,
+          "devices": 14,
+          "document-evidence": 5,
+          "donors": 2,
+          "dual-agent-cleanroom": 2,
+          "electrical-designs": 5,
+          "engineering": 44,
+          "engineering-assurance": 4,
+          "engineering-package": 3,
+          "engineering-package-download": 1,
+          "engineering-review": 3,
+          "engineering-source-ingestion": 2,
+          "engineering-source-multipart": 2,
+          "engineering-source-review": 2,
+          "engineering-source-role": 1,
+          "execution": 6,
+          "fabrication-missions": 14,
+          "fabricator-digital-thread": 14,
+          "fabricator-integrations": 13,
+          "fabricator-intelligence": 7,
+          "fabricator-lab": 6,
+          "fabricator-validation": 2,
+          "findings": 1,
+          "hashing": 3,
+          "lookup": 2,
+          "machine-projects": 10,
+          "manufacturing": 2,
+          "mechanical": 4,
+          "model3d": 2,
+          "parts": 1,
+          "persistence": 3,
+          "physical-evidence": 18,
+          "physical-operators": 8,
+          "project-engineering-plan": 2,
+          "project-events": 4,
+          "project-physical-validation": 4,
+          "project-threads": 4,
+          "projects": 30,
+          "reuse": 5,
+          "review-packet": 1,
+          "revisions": 2,
+          "salvage-fabrication": 1,
+          "semantic-circuit-planning": 2,
+          "source-storage-operations": 3,
+          "source-upload-sessions": 6,
+          "status": 2,
+          "stored-source-parser": 2
+        },
+        "unsupported_parameter_locations": []
+      },
+      "tool": "hs_backend_status"
+    },
+    {
+      "arguments": {
+        "task": "salvage_fabrication"
+      },
+      "response": {
+        "authority_contract": {
+          "agent_can_accept_mission": false,
+          "agent_can_approve_physical_actuation": false,
+          "agent_can_bypass_backend_gates": false,
+          "agent_can_confirm_visual_donor_draft": false,
+          "agent_can_supply_human_measurement": false,
+          "context_persists_independent_truth": false,
+          "lab_reservation_equals_actuation_authority": false,
+          "marking_text_establishes_part_identity": false,
+          "projection_grants_physical_authority": false,
+          "visual_draft_geometry_is_measured": false,
+          "visual_draft_is_donor_contract_truth": false
+        },
+        "detail": "compact",
+        "excluded_human_or_authority_routes": [
+          "POST /v1/projects/{project_id}/missions/{mission_id}/accept",
+          "POST /v1/projects/{project_id}/missions/{mission_id}/needs/{need_seq}/evidence",
+          "POST /v1/projects/{project_id}/missions/{mission_id}/needs/{need_seq}/answer",
+          "POST /v1/fabricator/intelligence/vision/donor-drafts/{draft_artifact_id}/confirm",
+          "POST /v1/fabrication/approval-requests/{request_id}/approve",
+          "POST /v1/fabrication/approval-requests/{request_id}/reject",
+          "POST /v1/fabrication/approval-requests/{request_id}/execute"
+        ],
+        "operation_ids": [
+          "read_salvage_fabrication_context_v1_projects__project_id__missions__mission_id__salvage_fabrication_get",
+          "read_intact_reuse_spec_v1_projects__project_id__missions__mission_id__intact_reuse_spec_get",
+          "get_spec_schema_v1_devices_spec_schema_get",
+          "post_parts_reading_v1_devices_parts_reading_post",
+          "post_draft_v1_devices_draft_post",
+          "load_project_mission_v1_projects__project_id__missions__mission_id__get",
+          "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+          "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+          "read_project_mission_run_v1_projects__project_id__missions__mission_id__runs__name__get",
+          "download_intact_reuse_bundle_v1_projects__project_id__missions__mission_id__runs__name__bundle_get",
+          "build_project_mission_package_v1_projects__project_id__missions__mission_id__package_post",
+          "download_project_mission_package_v1_projects__project_id__missions__mission_id__package_get",
+          "stage_project_mission_design_v1_projects__project_id__missions__mission_id__stage_post",
+          "inspect_retained_image_v1_fabricator_intelligence_vision_inspect_post",
+          "create_visual_donor_draft_v1_fabricator_intelligence_vision_donor_drafts_post",
+          "list_procurement_quotes_v1_fabricator_intelligence_procurement_quotes_get",
+          "estimate_procurement_v1_fabricator_intelligence_procurement_estimate_post",
+          "compare_fabrication_options_v1_fabricator_intelligence_architecture_tradeoffs_post",
+          "list_lab_resources_v1_fabricator_lab_resources_get",
+          "plan_lab_workflow_v1_fabricator_lab_workflows_post",
+          "read_lab_workflow_v1_fabricator_lab_workflows__plan_id__get",
+          "list_physical_operators_v1_fabrication_operators_get",
+          "list_physical_artifacts_v1_fabrication_artifacts_get",
+          "perform_non_actuating_v1_fabrication_non_actuating_post",
+          "request_physical_approval_v1_fabrication_approval_requests_post",
+          "read_physical_approval_v1_fabrication_approval_requests__request_id__get",
+          "build_physical_revision_proposal_v1_fabricator_projects__project_id__missions__mission_id__revision_proposal_post"
+        ],
+        "operations": [
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "read_salvage_fabrication_context_v1_projects__project_id__missions__mission_id__salvage_fabrication_get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/salvage-fabrication",
+            "summary": "Read Salvage Fabrication Context"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "read_intact_reuse_spec_v1_projects__project_id__missions__mission_id__intact_reuse_spec_get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/intact-reuse-spec",
+            "summary": "Discover a bounded intact-input reuse spec and registered source/donor IDs"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "get_spec_schema_v1_devices_spec_schema_get",
+            "path": "/v1/devices/spec-schema",
+            "summary": "JSON Schema and catalogue for writing a device spec"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "post_parts_reading_v1_devices_parts_reading_post",
+            "path": "/v1/devices/parts-reading",
+            "summary": "Say how a typed parts list is read"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "post_draft_v1_devices_draft_post",
+            "path": "/v1/devices/draft",
+            "summary": "Draft a wired spec from a controller and a list of parts"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "load_project_mission_v1_projects__project_id__missions__mission_id__get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}",
+            "summary": "Load Project Mission"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/events",
+            "summary": "Propose a candidate, repair, finding, evidence need or terminal state"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run",
+            "summary": "Run a bounded software check on a stored candidate"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "read_project_mission_run_v1_projects__project_id__missions__mission_id__runs__name__get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}",
+            "summary": "Read Project Mission Run"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "download_intact_reuse_bundle_v1_projects__project_id__missions__mission_id__runs__name__bundle_get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}/bundle",
+            "summary": "Download a hash-bound intact-reuse SOFTWARE REVIEW bundle, not a READY build package"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "build_project_mission_package_v1_projects__project_id__missions__mission_id__package_post",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/package",
+            "summary": "Build Project Mission Package"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "download_project_mission_package_v1_projects__project_id__missions__mission_id__package_get",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/package",
+            "summary": "Download Project Mission Package"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "stage_project_mission_design_v1_projects__project_id__missions__mission_id__stage_post",
+            "path": "/v1/projects/{project_id}/missions/{mission_id}/stage",
+            "summary": "Stage Project Mission Design"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "inspect_retained_image_v1_fabricator_intelligence_vision_inspect_post",
+            "path": "/v1/fabricator/intelligence/vision/inspect",
+            "summary": "Inspect Retained Image"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "create_visual_donor_draft_v1_fabricator_intelligence_vision_donor_drafts_post",
+            "path": "/v1/fabricator/intelligence/vision/donor-drafts",
+            "summary": "Create Visual Donor Draft"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "list_procurement_quotes_v1_fabricator_intelligence_procurement_quotes_get",
+            "path": "/v1/fabricator/intelligence/procurement/quotes",
+            "summary": "List Procurement Quotes"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "estimate_procurement_v1_fabricator_intelligence_procurement_estimate_post",
+            "path": "/v1/fabricator/intelligence/procurement/estimate",
+            "summary": "Estimate Procurement"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "compare_fabrication_options_v1_fabricator_intelligence_architecture_tradeoffs_post",
+            "path": "/v1/fabricator/intelligence/architecture/tradeoffs",
+            "summary": "Compare Fabrication Options"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "list_lab_resources_v1_fabricator_lab_resources_get",
+            "path": "/v1/fabricator/lab/resources",
+            "summary": "List Lab Resources"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "plan_lab_workflow_v1_fabricator_lab_workflows_post",
+            "path": "/v1/fabricator/lab/workflows",
+            "summary": "Plan Lab Workflow"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "read_lab_workflow_v1_fabricator_lab_workflows__plan_id__get",
+            "path": "/v1/fabricator/lab/workflows/{plan_id}",
+            "summary": "Read Lab Workflow"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "list_physical_operators_v1_fabrication_operators_get",
+            "path": "/v1/fabrication/operators",
+            "summary": "List Physical Operators"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "list_physical_artifacts_v1_fabrication_artifacts_get",
+            "path": "/v1/fabrication/artifacts",
+            "summary": "List Physical Artifacts"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "perform_non_actuating_v1_fabrication_non_actuating_post",
+            "path": "/v1/fabrication/non-actuating",
+            "summary": "Perform Non Actuating"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "request_physical_approval_v1_fabrication_approval_requests_post",
+            "path": "/v1/fabrication/approval-requests",
+            "summary": "Request Physical Approval"
+          },
+          {
+            "method": "GET",
+            "mutation": false,
+            "operation_id": "read_physical_approval_v1_fabrication_approval_requests__request_id__get",
+            "path": "/v1/fabrication/approval-requests/{request_id}",
+            "summary": "Read Physical Approval"
+          },
+          {
+            "method": "POST",
+            "mutation": true,
+            "operation_id": "build_physical_revision_proposal_v1_fabricator_projects__project_id__missions__mission_id__revision_proposal_post",
+            "path": "/v1/fabricator/projects/{project_id}/missions/{mission_id}/revision-proposal",
+            "summary": "Build Physical Revision Proposal"
+          }
+        ],
+        "recovery": {
+          "403": "Check the human/authority boundary. Do not impersonate a person or request their operator token.",
+          "409": "Reload mission context. If busy, wait for the current operation; if stale, rebuild the proposal from the fresh event sequence. Do not blindly replay mutations.",
+          "422": "Read the error message and the operation schema/examples; correct the request instead of repeating it.",
+          "resume": "Reload context after interruption; read a candidate's full spec from the mission and hashed check output from its run artifact."
+        },
+        "related_workflows": [
+          {
+            "task": "document_grounded_pre_fabrication",
+            "when": "Admit document bytes and record hash-bound/page-addressed claims in the canonical source graph."
+          },
+          {
+            "task": "engineering_assurance",
+            "when": "Inspect evidence dependencies and claim support without promoting authority."
+          }
+        ],
+        "request_contracts": {
+          "argument": "operation_id",
+          "instructions": "Describe an unfamiliar operation before calling it. Mission events expose named JSON examples and a discriminated event schema.",
+          "tool": "hs_backend_describe_operation"
+        },
+        "schema_version": "hardware_splicer.salvage_fabrication_manifest.v2",
+        "start_here": {
+          "instructions": "Read this mission context first; reuse its last_event_seq for proposals. Never invent IDs.",
+          "operation_id": "read_salvage_fabrication_context_v1_projects__project_id__missions__mission_id__salvage_fabrication_get",
+          "path_params": [
+            "project_id",
+            "mission_id"
+          ]
+        },
+        "task": "salvage_fabrication",
+        "workflow": [
+          "reload the canonical mission-scoped salvage context at the start of every turn",
+          "for intact input-device reuse, discover intact-reuse-spec, propose the actual donor design, run intact_reuse and download its software review bundle without inventing a catalog board or claiming READY",
+          "inspect retained images and prefill typed donor drafts while preserving model-inference provenance",
+          "leave a visual draft pending human confirmation; continue independent software work without treating the draft as a donor contract",
+          "inspect retained hypotheses/resources and propose findings or a bounded evidence need when uncertain",
+          "propose and deterministically evaluate multiple architecture candidates",
+          "compare clean-sheet, reclaim-heavy and hybrid options against the canonical resource graph",
+          "generate or inspect bounded artifacts through canonical specialist operations",
+          "schedule required lab capabilities without treating reservation as physical authority",
+          "request exact physical approval when an actuation plan is ready, but never approve it as the agent",
+          "ingest resulting evidence through canonical human/evidence workflows outside this agent manifest",
+          "propose a grounded revision when retained physical evidence invalidates the current design"
+        ]
+      },
+      "tool": "hs_backend_task_manifest"
+    },
+    {
+      "arguments": {
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post"
+      },
+      "response": {
+        "method": "POST",
+        "operation": {
+          "operationId": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "project_id",
+              "required": true,
+              "schema": {
+                "title": "Project Id",
+                "type": "string"
+              }
+            },
+            {
+              "in": "path",
+              "name": "mission_id",
+              "required": true,
+              "schema": {
+                "title": "Mission Id",
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "candidate_proposed": {
+                    "summary": "Template: replace placeholder content and use the current event sequence",
+                    "value": {
+                      "author": {
+                        "id": "salvage-agent",
+                        "kind": "agent"
+                      },
+                      "event": {
+                        "candidate": {
+                          "id": "A",
+                          "kind": "reclaim_heavy",
+                          "label": "Reuse candidate",
+                          "rationale": "Replace spec with the actual grounded draft/design before evaluation.",
+                          "spec": {}
+                        },
+                        "type": "candidate_proposed"
+                      },
+                      "expected_event_seq": 0
+                    }
+                  },
+                  "evidence_required": {
+                    "summary": "Template: replace placeholder content and use the current event sequence",
+                    "value": {
+                      "author": {
+                        "id": "salvage-agent",
+                        "kind": "agent"
+                      },
+                      "event": {
+                        "blocker": "BLOCKED_NEEDS_REVERSE_ENGINEERING",
+                        "need": "Resolve the donor interface from trustworthy documentation; no measurement is claimed.",
+                        "type": "evidence_required"
+                      },
+                      "expected_event_seq": 0
+                    }
+                  },
+                  "finding_offered": {
+                    "summary": "Template: replace placeholder content and use the current event sequence",
+                    "value": {
+                      "author": {
+                        "id": "salvage-agent",
+                        "kind": "agent"
+                      },
+                      "event": {
+                        "finding": {
+                          "artifacts": [],
+                          "claim": "Replace with a bounded observation from the named source.",
+                          "donor_id": "donor:example:block",
+                          "method": "document",
+                          "source": "Replace with the actual document locator."
+                        },
+                        "type": "finding_offered"
+                      },
+                      "expected_event_seq": 0
+                    }
+                  },
+                  "repair_proposed": {
+                    "summary": "Template: replace placeholder content and use the current event sequence",
+                    "value": {
+                      "author": {
+                        "id": "salvage-agent",
+                        "kind": "agent"
+                      },
+                      "event": {
+                        "candidate_id": "A",
+                        "rationale": "Replace spec with a repair grounded in a failed check or new human evidence.",
+                        "spec": {},
+                        "type": "repair_proposed"
+                      },
+                      "expected_event_seq": 0
+                    }
+                  },
+                  "terminal_proposed": {
+                    "summary": "Template: replace placeholder content and use the current event sequence",
+                    "value": {
+                      "author": {
+                        "id": "salvage-agent",
+                        "kind": "agent"
+                      },
+                      "event": {
+                        "candidate_id": "A",
+                        "reason": "Only submit after HS checks establish readiness.",
+                        "state": "READY_FOR_HUMAN_BUILD",
+                        "type": "terminal_proposed"
+                      },
+                      "expected_event_seq": 0
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Structural request contract only. Canonical runtime checks still decide admissibility.",
+                  "properties": {
+                    "author": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "maxLength": 120,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "agent",
+                            "human"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind"
+                      ],
+                      "type": "object"
+                    },
+                    "event": {
+                      "discriminator": {
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "candidate": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "clean_sheet",
+                                    "hybrid",
+                                    "reclaim_heavy"
+                                  ]
+                                },
+                                "label": {
+                                  "maxLength": 200,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "rationale": {
+                                  "maxLength": 2000,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "spec": {
+                                  "description": "Unvalidated design proposal, not measured facts. Replace with your draft/design spec. GET /v1/devices/spec-schema describes the planner's structure; donor IDs require frozen mission context. Partial specs may be proposed but cannot earn readiness without the canonical checks.",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "kind",
+                                "label",
+                                "spec",
+                                "rationale"
+                              ],
+                              "type": "object"
+                            },
+                            "type": {
+                              "const": "candidate_proposed"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "candidate"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "candidate_id": {
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                              "type": "string"
+                            },
+                            "rationale": {
+                              "maxLength": 2000,
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "spec": {
+                              "description": "Unvalidated design proposal, not measured facts. Replace with your draft/design spec. GET /v1/devices/spec-schema describes the planner's structure; donor IDs require frozen mission context. Partial specs may be proposed but cannot earn readiness without the canonical checks.",
+                              "type": "object"
+                            },
+                            "type": {
+                              "const": "repair_proposed"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "candidate_id",
+                            "spec",
+                            "rationale"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blocker": {
+                              "enum": [
+                                "BLOCKED_NEEDS_PART_DATA",
+                                "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+                                "BLOCKED_NEEDS_PROCUREMENT_EVIDENCE",
+                                "BLOCKED_NEEDS_REVERSE_ENGINEERING",
+                                "BLOCKED_UNSAFE"
+                              ]
+                            },
+                            "candidate_id": {
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                              "type": "string"
+                            },
+                            "cites": {
+                              "items": {
+                                "minimum": 1,
+                                "type": "integer"
+                              },
+                              "maxItems": 40,
+                              "type": "array"
+                            },
+                            "need": {
+                              "maxLength": 4000,
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "request": {
+                              "additionalProperties": false,
+                              "allOf": [
+                                {
+                                  "if": {
+                                    "properties": {
+                                      "kind": {
+                                        "enum": [
+                                          "dimensional",
+                                          "electrical",
+                                          "continuity"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "required": [
+                                      "quantity"
+                                    ]
+                                  }
+                                },
+                                {
+                                  "if": {
+                                    "properties": {
+                                      "kind": {
+                                        "const": "dimensional"
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "properties": {
+                                      "quantity": {
+                                        "enum": [
+                                          "above_board_mm",
+                                          "pcb_mm.x",
+                                          "pcb_mm.y",
+                                          "pcb_mm.z"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "if": {
+                                    "properties": {
+                                      "kind": {
+                                        "const": "boot_log"
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "not": {
+                                      "required": [
+                                        "quantity"
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "if": {
+                                    "required": [
+                                      "signal"
+                                    ]
+                                  },
+                                  "then": {
+                                    "properties": {
+                                      "kind": {
+                                        "enum": [
+                                          "electrical",
+                                          "continuity"
+                                        ]
+                                      },
+                                      "target": {
+                                        "pattern": "^donor:"
+                                      }
+                                    }
+                                  }
+                                }
+                              ],
+                              "description": "A request, never a measurement or approval. Dimensional targets must be library module IDs and quantities pcb_mm.x/pcb_mm.y/pcb_mm.z/above_board_mm. Electrical/continuity requires a short quantity name; only those donor-target requests may name signal. boot_log has no quantity. Expected min must not exceed max.",
+                              "properties": {
+                                "expected": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "max": {
+                                      "type": "number"
+                                    },
+                                    "min": {
+                                      "type": "number"
+                                    },
+                                    "unit": {
+                                      "maxLength": 10,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "min",
+                                    "max",
+                                    "unit"
+                                  ],
+                                  "type": "object"
+                                },
+                                "instructions": {
+                                  "maxLength": 4000,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "enum": [
+                                    "boot_log",
+                                    "continuity",
+                                    "dimensional",
+                                    "electrical"
+                                  ]
+                                },
+                                "quantity": {
+                                  "maxLength": 32,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "signal": {
+                                  "maxLength": 120,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "target": {
+                                  "maxLength": 200,
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "target",
+                                "instructions"
+                              ],
+                              "type": "object"
+                            },
+                            "type": {
+                              "const": "evidence_required"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "blocker",
+                            "need"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "finding": {
+                              "additionalProperties": false,
+                              "description": "Donor must be in this mission intake. All findings remain re_observation; hashes are unverified references.",
+                              "properties": {
+                                "artifacts": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "name": {
+                                        "maxLength": 200,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "sha256": {
+                                        "pattern": "^[0-9a-fA-F]{64}$",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "sha256"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "maxItems": 20,
+                                  "type": "array"
+                                },
+                                "claim": {
+                                  "maxLength": 4000,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "donor_id": {
+                                  "pattern": "^donor:[a-z0-9][a-z0-9-]{0,63}:[a-z0-9][a-z0-9-]{0,63}$",
+                                  "type": "string"
+                                },
+                                "method": {
+                                  "enum": [
+                                    "continuity",
+                                    "document",
+                                    "firmware_analysis",
+                                    "marking",
+                                    "signal_capture",
+                                    "vision"
+                                  ]
+                                },
+                                "signal": {
+                                  "anyOf": [
+                                    {
+                                      "maxLength": 120,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "source": {
+                                  "maxLength": 200,
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "donor_id",
+                                "claim",
+                                "method",
+                                "source",
+                                "artifacts"
+                              ],
+                              "type": "object"
+                            },
+                            "type": {
+                              "const": "finding_offered"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "finding"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "candidate_id": {
+                              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                              "type": "string"
+                            },
+                            "cites": {
+                              "items": {
+                                "minimum": 1,
+                                "type": "integer"
+                              },
+                              "maxItems": 40,
+                              "type": "array"
+                            },
+                            "reason": {
+                              "maxLength": 2000,
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "state": {
+                              "enum": [
+                                "READY_FOR_HUMAN_BUILD",
+                                "BLOCKED_NEEDS_PART_DATA",
+                                "BLOCKED_NEEDS_REVERSE_ENGINEERING",
+                                "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+                                "BLOCKED_NEEDS_PROCUREMENT_EVIDENCE",
+                                "BLOCKED_UNSAFE",
+                                "NO_FEASIBLE_ARCHITECTURE",
+                                "BUDGET_EXHAUSTED"
+                              ]
+                            },
+                            "type": {
+                              "const": "terminal_proposed"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "state",
+                            "reason"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "expected_event_seq": {
+                      "description": "Use last_event_seq from a fresh mission context; reload after HTTP 409.",
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "event",
+                    "author"
+                  ],
+                  "title": "Request",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Propose one event, never an evaluation or authority promotion. Templates are not ready designs. Use current last_event_seq; human acceptance is required for execution and findings. A physical-evidence request pauses for a person; do not terminalize a mission you intend to resume.",
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "additionalProperties": true,
+                    "title": "Response Propose Project Mission Event V1 Projects  Project Id  Missions  Mission Id  Events Post",
+                    "type": "object"
+                  }
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "summary": "Propose a candidate, repair, finding, evidence need or terminal state",
+          "tags": [
+            "fabrication-missions"
+          ]
+        },
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "path": "/v1/projects/{project_id}/missions/{mission_id}/events",
+        "referenced_schemas": {
+          "HTTPValidationError": {
+            "properties": {
+              "detail": {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationError"
+                },
+                "title": "Detail",
+                "type": "array"
+              }
+            },
+            "title": "HTTPValidationError",
+            "type": "object"
+          },
+          "ValidationError": {
+            "properties": {
+              "ctx": {
+                "title": "Context",
+                "type": "object"
+              },
+              "input": {
+                "title": "Input"
+              },
+              "loc": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "title": "Location",
+                "type": "array"
+              },
+              "msg": {
+                "title": "Message",
+                "type": "string"
+              },
+              "type": {
+                "title": "Error Type",
+                "type": "string"
+              }
+            },
+            "required": [
+              "loc",
+              "msg",
+              "type"
+            ],
+            "title": "ValidationError",
+            "type": "object"
+          }
+        }
+      },
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "arguments": {
+        "operation_id": "read_intact_reuse_spec_v1_projects__project_id__missions__mission_id__intact_reuse_spec_get",
+        "path_params": {
+          "mission_id": "mission-249cc994393645cb",
+          "project_id": "mouse-reuse"
+        }
+      },
+      "response": {
+        "body": {
+          "donor_ids": [
+            "donor:usb-mouse:controller"
+          ],
+          "example": {
+            "design_class": "intact_input_reuse",
+            "donors_used": [
+              "donor:usb-mouse:controller"
+            ],
+            "interface": {
+              "action": "activate",
+              "button": "left",
+              "device_alias": "donor_mouse"
+            },
+            "mechanical": {
+              "approach": "external_actuator",
+              "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+              "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+              "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+            },
+            "source_ids": [
+              "upload-b98f9a76a04dc4a97add"
+            ]
+          },
+          "instructions": "Replace example with your grounded design; required donor/source lists may be empty until intake/admission is prepared. Propose via mission events, then run intact_reuse. Its response's bundle_download_path returns the software review ZIP before physical readiness, never a READY build package. Read the hashed run for checks and source lineage.",
+          "operation": "intact_reuse",
+          "registered_source_count": 1,
+          "registered_source_ids": [
+            "upload-b98f9a76a04dc4a97add"
+          ],
+          "schema": {
+            "$defs": {
+              "InputBinding": {
+                "additionalProperties": false,
+                "properties": {
+                  "action": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                    "title": "Action",
+                    "type": "string"
+                  },
+                  "button": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                    "title": "Button",
+                    "type": "string"
+                  },
+                  "device_alias": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                    "title": "Device Alias",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "device_alias",
+                  "button",
+                  "action"
+                ],
+                "title": "InputBinding",
+                "type": "object"
+              },
+              "MechanicalProposal": {
+                "additionalProperties": false,
+                "properties": {
+                  "approach": {
+                    "enum": [
+                      "external_actuator",
+                      "remote_contact"
+                    ],
+                    "title": "Approach",
+                    "type": "string"
+                  },
+                  "independent_return": {
+                    "maxLength": 1000,
+                    "minLength": 1,
+                    "title": "Independent Return",
+                    "type": "string"
+                  },
+                  "load_path": {
+                    "maxLength": 1000,
+                    "minLength": 1,
+                    "title": "Load Path",
+                    "type": "string"
+                  },
+                  "travel_stop": {
+                    "maxLength": 1000,
+                    "minLength": 1,
+                    "title": "Travel Stop",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "approach",
+                  "load_path",
+                  "independent_return",
+                  "travel_stop"
+                ],
+                "title": "MechanicalProposal",
+                "type": "object"
+              }
+            },
+            "additionalProperties": false,
+            "properties": {
+              "design_class": {
+                "const": "intact_input_reuse",
+                "title": "Design Class",
+                "type": "string"
+              },
+              "donors_used": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 1,
+                "minItems": 1,
+                "title": "Donors Used",
+                "type": "array"
+              },
+              "interface": {
+                "$ref": "#/$defs/InputBinding"
+              },
+              "mechanical": {
+                "$ref": "#/$defs/MechanicalProposal"
+              },
+              "source_ids": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "minItems": 1,
+                "title": "Source Ids",
+                "type": "array"
+              }
+            },
+            "required": [
+              "design_class",
+              "donors_used",
+              "source_ids",
+              "interface",
+              "mechanical"
+            ],
+            "title": "IntactReuseSpec",
+            "type": "object"
+          },
+          "scope": "Normalized host-button events only. Bindings/mechanics are proposals, not observed USB reports or measured geometry."
+        },
+        "byte_length": 2777,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "2777",
+          "content-type": "application/json"
+        },
+        "method": "GET",
+        "ok": true,
+        "operation_id": "read_intact_reuse_spec_v1_projects__project_id__missions__mission_id__intact_reuse_spec_get",
+        "path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/intact-reuse-spec",
+        "sha256": "0f897d155054b3e54869e06d8a52556feafc5e15e841ec9817697fcabc924d63",
+        "status_code": 200
+      },
+      "tool": "hs_backend_call"
+    },
+    {
+      "arguments": {
+        "json_body": {
+          "author": {
+            "id": "scripted-mcp-control",
+            "kind": "agent"
+          },
+          "event": {
+            "candidate": {
+              "id": "intact_mouse",
+              "kind": "reclaim_heavy",
+              "label": "Intact mouse reuse",
+              "rationale": "Software control uses the discoverable proposal template; no model inference or measurements.",
+              "spec": {
+                "design_class": "intact_input_reuse",
+                "donors_used": [
+                  "donor:usb-mouse:controller"
+                ],
+                "interface": {
+                  "action": "activate",
+                  "button": "left",
+                  "device_alias": "donor_mouse"
+                },
+                "mechanical": {
+                  "approach": "external_actuator",
+                  "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                  "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                  "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                },
+                "source_ids": [
+                  "upload-b98f9a76a04dc4a97add"
+                ]
+              }
+            },
+            "type": "candidate_proposed"
+          }
+        },
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "path_params": {
+          "mission_id": "mission-249cc994393645cb",
+          "project_id": "mouse-reuse"
+        }
+      },
+      "response": {
+        "body": {
+          "mission": {
+            "accepted": {
+              "at": "2026-10-19T05:53:08.808188+00:00",
+              "budgets": {
+                "max_candidates": 3,
+                "max_operator_jobs": 20,
+                "max_repairs_per_candidate": 3,
+                "operator_jobs_used": 0,
+                "repairs_used": {}
+              },
+              "by": {
+                "id": "software-control-host",
+                "kind": "human"
+              }
+            },
+            "budgets": {
+              "max_candidates": 3,
+              "max_operator_jobs": 20,
+              "max_repairs_per_candidate": 3,
+              "operator_jobs_used": 0,
+              "repairs_used": {}
+            },
+            "candidates": [
+              {
+                "covers_inventory": false,
+                "evaluation_base_seq": 5,
+                "evaluations": [],
+                "id": "intact_mouse",
+                "kind": "reclaim_heavy",
+                "label": "Intact mouse reuse",
+                "not_in_inventory": [],
+                "rationale": "Software control uses the discoverable proposal template; no model inference or measurements.",
+                "repairs": 0,
+                "spec": {
+                  "design_class": "intact_input_reuse",
+                  "donors_used": [
+                    "donor:usb-mouse:controller"
+                  ],
+                  "interface": {
+                    "action": "activate",
+                    "button": "left",
+                    "device_alias": "donor_mouse"
+                  },
+                  "mechanical": {
+                    "approach": "external_actuator",
+                    "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                    "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                    "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                  },
+                  "source_ids": [
+                    "upload-b98f9a76a04dc4a97add"
+                  ]
+                },
+                "uncovered_inventory": [
+                  "Unobserved ordinary wired USB mouse"
+                ],
+                "violated_requirements": []
+              }
+            ],
+            "created_at": "2026-10-19T05:53:08.777704+00:00",
+            "donors": [
+              {
+                "can_generate_firmware": false,
+                "capabilities": [],
+                "contract_state": "unknown",
+                "donor_id": "donor:usb-mouse:controller",
+                "findings": [],
+                "label": "Unobserved mouse",
+                "missing_facts": [
+                  "contract"
+                ],
+                "optional": false,
+                "person_measurements": [],
+                "signals": []
+              }
+            ],
+            "events": [
+              {
+                "author": {
+                  "id": "software-control-preparer",
+                  "kind": "agent"
+                },
+                "created_at": "2026-10-19T05:53:08.777715+00:00",
+                "seq": 1,
+                "type": "opened"
+              },
+              {
+                "author": {
+                  "id": "hardware-splicer",
+                  "kind": "system"
+                },
+                "created_at": "2026-10-19T05:53:08.795705+00:00",
+                "draft": {
+                  "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+                  "ok": false,
+                  "plan_errors": 0,
+                  "plan_warnings": 0
+                },
+                "reading": {
+                  "controller": null,
+                  "fragments": [
+                    {
+                      "matches": [],
+                      "text": "Unobserved ordinary wired USB mouse"
+                    }
+                  ],
+                  "left_out": [
+                    "Unobserved ordinary wired USB mouse"
+                  ],
+                  "parts": []
+                },
+                "result_sha256": "85a1c77eeaea526acecb59c4f085236c087a157b8081b6b94c7ed4501188c68b",
+                "seq": 2,
+                "type": "inventory_read"
+              },
+              {
+                "author": {
+                  "id": "hardware-splicer",
+                  "kind": "system"
+                },
+                "created_at": "2026-10-19T05:53:08.802063+00:00",
+                "donors": [
+                  {
+                    "can_generate_firmware": false,
+                    "capabilities": [],
+                    "contract_state": "unknown",
+                    "donor_id": "donor:usb-mouse:controller",
+                    "label": "Unobserved mouse",
+                    "missing_facts": [
+                      "contract"
+                    ],
+                    "optional": false,
+                    "signals": []
+                  }
+                ],
+                "result_sha256": "8d2ee0e3266ece566681a309090f5e005e0eda5ddcced2044cf2f6cb5eb38454",
+                "seq": 3,
+                "type": "donor_read"
+              },
+              {
+                "author": {
+                  "id": "software-control-host",
+                  "kind": "human"
+                },
+                "budgets": {
+                  "max_candidates": 3,
+                  "max_operator_jobs": 20,
+                  "max_repairs_per_candidate": 3,
+                  "operator_jobs_used": 0,
+                  "repairs_used": {}
+                },
+                "created_at": "2026-10-19T05:53:08.808188+00:00",
+                "seq": 4,
+                "type": "accepted"
+              },
+              {
+                "author": {
+                  "id": "scripted-mcp-control",
+                  "kind": "agent"
+                },
+                "candidate": {
+                  "id": "intact_mouse",
+                  "kind": "reclaim_heavy",
+                  "label": "Intact mouse reuse",
+                  "rationale": "Software control uses the discoverable proposal template; no model inference or measurements.",
+                  "spec": {
+                    "design_class": "intact_input_reuse",
+                    "donors_used": [
+                      "donor:usb-mouse:controller"
+                    ],
+                    "interface": {
+                      "action": "activate",
+                      "button": "left",
+                      "device_alias": "donor_mouse"
+                    },
+                    "mechanical": {
+                      "approach": "external_actuator",
+                      "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                      "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                      "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                    },
+                    "source_ids": [
+                      "upload-b98f9a76a04dc4a97add"
+                    ]
+                  }
+                },
+                "created_at": "2026-10-19T05:53:11.795722+00:00",
+                "seq": 5,
+                "type": "candidate_proposed"
+              }
+            ],
+            "firmware_authorized": false,
+            "intake": {
+              "constraints": [],
+              "donors": [
+                {
+                  "donor_id": "donor:usb-mouse:controller",
+                  "label": "Unobserved mouse",
+                  "optional": false
+                }
+              ],
+              "goal": "Develop an intact wired-mouse foot-control software review bundle, not a physical build",
+              "inventory": [
+                "Unobserved ordinary wired USB mouse"
+              ]
+            },
+            "inventory": {
+              "draft": {
+                "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+                "ok": false,
+                "plan_errors": 0,
+                "plan_warnings": 0
+              },
+              "reading": {
+                "controller": null,
+                "fragments": [
+                  {
+                    "matches": [],
+                    "text": "Unobserved ordinary wired USB mouse"
+                  }
+                ],
+                "left_out": [
+                  "Unobserved ordinary wired USB mouse"
+                ],
+                "parts": []
+              },
+              "result_sha256": "85a1c77eeaea526acecb59c4f085236c087a157b8081b6b94c7ed4501188c68b"
+            },
+            "last_event_seq": 5,
+            "mission_id": "mission-249cc994393645cb",
+            "needs": [],
+            "phase": "ARCHITECTING",
+            "physical_correctness": "UNPROVEN",
+            "power_on_authorized": false,
+            "project_id": "mouse-reuse",
+            "revision": 2,
+            "schema_version": "hardware_splicer.fabrication_mission.v1",
+            "staged": null,
+            "terminal": null
+          },
+          "ok": true
+        },
+        "byte_length": 4829,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "4829",
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "ok": true,
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/events",
+        "sha256": "61ad8b75072d081fbd79c6edb4ccb8c5f04c8d5a60817b30de2b109ef3a269ca",
+        "status_code": 201
+      },
+      "tool": "hs_backend_call"
+    },
+    {
+      "arguments": {
+        "operation_id": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post"
+      },
+      "response": {
+        "method": "POST",
+        "operation": {
+          "operationId": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "project_id",
+              "required": true,
+              "schema": {
+                "title": "Project Id",
+                "type": "string"
+              }
+            },
+            {
+              "in": "path",
+              "name": "mission_id",
+              "required": true,
+              "schema": {
+                "title": "Mission Id",
+                "type": "string"
+              }
+            },
+            {
+              "in": "path",
+              "name": "candidate_id",
+              "required": true,
+              "schema": {
+                "title": "Candidate Id",
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "device_application": {
+                    "value": {
+                      "operation": "device_application"
+                    }
+                  },
+                  "device_application_run": {
+                    "value": {
+                      "operation": "device_application_run"
+                    }
+                  },
+                  "device_case": {
+                    "value": {
+                      "operation": "device_case"
+                    }
+                  },
+                  "device_draft": {
+                    "value": {
+                      "operation": "device_draft"
+                    }
+                  },
+                  "device_engineering": {
+                    "value": {
+                      "operation": "device_engineering"
+                    }
+                  },
+                  "device_plan": {
+                    "value": {
+                      "operation": "device_plan"
+                    }
+                  },
+                  "device_reclaim_match": {
+                    "value": {
+                      "operation": "device_reclaim_match"
+                    }
+                  },
+                  "intact_reuse": {
+                    "value": {
+                      "operation": "intact_reuse"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "operation": {
+                      "enum": [
+                        "device_application",
+                        "device_application_run",
+                        "device_case",
+                        "device_draft",
+                        "device_engineering",
+                        "device_plan",
+                        "device_reclaim_match",
+                        "intact_reuse"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "operation"
+                  ],
+                  "title": "Request",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Run one software-only check on an accepted mission's stored candidate, spending one operator job. For intact host-input-device reuse, first read the mission's intact-reuse-spec, then run intact_reuse to produce/test a software review bundle even while physical evidence is missing; read its run and download runs/{name}/bundle. This does not count as a device_plan/device_engineering pass or READY. For catalog readiness, run device_plan first and device_engineering after a clean plan. Do not claim a prior check is current after repair or new evidence. Read the returned hashed artifact for details.",
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "additionalProperties": true,
+                    "title": "Response Run Project Mission Operation V1 Projects  Project Id  Missions  Mission Id  Candidates  Candidate Id  Run Post",
+                    "type": "object"
+                  }
+                }
+              },
+              "description": "Successful Response"
+            },
+            "422": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              },
+              "description": "Validation Error"
+            }
+          },
+          "summary": "Run a bounded software check on a stored candidate",
+          "tags": [
+            "fabrication-missions"
+          ]
+        },
+        "operation_id": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+        "path": "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run",
+        "referenced_schemas": {
+          "HTTPValidationError": {
+            "properties": {
+              "detail": {
+                "items": {
+                  "$ref": "#/components/schemas/ValidationError"
+                },
+                "title": "Detail",
+                "type": "array"
+              }
+            },
+            "title": "HTTPValidationError",
+            "type": "object"
+          },
+          "ValidationError": {
+            "properties": {
+              "ctx": {
+                "title": "Context",
+                "type": "object"
+              },
+              "input": {
+                "title": "Input"
+              },
+              "loc": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "title": "Location",
+                "type": "array"
+              },
+              "msg": {
+                "title": "Message",
+                "type": "string"
+              },
+              "type": {
+                "title": "Error Type",
+                "type": "string"
+              }
+            },
+            "required": [
+              "loc",
+              "msg",
+              "type"
+            ],
+            "title": "ValidationError",
+            "type": "object"
+          }
+        }
+      },
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "arguments": {
+        "json_body": {
+          "operation": "intact_reuse"
+        },
+        "operation_id": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+        "path_params": {
+          "candidate_id": "intact_mouse",
+          "mission_id": "mission-249cc994393645cb",
+          "project_id": "mouse-reuse"
+        }
+      },
+      "response": {
+        "body": {
+          "bundle_download_path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/runs/intact_reuse-1062d15a5f6b26fb.json/bundle",
+          "evaluation": {
+            "artifact": "runs/intact_reuse-1062d15a5f6b26fb.json",
+            "operation": "intact_reuse",
+            "result": {
+              "errors": 0,
+              "result_sha256": "1062d15a5f6b26fb3a96eb630b3aece4f8eb057c2564f96fc6c5c4fd320da4a3",
+              "summary": "intact_reuse: 7 synthetic adapter replays passed; software review bundle only, physical questions unresolved",
+              "warnings": 4
+            },
+            "seq": 6
+          },
+          "mission": {
+            "accepted": {
+              "at": "2026-10-19T05:53:08.808188+00:00",
+              "budgets": {
+                "max_candidates": 3,
+                "max_operator_jobs": 20,
+                "max_repairs_per_candidate": 3,
+                "operator_jobs_used": 0,
+                "repairs_used": {}
+              },
+              "by": {
+                "id": "software-control-host",
+                "kind": "human"
+              }
+            },
+            "budgets": {
+              "max_candidates": 3,
+              "max_operator_jobs": 20,
+              "max_repairs_per_candidate": 3,
+              "operator_jobs_used": 1,
+              "repairs_used": {}
+            },
+            "candidates": [
+              {
+                "covers_inventory": false,
+                "evaluation_base_seq": 5,
+                "evaluations": [
+                  {
+                    "artifact": "runs/intact_reuse-1062d15a5f6b26fb.json",
+                    "operation": "intact_reuse",
+                    "result": {
+                      "errors": 0,
+                      "result_sha256": "1062d15a5f6b26fb3a96eb630b3aece4f8eb057c2564f96fc6c5c4fd320da4a3",
+                      "summary": "intact_reuse: 7 synthetic adapter replays passed; software review bundle only, physical questions unresolved",
+                      "warnings": 4
+                    },
+                    "seq": 6
+                  }
+                ],
+                "id": "intact_mouse",
+                "kind": "reclaim_heavy",
+                "label": "Intact mouse reuse",
+                "not_in_inventory": [],
+                "rationale": "Software control uses the discoverable proposal template; no model inference or measurements.",
+                "repairs": 0,
+                "spec": {
+                  "design_class": "intact_input_reuse",
+                  "donors_used": [
+                    "donor:usb-mouse:controller"
+                  ],
+                  "interface": {
+                    "action": "activate",
+                    "button": "left",
+                    "device_alias": "donor_mouse"
+                  },
+                  "mechanical": {
+                    "approach": "external_actuator",
+                    "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                    "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                    "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                  },
+                  "source_ids": [
+                    "upload-b98f9a76a04dc4a97add"
+                  ]
+                },
+                "uncovered_inventory": [
+                  "Unobserved ordinary wired USB mouse"
+                ],
+                "violated_requirements": []
+              }
+            ],
+            "created_at": "2026-10-19T05:53:08.777704+00:00",
+            "donors": [
+              {
+                "can_generate_firmware": false,
+                "capabilities": [],
+                "contract_state": "unknown",
+                "donor_id": "donor:usb-mouse:controller",
+                "findings": [],
+                "label": "Unobserved mouse",
+                "missing_facts": [
+                  "contract"
+                ],
+                "optional": false,
+                "person_measurements": [],
+                "signals": []
+              }
+            ],
+            "events": [
+              {
+                "author": {
+                  "id": "software-control-preparer",
+                  "kind": "agent"
+                },
+                "created_at": "2026-10-19T05:53:08.777715+00:00",
+                "seq": 1,
+                "type": "opened"
+              },
+              {
+                "author": {
+                  "id": "hardware-splicer",
+                  "kind": "system"
+                },
+                "created_at": "2026-10-19T05:53:08.795705+00:00",
+                "draft": {
+                  "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+                  "ok": false,
+                  "plan_errors": 0,
+                  "plan_warnings": 0
+                },
+                "reading": {
+                  "controller": null,
+                  "fragments": [
+                    {
+                      "matches": [],
+                      "text": "Unobserved ordinary wired USB mouse"
+                    }
+                  ],
+                  "left_out": [
+                    "Unobserved ordinary wired USB mouse"
+                  ],
+                  "parts": []
+                },
+                "result_sha256": "85a1c77eeaea526acecb59c4f085236c087a157b8081b6b94c7ed4501188c68b",
+                "seq": 2,
+                "type": "inventory_read"
+              },
+              {
+                "author": {
+                  "id": "hardware-splicer",
+                  "kind": "system"
+                },
+                "created_at": "2026-10-19T05:53:08.802063+00:00",
+                "donors": [
+                  {
+                    "can_generate_firmware": false,
+                    "capabilities": [],
+                    "contract_state": "unknown",
+                    "donor_id": "donor:usb-mouse:controller",
+                    "label": "Unobserved mouse",
+                    "missing_facts": [
+                      "contract"
+                    ],
+                    "optional": false,
+                    "signals": []
+                  }
+                ],
+                "result_sha256": "8d2ee0e3266ece566681a309090f5e005e0eda5ddcced2044cf2f6cb5eb38454",
+                "seq": 3,
+                "type": "donor_read"
+              },
+              {
+                "author": {
+                  "id": "software-control-host",
+                  "kind": "human"
+                },
+                "budgets": {
+                  "max_candidates": 3,
+                  "max_operator_jobs": 20,
+                  "max_repairs_per_candidate": 3,
+                  "operator_jobs_used": 0,
+                  "repairs_used": {}
+                },
+                "created_at": "2026-10-19T05:53:08.808188+00:00",
+                "seq": 4,
+                "type": "accepted"
+              },
+              {
+                "author": {
+                  "id": "scripted-mcp-control",
+                  "kind": "agent"
+                },
+                "candidate": {
+                  "id": "intact_mouse",
+                  "kind": "reclaim_heavy",
+                  "label": "Intact mouse reuse",
+                  "rationale": "Software control uses the discoverable proposal template; no model inference or measurements.",
+                  "spec": {
+                    "design_class": "intact_input_reuse",
+                    "donors_used": [
+                      "donor:usb-mouse:controller"
+                    ],
+                    "interface": {
+                      "action": "activate",
+                      "button": "left",
+                      "device_alias": "donor_mouse"
+                    },
+                    "mechanical": {
+                      "approach": "external_actuator",
+                      "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                      "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                      "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                    },
+                    "source_ids": [
+                      "upload-b98f9a76a04dc4a97add"
+                    ]
+                  }
+                },
+                "created_at": "2026-10-19T05:53:11.795722+00:00",
+                "seq": 5,
+                "type": "candidate_proposed"
+              },
+              {
+                "artifact": "runs/intact_reuse-1062d15a5f6b26fb.json",
+                "author": {
+                  "id": "hardware-splicer",
+                  "kind": "system"
+                },
+                "candidate_id": "intact_mouse",
+                "created_at": "2026-10-19T05:53:11.879367+00:00",
+                "operation": "intact_reuse",
+                "result": {
+                  "errors": 0,
+                  "result_sha256": "1062d15a5f6b26fb3a96eb630b3aece4f8eb057c2564f96fc6c5c4fd320da4a3",
+                  "summary": "intact_reuse: 7 synthetic adapter replays passed; software review bundle only, physical questions unresolved",
+                  "warnings": 4
+                },
+                "seq": 6,
+                "type": "evaluation_recorded"
+              }
+            ],
+            "firmware_authorized": false,
+            "intake": {
+              "constraints": [],
+              "donors": [
+                {
+                  "donor_id": "donor:usb-mouse:controller",
+                  "label": "Unobserved mouse",
+                  "optional": false
+                }
+              ],
+              "goal": "Develop an intact wired-mouse foot-control software review bundle, not a physical build",
+              "inventory": [
+                "Unobserved ordinary wired USB mouse"
+              ]
+            },
+            "inventory": {
+              "draft": {
+                "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+                "ok": false,
+                "plan_errors": 0,
+                "plan_warnings": 0
+              },
+              "reading": {
+                "controller": null,
+                "fragments": [
+                  {
+                    "matches": [],
+                    "text": "Unobserved ordinary wired USB mouse"
+                  }
+                ],
+                "left_out": [
+                  "Unobserved ordinary wired USB mouse"
+                ],
+                "parts": []
+              },
+              "result_sha256": "85a1c77eeaea526acecb59c4f085236c087a157b8081b6b94c7ed4501188c68b"
+            },
+            "last_event_seq": 6,
+            "mission_id": "mission-249cc994393645cb",
+            "needs": [],
+            "phase": "EVALUATING",
+            "physical_correctness": "UNPROVEN",
+            "power_on_authorized": false,
+            "project_id": "mouse-reuse",
+            "revision": 2,
+            "schema_version": "hardware_splicer.fabrication_mission.v1",
+            "staged": null,
+            "terminal": null
+          },
+          "ok": true
+        },
+        "byte_length": 6115,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "6115",
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "ok": true,
+        "operation_id": "run_project_mission_operation_v1_projects__project_id__missions__mission_id__candidates__candidate_id__run_post",
+        "path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/candidates/intact_mouse/run",
+        "sha256": "aa199b5d42cfb7352fd1ac6a8b292da713cd8bcb08b1b9432305b57e4b597641",
+        "status_code": 200
+      },
+      "tool": "hs_backend_call"
+    },
+    {
+      "arguments": {
+        "operation_id": "read_project_mission_run_v1_projects__project_id__missions__mission_id__runs__name__get",
+        "path_params": {
+          "mission_id": "mission-249cc994393645cb",
+          "name": "intact_reuse-1062d15a5f6b26fb.json",
+          "project_id": "mouse-reuse"
+        }
+      },
+      "response": {
+        "body": {
+          "ok": true,
+          "run": {
+            "bundle_download_path_template": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/runs/{name}/bundle",
+            "contract": {
+              "candidate_id": "intact_mouse",
+              "design": {
+                "design_class": "intact_input_reuse",
+                "donors_used": [
+                  "donor:usb-mouse:controller"
+                ],
+                "interface": {
+                  "action": "activate",
+                  "button": "left",
+                  "device_alias": "donor_mouse"
+                },
+                "mechanical": {
+                  "approach": "external_actuator",
+                  "independent_return": "Proposed return mechanism; force and travel remain unmeasured.",
+                  "load_path": "Proposed separate pedal frame carries foot load, not the mouse switch.",
+                  "travel_stop": "Proposed adjustable hard stop; dimensions require actual specimen evidence."
+                },
+                "source_ids": [
+                  "upload-b98f9a76a04dc4a97add"
+                ]
+              },
+              "fabrication_ready": false,
+              "interface": {
+                "action": "activate",
+                "button": "left",
+                "device_alias": "donor_mouse"
+              },
+              "mission_anchor_revision": 2,
+              "mission_id": "mission-249cc994393645cb",
+              "physical_authority_granted": false,
+              "physical_correctness": "UNPROVEN",
+              "power_on_ready": false,
+              "project_id": "mouse-reuse",
+              "schema_version": "hardware_splicer.intact_input_reuse.v1",
+              "source_read_revision": 2,
+              "sources": [
+                {
+                  "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+                  "interpretation": "Registered source reference, not independently reviewed physical evidence.",
+                  "source_id": "upload-b98f9a76a04dc4a97add"
+                }
+              ],
+              "spec_sha256": "34b9d1152f4ff9fe99f06e8f02c8168b80b3207d9acd9dcaec25b0450caaa6fe",
+              "unresolved_physical_questions": [
+                "Actual specimen identity, condition and continued electrical safety remain unestablished.",
+                "Actual USB descriptors, host-device identity, normalized event mapping and target application binding require evidence.",
+                "Mechanical fit, button force/travel and allowable limits are unmeasured; no fabrication dimensions are supplied.",
+                "Pedal loads, return, stability, cable strain and service life require separate physical assessment."
+              ]
+            },
+            "files": [
+              {
+                "bytes": 1131,
+                "name": "README.md",
+                "sha256": "8a4ba33ec98c2877c30ffe8c1170ba207479fe4f93f8b53da28da91f8def2d11"
+              },
+              {
+                "bytes": 2627,
+                "name": "adapter.py",
+                "sha256": "e30fb3f2df289e95f2ec4fd6969ae9279576422207ffaa5fe8cfd6e4d3389e27"
+              },
+              {
+                "bytes": 1982,
+                "name": "contract.json",
+                "sha256": "67086790b726bdd1468f8caac2be6e687ad3bf58ec9c80d73c9def3056d846fd"
+              },
+              {
+                "bytes": 301,
+                "name": "example-events.jsonl",
+                "sha256": "9eacdcfe8357f4508a624095a8157263eb5fc27af7cbd95461bb71310ec1a894"
+              },
+              {
+                "bytes": 4162,
+                "name": "offline-checks.json",
+                "sha256": "36dde04b51c8248b9f536dd8ed65b1ccec6a97c51bb5cebcac83aa00f7b12cb0"
+              },
+              {
+                "bytes": 2325,
+                "name": "test_adapter.py",
+                "sha256": "b48eb87e4bac4aa3f8e4f5db87d7a104e80e648d5965e555fb1886b05cff2aa9"
+              }
+            ],
+            "offline_checks": {
+              "kind": "synthetic_normalized_event_replay",
+              "scenarios": [
+                {
+                  "actual_action_steps": [],
+                  "actual_actions": 0,
+                  "expected_action_steps": [],
+                  "expected_actions": 0,
+                  "name": "no_connection",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    4
+                  ],
+                  "actual_actions": 1,
+                  "expected_action_steps": [
+                    4
+                  ],
+                  "expected_actions": 1,
+                  "name": "held_at_connect",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    2
+                  ],
+                  "actual_actions": 1,
+                  "expected_action_steps": [
+                    2
+                  ],
+                  "expected_actions": 1,
+                  "name": "hold_no_repeat",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    2,
+                    5,
+                    8,
+                    11,
+                    14,
+                    17,
+                    20,
+                    23,
+                    26,
+                    29,
+                    32,
+                    35,
+                    38,
+                    41,
+                    44,
+                    47,
+                    50,
+                    53,
+                    56,
+                    59,
+                    62,
+                    65,
+                    68,
+                    71,
+                    74,
+                    77,
+                    80,
+                    83,
+                    86,
+                    89,
+                    92,
+                    95,
+                    98,
+                    101,
+                    104,
+                    107,
+                    110,
+                    113,
+                    116,
+                    119,
+                    122,
+                    125,
+                    128,
+                    131,
+                    134,
+                    137,
+                    140,
+                    143,
+                    146,
+                    149,
+                    152,
+                    155,
+                    158,
+                    161,
+                    164,
+                    167,
+                    170,
+                    173,
+                    176,
+                    179,
+                    182,
+                    185,
+                    188,
+                    191,
+                    194,
+                    197,
+                    200,
+                    203,
+                    206,
+                    209,
+                    212,
+                    215,
+                    218,
+                    221,
+                    224,
+                    227,
+                    230,
+                    233,
+                    236,
+                    239,
+                    242,
+                    245,
+                    248,
+                    251,
+                    254,
+                    257,
+                    260,
+                    263,
+                    266,
+                    269,
+                    272,
+                    275,
+                    278,
+                    281,
+                    284,
+                    287,
+                    290,
+                    293,
+                    296,
+                    299
+                  ],
+                  "actual_actions": 100,
+                  "expected_action_steps": [
+                    2,
+                    5,
+                    8,
+                    11,
+                    14,
+                    17,
+                    20,
+                    23,
+                    26,
+                    29,
+                    32,
+                    35,
+                    38,
+                    41,
+                    44,
+                    47,
+                    50,
+                    53,
+                    56,
+                    59,
+                    62,
+                    65,
+                    68,
+                    71,
+                    74,
+                    77,
+                    80,
+                    83,
+                    86,
+                    89,
+                    92,
+                    95,
+                    98,
+                    101,
+                    104,
+                    107,
+                    110,
+                    113,
+                    116,
+                    119,
+                    122,
+                    125,
+                    128,
+                    131,
+                    134,
+                    137,
+                    140,
+                    143,
+                    146,
+                    149,
+                    152,
+                    155,
+                    158,
+                    161,
+                    164,
+                    167,
+                    170,
+                    173,
+                    176,
+                    179,
+                    182,
+                    185,
+                    188,
+                    191,
+                    194,
+                    197,
+                    200,
+                    203,
+                    206,
+                    209,
+                    212,
+                    215,
+                    218,
+                    221,
+                    224,
+                    227,
+                    230,
+                    233,
+                    236,
+                    239,
+                    242,
+                    245,
+                    248,
+                    251,
+                    254,
+                    257,
+                    260,
+                    263,
+                    266,
+                    269,
+                    272,
+                    275,
+                    278,
+                    281,
+                    284,
+                    287,
+                    290,
+                    293,
+                    296,
+                    299
+                  ],
+                  "expected_actions": 100,
+                  "name": "hundred_press_release_cycles",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    4
+                  ],
+                  "actual_actions": 1,
+                  "expected_action_steps": [
+                    4
+                  ],
+                  "expected_actions": 1,
+                  "name": "other_device_isolated",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    4
+                  ],
+                  "actual_actions": 1,
+                  "expected_action_steps": [
+                    4
+                  ],
+                  "expected_actions": 1,
+                  "name": "other_button_ignored",
+                  "pass": true
+                },
+                {
+                  "actual_action_steps": [
+                    2,
+                    9
+                  ],
+                  "actual_actions": 2,
+                  "expected_action_steps": [
+                    2,
+                    9
+                  ],
+                  "expected_actions": 2,
+                  "name": "reconnect_requires_release",
+                  "pass": true
+                }
+              ]
+            },
+            "package_bytes": 4830,
+            "package_sha256": "0751000fb19909800564e3a84c8bd9f0887abeda4e40392f43ba4b772ea7cc29",
+            "physical_authority_granted": false,
+            "physical_correctness": "UNPROVEN",
+            "schema_version": "hardware_splicer.intact_input_reuse_run.v1",
+            "scope": "SOFTWARE_REVIEW_ONLY",
+            "software_checks_passed": true
+          }
+        },
+        "byte_length": 4626,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "4626",
+          "content-type": "application/json"
+        },
+        "method": "GET",
+        "ok": true,
+        "operation_id": "read_project_mission_run_v1_projects__project_id__missions__mission_id__runs__name__get",
+        "path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/runs/intact_reuse-1062d15a5f6b26fb.json",
+        "sha256": "d7e29a4f502f6b18247532e9eff02c94c3c56cda3fe5893a57c16a146de8dee2",
+        "status_code": 200
+      },
+      "tool": "hs_backend_call"
+    },
+    {
+      "arguments": {
+        "operation_id": "download_intact_reuse_bundle_v1_projects__project_id__missions__mission_id__runs__name__bundle_get",
+        "path_params": {
+          "mission_id": "mission-249cc994393645cb",
+          "name": "intact_reuse-1062d15a5f6b26fb.json",
+          "project_id": "mouse-reuse"
+        },
+        "response_mode": "base64"
+      },
+      "response": {
+        "body_base64": "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",
+        "byte_length": 4830,
+        "content_type": "application/zip",
+        "headers": {
+          "content-disposition": "attachment; filename=\"intact-reuse-0751000fb1990980.zip\"",
+          "content-length": "4830",
+          "content-type": "application/zip"
+        },
+        "method": "GET",
+        "ok": true,
+        "operation_id": "download_intact_reuse_bundle_v1_projects__project_id__missions__mission_id__runs__name__bundle_get",
+        "path": "/v1/projects/mouse-reuse/missions/mission-249cc994393645cb/runs/intact_reuse-1062d15a5f6b26fb.json/bundle",
+        "sha256": "0751000fb19909800564e3a84c8bd9f0887abeda4e40392f43ba4b772ea7cc29",
+        "status_code": 200
+      },
+      "tool": "hs_backend_call"
+    }
+  ]
+}

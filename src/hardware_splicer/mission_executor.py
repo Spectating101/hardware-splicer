@@ -20,6 +20,7 @@ from .device_engineering import build_engineering_review
 from .device_plan import DevicePlanError, build_device_plan
 from .mission_store import MissionStateError, MissionStore, MissionValidationError
 from .donor_device_plan import mission_donor_modules
+from .intact_reuse import IntactReuseError, build_intact_reuse
 
 MISSION_OPERATIONS = (
     "device_plan",
@@ -27,6 +28,7 @@ MISSION_OPERATIONS = (
     "device_case",
     "device_application",
     "device_application_run",
+    "intact_reuse",
 )
 
 
@@ -145,7 +147,7 @@ def _run_locked_mission_operation(
     if operation not in MISSION_OPERATIONS:
         raise MissionValidationError(
             "operation must be one of device_plan, device_engineering, device_case, "
-            "device_application, device_application_run"
+            "device_application, device_application_run, intact_reuse"
         )
     view = missions.get_mission(project_id, mission_id)
     if view.get("accepted") is None:
@@ -161,12 +163,20 @@ def _run_locked_mission_operation(
         raise MissionValidationError(f"candidate {candidate_id!r} does not exist")
     spec = candidate["spec"]
     try:
-        donor_modules = mission_donor_modules(view, spec)
-        if donor_modules:
-            errors, warnings, summary, artifact = _run_operation(operation, spec, donor_modules=donor_modules)
+        if operation == "intact_reuse":
+            project = missions.project_store.load_latest_with_recovery(project_id)
+            artifact, package = build_intact_reuse(spec, view=view, project=project, candidate_id=candidate_id,
+                                                  project_root=missions.project_store.root)
+            missions.store_package(project_id, mission_id, package)
+            errors, warnings = 0, len(artifact["contract"]["unresolved_physical_questions"])
+            summary = "intact_reuse: 7 synthetic adapter replays passed; software review bundle only, physical questions unresolved"
         else:
-            errors, warnings, summary, artifact = _run_operation(operation, spec)
-    except DevicePlanError as exc:
+            donor_modules = mission_donor_modules(view, spec)
+            if donor_modules:
+                errors, warnings, summary, artifact = _run_operation(operation, spec, donor_modules=donor_modules)
+            else:
+                errors, warnings, summary, artifact = _run_operation(operation, spec)
+    except (DevicePlanError, IntactReuseError) as exc:
         errors, warnings, summary, artifact = _refused(str(exc))
     except DeviceRuntimeError as exc:
         errors, warnings, summary, artifact = _not_run(str(exc))

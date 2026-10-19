@@ -7,6 +7,11 @@
 
 Use this page as the **single entry** when browsing on GitHub.
 
+**Want to see what this means without reading an engineering report?**
+Try the [old mouse → foot button worked example](MOUSE_REUSE_DEMO.md).
+It shows the saved agent proposal and lets you try the actual software with
+pretend presses. No hardware, account or model allowance is needed.
+
 ---
 
 ## 1. What to read first (15 minutes)

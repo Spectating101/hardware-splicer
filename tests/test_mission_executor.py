@@ -82,7 +82,7 @@ def test_acceptance_draft_counts_match_the_canonical_executor_plan(tmp_path):
 
 
 def test_the_operations_are_the_software_only_device_checks():
-    assert set(MISSION_OPERATIONS) == {"device_plan", "device_engineering", "device_case", "device_application", "device_application_run"}
+    assert set(MISSION_OPERATIONS) == {"device_plan", "device_engineering", "device_case", "device_application", "device_application_run", "intact_reuse"}
 
 
 def test_a_clean_plan_and_its_engineering_review_are_recorded_with_their_verdicts(tmp_path):

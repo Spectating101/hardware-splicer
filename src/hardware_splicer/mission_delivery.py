@@ -14,6 +14,7 @@ import copy
 import hashlib
 import io
 import json
+import re
 import zipfile
 from functools import partial
 from typing import Any, Mapping
@@ -21,7 +22,8 @@ from typing import Any, Mapping
 from .device_application import build_device_application
 from .device_case import build_device_case
 from .device_plan import DevicePlanError
-from .mission_store import MissionStateError, MissionStore, _normalize_author
+from .mission_store import MissionError, MissionNotFound, MissionStateError, MissionStore, MissionValidationError, _normalize_author
+from .intact_reuse import REPORT_SCHEMA as INTACT_REPORT_SCHEMA
 from .project_review_store import ProjectReviewStore
 from .donor_device_plan import mission_donor_modules
 
@@ -176,6 +178,144 @@ def read_mission_package(missions: MissionStore, project_id: str, mission_id: st
     if data is None:
         raise MissionStateError("the package was not stored")
     return data
+
+
+def _retained_manifest(data: bytes, view: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Recognize a hash-bound current prototype package; never generate a comparison package."""
+    terminal = view.get("terminal") or {}
+    if terminal.get("state") != "READY_FOR_HUMAN_BUILD":
+        return None
+    candidate = next((c for c in view["candidates"] if c["id"] == terminal.get("candidate_id")), None)
+    if candidate is None:
+        return None
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if (len(infos) > 4096 or len(set(names)) != len(names)
+                    or sum(info.file_size for info in infos) > 64 * 1024 * 1024
+                    or any(name.startswith("/") or "\\" in name or ".." in name.split("/") for name in names)
+                    or any((info.external_attr >> 16) & 0o170000 == 0o120000 for info in infos)):
+                return None
+            manifest = json.loads(archive.read("MISSION_PACKAGE.json"))
+            if not isinstance(manifest, dict) or not isinstance(manifest.get("files"), dict):
+                return None
+            if (manifest.get("schema_version") != MISSION_PACKAGE_SCHEMA
+                    or manifest.get("project_id") != view["project_id"]
+                    or manifest.get("mission_id") != view["mission_id"]
+                    or manifest.get("candidate_id") != candidate["id"]
+                    or manifest.get("spec_sha256") != _sha(_canonical(candidate["spec"]))
+                    or manifest.get("terminal") != {"state": terminal["state"], "grounding": terminal.get("grounding")}
+                    or manifest.get("physical_correctness") != "UNPROVEN"
+                    or manifest.get("firmware_authorized") is not False
+                    or manifest.get("power_on_authorized") is not False
+                    or not isinstance(manifest.get("deliverables"), dict)):
+                return None
+            if set(names) != set(manifest["files"]) | {"MISSION_PACKAGE.json"}:
+                return None
+            for name, entry in manifest["files"].items():
+                content = archive.read(name)
+                if (not isinstance(entry, dict) or entry.get("sha256") != _sha(content)
+                        or entry.get("size_bytes") != len(content)):
+                    return None
+            terminal_seq = max(e["seq"] for e in view["events"] if e["type"] == "terminal_proposed")
+            events = [e for e in view["events"] if e["seq"] <= terminal_seq]
+            if (archive.read("02_design/spec.json") != _canonical(candidate["spec"])
+                    or archive.read("01_requirements/intake.json") != _canonical(view["intake"])
+                    or archive.read("06_provenance/events.jsonl") != b"".join(_canonical(e) + b"\n" for e in events)):
+                return None
+            base = candidate["evaluation_base_seq"]
+            plan = _latest(candidate, "device_plan", base)
+            review = _latest(candidate, "device_engineering", plan["seq"] if plan else base)
+            if plan is None or review is None:
+                return None
+            for name, evaluation in (("02_design/plan.json", plan), ("02_design/engineering.json", review)):
+                if _sha(archive.read(name)) != evaluation["result"]["result_sha256"]:
+                    return None
+            return manifest
+    except (ValueError, KeyError, TypeError, OSError, zipfile.BadZipFile, RuntimeError):
+        return None
+
+
+def inspect_mission_delivery(missions: MissionStore, project_id: str, mission_id: str) -> dict[str, Any]:
+    """Report retained output, not potential output. No builders, tests, or writes."""
+    view = missions.get_mission(project_id, mission_id)
+    base = f"/v1/projects/{project_id}/missions/{mission_id}"
+    files = []
+    for candidate in view["candidates"]:
+        for evaluation in candidate["evaluations"]:
+            artifact = evaluation.get("artifact")
+            if not artifact:
+                continue
+            row = {"kind": "check_result", "candidate_id": candidate["id"], "operation": evaluation["operation"],
+                   "evaluation_seq": evaluation["seq"], "current": evaluation["seq"] > candidate["evaluation_base_seq"],
+                   "sha256": evaluation["result"]["result_sha256"], "presentation": "structured_data",
+                   "status": "available", "download_path": f"{base}/{artifact}"}
+            try:
+                report = missions.read_run(project_id, mission_id, artifact)
+            except (MissionError, OSError, ValueError):
+                row.update(status="unavailable", download_path=None)
+                files.append(row)
+                continue
+            files.append(row)
+            if evaluation["operation"] != "intact_reuse" or report.get("software_checks_passed") is not True:
+                continue
+            bundle = {**row, "kind": "software_review_bundle", "scope": "SOFTWARE_REVIEW_ONLY",
+                      "presentation": "software_review_zip", "sha256": report.get("package_sha256"),
+                      "producer_attribution": "not_recorded", "download_path": f"{base}/{artifact}/bundle"}
+            contract = report.get("contract") or {}
+            try:
+                if (report.get("schema_version") != INTACT_REPORT_SCHEMA
+                        or contract.get("project_id") != project_id or contract.get("mission_id") != mission_id
+                        or contract.get("candidate_id") != candidate["id"]
+                        or missions.read_package(project_id, mission_id, report.get("package_sha256")) is None):
+                    raise MissionStateError("software bundle is not bound to this mission")
+            except (MissionError, OSError, ValueError, TypeError):
+                bundle.update(status="unavailable", download_path=None)
+            files.append(bundle)
+
+    eligible = (view.get("terminal") or {}).get("state") == "READY_FOR_HUMAN_BUILD"
+    packages = []
+    status = "not_generated" if eligible else "blocked"
+    scan_complete = True
+    try:
+        if eligible:
+            for digest, data in missions.iter_retained_packages(project_id, mission_id):
+                manifest = _retained_manifest(data, view)
+                if manifest is not None:
+                    packages.append({"sha256": digest, "size_bytes": len(data), "scope": "PROTOTYPE_REVIEW_ONLY",
+                                     "producer_attribution": "not_recorded", "deliverables": manifest["deliverables"],
+                                     "download_path": f"{base}/delivery/packages/{digest}"})
+    except (MissionError, OSError):
+        status, scan_complete = "unavailable", False
+    if packages and scan_complete:
+        status = "available"
+    return {
+        "schema_version": "hardware_splicer.mission_delivery_inspection.v1",
+        "project_id": project_id, "mission_id": mission_id, "last_event_seq": view["last_event_seq"],
+        "recorded_files": files,
+        "prototype_package": {"status": status, "retained_packages": packages, "scan_complete": scan_complete,
+                              "build_path": f"{base}/package" if eligible else None, "build_method": "POST" if eligible else None},
+        "unresolved_needs": [n for n in view["needs"] if n["need_state"] != "resolved"],
+        "safety_concerns": view["safety_concerns"], "physical_correctness": view["physical_correctness"],
+        "sale_readiness": "NOT_ASSESSED", "inspection_generated_artifacts": False,
+        "file_presence_proves_agent_delivery": False,
+    }
+
+
+def read_retained_mission_package(missions: MissionStore, project_id: str, mission_id: str, digest: str) -> bytes:
+    """Download only an already-retained current package; unlike legacy GET /package, never build it."""
+    if re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+        raise MissionValidationError("package hash must be 64 lowercase hex characters")
+    view = missions.get_mission(project_id, mission_id)
+    if (view.get("terminal") or {}).get("state") == "READY_FOR_HUMAN_BUILD":
+        try:
+            for stored_digest, data in missions.iter_retained_packages(project_id, mission_id):
+                if stored_digest == digest and _retained_manifest(data, view) is not None:
+                    return data
+        except (MissionError, OSError) as exc:
+            raise MissionStateError("retained package could not be verified") from exc
+    raise MissionNotFound("no retained current prototype package with that hash")
 
 
 def _repairs(view: Mapping[str, Any], candidate_id: str) -> list[dict[str, Any]]:

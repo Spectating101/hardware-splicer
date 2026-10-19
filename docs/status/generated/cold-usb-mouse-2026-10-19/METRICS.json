@@ -1,0 +1,226 @@
+{
+  "discovery_calls": 25,
+  "discovery_calls_before_first_successful_mutation": 13,
+  "elapsed_tool_seconds": 3.253,
+  "error_calls": 3,
+  "errors": [
+    {
+      "error": {
+        "body": {
+          "detail": {
+            "message": "registered document source is not a PDF by signature",
+            "type": "invalid_document_evidence_request"
+          }
+        },
+        "byte_length": 120,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "120",
+          "content-type": "application/json"
+        },
+        "method": "GET",
+        "ok": false,
+        "operation_id": "inspect_document_v1_projects__project_id__sources__source_id__document_get",
+        "path": "/v1/projects/cold-usb-mouse-document-study/sources/upload-b98f9a76a04dc4a97add/document",
+        "sha256": "7c6f00d4ab51aebfd9c76cebd49a1d8648d5a8f73a315d1ddc8dccd373e584d3",
+        "status_code": 422
+      },
+      "operation_id": "inspect_document_v1_projects__project_id__sources__source_id__document_get",
+      "seq": 21,
+      "status": 422,
+      "tool": "hs_backend_call"
+    },
+    {
+      "error": {
+        "body": {
+          "detail": {
+            "message": "event.candidate.spec must not contain authority field 'physical_correctness'",
+            "type": "invalid_request"
+          }
+        },
+        "byte_length": 126,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "126",
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "ok": false,
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "path": "/v1/projects/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events",
+        "sha256": "9097930d2c636a0ed457ef07c0d363d28a60e1a13533e1cb952f05f264ced633",
+        "status_code": 422
+      },
+      "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+      "seq": 23,
+      "status": 422,
+      "tool": "hs_backend_call"
+    },
+    {
+      "error": {
+        "body": {
+          "detail": {
+            "message": "event.candidate.spec must not contain authority field 'physical_correctness'",
+            "type": "invalid_request"
+          }
+        },
+        "byte_length": 126,
+        "content_type": "application/json",
+        "headers": {
+          "content-length": "126",
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "ok": false,
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "path": "/v1/projects/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events",
+        "sha256": "9097930d2c636a0ed457ef07c0d363d28a60e1a13533e1cb952f05f264ced633",
+        "status_code": 422
+      },
+      "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+      "seq": 24,
+      "status": 422,
+      "tool": "hs_backend_call"
+    }
+  ],
+  "first_successful_mutating_call_seq": 17,
+  "metric_note": "Body-carrying calls include non-persistent software checks; persistence is independently checked against exported canonical records. MCP is_error is read from raw SDK result, not the bridge's fallback ok field.",
+  "model_input_tokens": null,
+  "model_output_tokens": null,
+  "phase_1": {
+    "discovery_calls": 16,
+    "discovery_calls_before_first_successful_mutation": 13,
+    "elapsed_tool_seconds": 2.642,
+    "error_calls": 3,
+    "errors": [
+      {
+        "error": {
+          "body": {
+            "detail": {
+              "message": "registered document source is not a PDF by signature",
+              "type": "invalid_document_evidence_request"
+            }
+          },
+          "byte_length": 120,
+          "content_type": "application/json",
+          "headers": {
+            "content-length": "120",
+            "content-type": "application/json"
+          },
+          "method": "GET",
+          "ok": false,
+          "operation_id": "inspect_document_v1_projects__project_id__sources__source_id__document_get",
+          "path": "/v1/projects/cold-usb-mouse-document-study/sources/upload-b98f9a76a04dc4a97add/document",
+          "sha256": "7c6f00d4ab51aebfd9c76cebd49a1d8648d5a8f73a315d1ddc8dccd373e584d3",
+          "status_code": 422
+        },
+        "operation_id": "inspect_document_v1_projects__project_id__sources__source_id__document_get",
+        "seq": 21,
+        "status": 422,
+        "tool": "hs_backend_call"
+      },
+      {
+        "error": {
+          "body": {
+            "detail": {
+              "message": "event.candidate.spec must not contain authority field 'physical_correctness'",
+              "type": "invalid_request"
+            }
+          },
+          "byte_length": 126,
+          "content_type": "application/json",
+          "headers": {
+            "content-length": "126",
+            "content-type": "application/json"
+          },
+          "method": "POST",
+          "ok": false,
+          "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+          "path": "/v1/projects/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events",
+          "sha256": "9097930d2c636a0ed457ef07c0d363d28a60e1a13533e1cb952f05f264ced633",
+          "status_code": 422
+        },
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "seq": 23,
+        "status": 422,
+        "tool": "hs_backend_call"
+      },
+      {
+        "error": {
+          "body": {
+            "detail": {
+              "message": "event.candidate.spec must not contain authority field 'physical_correctness'",
+              "type": "invalid_request"
+            }
+          },
+          "byte_length": 126,
+          "content_type": "application/json",
+          "headers": {
+            "content-length": "126",
+            "content-type": "application/json"
+          },
+          "method": "POST",
+          "ok": false,
+          "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+          "path": "/v1/projects/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events",
+          "sha256": "9097930d2c636a0ed457ef07c0d363d28a60e1a13533e1cb952f05f264ced633",
+          "status_code": 422
+        },
+        "operation_id": "propose_project_mission_event_v1_projects__project_id__missions__mission_id__events_post",
+        "seq": 24,
+        "status": 422,
+        "tool": "hs_backend_call"
+      }
+    ],
+    "first_successful_mutating_call_seq": 17,
+    "metric_note": "Body-carrying calls include non-persistent software checks; persistence is independently checked against exported canonical records. MCP is_error is read from raw SDK result, not the bridge's fallback ok field.",
+    "model_input_tokens": null,
+    "model_output_tokens": null,
+    "response_bytes": 367959,
+    "successful_body_carrying_calls": [
+      17,
+      25,
+      26,
+      27,
+      29,
+      30
+    ],
+    "successful_calls": 29,
+    "token_metrics_note": "Orchestrator did not expose per-child model token usage; response bytes are NOT token estimates.",
+    "tool_calls": 32,
+    "wall_seconds_first_to_last_call": 177.556
+  },
+  "phase_2": {
+    "discovery_calls": 9,
+    "discovery_calls_before_first_successful_mutation": 9,
+    "elapsed_tool_seconds": 0.611,
+    "error_calls": 0,
+    "errors": [],
+    "first_successful_mutating_call_seq": 46,
+    "metric_note": "Body-carrying calls include non-persistent software checks; persistence is independently checked against exported canonical records. MCP is_error is read from raw SDK result, not the bridge's fallback ok field.",
+    "model_input_tokens": null,
+    "model_output_tokens": null,
+    "response_bytes": 238309,
+    "successful_body_carrying_calls": [
+      46
+    ],
+    "successful_calls": 16,
+    "token_metrics_note": "Orchestrator did not expose per-child model token usage; response bytes are NOT token estimates.",
+    "tool_calls": 16,
+    "wall_seconds_first_to_last_call": 105.574
+  },
+  "response_bytes": 606268,
+  "successful_body_carrying_calls": [
+    17,
+    25,
+    26,
+    27,
+    29,
+    30,
+    46
+  ],
+  "successful_calls": 45,
+  "token_metrics_note": "Orchestrator did not expose per-child model token usage; response bytes are NOT token estimates.",
+  "tool_calls": 48,
+  "wall_seconds_first_to_last_call": 346.429
+}

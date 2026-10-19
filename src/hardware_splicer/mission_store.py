@@ -29,13 +29,14 @@ except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
     fcntl = None
 
 from .device_draft import draft_from_parts_text, parse_parts_text
-from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
+from .device_plan import (_OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan,
+                          unrecognized_device_spec_fields)
 from pydantic import ValidationError
 
 from .physical_evidence_ledger import (PhysicalEvidenceEnvelope, physical_evidence_envelope_hash,
                                        validate_physical_evidence_envelope)
 from .mission_donors import (normalize_donors, normalize_used, normalize_finding, read_donors,
-                             donor_problem, donor_grounding)
+                             donor_problem, donor_grounding, candidate_donor_coverage)
 from .donor_device_plan import mission_donor_modules
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
@@ -73,6 +74,7 @@ _EVAL_OPERATIONS = frozenset(
         "device_application",
         "device_application_run",
         "device_reclaim_match",
+        "intact_reuse",
     }
 )
 _AUTHOR_KEYS = frozenset({"kind", "id"})
@@ -726,8 +728,19 @@ def _latest_operation(
     return latest
 
 
+def _spec_diagnostics(spec: Mapping[str, Any]) -> Dict[str, Any]:
+    if spec.get("design_class") == "intact_input_reuse":
+        return {"scope": "intact_reuse_check_required", "unrecognized_fields": [],
+                "effect": "not_checked_by_catalog_diagnostics; run the strict intact_reuse check"}
+    return {
+        "scope": "catalog_device_spec",
+        "unrecognized_fields": unrecognized_device_spec_fields(spec, extra_top_level_fields=("donors_used",)),
+        "effect": "retained_in_proposal_not_checked_by_catalog_planner",
+    }
+
+
 def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None,
-                      requirements: list[Mapping[str, Any]], donors=None) -> Dict[str, Any]:
+                      requirements: list[Mapping[str, Any]], donors=None, references=()) -> Dict[str, Any]:
     uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
@@ -736,10 +749,14 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "rationale": state["rationale"],
         "spec": state["spec"],
         "repairs": state["repairs"],
+        "evaluation_base_seq": _since_seq(state),
         "covers_inventory": inventory is not None and not uncovered,
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
         "violated_requirements": _violated_requirements(requirements, state["spec"], donors),
+        "donor_coverage": candidate_donor_coverage(
+            {"donors": donors or [], "donor_references": references}, state["spec"]),
+        "spec_diagnostics": _spec_diagnostics(state["spec"]),
         "evaluations": [
             {
                 "seq": item["seq"],
@@ -829,6 +846,11 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
                           "candidate_id": event.get("candidate_id"), "request": event.get("request"),
                           "need_state": "open", "answered_by": None}
             needs[seq]["cites"] = list(event.get("cites") or [])
+            if event["blocker"] == "BLOCKED_UNSAFE":
+                # An explicit uncheckable concern, not keyword detection or a
+                # system safety assessment. Preserve its declared reporter.
+                needs[seq]["grounding"] = "agent_assertion"
+                needs[seq]["author"] = dict(event["author"])
             phase = "EVIDENCE_REQUIRED"
         elif event_type == "evidence_supplied":
             need = needs[int(event["need_seq"])]
@@ -1289,11 +1311,17 @@ class MissionStore:
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
             "donors": replayed["donors"],
-            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"])
+            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"],
+                                             replayed["donor_references"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "staged": replayed["staged"],
             "needs": replayed["needs"],
+            "safety_concerns": [
+                {"need_seq": need["seq"], "state": need["need_state"], "candidate_id": need["candidate_id"],
+                 "concern": need["need"], "grounding": need["grounding"], "author": need["author"]}
+                for need in replayed["needs"] if need["blocker"] == "BLOCKED_UNSAFE"
+            ],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
             "firmware_authorized": False,
@@ -1476,6 +1504,38 @@ class MissionStore:
         if hashlib.sha256(data).hexdigest() != package_sha256:
             raise MissionError(f"package {path.name} does not match its content hash")
         return data
+
+    def iter_retained_packages(self, project_id: str, mission_id: str) -> Iterator[tuple[str, bytes]]:
+        """Read bounded retained bytes, without building packages or creating directories.
+
+        A retained ZIP is not necessarily referenced by a successful operation.
+        Delivery projections must bind its contents to the mission before offering it.
+        """
+        self.get_mission(project_id, mission_id)
+        root = self._package_path(project_id, mission_id, "0" * 64).parent
+        _reject_symlink(root, label="packages directory")
+        if not root.exists():
+            return
+        if not root.is_dir():
+            raise MissionError("packages path is not a directory")
+        paths = sorted(root.iterdir())
+        if len(paths) > 256:
+            raise MissionError("retained package inspection exceeds its entry limit")
+        total = 0
+        for path in paths:
+            if re.fullmatch(r"[0-9a-f]{16}\.zip", path.name) is None:
+                continue
+            _reject_symlink(path, label="package file")
+            size = path.stat().st_size
+            total += size
+            if not path.is_file() or size > 64 * 1024 * 1024 or total > 128 * 1024 * 1024:
+                raise MissionError("retained package inspection exceeds its file/byte limits")
+            with path.open("rb") as stream:
+                data = stream.read(size + 1)
+            digest = hashlib.sha256(data).hexdigest()
+            if len(data) != size or digest[:16] != path.stem:
+                raise MissionError("retained package does not match its content name")
+            yield digest, data
 
     def _envelope_used(self, project_id: str, envelope_hash: str) -> bool:
         root = self._missions_root(project_id)
@@ -1692,9 +1752,12 @@ class MissionStore:
             new_fact = int(candidate.get("last_evidence_seq") or 0) > base
             failing = plan is not None and _plan_is_failing(plan.get("result"))
             review_failed = review is not None and int(review["result"].get("errors") or 0) > 0
-            if not (failing or review_failed or new_fact):
+            reuse = _latest_operation(candidate["evaluations"], "intact_reuse", after_seq=_since_seq(candidate))
+            reuse_failed = (candidate["spec"].get("design_class") == "intact_input_reuse"
+                            and reuse is not None and int(reuse["result"].get("errors") or 0) > 0)
+            if not (failing or review_failed or reuse_failed or new_fact):
                 raise MissionStateError("repair_proposed requires a failing device_plan or device_engineering evaluation "
-                                        "of the current spec, or a person's evidence since the latest repair")
+                                        "of the current spec, a failing intact_reuse check, or a person's evidence since the latest repair")
             if int(candidate["repairs"]) >= int(budgets["max_repairs_per_candidate"]):
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
@@ -1826,7 +1889,7 @@ class MissionStore:
         if not isinstance(operation, str) or operation not in _EVAL_OPERATIONS:
             raise MissionValidationError(
                 "operation must be one of device_draft, device_plan, device_engineering, "
-                "device_case, device_application, device_application_run, device_reclaim_match"
+                "device_case, device_application, device_application_run, device_reclaim_match, intact_reuse"
             )
         last_seq = int(replayed["last_event_seq"])
         next_seq = last_seq + 1

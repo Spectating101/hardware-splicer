@@ -1,0 +1,196 @@
+{
+  "mission": {
+    "accepted": {
+      "at": "2026-10-18T18:00:38.580865+00:00",
+      "budgets": {
+        "max_candidates": 3,
+        "max_operator_jobs": 6,
+        "max_repairs_per_candidate": 2,
+        "operator_jobs_used": 0,
+        "repairs_used": {}
+      },
+      "by": {
+        "id": "software-trial-host",
+        "kind": "human"
+      }
+    },
+    "budgets": {
+      "max_candidates": 3,
+      "max_operator_jobs": 6,
+      "max_repairs_per_candidate": 2,
+      "operator_jobs_used": 0,
+      "repairs_used": {}
+    },
+    "candidates": [],
+    "created_at": "2026-10-18T18:00:38.572260+00:00",
+    "donors": [
+      {
+        "can_generate_firmware": false,
+        "capabilities": [],
+        "contract_state": "unknown",
+        "donor_id": "donor:usb-mouse:controller",
+        "findings": [],
+        "label": "Unobserved wired mouse controller",
+        "missing_facts": [
+          "contract"
+        ],
+        "optional": false,
+        "person_measurements": [],
+        "signals": []
+      }
+    ],
+    "events": [
+      {
+        "author": {
+          "id": "trial-preparer",
+          "kind": "agent"
+        },
+        "created_at": "2026-10-18T18:00:38.572274+00:00",
+        "seq": 1,
+        "type": "opened"
+      },
+      {
+        "author": {
+          "id": "hardware-splicer",
+          "kind": "system"
+        },
+        "created_at": "2026-10-18T18:00:38.579283+00:00",
+        "draft": {
+          "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+          "ok": false,
+          "plan_errors": 0,
+          "plan_warnings": 0
+        },
+        "reading": {
+          "controller": null,
+          "fragments": [
+            {
+              "matches": [],
+              "text": "Document-only reference: ordinary discarded wired USB mouse"
+            },
+            {
+              "matches": [],
+              "text": "Logitech B100 is a manufacturer-document exemplar"
+            },
+            {
+              "matches": [],
+              "text": "not an observed specimen"
+            }
+          ],
+          "left_out": [
+            "Document-only reference: ordinary discarded wired USB mouse",
+            "Logitech B100 is a manufacturer-document exemplar",
+            "not an observed specimen"
+          ],
+          "parts": []
+        },
+        "result_sha256": "0cf316b1ee288673ada3113908fba20a96ed15026b70766f8dfaf7a0c2c6ce10",
+        "seq": 2,
+        "type": "inventory_read"
+      },
+      {
+        "author": {
+          "id": "hardware-splicer",
+          "kind": "system"
+        },
+        "created_at": "2026-10-18T18:00:38.580325+00:00",
+        "donors": [
+          {
+            "can_generate_firmware": false,
+            "capabilities": [],
+            "contract_state": "unknown",
+            "donor_id": "donor:usb-mouse:controller",
+            "label": "Unobserved wired mouse controller",
+            "missing_facts": [
+              "contract"
+            ],
+            "optional": false,
+            "signals": []
+          }
+        ],
+        "result_sha256": "0d4b454aeeec13ed7393f06943c89b422509736578a5d480bce6b9cb65bd35db",
+        "seq": 3,
+        "type": "donor_read"
+      },
+      {
+        "author": {
+          "id": "software-trial-host",
+          "kind": "human"
+        },
+        "budgets": {
+          "max_candidates": 3,
+          "max_operator_jobs": 6,
+          "max_repairs_per_candidate": 2,
+          "operator_jobs_used": 0,
+          "repairs_used": {}
+        },
+        "created_at": "2026-10-18T18:00:38.580865+00:00",
+        "seq": 4,
+        "type": "accepted"
+      }
+    ],
+    "firmware_authorized": false,
+    "intake": {
+      "constraints": [
+        "No physical specimen is available; no measured dimensions, voltages, continuity, USB descriptor or bench readings exist.",
+        "No purchased development board, mains disassembly, flashing, power-on or fabrication.",
+        "Any useful package or design must clearly distinguish document declarations, engineering proposals and unverified specimen facts."
+      ],
+      "donors": [
+        {
+          "donor_id": "donor:usb-mouse:controller",
+          "label": "Unobserved wired mouse controller",
+          "optional": false
+        }
+      ],
+      "goal": "Develop a useful single-action USB foot control from an ordinary discarded wired mouse, without buying a development board. Compare alternatives and persist concrete engineering work; no physical specimen or measurements exist.",
+      "inventory": [
+        "Document-only reference: ordinary discarded wired USB mouse; Logitech B100 is a manufacturer-document exemplar, not an observed specimen"
+      ]
+    },
+    "inventory": {
+      "draft": {
+        "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+        "ok": false,
+        "plan_errors": 0,
+        "plan_warnings": 0
+      },
+      "reading": {
+        "controller": null,
+        "fragments": [
+          {
+            "matches": [],
+            "text": "Document-only reference: ordinary discarded wired USB mouse"
+          },
+          {
+            "matches": [],
+            "text": "Logitech B100 is a manufacturer-document exemplar"
+          },
+          {
+            "matches": [],
+            "text": "not an observed specimen"
+          }
+        ],
+        "left_out": [
+          "Document-only reference: ordinary discarded wired USB mouse",
+          "Logitech B100 is a manufacturer-document exemplar",
+          "not an observed specimen"
+        ],
+        "parts": []
+      },
+      "result_sha256": "0cf316b1ee288673ada3113908fba20a96ed15026b70766f8dfaf7a0c2c6ce10"
+    },
+    "last_event_seq": 4,
+    "mission_id": "mission-8851a9f8860a4337",
+    "needs": [],
+    "phase": "INTAKE",
+    "physical_correctness": "UNPROVEN",
+    "power_on_authorized": false,
+    "project_id": "cold-usb-mouse-document-study",
+    "revision": 1,
+    "schema_version": "hardware_splicer.fabrication_mission.v1",
+    "staged": null,
+    "terminal": null
+  },
+  "ok": true
+}

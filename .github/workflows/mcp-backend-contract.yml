@@ -7,6 +7,12 @@ on:
       - "requirements-backend-mcp.txt"
       - "src/hardware_splicer/backend_mcp_server.py"
       - "src/hardware_splicer/mcp_backend_gateway.py"
+      - "src/hardware_splicer/mission_agent_contract.py"
+      - "src/hardware_splicer/mission_store.py"
+      - "src/hardware_splicer/mission_donors.py"
+      - "src/hardware_splicer/mission_executor.py"
+      - "src/hardware_splicer/intact_reuse*.py"
+      - "src/hardware_splicer/salvage_fabrication*.py"
       - "src/hardware_splicer/external_mcp_trace_audit.py"
       - "src/hardware_splicer/frontier_operator_experiment.py"
       - "src/hardware_splicer/codex_astra_*.py"
@@ -16,6 +22,9 @@ on:
       - "src/hardware_splicer/product_api.py"
       - "src/hardware_splicer/**/*_api.py"
       - "tests/test_mcp_backend_gateway.py"
+      - "tests/test_salvage_agent_onboarding.py"
+      - "tests/test_intact_reuse.py"
+      - "tests/test_salvage_fabrication.py"
       - "tests/test_external_mcp_trace_audit.py"
       - "tests/test_external_mcp_agent_proof_runner.py"
       - "tests/test_frontier_operator*.py"
@@ -25,6 +34,7 @@ on:
       - "tests/test_codex_mission_progress.py"
       - "tests/test_codex_final_report.py"
       - "scripts/smoke_backend_mcp_stdio.py"
+      - "scripts/smoke_intact_reuse_mcp.py"
       - "scripts/smoke_backend_mcp_http.py"
       - "scripts/run_external_mcp_agent_proof.py"
       - "scripts/plan_frontier_operator_experiment.py"
@@ -33,6 +43,9 @@ on:
       - "scripts/run_codex_astra_case.py"
       - "scripts/audit_codex_astra_trace.py"
       - "docs/EXTERNAL_MCP_AGENT_PROOF.md"
+      - "docs/AGENT_QUICKSTART.md"
+      - "docs/LEGACY_COMPOSE_AGENT_QUICKSTART.md"
+      - "docs/SALVAGE_AGENT_TRIAL.md"
       - "docs/EXTERNAL_MCP_PROOF_ACCEPTANCE.md"
       - "docs/FRONTIER_OPERATOR_EXPERIMENT.md"
       - "docs/CODEX_ASTRA_CLEANROOM_RUNBOOK.md"
@@ -64,6 +77,9 @@ jobs:
         run: |
           pytest -q \
             tests/test_mcp_backend_gateway.py \
+            tests/test_salvage_agent_onboarding.py \
+            tests/test_intact_reuse.py \
+            tests/test_salvage_fabrication.py \
             tests/test_external_mcp_trace_audit.py \
             tests/test_external_mcp_agent_proof_runner.py \
             tests/test_frontier_operator_experiment.py \
@@ -80,6 +96,8 @@ jobs:
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
       - name: Exercise a real MCP Streamable HTTP client session
         run: timeout --signal=TERM --kill-after=5s 90s python scripts/smoke_backend_mcp_http.py
+      - name: Build and download an intact-device software review bundle over real MCP
+        run: timeout --signal=TERM --kill-after=5s 90s python scripts/smoke_intact_reuse_mcp.py --output "$RUNNER_TEMP/intact-reuse-proof"
       - name: Validate external-agent proof harness and frozen case inventory
         run: |
           python scripts/run_external_mcp_agent_proof.py --help >/dev/null

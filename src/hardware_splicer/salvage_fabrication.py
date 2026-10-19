@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 from .fabrication_operator import FabricationValidationError
 from .mission_donors import read_donors
 from .mission_store import MissionStore
+from .salvage_investigation import project_investigation_queue
 from .salvage_resource_graph import project_salvage_resource_graph
 
 _SCHEMA = "hardware_splicer.salvage_fabrication_context.v1"
@@ -68,14 +69,19 @@ def build_salvage_fabrication_context(
         "terminal": mission.get("terminal"),
         "staged": mission.get("staged"),
         "goal": mission.get("intake", {}).get("goal"),
+        "inventory": list(mission.get("intake", {}).get("inventory") or []),
+        "inventory_reading": mission.get("inventory"),
+        "requirements": list(mission.get("intake", {}).get("requirements") or []),
         "constraints": list(mission.get("intake", {}).get("constraints") or []),
         "budgets": dict(mission.get("budgets") or {}),
         "resource_graph": graph,
+        "investigation_queue": project_investigation_queue(graph),
         "donor_snapshot": donor_snapshot,
         "donor_snapshot_frozen": donor_snapshot_frozen,
         "hypotheses": hypotheses,
         "candidates": candidates,
         "needs": needs,
+        "safety_concerns": list(mission.get("safety_concerns") or []),
         "next_state": next_state,
         "truth_contract": {
             "projection_only": True,
@@ -88,6 +94,7 @@ def build_salvage_fabrication_context(
             "agent_can_accept_mission": False,
             "agent_can_supply_human_measurement": False,
             "agent_can_approve_physical_actuation": False,
+            "absence_of_safety_concerns_means_safe": False,
         },
     }
     context["context_sha256"] = _digest(context)
@@ -99,14 +106,29 @@ def _candidate_summary(row: Mapping[str, Any]) -> dict[str, Any]:
         raise FabricationValidationError("mission candidate must be an object")
     evaluations = row.get("evaluations") or []
     latest = evaluations[-1] if isinstance(evaluations, list) and evaluations else None
+    # Freshness uses the same lineage boundary as the canonical readiness gate;
+    # it does not independently decide readiness or grant authority.
+    base_seq = row.get("evaluation_base_seq")
+    checks = {
+        item["operation"]: {
+            **{key: item.get(key) for key in ("seq", "operation", "result", "artifact")},
+            "current": type(base_seq) is int and type(item.get("seq")) is int and item["seq"] > base_seq,
+        }
+        for item in evaluations
+        if isinstance(item, Mapping) and isinstance(item.get("operation"), str)
+    }
     return {
         "candidate_id": row.get("id"),
         "kind": row.get("kind"),
         "label": row.get("label"),
         "repairs": row.get("repairs"),
+        "evaluation_base_seq": base_seq,
         "covers_inventory": row.get("covers_inventory"),
         "uncovered_inventory": list(row.get("uncovered_inventory") or []),
         "violated_requirements": list(row.get("violated_requirements") or []),
+        "donor_coverage": row.get("donor_coverage"),
+        "spec_diagnostics": row.get("spec_diagnostics"),
+        "recorded_checks": checks,
         "latest_evaluation": (
             {
                 "seq": latest.get("seq"),
@@ -132,6 +154,7 @@ def _need_summary(row: Mapping[str, Any]) -> dict[str, Any]:
         "need": row.get("need"),
         "request": dict(request) if request is not None else None,
         "requires_human_physical_evidence": request is not None,
+        "grounding": row.get("grounding"),
     }
 
 
@@ -177,7 +200,10 @@ def _next_state(
         return {
             "state": "terminal",
             "agent_may_mutate_mission": False,
-            "recommended_intents": ["read_terminal", "build_or_read_package", "stage_if_ready"],
+            "recommended_intents": (
+                ["read_terminal", "build_or_read_package", "stage_if_ready"]
+                if terminal.get("state") == "READY_FOR_HUMAN_BUILD" else ["read_terminal", "read_recorded_concerns"]
+            ),
         }
     if mission.get("accepted") is None:
         return {
@@ -186,6 +212,16 @@ def _next_state(
             "recommended_intents": ["inspect_context", "await_human_acceptance"],
         }
     unresolved = [row for row in needs if row.get("state") != "resolved"]
+    if any(row.get("blocker") == "BLOCKED_UNSAFE" for row in unresolved):
+        return {
+            "state": "safety_concern_recorded",
+            "agent_may_mutate_mission": True,
+            "recommended_intents": [
+                "read_recorded_safety_concern",
+                "propose_grounded_unsafe_terminal",
+                "offer_separate_safer_goal_without_claiming_it_verified",
+            ],
+        }
     if unresolved:
         physical = any(row.get("requires_human_physical_evidence") for row in unresolved)
         return {
@@ -193,6 +229,7 @@ def _next_state(
             "agent_may_mutate_mission": True,
             "recommended_intents": [
                 "inspect_existing_hypotheses",
+                "continue_independent_research_or_design",
                 "await_human_physical_evidence" if physical else "resolve_nonphysical_evidence_need",
                 "propose_repair_after_new_fact",
             ],

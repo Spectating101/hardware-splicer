@@ -14,8 +14,11 @@ from fastapi import status as http_status
 from fastapi.concurrency import run_in_threadpool
 
 from .mission_answer import answer_need
-from .mission_delivery import build_mission_package, read_mission_package, stage_mission_design
+from .mission_delivery import (build_mission_package, read_mission_package, stage_mission_design,
+                               inspect_mission_delivery, read_retained_mission_package)
 from .mission_executor import run_mission_operation
+from .mission_agent_contract import mission_event_openapi, mission_run_openapi
+from .intact_reuse import REPORT_SCHEMA as INTACT_REPORT_SCHEMA, discovery as intact_reuse_discovery
 from .mission_store import (
     MissionConflict,
     MissionError,
@@ -181,7 +184,18 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
 
-    @router.post("/{mission_id}/events", status_code=http_status.HTTP_201_CREATED)
+    @router.get("/{mission_id}/intact-reuse-spec", summary="Discover a bounded intact-input reuse spec and registered source/donor IDs")
+    def read_intact_reuse_spec(project_id: str, mission_id: str) -> Dict[str, Any]:
+        try:
+            view = mission_store.get_mission(project_id, mission_id)
+            snapshot = mission_store.project_store.load_latest_with_recovery(project_id)["snapshot"]
+            return intact_reuse_discovery(view, snapshot)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+
+    @router.post("/{mission_id}/events", status_code=http_status.HTTP_201_CREATED,
+                 summary="Propose a candidate, repair, finding, evidence need or terminal state",
+                 openapi_extra=mission_event_openapi())
     def propose_project_mission_event(
         project_id: str,
         mission_id: str,
@@ -200,7 +214,8 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
 
-    @router.post("/{mission_id}/candidates/{candidate_id}/run")
+    @router.post("/{mission_id}/candidates/{candidate_id}/run", summary="Run a bounded software check on a stored candidate",
+                 openapi_extra=mission_run_openapi())
     async def run_project_mission_operation(
         project_id: str,
         mission_id: str,
@@ -220,7 +235,12 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
             evaluation = _latest_evaluation(mission, candidate_id)
         except Exception as exc:
             raise _mission_error(exc) from exc
-        return {"ok": True, "mission": mission, "evaluation": evaluation}
+        response = {"ok": True, "mission": mission, "evaluation": evaluation}
+        if evaluation["operation"] == "intact_reuse" and evaluation["result"]["errors"] == 0:
+            response["bundle_download_path"] = (
+                f"/v1/projects/{project_id}/missions/{mission_id}/{evaluation['artifact']}/bundle"
+            )
+        return response
 
     @router.get("/{mission_id}/runs/{name}")
     def read_project_mission_run(
@@ -240,6 +260,25 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                 ) from exc
             raise _mission_error(exc) from exc
         return {"ok": True, "run": run}
+
+    @router.get("/{mission_id}/runs/{name}/bundle", summary="Download a hash-bound intact-reuse SOFTWARE REVIEW bundle, not a READY build package")
+    def download_intact_reuse_bundle(project_id: str, mission_id: str, name: str) -> Response:
+        try:
+            run = read_project_mission_run(project_id, mission_id, name)["run"]
+            if run.get("schema_version") != INTACT_REPORT_SCHEMA or run.get("software_checks_passed") is not True:
+                raise MissionNotFound("run has no passing intact-reuse software review bundle")
+            digest = run.get("package_sha256")
+            data = mission_store.read_package(project_id, mission_id, digest)
+            if data is None:
+                raise MissionNotFound("recorded software review bundle is missing")
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return Response(content=data, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="intact-reuse-{digest[:16]}.zip"',
+            "X-Content-SHA256": digest, "X-HS-Artifact-Scope": "software-review-only",
+        })
 
     @router.post("/{mission_id}/needs/{need_seq}/evidence", status_code=http_status.HTTP_201_CREATED)
     def supply_project_mission_evidence(
@@ -298,6 +337,25 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
+
+    @router.get("/{mission_id}/delivery", summary="Inspect already-retained mission output without generating missing files")
+    async def inspect_project_mission_delivery(project_id: str, mission_id: str) -> Dict[str, Any]:
+        try:
+            delivery = await run_in_threadpool(inspect_mission_delivery, mission_store, project_id, mission_id)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, "delivery": delivery}
+
+    @router.get("/{mission_id}/delivery/packages/{package_sha256}", summary="Download an already-retained prototype review package; never generate it")
+    async def download_retained_project_mission_package(project_id: str, mission_id: str, package_sha256: str) -> Response:
+        try:
+            data = await run_in_threadpool(read_retained_mission_package, mission_store, project_id, mission_id, package_sha256)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return Response(content=data, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="{mission_id}-retained-package.zip"',
+            "X-Content-SHA256": package_sha256, "X-HS-Artifact-Scope": "prototype-review-only",
+        })
 
     @router.post("/{mission_id}/package")
     async def build_project_mission_package(project_id: str, mission_id: str) -> Dict[str, Any]:

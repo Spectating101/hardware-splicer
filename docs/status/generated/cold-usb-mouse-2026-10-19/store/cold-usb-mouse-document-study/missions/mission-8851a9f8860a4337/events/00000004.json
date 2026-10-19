@@ -1,0 +1,16 @@
+{
+  "author": {
+    "id": "software-trial-host",
+    "kind": "human"
+  },
+  "budgets": {
+    "max_candidates": 3,
+    "max_operator_jobs": 6,
+    "max_repairs_per_candidate": 2,
+    "operator_jobs_used": 0,
+    "repairs_used": {}
+  },
+  "created_at": "2026-10-18T18:00:38.580865+00:00",
+  "seq": 4,
+  "type": "accepted"
+}

@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "automatic_authorization": false,
+    "bytes_retained": true,
+    "engineering_source_ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+    "physical_authority_unchanged": true,
+    "registered_content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+    "registered_source_id": "upload-b98f9a76a04dc4a97add",
+    "server_computed_hash": true,
+    "source": "engineering_source_ingestion"
+  },
+  "project_id": "cold-usb-mouse-document-study",
+  "revision": 2,
+  "saved_at": "2026-10-18T18:02:42.262715+00:00",
+  "schema_version": "hardware_splicer.project_snapshot.v1",
+  "snapshot": {
+    "currentStage": "design",
+    "engineeringSourceUploads": [
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "text_document",
+          "limitations": [
+            "Text is retained without automatically promoting its statements into engineering claims."
+          ],
+          "media_type": "text/markdown",
+          "metadata": {
+            "declared_media_type": "text/markdown",
+            "extension_media_type": "text/markdown",
+            "signature_media_type": null
+          },
+          "parser_disposition": "inventory_only",
+          "parser_route": null,
+          "source_type": "other",
+          "structured_format": null
+        },
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "SOURCES.md",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 2134,
+        "source_id": "upload-b98f9a76a04dc4a97add"
+      }
+    ],
+    "engineeringSources": [
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+          "bytes_retained": true,
+          "captured_at": "2026-10-19 Asia/Taipei",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "Text is retained without automatically promoting its statements into engineering claims."
+          ],
+          "media_type": "text/markdown",
+          "original_filename": "SOURCES.md",
+          "parser_disposition": "inventory_only",
+          "parser_route": null,
+          "provenance": "Host-transcribed frozen public-document paraphrases; not original vendor HTML. Hashes in this packet identify host-retained HTML, not these ingested bytes.",
+          "server_computed_hash": true,
+          "size_bytes": 2134,
+          "source_kind": "text_document",
+          "specimen_present": false,
+          "structured_format": null
+        },
+        "revision": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "source_id": "upload-b98f9a76a04dc4a97add",
+        "source_type": "other",
+        "uri": "hs-project://cold-usb-mouse-document-study/sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5"
+      }
+    ],
+    "graph": {
+      "edges": [],
+      "nodes": []
+    },
+    "machineProject": {
+      "name": "USB mouse reuse study",
+      "project_id": "cold-usb-mouse-document-study",
+      "purpose": "Develop a useful single-action USB foot control from an ordinary discarded wired mouse, without buying a development board. Compare alternatives and persist concrete engineering work; no physical specimen or measurements exist."
+    },
+    "mode": "salvage",
+    "projectId": "cold-usb-mouse-document-study",
+    "projectName": "Document-only USB mouse reuse study"
+  }
+}

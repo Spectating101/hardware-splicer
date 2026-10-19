@@ -1,0 +1,22 @@
+{
+  "file_hashes": {
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000001.json": "8b8cdf3d40bcc7ca7d6f9c1d4c36f57a82703738cc44d7805d5d562c843d2e43",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000002.json": "0c8bea017a22d0ba08b7de94c9e529e740ef7ec4e164193cc3acbc412cfa3c38",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000003.json": "272828e224e9b757378a3b2a7c677d35928160080bab2499b5d7c40c9b7fb16c",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000004.json": "19df1bb2725a5ee3deb594be61ce636f22d8189e90ce518a45f38d5d79be89a2",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000005.json": "3b0d2fa0169dc5f5be8781f8bf2adc117d41279942de3b0b85ca9bd4ad83a593",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000006.json": "2ff5610b149e43d7b159413c75cbbb02a143c953a6cbcd70113cdd86d3fd4e38",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000007.json": "47df3eab806c1c56c12dff2eead5489ea97e972be3bfecc9c8faf961ed0acf45",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000008.json": "6d7a2a5fe72cc8fbffaeb09e8fc872fbf6f57d8e31576adb12990792de3d28b3",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/mission.json": "3088597badab7cb2914ab241b9586143806406a87a31be6a615c9b3be9ad5a60",
+    "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/runs/device_plan-eb9b0ce4ebfff18f.json": "eb9b0ce4ebfff18fcd1c383f559bb45d5bf90acf31f581819cf9e2afe2757904",
+    "store/cold-usb-mouse-document-study/project.json": "5d45ec8034e832775c0c9627b667e497d9288f2f0e8d042438bfcf1bf9633bfd",
+    "store/cold-usb-mouse-document-study/revisions/00000001.json": "c77a3b7f6b917c8831cbfc3877b0eeecc19a59bdee0a98dbbaab915b4bec1c5d",
+    "store/cold-usb-mouse-document-study/revisions/00000002.json": "d86955d79661f230b2784812d52db3a952a7dc60c29c71710a4637e2d7837a84",
+    "store/cold-usb-mouse-document-study/revisions/00000003.json": "07a835155893c4d88a11521d8aed69d2ae390f9b5c7e39203853a8f1aa282744",
+    "store/cold-usb-mouse-document-study/sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5"
+  },
+  "note": "Frozen after phase-1 completion and before fresh-session continuation; no solution/report is supplied to phase 2.",
+  "phase": 1,
+  "tool_call_count": 32
+}

@@ -193,16 +193,19 @@ async def hs_backend_task_manifest(
         "fabrication_mission",
         "salvage_fabrication",
     ],
+    include_schemas: bool = False,
 ) -> str:
     """Return one task-scoped canonical workflow contract in a single discovery call.
 
     Prefer this over repeated broad list/describe calls when the task matches. The manifest
     is generated from the live product OpenAPI document and does not bypass backend gates or
-    grant physical authority.
+    grant physical authority. Salvage starts with a compact operation index;
+    describe only the operations needed now, or request include_schemas=true.
+    Other task manifests retain their existing schema-rich response.
     """
 
     if task == "salvage_fabrication":
-        return _render(salvage_fabrication_manifest(_product_app))
+        return _render(salvage_fabrication_manifest(_product_app, include_schemas=include_schemas))
     return _render(task_operation_manifest(task, _product_app))
 
 

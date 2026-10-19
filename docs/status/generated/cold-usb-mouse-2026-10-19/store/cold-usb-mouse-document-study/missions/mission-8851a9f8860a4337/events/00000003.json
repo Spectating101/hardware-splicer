@@ -1,0 +1,24 @@
+{
+  "author": {
+    "id": "hardware-splicer",
+    "kind": "system"
+  },
+  "created_at": "2026-10-18T18:00:38.580325+00:00",
+  "donors": [
+    {
+      "can_generate_firmware": false,
+      "capabilities": [],
+      "contract_state": "unknown",
+      "donor_id": "donor:usb-mouse:controller",
+      "label": "Unobserved wired mouse controller",
+      "missing_facts": [
+        "contract"
+      ],
+      "optional": false,
+      "signals": []
+    }
+  ],
+  "result_sha256": "0d4b454aeeec13ed7393f06943c89b422509736578a5d480bce6b9cb65bd35db",
+  "seq": 3,
+  "type": "donor_read"
+}
