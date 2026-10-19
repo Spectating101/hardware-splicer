@@ -81,6 +81,7 @@ def build_salvage_fabrication_context(
         "hypotheses": hypotheses,
         "candidates": candidates,
         "needs": needs,
+        "safety_concerns": list(mission.get("safety_concerns") or []),
         "next_state": next_state,
         "truth_contract": {
             "projection_only": True,
@@ -93,6 +94,7 @@ def build_salvage_fabrication_context(
             "agent_can_accept_mission": False,
             "agent_can_supply_human_measurement": False,
             "agent_can_approve_physical_actuation": False,
+            "absence_of_safety_concerns_means_safe": False,
         },
     }
     context["context_sha256"] = _digest(context)
@@ -124,6 +126,8 @@ def _candidate_summary(row: Mapping[str, Any]) -> dict[str, Any]:
         "covers_inventory": row.get("covers_inventory"),
         "uncovered_inventory": list(row.get("uncovered_inventory") or []),
         "violated_requirements": list(row.get("violated_requirements") or []),
+        "donor_coverage": row.get("donor_coverage"),
+        "spec_diagnostics": row.get("spec_diagnostics"),
         "recorded_checks": checks,
         "latest_evaluation": (
             {
@@ -150,6 +154,7 @@ def _need_summary(row: Mapping[str, Any]) -> dict[str, Any]:
         "need": row.get("need"),
         "request": dict(request) if request is not None else None,
         "requires_human_physical_evidence": request is not None,
+        "grounding": row.get("grounding"),
     }
 
 
@@ -195,7 +200,10 @@ def _next_state(
         return {
             "state": "terminal",
             "agent_may_mutate_mission": False,
-            "recommended_intents": ["read_terminal", "build_or_read_package", "stage_if_ready"],
+            "recommended_intents": (
+                ["read_terminal", "build_or_read_package", "stage_if_ready"]
+                if terminal.get("state") == "READY_FOR_HUMAN_BUILD" else ["read_terminal", "read_recorded_concerns"]
+            ),
         }
     if mission.get("accepted") is None:
         return {
@@ -204,6 +212,16 @@ def _next_state(
             "recommended_intents": ["inspect_context", "await_human_acceptance"],
         }
     unresolved = [row for row in needs if row.get("state") != "resolved"]
+    if any(row.get("blocker") == "BLOCKED_UNSAFE" for row in unresolved):
+        return {
+            "state": "safety_concern_recorded",
+            "agent_may_mutate_mission": True,
+            "recommended_intents": [
+                "read_recorded_safety_concern",
+                "propose_grounded_unsafe_terminal",
+                "offer_separate_safer_goal_without_claiming_it_verified",
+            ],
+        }
     if unresolved:
         physical = any(row.get("requires_human_physical_evidence") for row in unresolved)
         return {

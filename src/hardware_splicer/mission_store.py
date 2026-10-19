@@ -29,13 +29,14 @@ except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
     fcntl = None
 
 from .device_draft import draft_from_parts_text, parse_parts_text
-from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
+from .device_plan import (_OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan,
+                          unrecognized_device_spec_fields)
 from pydantic import ValidationError
 
 from .physical_evidence_ledger import (PhysicalEvidenceEnvelope, physical_evidence_envelope_hash,
                                        validate_physical_evidence_envelope)
 from .mission_donors import (normalize_donors, normalize_used, normalize_finding, read_donors,
-                             donor_problem, donor_grounding)
+                             donor_problem, donor_grounding, candidate_donor_coverage)
 from .donor_device_plan import mission_donor_modules
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
@@ -727,8 +728,19 @@ def _latest_operation(
     return latest
 
 
+def _spec_diagnostics(spec: Mapping[str, Any]) -> Dict[str, Any]:
+    if spec.get("design_class") == "intact_input_reuse":
+        return {"scope": "intact_reuse_check_required", "unrecognized_fields": [],
+                "effect": "not_checked_by_catalog_diagnostics; run the strict intact_reuse check"}
+    return {
+        "scope": "catalog_device_spec",
+        "unrecognized_fields": unrecognized_device_spec_fields(spec, extra_top_level_fields=("donors_used",)),
+        "effect": "retained_in_proposal_not_checked_by_catalog_planner",
+    }
+
+
 def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None,
-                      requirements: list[Mapping[str, Any]], donors=None) -> Dict[str, Any]:
+                      requirements: list[Mapping[str, Any]], donors=None, references=()) -> Dict[str, Any]:
     uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
@@ -742,6 +754,9 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
         "violated_requirements": _violated_requirements(requirements, state["spec"], donors),
+        "donor_coverage": candidate_donor_coverage(
+            {"donors": donors or [], "donor_references": references}, state["spec"]),
+        "spec_diagnostics": _spec_diagnostics(state["spec"]),
         "evaluations": [
             {
                 "seq": item["seq"],
@@ -831,6 +846,11 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
                           "candidate_id": event.get("candidate_id"), "request": event.get("request"),
                           "need_state": "open", "answered_by": None}
             needs[seq]["cites"] = list(event.get("cites") or [])
+            if event["blocker"] == "BLOCKED_UNSAFE":
+                # An explicit uncheckable concern, not keyword detection or a
+                # system safety assessment. Preserve its declared reporter.
+                needs[seq]["grounding"] = "agent_assertion"
+                needs[seq]["author"] = dict(event["author"])
             phase = "EVIDENCE_REQUIRED"
         elif event_type == "evidence_supplied":
             need = needs[int(event["need_seq"])]
@@ -1291,11 +1311,17 @@ class MissionStore:
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
             "donors": replayed["donors"],
-            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"])
+            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"],
+                                             replayed["donor_references"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "staged": replayed["staged"],
             "needs": replayed["needs"],
+            "safety_concerns": [
+                {"need_seq": need["seq"], "state": need["need_state"], "candidate_id": need["candidate_id"],
+                 "concern": need["need"], "grounding": need["grounding"], "author": need["author"]}
+                for need in replayed["needs"] if need["blocker"] == "BLOCKED_UNSAFE"
+            ],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
             "firmware_authorized": False,

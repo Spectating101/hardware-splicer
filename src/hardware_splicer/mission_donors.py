@@ -234,18 +234,33 @@ def normalize_finding(value: Any, references: list[Mapping]) -> dict:
             "grade": "re_observation"}
 
 
-def donor_problem(replayed: Mapping, spec: Mapping, *, ready: bool) -> str | None:
+def candidate_donor_coverage(replayed: Mapping, spec: Mapping) -> dict:
+    """Project the existing coverage/verification rules, never proof of implementation."""
     used = set(spec.get("donors_used") or [])
     references = replayed.get("donor_references") or []
     missing = [r["donor_id"] for r in references if not r["optional"] and r["donor_id"] not in used]
-    if missing:
-        return "required donors not covered: " + ", ".join(missing)
-    if ready:
-        by_id = {d["donor_id"]: d for d in replayed.get("donors") or []}
-        for ident in sorted(used):
-            donor = by_id.get(ident)
-            if not donor or donor["contract_state"] != "verified":
-                return f"donor {ident} is not verified; missing facts: " + ", ".join(donor["missing_facts"] if donor else ["donor_read"])
+    by_id = {d["donor_id"]: d for d in replayed.get("donors") or []}
+    unverified = []
+    for ident in sorted(used):
+        donor = by_id.get(ident)
+        if not donor or donor["contract_state"] != "verified":
+            unverified.append({"donor_id": ident, "missing_facts": list(donor["missing_facts"]) if donor else ["donor_read"]})
+    return {
+        "used_donors": sorted(used),
+        "missing_required_donors": missing,
+        "covers_required_donors": not missing,
+        "unverified_used_donors": unverified,
+        "coverage_establishes_implementation": False,
+    }
+
+
+def donor_problem(replayed: Mapping, spec: Mapping, *, ready: bool) -> str | None:
+    coverage = candidate_donor_coverage(replayed, spec)
+    if coverage["missing_required_donors"]:
+        return "required donors not covered: " + ", ".join(coverage["missing_required_donors"])
+    if ready and coverage["unverified_used_donors"]:
+        donor = coverage["unverified_used_donors"][0]
+        return f"donor {donor['donor_id']} is not verified; missing facts: " + ", ".join(donor["missing_facts"])
     return None
 
 

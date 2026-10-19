@@ -441,6 +441,34 @@ def device_spec_json_schema(*, include_project_donors: bool = False) -> dict[str
     }
 
 
+def unrecognized_device_spec_fields(spec: dict[str, Any], *, extra_top_level_fields=()) -> list[str]:
+    """Return unknown JSON pointers without validating or discarding proposal content.
+
+    The legacy parser drops many unknown keys; strict subobjects may refuse them.
+    Reporting omissions separately keeps partial/generic proposals admissible and
+    does not pretend an extension was checked just because a narrow check is clean.
+    """
+    schema = device_spec_json_schema()
+    schema["properties"].update({key: {} for key in extra_top_level_fields})
+    unknown = []
+
+    def walk(value, definition, path):
+        if isinstance(value, dict) and definition.get("type") == "object":
+            properties = definition.get("properties", {})
+            for key, child in value.items():
+                pointer = path + "/" + key.replace("~", "~0").replace("/", "~1")
+                if key not in properties:
+                    unknown.append(pointer)
+                else:
+                    walk(child, properties[key], pointer)
+        elif isinstance(value, list) and definition.get("type") == "array":
+            for index, child in enumerate(value):
+                walk(child, definition.get("items", {}), path + "/" + str(index))
+
+    walk(spec, schema, "")
+    return sorted(unknown)
+
+
 def device_catalog() -> list[dict[str, Any]]:
     """What a model needs in order to wire modules: each module's id, kind, pins with their roles, and its pin orders."""
 

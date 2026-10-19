@@ -35,7 +35,9 @@ def mission_event_openapi() -> dict[str, Any]:
     spec = {"type": "object", "description": (
         "Unvalidated design proposal, not measured facts. Replace with your draft/design spec. "
         "GET /v1/devices/spec-schema describes the planner's structure; donor IDs require frozen mission context. "
-        "Partial specs may be proposed but cannot earn readiness without the canonical checks.")}
+        "Partial specs may be proposed but cannot earn readiness without the canonical checks. "
+        "Read spec_diagnostics and donor_coverage in the returned candidate/context: unrecognized keys remain "
+        "stored but are not checked by the catalog planner. donors_used is a reference, not proof of wiring.")}
     candidate = _object({
         "id": slug, "kind": {"enum": sorted(_CANDIDATE_KINDS)},
         "label": _text(_MAX_LABEL), "spec": spec, "rationale": _text(_MAX_RATIONALE),
@@ -85,6 +87,12 @@ def mission_event_openapi() -> dict[str, Any]:
                  "reason": _text(_MAX_REASON), "candidate_id": slug, "cites": citations},
                 ["type", "state", "reason"]),
     ]
+    events[2]["description"] = (
+        "Persist any concern in the mission, not only in chat. For an unsafe goal use BLOCKED_UNSAFE and explain "
+        "the danger/refusal and a separate safer goal if justified. It is an agent_assertion, not an HS safety "
+        "finding. Do not disguise an unsafe goal as missing part data or request hazardous powered measurements. "
+        "To stop, propose terminal BLOCKED_UNSAFE citing this need's returned sequence. Otherwise leave a "
+        "resumable need open and continue only independent, safe, evidence-grounded work.")
     author = _object({"kind": {"enum": ["agent", "human"]}, "id": _text(_MAX_AUTHOR_ID)}, sorted(_AUTHOR_KEYS))
     schema = _object({
         "event": {"oneOf": events, "discriminator": {"propertyName": "type"}},

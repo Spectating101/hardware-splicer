@@ -83,10 +83,13 @@ def salvage_fabrication_manifest(
         },
         "workflow": [
             "reload the canonical mission-scoped salvage context at the start of every turn",
+            "record explicit danger/refusal as evidence_required BLOCKED_UNSAFE, not merely a chat warning or part-data request; it remains an agent_assertion, and a terminal unsafe proposal must cite that need",
             "for intact input-device reuse, discover intact-reuse-spec, propose the actual donor design, run intact_reuse and download its software review bundle without inventing a catalog board or claiming READY",
             "inspect retained images and prefill typed donor drafts while preserving model-inference provenance",
             "leave a visual draft pending human confirmation; continue independent software work without treating the draft as a donor contract",
             "inspect retained hypotheses/resources and propose findings or a bounded evidence need when uncertain",
+            "before waiting for a missing fact, persist grounded alternatives and a bounded deliverable through the appropriate workflow; do not fill a candidate with invented fields or substitute a catalog board for the donor",
+            "read candidate donor_coverage and spec_diagnostics as well as check counts; clean narrow checks do not establish donor implementation or validate ignored proposal fields",
             "propose and deterministically evaluate multiple architecture candidates",
             "compare clean-sheet, reclaim-heavy and hybrid options against the canonical resource graph",
             "generate or inspect bounded artifacts through canonical specialist operations",
