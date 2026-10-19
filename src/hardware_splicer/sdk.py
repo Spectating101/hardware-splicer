@@ -132,6 +132,39 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def plan_source_bound_design(*, scenario: Mapping[str, Any]) -> Dict[str, Any]:
+    """Agent entrypoint: conditional engineering proposal with independent audit.
+
+    Unlike a scenario-compiler PASS, this result never grants electrical,
+    fabrication, motion or physical-device authority. Source IDs and claim
+    digests are verified, then incompatible inferred topologies are rejected.
+    """
+    from .engineering_planner import plan_engineering_project
+    from .source_bound_candidate_trial import build_source_bound_candidate
+    from .source_bound_candidate_oracle import independently_audit_source_bound_candidate
+
+    if not isinstance(scenario, Mapping):
+        raise ValueError("scenario must be a full evidence/source/goal object")
+    intake = scenario.get("intake")
+    if not isinstance(intake, Mapping):
+        raise ValueError("scenario.intake must be an object")
+    plan=plan_engineering_project(
+        intake,
+        engineering_sources=scenario.get("engineering_sources"),
+        declared_conflicts=scenario.get("declared_conflicts"),
+        skip_vision=True,
+    )
+    candidate=build_source_bound_candidate(scenario,plan=plan)
+    audit=independently_audit_source_bound_candidate(scenario,plan,candidate)
+    return {
+        "schema_version":"hardware_splicer.sdk_source_bound_design.v1",
+        "candidate":candidate,
+        "independent_evidence_audit":audit,
+        "conditional_architecture_accepted":audit["conditional_candidate_accepted"],
+        "physical_build_authorized":False,
+    }
+
+
 def investigate_public_donor_sources(
     *,
     repair_intake: Mapping[str, Any] | None = None,
