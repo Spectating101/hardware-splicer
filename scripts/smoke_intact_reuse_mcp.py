@@ -21,8 +21,13 @@ import tempfile
 import zipfile
 
 from fastapi.testclient import TestClient
-from mcp import Client, StdioServerParameters
-from mcp.client.stdio import stdio_client
+
+# Direct script execution must not import legacy scripts/hardware_splicer.py.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [str(_REPO_ROOT / "src"), *[
+    entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
+]]
 
 from hardware_splicer.operator_identity import hash_operator_token
 from hardware_splicer.product_api import create_product_app
@@ -30,6 +35,9 @@ from hardware_splicer.project_store import ProjectStore
 
 
 async def exercise(output: Path) -> dict:
+    from mcp import Client, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
     output.mkdir(parents=True, exist_ok=False)
     packet = Path(__file__).resolve().parents[1] / "docs/status/generated/cold-usb-mouse-2026-10-19/SOURCES.md"
     packet_bytes = packet.read_bytes()

@@ -258,3 +258,10 @@ def test_only_one_symbolic_action_is_emitted_no_host_side_effects():
     assert adapter.feed({"type": "released", "device": "mouse", "button": "left"}) == []
     assert adapter.feed({"type": "pressed", "device": "mouse", "button": "left"}) == [{"type": "action", "action": "activate", "device_alias": "mouse"}]
     assert adapter.feed({"type": "pressed", "device": "mouse", "button": "left"}) == []
+
+
+def test_direct_smoke_entrypoint_is_not_shadowed_by_legacy_script():
+    script = Path(__file__).resolve().parents[1] / "scripts/smoke_intact_reuse_mcp.py"
+    result = subprocess.run([sys.executable, "-I", str(script), "--help"], capture_output=True, text=True, timeout=20)
+    assert result.returncode == 0, result.stderr
+    assert "--output" in result.stdout
