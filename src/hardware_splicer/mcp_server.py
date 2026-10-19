@@ -125,6 +125,27 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_plan_source_bound_design",
+            description=(
+                "Analyze a scenario with canonical engineering source graph,"
+                " claim provenance, native topology, conflict and impact maps."
+                " Return conditional decisions with exact claim bindings and"
+                " independent integrity/architecture audits. Reject mobile"
+                " topology for stationary projects; never authorize physical"
+                " operations from public links or fixture measurement labels."
+            ),
+            inputSchema={
+                "type":"object",
+                "properties":{
+                    "scenario":{
+                        "type":"object",
+                        "description":"Full engineering case: scenario_id, mode, intake, engineering_sources, and optional declared_conflicts",
+                    },
+                },
+                "required":["scenario"],
+            },
+        ),
+        Tool(
             name="hs_plan_salvage",
             description=(
                 "Plan salvage splice from goal + inventory without KiCad compile (~fast). "
@@ -594,6 +615,12 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result = await asyncio.to_thread(
             sdk.validate_virtual_splice_feasibility,
             source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
+    if name == "hs_plan_source_bound_design":
+        result=await asyncio.to_thread(
+            sdk.plan_source_bound_design,
+            scenario=args.get("scenario"),
         )
         return _tool_result(result)
     if name == "hs_plan_salvage":

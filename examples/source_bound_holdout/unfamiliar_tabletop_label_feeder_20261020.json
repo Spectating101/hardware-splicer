@@ -1,0 +1,122 @@
+{
+  "scenario_id": "unfamiliar_tabletop_label_feeder_holdout",
+  "mode": "synthesize",
+  "expected_archetype": "generic_mechatronics",
+  "challenge": {
+    "expected_conflict_count": 0,
+    "identity_continuity_required": true,
+    "description": "Unfamiliar stationary equipment project built from unowned faulty listed components. The goal is source-bound preliminary architecture, not a rover or physical repair."
+  },
+  "engineering_sources": [
+    {
+      "source_id": "ruten_22623851402690",
+      "source_type": "service_note",
+      "uri": "https://www.ruten.com.tw/item/22623851402690/",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:46+00:00",
+      "content_hash": "64570f292202f423b20f691656aec278a4c0e1ccf69901198b86464615f62cd6",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:46+00:00: (A56)【現況出售/殺肉零件機】Symbol Motorola LS2208 一維雷射條碼掃描機（剪線未測） | 露天市集 | 全台最大的網路購物市集",
+        "Seller advertisement observed; original device condition, possession and reusable components unverified"
+      ]
+    },
+    {
+      "source_id": "ruten_21447795842755",
+      "source_type": "service_note",
+      "uri": "https://www.ruten.com.tw/item/21447795842755/",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:47+00:00",
+      "content_hash": "9630ee4ebaca23b96cfa79528569e240b19a684385d14a81b4f10a64f6703129",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:47+00:00: EPSON LQ-680 LQ-680C 點陣印表機 報帳/故障/殺肉機(隨機出貨...) | 露天市集 | 全台最大的網路購物市集",
+        "Seller advertisement observed; original device condition, possession and reusable components unverified"
+      ]
+    },
+    {
+      "source_id": "ruten_22606139676402",
+      "source_type": "service_note",
+      "uri": "https://www.ruten.com.tw/item/22606139676402/",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:47+00:00",
+      "content_hash": "8deedc8d5321f1fa0b8a05a0e61c99d66a143f5ed9d9cc34e6fadc3636078ded",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:47+00:00: 威聯通 QNAP TS-219P II NAS 網路硬碟儲存 主機板 零件 殺肉 | 露天市集 | 全台最大的網路購物市集",
+        "Seller advertisement observed; original device condition, possession and reusable components unverified"
+      ]
+    },
+    {
+      "source_id": "zebra_ls2208_spec",
+      "source_type": "manual",
+      "uri": "https://www.zebra.com/us/en/products/spec-sheets/scanners/general-purpose-scanners/ls2208.html",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:46+00:00",
+      "content_hash": "a5b87cef6305324c4b65b5bfb4ba68deeeee23f02c3f4576e187dd62f25bd8c4",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:46+00:00: LS2208 Handheld Scanner Specification Sheet | Zebra | Zebra",
+        "Manufacturer model family page reobserved; no physical specimen or pinout validation",
+        "Published model-family interface labels: USB, RS232, Keyboard Wedge"
+      ]
+    },
+    {
+      "source_id": "epson_lq680_manual",
+      "source_type": "manual",
+      "uri": "https://support2.epson.net/manuals/english/sidm/lq_680/index.html",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:47+00:00",
+      "content_hash": "7c5bf0d2394d41a7ea24a107b9374022ff4a4334fd0fa95f486f4047007753e0",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:47+00:00: EPSON Manual Web-Site",
+        "Manufacturer model family page reobserved; no physical specimen or pinout validation"
+      ]
+    },
+    {
+      "source_id": "qnap_ts219pii_spec",
+      "source_type": "manual",
+      "uri": "https://www.qnap.com/en-in/product/ts-219p%20ii/specs/hardware",
+      "version": "observed-public-page-2026-10-20",
+      "retrieved_at": "2026-10-19T17:55:48+00:00",
+      "content_hash": "86dcbdc469854f3364bf1ecb37f8c9e4f99ef2e60dd8d863faba58a90b6dfbbb",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Public page title on 2026-10-19T17:55:48+00:00: TS-219P II | Hardware Specs | QNAP (IN)",
+        "Manufacturer model family page reobserved; no physical specimen or pinout validation",
+        "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA"
+      ]
+    }
+  ],
+  "declared_conflicts": [],
+  "intake": {
+    "project_name": "unfamiliar_tabletop_label_feeder_holdout",
+    "goal": "Propose a stationary tabletop barcode-triggered label indexing and logging station using only hypothetically recoverable printer motion, scanner decoding and bare NAS computing, with explicit interface contradictions and an independent safe stop. This is not a mobile rover. None of the devices is owned or characterized.",
+    "salvage_mode": false,
+    "available_parts": [
+      {
+        "name": "seller-listed faulty Epson LQ-680 printer, not owned",
+        "type": "unverified_donor_listing",
+        "quantity": 1
+      },
+      {
+        "name": "seller-listed LS2208 scanner with severed cable, not owned",
+        "type": "unverified_donor_listing",
+        "quantity": 1
+      },
+      {
+        "name": "seller-listed bare QNAP TS-219P II NAS PCB without verified PSU, not owned",
+        "type": "unverified_donor_listing",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "stationary_only": true,
+      "no_unverified_wiring": true,
+      "no_physical_parts_in_custody": true,
+      "independent_stop_required": true,
+      "must_not_imply_vendor_listing_is_physical_inventory": true
+    }
+  }
+}

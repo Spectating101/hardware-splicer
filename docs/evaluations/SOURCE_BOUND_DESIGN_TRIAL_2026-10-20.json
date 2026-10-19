@@ -1,0 +1,1417 @@
+{
+  "baseline_source_agnostic": {
+    "bounded_engineering_candidate_count": 1,
+    "reference_and_gap_triage_count": 2,
+    "rows": [
+      {
+        "detected_archetype": "pan_tilt",
+        "dimensions": {
+          "candidate_synthesis": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "conflict_resolution": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "donor_reuse": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "identity_continuity": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "requirements": {
+            "evidence": [
+              "goal and constraints"
+            ],
+            "satisfied": true
+          },
+          "revision_impact": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "source_provenance": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "source_retention": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "uncertainty_visibility": {
+            "evidence": [
+              "missing information, assumptions, or unresolved references"
+            ],
+            "satisfied": true
+          },
+          "verification_authority": {
+            "evidence": [
+              "acceptance, evidence, safety, and authority boundaries"
+            ],
+            "satisfied": true
+          }
+        },
+        "engineering_source_count": 4,
+        "expected_archetype": "quadruped",
+        "gaps": [
+          "candidate_machine_not_synthesized",
+          "cross_source_identity_not_canonical",
+          "engineering_sources_not_retained",
+          "source_conflicts_not_resolved",
+          "source_provenance_not_pinned"
+        ],
+        "missing_info": [
+          "controller choice",
+          "actuator model/current",
+          "runtime target",
+          "measured dimensions",
+          "mechanical simulation",
+          "bench evidence",
+          "reviewed release scope"
+        ],
+        "mode": "reconstruct",
+        "planning_confidence": 0.73,
+        "scenario_id": "conflicting_quadruped_reconstruction",
+        "schema_version": "hardware_splicer.source_agnostic_benchmark.v1",
+        "score": 48.0,
+        "source_retention_ratio": 0.0,
+        "verdict": "reference_and_gap_triage"
+      },
+      {
+        "detected_archetype": "rover",
+        "dimensions": {
+          "candidate_synthesis": {
+            "evidence": [
+              "archetype plus candidate machine/build"
+            ],
+            "satisfied": true
+          },
+          "conflict_resolution": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "donor_reuse": {
+            "evidence": [
+              "resolved donor modules and splice graph"
+            ],
+            "satisfied": true
+          },
+          "identity_continuity": {
+            "evidence": [
+              "canonical identities across evidence and design objects"
+            ],
+            "satisfied": true
+          },
+          "requirements": {
+            "evidence": [
+              "goal and constraints"
+            ],
+            "satisfied": true
+          },
+          "revision_impact": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "source_provenance": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "source_retention": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "uncertainty_visibility": {
+            "evidence": [
+              "missing information, assumptions, or unresolved references"
+            ],
+            "satisfied": true
+          },
+          "verification_authority": {
+            "evidence": [
+              "acceptance, evidence, safety, and authority boundaries"
+            ],
+            "satisfied": true
+          }
+        },
+        "engineering_source_count": 4,
+        "expected_archetype": "rover",
+        "gaps": [
+          "engineering_sources_not_retained",
+          "source_conflicts_not_resolved",
+          "source_provenance_not_pinned"
+        ],
+        "missing_info": [
+          "runtime target",
+          "measured dimensions",
+          "mechanical simulation",
+          "bench evidence",
+          "reviewed release scope"
+        ],
+        "mode": "repair",
+        "planning_confidence": 0.83,
+        "scenario_id": "donor_repair_rover",
+        "schema_version": "hardware_splicer.source_agnostic_benchmark.v1",
+        "score": 70.0,
+        "source_retention_ratio": 0.25,
+        "verdict": "structured_project_assistant"
+      },
+      {
+        "detected_archetype": "rover",
+        "dimensions": {
+          "candidate_synthesis": {
+            "evidence": [
+              "archetype plus candidate machine/build"
+            ],
+            "satisfied": true
+          },
+          "conflict_resolution": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "donor_reuse": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "identity_continuity": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "requirements": {
+            "evidence": [
+              "goal and constraints"
+            ],
+            "satisfied": true
+          },
+          "revision_impact": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "source_provenance": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "source_retention": {
+            "evidence": [],
+            "satisfied": false
+          },
+          "uncertainty_visibility": {
+            "evidence": [
+              "missing information, assumptions, or unresolved references"
+            ],
+            "satisfied": true
+          },
+          "verification_authority": {
+            "evidence": [
+              "acceptance, evidence, safety, and authority boundaries"
+            ],
+            "satisfied": true
+          }
+        },
+        "engineering_source_count": 4,
+        "expected_archetype": "rover",
+        "gaps": [
+          "baseline_to_candidate_impact_missing",
+          "cross_source_identity_not_canonical",
+          "engineering_sources_not_retained",
+          "source_conflicts_not_resolved",
+          "source_provenance_not_pinned"
+        ],
+        "missing_info": [
+          "controller choice",
+          "actuator model/current",
+          "runtime target",
+          "measured dimensions",
+          "mechanical simulation",
+          "bench evidence",
+          "reviewed release scope"
+        ],
+        "mode": "evolve",
+        "planning_confidence": 0.83,
+        "scenario_id": "field_failure_payload_revision",
+        "schema_version": "hardware_splicer.source_agnostic_benchmark.v1",
+        "score": 50.0,
+        "source_retention_ratio": 0.0,
+        "verdict": "reference_and_gap_triage"
+      },
+      {
+        "detected_archetype": "rover",
+        "dimensions": {
+          "candidate_synthesis": {
+            "evidence": [
+              "archetype plus candidate machine/build"
+            ],
+            "satisfied": true
+          },
+          "conflict_resolution": {
+            "evidence": [
+              "conflict identity and explicit disposition"
+            ],
+            "satisfied": true
+          },
+          "donor_reuse": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "identity_continuity": {
+            "evidence": [
+              "canonical identities across evidence and design objects"
+            ],
+            "satisfied": true
+          },
+          "requirements": {
+            "evidence": [
+              "goal and constraints"
+            ],
+            "satisfied": true
+          },
+          "revision_impact": {
+            "evidence": [
+              "not required"
+            ],
+            "satisfied": true
+          },
+          "source_provenance": {
+            "evidence": [
+              "source identity, revision/hash, and authority ceiling"
+            ],
+            "satisfied": true
+          },
+          "source_retention": {
+            "evidence": [
+              "retained 100% of source identities"
+            ],
+            "satisfied": true
+          },
+          "uncertainty_visibility": {
+            "evidence": [
+              "missing information, assumptions, or unresolved references"
+            ],
+            "satisfied": true
+          },
+          "verification_authority": {
+            "evidence": [
+              "acceptance, evidence, safety, and authority boundaries"
+            ],
+            "satisfied": true
+          }
+        },
+        "engineering_source_count": 0,
+        "expected_archetype": "rover",
+        "gaps": [],
+        "missing_info": [
+          "measured dimensions",
+          "mechanical simulation",
+          "bench evidence",
+          "reviewed release scope"
+        ],
+        "mode": "synthesize",
+        "planning_confidence": 0.88,
+        "scenario_id": "requirement_only_inspection_rover",
+        "schema_version": "hardware_splicer.source_agnostic_benchmark.v1",
+        "score": 100.0,
+        "source_retention_ratio": 1.0,
+        "verdict": "bounded_engineering_candidate"
+      }
+    ],
+    "scenario_count": 4,
+    "schema_version": "hardware_splicer.source_agnostic_suite.v1",
+    "structured_project_assistant_count": 1,
+    "unsupported_count": 0
+  },
+  "cases": [
+    {
+      "candidate": {
+        "archetype": "quadruped",
+        "architecture_consistency": {
+          "engineered_architecture_verified": false,
+          "mobile_topology_mismatch_detected": false,
+          "native_topology_usable": true,
+          "stationary_only_required": false
+        },
+        "baseline_revision": null,
+        "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+        "change_impact_target_ids": [
+          "conflicting_quadruped_reconstruction",
+          "system"
+        ],
+        "conditional_design_recommendation_only": true,
+        "decisions": [
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Produce one coherent candidate revision, never splice servo/PWM and brushless control generations without verifying model and revision.",
+            "decision_id": "select_revision_boundary",
+            "evidence_needed_to_execute": [
+              "Fetch and pin manufacturer/repository revision-specific BOM, mechanical drawings, controller firmware and actuator driver contracts"
+            ],
+            "original_input_constraints": {},
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-eb9f27634333",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "925255f8ef36e599b473e72e274835ef41d8277a175928d598b3f64da010fb71",
+                "source_id": "pupper_v1_repo",
+                "verbatim_claim": "twelve servo-class actuators"
+              },
+              {
+                "claim_id": "claim-5b8b7f5108eb",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "7a9a18792990139b21ddc2904878d3bb05a874c8b8020a78f86f8b0f749ccc55",
+                "source_id": "pupper_v1_build_guide",
+                "verbatim_claim": "legacy mechanical assembly"
+              },
+              {
+                "claim_id": "claim-219ee1213db5",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "4b2b9182aa5fe6fbc0e230dd9796a52e343d92be494ce96b322e8a06fbd2ce92",
+                "source_id": "pupper_v3_announcement",
+                "verbatim_claim": "brushless actuators"
+              },
+              {
+                "claim_id": "claim-c7ed7d82bbd0",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "d9ba62453016550504dfea7689503153068917f8981606e7249667679c544d5b",
+                "source_id": "pupper_v3_announcement",
+                "verbatim_claim": "new mechanical and control architecture"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          },
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Retain 12 declared degrees of freedom as design requirement; actuator, driver and controller compatibility remain unassigned.",
+            "decision_id": "map_actuation_and_control",
+            "evidence_needed_to_execute": [
+              "Resolve revision-specific actuator IDs, rated voltage/current, controller pinout, rail separation and first-motion interlocks"
+            ],
+            "original_input_constraints": {
+              "degrees_of_freedom": 12,
+              "joints_per_leg": 3,
+              "leg_count": 4
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-eb9f27634333",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "925255f8ef36e599b473e72e274835ef41d8277a175928d598b3f64da010fb71",
+                "source_id": "pupper_v1_repo",
+                "verbatim_claim": "twelve servo-class actuators"
+              },
+              {
+                "claim_id": "claim-90e198438022",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "9638d62db48aa337b86258462ca0773f69273f3da43f8f30f5dbf751aebb9956",
+                "source_id": "pupper_v1_repo",
+                "verbatim_claim": "Raspberry Pi control"
+              },
+              {
+                "claim_id": "claim-9e16afde9e74",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "7af8e1a35c9f01711d9534b5d144a85f163d42d35d6e8dc8a977455d3ea71a6d",
+                "source_id": "pupper_v1_repo",
+                "verbatim_claim": "PWM hardware interface"
+              },
+              {
+                "claim_id": "claim-219ee1213db5",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "4b2b9182aa5fe6fbc0e230dd9796a52e343d92be494ce96b322e8a06fbd2ce92",
+                "source_id": "pupper_v3_announcement",
+                "verbatim_claim": "brushless actuators"
+              },
+              {
+                "claim_id": "claim-0028f4c65d2a",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "e565478537f8ddbd8638552178cae6fc0525b4a419ffa8fd000418014ab04eb6",
+                "source_id": "pupper_v3_announcement",
+                "verbatim_claim": "Raspberry Pi 5"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          }
+        ],
+        "engineering_readiness_from_native_planner": "blocked",
+        "engineering_source_claim_count": 18,
+        "goal": "Reconstruct one coherent twelve-degree-of-freedom quadruped build from mixed Pupper references without combining incompatible revisions. Produce explicit conflicts, unresolved identities, a selected revision boundary, and a safe first-motion plan.",
+        "mandatory_open_gates": [
+          "No externally authenticated measurements or direct donor component observations are present in this experiment",
+          "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device",
+          "At least one declared engineering-source conflict remains blocking and must not be silently selected"
+        ],
+        "mode": "reconstruct",
+        "model_generated_or_inferred_topology": true,
+        "named_component_ids": [
+          "IMU",
+          "battery-pack",
+          "four-leg-assemblies",
+          "robot-computer",
+          "twelve-candidate-joint-actuators"
+        ],
+        "new_product_physically_functional": false,
+        "physical_fabrication_or_power_authorized": false,
+        "physical_specimen_evidence_authenticated": false,
+        "proposal_is_physical_build": false,
+        "raw_native_planner_archetype": "quadruped",
+        "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF",
+        "repair_completed": false,
+        "scenario_id": "conflicting_quadruped_reconstruction",
+        "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+        "source_conflicts": [
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-f8749ed6a099",
+              "claim-e14c3ba917d8"
+            ],
+            "conflict_id": "actuator_family",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          },
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-b99d1f1e816e",
+              "claim-7d11d3043746"
+            ],
+            "conflict_id": "compute_platform",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          },
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-ded40080c7d4",
+              "claim-f4d017fa0354"
+            ],
+            "conflict_id": "mechanical_revision",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          },
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-e34a625db400",
+              "claim-8f5199f845e9"
+            ],
+            "conflict_id": "control_stack",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          }
+        ],
+        "source_integrity": [
+          {
+            "expected_source_sha256": "d0dc7901c0f435bac8d4ad58415452b1566b8d17ccead8213a2f8bb538598f23",
+            "expected_uri": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+            "expected_version": "master-eol",
+            "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-90e198438022",
+              "claim-9e16afde9e74",
+              "claim-eb9f27634333"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "pupper_v1_repo",
+            "source_record_sha256": "93539a6cba31f1b2e3e20672631402ee92b084a4372251293734811b3a18e9b4"
+          },
+          {
+            "expected_source_sha256": "a2acbb9439bfae255955473c1d116668a79751972898e850ba8b0e16db33b1e3",
+            "expected_uri": "https://pupper.readthedocs.io/",
+            "expected_version": "v1-guide",
+            "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-5b8b7f5108eb",
+              "claim-d80d0602644b"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "pupper_v1_build_guide",
+            "source_record_sha256": "af4e3fa257e308d294f4e57bb953f26d84eb68ac442247ac1784e9e445e26ecd"
+          },
+          {
+            "expected_source_sha256": "803d85b8d5655efe1b79dea46586a39c9c3d839e84557b35ea962a15dc012a90",
+            "expected_uri": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+            "expected_version": "v3-preview",
+            "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-0028f4c65d2a",
+              "claim-219ee1213db5",
+              "claim-c7ed7d82bbd0"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "pupper_v3_announcement",
+            "source_record_sha256": "c07608510d89411c890d51b9637484c491d500b2fd23b58f7cb29374d08693cb"
+          },
+          {
+            "expected_source_sha256": "0b3ba1c87010428cb6911827e921d234dff10239c85f91c1b6dc0d3745334dec",
+            "expected_uri": "https://www.youtube.com/results?search_query=Stanford+Pupper+assembly",
+            "expected_version": "unresolved-video-revision",
+            "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-4749fbbc3ad7",
+              "claim-cfb34e41c06c"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "assembly_video_observation",
+            "source_record_sha256": "ef499f72b869bc8302fc5aef0ff5f65a6fa6e05f64f9250a4b07b8618294ba76"
+          }
+        ],
+        "source_scenario_digest": "e5837b2f9f4780aec0d99578ef9cfb35dcb4e0f4f2b417db1555d64a16593d97",
+        "source_trace_complete": true,
+        "topology_actuator_count": 12,
+        "topology_joint_count": 12,
+        "topology_reference_id": "topology-5bb08facfe37",
+        "unresolved_blocking_source_conflicts": 4,
+        "verified_usable_donor_count": 0
+      },
+      "independent_audit": {
+        "claim_graph_conflicts_checked": 4,
+        "conditional_candidate_accepted": true,
+        "engineering_decisions_checked": 2,
+        "explicit_topology_rejection_was_honestly_recorded": false,
+        "fabrication_authorized": false,
+        "failures": [],
+        "passes_independent_architecture_relevance": true,
+        "passes_independent_evidence_integrity": true,
+        "physically_validated": false,
+        "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+        "source_claim_bindings_checked": 9,
+        "source_metadata_integrity_checked": 4
+      },
+      "scenario_id": "conflicting_quadruped_reconstruction"
+    },
+    {
+      "candidate": {
+        "archetype": "rover",
+        "architecture_consistency": {
+          "engineered_architecture_verified": false,
+          "mobile_topology_mismatch_detected": false,
+          "native_topology_usable": true,
+          "stationary_only_required": false
+        },
+        "baseline_revision": null,
+        "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+        "change_impact_target_ids": [
+          "candidate-geared-DC-motors",
+          "donor_repair_rover",
+          "firmware-control",
+          "mechanical-structure",
+          "system"
+        ],
+        "conditional_design_recommendation_only": true,
+        "decisions": [
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Exclude the reported burned driver from any powered reuse proposal; characterize the actual driver replacement and wiring separately.",
+            "decision_id": "isolate_failed_driver",
+            "evidence_needed_to_execute": [
+              "Record actual board/driver markings and damage, manufacturer package ratings, stalled motor current and an independently bounded power path"
+            ],
+            "original_input_constraints": {
+              "battery_voltage_v": 12,
+              "first_motion_current_limit_a": 1.0
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-5b37b3d7ece4",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "c729f1da818a8d68167d9ae619bce552464ffa83f7b08addaf1d3ee2008c9796",
+                "source_id": "damaged_rover_photos",
+                "verbatim_claim": "one driver visibly burned"
+              },
+              {
+                "claim_id": "claim-5f644e84161d",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "de49210670c1491b7b0b7f82e572da74e75ebe85e5331c887680625b231b7979",
+                "source_id": "candidate_driver_datasheet",
+                "verbatim_claim": "continuous current rating"
+              },
+              {
+                "claim_id": "claim-55c2ec737564",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "9b3e72532517491a53e98a87a28b77677e65c6ec126f1f542d7c2185a7783428",
+                "source_id": "candidate_driver_datasheet",
+                "verbatim_claim": "thermal protection"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          },
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Treat all four proposed motors as unverified until individual identities and safe matching pair are measured; do not assume any particular two are compatible.",
+            "decision_id": "screen_drive_motor_pair",
+            "evidence_needed_to_execute": [
+              "Identify two actual motors and their individually measured winding, speed/load and current characteristics"
+            ],
+            "original_input_constraints": {
+              "maximum_speed_mps": 0.25,
+              "mismatched_motor_must_be_rejected_or_derated": true
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-8659848748ea",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "d7355551ddd64e92103dd25a7b55c55a13e43df6af038c69088f5be4d7dcaafb",
+                "source_id": "damaged_rover_photos",
+                "verbatim_claim": "four motors installed"
+              },
+              {
+                "claim_id": "claim-0c02c87cff53",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "891fed63db9d117e6d020125a8bb466b39cc080043d28712045b221711bfccbf",
+                "source_id": "motor_measurements",
+                "verbatim_claim": "three motors have matching resistance"
+              },
+              {
+                "claim_id": "claim-8f3f8fffb00c",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "f974b74483cf3f5460fce481d9b2a30817fc088164c38c484d723e5cde78d474",
+                "source_id": "motor_measurements",
+                "verbatim_claim": "one motor differs materially"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          }
+        ],
+        "engineering_readiness_from_native_planner": "blocked",
+        "engineering_source_claim_count": 14,
+        "goal": "Recover a supervised low-speed rover from a damaged four-wheel donor chassis, retaining only measured-compatible motors and safe donor electronics. Replace the burned driver, reconstruct the pin map, and produce a current-limited bring-up sequence.",
+        "mandatory_open_gates": [
+          "No externally authenticated measurements or direct donor component observations are present in this experiment",
+          "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device",
+          "At least one declared engineering-source conflict remains blocking and must not be silently selected",
+          "Damaged donor identities and measured-compatible motor pair remain unverified"
+        ],
+        "mode": "repair",
+        "model_generated_or_inferred_topology": true,
+        "named_component_ids": [
+          "12-V-bench-battery",
+          "BTS7960-donor-motor-drivers",
+          "ESP32-donor-controller",
+          "candidate-geared-DC-motors",
+          "current-limited-bench-supply",
+          "damaged-four-wheel-chassis",
+          "multimeter"
+        ],
+        "new_product_physically_functional": false,
+        "physical_fabrication_or_power_authorized": false,
+        "physical_specimen_evidence_authenticated": false,
+        "proposal_is_physical_build": false,
+        "raw_native_planner_archetype": "rover",
+        "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF",
+        "repair_completed": false,
+        "scenario_id": "donor_repair_rover",
+        "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+        "source_conflicts": [
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-5854f9e3c662",
+              "claim-43313e82bac3"
+            ],
+            "conflict_id": "motor_population",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          },
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-eab6d777821b",
+              "claim-b9cb1fc4cc14"
+            ],
+            "conflict_id": "driver_current",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          }
+        ],
+        "source_integrity": [
+          {
+            "expected_source_sha256": "0521c950c8c9f27f3083f7bec802bd2a3dd838ce15cd3284cd8e0acfe0831b3c",
+            "expected_uri": "evidence://repair/damaged-rover-photos",
+            "expected_version": "capture-1",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-5b37b3d7ece4",
+              "claim-8659848748ea",
+              "claim-e29e4c35d964"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "damaged_rover_photos",
+            "source_record_sha256": "831c86243f2f723ee4ee969f4282edf71690cce8502cbb39850cd4203c82b869"
+          },
+          {
+            "expected_source_sha256": "489c6fd6c632c080b7a8bbf448c23c766eaaf660cb48cb81ff74539e95f43c97",
+            "expected_uri": "evidence://repair/motor-resistance-speed",
+            "expected_version": "bench-1",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-0c02c87cff53",
+              "claim-8f3f8fffb00c"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "motor_measurements",
+            "source_record_sha256": "00658bcd0fd3320e4de2ef1d6f073db484f6e07da1aab1da0f959c84d2483c9a"
+          },
+          {
+            "expected_source_sha256": "bbdb56108eb86d7e5189d514b454d8eba6d7548631daeed76f0da7214718767c",
+            "expected_uri": "evidence://repair/driver-datasheet",
+            "expected_version": "rev-c",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-01945f85a138",
+              "claim-55c2ec737564",
+              "claim-5f644e84161d"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "candidate_driver_datasheet",
+            "source_record_sha256": "40b1ff8880cdd44a2b676a5359c86f87363b21aece74e3664374f1f9b72a749d"
+          },
+          {
+            "expected_source_sha256": "09f741be04706ade58a9631e8cbaa1a70b4ea2fc0d14feede472446d8487b25e",
+            "expected_uri": "evidence://repair/original-firmware.bin",
+            "expected_version": "unknown",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-0680fbd11c5b",
+              "claim-679d1de6caa8"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "old_firmware_binary",
+            "source_record_sha256": "44e1969c46d9c6b69b31766bc785845a4f812138d64bafae1d04515c431e450b"
+          }
+        ],
+        "source_scenario_digest": "d17bbf36e830a258d875912ea9705a5c29b6a8ed991d4f8db5087358a98d934f",
+        "source_trace_complete": true,
+        "topology_actuator_count": 2,
+        "topology_joint_count": 2,
+        "topology_reference_id": "topology-0fef01bba462",
+        "unresolved_blocking_source_conflicts": 2,
+        "verified_usable_donor_count": 0
+      },
+      "independent_audit": {
+        "claim_graph_conflicts_checked": 2,
+        "conditional_candidate_accepted": true,
+        "engineering_decisions_checked": 2,
+        "explicit_topology_rejection_was_honestly_recorded": false,
+        "fabrication_authorized": false,
+        "failures": [],
+        "passes_independent_architecture_relevance": true,
+        "passes_independent_evidence_integrity": true,
+        "physically_validated": false,
+        "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+        "source_claim_bindings_checked": 6,
+        "source_metadata_integrity_checked": 4
+      },
+      "scenario_id": "donor_repair_rover"
+    },
+    {
+      "candidate": {
+        "archetype": "rover",
+        "architecture_consistency": {
+          "engineered_architecture_verified": false,
+          "mobile_topology_mismatch_detected": false,
+          "native_topology_usable": true,
+          "stationary_only_required": false
+        },
+        "baseline_revision": 7,
+        "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+        "change_impact_target_ids": [
+          "base-link",
+          "depth-camera-payload",
+          "field_failure_payload_revision",
+          "firmware-control",
+          "left-drive-actuator",
+          "system",
+          "topology-05e0ce397f02"
+        ],
+        "conditional_design_recommendation_only": true,
+        "decisions": [
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Prefer investigating a lower or redistributed camera payload, but do not calculate a safe tipping angle without total center of mass, track width and acceleration.",
+            "decision_id": "reassess_payload_stability",
+            "evidence_needed_to_execute": [
+              "Measure revised mass distribution, rover wheelbase/track, physical center of mass, wheel slip and measured dynamic tilt"
+            ],
+            "original_input_constraints": {
+              "current_payload_height_mm": 310,
+              "payload_mass_g": 620,
+              "static_tilt_margin_deg": 15
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-4ccb31470e57",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "1c47360b0ef37cef8e8af9ddcdba86edb91e0fbfe0c8d69d49a5331f6646cadf",
+                "source_id": "baseline_project_snapshot",
+                "verbatim_claim": "stable without camera mast"
+              },
+              {
+                "claim_id": "claim-ad91940f7e11",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "8aa6e9832a0d821357cba3339132586682716dffcc38c7a59703d083107670be",
+                "source_id": "field_telemetry_run_18",
+                "verbatim_claim": "pitch excursion precedes tip event"
+              },
+              {
+                "claim_id": "claim-e4a66990e52c",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "e1bcee5a54dec2db09e3759afe15a37b34f5513ecf87115bdee3b327338c8b1f",
+                "source_id": "payload_measurements",
+                "verbatim_claim": "camera mast mass 620 g"
+              },
+              {
+                "claim_id": "claim-612cb87ae113",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "adfd3fd34da31f325bd16b29461a2c613b7c8573c27da9bf248069492a6d76ef",
+                "source_id": "payload_measurements",
+                "verbatim_claim": "payload center is 310 mm above deck"
+              },
+              {
+                "claim_id": "claim-3aee6d3b3b85",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "45b0cbcc9225f0fb916f5eabea07f5b26108b7b66c1806930899c8f1c3269965",
+                "source_id": "operator_field_log",
+                "verbatim_claim": "tips during fast turn"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          },
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Investigate acceleration/camera-startup rail droop and power-path isolation with baseline revision pinned; do not select regulator or claim a stable rail without logged transients.",
+            "decision_id": "separate_and_validate_logic_rail",
+            "evidence_needed_to_execute": [
+              "Acquire timestamp-aligned voltage/current logs, actual regulator ratings, ground topology and load-step response"
+            ],
+            "original_input_constraints": {
+              "maximum_speed_mps": 0.3,
+              "no_logic_rail_brownout": true
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [
+              {
+                "claim_id": "claim-605bd0fee522",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "f997927548653a1805e8ebdb9fed14599c833213663a6f868250bb52717053e9",
+                "source_id": "field_telemetry_run_18",
+                "verbatim_claim": "logic rail drops during acceleration"
+              },
+              {
+                "claim_id": "claim-e35e863f874f",
+                "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+                "original_claim_sha256": "3ef9ff2b2f0dcfae3026deed35c7290ad3fc1d1705d9ac2bd061ebcbf0c1ae31",
+                "source_id": "operator_field_log",
+                "verbatim_claim": "reboots after simultaneous steering and camera startup"
+              }
+            ],
+            "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+          }
+        ],
+        "engineering_readiness_from_native_planner": "blocked",
+        "engineering_source_claim_count": 10,
+        "goal": "Revise an indoor inspection rover after a tall camera mast caused tipping and logic-rail brownouts. Preserve baseline identities, lower or redistribute the payload, separate noisy power loads, update the operating envelope, and define regression tests before returning to field use.",
+        "mandatory_open_gates": [
+          "No externally authenticated measurements or direct donor component observations are present in this experiment",
+          "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device",
+          "At least one declared engineering-source conflict remains blocking and must not be silently selected",
+          "Baseline release scope does not transfer to changed payload geometry or power network"
+        ],
+        "mode": "evolve",
+        "model_generated_or_inferred_topology": true,
+        "named_component_ids": [
+          "12-V-battery-pack",
+          "5-V-regulator",
+          "IMU",
+          "adjustable-camera-mast",
+          "current-logger",
+          "depth-camera-payload",
+          "revision-7-differential-rover"
+        ],
+        "new_product_physically_functional": false,
+        "physical_fabrication_or_power_authorized": false,
+        "physical_specimen_evidence_authenticated": false,
+        "proposal_is_physical_build": false,
+        "raw_native_planner_archetype": "rover",
+        "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF",
+        "repair_completed": false,
+        "scenario_id": "field_failure_payload_revision",
+        "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+        "source_conflicts": [
+          {
+            "blocking": true,
+            "claim_ids": [
+              "claim-175af73cf609",
+              "claim-d2a31b3a5a47"
+            ],
+            "conflict_id": "baseline_release_scope",
+            "disposition": "blocked_pending_revision_selection",
+            "source_evidence_selected": false
+          }
+        ],
+        "source_integrity": [
+          {
+            "expected_source_sha256": "2d00a65de4b5986da3eb54936170b24a5614b14d91fb9b6b6b7ec4b7fbffab90",
+            "expected_uri": "evidence://field-revision/project-r7",
+            "expected_version": "revision-7",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-1e5c232fb3f4",
+              "claim-4ccb31470e57"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "baseline_project_snapshot",
+            "source_record_sha256": "7252817ea1bc332f00605fb4632af232a4fb04b87945d2ef53e4bf81cf63bee8"
+          },
+          {
+            "expected_source_sha256": "88b7965bdda1ea741fe11c5a6aa2959703b794d62d417a97bd52f414a505395a",
+            "expected_uri": "evidence://field-revision/run-18-telemetry",
+            "expected_version": "run-18",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-605bd0fee522",
+              "claim-ad91940f7e11"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "field_telemetry_run_18",
+            "source_record_sha256": "1c23d4f2c2460c898f4970506ad02edeb1b230bcb276562a48633d34a9b060a1"
+          },
+          {
+            "expected_source_sha256": "9bb6e553b86b8f37ad3aa5b2a0d0f7b7f43dc021da4e131749940c048e1809ec",
+            "expected_uri": "evidence://field-revision/payload-calipers-scale",
+            "expected_version": "capture-2",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-612cb87ae113",
+              "claim-e4a66990e52c"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "payload_measurements",
+            "source_record_sha256": "9356f46d9b3f9ec4705c722bf16aba5fe93923d564a913836b65a9b87c6e959a"
+          },
+          {
+            "expected_source_sha256": "194ebe6b0ff7faf98706d2dffdf0a7c14e27afc2091c0858bb17f752c0dbb825",
+            "expected_uri": "evidence://field-revision/operator-log",
+            "expected_version": "log-18",
+            "external_attestation_status": "UNMOUNTED_FIXTURE_REFERENCE_NOT_PHYSICAL_PROOF",
+            "retained_source_record": true,
+            "source_claim_ids": [
+              "claim-3aee6d3b3b85",
+              "claim-e35e863f874f"
+            ],
+            "source_claims_physical_authority": false,
+            "source_id": "operator_field_log",
+            "source_record_sha256": "73b3b43003068c58bfb96ac176f6bf22cfbdd150bed8e22eb87afad282162984"
+          }
+        ],
+        "source_scenario_digest": "43991f3336fb1001a2156ea1393bcf131c3b6944dcecb600904a2fa00333cc0b",
+        "source_trace_complete": true,
+        "topology_actuator_count": 2,
+        "topology_joint_count": 2,
+        "topology_reference_id": "topology-05e0ce397f02",
+        "unresolved_blocking_source_conflicts": 1,
+        "verified_usable_donor_count": 0
+      },
+      "independent_audit": {
+        "claim_graph_conflicts_checked": 1,
+        "conditional_candidate_accepted": true,
+        "engineering_decisions_checked": 2,
+        "explicit_topology_rejection_was_honestly_recorded": false,
+        "fabrication_authorized": false,
+        "failures": [],
+        "passes_independent_architecture_relevance": true,
+        "passes_independent_evidence_integrity": true,
+        "physically_validated": false,
+        "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+        "source_claim_bindings_checked": 7,
+        "source_metadata_integrity_checked": 4
+      },
+      "scenario_id": "field_failure_payload_revision"
+    },
+    {
+      "candidate": {
+        "archetype": "rover",
+        "architecture_consistency": {
+          "engineered_architecture_verified": false,
+          "mobile_topology_mismatch_detected": false,
+          "native_topology_usable": true,
+          "stationary_only_required": false
+        },
+        "baseline_revision": null,
+        "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+        "change_impact_target_ids": [
+          "12-v-geared-encoder-motors",
+          "base-link",
+          "requirement_only_inspection_rover",
+          "system",
+          "topology-729b06af4ef4"
+        ],
+        "conditional_design_recommendation_only": true,
+        "decisions": [
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Propose a two-driven-wheel reference topology with conditional inspection payload clearance; do not claim mechanical fit until actual geometry is verified.",
+            "decision_id": "dimension_rover_envelope",
+            "evidence_needed_to_execute": [
+              "Produce measured motor/wheel/frame CAD dimensions and a collision envelope"
+            ],
+            "original_input_constraints": {
+              "maximum_width_mm": 250,
+              "payload_g": 500,
+              "threshold_height_mm": 15
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [],
+            "support_type": "REQUIREMENT_ONLY"
+          },
+          {
+            "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+            "candidate_action": "Energy requirement is E_Wh >= runtime_h * average_input_power_W / battery_to_load_efficiency; actual power and efficiency are unknown.",
+            "decision_id": "derive_runtime_power_budget",
+            "evidence_needed_to_execute": [
+              "Measure average/peak current for drive, computing, sensors and camera; confirm battery chemistry and cutoff limits"
+            ],
+            "original_input_constraints": {
+              "battery_voltage_v": 12,
+              "maximum_noise_dba": 55,
+              "runtime_min": 90
+            },
+            "safe_to_execute_now": false,
+            "source_claims": [],
+            "support_type": "REQUIREMENT_ONLY"
+          }
+        ],
+        "engineering_readiness_from_native_planner": "blocked",
+        "engineering_source_claim_count": 0,
+        "goal": "Design a quiet compact indoor inspection rover that fits through a 250 mm gap, crosses a 15 mm threshold, carries a 500 g camera payload, operates for 90 minutes, and can be safely stopped by the operator. There is no canonical reference design to copy.",
+        "mandatory_open_gates": [
+          "No externally authenticated measurements or direct donor component observations are present in this experiment",
+          "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device"
+        ],
+        "mode": "synthesize",
+        "model_generated_or_inferred_topology": true,
+        "named_component_ids": [
+          "12-V-battery-pack",
+          "12-V-geared-encoder-motors",
+          "2D-lidar",
+          "ESP32-S3-controller",
+          "IMU",
+          "Raspberry-Pi-5",
+          "current-limited-bench-supply",
+          "depth-camera",
+          "dual-motor-driver",
+          "multimeter"
+        ],
+        "new_product_physically_functional": false,
+        "physical_fabrication_or_power_authorized": false,
+        "physical_specimen_evidence_authenticated": false,
+        "proposal_is_physical_build": false,
+        "raw_native_planner_archetype": "rover",
+        "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF",
+        "repair_completed": false,
+        "scenario_id": "requirement_only_inspection_rover",
+        "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+        "source_conflicts": [],
+        "source_integrity": [],
+        "source_scenario_digest": "9ba6580fad4c60082c57a138bc2ce0f3e68a80d2c54d541de80b8756236a892f",
+        "source_trace_complete": true,
+        "topology_actuator_count": 2,
+        "topology_joint_count": 2,
+        "topology_reference_id": "topology-729b06af4ef4",
+        "unresolved_blocking_source_conflicts": 0,
+        "verified_usable_donor_count": 0
+      },
+      "independent_audit": {
+        "claim_graph_conflicts_checked": 0,
+        "conditional_candidate_accepted": true,
+        "engineering_decisions_checked": 2,
+        "explicit_topology_rejection_was_honestly_recorded": false,
+        "fabrication_authorized": false,
+        "failures": [],
+        "passes_independent_architecture_relevance": true,
+        "passes_independent_evidence_integrity": true,
+        "physically_validated": false,
+        "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+        "source_claim_bindings_checked": 0,
+        "source_metadata_integrity_checked": 0
+      },
+      "scenario_id": "requirement_only_inspection_rover"
+    }
+  ],
+  "conditional_design_count": 4,
+  "fabrication_authorized_count": 0,
+  "integrity_audited_design_count": 4,
+  "note": "Canonical source graph and topology produce conditional decisions. Earlier fixture claims are input data and have NOT been independently instrument-authenticated.",
+  "physically_verified_design_count": 0,
+  "schema_version": "hardware_splicer.source_bound_design_suite.v1",
+  "unseen_public_source_holdout": {
+    "candidate": {
+      "archetype": "UNRESOLVED_STATIONARY_EQUIPMENT",
+      "architecture_consistency": {
+        "engineered_architecture_verified": false,
+        "mobile_topology_mismatch_detected": true,
+        "native_topology_usable": false,
+        "stationary_only_required": true
+      },
+      "baseline_revision": null,
+      "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+      "change_impact_target_ids": [
+        "left-drive-actuator",
+        "system",
+        "unfamiliar_tabletop_label_feeder_holdout"
+      ],
+      "conditional_design_recommendation_only": true,
+      "decisions": [
+        {
+          "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+          "candidate_action": "Propose functional blocks for the stated product, but do not substitute a generic rover or infer a compatible electrical design from source names.",
+          "decision_id": "decompose_requested_product_into_subsystems",
+          "evidence_needed_to_execute": [
+            "Confirm actual sensor, control, motion, mechanical and power contracts for every proposed subsystem"
+          ],
+          "original_input_constraints": {},
+          "safe_to_execute_now": false,
+          "source_claims": [
+            {
+              "claim_id": "claim-cf9811f80f95",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "351426caea3ee83ae358d7320bef2b3dce8d52f2bd4dfb8df8641acd440ea0c5",
+              "source_id": "ruten_22623851402690",
+              "verbatim_claim": "Public page title on 2026-10-19T17:55:46+00:00: (A56)【現況出售/殺肉零件機】Symbol Motorola LS2208 一維雷射條碼掃描機（剪線未測） | 露天市集 | 全台最大的網路購物市集"
+            },
+            {
+              "claim_id": "claim-1c0b5c905e61",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "1746b45c244cf2eef1bd15012aea1ab6a537601f8d52e43a7638a0136553bf64",
+              "source_id": "zebra_ls2208_spec",
+              "verbatim_claim": "Public page title on 2026-10-19T17:55:46+00:00: LS2208 Handheld Scanner Specification Sheet | Zebra | Zebra"
+            },
+            {
+              "claim_id": "claim-65acf8d38d11",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "c22f3e361332e3cd6375d2e50591f39de20a650cfc0fe15114f450d123c057b1",
+              "source_id": "zebra_ls2208_spec",
+              "verbatim_claim": "Published model-family interface labels: USB, RS232, Keyboard Wedge"
+            },
+            {
+              "claim_id": "claim-f5fa8e5a77b3",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "a4f4eec896aa96013c52487aa739be5c1d210d2c0e2c1c15a6203bf363add1dd",
+              "source_id": "qnap_ts219pii_spec",
+              "verbatim_claim": "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA"
+            }
+          ],
+          "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+        },
+        {
+          "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+          "candidate_action": "Keep seller-listed devices as discovery hypotheses; no usable donor component or safe-to-connect interface is known.",
+          "decision_id": "reject_unverified_source_hardware_as_owned_inventory",
+          "evidence_needed_to_execute": [
+            "Identify an actual acquired specimen, record its model/revision, document original functionality, then characterize relevant electrical/mechanical interfaces"
+          ],
+          "original_input_constraints": {},
+          "safe_to_execute_now": false,
+          "source_claims": [
+            {
+              "claim_id": "claim-3abc77a1d01d",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "4947161c0233e62811fe76f86753ada82582c3ae958b1154d4e76317c1e03368",
+              "source_id": "ruten_22623851402690",
+              "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            },
+            {
+              "claim_id": "claim-f6418cd6e82b",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "8fa5e72c9d73d19c701783e9f4abe0b54d98fb2f69d91a0958cbc2cab994f392",
+              "source_id": "ruten_21447795842755",
+              "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            },
+            {
+              "claim_id": "claim-aa881b8f73f4",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "bf71f0d8c3fc4bc4067bd2138f584f5c688274badf60c759bcdded38dc4c38bd",
+              "source_id": "ruten_22606139676402",
+              "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            },
+            {
+              "claim_id": "claim-65acf8d38d11",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "c22f3e361332e3cd6375d2e50591f39de20a650cfc0fe15114f450d123c057b1",
+              "source_id": "zebra_ls2208_spec",
+              "verbatim_claim": "Published model-family interface labels: USB, RS232, Keyboard Wedge"
+            },
+            {
+              "claim_id": "claim-f5fa8e5a77b3",
+              "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+              "original_claim_sha256": "a4f4eec896aa96013c52487aa739be5c1d210d2c0e2c1c15a6203bf363add1dd",
+              "source_id": "qnap_ts219pii_spec",
+              "verbatim_claim": "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA"
+            }
+          ],
+          "support_type": "DECLARED_CLAIM_AND_REQUIREMENT"
+        }
+      ],
+      "engineering_readiness_from_native_planner": "blocked",
+      "engineering_source_claim_count": 14,
+      "goal": "Propose a stationary tabletop barcode-triggered label indexing and logging station using only hypothetically recoverable printer motion, scanner decoding and bare NAS computing, with explicit interface contradictions and an independent safe stop. This is not a mobile rover. None of the devices is owned or characterized.",
+      "mandatory_open_gates": [
+        "No externally authenticated measurements or direct donor component observations are present in this experiment",
+        "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device",
+        "NATIVE_TOPOLOGY_REJECTED: source planner invented a mobile architecture despite stationary-only requirement"
+      ],
+      "mode": "synthesize",
+      "model_generated_or_inferred_topology": true,
+      "named_component_ids": [
+        "seller-listed-LS2208-scanner-with-severed-cable-not-owned",
+        "seller-listed-bare-QNAP-TS-219P-II-NAS-PCB-without-verified-PSU-not-owned",
+        "seller-listed-faulty-Epson-LQ-680-printer-not-owned"
+      ],
+      "new_product_physically_functional": false,
+      "physical_fabrication_or_power_authorized": false,
+      "physical_specimen_evidence_authenticated": false,
+      "proposal_is_physical_build": false,
+      "raw_native_planner_archetype": "rover",
+      "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF",
+      "repair_completed": false,
+      "scenario_id": "unfamiliar_tabletop_label_feeder_holdout",
+      "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+      "source_conflicts": [],
+      "source_integrity": [
+        {
+          "expected_source_sha256": "ee50815faa7de67fdd4db7f564b78b4dba26d69723479f008e0c677f395abf55",
+          "expected_uri": "https://www.ruten.com.tw/item/22623851402690/",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-3abc77a1d01d",
+            "claim-cf9811f80f95"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "ruten_22623851402690",
+          "source_record_sha256": "d8a3dab71fd1616839f7e5062d5d6559e52d6c45154eda91db9478ce7a84cc61"
+        },
+        {
+          "expected_source_sha256": "5304b5fd7be82c999367ba9f00dc802a7d75aa66af515d5203d122cb1ac7d011",
+          "expected_uri": "https://www.ruten.com.tw/item/21447795842755/",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-48aa8c3231a2",
+            "claim-f6418cd6e82b"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "ruten_21447795842755",
+          "source_record_sha256": "7aadb78f37cdb47ffe0ba27402851535dd8e46e387aa32a62bee334df5d33629"
+        },
+        {
+          "expected_source_sha256": "cd6d9f343c33cc57a5b8229d385be0f3852accff6f722d92edcdb55f4aa5b359",
+          "expected_uri": "https://www.ruten.com.tw/item/22606139676402/",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-aa881b8f73f4",
+            "claim-e62c24357ae6"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "ruten_22606139676402",
+          "source_record_sha256": "67288d032cecf87f35a8eebefdcb1e5f224cf9779f1f845502a8d19bd203011a"
+        },
+        {
+          "expected_source_sha256": "6066579621d5e04d067b6e74d9923288229b396e64c5f578103750e6b171fda4",
+          "expected_uri": "https://www.zebra.com/us/en/products/spec-sheets/scanners/general-purpose-scanners/ls2208.html",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-1c0b5c905e61",
+            "claim-65acf8d38d11",
+            "claim-da614426e556"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "zebra_ls2208_spec",
+          "source_record_sha256": "83ecf342066b05c20c0701cd5e06b392d9282de12e94273f5820bb421f3a360d"
+        },
+        {
+          "expected_source_sha256": "cf662597e4cf3afc750d4474cef1fd505f3a80db6156a5da8c48fd2124cd2969",
+          "expected_uri": "https://support2.epson.net/manuals/english/sidm/lq_680/index.html",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-1022370ac275",
+            "claim-24b7e9403c25"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "epson_lq680_manual",
+          "source_record_sha256": "ff02cae1d231a36c4f5ee97224b3064c366c30654028ff71f819b62c2e13be91"
+        },
+        {
+          "expected_source_sha256": "c29e1e4dfb3188fc00fa002ebcd274c62c921b483c74fb55e333f507de2d209e",
+          "expected_uri": "https://www.qnap.com/en-in/product/ts-219p%20ii/specs/hardware",
+          "expected_version": "observed-public-page-2026-10-20",
+          "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+          "retained_source_record": true,
+          "source_claim_ids": [
+            "claim-5e8b6a316eba",
+            "claim-f5fa8e5a77b3",
+            "claim-fd0ae73c9afd"
+          ],
+          "source_claims_physical_authority": false,
+          "source_id": "qnap_ts219pii_spec",
+          "source_record_sha256": "5863e5dae6a6e6069b13d043859e32c7625d31b9369e4f74ab98f5d8336a6cc3"
+        }
+      ],
+      "source_scenario_digest": "751f0cd83590772e1c8bfffa3902a5c25827d23c47597b6bebe51de206aa8eb7",
+      "source_trace_complete": true,
+      "topology_actuator_count": 2,
+      "topology_joint_count": 2,
+      "topology_reference_id": "topology-181862ce95f3",
+      "unresolved_blocking_source_conflicts": 0,
+      "verified_usable_donor_count": 0
+    },
+    "independent_audit": {
+      "claim_graph_conflicts_checked": 0,
+      "conditional_candidate_accepted": false,
+      "engineering_decisions_checked": 2,
+      "explicit_topology_rejection_was_honestly_recorded": true,
+      "fabrication_authorized": false,
+      "failures": [],
+      "passes_independent_architecture_relevance": false,
+      "passes_independent_evidence_integrity": true,
+      "physically_validated": false,
+      "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+      "source_claim_bindings_checked": 9,
+      "source_metadata_integrity_checked": 6
+    },
+    "scenario_id": "unfamiliar_tabletop_label_feeder_holdout"
+  },
+  "validated_repair_count": 0
+}
