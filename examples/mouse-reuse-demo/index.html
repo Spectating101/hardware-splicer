@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Can an old mouse become a foot button? · Hardware Splicer</title>
+  <style>
+    :root{color-scheme:light dark;--bg:light-dark(#f7f7f2,#171c1a);--surface:light-dark(#fff,#222b26);--ink:light-dark(#193729,#e6f3e8);--muted:light-dark(#546258,#b0c5b6);--line:light-dark(#d9e0d7,#405347);--accent:light-dark(#236342,#8cdbac);--soft:light-dark(#eaf2e9,#2a3d30)}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1040px;margin:auto;padding:32px 24px 56px}header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:14px}.brand{font-weight:700;letter-spacing:.04em}header span{color:var(--muted)}h1{font-size:clamp(30px,5vw,49px);line-height:1.14;letter-spacing:-.04em;max-width:740px;margin:35px 0 18px}h2{font-size:22px;margin:0 0 8px;line-height:1.3}h3{font-size:17px;margin:0 0 6px}p{margin:0 0 16px}.intro{max-width:680px;color:var(--muted)}.notice{border-left:3px solid var(--accent);padding:10px 15px;margin:22px 0 26px;background:var(--soft);font-size:14px}.story{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}.step{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-bottom:12px}.object{display:flex;align-items:center;gap:22px}.mouse{width:110px;flex-shrink:0;color:var(--accent)}.muted{color:var(--muted)}.small{font-size:13px}.goal{font-size:23px;line-height:1.4;letter-spacing:-.02em;margin:17px 0}.wide{grid-column:1/-1}.choices{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:17px}.choice{padding:18px;border:1px solid var(--line);border-radius:12px}.choice.preferred{background:var(--soft)}.choice p{margin:0;font-size:14px}.tag{display:inline-block;font-size:12px;margin-bottom:8px;color:var(--accent);font-weight:700}button,.download{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 15px;border-radius:9px;cursor:pointer;text-decoration:none;display:inline-block}button:hover:not(:disabled),.download:hover{background:var(--soft)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:650}.primary:hover:not(:disabled){background:var(--ink);color:var(--bg)}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.try{display:grid;grid-template-columns:1.2fr .8fr;gap:26px;margin-top:18px}.controls{display:flex;flex-wrap:wrap;gap:9px}.controls.secondary{margin-top:12px}.readout{border-radius:14px;background:var(--soft);padding:19px 20px;text-align:center;display:grid;align-content:center}.count{font-size:68px;line-height:1.12;font-variant-numeric:tabular-nums;letter-spacing:-.06em;font-weight:650}.status{font-size:13px;margin:6px 0 0;color:var(--muted)}.last{min-height:50px;font-size:15px;margin:16px 0 0}.bottom{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}.bottom p{margin:0}.outcome{margin-top:20px;padding:22px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:28px}.outcome p{font-size:14px;color:var(--muted)}details{margin-top:24px;font-size:13px;color:var(--muted)}summary{cursor:pointer}details p{margin-top:12px;overflow-wrap:anywhere}#error{color:var(--ink);font-weight:650}.hidden,[hidden]{display:none!important}a{color:var(--accent)}@media(max-width:680px){main{padding:22px 16px 36px}.story,.choices,.try,.outcome{grid-template-columns:1fr}.card{padding:20px}.bottom{align-items:flex-start;flex-direction:column}.readout{min-height:150px}.object{gap:14px}.mouse{width:88px}h1{margin-top:26px}.controls button{flex:1 1 auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header><div class="brand">HARDWARE SPLICER</div><span>One worked example · no account needed</span></header>
+  <h1>Could an old mouse become<br>a foot button?</h1>
+  <p class="intro">That’s the idea: start with something ordinary, work out how to reuse it, and make something you can try.</p>
+  <div class="notice">Computer-only demonstration. There is no physical mouse or foot pedal being tested here.</div>
+  <div class="story">
+    <section class="card" aria-labelledby="starting-title">
+      <div class="step">1 · What we start with</div>
+      <div class="object">
+        <svg class="mouse" viewBox="0 0 120 145" role="img" aria-label="Illustration of a wired mouse, not a photograph of an actual donor">
+          <path d="M60 2v21" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M24 68c0-27 13-43 36-43s36 16 36 43v28c0 25-13 39-36 39S24 121 24 96Z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M60 25v49M25 75h70" fill="none" stroke="currentColor" stroke-width="2"/><rect x="55" y="43" width="10" height="19" rx="5" fill="currentColor"/>
+        </svg>
+        <div><h2 id="starting-title">An old wired mouse</h2><p class="muted small">Public product information is our starting point. Its actual condition and insides are unknown.</p></div>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="goal-title">
+      <div class="step">2 · What we want</div>
+      <h2 id="goal-title" class="goal">“Can I press something with my foot to trigger one action on my computer?”</h2>
+      <p class="muted small">Reuse the mouse. Don’t start by buying another controller board.</p>
+    </section>
+    <section class="card wide" aria-labelledby="agent-title">
+      <div class="step">3 · What the agent worked out</div>
+      <h2 id="agent-title">Keep the mouse intact first.</h2>
+      <p class="muted small">These are summaries of the saved agent study—not a new AI conversation running on this page.</p>
+      <div class="choices">
+        <div class="choice preferred"><span class="tag">Preferred proposal</span><h3>Let a pedal press its button</h3><p>Keep the mouse’s electronics and cable. A separate frame would carry your foot’s weight, rather than the mouse itself.</p></div>
+        <div class="choice"><span class="tag">Alternative, more unknowns</span><h3>Move the button to a pedal</h3><p>Keep the electronics but extend a switch. First, someone would need to identify the real contacts and check the circuit.</p></div>
+      </div>
+    </section>
+    <section class="card wide" aria-labelledby="try-title">
+      <div class="step">4 · Try the software part</div>
+      <h2 id="try-title">One press should mean one action.</h2>
+      <p class="muted small">The buttons below feed pretend signals into the actual saved Python program. Nothing controls your mouse or another app.</p>
+      <p id="loading" class="small">Connecting to the local demonstration…</p>
+      <p id="error" role="alert" hidden></p>
+      <div class="try" id="try-panel" hidden>
+        <div>
+          <div class="controls"><button type="button" class="primary" id="press">Press once</button><button type="button" id="hold">Hold down</button><button type="button" id="release" disabled>Let go</button></div>
+          <div class="controls secondary"><button type="button" id="repeat" disabled>Keep holding</button><button type="button" id="other">Other mouse</button><button type="button" id="reconnect">Unplug &amp; reconnect</button></div>
+          <p id="last-result" class="last" role="status" aria-live="polite">Try “Press once” and watch the number change.</p>
+          <button type="button" id="reset" class="small">Start again</button>
+        </div>
+        <div class="readout"><div class="count" id="action-count" aria-label="Actions triggered">0</div><div>Actions triggered in this demo</div><p id="program-state" class="status">Ready for a press</p></div>
+      </div>
+      <div class="bottom"><p class="small muted">Want to keep it? The saved program and its tests are included.</p><a class="download" href="/bundle.zip" download="mouse-reuse-software.zip">Download the program</a></div>
+    </section>
+  </div>
+  <div class="outcome"><section><h3>What works today</h3><p>The program can turn a press into one action, avoid repeats while held, and ignore a different mouse’s signals.</p></section><section><h3>What isn’t finished</h3><p>Reading a real mouse, connecting its action to your chosen app, and designing/testing the physical pedal. This is not a finished device.</p></section></div>
+  <details><summary>Where this example came from</summary><p id="provenance">Loading the saved evidence identities…</p><p>The agent’s planning and the later software-package run were separate. This page joins them into a worked example; it does not pretend a new agent built and tested a real pedal.</p></details>
+</main>
+<script>
+(()=>{
+  const $=id=>document.getElementById(id);
+  const buttons=['press','hold','release','repeat','other','reconnect','reset'];
+  let binding,history=[],held=false,busy=false;
+  const event=(type,device=binding.device_alias)=>({type,device,...(['pressed','released'].includes(type)?{button:binding.button}:{})});
+  function controls(){buttons.forEach(id=>$(id).disabled=busy);if(!busy){$('hold').disabled=held;$('press').disabled=held;$('release').disabled=!held;$('repeat').disabled=!held;}}
+  async function request(events){
+    const response=await fetch('/try',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({events})});
+    const result=await response.json();if(!response.ok)throw new Error(result.error||'The program could not respond.');return result;
+  }
+  function show(result,message){$('action-count').textContent=result.actions_triggered;$('program-state').textContent=({armed:'Ready for a press',wait_release:'Waiting for you to let go',disconnected:'Not connected'})[result.state];$('last-result').textContent=message;}
+  async function act(events,message,nextHeld=held,reset=false){
+    if(busy)return;busy=true;controls();$('error').hidden=true;
+    const next=reset?events:[...history,...events];
+    try{const result=await request(next);history=next;held=nextHeld;show(result,message);}
+    catch(error){$('error').textContent=error.message;$('error').hidden=false;}
+    finally{busy=false;controls();}
+  }
+  $('press').addEventListener('click',()=>act([event('pressed'),event('released')],'One press → one more action.',false));
+  $('hold').addEventListener('click',()=>act([event('pressed')],'The press triggered one action. You are still holding it.',true));
+  $('repeat').addEventListener('click',()=>act([event('pressed')],'Still held → no extra action.'));
+  $('release').addEventListener('click',()=>act([event('released')],'Released. Ready for the next press.',false));
+  $('other').addEventListener('click',()=>act([event('pressed',binding.device_alias+'_other'),event('released',binding.device_alias+'_other')],'A different mouse → no action.'));
+  $('reconnect').addEventListener('click',()=>act([event('disconnected'),event('connected'),event('pressed')],'Reconnected while held → no action. Let go before pressing again.',true));
+  $('reset').addEventListener('click',()=>act([event('connected'),event('released')],'Started again. Try a press.',false,true));
+  (async()=>{try{
+    const response=await fetch('/story');if(!response.ok)throw new Error('The saved example could not be loaded.');const story=await response.json();binding=story.binding;
+    $('provenance').textContent='Saved agent proposals: '+story.recorded_candidate_ids.join(', ')+'. Saved program SHA-256: '+story.package_sha256+'. No new model call, account or physical device is used.';
+    await act([event('connected'),event('released')],'Try “Press once” and watch the number change.',false,true);
+    if($('error').hidden)$('try-panel').hidden=false;
+  }catch(error){$('error').textContent=error.message;$('error').hidden=false;}finally{$('loading').hidden=true;}})();
+})();
+</script>
+</body>
+</html>

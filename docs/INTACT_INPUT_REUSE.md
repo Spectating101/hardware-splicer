@@ -5,6 +5,9 @@ This is the first non-catalog execution slice prompted by the document-only
 a concrete artifact rather than converting an unknown donor into a development
 board. It does not complete arbitrary e-waste engineering or validate hardware.
 
+For a plain-language, clickable walkthrough, see
+[Try Hardware Splicer without hardware](MOUSE_REUSE_DEMO.md).
+
 ## Agent workflow
 
 Use the normal `salvage_fabrication` manifest, then:
