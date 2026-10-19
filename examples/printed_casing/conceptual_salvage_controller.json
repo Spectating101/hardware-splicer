@@ -1,0 +1,22 @@
+{
+  "case_id": "conceptual_controller_housing_v0",
+  "evidence_type": "DECLARED_CONCEPT_FIXTURE",
+  "goal": "Modular printed controller casing for a future mixed salvaged-electronics assembly",
+  "geometry_mm": {
+    "outer_width": 100,
+    "outer_depth": 75,
+    "base_height": 35,
+    "wall": 2.4,
+    "lid_thickness": 2.4,
+    "lip_height": 1.8,
+    "lip_thickness": 1.2,
+    "lip_clearance_per_side": 0.35,
+    "lid_boss_outer_diameter": 8,
+    "lid_boss_pilot_diameter": 2.7,
+    "lid_boss_edge_offset": 10,
+    "port_width": 14,
+    "port_height": 7,
+    "lid_vent_diameter": 4.4
+  },
+  "explicit_nonclaims": ["No actual donor chassis or PCB has been measured", "Not a fabrication authorization"]
+}

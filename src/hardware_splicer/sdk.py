@@ -132,6 +132,17 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:
+    """Agent-safe 3D printable casing CAD plan; never automatically slice or print.
+
+    Designs a source-explicit concept for the installed SolidCraft interface.
+    The controlled CLI runner performs independent external CAD/mesh/PartCAD
+    checks separately. The SDK method cannot start printer actuation.
+    """
+    from .printed_enclosure_workbench import prepare_printed_enclosure
+    return prepare_printed_enclosure(casing_spec)
+
+
 def prepare_solidcraft_workspace(*, scenario: Mapping[str, Any]) -> Dict[str, Any]:
     """Prepare a source-audited mechanical CAD handoff without physical authority.
 
