@@ -268,12 +268,31 @@ const NEED_STATE: Record<MissionNeed['need_state'], { label: string; className: 
   contradicted: { label: 'Reading out of range', className: 'border-red-400/50 bg-red-950/40 text-red-100' },
 };
 
+/** Show "(1) a (2) b" as a list. Display only: every word of the agent's text is kept, in order. */
+export function splitNumbered(text: string): { lead: string; items: string[] } {
+  const marks = [...text.matchAll(/\((\d{1,2})\)\s+/g)];
+  if (marks.length < 2 || marks[0][1] !== '1') return { lead: text.trim(), items: [] };
+  const lead = text.slice(0, marks[0].index).trim();
+  const items = marks.map((mark, index) => {
+    const start = (mark.index ?? 0) + mark[0].length;
+    const end = index + 1 < marks.length ? marks[index + 1].index : text.length;
+    return text.slice(start, end).trim().replace(/[;,]$/, '');
+  });
+  return { lead, items };
+}
+
 export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged: () => void }) {
   const ended = Boolean(mission.terminal);
   // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
-  const requests = mission.needs.filter((need) => need.request);
-  const notes = mission.needs.filter((need) => !need.request);
-  if (!requests.length && !notes.length) return null;
+  const flagged = new Set((mission.safety_concerns ?? []).map((concern) => concern.need_seq));
+  // Never offer an answer form for BLOCKED_UNSAFE, even when an older/partial response omits safety_concerns.
+  const isSafety = (need: MissionNeed) => need.blocker === 'BLOCKED_UNSAFE' || flagged.has(need.seq);
+  const requests = mission.needs.filter((need) => need.request && !isSafety(need));
+  const plain = mission.needs.filter((need) => !need.request && !isSafety(need));
+  // A free-text need on a running mission is the agent asking for something. It is not a side note.
+  const asks = ended || !mission.accepted ? [] : plain.filter((need) => need.need_state === 'open');
+  const notes = plain.filter((need) => !asks.includes(need));
+  if (!requests.length && !notes.length && !asks.length) return null;
   return (
     <>
     {requests.length ? (
@@ -313,6 +332,29 @@ export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged
       </ul>
     </Section>
     ) : null}
+    {asks.length ? (
+      <Section title="What the agent says it still needs" hint="In the agent’s own words. HS did not check this, and this page cannot take an answer to it yet.">
+        <ul className="space-y-3">
+          {asks.map((need) => {
+            const { lead, items } = splitNumbered(need.need);
+            return (
+              <li key={need.seq} data-testid="agent-ask" className="rounded-xl border border-amber-300/40 bg-amber-300/5 p-4 text-sm leading-6 text-slate-100">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <WhoChip who="agent" label="Asked by the agent" />
+                  <span className="rounded-full border border-amber-300/50 bg-amber-300/10 px-2 py-0.5 text-[11px] font-medium text-amber-100">Waiting for you</span>
+                </div>
+                {lead ? <p>{lead}</p> : null}
+                {items.length ? (
+                  <ol className="hs-reset mt-2 list-decimal space-y-1.5 pl-5 marker:text-amber-200">
+                    {items.map((item, index) => <li key={index}>{item}</li>)}
+                  </ol>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
+    ) : null}
     {notes.length ? (
       <Section title="Concerns the agent recorded" hint="Notes, not requests. HS did not check them.">
         <ul className="space-y-2">
@@ -332,7 +374,8 @@ export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged
 /** An accepted mission with no design yet is waiting on an agent. Say how to point one at it. */
 export function AgentHandoff({ mission }: { mission: Mission }) {
   const [copied, setCopied] = useState(false);
-  if (!mission.accepted || mission.terminal || mission.candidates.length) return null;
+  const agentActed = (mission.events ?? []).some((event) => event.author.kind === 'agent' && event.type !== 'opened');
+  if (!mission.accepted || mission.terminal || mission.candidates.length || agentActed) return null;
   const text = `Fabrication mission ${mission.mission_id} in project ${mission.project_id}.\n`
     + 'Use the fabrication_mission task (MCP) or the routes in docs/AGENT_MISSION.md. Draft from the parts list, propose a design, '
     + 'ask HS to run its checks, and propose the terminal state the evidence supports. You cannot accept the mission or record a result.';
@@ -427,6 +470,69 @@ function CheckIcon({ errors, warnings }: { errors: number; warnings: number }) {
   return <Check className="h-4 w-4 shrink-0 text-emerald-300" aria-label="Clean" />;
 }
 
+/** A reported concern is not an HS safety verdict, even when a mission terminates. */
+export function SafetyPanel({ mission }: { mission: Mission }) {
+  const concerns = mission.safety_concerns ?? [];
+  if (!concerns.length) {
+    return (
+      <p data-testid="no-safety-concern" className="px-1 text-xs leading-5 text-slate-500">
+        No safety concern has been recorded. That is not a safety check: HS does not assess danger, and a concern may go unreported.
+      </p>
+    );
+  }
+  const allDeclaredAgent = concerns.every((concern) => concern.author?.kind === 'agent');
+  return (
+    <section data-testid="safety-concern" aria-label="Safety concern" className="rounded-2xl border border-red-400/50 bg-red-950/30 p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <AlertTriangle className="h-5 w-5 text-red-300" aria-hidden="true" />
+        <h2 className="text-base font-semibold text-red-100">
+          {allDeclaredAgent ? 'The agent flagged a safety concern' : 'A safety concern was recorded'}
+        </h2>
+        {allDeclaredAgent ? (
+          <WhoChip who="agent" label="The agent’s word, not checked by HS" />
+        ) : (
+          <span className="rounded-full border border-red-300/40 px-2 py-0.5 text-[11px] text-red-100">
+            Reported claim, not checked by HS
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-xs leading-5 text-red-100/80">
+        HS cannot judge danger. These are recorded claims, not a safety assessment. Do not open, power or handle the item on the strength of this page.
+      </p>
+      <ul className="mt-3 space-y-3">
+        {concerns.map((concern) => {
+          const stoppedOnThis = mission.terminal?.state === 'BLOCKED_UNSAFE'
+            && (mission.terminal.cites ?? []).includes(concern.need_seq);
+          const state = concern.state === 'resolved'
+            ? 'Evidence recorded; safety not assessed'
+            : stoppedOnThis
+              ? 'Mission stopped citing this concern'
+              : mission.terminal
+                ? 'Mission ended for another reason; concern remains recorded'
+                : concern.state === 'contradicted'
+                  ? 'Evidence contested'
+                  : 'Still open';
+          const reporter = concern.author?.kind === 'agent' ? 'Reported as agent'
+            : concern.author?.kind === 'human' ? 'Reporter declared human (identity not verified here)'
+              : 'Reporter not established';
+          return (
+            <li key={concern.need_seq} className="rounded-xl border border-red-400/30 bg-black/25 p-4 text-sm leading-6 text-slate-100">
+              <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-red-100/80">
+                <span>Recorded at event #{concern.need_seq}</span>
+                <span>·</span>
+                <span>{reporter}</span>
+                <span>·</span>
+                <span>{state}</span>
+              </div>
+              <p className="whitespace-pre-line">{concern.concern}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function CandidatesPanel({ mission }: { mission: Mission }) {
   if (!mission.candidates.length) {
     return (
@@ -455,8 +561,28 @@ export function CandidatesPanel({ mission }: { mission: Mission }) {
                 {candidate.violated_requirements.map((line) => (
                   <span key={line} className="rounded-full border border-red-400/50 bg-red-950/30 px-2 py-0.5 text-red-100">Breaks: {line}</span>
                 ))}
+                {(candidate.donor_coverage?.missing_required_donors ?? []).map((donor) => (
+                  <span key={donor} data-testid="donor-left-out" className="rounded-full border border-red-400/50 bg-red-950/30 px-2 py-0.5 text-red-100">Leaves out the donor you named: {donor}</span>
+                ))}
+                {(candidate.donor_coverage?.unverified_used_donors ?? []).map((donor) => (
+                  <span key={donor.donor_id} className="rounded-full border border-amber-300/50 bg-amber-300/10 px-2 py-0.5 text-amber-100">
+                    Names {donor.donor_id}, not verified yet{donor.missing_facts.length ? `: needs ${donor.missing_facts.join(', ')}` : ''}
+                  </span>
+                ))}
                 {candidate.repairs ? <span className="rounded-full border border-white/15 px-2 py-0.5 text-slate-300">{candidate.repairs} {candidate.repairs === 1 ? 'repair' : 'repairs'}</span> : null}
               </div>
+              {candidate.donor_coverage?.used_donors?.length ? (
+                <p className="mt-2 text-[11px] leading-5 text-slate-500">Naming a donor is a reference. It does not show the donor is wired into the design.</p>
+              ) : null}
+              {candidate.spec_diagnostics?.unrecognized_fields?.length ? (
+                <details data-testid="unchecked-fields" className="mt-2 rounded-lg border border-amber-300/40 bg-amber-300/5 px-3 py-2 text-xs text-amber-100">
+                  <summary className="cursor-pointer">{candidate.spec_diagnostics.unrecognized_fields.length} {candidate.spec_diagnostics.unrecognized_fields.length === 1 ? 'field' : 'fields'} HS did not check</summary>
+                  <p className="mt-1 leading-5 text-amber-100/80">The agent wrote these. They are kept as written, but HS’s planner ignores them, so a clean check says nothing about them.</p>
+                  <ul className="mt-1 font-mono text-[11px] text-amber-50/90">
+                    {candidate.spec_diagnostics.unrecognized_fields.map((field) => <li key={field}>{field}</li>)}
+                  </ul>
+                </details>
+              ) : null}
               {candidate.evaluations.length ? (
                 <ol className="mt-3 space-y-1.5 border-t border-white/10 pt-3">
                   {candidate.evaluations.map((evaluation) => (

@@ -10,6 +10,7 @@ import {
   CandidatesPanel,
   NeedsPanel,
   VerdictPanel,
+  SafetyPanel,
   WhoChip,
 } from '@/components/engineering/mission-detail';
 import { DeliveryPanel } from '@/components/engineering/mission-delivery';
@@ -217,6 +218,7 @@ export default function MissionsPage() {
               <h2 data-testid="mission-goal" className="text-2xl font-semibold leading-snug text-white">{detail.intake.goal}</h2>
               <p className="mt-1 text-xs text-slate-500">Mission {detail.mission_id} · opened {when(detail.created_at)}</p>
             </header>
+            <SafetyPanel mission={detail} />
             <VerdictPanel mission={detail} />
             <AcceptPanel mission={detail} onAccepted={updated} />
             <AgentHandoff mission={detail} />
