@@ -1,0 +1,878 @@
+{
+  "actual_motor_actuated": false,
+  "automatically_identified_architecture_changes": [
+    "Do not assign GPIO or specify motor driver before actual donor motor type/current/protection evidence",
+    "Separate software stop-state behavior from missing independent safety-rated hardware stop",
+    "Retain QNAP motherboard as noncritical candidate, not prerequisite for software testing",
+    "Keep scanner decoding and genuine barcode I/O external to synthetic software test"
+  ],
+  "bounded_software_state_audit": {
+    "events_checked": 28602,
+    "max_depth": 4,
+    "passed": true,
+    "physical_hardware_evaluated": false,
+    "schema_version": "hardware_splicer.bounded_virtual_audit.v1",
+    "sequences_checked": 7380,
+    "violations": []
+  },
+  "conditional_motor_driver_plan": {
+    "constraints": [
+      {
+        "id": "load_current_estimate",
+        "status": "blocked"
+      },
+      {
+        "id": "supply_rail",
+        "status": "blocked"
+      },
+      {
+        "id": "control_signal_voltage",
+        "status": "blocked"
+      },
+      {
+        "id": "driver_current_rating",
+        "status": "blocked"
+      },
+      {
+        "id": "inductive_load_protection",
+        "status": "blocked"
+      }
+    ],
+    "missing_evidence": [
+      "load_current_estimate",
+      "supply_rail",
+      "control_signal_voltage",
+      "l298n_output_current_rating",
+      "flyback_or_driver_protection"
+    ],
+    "motor_type_measured": false,
+    "physical_driver_selected": false,
+    "planner_result": "blocked",
+    "topology_hypothesis": "DC motor driver path ONLY if future evidence establishes a DC motor; stepper path otherwise requires separate design"
+  },
+  "goal": "tabletop automated barcode inspection and object indexing machine",
+  "hardware_gates_open": [
+    {
+      "gate": "donor scanner original-function and exact cable/host interface",
+      "status": "BLOCKED",
+      "why": "no physically tested barcode decoder and host interface"
+    },
+    {
+      "gate": "motor identity and dynamics",
+      "status": "BLOCKED",
+      "why": "Epson mechanism not inspected; drive type, stall/run current, travel and limit switching unknown"
+    },
+    {
+      "gate": "power and motor driver",
+      "motor_planner_missing_evidence": [
+        "load_current_estimate",
+        "supply_rail",
+        "control_signal_voltage",
+        "l298n_output_current_rating",
+        "flyback_or_driver_protection"
+      ],
+      "status": "BLOCKED",
+      "why": "structured HS motor-driver planner rejected absent electrical contracts"
+    },
+    {
+      "gate": "host computer and software/hardware IO",
+      "status": "BLOCKED",
+      "why": "QNAP source is board-only with unknown power and software; use Linux host only for virtual logic"
+    },
+    {
+      "gate": "independent safety stop",
+      "status": "BLOCKED",
+      "why": "ordinary salvaged mouse button is not a safety-rated stop"
+    },
+    {
+      "gate": "cross-donor physical/mechanical integration",
+      "status": "BLOCKED",
+      "why": "no acquired donors, dimensions, wiring, physical tests or finished machine"
+    }
+  ],
+  "method": "finite autonomous planning and synthetic software checks without physical components",
+  "mission": "novel_splice",
+  "next_step": "instrumented donor intake under independent physical safety controls OR additional bounded documentation search; not a manual user check request",
+  "novel_product_functionally_proven": false,
+  "physical_actions_authorized": false,
+  "physical_barcode_reader_verified": false,
+  "physical_gate_count_open": 6,
+  "physical_safety_system_verified": false,
+  "repair_original_function_proven": false,
+  "schema_version": "hardware_splicer.autonomous_splice_feasibility.v1",
+  "selected_noncritical_compute_path": "existing authorized Linux host for software-only simulation; QNAP bare board excluded from critical path",
+  "software_gates_closed": [
+    {
+      "cases_passed": 8,
+      "cases_total": 8,
+      "gate": "barcode-indexing reference controller response to synthetic events",
+      "physical_hardware_implication": "NONE",
+      "status": "SOFTWARE_BEHAVIOR_VALIDATED_WITH_SYNTHETIC_EVENTS"
+    }
+  ],
+  "software_validation_count": 1,
+  "source_research_basis": "hardware_splicer.autonomous_evidence_controller.v1",
+  "steps": [
+    {
+      "outcome": "BLOCKED_WITH_EXPLICIT_MISSING_CONTRACTS",
+      "physical_claim_advanced": false,
+      "round": 1,
+      "selected_action": "evaluate_motion_driver_against_real_HS_electrical_truth",
+      "tool": "hardware_splicer.sdk.plan_motor_driver_circuit"
+    },
+    {
+      "outcome": "SOFTWARE_BEHAVIOR_VALIDATED_WITH_SYNTHETIC_EVENTS",
+      "physical_claim_advanced": false,
+      "round": 2,
+      "selected_action": "run_virtual_reference_controller_fault_injection",
+      "tool": "virtual_splice_reference_cell.run_virtual_reference_cases"
+    },
+    {
+      "outcome": "SOFTWARE_SUBGOAL_CLOSED; PHYSICAL_PRODUCT_NOT_VALIDATED",
+      "physical_claim_advanced": false,
+      "round": 3,
+      "selected_action": "reconcile_function_coverage_and_remaining_hardware_gates",
+      "tool": "autonomous_splice_feasibility.evaluate_splice_feasibility"
+    }
+  ],
+  "stop_reason": "Remaining mission closure gates require physical component evidence not available in this machine/session",
+  "virtual_control_software": {
+    "actual_safety_stop_verified": false,
+    "cases": [
+      {
+        "actual_completed_count": 1,
+        "actual_end_state": "ready",
+        "case": "normal_cycle",
+        "expected_completed_count": 1,
+        "expected_end_state": "ready",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_complete",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "await_scan",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": "TEST-0001",
+            "completed_count": 1,
+            "event": "scan",
+            "faults": [],
+            "from": "await_scan",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "complete",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 1,
+            "event": "ack",
+            "faults": [],
+            "from": "complete",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "inhibited",
+        "case": "stop_during_motion",
+        "expected_completed_count": 0,
+        "expected_end_state": "inhibited",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_open",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_complete",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "scan",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 1,
+        "actual_end_state": "complete",
+        "case": "premature_scan_rejected",
+        "expected_completed_count": 1,
+        "expected_end_state": "complete",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "scan",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "scan",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_complete",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "await_scan",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": "VALID-0002",
+            "completed_count": 1,
+            "event": "scan",
+            "faults": [],
+            "from": "await_scan",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "complete",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "fault",
+        "case": "motion_timeout_fail_closed",
+        "expected_completed_count": 0,
+        "expected_end_state": "fault",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_timeout",
+            "faults": [
+              "motion_timeout"
+            ],
+            "from": "indexing",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "fault",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "scan",
+            "faults": [
+              "motion_timeout"
+            ],
+            "from": "fault",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "fault",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "fault",
+        "case": "limit_fault_fail_closed",
+        "expected_completed_count": 0,
+        "expected_end_state": "fault",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "limit_fault",
+            "faults": [
+              "limit_fault"
+            ],
+            "from": "indexing",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "fault",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_complete",
+            "faults": [
+              "limit_fault"
+            ],
+            "from": "fault",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "fault",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "indexing",
+        "case": "reset_requires_interlock",
+        "expected_completed_count": 0,
+        "expected_end_state": "indexing",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "ready",
+        "case": "stop_requires_explicit_rearm",
+        "expected_completed_count": 0,
+        "expected_end_state": "ready",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "stop",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": false,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          }
+        ]
+      },
+      {
+        "actual_completed_count": 0,
+        "actual_end_state": "fault",
+        "case": "invalid_scan_fault",
+        "expected_completed_count": 0,
+        "expected_end_state": "fault",
+        "real_motor_command_issued": false,
+        "real_sensor_observed": false,
+        "safety_rated_e_stop_present": false,
+        "software_test_pass": true,
+        "virtual_event_trace": [
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "interlock_closed",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "inhibited",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "reset",
+            "faults": [],
+            "from": "inhibited",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "ready",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "load",
+            "faults": [],
+            "from": "ready",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "indexing",
+            "virtual_index_requested": true
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "motion_complete",
+            "faults": [],
+            "from": "indexing",
+            "interlock_reported_closed": true,
+            "physical_hardware_actuated": false,
+            "to": "await_scan",
+            "virtual_index_requested": false
+          },
+          {
+            "accepted_event": true,
+            "actual_safety_stop_verified": false,
+            "barcode_recorded": null,
+            "completed_count": 0,
+            "event": "scan",
+            "faults": [
+              "invalid_scan"
+            ],
+            "from": "await_scan",
+            "interlock_reported_closed": false,
+            "physical_hardware_actuated": false,
+            "to": "fault",
+            "virtual_index_requested": false
+          }
+        ]
+      }
+    ],
+    "donor_modules_operational": false,
+    "passed": 8,
+    "physical_operation_authorized": false,
+    "physical_product_works": false,
+    "schema_version": "hardware_splicer.virtual_splice_reference_cell.v1",
+    "software_reference_logic_passed": true,
+    "test_scope": "deterministic synthetic software events only, no actual barcode reader, machine or safety loop",
+    "total": 8
+  },
+  "virtual_software_behaves_as_expected": true
+}

@@ -103,6 +103,28 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_validate_virtual_splice_feasibility",
+            description=(
+                "Automatically investigate the current barcode indexing"
+                " donor proposal (or accept a previously recorded source"
+                " research object), run the existing HS motor-driver evidence"
+                " planner and synthetic virtual-controller fault-injection"
+                " tests plus bounded state-sequence audit. Explicitly"
+                " separates software logic test results from donor hardware"
+                " electrical, physical and safety blockers. NEVER operates"
+                " physical devices or grants fabrication authority."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "source_research": {
+                        "type":"object",
+                        "description":"Optional prior raw hs_investigate_public_donors output; otherwise automatically fetch live allowlisted public sources",
+                    },
+                },
+            },
+        ),
+        Tool(
             name="hs_plan_salvage",
             description=(
                 "Plan salvage splice from goal + inventory without KiCad compile (~fast). "
@@ -568,6 +590,12 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
             splice_intake=args.get("splice_intake"),
         )
         return _tool_result(report)
+    if name == "hs_validate_virtual_splice_feasibility":
+        result = await asyncio.to_thread(
+            sdk.validate_virtual_splice_feasibility,
+            source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
     if name == "hs_plan_salvage":
         return _tool_result(
             sdk.plan_salvage(
