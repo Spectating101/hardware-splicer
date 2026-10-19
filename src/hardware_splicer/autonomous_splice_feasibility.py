@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from .virtual_splice_reference_cell import run_virtual_reference_cases, audit_bounded_sequences
+from .independent_splice_oracle import verify_untrusted_summaries, challenge_live_controller
 from .sdk import plan_motor_driver_circuit
 
 SCHEMA="hardware_splicer.autonomous_splice_feasibility.v1"
@@ -63,10 +64,20 @@ def evaluate_splice_feasibility(research: Mapping[str,Any])->dict[str,Any]:
         raise ValueError("uncharacterized motion element falsely declared design-ready")
     virtual=run_virtual_reference_cases()
     audit=audit_bounded_sequences(max_depth=4)
-    if not audit["passed"]:
-        raise ValueError("software state audit violation")
-    if not virtual["software_reference_logic_passed"]:
-        raise ValueError("virtual inspection behavior failed; cannot declare software reference validated")
+    independently_checked=verify_untrusted_summaries(virtual,audit)
+    if not independently_checked["independent_summary_consistent"]:
+        raise ValueError(
+            "independent oracle rejected self-reported software pass: "
+            + ", ".join(independently_checked["failed_checks"])
+        )
+    adversarial=challenge_live_controller()
+    if any(
+        row["issue_open"] for row in adversarial["challenges"]
+        if row["challenge"] in (
+            "stop_while_indexing","reset_mid_indexing","synthetic_tick_limit","premature_motion_complete"
+        )
+    ):
+        raise ValueError("adversarial controller invariant failed")
     # This is an *engineering* outcome: one software validation gate
     # closes, while component-level evidence gates stay open.
     resolved_software=[{
@@ -118,6 +129,10 @@ def evaluate_splice_feasibility(research: Mapping[str,Any])->dict[str,Any]:
         },
         "virtual_control_software":virtual,
         "bounded_software_state_audit":audit,
+        "independent_summary_audit":independently_checked,
+        "independent_adversarial_challenges":adversarial,
+        "unresolved_software_semantic_risks":list(adversarial["unresolved_semantic_risks"]),
+        "physical_controller_acceptance":"BLOCKED",
         "software_gates_closed":resolved_software,
         "hardware_gates_open":unresolved,
         "software_validation_count":len(resolved_software),
@@ -129,7 +144,8 @@ def evaluate_splice_feasibility(research: Mapping[str,Any])->dict[str,Any]:
             "Retain QNAP motherboard as noncritical candidate, not prerequisite for software testing",
             "Keep scanner decoding and genuine barcode I/O external to synthetic software test",
         ],
-        "virtual_software_behaves_as_expected":True,
+        "virtual_software_behaves_as_expected":independently_checked["independent_summary_consistent"],
+        "virtual_event_source_authenticity_proven":False,
         "physical_barcode_reader_verified":False,
         "actual_motor_actuated":False,
         "physical_safety_system_verified":False,

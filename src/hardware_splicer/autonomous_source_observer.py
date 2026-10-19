@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import Request, build_opener
+from urllib.request import Request, build_opener, HTTPRedirectHandler
 from collections.abc import Callable, Mapping
 
 SCHEMA = "hardware_splicer.autonomous_source_observation.v1"
@@ -83,10 +83,17 @@ def _allowlisted_url(url: str, purpose: str) -> str:
     return url
 
 
+class _RejectAllRedirects(HTTPRedirectHandler):
+    """Reject a redirect BEFORE urllib fetches the next, untrusted URL."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError("source redirects forbidden before network follow")
+
+
 def _fetch_public_html(url: str) -> tuple[int, str, bytes, str]:
-    """Use a bounded GET; refuse redirects away from the source allowlist."""
+    """Use a bounded GET; never follow off-allowlist or identity-changing redirects."""
     request=Request(url,headers={"Accept":"text/html","User-Agent":"Mozilla/5.0 HardwareSplicer-Research-Check/1.0"})
-    response=build_opener().open(request,timeout=TIMEOUT_SEC)
+    response=build_opener(_RejectAllRedirects()).open(request,timeout=TIMEOUT_SEC)
     with response:
         final=response.geturl()
         data=response.read(MAX_READ+1)

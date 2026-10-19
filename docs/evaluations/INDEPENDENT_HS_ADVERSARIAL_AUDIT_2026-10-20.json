@@ -1,0 +1,252 @@
+{
+  "actual_source_receipts_retrieved": 7,
+  "base_pr": 153,
+  "bounded_event_sequences": 11110,
+  "bounded_simulated_transitions": 43210,
+  "controller_mutation_audit": {
+    "adversarial_cases": {
+      "all_adversarial_challenges_clear": false,
+      "challenges": [
+        {
+          "challenge": "unauthenticated_motion_and_barcode",
+          "completed": 1,
+          "faults": [],
+          "issue_open": true,
+          "not_a_real_inspection": true,
+          "risk": "HIGH: externally supplied synthetic events can record completion without authenticating real motion or scanner",
+          "state": "complete",
+          "virtual_index_requested": false
+        },
+        {
+          "challenge": "replayed_code_without_item_identity",
+          "completed": 2,
+          "faults": [],
+          "issue_open": true,
+          "not_a_real_inspection": true,
+          "risk": "MEDIUM: repeated synthetic barcode events can count as separate cycles without identifying distinct physical items",
+          "state": "complete",
+          "virtual_index_requested": false
+        },
+        {
+          "challenge": "missing_external_watchdog_ticks",
+          "completed": 0,
+          "faults": [],
+          "issue_open": true,
+          "not_a_real_inspection": true,
+          "risk": "HIGH: tick-based virtual budget cannot enforce any timeout unless a trusted independent clock injects ticks",
+          "state": "indexing",
+          "virtual_index_requested": true
+        },
+        {
+          "challenge": "stop_while_indexing",
+          "completed": 0,
+          "faults": [],
+          "issue_open": false,
+          "not_a_real_inspection": true,
+          "risk": "software stop must inhibit indexing and require separate re-arm",
+          "state": "inhibited",
+          "virtual_index_requested": false
+        },
+        {
+          "challenge": "reset_mid_indexing",
+          "completed": 0,
+          "faults": [
+            "reset_during_unfinished_cycle"
+          ],
+          "issue_open": false,
+          "not_a_real_inspection": true,
+          "risk": "reset must abort active virtual operation and require separate re-arming",
+          "state": "inhibited",
+          "virtual_index_requested": false
+        },
+        {
+          "challenge": "synthetic_tick_limit",
+          "completed": 0,
+          "faults": [
+            "synthetic_index_tick_limit"
+          ],
+          "issue_open": false,
+          "not_a_real_inspection": true,
+          "risk": "if ticks ARE supplied in simulation, exceeding the configured index budget must prevent completion",
+          "state": "fault",
+          "virtual_index_requested": false
+        },
+        {
+          "challenge": "premature_motion_complete",
+          "completed": 0,
+          "faults": [],
+          "issue_open": false,
+          "not_a_real_inspection": true,
+          "risk": "out-of-order synthetic motion and barcode events must not close a cycle",
+          "state": "ready",
+          "virtual_index_requested": false
+        }
+      ],
+      "physical_specimen_tested": false,
+      "release_for_physical_control": false,
+      "schema_version": "hardware_splicer.independent_adversarial_challenges.v1",
+      "unresolved_semantic_risks": [
+        "unauthenticated_motion_and_barcode",
+        "replayed_code_without_item_identity",
+        "missing_external_watchdog_ticks"
+      ]
+    },
+    "assessment": "read-only synthetic software adversarial exercise; no verified field instrumentation",
+    "baseline_bounded_sequences": 11110,
+    "baseline_independent_summary": {
+      "failed_checks": [],
+      "independent_summary_consistent": true,
+      "physical_operation_authorized": false,
+      "schema_version": "hardware_splicer.independent_splice_oracle.v1",
+      "trace_scenarios_checked": 10,
+      "trusted_physical_sensor_evidence": false
+    },
+    "baseline_scenarios": 10,
+    "contradictory_report_injections": [
+      {
+        "injection": "false_green_scenario_count",
+        "oracle_rejected": true,
+        "reason_codes": [
+          "contradictory_scenario_summary"
+        ]
+      },
+      {
+        "injection": "false_green_audit_with_violations",
+        "oracle_rejected": true,
+        "reason_codes": [
+          "bounded_audit_violations_or_false_pass"
+        ]
+      }
+    ],
+    "mutants_detected": 4,
+    "mutants_tested": 4,
+    "mutation_challenges": [
+      {
+        "behavioral_invariant_violations": [
+          "stop_while_indexing"
+        ],
+        "independent_oracle_detected": true,
+        "mutation": "ignore_stop",
+        "trace_or_summary_failures": [
+          "bounded_audit_violations_or_false_pass",
+          "false_bounded_event_count",
+          "false_bounded_sequence_count",
+          "trace_missing_required_event:stop_requires_explicit_rearm"
+        ]
+      },
+      {
+        "behavioral_invariant_violations": [
+          "synthetic_tick_limit"
+        ],
+        "independent_oracle_detected": true,
+        "mutation": "ignore_ticks",
+        "trace_or_summary_failures": [
+          "contradictory_scenario_summary",
+          "scenario_incorrect:virtual_tick_limit_inhibits",
+          "trace_missing_required_event:virtual_tick_limit_inhibits"
+        ]
+      },
+      {
+        "behavioral_invariant_violations": [
+          "reset_mid_indexing"
+        ],
+        "independent_oracle_detected": true,
+        "mutation": "allow_unacknowledged_reset",
+        "trace_or_summary_failures": [
+          "contradictory_scenario_summary",
+          "scenario_incorrect:reset_during_indexing_inhibits",
+          "trace_reset_without_abort:reset_during_indexing_inhibits"
+        ]
+      },
+      {
+        "behavioral_invariant_violations": [
+          "premature_motion_complete"
+        ],
+        "independent_oracle_detected": true,
+        "mutation": "credit_out_of_order_scan",
+        "trace_or_summary_failures": [
+          "bounded_audit_violations_or_false_pass",
+          "contradictory_scenario_summary",
+          "false_bounded_event_count",
+          "false_bounded_sequence_count",
+          "scenario_incorrect:premature_scan_rejected",
+          "scenario_incorrect:stop_during_motion",
+          "trace_phantom_completion:premature_scan_rejected",
+          "trace_phantom_completion:stop_during_motion"
+        ]
+      }
+    ],
+    "open_real_world_critical_risks": [
+      "unauthenticated_motion_and_barcode",
+      "replayed_code_without_item_identity",
+      "missing_external_watchdog_ticks"
+    ],
+    "physical_controller_release": "BLOCKED",
+    "physical_devices_observed": 0,
+    "physical_motion_actuated": false,
+    "physical_scanner_tested": false,
+    "physical_stop_circuit_tested": false,
+    "schema_version": "hardware_splicer.independent_adversarial_mutation_audit.v1"
+  },
+  "evaluation_date": "2026-10-20",
+  "fixed_regressions": [
+    {
+      "after": "inhibits and requires rearm",
+      "before": "returned ready without motion stop confirmation",
+      "id": "RESET_DURING_INDEXING"
+    },
+    {
+      "after": "faults after 8 injected virtual ticks",
+      "before": "no internal tick budget",
+      "id": "INJECTED_VIRTUAL_TICK_LIMIT"
+    },
+    {
+      "after": "independent oracle rejects incompatible case and audit data",
+      "before": "inconsistent passing summary and audit violation were accepted",
+      "id": "TRUST_SELF_REPORTED_COUNTS"
+    },
+    {
+      "after": "redirects rejected before following",
+      "before": "urllib default followed redirects before final URL validation",
+      "id": "SOURCE_REDIRECT_POLICY"
+    }
+  ],
+  "independent_oracle": {
+    "failed_checks": [],
+    "independent_summary_consistent": true,
+    "physical_operation_authorized": false,
+    "schema_version": "hardware_splicer.independent_splice_oracle.v1",
+    "trace_scenarios_checked": 10,
+    "trusted_physical_sensor_evidence": false
+  },
+  "operator_must_manually_check_for_software_validation": false,
+  "physical_controller_release": "BLOCKED",
+  "physical_hardware_observed": false,
+  "prior_pass_claims_not_used_as_acceptance": true,
+  "schema_version": "hardware_splicer.independent_adversarial_readiness_audit.v1",
+  "targeted_software_passed": 10,
+  "targeted_software_scenarios": 10,
+  "unresolved_high_priority_findings": [
+    {
+      "id": "UNAUTHENTICATED_COMPLETION_EVENTS",
+      "meaning": "No authenticated sensor and actuator evidence; virtual cycle counts are not real inspections",
+      "reproduction": "Inject synthetic interlock, reset, load, motion_complete, and scan events with no real scanner or motor observation; the virtual cycle counter increments",
+      "severity": "high",
+      "status": "OPEN_REAL_WORLD_INTEGRATION_BLOCKER"
+    },
+    {
+      "id": "NO_DISTINCT_ITEM_IDENTITY",
+      "meaning": "Cannot infer two distinct physical objects from two barcode callbacks; duplicates may be legitimate but need actual item tracking",
+      "reproduction": "Replay the same barcode in two synthetic cycles; virtual cycle count becomes 2",
+      "severity": "medium",
+      "status": "OPEN_REAL_WORLD_INTEGRATION_BLOCKER"
+    },
+    {
+      "id": "NO_INDEPENDENT_WALL_CLOCK_OR_HARDWARE_TIMEOUT",
+      "meaning": "Virtual tick budget is not a real-time watchdog; physical event sources could cease delivering ticks",
+      "reproduction": "Trigger virtual index then dispatch 100 unrelated events without tick/timeout; remains indexing",
+      "severity": "high",
+      "status": "OPEN_REAL_WORLD_INTEGRATION_BLOCKER"
+    }
+  ]
+}
