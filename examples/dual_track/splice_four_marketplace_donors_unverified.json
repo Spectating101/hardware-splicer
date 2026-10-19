@@ -1,0 +1,13 @@
+{
+ "project_name":"dual_track_marketplace_heterogeneous_new_machine",
+ "goal":"CREATE A NEW tabletop barcode-inspection and indexing machine by recombining useful subsystems of multiple UNRELATED broken/surplus devices: LS2208 scanner, Epson LQ-680 printer carriage, QNAP TS-219P II motherboard, and Apple mouse switches. Required functions: barcode detection, controlled object indexing, local processing, manual stop/input; explain missing components and conditions. Do not restore any original device.",
+ "salvage_mode":true,
+ "available_parts":[
+   {"name":"Symbol LS2208 scanner with severed cable, untested","type":"donor_board","condition":"untested","notes":"marketplace CLAIM only https://www.ruten.com.tw/item/22623851402690/ ; no confirmed scanner function or pinout"},
+   {"name":"Epson LQ-680 dot-matrix printer faulty, printhead absent","type":"mechanical_motion","condition":"untested","notes":"marketplace CLAIM only https://www.ruten.com.tw/item/21447795842755/ ; guide and motor functionality unverified"},
+   {"name":"QNAP TS-219P II bare motherboard plus SATA board, no power supply","type":"donor_board","condition":"untested","notes":"marketplace CLAIM only https://www.ruten.com.tw/item/22606139676402/ ; seller claims basic network discovery but nothing measured"},
+   {"name":"Apple A1314 mouse optical tracking faulty, buttons reportedly functional","type":"input_device","condition":"untested","notes":"marketplace CLAIM only https://www.ruten.com.tw/item/22613329448846/ ; button and interface functions unverified"}
+ ],
+ "constraints":{"strategy_mode":"constrained"},
+ "evidence_notes":["All four listed items are unowned market observations and no donor has been physically inspected","No pin-level contracts, power/drive specifications, dimensions, motor current, functioning decoder, wiring safety, or operator authorizations"]
+}

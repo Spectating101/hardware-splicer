@@ -1,0 +1,90 @@
+{
+  "cases": [
+    {
+      "build_id": "robot_drive_base",
+      "carrier_drc_pass": true,
+      "case_id": "repair_fixture",
+      "circuit_backed_donor_blocks": 6,
+      "fixture_scope": "preconfigured donor/board fixture; no original-function repair or newly assembled multi-source machine",
+      "mission_success": null,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_testing_done": false,
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "ready_after_measurements"
+    },
+    {
+      "build_id": "plotter_motion_stage",
+      "carrier_drc_pass": true,
+      "case_id": "splice_fixture",
+      "circuit_backed_donor_blocks": 3,
+      "fixture_scope": "preconfigured donor/board fixture; no original-function repair or newly assembled multi-source machine",
+      "mission_success": null,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_testing_done": false,
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "ready_after_measurements"
+    },
+    {
+      "build_id": "usb_uart_debug_adapter",
+      "carrier_drc_pass": true,
+      "case_id": "repair_unverified",
+      "circuit_backed_donor_blocks": 0,
+      "marketplace_listing_ids": [
+        "ls2208"
+      ],
+      "mission_success": false,
+      "original_device_restored": false,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_donors_in_custody": 0,
+      "physical_testing_done": false,
+      "pipeline_pass_is_not_mission_pass": true,
+      "reason": "Generated generic USB/UART adapter, NOT scanner fault isolation, original-function restoration, or verified repair.",
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "reuse_ready",
+      "verified_components_from_listings": 0,
+      "working_new_multi_donor_product": false
+    },
+    {
+      "build_id": "inspection_motion_fixture",
+      "carrier_drc_pass": true,
+      "case_id": "splice_unverified",
+      "circuit_backed_donor_blocks": 0,
+      "marketplace_listing_ids": [
+        "ls2208",
+        "epson-lq680",
+        "qnap-ts219pii",
+        "apple-a1314"
+      ],
+      "mission_success": false,
+      "original_device_restored": false,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_donors_in_custody": 0,
+      "physical_testing_done": false,
+      "pipeline_pass_is_not_mission_pass": true,
+      "reason": "Marketplace-only donor claims have no physical module contracts, tested interfaces or completed functional product.",
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "reuse_ready",
+      "verified_components_from_listings": 0,
+      "working_new_multi_donor_product": false
+    }
+  ],
+  "date": "2026-10-20",
+  "fixture_compiles_passed": 2,
+  "limitations": [
+    "Fixtures are pre-established examples and are not evidence of field repair or a new assembled device",
+    "Market source descriptions were deliberately inserted as hypothetical available_parts to stress the current planner; none is owned, proven functional or authorized for electrical use",
+    "No equipment was bought, inspected, powered, flashed, fabricated or tested",
+    "KiCad DRC only covers generated carrier boards and not the absent donor electronics",
+    "Unmanifested splice_demo --intake evaluation uses result.ok, not acceptance of repair or novel product mission"
+  ],
+  "market_compiles_passed": 2,
+  "market_missions_proved": 0,
+  "market_pipeline_reported_pass": 2,
+  "overall": "S2_CARRIER_COMPILER_WORKS; RESTORATIVE_REPAIR_AND_HETEROGENEOUS_SPLICING_NOT_YET_PROVED",
+  "schema_version": "hardware_splicer.repair_vs_splicing_benchmark.v1",
+  "tested_physical_devices": 0
+}
