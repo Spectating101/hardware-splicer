@@ -260,6 +260,11 @@ test('a danger the agent raises is shown first as the agent\'s word, and none re
   // It is a concern, not an errand: nothing asks the person to measure or gather anything.
   await expect(page.getByTestId('verdict-title')).toHaveText('The agent flagged a safety concern');
   await expect(page.getByText('What the agent says it still needs')).toHaveCount(0);
+  const current = (await (await request.get(`${API}/v1/projects/${project}/missions/${id}`)).json()).mission;
+  const cited = current.safety_concerns[0].need_seq;
+  await propose(request, id, { type: 'terminal_proposed', state: 'BLOCKED_UNSAFE', cites: [cited], reason: 'Stop citing this reported concern.' });
+  await page.reload();
+  await expect(page.getByTestId('safety-concern')).toContainText('Mission stopped citing this concern');
 });
 
 test('a design that leaves out a donor, or carries fields HS did not check, says so on the design', async ({ page, request }) => {
@@ -278,4 +283,41 @@ test('a design that leaves out a donor, or carries fields HS did not check, says
   await unchecked.locator('summary').click();
   await expect(unchecked).toContainText('/reserved_keypad_gpio');
   await expect(unchecked).toContainText('a clean check says nothing about them');
+});
+
+
+test('a safety concern cannot become a measurement form or be attributed to an unrelated terminal stop', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the operator token the verify script registers');
+  const id = await openMission(request, { goal: 'Investigate two unrelated blockers', inventory: ['ESP32'] });
+  await post(request, `/v1/projects/${project}/missions/${id}/accept`, {}, { 'X-HS-Operator-Token': TOKEN });
+  await propose(request, id, { type: 'evidence_required', blocker: 'BLOCKED_UNSAFE',
+    need: 'Agent claims the unobserved assembly might be dangerous.',
+    request: { kind: 'electrical', target: 'unobserved supply', quantity: 'voltage',
+      instructions: 'Do not measure this from the UI; HS has not established safe conditions.' } });
+  await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
+  await expect(page.getByTestId('safety-concern')).toContainText('Agent claims');
+  await expect(page.getByRole('button', { name: /Record my reading/ })).toHaveCount(0);
+  await expect(page.getByText('Asked of you')).toHaveCount(0);
+
+  const other = await propose(request, id, { type: 'evidence_required', blocker: 'BLOCKED_NEEDS_REVERSE_ENGINEERING',
+    need: 'The unidentified part requires separate data.' });
+  const otherSeq = other.mission.last_event_seq;
+  await propose(request, id, { type: 'terminal_proposed', state: 'BLOCKED_NEEDS_REVERSE_ENGINEERING',
+    reason: 'The donor is not identified; this is not a safety-stop verdict.', cites: [otherSeq] });
+  await page.reload();
+  const warning = page.getByTestId('safety-concern');
+  await expect(warning).toContainText('Mission ended for another reason');
+  await expect(warning).not.toContainText('Mission stopped citing this concern');
+});
+
+test('the safety banner does not claim agent authorship for a differently declared reporter', async ({ page, request }) => {
+  const id = await openMission(request, { goal: 'Review an unverified safety report', inventory: ['ESP32'] });
+  await post(request, `/v1/projects/${project}/missions/${id}/events`, {
+    author: { kind: 'human', id: 'claimed-person' },
+    event: { type: 'evidence_required', blocker: 'BLOCKED_UNSAFE', need: 'A concern with a declared human reporter.' },
+  });
+  await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
+  await expect(page.getByTestId('safety-concern')).toContainText('A safety concern was recorded');
+  await expect(page.getByTestId('safety-concern')).toContainText('Reporter declared human (identity not verified here)');
+  await expect(page.getByTestId('safety-concern')).not.toContainText('The agent flagged a safety concern');
 });
