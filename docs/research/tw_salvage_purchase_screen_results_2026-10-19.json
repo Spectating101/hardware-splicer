@@ -1,0 +1,417 @@
+{
+  "evaluations": [
+    {
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B%E6%A8%99%E7%B1%A4%E6%A9%9F/?sort=ords%2Fdc",
+        "https://www.ruten.com.tw/find/?q=tsc+244+plus&sort=ords%2Fdc"
+      ],
+      "downside_sensitivity": [
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -303.6,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -110.4,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": 82.8,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -102.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": 192.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": 486.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": 99.6,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": 494.4,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": 889.2,
+          "sale_factor": 1.2
+        }
+      ],
+      "failure_mode_gate": "TSC 244 printhead alone listed about NT$2880; if unverified/bad printhead, NO BID.",
+      "id": "tsc-ttp244plus-budget-fault",
+      "modeled_unit_economics": {
+        "acquisition_price_basis": "advertised_asking_price",
+        "break_even_max_purchase_twd": 839.0,
+        "expected_net_per_acquired_unit_twd": 339.0,
+        "failure_contribution_before_purchase_twd": -25.0,
+        "id": "tsc-ttp244plus-budget-fault",
+        "max_purchase_for_target_profit_twd": 539.0,
+        "minimum_sale_to_break_even_twd": 2261.9,
+        "modeled_sale_twd_not_observed": 2800.0,
+        "purchase_authorized": false,
+        "required_evidence": [
+          "Same-model sold/completed prices, not advertised asking prices",
+          "Actual donor condition and fault diagnosis before payment",
+          "Measured success yield and repair hours from a precommitted pilot",
+          "Ownership and appropriate Taiwanese reuse/resale permissions",
+          "Actual shipping, platform fee, warranty and return costs"
+        ],
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "source_ask_twd": 500.0,
+        "status": "INSUFFICIENT_SAME_MODEL_COMPS",
+        "success_contribution_before_purchase_twd": 1445.0,
+        "success_yield_assumed_not_observed": 0.7
+      },
+      "resale_assumption": "Illustrative optimistic resale; working TTP-244 Pro/Plus variants listed at roughly NT$1960-3115; sold comps unverified.",
+      "source_confidence": "B_condition_dependent_asks_A_component_cost_C_actual_resale",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E7%86%B1%E8%BD%89%20%E6%A8%99%E7%B1%A4%E6%A9%9F/?sort=ords%2Fdc",
+        "https://www.ruten.com.tw/search/tsc%2B244%2Bplus/"
+      ]
+    },
+    {
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/brother%20ql/"
+      ],
+      "downside_sensitivity": [
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -381.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -244.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -107.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -237.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -28.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": 181.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -93.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": 188.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": 469.0,
+          "sale_factor": 1.2
+        }
+      ],
+      "failure_mode_gate": "Must show working print/cutter/USB and correct label consumables before purchase unless acquisition is essentially free.",
+      "id": "brother-ql800-untested",
+      "modeled_unit_economics": {
+        "acquisition_price_basis": "advertised_asking_price",
+        "break_even_max_purchase_twd": 524.25,
+        "expected_net_per_acquired_unit_twd": 24.25,
+        "failure_contribution_before_purchase_twd": 0.0,
+        "id": "brother-ql800-untested",
+        "max_purchase_for_target_profit_twd": 224.25,
+        "minimum_sale_to_break_even_twd": 1958.55,
+        "modeled_sale_twd_not_observed": 2000.0,
+        "purchase_authorized": false,
+        "required_evidence": [
+          "Same-model sold/completed prices, not advertised asking prices",
+          "Actual donor condition and fault diagnosis before payment",
+          "Measured success yield and repair hours from a precommitted pilot",
+          "Ownership and appropriate Taiwanese reuse/resale permissions",
+          "Actual shipping, platform fee, warranty and return costs"
+        ],
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "source_ask_twd": 500.0,
+        "status": "INSUFFICIENT_SAME_MODEL_COMPS",
+        "success_contribution_before_purchase_twd": 1045.0,
+        "success_yield_assumed_not_observed": 0.65
+      },
+      "resale_assumption": "No reliable exact QL-800 completed sale. NT$5390 new advertised, QL-700 used listed NT$2300 (different model). Do not mistake the new price for used resale.",
+      "source_confidence": "B_input_listing_C_resale_model_missing_sold_comps",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B/?cateid=0011002800010007"
+      ]
+    },
+    {
+      "comparable_urls": [
+        "https://shopee.tw/search?keyword=%E4%BA%8C%E6%89%8B%E5%8D%B0%E8%A1%A8%E6%A9%9F"
+      ],
+      "downside_sensitivity": [
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -611.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -629.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -647.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -503.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -467.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -431.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -395.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -305.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -215.0,
+          "sale_factor": 1.2
+        }
+      ],
+      "failure_mode_gate": "Low value density, consumables and return freight. Avoid without free pickup and documented working toner.",
+      "id": "hp-p1505n-failed",
+      "modeled_unit_economics": {
+        "acquisition_price_basis": "advertised_asking_price",
+        "break_even_max_purchase_twd": -176.0,
+        "expected_net_per_acquired_unit_twd": -476.0,
+        "failure_contribution_before_purchase_twd": -25.0,
+        "id": "hp-p1505n-failed",
+        "max_purchase_for_target_profit_twd": -476.0,
+        "minimum_sale_to_break_even_twd": 2461.62,
+        "modeled_sale_twd_not_observed": 1500.0,
+        "purchase_authorized": false,
+        "required_evidence": [
+          "Same-model sold/completed prices, not advertised asking prices",
+          "Actual donor condition and fault diagnosis before payment",
+          "Measured success yield and repair hours from a precommitted pilot",
+          "Ownership and appropriate Taiwanese reuse/resale permissions",
+          "Actual shipping, platform fee, warranty and return costs"
+        ],
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "source_ask_twd": 300.0,
+        "status": "INSUFFICIENT_SAME_MODEL_COMPS",
+        "success_contribution_before_purchase_twd": 155.0,
+        "success_yield_assumed_not_observed": 0.55
+      },
+      "resale_assumption": "Comparable working old HP mono lasers are advertised NT$1500-1680 including cartridges; exact P1505N sold comps not proven.",
+      "source_confidence": "B_input_B_comparable_C_yield",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C/?cateid=00110028"
+      ]
+    },
+    {
+      "comparable_urls": [],
+      "downside_sensitivity": [
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -577.4,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -598.6,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -619.8,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -491.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -469.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -447.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -404.6,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -339.4,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -274.2,
+          "sale_factor": 1.2
+        }
+      ],
+      "failure_mode_gate": "Panel defects (lines/cracks) or mains-side electronics; bulky breakage/freight. Prefer free pickup for parts, not resale.",
+      "id": "acer-sa241y-broken-display",
+      "modeled_unit_economics": {
+        "acquisition_price_basis": "advertised_asking_price",
+        "break_even_max_purchase_twd": -230.0,
+        "expected_net_per_acquired_unit_twd": -480.0,
+        "failure_contribution_before_purchase_twd": -25.0,
+        "id": "acer-sa241y-broken-display",
+        "max_purchase_for_target_profit_twd": -530.0,
+        "minimum_sale_to_break_even_twd": 2266.67,
+        "modeled_sale_twd_not_observed": 1200.0,
+        "purchase_authorized": false,
+        "required_evidence": [
+          "Same-model sold/completed prices, not advertised asking prices",
+          "Actual donor condition and fault diagnosis before payment",
+          "Measured success yield and repair hours from a precommitted pilot",
+          "Ownership and appropriate Taiwanese reuse/resale permissions",
+          "Actual shipping, platform fee, warranty and return costs"
+        ],
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "source_ask_twd": 250.0,
+        "status": "INSUFFICIENT_SAME_MODEL_COMPS",
+        "success_contribution_before_purchase_twd": 85.0,
+        "success_yield_assumed_not_observed": 0.5
+      },
+      "resale_assumption": "No exact model used completed-price comp; illustrative resale only.",
+      "source_confidence": "B_input_C_resale_model",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C%2B%E8%9E%A2%E5%B9%95/?cateid=00110025&sort=new%2Fdc"
+      ]
+    },
+    {
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B%E8%BF%B7%E4%BD%A0%E4%B8%BB%E6%A9%9F/?cateid=0011&sort=new%2Fdc"
+      ],
+      "downside_sensitivity": [
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -874.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -856.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -838.0,
+          "sale_factor": 0.8
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -694.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -586.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -478.0,
+          "sale_factor": 1.0
+        },
+        {
+          "assumed_success_yield": 0.4,
+          "expected_net_twd": -514.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.6,
+          "expected_net_twd": -316.0,
+          "sale_factor": 1.2
+        },
+        {
+          "assumed_success_yield": 0.8,
+          "expected_net_twd": -118.0,
+          "sale_factor": 1.2
+        }
+      ],
+      "failure_mode_gate": "No battery, SSD or mains safety assumptions; avoid locked/unsupported devices, and verify data wipe/ownership.",
+      "id": "old-parts-only-laptop",
+      "modeled_unit_economics": {
+        "acquisition_price_basis": "advertised_asking_price",
+        "break_even_max_purchase_twd": 133.0,
+        "expected_net_per_acquired_unit_twd": -667.0,
+        "failure_contribution_before_purchase_twd": 125.0,
+        "id": "old-parts-only-laptop",
+        "max_purchase_for_target_profit_twd": -167.0,
+        "minimum_sale_to_break_even_twd": 4146.91,
+        "modeled_sale_twd_not_observed": 2500.0,
+        "purchase_authorized": false,
+        "required_evidence": [
+          "Same-model sold/completed prices, not advertised asking prices",
+          "Actual donor condition and fault diagnosis before payment",
+          "Measured success yield and repair hours from a precommitted pilot",
+          "Ownership and appropriate Taiwanese reuse/resale permissions",
+          "Actual shipping, platform fee, warranty and return costs"
+        ],
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "source_ask_twd": 800.0,
+        "status": "INSUFFICIENT_SAME_MODEL_COMPS",
+        "success_contribution_before_purchase_twd": 665.0,
+        "success_yield_assumed_not_observed": 0.45
+      },
+      "resale_assumption": "Illustrative only: NOT same-model resale; broad category includes obsolete CPUs, dead batteries, locked devices.",
+      "source_confidence": "B_input_C_resale_C_condition",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C%E7%AD%86%E9%9B%BB/"
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.salvage_purchase_screen_report.v1",
+  "source": "tw_salvage_sourcing_scenarios_2026-10-19.json",
+  "status": "SCENARIOS_ONLY_NO_PURCHASE_AUTHORITY"
+}
