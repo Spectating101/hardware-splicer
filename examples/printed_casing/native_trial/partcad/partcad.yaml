@@ -1,0 +1,17 @@
+desc: Two-part HS printed enclosure prototype, not real harvested device.
+parts:
+  casing_base:
+    type: step
+    path: HS_Casing_Base.step
+    desc: Open printed housing, cable exit, screw and board bosses; conceptual only
+  casing_lid:
+    type: step
+    path: HS_Casing_Lid.step
+    desc: Ventilated printable lid with locating skirt and clearance holes; conceptual only
+assemblies:
+  casing_print_layout:
+    type: assy
+    path: casing_print_layout.assy
+  casing_assembled:
+    type: assy
+    path: casing_assembled.assy

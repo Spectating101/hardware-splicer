@@ -125,6 +125,27 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_prepare_printed_casing",
+            description=(
+                "Prepare a real SolidCraft parametric printable housing: hollow"
+                " casing, removable ventilated lid, clearance skirt, cable port,"
+                " screw bosses and provisional PCB mounts. Use ONLY explicitly"
+                " declared concept dimensions. Returns SolidCraft layout and"
+                " assembly command scripts plus dimensional/evidence gates."
+                " Native STL/3MF/PartCAD exports are executed by the separate"
+                " guarded CLI runner. NO slicer, G-code, printer IO or physical"
+                " hardware approval is performed by this tool."
+            ),
+            inputSchema={
+                "type":"object",
+                "properties":{"casing_spec":{
+                    "type":"object",
+                    "description":"Declared housing geometry and authority marker; see examples/printed_casing/conceptual_salvage_controller.json"
+                }},
+                "required":["casing_spec"],
+            },
+        ),
+        Tool(
             name="hs_prepare_solidcraft_workspace",
             description=(
                 "Run HS independent source/functional architecture audit and"
@@ -634,6 +655,12 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result = await asyncio.to_thread(
             sdk.validate_virtual_splice_feasibility,
             source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
+    if name == "hs_prepare_printed_casing":
+        result=await asyncio.to_thread(
+            sdk.prepare_printed_casing,
+            casing_spec=args.get("casing_spec"),
         )
         return _tool_result(result)
     if name == "hs_prepare_solidcraft_workspace":
