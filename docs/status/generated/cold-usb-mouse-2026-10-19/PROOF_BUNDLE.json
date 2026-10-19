@@ -1,0 +1,255 @@
+{
+  "artifacts": [
+    {
+      "original_bytes": 1838,
+      "original_sha256": "bdcf225e40f01d92e5fe7f66c3647eb5213b2de3a32d30157b3628f159ef2032",
+      "path": "preregistration.json",
+      "published_bytes": 1838,
+      "published_sha256": "bdcf225e40f01d92e5fe7f66c3647eb5213b2de3a32d30157b3628f159ef2032",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 3140,
+      "original_sha256": "9c8029c680e11aa1bf932d05a4e2bf25b2cbc558f49bdfa404a9db463a621fa9",
+      "path": "PHASE1_PROMPT.md",
+      "published_bytes": 3015,
+      "published_sha256": "e5ae4723cb90b3afa8c39a18566450d95e4e146eb9f72c21b053cb9e53a18275",
+      "sanitized": true
+    },
+    {
+      "original_bytes": 3337,
+      "original_sha256": "f482df80cd6bcf487ac191c020c7bf10d46062565b743784174c47fa4d97d0b2",
+      "path": "PHASE2_PROMPT.md",
+      "published_bytes": 3212,
+      "published_sha256": "7b2fd7587f45ae823fa4913d42d1a6c9bc74d722efd9eafe07917782d641cbcd",
+      "sanitized": true
+    },
+    {
+      "original_bytes": 2134,
+      "original_sha256": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+      "path": "SOURCES.md",
+      "published_bytes": 2134,
+      "published_sha256": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 5266,
+      "original_sha256": "4d602d86f99b95c352c67470e437c4cb9178bb5473831ca88b757a3fdbada334",
+      "path": "QUICKSTART.md",
+      "published_bytes": 5266,
+      "published_sha256": "4d602d86f99b95c352c67470e437c4cb9178bb5473831ca88b757a3fdbada334",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 736545,
+      "original_sha256": "e5465ff7039cb403742497c7025df279b843b8196956f4257ee00736c4ba66f4",
+      "path": "trace.jsonl",
+      "published_bytes": 736545,
+      "published_sha256": "e5465ff7039cb403742497c7025df279b843b8196956f4257ee00736c4ba66f4",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 6110,
+      "original_sha256": "8a8bdd6bd0fdab69b12cb554a151b01df284576acf9251238bab6a21a42747c9",
+      "path": "host-prepared-mission.json",
+      "published_bytes": 6110,
+      "published_sha256": "8a8bdd6bd0fdab69b12cb554a151b01df284576acf9251238bab6a21a42747c9",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2819,
+      "original_sha256": "affe9f8b1b0a060fde13eae6f400434fc59f9c1bb0d9ed2cb0ad0924ef3270e1",
+      "path": "PHASE1_REPORT.md",
+      "published_bytes": 2819,
+      "published_sha256": "affe9f8b1b0a060fde13eae6f400434fc59f9c1bb0d9ed2cb0ad0924ef3270e1",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2268,
+      "original_sha256": "58108c26c11c5b96b334b819a03a8ef05ed118e1aa428d9623123acf03eddba1",
+      "path": "PHASE2_REPORT.md",
+      "published_bytes": 2268,
+      "published_sha256": "58108c26c11c5b96b334b819a03a8ef05ed118e1aa428d9623123acf03eddba1",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2497,
+      "original_sha256": "12914fc02b02409b3a5d0658310d1098918e402367f32ca63e711a4be00f757d",
+      "path": "HOST_INTERVENTIONS.md",
+      "published_bytes": 2497,
+      "published_sha256": "12914fc02b02409b3a5d0658310d1098918e402367f32ca63e711a4be00f757d",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2584,
+      "original_sha256": "ac1c93f1398760e0a7c538b0701e09face5254dea15ac91aff400fc8b376457e",
+      "path": "checkpoint.json",
+      "published_bytes": 2584,
+      "published_sha256": "ac1c93f1398760e0a7c538b0701e09face5254dea15ac91aff400fc8b376457e",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 663,
+      "original_sha256": "f763e116ae3aed924d1ee07aaeeac184df7627399744aec7ba4c76985eda734c",
+      "path": "checkpoint.py",
+      "published_bytes": 663,
+      "published_sha256": "f763e116ae3aed924d1ee07aaeeac184df7627399744aec7ba4c76985eda734c",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 5531,
+      "original_sha256": "304c373416b27a6936e4bcdb16683e2e4b9a95db9c9cc55cb2ce3719bbfb8e81",
+      "path": "host.py",
+      "published_bytes": 5531,
+      "published_sha256": "304c373416b27a6936e4bcdb16683e2e4b9a95db9c9cc55cb2ce3719bbfb8e81",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2774,
+      "original_sha256": "d0dd796a66c4840906530898a6219dcb26586077b609677622d9ee6c4c54765f",
+      "path": "bridge.py",
+      "published_bytes": 2774,
+      "published_sha256": "d0dd796a66c4840906530898a6219dcb26586077b609677622d9ee6c4c54765f",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 4934,
+      "original_sha256": "8ba6589a551a78d7d362c4db620c6b5bd6d67bd459629cb187e9d19ed3bcfa82",
+      "path": "export_evidence.py",
+      "published_bytes": 4875,
+      "published_sha256": "42cc16d2bd8243bc4ce8b27a4e7c109711aae08d4159dde39ccd08dd5e26753f",
+      "sanitized": true
+    },
+    {
+      "original_bytes": 154,
+      "original_sha256": "8b8cdf3d40bcc7ca7d6f9c1d4c36f57a82703738cc44d7805d5d562c843d2e43",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000001.json",
+      "published_bytes": 154,
+      "published_sha256": "8b8cdf3d40bcc7ca7d6f9c1d4c36f57a82703738cc44d7805d5d562c843d2e43",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 1027,
+      "original_sha256": "0c8bea017a22d0ba08b7de94c9e529e740ef7ec4e164193cc3acbc412cfa3c38",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000002.json",
+      "published_bytes": 1027,
+      "published_sha256": "0c8bea017a22d0ba08b7de94c9e529e740ef7ec4e164193cc3acbc412cfa3c38",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 576,
+      "original_sha256": "272828e224e9b757378a3b2a7c677d35928160080bab2499b5d7c40c9b7fb16c",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000003.json",
+      "published_bytes": 576,
+      "published_sha256": "272828e224e9b757378a3b2a7c677d35928160080bab2499b5d7c40c9b7fb16c",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 322,
+      "original_sha256": "19df1bb2725a5ee3deb594be61ce636f22d8189e90ce518a45f38d5d79be89a2",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000004.json",
+      "published_bytes": 322,
+      "published_sha256": "19df1bb2725a5ee3deb594be61ce636f22d8189e90ce518a45f38d5d79be89a2",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 3656,
+      "original_sha256": "3b0d2fa0169dc5f5be8781f8bf2adc117d41279942de3b0b85ca9bd4ad83a593",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000005.json",
+      "published_bytes": 3656,
+      "published_sha256": "3b0d2fa0169dc5f5be8781f8bf2adc117d41279942de3b0b85ca9bd4ad83a593",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 4092,
+      "original_sha256": "2ff5610b149e43d7b159413c75cbbb02a143c953a6cbcd70113cdd86d3fd4e38",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000006.json",
+      "published_bytes": 4092,
+      "published_sha256": "2ff5610b149e43d7b159413c75cbbb02a143c953a6cbcd70113cdd86d3fd4e38",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 493,
+      "original_sha256": "47df3eab806c1c56c12dff2eead5489ea97e972be3bfecc9c8faf961ed0acf45",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000007.json",
+      "published_bytes": 493,
+      "published_sha256": "47df3eab806c1c56c12dff2eead5489ea97e972be3bfecc9c8faf961ed0acf45",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 1268,
+      "original_sha256": "6d7a2a5fe72cc8fbffaeb09e8fc872fbf6f57d8e31576adb12990792de3d28b3",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/events/00000008.json",
+      "published_bytes": 1268,
+      "published_sha256": "6d7a2a5fe72cc8fbffaeb09e8fc872fbf6f57d8e31576adb12990792de3d28b3",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 1328,
+      "original_sha256": "3088597badab7cb2914ab241b9586143806406a87a31be6a615c9b3be9ad5a60",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/mission.json",
+      "published_bytes": 1328,
+      "published_sha256": "3088597badab7cb2914ab241b9586143806406a87a31be6a615c9b3be9ad5a60",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 52,
+      "original_sha256": "eb9b0ce4ebfff18fcd1c383f559bb45d5bf90acf31f581819cf9e2afe2757904",
+      "path": "store/cold-usb-mouse-document-study/missions/mission-8851a9f8860a4337/runs/device_plan-eb9b0ce4ebfff18f.json",
+      "published_bytes": 52,
+      "published_sha256": "eb9b0ce4ebfff18fcd1c383f559bb45d5bf90acf31f581819cf9e2afe2757904",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 259,
+      "original_sha256": "b17f03ab10e91c92517e25d0b7374040b40d1a57fca607e970afe15c7ac27f9a",
+      "path": "store/cold-usb-mouse-document-study/project.json",
+      "published_bytes": 259,
+      "published_sha256": "b17f03ab10e91c92517e25d0b7374040b40d1a57fca607e970afe15c7ac27f9a",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 807,
+      "original_sha256": "c77a3b7f6b917c8831cbfc3877b0eeecc19a59bdee0a98dbbaab915b4bec1c5d",
+      "path": "store/cold-usb-mouse-document-study/revisions/00000001.json",
+      "published_bytes": 807,
+      "published_sha256": "c77a3b7f6b917c8831cbfc3877b0eeecc19a59bdee0a98dbbaab915b4bec1c5d",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 4395,
+      "original_sha256": "d86955d79661f230b2784812d52db3a952a7dc60c29c71710a4637e2d7837a84",
+      "path": "store/cold-usb-mouse-document-study/revisions/00000002.json",
+      "published_bytes": 4395,
+      "published_sha256": "d86955d79661f230b2784812d52db3a952a7dc60c29c71710a4637e2d7837a84",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 18798,
+      "original_sha256": "07a835155893c4d88a11521d8aed69d2ae390f9b5c7e39203853a8f1aa282744",
+      "path": "store/cold-usb-mouse-document-study/revisions/00000003.json",
+      "published_bytes": 18798,
+      "published_sha256": "07a835155893c4d88a11521d8aed69d2ae390f9b5c7e39203853a8f1aa282744",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 27425,
+      "original_sha256": "60b092b9d6d3a283f0f16377414b131aa52c4a4c06bdfb3f715540313147dd02",
+      "path": "store/cold-usb-mouse-document-study/revisions/00000004.json",
+      "published_bytes": 27425,
+      "published_sha256": "60b092b9d6d3a283f0f16377414b131aa52c4a4c06bdfb3f715540313147dd02",
+      "sanitized": false
+    },
+    {
+      "original_bytes": 2134,
+      "original_sha256": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+      "path": "store/cold-usb-mouse-document-study/sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+      "published_bytes": 2134,
+      "published_sha256": "b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+      "sanitized": false
+    }
+  ],
+  "note": "HTML bytes retained privately with frozen hashes; source paraphrases published. Paths sanitized, each artifact binds original and published bytes. Raw payload-internal artifact hashes refer to original producer bytes, not sanitized export bytes.",
+  "raw_manufacturer_html_published": false,
+  "run_id": "cold-usb-mouse-2026-10-19-a0530015"
+}

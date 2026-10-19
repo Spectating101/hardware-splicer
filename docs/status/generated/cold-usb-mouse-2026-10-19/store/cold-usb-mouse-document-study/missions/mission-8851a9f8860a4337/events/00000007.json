@@ -1,0 +1,18 @@
+{
+  "artifact": "runs/device_plan-eb9b0ce4ebfff18f.json",
+  "author": {
+    "id": "hardware-splicer",
+    "kind": "system"
+  },
+  "candidate_id": "intact_pedal",
+  "created_at": "2026-10-18T18:03:57.726108+00:00",
+  "operation": "device_plan",
+  "result": {
+    "errors": 1,
+    "result_sha256": "eb9b0ce4ebfff18fcd1c383f559bb45d5bf90acf31f581819cf9e2afe2757904",
+    "summary": "refused: modules must be a list of 1 to 8",
+    "warnings": 0
+  },
+  "seq": 7,
+  "type": "evaluation_recorded"
+}

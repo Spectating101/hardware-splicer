@@ -62,6 +62,9 @@ summaries, budgets, evidence needs and `next_state`.
   discriminated schema and examples for candidates, repairs, findings, evidence
   needs and terminal proposals. Replace placeholder content with your actual
   design/observations; an empty example spec is not a working design.
+- Candidate specs must omit backend-owned authority keys entirely, including
+  `physical_correctness`, even when its proposed value is `UNPROVEN`. State
+  limitations in ordinary proposal text; HS supplies its own authority labels.
 - Send `json_body` containing `event`, `author: {"kind":"agent","id":"<your ID>"}`
   and `expected_event_seq` from a fresh context. Supply only the path parameters
   named in the operation's path, not every ID you have.
@@ -76,6 +79,24 @@ candidate's stored spec and its hashed run artifact when you need check details.
 `recorded_checks` summarizes recorded results. Its `current` flag uses HS's
 canonical repair/evidence boundary; a current check is still **not** a readiness
 verdict or physical authority.
+
+## Current document and design limits
+
+Source admission can retain a Markdown evidence packet, but page-addressed
+document inspection/claim registration currently requires an actual PDF by
+signature. Do not rename a packet to `.pdf` or present host paraphrases as
+manufacturer-document extraction.
+
+The device planner accepts its catalog module schema, not arbitrary intact
+consumer electronics or mechanical-only reuse designs. If that domain does
+not fit, use the related bounded pre-fabrication workflow to persist the actual
+alternatives, design constraints and next actions. Do not substitute a catalog
+development board just to make a check pass. A bounded plan is not an executable
+adapter, CAD or a validated build package.
+
+Read the bounded plan's `assessment.blockers` as well as existing snapshot
+`engineeringBlockers`. The plan response's `engineering_blockers` currently
+reports the latter; an empty list does not mean the proposal has no blockers.
 
 ## Errors, waiting and delivery
 

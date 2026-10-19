@@ -1,0 +1,481 @@
+{
+  "metadata": {
+    "automatic_execution": false,
+    "generated_plan_quarantined": false,
+    "physical_authority_unchanged": true,
+    "pre_fabrication_plan_schema": "hardware_splicer.pre_fabrication_plan.v1",
+    "source": "bounded_pre_fabrication_plan"
+  },
+  "project_id": "cold-usb-mouse-document-study",
+  "revision": 4,
+  "saved_at": "2026-10-18T18:07:06.215380+00:00",
+  "schema_version": "hardware_splicer.project_snapshot.v1",
+  "snapshot": {
+    "currentStage": "design",
+    "engineeringBlockers": [],
+    "engineeringSourceUploads": [
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "text_document",
+          "limitations": [
+            "Text is retained without automatically promoting its statements into engineering claims."
+          ],
+          "media_type": "text/markdown",
+          "metadata": {
+            "declared_media_type": "text/markdown",
+            "extension_media_type": "text/markdown",
+            "signature_media_type": null
+          },
+          "parser_disposition": "inventory_only",
+          "parser_route": null,
+          "source_type": "other",
+          "structured_format": null
+        },
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "SOURCES.md",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 2134,
+        "source_id": "upload-b98f9a76a04dc4a97add"
+      }
+    ],
+    "engineeringSources": [
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+          "bytes_retained": true,
+          "captured_at": "2026-10-19 Asia/Taipei",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "Text is retained without automatically promoting its statements into engineering claims."
+          ],
+          "media_type": "text/markdown",
+          "original_filename": "SOURCES.md",
+          "parser_disposition": "inventory_only",
+          "parser_route": null,
+          "provenance": "Host-transcribed frozen public-document paraphrases; not original vendor HTML. Hashes in this packet identify host-retained HTML, not these ingested bytes.",
+          "server_computed_hash": true,
+          "size_bytes": 2134,
+          "source_kind": "text_document",
+          "specimen_present": false,
+          "structured_format": null
+        },
+        "revision": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "source_id": "upload-b98f9a76a04dc4a97add",
+        "source_type": "other",
+        "uri": "hs-project://cold-usb-mouse-document-study/sources/sha256/b9/b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5"
+      }
+    ],
+    "engineering_readiness": {
+      "evidence_complete": false,
+      "fabrication_ready": false,
+      "physical_authority_granted": false,
+      "power_on_ready": false
+    },
+    "engineering_status": "bounded_pre_fabrication_plan",
+    "graph": {
+      "edges": [],
+      "nodes": []
+    },
+    "machineProject": {
+      "name": "USB mouse reuse study",
+      "project_id": "cold-usb-mouse-document-study",
+      "purpose": "Develop a useful single-action USB foot control from an ordinary discarded wired mouse, without buying a development board. Compare alternatives and persist concrete engineering work; no physical specimen or measurements exist."
+    },
+    "mode": "salvage",
+    "preFabricationPlan": {
+      "actions": [
+        {
+          "action": "Obtain actual donor identity, external condition, button positions and available reclaimed base/hinge/return materials. Report actual dimensions and provenance; do not import B100 envelope as specimen dimensions.",
+          "id": "A1",
+          "status": "awaiting_evidence"
+        },
+        {
+          "action": "On a later authorized bench, establish enumeration and actual input reports; identify exactly one chosen button down/up pair and confirm release behavior. Capture OS/application and supported bindings.",
+          "id": "A2",
+          "status": "awaiting_future_authorization"
+        },
+        {
+          "action": "Size an adjustable mouse cradle and independent pedal load path; set compliant pusher and positive stop using actual button force/travel evidence. No build dimensions established here.",
+          "id": "A3",
+          "status": "design_after_A1"
+        },
+        {
+          "action": "Only if remote option remains needed, obtain unpowered switch-node continuity/topology evidence and reclaimed switch/wire/enclosure inventory before drawing any pin-level schematic.",
+          "id": "A4",
+          "status": "conditional_remote_contact_only"
+        },
+        {
+          "action": "Proposed later acceptance: 100 deliberate press/release cycles yield exactly 100 target actions and no extra events; 10-second hold yields one action then releases cleanly; no pointer/wheel/other-button events, slipping, cable pull or switch bottoming. These are proposed trial criteria, not lifetime proof or completed tests.",
+          "id": "A5",
+          "status": "future_acceptance_protocol"
+        },
+        {
+          "action": "Retain this bounded plan until arbitrary mouse-controller and mechanical-only specs are supported or a measured donor contract exists. Do not repair into an invented catalog board to pass HS.",
+          "id": "A6",
+          "status": "software_gap"
+        },
+        {
+          "action": "Implement and validate the recorded DISARMED/ARMED/HELD host behavior only after OS/application binding and device-identity evidence. Evaluate V1-V7 including bounce and connect-held handling; no software was implemented here.",
+          "id": "A7",
+          "status": "proposed_software_contract"
+        },
+        {
+          "action": "Evaluate the recorded pedal_parameterization with actual donor tolerances, safe travel/force evidence and intended foot load before selecting dimensions. If safe bounds are unavailable, remain pending.",
+          "id": "A8",
+          "status": "symbolic_design_only"
+        }
+      ],
+      "architecture_candidates": [
+        {
+          "candidate_id": "intact_pedal",
+          "candidate_kind": "reclaim_heavy",
+          "component_family": "original_wired_mouse_usb_controller",
+          "label": "Intact mouse in a load-bearing pedal cradle",
+          "proposed_design": {
+            "approach": "An external hinged treadle presses exactly one existing button through a compliant adjustable pusher; original mouse remains intact.",
+            "decision_metrics": {
+              "advance_if": "Actual donor works, chosen action can bind, mechanical force/travel evidence supports safe load bypass.",
+              "electrical_intrusion": "None proposed",
+              "footprint": "Larger; unknown until actual donor fit",
+              "main_risks": [
+                "Housing creep or button overtravel",
+                "Foot load bypass failure",
+                "Unwanted mouse motion or clicks"
+              ],
+              "reversibility": "High"
+            },
+            "donor_identity": "Unknown discarded wired USB mouse; B100 is exemplar only",
+            "donor_resource": "donor:usb-mouse:controller",
+            "evidence_packet": {
+              "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+              "kind": "host_transcribed_document_paraphrases",
+              "limitation": "No specimen exists; original HTML hashes are locator provenance only; HS page-addressed document inspection rejected Markdown with 422 PDF signature requirement.",
+              "sections": [
+                "S1: Logitech B100 product exemplar",
+                "S2: USB-IF HID specification overview"
+              ],
+              "source_id": "upload-b98f9a76a04dc4a97add"
+            },
+            "evidence_status": "Document-only design proposal; physical correctness remains unproven. No physical actions permitted in this trial.",
+            "host_behavior": {
+              "mapping": "Use native application mouse-button binding if available. A keyboard-only target requires device-specific host remapping, subject to later OS/application evidence.",
+              "single_action": "One target application action on the chosen button down transition; suppress repeat while held; re-arm after release.",
+              "unwanted_inputs": "Mount against translation; shield unused buttons and wheel; verify zero unwanted pointer/wheel/other button actions in target use."
+            },
+            "mechanical_design": {
+              "adjustment": "Adjust mouse locating blocks, pusher position and stop only after actual envelope, button travel and allowable force are established. No dimensions are fabricated.",
+              "load_path": "Foot load goes through treadle, hinge and positive hard stop into a broad nonslip base; mouse shell/button is not the structural end stop.",
+              "protection": "Guard wheel and other buttons, retain cable strain relief, avoid pinch points; removal should restore ordinary mouse use.",
+              "return": "Independent treadle return bias must release the pusher; do not rely on the mouse switch to lift the pedal."
+            },
+            "proposal_only": true,
+            "system_boundary": "Reuse original mouse USB cable/controller/firmware; no purchased development board and no firmware modification.",
+            "unknowns": [
+              "Actual donor identity and functional state",
+              "Actual USB enumeration and button reports",
+              "Available reclaimed mechanical material",
+              "Foot force, travel, return, slip resistance and useful service life"
+            ]
+          },
+          "proposed_logical_mapping": [
+            {
+              "direction": "dut_to_host",
+              "dut": "chosen original mouse button via original USB interface",
+              "host": "target application action"
+            }
+          ],
+          "rationale": "Preferred first investigation: retains original USB implementation and avoids all switch pinout assumptions. S1 describes buttons and USB use only for an exemplar. Mechanical fit and performance remain unmeasured.",
+          "status": "preferred_family_candidate"
+        },
+        {
+          "candidate_id": "remote_contact",
+          "candidate_kind": "hybrid",
+          "component_family": "original_wired_mouse_usb_controller",
+          "label": "Reuse mouse electronics with a remote pedal contact",
+          "proposed_design": {
+            "approach": "Protect original mouse electronics in enclosure; extend only an identified button-switch closure to a separately enclosed pedal contact.",
+            "decision_metrics": {
+              "advance_if": "Mapped donor topology plus suitable reclaimed switch/wire/enclosure and authorization exist; otherwise retain intact approach.",
+              "electrical_intrusion": "Requires soldering and reverse engineering later",
+              "footprint": "Potentially smaller pedal; no dimensions claimed",
+              "main_risks": [
+                "Wrong switch nodes or non-dry-contact topology",
+                "Damaged pads/shorts",
+                "Bounce and spurious events",
+                "No suitable reclaimed remote switch available"
+              ],
+              "reversibility": "Lower"
+            },
+            "donor_identity": "Unknown discarded wired USB mouse; B100 is exemplar only",
+            "donor_resource": "donor:usb-mouse:controller",
+            "electrical_design": {
+              "connection_rule": "No pad numbers, common-ground assumption, pullup voltage or pinout asserted. Before a schematic, establish switch terminal function and open/closed topology with unpowered traceable evidence.",
+              "contact_rule": "Only if evidence confirms an isolated dry-contact equivalent, propose a passive normally-open contact across the verified original button closure nodes. Never inject external voltage or connect USB supply/data wires to the pedal.",
+              "routing": "Keep USB cable and electronics unchanged; evaluate added wire length, strain relief, short protection and switch bounce after donor evidence."
+            },
+            "evidence_packet": {
+              "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+              "kind": "host_transcribed_document_paraphrases",
+              "limitation": "No specimen exists; original HTML hashes are locator provenance only; HS page-addressed document inspection rejected Markdown with 422 PDF signature requirement.",
+              "sections": [
+                "S1: Logitech B100 product exemplar",
+                "S2: USB-IF HID specification overview"
+              ],
+              "source_id": "upload-b98f9a76a04dc4a97add"
+            },
+            "evidence_status": "Document-only design proposal; physical correctness remains unproven. No physical actions permitted in this trial.",
+            "host_behavior": {
+              "mapping": "Use native application mouse-button binding if available. A keyboard-only target requires device-specific host remapping, subject to later OS/application evidence.",
+              "single_action": "One target application action on the chosen button down transition; suppress repeat while held; re-arm after release.",
+              "unwanted_inputs": "Mount against translation; shield unused buttons and wheel; verify zero unwanted pointer/wheel/other button actions in target use."
+            },
+            "mechanical_design": {
+              "load_path": "Pedal chassis and hard stop carry foot load independently of the electrical switch.",
+              "materials": "Remote contact, wire and enclosure are requirements, not claimed available stock."
+            },
+            "proposal_only": true,
+            "system_boundary": "Reuse original mouse USB cable/controller/firmware; no purchased development board and no firmware modification.",
+            "unknowns": [
+              "Actual donor identity and functional state",
+              "Actual USB enumeration and button reports",
+              "Available reclaimed mechanical material",
+              "Foot force, travel, return, slip resistance and useful service life"
+            ]
+          },
+          "proposed_logical_mapping": [
+            {
+              "direction": "dut_to_host",
+              "dut": "chosen original mouse button via original USB interface",
+              "host": "target application action"
+            }
+          ],
+          "rationale": "Alternative for smaller foot interface or relocating electronics: original mouse remains USB endpoint, while a separate passive contact would actuate the chosen existing switch circuit. Requires topology and continuity evidence absent from S1/S2.",
+          "status": "alternative_candidate"
+        }
+      ],
+      "assessment": {
+        "behavioral_contract": {
+          "qualification": "Require evidence-based stable down/release qualification if raw input chatters. No debounce interval is asserted from these documents. A bouncing release must not prematurely re-arm; timing must later balance chatter rejection and minimum intended inter-press interval.",
+          "reconnect": "Do not replay queued clicks or infer release from unplugging. Reconnect/focus restoration requires released baseline and fresh press. Global-focus operation would require an explicit revised target requirement.",
+          "routing": "Select donor by observed device identity with a reconnect policy; do not globally bind every mouse. Choose exactly one native-binding or remapper path so a physical press is not counted twice. If device isolation or repeat suppression is unavailable, the selected application path fails this requirement.",
+          "scope": "Both candidates; host mapping or target application must provide this behavior without changing donor firmware.",
+          "startup": "Start DISARMED; a device connected with button already held produces zero actions until released and deliberately pressed again.",
+          "states": [
+            "DISARMED",
+            "ARMED",
+            "HELD"
+          ],
+          "status": "engineering_proposal_not_implemented_or_tested",
+          "transitions": [
+            {
+              "actions": 0,
+              "from": "DISARMED",
+              "input": "confirmed released chosen button on explicitly selected donor device, target active and enabled",
+              "to": "ARMED"
+            },
+            {
+              "actions": 1,
+              "from": "ARMED",
+              "input": "qualified chosen button down",
+              "to": "HELD"
+            },
+            {
+              "actions": 0,
+              "from": "HELD",
+              "input": "continued down reports, repeats or same press",
+              "to": "HELD"
+            },
+            {
+              "actions": 0,
+              "from": "HELD",
+              "input": "qualified stable release",
+              "to": "ARMED"
+            },
+            {
+              "actions": 0,
+              "from": "any",
+              "input": "device removal, unknown report state, target focus loss or explicit disable",
+              "to": "DISARMED"
+            }
+          ],
+          "vectors_proposed_only": [
+            {
+              "expected_actions": 1,
+              "id": "V1",
+              "sequence": "released baseline, press, held reports for 10 seconds, release"
+            },
+            {
+              "expected_actions": 0,
+              "id": "V2",
+              "sequence": "button held at connection, repeated held reports, release"
+            },
+            {
+              "expected_actions": 2,
+              "id": "V3",
+              "sequence": "released baseline, press, unplug while held, reconnect still held, release, fresh press"
+            },
+            {
+              "expected_actions": 100,
+              "id": "V4",
+              "sequence": "released baseline, 100 deliberate qualified press/release cycles"
+            },
+            {
+              "expected_actions": 0,
+              "id": "V5",
+              "sequence": "released baseline, other button or wheel activity"
+            },
+            {
+              "expected_actions": 1,
+              "id": "V6",
+              "qualification": "Conditional on a subsequently validated qualifier; the abstract edge model alone cannot establish this result.",
+              "sequence": "one press with raw down/up chatter inside a not-yet-measured bounce envelope"
+            },
+            {
+              "expected_actions": 0,
+              "id": "V7",
+              "sequence": "released baseline, focus loss, press while inactive, focus restore while held, release"
+            }
+          ],
+          "verification": "These vectors specify acceptance, not executed tests or an implemented remapper. S2 does not supply report offsets or actual donor descriptors."
+        },
+        "blockers": [
+          "No specimen, measurements or donor USB reports.",
+          "Planner domain mismatch: device_plan requires catalog modules (1 to 8); unobserved mouse cannot honestly be substituted with Pico/ESP32.",
+          "Markdown packet retained, but PDF-only document evidence interface prevents page-addressed claim registration."
+        ],
+        "check_artifact": "runs/device_plan-eb9b0ce4ebfff18f.json",
+        "evidence_packet": {
+          "authority_ceiling": "declared",
+          "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+          "kind": "host_transcribed_document_paraphrases",
+          "limitation": "No specimen exists; original HTML hashes are locator provenance only; HS page-addressed document inspection rejected Markdown with 422 PDF signature requirement.",
+          "sections": [
+            "S1: Logitech B100 product exemplar",
+            "S2: USB-IF HID specification overview"
+          ],
+          "source_id": "upload-b98f9a76a04dc4a97add"
+        },
+        "handoff": "Resume current project preFabricationPlan, not frozen mission revision alone. Retain mission need 8; collect target OS/application/action and donor-specific evidence before implementation. No new source evidence has arrived.",
+        "independent_signoff": false,
+        "mission_id": "mission-8851a9f8860a4337",
+        "pedal_parameterization": {
+          "evidence_needed": [
+            "actual donor envelope and button location",
+            "button make/release travel distribution",
+            "safe overtravel and force bounds or suitable independent protection",
+            "pusher/stop manufacturing and adjustment tolerances",
+            "pedal return and friction",
+            "intended user load and material condition"
+          ],
+          "exemplar_limit": "S1 dimensions 113x62x38 mm describe the B100 product envelope only and cannot fill any actual-donor variable.",
+          "feasibility": [
+            "y_stop_min > g_max + x_on_max, with positive actuation margin",
+            "y_stop_max < g_min + x_safe_min, with positive overtravel margin",
+            "Released pusher must clear button despite return tolerances; verify complete button-up independently.",
+            "These inequalities require a nonempty tolerance window. If no safe travel bound or no feasible window exists, do not size a rigid pusher; redesign the compliant mechanism or reject this donor geometry."
+          ],
+          "force_constraint": "Travel inequalities do not prove safe force. The compliant pusher must independently cap force before the base stop bears foot load; measure required actuation force and establish a safe force bound. Do not infer a foot-load rating from a hand-operated mouse switch.",
+          "load_path": "At end travel, base/hinge/treadle stop must bypass mouse and switch. Define intended maximum foot load and examine stop, hinge, base, slip and pinch risks before any later build.",
+          "status": "symbolic_engineering_proposal_no_dimensions_or_load_rating",
+          "variables": {
+            "g": "pusher-to-button initial clearance, with tolerance interval [g_min,g_max]",
+            "x_on": "button displacement needed to actuate, worst-case x_on_max",
+            "x_safe": "independently established safe button displacement upper limit, conservative x_safe_min",
+            "y_stop": "pusher displacement at structural stop, tolerance interval [y_stop_min,y_stop_max]"
+          }
+        },
+        "physical_correctness": "UNPROVEN",
+        "resume_audit": {
+          "author": "cold-mouse-phase2",
+          "duplicate_source_admission": false,
+          "existing_candidate_ids": [
+            "intact_pedal",
+            "remote_contact"
+          ],
+          "loaded_mission_event_seq": 8,
+          "loaded_project_revision": 3,
+          "prior_check_readback": "runs/device_plan-eb9b0ce4ebfff18f.json confirms only refused: modules must be a list of 1 to 8; no electrical/mechanical checks executed.",
+          "prior_mutations_replayed": false
+        },
+        "scope": "Resumable document-grounded comparison and validation plan; no fabrication, flashing, power-on, procurement or approvals.",
+        "source_interpretation": {
+          "S1": "Manufacturer exemplar declaration of three buttons, USB-A host compatibility including Linux and 113x62x38 mm product envelope. Not specimen or PCB geometry.",
+          "S2": "Generic HID self-description/usages overview. Does not establish donor descriptor, report fields or boot-protocol behavior."
+        },
+        "verification_status": "Canonical persistence and source/assurance checks only. No executable host adapter, CAD, pin-level schematic, build package, physical measurements or bench tests produced."
+      },
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "correct_engineering_architecture_asserted": false,
+      "decisions": [
+        {
+          "decision": "Investigate intact_pedal first.",
+          "id": "D1",
+          "reason": "Requires no electrical contact map, is reversible and retains existing USB implementation. Actual suitability unproven."
+        },
+        {
+          "decision": "Hold remote_contact pending topology and reclaimed-component evidence.",
+          "id": "D2",
+          "reason": "Potentially smaller foot interface at cost of soldering, bounce/short risks and additional unavailable parts."
+        },
+        {
+          "decision": "Retain both existing candidates and their source packet; extend only the bounded plan with host behavior and symbolic mechanical constraints.",
+          "id": "D3",
+          "reason": "Neither additional evidence nor a supported arbitrary-mouse planner has appeared. Persistence is useful, but readiness and physical correctness cannot be inferred."
+        }
+      ],
+      "fabrication_ready": false,
+      "physical_authority_granted": false,
+      "physical_correctness": "UNPROVEN",
+      "power_on_ready": false,
+      "project_id": "cold-usb-mouse-document-study",
+      "quarantined_generated_plan": null,
+      "requirements": [
+        {
+          "evidence": "Proposal; target application and OS unspecified.",
+          "id": "R1",
+          "requirement": "One chosen target action for each deliberate pedal press; zero repeats during sustained hold; re-arm on release."
+        },
+        {
+          "id": "R2",
+          "requirement": "No new development board, firmware changes or external voltage injected into button nodes."
+        },
+        {
+          "id": "R3",
+          "requirement": "Pedal frame and hard stop carry foot load; independent return; no unintended pointer/wheel/other button input."
+        },
+        {
+          "evidence": "Phase-2 engineering proposal; application compatibility and debounce timings remain unknown.",
+          "id": "R4",
+          "requirement": "No action from initial held connection, reconnect, disabled/focus-lost input, unknown state or unrelated mouse. Stable release is required before re-arming; one binding path only."
+        }
+      ],
+      "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+      "source_ids": [
+        "upload-b98f9a76a04dc4a97add"
+      ],
+      "source_revision": 3
+    },
+    "projectId": "cold-usb-mouse-document-study",
+    "projectName": "Document-only USB mouse reuse study"
+  }
+}

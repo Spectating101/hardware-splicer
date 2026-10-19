@@ -1,0 +1,65 @@
+{
+  "author": {
+    "id": "cold-mouse-phase1",
+    "kind": "agent"
+  },
+  "candidate": {
+    "id": "remote_contact",
+    "kind": "hybrid",
+    "label": "Reuse mouse electronics with a remote pedal contact",
+    "rationale": "Alternative for smaller foot interface or relocating electronics: original mouse remains USB endpoint, while a separate passive contact would actuate the chosen existing switch circuit. Requires topology and continuity evidence absent from S1/S2.",
+    "spec": {
+      "approach": "Protect original mouse electronics in enclosure; extend only an identified button-switch closure to a separately enclosed pedal contact.",
+      "decision_metrics": {
+        "advance_if": "Mapped donor topology plus suitable reclaimed switch/wire/enclosure and authorization exist; otherwise retain intact approach.",
+        "electrical_intrusion": "Requires soldering and reverse engineering later",
+        "footprint": "Potentially smaller pedal; no dimensions claimed",
+        "main_risks": [
+          "Wrong switch nodes or non-dry-contact topology",
+          "Damaged pads/shorts",
+          "Bounce and spurious events",
+          "No suitable reclaimed remote switch available"
+        ],
+        "reversibility": "Lower"
+      },
+      "donor_identity": "Unknown discarded wired USB mouse; B100 is exemplar only",
+      "donor_resource": "donor:usb-mouse:controller",
+      "electrical_design": {
+        "connection_rule": "No pad numbers, common-ground assumption, pullup voltage or pinout asserted. Before a schematic, establish switch terminal function and open/closed topology with unpowered traceable evidence.",
+        "contact_rule": "Only if evidence confirms an isolated dry-contact equivalent, propose a passive normally-open contact across the verified original button closure nodes. Never inject external voltage or connect USB supply/data wires to the pedal.",
+        "routing": "Keep USB cable and electronics unchanged; evaluate added wire length, strain relief, short protection and switch bounce after donor evidence."
+      },
+      "evidence_packet": {
+        "content_hash": "sha256:b98f9a76a04dc4a97addf69fb25d3e54255c03d5a6b01052ef2f5c2c8d4057c5",
+        "kind": "host_transcribed_document_paraphrases",
+        "limitation": "No specimen exists; original HTML hashes are locator provenance only; HS page-addressed document inspection rejected Markdown with 422 PDF signature requirement.",
+        "sections": [
+          "S1: Logitech B100 product exemplar",
+          "S2: USB-IF HID specification overview"
+        ],
+        "source_id": "upload-b98f9a76a04dc4a97add"
+      },
+      "evidence_status": "Document-only design proposal; physical correctness remains unproven. No physical actions permitted in this trial.",
+      "host_behavior": {
+        "mapping": "Use native application mouse-button binding if available. A keyboard-only target requires device-specific host remapping, subject to later OS/application evidence.",
+        "single_action": "One target application action on the chosen button down transition; suppress repeat while held; re-arm after release.",
+        "unwanted_inputs": "Mount against translation; shield unused buttons and wheel; verify zero unwanted pointer/wheel/other button actions in target use."
+      },
+      "mechanical_design": {
+        "load_path": "Pedal chassis and hard stop carry foot load independently of the electrical switch.",
+        "materials": "Remote contact, wire and enclosure are requirements, not claimed available stock."
+      },
+      "proposal_only": true,
+      "system_boundary": "Reuse original mouse USB cable/controller/firmware; no purchased development board and no firmware modification.",
+      "unknowns": [
+        "Actual donor identity and functional state",
+        "Actual USB enumeration and button reports",
+        "Available reclaimed mechanical material",
+        "Foot force, travel, return, slip resistance and useful service life"
+      ]
+    }
+  },
+  "created_at": "2026-10-18T18:03:53.198247+00:00",
+  "seq": 6,
+  "type": "candidate_proposed"
+}

@@ -1,0 +1,39 @@
+{
+  "author": {
+    "id": "hardware-splicer",
+    "kind": "system"
+  },
+  "created_at": "2026-10-18T18:00:38.579283+00:00",
+  "draft": {
+    "error": "name a controller from the library: ESP32-DevKitC V4 (ESP32-WROOM-32E), Raspberry Pi Pico (RP2040)",
+    "ok": false,
+    "plan_errors": 0,
+    "plan_warnings": 0
+  },
+  "reading": {
+    "controller": null,
+    "fragments": [
+      {
+        "matches": [],
+        "text": "Document-only reference: ordinary discarded wired USB mouse"
+      },
+      {
+        "matches": [],
+        "text": "Logitech B100 is a manufacturer-document exemplar"
+      },
+      {
+        "matches": [],
+        "text": "not an observed specimen"
+      }
+    ],
+    "left_out": [
+      "Document-only reference: ordinary discarded wired USB mouse",
+      "Logitech B100 is a manufacturer-document exemplar",
+      "not an observed specimen"
+    ],
+    "parts": []
+  },
+  "result_sha256": "0cf316b1ee288673ada3113908fba20a96ed15026b70766f8dfaf7a0c2c6ce10",
+  "seq": 2,
+  "type": "inventory_read"
+}

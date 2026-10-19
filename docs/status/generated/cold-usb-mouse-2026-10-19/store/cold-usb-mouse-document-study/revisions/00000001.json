@@ -1,0 +1,22 @@
+{
+  "metadata": {},
+  "project_id": "cold-usb-mouse-document-study",
+  "revision": 1,
+  "saved_at": "2026-10-18T18:00:38.215962+00:00",
+  "schema_version": "hardware_splicer.project_snapshot.v1",
+  "snapshot": {
+    "currentStage": "design",
+    "graph": {
+      "edges": [],
+      "nodes": []
+    },
+    "machineProject": {
+      "name": "USB mouse reuse study",
+      "project_id": "cold-usb-mouse-document-study",
+      "purpose": "Develop a useful single-action USB foot control from an ordinary discarded wired mouse, without buying a development board. Compare alternatives and persist concrete engineering work; no physical specimen or measurements exist."
+    },
+    "mode": "salvage",
+    "projectId": "cold-usb-mouse-document-study",
+    "projectName": "Document-only USB mouse reuse study"
+  }
+}
