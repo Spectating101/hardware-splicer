@@ -156,6 +156,25 @@ def investigate_public_donor_sources(
     return run_public_evidence_investigation(repair,splice)
 
 
+def validate_virtual_splice_feasibility(
+    *,
+    source_research: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Autonomously evaluate the proposed barcode-indexing reference behavior.
+
+    When source research is omitted the SDK performs fresh bounded public
+    source verification. All motion/scanner events are synthetic. Electrical
+    design uses the existing motor-driver planner with unresolved values.
+    No real device is accessed, programmed, powered, or characterized.
+    """
+    from .autonomous_splice_feasibility import evaluate_splice_feasibility
+    if source_research is None:
+        source_research = investigate_public_donor_sources()
+    if not isinstance(source_research, Mapping):
+        raise ValueError("source_research must be an evidence observation object")
+    return evaluate_splice_feasibility(source_research)
+
+
 def plan_salvage(
     *,
     goal: str,
