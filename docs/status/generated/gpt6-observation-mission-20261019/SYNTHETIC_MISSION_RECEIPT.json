@@ -1,0 +1,118 @@
+{
+  "firmware_authorized": false,
+  "human_acceptance_on_mission": true,
+  "human_review_required": true,
+  "initial_assessment": {
+    "alias_is_verified_hardware_identity": false,
+    "alias_matches": false,
+    "alias_semantics": "Operator-declared normalized alias, not a physical device identity.",
+    "assessment": "proposed_alias_mismatch",
+    "candidate_id": "initial",
+    "capture_bytes": 325,
+    "capture_sha256": "c2dcc72ce8a4013e6aedcbaeb692e553ae6d7a1ad45ce697f975ee597f05e04e",
+    "event_count": 6,
+    "expected_actions": 1,
+    "human_review_required": true,
+    "interface": {
+      "action": "activate",
+      "button": "left",
+      "device_alias": "wrong_mouse"
+    },
+    "mission_id": "mission-272aeebe651d434f",
+    "next_action": "Propose a software binding with the observed alias, but do not treat the alias as verified donor identity.",
+    "observed_alias": "donor_mouse",
+    "open_physical_questions": [
+      "Actual donor specimen identity and HID binding have not been independently established.",
+      "Actual mechanical force, travel, stability, independent return and cable strain are unmeasured.",
+      "An explicitly consenting person must inspect the specimen before any build or operation."
+    ],
+    "origin": "synthetic_fixture",
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "project_id": "mouse-observation-software-trial",
+    "schema_version": "hardware_splicer.mouse_observation_assessment.v1",
+    "scope": "SOFTWARE_COMPARISON_ONLY",
+    "source_authenticity_verified": false,
+    "symbolic_actions": 0
+  },
+  "mission_id": "mission-272aeebe651d434f",
+  "mission_terminal": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+  "no_physical_device_access": true,
+  "operator": "synthetic-trial-operator",
+  "operator_identity_kind": "test-only token with declared human role; not user consent for physical capture",
+  "physical_correctness": "UNPROVEN",
+  "physical_human_review_completed": false,
+  "physical_review_status": "AWAITING_REAL_SPECIMEN_AND_EXPLICIT_CONSENT",
+  "power_on_authorized": false,
+  "project_id": "mouse-observation-software-trial",
+  "prototype_package_status": "blocked",
+  "retained_file_count": 4,
+  "review_bundle_sha256": {
+    "initial": "8b2df1c73013e8e16231395284d207950c64307c3db86955174b19127ef0d1dd",
+    "revised": "cb20918cb02addbeaa920847692d010275ceb3938ad575263bc361f13183a876"
+  },
+  "review_result": "BLOCKED_WAITING_FOR_REAL_SPECIMEN",
+  "revised_assessment": {
+    "alias_is_verified_hardware_identity": false,
+    "alias_matches": true,
+    "alias_semantics": "Operator-declared normalized alias, not a physical device identity.",
+    "assessment": "software_binding_matches_trace",
+    "candidate_id": "revised",
+    "capture_bytes": 325,
+    "capture_sha256": "c2dcc72ce8a4013e6aedcbaeb692e553ae6d7a1ad45ce697f975ee597f05e04e",
+    "event_count": 6,
+    "expected_actions": 1,
+    "human_review_required": true,
+    "interface": {
+      "action": "activate",
+      "button": "left",
+      "device_alias": "donor_mouse"
+    },
+    "mission_id": "mission-272aeebe651d434f",
+    "next_action": "Keep actual donor identity, button mapping, electrical condition, mechanism travel and force blocked.",
+    "observed_alias": "donor_mouse",
+    "open_physical_questions": [
+      "Actual donor specimen identity and HID binding have not been independently established.",
+      "Actual mechanical force, travel, stability, independent return and cable strain are unmeasured.",
+      "An explicitly consenting person must inspect the specimen before any build or operation."
+    ],
+    "origin": "synthetic_fixture",
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "project_id": "mouse-observation-software-trial",
+    "schema_version": "hardware_splicer.mouse_observation_assessment.v1",
+    "scope": "SOFTWARE_COMPARISON_ONLY",
+    "source_authenticity_verified": false,
+    "symbolic_actions": 1
+  },
+  "schema_version": "hardware_splicer.observation_trial_receipt.v1",
+  "scope": "SYNTHETIC_SOFTWARE_ONLY",
+  "software_checks": [
+    {
+      "candidate_id": "initial",
+      "errors": 0,
+      "operation": "intact_reuse",
+      "warnings": 4
+    },
+    {
+      "candidate_id": "revised",
+      "errors": 0,
+      "operation": "intact_reuse",
+      "warnings": 4
+    }
+  ],
+  "source_ids": {
+    "synthetic_comparison": "upload-32259882a1c18fdba43a",
+    "synthetic_trace": "upload-c2dcc72ce8a4013e6aed"
+  },
+  "synthetic_trace_sha256": "c2dcc72ce8a4013e6aedcbaeb692e553ae6d7a1ad45ce697f975ee597f05e04e",
+  "tested_candidates": [
+    "initial",
+    "revised"
+  ],
+  "unresolved_evidence_need": {
+    "blocker": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+    "need": "SYNTHETIC-ONLY normalized trace sha256:c2dcc72ce8a4013e6aedcbaeb692e553ae6d7a1ad45ce697f975ee597f05e04e showed an alias mismatch against initial candidate; revised software alias matches the synthetic trace. Do not treat this as measured USB or physical donor evidence. Human must identify and inspect an actual nonhazardous specimen, observe actual host button mapping with explicit consent, and measure mechanical force/travel/return/stops/strain relief before considering a physical design.",
+    "seq": 9
+  }
+}

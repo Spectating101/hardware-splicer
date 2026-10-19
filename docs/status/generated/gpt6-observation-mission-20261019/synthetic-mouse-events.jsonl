@@ -1,0 +1,6 @@
+{"type":"connected","device":"donor_mouse"}
+{"type":"released","device":"donor_mouse","button":"left"}
+{"type":"pressed","device":"donor_mouse","button":"left"}
+{"type":"pressed","device":"donor_mouse","button":"left"}
+{"type":"released","device":"donor_mouse","button":"left"}
+{"type":"disconnected","device":"donor_mouse"}
