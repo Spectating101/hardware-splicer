@@ -1,0 +1,64 @@
+{
+  "artifacts_sha256": {
+    "SOLIDCRAFT_CONCEPT.commands.json": "ca008d51d3f86dbfee8b64d1e2f24084c42fcc9fbe4ae207eca151db436fe60e",
+    "SOLIDCRAFT_CONCEPT.png": "fbe7aaabb9dc11347efbd36570d512ab64aa5f62acd8dba16b9efcdc7bba104d",
+    "SOLIDCRAFT_CONCEPT.solidcraft": "e4f175e3a6e2cff85aec71f122c16df01a6950230c776ac3f93054b3274f2628",
+    "SOLIDCRAFT_CONCEPT.step": "dbe0781b195f223d30a6d245376f4c67b44b8d6cc8225be526de57091d461a51"
+  },
+  "cad_cli": {
+    "bounding_box_mm": {
+      "max": [
+        120.0,
+        80.0,
+        25.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "command_count": 4,
+    "dimensions_are_arbitrary_explicit_test_inputs_not_donor_measurements": true,
+    "editable_native_file_saved": true,
+    "editable_timeline": [
+      "Sketch",
+      "ExtrudeFeature"
+    ],
+    "real_binary_executed": true,
+    "step_file_exported": true,
+    "volume_mm3": 240000.0
+  },
+  "cad_mcp": {
+    "batch_command_count": 4,
+    "desktop_ui_live_session_tested": false,
+    "discovered_tools": 15,
+    "measured_volume_mm3": 240000.0,
+    "protocol_version": "2025-06-18",
+    "real_server_executed": true
+  },
+  "limitations": [
+    "No actual donor part, CAD geometry or mechanical interface characterized",
+    "Only bounded domain-specific functional classifiers tested, not generic engineering AGI",
+    "Native app/browser UI has not been integrated into HS; MCP and CLI paths are tested",
+    "Upstream plugin runtime is currently documented as a design proposal, not a verified installed capability",
+    "Source build needs Rust 1.95; host has Rust 1.89; verified official release binary was used"
+  ],
+  "observed_date": "2026-10-20",
+  "official_release_archive_sha256": "2ae3b585fcdd74cc2775d162fc7e36c8d2d18550f517770e2f1563a12772f766",
+  "official_release_checksum_verified": true,
+  "physical_donor_measured": false,
+  "physical_fabrication_authorized": false,
+  "physical_machine_constructed": false,
+  "schema_version": "hardware_splicer.solidcraft_native_mcp_integration.v1",
+  "unfamiliar_stationary_holdout": {
+    "functional_blocks": 5,
+    "functional_class": "stationary_processing_cell",
+    "invented_cad_emitted_without_dimensions": false,
+    "native_rover_proposal_rejected": true
+  },
+  "upstream_commit": "e4d9015f68bddbdd9a0359ef8d8f83cfbb5b54de",
+  "upstream_name": "SolidCraft (formerly SolveCraft)",
+  "upstream_release": "v0.16.2",
+  "upstream_repo": "https://github.com/tangency-labs/solidcraft"
+}

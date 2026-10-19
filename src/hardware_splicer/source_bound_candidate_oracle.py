@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
+from .functional_architecture_oracle import verify_functional_architecture
 from typing import Any
 
 SCHEMA="hardware_splicer.source_bound_candidate_oracle.v1"
@@ -110,6 +111,12 @@ def independently_audit_source_bound_candidate(
         issues.append("scenario_digest_mismatch")
     if candidate.get("topology_reference_id")!=(plan.get("robot_topology") or {}).get("topology_id"):
         issues.append("topology_identity_mismatch")
+    function_plan=candidate.get("functional_architecture") or {}
+    function_oracle=verify_functional_architecture(scenario.get("intake") or {},function_plan)
+    if not function_oracle["passes_bounded_requirement_check"]:
+        issues.extend("functional_contract:"+str(x) for x in function_oracle["failures"])
+    if function_plan!=plan.get("functional_architecture"):
+        issues.append("functional_architecture_differs_from_planner")
     raw_arch=(plan.get("robot_topology") or {}).get("robot_genre")
     stationary=(scenario.get("intake",{}).get("constraints") or {}).get("stationary_only") is True
     should_reject=stationary and raw_arch in {"rover","quadruped","tracked_vehicle","wheeled_robot"}
@@ -142,13 +149,21 @@ def independently_audit_source_bound_candidate(
         issues.append("canonical_readiness_misquoted")
     return {
         "schema_version":SCHEMA,
+        "functional_architecture_oracle":function_oracle,
         "source_metadata_integrity_checked":len(expected),
         "source_claim_bindings_checked":sum(len(x.get("source_claims") or []) for x in decisions),
         "claim_graph_conflicts_checked":len(graph_conflicts),
         "engineering_decisions_checked":len(decisions),
         "passes_independent_evidence_integrity":not issues,
-        "passes_independent_architecture_relevance":not should_reject and not issues,
-        "conditional_candidate_accepted":not should_reject and not issues,
+        "passes_independent_architecture_relevance":(
+            not should_reject and not issues and function_oracle["passes_bounded_requirement_check"]
+            and function_plan.get("functional_decomposition_supported") is True
+        ),
+        "conditional_candidate_accepted":(
+            not should_reject and not issues and function_oracle["passes_bounded_requirement_check"]
+            and function_plan.get("functional_decomposition_supported") is True
+            and not any(x["blocking"] for x in graph_conflicts.values())
+        ),
         "explicit_topology_rejection_was_honestly_recorded":should_reject and not issues,
         "failures":sorted(set(issues)),
         "physically_validated":False,

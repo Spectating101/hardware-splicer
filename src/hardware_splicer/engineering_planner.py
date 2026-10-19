@@ -15,6 +15,7 @@ from .change_impact import ChangeImpactGraph, build_change_impact_graph
 from .engineering_analysis import EngineeringAnalysisReport, analyze_engineering_candidate
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
 from .machine_project import AuthorityState, MachineProject
+from .functional_architecture import derive_functional_architecture
 from .machine_project_seed import machine_project_from_intake
 from .project_intake import plan_project_from_intake
 from .project_intake_truth import plan_project_from_intake_truthful
@@ -506,7 +507,16 @@ def plan_engineering_project(
         identity_map,
     )
 
+    functional=derive_functional_architecture(body)
     native_archetype = _native_archetype(topology, str(plan.get("archetype") or "generic_mechatronics"))
+    rejected_native=(
+        bool((body.get("constraints") or {}).get("stationary_only"))
+        and topology.robot_genre.value in {"rover","quadruped","tracked_vehicle","wheeled_robot"}
+    )
+    if rejected_native:
+        # Preserve rejected topology for debugging, NEVER propagate a mobile
+        # platform as the canonical design of explicitly stationary machinery.
+        native_archetype="generic_mechatronics"
     plan.update(
         {
             "schema_version": ENGINEERING_PLAN_SCHEMA,
@@ -520,6 +530,8 @@ def plan_engineering_project(
             "architecture_source": architecture_truth.get("source"),
             "archetype": native_archetype,
             "native_robot_genre": topology.robot_genre.value,
+            "native_robot_topology_rejected":rejected_native,
+            "functional_architecture":functional,
             "robot_genre_proposal": genre_proposal,
             "engineering_source_graph": source_graph.model_dump(mode="json"),
             "reference_sources": source_graph.model_dump(mode="json"),
@@ -565,21 +577,31 @@ def plan_engineering_project(
             "machine_project": machine_project.model_dump(mode="json"),
         }
     )
-    robotics_project = _mapping(compile_spec.get("robotics_project"))
-    platform = _mapping(robotics_project.get("platform"))
-    platform.update(
-        {
-            "type": topology.robot_genre.value,
-            "topology_id": topology.topology_id,
-            "degree_of_freedom_count": topology.degree_of_freedom_count,
-            "link_ids": [row.link_id for row in topology.links],
-            "joint_ids": [row.joint_id for row in topology.joints],
-            "actuator_ids": [row.actuator_id for row in topology.actuators],
-            "sensor_ids": [row.sensor_id for row in topology.sensors],
+    if rejected_native:
+        # A legacy rover compile spec is demonstrably irrelevant. It must not
+        # be allowed to build just because the robot planner had a fallback.
+        compile_spec.pop("robotics_project",None)
+        compile_spec["rejected_native_topology"]={
+            "inferred_genre":topology.robot_genre.value,
+            "rejection_reason":"stationary_only requirement contradicts mobile rover archetype",
+            "physical_build_authorized":False,
         }
-    )
-    robotics_project["platform"] = platform
-    compile_spec["robotics_project"] = robotics_project
+    else:
+        robotics_project = _mapping(compile_spec.get("robotics_project"))
+        platform = _mapping(robotics_project.get("platform"))
+        platform.update(
+            {
+                "type": topology.robot_genre.value,
+                "topology_id": topology.topology_id,
+                "degree_of_freedom_count": topology.degree_of_freedom_count,
+                "link_ids": [row.link_id for row in topology.links],
+                "joint_ids": [row.joint_id for row in topology.joints],
+                "actuator_ids": [row.actuator_id for row in topology.actuators],
+                "sensor_ids": [row.sensor_id for row in topology.sensors],
+            }
+        )
+        robotics_project["platform"] = platform
+        compile_spec["robotics_project"] = robotics_project
     scenario["compile_spec"] = compile_spec
     scenario["engineering_acceptance"] = {
         "blocking_source_conflicts": len(source_graph.blocking_conflicts),
@@ -596,6 +618,10 @@ def plan_engineering_project(
 
     missing = list(plan.get("missing_info") or [])
     missing.extend(_engineering_missing_info(source_graph, topology, analysis, change_impact))
+    if rejected_native:
+        missing.append("Native mobile robot topology rejected for explicit stationary-only machine goal")
+    if not functional["functional_decomposition_supported"]:
+        missing.append("Unresolved functional-domain selection or contradictory mobility requirements")
     for question in list(mode_proposal.get("unresolved_questions") or []):
         text = str(question).strip()
         if text:
@@ -621,7 +647,9 @@ def plan_engineering_project(
         confidence = min(confidence, 0.25)
     plan["planning_confidence"] = round(max(0.0, min(confidence, 1.0)), 3)
     blocked = bool(
-        source_graph.blocking_conflicts
+        rejected_native
+        or not functional["functional_decomposition_supported"]
+        or source_graph.blocking_conflicts
         or analysis.blocking_findings
         or change_impact.blocking_impacts
         or str(mode_proposal.get("status") or "") == "unresolved"
@@ -629,14 +657,16 @@ def plan_engineering_project(
     )
     plan["engineering_readiness"] = {
         "status": "blocked" if blocked else "candidate",
-        "candidate_machine_synthesized": True,
+        "candidate_machine_synthesized": not rejected_native,
         "project_mode": body["mode"],
         "project_mode_status": mode_proposal.get("status"),
         "project_mode_source": mode_proposal.get("source"),
         "architecture_status": architecture_truth.get("status"),
         "architecture_source": architecture_truth.get("source"),
         "architecture_build_id": architecture_truth.get("build_id"),
-        "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC,
+        "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC and not rejected_native,
+        "native_topology_rejected_due_to_functional_requirements":rejected_native,
+        "functional_architecture_domain":functional["functional_domain"],
         "robot_genre_status": genre_proposal.get("status"),
         "robot_genre_source": genre_proposal.get("source"),
         "source_provenance_complete": source_graph.source_provenance_complete,

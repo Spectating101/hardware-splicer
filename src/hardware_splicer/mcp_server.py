@@ -125,6 +125,25 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_prepare_solidcraft_workspace",
+            description=(
+                "Run HS independent source/functional architecture audit and"
+                " prepare a bounded SolidCraft (formerly SolveCraft) command"
+                " script for an explicitly dimensioned conceptual mechanical"
+                " envelope. Omits any geometry if dimensions are not declared."
+                " Script targets SolidCraft MCP/CLI; no device IO, physical"
+                " compatibility or fabrication authority is claimed."
+            ),
+            inputSchema={
+                "type":"object",
+                "properties":{"scenario":{
+                    "type":"object",
+                    "description":"Full HS scenario, with intake.concept_envelope_mm declared for optional geometry"
+                }},
+                "required":["scenario"],
+            },
+        ),
+        Tool(
             name="hs_plan_source_bound_design",
             description=(
                 "Analyze a scenario with canonical engineering source graph,"
@@ -615,6 +634,12 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result = await asyncio.to_thread(
             sdk.validate_virtual_splice_feasibility,
             source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
+    if name == "hs_prepare_solidcraft_workspace":
+        result=await asyncio.to_thread(
+            sdk.prepare_solidcraft_workspace,
+            scenario=args.get("scenario"),
         )
         return _tool_result(result)
     if name == "hs_plan_source_bound_design":

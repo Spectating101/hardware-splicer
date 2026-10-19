@@ -132,6 +132,33 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def prepare_solidcraft_workspace(*, scenario: Mapping[str, Any]) -> Dict[str, Any]:
+    """Prepare a source-audited mechanical CAD handoff without physical authority.
+
+    The script can be sent to an installed SolidCraft MCP session. There is
+    deliberately no unsupervised CAD binary execution, file-system write,
+    purchased part, motor control or power-on in this SDK function.
+    """
+    from .solidcraft_workspace_bridge import build_solidcraft_workspace_handoff
+
+    analysis=plan_source_bound_design(scenario=scenario)
+    if not analysis["independent_evidence_audit"]["passes_independent_evidence_integrity"]:
+        raise ValueError("independent source/function audit rejected scenario")
+    intake=scenario["intake"]
+    functional=analysis["candidate"]["functional_architecture"]
+    handoff=build_solidcraft_workspace_handoff(intake,functional)
+    return {
+        "schema_version":"hardware_splicer.sdk_solidcraft_workspace.v1",
+        "evidence_audit":analysis["independent_evidence_audit"],
+        "native_robot_topology_accepted":analysis["conditional_architecture_accepted"],
+        "functional_architecture":functional,
+        "cad_handoff":handoff,
+        "cad_interactions_via_solidcraft_mcp_possible":handoff["script_ready"],
+        "physical_assembly_proven":False,
+        "fabrication_authorized":False,
+    }
+
+
 def plan_source_bound_design(*, scenario: Mapping[str, Any]) -> Dict[str, Any]:
     """Agent entrypoint: conditional engineering proposal with independent audit.
 
