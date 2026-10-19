@@ -1,0 +1,169 @@
+{
+  "schema_version": "hardware_splicer.salvage_sourcing_research.v1",
+  "date": "2026-10-19",
+  "currency": "TWD",
+  "status": "exploratory_advertised_asks_only_not_a_purchase_order",
+  "methodology": "Visible Taiwan Ruten/Shopee advertised asking prices versus modeled sale/repair assumptions. Not sold-price research. The economic screen cannot authorize purchasing.",
+  "opportunities": [
+    {
+      "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+      "id": "tsc-ttp244plus-budget-fault",
+      "category": "Business thermal-transfer label printer",
+      "input_description": "TSC TTP-244 Plus described as faulty; NT$500-1500 variant/condition dependent",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E7%86%B1%E8%BD%89%20%E6%A8%99%E7%B1%A4%E6%A9%9F/?sort=ords%2Fdc",
+        "https://www.ruten.com.tw/search/tsc%2B244%2Bplus/"
+      ],
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B%E6%A8%99%E7%B1%A4%E6%A9%9F/?sort=ords%2Fdc",
+        "https://www.ruten.com.tw/find/?q=tsc+244+plus&sort=ords%2Fdc"
+      ],
+      "ask_twd": 500,
+      "source_ask_status": "advertised_asking_price",
+      "working_comparable": "related_model",
+      "modeled_sale_twd": 2800,
+      "sale_assumption_note": "Illustrative optimistic resale; working TTP-244 Pro/Plus variants listed at roughly NT$1960-3115; sold comps unverified.",
+      "success_yield": 0.70,
+      "platform_fee_rate": 0.10,
+      "successful_parts_twd": 300,
+      "inbound_shipping_twd": 90,
+      "outbound_shipping_twd": 150,
+      "packing_twd": 50,
+      "warranty_reserve_twd": 200,
+      "intake_labor_hours": 0.30,
+      "successful_labor_hours": 1.50,
+      "failed_labor_hours": 0.50,
+      "labor_rate_twd_hour": 250,
+      "failure_salvage_recovery_twd": 100,
+      "target_profit_per_purchase_twd": 300,
+      "hard_stop": "TSC 244 printhead alone listed about NT$2880; if unverified/bad printhead, NO BID.",
+      "source_confidence": "B_condition_dependent_asks_A_component_cost_C_actual_resale"
+    },
+    {
+      "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+      "id": "brother-ql800-untested",
+      "category": "Small business desktop label printer",
+      "input_description": "Brother QL-800 powers on but functions untested advertised about NT$500",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B/?cateid=0011002800010007"
+      ],
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/brother%20ql/"
+      ],
+      "ask_twd": 500,
+      "source_ask_status": "advertised_asking_price",
+      "working_comparable": "missing",
+      "modeled_sale_twd": 2000,
+      "sale_assumption_note": "No reliable exact QL-800 completed sale. NT$5390 new advertised, QL-700 used listed NT$2300 (different model). Do not mistake the new price for used resale.",
+      "success_yield": 0.65,
+      "platform_fee_rate": 0.10,
+      "successful_parts_twd": 180,
+      "inbound_shipping_twd": 80,
+      "outbound_shipping_twd": 110,
+      "packing_twd": 45,
+      "warranty_reserve_twd": 120,
+      "intake_labor_hours": 0.30,
+      "successful_labor_hours": 1.20,
+      "failed_labor_hours": 0.30,
+      "labor_rate_twd_hour": 250,
+      "failure_salvage_recovery_twd": 75,
+      "target_profit_per_purchase_twd": 300,
+      "hard_stop": "Must show working print/cutter/USB and correct label consumables before purchase unless acquisition is essentially free.",
+      "source_confidence": "B_input_listing_C_resale_model_missing_sold_comps"
+    },
+    {
+      "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+      "id": "hp-p1505n-failed",
+      "category": "Old office laser printer",
+      "input_description": "Broken HP LaserJet P1505N advertised around NT$300",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C/?cateid=00110028"
+      ],
+      "comparable_urls": [
+        "https://shopee.tw/search?keyword=%E4%BA%8C%E6%89%8B%E5%8D%B0%E8%A1%A8%E6%A9%9F"
+      ],
+      "ask_twd": 300,
+      "source_ask_status": "advertised_asking_price",
+      "working_comparable": "related_model",
+      "modeled_sale_twd": 1500,
+      "sale_assumption_note": "Comparable working old HP mono lasers are advertised NT$1500-1680 including cartridges; exact P1505N sold comps not proven.",
+      "success_yield": 0.55,
+      "platform_fee_rate": 0.10,
+      "successful_parts_twd": 250,
+      "inbound_shipping_twd": 150,
+      "outbound_shipping_twd": 210,
+      "packing_twd": 85,
+      "warranty_reserve_twd": 150,
+      "intake_labor_hours": 0.40,
+      "successful_labor_hours": 2.00,
+      "failed_labor_hours": 0.30,
+      "labor_rate_twd_hour": 250,
+      "failure_salvage_recovery_twd": 50,
+      "target_profit_per_purchase_twd": 300,
+      "hard_stop": "Low value density, consumables and return freight. Avoid without free pickup and documented working toner.",
+      "source_confidence": "B_input_B_comparable_C_yield"
+    },
+    {
+      "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+      "id": "acer-sa241y-broken-display",
+      "category": "Consumer LCD display",
+      "input_description": "Acer SA241Y 23.8-inch faulty listing NT$250",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C%2B%E8%9E%A2%E5%B9%95/?cateid=00110025&sort=new%2Fdc"
+      ],
+      "comparable_urls": [],
+      "ask_twd": 250,
+      "source_ask_status": "advertised_asking_price",
+      "working_comparable": "missing",
+      "modeled_sale_twd": 1200,
+      "sale_assumption_note": "No exact model used completed-price comp; illustrative resale only.",
+      "success_yield": 0.50,
+      "platform_fee_rate": 0.10,
+      "successful_parts_twd": 200,
+      "inbound_shipping_twd": 160,
+      "outbound_shipping_twd": 200,
+      "packing_twd": 90,
+      "warranty_reserve_twd": 130,
+      "intake_labor_hours": 0.40,
+      "successful_labor_hours": 1.50,
+      "failed_labor_hours": 0.30,
+      "labor_rate_twd_hour": 250,
+      "failure_salvage_recovery_twd": 50,
+      "target_profit_per_purchase_twd": 300,
+      "hard_stop": "Panel defects (lines/cracks) or mains-side electronics; bulky breakage/freight. Prefer free pickup for parts, not resale.",
+      "source_confidence": "B_input_C_resale_model"
+    },
+    {
+      "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+      "id": "old-parts-only-laptop",
+      "category": "Old laptop parts machine",
+      "input_description": "ASUS/Acer commodity older parts laptops around NT$650-1100, many missing components",
+      "source_urls": [
+        "https://www.ruten.com.tw/search/%E6%95%85%E9%9A%9C%E7%AD%86%E9%9B%BB/"
+      ],
+      "comparable_urls": [
+        "https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B%E8%BF%B7%E4%BD%A0%E4%B8%BB%E6%A9%9F/?cateid=0011&sort=new%2Fdc"
+      ],
+      "ask_twd": 800,
+      "source_ask_status": "advertised_asking_price",
+      "working_comparable": "missing",
+      "modeled_sale_twd": 2500,
+      "sale_assumption_note": "Illustrative only: NOT same-model resale; broad category includes obsolete CPUs, dead batteries, locked devices.",
+      "success_yield": 0.45,
+      "platform_fee_rate": 0.10,
+      "successful_parts_twd": 500,
+      "inbound_shipping_twd": 110,
+      "outbound_shipping_twd": 200,
+      "packing_twd": 60,
+      "warranty_reserve_twd": 200,
+      "intake_labor_hours": 0.50,
+      "successful_labor_hours": 2.50,
+      "failed_labor_hours": 0.50,
+      "labor_rate_twd_hour": 250,
+      "failure_salvage_recovery_twd": 250,
+      "target_profit_per_purchase_twd": 300,
+      "hard_stop": "No battery, SSD or mains safety assumptions; avoid locked/unsupported devices, and verify data wipe/ownership.",
+      "source_confidence": "B_input_C_resale_C_condition"
+    }
+  ]
+}
