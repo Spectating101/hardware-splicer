@@ -1,0 +1,25 @@
+{
+  "assembly_bom_is_a_design_not_stock": true,
+  "assembly_id": "conceptual_station",
+  "cad_backend": "SolidCraft",
+  "declared_concept_envelope_mm": {
+    "depth": 80.0,
+    "height": 25.0,
+    "width": 120.0
+  },
+  "electrical_interface_verified": false,
+  "inventree_stock_item_id": null,
+  "mechanical_fit_verified": false,
+  "package_backend": "PartCAD",
+  "part_id": "concept_envelope",
+  "partcad_project_kind": "CONDITIONAL_NONPHYSICAL_CONCEPT",
+  "partcad_source_step_sha256": "dbe0781b195f223d30a6d245376f4c67b44b8d6cc8225be526de57091d461a51",
+  "physical_fabrication_authorized": false,
+  "physical_specimen_id": null,
+  "schema_version": "hardware_splicer.partcad_assembly_handoff.v1",
+  "solidcraft_step_source_sha256": "dbe0781b195f223d30a6d245376f4c67b44b8d6cc8225be526de57091d461a51",
+  "source_is_measured_salvage": false,
+  "source_kind": "declared_concept_fixture",
+  "sourcing_confidence": "NOT_IN_POSSESSION",
+  "usable_quantity": 0
+}

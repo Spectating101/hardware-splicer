@@ -1,0 +1,11 @@
+desc: Hardware Splicer declared concept fixture. Not a donor or production assembly.
+parts:
+  concept_envelope:
+    type: step
+    path: source.step
+    desc: Declared test geometry; source hash in HS_PARTCAD_AUTHORITY.json
+assemblies:
+  conceptual_station:
+    type: assy
+    path: assembly.assy
+    desc: Conditional conceptual layout only. Never physical stock.

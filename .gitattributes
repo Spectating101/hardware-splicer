@@ -1,0 +1,3 @@
+# Native CAD export data: preserve exact bytes and source SHA-256.
+# STEP emitters may contain significant internal spacing/OCCT formatting.
+examples/partcad/native_trial/*.step -diff -whitespace
