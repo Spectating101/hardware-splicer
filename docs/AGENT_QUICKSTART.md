@@ -87,12 +87,29 @@ document inspection/claim registration currently requires an actual PDF by
 signature. Do not rename a packet to `.pdf` or present host paraphrases as
 manufacturer-document extraction.
 
-The device planner accepts its catalog module schema, not arbitrary intact
-consumer electronics or mechanical-only reuse designs. If that domain does
-not fit, use the related bounded pre-fabrication workflow to persist the actual
-alternatives, design constraints and next actions. Do not substitute a catalog
-development board just to make a check pass. A bounded plan is not an executable
-adapter, CAD or a validated build package.
+The catalog device planner is not an arbitrary consumer-device design engine.
+For intact input-device reuse, the salvage manifest includes the mission's
+`intact-reuse-spec`: a compact schema, actual donor/source IDs and a proposal
+template. Fill it with your grounded design, propose the candidate through
+events, then run `{"operation":"intact_reuse"}` through the usual candidate
+run route. It tests the delivered normalized-event adapter and returns a
+`bundle_download_path`. Read the hashed run, then download that SOFTWARE REVIEW
+ZIP. No catalog development board is substituted.
+
+This first intact-reuse slice supports one logical button-to-action binding,
+an external actuator or a conditional remote-contact proposal. The bundle has
+standard-library Python code, seven offline replay scenarios, an example input
+stream, proposed mechanics, source hashes and unresolved physical questions.
+It does not read raw USB, identify a host device, inject OS keys, provide wiring
+or fabricate geometry. Host integration and physical evidence remain separate.
+It does **not** count as a passing catalog plan/review or authorize READY/build
+delivery. A successful software check with unresolved physical warnings is not
+a failed software spec that permits arbitrary repair; a failed intact check
+can be repaired through the normal budgeted event path.
+
+For other unsupported reuse classes, the related bounded pre-fabrication
+workflow can retain alternatives and next actions. Neither it nor the intact
+software review bundle is CAD or a validated build package.
 
 Read the bounded plan's `assessment.blockers` as well as existing snapshot
 `engineeringBlockers`. The plan response's `engineering_blockers` currently

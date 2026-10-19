@@ -125,6 +125,9 @@ def mission_run_openapi() -> dict[str, Any]:
         _object({"operation": {"enum": sorted(_EVAL_OPERATIONS)}}, ["operation"]),
         {operation: {"value": {"operation": operation}} for operation in sorted(_EVAL_OPERATIONS)},
         "Run one software-only check on an accepted mission's stored candidate, spending one operator job. "
-        "For readiness, run device_plan first and device_engineering after a clean plan. "
+        "For intact host-input-device reuse, first read the mission's intact-reuse-spec, then run intact_reuse "
+        "to produce/test a software review bundle even while physical evidence is missing; read its run and download "
+        "runs/{name}/bundle. This does not count as a device_plan/device_engineering pass or READY. "
+        "For catalog readiness, run device_plan first and device_engineering after a clean plan. "
         "Do not claim a prior check is current after repair or new evidence. Read the returned hashed artifact for details.",
     )

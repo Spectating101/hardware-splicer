@@ -10,6 +10,7 @@ from .mcp_backend_gateway import describe_operation, operation_catalog
 _TASK = "salvage_fabrication"
 _ROUTES = (
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/salvage-fabrication"),
+    ("GET", "/v1/projects/{project_id}/missions/{mission_id}/intact-reuse-spec"),
     ("GET", "/v1/devices/spec-schema"),
     ("POST", "/v1/devices/parts-reading"),
     ("POST", "/v1/devices/draft"),
@@ -17,6 +18,7 @@ _ROUTES = (
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/events"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run"),
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}"),
+    ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}/bundle"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/package"),
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/package"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/stage"),
@@ -81,6 +83,7 @@ def salvage_fabrication_manifest(
         },
         "workflow": [
             "reload the canonical mission-scoped salvage context at the start of every turn",
+            "for intact input-device reuse, discover intact-reuse-spec, propose the actual donor design, run intact_reuse and download its software review bundle without inventing a catalog board or claiming READY",
             "inspect retained images and prefill typed donor drafts while preserving model-inference provenance",
             "leave a visual draft pending human confirmation; continue independent software work without treating the draft as a donor contract",
             "inspect retained hypotheses/resources and propose findings or a bounded evidence need when uncertain",

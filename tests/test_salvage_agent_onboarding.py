@@ -105,7 +105,7 @@ def test_compact_manifest_is_small_and_full_contracts_are_on_demand(host):
     assert full["detail"] == "full"
     assert compact["schema_version"] == "hardware_splicer.salvage_fabrication_manifest.v2"
     assert compact["operation_ids"] == full["operation_ids"]
-    assert size(compact) < 14000
+    assert size(compact) < 16000
     assert size(compact) < size(full) * 0.35
     assert all("referenced_schemas" not in op and "operation" not in op for op in compact["operations"])
     assert all("referenced_schemas" in op for op in full["operations"])

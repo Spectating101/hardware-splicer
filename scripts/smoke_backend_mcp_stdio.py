@@ -166,7 +166,7 @@ async def run() -> None:
                 "hs_backend_task_manifest", {"task": "salvage_fabrication"},
             ))
             assert salvage["detail"] == "compact"
-            assert len(json.dumps(salvage, indent=2, sort_keys=True).encode()) < 14000
+            assert len(json.dumps(salvage, indent=2, sort_keys=True).encode()) < 16000
             assert "/v1/fabricator/intelligence/vision/donor-drafts" in {
                 op["path"] for op in salvage["operations"]
             }

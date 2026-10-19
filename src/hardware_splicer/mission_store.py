@@ -73,6 +73,7 @@ _EVAL_OPERATIONS = frozenset(
         "device_application",
         "device_application_run",
         "device_reclaim_match",
+        "intact_reuse",
     }
 )
 _AUTHOR_KEYS = frozenset({"kind", "id"})
@@ -1693,9 +1694,12 @@ class MissionStore:
             new_fact = int(candidate.get("last_evidence_seq") or 0) > base
             failing = plan is not None and _plan_is_failing(plan.get("result"))
             review_failed = review is not None and int(review["result"].get("errors") or 0) > 0
-            if not (failing or review_failed or new_fact):
+            reuse = _latest_operation(candidate["evaluations"], "intact_reuse", after_seq=_since_seq(candidate))
+            reuse_failed = (candidate["spec"].get("design_class") == "intact_input_reuse"
+                            and reuse is not None and int(reuse["result"].get("errors") or 0) > 0)
+            if not (failing or review_failed or reuse_failed or new_fact):
                 raise MissionStateError("repair_proposed requires a failing device_plan or device_engineering evaluation "
-                                        "of the current spec, or a person's evidence since the latest repair")
+                                        "of the current spec, a failing intact_reuse check, or a person's evidence since the latest repair")
             if int(candidate["repairs"]) >= int(budgets["max_repairs_per_candidate"]):
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
@@ -1827,7 +1831,7 @@ class MissionStore:
         if not isinstance(operation, str) or operation not in _EVAL_OPERATIONS:
             raise MissionValidationError(
                 "operation must be one of device_draft, device_plan, device_engineering, "
-                "device_case, device_application, device_application_run, device_reclaim_match"
+                "device_case, device_application, device_application_run, device_reclaim_match, intact_reuse"
             )
         last_seq = int(replayed["last_event_seq"])
         next_seq = last_seq + 1

@@ -252,6 +252,21 @@ mission: it calls the canonical device functions, maps their verdicts onto evalu
 the full output as a hashed run file. A check that refuses or cannot run is recorded as a failure, never as a pass.
 The executor never writes a project snapshot and never grants physical authority.
 
+For intact host-input-device reuse, `intact_reuse` is a separate software check,
+not a catalog `device_plan` substitute. Its schema/template comes from the
+mission's read-only `intact-reuse-spec`. It retains the real donor reference,
+re-verifies admitted source bytes, generates a normalized-event adapter and
+executes seven synthetic replay cases against its exact delivered bytes. The
+existing mission package store holds the resulting SOFTWARE REVIEW ZIP; the
+hashed evaluation artifact binds its digest, source-read revision, candidate
+spec and file/check identities. `runs/{name}/bundle` downloads only a bundle
+referenced by this mission's hash-verified run. It is available before READY
+because it is not a READY build package. No actual host-device binding, USB
+descriptor parsing, OS key injection, wiring or measured geometry is generated.
+An intact-spec software failure permits a bounded repair; unresolved physical
+warnings alone do not. The existing catalog READY, donor-verification and
+staging gates are unchanged. See [`INTACT_INPUT_REUSE.md`](INTACT_INPUT_REUSE.md).
+
 Mission mutations use a nonblocking POSIX advisory lock on the immutable `mission.json` marker, shared across
 threads, store instances and worker processes. The executor holds it from budget/spec selection through result
 recording. Proposals, acceptance and direct internal evaluation writes use the same lock. Contention returns
