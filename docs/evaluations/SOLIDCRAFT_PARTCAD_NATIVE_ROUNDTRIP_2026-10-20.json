@@ -1,0 +1,92 @@
+{
+  "actual_partcad_bom_success": true,
+  "artifact_hashes": {
+    "HS_PARTCAD_AUTHORITY.json": {
+      "byte_count": 958,
+      "sha256": "bf2a9a5c03665180a17c3273121888de84ff764102ebe8652b61a3af0e670163"
+    },
+    "assembly.assy": {
+      "byte_count": 193,
+      "sha256": "e3d1cdcd3a4634ce70ddb06e51d1cbdd4e13f8e495af5e217bcd790703150d70"
+    },
+    "partcad.yaml": {
+      "byte_count": 365,
+      "sha256": "227fa815a0e9d5748d6a22571d4941b28b84fc4410e3e80fcb6360016e26479e"
+    },
+    "roundtrip_conceptual_station.step": {
+      "byte_count": 15444,
+      "sha256": "cca77e2b52cf7ee21e0e62c19c4214ac856b31136f62a22f4c9cd07e6482ccc6"
+    },
+    "source.step": {
+      "byte_count": 5074,
+      "sha256": "dbe0781b195f223d30a6d245376f4c67b44b8d6cc8225be526de57091d461a51"
+    }
+  },
+  "assembly_owned_inventory_count": 0,
+  "assembly_part_count": 1,
+  "assembly_real_donor_count": 0,
+  "body_name_preserved": false,
+  "independent_solidcraft_eval_succeeded": true,
+  "limitations": [
+    "Geometric equality proven for one conceptual rectangular prism only",
+    "The STEP body name changed on re-export; preserve identity in HS manifest",
+    "The SolidCraft parametric history is not reproduced from the PartCAD STEP export",
+    "No real harvested donor has measured geometry, fitted assembly or verified electrical connection",
+    "No native SolidCraft+PartCAD graphical UI in a single process has been launched"
+  ],
+  "manufacturer_ready": false,
+  "native_partcad_step_export_succeeded": true,
+  "native_solidcraft_editable_design_still_source_of_truth": true,
+  "observation_date": "2026-10-20",
+  "operator_environment": "Optiplex Linux, isolated Python venv and PartCAD CAD sandbox",
+  "partcad_exported_body_properties": {
+    "area_mm2": 29200.0,
+    "bbox": {
+      "max": [
+        120.0,
+        80.0,
+        25.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "center_of_mass": [
+      60.0,
+      40.0,
+      12.5
+    ],
+    "edges": 12,
+    "faces": 6,
+    "volume_mm3": 240000.0
+  },
+  "partcad_list_assemblies_success": true,
+  "partcad_list_parts_success": true,
+  "partcad_source_reference": "https://github.com/partcad/partcad",
+  "partcad_version": "0.8.220",
+  "physical_fabrication_authorized": false,
+  "schema_version": "hardware_splicer.solidcraft_partcad_native_roundtrip.v1",
+  "shape_equal_on_checked_metrics": true,
+  "solidcraft_source_release": "v0.16.2",
+  "source_parametric_feature_history_preserved_by_step": false,
+  "source_provenance_ceiling": "DECLARED_SOFTWARE_TEST_GEOMETRY",
+  "source_solidcraft_body_properties": {
+    "bbox": {
+      "max": [
+        120.0,
+        80.0,
+        25.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "volume_mm3": 240000.0
+  },
+  "source_step_hash_verified": true,
+  "tested_upstream": "PartCAD"
+}

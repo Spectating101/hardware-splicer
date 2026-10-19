@@ -1,0 +1,5 @@
+links:
+  - part: concept_envelope
+    name: concept_envelope_instance
+    description: Concept fixture; real fit, material, mounting and wiring unknown.
+    location: [[0, 0, 0], [0, 0, 1], 0]

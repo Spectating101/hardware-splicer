@@ -43,6 +43,8 @@
 | esphome | [ESPHome](https://github.com/esphome/esphome) | wired | `esphome_export.py` → `firmware/esphome_stub.yaml` | Pin-true YAML stub — not flash authorization |
 | nopscadlib | [NopSCADlib](https://github.com/nophead/NopSCADlib) | reference | `MECHANISM_PACK.oss_mech_refs` | Vitamins/manual pattern reference |
 | build123d | [build123d](https://github.com/gumyr/build123d) | reference | `MECHANISM_PACK.oss_mech_refs` | Optional parametric CAD — no hard STL dep |
+| solidcraft | SolidCraft (tangency-labs) | partial | hs_prepare_solidcraft_workspace + native CLI/MCP/GUI trial | External parametric CAD tested; graphical HS sidebar absent |
+| partcad | PartCAD (partcad/partcad) | partial | partcad_assembly_bridge.py + run_solidcraft_partcad_bridge.py | Real PartCAD 0.8.220 assembly and STEP roundtrip, concept fixture only |
 | skidl | [SKiDL](https://github.com/devbisme/skidl) | wired | KiCad netlist ingest via `kicad_netlist_text` | Python netlist → compile spine (import path) |
 | atopile | [atopile](https://github.com/atopile/atopile) | partial | KiCad netlist paste + [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) | Code-defined boards via netlist export |
 | schematic-ai | SINA / pcbGPT | planned | Intake → netlist-compile + gates | Research intake — not product UI |
