@@ -216,6 +216,15 @@ export function verdictOf(mission: Mission): Verdict {
   }
   const open = mission.needs.filter((need) => need.need_state !== 'resolved');
   if (mission.phase === 'EVIDENCE_REQUIRED' || open.length) {
+    // A structured request has an answer form on this page. A free-text one is the agent asking in its own words
+    // (photos, a nameplate, a manual): honest about what is being asked, and that this page cannot take the answer yet.
+    if (open.length && open.every((need) => !need.request)) {
+      return {
+        title: 'Waiting for information from you',
+        meaning: 'The agent says it cannot go on without the items below. This page has no form for them yet, so they are shown as the agent wrote them.',
+        tone: 'waiting',
+      };
+    }
     return {
       title: 'Waiting for a measurement from you',
       meaning: 'The agent asked for something only a person can do. The mission resumes when you answer.',
