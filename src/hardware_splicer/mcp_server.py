@@ -85,6 +85,24 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_investigate_public_donors",
+            description=(
+                "AUTONOMOUS, READ-ONLY public donor investigation. Rechecks exactly"
+                " allowlisted Taiwan marketplace listings and manufacturer"
+                " family pages, runs competing repair hypotheses and source-bound"
+                " multi-donor interface analysis, and automatically revises the"
+                " proposed engineering paths. No human inspection, purchase,"
+                " powering, firmware upload, or physical verification implied."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "repair_intake": {"type": "object", "description": "Optional explicit restorative_repair intake; default bundled Taiwan test"},
+                    "splice_intake": {"type": "object", "description": "Optional explicit novel_splice intake; default bundled Taiwan test"},
+                },
+            },
+        ),
+        Tool(
             name="hs_plan_salvage",
             description=(
                 "Plan salvage splice from goal + inventory without KiCad compile (~fast). "
@@ -543,6 +561,13 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         return _tool_result(sdk.resolve_inventory_parts(args.get("parts") or []))
     if name == "hs_suggest_modules":
         return _tool_result(sdk.suggest_modules(str(args.get("goal") or "")))
+    if name == "hs_investigate_public_donors":
+        report = await asyncio.to_thread(
+            sdk.investigate_public_donor_sources,
+            repair_intake=args.get("repair_intake"),
+            splice_intake=args.get("splice_intake"),
+        )
+        return _tool_result(report)
     if name == "hs_plan_salvage":
         return _tool_result(
             sdk.plan_salvage(

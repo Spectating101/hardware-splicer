@@ -1,0 +1,534 @@
+{
+  "audited_status": "PUBLIC_RESEARCH_ADVANCED; PHYSICAL_AND_INTEGRATION_PROOF_UNAVAILABLE",
+  "automatic_action_trace": [
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_seller_item_metadata",
+      "selected_because": "Verify whether listed model and seller claim can still be observed without touching hardware",
+      "sequence": 1,
+      "subject": "ruten:22623851402690"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_manufacturer_family_spec",
+      "selected_because": "Different host cable standards may explain the reported failure; verify family-specific interface options",
+      "sequence": 2,
+      "subject": "zebra:ls2208_spec"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "reuse_previous_source_receipt",
+      "selected_because": "Check exact listing-model consistency before using any seller-named component as a candidate",
+      "sequence": 3,
+      "subject": "ruten:22623851402690"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_seller_item_metadata",
+      "selected_because": "Check exact listing-model consistency before using any seller-named component as a candidate",
+      "sequence": 4,
+      "subject": "ruten:21447795842755"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_seller_item_metadata",
+      "selected_because": "Check exact listing-model consistency before using any seller-named component as a candidate",
+      "sequence": 5,
+      "subject": "ruten:22606139676402"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_seller_item_metadata",
+      "selected_because": "Check exact listing-model consistency before using any seller-named component as a candidate",
+      "sequence": 6,
+      "subject": "ruten:22613329448846"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_manufacturer_reference",
+      "selected_because": "Check whether an official manual exists for the exact printer family; do not import unrelated Stylus 680 motor specifications",
+      "sequence": 7,
+      "subject": "epson:lq680_manual"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "retry_decision": "no_repeated_fetch_or_retry",
+      "selected_action": "read_manufacturer_reference",
+      "selected_because": "Identify documented ports of the complete NAS family while keeping the bare PCB unpowered and unverified",
+      "sequence": 8,
+      "subject": "qnap:ts219pii_spec"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "CONDITIONAL_DESIGN_REVISION_GENERATED",
+      "retry_decision": "do_not_authorize_untested_component_bindings",
+      "selected_action": "revise_repair_route_and_new_machine_architecture",
+      "sequence": 9,
+      "subject": "both_missions"
+    },
+    {
+      "advanced_physical_evidence": false,
+      "result_status": "SOURCE_EVIDENCE_REASSESSED",
+      "retry_decision": "stop_at_public_evidence_frontier",
+      "selected_action": "recompute_repair_and_splice_evidence_gaps",
+      "sequence": 10,
+      "subject": "both_missions"
+    }
+  ],
+  "coverage": "two mission casefiles; 4 public seller pages plus 3 official manufacturer pages",
+  "observed_date": "2026-10-20",
+  "physical_operations_executed": 0,
+  "proposed_engineering_revision": {
+    "new_product_revision": {
+      "candidate_source_consistency_count": 4,
+      "complete_system_demonstrated": false,
+      "connection_authorized": false,
+      "donor_measured_or_integrated": false,
+      "external_support_components_likely_needed": [
+        "documented scanner-host interface cable with exact part compatibility",
+        "properly rated motion driver and controller after motor characterization",
+        "verified supply and protection hardware",
+        "independent safety-rated machine stop and interlock design",
+        "documented motion mounting and limit sensing"
+      ],
+      "identified_critical_missing_functions": [
+        "operator input and stop"
+      ],
+      "module_dispositions": [
+        {
+          "candidate_id": "ls2208_scanner_engine",
+          "disposition": "CANDIDATE_UNVERIFIED",
+          "next_material_fact": "Actual physical scan/decoder operation untested",
+          "source_ref": "ruten:22623851402690",
+          "usable_subsystem_verified": false
+        },
+        {
+          "candidate_id": "epson_paper_motion",
+          "disposition": "CANDIDATE_UNVERIFIED",
+          "next_material_fact": "Actual motor existence/type and winding not confirmed",
+          "source_ref": "ruten:21447795842755",
+          "usable_subsystem_verified": false
+        },
+        {
+          "candidate_id": "qnap_embedded_compute",
+          "disposition": "OPTIONAL_COMPUTE_DONOR_UNTIL_POWER_AND_OS_PROVED",
+          "next_material_fact": "Bare-board DC input and PSU missing",
+          "source_ref": "ruten:22606139676402",
+          "usable_subsystem_verified": false
+        },
+        {
+          "candidate_id": "mouse_button_switch",
+          "disposition": "ONLY_NONSafety_UI_HYPOTHESIS",
+          "next_material_fact": "Buttons reportedly respond, but not physically tested",
+          "source_ref": "ruten:22613329448846",
+          "usable_subsystem_verified": false
+        }
+      ],
+      "provisional_functional_blocks": [
+        {
+          "fallback": "separately documented, known-good USB barcode scanner for reference software testing",
+          "function": "barcode read",
+          "limitation": "LS2208 physical output and cable interface still unknown",
+          "preferred_hypothesis": "LS2208 intact decoder via correctly identified manufacturer-compatible cable"
+        },
+        {
+          "fallback": "known-rated low-voltage linear motion stage for software reference tests",
+          "function": "mechanical indexing",
+          "limitation": "no verified motor type, driver or travel limits",
+          "preferred_hypothesis": "salvaged LQ-680 carriage/paper-feed mechanism after physical teardown"
+        },
+        {
+          "fallback": "existing authorized Linux computer can be used for software-only processing demonstrations",
+          "function": "local decision logic",
+          "limitation": "no permission to assume a bare QNAP PCB is a compatible host",
+          "preferred_hypothesis": "QNAP bare motherboard may become optional embedded compute if exact power/OS/ports can be demonstrated"
+        },
+        {
+          "fallback": "use a separately specified independent safety-rated stop system, not an ordinary mouse switch",
+          "function": "human input and stop",
+          "limitation": "existing four donors do not establish a safety-stop solution",
+          "preferred_hypothesis": "salvaged mouse switch only for non-safety user-interface input"
+        }
+      ],
+      "replacement_part_purchased": false,
+      "revision_name": "barcode_inspection_reference_architecture_v1",
+      "scope": "software-only candidate revision; not wiring or fabrication instructions"
+    },
+    "physical_hardware_actions": 0,
+    "repair_mission_success": false,
+    "repair_route": {
+      "alternative_faults_eliminated": [],
+      "confidence_scope": "plausible repair route, not confirmed faulty component",
+      "hypothesis_advanced": "severed_interface_cable",
+      "original_device_repaired": false,
+      "route_id": "consider_exact_model_replacement_interface_cable",
+      "safe_method": "Identify exact host cable variant before selecting a manufacturer-compatible replacement; DO NOT invent or apply conductor pinouts.",
+      "why": "Seller's cut-cable description was reobserved and manufacturer model-family documentation supports multiple modular host interfaces."
+    },
+    "schema_version": "hardware_splicer.autonomous_engineering_revision.v1",
+    "splice_mission_success": false,
+    "why_this_is_a_revision": "Uses retrieved model-family facts and renewed seller listing identities to re-rank approaches and reject unsafe or undocumented subassemblies."
+  },
+  "purchases_or_seller_contacts": 0,
+  "repair_analysis": {
+    "analysis": {
+      "actual_scanner_condition_verified": false,
+      "diagnosis_proved": false,
+      "family_spec_state": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "first_hypothesis_id": "severed_interface_cable",
+      "interpretation": "Host-mode options confirmed at manufacturer FAMILY level; seller's exact specimen and cable remain unverified.",
+      "model_family_host_interfaces_known": [
+        "USB",
+        "RS232",
+        "Keyboard Wedge"
+      ],
+      "next_automatable_step": "model_specific_documentation_followup_or_alternate_source_lookup",
+      "physical_inspection_still_required": true,
+      "repair_differential_hypothesis_count": 4,
+      "seller_cut_cable_description_reobserved": true,
+      "seller_description_does_not_prove_damage": true,
+      "seller_listing_state": "SELLER_ADVERTISEMENT_REOBSERVED_NOT_PART_VERIFIED",
+      "specific_used_scanner_cable_variant_known": false
+    },
+    "mission_success": false,
+    "original_function": "scan a barcode and deliver the original decoded barcode output to a compatible host",
+    "repair_procedure_established": false
+  },
+  "schema_version": "hardware_splicer.autonomous_public_evidence_archive.v1",
+  "source_checks": [
+    {
+      "content_sha256": "64570f292202f423b20f691656aec278a4c0e1ccf69901198b86464615f62cd6",
+      "expected_model": "LS2208",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": null,
+      "manufacturer_family_interface_options": [],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:46+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "market_listing",
+      "seller_price_claim_twd": {
+        "max": 50,
+        "min": 50
+      },
+      "seller_stock_claim_units": 1,
+      "source_id": "ruten:22623851402690",
+      "source_url": "https://www.ruten.com.tw/item/22623851402690/",
+      "status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "title": "(A56)【現況出售/殺肉零件機】Symbol Motorola LS2208 一維雷射條碼掃描機（剪線未測） | 露天市集 | 全台最大的網路購物市集"
+    },
+    {
+      "content_sha256": "a5b87cef6305324c4b65b5bfb4ba68deeeee23f02c3f4576e187dd62f25bd8c4",
+      "expected_model": "LS2208",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": null,
+      "manufacturer_family_interface_options": [
+        "USB",
+        "RS232",
+        "Keyboard Wedge"
+      ],
+      "manufacturer_family_voltage_range_claim": "4.5 to 5.5 VDC (manufacturer family; NOT specimen pinout)",
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:46+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "manufacturer_spec",
+      "seller_price_claim_twd": null,
+      "seller_stock_claim_units": null,
+      "source_id": "zebra:ls2208_spec",
+      "source_url": "https://www.zebra.com/us/en/products/spec-sheets/scanners/general-purpose-scanners/ls2208.html",
+      "status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "title": "LS2208 Handheld Scanner Specification Sheet | Zebra | Zebra"
+    },
+    {
+      "content_sha256": "9630ee4ebaca23b96cfa79528569e240b19a684385d14a81b4f10a64f6703129",
+      "expected_model": "LQ-680",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": null,
+      "manufacturer_family_interface_options": [],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:47+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "market_listing",
+      "seller_price_claim_twd": {
+        "max": 300,
+        "min": 300
+      },
+      "seller_stock_claim_units": 5,
+      "source_id": "ruten:21447795842755",
+      "source_url": "https://www.ruten.com.tw/item/21447795842755/",
+      "status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "title": "EPSON LQ-680 LQ-680C 點陣印表機 報帳/故障/殺肉機(隨機出貨...) | 露天市集 | 全台最大的網路購物市集"
+    },
+    {
+      "content_sha256": "8deedc8d5321f1fa0b8a05a0e61c99d66a143f5ed9d9cc34e6fadc3636078ded",
+      "expected_model": "TS-219P II",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": null,
+      "manufacturer_family_interface_options": [],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:47+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "market_listing",
+      "seller_price_claim_twd": {
+        "max": 650,
+        "min": 650
+      },
+      "seller_stock_claim_units": 1,
+      "source_id": "ruten:22606139676402",
+      "source_url": "https://www.ruten.com.tw/item/22606139676402/",
+      "status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "title": "威聯通 QNAP TS-219P II NAS 網路硬碟儲存 主機板 零件 殺肉 | 露天市集 | 全台最大的網路購物市集"
+    },
+    {
+      "content_sha256": "b7fbf72fdc9627bc0584caa8bd0ded2e9e3c872dcb745eff2c10737794efb110",
+      "expected_model": "A1314",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": null,
+      "manufacturer_family_interface_options": [],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:47+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "market_listing",
+      "seller_price_claim_twd": {
+        "max": 500,
+        "min": 500
+      },
+      "seller_stock_claim_units": 1,
+      "source_id": "ruten:22613329448846",
+      "source_url": "https://www.ruten.com.tw/item/22613329448846/",
+      "status": "MARKET_LISTING_METADATA_REOBSERVED",
+      "title": "APPIE蘋果一代藍牙 A1314白色鍵盤滑鼠組 鍵盤完整滑鼠左右鍵ok 移動紅外線NG不移動  故障機/零件/殺肉機 | 露天市集 | 全台最大的網路購物市集"
+    },
+    {
+      "content_sha256": "7c5bf0d2394d41a7ea24a107b9374022ff4a4334fd0fa95f486f4047007753e0",
+      "expected_model": "LQ-680",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": "Epson official LQ-680 reference manual index; no motor/driver electrical specifications validated",
+      "manufacturer_family_interface_options": [],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:47+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "manufacturer_spec",
+      "seller_price_claim_twd": null,
+      "seller_stock_claim_units": null,
+      "source_id": "epson:lq680_manual",
+      "source_url": "https://support2.epson.net/manuals/english/sidm/lq_680/index.html",
+      "status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "title": "EPSON Manual Web-Site"
+    },
+    {
+      "content_sha256": "86dcbdc469854f3364bf1ecb37f8c9e4f99ef2e60dd8d863faba58a90b6dfbbb",
+      "expected_model": "TS-219P II",
+      "interfaces_measured": false,
+      "manufacturer_family_caveat": "Published complete NAS model specification, not tested ports or safe power rails of a bare salvaged board",
+      "manufacturer_family_interface_options": [
+        "USB 2.0",
+        "USB 3.2",
+        "Gigabit",
+        "eSATA"
+      ],
+      "manufacturer_family_voltage_range_claim": null,
+      "model_match": true,
+      "observed_at_utc": "2026-10-19T17:55:48+00:00",
+      "physical_parts_verified": false,
+      "purchase_or_power_authorized": false,
+      "purpose": "manufacturer_spec",
+      "seller_price_claim_twd": null,
+      "seller_stock_claim_units": null,
+      "source_id": "qnap:ts219pii_spec",
+      "source_url": "https://www.qnap.com/en-in/product/ts-219p%20ii/specs/hardware",
+      "status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+      "title": "TS-219P II | Hardware Specs | QNAP (IN)"
+    }
+  ],
+  "splicing_analysis": {
+    "candidate_source_audit": [
+      {
+        "can_bind_electrical_interface": false,
+        "candidate_id": "ls2208_scanner_engine",
+        "current_seller_ask_twd": {
+          "max": 50,
+          "min": 50
+        },
+        "current_seller_stock_claim": 1,
+        "function_hypothesis_status": "UNVERIFIED",
+        "official_model_family_interface_options": [
+          "USB",
+          "RS232",
+          "Keyboard Wedge"
+        ],
+        "official_model_family_source_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+        "public_listing_identity_status": "SELLER_ADVERTISEMENT_REOBSERVED_NOT_PART_VERIFIED",
+        "source_ref": "ruten:22623851402690",
+        "verified_components": 0
+      },
+      {
+        "can_bind_electrical_interface": false,
+        "candidate_id": "epson_paper_motion",
+        "current_seller_ask_twd": {
+          "max": 300,
+          "min": 300
+        },
+        "current_seller_stock_claim": 5,
+        "function_hypothesis_status": "UNVERIFIED",
+        "official_model_family_interface_options": [],
+        "official_model_family_source_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+        "public_listing_identity_status": "SELLER_ADVERTISEMENT_REOBSERVED_NOT_PART_VERIFIED",
+        "source_ref": "ruten:21447795842755",
+        "verified_components": 0
+      },
+      {
+        "can_bind_electrical_interface": false,
+        "candidate_id": "qnap_embedded_compute",
+        "current_seller_ask_twd": {
+          "max": 650,
+          "min": 650
+        },
+        "current_seller_stock_claim": 1,
+        "function_hypothesis_status": "UNVERIFIED",
+        "official_model_family_interface_options": [
+          "USB 2.0",
+          "USB 3.2",
+          "Gigabit",
+          "eSATA"
+        ],
+        "official_model_family_source_status": "MANUFACTURER_FAMILY_SPEC_REOBSERVED",
+        "public_listing_identity_status": "SELLER_ADVERTISEMENT_REOBSERVED_NOT_PART_VERIFIED",
+        "source_ref": "ruten:22606139676402",
+        "verified_components": 0
+      },
+      {
+        "can_bind_electrical_interface": false,
+        "candidate_id": "mouse_button_switch",
+        "current_seller_ask_twd": {
+          "max": 500,
+          "min": 500
+        },
+        "current_seller_stock_claim": 1,
+        "function_hypothesis_status": "UNVERIFIED",
+        "official_model_family_interface_options": [],
+        "official_model_family_source_status": "NOT_RECHECKED",
+        "public_listing_identity_status": "SELLER_ADVERTISEMENT_REOBSERVED_NOT_PART_VERIFIED",
+        "source_ref": "ruten:22613329448846",
+        "verified_components": 0
+      }
+    ],
+    "function_coverage": [
+      {
+        "candidate_hypotheses": [
+          "ls2208_scanner_engine"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "decode barcode",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [
+          "epson_paper_motion"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "index object using controlled motion",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [
+          "qnap_embedded_compute"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "process scan output locally",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [],
+        "coverage_status": "PARTIAL_CLAIM_GAP",
+        "partial_candidate_hypotheses": [
+          "mouse_button_switch"
+        ],
+        "required_function": "operator input and stop",
+        "verified_functional_coverage": false
+      }
+    ],
+    "interconnection_gaps": [
+      {
+        "priority": 2,
+        "reason": "No component fully claimed to cover this function; ordinary mouse buttons do not prove a safety-rated stop",
+        "required_function": "operator input and stop",
+        "type": "missing_system_function"
+      },
+      {
+        "connection_id": "buttons_to_compute",
+        "missing_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "priority": 3,
+        "reason": "BLOCKED_UNKNOWN_INTERFACE",
+        "type": "interface_unknown"
+      },
+      {
+        "connection_id": "motion_to_compute",
+        "missing_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "priority": 3,
+        "reason": "BLOCKED_UNKNOWN_INTERFACE",
+        "type": "interface_unknown"
+      },
+      {
+        "connection_id": "scanner_to_compute",
+        "missing_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "priority": 3,
+        "reason": "BLOCKED_UNKNOWN_INTERFACE",
+        "type": "interface_unknown"
+      }
+    ],
+    "mission_success": false,
+    "new_product": "tabletop automated barcode inspection and object indexing machine",
+    "verified_distinct_donors": 0
+  },
+  "stop_reason": "source_recheck_done_and_remaining_requirements_are_not_verifiable_by_public_listing_or_family_spec_alone"
+}
