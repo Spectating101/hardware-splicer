@@ -85,7 +85,7 @@ def test_invalid_virtual_scan_latches_fault(bad_code):
 
 def test_suite_checks_synthetic_only_and_does_not_promote_safety_authority():
     output=run_virtual_reference_cases()
-    assert output["passed"]==output["total"]==8
+    assert output["passed"]==output["total"]==10
     assert output["software_reference_logic_passed"] is True
     assert output["physical_product_works"] is False
     assert output["actual_safety_stop_verified"] is False
@@ -93,7 +93,7 @@ def test_suite_checks_synthetic_only_and_does_not_promote_safety_authority():
 
 def test_bounded_state_exhaustion_has_no_sequence_invariant_violation():
     a=audit_bounded_sequences(max_depth=4)
-    assert a["sequences_checked"]==7380
+    assert a["sequences_checked"]==11110
     assert a["violations"]==[]
     assert a["passed"] is True
     assert a["physical_hardware_evaluated"] is False
@@ -107,7 +107,7 @@ def test_bounded_oracle_rejects_invalid_work_budget(bad_depth):
 
 def test_source_scoped_feasibility_uses_actual_hs_electrical_constraints():
     output=evaluate_splice_feasibility(source_record())
-    assert output["virtual_control_software"]["passed"]==8
+    assert output["virtual_control_software"]["passed"]==10
     assert output["bounded_software_state_audit"]["passed"]
     assert output["conditional_motor_driver_plan"]["planner_result"]=="blocked"
     missing=output["conditional_motor_driver_plan"]["missing_evidence"]
@@ -151,12 +151,12 @@ def test_sdk_mcp_tool_supports_offline_evidence_replay(monkeypatch):
     assert any(x.name=="hs_validate_virtual_splice_feasibility" for x in tools)
     payload=asyncio.run(mcp_server.call_tool("hs_validate_virtual_splice_feasibility",{"source_research":record}))
     mcp=json.loads(payload[0].text)
-    assert mcp["virtual_control_software"]["passed"]==8
+    assert mcp["virtual_control_software"]["passed"]==10
     assert mcp["conditional_motor_driver_plan"]["planner_result"]=="blocked"
     assert not mcp["physical_actions_authorized"]
 
 def test_repository_archived_source_observation_can_replay_without_fetch():
     archived=json.loads((ROOT/"docs/evaluations"/"AUTONOMOUS_PUBLIC_DONOR_INVESTIGATION_2026-10-20.json").read_text())
     result=evaluate_splice_feasibility(archived)
-    assert result["virtual_control_software"]["passed"]==8
+    assert result["virtual_control_software"]["passed"]==10
     assert result["novel_product_functionally_proven"] is False

@@ -18,6 +18,8 @@ class VirtualInspectionCell:
     barcode: str | None = None
     faults: list[str] = field(default_factory=list)
     completed_count: int = 0
+    virtual_index_ticks: int = 0
+    max_virtual_index_ticks: int = 8
     event_history: list[dict[str, Any]] = field(default_factory=list)
 
     def dispatch(self, event: str, value: Any = None) -> dict[str, Any]:
@@ -25,11 +27,12 @@ class VirtualInspectionCell:
         allowed = {
             "interlock_closed", "interlock_open", "reset", "load",
             "motion_complete", "scan", "ack", "stop",
-            "motion_timeout", "limit_fault",
+            "motion_timeout", "limit_fault", "tick",
         }
         if event not in allowed:
             raise ValueError("unknown virtual controller event")
         before = self.state
+        previous_ticks = self.virtual_index_ticks
         if event in {"stop", "interlock_open"}:
             # An ordinary software stop must latch off re-arm until the
             # abstract interlock is deliberately re-closed AND reset.
@@ -43,7 +46,13 @@ class VirtualInspectionCell:
         elif event == "reset":
             self.virtual_index_requested = False
             self.barcode = None
-            if self.interlock_reported_closed:
+            if self.state in {"indexing", "await_scan"}:
+                # Aborting an in-progress operation is NOT the same as
+                # completed motion or a safe restart.
+                self.state = "inhibited"
+                self.interlock_reported_closed = False
+                self.faults.append("reset_during_unfinished_cycle")
+            elif self.interlock_reported_closed:
                 self.state = "ready"
             else:
                 self.state = "inhibited"
@@ -52,10 +61,20 @@ class VirtualInspectionCell:
             self.interlock_reported_closed = False
             self.state = "fault"
             self.faults.append(event)
+        elif event == "tick" and self.state == "indexing":
+            # Ticks are explicitly injected VIRTUAL test events, not a
+            # wall-clock/PLC watchdog and not proof of real motion stopping.
+            self.virtual_index_ticks += 1
+            if self.virtual_index_ticks >= self.max_virtual_index_ticks:
+                self.virtual_index_requested = False
+                self.interlock_reported_closed = False
+                self.state = "fault"
+                self.faults.append("synthetic_index_tick_limit")
         elif self.state in {"fault", "inhibited"}:
             # Synthetic event cannot silently bypass a latched stop or fault.
             pass
         elif event == "load" and self.state == "ready":
+            self.virtual_index_ticks = 0
             self.virtual_index_requested = True
             self.barcode = None
             self.state = "indexing"
@@ -80,13 +99,14 @@ class VirtualInspectionCell:
             "from": before,
             "to": self.state,
             "virtual_index_requested": self.virtual_index_requested,
+            "virtual_index_ticks": self.virtual_index_ticks,
             "interlock_reported_closed": self.interlock_reported_closed,
             "barcode_recorded": self.barcode,
             "faults": list(self.faults),
             "completed_count": self.completed_count,
             "physical_hardware_actuated": False,
             "actual_safety_stop_verified": False,
-            "accepted_event": before != self.state or event in {"interlock_closed", "stop", "interlock_open"},
+            "accepted_event": before != self.state or previous_ticks != self.virtual_index_ticks or event in {"interlock_closed", "stop", "interlock_open"},
         }
         self.event_history.append(result)
         return result
@@ -124,6 +144,15 @@ SCENARIOS: dict[str,list[tuple[str,Any]]] = {
         ("stop",None), ("reset",None), ("load",None),
         ("interlock_closed",None), ("reset",None),
     ],
+    "reset_during_indexing_inhibits": [
+        ("interlock_closed",None), ("reset",None), ("load",None),
+        ("reset",None), ("load",None),
+    ],
+    "virtual_tick_limit_inhibits": [
+        ("interlock_closed",None), ("reset",None), ("load",None),
+        *[("tick",None) for _ in range(8)],
+        ("motion_complete",None), ("scan","NOT-A-RESULT"),
+    ],
     "invalid_scan_fault": [
         ("interlock_closed",None), ("reset",None), ("load",None),
         ("motion_complete",None), ("scan",""),
@@ -142,6 +171,8 @@ def run_virtual_reference_cases() -> dict[str,Any]:
         "limit_fault_fail_closed": ("fault",0),
         "reset_requires_interlock": ("indexing",0),
         "stop_requires_explicit_rearm": ("ready",0),
+        "reset_during_indexing_inhibits": ("inhibited",0),
+        "virtual_tick_limit_inhibits": ("fault",0),
         "invalid_scan_fault": ("fault",0),
     }
     for name,events in SCENARIOS.items():
@@ -184,7 +215,7 @@ def audit_bounded_sequences(max_depth: int = 4) -> dict:
     from itertools import product
     if type(max_depth) is not int or not 1 <= max_depth <= 5:
         raise ValueError('max_depth outside audit budget')
-    alphabet = ('interlock_closed','interlock_open','reset','load','motion_complete','scan','stop','motion_timeout','limit_fault')
+    alphabet = ('interlock_closed','interlock_open','reset','load','motion_complete','scan','stop','motion_timeout','limit_fault','tick')
     n=0
     steps=0
     failures=[]
