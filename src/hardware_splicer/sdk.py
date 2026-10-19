@@ -132,6 +132,30 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def investigate_public_donor_sources(
+    *,
+    repair_intake: Mapping[str, Any] | None = None,
+    splice_intake: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Automatically recheck bounded public sources and revise both missions.
+
+    Defaults to the bundled Taiwan scanner-repair/multi-donor research cases.
+    This is intentionally limited to *public website reading* and conditional
+    design hypotheses: no hardware, purchase, authority or user inspection.
+    """
+    from .autonomous_evidence_controller import run_public_evidence_investigation
+
+    def _canonical_case(filename: str) -> dict[str,Any]:
+        path = ROOT / "examples" / "dual_track" / filename
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    repair = repair_intake if repair_intake is not None else _canonical_case("repair_ls2208_unverified.json")
+    splice = splice_intake if splice_intake is not None else _canonical_case("splice_four_marketplace_donors_unverified.json")
+    if not isinstance(repair,Mapping) or not isinstance(splice,Mapping):
+        raise ValueError("research mission inputs must be objects")
+    return run_public_evidence_investigation(repair,splice)
+
+
 def plan_salvage(
     *,
     goal: str,
