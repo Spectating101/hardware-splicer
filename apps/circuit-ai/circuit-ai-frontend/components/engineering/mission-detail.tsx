@@ -284,9 +284,11 @@ export function splitNumbered(text: string): { lead: string; items: string[] } {
 export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged: () => void }) {
   const ended = Boolean(mission.terminal);
   // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
-  const requests = mission.needs.filter((need) => need.request);
   const flagged = new Set((mission.safety_concerns ?? []).map((concern) => concern.need_seq));
-  const plain = mission.needs.filter((need) => !need.request && !flagged.has(need.seq));
+  // Never offer an answer form for BLOCKED_UNSAFE, even when an older/partial response omits safety_concerns.
+  const isSafety = (need: MissionNeed) => need.blocker === 'BLOCKED_UNSAFE' || flagged.has(need.seq);
+  const requests = mission.needs.filter((need) => need.request && !isSafety(need));
+  const plain = mission.needs.filter((need) => !need.request && !isSafety(need));
   // A free-text need on a running mission is the agent asking for something. It is not a side note.
   const asks = ended || !mission.accepted ? [] : plain.filter((need) => need.need_state === 'open');
   const notes = plain.filter((need) => !asks.includes(need));
@@ -468,37 +470,64 @@ function CheckIcon({ errors, warnings }: { errors: number; warnings: number }) {
   return <Check className="h-4 w-4 shrink-0 text-emerald-300" aria-label="Clean" />;
 }
 
-/** Shown first. Only the agent can raise this, HS cannot check it, and an empty list is not a finding of safety. */
+/** A reported concern is not an HS safety verdict, even when a mission terminates. */
 export function SafetyPanel({ mission }: { mission: Mission }) {
   const concerns = mission.safety_concerns ?? [];
   if (!concerns.length) {
     return (
       <p data-testid="no-safety-concern" className="px-1 text-xs leading-5 text-slate-500">
-        No safety concern has been recorded. That is not a safety check: HS does not assess danger, and an agent may not raise it.
+        No safety concern has been recorded. That is not a safety check: HS does not assess danger, and a concern may go unreported.
       </p>
     );
   }
+  const allDeclaredAgent = concerns.every((concern) => concern.author?.kind === 'agent');
   return (
     <section data-testid="safety-concern" aria-label="Safety concern" className="rounded-2xl border border-red-400/50 bg-red-950/30 p-5">
       <div className="flex flex-wrap items-center gap-2">
         <AlertTriangle className="h-5 w-5 text-red-300" aria-hidden="true" />
-        <h2 className="text-base font-semibold text-red-100">The agent flagged a safety concern</h2>
-        <WhoChip who="agent" label="The agent’s word, not checked by HS" />
+        <h2 className="text-base font-semibold text-red-100">
+          {allDeclaredAgent ? 'The agent flagged a safety concern' : 'A safety concern was recorded'}
+        </h2>
+        {allDeclaredAgent ? (
+          <WhoChip who="agent" label="The agent’s word, not checked by HS" />
+        ) : (
+          <span className="rounded-full border border-red-300/40 px-2 py-0.5 text-[11px] text-red-100">
+            Reported claim, not checked by HS
+          </span>
+        )}
       </div>
       <p className="mt-2 text-xs leading-5 text-red-100/80">
-        HS cannot judge danger. This is what the agent wrote, kept as written. Do not open, power or handle the item on the strength of this page.
+        HS cannot judge danger. These are recorded claims, not a safety assessment. Do not open, power or handle the item on the strength of this page.
       </p>
       <ul className="mt-3 space-y-3">
-        {concerns.map((concern) => (
-          <li key={concern.need_seq} className="rounded-xl border border-red-400/30 bg-black/25 p-4 text-sm leading-6 text-slate-100">
-            <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-red-100/80">
-              <span>Recorded at event #{concern.need_seq}</span>
-              <span>·</span>
-              <span>{mission.terminal ? 'The mission was stopped on it' : concern.state === 'resolved' ? 'Resolved' : 'Still open'}</span>
-            </div>
-            <p className="whitespace-pre-line">{concern.concern}</p>
-          </li>
-        ))}
+        {concerns.map((concern) => {
+          const stoppedOnThis = mission.terminal?.state === 'BLOCKED_UNSAFE'
+            && (mission.terminal.cites ?? []).includes(concern.need_seq);
+          const state = concern.state === 'resolved'
+            ? 'Evidence recorded; safety not assessed'
+            : stoppedOnThis
+              ? 'Mission stopped citing this concern'
+              : mission.terminal
+                ? 'Mission ended for another reason; concern remains recorded'
+                : concern.state === 'contradicted'
+                  ? 'Evidence contested'
+                  : 'Still open';
+          const reporter = concern.author?.kind === 'agent' ? 'Reported as agent'
+            : concern.author?.kind === 'human' ? 'Reporter declared human (identity not verified here)'
+              : 'Reporter not established';
+          return (
+            <li key={concern.need_seq} className="rounded-xl border border-red-400/30 bg-black/25 p-4 text-sm leading-6 text-slate-100">
+              <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-red-100/80">
+                <span>Recorded at event #{concern.need_seq}</span>
+                <span>·</span>
+                <span>{reporter}</span>
+                <span>·</span>
+                <span>{state}</span>
+              </div>
+              <p className="whitespace-pre-line">{concern.concern}</p>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
