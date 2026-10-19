@@ -216,6 +216,8 @@ def build_source_bound_candidate(scenario: Mapping[str,Any], *, plan: Mapping[st
         "topology_reference_id":topology.get("topology_id"),
         "topology_joint_count":len(topology.get("joints") or []),
         "topology_actuator_count":len(topology.get("actuators") or []),
+        "functional_architecture":plan.get("functional_architecture"),
+        "functional_architecture_conditional_only":True,
         "named_component_ids":sorted(ids.get("component_aliases") or {}),
         "source_integrity":declared_source_checks,
         "engineering_source_claim_count":len(graph["claims"]),

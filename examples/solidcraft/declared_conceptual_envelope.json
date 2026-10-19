@@ -1,0 +1,20 @@
+{
+  "scenario_id": "solidcraft_declared_dimensions_demo",
+  "mode": "synthesize",
+  "expected_archetype": "generic_mechatronics",
+  "intake": {
+    "project_name": "declared_stationary_indexer_concept",
+    "goal": "Conceptual stationary barcode-triggered material indexing cell; this model is only an envelope illustration and contains no observed salvaged components.",
+    "constraints": {
+      "stationary_only": true,
+      "independent_stop_required": true,
+      "no_physical_parts_in_custody": true
+    },
+    "concept_envelope_mm": {
+      "width": 120,
+      "depth": 80,
+      "height": 25
+    }
+  },
+  "note": "Dimensions are arbitrary, declared SOFTWARE TEST values, not recovered from seller sources or real hardware. No donor fitting or build release."
+}
