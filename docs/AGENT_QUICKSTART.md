@@ -79,6 +79,11 @@ summaries, budgets, evidence needs and `next_state`.
 - Run candidate checks through the mission's `/run` operation. Its schema lists
   the supported checks. For readiness, HS needs a clean plan and a subsequent
   engineering review. Read hashed run output for findings and repair suggestions.
+- Before your handoff, read the mission's `/delivery` inspection. It lists
+  already-retained check files and software-review bundles even before READY.
+  Distinguish files actually present from an eligible generation action, and
+  historical output from output for the current spec. The inspection creates
+  nothing. See [delivery inspection](MISSION_DELIVERY_INSPECTION.md).
 - Visual drafts remain pending human confirmation. Continue independent
   software work; do not promote the draft to donor or measured truth.
 

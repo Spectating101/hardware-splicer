@@ -14,7 +14,8 @@ from fastapi import status as http_status
 from fastapi.concurrency import run_in_threadpool
 
 from .mission_answer import answer_need
-from .mission_delivery import build_mission_package, read_mission_package, stage_mission_design
+from .mission_delivery import (build_mission_package, read_mission_package, stage_mission_design,
+                               inspect_mission_delivery, read_retained_mission_package)
 from .mission_executor import run_mission_operation
 from .mission_agent_contract import mission_event_openapi, mission_run_openapi
 from .intact_reuse import REPORT_SCHEMA as INTACT_REPORT_SCHEMA, discovery as intact_reuse_discovery
@@ -336,6 +337,25 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
+
+    @router.get("/{mission_id}/delivery", summary="Inspect already-retained mission output without generating missing files")
+    async def inspect_project_mission_delivery(project_id: str, mission_id: str) -> Dict[str, Any]:
+        try:
+            delivery = await run_in_threadpool(inspect_mission_delivery, mission_store, project_id, mission_id)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return {"ok": True, "delivery": delivery}
+
+    @router.get("/{mission_id}/delivery/packages/{package_sha256}", summary="Download an already-retained prototype review package; never generate it")
+    async def download_retained_project_mission_package(project_id: str, mission_id: str, package_sha256: str) -> Response:
+        try:
+            data = await run_in_threadpool(read_retained_mission_package, mission_store, project_id, mission_id, package_sha256)
+        except Exception as exc:
+            raise _mission_error(exc) from exc
+        return Response(content=data, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="{mission_id}-retained-package.zip"',
+            "X-Content-SHA256": package_sha256, "X-HS-Artifact-Scope": "prototype-review-only",
+        })
 
     @router.post("/{mission_id}/package")
     async def build_project_mission_package(project_id: str, mission_id: str) -> Dict[str, Any]:

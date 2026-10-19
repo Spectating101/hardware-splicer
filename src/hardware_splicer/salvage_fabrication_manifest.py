@@ -19,6 +19,8 @@ _ROUTES = (
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/candidates/{candidate_id}/run"),
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}"),
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/runs/{name}/bundle"),
+    ("GET", "/v1/projects/{project_id}/missions/{mission_id}/delivery"),
+    ("GET", "/v1/projects/{project_id}/missions/{mission_id}/delivery/packages/{package_sha256}"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/package"),
     ("GET", "/v1/projects/{project_id}/missions/{mission_id}/package"),
     ("POST", "/v1/projects/{project_id}/missions/{mission_id}/stage"),
@@ -83,6 +85,7 @@ def salvage_fabrication_manifest(
         },
         "workflow": [
             "reload the canonical mission-scoped salvage context at the start of every turn",
+            "inspect delivery before handoff: it lists retained output even before READY and never generates missing artifacts; file presence alone does not prove the agent produced it",
             "record explicit danger/refusal as evidence_required BLOCKED_UNSAFE, not merely a chat warning or part-data request; it remains an agent_assertion, and a terminal unsafe proposal must cite that need",
             "for intact input-device reuse, discover intact-reuse-spec, propose the actual donor design, run intact_reuse and download its software review bundle without inventing a catalog board or claiming READY",
             "inspect retained images and prefill typed donor drafts while preserving model-inference provenance",

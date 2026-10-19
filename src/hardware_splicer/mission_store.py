@@ -1505,6 +1505,38 @@ class MissionStore:
             raise MissionError(f"package {path.name} does not match its content hash")
         return data
 
+    def iter_retained_packages(self, project_id: str, mission_id: str) -> Iterator[tuple[str, bytes]]:
+        """Read bounded retained bytes, without building packages or creating directories.
+
+        A retained ZIP is not necessarily referenced by a successful operation.
+        Delivery projections must bind its contents to the mission before offering it.
+        """
+        self.get_mission(project_id, mission_id)
+        root = self._package_path(project_id, mission_id, "0" * 64).parent
+        _reject_symlink(root, label="packages directory")
+        if not root.exists():
+            return
+        if not root.is_dir():
+            raise MissionError("packages path is not a directory")
+        paths = sorted(root.iterdir())
+        if len(paths) > 256:
+            raise MissionError("retained package inspection exceeds its entry limit")
+        total = 0
+        for path in paths:
+            if re.fullmatch(r"[0-9a-f]{16}\.zip", path.name) is None:
+                continue
+            _reject_symlink(path, label="package file")
+            size = path.stat().st_size
+            total += size
+            if not path.is_file() or size > 64 * 1024 * 1024 or total > 128 * 1024 * 1024:
+                raise MissionError("retained package inspection exceeds its file/byte limits")
+            with path.open("rb") as stream:
+                data = stream.read(size + 1)
+            digest = hashlib.sha256(data).hexdigest()
+            if len(data) != size or digest[:16] != path.stem:
+                raise MissionError("retained package does not match its content name")
+            yield digest, data
+
     def _envelope_used(self, project_id: str, envelope_hash: str) -> bool:
         root = self._missions_root(project_id)
         if not root.is_dir():
