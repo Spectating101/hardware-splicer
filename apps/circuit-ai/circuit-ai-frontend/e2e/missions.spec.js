@@ -321,3 +321,72 @@ test('the safety banner does not claim agent authorship for a differently declar
   await expect(page.getByTestId('safety-concern')).toContainText('Reporter declared human (identity not verified here)');
   await expect(page.getByTestId('safety-concern')).not.toContainText('The agent flagged a safety concern');
 });
+
+test('build sheet exposes omitted donor, unchecked fields and safety warnings without mutating a mission', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the test-only operator token');
+  const id = await openMission(request, {
+    goal: 'Review an uninspected donor before any prototype',
+    inventory: ['ESP32', 'BME280', 'OLED'],
+    donors: [{ donor_id: 'donor:unseen:switches', label: 'Unobserved switches', optional: false }],
+  });
+  await post(request, '/v1/projects/' + project + '/missions/' + id + '/accept', {}, { 'X-HS-Operator-Token': TOKEN });
+  const example = (await (await request.get(API + '/v1/devices/examples')).json()).examples.esp32_oled_bme280_usb;
+  await propose(request, id, { type: 'candidate_proposed', candidate: { id: 'A', kind: 'clean_sheet',
+    label: 'Catalog-only substitute, no switch donor', rationale: 'This proposal does not include the required old switches',
+    spec: { ...example, imaginary_switch_mount: { screw_gap_mm: 12 } } } });
+  await propose(request, id, { type: 'evidence_required', blocker: 'BLOCKED_UNSAFE', candidate_id: 'A',
+    need: 'Agent reports a hazard that has not been independently checked.',
+    request: { kind: 'electrical', target: 'unobserved supply', quantity: 'voltage',
+      instructions: 'Do not test an unidentified live supply.' } });
+  const before = (await (await request.get(API + '/v1/projects/' + project + '/missions/' + id)).json()).mission.last_event_seq;
+  await page.goto(APP + '/engineering/missions?project=' + project + '&mission=' + id);
+  await expect(page.getByTestId('build-sheet-toggle')).toBeVisible();
+  await page.getByTestId('build-sheet-toggle').click();
+  await expect(page.getByTestId('build-sheet-authority')).toContainText('REVIEW ONLY');
+  await expect(page.getByTestId('build-sheet-authority')).toContainText('Power-on authorized: false');
+  await expect(page.getByTestId('build-sheet-missing-donors')).toContainText('donor:unseen:switches');
+  await expect(page.getByTestId('build-sheet-unchecked')).toContainText('/imaginary_switch_mount');
+  await expect(page.getByTestId('build-sheet-safety')).toContainText('not HS safety checks');
+  await expect(page.getByTestId('build-sheet-open-needs')).toContainText('BLOCKED_UNSAFE');
+  await expect(page.getByTestId('build-sheet-retained')).toContainText('Prototype review package: blocked');
+  await expect(page.getByTestId('build-sheet-retained')).toContainText('No retained files');
+  // Reading and copying are not build/approve/power commands. Nothing in the mission changes.
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: APP });
+  await page.getByTestId('build-sheet-copy').click();
+  await expect(page.getByTestId('build-sheet-copy')).toContainText('Copied review sheet');
+  const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboard).toContain('NOT BUILD INSTRUCTIONS');
+  expect(clipboard).toContain('donor:unseen:switches');
+  const after = (await (await request.get(API + '/v1/projects/' + project + '/missions/' + id)).json()).mission.last_event_seq;
+  expect(after).toBe(before);
+});
+
+test('build sheet reports only retained check bytes and never fabricates a prototype ZIP', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the test-only operator token');
+  const id = await openMission(request, { goal: 'Read-only handoff of a software-checked device', inventory: ['ESP32', 'BME280', 'OLED'] });
+  await post(request, '/v1/projects/' + project + '/missions/' + id + '/accept', {}, { 'X-HS-Operator-Token': TOKEN });
+  const spec = (await (await request.get(API + '/v1/devices/examples')).json()).examples.esp32_oled_bme280_usb;
+  await propose(request, id, { type: 'candidate_proposed', candidate: { id: 'A', kind: 'clean_sheet',
+    label: 'ESP32 BME280 OLED', rationale: 'Catalog proposal only', spec } });
+  await post(request, '/v1/projects/' + project + '/missions/' + id + '/candidates/A/run', { operation: 'device_plan' });
+  await post(request, '/v1/projects/' + project + '/missions/' + id + '/candidates/A/run', { operation: 'device_engineering' });
+  await propose(request, id, { type: 'terminal_proposed', state: 'READY_FOR_HUMAN_BUILD',
+    candidate_id: 'A', reason: 'Canonical software plan and engineering checks passed' });
+  await page.goto(APP + '/engineering/missions?project=' + project + '&mission=' + id);
+  await page.getByTestId('build-sheet-toggle').click();
+  await expect(page.getByTestId('build-sheet-authority')).toContainText('HS recorded software readiness');
+  await expect(page.getByTestId('build-sheet-authority')).toContainText('Power-on authorized: false');
+  const outputs = page.getByTestId('build-sheet-retained');
+  await expect(outputs).toContainText('check_result — available, current');
+  await expect(outputs).toContainText('Prototype review package: not_generated');
+  await expect(outputs).toContainText('Inspection generated no artifacts.');
+  await expect(outputs).not.toContainText('Prototype review ZIP retained');
+
+  // Only the separate, existing explicit handoff creates a retained package.
+  await page.getByRole('button', { name: /Build the package/ }).click();
+  await expect(page.getByRole('link', { name: /Download ZIP/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh retained files' }).click();
+  await expect(outputs).toContainText('Prototype review package: available');
+  await expect(page.getByTestId('build-sheet-packages')).toContainText('SHA-256');
+  await expect(page.getByTestId('build-sheet-packages')).toContainText('Producer attribution: not_recorded');
+});

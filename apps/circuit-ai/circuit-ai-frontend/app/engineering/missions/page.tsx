@@ -14,6 +14,7 @@ import {
   WhoChip,
 } from '@/components/engineering/mission-detail';
 import { DeliveryPanel } from '@/components/engineering/mission-delivery';
+import { BuildSheetPanel } from '@/components/engineering/mission-build-sheet';
 import { DonorsPanel } from '@/components/engineering/mission-donors';
 import { MissionStart } from '@/components/engineering/mission-start';
 import { TimelinePanel } from '@/components/engineering/mission-timeline';
@@ -223,6 +224,7 @@ export default function MissionsPage() {
             <AcceptPanel mission={detail} onAccepted={updated} />
             <AgentHandoff mission={detail} />
             <NeedsPanel mission={detail} onChanged={loadDetail} />
+            <BuildSheetPanel mission={detail} />
             <DeliveryPanel mission={detail} onChanged={loadDetail} />
             <AskedForPanel mission={detail} />
             <DonorsPanel mission={detail} />

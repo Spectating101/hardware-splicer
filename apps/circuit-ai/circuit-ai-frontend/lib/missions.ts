@@ -403,6 +403,57 @@ export async function fetchMission(projectId: string, missionId: string): Promis
   return payload.mission;
 }
 
+/** Files are a read-only backend inventory, not an agent's delivery claim or proof of fabrication. */
+export type MissionRetainedFile = {
+  kind: string;
+  candidate_id: string;
+  operation: string;
+  evaluation_seq: number;
+  current: boolean;
+  status: 'available' | 'unavailable';
+  sha256: string | null;
+  presentation: string;
+  scope?: string;
+  producer_attribution?: string;
+  download_path: string | null;
+};
+
+export type MissionDeliveryInspection = {
+  schema_version: string;
+  mission_id: string;
+  project_id: string;
+  last_event_seq: number;
+  recorded_files: MissionRetainedFile[];
+  prototype_package: {
+    status: 'available' | 'blocked' | 'not_generated' | 'unavailable';
+    scan_complete: boolean;
+    retained_packages: {
+      sha256: string;
+      size_bytes: number;
+      scope: string;
+      producer_attribution: string;
+      deliverables: PackageManifest['deliverables'];
+      download_path: string;
+    }[];
+  };
+  unresolved_needs: MissionNeed[];
+  safety_concerns: MissionSafetyConcern[];
+  physical_correctness: string;
+  sale_readiness: string;
+  inspection_generated_artifacts: boolean;
+  file_presence_proves_agent_delivery: boolean;
+};
+
+/** GET is non-generating. Unlike the older package GET it does not build missing artifacts. */
+export async function inspectMissionDelivery(projectId: string, missionId: string): Promise<MissionDeliveryInspection> {
+  const payload = await call<{ delivery: MissionDeliveryInspection }>(
+    base(projectId) + '/' + encodeURIComponent(missionId) + '/delivery',
+    undefined,
+    'Could not inspect retained mission output',
+  );
+  return payload.delivery;
+}
+
 export async function acceptMission(projectId: string, missionId: string, token: string): Promise<Mission> {
   const payload = await call<{ mission: Mission }>(
     `${base(projectId)}/${encodeURIComponent(missionId)}/accept`,
