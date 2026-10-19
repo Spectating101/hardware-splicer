@@ -177,7 +177,17 @@ def main() -> int:
             "splice_readiness": (splice_plan.get("functional_reuse_plan") or {}).get("splice_readiness"),
             "artifacts": result.get("artifacts") or {},
         }
-        evaluation = {"passed": bool(result.get("ok")), "failures": [] if result.get("ok") else ["result_ok=false"]}
+        mission_report = result.get("engineering_mission_evaluation")
+        if mission_report is not None:
+            metrics["engineering_mission_evaluation"] = mission_report
+            evaluation = {
+                "passed": bool(mission_report.get("mission_success")),
+                "compiler_passed": bool(result.get("compile_ok")),
+                "mission_type": mission_report.get("type"),
+                "failures": list(mission_report.get("open_acceptance_gates") or []),
+            }
+        else:
+            evaluation = {"passed": bool(result.get("ok")), "failures": [] if result.get("ok") else ["result_ok=false"]}
     else:
         manifest = load_splice_manifest(args.manifest)
         case = get_splice_case(manifest, args.case)
