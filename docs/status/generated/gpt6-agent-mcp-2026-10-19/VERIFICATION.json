@@ -1,0 +1,71 @@
+{
+  "checks": [
+    {
+      "candidate": "intact_lever",
+      "physical_warnings": 4,
+      "replays": 7
+    },
+    {
+      "candidate": "remote_contact",
+      "physical_warnings": 5,
+      "replays": 7
+    }
+  ],
+  "downloads": [
+    {
+      "bytes": 5070,
+      "candidate": "intact_lever",
+      "command_actions": [
+        {
+          "action": "activate",
+          "device_alias": "salvaged_mouse",
+          "type": "action"
+        }
+      ],
+      "files": [
+        "README.md",
+        "adapter.py",
+        "contract.json",
+        "example-events.jsonl",
+        "offline-checks.json",
+        "test_adapter.py"
+      ],
+      "replays_passed": 7,
+      "sha256": "534765fcf1c827133065f3ea2f6a606b1c746f5dfbba447306d0e6c7121fc22b"
+    },
+    {
+      "bytes": 5052,
+      "candidate": "remote_contact",
+      "command_actions": [
+        {
+          "action": "activate",
+          "device_alias": "reclaimed_mouse_board",
+          "type": "action"
+        }
+      ],
+      "files": [
+        "README.md",
+        "adapter.py",
+        "contract.json",
+        "example-events.jsonl",
+        "offline-checks.json",
+        "test_adapter.py"
+      ],
+      "replays_passed": 7,
+      "sha256": "2d286e117c1f029d9bb2139226955f652b9b0bc57066921e05c50eca1337db55"
+    }
+  ],
+  "host_source": "prior host-transcribed manufacturer/HID document packet, no physical specimen",
+  "invalid_mcp_or_http_calls": 0,
+  "live_hid_device_used": false,
+  "mission_id": "mission-6d5af3fc1aba4db0",
+  "model": "GPT-6",
+  "model_directed_mcp_calls": 17,
+  "physical_authority_granted": false,
+  "prior_code_and_example_exposure": true,
+  "project_id": "gpt6-mouse-footcontrol",
+  "ready_for_human_build": false,
+  "token_usage": "unavailable",
+  "trial_kind": "model_directed_mcp_execution_not_blind_cold_agent",
+  "workspace_branch": "agent/gpt6-pr138-independent-review"
+}
