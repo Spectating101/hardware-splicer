@@ -51,5 +51,116 @@
       "ruten:22613329448846"
     ],
     "minimum_distinct_donors": 2
+  },
+  "engineering_materials": {
+    "component_hypotheses": [
+      {
+        "candidate_id": "ls2208_scanner_engine",
+        "source_ref": "ruten:22623851402690",
+        "name": "LS2208 intact barcode engine/controller (possible; cable cut, untested)",
+        "function_tags": [
+          "decode barcode"
+        ],
+        "partial_function_tags": [],
+        "evidence_class": "manufacturer_family_documentation",
+        "evidence_url": "https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/ls2208-prg-en.pdf",
+        "interface": {
+          "protocol": null,
+          "connector": null,
+          "voltage_v": null
+        },
+        "missing_facts": [
+          "Actual physical scan/decoder operation untested",
+          "Exact LS2208 host cable generation/variant unknown",
+          "Protocol, connector wires and power characteristics of available specimen unmeasured"
+        ]
+      },
+      {
+        "candidate_id": "epson_paper_motion",
+        "source_ref": "ruten:21447795842755",
+        "name": "Epson LQ-680 paper/carriage motion mechanism, motor or rails hypothesis",
+        "function_tags": [
+          "index object using controlled motion"
+        ],
+        "partial_function_tags": [],
+        "evidence_class": "seller_claim",
+        "evidence_url": "https://www.ruten.com.tw/item/21447795842755/",
+        "interface": {
+          "protocol": null,
+          "connector": null,
+          "voltage_v": null
+        },
+        "missing_facts": [
+          "Actual motor existence/type and winding not confirmed",
+          "Carriage geometry and usable stroke unmeasured",
+          "Drive electronics, limit switches and current limits unknown",
+          "Seller excludes printhead/accessories; missing mechanics may prevent independent motion"
+        ]
+      },
+      {
+        "candidate_id": "qnap_embedded_compute",
+        "source_ref": "ruten:22606139676402",
+        "name": "QNAP TS-219P II bare board potentially reusable for local processing",
+        "function_tags": [
+          "process scan output locally"
+        ],
+        "partial_function_tags": [],
+        "evidence_class": "seller_claim",
+        "evidence_url": "https://www.ruten.com.tw/item/22606139676402/",
+        "interface": {
+          "protocol": null,
+          "connector": null,
+          "voltage_v": null
+        },
+        "missing_facts": [
+          "Bare-board DC input and PSU missing",
+          "Cannot assume accessible USB host/serial interfaces or modern software support",
+          "Seller Qfinder boot claim not independently observed",
+          "No original enclosure/disks"
+        ]
+      },
+      {
+        "candidate_id": "mouse_button_switch",
+        "source_ref": "ruten:22613329448846",
+        "name": "Apple mouse button switches potentially useful for non-safety operator input",
+        "function_tags": [],
+        "partial_function_tags": [
+          "operator input and stop"
+        ],
+        "evidence_class": "seller_claim",
+        "evidence_url": "https://www.ruten.com.tw/item/22613329448846/",
+        "interface": {
+          "protocol": null,
+          "connector": null,
+          "voltage_v": null
+        },
+        "missing_facts": [
+          "Buttons reportedly respond, but not physically tested",
+          "Unknown standalone switch wiring and voltage",
+          "Mouse switch must not serve as safety-rated emergency stop",
+          "Dedicated operator stop/safety input missing"
+        ]
+      }
+    ],
+    "proposed_connections": [
+      {
+        "connection_id": "scanner_to_compute",
+        "from_candidate": "ls2208_scanner_engine",
+        "to_candidate": "qnap_embedded_compute",
+        "purpose": "transfer decoded barcode to local controller"
+      },
+      {
+        "connection_id": "motion_to_compute",
+        "from_candidate": "epson_paper_motion",
+        "to_candidate": "qnap_embedded_compute",
+        "purpose": "command controlled indexing motion through missing motor driver"
+      },
+      {
+        "connection_id": "buttons_to_compute",
+        "from_candidate": "mouse_button_switch",
+        "to_candidate": "qnap_embedded_compute",
+        "purpose": "non-safety operator input only"
+      }
+    ]
   }
 }

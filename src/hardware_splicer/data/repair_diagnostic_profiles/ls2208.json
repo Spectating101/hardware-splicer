@@ -1,0 +1,59 @@
+{
+  "schema_version": "hardware_splicer.repair_diagnostic_profile.v1",
+  "profile_id": "zebra_symbol_ls2208",
+  "model_match_tokens": ["ls2208"],
+  "manufacturer": "Zebra / Symbol",
+  "manufacturer_reference": {
+    "title": "LS2208 Product Reference Guide",
+    "url": "https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/ls2208-prg-en.pdf",
+    "authority": "manufacturer_family_documentation_not_specimen_measurement",
+    "scope": "LS2208 model family; exact unit generation and interface cable not yet verified"
+  },
+  "manufacturer_facts": [
+    "LS2208 product guide describes a modular replaceable scanner-to-host interface cable.",
+    "Different host/interface modes are supported, including USB and RS-232; a given cable cannot be assumed interchangeable.",
+    "USB host modes include USB HID keyboard; RS-232 implementations depend on suitable host cable and configuration."
+  ],
+  "hypotheses": [
+    {
+      "id": "severed_interface_cable",
+      "statement": "A cut or damaged interface cable may interrupt power and/or host data.",
+      "indicators": ["cut cable", "cable cut", "severed", "cut-cable"],
+      "discriminating_evidence": [
+        "Photographs of exact specimen, physical cable damage, connector, and strain relief",
+        "Exact scanner and cable part numbers plus manufacturer-compatible replacement interface",
+        "Qualified operator unpowered cable continuity/short inspection"
+      ]
+    },
+    {
+      "id": "wrong_host_cable_or_interface",
+      "statement": "Host/cable/interface variation may prevent recognition or correct communication.",
+      "indicators": ["usb", "serial", "host", "interface", "cable"],
+      "discriminating_evidence": [
+        "Exact host-cable model/part number and host interface mode",
+        "Manufacturer manual matching the identified variant",
+        "Observed connection behavior following a separately authorized safe test"
+      ]
+    },
+    {
+      "id": "scanner_internal_electronics_fault",
+      "statement": "Internal electronics or optics may be faulty independently of cable condition.",
+      "indicators": ["dead", "no scan", "no light", "untested"],
+      "discriminating_evidence": [
+        "Physical enclosure/PCB condition and exact assembly identification",
+        "Baseline optical/host behavior observed by a qualified operator with validated cable and safe setup",
+        "Further fault isolation if a verified cable does not restore scanning"
+      ]
+    },
+    {
+      "id": "host_configuration_or_decode_settings",
+      "statement": "Configuration or decode settings may prevent a compatible host from receiving a scan.",
+      "indicators": ["scan", "barcode", "host", "usb", "serial"],
+      "discriminating_evidence": [
+        "Record exact host operating mode and USB HID or RS-232 expectations",
+        "Manufacturer troubleshooting guide and model-specific configuration procedure",
+        "Observed decoded scan output in a supervised post-repair test"
+      ]
+    }
+  ]
+}

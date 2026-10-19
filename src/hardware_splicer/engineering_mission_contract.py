@@ -163,6 +163,8 @@ def repair_investigation_plan(
     if mission.get("type") != "restorative_repair":
         raise ValueError("repair plan only valid for original-function repair mission")
     notes = repair_intake if isinstance(repair_intake, Mapping) else {}
+    from .engineering_repair_differential import repair_differential
+    differential = repair_differential(mission, notes)
     symptoms = notes.get("symptoms") or []
     if isinstance(symptoms, str):
         symptoms = [symptoms]
@@ -179,6 +181,7 @@ def repair_investigation_plan(
         ],
         "candidate_fault_root_cause": None,
         "repair_instructions_validated": False,
+        "differential_diagnosis": differential,
         "diagnosis_status": "BLOCKED_AWAITING_ORIGINAL_DEVICE_EVIDENCE",
         "next_evidence_requests": [
             "Confirm possession, ownership/permission and exact physical specimen identity.",

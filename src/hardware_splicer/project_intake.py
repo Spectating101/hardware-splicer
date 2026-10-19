@@ -19,6 +19,7 @@ from .vision_evidence_assistant import enrich_intake_with_vision_assistance
 from .engineering_mission_contract import (
     normalize_engineering_mission, evaluate_engineering_mission, repair_investigation_plan,
 )
+from .engineering_multi_donor_compatibility import evaluate_multi_donor_compatibility
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
@@ -76,6 +77,11 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
 def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = False) -> Dict[str, Any]:
     body = _to_dict(intake, "intake")
     mission = normalize_engineering_mission(body)
+    compatibility = (
+        evaluate_multi_donor_compatibility(mission, body.get("engineering_materials"))
+        if mission and mission["type"] == "novel_splice"
+        else None
+    )
     if mission and mission["type"] == "restorative_repair":
         investigation = repair_investigation_plan(
             mission,
@@ -164,6 +170,7 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
     return {
         "schema_version": SCHEMA_VERSION,
         "engineering_mission": mission,
+        "multi_donor_compatibility": compatibility,
         "project_name": project_name,
         "goal": goal,
         "archetype": archetype,
@@ -316,6 +323,7 @@ def splice_and_build_from_intake(
         "archetype": plan.get("archetype"),
         "planning_confidence": plan.get("planning_confidence"),
         "engineering_mission": plan.get("engineering_mission"),
+        "multi_donor_compatibility": plan.get("multi_donor_compatibility"),
         "budget": plan.get("budget"),
         "normalized_parts": plan.get("normalized_parts"),
         "assumptions": plan.get("assumptions"),
@@ -556,6 +564,12 @@ def splice_and_build_from_intake(
         result_body["compile_ok"] = result_body["ok"]
         result_body["ok"] = False  # Explicit mission result != successful carrier compilation
         result_body["artifacts"]["engineering_mission_evaluation"] = str(mission_file)
+        if mission["type"] == "novel_splice":
+            compat = plan.get("multi_donor_compatibility")
+            compat_file = out_path / "MULTI_DONOR_COMPATIBILITY.json"
+            compat_file.write_text(json.dumps(compat, indent=2), encoding="utf-8")
+            result_body["multi_donor_compatibility"] = compat
+            result_body["artifacts"]["multi_donor_compatibility"] = str(compat_file)
     # Authoritative firmware + bring-up: regenerate from compiled build_graph
     graph_path = Path(str(compile_result.build_graph_file or ""))
     if graph_path.is_file():
@@ -703,6 +717,12 @@ def run_project_intake(
         result["mission_success"] = False
         result["ok"] = False  # Explicit mission remains blocked despite intermediate design progress
         result["artifacts"]["engineering_mission_evaluation"] = str(mission_file)
+        if mission["type"] == "novel_splice":
+            compat = plan.get("multi_donor_compatibility")
+            compat_file = out_path / "MULTI_DONOR_COMPATIBILITY.json"
+            compat_file.write_text(json.dumps(compat, indent=2), encoding="utf-8")
+            result["multi_donor_compatibility"] = compat
+            result["artifacts"]["multi_donor_compatibility"] = str(compat_file)
     scenario_result_path = result["artifacts"].get("scenario_result")
     if scenario_result_path:
         Path(str(scenario_result_path)).write_text(json.dumps(result, indent=2), encoding="utf-8")
