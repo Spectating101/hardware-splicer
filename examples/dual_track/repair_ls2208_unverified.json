@@ -1,19 +1,36 @@
 {
- "project_name":"dual_track_marketplace_ls2208_repair",
- "goal":"Restore the ORIGINAL barcode-scanning function of a Symbol/Motorola LS2208 scanner with seller-reported cut cable. Identify fault and appropriate repair instructions, check compatible host interface, and do not assume a pinout or proof of repair.",
- "salvage_mode":true,
- "repair_intake":{
-  "device_hint":"Symbol LS2208 (seller claimed)",
-  "symptoms":["Seller advertises scanner with cut cable; operating status unknown"],
-  "when_it_fails":"Not established; no unit physically obtained",
-  "operator_notes":"Marketplace-only source from Ruten product 22623851402690, advertised NT$50. No measured pinout, no observed damage beyond seller description. Do NOT authorize power or repair."
- },
- "available_parts":[{
-   "name":"Symbol LS2208 barcode scanner, cable cut, unverified marketplace hypothesis",
-   "type":"donor_board",
-   "condition":"untested",
-   "notes":"NOT OWNED OR PHYSICALLY EXAMINED: listing https://www.ruten.com.tw/item/22623851402690/ . Cannot be treated as verified hardware."
- }],
- "constraints":{"strategy_mode":"constrained"},
- "evidence_notes":["Listing is marketplace SELLER CLAIM only; no specimen in custody","No physical pinout, voltage measurement, repair, test result, laser-emitter safety approval, or operator physical consent"]
+  "project_name": "dual_track_marketplace_ls2208_repair",
+  "goal": "Restore the ORIGINAL barcode-scanning function of a Symbol/Motorola LS2208 scanner with seller-reported cut cable. Identify fault and appropriate repair instructions, check compatible host interface, and do not assume a pinout or proof of repair.",
+  "salvage_mode": true,
+  "repair_intake": {
+    "device_hint": "Symbol LS2208 (seller claimed)",
+    "symptoms": [
+      "Seller advertises scanner with cut cable; operating status unknown"
+    ],
+    "when_it_fails": "Not established; no unit physically obtained",
+    "operator_notes": "Marketplace-only source from Ruten product 22623851402690, advertised NT$50. No measured pinout, no observed damage beyond seller description. Do NOT authorize power or repair."
+  },
+  "available_parts": [
+    {
+      "name": "Symbol LS2208 barcode scanner, cable cut, unverified marketplace hypothesis",
+      "type": "donor_board",
+      "condition": "untested",
+      "notes": "NOT OWNED OR PHYSICALLY EXAMINED: listing https://www.ruten.com.tw/item/22623851402690/ . Cannot be treated as verified hardware."
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained"
+  },
+  "evidence_notes": [
+    "Listing is marketplace SELLER CLAIM only; no specimen in custody",
+    "No physical pinout, voltage measurement, repair, test result, laser-emitter safety approval, or operator physical consent"
+  ],
+  "engineering_mission": {
+    "type": "restorative_repair",
+    "original_device": "Symbol LS2208 barcode scanner",
+    "original_function": "scan a barcode and deliver the original decoded barcode output to a compatible host",
+    "source_refs": [
+      "ruten:22623851402690"
+    ]
+  }
 }

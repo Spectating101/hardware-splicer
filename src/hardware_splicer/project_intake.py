@@ -16,6 +16,9 @@ from .compile_casefile import write_compile_casefile
 from .scratch_pipeline import compile_scratch_build
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
+from .engineering_mission_contract import (
+    normalize_engineering_mission, evaluate_engineering_mission, repair_investigation_plan,
+)
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
@@ -72,6 +75,24 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
 
 def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = False) -> Dict[str, Any]:
     body = _to_dict(intake, "intake")
+    mission = normalize_engineering_mission(body)
+    if mission and mission["type"] == "restorative_repair":
+        investigation = repair_investigation_plan(
+            mission,
+            body.get("repair_intake") if isinstance(body.get("repair_intake"), Mapping) else {},
+        )
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "project_name": str(body.get("project_name") or "repair_investigation"),
+            "goal": str(body.get("goal") or ""),
+            "planning_mode": "repair_investigation_only",
+            "engineering_mission": mission,
+            "repair_investigation": investigation,
+            "recommended_build_id": None,
+            "salvage_package": {},
+            "compilation_authorized_from_diagnostic_plan": False,
+            "missing_info": list(investigation["next_evidence_requests"]),
+        }
     from .vision_inventory import merge_attachment_inventory_into_intake
 
     body, offline_inventory = merge_attachment_inventory_into_intake(body)
@@ -142,6 +163,7 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
     }
     return {
         "schema_version": SCHEMA_VERSION,
+        "engineering_mission": mission,
         "project_name": project_name,
         "goal": goal,
         "archetype": archetype,
@@ -164,6 +186,47 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
     }
 
 
+def _blocked_original_function_repair(
+    intake: Mapping[str, Any],
+    *,
+    out_dir: str | Path,
+    mission: Mapping[str, Any],
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """First-class repair mission: diagnostic investigation, NOT a fallback PCB."""
+    out_path = Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    diagnosis = repair_investigation_plan(
+        mission,
+        intake.get("repair_intake") if isinstance(intake.get("repair_intake"), Mapping) else {},
+    )
+    mission_report = evaluate_engineering_mission(
+        mission, build_id=None, compiler_passed=False, salvage_package={},
+    )
+    diagnostic_file = out_path / "REPAIR_INVESTIGATION.json"
+    mission_file = out_path / "ENGINEERING_MISSION_EVALUATION.json"
+    diagnostic_file.write_text(json.dumps(diagnosis, indent=2), encoding="utf-8")
+    mission_file.write_text(json.dumps(mission_report, indent=2), encoding="utf-8")
+    return {
+        "ok": False,
+        "compile_ok": False,
+        "mission_success": False,
+        "request_id": request_id,
+        "project_name": str(intake.get("project_name") or "repair_investigation"),
+        "goal": str(intake.get("goal") or ""),
+        "build_id": None,
+        "salvage_verdict": "BLOCKED_AWAITING_ORIGINAL_DEVICE_EVIDENCE",
+        "salvage_package": {},
+        "engineering_mission": dict(mission),
+        "engineering_mission_evaluation": mission_report,
+        "repair_investigation": diagnosis,
+        "artifacts": {
+            "repair_investigation": str(diagnostic_file),
+            "engineering_mission_evaluation": str(mission_file),
+        },
+    }
+
+
 def splice_and_build_from_intake(
     intake: Mapping[str, Any],
     *,
@@ -172,6 +235,11 @@ def splice_and_build_from_intake(
     request_id: str | None = None,
 ) -> Dict[str, Any]:
     """Plan salvage splice + compile catalog build without full mecha/scenario pipeline."""
+    mission = normalize_engineering_mission(intake)
+    if mission and mission["type"] == "restorative_repair":
+        return _blocked_original_function_repair(
+            intake, out_dir=out_dir, mission=mission, request_id=request_id,
+        )
     plan = plan_project_from_intake(intake)
     salvage_package = _to_dict(plan.get("salvage_package") or {}, "intake_plan.salvage_package")
     build_id = str(
@@ -247,6 +315,7 @@ def splice_and_build_from_intake(
         "goal": plan.get("goal"),
         "archetype": plan.get("archetype"),
         "planning_confidence": plan.get("planning_confidence"),
+        "engineering_mission": plan.get("engineering_mission"),
         "budget": plan.get("budget"),
         "normalized_parts": plan.get("normalized_parts"),
         "assumptions": plan.get("assumptions"),
@@ -471,6 +540,22 @@ def splice_and_build_from_intake(
             "evidence_summary": post_plan.get("evidence_summary"),
         },
     }
+    mission = plan.get("engineering_mission")
+    if mission:
+        mission_report = evaluate_engineering_mission(
+            mission,
+            build_id=build_id,
+            compiler_passed=result_body["ok"],
+            salvage_package=salvage_package,
+        )
+        mission_file = out_path / "ENGINEERING_MISSION_EVALUATION.json"
+        mission_file.write_text(json.dumps(mission_report, indent=2), encoding="utf-8")
+        result_body["engineering_mission"] = mission
+        result_body["engineering_mission_evaluation"] = mission_report
+        result_body["mission_success"] = False
+        result_body["compile_ok"] = result_body["ok"]
+        result_body["ok"] = False  # Explicit mission result != successful carrier compilation
+        result_body["artifacts"]["engineering_mission_evaluation"] = str(mission_file)
     # Authoritative firmware + bring-up: regenerate from compiled build_graph
     graph_path = Path(str(compile_result.build_graph_file or ""))
     if graph_path.is_file():
@@ -519,6 +604,11 @@ def run_project_intake(
     splicer_port: int = 0,
     request_id: str | None = None,
 ) -> Dict[str, Any]:
+    mission = normalize_engineering_mission(intake)
+    if mission and mission["type"] == "restorative_repair":
+        return _blocked_original_function_repair(
+            intake, out_dir=out_dir, mission=mission, request_id=request_id,
+        )
     plan = plan_project_from_intake(intake)
     result = run_hardware_scenario(
         plan["scenario"],
@@ -598,6 +688,21 @@ def run_project_intake(
         "salvage_bom_csv": str(out_path / "SALVAGE_BOM.csv") if (out_path / "SALVAGE_BOM.csv").is_file() else "",
         "firmware_scaffold": str(firmware_meta) if firmware_meta.is_file() else "",
     }
+    mission = plan.get("engineering_mission")
+    if mission:
+        mission_report = evaluate_engineering_mission(
+            mission,
+            build_id=str(plan.get("recommended_build_id") or ""),
+            compiler_passed=bool(result.get("compile_ok")),
+            salvage_package=salvage_package,
+        )
+        mission_file = out_path / "ENGINEERING_MISSION_EVALUATION.json"
+        mission_file.write_text(json.dumps(mission_report, indent=2), encoding="utf-8")
+        result["engineering_mission"] = mission
+        result["engineering_mission_evaluation"] = mission_report
+        result["mission_success"] = False
+        result["ok"] = False  # Explicit mission remains blocked despite intermediate design progress
+        result["artifacts"]["engineering_mission_evaluation"] = str(mission_file)
     scenario_result_path = result["artifacts"].get("scenario_result")
     if scenario_result_path:
         Path(str(scenario_result_path)).write_text(json.dumps(result, indent=2), encoding="utf-8")

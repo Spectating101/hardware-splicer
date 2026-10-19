@@ -1,0 +1,166 @@
+{
+  "cases": [
+    {
+      "build_id": "robot_drive_base",
+      "carrier_drc_pass": true,
+      "case_id": "repair_fixture",
+      "circuit_backed_donor_blocks": 6,
+      "fixture_scope": "preconfigured donor/board fixture; no original-function repair or newly assembled multi-source machine",
+      "mission_success": null,
+      "native_mission_evaluation": null,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_testing_done": false,
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "ready_after_measurements"
+    },
+    {
+      "build_id": "plotter_motion_stage",
+      "carrier_drc_pass": true,
+      "case_id": "splice_fixture",
+      "circuit_backed_donor_blocks": 3,
+      "fixture_scope": "preconfigured donor/board fixture; no original-function repair or newly assembled multi-source machine",
+      "mission_success": null,
+      "native_mission_evaluation": null,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_testing_done": false,
+      "reported_pipeline_pass": true,
+      "salvage_verdict": "ready_after_measurements"
+    },
+    {
+      "build_id": null,
+      "carrier_drc_pass": false,
+      "case_id": "repair_unverified",
+      "circuit_backed_donor_blocks": 0,
+      "marketplace_listing_ids": [
+        "ls2208"
+      ],
+      "mission_success": false,
+      "native_mission_evaluation": {
+        "compile": {
+          "carrier_compile_passed": false,
+          "circuit_backed_blocks_prove_physical_function": false,
+          "circuit_backed_fixture_or_candidate_blocks": 0,
+          "generated_build_id": null
+        },
+        "design_alignment_status": "unresolved_original_function",
+        "goal": {
+          "original_device": "Symbol LS2208 barcode scanner",
+          "original_function": "scan a barcode and deliver the original decoded barcode output to a compatible host"
+        },
+        "human_operator_physical_authority_granted": false,
+        "mission_success": false,
+        "new_product_functionally_tested": null,
+        "open_acceptance_gates": [
+          "independent specimen identity and safe physical intake",
+          "baseline observation of original function and differential fault diagnosis",
+          "documented model-compatible repair plan and safe verification steps",
+          "authorized repair performed and original function independently retested"
+        ],
+        "original_device_function_restored": false,
+        "reason": "Software compilation and seller/operator descriptions do not close physical mission acceptance.",
+        "schema_version": "hardware_splicer.engineering_mission_evaluation.v1",
+        "source_refs": [
+          "ruten:22623851402690"
+        ],
+        "type": "restorative_repair",
+        "verdict": "BLOCKED_ON_INDEPENDENT_PHYSICAL_AND_FUNCTIONAL_EVIDENCE",
+        "verified_interface_count_from_this_execution": 0,
+        "verified_physical_donor_count_from_this_execution": 0
+      },
+      "original_device_restored": false,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_donors_in_custody": 0,
+      "physical_testing_done": false,
+      "pipeline_pass_is_not_mission_pass": false,
+      "reason": "Original-function repair is appropriately blocked with a diagnostic evidence queue; no unrelated substitute circuit was generated.",
+      "reported_pipeline_pass": false,
+      "salvage_verdict": "BLOCKED_REPAIR_DIAGNOSIS",
+      "verified_components_from_listings": 0,
+      "working_new_multi_donor_product": false
+    },
+    {
+      "build_id": "inspection_motion_fixture",
+      "carrier_drc_pass": true,
+      "case_id": "splice_unverified",
+      "circuit_backed_donor_blocks": 0,
+      "marketplace_listing_ids": [
+        "ls2208",
+        "epson-lq680",
+        "qnap-ts219pii",
+        "apple-a1314"
+      ],
+      "mission_success": false,
+      "native_mission_evaluation": {
+        "compile": {
+          "carrier_compile_passed": true,
+          "circuit_backed_blocks_prove_physical_function": false,
+          "circuit_backed_fixture_or_candidate_blocks": 0,
+          "generated_build_id": "inspection_motion_fixture"
+        },
+        "design_alignment_status": "proposed_architecture_unverified",
+        "goal": {
+          "new_product": "tabletop automated barcode inspection and object indexing machine",
+          "required_functions": [
+            "decode barcode",
+            "index object using controlled motion",
+            "process scan output locally",
+            "operator input and stop"
+          ]
+        },
+        "human_operator_physical_authority_granted": false,
+        "mission_success": false,
+        "new_product_functionally_tested": false,
+        "open_acceptance_gates": [
+          "independently inspect and identify at least two distinct physical donors",
+          "verify exact subsystem functions, pinouts, power limits and geometry per source",
+          "prove new architecture covers every required function and integrates the verified donors",
+          "validate carrier plus mechanical fabrication, firmware/control and system safety",
+          "observe a working new product completing its end-to-end function"
+        ],
+        "original_device_function_restored": null,
+        "reason": "Software compilation and seller/operator descriptions do not close physical mission acceptance.",
+        "schema_version": "hardware_splicer.engineering_mission_evaluation.v1",
+        "source_refs": [
+          "ruten:22623851402690",
+          "ruten:21447795842755",
+          "ruten:22606139676402",
+          "ruten:22613329448846"
+        ],
+        "type": "novel_splice",
+        "verdict": "BLOCKED_ON_INDEPENDENT_PHYSICAL_AND_FUNCTIONAL_EVIDENCE",
+        "verified_interface_count_from_this_execution": 0,
+        "verified_physical_donor_count_from_this_execution": 0
+      },
+      "original_device_restored": false,
+      "physical_assembly_done": false,
+      "physical_authority_from_run": false,
+      "physical_donors_in_custody": 0,
+      "physical_testing_done": false,
+      "pipeline_pass_is_not_mission_pass": false,
+      "reason": "Marketplace-only donor claims have no physical module contracts, tested interfaces or completed functional product.",
+      "reported_pipeline_pass": false,
+      "salvage_verdict": "reuse_ready",
+      "verified_components_from_listings": 0,
+      "working_new_multi_donor_product": false
+    }
+  ],
+  "date": "2026-10-20",
+  "fixture_compiles_passed": 2,
+  "limitations": [
+    "Fixtures are pre-established examples and are not evidence of field repair or a new assembled device",
+    "Market source descriptions were deliberately inserted as hypothetical available_parts to stress the current planner; none is owned, proven functional or authorized for electrical use",
+    "No equipment was bought, inspected, powered, flashed, fabricated or tested",
+    "KiCad DRC only covers generated carrier boards and not the absent donor electronics",
+    "Unmanifested splice_demo --intake evaluation uses result.ok, not acceptance of repair or novel product mission"
+  ],
+  "market_compiles_passed": 1,
+  "market_missions_proved": 0,
+  "market_native_mission_verdicts_blocked": 2,
+  "market_pipeline_reported_pass": 0,
+  "overall": "S2_CARRIER_COMPILER_WORKS; RESTORATIVE_REPAIR_AND_HETEROGENEOUS_SPLICING_NOT_YET_PROVED",
+  "schema_version": "hardware_splicer.repair_vs_splicing_benchmark.v1",
+  "tested_physical_devices": 0
+}
