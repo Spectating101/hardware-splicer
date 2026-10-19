@@ -285,7 +285,8 @@ export function NeedsPanel({ mission, onChanged }: { mission: Mission; onChanged
   const ended = Boolean(mission.terminal);
   // A request is something a person can answer. A plain note is just the agent saying what it thinks is missing.
   const requests = mission.needs.filter((need) => need.request);
-  const plain = mission.needs.filter((need) => !need.request);
+  const flagged = new Set((mission.safety_concerns ?? []).map((concern) => concern.need_seq));
+  const plain = mission.needs.filter((need) => !need.request && !flagged.has(need.seq));
   // A free-text need on a running mission is the agent asking for something. It is not a side note.
   const asks = ended || !mission.accepted ? [] : plain.filter((need) => need.need_state === 'open');
   const notes = plain.filter((need) => !asks.includes(need));
@@ -467,6 +468,42 @@ function CheckIcon({ errors, warnings }: { errors: number; warnings: number }) {
   return <Check className="h-4 w-4 shrink-0 text-emerald-300" aria-label="Clean" />;
 }
 
+/** Shown first. Only the agent can raise this, HS cannot check it, and an empty list is not a finding of safety. */
+export function SafetyPanel({ mission }: { mission: Mission }) {
+  const concerns = mission.safety_concerns ?? [];
+  if (!concerns.length) {
+    return (
+      <p data-testid="no-safety-concern" className="px-1 text-xs leading-5 text-slate-500">
+        No safety concern has been recorded. That is not a safety check: HS does not assess danger, and an agent may not raise it.
+      </p>
+    );
+  }
+  return (
+    <section data-testid="safety-concern" aria-label="Safety concern" className="rounded-2xl border border-red-400/50 bg-red-950/30 p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <AlertTriangle className="h-5 w-5 text-red-300" aria-hidden="true" />
+        <h2 className="text-base font-semibold text-red-100">The agent flagged a safety concern</h2>
+        <WhoChip who="agent" label="The agent’s word, not checked by HS" />
+      </div>
+      <p className="mt-2 text-xs leading-5 text-red-100/80">
+        HS cannot judge danger. This is what the agent wrote, kept as written. Do not open, power or handle the item on the strength of this page.
+      </p>
+      <ul className="mt-3 space-y-3">
+        {concerns.map((concern) => (
+          <li key={concern.need_seq} className="rounded-xl border border-red-400/30 bg-black/25 p-4 text-sm leading-6 text-slate-100">
+            <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-red-100/80">
+              <span>Recorded at event #{concern.need_seq}</span>
+              <span>·</span>
+              <span>{mission.terminal ? 'The mission was stopped on it' : concern.state === 'resolved' ? 'Resolved' : 'Still open'}</span>
+            </div>
+            <p className="whitespace-pre-line">{concern.concern}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function CandidatesPanel({ mission }: { mission: Mission }) {
   if (!mission.candidates.length) {
     return (
@@ -495,8 +532,28 @@ export function CandidatesPanel({ mission }: { mission: Mission }) {
                 {candidate.violated_requirements.map((line) => (
                   <span key={line} className="rounded-full border border-red-400/50 bg-red-950/30 px-2 py-0.5 text-red-100">Breaks: {line}</span>
                 ))}
+                {(candidate.donor_coverage?.missing_required_donors ?? []).map((donor) => (
+                  <span key={donor} data-testid="donor-left-out" className="rounded-full border border-red-400/50 bg-red-950/30 px-2 py-0.5 text-red-100">Leaves out the donor you named: {donor}</span>
+                ))}
+                {(candidate.donor_coverage?.unverified_used_donors ?? []).map((donor) => (
+                  <span key={donor.donor_id} className="rounded-full border border-amber-300/50 bg-amber-300/10 px-2 py-0.5 text-amber-100">
+                    Names {donor.donor_id}, not verified yet{donor.missing_facts.length ? `: needs ${donor.missing_facts.join(', ')}` : ''}
+                  </span>
+                ))}
                 {candidate.repairs ? <span className="rounded-full border border-white/15 px-2 py-0.5 text-slate-300">{candidate.repairs} {candidate.repairs === 1 ? 'repair' : 'repairs'}</span> : null}
               </div>
+              {candidate.donor_coverage?.used_donors?.length ? (
+                <p className="mt-2 text-[11px] leading-5 text-slate-500">Naming a donor is a reference. It does not show the donor is wired into the design.</p>
+              ) : null}
+              {candidate.spec_diagnostics?.unrecognized_fields?.length ? (
+                <details data-testid="unchecked-fields" className="mt-2 rounded-lg border border-amber-300/40 bg-amber-300/5 px-3 py-2 text-xs text-amber-100">
+                  <summary className="cursor-pointer">{candidate.spec_diagnostics.unrecognized_fields.length} {candidate.spec_diagnostics.unrecognized_fields.length === 1 ? 'field' : 'fields'} HS did not check</summary>
+                  <p className="mt-1 leading-5 text-amber-100/80">The agent wrote these. They are kept as written, but HS’s planner ignores them, so a clean check says nothing about them.</p>
+                  <ul className="mt-1 font-mono text-[11px] text-amber-50/90">
+                    {candidate.spec_diagnostics.unrecognized_fields.map((field) => <li key={field}>{field}</li>)}
+                  </ul>
+                </details>
+              ) : null}
               {candidate.evaluations.length ? (
                 <ol className="mt-3 space-y-1.5 border-t border-white/10 pt-3">
                   {candidate.evaluations.map((evaluation) => (

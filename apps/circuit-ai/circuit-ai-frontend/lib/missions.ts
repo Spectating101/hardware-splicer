@@ -26,6 +26,25 @@ export type MissionCandidate = {
   violated_requirements: string[];
   evaluations: Evaluation[];
   spec?: Record<string, unknown>;
+  /** What the design says about the donors named in the intake. Naming a donor is a reference, not proof of wiring. */
+  donor_coverage?: {
+    used_donors: string[];
+    missing_required_donors: string[];
+    covers_required_donors: boolean;
+    unverified_used_donors: { donor_id: string; missing_facts: string[] }[];
+  };
+  /** Fields the agent wrote that HS's planner did not recognise. They are kept, and not checked. */
+  spec_diagnostics?: { scope: string; unrecognized_fields: string[] };
+};
+
+/** A danger the agent put on the record. The agent's word only: HS cannot check it, and none recorded is not "safe". */
+export type MissionSafetyConcern = {
+  need_seq: number;
+  state: 'open' | 'resolved' | 'contradicted';
+  candidate_id: string | null;
+  concern: string;
+  grounding: string | null;
+  author: Author | null;
 };
 
 export type MissionNeed = {
@@ -86,6 +105,7 @@ export type Mission = {
   terminal: MissionTerminal | null;
   staged: { review_id: string; package_sha256: string } | null;
   needs: MissionNeed[];
+  safety_concerns?: MissionSafetyConcern[];
   last_event_seq: number;
   physical_correctness: string;
   firmware_authorized: boolean;
@@ -218,6 +238,13 @@ export function verdictOf(mission: Mission): Verdict {
   if (mission.phase === 'EVIDENCE_REQUIRED' || open.length) {
     // A structured request has an answer form on this page. A free-text one is the agent asking in its own words
     // (photos, a nameplate, a manual): honest about what is being asked, and that this page cannot take the answer yet.
+    if (open.length && open.every((need) => need.blocker === 'BLOCKED_UNSAFE')) {
+      return {
+        title: 'The agent flagged a safety concern',
+        meaning: 'This is the agent’s word, not an HS check. The mission is still open, and nothing here asks you to measure or handle anything.',
+        tone: 'asserted',
+      };
+    }
     if (open.length && open.every((need) => !need.request)) {
       return {
         title: 'Waiting for information from you',

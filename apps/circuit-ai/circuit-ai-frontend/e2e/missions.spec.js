@@ -112,7 +112,9 @@ test('an agent\'s own claim is shown as the agent\'s word, never as something HS
   // An unaccepted mission can be read, and an agent's note is never presented as a request to the person.
   await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
   await expect(page.getByTestId('mission-goal')).toHaveText('A weather display');
-  await expect(page.getByText('Concerns the agent recorded')).toBeVisible();
+  // A danger the agent raises is the red banner, in the agent's words and marked as unchecked, never a request.
+  await expect(page.getByTestId('safety-concern')).toContainText('The regulator may overheat');
+  await expect(page.getByTestId('safety-concern')).toContainText('not checked by HS');
   await expect(page.getByText('Asked of you')).toHaveCount(0);
   expect(mission.terminal).toBeNull();
 });
@@ -235,4 +237,45 @@ test('donor hardware shows how well each fact is established, and an agent findi
   await expect(donor).toContainText('Still needed before a design can rely on it');
   await expect(donor.getByText('Observed, not measured')).toBeVisible();
   await expect(donor).toContainText('never count as a measurement');
+});
+
+test('a danger the agent raises is shown first as the agent\'s word, and none recorded is not called safe', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the operator token the verify script registers');
+  const id = await openMission(request, { goal: 'Reuse an old mains transformer as a bench supply', inventory: ['ESP32'] });
+  await post(request, `/v1/projects/${project}/missions/${id}/accept`, {}, { 'X-HS-Operator-Token': TOKEN });
+  await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
+  // Before the agent says anything: a note that silence is not safety, and no banner.
+  await expect(page.getByTestId('no-safety-concern')).toContainText('not a safety check');
+  await expect(page.getByTestId('safety-concern')).toHaveCount(0);
+
+  await propose(request, id, { type: 'evidence_required', blocker: 'BLOCKED_UNSAFE',
+    need: 'The goal puts mains voltage on a bench supply with no isolation. I will not design it. A separate, low-voltage goal would be safer.' });
+  await page.reload();
+  const banner = page.getByTestId('safety-concern');
+  await expect(banner).toContainText('The agent flagged a safety concern');
+  await expect(banner).toContainText('The agent’s word, not checked by HS');
+  await expect(banner).toContainText('I will not design it');
+  await expect(banner).toContainText('Still open');
+  await expect(page.getByTestId('no-safety-concern')).toHaveCount(0);
+  // It is a concern, not an errand: nothing asks the person to measure or gather anything.
+  await expect(page.getByTestId('verdict-title')).toHaveText('The agent flagged a safety concern');
+  await expect(page.getByText('What the agent says it still needs')).toHaveCount(0);
+});
+
+test('a design that leaves out a donor, or carries fields HS did not check, says so on the design', async ({ page, request }) => {
+  test.skip(!TOKEN, 'needs the operator token the verify script registers');
+  const id = await openMission(request, { goal: 'A weather display that reuses my old radio buttons', inventory: ['ESP32', 'BME280', 'OLED'],
+    donors: [{ donor_id: 'donor:e2e:buttons', label: 'Old radio buttons', optional: false }] });
+  await post(request, `/v1/projects/${project}/missions/${id}/accept`, {}, { 'X-HS-Operator-Token': TOKEN });
+  const spec = { ...(await (await request.get(`${API}/v1/devices/examples`)).json()).examples.esp32_oled_bme280_usb, reserved_keypad_gpio: [25, 26] };
+  await propose(request, id, { type: 'candidate_proposed', candidate: { id: 'A', kind: 'clean_sheet', label: 'Without the radio', spec, rationale: 'parts as listed' } });
+
+  await page.goto(`${APP}/engineering/missions?project=${project}&mission=${id}`);
+  // HS's checks can come back clean while the design ignores the donor. The card must say the donor is left out.
+  await expect(page.getByTestId('donor-left-out')).toContainText('Leaves out the donor you named: donor:e2e:buttons');
+  const unchecked = page.getByTestId('unchecked-fields');
+  await expect(unchecked).toContainText('1 field HS did not check');
+  await unchecked.locator('summary').click();
+  await expect(unchecked).toContainText('/reserved_keypad_gpio');
+  await expect(unchecked).toContainText('a clean check says nothing about them');
 });
