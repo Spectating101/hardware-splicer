@@ -1,0 +1,156 @@
+{
+  "evaluation_date": "2026-10-20",
+  "execution": "offline Optiplex; real project-intake and splice compiler; unowned marketplace evidence",
+  "repair": {
+    "hypotheses": [
+      {
+        "id": "severed_interface_cable",
+        "next_evidence": [
+          "Photographs of exact specimen, physical cable damage, connector, and strain relief",
+          "Exact scanner and cable part numbers plus manufacturer-compatible replacement interface",
+          "Qualified operator unpowered cable continuity/short inspection"
+        ],
+        "priority": "investigate_early",
+        "root_cause_proven": false,
+        "seller_indicators": [
+          "cut cable"
+        ]
+      },
+      {
+        "id": "host_configuration_or_decode_settings",
+        "next_evidence": [
+          "Record exact host operating mode and USB HID or RS-232 expectations",
+          "Manufacturer troubleshooting guide and model-specific configuration procedure",
+          "Observed decoded scan output in a supervised post-repair test"
+        ],
+        "priority": "investigate_early",
+        "root_cause_proven": false,
+        "seller_indicators": [
+          "scan",
+          "barcode"
+        ]
+      },
+      {
+        "id": "wrong_host_cable_or_interface",
+        "next_evidence": [
+          "Exact host-cable model/part number and host interface mode",
+          "Manufacturer manual matching the identified variant",
+          "Observed connection behavior following a separately authorized safe test"
+        ],
+        "priority": "investigate_early",
+        "root_cause_proven": false,
+        "seller_indicators": [
+          "cable"
+        ]
+      },
+      {
+        "id": "scanner_internal_electronics_fault",
+        "next_evidence": [
+          "Physical enclosure/PCB condition and exact assembly identification",
+          "Baseline optical/host behavior observed by a qualified operator with validated cable and safe setup",
+          "Further fault isolation if a verified cable does not restore scanning"
+        ],
+        "priority": "alternative_possible",
+        "root_cause_proven": false,
+        "seller_indicators": []
+      }
+    ],
+    "manufacturer_family_manual": "https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/ls2208-prg-en.pdf",
+    "original_device": "Symbol LS2208 barcode scanner",
+    "original_function": "scan a barcode and deliver the original decoded barcode output to a compatible host",
+    "physical_hardware_examined": false,
+    "repair_procedure_verified": false,
+    "root_cause_verified": false
+  },
+  "schema_version": "hardware_splicer.evidence_diagnostic_replay.v1",
+  "splicing": {
+    "actual_verified_donors": 0,
+    "can_claim_new_product": false,
+    "candidate_modules": 4,
+    "claimed_source_count": 4,
+    "function_coverage": [
+      {
+        "candidate_hypotheses": [
+          "ls2208_scanner_engine"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "decode barcode",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [
+          "epson_paper_motion"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "index object using controlled motion",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [
+          "qnap_embedded_compute"
+        ],
+        "coverage_status": "HYPOTHESIZED_NOT_VERIFIED",
+        "partial_candidate_hypotheses": [],
+        "required_function": "process scan output locally",
+        "verified_functional_coverage": false
+      },
+      {
+        "candidate_hypotheses": [],
+        "coverage_status": "PARTIAL_CLAIM_GAP",
+        "partial_candidate_hypotheses": [
+          "mouse_button_switch"
+        ],
+        "required_function": "operator input and stop",
+        "verified_functional_coverage": false
+      }
+    ],
+    "mission_success": false,
+    "new_product": "tabletop barcode inspection and indexing machine",
+    "proposed_interfaces": [
+      {
+        "comparison_status": "BLOCKED_UNKNOWN_INTERFACE",
+        "connection_id": "scanner_to_compute",
+        "electrical_connection_proven": false,
+        "missing_interface_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "safe_to_wire": false
+      },
+      {
+        "comparison_status": "BLOCKED_UNKNOWN_INTERFACE",
+        "connection_id": "motion_to_compute",
+        "electrical_connection_proven": false,
+        "missing_interface_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "safe_to_wire": false
+      },
+      {
+        "comparison_status": "BLOCKED_UNKNOWN_INTERFACE",
+        "connection_id": "buttons_to_compute",
+        "electrical_connection_proven": false,
+        "missing_interface_facts": [
+          "from.connector",
+          "from.protocol",
+          "from.voltage_v",
+          "to.connector",
+          "to.protocol",
+          "to.voltage_v"
+        ],
+        "safe_to_wire": false
+      }
+    ]
+  }
+}
