@@ -11,6 +11,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any, Callable
 
 from fastapi.testclient import TestClient
 
@@ -32,7 +33,9 @@ def check_response(response, expected=200):
     return response.json()
 
 
-def run(source_dir: Path) -> dict:
+def run(source_dir: Path, *,
+        assembly_fixture: Callable[[list[dict[str, Any]]], dict[str, Any]] | None = None,
+        ) -> dict:
     digest_report = verify_source_files(source_dir)
     if digest_report["verified_count"] != 2:
         raise ValueError("Refusing simulation if original PDF digests or quoted values don't match")
@@ -130,6 +133,29 @@ def run(source_dir: Path) -> dict:
             raise ValueError(f"Unexpected material screening outcome: {verdict}")
         if screen["selection_authorized"] or not screen["comparable_numeric_criteria"]:
             raise ValueError("Invalid authority or incomplete comparison")
+        three_layer = None
+        if assembly_fixture is not None:
+            assembly_request = assembly_fixture(candidates)
+            reviewed = check_response(app.post(
+                "/v1/engineering/chemical/enclosure/assembly-review",
+                json=assembly_request,
+            ))
+            if reviewed["result"] != "bounded_assembly_screen_consistent_but_unverified":
+                raise ValueError("Source-backed three-layer enclosure screening blocked unexpectedly")
+            if reviewed["build_readiness_authorized"]:
+                raise ValueError("Source-backed screen accidentally granted build authority")
+            three_layer = {
+                "result": reviewed["result"],
+                "mechanical_computed_geometry_checks": reviewed["mechanical"]["geometry_computed_check_count"],
+                "mechanical_computed_fit_checks": reviewed["mechanical"]["fit_computed_check_count"],
+                "electrical_erc_errors": reviewed["electrical"]["erc_error_count"],
+                "selected_material": reviewed["selected_enclosure_id"],
+                "source_claim_evidence_ids": [
+                    row["evidence_id"] for row in candidates
+                    if reviewed["selected_enclosure_id"] in row["supports"]
+                ],
+                "build_authorized": False,
+            }
         final_revision = store.load(project_id)["revision"]
         if final_revision != revision:
             raise ValueError("Read-only screen mutated canonical project store")
@@ -145,7 +171,8 @@ def run(source_dir: Path) -> dict:
             "canonical_project_store_not_modified_by_material_screen": True,
             "candidate_screening": verdict,
             "material_selection_authorized": False,
-            "limits": "Manually selected source claims, not autonomous extraction or physical testing.",
+            "three_layer_assembly": three_layer,
+            "limits": "Manually selected source claims, declared coarse geometry and logical ERC, not autonomous extraction or physical testing.",
         }
 
 

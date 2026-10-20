@@ -10,6 +10,10 @@ from .chemical_gas import gas_state_report
 from .chemical_battery import battery_discharge_report
 from .chemical_materials import solid_composition_report
 from .chemical_source_bridge import draft_iso75_evidence
+from .chemical_assembly_review import review_enclosure_assembly
+from .electrical_design import ElectricalDesign
+from .step_geometry import MechanicalGeometryReport
+from .mechanical_fit import ClearanceBox, ClearanceRequirement, FastenerStack
 from .material_evidence import evaluate_material_evidence, compare_material_candidates
 from .machine_project import MachineProject
 from .chemical_engineering import (
@@ -68,6 +72,18 @@ class MaterialDocumentClaimRequest(BaseModel):
     material_id: str = Field(min_length=1, max_length=128)
 
 
+class EnclosureAssemblyReviewRequest(BaseModel):
+    project: MachineProject
+    candidate_ids: list[str] = Field(min_length=2, max_length=20)
+    selected_enclosure_id: str = Field(min_length=1, max_length=128)
+    electrical_component_id: str = Field(min_length=1, max_length=128)
+    electrical_design: ElectricalDesign
+    mechanical_geometry: MechanicalGeometryReport
+    clearance_boxes: list[ClearanceBox] = Field(min_length=1, max_length=100)
+    clearance_requirements: list[ClearanceRequirement] = Field(min_length=1, max_length=100)
+    fastener_stacks: list[FastenerStack] = Field(default_factory=list, max_length=100)
+
+
 class MaterialCompareRequest(BaseModel):
     project: MachineProject
     component_ids: list[str] = Field(min_length=2, max_length=20)
@@ -120,6 +136,21 @@ def create_chemical_router() -> APIRouter:
     def draft_material_document_evidence(request: MaterialDocumentClaimRequest) -> dict[str, Any]:
         return _call(draft_iso75_evidence, request.claim, component_id=request.component_id,
                      constraint_id=request.constraint_id, material_id=request.material_id)
+
+    @router.post("/enclosure/assembly-review")
+    def check_enclosure_assembly(request: EnclosureAssemblyReviewRequest) -> dict[str, Any]:
+        return _call(
+            review_enclosure_assembly,
+            project=request.project,
+            candidate_ids=request.candidate_ids,
+            selected_enclosure_id=request.selected_enclosure_id,
+            electrical_component_id=request.electrical_component_id,
+            electrical_design=request.electrical_design,
+            mechanical_geometry=request.mechanical_geometry,
+            clearance_boxes=request.clearance_boxes,
+            clearance_requirements=request.clearance_requirements,
+            fastener_stacks=request.fastener_stacks,
+        )
 
     @router.post("/materials/compare")
     def compare_materials(request: MaterialCompareRequest) -> dict[str, Any]:

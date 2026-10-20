@@ -103,3 +103,40 @@ where an apparent result MUST NOT be treated as evidence of actual suitability.
 Conclusion: **credible prototype for evidence-bounded material screening**,
 but **not ready to choose certified production materials without human review
 and application-specific experimental/standards evidence**.
+
+## Results C — chemical/mechanical/electrical integration
+
+A new read-only enclosure assembly endpoint combines real internal HS
+mechanical STEP/clearance checkers, electrical ERC and material evidence
+checks. In 11 deliberately authored negative/positive scenarios, 11 passed.
+
+- Baseline: under hypothetical 100C (0.45 MPa) and 90C (1.8 MPa) HDT criteria,
+  PC Blend is numerically consistent. The synthetic PCB/lid exclusion volumes
+  have declared separation 8 mm against a 5 mm clearance screen; the illustrative
+  net has two mapped pins and no electrical ERC errors. Result UNVERIFIED.
+- Negative scenarios reject ASA material evidence, lid/PCB overlap,
+  multiple electrical hard drivers, wrong project identities, untracked
+  electrical component, disconnected enclosure/PCB mating identity,
+  missing materials evidence, missing clearance coverage, and unequal
+  candidate screening constraints.
+- A forged precomputed passing geometry status is ignored: the actual
+  geometry and fit analyses are recomputed from supplied model details.
+- A separate pair of tests blocks nonfinite mechanical/electrical parameters.
+- Outstanding evidence explicitly covers real operating temperature,
+  full geometric bodies/fit, insulation, material provenance and manufacturing.
+
+The example STEP is a deliberately minimal Cartesian-point envelope, not a
+production CAD solid. The electrical net and geometric coordinates are
+synthetic declared tests. There is no true 3D collision or thermal simulation.
+
+A second integrated experiment, registered_three_layer_end_to_end.py,
+uses BOTH original Prusa PDFs with hash verification, four page-anchored
+proposed claims, four evidence objects, and the three-layer assembly review.
+It returned 11 mechanical geometry checks, 2 fit checks and 0 ERC errors
+while reporting only analytical consistency, never build authorization.
+The material screen did not mutate the project's revision history.
+
+These are software integration proofs, NOT engineering validation of a real
+enclosure. The next research step is a real STEP/PCB artifact, real thermal
+measurements, application-specific electrical/safety constraints, independent
+multi-vendor evaluation and a guided interface.

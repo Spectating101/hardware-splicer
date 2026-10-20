@@ -15,6 +15,7 @@ No second agent or engineering-release system is created.
 | POST /v1/engineering/chemical/materials/composition | pymatgen-core (optional) | Elemental mass/atomic fractions and reduced formula |
 | POST /v1/engineering/chemical/materials/evidence-check | HS MachineProject | Read-only property/limit reconciliation across chemical, mechanical and electrical constraints |
 | POST /v1/engineering/chemical/materials/compare | HS MachineProject | Fairness-gated comparison across candidates; rejects unequal screening requirements |
+| POST /v1/engineering/chemical/enclosure/assembly-review | MachineProject + electrical ERC + STEP geometry + mechanical fit + chemical evidence | Read-only, identity-bound joint enclosure screening; recomputes geometry/fit rather than trusting supplied status |
 | POST /v1/engineering/chemical/materials/document-claim/evidence-draft | HS canonical document-claim adapter | Parsed ISO75 HDT quote to proposed MachineProject EvidenceRef, with page/hash locator and no authority promotion |
 | POST /v1/engineering/chemical/gas/state | Cantera (optional) | Bounded air-model thermophysical state and TP equilibrium |
 | POST /v1/engineering/chemical/process/mass-balance | HS engine | Declared overall and nonreactive component mass-flow checks |
@@ -32,8 +33,8 @@ to hide a missing dependency. Routes appear in canonical OpenAPI and are callabl
 via the existing hs-backend-mcp gateway.
 
 For concise agent discovery, the MCP gateway supports task manifests
-chemical_material_review, chemical_process_review and
-chemical_battery_model_review. These are discovery groups, not autonomous
+chemical_material_review, chemical_process_review,
+chemical_battery_model_review and chemical_enclosure_assembly. These are discovery groups, not autonomous
 authorization or long-running background tasks.
 
 ## Suggested agent sequence
@@ -111,3 +112,27 @@ embedded in HS here.
   hash-reverified document reading, page-anchored claim registration, proposed
   EvidenceRef conversion and read-only material screening.
 - Detailed limitations and benchmark findings: docs/CHEMICAL_ENGINEERING_EVALUATION.md.
+
+## Three-layer assembly review (v1)
+
+The bounded assembly operation requires:
+- One canonical MachineProject with two distinct material candidates, one
+  selected mechanical enclosure and one explicit electrical board component.
+- An ElectricalDesign with the same project ID, mapped component identities,
+  populated pins/nets, and a canonical ERC check, actually executed.
+- A MechanicalGeometryReport with the same project ID and STEP source summaries
+  plus part-linked reciprocal board/enclosure mating interfaces.
+- Explicit PCB/lid clearance envelopes and a constraint linking the
+  selected enclosure and board. The geometry and fit checks are recomputed.
+- Method/load-matched material evidence under equivalent candidate criteria.
+
+Contradictions and missing coverage block analytical screening. A clean result
+is still bounded_assembly_screen_consistent_but_unverified, NOT build-ready.
+It includes mandatory independent follow-up on operating thermal loads, actual
+solid geometry, insulation, manufacturing, and material source qualification.
+No coupled thermal solver, structural FEA, real PCB inspection, safety
+certificate or fabrication authority is provided.
+
+See eval/chemical_materials/three_layer_enclosure_v1.py for 11 bounded cases,
+and registered_three_layer_end_to_end.py for a genuine original-PDF-to-HS-
+project evidence and three-layer screening exercise on a temporary store.
