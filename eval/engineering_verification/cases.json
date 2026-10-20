@@ -1,0 +1,162 @@
+[
+  {
+    "case_id": "current_margin_safe",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "supply_current_limit_a": 5,
+        "peak_current_a": 4
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-current-margin",
+      "status": "pass",
+      "blocking": false,
+      "outputs": {
+        "current_margin_a": 1.0
+      }
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  },
+  {
+    "case_id": "current_margin_overload",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "supply_current_limit_a": 3,
+        "peak_current_a": 6
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-current-margin",
+      "status": "fail",
+      "blocking": true,
+      "outputs": {
+        "current_margin_a": -3.0
+      }
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  },
+  {
+    "case_id": "current_margin_unknown",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "supply_current_limit_a": 3
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-current-margin",
+      "status": "unknown",
+      "blocking": true,
+      "outputs": {}
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  },
+  {
+    "case_id": "battery_runtime_enough",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "battery_energy_wh": 30,
+        "continuous_power_w": 10,
+        "battery_usable_fraction": 0.8,
+        "runtime_min": 120
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-runtime",
+      "status": "pass",
+      "blocking": false,
+      "outputs": {
+        "estimated_runtime_min": 144.0
+      }
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  },
+  {
+    "case_id": "battery_runtime_insufficient",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "battery_energy_wh": 20,
+        "continuous_power_w": 20,
+        "battery_usable_fraction": 0.8,
+        "runtime_min": 90
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-runtime",
+      "status": "fail",
+      "blocking": true,
+      "outputs": {
+        "estimated_runtime_min": 48.0
+      }
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  },
+  {
+    "case_id": "battery_runtime_unknown",
+    "input": {
+      "goal": "Evaluate low-voltage robotics power subsystem; physical tests not performed.",
+      "available_parts": [
+        {
+          "name": "unverified drive motor",
+          "type": "dc_motor",
+          "quantity": 1
+        }
+      ],
+      "constraints": {
+        "runtime_min": 90
+      }
+    },
+    "oracle": {
+      "finding_id": "analysis-runtime",
+      "status": "unknown",
+      "blocking": true,
+      "outputs": {}
+    },
+    "source_basis": "Analytical energy (Wh/W*60) and current limit minus peak current; unknown remains unknown",
+    "physical_authority_expected": false
+  }
+]
