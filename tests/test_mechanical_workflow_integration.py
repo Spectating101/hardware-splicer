@@ -14,6 +14,15 @@ from hardware_splicer.mechanical_workflow_integration import (
 from hardware_splicer.mechanical_authority import build_mechanical_authority
 
 
+def _mecha_runner_via_hs_bridge():
+    """Resolve Mecha through HS's normal local-app bridge, not a CI PYTHONPATH."""
+    from hardware_splicer.mechanism_bridge import _ensure_mecha_on_path
+    if not _ensure_mecha_on_path():
+        pytest.skip("Mecha-Splicer sibling app is not installed")
+    from mecha_splicer.runner import run
+    return run
+
+
 BRACKET = {
     "name": "plate", "w_mm": 60, "d_mm": 20, "t_mm": 4,
     "hole_d_mm": 3.2, "hole_spacing_mm": 40,
@@ -79,7 +88,7 @@ def test_failed_solver_fails_closed_and_keeps_source(tmp_path, monkeypatch):
 
 
 def test_mecha_build_publishes_structural_advisory_in_normal_files(tmp_path):
-    from mecha_splicer.runner import run
+    run = _mecha_runner_via_hs_bridge()
     spec = {
         "project_name": "hs-mechanical-end-to-end",
         "mode": "prototype",
@@ -105,7 +114,7 @@ def test_mecha_build_publishes_structural_advisory_in_normal_files(tmp_path):
 
 
 def test_mecha_enclosure_does_not_claim_bracket_contact_support(tmp_path):
-    from mecha_splicer.runner import run
+    run = _mecha_runner_via_hs_bridge()
     spec = {
         "project_name": "enclosure-only",
         "enclosure": {
@@ -120,7 +129,7 @@ def test_mecha_enclosure_does_not_claim_bracket_contact_support(tmp_path):
 
 
 def test_mecha_runner_run_mode_requires_real_output_directory():
-    from mecha_splicer.runner import run
+    run = _mecha_runner_via_hs_bridge()
     with pytest.raises(ValueError, match="requires out_dir"):
         run({"project_name": "invalid", "bracket": BRACKET},
             structural_screening="run")
@@ -230,7 +239,7 @@ def test_disabling_structural_analysis_cannot_promote_mechanical_release():
 def test_real_mecha_runner_with_opt_in_solver_packages_review(tmp_path):
     pytest.importorskip("gmsh")
     pytest.importorskip("skfem")
-    from mecha_splicer.runner import run
+    run = _mecha_runner_via_hs_bridge()
     bundle = run(
         {"project_name": "actual-bracket", "bracket": BRACKET},
         out_dir=tmp_path, structural_screening="run",
