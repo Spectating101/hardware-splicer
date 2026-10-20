@@ -27,3 +27,14 @@ Both registries load into a single canonical product/API and MCP interface.
 See docs/PRACTICAL_CHEMISTRY_V2_FREEZE.md. After v2, use real device
 evidence and held-out repair outcomes to prioritize changes, rather than
 adding unrelated chemistry solvers or unverified product recommendations.
+
+## HS project-to-review workflow benchmark
+
+    PYTHONPATH=src python eval/practical_chemistry/full_hs_workflow_benchmark_v1.py
+
+Runs 4 synthetic projects through the actual HS API, revisioned ProjectStore,
+practical chemistry preview, pending review, submitted acceptance, findings
+and hash-bound review packet. This is a software integration demonstration,
+not an operator usability study, real-world repair or measured ROI.
+
+See docs/PRACTICAL_CHEMISTRY_HS_WORKFLOW_AUDIT.md.

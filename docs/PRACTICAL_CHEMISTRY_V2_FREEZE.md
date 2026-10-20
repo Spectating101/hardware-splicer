@@ -98,3 +98,12 @@ no unknown-battery handling approval, no measurement-based cure/thermal/gear
 durability evidence, no autonomous source freshness check or external expert
 qualification. A source-scoped product description is *not* a verified
 compatibility matrix for a specific physical specimen.
+
+## Canonical HS project-workflow audit
+
+Chemistry can now preview assessments against one revision-pinned HS
+MachineProject component, stage an existing full-snapshot review, and
+retain chemical blockers in the existing findings and hash-bound review packet
+after a submitted acceptance. It does NOT certify or independently verify
+a repair. See docs/PRACTICAL_CHEMISTRY_HS_WORKFLOW_AUDIT.md for the 4-case
+integration test, remaining global release gate gap, and limitations.

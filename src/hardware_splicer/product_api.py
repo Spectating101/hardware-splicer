@@ -19,6 +19,7 @@ from .ai_project_tool_executor_api import create_ai_project_tool_executor_router
 from .api import create_app as create_engine_app
 from .capability_api import create_capability_router
 from .chemical_api import create_chemical_router
+from .project_practical_chemistry_api import create_project_practical_chemistry_router
 from .capability_reuse_api import create_capability_reuse_router
 from .circuit_json_api import create_circuit_json_router
 from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
@@ -155,6 +156,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
     app.include_router(create_chemical_router())
+    app.include_router(create_project_practical_chemistry_router(resolved_store))
     _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))

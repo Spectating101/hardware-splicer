@@ -28,6 +28,12 @@ _TASK_OPERATION_PATHS = {
     "practical_chemistry_repair": (
         ("GET", "/v1/engineering/chemical/practical/catalog"),
         ("POST", "/v1/engineering/chemical/practical/assess"),
+        ("GET", "/v1/projects/{project_id}"),
+        ("POST", "/v1/projects/{project_id}/chemistry/practical/preview"),
+        ("POST", "/v1/projects/{project_id}/reviews"),
+        ("GET", "/v1/projects/{project_id}/reviews"),
+        ("GET", "/v1/projects/{project_id}/findings"),
+        ("GET", "/v1/projects/{project_id}/review-packet"),
         ("GET", "/v1/engineering/chemical/engines"),
         ("POST", "/v1/engineering/chemical/materials/compare"),
     ),
