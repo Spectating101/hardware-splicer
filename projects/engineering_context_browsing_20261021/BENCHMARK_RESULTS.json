@@ -1,0 +1,213 @@
+{
+  "benchmark_schema": "hardware_splicer.engineering_context_ablation.v1",
+  "design": "one native model, three projects, matched pre/post questions, first-party publisher HTML",
+  "known_publisher_URLs_were_supplied_by_evaluator": true,
+  "search_engine_discovery_proven_reliable": false,
+  "model_provider": "copilot_cli, tool-disabled in text inference",
+  "baseline_had_persisted_research_request_but_no_external_source_text": true,
+  "post_research_had_retrieved_hashed_publisher_excerpts": true,
+  "require_human_acceptance_for_research_action": true,
+  "source_fact_counts_derived_by_predeclared_token_presence_not_independent_semantic_fact_check": true,
+  "no_physical_testing_or_design_approval": true,
+  "cases": {
+    "drone": {
+      "question": "Identify the exact manufacturer-published motor model and KV rating, ESC amperage, and propeller type supplied with the Holybro X500 V2 ARF kit. If evidence is missing, be precise and do not invent values.",
+      "fact_checks": {
+        "motor_2216_KV920": [
+          "2216",
+          "920"
+        ],
+        "esc_20A": [
+          "20a",
+          "esc"
+        ],
+        "propeller_1045": [
+          "1045"
+        ]
+      },
+      "before_facts_in_model": {
+        "motor_2216_KV920": false,
+        "esc_20A": false,
+        "propeller_1045": false
+      },
+      "after_facts_in_model": {
+        "motor_2216_KV920": true,
+        "esc_20A": true,
+        "propeller_1045": true
+      },
+      "after_facts_explicit_in_captured_publisher_material": {
+        "motor_2216_KV920": true,
+        "esc_20A": true,
+        "propeller_1045": true
+      },
+      "after_model_fact_terms_supported_by_publisher": {
+        "motor_2216_KV920": true,
+        "esc_20A": true,
+        "propeller_1045": true
+      },
+      "before_fact_mentions": 0,
+      "after_fact_mentions": 3,
+      "after_source_supported_mentions": 3,
+      "possible_fact_checks": 3,
+      "publisher_sources": [
+        {
+          "url": "https://holybro.com/products/x500-v2-kits",
+          "sha256": "sha256:179e2376b59c9e9e3f7fc2f69cde566e762de1471b62eaee25860915421d0923",
+          "evidence_scope": "attributed_publisher_claim_not_physical_validation"
+        }
+      ],
+      "valid_publisher_source_ids_cited": [
+        "web-b2b2db5f4c2b04bd26d4"
+      ],
+      "before_proposed_tool_types": [
+        "research_engineering_context"
+      ],
+      "after_proposed_tool_types": [
+        "research_engineering_context"
+      ],
+      "agent_after_summary": "Proposed evidence-bounded identification from the retrieved Holybro publisher excerpt: the X500 V2 ARF kit is stated to include Holybro 2216 KV920 motors, BLHeli S 20A ESCs, and six 1045 propellers with retainers. These remain attributed publisher claims from https://holybro.com/products/x500-v2-kits, not verified physical fit, compatibility, purchased-component properties, or manufacturing approval.",
+      "original_publisher_text_not_republished_in_Git": true,
+      "physical_validation": false
+    },
+    "repair": {
+      "question": "For PSP 300x UMD drive replacement, identify the documented first physical preparation, the original guide step count if available, and why another PSP variant should not substitute for the original guide.",
+      "fact_checks": {
+        "battery_removed": [
+          "battery",
+          "remov"
+        ],
+        "guide_42_steps": [
+          "42",
+          "step"
+        ],
+        "correct_variant": [
+          "300x"
+        ]
+      },
+      "before_facts_in_model": {
+        "battery_removed": true,
+        "guide_42_steps": false,
+        "correct_variant": true
+      },
+      "after_facts_in_model": {
+        "battery_removed": true,
+        "guide_42_steps": true,
+        "correct_variant": true
+      },
+      "after_facts_explicit_in_captured_publisher_material": {
+        "battery_removed": true,
+        "guide_42_steps": true,
+        "correct_variant": true
+      },
+      "after_model_fact_terms_supported_by_publisher": {
+        "battery_removed": true,
+        "guide_42_steps": true,
+        "correct_variant": true
+      },
+      "before_fact_mentions": 2,
+      "after_fact_mentions": 3,
+      "after_source_supported_mentions": 3,
+      "possible_fact_checks": 3,
+      "publisher_sources": [
+        {
+          "url": "https://www.ifixit.com/Guide/PSP+300x+UMD+Drive+Replacement/1586",
+          "sha256": "sha256:e5c9963119132de856ad67e5d50c8ea07900aef2f4f45cdf97e751aa03724c2d",
+          "evidence_scope": "attributed_publisher_claim_not_physical_validation"
+        }
+      ],
+      "valid_publisher_source_ids_cited": [
+        "web-7b7694b715d26393c640"
+      ],
+      "before_proposed_tool_types": [
+        "research_engineering_context"
+      ],
+      "after_proposed_tool_types": [
+        "identify_missing_evidence",
+        "prepare_verification"
+      ],
+      "agent_after_summary": "Proposed interpretation of the supplied iFixit publication: the documented first physical preparation is to place the PSP face down, remove the battery cover, and remove the battery before proceeding; the guide reports 42 steps. The publication is specifically for PSP 300x and does not establish that another PSP variant is physically interchangeable or suitable as a substitute.",
+      "original_publisher_text_not_republished_in_Git": true,
+      "physical_validation": false
+    },
+    "chemistry": {
+      "question": "Identify manufacturer-supported UV or outdoor use suitability and thermal resistance for Prusament ASA. Do not infer an exact heat-deflection number without the referenced original test datasheet.",
+      "fact_checks": {
+        "asa_outdoor_UV": [
+          "uv",
+          "outdoor"
+        ],
+        "temperature_resistance": [
+          "temperature",
+          "resistance"
+        ],
+        "published_93_C": [
+          "93"
+        ]
+      },
+      "before_facts_in_model": {
+        "asa_outdoor_UV": true,
+        "temperature_resistance": false,
+        "published_93_C": false
+      },
+      "after_facts_in_model": {
+        "asa_outdoor_UV": true,
+        "temperature_resistance": true,
+        "published_93_C": true
+      },
+      "after_facts_explicit_in_captured_publisher_material": {
+        "asa_outdoor_UV": true,
+        "temperature_resistance": true,
+        "published_93_C": true
+      },
+      "after_model_fact_terms_supported_by_publisher": {
+        "asa_outdoor_UV": true,
+        "temperature_resistance": true,
+        "published_93_C": true
+      },
+      "before_fact_mentions": 1,
+      "after_fact_mentions": 3,
+      "after_source_supported_mentions": 3,
+      "possible_fact_checks": 3,
+      "publisher_sources": [
+        {
+          "url": "https://prusament.com/materials/prusament-asa/",
+          "sha256": "sha256:02d10a8260ec2733f4aa5be8765f779ad1f1be7a32e21fcb80d0b8fcd8579bc3",
+          "evidence_scope": "attributed_publisher_claim_not_physical_validation"
+        }
+      ],
+      "valid_publisher_source_ids_cited": [
+        "web-75bcefa0846716c130ff"
+      ],
+      "before_proposed_tool_types": [
+        "research_engineering_context"
+      ],
+      "after_proposed_tool_types": [
+        "research_engineering_context",
+        "identify_missing_evidence",
+        "clarify_requirement"
+      ],
+      "agent_after_summary": "Proposed evidence assessment for Prusament ASA: the retrieved Prusament publication states that ASA is UV stable, suitable for outdoor use, and temperature resistant up to 93 °C. These are attributed publisher claims from https://prusament.com/materials/prusament-asa/, not verification of a particular part's physical fit, safety, chemical compatibility, purchased material properties, heat-deflection performance, or manufacturing approval. The exact requested heat-deflection or referenced test-datasheet evidence remains unresolved.",
+      "original_publisher_text_not_republished_in_Git": true,
+      "physical_validation": false
+    }
+  },
+  "total_before_fact_mention_count": 3,
+  "total_after_fact_mention_count": 9,
+  "total_after_source_supported_fact_mention_count": 9,
+  "total_possible_fact_checks": 9,
+  "post_fix_repeat_browsing_probe": {
+    "http_status": 200,
+    "actions": [
+      "prepare_verification",
+      "identify_missing_evidence"
+    ],
+    "research_requested_again": false,
+    "context_research_fulfilled": [
+      {
+        "request_id": "x500-factory-spec",
+        "publisher_documents_available": 1,
+        "status": "source_context_retrieved"
+      }
+    ]
+  }
+}

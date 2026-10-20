@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 from .compose_dispatch import compose_dispatch
 from .engineering_project_source_bundle import analyze_registered_project_bundle
 from .engineering_cad_carrier import generate_registered_pcb_carrier
+from .engineering_web_research import research_engineering_gap, research_request_sha256
 from .engineering_layer_reviews import screen_declared_mechanics, screen_declared_chemistry, prepare_declared_enclosure
 from .guided_engineering_planner import plan_guided_engineering_project
 from .project_store import ProjectStore, validate_project_id
@@ -38,6 +39,7 @@ EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "review_mechanical_layer",
     "review_practical_chemistry",
     "prepare_printed_enclosure_concept",
+    "research_engineering_context",
 )
 
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
@@ -293,6 +295,64 @@ def execute_ai_project_action_preview(
             artifact = _atomic_write_json(artifact_path, plan)
             summary = _plan_summary(plan)
             artifact_name = "guided_plan.json"
+        elif action_type == "research_engineering_context":
+            # Only the project-registered question/allowed hosts may reach the
+            # network. The model may select an existing id, never a URL/host.
+            requests = _rows(snapshot.get("engineeringResearchRequests"))
+            if len(requests)>8:
+                raise ValueError('research request registry exceeds bounded size')
+            requested_id = str(_mapping(action.get('inputs')).get('research_request_id') or '')
+            if not requested_id and len(requests)==1:
+                requested_id = str(requests[0].get('id') or '')
+            selected=[row for row in requests if str(row.get('id') or '')==requested_id]
+            if len(selected)!=1:
+                raise ValueError('action must select exactly one registered research request')
+            # Repeated request: reuse the previous project's immutable cited
+            # evidence instead of burning network calls on a browsing loop.
+            def _fresh_research(row):
+                try:
+                    stamp=datetime.fromisoformat(str(row.get('searched_at_utc') or ''))
+                    return (stamp.tzinfo is not None and
+                            0 <= (datetime.now(timezone.utc)-stamp).total_seconds() < 21600)
+                except (TypeError, ValueError):
+                    return False
+            expected_hash=research_request_sha256(selected[0])
+            previous=[row for row in _rows(snapshot.get('engineeringWebResearchRuns'))
+                 if row.get('request_id')==requested_id and row.get('sources')
+                 and row.get('research_status')=='source_context_retrieved'
+                 and row.get('request_sha256')==expected_hash
+                 and _fresh_research(row)]
+            if previous:
+                reused=previous[-1]
+                researched={
+                    'request_id':requested_id,
+                    'request_sha256':reused.get('request_sha256'),
+                    'status':'source_context_reused',
+                    'source_count':len(reused['sources']),
+                    'sources':reused['sources'],
+                    'source_publication_not_physical_verification':True,
+                    'physical_authority_unchanged':True,
+                    'retrieval_reused_without_network':True,
+                }
+            else:
+                researched=research_engineering_gap(selected[0])
+            artifact_path=run_dir/'source_bound_web_research.json'
+            artifact=_atomic_write_json(artifact_path,researched)
+            summary={
+                'ok':True,
+                'research_request_id':researched['request_id'],
+                'request_sha256':researched['request_sha256'],
+                'searched_at_utc':researched.get('searched_at_utc'),
+                'research_status':researched['status'],
+                'source_count':researched['source_count'],
+                'sources':[{k:v for k,v in source.items() if k in
+                          ('source_id','url','title','excerpt','original_sha256','source_scope')}
+                           for source in researched['sources']],
+                'source_publication_not_physical_verification':True,
+                'physical_authority_unchanged':True,
+                'automatic_execution':False,
+            }
+            artifact_name=artifact_path.name
         elif action_type == "review_mechanical_layer":
             requests = _mapping(snapshot.get("engineeringLayerRequests"))
             source_geometry = {}
