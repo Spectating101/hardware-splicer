@@ -1,5 +1,7 @@
 # Hardware Splicer
 
+**Broader engineering-agent mission and operating contract:** [`docs/HARDWARE_SPLICER_MISSION_FREEZE.md`](docs/HARDWARE_SPLICER_MISSION_FREEZE.md). The bounded SPI adapter demonstration below is evidence of a particular current capability, not the full intended product scope.
+
 **Software that runs the checks a hardware engineer would run before a circuit board is built, and packages the result so anyone can rebuild and verify it.**
 
 ![SPI flash adapter reference design, top copper layer](docs/product/media/spi_flash_adapter_v1-top.svg)

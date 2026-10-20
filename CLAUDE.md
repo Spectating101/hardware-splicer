@@ -1,5 +1,7 @@
 # Hardware-Splicer — working notes for agents
 
+**Read first for project direction:** [`docs/HARDWARE_SPLICER_MISSION_FREEZE.md`](docs/HARDWARE_SPLICER_MISSION_FREEZE.md). This is the canonical strategic scope and work-selection contract; do not replace user engineering outcomes with synthetic benchmarks, reference-kit duplication or demo builds. Existing engineering authority/safety contracts still apply.
+
 Orientation: [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md).
 Setup: [`docs/SETUP.md`](docs/SETUP.md) · Tests: [`docs/TESTING.md`](docs/TESTING.md) ·
 API/MCP: [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md).
