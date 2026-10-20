@@ -165,6 +165,42 @@ def run_reasoning_engineering_agent(
     raise ValueError("unsupported engineering agent provider")
 
 
+def evaluate_assumed_robot_arm(
+    *, proposal: Mapping[str, Any], benchmark_spec: Mapping[str, Any]
+) -> Dict[str, Any]:
+    """Evaluate a proposed salvage arm using explicitly unverified part intervals.
+
+    No physical approval or hidden actuator/print/robot command execution.
+    """
+    from .robot_arm_design import parse_robot_arm_design, evaluate_robot_arm_design
+    from .arm_splice_assumption_oracle import stress_test_assumed_arm
+    arm = parse_robot_arm_design(
+        proposal, inventory=benchmark_spec.get("assumed_part_catalog") or [],
+        known_source_ids=[],
+    )
+    if arm.source_ids:
+        raise ValueError("hypothetical arm design cannot claim witnessed source IDs")
+    conservative = stress_test_assumed_arm(arm, benchmark_spec)
+    canonical = evaluate_robot_arm_design(
+        arm, requirements=benchmark_spec["requirements"],
+        inventory=benchmark_spec["assumed_part_catalog"],
+    )
+    return {
+        "schema_version":"hs.assumed_robot_arm_assessment.v1",
+        "proposal":arm.model_dump(mode="json"),
+        "nominal_analysis":canonical.model_dump(mode="json"),
+        "stress_analysis":conservative,
+        "physical_data_authenticated":False,
+        "motion_authorized":False,
+    }
+
+
+def prepare_assumed_arm_fingers(*, finger_spec: Mapping[str, Any]) -> Dict[str, Any]:
+    """Prepare actual SolidCraft commands for unverified robotic gripper inserts."""
+    from .robot_arm_cad_adapter import prepare_robot_arm_finger_inserts
+    return prepare_robot_arm_finger_inserts(finger_spec)
+
+
 def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:
     """Agent-safe 3D printable casing CAD plan; never automatically slice or print.
 

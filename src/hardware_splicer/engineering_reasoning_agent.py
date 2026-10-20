@@ -17,7 +17,8 @@ from .integrations.llm_text_client import call_llm_chat
 
 ALLOWED_TOOLS=frozenset({
     "inspect_sources", "derive_functions", "audit_candidate", "propose_printed_casing",
-    "inspect_fabrication_package",
+    "inspect_fabrication_package", "inspect_robot_arm_campaign",
+    "evaluate_assumed_robot_arm", "prepare_assumed_arm_fingers",
 })
 MAX_STEPS=6
 
@@ -27,6 +28,50 @@ def _digest(value:Any)->str:
 
 
 def _tools(name:str, args:Mapping[str,Any], scenario:Mapping[str,Any])->dict:
+    if name=="inspect_robot_arm_campaign":
+        # Recorded external evidence is bundled with source hashes; never infer
+        # that scenario assumptions are real measured or acquired parts.
+        from pathlib import Path
+        from zipfile import ZipFile
+        base=Path(__file__).resolve().parents[2]
+        archived=base/"examples/assumption_robot_arm/HS_ROBOT_ARM_SPLICE_BENCHMARK_20261020.zip"
+        with ZipFile(archived) as z:
+            manifest=json.loads(z.read("MANIFEST.json"))
+            initial=json.loads(z.read("reports/initial_live_codex_design.json"))
+            revised=json.loads(z.read("reports/revised_live_codex_design.json"))
+            fingers=json.loads(z.read("printer/FINGER_SLICER_AUDIT.json"))
+        return {
+            "recorded_two_live_model_arm_designs":manifest["two_live_model_arm_designs"],
+            "first_candidate_torque_classification":initial["interval_stress_oracle"]["result"],
+            "revised_candidate_torque_classification":revised["interval_stress_oracle"]["result"],
+            "revised_previously_parsed_typed_proposal":revised["proposal"],
+            "first_previously_parsed_typed_proposal":initial["proposal"],
+            "revised_candidate_actual_arm_present":False,
+            "revised_ik_within_5mm":revised["pybullet_independent_kinematics"]["ik_within_5mm"],
+            "revised_pick_place_proxy_collision_free":revised["robotic_assembly_pick_place_simulation"]["proxy_self_collision_free"],
+            "real_gripper_insert_STL_and_gcode_created":True,
+            "estimated_gripper_insert_print_grams":fingers["estimated_filament_grams"],
+            "assumed_actuator_specs_are_measured":False,
+            "missing_for_reality":["actual motor torque, mass and feedback",
+              "full load-bearing CAD and inertia","arm/table/gripper real collision",
+              "physical independent stop","authorized printer and operator"],
+            "physical_fabrication_authorized":False,
+            "actual_robot_actuated":False,
+        }
+    if name=="evaluate_assumed_robot_arm":
+        from .sdk import evaluate_assumed_robot_arm
+        benchmark=scenario.get("assumed_robot_arm_spec")
+        if not isinstance(benchmark, Mapping):
+            raise ValueError("scenario must declare assumed_robot_arm_spec")
+        return evaluate_assumed_robot_arm(
+            proposal=args.get("proposal"),benchmark_spec=benchmark
+        )
+    if name=="prepare_assumed_arm_fingers":
+        from .sdk import prepare_assumed_arm_fingers
+        finger_spec=scenario.get("assumed_arm_finger_spec")
+        if not isinstance(finger_spec,Mapping):
+            raise ValueError("scenario must declare assumed_arm_finger_spec")
+        return prepare_assumed_arm_fingers(finger_spec=finger_spec)
     if name=="inspect_fabrication_package":
         # Fixed, versioned, independently audited sample. No LLM-chosen
         # filesystem path, CLI commands, network or physical printer calls.
@@ -150,7 +195,10 @@ def run_engineering_reasoning_agent(
             {"name":"derive_functions","purpose":"Inspect functional decomposition; not physical proof"},
             {"name":"audit_candidate","purpose":"Run actual canonical HS planner and independent oracle"},
             {"name":"propose_printed_casing","purpose":"Only declared test dimensions and concept authority"},
-            {"name":"inspect_fabrication_package","purpose":"Inspect the ACTUAL externally sliced G-code, SolidCraft/PartCAD assembly, staged-printer dry-run, and physical deployment blockers for this machine; use this tool to give instructions about bringing a design into reality."},
+            {"name":"inspect_fabrication_package","purpose":"Inspect actual previously sliced casing G-code and printer handoff, without actuation"},
+            {"name":"inspect_robot_arm_campaign","purpose":"Read the REAL stored live Codex, PyBullet, SolidCraft and PrusaSlicer arm trials, including failed stress and collision checks"},
+            {"name":"evaluate_assumed_robot_arm","purpose":"Evaluate typed candidate with scenario hypothetical catalog. REQUIRED arguments.proposal must be an object with a joints array (1-8), each with joint_id string, joint_type='revolute', axis [x,y,z], strictly positive link_length_mm, actuator_part_id matching the scenario catalog, lower_limit_deg/upper_limit_deg. Also include end_effector, source_ids=[], authority_effect='none', automatic_execution=false. You may copy the revised_previously_parsed_typed_proposal returned by inspect_robot_arm_campaign and MODIFY it before evaluation. DO NOT send status-only plans, notes or partially specified joints."},
+            {"name":"prepare_assumed_arm_fingers","purpose":"Produce geometry-only SolidCraft command plan for hypothetical printable finger inserts declared in the scenario"},
         ],
         "safety":"Never claim a donor owned/measured, a working assembly, or permission to actuate/print.",
     }

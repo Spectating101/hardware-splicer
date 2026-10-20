@@ -141,6 +141,33 @@ async def list_tools() -> list[Tool]:
             },"required":["scenario"]},
         ),
         Tool(
+            name="hs_evaluate_assumed_robot_arm",
+            description=(
+                "Independently evaluate a model-designed robot arm against "
+                "illustrative component torque/mass ranges, reach and conservative "
+                "payload-plus-link-self-weight estimates. Invented actuator IDs "
+                "are rejected. The catalog must be explicitly marked as benchmark "
+                "assumptions, not claimed measured salvaged parts. Output never "
+                "grants motor power, robot motion or fabrication authority."
+            ),
+            inputSchema={"type":"object","properties":{
+                "proposal":{"type":"object"},
+                "benchmark_spec":{"type":"object"}
+            },"required":["proposal","benchmark_spec"]},
+        ),
+        Tool(
+            name="hs_prepare_assumed_arm_fingers",
+            description=(
+                "Generate native SolidCraft parametric command plan for a "
+                "two-piece candidate gripper finger set. Hole locations, "
+                "gripper compatibility, material and holding force are "
+                "benchmark assumptions; no real arm is controlled."
+            ),
+            inputSchema={"type":"object","properties":{
+                "finger_spec":{"type":"object"}
+            },"required":["finger_spec"]},
+        ),
+        Tool(
             name="hs_prepare_printed_casing",
             description=(
                 "Prepare a real SolidCraft parametric printable housing: hollow"
@@ -679,6 +706,19 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
             scenario=args.get("scenario"),
             max_steps=args.get("max_steps",4),
             provider=args.get("provider","codex_chatgpt"),
+        )
+        return _tool_result(result)
+    if name == "hs_evaluate_assumed_robot_arm":
+        result=await asyncio.to_thread(
+            sdk.evaluate_assumed_robot_arm,
+            proposal=args.get("proposal"),
+            benchmark_spec=args.get("benchmark_spec"),
+        )
+        return _tool_result(result)
+    if name == "hs_prepare_assumed_arm_fingers":
+        result=await asyncio.to_thread(
+            sdk.prepare_assumed_arm_fingers,
+            finger_spec=args.get("finger_spec"),
         )
         return _tool_result(result)
     if name == "hs_prepare_printed_casing":

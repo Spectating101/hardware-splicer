@@ -7,7 +7,8 @@ from typing import Any
 META=re.compile(r'^;\s*([^=\n]+?)\s*=\s*(.*)$')
 POS=re.compile(r'(?:^|\s)([XYZE])(-?\d+(?:\.\d+)?)')
 
-def audit_offline_gcode(path:Path,bed_xy=(250.0,210.0),margin=4.0)->dict[str,Any]:
+def audit_offline_gcode(path:Path,bed_xy=(250.0,210.0),margin=4.0,
+    expected_parts:tuple[str,...]=("HS_Casing_Base","HS_Casing_Lid"))->dict[str,Any]:
     p=Path(path)
     if not p.is_file() or not 1000 <= p.stat().st_size <= 40_000_000:raise ValueError("invalid G-code file size")
     data=p.read_bytes()
@@ -40,7 +41,7 @@ def audit_offline_gcode(path:Path,bed_xy=(250.0,210.0),margin=4.0)->dict[str,Any
         objects=json.loads(meta["objects_info"])["objects"]
     except (KeyError,ValueError,TypeError) as e:raise ValueError("G-code object metadata invalid") from e
     names={o["name"] for o in objects}
-    if names!={"HS_Casing_Base","HS_Casing_Lid"}:
+    if names!=set(expected_parts) or len(objects)!=len(expected_parts):
         raise ValueError("G-code object identity mismatch")
     bboxes={}
     for obj in objects:

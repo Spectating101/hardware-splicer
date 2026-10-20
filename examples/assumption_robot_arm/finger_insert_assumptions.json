@@ -1,0 +1,14 @@
+{
+  "source_authority": "BENCHMARK_ASSUMPTION_ONLY",
+  "purpose": "Printable candidate jaw inserts for an unknown salvage arm gripper; NOT verified to match any gripper.",
+  "dimensions_mm": {
+    "length": 45,
+    "width": 12,
+    "thickness": 8,
+    "fastener_hole_diameter": 3.2,
+    "fastener_edge_margin": 9,
+    "print_layout_gap": 16
+  },
+  "physical_release": false,
+  "measured_donor_count": 0
+}
