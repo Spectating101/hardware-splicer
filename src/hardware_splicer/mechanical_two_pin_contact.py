@@ -27,6 +27,8 @@ def solve_two_pin_contact(
     poisson: float = .25,
     numerical_gauge_n_per_m: float = .01,
     active_selection_n_per_m: float = 1e7,
+    local_mesh_target_mm: float | None = None,
+    local_radius_mm: float = 4.,
 ) -> dict[str, Any]:
     import numpy as np
     from scipy import sparse
@@ -55,7 +57,19 @@ def solve_two_pin_contact(
         1e-4 <= numerical_gauge_n_per_m <= 1e3
     ):
         raise ValueError("invalid numerical rigid-mode stabilization")
-    m = mesh_cad_solid(step_file, mesh_target_mm=mesh_target_mm, geometry_order=2)
+    if local_mesh_target_mm is not None:
+        from .mechanical_cad_fem import LocalRefinement
+        refinement = LocalRefinement(
+            target_size_mm=local_mesh_target_mm,
+            radius_mm=local_radius_mm,
+            refine_circular_edges=True,
+        )
+    else:
+        refinement = None
+    m = mesh_cad_solid(
+        step_file, mesh_target_mm=mesh_target_mm,
+        geometry_order=2, local_refinement=refinement,
+    )
     bare = MeshTet2.from_mesh(MeshTet(
         np.asarray(m.nodes_m).T, np.asarray(m.elements).T,
     ))
@@ -190,6 +204,49 @@ def solve_two_pin_contact(
                 if node["hole"] == hole
             )),
         })
+    # Probe contact at actual quadratic face quadrature points, not only
+    # collocated surface nodes. These probes are diagnostic only: finite
+    # sampling cannot guarantee contact everywhere on the continuous BREP.
+    from skfem import FacetBasis
+    surface_contact_probes = []
+    for pin_index, (cx, cy) in enumerate(centers):
+        wall = exterior[
+            np.all(
+                abs(
+                    np.hypot(
+                        faces_xyz[0] - cx * .001,
+                        faces_xyz[1] - cy * .001,
+                    ) - radius
+                ) < .00012,
+                axis=0,
+            )
+        ]
+        fb = FacetBasis(mesh, element, facets=wall, dofs=basis.dofs)
+        sample_xyz = np.asarray(fb.global_coordinates())
+        radial = np.hypot(
+            sample_xyz[0] - cx*.001,
+            sample_xyz[1] - cy*.001,
+        )
+        nx = (sample_xyz[0] - cx*.001)/radial
+        ny = (sample_xyz[1] - cy*.001)/radial
+        displacement_samples = np.asarray(fb.interpolate(u))
+        physical_gap = (
+            displacement_samples[0]*nx + displacement_samples[1]*ny
+            - (right_pin_drive_mm*.001*nx if pin_index == 1 else 0.)
+            + radial_clearance_mm*.001
+        )
+        min_gap = float(physical_gap.min())
+        negative = np.maximum(-physical_gap, 0.)
+        surface_contact_probes.append({
+            "hole_index": pin_index,
+            "quadrature_sample_count": int(physical_gap.size),
+            "minimum_quadrature_gap_m": min_gap,
+            "largest_sampled_between_node_penetration_m": float(negative.max()),
+            "sampled_penetrating_area_m2": float(
+                np.sum(fb.dx * (negative > 1e-12))
+            ),
+            "continuous_surface_nonpenetration_proven": False,
+        })
     gauge_force = numerical_gauge_n_per_m * u
     gauge_resultant = np.asarray([
         gauge_force[basis.nodal_dofs[a]].sum() +
@@ -245,12 +302,19 @@ def solve_two_pin_contact(
                 np.sum(basis.dx*np.where(region, vm**2, 0.)) /
                 max(float(np.sum(basis.dx*region)),1e-18)
             )),
+            "p95_quadrature_von_mises_pa": float(
+                np.percentile(vm[region], 95)
+            ),
+            "p90_quadrature_von_mises_pa": float(
+                np.percentile(vm[region], 90)
+            ),
         })
     return {
         "schema_version": "hardware_splicer.two_bore_nodal_kkt.v1",
         "status": "nodal_two_pin_complementarity_screen_only",
         "source_step_sha256": m.source_sha256,
         "mesh_target_mm": mesh_target_mm,
+        "local_refinement": m.local_refinement,
         "geometry_order": 2,
         "tetrahedron_count": len(m.elements),
         "quadratic_dof_count": int(basis.N),
@@ -265,6 +329,7 @@ def solve_two_pin_contact(
         "relative_gauge_reaction": gauge_error/max(transmitted_force,1e-12),
         "transmitted_force_scale_n": transmitted_force,
         "per_pin": per_hole,
+        "between_node_surface_gap_probes": surface_contact_probes,
         "per_hole_stress": per_hole_stress,
         "global_peak_sampled_von_mises_pa": float(vm.max()),
         "nodal_max_gap_violation_m": kkt["max_negative_gap_m"],
