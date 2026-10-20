@@ -42,6 +42,8 @@ def test_single_tetra_agrees_with_closed_form_under_fixed_base():
     expected_vm = 2 * mu * (expected_x / 0.1)
     assert out["max_von_mises_pa"] == pytest.approx(expected_vm, rel=1e-9)
     assert out["yield_safety_factor"] == pytest.approx(100e6 / expected_vm)
+    assert out["peak_stress_element_index"] == 0
+    assert out["peak_stress_centroid_m"] == pytest.approx([0.025, 0.025, 0.025])
     assert out["force_equilibrium_residual_n"] < 1e-7
     assert sum(row[0] for row in out["support_reactions_n"]) == pytest.approx(-10.0)
     assert out["structural_safety_verified"] is False

@@ -230,6 +230,9 @@ def solve_linear_tetra_fem(request: FemInput | dict[str, Any]) -> dict[str, Any]
     if equilibrium_residual > 1e-6 * max(1.0, applied_force_magnitude):
         raise ValueError("FEM force equilibrium check failed")
     max_von_mises = max(vm_rows)
+    peak_stress_element = int(max(range(len(vm_rows)), key=vm_rows.__getitem__))
+    peak_nodes = request.elements[peak_stress_element]
+    peak_stress_centroid_m = nodes[peak_nodes].mean(axis=0).tolist()
     yield_sf = (
         float(request.yield_strength_pa / max_von_mises)
         if request.yield_strength_pa is not None and max_von_mises > 0
@@ -248,6 +251,8 @@ def solve_linear_tetra_fem(request: FemInput | dict[str, Any]) -> dict[str, Any]
         "element_stress_pa": stress_rows,
         "element_von_mises_pa": vm_rows,
         "max_von_mises_pa": max_von_mises,
+        "peak_stress_element_index": peak_stress_element,
+        "peak_stress_centroid_m": peak_stress_centroid_m,
         "yield_safety_factor": yield_sf,
         "support_reactions_n": reactions.tolist(),
         "force_equilibrium_residual_n": equilibrium_residual,
