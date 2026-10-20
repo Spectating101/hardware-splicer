@@ -132,6 +132,12 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def run_reasoning_engineering_agent(*, scenario: Mapping[str, Any], max_steps: int = 6) -> Dict[str, Any]:
+    """Bounded live LLM-driven engineering reasoning with read/design-only tools."""
+    from .engineering_reasoning_agent import run_engineering_reasoning_agent
+    return run_engineering_reasoning_agent(scenario,max_steps=max_steps)
+
+
 def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:
     """Agent-safe 3D printable casing CAD plan; never automatically slice or print.
 

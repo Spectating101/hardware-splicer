@@ -1,0 +1,11 @@
+{
+  "deterministic_llm_callback_is_real_model": false,
+  "deterministic_tool_loop_tested": true,
+  "error": "qwen_http_error",
+  "live_inference_success": false,
+  "live_inference_tested": true,
+  "model_was_called": true,
+  "physical_release": false,
+  "status": "MODEL_UNAVAILABLE",
+  "steps": []
+}
