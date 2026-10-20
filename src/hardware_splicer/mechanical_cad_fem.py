@@ -47,6 +47,9 @@ class CadTetraMesh:
     cad_kernel_volume_m3: float | None = None
     mesh_volume_error_fraction: float | None = None
     local_refinement: dict[str, Any] | None = None
+    geometry_interpolation_order: int = 1
+    quadratic_edge_vertices: list[list[int]] | None = None
+    quadratic_edge_midpoints_m: list[list[float]] | None = None
 
 
 def _load_gmsh() -> Any:
@@ -97,7 +100,9 @@ def _validate_volume_boundary(tets: list[list[int]], triangles: list[list[int]])
         raise ValueError("multiple disconnected surface shells; cavities are not supported")
 
 
-def _triangulated_volume_mesh(gmsh: Any, *, to_m: float) -> tuple[
+def _triangulated_volume_mesh(
+    gmsh: Any, *, to_m: float, geometry_order: Literal[1, 2] = 1
+) -> tuple[
     list[list[float]], list[list[int]], list[list[int]], float, list[list[float]]
 ]:
     import numpy as np
@@ -106,9 +111,16 @@ def _triangulated_volume_mesh(gmsh: Any, *, to_m: float) -> tuple[
     tags = [int(x) for x in tags]
     coords = np.asarray(coords, dtype=float).reshape((-1, 3))
     types, _, connectivity = gmsh.model.mesh.getElements(dim=3)
-    if len(types) != 1 or int(types[0]) != 4:
-        raise ValueError("CAD mesh must contain exclusively linear 4-node tetrahedra")
-    tets_by_tag = np.asarray(connectivity[0], dtype=int).reshape((-1, 4))
+    expected_type = 4 if geometry_order == 1 else 11
+    corners_per_element = 4 if geometry_order == 1 else 10
+    if len(types) != 1 or int(types[0]) != expected_type:
+        raise ValueError(
+            f"CAD meshing requires only Gmsh tetrahedral type {expected_type}"
+        )
+    tets_by_tag = (
+        np.asarray(connectivity[0], dtype=int)
+        .reshape((-1, corners_per_element))[:, :4]
+    )
     if not len(tets_by_tag) or len(tets_by_tag) > MAX_MESH_ELEMENTS:
         raise ValueError(f"tetrahedral element count must be 1..{MAX_MESH_ELEMENTS}")
 
@@ -126,10 +138,15 @@ def _triangulated_volume_mesh(gmsh: Any, *, to_m: float) -> tuple[
 
     surface_types, _, surface_connectivity = gmsh.model.mesh.getElements(dim=2)
     triangles: list[list[int]] = []
+    expected_surface_type = 2 if geometry_order == 1 else 9
+    surface_nodes = 3 if geometry_order == 1 else 6
     for kind, flat in zip(surface_types, surface_connectivity):
-        if int(kind) != 2:
-            raise ValueError("CAD exterior mesh must contain only 3-node triangles")
-        for tri in np.asarray(flat, dtype=int).reshape((-1, 3)):
+        if int(kind) != expected_surface_type:
+            raise ValueError(
+                f"CAD exterior requires Gmsh triangles type {expected_surface_type}"
+            )
+        for full_tri in np.asarray(flat, dtype=int).reshape((-1, surface_nodes)):
+            tri = full_tri[:3]
             if all(int(tag) in remap for tag in tri):
                 triangles.append([remap[int(tag)] for tag in tri])
     if not triangles:
@@ -148,6 +165,58 @@ def _triangulated_volume_mesh(gmsh: Any, *, to_m: float) -> tuple[
         volumes.append(abs(det) / 6)
     bounds = [points.min(axis=0).tolist(), points.max(axis=0).tolist()]
     return nodes, tets, triangles, float(sum(volumes)), bounds
+
+
+def _quadratic_edge_geometry(
+    gmsh: Any, *, to_m: float
+) -> tuple[list[list[int]], list[list[float]]]:
+    """Extract curved Gmsh type-11 tetra edge nodes with validated endpoints.
+
+    Gmsh 10-node tetra edge order is (0,1), (1,2), (0,2),
+    (0,3), (2,3), (1,3). This mapping is explicit rather than relying on
+    shared node indexing with any particular finite-element library.
+    """
+    import numpy as np
+
+    types, _, connectivity = gmsh.model.mesh.getElements(dim=3)
+    if len(types) != 1 or int(types[0]) != 11:
+        raise ValueError("expected Gmsh order-2 10-node tetrahedral elements")
+    tets = np.asarray(connectivity[0], dtype=int).reshape((-1, 10))
+    vertex_tags = sorted(set(int(x) for x in tets[:, :4].ravel()))
+    vertex_index = {tag: i for i, tag in enumerate(vertex_tags)}
+    tags, coords, _ = gmsh.model.mesh.getNodes()
+    coords = np.asarray(coords, dtype=float).reshape((-1, 3))
+    point_index = {int(tag): i for i, tag in enumerate(tags)}
+    gmsh_edges = ((0, 1), (1, 2), (0, 2), (0, 3), (2, 3), (1, 3))
+    edge_map: dict[tuple[int, int], list[float]] = {}
+    for tet in tets:
+        for edge_index, (a, b) in enumerate(gmsh_edges):
+            pair = tuple(sorted((
+                vertex_index[int(tet[a])], vertex_index[int(tet[b])]
+            )))
+            mid_tag = int(tet[4 + edge_index])
+            if mid_tag not in point_index:
+                raise ValueError("Gmsh high-order element refers to missing edge node")
+            midpoint = (coords[point_index[mid_tag]] * to_m).tolist()
+            if not all(math.isfinite(v) for v in midpoint):
+                raise ValueError("nonfinite high-order edge midpoint")
+            if pair in edge_map:
+                if not np.allclose(edge_map[pair], midpoint, atol=1e-12, rtol=0):
+                    raise ValueError("Gmsh high-order edge node is inconsistent")
+            edge_map[pair] = midpoint
+    expected_edges = {
+        tuple(sorted((vertex_index[int(tet[a])], vertex_index[int(tet[b])])))
+        for tet in tets
+        for a, b in gmsh_edges
+    }
+    if set(edge_map) != expected_edges:
+        raise ValueError("Gmsh high-order edge set is incomplete")
+    if len(edge_map) > 8000:
+        raise ValueError("bounded high-order edge node budget exceeded")
+    sorted_edges = sorted(edge_map)
+    return [list(pair) for pair in sorted_edges], [
+        edge_map[pair] for pair in sorted_edges
+    ]
 
 
 def _configure_local_refinement(
@@ -276,6 +345,7 @@ def mesh_cad_solid(
     mesh_target_mm: float = 8.0,
     stl_units: Literal["mm"] | None = None,
     local_refinement: LocalRefinement | None = None,
+    geometry_order: Literal[1, 2] = 1,
 ) -> CadTetraMesh:
     """Mesh a *single* closed solid. STEP target units are mm; STL needs explicit mm.
 
@@ -290,6 +360,12 @@ def mesh_cad_solid(
         raise ValueError("only STEP (.stp, .step) and closed STL are supported")
     if suffix == ".stl" and stl_units != "mm":
         raise ValueError("STL has no unit metadata; explicitly declare stl_units='mm'")
+    if geometry_order not in (1, 2):
+        raise ValueError("geometry_order must be 1 or 2")
+    if geometry_order == 2 and suffix not in (".stp", ".step"):
+        raise ValueError(
+            "CAD-conforming high-order geometry requires STEP, not faceted STL"
+        )
     if not math.isfinite(mesh_target_mm) or not (0.5 <= mesh_target_mm <= 500.0):
         raise ValueError("mesh_target_mm must be 0.5..500 mm")
     if source.stat().st_size > MAX_CAD_BYTES or source.stat().st_size == 0:
@@ -351,9 +427,19 @@ def mesh_cad_solid(
             gmsh.option.setNumber("Mesh.MeshSizeMax", mesh_target_mm)
         gmsh.option.setNumber("Mesh.ElementOrder", 1)
         gmsh.model.mesh.generate(3)
+        if geometry_order == 2:
+            gmsh.model.mesh.setOrder(2)
+            # Gmsh high-order optimization untangles curved elements that
+            # can invert when edge midside nodes project onto a CAD circle.
+            gmsh.model.mesh.optimize("HighOrder", force=True)
         nodes, tets, triangles, volume_m3, bounds = _triangulated_volume_mesh(
-            gmsh, to_m=0.001
+            gmsh, to_m=0.001, geometry_order=geometry_order
         )
+        curved_edges = curved_midpoints = None
+        if geometry_order == 2:
+            curved_edges, curved_midpoints = _quadratic_edge_geometry(
+                gmsh, to_m=0.001
+            )
         volume_error = (
             abs(volume_m3 - kernel_volume_m3) / kernel_volume_m3
             if kernel_volume_m3 is not None else None
@@ -385,6 +471,9 @@ def mesh_cad_solid(
             cad_kernel_volume_m3=kernel_volume_m3,
             mesh_volume_error_fraction=volume_error,
             local_refinement=local_info,
+            geometry_interpolation_order=geometry_order,
+            quadratic_edge_vertices=curved_edges,
+            quadratic_edge_midpoints_m=curved_midpoints,
         )
     finally:
         gmsh.finalize()
