@@ -565,6 +565,7 @@ def run_curved_stress_sensitivity(
     poisson_ratio: float,
     stress_tolerance: float = .03,
     displacement_tolerance: float = .02,
+    hotspot_location_tolerance_mm: float = 5.0,
     local_refinement: LocalRefinement | None = None,
 ) -> dict[str, Any]:
     """Bounded 3–4-mesh P2 curved stress sensitivity; never certifies strength."""
@@ -583,6 +584,13 @@ def run_curved_stress_sensitivity(
         0 < displacement_tolerance <= .25
     ):
         raise ValueError("displacement_tolerance must be finite in (0, 0.25]")
+    if not (
+        math.isfinite(hotspot_location_tolerance_mm)
+        and .1 <= hotspot_location_tolerance_mm <= 100
+    ):
+        raise ValueError(
+            "hotspot_location_tolerance_mm must be finite in [0.1, 100]"
+        )
 
     levels = []
     source_hash = None
@@ -634,7 +642,17 @@ def run_curved_stress_sensitivity(
             abs(fine["load_work_conjugate_deflection_m"]),
             abs(coarse["load_work_conjugate_deflection_m"]), 1e-15
         )
+        from math import dist
+
+        hotspot_shift_mm = dist(
+            coarse["peak_sample_location_m"],
+            fine["peak_sample_location_m"],
+        ) * 1000
         comparisons.append({
+            "peak_hotspot_shift_mm": hotspot_shift_mm,
+            "peak_hotspot_location_consistent": (
+                hotspot_shift_mm <= hotspot_location_tolerance_mm
+            ),
             "coarse_mesh_mm": coarse["mesh_target_mm"],
             "fine_mesh_mm": fine["mesh_target_mm"],
             "quadratic_dof_growth": (
@@ -652,6 +670,8 @@ def run_curved_stress_sensitivity(
         blockers.append("p2_peak_stress_changes_with_curved_mesh_refinement")
     if any(not x["displacement_tolerance_met"] for x in comparisons):
         blockers.append("p2_displacement_changes_with_curved_mesh_refinement")
+    if any(not x["peak_hotspot_location_consistent"] for x in comparisons):
+        blockers.append("p2_peak_hotspot_moves_with_curved_mesh_refinement")
     if any(
         x["curved_vs_cad_volume_error_fraction"] > .01 for x in levels
     ):
@@ -668,6 +688,7 @@ def run_curved_stress_sensitivity(
         "adjacent_mesh_comparisons": comparisons,
         "stress_tolerance": stress_tolerance,
         "displacement_tolerance": displacement_tolerance,
+        "hotspot_location_tolerance_mm": hotspot_location_tolerance_mm,
         "blockers": blockers,
         "peak_stress_convergence_verified": False,
         "mesh_convergence_verified": False,
