@@ -119,6 +119,12 @@ _COMMAND_PROBES: dict[str, dict[str, Any]] = {
 _PYTHON_PROBES: dict[str, str] = {
     "build123d": "build123d",
     "cadquery-isolated": "cadquery",
+    "rdkit": "rdkit",
+    "thermo": "thermo",
+    "chemicals": "chemicals",
+    "cantera": "cantera",
+    "pybamm": "pybamm",
+    "pymatgen": "pymatgen",
 }
 
 _PROJECT_ARTIFACTS: dict[str, tuple[str, ...]] = {

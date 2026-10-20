@@ -31,6 +31,8 @@ mcp = ["mcp>=1.2,<2"]
 # Canonical whole-product MCP gateway targets the current stable SDK line.
 backend-mcp = ["mcp>=2,<3"]
 dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
+# Optional scientific packages never required for ordinary electrical/mechanical paths.
+chemical = ["rdkit>=2024.9", "thermo>=0.4", "chemicals>=1.3"]
 
 [project.scripts]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"
