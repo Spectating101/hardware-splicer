@@ -1,0 +1,288 @@
+{
+  "schema_version": "hardware_splicer.low_cost_physical_product_decision_model.v1",
+  "seller_prices_are_checkout_verified": false,
+  "finished_goods_ever_physically_built": false,
+  "unit_economics_have_observed_sales": false,
+  "marketing_conversion_rate_known": false,
+  "printer_fixed_cost_included": false,
+  "design_development_hours_amortized": false,
+  "customer_revenue_realized_twd": 0,
+  "products": [
+    {
+      "id": "modular_pcb_phone_repair_fixture",
+      "role": "first_internal_utility_and_conditional_sale_test",
+      "sale_price_hypothesis_twd": 1190.0,
+      "parts_material_hardware_twd": 250.0,
+      "line_items": [
+        {
+          "id": "608zz_bearing",
+          "quantity": 2,
+          "total_twd": 26.0,
+          "source_status": "listed_per_bearing",
+          "url": "https://www.ruten.com.tw/item/22635479599540/"
+        },
+        {
+          "id": "m3_insert",
+          "quantity": 12,
+          "total_twd": 24.0,
+          "source_status": "per_piece_planning_from_multi_variant_bag_listing",
+          "url": "https://www.ruten.com.tw/item/22540097538746/"
+        },
+        {
+          "id": "screw_knob_spring_bundle",
+          "quantity": 1,
+          "total_twd": 95.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "rubber_nonmarring_pads",
+          "quantity": 1,
+          "total_twd": 45.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "clamp_structural_hardware",
+          "quantity": 1,
+          "total_twd": 60.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        }
+      ],
+      "hours_assumed": 0.5,
+      "selling_fee_assumed_twd": 119.0,
+      "printed_mass_assumption_grams": 180.0,
+      "physical_sample_built": false,
+      "actual_customer_demand_verified": false,
+      "physical_sale_authorized": false,
+      "self_print": {
+        "printed_piece_cost_twd": 159.72,
+        "other_packaging_shipping_qa_twd": 140.0,
+        "labor_cost_twd": 100.0,
+        "assumed_unit_total_twd": 768.72,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 421.28,
+        "contribution_margin_fraction": 0.354,
+        "break_even_list_price_twd": 721.91,
+        "list_price_for_20pct_contribution_twd": 928.17,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 321.85
+      },
+      "outsource": {
+        "printed_piece_cost_twd": 252.0,
+        "other_packaging_shipping_qa_twd": 140.0,
+        "labor_cost_twd": 100.0,
+        "assumed_unit_total_twd": 861.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 329.0,
+        "contribution_margin_fraction": 0.2765,
+        "break_even_list_price_twd": 824.44,
+        "list_price_for_20pct_contribution_twd": 1060.0,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 206.5
+      },
+      "outsource_higher_quote_sensitivity": {
+        "test_rate_twd_per_gram": 5.0,
+        "actual_supplier_quote_confirmed": false,
+        "printed_piece_cost_twd": 900.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": -319.0,
+        "contribution_margin_fraction": -0.2681
+      }
+    },
+    {
+      "id": "articulated_inspection_camera_stand",
+      "role": "second_internal_utility_product",
+      "sale_price_hypothesis_twd": 1490.0,
+      "parts_material_hardware_twd": 419.0,
+      "line_items": [
+        {
+          "id": "608zz_bearing",
+          "quantity": 3,
+          "total_twd": 39.0,
+          "source_status": "listed_per_bearing",
+          "url": "https://www.ruten.com.tw/item/22635479599540/"
+        },
+        {
+          "id": "m3_insert",
+          "quantity": 15,
+          "total_twd": 30.0,
+          "source_status": "per_piece_planning_from_multi_variant_bag_listing",
+          "url": "https://www.ruten.com.tw/item/22540097538746/"
+        },
+        {
+          "id": "jig_bolts_spacers",
+          "quantity": 1,
+          "total_twd": 120.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "camera_ball_mount",
+          "quantity": 1,
+          "total_twd": 110.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "camera_weighted_clamp_base",
+          "quantity": 1,
+          "total_twd": 120.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        }
+      ],
+      "hours_assumed": 1,
+      "selling_fee_assumed_twd": 149.0,
+      "printed_mass_assumption_grams": 220.0,
+      "physical_sample_built": false,
+      "actual_customer_demand_verified": false,
+      "physical_sale_authorized": false,
+      "self_print": {
+        "printed_piece_cost_twd": 191.88,
+        "other_packaging_shipping_qa_twd": 160.0,
+        "labor_cost_twd": 200.0,
+        "assumed_unit_total_twd": 1119.88,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 370.12,
+        "contribution_margin_fraction": 0.2484,
+        "break_even_list_price_twd": 1078.76,
+        "list_price_for_20pct_contribution_twd": 1386.97,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 247.65
+      },
+      "outsource": {
+        "printed_piece_cost_twd": 308.0,
+        "other_packaging_shipping_qa_twd": 160.0,
+        "labor_cost_twd": 200.0,
+        "assumed_unit_total_twd": 1236.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 254.0,
+        "contribution_margin_fraction": 0.1705,
+        "break_even_list_price_twd": 1207.78,
+        "list_price_for_20pct_contribution_twd": 1552.86,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 102.5
+      },
+      "outsource_higher_quote_sensitivity": {
+        "test_rate_twd_per_gram": 5.0,
+        "actual_supplier_quote_confirmed": false,
+        "printed_piece_cost_twd": 1100.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": -538.0,
+        "contribution_margin_fraction": -0.3611
+      }
+    },
+    {
+      "id": "mini_four_axis_learning_arm",
+      "role": "engineering_demonstrator_then_possible_education_product",
+      "sale_price_hypothesis_twd": 5990.0,
+      "parts_material_hardware_twd": 2713.0,
+      "line_items": [
+        {
+          "id": "ds3218_180deg",
+          "quantity": 2,
+          "total_twd": 950.0,
+          "source_status": "listed_single_variant",
+          "url": "https://www.ruten.com.tw/item/22638691325276/"
+        },
+        {
+          "id": "mg996r_180deg",
+          "quantity": 2,
+          "total_twd": 290.0,
+          "source_status": "listed_option_price",
+          "url": "https://www.ruten.com.tw/item/21610014880630/"
+        },
+        {
+          "id": "mg90s_180deg",
+          "quantity": 1,
+          "total_twd": 90.0,
+          "source_status": "listed_option_range_83_90",
+          "url": "https://www.ruten.com.tw/item/21210302605787/"
+        },
+        {
+          "id": "esp32_devkit",
+          "quantity": 1,
+          "total_twd": 169.0,
+          "source_status": "listed_price",
+          "url": "https://www.ruten.com.tw/item/22541165012010/"
+        },
+        {
+          "id": "pca9685_pwm",
+          "quantity": 1,
+          "total_twd": 122.0,
+          "source_status": "listed_price",
+          "url": "https://www.ruten.com.tw/item/22326111365451/"
+        },
+        {
+          "id": "enclosed_5v_servo_supply",
+          "quantity": 1,
+          "total_twd": 500.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "608zz_bearing",
+          "quantity": 4,
+          "total_twd": 52.0,
+          "source_status": "listed_per_bearing",
+          "url": "https://www.ruten.com.tw/item/22635479599540/"
+        },
+        {
+          "id": "m3_insert",
+          "quantity": 25,
+          "total_twd": 50.0,
+          "source_status": "per_piece_planning_from_multi_variant_bag_listing",
+          "url": "https://www.ruten.com.tw/item/22540097538746/"
+        },
+        {
+          "id": "arm_fasteners_servo_horns",
+          "quantity": 1,
+          "total_twd": 200.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "electrical_limits_fuse_low_voltage",
+          "quantity": 1,
+          "total_twd": 180.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        },
+        {
+          "id": "arm_wires_connectors",
+          "quantity": 1,
+          "total_twd": 110.0,
+          "source_status": "UNVERIFIED_ESTIMATE",
+          "url": null
+        }
+      ],
+      "hours_assumed": 3,
+      "selling_fee_assumed_twd": 599.0,
+      "printed_mass_assumption_grams": 450.0,
+      "physical_sample_built": false,
+      "actual_customer_demand_verified": false,
+      "physical_sale_authorized": false,
+      "self_print": {
+        "printed_piece_cost_twd": 339.3,
+        "other_packaging_shipping_qa_twd": 470.0,
+        "labor_cost_twd": 600.0,
+        "assumed_unit_total_twd": 4721.3,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 1268.7,
+        "contribution_margin_fraction": 0.2118,
+        "break_even_list_price_twd": 4580.33,
+        "list_price_for_20pct_contribution_twd": 5889.0,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 884.38
+      },
+      "outsource": {
+        "printed_piece_cost_twd": 630.0,
+        "other_packaging_shipping_qa_twd": 470.0,
+        "labor_cost_twd": 600.0,
+        "assumed_unit_total_twd": 5012.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": 978.0,
+        "contribution_margin_fraction": 0.1633,
+        "break_even_list_price_twd": 4903.33,
+        "list_price_for_20pct_contribution_twd": 6304.29,
+        "contribution_with_25pct_print_cost_overrun_and_extra_5pct_returns_twd": 521.0
+      },
+      "outsource_higher_quote_sensitivity": {
+        "test_rate_twd_per_gram": 5.0,
+        "actual_supplier_quote_confirmed": false,
+        "printed_piece_cost_twd": 2250.0,
+        "unit_contribution_before_fixed_overhead_and_taxes_twd": -642.0,
+        "contribution_margin_fraction": -0.1072
+      }
+    }
+  ]
+}
