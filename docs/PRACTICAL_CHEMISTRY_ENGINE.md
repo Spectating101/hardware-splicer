@@ -151,3 +151,15 @@ repair records with measured failures, manufacturer datasheet variations,
 corrosion imaging and classification, representative bonding coupons, PCB
 coating masking and real supplier pricing. Deep practical capability needs
 good empirical coverage, not just additional named chemical solvers.
+
+## V2 scope and feature freeze
+
+The v2 source registry introduces ten additional manufacturer/repair sources
+and ten additional methods. High-value domains include potting, thermal pad
+versus thermal paste, RTV neutral-cure seals, O-ring/elastomer greases,
+plastic-moving-part lubricants, conductive electrical grease and trace-loss
+corrosion triage. It deliberately keeps a strict distinction between source
+claims and validated physical use.
+
+See docs/PRACTICAL_CHEMISTRY_V2_FREEZE.md for the exact acceptance matrix,
+thermal assumptions, authored benchmark cases and freeze rule.

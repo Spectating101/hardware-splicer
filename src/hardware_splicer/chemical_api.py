@@ -43,13 +43,24 @@ class PracticalChemistryQuote(BaseModel):
     failed_attempt_disposal_cost: float | None = Field(default=None, ge=0)
 
 
+class ThermalInterfaceGeometry(BaseModel):
+    thickness_mm: float = Field(gt=0, le=10)
+    contact_area_mm2: float = Field(gt=0, le=1e7)
+    heat_load_w: float = Field(gt=0, le=10000)
+    allowable_rise_c: float | None = Field(default=None, gt=0, le=1000)
+
+
 class PracticalChemistryAssessmentRequest(BaseModel):
-    task: Literal["clean_flux", "clean_contacts", "bond_joint", "coat_pcb", "finish_surface", "assess_corrosion"]
+    task: Literal["clean_flux", "clean_contacts", "bond_joint", "coat_pcb", "finish_surface", "assess_corrosion",
+                  "pot_electronics", "manage_thermal_interface", "seal_enclosure",
+                  "lubricate_seals", "lubricate_moving_parts", "protect_contacts"]
     primary_material: Literal["FR4", "metal_contact", "gold_contact", "ABS", "ASA", "PC", "PP", "PE",
-                              "PETG", "acrylic", "unknown"]
+                              "PETG", "acrylic", "EPDM", "NBR", "silicone_rubber",
+                              "nylon", "POM", "aluminum", "unknown"]
     material_identity: Literal["verified", "claimed", "unknown"]
     adjacent_materials: list[Literal["FR4", "metal_contact", "gold_contact", "ABS", "ASA",
-                                     "PC", "PP", "PE", "PETG", "acrylic", "unknown"]] = Field(
+                                     "PC", "PP", "PE", "PETG", "acrylic", "EPDM", "NBR",
+                                     "silicone_rubber", "nylon", "POM", "aluminum", "unknown"]] = Field(
                                          default_factory=list, max_length=20)
     electrical_state: Literal["off", "energized", "unknown"] = "unknown"
     battery_status: Literal["none", "removed", "installed", "damaged", "unknown"] = "unknown"
@@ -58,6 +69,11 @@ class PracticalChemistryAssessmentRequest(BaseModel):
         default_factory=list, max_length=10)
     rework_required: bool = False
     residue_tolerance: Literal["none", "allowed", "unknown"] = "unknown"
+    electrical_function_required: Literal["insulating","conductive","not_applicable","unknown"] = "unknown"
+    interface_geometry: ThermalInterfaceGeometry | None = None
+    contact_pressure_confirmed: bool = False
+    dimensional_stability_required: bool = False
+    corrosion_damage: Literal["unknown","surface_residue","pitting","trace_loss"] = "unknown"
     keepouts_confirmed: bool = False
     service_temperature_c: float | None = Field(default=None, ge=-50, le=300)
     cost_quotes: dict[str, PracticalChemistryQuote] = Field(default_factory=dict, max_length=100)
@@ -221,6 +237,12 @@ def create_chemical_router() -> APIRouter:
                      exposure=request.exposure,
                      rework_required=request.rework_required,
                      residue_tolerance=request.residue_tolerance,
+                     electrical_function_required=request.electrical_function_required,
+                     interface_geometry=request.interface_geometry.model_dump()
+                                        if request.interface_geometry is not None else None,
+                     contact_pressure_confirmed=request.contact_pressure_confirmed,
+                     dimensional_stability_required=request.dimensional_stability_required,
+                     corrosion_damage=request.corrosion_damage,
                      keepouts_confirmed=request.keepouts_confirmed,
                      service_temperature_c=request.service_temperature_c,
                      cost_quotes={key:value.model_dump(exclude_none=True)

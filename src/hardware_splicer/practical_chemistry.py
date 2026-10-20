@@ -16,19 +16,39 @@ import math
 from typing import Any, Mapping
 
 from .chemical_engineering import NON_AUTHORITY
+from .practical_chemistry_thermal import thermal_interface_screen
 
 _CATALOG_FILE = "practical_chemistry_catalog_v1.json"
-_TASKS = frozenset({"clean_flux", "clean_contacts", "bond_joint", "coat_pcb", "finish_surface", "assess_corrosion"})
-_MATERIALS = frozenset({"FR4", "metal_contact", "gold_contact", "ABS", "ASA", "PC", "PP", "PE", "PETG", "acrylic", "unknown"})
+_CATALOG_V2_FILE = "practical_chemistry_catalog_v2.json"
+_TASKS = frozenset({
+    "clean_flux", "clean_contacts", "bond_joint", "coat_pcb", "finish_surface",
+    "assess_corrosion", "pot_electronics", "manage_thermal_interface",
+    "seal_enclosure", "lubricate_seals", "lubricate_moving_parts", "protect_contacts",
+})
+_MATERIALS = frozenset({"FR4", "metal_contact", "gold_contact", "ABS", "ASA", "PC", "PP", "PE", "PETG", "acrylic", "EPDM", "NBR", "silicone_rubber",
+    "nylon", "POM", "aluminum", "unknown"})
 _BATTERY_STATUSES = frozenset({"none", "removed", "installed", "damaged", "unknown"})
-_PROVENANCE = ("specific_product", "product_family", "broad_product_claim", "material_family", "repair_guidance", "general_alternative")
-_CONTACT_TASKS = frozenset({"clean_flux", "clean_contacts", "coat_pcb", "assess_corrosion"})
-_NON_REWORKABLE = frozenset({"structural_acrylic", "general_epoxy", "polymer_solvent_finish"})
-_CONSUMABLE_CLASSES = frozenset({"electronics_cleaner", "contact_cleaner", "acrylic_conformal", "hybrid_conformal", "polymer_solvent_finish", "structural_acrylic", "general_epoxy"})
+_PROVENANCE = ("specific_datasheet", "specific_product", "product_family", "broad_product_claim", "material_family", "repair_guidance", "general_alternative")
+_CONTACT_TASKS = frozenset({
+    "clean_flux", "clean_contacts", "coat_pcb", "assess_corrosion",
+    "pot_electronics", "manage_thermal_interface", "protect_contacts",
+    "seal_enclosure",
+})
+_NON_REWORKABLE = frozenset({"structural_acrylic", "general_epoxy", "polymer_solvent_finish",
+    "rigid_epoxy_potting", "flexible_epoxy_potting"})
+_CONSUMABLE_CLASSES = frozenset({"electronics_cleaner", "contact_cleaner", "acrylic_conformal", "hybrid_conformal", "polymer_solvent_finish", "structural_acrylic", "general_epoxy",
+    "rigid_epoxy_potting", "flexible_epoxy_potting", "neutral_cure_rtv",
+    "seal_lubricant", "o_ring_grease_swelling", "plastic_safe_pao_grease",
+    "electrically_conductive_grease", "thermal_paste", "thermal_gap_pad"})
 
 
 def catalog() -> dict[str, Any]:
     data = json.loads(files("hardware_splicer").joinpath("data", _CATALOG_FILE).read_text(encoding="utf-8"))
+    extended = json.loads(files("hardware_splicer").joinpath("data", _CATALOG_V2_FILE).read_text(encoding="utf-8"))
+    data["sources"].extend(extended["sources"])
+    data["methods"].extend(extended["methods"])
+    data["schema_version"] = "hardware_splicer.practical_chemistry_catalog.v2"
+    data["extension_provenance"] = extended["assembled_from"]
     sources = {row["id"]: row for row in data["sources"]}
     if len(sources) != len(data["sources"]):
         raise ValueError("Duplicate evidence source ID in practical catalog")
@@ -142,6 +162,11 @@ def assess_practical_chemistry(
     exposure: list[str] | None = None,
     rework_required: bool = False,
     residue_tolerance: str = "unknown",
+    electrical_function_required: str = "unknown",
+    interface_geometry: Mapping[str, Any] | None = None,
+    contact_pressure_confirmed: bool = False,
+    dimensional_stability_required: bool = False,
+    corrosion_damage: str = "unknown",
     keepouts_confirmed: bool = False,
     service_temperature_c: float | None = None,
     cost_quotes: Mapping[str, Mapping[str, Any]] | None = None,
@@ -161,6 +186,18 @@ def assess_practical_chemistry(
         raise ValueError("Unsupported duty classification")
     if residue_tolerance not in {"none", "allowed", "unknown"}:
         raise ValueError("Unsupported residue tolerance")
+    if electrical_function_required not in {"insulating", "conductive", "not_applicable", "unknown"}:
+        raise ValueError("Unsupported required electrical function")
+    if corrosion_damage not in {"unknown", "surface_residue", "pitting", "trace_loss"}:
+        raise ValueError("Unsupported corrosion damage classification")
+    if interface_geometry is not None:
+        if task != "manage_thermal_interface" or not isinstance(interface_geometry, Mapping):
+            raise ValueError("Interface geometry may only accompany thermal interface tasks")
+        allowed = {"thickness_mm", "contact_area_mm2", "heat_load_w", "allowable_rise_c"}
+        if not {"thickness_mm", "contact_area_mm2", "heat_load_w"}.issubset(interface_geometry) or (
+            set(interface_geometry) - allowed
+        ):
+            raise ValueError("Thermal interface geometry must declare exact bounded fields")
     neighbors = sorted(set(adjacent_materials or []))
     if len(neighbors) > 20 or any(mat not in _MATERIALS for mat in neighbors):
         raise ValueError("Invalid list of adjacent materials")
@@ -197,6 +234,8 @@ def assess_practical_chemistry(
         global_blockers.append("safety_critical_application_requires_specialist")
     if primary_material == "unknown" or material_identity == "unknown":
         global_blockers.append("material_identity_unknown")
+    if task in {"pot_electronics", "seal_enclosure", "manage_thermal_interface", "protect_contacts"} and battery_status not in {"none","removed"}:
+        global_blockers.append("battery_not_confirmed_removed")
 
     methods_by_id = {row["id"]: row for row in evidence["methods"]}
     if cost_quotes and any(key not in methods_by_id or methods_by_id[key]["task"] != task
@@ -255,6 +294,73 @@ def assess_practical_chemistry(
             research.append("current_tds_sds_and_local_regulatory_requirements")
         if method["family"] == "repair_triage":
             research.append("inspect_corrosion_extent_and_repairability_before_chemicals")
+        if task == "assess_corrosion":
+            if corrosion_damage == "unknown" and method["family"] != "repair_triage":
+                hold_for_evidence.append("corrosion_damage_classification_missing")
+            if corrosion_damage == "pitting" and method["family"] == "repair_triage":
+                hold_for_evidence.append("pitted_conductor_integrity_unverified")
+            if corrosion_damage == "surface_residue" and method["family"] == "replacement_after_corrosion":
+                hold_for_evidence.append("replacement_unnecessary_until_inspection_complete")
+            if corrosion_damage == "trace_loss" and method["family"] == "repair_triage":
+                reasons.append("material_loss_requires_repair_or_replacement_assessment")
+        if task == "pot_electronics":
+            if rework_required and method.get("reentry") == "permanent":
+                reasons.append("permanent_encapsulation_conflicts_with_reentry")
+            if "heat_cycle" in environments and method.get("stiffness") == "rigid":
+                hold_for_evidence.append("rigid_potting_thermal_cycling_stress_unverified")
+            research.append("exotherm_shrinkage_and_component_thermal_limits_not_established")
+            hold_for_evidence.append("potting_heat_and_cure_validation_missing")
+        if task in {"lubricate_seals","lubricate_moving_parts"}:
+            hold_for_evidence.append("exact_elastomer_or_plastic_grade_compatibility_unverified")
+            if dimensional_stability_required and method.get("expected_elastomer_swelling"):
+                reasons.append("intentional_o_ring_swelling_incompatible_with_dimensional_stability")
+            if method["id"] == "seal_orings_55" and (
+                primary_material == "silicone_rubber" or
+                any(mat in {"ABS","PC"} for mat in neighbors)
+            ):
+                reasons.append("manufacturer_requires_special_testing_for_this_elastomer_or_plastic")
+        if task == "protect_contacts":
+            required = electrical_function_required
+            if required == "insulating" and method.get("electrical_function") == "conductive":
+                reasons.append("conductive_grease_in_insulating_contact_zone")
+            if required == "unknown":
+                hold_for_evidence.append("contact_electrical_function_unknown")
+            if not keepouts_confirmed:
+                hold_for_evidence.append("conductive_material_migration_keepouts_unverified")
+        if task == "seal_enclosure":
+            if not keepouts_confirmed:
+                hold_for_evidence.append("seal_keepouts_and_cure_access_unverified")
+            research.append("water_ingress_and_confined_cure_require_physical_validation")
+        thermal_screen = None
+        if task == "manage_thermal_interface":
+            if electrical_function_required == "conductive":
+                reasons.append("catalog_thermal_products_do_not_establish_conductive_contact_function")
+            if electrical_function_required == "unknown":
+                hold_for_evidence.append("electrical_insulation_need_unconfirmed")
+            if not interface_geometry:
+                hold_for_evidence.append("thermal_geometry_and_heat_load_missing")
+            else:
+                k = method.get("nominal_thermal_conductivity_w_mk")
+                thermal_screen = thermal_interface_screen(
+                    thickness_mm=interface_geometry["thickness_mm"],
+                    contact_area_mm2=interface_geometry["contact_area_mm2"],
+                    heat_load_w=interface_geometry["heat_load_w"],
+                    bulk_conductivity_w_mk=k,
+                    allowable_rise_c=interface_geometry.get("allowable_rise_c"),
+                )
+                thickness = interface_geometry["thickness_mm"]
+                if method["family"] == "thermal_gap_pad":
+                    listed = method.get("manufacturer_listed_thickness_mm", [])
+                    if thickness > max(listed) or thickness < min(listed)*0.5:
+                        reasons.append("gap_outside_nominal_pad_thickness_envelope")
+                    if not contact_pressure_confirmed:
+                        hold_for_evidence.append("pad_compression_pressure_unknown")
+                if method["family"] == "thermal_paste" and thickness > 0.2:
+                    reasons.append("thermal_paste_inappropriate_for_declared_thick_gap_screen")
+                if thermal_screen["fails_even_idealized_screen"]:
+                    reasons.append("thermal_bulk_lower_bound_exceeds_user_threshold")
+                else:
+                    hold_for_evidence.append("measured_interface_impedance_missing")
         if method["family"] == "nonchemical_alternative":
             research.append("check_replacement_fit_and_source_availability")
         is_nonchemical = method["family"] == "nonchemical_alternative"
@@ -284,6 +390,9 @@ def assess_practical_chemistry(
             "required_validation": method["validation"],
             "failure_modes": method["failure_modes"],
             "economics": _economics(quote, currency=currency),
+            "thermal_screen": thermal_screen,
+            "electrical_function": method.get("electrical_function"),
+            "reentry": method.get("reentry"),
             "qualified_for_production": False,
             "chemical_handling_approved": False,
         })
@@ -306,6 +415,11 @@ def assess_practical_chemistry(
             "battery_status": battery_status, "duty": duty,
             "exposure": environments, "rework_required": rework_required,
             "residue_tolerance": residue_tolerance,
+            "electrical_function_required": electrical_function_required,
+            "interface_geometry": dict(interface_geometry) if interface_geometry else None,
+            "contact_pressure_confirmed": contact_pressure_confirmed,
+            "dimensional_stability_required": dimensional_stability_required,
+            "corrosion_damage": corrosion_damage,
             "keepouts_confirmed": keepouts_confirmed,
             "service_temperature_c": service_temperature_c,
         },
@@ -346,6 +460,12 @@ def _acceptance_workflow(task: str) -> list[dict[str, str]]:
         "coat_pcb": "Verify keep-out masking, witness coupon, coating coverage, adhesion, cure and electrical checks",
         "finish_surface": "Compare safe alternative finishing; verify dimensions, loss of detail and surface integrity on coupon",
         "assess_corrosion": "Inspect under components, evaluate metal loss and ongoing moisture source before deciding repairability",
+        "pot_electronics": "Inspect resin shrinkage/exotherm, component strain, thermal dissipation, cure voids and rework loss",
+        "manage_thermal_interface": "Measure assembled gap, pressure, impedance, heat source power and operating temperature",
+        "seal_enclosure": "Validate cure chemistry, physical seal geometry, adhesion and moisture ingress under cycling",
+        "lubricate_seals": "Measure actual O-ring swelling, compression set, compatibility and sealing after ageing",
+        "lubricate_moving_parts": "Verify gear or slide wear, grease migration, noise and plastic compatibility",
+        "protect_contacts": "Test electrical continuity/leakage, conductive-material migration and long-term contact durability",
     }
     common.extend([
         {"phase": "inspection", "gate": practical[task]},

@@ -13,3 +13,17 @@ available approaches are in the practical chemistry catalog under package
 data. They are not experimental safety or compatibility certifications.
 
 See docs/PRACTICAL_CHEMISTRY_ENGINE.md for endpoints and economics.
+
+## Practical V2 and expansion freeze
+
+Run the 35 additional v2 authored edge/failure cases:
+
+    PYTHONPATH=src python eval/practical_chemistry/decision_benchmark_v2.py
+
+The v2 extension registry is the separate
+src/hardware_splicer/data/practical_chemistry_catalog_v2.json.
+Both registries load into a single canonical product/API and MCP interface.
+
+See docs/PRACTICAL_CHEMISTRY_V2_FREEZE.md. After v2, use real device
+evidence and held-out repair outcomes to prioritize changes, rather than
+adding unrelated chemistry solvers or unverified product recommendations.

@@ -34,7 +34,7 @@ def job(**overrides):
 
 def test_catalog_sources_real_and_no_unattributed_proposals():
     report = catalog()
-    assert report["schema_version"].endswith(".v1")
+    assert report["schema_version"].endswith(".v2")
     assert len(report["sources"]) >= 10
     assert len(report["methods"]) >= 10
     for source in report["sources"]:
