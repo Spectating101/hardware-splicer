@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 
 from .compose_dispatch import compose_dispatch
 from .engineering_project_source_bundle import analyze_registered_project_bundle
+from .engineering_cad_carrier import generate_registered_pcb_carrier
 from .guided_engineering_planner import plan_guided_engineering_project
 from .project_store import ProjectStore, validate_project_id
 
@@ -31,6 +32,8 @@ EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "run_compose",
     "run_erc",
     "run_drc",
+    "inspect_registered_sources",
+    "generate_board_carrier_candidate",
 )
 
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
@@ -256,6 +259,8 @@ def execute_ai_project_action_preview(
         )
     if action.get("tool_result"):
         return dict(action.get("tool_result") or {})
+    if action.get("unrecognized_source_ids"):
+        raise AIActionNotExecutable("model action has unrecognized source citations")
 
     session_id = _safe_id(session.get("session_id"), "session_id")
     action_id = _safe_id(action.get("action_id"), "action_id")
@@ -284,6 +289,63 @@ def execute_ai_project_action_preview(
             artifact = _atomic_write_json(artifact_path, plan)
             summary = _plan_summary(plan)
             artifact_name = "guided_plan.json"
+        elif action_type == "generate_board_carrier_candidate":
+            design_dir = run_dir / 'parametric_board_carrier'
+            generated = generate_registered_pcb_carrier(
+                project_id, _rows(snapshot.get("engineeringSources")),
+                design_dir, project_root=store.root,
+            )
+            artifact_path = run_dir / 'carrier_design_manifest.json'
+            artifact = _atomic_write_json(artifact_path, generated)
+            summary = {
+                "ok": True, "status": generated.get("status"),
+                "source_board_sha256": generated.get("registered_board_sha256"),
+                "board_bbox_mm": generated.get("board_bbox_mm"),
+                "carrier_outer_mm": generated.get("carrier_outer_mm"),
+                "valid_solid": generated.get("validated_single_solid"),
+                "artifact_dir_relative": f"{relative_run_dir}/parametric_board_carrier",
+                "generated_artifacts": generated.get("generated_artifacts"),
+                "geometric_envelope_only": True,
+                "device_fit_verified": False,
+                "fabrication_authorized": False,
+                "manufacturing_approved": False,
+                "automatic_execution": False,
+            }
+            artifact_name = artifact_path.name
+        elif action_type == "inspect_registered_sources":
+            # Multi-domain software action; source types, rather than the device
+            # name, dispatch to KiCad, CAD, repair guide and/or reference BOM.
+            # Model inputs never supply paths, commands, source claims or ratings.
+            inspected = analyze_registered_project_bundle(
+                project_id, _rows(snapshot.get("engineeringSources")),
+                project_root=store.root,
+                budget_cap_usd=_mapping(snapshot.get('constraints')).get('max_cost_usd'),
+            )
+            artifact_path = run_dir / "registered_engineering_sources.json"
+            artifact = _atomic_write_json(artifact_path, inspected)
+            summary = {
+                "ok": True,
+                "result_status": inspected.get("status"),
+                "source_set_sha256": inspected.get("source_set_sha256"),
+                "source_types": sorted(set(
+                    row.get("kind", "unsupported")
+                    for row in _mapping(inspected.get("input_sources")).values()
+                    if isinstance(row, Mapping))),
+                "project_context": inspected.get("project_context"),
+                "rule_check_count": len(_mapping(inspected.get("software_checks"))),
+                "geometry_items": len(_mapping(inspected.get("geometry"))),
+                "repair_guides": len(_mapping(inspected.get("repair_evidence"))),
+                "reference_bom_audit": bool(inspected.get("alternative_reference_bom_audit")),
+                "source_inspection_only": True,
+                "source_analysis_complete": inspected.get("status") in {"analyzed_with_findings", "analyzed_non_electrical_sources"},
+                "source_analysis_failures": inspected.get("source_analysis_failures") or [],
+                "engineering_objective_completed": False,
+                "physical_fit_verified": False,
+                "repair_diagnosis_verified": False,
+                "manufacturing_approved": False,
+                "automatic_execution": False,
+            }
+            artifact_name = artifact_path.name
         elif action_type in {"run_erc", "run_drc"}:
             # Always use the model's PINNED original registered source set, not
             # model-supplied paths or shell flags. Companions are hash-verified.

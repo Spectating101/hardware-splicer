@@ -26,7 +26,7 @@ from .project_store import default_project_root, validate_project_id
 
 
 ENGINEERING_SOURCE_INGESTION_SCHEMA = "hardware_splicer.engineering_source_ingestion.v1"
-MAX_ENGINEERING_SOURCE_BYTES = 16 * 1024 * 1024
+MAX_ENGINEERING_SOURCE_BYTES = 32 * 1024 * 1024
 MAX_ENGINEERING_SOURCE_BASE64_CHARACTERS = 4 * ((MAX_ENGINEERING_SOURCE_BYTES + 2) // 3)
 MAX_SOURCE_FILENAME_CHARACTERS = 255
 

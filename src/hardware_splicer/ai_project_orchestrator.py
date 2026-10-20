@@ -34,6 +34,8 @@ ALLOWED_AI_ACTION_TYPES = (
     "run_compose",
     "run_erc",
     "run_drc",
+    "inspect_registered_sources",
+    "generate_board_carrier_candidate",
     "revise_candidate",
     "prepare_verification",
     "prepare_engineering_package",
@@ -192,6 +194,7 @@ def _project_source_bundle_context(run: Mapping[str, Any]) -> Dict[str, Any]:
             "pinout_compatibility_verified": False,
         },
         "geometry": run.get("geometry") or {},
+        "repair_evidence": run.get("repair_evidence") or {},
         "alternative_reference_bom_audit": run.get("alternative_reference_bom_audit"),
         "source_limits": run.get("semantic_limitations") or [],
         "design_or_physical_authority_raised": False,
@@ -251,6 +254,9 @@ def build_ai_project_context(
         "constraints": _sanitize_value(dict(constraints or {})),
         "project_summary": selected_snapshot,
         "registered_sources": sources,
+        "source_aliases": [{"alias": f"S{i+1}", "source_id": r.get("source_id"),
+                            "filename": (r.get("metadata") or {}).get("original_filename")}
+                           for i, r in enumerate(sources) if r.get("source_id")],
         "parsed_sources": parsed_sources,
         "parser_runs": parser_runs,
         "project_source_bundle_checks": source_bundles,
@@ -315,6 +321,9 @@ def build_ai_project_prompt(context: Mapping[str, Any], *, max_actions: int) -> 
         "tradeoffs, assumptions, source_ids\n"
         f"- actions: array of at most {int(max_actions)} objects with action_type, title, "
         "rationale, inputs, source_ids\n"
+        "Source citations: use ONLY a valid source ID copied from registered_sources, "
+        "or use its short alias S1, S2, etc. from source_aliases in each source_ids array. "
+        "If no source supports a claim, use []. Never invent, truncate, or modify source identifiers. "
         "IMPORTANT: action.inputs MUST always be a JSON object (use {} when unknown), "
         "never a string, list, or prose. Each requirement and architecture candidate "
         "must be a JSON object. Empty evidence source_ids must be [] rather than "
@@ -537,6 +546,30 @@ def run_ai_project_orchestrator(
         project_revision=project_revision,
         max_actions=max_actions,
     )
+    # Canonical, deterministic alias translation — NOT fuzzy source ID repair.
+    valid_ids = {str(row.get("source_id") or "") for row in context["registered_sources"]}
+    aliases = {str(row["alias"]): str(row["source_id"])
+               for row in context.get("source_aliases") or []}
+    unknown_ids = set()
+    for family in ("requirements", "architecture_candidates", "actions"):
+        for item in parsed.get(family) or []:
+            if not isinstance(item, dict):
+                continue
+            original_identities = list(item.get("source_ids") or [])
+            canonical = []
+            unresolved = []
+            for identity in original_identities:
+                resolved = aliases.get(identity, identity)
+                if resolved not in valid_ids:
+                    unknown_ids.add(str(identity))
+                    unresolved.append(str(identity))
+                    continue
+                if resolved not in canonical:
+                    canonical.append(resolved)
+            item["source_ids"] = canonical
+            if unresolved:
+                item["unrecognized_source_ids"] = unresolved
+    parsed["unrecognized_source_references"] = sorted(unknown_ids)
     created_at = _utc_now()
     return {
         "schema_version": AI_PROJECT_SESSION_SCHEMA,

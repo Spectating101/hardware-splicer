@@ -19,6 +19,8 @@ import xml.etree.ElementTree as ET
 
 from .stored_source_parser import read_registered_source_bytes
 from .engineering_reference_bom_audit import audit_markdown_reference_bom
+from .engineering_multidomain_sources import inspect_step_brep, inspect_repair_guide_html, inspect_scad_polyhedron
+from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
 
 
 def _digest(raw: bytes) -> str:
@@ -60,8 +62,14 @@ def _source_kind(name: str, data: bytes) -> str | None:
         return 'kicad_board'
     if name.lower().endswith('.stl') and len(data) >= 84:
         return 'binary_stl_candidate'
-    if name.lower() == 'bom.md' and data.lstrip().startswith(b'#'):
+    if name.lower().endswith('.md') and b'estimated total by category' in data[:300_000].lower():
         return 'reference_markdown_bom'
+    if name.lower().endswith(('.step', '.stp')) and data[:1024].lstrip().startswith(b'ISO-10303-21;'):
+        return 'step_cad'
+    if name.lower().endswith('.html') and b'<html' in data[:1500].lower():
+        return 'repair_guide_html'
+    if name.lower().endswith('.scad') and b'polyhedron' in data[:4096]:
+        return 'scad_polyhedron'
     return None
 
 
@@ -72,7 +80,7 @@ def _validate_named_files(named: Mapping[str, bytes]) -> dict[str, str]:
     for name, data in named.items():
         if name != Path(name).name or '/' in name or '\\' in name or name.startswith('.'):
             raise ValueError('source filename must be a safe basename')
-        if not isinstance(data, bytes) or len(data) > 16 * 1024 * 1024:
+        if not isinstance(data, bytes) or len(data) > MAX_ENGINEERING_SOURCE_BYTES:
             raise ValueError('source bytes missing or over limit')
         kind = _source_kind(name, data)
         if kind:
@@ -125,7 +133,7 @@ def _netlist_facts(xml_path: Path) -> dict[str, Any]:
             "component_ratings_validated": False, "pinout_compatibility_verified": False}
 
 
-def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mapping[str, str] | None = None) -> dict[str, Any]:
+def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mapping[str, str] | None = None, budget_cap_usd: float | None = None) -> dict[str, Any]:
     """Run KiCad CLI on companion files and parse a real source netlist."""
     formats = _validate_named_files(named)
     entry = {name: {"sha256": _digest(content), "kind": formats.get(name, 'unsupported')}
@@ -137,14 +145,38 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
     result: dict[str, Any] = {"schema_version": "hardware_splicer.project_source_bundle.v1",
                               "input_sources": entry, "software_tool": "kicad-cli",
                               "status": "incomplete", "project_context": "unresolved",
-                              "software_checks": {}, "geometry": {},
+                              "software_checks": {}, "geometry": {}, "repair_evidence": {},
                               "release_authorized": False,
                               "manufacturing_approved": False}
     for name, kind in formats.items():
         if kind == 'binary_stl_candidate':
             result['geometry'][name] = inspect_stl(named[name])
         if kind == 'reference_markdown_bom':
-            result['alternative_reference_bom_audit'] = audit_markdown_reference_bom(named[name], cap_usd=250)
+            result['alternative_reference_bom_audit'] = audit_markdown_reference_bom(named[name], cap_usd=budget_cap_usd)
+        if kind == 'step_cad':
+            result['geometry'][name] = inspect_step_brep(named[name])
+        if kind == 'repair_guide_html':
+            result['repair_evidence'][name] = inspect_repair_guide_html(named[name])
+        if kind == 'scad_polyhedron':
+            result['geometry'][name] = inspect_scad_polyhedron(named[name])
+    source_failures = []
+    for name, data in result['geometry'].items():
+        if data.get('status') not in {'imported_brep','parsed_raw_bounds','parsed_polyhedron_vertices'}:
+            source_failures.append({'source':name,'status':data.get('status')})
+    for name, data in result['repair_evidence'].items():
+        if data.get('status') != 'indexed_real_repair_guide':
+            source_failures.append({'source':name,'status':data.get('status')})
+    result['source_analysis_failures'] = source_failures
+    if not any(kind == 'kicad_board' for kind in formats.values()):
+        result['project_context'] = 'not_applicable'
+        result['status'] = ('incomplete' if source_failures or not formats
+                            else 'analyzed_non_electrical_sources')
+        result['software_tool'] = 'source_type_auto_dispatch'
+        result['semantic_limitations'] = [
+            'Extracted source facts do not prove physical fit or a finished design.',
+            'Unknown physical measurements, safety and procurement remain blocked.',
+        ]
+        return result
     if not shutil.which('kicad-cli'):
         result['reason'] = 'kicad-cli unavailable'
         return result
@@ -201,7 +233,8 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
 
 
 def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str, Any]], *,
-                                      project_root: str | Path | None = None) -> dict[str, Any]:
+                                      project_root: str | Path | None = None,
+                                      budget_cap_usd: float | None = None) -> dict[str, Any]:
     """Operate on same-project, SHA256-verified registered source blobs only."""
     selected: dict[str, bytes] = {}
     identities: dict[str, str] = {}
@@ -211,7 +244,7 @@ def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str
         if not filename or Path(filename).name != filename or '/' in filename or '\\' in filename:
             continue
         suffix = Path(filename).suffix.lower()
-        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.stl'} and filename.lower() != 'bom.md':
+        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.stl','.step','.stp','.html','.scad','.md'}:
             continue
         if filename in selected:
             raise ValueError('ambiguous multiple source identities for '+filename)
@@ -220,7 +253,7 @@ def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str
         identities[filename] = str(src.get('content_hash') or '')
     if not selected:
         raise ValueError('no eligible registered engineering files')
-    out = analyze_project_bundle(selected, source_identity=identities)
+    out = analyze_project_bundle(selected, source_identity=identities, budget_cap_usd=budget_cap_usd)
     source_pairs = sorted((str(row.get('source_id') or ''), str(row.get('content_hash') or ''))
                           for row in sources)
     import json
