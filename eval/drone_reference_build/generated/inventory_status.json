@@ -1,0 +1,254 @@
+{
+  "schema_version": "hardware_splicer.drone_inventory_readiness.v1",
+  "inventory": [
+    {
+      "id": "frame",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "fc",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "power",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "motors",
+      "required_quantity": 4,
+      "on_hand_quantity": 0,
+      "shortfall": 4,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "esc",
+      "required_quantity": 4,
+      "on_hand_quantity": 0,
+      "shortfall": 4,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "props",
+      "required_quantity": 6,
+      "on_hand_quantity": 0,
+      "shortfall": 6,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "pdb",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "gps",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "telemetry",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "battery",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    },
+    {
+      "id": "rc",
+      "required_quantity": 1,
+      "on_hand_quantity": 0,
+      "shortfall": 1,
+      "identity_verified": false,
+      "compatibility_verified": false,
+      "ready": false
+    }
+  ],
+  "stages": [
+    {
+      "stage_id": "identify",
+      "required_parts": [
+        "frame",
+        "fc",
+        "power",
+        "motors",
+        "esc",
+        "props",
+        "pdb",
+        "gps"
+      ],
+      "unverified_or_missing_parts": [
+        "frame",
+        "fc",
+        "power",
+        "motors",
+        "esc",
+        "props",
+        "pdb",
+        "gps"
+      ],
+      "required_evidence": "Photos of labels, board revisions, complete parts inventory",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "frame",
+      "required_parts": [
+        "frame",
+        "motors"
+      ],
+      "unverified_or_missing_parts": [
+        "frame",
+        "motors"
+      ],
+      "required_evidence": "Dimension/mount verification and mechanical inspection",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "power",
+      "required_parts": [
+        "battery",
+        "power",
+        "pdb",
+        "esc",
+        "fc"
+      ],
+      "unverified_or_missing_parts": [
+        "battery",
+        "power",
+        "pdb",
+        "esc",
+        "fc"
+      ],
+      "required_evidence": "Connector pin map, polarity and rail-voltage design review",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "control",
+      "required_parts": [
+        "fc",
+        "esc",
+        "gps",
+        "telemetry",
+        "rc"
+      ],
+      "unverified_or_missing_parts": [
+        "fc",
+        "esc",
+        "gps",
+        "telemetry",
+        "rc"
+      ],
+      "required_evidence": "Port map and cable continuity review",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "px4",
+      "required_parts": [
+        "fc"
+      ],
+      "unverified_or_missing_parts": [
+        "fc"
+      ],
+      "required_evidence": "Offline configuration manifest, parameter snapshot and reviewer signoff",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "bench",
+      "required_parts": [
+        "battery",
+        "power",
+        "pdb",
+        "esc",
+        "fc",
+        "motors"
+      ],
+      "unverified_or_missing_parts": [
+        "battery",
+        "power",
+        "pdb",
+        "esc",
+        "fc",
+        "motors"
+      ],
+      "required_evidence": "Independent powered-test procedure and physical supervisor approval",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    },
+    {
+      "stage_id": "release",
+      "required_parts": [
+        "frame",
+        "fc",
+        "power",
+        "motors",
+        "esc",
+        "props",
+        "pdb",
+        "gps",
+        "battery",
+        "rc"
+      ],
+      "unverified_or_missing_parts": [
+        "frame",
+        "fc",
+        "power",
+        "motors",
+        "esc",
+        "props",
+        "pdb",
+        "gps",
+        "battery",
+        "rc"
+      ],
+      "required_evidence": "Physical validation, mechanical/electrical acceptance, aviation compliance",
+      "review_status": "hold",
+      "eligible_for_document_review": false
+    }
+  ],
+  "unfilled_line_items": 11,
+  "unverified_line_items": 11,
+  "physical_assembly_authorized": false,
+  "flight_authorized": false
+}
