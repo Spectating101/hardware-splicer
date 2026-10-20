@@ -1,0 +1,300 @@
+{
+  "schema_version": "hardware_splicer.low_cost_physical_product_economics.v1",
+  "researched_on": "2026-10-20",
+  "market": "Taiwan, New Taiwan dollars",
+  "pricing_authority": "SELLER_ADVERTISED_LISTINGS_NOT_CHECKOUT_QUOTES",
+  "manufacturing_authority": "NOT_PHYSICALLY_BUILT_OR_MEASURED",
+  "labor_benchmark_twd_hour": 200,
+  "platform_fee_assumption_fraction": 0.1,
+  "material_quotes": {
+    "petg_per_kg_twd": {
+      "price": 554,
+      "basis": "seller_advertised_from_range_554_to_599",
+      "url": "https://www.ruten.com.tw/item/22632341480050/"
+    },
+    "pla_per_kg_twd": {
+      "price": 499,
+      "basis": "seller_advertised",
+      "url": "https://www.ruten.com.tw/item/22046953019764/"
+    },
+    "petg_outsource_per_g_twd": {
+      "price": 1.4,
+      "minimum_order_twd": 150,
+      "basis": "published_service_reference_subject_to_quote",
+      "url": "https://www.wancai-3d.com/fabrication-services-1"
+    },
+    "petg_outsource_high_cost_sensitivity_per_g_twd": {
+      "price": 5.0,
+      "basis": "STRESS_TEST_NOT_FIRM_QUOTE",
+      "reference": "https://www.tasker.com.tw/workroom/voq3NR/service-detail/38343",
+      "note": "This PLA listing is 5/g plus machine-time fee; PETG may be costlier. Deliberately pessimistic sensitivity only."
+    }
+  },
+  "component_quotes": {
+    "mg996r_180deg": {
+      "price": 145,
+      "basis": "listed_option_price",
+      "url": "https://www.ruten.com.tw/item/21610014880630/",
+      "risk": "often stall-torque-only ratings and variable clones"
+    },
+    "ds3218_180deg": {
+      "price": 475,
+      "basis": "listed_single_variant",
+      "url": "https://www.ruten.com.tw/item/22638691325276/",
+      "risk": "20 kg-cm is advertised stall torque, not continuous joint output"
+    },
+    "mg90s_180deg": {
+      "price": 90,
+      "basis": "listed_option_range_83_90",
+      "url": "https://www.ruten.com.tw/item/21210302605787/",
+      "risk": "verify 180-degree positional type; 360 continuous type is not position servo"
+    },
+    "esp32_devkit": {
+      "price": 169,
+      "basis": "listed_price",
+      "url": "https://www.ruten.com.tw/item/22541165012010/"
+    },
+    "pca9685_pwm": {
+      "price": 122,
+      "basis": "listed_price",
+      "url": "https://www.ruten.com.tw/item/22326111365451/",
+      "risk": "board handles PWM signals, not motor supply or a safety stop"
+    },
+    "608zz_bearing": {
+      "price": 13,
+      "basis": "listed_per_bearing",
+      "url": "https://www.ruten.com.tw/item/22635479599540/"
+    },
+    "m3_insert": {
+      "price": 2,
+      "basis": "per_piece_planning_from_multi_variant_bag_listing",
+      "url": "https://www.ruten.com.tw/item/22540097538746/",
+      "risk": "bag option and minimum order must be confirmed"
+    },
+    "enclosed_5v_servo_supply": {
+      "price": 500,
+      "basis": "UNVERIFIED_ESTIMATE",
+      "risk": "must confirm certified enclosed supply voltage, peak servo current and safe connector, not open mains terminals"
+    },
+    "screw_knob_spring_bundle": {
+      "price": 95,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "rubber_nonmarring_pads": {
+      "price": 45,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "clamp_structural_hardware": {
+      "price": 60,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "jig_bolts_spacers": {
+      "price": 120,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "camera_ball_mount": {
+      "price": 110,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "camera_weighted_clamp_base": {
+      "price": 120,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "electrical_limits_fuse_low_voltage": {
+      "price": 180,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "arm_fasteners_servo_horns": {
+      "price": 200,
+      "basis": "UNVERIFIED_ESTIMATE"
+    },
+    "arm_wires_connectors": {
+      "price": 110,
+      "basis": "UNVERIFIED_ESTIMATE"
+    }
+  },
+  "competitor_advertised": [
+    {
+      "class": "generic PCB soldering fixture",
+      "advertised_twd": 336,
+      "url": "https://www.ruten.com.tw/item/22635511227578/",
+      "note": "basic holder, not directly comparable to customized modular fixture"
+    },
+    {
+      "class": "acrylic 4DOF arm kit",
+      "advertised_twd": 897,
+      "url": "https://www.ruten.com.tw/item/22230882402946/",
+      "note": "check exactly included variants before comparison"
+    },
+    {
+      "class": "metal 4DOF arm variant family",
+      "advertised_range_twd": [
+        981,
+        3974
+      ],
+      "url": "https://www.ruten.com.tw/item/22632331612269/",
+      "note": "lowest option omits servos; not price for working robot"
+    },
+    {
+      "class": "4DOF Raspberry Pi arm without main controller",
+      "advertised_twd": 2581,
+      "url": "https://www.ruten.com.tw/item/22628061812064/",
+      "note": "does not necessarily include compatible host controller"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "modular_pcb_phone_repair_fixture",
+      "role": "first_internal_utility_and_conditional_sale_test",
+      "physical_design_status": "PRODUCT_CONCEPT_UNBUILT",
+      "utility": "replaceable non-marring jaws, adjustable PCB/phone repair workholding, later jig extension for arm soldering",
+      "benchmark_printed_petg_grams": 180,
+      "self_print_machine_time_and_scrap_twd": 60,
+      "sale_price_hypothesis_twd": 1190,
+      "assembly_hours_assumed": 0.5,
+      "qa_warranty_reserve_twd": 40,
+      "packaging_twd": 40,
+      "outbound_fulfillment_twd": 60,
+      "parts": [
+        {
+          "id": "608zz_bearing",
+          "qty": 2
+        },
+        {
+          "id": "m3_insert",
+          "qty": 12
+        },
+        {
+          "id": "screw_knob_spring_bundle",
+          "qty": 1
+        },
+        {
+          "id": "rubber_nonmarring_pads",
+          "qty": 1
+        },
+        {
+          "id": "clamp_structural_hardware",
+          "qty": 1
+        }
+      ],
+      "required_differentiation": "modular replaceable jaws and custom fit for a specified non-energized bench use, not generic $336 holder",
+      "physical_safety_notes": "printed PETG is not ESD certified or high-temperature solder-iron safe; separate insulating/heat precautions required",
+      "buy_before_demand_verified": false
+    },
+    {
+      "id": "articulated_inspection_camera_stand",
+      "role": "second_internal_utility_product",
+      "physical_design_status": "PRODUCT_CONCEPT_UNBUILT",
+      "utility": "phone/camera/microscope positioning for filming HS repairs and inspecting donor hardware",
+      "benchmark_printed_petg_grams": 220,
+      "self_print_machine_time_and_scrap_twd": 70,
+      "sale_price_hypothesis_twd": 1490,
+      "assembly_hours_assumed": 1,
+      "qa_warranty_reserve_twd": 45,
+      "packaging_twd": 50,
+      "outbound_fulfillment_twd": 65,
+      "parts": [
+        {
+          "id": "608zz_bearing",
+          "qty": 3
+        },
+        {
+          "id": "m3_insert",
+          "qty": 15
+        },
+        {
+          "id": "jig_bolts_spacers",
+          "qty": 1
+        },
+        {
+          "id": "camera_ball_mount",
+          "qty": 1
+        },
+        {
+          "id": "camera_weighted_clamp_base",
+          "qty": 1
+        }
+      ],
+      "required_differentiation": "stiff camera positioning with tested load/deflection and replaceable device mounts",
+      "physical_safety_notes": "must validate clamp and stability before attaching expensive camera or phone",
+      "buy_before_demand_verified": false
+    },
+    {
+      "id": "mini_four_axis_learning_arm",
+      "role": "engineering_demonstrator_then_possible_education_product",
+      "physical_design_status": "PRODUCT_CONCEPT_UNBUILT",
+      "utility": "internal 200-250mm class light object/parts sorting and servo characterization testbed",
+      "benchmark_printed_petg_grams": 450,
+      "self_print_machine_time_and_scrap_twd": 90,
+      "sale_price_hypothesis_twd": 5990,
+      "assembly_hours_assumed": 3,
+      "qa_warranty_reserve_twd": 250,
+      "packaging_twd": 100,
+      "outbound_fulfillment_twd": 120,
+      "parts": [
+        {
+          "id": "ds3218_180deg",
+          "qty": 2
+        },
+        {
+          "id": "mg996r_180deg",
+          "qty": 2
+        },
+        {
+          "id": "mg90s_180deg",
+          "qty": 1
+        },
+        {
+          "id": "esp32_devkit",
+          "qty": 1
+        },
+        {
+          "id": "pca9685_pwm",
+          "qty": 1
+        },
+        {
+          "id": "enclosed_5v_servo_supply",
+          "qty": 1
+        },
+        {
+          "id": "608zz_bearing",
+          "qty": 4
+        },
+        {
+          "id": "m3_insert",
+          "qty": 25
+        },
+        {
+          "id": "arm_fasteners_servo_horns",
+          "qty": 1
+        },
+        {
+          "id": "electrical_limits_fuse_low_voltage",
+          "qty": 1
+        },
+        {
+          "id": "arm_wires_connectors",
+          "qty": 1
+        }
+      ],
+      "required_differentiation": "measured torque/position characterization, reproducible build manual and application-specific fixture; not generic $897 DIY arm kit",
+      "physical_safety_notes": "servo advertised kg-cm is stall not continuous; don't wire open-frame mains PSU or command motion until wiring, current, mechanical and stopping controls verified",
+      "initial_reach_target_mm_range": [
+        200,
+        250
+      ],
+      "initial_payload_target_grams_upper_bound_assumption": 30,
+      "buy_before_demand_verified": false
+    }
+  ],
+  "status": {
+    "physical_parts_purchased": false,
+    "supplier_quotes_confirmed_at_checkout": false,
+    "actual_printer_available": false,
+    "prototype_physically_assembled": false,
+    "market_demand_observed": false,
+    "customer_payments_received": false,
+    "consumer_electrical_regulatory_clearance": false,
+    "approval_for_market_sales": false
+  }
+}
