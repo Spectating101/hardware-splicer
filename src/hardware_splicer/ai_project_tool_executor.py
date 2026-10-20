@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Sequence
 
 from .compose_dispatch import compose_dispatch
+from .engineering_project_source_bundle import analyze_registered_project_bundle
 from .guided_engineering_planner import plan_guided_engineering_project
 from .project_store import ProjectStore, validate_project_id
 
@@ -28,6 +29,8 @@ AI_TOOL_EXECUTOR_IDENTITY = "hardware_splicer.ai_project_tool_executor.python.v1
 EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "run_guided_plan",
     "run_compose",
+    "run_erc",
+    "run_drc",
 )
 
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
@@ -281,6 +284,33 @@ def execute_ai_project_action_preview(
             artifact = _atomic_write_json(artifact_path, plan)
             summary = _plan_summary(plan)
             artifact_name = "guided_plan.json"
+        elif action_type in {"run_erc", "run_drc"}:
+            # Always use the model's PINNED original registered source set, not
+            # model-supplied paths or shell flags. Companions are hash-verified.
+            checked = analyze_registered_project_bundle(
+                project_id, _rows(snapshot.get("engineeringSources")),
+                project_root=store.root,
+            )
+            gate = "erc" if action_type == "run_erc" else "drc"
+            actual = _mapping(_mapping(checked.get("software_checks")).get(gate))
+            if checked.get("project_context") != "source_bundle_sibling_files_present" or not actual.get("check_executed"):
+                raise ValueError(f"complete registered KiCad project required for {gate} preview")
+            artifact_path = run_dir / f"{gate}_registered_project.json"
+            artifact = _atomic_write_json(artifact_path, checked)
+            summary = {
+                "ok": True, "source_set_sha256": checked.get("source_set_sha256"),
+                "project_context": checked.get("project_context"),
+                "project_stem": checked.get("project_stem"),
+                "check": gate, "check_executed": True,
+                "check_status": actual.get("status"),
+                "rule_finding_count": actual.get("rule_finding_count"),
+                "rule_findings_by_type": actual.get("rule_findings_by_type"),
+                "report_sha256": actual.get("report_sha256"),
+                "source_design_is_not_validated": True,
+                "manufacturing_approved": False,
+                "automatic_execution": False,
+            }
+            artifact_name = artifact_path.name
         elif action_type == "run_compose":
             compose = compose_callable or compose_dispatch
             inputs = _mapping(action.get("inputs"))

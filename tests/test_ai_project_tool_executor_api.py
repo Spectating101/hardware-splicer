@@ -208,7 +208,7 @@ def test_preview_requires_current_revision_and_explicit_acceptance(tmp_path: Pat
 
 
 def test_nonallowlisted_action_is_refused(tmp_path: Path) -> None:
-    client, _, calls = _client(tmp_path, action_type="run_drc")
+    client, _, calls = _client(tmp_path, action_type="generate_netlist_candidate")
 
     response = client.post(
         f"/v1/projects/rover/ai-sessions/{SESSION_ID}/actions/{ACTION_ID}/execute-preview",
@@ -227,7 +227,7 @@ def test_tool_schema_is_fail_closed(tmp_path: Path) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["executable_preview_actions"] == ["run_guided_plan", "run_compose"]
+    assert body["executable_preview_actions"] == ["run_guided_plan", "run_compose", "run_erc", "run_drc"]
     assert body["requires_explicit_acceptance"] is True
     assert body["automatic_execution"] is False
     assert body["allow_llm_first_compose"] is False

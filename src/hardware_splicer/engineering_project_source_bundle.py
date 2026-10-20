@@ -18,6 +18,7 @@ from typing import Any, Mapping
 import xml.etree.ElementTree as ET
 
 from .stored_source_parser import read_registered_source_bytes
+from .engineering_reference_bom_audit import audit_markdown_reference_bom
 
 
 def _digest(raw: bytes) -> str:
@@ -59,6 +60,8 @@ def _source_kind(name: str, data: bytes) -> str | None:
         return 'kicad_board'
     if name.lower().endswith('.stl') and len(data) >= 84:
         return 'binary_stl_candidate'
+    if name.lower() == 'bom.md' and data.lstrip().startswith(b'#'):
+        return 'reference_markdown_bom'
     return None
 
 
@@ -140,6 +143,8 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
     for name, kind in formats.items():
         if kind == 'binary_stl_candidate':
             result['geometry'][name] = inspect_stl(named[name])
+        if kind == 'reference_markdown_bom':
+            result['alternative_reference_bom_audit'] = audit_markdown_reference_bom(named[name], cap_usd=250)
     if not shutil.which('kicad-cli'):
         result['reason'] = 'kicad-cli unavailable'
         return result
@@ -206,7 +211,7 @@ def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str
         if not filename or Path(filename).name != filename or '/' in filename or '\\' in filename:
             continue
         suffix = Path(filename).suffix.lower()
-        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.stl'}:
+        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.stl'} and filename.lower() != 'bom.md':
             continue
         if filename in selected:
             raise ValueError('ambiguous multiple source identities for '+filename)
@@ -215,4 +220,9 @@ def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str
         identities[filename] = str(src.get('content_hash') or '')
     if not selected:
         raise ValueError('no eligible registered engineering files')
-    return analyze_project_bundle(selected, source_identity=identities)
+    out = analyze_project_bundle(selected, source_identity=identities)
+    source_pairs = sorted((str(row.get('source_id') or ''), str(row.get('content_hash') or ''))
+                          for row in sources)
+    import json
+    out['source_set_sha256'] = _digest(json.dumps(source_pairs, sort_keys=True).encode())
+    return out

@@ -169,6 +169,35 @@ def _parser_run_context(run: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+
+def _project_source_bundle_context(run: Mapping[str, Any]) -> Dict[str, Any]:
+    """Allow the operator to reason from checked component/net facts, not raw CAD."""
+    netlist = dict(run.get("netlist") or {})
+    return _sanitize_value({
+        "schema_version": run.get("schema_version"),
+        "project_context": run.get("project_context"),
+        "source_set_sha256": run.get("source_set_sha256"),
+        "source_hashes": {k: v.get("sha256") for k, v in (run.get("input_sources") or {}).items()},
+        "checks": {name: {
+            "status": check.get("status"),
+            "rule_finding_count": check.get("rule_finding_count"),
+            "rule_findings_by_type": check.get("rule_findings_by_type"),
+        } for name, check in (run.get("software_checks") or {}).items()},
+        "netlist": {
+            "status": netlist.get("status"), "component_count": netlist.get("component_count"),
+            "net_count": netlist.get("net_count"),
+            "components": (netlist.get("components") or [])[:64],
+            "nets": (netlist.get("nets") or [])[:64],
+            "component_ratings_validated": False,
+            "pinout_compatibility_verified": False,
+        },
+        "geometry": run.get("geometry") or {},
+        "alternative_reference_bom_audit": run.get("alternative_reference_bom_audit"),
+        "source_limits": run.get("semantic_limitations") or [],
+        "design_or_physical_authority_raised": False,
+    })
+
+
 def build_ai_project_context(
     project_id: str,
     revision: int,
@@ -186,6 +215,10 @@ def build_ai_project_context(
     parser_runs = [
         _parser_run_context(row)
         for row in _rows(snapshot.get("engineeringSourceParserRuns"))
+    ]
+    source_bundles = [
+        _project_source_bundle_context(row)
+        for row in _rows(snapshot.get("engineeringSourceBundleRuns"))[-3:]
     ]
 
     selected_snapshot = {
@@ -220,6 +253,7 @@ def build_ai_project_context(
         "registered_sources": sources,
         "parsed_sources": parsed_sources,
         "parser_runs": parser_runs,
+        "project_source_bundle_checks": source_bundles,
         "context_policy": {
             "raw_registered_file_content_included": False,
             "source_authority_may_not_be_elevated": True,
@@ -235,6 +269,15 @@ def build_ai_project_context(
         },
     }
     encoded = _canonical_json(context)
+    if len(encoded) > _MAX_CONTEXT_CHARS:
+        context["project_source_bundle_checks"] = [
+            {"source_set_sha256": r.get("source_set_sha256"), "checks": r.get("checks"),
+             "netlist": {"component_count": (r.get("netlist") or {}).get("component_count"),
+                         "net_count": (r.get("netlist") or {}).get("net_count")}}
+            for r in source_bundles
+        ]
+        context["context_policy"]["bundle_details_omitted_for_context_bound"] = True
+        encoded = _canonical_json(context)
     if len(encoded) > _MAX_CONTEXT_CHARS:
         context["parser_runs"] = []
         context["context_policy"]["parser_runs_omitted_for_context_bound"] = True
