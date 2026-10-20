@@ -181,3 +181,22 @@ def test_explicit_offline_compatibility_keeps_legacy_scaffold_with_provenance(mo
     assert plan["compatibility_scaffold"]["legacy_build_id"] == "automatic_plant_watering"
     assert plan["authority_effect"] == "none"
     assert plan["automatic_execution"] is False
+
+
+def test_real_device_empty_catalog_allowlist_never_executes_demo_planner(monkeypatch):
+    monkeypatch.setattr(truth_module, "offline_salvage_enabled", lambda: True)
+    result=plan_project_from_intake_truthful({
+        "project_name":"PSP-3000 UMD repair", "goal":"Fix game console optical drive",
+        "approved_catalog_build_ids":[], "available_parts":[{"name":"PSP-3000","type":"electronic_device"}],
+    },legacy_planner=_fail_legacy,architecture_proposal_callable=_fail_model)
+    assert result['catalog_routing']['status']=='no_approved_candidate'
+    assert result['scenario']['compile_spec']=={}
+    assert result['compatibility_scaffold']['historical_planner_ran'] is False
+    assert result['architecture_status']=='unresolved'
+
+def test_real_device_explicit_nonapproved_build_rejected(monkeypatch):
+    import pytest
+    monkeypatch.setattr(truth_module,"offline_salvage_enabled",lambda:True)
+    with pytest.raises(ValueError,match="explicit build not in approved"):
+        plan_project_from_intake_truthful({'goal':'device repair','build_id':'usb_fume_extractor',
+                                           'approved_catalog_build_ids':[]},legacy_planner=_fail_legacy)

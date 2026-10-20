@@ -1,0 +1,267 @@
+{
+  "schema_version": "hardware_splicer.real_device_work_package.v1",
+  "project_id": "steamdeck_oled_ssd",
+  "device": "Steam Deck OLED internal SSD replacement",
+  "project_kind": "upgrade_repair",
+  "catalog_routing": {
+    "candidate": "room_display_station",
+    "status": "blocked_no_compatible_catalog_build"
+  },
+  "source_leads": [
+    {
+      "source_id": "ifixit_deck_oled_ssd",
+      "uri": "https://www.ifixit.com/Guide/Steam+Deck+OLED+SSD+Replacement/168255",
+      "verified_full_document": false,
+      "content_hash": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "req-01",
+      "requirement": "LCD versus OLED model identification and compatible storage",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-02",
+      "requirement": "backup/restore and recovery workflow",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-03",
+      "requirement": "physical replacement access and ESD precautions",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-04",
+      "requirement": "functional tests and go/no-go gates",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-05",
+      "requirement": "approximate cost categories",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    }
+  ],
+  "work_steps": [
+    {
+      "id": "step-01",
+      "instruction": "Record the current symptom, OS behavior, free space, SMART or equivalent health output, filesystem checks, and any error messages without assuming the SSD is the cause.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-02",
+      "instruction": "Confirm OLED identity and document the current SSD model, capacity, interface information, and visible physical configuration if safely accessible.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-03",
+      "instruction": "Back up required files and configuration data while the current drive remains readable; verify the backup by opening representative files and recording what was included.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-04",
+      "instruction": "Prepare the recovery/install path and document account, encryption, game-library, and application restoration requirements before removing the original drive.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-05",
+      "instruction": "Power down fully, disconnect external power, establish ESD controls, and follow a device-specific OLED disassembly procedure. Do not proceed if the procedure or tool fit is uncertain.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-06",
+      "instruction": "Access the SSD without stressing cables, shields, connectors, or the battery assembly; preserve the original SSD and hardware for diagnosis or recovery.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-07",
+      "instruction": "Install only a candidate that has independently verified M.2 2230 single-sided fit and Steam Deck OLED electrical/software compatibility. No exact replacement is authorized by the supplied evidence.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-08",
+      "instruction": "Reassemble with correct shielding, fasteners, connector seating, and no pinched cables, then perform a visual inspection before power-up.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-09",
+      "instruction": "Confirm drive detection in the available firmware or recovery environment.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-10",
+      "instruction": "Install or recover SteamOS using the selected authoritative recovery procedure, then restore backed-up data and reconfigure libraries or accounts as applicable.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-11",
+      "instruction": "Run the validation gates and record results; if any required gate fails, stop and diagnose rather than treating the SSD replacement as the solution.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "id": "gap-01",
+      "description": "The current SSD health, SMART status, filesystem state, boot status, and exact failure symptoms are unknown.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-02",
+      "description": "Backup status, backup completeness, backup readability, and recovery objectives are unknown.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-03",
+      "description": "The exact Steam Deck OLED model identifier and hardware revision have not been independently documented.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-04",
+      "description": "The current SSD model and its interface details are unknown.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-05",
+      "description": "No exact replacement SSD has been proposed, so interface support, capacity support, firmware behavior, thermal behavior, endurance, and physical clearance remain unverified.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-06",
+      "description": "The required recovery-image version, installation method, encryption state, and restore procedure are unspecified.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-07",
+      "description": "The user's required data set, acceptable downtime, and tolerance for reinstallation or data loss are unspecified.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-08",
+      "description": "Disassembly tool availability, ESD controls, workspace conditions, and operator experience are unknown.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-09",
+      "description": "There is no supplied bench evidence, measured diagnostic output, or post-repair test result.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-10",
+      "description": "The supplied ifixit_deck_oled_ssd claims establish OLED M.2 2230 single-sided storage, additional recovery or installation work, and ESD precautions, but do not establish compatibility of any particular replacement part or that replacement will resolve the issue.",
+      "status": "open",
+      "resolution_evidence": null
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "gate-01",
+      "criterion": "Do not substitute LCD-specific guide without model review",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-02",
+      "criterion": "Do not claim replacement fixes unmeasured issue",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-03",
+      "criterion": "No data preservation guarantee without backup",
+      "status": "not_accepted",
+      "evidence_refs": []
+    }
+  ],
+  "required_parts": [
+    {
+      "requirement": "Device-specific requirement: Steam Deck OLED must be confirmed before work; the supplied task explicitly prohibits substituting an LCD-specific guide without model review.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Storage requirement sourced from ifixit_deck_oled_ssd: Steam Deck OLED SSD is M.2 2230 and single-sided.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The replacement must also have an interface, keying, electrical characteristics, controller behavior, thermal envelope, and capacity supported by the Steam Deck OLED and intended operating-system workflow; exact compatibility is unverified from the supplied claims.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Use an appropriate external backup destination with enough capacity for the selected data; destination type and capacity are not supplied.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Use a SteamOS-compatible recovery or installation medium and a recovery image obtained from an authoritative source; exact image version and procedure are not supplied.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Use ESD-control equipment and suitable non-damaging disassembly tools. The supplied ifixit_deck_oled_ssd claim requires following ESD precautions.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Do not select a replacement SSD, enclosure, adapter, screw, thermal interface, or recovery medium as an exact part until compatibility and physical fit are verified.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Approximate cost categories, not sourced facts: replacement SSD, backup/recovery media, ESD and hand tools, and possible professional data recovery or repair labor.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    }
+  ],
+  "engineering_readiness": "blocked",
+  "physical_validation_performed": false,
+  "source_documents_verified": false,
+  "build_or_repair_completed": false
+}

@@ -31,3 +31,11 @@ The live model operator was `copilot-spectator26` with its repo-editing and comm
 A case should only be considered a usable deliverable when it has a verified device identity, source-backed interfaces, concretely compatible part selections, bill of materials or donor alternatives, device-specific procedures, an engineering calculation/review package where applicable, repair acceptance gates, and explicit human/bench verification requirements. None of the three cases meets all those conditions yet. This is a real-target *failure discovery and engineering planning* experiment, not a validated build.
 
 The next work should upgrade actual document ingestion and domain-specific output/validation pipelines instead of adding more synthetic diagnostic fixtures. In particular, fail closed rather than map an unsupported PSP, Steam Deck, or drone into irrelevant generic catalog builds.
+
+## October 20 implementation follow-through: routing repaired and work packages
+
+The production source-aware planner now accepts the opt-in `approved_catalog_build_ids` allowlist from project intake. For these three real devices it is explicitly empty, so the truthful planner skips the legacy catalog planner and leaves architecture `unresolved`, with **no build ID**. This prevents PSP repairs being converted into a fume extractor, Steam Deck service into a display station, and an aircraft project into an unrelated adapter. Existing legacy demo flows remain unchanged where this policy is absent.
+
+A new `real_device_work_package` compiler converts the device-specific advisory reviews into explicit requirements, proposed work steps, unverified part requirements, source leads, acceptance gates and unresolved engineering gaps. The generated JSON packages live under `work_packages/`. All three remain `blocked`: no component compatibility, full-source ingestion, field measurement, physical repair, or fabrication has been established. This is an improvement to the actual real-device project path, **not** a claim of build readiness.
+
+The planner still runs some generic mechatronic topology/analysis checks for consumer devices; those need domain-specific replacement. To produce a build-ready project, next bind document contents and component identifiers to device-specific steps, then exercise verification with real reference schematics or measured parts.
