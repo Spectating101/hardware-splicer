@@ -164,3 +164,9 @@ def main_derive() -> None:
     prediction = predict_derivative_reuse(baseline, candidate, evidence_items)
     _write_or_print(prediction, args.out)
     raise SystemExit(0 if prediction.get("status") == "predicted" else 2)
+
+
+def main_mechanical() -> None:
+    """Opt-in trusted-file entry into integrated mechanical evidence workbench."""
+    from hardware_splicer.mechanical_contact_workbench import main as run
+    raise SystemExit(run())

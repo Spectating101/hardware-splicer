@@ -227,3 +227,31 @@ See [`docs/external_assessment/`](docs/external_assessment/) for the controlled 
 Software license: **MIT** — see [`LICENSE`](LICENSE).
 
 The system assists engineering and evidence workflows; **physical authorization remains explicitly bounded and human-scoped.**
+
+
+### Mechanical engineering — connected to normal HS workflow
+
+Mecha-Splicer now reports structural screening applicability in its ordinary
+build bundle, MECH_CHECK, SIM_RESULTS, BUILD_RECIPE and RISK_REGISTER.
+It does **not** run FEM by default. A two-hole plate can opt in to bounded,
+local curved CAD/FEM and two-pin contact screening using
+the Mecha runner parameter `structural_screening="run"`, with optional
+mesh targets, assumed pin displacement and clearance.
+
+The HS mechanism pack propagates this evidence to the mechanical and
+whole-system mechatronics release authority. Neither an inconclusive
+contact calculation nor disabling the analysis authorizes load-bearing release.
+
+A local operator command is available after optional dependency installation:
+
+```bash
+pip install -e '.[dev,physics,cad-meshing,physics-validation]'
+hs-mechanical --spec-json examples/mechanical/mecha_simple_plate_bracket.json --output-dir ./pilot-bracket-01 --mesh-study-mm 8 6 5 --drive-mm 0.02 --clearance-mm 0.005
+```
+
+This outputs STEP geometry, raw evidence, a readable offline HTML review,
+a simulated (uncalibrated) force–displacement curve and a physical test
+checklist. Expected nonzero screening status is **not** numerical failure,
+and a numerical pass is **not** an engineering load rating.
+
+[Integrated Mecha/HS workflow and scope](docs/MECHANICAL_HS_CORE_INTEGRATION_2026-10-20.md)
