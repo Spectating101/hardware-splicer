@@ -24,6 +24,15 @@ AxisPlane = Literal["x_min", "x_max", "y_min", "y_max", "z_min", "z_max"]
 
 
 @dataclass(frozen=True)
+class LocalRefinement:
+    """Declare an optional, bounded field for STEP circular curves and/or spots."""
+    target_size_mm: float
+    radius_mm: float
+    refine_circular_edges: bool = True
+    hotspot_centers_mm: tuple[tuple[float, float, float], ...] = ()
+
+
+@dataclass(frozen=True)
 class CadTetraMesh:
     nodes_m: list[list[float]]
     elements: list[list[int]]
@@ -37,6 +46,7 @@ class CadTetraMesh:
     bounding_box_m: list[list[float]]
     cad_kernel_volume_m3: float | None = None
     mesh_volume_error_fraction: float | None = None
+    local_refinement: dict[str, Any] | None = None
 
 
 def _load_gmsh() -> Any:
@@ -140,11 +150,132 @@ def _triangulated_volume_mesh(gmsh: Any, *, to_m: float) -> tuple[
     return nodes, tets, triangles, float(sum(volumes)), bounds
 
 
+def _configure_local_refinement(
+    gmsh: Any,
+    refinement: LocalRefinement,
+    *,
+    global_size_mm: float,
+    cad_bounds_mm: tuple[float, float, float, float, float, float],
+    source_format: str,
+) -> dict[str, Any]:
+    """Create a Gmsh background mesh field for explicitly scoped hotspots."""
+    target = refinement.target_size_mm
+    radius = refinement.radius_mm
+    if not all(math.isfinite(x) for x in (target, radius)):
+        raise ValueError("local mesh size and radius must be finite")
+    if not (0.5 <= target < global_size_mm):
+        raise ValueError("local mesh target must be >=0.5 mm and smaller than global size")
+    if not (0.5 <= radius <= 500):
+        raise ValueError("local radius must be in [0.5, 500] mm")
+    spots = refinement.hotspot_centers_mm
+    if len(spots) > 12:
+        raise ValueError("at most 12 explicit hotspot centers are supported")
+    if not refinement.refine_circular_edges and not spots:
+        raise ValueError("local refinement needs circular CAD edges or hotspot centers")
+    xmin, ymin, zmin, xmax, ymax, zmax = cad_bounds_mm
+    for spot in spots:
+        if len(spot) != 3 or not all(math.isfinite(x) for x in spot):
+            raise ValueError("every hotspot must have three finite mm coordinates")
+        for coord, lo, hi in zip(spot, (xmin, ymin, zmin), (xmax, ymax, zmax)):
+            if coord < lo - 0.01 or coord > hi + 0.01:
+                raise ValueError("hotspot must lie within the CAD bounding box")
+    curve_tags: list[int] = []
+    if refinement.refine_circular_edges:
+        if source_format not in {".step", ".stp"}:
+            raise ValueError("automatic circular-edge refinement requires STEP CAD")
+        curve_tags = [
+            tag for dim, tag in gmsh.model.getEntities(dim=1)
+            if gmsh.model.getType(dim, tag) == "Circle"
+        ]
+        if not curve_tags:
+            raise ValueError("STEP contains no circular edges; specify hotspot centers")
+        if len(curve_tags) > 24:
+            raise ValueError("too many circular curves for bounded local refinement")
+
+    fields: list[int] = []
+    if curve_tags:
+        dist = gmsh.model.mesh.field.add("Distance")
+        gmsh.model.mesh.field.setNumbers(dist, "CurvesList", curve_tags)
+        gmsh.model.mesh.field.setNumber(dist, "Sampling", 100)
+        threshold = gmsh.model.mesh.field.add("Threshold")
+        for key, value in (
+            ("InField", dist), ("SizeMin", target),
+            ("SizeMax", global_size_mm), ("DistMin", 0), ("DistMax", radius),
+        ):
+            gmsh.model.mesh.field.setNumber(threshold, key, value)
+        fields.append(threshold)
+    for cx, cy, cz in spots:
+        ball = gmsh.model.mesh.field.add("Ball")
+        for key, value in (
+            ("XCenter", cx), ("YCenter", cy), ("ZCenter", cz),
+            ("Radius", radius), ("VIn", target), ("VOut", global_size_mm),
+        ):
+            gmsh.model.mesh.field.setNumber(ball, key, value)
+        fields.append(ball)
+
+    if len(fields) > 1:
+        combined = gmsh.model.mesh.field.add("Min")
+        gmsh.model.mesh.field.setNumbers(combined, "FieldsList", fields)
+        gmsh.model.mesh.field.setAsBackgroundMesh(combined)
+    else:
+        gmsh.model.mesh.field.setAsBackgroundMesh(fields[0])
+
+    gmsh.option.setNumber("Mesh.MeshSizeMin", target)
+    gmsh.option.setNumber("Mesh.MeshSizeMax", global_size_mm)
+    gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0)
+    gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 0)
+    gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
+    return {
+        "mode": "localized_background_mesh",
+        "circular_edge_tags": curve_tags,
+        "circular_edge_count": len(curve_tags),
+        "hotspot_centers_mm": [list(x) for x in spots],
+        "local_mesh_target_mm": target,
+        "global_mesh_target_mm": global_size_mm,
+        "local_radius_mm": radius,
+        "physical_accuracy_verified": False,
+    }
+
+
+def _count_nodes_near_refinement_features(
+    gmsh: Any,
+    nodes_m: list[list[float]],
+    info: dict[str, Any],
+) -> int:
+    """Count actual mesh nodes within the declared field's influence region.
+
+    Used as a *mesh density diagnostic*, not a direct proof of stress convergence.
+    """
+    import numpy as np
+    from scipy.spatial import cKDTree
+
+    samples: list[list[float]] = [
+        list(center) for center in info["hotspot_centers_mm"]
+    ]
+    for tag in info["circular_edge_tags"]:
+        bounds_low, bounds_high = gmsh.model.getParametrizationBounds(1, tag)
+        low, high = float(bounds_low[0]), float(bounds_high[0])
+        params = np.linspace(low, high, 64, endpoint=False)
+        points = np.asarray(
+            gmsh.model.getValue(1, tag, params.tolist()), dtype=float
+        ).reshape((-1, 3))
+        samples.extend(points.tolist())
+    if not samples:
+        raise ValueError("local refinement has no sampled geometric targets")
+    distances, _ = cKDTree(np.asarray(samples)).query(
+        np.asarray(nodes_m) * 1000, k=1
+    )
+    return int(np.count_nonzero(
+        distances <= info["local_radius_mm"] + 1e-8
+    ))
+
+
 def mesh_cad_solid(
     path: str | Path,
     *,
     mesh_target_mm: float = 8.0,
     stl_units: Literal["mm"] | None = None,
+    local_refinement: LocalRefinement | None = None,
 ) -> CadTetraMesh:
     """Mesh a *single* closed solid. STEP target units are mm; STL needs explicit mm.
 
@@ -207,8 +338,17 @@ def mesh_cad_solid(
                 "part too large for bounded FEM at requested mesh size; "
                 "increase mesh_target_mm or use an offline engineering solver"
             )
-        gmsh.option.setNumber("Mesh.MeshSizeMin", mesh_target_mm)
-        gmsh.option.setNumber("Mesh.MeshSizeMax", mesh_target_mm)
+        local_info = None
+        if local_refinement is not None:
+            local_info = _configure_local_refinement(
+                gmsh, local_refinement,
+                global_size_mm=mesh_target_mm,
+                cad_bounds_mm=(xmin, ymin, zmin, xmax, ymax, zmax),
+                source_format=suffix,
+            )
+        else:
+            gmsh.option.setNumber("Mesh.MeshSizeMin", mesh_target_mm)
+            gmsh.option.setNumber("Mesh.MeshSizeMax", mesh_target_mm)
         gmsh.option.setNumber("Mesh.ElementOrder", 1)
         gmsh.model.mesh.generate(3)
         nodes, tets, triangles, volume_m3, bounds = _triangulated_volume_mesh(
@@ -223,6 +363,14 @@ def mesh_cad_solid(
                 "tetrahedral volume differs from STEP CAD kernel volume by more "
                 "than 5%; refine the mesh before evaluating stress"
             )
+        if local_info is not None:
+            local_info["influence_region_node_count"] = (
+                _count_nodes_near_refinement_features(
+                    gmsh, nodes, local_info
+                )
+            )
+            if local_info["influence_region_node_count"] == 0:
+                raise ValueError("local refinement produced no nodes near targets")
         return CadTetraMesh(
             nodes_m=nodes,
             elements=tets,
@@ -236,6 +384,7 @@ def mesh_cad_solid(
             bounding_box_m=bounds,
             cad_kernel_volume_m3=kernel_volume_m3,
             mesh_volume_error_fraction=volume_error,
+            local_refinement=local_info,
         )
     finally:
         gmsh.finalize()
@@ -320,8 +469,12 @@ def run_cad_screening(
     fixed_plane: AxisPlane, loaded_plane: AxisPlane, total_force_n: list[float],
     youngs_modulus_pa: float, poisson_ratio: float,
     yield_strength_pa: float | None = None,
+    local_refinement: LocalRefinement | None = None,
 ) -> dict[str, Any]:
-    mesh = mesh_cad_solid(path, mesh_target_mm=mesh_target_mm, stl_units=stl_units)
+    mesh = mesh_cad_solid(
+        path, mesh_target_mm=mesh_target_mm, stl_units=stl_units,
+        local_refinement=local_refinement,
+    )
     case, boundary = build_face_loaded_case(
         mesh, fixed_plane=fixed_plane, loaded_plane=loaded_plane,
         total_force_n=total_force_n, youngs_modulus_pa=youngs_modulus_pa,
@@ -341,6 +494,7 @@ def run_cad_screening(
             "cad_kernel_volume_m3": mesh.cad_kernel_volume_m3,
             "mesh_volume_error_fraction": mesh.mesh_volume_error_fraction,
             "surface_triangle_count": len(mesh.surface_triangles),
+            "local_refinement": mesh.local_refinement,
         },
         "boundary_conditions": boundary,
         "analysis": result,
@@ -355,6 +509,27 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Local bounded CAD-to-FEM screening")
     parser.add_argument("cad_file", type=Path)
     parser.add_argument("--mesh-size-mm", type=float, default=8.0)
+    parser.add_argument(
+        "--local-mesh-size-mm", type=float, default=None,
+        help="Apply a single locally refined mesh at this target mm",
+    )
+    parser.add_argument(
+        "--local-study-mm", nargs="+", type=float, default=None,
+        help="Apply 3–4 decreasing localized targets; uses --mesh-size-mm as global",
+    )
+    parser.add_argument(
+        "--local-radius-mm", type=float, default=None,
+        help="Feature-distance influence radius in mm",
+    )
+    parser.add_argument(
+        "--refine-circular-edges", action="store_true",
+        help="STEP only: refine all OCC circular edges (no silent feature inference)",
+    )
+    parser.add_argument(
+        "--hotspot-xyz-mm", nargs=3, type=float, action="append",
+        metavar=("X", "Y", "Z"),
+        help="Explicit CAD-coordinate hotspot center (mm); repeatable",
+    )
     parser.add_argument(
         "--mesh-study-mm", type=float, nargs="+",
         help="Run 3-4 strictly decreasing coarse-to-fine sizes, e.g. 12 8 6; "
@@ -378,17 +553,49 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--yield-pa", type=float, default=None)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.mesh_study_mm is not None:
+    study_count = sum(
+        value is not None for value in (
+            args.mesh_study_mm, args.local_study_mm, args.local_mesh_size_mm
+        )
+    )
+    if study_count > 1:
+        parser.error("select only one of global mesh study, local mesh study, or local mesh")
+    has_local_options = (
+        args.local_radius_mm is not None or args.refine_circular_edges
+        or args.hotspot_xyz_mm is not None
+    )
+    if has_local_options != (
+        args.local_mesh_size_mm is not None or args.local_study_mm is not None
+    ):
+        parser.error("local refinement requires size/study, radius, and feature targets")
+    if has_local_options and (
+        args.local_radius_mm is None
+        or not (args.refine_circular_edges or args.hotspot_xyz_mm)
+    ):
+        parser.error("local refinement needs radius and circular edges or hotspots")
+    if args.mesh_study_mm is not None or args.local_study_mm is not None:
         from .mechanical_cad_convergence import run_cad_mesh_sensitivity
 
         result = run_cad_mesh_sensitivity(
-            args.cad_file, mesh_sizes_mm=args.mesh_study_mm,
+            args.cad_file,
+            mesh_sizes_mm=(
+                args.local_study_mm if args.local_study_mm is not None
+                else args.mesh_study_mm
+            ),
             stl_units=args.stl_units,
             fixed_plane=args.fixed_plane, loaded_plane=args.loaded_plane,
             total_force_n=args.force_n, youngs_modulus_pa=args.youngs_pa,
             poisson_ratio=args.poisson, yield_strength_pa=args.yield_pa,
             displacement_tolerance=args.displacement_tolerance,
             stress_tolerance=args.stress_tolerance,
+            global_mesh_size_mm=(
+                args.mesh_size_mm if args.local_study_mm is not None else None
+            ),
+            local_radius_mm=args.local_radius_mm,
+            refine_circular_edges=args.refine_circular_edges,
+            hotspot_centers_mm=tuple(
+                tuple(x) for x in (args.hotspot_xyz_mm or [])
+            ),
         )
     else:
         result = run_cad_screening(
@@ -396,11 +603,21 @@ def main(argv: list[str] | None = None) -> int:
             fixed_plane=args.fixed_plane, loaded_plane=args.loaded_plane,
             total_force_n=args.force_n, youngs_modulus_pa=args.youngs_pa,
             poisson_ratio=args.poisson, yield_strength_pa=args.yield_pa,
+            local_refinement=(
+                LocalRefinement(
+                    target_size_mm=args.local_mesh_size_mm,
+                    radius_mm=args.local_radius_mm,
+                    refine_circular_edges=args.refine_circular_edges,
+                    hotspot_centers_mm=tuple(
+                        tuple(x) for x in (args.hotspot_xyz_mm or [])
+                    ),
+                ) if args.local_mesh_size_mm is not None else None
+            ),
         )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     print(f"CAD-to-FEM screening saved: {args.out}")
-    if args.mesh_study_mm is not None:
+    if args.mesh_study_mm is not None or args.local_study_mm is not None:
         print(f"mesh sensitivity: {result['status']}; "
               f"blockers={result['sensitivity_blockers']}; "
               "physical validation still required")
