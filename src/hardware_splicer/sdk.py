@@ -132,6 +132,11 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return declared-concept SolidCraft enclosure instructions; no printer action."""
+    from .printed_enclosure_workbench import prepare_printed_enclosure
+    return prepare_printed_enclosure(casing_spec)
+
 def plan_salvage(
     *,
     goal: str,

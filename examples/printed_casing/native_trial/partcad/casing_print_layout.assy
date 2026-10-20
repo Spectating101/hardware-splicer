@@ -1,0 +1,7 @@
+links:
+  - part: casing_base
+    name: HS_Casing_Base
+    location: [[0,0,0],[0,0,1],0]
+  - part: casing_lid
+    name: HS_Casing_Lid
+    location: [[0,0,0],[0,0,1],0]
