@@ -36,7 +36,7 @@ by API, UI, and future CI gates.
 
 | Enum | Values |
 |------|--------|
-| `Domain` | `system`, `mechanical`, `electrical`, `firmware`, `software`, `sourcing`, `assembly`, `verification` |
+| `Domain` | `system`, `mechanical`, `chemical`, `electrical`, `firmware`, `software`, `sourcing`, `assembly`, `verification` |
 | `AuthorityState` | `unknown` → `proposed` → `declared` → `observed` → `measured` → `verified` → `authorized` |
 | `LifecycleState` | `intake` → `architecture` → `design` → `verify` → `bench` → `package` |
 | `ReleaseState` | `concept` → `design_ready` → `build_ready` → `bench_ready` → `operationally_authorized` |

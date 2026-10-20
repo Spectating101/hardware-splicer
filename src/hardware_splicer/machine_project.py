@@ -24,6 +24,7 @@ MACHINE_PROJECT_SCHEMA = "hardware_splicer.machine_project.v1"
 class Domain(str, Enum):
     SYSTEM = "system"
     MECHANICAL = "mechanical"
+    CHEMICAL = "chemical"
     ELECTRICAL = "electrical"
     FIRMWARE = "firmware"
     SOFTWARE = "software"

@@ -112,6 +112,14 @@ def engineering_snapshot(
         "missingInfo": list(plan.get("missing_info") or []),
     }
     _copy_previous_engineering_findings(snapshot, previous_snapshot)
+    # Chemistry remains an immutable, review-recorded project discipline,
+    # not an input surface on the untrusted engineering planner. Preserve
+    # it from the previous accepted snapshot across ordinary re-plans and
+    # physical evidence updates; never trust new plan JSON for these rows.
+    if isinstance(previous_snapshot, Mapping) and "practicalChemistryAssessments" in previous_snapshot:
+        snapshot["practicalChemistryAssessments"] = deepcopy(
+            previous_snapshot["practicalChemistryAssessments"]
+        )
     return snapshot
 
 
@@ -326,6 +334,17 @@ def save_engineering_plan(
                 )
             persisted_plan = _reapply_persisted_audit_history(persisted_plan, prior_plan)
 
+    # A planned engineering snapshot may retain chemical screening decisions
+    # outside its plan payload. Recompute the gate from the persisted previous
+    # project revision, rather than trusting a caller-supplied plan's status.
+    if previous_snapshot is not None:
+        from .project_chemistry_release_gate import (
+            apply_chemistry_hold_to_plan, evaluate_project_chemistry_gate,
+        )
+        chemistry = evaluate_project_chemistry_gate(
+            previous_snapshot, project_id=resolved_project_id,
+        )
+        persisted_plan = apply_chemistry_hold_to_plan(persisted_plan, chemistry)
     snapshot = engineering_snapshot(persisted_plan, previous_snapshot=previous_snapshot)
     snapshot["projectId"] = resolved_project_id
     machine_project = snapshot.get("machineProject")
