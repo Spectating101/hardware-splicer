@@ -197,6 +197,7 @@ def _project_source_bundle_context(run: Mapping[str, Any]) -> Dict[str, Any]:
             "pinout_compatibility_verified": False,
         },
         "geometry": run.get("geometry") or {},
+        "board_interface_geometry": run.get("board_interface_geometry"),
         "repair_evidence": run.get("repair_evidence") or {},
         "alternative_reference_bom_audit": run.get("alternative_reference_bom_audit"),
         "source_limits": run.get("semantic_limitations") or [],

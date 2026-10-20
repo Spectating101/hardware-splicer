@@ -125,3 +125,25 @@ capabilities. Real device assembly and multi-domain engineering validation are
 Full per-case numerical records are in [TRIAL_RESULTS.json](./TRIAL_RESULTS.json).
 Original unredacted machine/project run evidence remains on Optiplex under
 `/tmp/hs-unified-cross-domain-20261021/`.
+
+### 2026-10-21: source-derived KiCad interface audit (next engineering milestone)
+
+The upstream `sector07-dev/RPI_DEV` commit `ebdfcff` was restored directly from
+its vendor-published `RPI DEV PCB Files.zip`. The **registered KiCad board bytes**
+are processed with the OS KiCad/pcbnew backend in a bounded temporary process.
+The analysis returns actual footprint reference/placement coordinates and
+nonplated drill features; **it never reclassifies signal or package holes as
+mechanical mounting features**.
+
+- Board outline *axis-aligned bounding box*: **90.95 × 61.35 mm** (not exact outline).
+- **26** actual footprint positions read from the PCB.
+- **No explicitly identified `MountingHole` footprint** in this source board.
+- One NPTH 3.6 mm feature, part of the `Q1` TO-247 transistor footprint, **not a confirmed enclosure fastener location**.
+- The earlier envelope-only carrier therefore has **unresolved retention**;
+  a visually plausible case cannot be accepted as a mating/retention design.
+
+The [machine-readable interface evidence](./cyberdeck_board_interface_evidence.json)
+contains the upstream file SHA256, all 26 source placements, and the mechanical
+unknowns. A separate optional-source test exercises the original archived board
+when available and remains explicitly skipped on hosts without `pcbnew`.
+No original publisher board file is included in Git or claimed as an HS-designed PCB.
