@@ -41,6 +41,35 @@ def main():
             distances.append(math.hypot(pt[0]-(a[0]+t*dx),pt[1]-(a[1]+t*dy)))
         return min(distances) if distances else float('inf')
     edge_points=[(v['x'],v['y']) for v in profile]
+    def segment_distance(a,b,c,d):
+        # Intersecting segments have zero distance, including crossing traces.
+        def cross(v,w,t):
+            return (w[0]-v[0])*(t[1]-v[1])-(w[1]-v[1])*(t[0]-v[0])
+        if cross(a,b,c)*cross(a,b,d)<0 and cross(c,d,a)*cross(c,d,b)<0:
+            return 0.
+        return min(edge_distance(a,[c,d]),edge_distance(b,[c,d]),
+                   edge_distance(c,[a,b]),edge_distance(d,[a,b]))
+    track_near_edge=[]
+    electrical_tracks=list(board.GetTracks())
+    for tr in electrical_tracks:
+        a=tr.GetStart();b=tr.GetEnd()
+        first=(_mm(a.x),_mm(a.y));last=(_mm(b.x),_mm(b.y))
+        width=_mm(tr.GetWidth(k.F_Cu) if tr.GetClass()=='PCB_VIA' else tr.GetWidth())
+        if width<=0 or width>15:raise ValueError('unsupported KiCad track width')
+        if edge_points:
+            dist=min(segment_distance(first,last,c,d) for c,d in zip(edge_points,edge_points[1:]+edge_points[:1]))
+            gap=dist-width/2
+            if gap<=1.2+0.45:
+                track_near_edge.append({
+                    'kind':tr.GetClass(),
+                    'source_net':tr.GetNetname()[:72],
+                    'layer':tr.GetLayerName(),
+                    'begin_xy_mm':{'x':first[0],'y':first[1]},
+                    'end_xy_mm':{'x':last[0],'y':last[1]},
+                    'width_mm':width,
+                    'conservative_gap_mm':round(gap,4),
+                    'scope':'nominal_source_copper_conductor_keepout_candidate_not_physical_contact',
+                })
     pad_clearance_risks=[]
     estimated_pad_count=0
     nominal_overlap=1.2
@@ -102,6 +131,10 @@ def main():
       'footprint_placements':parts,
       'nonplated_drill_features':nonplated,
       'plated_drill_count':plated_count,
+      'source_track_or_via_count':len(electrical_tracks),
+      'source_zone_count':len(list(board.Zones())),
+      'nominal_edge_lip_track_risk_candidates':track_near_edge,
+      'nominal_edge_lip_track_risk_candidate_count':len(track_near_edge),
       'pad_count_all_layers':estimated_pad_count,
       'nominal_edge_capture_pad_overlap_mm':nominal_overlap,
       'edge_pad_clearance_caution_margin_mm':caution_margin,

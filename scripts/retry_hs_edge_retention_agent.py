@@ -16,13 +16,13 @@ current=store.load_latest_with_recovery(pid)
 rev=current['revision']
 mission=(
  'The source-registered RPI_DEV KiCad board has no mounting-hole footprints. '
- 'Its 33-vertex sampled Edge.Cuts profile has a notch. The previous fixed-parameter '
- 'CAD action is software-only and does NOT require a persisted mechanical layer '
- 'request. Propose generate_board_edge_retention_candidate with inputs {} to '
- 'produce the original-source two-piece PCB edge-capture base/lid and check '
- 'original-board STEP intersections. It must exclude nominal pad bounding boxes '
- 'from retaining lips; do not assert that all traces, components or physical '
- 'retention are verified. Physical approval remains blocked. '
+ 'Its 33-vertex sampled Edge.Cuts profile has a notch. The original board also has 145 '
+ 'pads, 456 tracks/vias, 0 zones, and seven traces near the lip clearance. The fixed-parameter '
+ 'CAD action is software-only and does NOT require mechanical load inputs. '
+ 'Propose generate_board_edge_retention_candidate with inputs {} to produce the '
+ 'original-source two-piece PCB edge-capture base/lid. It must exclude 23 pad bounding boxes '
+ 'AND the 7 near-edge traces/vias from retaining lips; rerun board-only STEP interference. '
+ 'Do not assert populated component fit or physical retention; approval remains blocked. '
  'Do not request manufacturing, purchasing or source-independent dimensions.')
 resp=client.post(f'/v1/projects/{pid}/ai-sessions',json={
  'mission':mission,'expected_revision':rev,

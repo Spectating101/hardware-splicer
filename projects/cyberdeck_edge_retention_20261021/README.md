@@ -58,18 +58,26 @@ physical packaging tradeoff, not necessarily a smaller or better product.
    retaining wall. The revised design had **0.0 mm³** remaining overlap with
    the 23 declared source pad keepouts and **0.0 mm³** interference with the
    board-only STEP or between base/lid.
-6. After clarifying that these source-only CAD operations do **not** require
+6. The next original-source KiCad conductor pass enumerated **456 tracks and
+   vias**, no source copper zones, and **7 trace segments** in or near the
+   proposed retaining-lip zone (including wide 5.0 mm copper). The pad-aware
+   prototype still had **29.4863 mm³** summed source trace/via keepout overlap.
+   A third revision excluded those 7 trace footprints from both source-derived
+   lip regions; the resulting projected nominal trace/via keepout overlap was
+   **0.0 mm³**. This does not certify plating, solder mask or powered
+   insulation.
+7. After clarifying that these source-only CAD operations do **not** require
    a manufactured physical measurement or a persisted mechanical-layer load
    case, the **actual Copilot HS AI session** proposed
    `generate_board_edge_retention_candidate`. An operator approved ONLY that
    specific software action through HS `/decision`; HS executed its canonical
    `/execute-preview`, wrote native STEP/STL, source hashes and a persistent
    engineering project artifact. This was not arbitrary model-provided code.
-7. We then **independently reimported the generated STEP parts** and compared
+8. We then **independently reimported the generated STEP parts** and compared
    against a second KiCad board-only export. All three nominal solid
    intersections remained **0.0 mm³**. A separate binary STL triangle/edge
    topology scan found **0 nonmanifold edges and 0 degenerate triangles**:
-   3,468 triangles for base, 2,568 for lid. These checks are necessary sanity
+   3,724 triangles for base, 2,824 for lid. These checks are necessary sanity
    checks, not proof of printability, stiffness or material suitability.
 
 ## Generated actual CAD and inspectable records
@@ -79,7 +87,7 @@ physical packaging tradeoff, not necessarily a smaller or better product.
 - [Base — generated STL](./source_edge_capture_base.stl)
 - [Lid — generated STL](./source_edge_capture_lid.stl)
 - [CAD_REPORT.json](./CAD_REPORT.json): exact source/model hashes, nominal
-  geometry dimensions, fastener hole centres, pad exclusions and explicit
+  geometry dimensions, fastener hole centres, pad and trace exclusions and explicit
   authority/physical test limitations
 - [INDEPENDENT_VALIDATION.json](./INDEPENDENT_VALIDATION.json): second geometry
   check, SHA-256 identity, STEP intersection and STL topology counts
@@ -94,9 +102,12 @@ identity and checks CAD **geometry**, not binary equality between two exports.
 
 ## What remains unproven
 
-- **Copper**: traces, vias, pours and solder-mask constraints were *not*
-  fully offset/interference-tested. Pad bounding boxes are conservative and do
-  not cover all trace conductors.
+- **Copper**: source 2D pad bounding boxes and PCB track/via centreline
+  widths now undergo a conservative nominal retaining-lip exclusion screen:
+  145 pads, 456 traces/vias and zero zone shapes inventoried. This is still
+  **not** a complete electrical clearance/insulation test: KiCad solder mask,
+  plating, pad stacks, populated connector bodies, PCB fabrication tolerances,
+  3D assembly contact and manufacturing variations remain unqualified.
 - **Populated 3D assembly**: component heights and envelope clearance, Q1
   heatsink/ground tab, cable mating, USB and connector service openings remain
   unverified. The board-only STEP omits placed component 3D models.
@@ -112,11 +123,12 @@ identity and checks CAD **geometry**, not binary equality between two exports.
   Its original **43 ERC and 16 DRC** results remain separate unresolved work.
 
 **Conclusion:** source-derived retainer geometry is now substantially better
-specified and the obvious pad keepout conflict has been repaired in CAD.
+specified and obvious original-source pad AND near-edge trace keepout
+conflicts have been repaired in CAD.
 **Software geometry candidate: PASS. Physical/circuit/system engineering: NOT
 VALIDATED.** Correct next step: original footprint-specific 3D models and
-pad/trace/courtyard clearance checks, then connector openings and mechanical
-load/retention assessment.
+full 3D component/courtyard and connector checks, then actual mounting
+interfaces and physical mechanical load/retention assessment.
 
 ## Reproduction
 

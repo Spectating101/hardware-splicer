@@ -58,6 +58,12 @@ def test_actual_source_board_edge_capture_step_parts_no_interference(tmp_path):
     assert g['uncorrected_pad_keepout_overlap_mm3'] > 30
     assert g['corrected_pad_keepout_overlap_mm3'] <= 0.02
     assert g['source_pad_projection_no_lip_overlap_pass']
+    assert g['source_trace_via_count_checked']==456
+    assert g['source_pcb_copper_zone_count']==0
+    assert g['source_trace_via_lip_risk_count']==7
+    assert g['initial_track_keepout_overlap_mm3']>20
+    assert g['corrected_track_keepout_overlap_mm3']<=0.02
+    assert g['source_tracks_and_vias_projected_keepouts_pass']
     assert len(result['external_lid_screw_centres_mm'])==4
     assert not result['board_corner_M3_holes_assumed']
     assert result['enclosure_outer_mm']=={'x':106.9,'y':77.3,'z':6.46}
@@ -83,6 +89,9 @@ def test_nominal_outline_contains_curved_notch_and_no_false_board_mounts():
     assert audited['explicit_mounting_footprint_refs']==[]
     assert audited['pad_count_all_layers']==145
     assert audited['nominal_edge_lip_pad_risk_candidate_count']==23
+    assert audited['source_track_or_via_count']==456
+    assert audited['nominal_edge_lip_track_risk_candidate_count']==7
+    assert audited['source_zone_count']==0
     assert any(34.90<p['x']<39.90 and p['y']>30 for p in audited['edge_cuts_profile_mm'])
     assert not audited['physical_fit_authorized']
 

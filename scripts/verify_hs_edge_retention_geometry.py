@@ -58,6 +58,9 @@ def check(folder:Path,board_step:Path,source_pcb:Path)->dict:
       'STEP_export_binary_hashes_need_not_match_due_to_exporter_metadata':True,
       'nominal_step_intersections':checks,
       'source_pad_exclusions_mm3':report['geometric_clearance_checks']['corrected_pad_keepout_overlap_mm3'],
+      'source_trace_exclusions_mm3':report['geometric_clearance_checks']['corrected_track_keepout_overlap_mm3'],
+      'source_nominal_copper_track_and_via_count':report['geometric_clearance_checks']['source_trace_via_count_checked'],
+      'source_near_lip_trace_risk_count':report['geometric_clearance_checks']['source_trace_via_lip_risk_count'],
       'step_stl_generated_sha256s_verified':hashes_ok,
       'independent_stl_manifold_edge_incidence':mesh,
       'software_geometry_screen_passed':(
@@ -66,7 +69,8 @@ def check(folder:Path,board_step:Path,source_pcb:Path)->dict:
           and checks['base_step_valid'] and checks['lid_step_valid']
           and all(hashes_ok.values())
           and all(x['closed_two_incident_edges_necessary_condition'] for x in mesh.values())
-          and report['geometric_clearance_checks']['corrected_pad_keepout_overlap_mm3']<=0.02),
+          and report['geometric_clearance_checks']['corrected_pad_keepout_overlap_mm3']<=0.02
+          and report['geometric_clearance_checks']['corrected_track_keepout_overlap_mm3']<=0.02),
       'comprehensive_copper_and_populated_component_fit_proven':False,
       'print_mechanical_authority_granted':False,
     }
@@ -87,6 +91,6 @@ if __name__=='__main__':
         opts.out.parent.mkdir(parents=True,exist_ok=True)
         opts.out.write_text(json.dumps(report,indent=2)+'\n')
     print('INDEPENDENT_CHECK',json.dumps({k:report[k] for k in (
-      'software_geometry_screen_passed','source_pad_exclusions_mm3')}) ,flush=True)
+      'software_geometry_screen_passed','source_pad_exclusions_mm3','source_trace_exclusions_mm3')}) ,flush=True)
     for k,v in report['independent_stl_manifold_edge_incidence'].items():
         print('STL',k,v,flush=True)

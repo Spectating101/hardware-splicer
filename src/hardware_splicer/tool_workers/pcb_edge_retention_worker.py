@@ -7,6 +7,7 @@ strength, connector/pad collisions, and real-world fit remain unverified.
 from __future__ import annotations
 import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 import cadquery as cq
@@ -146,6 +147,52 @@ def execute(step_path:Path,geometry_path:Path,output:Path)->dict:
         after_pad_interference_mm3+=_volume(lid.intersect(upper))
     if after_pad_interference_mm3>0.02:
         raise ValueError('source pad clearance exclusion still collides with candidate lips')
+    # Trace/via centreline and width data from the same original KiCad source
+    # need separately bounded keepouts; pads alone are insufficient (several
+    # original traces are 5 mm wide and run near PCB perimeter).
+    risk_tracks=geo.get('nominal_edge_lip_track_risk_candidates')
+    if not isinstance(risk_tracks,list) or len(risk_tracks)>175:
+        raise ValueError('source conductor risk list missing or unbounded')
+    if geo.get('source_zone_count') is None:
+        raise ValueError('original PCB source copper zone inventory required')
+
+    def conductor_cutter(tr, zmin, length):
+        begin=tr['begin_xy_mm'];end=tr['end_xy_mm']
+        x0,y0=float(begin['x']),-float(begin['y'])
+        x1,y1=float(end['x']),-float(end['y'])
+        copper_radius=float(tr['width_mm'])/2+pad_extra
+        delta_x=x1-x0;delta_y=y1-y0
+        span=math.hypot(delta_x,delta_y)
+        if not (0.1<=copper_radius<=9.0 and 0<=span<=300):
+            raise ValueError('invalid source conductor segment')
+        endpoints=(cq.Workplane('XY').center(x0,y0).circle(copper_radius).extrude(length)
+                   .union(cq.Workplane('XY').center(x1,y1).circle(copper_radius).extrude(length)))
+        if span>0.001:
+            midx=(x0+x1)/2;midy=(y0+y1)/2
+            bridge=(cq.Workplane('XY').center(midx,midy)
+                    .rect(span,copper_radius*2).extrude(length)
+                    .rotate((midx,midy,0),(midx,midy,1),math.degrees(math.atan2(delta_y,delta_x))))
+            endpoints=endpoints.union(bridge)
+        return endpoints.translate((0,0,zmin))
+
+    pre_trace_interference_mm3=0.0
+    for tr in risk_tracks:
+        bottom_cut=conductor_cutter(tr,bbox.zmin-floor-0.04,floor+0.08)
+        upper_cut=conductor_cutter(tr,lid_z0-0.04,lid_height+0.08)
+        bottom_cut=bottom_cut.intersect(board_interior_base)
+        upper_cut=upper_cut.intersect(board_interior_lid)
+        pre_trace_interference_mm3+=_volume(base.intersect(bottom_cut))
+        pre_trace_interference_mm3+=_volume(lid.intersect(upper_cut))
+        base=base.cut(bottom_cut)
+        lid=lid.cut(upper_cut)
+    post_trace_interference_mm3=0.0
+    for tr in risk_tracks:
+        below=conductor_cutter(tr,bbox.zmin-floor-0.04,floor+0.08).intersect(board_interior_base)
+        above=conductor_cutter(tr,lid_z0-0.04,lid_height+0.08).intersect(board_interior_lid)
+        post_trace_interference_mm3+=_volume(base.intersect(below))
+        post_trace_interference_mm3+=_volume(lid.intersect(above))
+    if post_trace_interference_mm3>0.02:
+        raise ValueError('trace-centreline copper clearance after exclusion remains unresolved')
     # Screw holes are in the CASE margin only; no assumed PCB holes.
     for x,y in screws:
         base=base.cut(cq.Workplane('XY').workplane(offset=bbox.zmin-floor-0.02)
@@ -193,6 +240,12 @@ def execute(step_path:Path,geometry_path:Path,output:Path)->dict:
            'uncorrected_pad_keepout_overlap_mm3':round(before_pad_interference_mm3,4),
            'corrected_pad_keepout_overlap_mm3':round(after_pad_interference_mm3,6),
            'source_pad_projection_no_lip_overlap_pass':True,
+           'source_trace_via_count_checked':geo.get('source_track_or_via_count'),
+           'source_pcb_copper_zone_count':geo.get('source_zone_count'),
+           'source_trace_via_lip_risk_count':len(risk_tracks),
+           'initial_track_keepout_overlap_mm3':round(pre_trace_interference_mm3,4),
+           'corrected_track_keepout_overlap_mm3':round(post_trace_interference_mm3,6),
+           'source_tracks_and_vias_projected_keepouts_pass':True,
            'pcb_component_models_included':False,
            'fastener_clamping_tested':False,
        },
@@ -202,6 +255,7 @@ def execute(step_path:Path,geometry_path:Path,output:Path)->dict:
        'connector_access_verified':False,
        'copper_edge_keepout_verified':False,
        'pad_bounding_regions_excluded_from_candidate_lip':True,
+       'source_trace_segment_regions_excluded_from_candidate_lip':True,
        'component_height_or_pad_clearance_verified':False,
        'edge_support_contact_pressure_verified':False,
        'material_and_print_orientation_qualified':False,

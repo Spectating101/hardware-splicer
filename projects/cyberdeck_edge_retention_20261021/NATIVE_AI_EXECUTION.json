@@ -3,12 +3,12 @@
   "native_source_stored": true,
   "model_provider": "copilot_cli",
   "model": "auto",
-  "session_id": "ai-session-59242feb272944019abb475ece97b0d0",
-  "summary": "Propose a software-only, fixed-parameter two-piece PCB edge-retention CAD candidate derived from the hash-verified RPI_DEV KiCad sources. The candidate should follow the supplied 33-vertex Edge.Cuts profile, account for the notch, exclude all identified nominal pad bounding boxes from retaining lips, and check intersections against the original-board STEP representation if available. This does not establish component fit, copper clearance, mechanical strength, material suitability, manufacturing readiness, or physical retention.",
+  "session_id": "ai-session-9a8387dae03b46a891a4e8706bd11a6b",
+  "summary": "Propose a software-only, fixed-parameter two-piece PCB edge-capture base/lid derived from the registered RPI_DEV KiCad board. The candidate should exclude all 23 identified pad bounding boxes and the seven near-edge traces/vias from retaining lips, then perform board-only STEP interference analysis. Populated-component fit, mechanical retention, material behavior, manufacturing suitability, and device operation remain unverified and approval-blocked.",
   "action_types": [
     "generate_board_edge_retention_candidate",
-    "identify_missing_evidence",
-    "prepare_verification"
+    "prepare_verification",
+    "identify_missing_evidence"
   ],
   "proposed_cad": true,
   "execution_status": "succeeded",
@@ -28,6 +28,12 @@
       "uncorrected_pad_keepout_overlap_mm3": 42.5469,
       "corrected_pad_keepout_overlap_mm3": 0.0,
       "source_pad_projection_no_lip_overlap_pass": true,
+      "source_trace_via_count_checked": 456,
+      "source_pcb_copper_zone_count": 0,
+      "source_trace_via_lip_risk_count": 7,
+      "initial_track_keepout_overlap_mm3": 29.4863,
+      "corrected_track_keepout_overlap_mm3": 0.0,
+      "source_tracks_and_vias_projected_keepouts_pass": true,
       "pcb_component_models_included": false,
       "fastener_clamping_tested": false
     },
@@ -39,26 +45,26 @@
     "generated_artifacts": [
       {
         "filename": "source_edge_capture_base.step",
-        "sha256": "sha256:7153728711c237391da1dd8d94035d49db4c9332fd52fb8f1d5300a3008be722",
-        "size_bytes": 545319
+        "sha256": "sha256:45f03352e7d5cbc2ba027358508113e925d3c5def6bff68cc72dfe056a659286",
+        "size_bytes": 591419
       },
       {
         "filename": "source_edge_capture_lid.step",
-        "sha256": "sha256:0cbcfbc4cb3982427076adbeb096b31f96591cc3a4d8a22f2afad87a644895eb",
-        "size_bytes": 378436
+        "sha256": "sha256:5b45102bf3e1161a9d7792aa2c392decd76d6952e3745e16c4618bdc1c36cd12",
+        "size_bytes": 423419
       },
       {
         "filename": "source_edge_capture_base.stl",
-        "sha256": "sha256:001234d43c6a94f3525fa29f7c1042c16c7ae359a5e37ca72758809c1fa8c10a",
-        "size_bytes": 173484
+        "sha256": "sha256:1bc63b66ed81563de53c3d189c5ad194b29a8301d86a5fb09d95712f3bae8fc4",
+        "size_bytes": 186284
       },
       {
         "filename": "source_edge_capture_lid.stl",
-        "sha256": "sha256:41aedd4bd135affb95f9ff2b45d8b0249abc49a8ee31b9a1aa95786c0e073456",
-        "size_bytes": 128484
+        "sha256": "sha256:adb60cf9be80623ffb2a42de0715b5b8805dd071e10bc06419ad7453d4891af0",
+        "size_bytes": 141284
       }
     ],
-    "artifact_dir_relative": "ai_tool_runs/ai-session-59242feb272944019abb475ece97b0d0/action-f21255f55f619efb/source_derived_edge_retention",
+    "artifact_dir_relative": "ai_tool_runs/ai-session-9a8387dae03b46a891a4e8706bd11a6b/action-2d44004dc6089b0f/source_derived_edge_retention",
     "screw_centres_outside_board_envelope": true,
     "actual_part_components_and_copper_clearance_verified": false,
     "physical_fit_verified": false,
@@ -66,8 +72,8 @@
     "automatic_execution": false
   },
   "artifact": {
-    "project_relative_path": "ai_tool_runs/ai-session-59242feb272944019abb475ece97b0d0/action-f21255f55f619efb/source_edge_retention_manifest.json",
-    "sha256": "880be96b95c618b07fc1f57bc55b06df2bfb31ebdf1cfde9fc6cca03a8cde5a5",
-    "size_bytes": 3761
+    "project_relative_path": "ai_tool_runs/ai-session-9a8387dae03b46a891a4e8706bd11a6b/action-2d44004dc6089b0f/source_edge_retention_manifest.json",
+    "sha256": "8d50e137e656660d9db49b91fbbc6bd72d10a33318ac1a4ba8a65eeb215584d1",
+    "size_bytes": 4111
   }
 }
