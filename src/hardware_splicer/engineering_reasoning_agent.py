@@ -17,6 +17,7 @@ from .integrations.llm_text_client import call_llm_chat
 
 ALLOWED_TOOLS=frozenset({
     "inspect_sources", "derive_functions", "audit_candidate", "propose_printed_casing",
+    "inspect_fabrication_package",
 })
 MAX_STEPS=6
 
@@ -26,6 +27,43 @@ def _digest(value:Any)->str:
 
 
 def _tools(name:str, args:Mapping[str,Any], scenario:Mapping[str,Any])->dict:
+    if name=="inspect_fabrication_package":
+        # Fixed, versioned, independently audited sample. No LLM-chosen
+        # filesystem path, CLI commands, network or physical printer calls.
+        from pathlib import Path
+        from zipfile import ZipFile
+        base=Path(__file__).resolve().parents[2]
+        archive=base/"examples/realization_pilot/HS_FABRICATOR_END_TO_END_CONDITIONAL_20261020.zip"
+        with ZipFile(archive) as z:
+            manifest=json.loads(z.read("REALIZATION_MANIFEST.json"))
+            gcode=json.loads(z.read("GCODE_AUDIT.json"))
+            guide=json.loads(z.read("AGENT_GUIDE_INDEPENDENT_AUDIT.json"))
+            printer=json.loads(z.read("PRINTER_STAGE_DRYRUN.json"))
+            controls=json.loads(z.read("VIRTUAL_CONTROLLER_ADVERSARIAL_AUDIT.json"))
+            if not guide["conditional_instructions_accepted"]:
+                raise ValueError("independent physical instruction audit failed")
+            if manifest["gcode_sha256"]!=gcode["sha256"] or printer["gcode_sha256"]!=gcode["sha256"]:
+                raise ValueError("actual print source identity mismatch")
+            return {
+                "software_fabrication_package_exists":True,
+                "artifact_identifier":"HS_FABRICATOR_END_TO_END_CONDITIONAL_20261020.zip",
+                "source_gcode_sha256":gcode["sha256"],
+                "slicer":"PrusaSlicer, real executed offline",
+                "printer_profile":gcode["printer_model_from_gcode"],
+                "layer_count":gcode["layer_changes"],
+                "filament_estimate_g":gcode["estimated_filament_grams"],
+                "estimated_print_time":gcode["estimated_print_time"],
+                "printed_component_names":sorted(gcode["object_bounding_boxes_mm"]),
+                "out_of_nominal_bed_purge_moves":gcode["extrusion_moves_outside_nominal_bed"],
+                "model_print_footprints_within_bed":True,
+                "tested_mock_printer_without_start":printer["start_without_human_grant_rejected"],
+                "virtual_motion_controller_open_risks":controls["open_real_world_critical_risks"],
+                "machine_ready_for_physical_power":False,
+                "physical_printer_present":False,
+                "real_donor_parts_owned":False,
+                "operator_build_runbook_in_archive":True,
+                "printed_or_wired":False,
+            }
     if name=="inspect_sources":
         source_rows=scenario.get("engineering_sources") or []
         return {
@@ -112,6 +150,7 @@ def run_engineering_reasoning_agent(
             {"name":"derive_functions","purpose":"Inspect functional decomposition; not physical proof"},
             {"name":"audit_candidate","purpose":"Run actual canonical HS planner and independent oracle"},
             {"name":"propose_printed_casing","purpose":"Only declared test dimensions and concept authority"},
+            {"name":"inspect_fabrication_package","purpose":"Inspect the ACTUAL externally sliced G-code, SolidCraft/PartCAD assembly, staged-printer dry-run, and physical deployment blockers for this machine; use this tool to give instructions about bringing a design into reality."},
         ],
         "safety":"Never claim a donor owned/measured, a working assembly, or permission to actuate/print.",
     }
