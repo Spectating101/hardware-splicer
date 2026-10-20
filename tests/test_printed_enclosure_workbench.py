@@ -129,12 +129,21 @@ def test_independent_bbox_checker_rejects_wrong_envelope():
                            [0,0,0],[100,75,35])
 
 
-def test_sdk_and_mcp_expose_guarded_print_casing(concept):
-    import asyncio
-    from hardware_splicer import sdk,mcp_server
+def test_sdk_exposes_guarded_print_casing_without_optional_mcp(concept):
+    """The base HS SDK must work on core installs without the opt-in MCP SDK."""
+    from hardware_splicer import sdk
     a=sdk.prepare_printed_casing(casing_spec=concept)
     assert a["real_printer_connected"] is False
     assert a["mechanical_production_release"] is False
+    assert len(a["solidcraft_print_layout_commands"]["commands"]) >= 20
+
+
+def test_optional_mcp_exposes_guarded_print_casing(concept):
+    """Only require MCP when the optional SDK has actually been installed."""
+    import asyncio
+    pytest.importorskip("mcp.server", reason="opt-in HS MCP backend not installed")
+    from hardware_splicer import sdk, mcp_server
+    a=sdk.prepare_printed_casing(casing_spec=concept)
     tools=asyncio.run(mcp_server.list_tools())
     assert any(t.name=="hs_prepare_printed_casing" for t in tools)
     response=asyncio.run(mcp_server.call_tool(
