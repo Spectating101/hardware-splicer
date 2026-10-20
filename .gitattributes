@@ -7,3 +7,5 @@ examples/printed_casing/native_trial/partcad/*.step -diff -whitespace
 examples/printed_casing/native_trial/*.stl -diff -whitespace
 examples/printed_casing/native_trial/*.3mf -diff -whitespace
 examples/printed_casing/native_trial/*.solidcraft -diff -whitespace
+# Verified zipped fabrication candidate; archive includes G-code and native CAD.
+examples/realization_pilot/*.zip -diff -whitespace

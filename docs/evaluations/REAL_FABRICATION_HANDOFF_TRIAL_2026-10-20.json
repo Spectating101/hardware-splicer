@@ -1,0 +1,60 @@
+{
+  "schema_version": "hs.end_to_end_realization_pilot_report.v1",
+  "evaluated_on": "2026-10-20",
+  "physical_machine_built": false,
+  "printer_or_donor_attached": false,
+  "real_slicer": "PrusaSlicer Debian package 2.9.2",
+  "genuine_slicer_execution": true,
+  "profile": "PrusaResearch.ini derived Original Prusa MK4S 0.4 + 0.20mm STRUCTURAL + Prusament PLA",
+  "profile_physically_verified": false,
+  "output_gcode_sha256": "b651096ce873cff5f5b28852d567a73c265f2efb384c1af251e6d58e907238f5",
+  "output_gcode_size_bytes": 5024818,
+  "printer_profile_declared_from_gcode": "MK4S",
+  "build_plate_mm": [
+    250,
+    210
+  ],
+  "model_parts": [
+    "HS_Casing_Base",
+    "HS_Casing_Lid"
+  ],
+  "actual_slicer_layer_count": 175,
+  "actual_slicer_grams": 74.1,
+  "actual_slicer_time": "3h 13m 39s",
+  "vendor_start_purge_outside_nominal_bed_count": 6,
+  "vendor_purge_y_minus4_review_required": true,
+  "footprint_margin_passed": true,
+  "actual_slicer_gcode_binary": false,
+  "virtual_printer_exact_gcode_upload_passed": true,
+  "virtual_printer_disallowed_start_rejected": true,
+  "real_printer_network_contacted": false,
+  "virtual_controller_mutants_tested": 4,
+  "virtual_controller_mutants_detected": 4,
+  "physical_controller_release": "BLOCKED",
+  "actual_chatgpt_codex_guidance_generated": true,
+  "agent_instructions_number": 30,
+  "independent_guide_acceptance": true,
+  "independent_guide_errors": [],
+  "archive_sha256": "a0b48febafe27c88d932f6a54b4c1750f70be67e36e81ae120dd50e001dc0d2e",
+  "archive_bytes": 1039084,
+  "files_in_zip": 26,
+  "physical_print_authorized": false,
+  "motor_power_authorized": false,
+  "electrical_harness_validated": false,
+  "actual_first_article_passed": false,
+  "stopping_conditions": [
+    "Only a hypothetical Prusa MK4S was selected from a manufacturer-derived profile; no actual printer identified",
+    "Outside-nominal-build-plate vendor purge G-code requires actual printer-specific review",
+    "No donor acquired/measured; cannot assert mounting and component fit",
+    "Scanner cut cable pinout, motor driver/current and controller/safety-stop unspecified",
+    "No approved physical power/motion/print test"
+  ],
+  "actual_agent_reentered_after_fabrication": true,
+  "second_real_agent_actions": [
+    "inspect_fabrication_package",
+    "audit_candidate",
+    "finish"
+  ],
+  "live_agent_re_evaluated_original_source_audit": true,
+  "second_agent_did_not_authorize_physical_action": true
+}
