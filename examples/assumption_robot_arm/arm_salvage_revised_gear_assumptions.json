@@ -1,0 +1,122 @@
+{
+  "schema_version": "hardware_splicer.arm_splicing_assumption_benchmark.v1",
+  "test_goal": "REVISE the earlier four-joint robot arm for a 400mm-reach 150g printed-part pickup task. Independent torque study of a prior 450mm serial chain with 5Nm shoulder and 3Nm elbow showed worst-case horizontal shoulder demand 8.60Nm vs derated supply 3.25Nm, elbow 3.82Nm vs derated 1.95Nm. New representative geared actuator CLASSES (20Nm shoulder, 12Nm elbow, both unowned, not real manufacturer specs) are now explicitly in the visible inventory. Select from visible identities; keep positive link dimensions, 4DoF yaw/pitch/pitch/pitch for 3D target positions, preserve 400mm reach. There are NO observed salvaged motors and real weight from stronger motors is not yet included in the assumed link mass distribution; still block real motion until measured.",
+  "case_type": "robotic_arm_as_assembly_tool_and_as_recycled_device",
+  "information_authority": "BENCHMARK_ASSUMPTION_ONLY",
+  "actual_salvaged_components_acquired": false,
+  "actual_arm_present": false,
+  "manual_gate": "all dimensions/ratings must be replaced by measured or model/revision-verified evidence before physical energization",
+  "requirements": {
+    "required_reach_mm": 400.0,
+    "payload_mass_kg": 0.15,
+    "minimum_static_torque_safety_factor": 1.5,
+    "max_joint_count": 5,
+    "target_repeatability_mm": 5.0,
+    "physical_motion_authorized": false
+  },
+  "assumed_part_catalog": [
+    {
+      "component_id": "assumed_base_yaw_24v",
+      "type": "actuator",
+      "continuous_torque_nm": 4.0,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    },
+    {
+      "component_id": "assumed_shoulder_24v",
+      "type": "actuator",
+      "continuous_torque_nm": 5.0,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    },
+    {
+      "component_id": "assumed_elbow_24v",
+      "type": "actuator",
+      "continuous_torque_nm": 3.0,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    },
+    {
+      "component_id": "assumed_wrist_24v",
+      "type": "actuator",
+      "continuous_torque_nm": 1.2,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    },
+    {
+      "component_id": "assumed_shoulder_geared_high_torque",
+      "type": "actuator",
+      "continuous_torque_nm": 20,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    },
+    {
+      "component_id": "assumed_elbow_geared_high_torque",
+      "type": "actuator",
+      "continuous_torque_nm": 12,
+      "nominal_voltage_v": 24,
+      "feedback": "encoder",
+      "source_type": "representative_not_measured",
+      "torque_low_factor": 0.65,
+      "torque_high_factor": 1.2
+    }
+  ],
+  "estimated_physical_intervals": {
+    "payload_mass_kg": [
+      0.05,
+      0.15
+    ],
+    "end_effector_mass_kg": [
+      0.08,
+      0.2
+    ],
+    "link_mass_kg_per_segment": [
+      0.06,
+      0.24
+    ],
+    "structural_link_deflection_mm_max_assumed": [
+      0.25,
+      3.0
+    ],
+    "joint_backlash_deg_each": [
+      0.3,
+      4.0
+    ],
+    "overall_actuator_thermal_derating_factor": [
+      0.65,
+      1.0
+    ],
+    "effective_acceleration_dynamic_torque_factor": [
+      1.0,
+      1.8
+    ],
+    "pick_and_place_nominal_distance_mm": [
+      250,
+      450
+    ]
+  },
+  "design_assumptions_not_evidence": [
+    "Assumed motors stand for classes of geared actuators with encoders, not identified donor motors or purchase recommendations.",
+    "The 24 V supply is a hypothesis only; no real power source, driver, controller or current rating is verified.",
+    "The arm payload includes a provisional lid or other printed part; existing 74.10g slicer estimate covers both case parts and does not establish measured lid mass.",
+    "Link mass and rigidity estimates are independent benchmark intervals; selected printable material and orientation remain unverified.",
+    "URDF collision objects are simple proxy boxes, not a tested robot or exact fabricated joints."
+  ],
+  "physical_release": false,
+  "catalog_stage": "alternative_geared_joint_classes_for_overload_revision_not_acquired"
+}

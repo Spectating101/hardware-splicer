@@ -9,3 +9,5 @@ examples/printed_casing/native_trial/*.3mf -diff -whitespace
 examples/printed_casing/native_trial/*.solidcraft -diff -whitespace
 # Verified zipped fabrication candidate; archive includes G-code and native CAD.
 examples/realization_pilot/*.zip -diff -whitespace
+# Reproducible robotics CAD/slicer/native benchmark artifacts.
+examples/assumption_robot_arm/*.zip -diff -whitespace
