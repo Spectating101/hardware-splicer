@@ -355,6 +355,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Local bounded CAD-to-FEM screening")
     parser.add_argument("cad_file", type=Path)
     parser.add_argument("--mesh-size-mm", type=float, default=8.0)
+    parser.add_argument(
+        "--mesh-study-mm", type=float, nargs="+",
+        help="Run 3-4 strictly decreasing coarse-to-fine sizes, e.g. 12 8 6; "
+             "report sensitivity rather than only one mesh",
+    )
+    parser.add_argument(
+        "--displacement-tolerance", type=float, default=0.02,
+        help="Max adjacent-mesh relative change (study only; default 0.02)",
+    )
+    parser.add_argument(
+        "--stress-tolerance", type=float, default=0.03,
+        help="Max adjacent-mesh peak von Mises change (study only; default 0.03)",
+    )
     parser.add_argument("--stl-units", choices=["mm"], default=None,
                         help="Mandatory for STL: acknowledge the model's mm units")
     parser.add_argument("--fixed-plane", choices=["x_min", "x_max", "y_min", "y_max", "z_min", "z_max"], required=True)
@@ -365,19 +378,37 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--yield-pa", type=float, default=None)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
-    result = run_cad_screening(
-        args.cad_file, mesh_target_mm=args.mesh_size_mm, stl_units=args.stl_units,
-        fixed_plane=args.fixed_plane, loaded_plane=args.loaded_plane,
-        total_force_n=args.force_n, youngs_modulus_pa=args.youngs_pa,
-        poisson_ratio=args.poisson, yield_strength_pa=args.yield_pa,
-    )
+    if args.mesh_study_mm is not None:
+        from .mechanical_cad_convergence import run_cad_mesh_sensitivity
+
+        result = run_cad_mesh_sensitivity(
+            args.cad_file, mesh_sizes_mm=args.mesh_study_mm,
+            stl_units=args.stl_units,
+            fixed_plane=args.fixed_plane, loaded_plane=args.loaded_plane,
+            total_force_n=args.force_n, youngs_modulus_pa=args.youngs_pa,
+            poisson_ratio=args.poisson, yield_strength_pa=args.yield_pa,
+            displacement_tolerance=args.displacement_tolerance,
+            stress_tolerance=args.stress_tolerance,
+        )
+    else:
+        result = run_cad_screening(
+            args.cad_file, mesh_target_mm=args.mesh_size_mm, stl_units=args.stl_units,
+            fixed_plane=args.fixed_plane, loaded_plane=args.loaded_plane,
+            total_force_n=args.force_n, youngs_modulus_pa=args.youngs_pa,
+            poisson_ratio=args.poisson, yield_strength_pa=args.yield_pa,
+        )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     print(f"CAD-to-FEM screening saved: {args.out}")
-    print(f"elements={result['analysis']['element_count']} "
-          f"max_displacement_m={result['analysis']['max_displacement_m']:.6g} "
-          f"max_von_mises_pa={result['analysis']['max_von_mises_pa']:.6g} "
-          "(screening only)")
+    if args.mesh_study_mm is not None:
+        print(f"mesh sensitivity: {result['status']}; "
+              f"blockers={result['sensitivity_blockers']}; "
+              "physical validation still required")
+    else:
+        print(f"elements={result['analysis']['element_count']} "
+              f"max_displacement_m={result['analysis']['max_displacement_m']:.6g} "
+              f"max_von_mises_pa={result['analysis']['max_von_mises_pa']:.6g} "
+              "(screening only)")
     return 0
 
 
