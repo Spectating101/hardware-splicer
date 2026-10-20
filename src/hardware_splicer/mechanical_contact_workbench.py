@@ -167,7 +167,7 @@ def make_operator_review(
         modeled_clearance = investigation["mesh_levels"][0]["clearance_mm"]
         if any(
             abs(row["radial_clearance_mm_median"] - modeled_clearance)
-            > max(.01, .25 * modeled_clearance)
+            > max(.001, .25 * modeled_clearance)
             for row in physical["orientations"]
         ):
             blockers.append("measured_clearance_differs_from_fem_assumption")

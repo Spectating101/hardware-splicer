@@ -34,7 +34,7 @@ def specimens_example():
                 "print_orientation": name,
                 "material_batch": "PETG-fake-for-test",
                 "fixture_protocol_id": "TEST-PROTOCOL",
-                "measured_bore_d_mm": 3.22,
+                "measured_bore_d_mm": 3.21,
                 "measured_pin_d_mm": 3.20,
                 "maximum_force_n": 17+i,
                 "displacement_at_maximum_mm": 0.15+i*.02,
@@ -52,7 +52,7 @@ def test_specimen_data_schema_and_statistics(tmp_path):
     assert r["evidence_completeness_blockers"] == []
     assert len(r["orientations"]) == 2
     assert all(x["specimen_count"] == 3 for x in r["orientations"])
-    assert all(x["radial_clearance_mm_median"] == pytest.approx(.01)
+    assert all(x["radial_clearance_mm_median"] == pytest.approx(.005)
                for x in r["orientations"])
     assert r["engineering_strength_signoff_present"] is False
     assert r["model_vs_physical_predictions_validated"] is False
