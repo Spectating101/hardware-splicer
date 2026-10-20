@@ -39,7 +39,7 @@ def engines_report() -> dict[str, Any]:
         "engines": [
             {"id": name, "package": package, "purpose": purpose,
              "installed": importlib.util.find_spec(package) is not None,
-             "adapter_implemented": name in {"rdkit", "thermo"}}
+             "adapter_implemented": name in {"rdkit", "thermo", "cantera", "pybamm", "pymatgen"}}
             for name, package, purpose in ENGINES
         ],
         "interpretation": "Presence is not validation or project evidence.",

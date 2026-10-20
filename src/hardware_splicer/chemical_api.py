@@ -6,6 +6,11 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .chemical_gas import gas_state_report
+from .chemical_battery import battery_discharge_report
+from .chemical_materials import solid_composition_report
+from .material_evidence import evaluate_material_evidence
+from .machine_project import MachineProject
 from .chemical_engineering import (
     EngineUnavailable,
     engines_report,
@@ -41,6 +46,30 @@ class MassBalanceRequest(BaseModel):
     relative_tolerance: float = Field(default=1e-4, ge=0, le=0.1)
 
 
+
+class GasStateRequest(BaseModel):
+    temperature_k: float = Field(ge=250, le=1200)
+    pressure_pa: float = Field(ge=5e4, le=5e6)
+    mole_fractions: dict[str, float] = Field(min_length=1, max_length=3)
+    equilibrium: bool = False
+    source_refs: list[str] = Field(default_factory=list, max_length=32)
+
+
+class MaterialEvidenceRequest(BaseModel):
+    project: MachineProject
+    component_id: str = Field(min_length=1, max_length=128)
+
+
+class BatteryDischargeRequest(BaseModel):
+    c_rate: float = Field(ge=0.1, le=1.0)
+    duration_s: float = Field(ge=60, le=3600)
+    source_refs: list[str] = Field(default_factory=list, max_length=32)
+
+
+class MaterialCompositionRequest(BaseModel):
+    formula: str = Field(min_length=1, max_length=128)
+    source_refs: list[str] = Field(default_factory=list, max_length=32)
+
 def _call(engine: Any, *args: Any, **kwargs: Any) -> dict[str, Any]:
     try:
         return engine(*args, **kwargs)
@@ -64,6 +93,27 @@ def create_chemical_router() -> APIRouter:
     @router.post("/properties/inspect")
     def inspect_properties(request: PropertyInspectRequest) -> dict[str, Any]:
         return _call(property_report, request.chemical_id, request.temperature_k, request.pressure_pa,
+                     source_refs=request.source_refs)
+
+    @router.post("/materials/composition")
+    def inspect_solid_composition(request: MaterialCompositionRequest) -> dict[str, Any]:
+        return _call(solid_composition_report, request.formula, source_refs=request.source_refs)
+
+    @router.post("/materials/evidence-check")
+    def review_material_evidence(request: MaterialEvidenceRequest) -> dict[str, Any]:
+        return _call(evaluate_material_evidence, request.project, request.component_id)
+
+    @router.post("/battery/discharge")
+    def model_battery_discharge(request: BatteryDischargeRequest) -> dict[str, Any]:
+        return _call(battery_discharge_report,
+                     c_rate=request.c_rate, duration_s=request.duration_s,
+                     source_refs=request.source_refs)
+
+    @router.post("/gas/state")
+    def inspect_gas_state(request: GasStateRequest) -> dict[str, Any]:
+        return _call(gas_state_report,
+                     temperature_k=request.temperature_k, pressure_pa=request.pressure_pa,
+                     mole_fractions=request.mole_fractions, equilibrium=request.equilibrium,
                      source_refs=request.source_refs)
 
     @router.post("/process/mass-balance")
