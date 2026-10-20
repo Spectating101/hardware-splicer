@@ -1,0 +1,5 @@
+pin_drive_mm,force_transferred_n,first_pin_contact_nodes,second_pin_contact_nodes,global_sampled_peak_stress_pa
+0.0,0.0,0,0,0.0
+0.01,7.289752631628866e-05,0,3,29.32251823416608
+0.02,16.223556526741127,27,13,4727156.097461529
+0.04,54.38280621336834,36,26,10032577.649419693

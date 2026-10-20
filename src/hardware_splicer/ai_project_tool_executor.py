@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 from .compose_dispatch import compose_dispatch
 from .engineering_project_source_bundle import analyze_registered_project_bundle
 from .engineering_cad_carrier import generate_registered_pcb_carrier
+from .engineering_layer_reviews import screen_declared_mechanics, screen_declared_chemistry, prepare_declared_enclosure
 from .guided_engineering_planner import plan_guided_engineering_project
 from .project_store import ProjectStore, validate_project_id
 
@@ -34,6 +35,9 @@ EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "run_drc",
     "inspect_registered_sources",
     "generate_board_carrier_candidate",
+    "review_mechanical_layer",
+    "review_practical_chemistry",
+    "prepare_printed_enclosure_concept",
 )
 
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
@@ -289,6 +293,62 @@ def execute_ai_project_action_preview(
             artifact = _atomic_write_json(artifact_path, plan)
             summary = _plan_summary(plan)
             artifact_name = "guided_plan.json"
+        elif action_type == "review_mechanical_layer":
+            requests = _mapping(snapshot.get("engineeringLayerRequests"))
+            source_geometry = {}
+            for record in _rows(snapshot.get("engineeringSourceBundleRuns"))[-2:]:
+                for name, result in _mapping(record.get("geometry")).items():
+                    if isinstance(result, Mapping):
+                        source_geometry[str(name)] = {
+                            key: result.get(key)
+                            for key in ('status','solid_count','bounding_box_mm','axis_span','point_count')
+                            if key in result
+                        }
+            assessment = screen_declared_mechanics(
+                _mapping(requests.get("mechanical")),run_dir=run_dir / 'structural_review',
+                source_geometry=source_geometry,
+            )
+            artifact_path = run_dir / 'mechanical_review.json'
+            artifact = _atomic_write_json(artifact_path, assessment)
+            summary = {
+                'ok':True,'status':assessment.get('status'),
+                'mechanical_scope':_mapping(assessment.get('calculated_scope')).get('status'),
+                'numerical_status':_mapping(assessment.get('solver_result')).get('status'),
+                'input_sha256':assessment['input_sha256'],
+                'source_geometry_count':len(source_geometry),
+                'physical_authority_unchanged':True,
+                'release_authorized':False,
+            }
+            artifact_name = artifact_path.name
+        elif action_type == "review_practical_chemistry":
+            requests=_mapping(snapshot.get("engineeringLayerRequests"))
+            assessment=screen_declared_chemistry(_mapping(requests.get('chemistry')))
+            artifact_path=run_dir/'practical_chemistry_review.json'
+            artifact=_atomic_write_json(artifact_path,assessment)
+            evaluation=_mapping(assessment.get('evaluation'))
+            summary={
+                'ok':True,'status':assessment.get('status'),
+                'decision':evaluation.get('decision'),
+                'input_sha256':assessment['input_sha256'],
+                'material_identity_downgraded':assessment['material_identity_downgraded'],
+                'chemical_clearance_authorized':False,
+                'physical_authority_unchanged':True,
+            }
+            artifact_name=artifact_path.name
+        elif action_type == "prepare_printed_enclosure_concept":
+            requests=_mapping(snapshot.get('engineeringLayerRequests'))
+            assembly=prepare_declared_enclosure(_mapping(requests.get('enclosure')))
+            artifact_path=run_dir/'enclosure_concept.json'
+            artifact=_atomic_write_json(artifact_path,assembly)
+            summary={
+                'ok':True,'status':assembly['status'],
+                'concept_sha256':assembly['design_request_sha256'],
+                'solidcraft_command_count':len(assembly['plan']['solidcraft_print_layout_commands']['commands']),
+                'native_cad_executed':False,
+                'physical_fit_verified':False,
+                'print_authorized':False,
+            }
+            artifact_name=artifact_path.name
         elif action_type == "generate_board_carrier_candidate":
             design_dir = run_dir / 'parametric_board_carrier'
             generated = generate_registered_pcb_carrier(

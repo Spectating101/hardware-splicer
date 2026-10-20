@@ -1,0 +1,577 @@
+{
+  "schema_version": "hardware_splicer.contact_workbench_v1",
+  "source_spec_sha256": "sha256:defa7785ccc4b683c3300d0fd313b6240fe01bda511ff9c4756cd7a0a5ef22a8",
+  "contact_audit": {
+    "schema_version": "hardware_splicer.two_pin_contact_audit.v1",
+    "status": "inconclusive_two_pin_contact_stress",
+    "source_step_sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+    "mesh_levels": [
+      {
+        "schema_version": "hardware_splicer.two_bore_nodal_kkt.v1",
+        "status": "nodal_two_pin_complementarity_screen_only",
+        "source_step_sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+        "mesh_target_mm": 8.0,
+        "local_refinement": null,
+        "geometry_order": 2,
+        "tetrahedron_count": 709,
+        "quadratic_dof_count": 4374,
+        "min_curved_geometry_jacobian": 1.508306222672083e-10,
+        "hole_wall_areas_m2": [
+          4.020022768191126e-05,
+          4.0201031873036725e-05
+        ],
+        "contact_node_count": 244,
+        "pin_drive_mm": 0.02,
+        "clearance_mm": 0.005,
+        "numerical_gauge_n_per_m": 0.01,
+        "numerical_gauge_resultant_n": [
+          0.00014461083406228981,
+          7.377114878593164e-07,
+          5.40246306141592e-13
+        ],
+        "contact_resultant_sum_n": [
+          0.00014461083301142708,
+          7.377116899845226e-07,
+          0.0
+        ],
+        "relative_gauge_reaction": 8.913749305000323e-06,
+        "transmitted_force_scale_n": 16.223556526741127,
+        "per_pin": [
+          {
+            "hole_index": 0,
+            "contact_node_count": 122,
+            "active_contact_node_count": 27,
+            "integrated_nodal_contact_resultant_n": [
+              -16.22341191590806,
+              -6.136647505436621e-07,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 1.2652260089511045
+          },
+          {
+            "hole_index": 1,
+            "contact_node_count": 122,
+            "active_contact_node_count": 13,
+            "integrated_nodal_contact_resultant_n": [
+              16.22355652674107,
+              1.3513764405281847e-06,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 3.5821063731382745
+          }
+        ],
+        "between_node_surface_gap_probes": [
+          {
+            "hole_index": 0,
+            "quadrature_sample_count": 324,
+            "minimum_quadrature_gap_m": -4.8365947093554436e-08,
+            "largest_sampled_between_node_penetration_m": 4.8365947093554436e-08,
+            "sampled_penetrating_area_m2": 6.9154220707212804e-06,
+            "continuous_surface_nonpenetration_proven": false
+          },
+          {
+            "hole_index": 1,
+            "quadrature_sample_count": 324,
+            "minimum_quadrature_gap_m": -7.547279933123696e-08,
+            "largest_sampled_between_node_penetration_m": 7.547279933123696e-08,
+            "sampled_penetrating_area_m2": 5.8362380184561185e-06,
+            "continuous_surface_nonpenetration_proven": false
+          }
+        ],
+        "per_hole_stress": [
+          {
+            "hole_index": 0,
+            "peak_sampled_von_mises_pa": 4727156.097461529,
+            "peak_location_m": [
+              0.008433901995680422,
+              0.00958378773282613,
+              8.28401430005637e-05
+            ],
+            "quadrature_sample_count": 1959,
+            "weighted_rms_von_mises_pa": 579269.4726578197,
+            "p95_quadrature_von_mises_pa": 1594247.3156519812,
+            "p90_quadrature_von_mises_pa": 1323680.3984978413
+          },
+          {
+            "hole_index": 1,
+            "peak_sampled_von_mises_pa": 3258922.8379219198,
+            "peak_location_m": [
+              0.05151037496743867,
+              0.010785738773916307,
+              0.0020599888345763815
+            ],
+            "quadrature_sample_count": 1898,
+            "weighted_rms_von_mises_pa": 575817.6738682013,
+            "p95_quadrature_von_mises_pa": 1374300.8326074048,
+            "p90_quadrature_von_mises_pa": 1188199.7269915682
+          }
+        ],
+        "global_peak_sampled_von_mises_pa": 4727156.097461529,
+        "nodal_max_gap_violation_m": 7.485836461069897e-14,
+        "min_contact_multiplier_n": 0.0,
+        "max_complementarity_n_m": 8.318604244036949e-14,
+        "contact_iterations": 5,
+        "penalty_stiffness_used_in_physics": false,
+        "both_pin_surfaces_use_unilateral_constraints": true,
+        "continuous_surface_nonpenetration_proven": false,
+        "numerical_gauge_negligible_checked": true,
+        "joint_strength_verified": false,
+        "physical_validation_required": true,
+        "structural_safety_verified": false,
+        "fabrication_authorized": false,
+        "release_authorized": false
+      },
+      {
+        "schema_version": "hardware_splicer.two_bore_nodal_kkt.v1",
+        "status": "nodal_two_pin_complementarity_screen_only",
+        "source_step_sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+        "mesh_target_mm": 6.0,
+        "local_refinement": null,
+        "geometry_order": 2,
+        "tetrahedron_count": 965,
+        "quadratic_dof_count": 5889,
+        "min_curved_geometry_jacobian": 2.507784503767952e-10,
+        "hole_wall_areas_m2": [
+          4.0200523939530204e-05,
+          4.0199650546311454e-05
+        ],
+        "contact_node_count": 240,
+        "pin_drive_mm": 0.02,
+        "clearance_mm": 0.005,
+        "numerical_gauge_n_per_m": 0.01,
+        "numerical_gauge_resultant_n": [
+          0.0001956702017723045,
+          3.1055191485811997e-07,
+          8.762962414167802e-13
+        ],
+        "contact_resultant_sum_n": [
+          0.00019567019821131737,
+          3.105532594487818e-07,
+          0.0
+        ],
+        "relative_gauge_reaction": 1.22817773801102e-05,
+        "transmitted_force_scale_n": 15.931769658230989,
+        "per_pin": [
+          {
+            "hole_index": 0,
+            "contact_node_count": 122,
+            "active_contact_node_count": 26,
+            "integrated_nodal_contact_resultant_n": [
+              -15.931573988032742,
+              -7.360888670743856e-07,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 1.230309192216129
+          },
+          {
+            "hole_index": 1,
+            "contact_node_count": 118,
+            "active_contact_node_count": 19,
+            "integrated_nodal_contact_resultant_n": [
+              15.931769658230953,
+              1.0466421265231673e-06,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 2.3711176060599044
+          }
+        ],
+        "between_node_surface_gap_probes": [
+          {
+            "hole_index": 0,
+            "quadrature_sample_count": 324,
+            "minimum_quadrature_gap_m": -4.487923396752395e-08,
+            "largest_sampled_between_node_penetration_m": 4.487923396752395e-08,
+            "sampled_penetrating_area_m2": 8.096728226531877e-06,
+            "continuous_surface_nonpenetration_proven": false
+          },
+          {
+            "hole_index": 1,
+            "quadrature_sample_count": 312,
+            "minimum_quadrature_gap_m": -5.154053756609185e-08,
+            "largest_sampled_between_node_penetration_m": 5.154053756609185e-08,
+            "sampled_penetrating_area_m2": 5.533888939902001e-06,
+            "continuous_surface_nonpenetration_proven": false
+          }
+        ],
+        "per_hole_stress": [
+          {
+            "hole_index": 0,
+            "peak_sampled_von_mises_pa": 2527852.781520796,
+            "peak_location_m": [
+              0.008689004898853152,
+              0.011141875638814433,
+              0.0010710046399193796
+            ],
+            "quadrature_sample_count": 2324,
+            "weighted_rms_von_mises_pa": 574175.892986172,
+            "p95_quadrature_von_mises_pa": 1490332.133163929,
+            "p90_quadrature_von_mises_pa": 1287319.3935448017
+          },
+          {
+            "hole_index": 1,
+            "peak_sampled_von_mises_pa": 2255193.365555976,
+            "peak_location_m": [
+              0.05127045027222939,
+              0.008881393096758894,
+              0.0001041893983153831
+            ],
+            "quadrature_sample_count": 2192,
+            "weighted_rms_von_mises_pa": 575060.6538092141,
+            "p95_quadrature_von_mises_pa": 1347019.0557093264,
+            "p90_quadrature_von_mises_pa": 1138457.28778438
+          }
+        ],
+        "global_peak_sampled_von_mises_pa": 2527852.781520796,
+        "nodal_max_gap_violation_m": 1.6790201160291583e-13,
+        "min_contact_multiplier_n": 0.0,
+        "max_complementarity_n_m": 3.6443488027193136e-13,
+        "contact_iterations": 5,
+        "penalty_stiffness_used_in_physics": false,
+        "both_pin_surfaces_use_unilateral_constraints": true,
+        "continuous_surface_nonpenetration_proven": false,
+        "numerical_gauge_negligible_checked": true,
+        "joint_strength_verified": false,
+        "physical_validation_required": true,
+        "structural_safety_verified": false,
+        "fabrication_authorized": false,
+        "release_authorized": false
+      },
+      {
+        "schema_version": "hardware_splicer.two_bore_nodal_kkt.v1",
+        "status": "nodal_two_pin_complementarity_screen_only",
+        "source_step_sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+        "mesh_target_mm": 5.0,
+        "local_refinement": null,
+        "geometry_order": 2,
+        "tetrahedron_count": 1101,
+        "quadratic_dof_count": 6726,
+        "min_curved_geometry_jacobian": 6.908855457530313e-10,
+        "hole_wall_areas_m2": [
+          4.0200733888512333e-05,
+          4.0200733888512333e-05
+        ],
+        "contact_node_count": 244,
+        "pin_drive_mm": 0.02,
+        "clearance_mm": 0.005,
+        "numerical_gauge_n_per_m": 0.01,
+        "numerical_gauge_resultant_n": [
+          0.0002246102762277588,
+          2.0158321280893228e-07,
+          -3.175098091381314e-13
+        ],
+        "contact_resultant_sum_n": [
+          0.00022461027458753335,
+          2.0158203483701398e-07,
+          0.0
+        ],
+        "relative_gauge_reaction": 1.4047400952007355e-05,
+        "transmitted_force_scale_n": 15.989460787341372,
+        "per_pin": [
+          {
+            "hole_index": 0,
+            "contact_node_count": 122,
+            "active_contact_node_count": 26,
+            "integrated_nodal_contact_resultant_n": [
+              -15.989236177066777,
+              -2.733548889518461e-07,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 1.263050302890306
+          },
+          {
+            "hole_index": 1,
+            "contact_node_count": 122,
+            "active_contact_node_count": 13,
+            "integrated_nodal_contact_resultant_n": [
+              15.989460787341365,
+              4.749369237888601e-07,
+              0.0
+            ],
+            "peak_nodal_normal_contact_multiplier_n": 3.5432904890972514
+          }
+        ],
+        "between_node_surface_gap_probes": [
+          {
+            "hole_index": 0,
+            "quadrature_sample_count": 324,
+            "minimum_quadrature_gap_m": -4.5075420622836865e-08,
+            "largest_sampled_between_node_penetration_m": 4.5075420622836865e-08,
+            "sampled_penetrating_area_m2": 6.972734800670802e-06,
+            "continuous_surface_nonpenetration_proven": false
+          },
+          {
+            "hole_index": 1,
+            "quadrature_sample_count": 324,
+            "minimum_quadrature_gap_m": -4.929639231012093e-08,
+            "largest_sampled_between_node_penetration_m": 4.929639231012093e-08,
+            "sampled_penetrating_area_m2": 5.316092764044967e-06,
+            "continuous_surface_nonpenetration_proven": false
+          }
+        ],
+        "per_hole_stress": [
+          {
+            "hole_index": 0,
+            "peak_sampled_von_mises_pa": 2906124.1636511567,
+            "peak_location_m": [
+              0.00876914068745746,
+              0.008866073493682737,
+              0.0011179656901386594
+            ],
+            "quadrature_sample_count": 2554,
+            "weighted_rms_von_mises_pa": 572619.3536680698,
+            "p95_quadrature_von_mises_pa": 1548769.0396470896,
+            "p90_quadrature_von_mises_pa": 1263066.1587782253
+          },
+          {
+            "hole_index": 1,
+            "peak_sampled_von_mises_pa": 3647726.690893898,
+            "peak_location_m": [
+              0.051512234204180676,
+              0.010705394868218868,
+              0.0024051454395920867
+            ],
+            "quadrature_sample_count": 2752,
+            "weighted_rms_von_mises_pa": 566801.7109967158,
+            "p95_quadrature_von_mises_pa": 1385335.0440884812,
+            "p90_quadrature_von_mises_pa": 1187996.5895151657
+          }
+        ],
+        "global_peak_sampled_von_mises_pa": 3647726.690893898,
+        "nodal_max_gap_violation_m": 1.184807756936311e-13,
+        "min_contact_multiplier_n": 0.0,
+        "max_complementarity_n_m": 1.805839537815835e-13,
+        "contact_iterations": 5,
+        "penalty_stiffness_used_in_physics": false,
+        "both_pin_surfaces_use_unilateral_constraints": true,
+        "continuous_surface_nonpenetration_proven": false,
+        "numerical_gauge_negligible_checked": true,
+        "joint_strength_verified": false,
+        "physical_validation_required": true,
+        "structural_safety_verified": false,
+        "fabrication_authorized": false,
+        "release_authorized": false
+      }
+    ],
+    "adjacent_mesh_comparisons": [
+      {
+        "coarse_mm": 8.0,
+        "fine_mm": 6.0,
+        "force_relative_change": 0.017985382430121852,
+        "per_hole": [
+          {
+            "hole_index": 0,
+            "peak_stress_relative_change": 0.46524871838307885,
+            "rms_stress_relative_change": 0.008793109100462777,
+            "p95_sampled_stress_relative_change": 0.06518134386543105
+          },
+          {
+            "hole_index": 1,
+            "peak_stress_relative_change": 0.3079942429707788,
+            "rms_stress_relative_change": 0.0013146870847185398,
+            "p95_sampled_stress_relative_change": 0.019851386429212727
+          }
+        ],
+        "per_hole_contact_resolution_growth": [
+          {
+            "hole_index": 0,
+            "effective_surface_node_growth_ratio": 1.0
+          },
+          {
+            "hole_index": 1,
+            "effective_surface_node_growth_ratio": 0.9672131147540983
+          }
+        ]
+      },
+      {
+        "coarse_mm": 6.0,
+        "fine_mm": 5.0,
+        "force_relative_change": 0.003608072209417858,
+        "per_hole": [
+          {
+            "hole_index": 0,
+            "peak_stress_relative_change": 0.1301635308159419,
+            "rms_stress_relative_change": 0.002710910257842653,
+            "p95_sampled_stress_relative_change": 0.03773119489557739
+          },
+          {
+            "hole_index": 1,
+            "peak_stress_relative_change": 0.3817537450966955,
+            "rms_stress_relative_change": 0.014361863844780363,
+            "p95_sampled_stress_relative_change": 0.027658282768964287
+          }
+        ],
+        "per_hole_contact_resolution_growth": [
+          {
+            "hole_index": 0,
+            "effective_surface_node_growth_ratio": 1.0
+          },
+          {
+            "hole_index": 1,
+            "effective_surface_node_growth_ratio": 1.0338983050847457
+          }
+        ]
+      }
+    ],
+    "numerical_gauge_sensitivity": [
+      {
+        "gauge_n_per_m": 0.001,
+        "transmitted_force_n": 16.223486512875695,
+        "relative_gauge_reaction": 8.913794659692168e-07
+      },
+      {
+        "gauge_n_per_m": 0.01,
+        "transmitted_force_n": 16.223556526741127,
+        "relative_gauge_reaction": 8.913749305000323e-06
+      },
+      {
+        "gauge_n_per_m": 0.1,
+        "transmitted_force_n": 16.22425718617726,
+        "relative_gauge_reaction": 8.913295618980644e-05
+      }
+    ],
+    "active_set_selection_sensitivity": [
+      {
+        "active_set_selection_n_per_m": 1000000.0,
+        "transmitted_force_n": 16.223556526741127,
+        "contact_iterations": 5
+      },
+      {
+        "active_set_selection_n_per_m": 10000000.0,
+        "transmitted_force_n": 16.223556526741127,
+        "contact_iterations": 5
+      },
+      {
+        "active_set_selection_n_per_m": 100000000.0,
+        "transmitted_force_n": 16.223556526741127,
+        "contact_iterations": 5
+      }
+    ],
+    "mesh_force_tolerance": 0.04,
+    "local_peak_stress_tolerance": 0.1,
+    "local_rms_stress_tolerance": 0.06,
+    "local_p95_stress_tolerance": 0.1,
+    "sampled_between_node_overlap_tolerance_um": 0.1,
+    "between_node_gap_sampled_not_proven_everywhere": true,
+    "blockers": [
+      "hole_0_contact_surface_resolution_not_refined",
+      "hole_0_peak_stress_not_converged",
+      "hole_1_contact_surface_resolution_not_refined",
+      "hole_1_peak_stress_not_converged"
+    ],
+    "selected_nodal_nonpenetration_verified": true,
+    "continuous_contact_surface_verified": false,
+    "nodal_contact_penalty_parameter_needed": false,
+    "true_assembly_strength_verified": false,
+    "physical_validation_required": true,
+    "structural_safety_verified": false,
+    "fabrication_authorized": false,
+    "release_authorized": false,
+    "claim_boundary": "Both pin surfaces use frictionless nodal KKT contact constraints with a weak measured numerical rigid-mode gauge. The continuum pressure field, real bolts and printed material remain unvalidated.",
+    "generated_step_provenance": {
+      "generator": "OpenCASCADE-derived-from-Mecha-bracket-spec",
+      "step_path": "/tmp/hs-unified-cross-domain-20261021/store/hs-unified-structural-calibration/ai_tool_runs/session-software-calibration/calibrate-two-pin-contact/structural_review/STRUCTURAL_SCREENING/bracket.step",
+      "step_sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+      "template_or_source_name": "plate",
+      "geometry_dimensions_mm": {
+        "w_mm": 60.0,
+        "d_mm": 20.0,
+        "t_mm": 4.0,
+        "hole_d_mm": 3.2,
+        "hole_spacing_mm": 40.0
+      },
+      "cylindrical_through_hole_centers_xy_mm": [
+        [
+          10.0,
+          10.0
+        ],
+        [
+          50.0,
+          10.0
+        ]
+      ],
+      "brep_to_openscad_geometric_equivalence_verified": false
+    }
+  },
+  "physical_trials": null,
+  "simulated_pin_sweep": {
+    "schema_version": "hardware_splicer.two_pin_displacement_sweep.v1",
+    "status": "bounded_numerical_contact_sweep_only",
+    "mesh_target_mm": 8.0,
+    "radial_clearance_mm_assumed": 0.005,
+    "levels": [
+      {
+        "pin_drive_mm": 0.0,
+        "force_transferred_n": 0.0,
+        "first_pin_contact_nodes": 0,
+        "second_pin_contact_nodes": 0,
+        "global_sampled_peak_stress_pa": 0.0,
+        "maximum_tested_nodal_gap_violation_m": 0.0
+      },
+      {
+        "pin_drive_mm": 0.01,
+        "force_transferred_n": 7.289752631628866e-05,
+        "first_pin_contact_nodes": 0,
+        "second_pin_contact_nodes": 3,
+        "global_sampled_peak_stress_pa": 29.32251823416608,
+        "maximum_tested_nodal_gap_violation_m": 1.0525215308955938e-14
+      },
+      {
+        "pin_drive_mm": 0.02,
+        "force_transferred_n": 16.223556526741127,
+        "first_pin_contact_nodes": 27,
+        "second_pin_contact_nodes": 13,
+        "global_sampled_peak_stress_pa": 4727156.097461529,
+        "maximum_tested_nodal_gap_violation_m": 7.485836461069897e-14
+      },
+      {
+        "pin_drive_mm": 0.04,
+        "force_transferred_n": 54.38280621336834,
+        "first_pin_contact_nodes": 36,
+        "second_pin_contact_nodes": 26,
+        "global_sampled_peak_stress_pa": 10032577.649419693,
+        "maximum_tested_nodal_gap_violation_m": 4.086635137278208e-13
+      }
+    ],
+    "blockers": [],
+    "physical_force_displacement_curve_measured": false,
+    "material_anisotropy_tested": false,
+    "failure_load_calibrated": false,
+    "structural_safety_verified": false,
+    "fabrication_authorized": false,
+    "release_authorized": false
+  },
+  "operator_review": {
+    "schema_version": "hardware_splicer.contact_operator_review.v1",
+    "disposition": "research_screening_only",
+    "numeric_contact_equilibrium_supported": true,
+    "screening_status": "inconclusive_two_pin_contact_stress",
+    "primary_blockers": [
+      "continuous_surface_contact_not_certified",
+      "engineer_signoff_and_real_failure_load_required",
+      "hole_0_contact_surface_resolution_not_refined",
+      "hole_0_peak_stress_not_converged",
+      "hole_1_contact_surface_resolution_not_refined",
+      "hole_1_peak_stress_not_converged",
+      "material_orientation_and_properties_not_calibrated",
+      "numerical_contact_stress_screen_inconclusive",
+      "physical_loading_fixture_not_matched_to_model",
+      "physical_specimen_measurements_absent"
+    ],
+    "physical_record_inventory_complete": false,
+    "ready_to_issue_strength_rating": false,
+    "ready_for_load_bearing_fabrication": false,
+    "can_export_test_coupon_as_non_load_bearing_prototype": true,
+    "next_actions": [
+      "Measure actual pin and bore diameters with traceable instruments",
+      "Test multiple physical specimens in at least two print orientations",
+      "Log force-displacement curves and observed failure locations",
+      "Match actual fastening fixture and material properties to the FEM case",
+      "Re-evaluate bore-surface contact stresses using refined contact integration",
+      "Obtain independent engineering sign-off before any load-bearing release"
+    ],
+    "fabrication_authorized": false,
+    "release_authorized": false
+  },
+  "fabrication_authorized": false,
+  "release_authorized": false
+}

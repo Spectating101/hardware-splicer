@@ -1,0 +1,456 @@
+{
+  "cyberdeck": {
+    "project_id": "hs-flex-cyberdeck",
+    "registered_source_sha256": {
+      "RPI_Dev_1.kicad_pro": "sha256:de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3",
+      "RPI_Dev_1.kicad_sch": "sha256:2e26a451bd7d4821f4fde3f76af84eb7df749dc7683392f86c1a799008137280",
+      "RPI_Dev_1.kicad_pcb": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+      "Front Case.stl": "sha256:b1d2861245bdf8e5b7e67f90a2862c6ffccf48aee8ffeeef2dbff86a5d1da041",
+      "BOM.md": "sha256:7ee60bc36bc34c494a08925ae006a28f3f87a3b8a2ae968d2b56a47af3a0b494"
+    },
+    "source_bundle_sha256": "sha256:e788376bc453d8bd390bb919b9fd553f1e5d8b555b0d123b1ecb3bbe5ab98212",
+    "source_analysis_status": "analyzed_with_findings",
+    "software_checks": {
+      "erc": {
+        "status": "findings_present",
+        "finding_count": 43
+      },
+      "drc": {
+        "status": "findings_present",
+        "finding_count": 16
+      }
+    },
+    "component_count": 26,
+    "net_count": 47,
+    "geometry": {
+      "Front Case.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 5180,
+        "axis_span": [
+          223.0,
+          17.0,
+          138.61
+        ]
+      }
+    },
+    "repair_guide_steps": {},
+    "declared_external_bom_audit": {
+      "status": "analyzed_external_cost_claims",
+      "category_count": 6,
+      "category_estimates": [
+        {
+          "name": "Compute & Power",
+          "min_usd": 65.0,
+          "max_usd": 84.0,
+          "source": "declared_external_repo_estimate"
+        },
+        {
+          "name": "Display",
+          "min_usd": 40.0,
+          "max_usd": 53.0,
+          "source": "declared_external_repo_estimate"
+        },
+        {
+          "name": "Input — Rotary",
+          "min_usd": 24.0,
+          "max_usd": 31.0,
+          "source": "declared_external_repo_estimate"
+        },
+        {
+          "name": "Input — Keyboard",
+          "min_usd": 8.0,
+          "max_usd": 12.0,
+          "source": "declared_external_repo_estimate"
+        },
+        {
+          "name": "Networking — Cellular",
+          "min_usd": 30.0,
+          "max_usd": 50.0,
+          "source": "declared_external_repo_estimate"
+        },
+        {
+          "name": "Networking — LoRa",
+          "min_usd": 26.0,
+          "max_usd": 40.0,
+          "source": "declared_external_repo_estimate"
+        }
+      ],
+      "category_sum_min_usd": 193.0,
+      "category_sum_max_usd": 270.0,
+      "published_total": {
+        "min_usd": 140.0,
+        "max_usd": 230.0
+      },
+      "published_total_reconciles_with_category_sum": false,
+      "published_total_discrepancy_usd": {
+        "min": 53.0,
+        "max": 40.0
+      },
+      "budget_cap_usd": 250.0,
+      "listed_category_upper_bound_below_cap": false,
+      "unit_prices_vendor_verified": false,
+      "excludes_unquantified_enclosure_shipping_tools_labor": true,
+      "source_cost_not_purchase_quote": true,
+      "purchase_approved": false
+    },
+    "ai_model_response_http": 200,
+    "ai_source_bundle_seen": true,
+    "ai_proposed_action_types": [
+      "inspect_registered_sources",
+      "run_erc",
+      "run_drc",
+      "identify_missing_evidence",
+      "review_mechanical_layer",
+      "review_practical_chemistry",
+      "prepare_printed_enclosure_concept",
+      "prepare_verification"
+    ],
+    "accepted_engineering_actions": [
+      {
+        "action_type": "inspect_registered_sources",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "result_status": "analyzed_with_findings",
+          "source_set_sha256": "sha256:e788376bc453d8bd390bb919b9fd553f1e5d8b555b0d123b1ecb3bbe5ab98212",
+          "source_types": [
+            "binary_stl_candidate",
+            "kicad_board",
+            "kicad_project_config",
+            "kicad_schematic",
+            "reference_markdown_bom"
+          ],
+          "project_context": "source_bundle_sibling_files_present",
+          "rule_check_count": 2,
+          "geometry_items": 1,
+          "repair_guides": 0,
+          "reference_bom_audit": true,
+          "source_inspection_only": true,
+          "source_analysis_complete": true,
+          "source_analysis_failures": [],
+          "engineering_objective_completed": false,
+          "physical_fit_verified": false,
+          "repair_diagnosis_verified": false,
+          "manufacturing_approved": false,
+          "automatic_execution": false
+        }
+      },
+      {
+        "action_type": "run_erc",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "source_set_sha256": "sha256:e788376bc453d8bd390bb919b9fd553f1e5d8b555b0d123b1ecb3bbe5ab98212",
+          "project_context": "source_bundle_sibling_files_present",
+          "project_stem": "RPI_Dev_1",
+          "check": "erc",
+          "check_executed": true,
+          "check_status": "findings_present",
+          "rule_finding_count": 43,
+          "rule_findings_by_type": {
+            "footprint_link_issues": 14,
+            "lib_symbol_issues": 29
+          },
+          "report_sha256": "sha256:354541b8803105b211241d59e1d739134f8d3162ddf9a2471795faee1e8fb538",
+          "source_design_is_not_validated": true,
+          "manufacturing_approved": false,
+          "automatic_execution": false
+        }
+      },
+      {
+        "action_type": "run_drc",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "source_set_sha256": "sha256:e788376bc453d8bd390bb919b9fd553f1e5d8b555b0d123b1ecb3bbe5ab98212",
+          "project_context": "source_bundle_sibling_files_present",
+          "project_stem": "RPI_Dev_1",
+          "check": "drc",
+          "check_executed": true,
+          "check_status": "findings_present",
+          "rule_finding_count": 16,
+          "rule_findings_by_type": {
+            "lib_footprint_issues": 15,
+            "lib_footprint_mismatch": 1
+          },
+          "report_sha256": "sha256:ba1e85b83643d8fb6466f8fe254ae18938a9d66a9f8422804ad25be9577f3dff",
+          "source_design_is_not_validated": true,
+          "manufacturing_approved": false,
+          "automatic_execution": false
+        }
+      },
+      {
+        "action_type": "review_mechanical_layer",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "advisory_only",
+          "mechanical_scope": "unsupported_mechanical_topology",
+          "numerical_status": null,
+          "input_sha256": "sha256:5c9dc0cf2e532e32a120f4f85bd1150c2071e86a72916375a5b977b2e4937b7d",
+          "source_geometry_count": 1,
+          "physical_authority_unchanged": true,
+          "release_authorized": false
+        }
+      },
+      {
+        "action_type": "review_practical_chemistry",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "evaluated_unverified_chemical_candidate",
+          "decision": "stop_and_escalate",
+          "input_sha256": "sha256:3ad46b1992eaba05a289f63cd46d2f1f004aee441adadf0a70ee3e130a2a7186",
+          "material_identity_downgraded": false,
+          "chemical_clearance_authorized": false,
+          "physical_authority_unchanged": true
+        }
+      },
+      {
+        "action_type": "prepare_printed_enclosure_concept",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "parametric_solidcraft_commands_created",
+          "concept_sha256": "sha256:3410d0a41e4abbd6d70d80cb2de5fc18e2c78d70c162fb83178277c8862d3714",
+          "solidcraft_command_count": 30,
+          "native_cad_executed": false,
+          "physical_fit_verified": false,
+          "print_authorized": false
+        }
+      }
+    ],
+    "physical_hardware_built": false,
+    "physical_authority_granted": false
+  },
+  "drone": {
+    "project_id": "hs-flex-drone",
+    "registered_source_sha256": {
+      "x500v2-frame.step": "sha256:e7ccd422cf7825b61ad8270a98d8fbbbc12aced102cc6a20ed17ee66b816c360",
+      "s500-arm.scad": "sha256:afb358ed551c06fb9560cae9e372353f13cf96e91acc1cc68d167216a7528761"
+    },
+    "source_bundle_sha256": "sha256:936c4a2f1056aaf26871e52c7f28d85085d40a58f0aa7a3f022c54f2fa345ca3",
+    "source_analysis_status": "analyzed_non_electrical_sources",
+    "software_checks": {},
+    "component_count": null,
+    "net_count": null,
+    "geometry": {
+      "x500v2-frame.step": {
+        "status": "imported_brep",
+        "solid_count": 244,
+        "bounding_box_mm": {
+          "span": {
+            "x": 400.3508,
+            "y": 322.2764,
+            "z": 400.3508
+          },
+          "min": {
+            "x": -200.1754,
+            "y": -215.2764,
+            "z": -200.1754
+          },
+          "max": {
+            "x": 200.1754,
+            "y": 107.0,
+            "z": 200.1754
+          }
+        }
+      },
+      "s500-arm.scad": {
+        "status": "parsed_polyhedron_vertices",
+        "point_count": 56896,
+        "axis_span": [
+          374.515,
+          374.515,
+          37.77
+        ]
+      }
+    },
+    "repair_guide_steps": {},
+    "declared_external_bom_audit": null,
+    "ai_model_response_http": 200,
+    "ai_source_bundle_seen": true,
+    "ai_proposed_action_types": [
+      "inspect_registered_sources",
+      "identify_missing_evidence",
+      "review_mechanical_layer",
+      "compare_architectures",
+      "propose_interfaces",
+      "prepare_verification"
+    ],
+    "accepted_engineering_actions": [
+      {
+        "action_type": "inspect_registered_sources",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "result_status": "analyzed_non_electrical_sources",
+          "source_set_sha256": "sha256:936c4a2f1056aaf26871e52c7f28d85085d40a58f0aa7a3f022c54f2fa345ca3",
+          "source_types": [
+            "scad_polyhedron",
+            "step_cad"
+          ],
+          "project_context": "not_applicable",
+          "rule_check_count": 0,
+          "geometry_items": 2,
+          "repair_guides": 0,
+          "reference_bom_audit": false,
+          "source_inspection_only": true,
+          "source_analysis_complete": true,
+          "source_analysis_failures": [],
+          "engineering_objective_completed": false,
+          "physical_fit_verified": false,
+          "repair_diagnosis_verified": false,
+          "manufacturing_approved": false,
+          "automatic_execution": false
+        }
+      },
+      {
+        "action_type": "review_mechanical_layer",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "advisory_only",
+          "mechanical_scope": "unsupported_mechanical_topology",
+          "numerical_status": null,
+          "input_sha256": "sha256:28e48c82a4c97b440d0c2f8b473af11d21eba4b7cff18c2fa21fb1c3334b3b23",
+          "source_geometry_count": 2,
+          "physical_authority_unchanged": true,
+          "release_authorized": false
+        }
+      }
+    ],
+    "physical_hardware_built": false,
+    "physical_authority_granted": false
+  },
+  "psp": {
+    "project_id": "hs-flex-psp-umd-repair",
+    "registered_source_sha256": {
+      "PSP300x_UMD_repair.html": "sha256:cca8d974b92b9d2d27f9e0179c2216ba7863837c883531c08663efc287778c46"
+    },
+    "source_bundle_sha256": "sha256:3058cfee1a7e0a6349c329cd712e651cd75e737c99a26d7f320c56d3670277e9",
+    "source_analysis_status": "analyzed_non_electrical_sources",
+    "software_checks": {},
+    "component_count": null,
+    "net_count": null,
+    "geometry": {},
+    "repair_guide_steps": {
+      "PSP300x_UMD_repair.html": 42
+    },
+    "declared_external_bom_audit": null,
+    "ai_model_response_http": 200,
+    "ai_source_bundle_seen": true,
+    "ai_proposed_action_types": [
+      "inspect_registered_sources",
+      "identify_missing_evidence",
+      "clarify_requirement",
+      "run_guided_plan",
+      "review_mechanical_layer",
+      "review_practical_chemistry",
+      "prepare_verification"
+    ],
+    "accepted_engineering_actions": [
+      {
+        "action_type": "inspect_registered_sources",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "result_status": "analyzed_non_electrical_sources",
+          "source_set_sha256": "sha256:3058cfee1a7e0a6349c329cd712e651cd75e737c99a26d7f320c56d3670277e9",
+          "source_types": [
+            "repair_guide_html"
+          ],
+          "project_context": "not_applicable",
+          "rule_check_count": 0,
+          "geometry_items": 0,
+          "repair_guides": 1,
+          "reference_bom_audit": false,
+          "source_inspection_only": true,
+          "source_analysis_complete": true,
+          "source_analysis_failures": [],
+          "engineering_objective_completed": false,
+          "physical_fit_verified": false,
+          "repair_diagnosis_verified": false,
+          "manufacturing_approved": false,
+          "automatic_execution": false
+        }
+      },
+      {
+        "action_type": "review_mechanical_layer",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "advisory_only",
+          "mechanical_scope": "unsupported_mechanical_topology",
+          "numerical_status": null,
+          "input_sha256": "sha256:90e3e764c696f3ebbb65b67a3f349fcb86d2db14e69a8d39ce49d7f82a89be9b",
+          "source_geometry_count": 0,
+          "physical_authority_unchanged": true,
+          "release_authorized": false
+        }
+      },
+      {
+        "action_type": "review_practical_chemistry",
+        "software_execution_status": "succeeded",
+        "summary": {
+          "ok": true,
+          "status": "evaluated_unverified_chemical_candidate",
+          "decision": "stop_and_escalate",
+          "input_sha256": "sha256:5a1a1e08c88ddbae2ae9a33c34e0a4aa49a49408f47de10b3c706719bde6ac53",
+          "material_identity_downgraded": false,
+          "chemical_clearance_authorized": false,
+          "physical_authority_unchanged": true
+        }
+      }
+    ],
+    "physical_hardware_built": false,
+    "physical_authority_granted": false
+  },
+  "bracket_calibration": {
+    "origin": "declared engineering calibration, not drone donor",
+    "tool_status": "succeeded",
+    "numerical_status": "inconclusive_two_pin_contact_stress",
+    "screen_status": "screened_inconclusive",
+    "mesh_levels_mm": [
+      8.0,
+      6.0,
+      5.0
+    ],
+    "computed_pin_force_n": [
+      16.223556526741127,
+      15.931769658230989,
+      15.989460787341372
+    ],
+    "blockers": [
+      "continuous_surface_contact_not_certified",
+      "engineer_signoff_and_real_failure_load_required",
+      "hole_0_contact_surface_resolution_not_refined",
+      "hole_0_peak_stress_not_converged",
+      "hole_1_contact_surface_resolution_not_refined",
+      "hole_1_peak_stress_not_converged",
+      "material_orientation_and_properties_not_calibrated",
+      "numerical_contact_stress_screen_inconclusive",
+      "physical_loading_fixture_not_matched_to_model",
+      "physical_specimen_measurements_absent"
+    ],
+    "generated_files": {
+      "predicted_load_curve.csv": {
+        "sha256": "sha256:b711c8ad9534731b172d7cde8becbd519f876fd66f6eef2acfc7288f13edcbf5",
+        "size": 278
+      },
+      "bracket.step": {
+        "sha256": "sha256:447391156fee796679041af9706ba8e1384c2a3bfc57fd4e032ec3792ca78f96",
+        "size": 22641
+      },
+      "remaining_actions.txt": {
+        "sha256": "sha256:048df72393be5c15a5921a8320c342734df00d0871ac4be5cd0f546e44663866",
+        "size": 431
+      },
+      "evidence.json": {
+        "sha256": "sha256:771f40a3b880389c56317afc28e0c1f6cdad6679864c6ac8793ce4c77825d0ae",
+        "size": 21931
+      }
+    },
+    "physical_authority_granted": false
+  }
+}

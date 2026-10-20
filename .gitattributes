@@ -7,3 +7,7 @@ examples/printed_casing/native_trial/partcad/*.step -diff -whitespace
 examples/printed_casing/native_trial/*.stl -diff -whitespace
 examples/printed_casing/native_trial/*.3mf -diff -whitespace
 examples/printed_casing/native_trial/*.solidcraft -diff -whitespace
+# Saved mechanical calibration STEP is generated geometry, not hand-authored prose.
+projects/unified_engineering_20261021/artifacts/structural_calibration/*.step -diff -whitespace
+# Numerical solver CSV uses the producer's CRLF bytes; keep evidence exact.
+projects/unified_engineering_20261021/artifacts/structural_calibration/*.csv -text -diff -whitespace

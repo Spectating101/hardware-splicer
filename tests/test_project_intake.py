@@ -270,40 +270,37 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     assert plan["scenario"]["expected"]["minimum_authority_level"] == "field_validation_authority"
 
 
-def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
+def test_project_intake_evidence_pack_cannot_erase_unrun_structural_contact_gate(tmp_path):
+    """Historical 9/9 evidence fixture predates the mandatory real contact gate.
+
+    It can still compile but must not claim production when bracket contact
+    and full enclosure/assembly integration remain unverified.
+    """
     intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
-
     result = run_project_intake(intake, out_dir=tmp_path / "plant-evidence", start_splicer=False, request_id="plant-evidence")
-
-    authority = result["project_authority"]
-    metrics = result["production_release_metrics"]
-    platform = result["compile_result"]["robotics_platform_authority"]
-    mechatronics = result["compile_result"]["mechatronics_authority"]
     mechanical = result["compile_result"]["mechanical_authority"]
-    actuation = result["compile_result"]["robotics_actuation"]
-
-    assert result["ok"] is True
-    assert authority["project_authority_level"] == "production_ready_project_package"
-    assert authority["claimable"] is True
-    assert metrics["production_ready"] is True
-    assert metrics["production_readiness_score"] == 1.0
-    assert metrics["gates_passed"] == metrics["gates_total"] == 9
-    assert metrics["evidence_gap_ids"] == []
-    assert mechanical["current_authority_level"] == "production_mechanical_release"
-    assert actuation["current_authority_level"] == "production_robotics_release"
-    assert platform["current_authority_level"] == "production_robotics_project_release"
-    assert mechatronics["current_authority_level"] == "production_mechatronics_release"
-    assert mechatronics["integration_trace"]["open_gaps"] == []
-    assert result["evidence_capture_kit"]["open_gate_count"] == 0
+    mechatronics = result["compile_result"]["mechatronics_authority"]
+    metrics = result["production_release_metrics"]
+    assert result["compile_ok"] is True
+    assert result["ok"] is False
+    assert result["project_authority"]["claimable"] is False
+    assert metrics["production_ready"] is False
+    assert metrics["gates_passed"] < metrics["gates_total"] == 9
+    assert "mechanical_release" in metrics["evidence_gap_ids"]
+    assert mechanical["structural_release_blocked"] is True
+    assert mechanical["structural_screening"]["status"] == "available_not_run"
+    assert mechanical["production_authorized"] is False
+    assert mechanical["current_authority_level"] != "production_mechanical_release"
+    assert mechatronics["current_authority_level"] != "production_mechatronics_release"
+    assert mechatronics["integration_trace"]["open_gaps"]
+    assert result["evidence_capture_kit"]["open_gate_count"] > 0
     assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
 
 
-def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
+def test_project_intake_notes_preserve_evidence_but_block_unverified_production(tmp_path):
     intake = load_project_intake(PLANT_NOTES_INTAKE)
-
     plan = plan_project_from_intake(intake)
     spec = plan["scenario"]["compile_spec"]
-
     assert plan["missing_info"] == []
     assert plan["evidence_extraction_report"]["accepted_count"] >= 20
     assert plan["evidence_extraction_report"]["rejected_count"] == 0
@@ -313,13 +310,14 @@ def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
     assert spec["mechatronics_release"]["acceptance_reviewed"] is True
 
     result = run_project_intake(intake, out_dir=tmp_path / "plant-notes", start_splicer=False, request_id="plant-notes")
-
-    assert result["ok"] is True
-    assert result["project_authority"]["project_authority_level"] == "production_ready_project_package"
-    assert result["production_release_metrics"]["production_ready"] is True
-    assert result["production_release_metrics"]["gates_passed"] == 9
+    assert result["compile_ok"] is True
+    assert result["ok"] is False
+    assert result["project_authority"]["claimable"] is False
+    assert result["production_release_metrics"]["production_ready"] is False
+    assert result["production_release_metrics"]["gates_passed"] < 9
+    assert result["compile_result"]["mechanical_authority"]["structural_release_blocked"] is True
     assert result["evidence_extraction_report"]["accepted_count"] >= 20
-    assert result["evidence_capture_kit"]["open_gate_count"] == 0
+    assert result["evidence_capture_kit"]["open_gate_count"] > 0
     assert Path(result["artifacts"]["evidence_extraction_report"]).exists()
 
 
