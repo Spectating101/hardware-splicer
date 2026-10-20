@@ -1,0 +1,57 @@
+{
+  "scenario_id": "public_bme280_sensor_unknown_bus",
+  "mode": "synthesize",
+  "expected_archetype": "sensor",
+  "challenge": {
+    "expected_conflict_count": 1,
+    "identity_continuity_required": true,
+    "description": "Choose safe digital bus wiring without assuming controller voltage or observed measurement"
+  },
+  "engineering_sources": [
+    {
+      "source_id": "sparkfun_bme280_hookup",
+      "source_type": "vendor_guide",
+      "uri": "https://learn.sparkfun.com/tutorials/qwiic-atmospheric-sensor-bme280-hookup-guide/all",
+      "version": "web-2026-10-20",
+      "authority_ceiling": "declared",
+      "claims": [
+        "SparkFun Qwiic BME280 interface uses a 3.3 V supply",
+        "BME280 can use I2C or SPI"
+      ]
+    }
+  ],
+  "declared_conflicts": [
+    {
+      "conflict_id": "controller_logic_unknown",
+      "claim_a": "Donor controller I/O level not measured",
+      "claim_b": "BME280 board uses 3.3V logic"
+    }
+  ],
+  "intake": {
+    "project_name": "public_bme280_sensor_unknown_bus",
+    "goal": "Repurpose a BME280 board with an unidentified donor microcontroller into a low-voltage environmental logger. Determine safe bus wiring or halt pending necessary facts; do not assume donor I/O voltage.",
+    "available_parts": [
+      {
+        "name": "BME280 Qwiic board",
+        "type": "sensor",
+        "quantity": 1
+      },
+      {
+        "name": "unidentified donor microcontroller",
+        "type": "microcontroller",
+        "quantity": 1
+      },
+      {
+        "name": "multimeter",
+        "type": "instrument",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "sensor_supply_v": 3.3,
+      "controller_logic_v": "unknown",
+      "must_verify_io_levels": true,
+      "bench_evidence_available": false
+    }
+  }
+}

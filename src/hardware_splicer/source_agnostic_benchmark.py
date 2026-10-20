@@ -169,9 +169,17 @@ def evaluate_source_agnostic_scenario(
 
         planner = plan_project_from_intake
 
-    intake = _mapping(scenario.get("intake"))
+    intake = dict(_mapping(scenario.get("intake")))
     challenge = _mapping(scenario.get("challenge"))
     sources = _sequence(scenario.get("engineering_sources"))
+    conflicts = _sequence(scenario.get("declared_conflicts"))
+    # Source records and declared disagreements are *inputs*, not reference answers.
+    # Pass them to the planner; scoring still examines its output independently.
+    # Never quietly overwrite user-provided intake evidence.
+    if sources:
+        intake.setdefault("engineering_sources", sources)
+    if conflicts:
+        intake.setdefault("declared_conflicts", conflicts)
     mode = str(scenario.get("mode") or "").strip().lower()
     expected_archetype = str(scenario.get("expected_archetype") or "")
     plan = dict(planner(intake, skip_vision=True))
@@ -317,6 +325,8 @@ def evaluate_source_agnostic_scenario(
         "detected_archetype": plan.get("archetype"),
         "planning_confidence": plan.get("planning_confidence"),
         "engineering_source_count": len(sources),
+        "source_handoff_count": len(_sequence(intake.get("engineering_sources"))),
+        "declared_conflict_handoff_count": len(_sequence(intake.get("declared_conflicts"))),
         "source_retention_ratio": round(retention_ratio, 3),
         "score": score,
         "verdict": verdict,

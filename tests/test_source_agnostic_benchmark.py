@@ -168,3 +168,37 @@ def test_requirement_only_full_run_builds_a_bounded_candidate_not_a_release(
     assert Path(result["artifacts"]["evidence_capture_kit"]).is_file()
     assert result["production_release_metrics"]["production_ready"] is False
     assert result["evidence_capture_kit"]["open_gate_count"] > 0
+
+
+def test_external_sources_and_conflicts_reach_planner_without_leaking_reference_answers() -> None:
+    scenario = load_source_agnostic_scenario(CASE_DIR / "donor_repair_rover.json")
+    calls = []
+
+    def spy(intake, *, skip_vision):
+        assert skip_vision is True
+        calls.append(intake)
+        assert intake["engineering_sources"] == scenario["engineering_sources"]
+        assert intake["declared_conflicts"] == scenario["declared_conflicts"]
+        assert "expected_archetype" not in intake
+        assert "challenge" not in intake
+        return {"goal": intake["goal"], "missing_info": ["requires physical evidence"]}
+
+    result = evaluate_source_agnostic_scenario(scenario, planner=spy)
+    assert len(calls) == 1
+    assert result["source_handoff_count"] == len(scenario["engineering_sources"])
+    assert result["declared_conflict_handoff_count"] == len(scenario["declared_conflicts"])
+    assert result["dimensions"]["source_retention"]["satisfied"] is False
+    assert result["dimensions"]["conflict_resolution"]["satisfied"] is False
+
+
+def test_zero_source_scenario_stays_zero_source() -> None:
+    scenario = load_source_agnostic_scenario(CASE_DIR / "requirement_only_inspection_rover.json")
+
+    def spy(intake, *, skip_vision):
+        assert "engineering_sources" not in intake
+        assert "declared_conflicts" not in intake
+        return {"goal": intake["goal"], "missing_info": []}
+
+    result = evaluate_source_agnostic_scenario(scenario, planner=spy)
+    assert result["source_handoff_count"] == 0
+    assert result["declared_conflict_handoff_count"] == 0
