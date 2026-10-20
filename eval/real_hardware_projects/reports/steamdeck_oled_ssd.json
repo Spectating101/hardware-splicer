@@ -1,0 +1,146 @@
+{
+  "schema": "hardware_splicer.real_project_assessment.v1",
+  "project_id": "steamdeck_oled_ssd",
+  "source_uris": [
+    "https://www.ifixit.com/Guide/Steam+Deck+OLED+SSD+Replacement/168255"
+  ],
+  "hs_raw_plan": {
+    "archetype": "generic_mechatronics",
+    "recommended_build_id": "room_display_station",
+    "architecture_status": "legacy_compatibility",
+    "missing_info": [
+      "controller choice",
+      "actuator model/current",
+      "runtime target",
+      "budget limit",
+      "measured dimensions",
+      "mechanical simulation",
+      "bench evidence",
+      "reviewed release scope",
+      "Resolve robot topology field topology-4428b4dabc3d.robot_genre: Native robot topology could not be resolved.",
+      "Provide analysis input for analysis-runtime: battery_energy_wh or battery_voltage_v + battery_capacity_ah, continuous or average load power",
+      "Provide analysis input for analysis-current-margin: supply_current_limit_a, peak_current_a or per-load peak/stall current",
+      "Provide analysis input for analysis-payload-margin: payload_mass_kg, payload_limit_kg",
+      "Provide analysis input for analysis-static-stability: support_width_mm or wheel_track_mm, combined_cg_height_mm",
+      "Provide analysis input for analysis-actuator-torque: payload_mass_kg, payload_lever_arm_m, actuator_continuous_torque_nm",
+      "Provide analysis input for analysis-dimensional-envelope: candidate_width_mm, maximum_width_mm",
+      "Provide analysis input for analysis-thermal: estimated_power_loss_w, thermal_resistance_c_per_w, ambient_temperature_c, maximum_component_temperature_c",
+      "Resolve change-impact field baseline_revision: A modification, repair, or field evolution requires a pinned baseline revision."
+    ]
+  },
+  "operator_casefile": {
+    "catalog_verdict": "reject",
+    "project_type": "Steam Deck OLED internal SSD diagnosis, data-preserving replacement, and recovery workflow",
+    "functional_subsystems": [
+      "Steam Deck OLED model and storage-interface identification",
+      "Existing SSD health and failure diagnosis",
+      "User-data backup and backup-integrity verification",
+      "SteamOS recovery or reinstallation",
+      "M.2 2230 single-sided SSD compatibility",
+      "Chassis access, battery isolation, connector protection, and ESD control",
+      "Post-repair storage detection, boot, software, and data-restoration validation"
+    ],
+    "decision_tree": [
+      {
+        "action": "Confirm the device is the OLED model using its physical model identifiers and board/chassis characteristics before using any guide or selecting storage.",
+        "purpose": "Prevent applying an LCD-specific procedure or compatibility assumption."
+      },
+      {
+        "action": "If the current SSD is readable, inspect free space, SMART or equivalent health data, filesystem errors, boot behavior, and observed symptoms before purchasing a replacement.",
+        "purpose": "Distinguish capacity shortage, software corruption, filesystem damage, and hardware failure; do not assume replacement will fix an unmeasured issue."
+      },
+      {
+        "action": "If the SSD is readable, create an external backup of required user data and verify that representative files can be opened from the backup.",
+        "purpose": "Reduce data-loss risk; no preservation guarantee exists without a verified backup."
+      },
+      {
+        "action": "If the SSD is failing or unreadable, stop repeated write attempts and determine whether a professional data-recovery path is required before disassembly or reinstallation.",
+        "purpose": "Avoid reducing recoverability through unnecessary writes or reinstallation."
+      },
+      {
+        "action": "Verify that the candidate replacement exactly matches the required Steam Deck OLED interface, M.2 2230 form factor, and single-sided physical envelope; reject any candidate lacking evidence for all requirements.",
+        "purpose": "Avoid choosing a replacement based only on capacity or a generic M.2 label."
+      },
+      {
+        "action": "Proceed to disassembly only after backup or an explicit recovery decision, a suitable ESD-controlled workspace, the correct tools, and a recovery image or installation path are available.",
+        "purpose": "Make physical work reversible and limit avoidable data and hardware risk."
+      },
+      {
+        "action": "After replacement, enter firmware or recovery tooling and confirm the new drive is detected before installing or restoring data.",
+        "purpose": "Separate physical/interface problems from operating-system installation problems."
+      },
+      {
+        "action": "If detection, installation, boot, thermal behavior, or storage tests fail, stop at the corresponding gate and do not declare the replacement successful.",
+        "purpose": "Prevent a success claim when the measured acceptance conditions are not met."
+      }
+    ],
+    "compatible_parts_or_requirements": [
+      "Device-specific requirement: Steam Deck OLED must be confirmed before work; the supplied task explicitly prohibits substituting an LCD-specific guide without model review.",
+      "Storage requirement sourced from ifixit_deck_oled_ssd: Steam Deck OLED SSD is M.2 2230 and single-sided.",
+      "The replacement must also have an interface, keying, electrical characteristics, controller behavior, thermal envelope, and capacity supported by the Steam Deck OLED and intended operating-system workflow; exact compatibility is unverified from the supplied claims.",
+      "Use an appropriate external backup destination with enough capacity for the selected data; destination type and capacity are not supplied.",
+      "Use a SteamOS-compatible recovery or installation medium and a recovery image obtained from an authoritative source; exact image version and procedure are not supplied.",
+      "Use ESD-control equipment and suitable non-damaging disassembly tools. The supplied ifixit_deck_oled_ssd claim requires following ESD precautions.",
+      "Do not select a replacement SSD, enclosure, adapter, screw, thermal interface, or recovery medium as an exact part until compatibility and physical fit are verified.",
+      "Approximate cost categories, not sourced facts: replacement SSD, backup/recovery media, ESD and hand tools, and possible professional data recovery or repair labor."
+    ],
+    "build_or_repair_sequence": [
+      "Record the current symptom, OS behavior, free space, SMART or equivalent health output, filesystem checks, and any error messages without assuming the SSD is the cause.",
+      "Confirm OLED identity and document the current SSD model, capacity, interface information, and visible physical configuration if safely accessible.",
+      "Back up required files and configuration data while the current drive remains readable; verify the backup by opening representative files and recording what was included.",
+      "Prepare the recovery/install path and document account, encryption, game-library, and application restoration requirements before removing the original drive.",
+      "Power down fully, disconnect external power, establish ESD controls, and follow a device-specific OLED disassembly procedure. Do not proceed if the procedure or tool fit is uncertain.",
+      "Access the SSD without stressing cables, shields, connectors, or the battery assembly; preserve the original SSD and hardware for diagnosis or recovery.",
+      "Install only a candidate that has independently verified M.2 2230 single-sided fit and Steam Deck OLED electrical/software compatibility. No exact replacement is authorized by the supplied evidence.",
+      "Reassemble with correct shielding, fasteners, connector seating, and no pinched cables, then perform a visual inspection before power-up.",
+      "Confirm drive detection in the available firmware or recovery environment.",
+      "Install or recover SteamOS using the selected authoritative recovery procedure, then restore backed-up data and reconfigure libraries or accounts as applicable.",
+      "Run the validation gates and record results; if any required gate fails, stop and diagnose rather than treating the SSD replacement as the solution."
+    ],
+    "critical_technical_unknowns": [
+      "The current SSD health, SMART status, filesystem state, boot status, and exact failure symptoms are unknown.",
+      "Backup status, backup completeness, backup readability, and recovery objectives are unknown.",
+      "The exact Steam Deck OLED model identifier and hardware revision have not been independently documented.",
+      "The current SSD model and its interface details are unknown.",
+      "No exact replacement SSD has been proposed, so interface support, capacity support, firmware behavior, thermal behavior, endurance, and physical clearance remain unverified.",
+      "The required recovery-image version, installation method, encryption state, and restore procedure are unspecified.",
+      "The user's required data set, acceptable downtime, and tolerance for reinstallation or data loss are unspecified.",
+      "Disassembly tool availability, ESD controls, workspace conditions, and operator experience are unknown.",
+      "There is no supplied bench evidence, measured diagnostic output, or post-repair test result.",
+      "The supplied ifixit_deck_oled_ssd claims establish OLED M.2 2230 single-sided storage, additional recovery or installation work, and ESD precautions, but do not establish compatibility of any particular replacement part or that replacement will resolve the issue."
+    ],
+    "validation_plan": [
+      "Identity gate: document evidence that the unit is OLED and confirm the chosen procedure is OLED-specific.",
+      "Pre-repair diagnosis gate: capture reproducible symptoms and storage-health or filesystem measurements; if measurements do not implicate the SSD, defer replacement.",
+      "Data gate: confirm required files exist in the backup and that representative files can be opened from the backup before removing the original SSD.",
+      "Compatibility gate: verify the candidate's exact form factor, single-sided construction, interface, physical clearance, and Steam Deck OLED support from reliable part documentation; reject unresolved items.",
+      "Assembly gate: after reassembly, inspect for connector seating, cable damage or pinching, missing fasteners, and abnormal physical conditions without powering an unsafe assembly.",
+      "Detection gate: confirm the replacement is detected by firmware or recovery tooling.",
+      "Installation gate: complete the selected recovery or installation workflow without unverified success assumptions.",
+      "Functional gate: verify normal boot, storage capacity reporting, filesystem access, sleep and resume, charging behavior, and representative application or game-library access.",
+      "Data-restoration gate: verify restored files and required user data against the pre-repair inventory.",
+      "Go/no-go rule: any failed identity, backup, compatibility, detection, installation, or functional gate blocks completion and requires diagnosis before further repair."
+    ],
+    "deliverable_gaps": [
+      "No independent OLED model-identification procedure or device-specific identifiers are supplied.",
+      "No measured storage diagnostics, failure symptoms, SMART output, filesystem output, or error logs are supplied.",
+      "No backup inventory, backup destination, integrity result, or data-recovery decision is supplied.",
+      "No exact replacement SSD or evidence of interface, firmware, capacity, thermal, and physical compatibility is supplied.",
+      "No authoritative recovery-image reference, version, or step-by-step recovery procedure is supplied.",
+      "No detailed OLED disassembly sequence, tool list, fastener map, or connector-specific precautions are supplied beyond the sourced ESD requirement.",
+      "No acceptance measurements or post-repair results are supplied.",
+      "Cost information is limited to unsourced categories; no reliable prices, labor estimates, or data-recovery estimates are available.",
+      "The HS recommendation of room_display_station and generic_mechatronics is unrelated to this handheld storage-repair project and provides no applicable design evidence."
+    ],
+    "completion_state": "blocked",
+    "physical_validation_claimed": false
+  },
+  "physical_build_completed": false,
+  "independent_design_verification_completed": false,
+  "catalog_compatibility_gate": {
+    "recommended_build_id": "room_display_station",
+    "explicitly_approved_for_project": false,
+    "status": "unverified_mismatch",
+    "rationale": "Device project does not explicitly approve this catalog build. LLM confidence cannot substitute for device compatibility evidence."
+  }
+}

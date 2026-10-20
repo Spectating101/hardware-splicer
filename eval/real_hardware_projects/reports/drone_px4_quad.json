@@ -1,0 +1,177 @@
+{
+  "schema": "hardware_splicer.real_project_assessment.v1",
+  "project_id": "drone_px4_quad",
+  "source_uris": [
+    "https://github.com/PX4/PX4-Autopilot/blob/main/docs/en/flight_controller/pixhawk6c.md",
+    "https://docs.px4.io/v1.17/en/assembly/quick_start_pixhawk6c"
+  ],
+  "hs_raw_plan": {
+    "archetype": "aerial_robot",
+    "recommended_build_id": "bench_power_adapter",
+    "architecture_status": "legacy_compatibility",
+    "missing_info": [
+      "runtime target",
+      "budget limit",
+      "measured dimensions",
+      "mechanical simulation",
+      "bench evidence",
+      "reviewed release scope",
+      "Resolve robot topology field front-left-rotor-joint.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field front-right-rotor-joint.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field rear-right-rotor-joint.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field rear-left-rotor-joint.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field front-left-rotor-actuator.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Resolve robot topology field front-right-rotor-actuator.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Resolve robot topology field rear-right-rotor-actuator.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Resolve robot topology field rear-left-rotor-actuator.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Provide analysis input for analysis-runtime: battery_energy_wh or battery_voltage_v + battery_capacity_ah, continuous or average load power",
+      "Provide analysis input for analysis-current-margin: supply_current_limit_a, peak_current_a or per-load peak/stall current",
+      "Provide analysis input for analysis-payload-margin: payload_mass_kg, payload_limit_kg",
+      "Provide analysis input for analysis-static-stability: support_width_mm or wheel_track_mm, combined_cg_height_mm",
+      "Provide analysis input for analysis-actuator-torque: payload_mass_kg, payload_lever_arm_m, actuator_continuous_torque_nm",
+      "Provide analysis input for analysis-dimensional-envelope: candidate_width_mm, maximum_width_mm",
+      "Provide analysis input for analysis-thermal: estimated_power_loss_w, thermal_resistance_c_per_w, ambient_temperature_c, maximum_component_temperature_c"
+    ]
+  },
+  "operator_casefile": {
+    "catalog_verdict": "relevant",
+    "project_type": "Non-flight-authorizing 450 mm class quadcopter assembly and bench-validation concept using a documented Pixhawk 6C with PX4",
+    "functional_subsystems": [
+      "Pixhawk 6C flight controller and PX4 configuration",
+      "Regulated flight-controller power subsystem with POWER1 and POWER2 supply paths",
+      "Power module, battery-side sensing, and controller-side power isolation",
+      "Four propulsion channels, each consisting of a motor, ESC, propeller, wiring, and mechanical mount",
+      "Battery, primary distribution, ESC power wiring, connectors, fusing or protection as required by the final electrical design",
+      "GPS and compass interface",
+      "PWM ESC signal and ground interface from Pixhawk 6C outputs",
+      "450 mm-class frame, landing structure, motor mounts, vibration management, and payload attachment provisions",
+      "Ground-side configuration and bench-only test equipment",
+      "Documentation package containing wiring, BOM, calculations, configuration records, and unresolved assumptions"
+    ],
+    "decision_tree": [
+      {
+        "next_action": "Reject any catalog build that is not an aerial multirotor or that lacks four motor/ESC channels, a compatible frame, and a documented Pixhawk 6C interface.",
+        "purpose": "Prevent an irrelevant demo build from being treated as the requested quadcopter assembly."
+      },
+      {
+        "next_action": "Retain the bench_power_adapter recommendation only as a bench-validation accessory; do not treat it as the aircraft battery, propulsion power source, or complete assembly.",
+        "purpose": "Use the catalog item only where it supports the explicitly bench-only scope."
+      },
+      {
+        "next_action": "Obtain the exact Pixhawk 6C power-module model and its input, output, current, connector, sensing, and isolation specifications.",
+        "purpose": "Design POWER1 and POWER2 correctly without connecting the battery directly to a regulated POWER port."
+      },
+      {
+        "next_action": "Select or document four compatible motor, ESC, propeller, battery, and power-distribution combinations only after voltage, current, connector, mounting, and firmware-interface compatibility are verified.",
+        "purpose": "Avoid assumed thrust, runtime, current, or replacement-part compatibility."
+      },
+      {
+        "next_action": "Collect motor thrust-current data for the exact motor, propeller, battery voltage, and ESC operating conditions.",
+        "purpose": "Complete the thrust-to-weight, expected-current, battery-sizing, and thermal calculations."
+      },
+      {
+        "next_action": "Resolve the four rotor actuator source-part bindings and provide measured or designed joint limits for front-left, front-right, rear-right, and rear-left rotor joints.",
+        "purpose": "Close the structured topology gaps before assembly documentation is considered complete."
+      },
+      {
+        "next_action": "Define the frame geometry, motor spacing, total mass budget, payload, center of gravity, and mechanical envelope.",
+        "purpose": "Verify the 450 mm classification, dimensional fit, stability, and payload margin."
+      },
+      {
+        "next_action": "Create a bench-only PX4 configuration and validation procedure with propellers removed and no flight authorization.",
+        "purpose": "Validate interfaces and configuration without authorizing operation in flight."
+      }
+    ],
+    "compatible_parts_or_requirements": [
+      "The documented source claims state that Pixhawk 6C POWER1 and POWER2 require regulated supply through a suitable power module.",
+      "The battery must not be wired directly to a regulated Pixhawk 6C POWER port.",
+      "The documented source claims state that Pixhawk 6C supports PWM servo outputs and PX4 multicopter configurations.",
+      "The documented source claims state that Pixhawk 6C supports power-module, GPS/compass, and ESC-interface wiring.",
+      "A power module must provide a verified regulated controller output and compatible voltage, current, connector, pinout, sensing, and isolation characteristics; the exact model is unknown.",
+      "Four ESCs must be compatible with the selected battery voltage, motor current envelope, cooling conditions, signal interface, connector scheme, and PX4 output assignment; exact ESCs are unknown.",
+      "Four motors must have verified mounting dimensions, shaft or propeller interface, voltage range, KV, continuous and peak current data, and thrust tables for the selected propellers; exact motors are unknown.",
+      "Propellers must be selected only from verified motor, battery-voltage, rotation-direction, clearance, and thrust-current data; propeller size and type are unknown.",
+      "The battery must have verified nominal voltage, capacity, continuous discharge capability, peak capability, connector, physical dimensions, and mass; battery voltage and capacity are unknown.",
+      "The frame and motor mounts must provide verified 450 mm-class geometry, structural compatibility, clearance, and landing support; measured dimensions and mechanical evidence are missing.",
+      "The catalog recommendation bench_power_adapter is potentially compatible with the bench-only scope, but its electrical ratings and compatibility with the planned power path are unverified."
+    ],
+    "build_or_repair_sequence": [
+      "Freeze the non-flight scope and label the aircraft as not flight-authorized.",
+      "Document the Pixhawk 6C connector pinouts and PX4 output mapping from the cited documentation, then obtain the exact hardware revision and connector implementation.",
+      "Define the battery-side distribution path, power-module input path, regulated controller output, POWER1/POWER2 allocation, sensing path, grounds, protection, and isolation boundaries.",
+      "Create a four-channel propulsion interface table covering motor, ESC, battery, propeller, connector, PWM signal, signal ground, power conductors, and mechanical mounting.",
+      "Collect exact motor-propeller-battery thrust and current data, then calculate total thrust, thrust-to-weight ratio, hover and peak current, battery energy, voltage sag margin, ESC margin, conductor sizing, and expected runtime.",
+      "Define frame geometry, rotor orientation, motor locations, clearance, landing structure, center of gravity, payload allowance, and vibration-control provisions.",
+      "Bind each front-left, front-right, rear-right, and rear-left actuator role to a declared structured part and document designed or measured joint limits.",
+      "Produce the assembly wiring diagram, power-rail diagram, connector and polarity schedule, BOM, mass budget, and unresolved-assumption register.",
+      "Configure PX4 for the documented Pixhawk 6C, frame type, output mapping, sensor interfaces, safety settings, and calibration requirements without enabling flight authorization.",
+      "Perform only bench validation with propellers removed: continuity and polarity checks, isolated rail checks, regulated-output checks, controller boot and power redundancy checks, sensor recognition, GPS/compass interface checks, ESC signal checks without propulsion operation, logging, and fault recording.",
+      "Update the design only after measured or documented evidence resolves the electrical, propulsion, mechanical, thermal, and topology unknowns."
+    ],
+    "critical_technical_unknowns": [
+      "Exact Pixhawk 6C hardware revision, connector pinout, and required POWER1/POWER2 operating ranges",
+      "Power module model, regulated output ratings, input range, current-sensing range, voltage-sensing range, connector pinout, and isolation behavior",
+      "Battery nominal voltage, maximum voltage, capacity, discharge rating, connector, dimensions, and mass",
+      "Motor model, KV, winding or phase characteristics, mounting pattern, voltage range, continuous current, peak current, and thrust data",
+      "Propeller manufacturer, diameter, pitch, material, rotation direction, clearance, and thrust-current data",
+      "ESC models, voltage/current ratings, cooling, firmware, input signal compatibility, telemetry capability, BEC behavior, connectors, and peak margin",
+      "Frame mass, arm length, rotor spacing, motor-mount pattern, structural limits, vibration behavior, and actual 450 mm classification",
+      "Total empty mass, payload mass, maximum takeoff mass, center of gravity, and required thrust-to-weight margin",
+      "Expected hover and peak current, battery voltage sag, energy consumption, thermal loads, and runtime target",
+      "Power-distribution-board or harness ratings, conductor gauge, connector ratings, protection strategy, and grounding topology",
+      "GPS/compass model, mounting location, cable compatibility, interference-control requirements, and availability",
+      "PX4 release, parameter set, output assignment, sensor calibration state, safety configuration, and documented controller firmware compatibility",
+      "Rotor actuator source-part identifiers for all four topology slots",
+      "Designed or measured joint limits for all four rotor joints",
+      "Runtime target, budget limit, measured dimensions, mechanical simulation, bench evidence, reviewed release scope, and payload limits",
+      "Inputs for runtime analysis: battery energy or voltage and capacity plus continuous or average load power",
+      "Inputs for current-margin analysis: supply-current limit, peak current, and per-load peak or stall current",
+      "Inputs for payload-margin analysis: payload mass and payload limit",
+      "Inputs for static-stability analysis: support width or wheel track and combined center-of-gravity height",
+      "Inputs for actuator-torque analysis: payload mass, payload lever arm, and actuator continuous torque",
+      "Inputs for dimensional-envelope analysis: candidate width and maximum width",
+      "Inputs for thermal analysis: estimated power loss, thermal resistance, ambient temperature, and maximum component temperature"
+    ],
+    "validation_plan": [
+      "Review all source claims against the cited PX4 Pixhawk 6C and wiring documentation; treat them as documentation claims, not physical test results.",
+      "Verify the final wiring diagram prevents direct battery connection to any regulated Pixhawk 6C POWER port.",
+      "Verify the selected power module's regulated outputs, sensing, current limits, connector pinout, and isolation against its manufacturer documentation before use.",
+      "Check the battery-side wiring, connector polarity, conductor ratings, protection, and distribution ratings against calculated continuous and peak currents.",
+      "Recalculate total mass, thrust-to-weight ratio, hover current, peak current, battery energy, voltage sag margin, and runtime only from exact motor-propeller-battery evidence.",
+      "Verify each ESC-to-motor pairing, ESC signal path, signal ground, output assignment, rotation direction, and fault behavior without installed propellers.",
+      "Verify frame clearances, motor mounting, rotor geometry, center of gravity, payload envelope, and all four topology bindings from design or measurement evidence.",
+      "Perform controller power-up, rail, redundancy, sensor, GPS/compass, and logging checks on the bench only.",
+      "Perform PX4 configuration and calibration checks with propulsion disabled and propellers removed.",
+      "Record every unresolved discrepancy, failed check, and missing source document; do not authorize flight from this protocol.",
+      "Use a second-person or independent review of the power-rail design, propulsion calculations, wiring, BOM, and PX4 parameter set before any scope change."
+    ],
+    "deliverable_gaps": [
+      "Exact controller power-rail design and isolation",
+      "Exact power-module selection and compatibility evidence",
+      "Four-motor ESC battery sizing table",
+      "Thrust-to-weight calculations and expected current",
+      "Runtime estimate based on measured or documented propulsion data",
+      "Complete assembly wiring diagram and connector schedule",
+      "Verified BOM with exact part numbers and compatibility evidence",
+      "Motor, ESC, propeller, battery, and frame specifications",
+      "Mass budget, payload budget, center-of-gravity analysis, and dimensional envelope",
+      "Thermal and conductor-sizing calculations",
+      "Four actuator source-part bindings in the structured topology",
+      "Designed or measured limits for all four rotor joints",
+      "PX4 release, parameter set, output mapping, and bench-only validation record",
+      "Bench evidence and reviewed release scope",
+      "Mechanical simulation or equivalent design evidence",
+      "Runtime, budget, measured dimensions, payload, and thermal-analysis inputs"
+    ],
+    "completion_state": "blocked",
+    "physical_validation_claimed": false
+  },
+  "physical_build_completed": false,
+  "independent_design_verification_completed": false,
+  "catalog_compatibility_gate": {
+    "recommended_build_id": "bench_power_adapter",
+    "explicitly_approved_for_project": false,
+    "status": "unverified_mismatch",
+    "rationale": "Device project does not explicitly approve this catalog build. LLM confidence cannot substitute for device compatibility evidence."
+  }
+}

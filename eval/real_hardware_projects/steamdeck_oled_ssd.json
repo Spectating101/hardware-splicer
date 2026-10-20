@@ -1,0 +1,61 @@
+{
+  "id": "steamdeck_oled_ssd",
+  "kind": "upgrade_repair",
+  "device": "Steam Deck OLED internal SSD replacement",
+  "task": "Create a practically usable SSD upgrade workflow preserving Steam Deck OLED model and data-recovery constraints; diagnose storage issue before choosing replacement.",
+  "intake": {
+    "project_name": "Steam Deck OLED SSD replacement upgrade",
+    "goal": "Investigate an SSD upgrade for Steam Deck OLED with intermittent storage errors, specify compatible single-sided 2230 SSD and software recovery/reimage plan; preserve data when possible; no unsafe battery handling or fabricated diagnostics.",
+    "mode": "repair",
+    "available_parts": [
+      {
+        "name": "Steam Deck OLED",
+        "type": "electronic_device",
+        "quantity": 1
+      },
+      {
+        "name": "proposed single-sided M.2 2230 NVMe SSD",
+        "type": "storage_module",
+        "quantity": 1
+      },
+      {
+        "name": "USB recovery media",
+        "type": "tool",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "deck_variant": "OLED",
+      "ssd_form_factor": "M.2 2230 single sided",
+      "current_ssd_health": "unknown",
+      "data_backup_status": "unknown",
+      "battery_replacement_requested": false
+    }
+  },
+  "sources": [
+    {
+      "source_id": "ifixit_deck_oled_ssd",
+      "source_type": "manual",
+      "uri": "https://www.ifixit.com/Guide/Steam+Deck+OLED+SSD+Replacement/168255",
+      "revision": "reviewed-2026-10-20",
+      "claims": [
+        "Steam Deck OLED SSD is single-sided M.2 2230",
+        "Physical SSD replacement requires additional software recovery or installation tasks",
+        "Follow ESD precautions during disassembly"
+      ]
+    }
+  ],
+  "deliverables": [
+    "LCD versus OLED model identification and compatible storage",
+    "backup/restore and recovery workflow",
+    "physical replacement access and ESD precautions",
+    "functional tests and go/no-go gates",
+    "approximate cost categories"
+  ],
+  "acceptance": [
+    "Do not substitute LCD-specific guide without model review",
+    "Do not claim replacement fixes unmeasured issue",
+    "No data preservation guarantee without backup"
+  ],
+  "approved_catalog_build_ids": []
+}
