@@ -132,10 +132,37 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
-def run_reasoning_engineering_agent(*, scenario: Mapping[str, Any], max_steps: int = 6) -> Dict[str, Any]:
-    """Bounded live LLM-driven engineering reasoning with read/design-only tools."""
+def run_reasoning_engineering_agent(
+    *,
+    scenario: Mapping[str, Any],
+    max_steps: int = 4,
+    provider: str = "codex_chatgpt",
+) -> Dict[str, Any]:
+    """Run a bounded agent with ChatGPT-authenticated Codex by default.
+
+    There is no implicit fallback to a paid API, Qwen or another model.
+    Codex is installed in the operator's unprivileged user directory.
+    """
     from .engineering_reasoning_agent import run_engineering_reasoning_agent
-    return run_engineering_reasoning_agent(scenario,max_steps=max_steps)
+    if provider == "codex_chatgpt":
+        from .codex_chatgpt_llm_adapter import CodexCliAdapter
+        from pathlib import Path
+        import os
+
+        cli_js = os.environ.get("HARDWARE_SPLICER_CODEX_CHATGPT_JS")
+        if cli_js is None:
+            cli_js = str(
+                Path.home()
+                / ".local/share/hardware-splicer/codex-chatgpt"
+                / "node_modules/@openai/codex/bin/codex.js"
+            )
+        agent = CodexCliAdapter(cli_js=cli_js)
+        return run_engineering_reasoning_agent(
+            scenario, llm_callable=agent, max_steps=max_steps
+        )
+    if provider == "legacy_text_provider":
+        return run_engineering_reasoning_agent(scenario, max_steps=max_steps)
+    raise ValueError("unsupported engineering agent provider")
 
 
 def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:

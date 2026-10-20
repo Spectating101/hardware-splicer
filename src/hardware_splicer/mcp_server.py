@@ -135,7 +135,9 @@ async def list_tools() -> list[Tool]:
             ),
             inputSchema={"type":"object","properties":{
                 "scenario":{"type":"object"},
-                "max_steps":{"type":"integer","minimum":1,"maximum":6}
+                "max_steps":{"type":"integer","minimum":1,"maximum":6},
+                "provider":{"type":"string","enum":["codex_chatgpt","legacy_text_provider"],
+                            "default":"codex_chatgpt"}
             },"required":["scenario"]},
         ),
         Tool(
@@ -675,7 +677,8 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result=await asyncio.to_thread(
             sdk.run_reasoning_engineering_agent,
             scenario=args.get("scenario"),
-            max_steps=args.get("max_steps",6),
+            max_steps=args.get("max_steps",4),
+            provider=args.get("provider","codex_chatgpt"),
         )
         return _tool_result(result)
     if name == "hs_prepare_printed_casing":

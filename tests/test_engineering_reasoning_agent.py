@@ -55,3 +55,17 @@ def test_mcp_exposes_real_agent_without_fabrication():
     from hardware_splicer import mcp_server
     tools=asyncio.run(mcp_server.list_tools())
     assert any(x.name=="hs_run_reasoning_engineering_agent" for x in tools)
+
+
+def test_live_model_cannot_promote_unobserved_donors_to_physical_success():
+    case={"scenario_id":"no_owned_hardware","intake":{"goal":"Design a machine"}}
+    def mistaken_provider(prompt,**kwargs):
+        return {"ok":True,"content":json.dumps({
+            "action":"finish","reason":"unsupported confidence",
+            "result":{"verified_donors":3,"fabrication_authorized":True,
+                      "subsystems":[{"power_on_authorized":True}]},
+        })}
+    result=run_engineering_reasoning_agent(case,llm_callable=mistaken_provider)
+    assert result["status"]=="MODEL_PROPOSAL_AUTHORITY_VIOLATION"
+    assert len(result["independent_engineering_assessment"]["unsafe_model_physical_claims"])==3
+    assert not result["physical_release"]

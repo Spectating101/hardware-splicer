@@ -1,0 +1,659 @@
+{
+  "schema_version": "hardware_splicer.engineering_reasoning_agent.v1",
+  "status": "MODEL_FINISHED",
+  "model_was_called": true,
+  "model_is_test_double": false,
+  "steps": [
+    {
+      "step": 1,
+      "model_action": "inspect_sources",
+      "model_reason": "Source sufficiency is the first gating uncertainty. The supplied titles and interface labels establish neither compatible connections nor recoverable motion, computing or stopping functions. Inspecting their limitations can expose architecture blockers before selecting a candidate. All three devices remain unowned, uncharacterized listings; this action grants no wiring, power, motor, flash, fabrication or printing authorization.",
+      "model_response_sha256": "11c8cf2ff7e85d6e81a3be3cfc80874fccceef454e08dfc2450acdb0e7cafe7c",
+      "tool_output": {
+        "source_count": 6,
+        "sources": [
+          {
+            "source_id": "ruten_22623851402690",
+            "uri": "https://www.ruten.com.tw/item/22623851402690/",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:46+00:00: (A56)【現況出售/殺肉零件機】Symbol Motorola LS2208 一維雷射條碼掃描機（剪線未測） | 露天市集 | 全台最大的網路購物市集",
+              "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          },
+          {
+            "source_id": "ruten_21447795842755",
+            "uri": "https://www.ruten.com.tw/item/21447795842755/",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:47+00:00: EPSON LQ-680 LQ-680C 點陣印表機 報帳/故障/殺肉機(隨機出貨...) | 露天市集 | 全台最大的網路購物市集",
+              "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          },
+          {
+            "source_id": "ruten_22606139676402",
+            "uri": "https://www.ruten.com.tw/item/22606139676402/",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:47+00:00: 威聯通 QNAP TS-219P II NAS 網路硬碟儲存 主機板 零件 殺肉 | 露天市集 | 全台最大的網路購物市集",
+              "Seller advertisement observed; original device condition, possession and reusable components unverified"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          },
+          {
+            "source_id": "zebra_ls2208_spec",
+            "uri": "https://www.zebra.com/us/en/products/spec-sheets/scanners/general-purpose-scanners/ls2208.html",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:46+00:00: LS2208 Handheld Scanner Specification Sheet | Zebra | Zebra",
+              "Manufacturer model family page reobserved; no physical specimen or pinout validation",
+              "Published model-family interface labels: USB, RS232, Keyboard Wedge"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          },
+          {
+            "source_id": "epson_lq680_manual",
+            "uri": "https://support2.epson.net/manuals/english/sidm/lq_680/index.html",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:47+00:00: EPSON Manual Web-Site",
+              "Manufacturer model family page reobserved; no physical specimen or pinout validation"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          },
+          {
+            "source_id": "qnap_ts219pii_spec",
+            "uri": "https://www.qnap.com/en-in/product/ts-219p%20ii/specs/hardware",
+            "claimed_version": "observed-public-page-2026-10-20",
+            "claims": [
+              "Public page title on 2026-10-19T17:55:48+00:00: TS-219P II | Hardware Specs | QNAP (IN)",
+              "Manufacturer model family page reobserved; no physical specimen or pinout validation",
+              "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA"
+            ],
+            "authentication": "SUPPLIED_UNVERIFIED"
+          }
+        ],
+        "physical_measurements_authenticated": false
+      },
+      "tool_ok": true,
+      "tool_result_sha256": "967fc835f2e43ada23437662081ad907eb91212367e7408a44d8c1892f1b3e41"
+    },
+    {
+      "step": 2,
+      "model_action": "derive_functions",
+      "model_reason": "Source inspection established only unverified listing and model-family claims. Functional decomposition is the next useful step because it can expose missing motion feedback, interface adaptation and independent stopping functions before a candidate exists to audit. Recoverability and compatibility remain hypotheses; this action authorizes no acquisition, wiring, power, motor actuation, firmware flashing, fabrication or printing.",
+      "model_response_sha256": "307bd7855e3a2c1cbe065312762903f75c099909dc1a1dcb138f0c966ac84820",
+      "tool_output": {
+        "schema_version": "hardware_splicer.functional_architecture.v1",
+        "functional_domain": "stationary_processing_cell",
+        "domain_selection_status": "CONDITIONAL_FUNCTIONAL_DECOMPOSITION",
+        "selection_basis": {
+          "stationary_only": true,
+          "requires_mobile_platform": false,
+          "four_leg_three_joint_requirement": false,
+          "explicit_motion_context": false,
+          "input_goal": "Propose a stationary tabletop barcode-triggered label indexing and logging station using only hypothetically recoverable printer motion, scanner decoding and bare NAS computing, with explicit interface contradictions and an independent safe stop. This is not a mobile rover. None of the devices is owned or characterized."
+        },
+        "functional_blocks": [
+          {
+            "functional_id": "function_220a290b5c37",
+            "role": "item_identification",
+            "declared_requirement_trace": "goal: stationary barcode/label processing",
+            "evidence_required_to_allocate_hardware": [
+              "sensor data protocol, actual original-function reading and scanner identity"
+            ],
+            "source_component_assignment_verified": false,
+            "physical_interface_contract_verified": false,
+            "provisional_only": true
+          },
+          {
+            "functional_id": "function_d618724cb5e7",
+            "role": "local_decision_and_logging",
+            "declared_requirement_trace": "goal: indexing and logging",
+            "evidence_required_to_allocate_hardware": [
+              "host OS and peripheral compatibility; genuine controller run"
+            ],
+            "source_component_assignment_verified": false,
+            "physical_interface_contract_verified": false,
+            "provisional_only": true
+          },
+          {
+            "functional_id": "function_a47d3e33ec39",
+            "role": "material_indexing",
+            "declared_requirement_trace": "goal: move label/material in controlled increments",
+            "evidence_required_to_allocate_hardware": [
+              "verified motor type, travel and force, limits, driver and mechanism"
+            ],
+            "source_component_assignment_verified": false,
+            "physical_interface_contract_verified": false,
+            "provisional_only": true
+          },
+          {
+            "functional_id": "function_8f922b8127ae",
+            "role": "independent_motion_inhibition",
+            "declared_requirement_trace": "constraints: independently stoppable machine",
+            "evidence_required_to_allocate_hardware": [
+              "independent electrical safety-rated stop/interlock and fault behavior"
+            ],
+            "source_component_assignment_verified": false,
+            "physical_interface_contract_verified": false,
+            "provisional_only": true
+          },
+          {
+            "functional_id": "function_c943b3fe9715",
+            "role": "rated_power_and_protection",
+            "declared_requirement_trace": "requirement: verified supply and protection",
+            "evidence_required_to_allocate_hardware": [
+              "rated supply, current, isolation and inductive protection"
+            ],
+            "source_component_assignment_verified": false,
+            "physical_interface_contract_verified": false,
+            "provisional_only": true
+          }
+        ],
+        "functional_edges": [
+          {
+            "from": "function_220a290b5c37",
+            "to": "function_d618724cb5e7",
+            "interaction": "digital observation",
+            "electrical_interface_verified": false
+          },
+          {
+            "from": "function_d618724cb5e7",
+            "to": "function_a47d3e33ec39",
+            "interaction": "motion request",
+            "electrical_interface_verified": false
+          },
+          {
+            "from": "function_8f922b8127ae",
+            "to": "function_a47d3e33ec39",
+            "interaction": "independent inhibit",
+            "electrical_interface_verified": false
+          },
+          {
+            "from": "function_c943b3fe9715",
+            "to": "function_a47d3e33ec39",
+            "interaction": "protected energy",
+            "electrical_interface_verified": false
+          }
+        ],
+        "architecture_is_a_robot": false,
+        "functional_decomposition_supported": true,
+        "source_couplings_verified": false,
+        "candidate_parts_observed": false,
+        "physical_connectivity_proven": false,
+        "mechanical_geometry_proven": false,
+        "physical_design_release_authorized": false
+      },
+      "tool_ok": true,
+      "tool_result_sha256": "7150045648504d93550ca3fad1861e2e287dc227981c463bc791d64fb15b7784"
+    },
+    {
+      "step": 3,
+      "model_action": "audit_candidate",
+      "model_reason": "The functional decomposition now supports a provisional candidate worth auditing for requirement coverage, interface compatibility and missing independent stopping functions. An audit can identify blockers without elevating listing claims into verified hardware capabilities. No ownership, working assembly, wiring, power, motor, flash, fabrication or printing authorization is asserted.",
+      "model_response_sha256": "78863b60c4233f23f17e521df97ea82a6934cbc093e81a77b794e5102c91caa6",
+      "tool_output": {
+        "schema_version": "hardware_splicer.sdk_source_bound_design.v1",
+        "candidate": {
+          "schema_version": "hardware_splicer.source_bound_candidate_trial.v1",
+          "scenario_id": "unfamiliar_tabletop_label_feeder_holdout",
+          "source_scenario_digest": "dacdd1a6ad150a0a0209145bfb55f3bf60633d5323687e93d10baea5fa359a62",
+          "mode": "synthesize",
+          "goal": "Propose a stationary tabletop barcode-triggered label indexing and logging station using only hypothetically recoverable printer motion, scanner decoding and bare NAS computing, with explicit interface contradictions and an independent safe stop. This is not a mobile rover. None of the devices is owned or characterized.",
+          "candidate_class": "CONDITIONAL_EVIDENCE_BOUND_DESIGN",
+          "proposal_is_physical_build": false,
+          "archetype": "generic_mechatronics",
+          "raw_native_planner_archetype": "generic_mechatronics",
+          "architecture_consistency": {
+            "stationary_only_required": true,
+            "mobile_topology_mismatch_detected": false,
+            "native_topology_usable": true,
+            "engineered_architecture_verified": false
+          },
+          "model_generated_or_inferred_topology": true,
+          "topology_reference_id": "topology-e77ee0cb0ea3",
+          "topology_joint_count": 0,
+          "topology_actuator_count": 0,
+          "functional_architecture": {
+            "schema_version": "hardware_splicer.functional_architecture.v1",
+            "functional_domain": "stationary_processing_cell",
+            "domain_selection_status": "CONDITIONAL_FUNCTIONAL_DECOMPOSITION",
+            "selection_basis": {
+              "stationary_only": true,
+              "requires_mobile_platform": false,
+              "four_leg_three_joint_requirement": false,
+              "explicit_motion_context": false,
+              "input_goal": "Propose a stationary tabletop barcode-triggered label indexing and logging station using only hypothetically recoverable printer motion, scanner decoding and bare NAS computing, with explicit interface contradictions and an independent safe stop. This is not a mobile rover. None of the devices is owned or characterized."
+            },
+            "functional_blocks": [
+              {
+                "functional_id": "function_220a290b5c37",
+                "role": "item_identification",
+                "declared_requirement_trace": "goal: stationary barcode/label processing",
+                "evidence_required_to_allocate_hardware": [
+                  "sensor data protocol, actual original-function reading and scanner identity"
+                ],
+                "source_component_assignment_verified": false,
+                "physical_interface_contract_verified": false,
+                "provisional_only": true
+              },
+              {
+                "functional_id": "function_d618724cb5e7",
+                "role": "local_decision_and_logging",
+                "declared_requirement_trace": "goal: indexing and logging",
+                "evidence_required_to_allocate_hardware": [
+                  "host OS and peripheral compatibility; genuine controller run"
+                ],
+                "source_component_assignment_verified": false,
+                "physical_interface_contract_verified": false,
+                "provisional_only": true
+              },
+              {
+                "functional_id": "function_a47d3e33ec39",
+                "role": "material_indexing",
+                "declared_requirement_trace": "goal: move label/material in controlled increments",
+                "evidence_required_to_allocate_hardware": [
+                  "verified motor type, travel and force, limits, driver and mechanism"
+                ],
+                "source_component_assignment_verified": false,
+                "physical_interface_contract_verified": false,
+                "provisional_only": true
+              },
+              {
+                "functional_id": "function_8f922b8127ae",
+                "role": "independent_motion_inhibition",
+                "declared_requirement_trace": "constraints: independently stoppable machine",
+                "evidence_required_to_allocate_hardware": [
+                  "independent electrical safety-rated stop/interlock and fault behavior"
+                ],
+                "source_component_assignment_verified": false,
+                "physical_interface_contract_verified": false,
+                "provisional_only": true
+              },
+              {
+                "functional_id": "function_c943b3fe9715",
+                "role": "rated_power_and_protection",
+                "declared_requirement_trace": "requirement: verified supply and protection",
+                "evidence_required_to_allocate_hardware": [
+                  "rated supply, current, isolation and inductive protection"
+                ],
+                "source_component_assignment_verified": false,
+                "physical_interface_contract_verified": false,
+                "provisional_only": true
+              }
+            ],
+            "functional_edges": [
+              {
+                "from": "function_220a290b5c37",
+                "to": "function_d618724cb5e7",
+                "interaction": "digital observation",
+                "electrical_interface_verified": false
+              },
+              {
+                "from": "function_d618724cb5e7",
+                "to": "function_a47d3e33ec39",
+                "interaction": "motion request",
+                "electrical_interface_verified": false
+              },
+              {
+                "from": "function_8f922b8127ae",
+                "to": "function_a47d3e33ec39",
+                "interaction": "independent inhibit",
+                "electrical_interface_verified": false
+              },
+              {
+                "from": "function_c943b3fe9715",
+                "to": "function_a47d3e33ec39",
+                "interaction": "protected energy",
+                "electrical_interface_verified": false
+              }
+            ],
+            "architecture_is_a_robot": false,
+            "functional_decomposition_supported": true,
+            "source_couplings_verified": false,
+            "candidate_parts_observed": false,
+            "physical_connectivity_proven": false,
+            "mechanical_geometry_proven": false,
+            "physical_design_release_authorized": false
+          },
+          "functional_architecture_conditional_only": true,
+          "named_component_ids": [
+            "seller-listed-LS2208-scanner-with-severed-cable-not-owned",
+            "seller-listed-bare-QNAP-TS-219P-II-NAS-PCB-without-verified-PSU-not-owned",
+            "seller-listed-faulty-Epson-LQ-680-printer-not-owned"
+          ],
+          "source_integrity": [
+            {
+              "source_id": "ruten_22623851402690",
+              "expected_source_sha256": "ee50815faa7de67fdd4db7f564b78b4dba26d69723479f008e0c677f395abf55",
+              "expected_uri": "https://www.ruten.com.tw/item/22623851402690/",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "d8a3dab71fd1616839f7e5062d5d6559e52d6c45154eda91db9478ce7a84cc61",
+              "source_claim_ids": [
+                "claim-3abc77a1d01d",
+                "claim-cf9811f80f95"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            },
+            {
+              "source_id": "ruten_21447795842755",
+              "expected_source_sha256": "5304b5fd7be82c999367ba9f00dc802a7d75aa66af515d5203d122cb1ac7d011",
+              "expected_uri": "https://www.ruten.com.tw/item/21447795842755/",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "7aadb78f37cdb47ffe0ba27402851535dd8e46e387aa32a62bee334df5d33629",
+              "source_claim_ids": [
+                "claim-48aa8c3231a2",
+                "claim-f6418cd6e82b"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            },
+            {
+              "source_id": "ruten_22606139676402",
+              "expected_source_sha256": "cd6d9f343c33cc57a5b8229d385be0f3852accff6f722d92edcdb55f4aa5b359",
+              "expected_uri": "https://www.ruten.com.tw/item/22606139676402/",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "67288d032cecf87f35a8eebefdcb1e5f224cf9779f1f845502a8d19bd203011a",
+              "source_claim_ids": [
+                "claim-aa881b8f73f4",
+                "claim-e62c24357ae6"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            },
+            {
+              "source_id": "zebra_ls2208_spec",
+              "expected_source_sha256": "6066579621d5e04d067b6e74d9923288229b396e64c5f578103750e6b171fda4",
+              "expected_uri": "https://www.zebra.com/us/en/products/spec-sheets/scanners/general-purpose-scanners/ls2208.html",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "83ecf342066b05c20c0701cd5e06b392d9282de12e94273f5820bb421f3a360d",
+              "source_claim_ids": [
+                "claim-1c0b5c905e61",
+                "claim-65acf8d38d11",
+                "claim-da614426e556"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            },
+            {
+              "source_id": "epson_lq680_manual",
+              "expected_source_sha256": "cf662597e4cf3afc750d4474cef1fd505f3a80db6156a5da8c48fd2124cd2969",
+              "expected_uri": "https://support2.epson.net/manuals/english/sidm/lq_680/index.html",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "ff02cae1d231a36c4f5ee97224b3064c366c30654028ff71f819b62c2e13be91",
+              "source_claim_ids": [
+                "claim-1022370ac275",
+                "claim-24b7e9403c25"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            },
+            {
+              "source_id": "qnap_ts219pii_spec",
+              "expected_source_sha256": "c29e1e4dfb3188fc00fa002ebcd274c62c921b483c74fb55e333f507de2d209e",
+              "expected_uri": "https://www.qnap.com/en-in/product/ts-219p%20ii/specs/hardware",
+              "expected_version": "observed-public-page-2026-10-20",
+              "retained_source_record": true,
+              "source_record_sha256": "5863e5dae6a6e6069b13d043859e32c7625d31b9369e4f74ab98f5d8336a6cc3",
+              "source_claim_ids": [
+                "claim-5e8b6a316eba",
+                "claim-f5fa8e5a77b3",
+                "claim-fd0ae73c9afd"
+              ],
+              "external_attestation_status": "DECLARED_PUBLIC_LINK_NOT_FETCHED_BY_THIS_TRIAL",
+              "source_claims_physical_authority": false
+            }
+          ],
+          "engineering_source_claim_count": 14,
+          "source_conflicts": [],
+          "decisions": [
+            {
+              "decision_id": "decompose_requested_product_into_subsystems",
+              "source_claims": [
+                {
+                  "claim_id": "claim-cf9811f80f95",
+                  "source_id": "ruten_22623851402690",
+                  "verbatim_claim": "Public page title on 2026-10-19T17:55:46+00:00: (A56)【現況出售/殺肉零件機】Symbol Motorola LS2208 一維雷射條碼掃描機（剪線未測） | 露天市集 | 全台最大的網路購物市集",
+                  "original_claim_sha256": "351426caea3ee83ae358d7320bef2b3dce8d52f2bd4dfb8df8641acd440ea0c5",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-1c0b5c905e61",
+                  "source_id": "zebra_ls2208_spec",
+                  "verbatim_claim": "Public page title on 2026-10-19T17:55:46+00:00: LS2208 Handheld Scanner Specification Sheet | Zebra | Zebra",
+                  "original_claim_sha256": "1746b45c244cf2eef1bd15012aea1ab6a537601f8d52e43a7638a0136553bf64",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-65acf8d38d11",
+                  "source_id": "zebra_ls2208_spec",
+                  "verbatim_claim": "Published model-family interface labels: USB, RS232, Keyboard Wedge",
+                  "original_claim_sha256": "c22f3e361332e3cd6375d2e50591f39de20a650cfc0fe15114f450d123c057b1",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-f5fa8e5a77b3",
+                  "source_id": "qnap_ts219pii_spec",
+                  "verbatim_claim": "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA",
+                  "original_claim_sha256": "a4f4eec896aa96013c52487aa739be5c1d210d2c0e2c1c15a6203bf363add1dd",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                }
+              ],
+              "original_input_constraints": {},
+              "candidate_action": "Propose functional blocks for the stated product, but do not substitute a generic rover or infer a compatible electrical design from source names.",
+              "support_type": "DECLARED_CLAIM_AND_REQUIREMENT",
+              "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+              "evidence_needed_to_execute": [
+                "Confirm actual sensor, control, motion, mechanical and power contracts for every proposed subsystem"
+              ],
+              "safe_to_execute_now": false
+            },
+            {
+              "decision_id": "reject_unverified_source_hardware_as_owned_inventory",
+              "source_claims": [
+                {
+                  "claim_id": "claim-3abc77a1d01d",
+                  "source_id": "ruten_22623851402690",
+                  "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified",
+                  "original_claim_sha256": "4947161c0233e62811fe76f86753ada82582c3ae958b1154d4e76317c1e03368",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-f6418cd6e82b",
+                  "source_id": "ruten_21447795842755",
+                  "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified",
+                  "original_claim_sha256": "8fa5e72c9d73d19c701783e9f4abe0b54d98fb2f69d91a0958cbc2cab994f392",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-aa881b8f73f4",
+                  "source_id": "ruten_22606139676402",
+                  "verbatim_claim": "Seller advertisement observed; original device condition, possession and reusable components unverified",
+                  "original_claim_sha256": "bf71f0d8c3fc4bc4067bd2138f584f5c688274badf60c759bcdded38dc4c38bd",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-65acf8d38d11",
+                  "source_id": "zebra_ls2208_spec",
+                  "verbatim_claim": "Published model-family interface labels: USB, RS232, Keyboard Wedge",
+                  "original_claim_sha256": "c22f3e361332e3cd6375d2e50591f39de20a650cfc0fe15114f450d123c057b1",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                },
+                {
+                  "claim_id": "claim-f5fa8e5a77b3",
+                  "source_id": "qnap_ts219pii_spec",
+                  "verbatim_claim": "Published model-family interface labels: USB 2.0, USB 3.2, Gigabit, eSATA",
+                  "original_claim_sha256": "a4f4eec896aa96013c52487aa739be5c1d210d2c0e2c1c15a6203bf363add1dd",
+                  "interpretation_ceiling": "SOURCE_REPORTED_NOT_INDEPENDENTLY_VERIFIED"
+                }
+              ],
+              "original_input_constraints": {},
+              "candidate_action": "Keep seller-listed devices as discovery hypotheses; no usable donor component or safe-to-connect interface is known.",
+              "support_type": "DECLARED_CLAIM_AND_REQUIREMENT",
+              "acceptance_status": "CONDITIONAL_NOT_PHYSICALLY_VALIDATED",
+              "evidence_needed_to_execute": [
+                "Identify an actual acquired specimen, record its model/revision, document original functionality, then characterize relevant electrical/mechanical interfaces"
+              ],
+              "safe_to_execute_now": false
+            }
+          ],
+          "baseline_revision": null,
+          "change_impact_target_ids": [
+            "system",
+            "unfamiliar_tabletop_label_feeder_holdout"
+          ],
+          "mandatory_open_gates": [
+            "No externally authenticated measurements or direct donor component observations are present in this experiment",
+            "A native robot topology is a proposed architecture, not a mechanically built or functionally verified device"
+          ],
+          "source_trace_complete": true,
+          "unresolved_blocking_source_conflicts": 0,
+          "engineering_readiness_from_native_planner": "blocked",
+          "physical_specimen_evidence_authenticated": false,
+          "verified_usable_donor_count": 0,
+          "repair_completed": false,
+          "new_product_physically_functional": false,
+          "physical_fabrication_or_power_authorized": false,
+          "conditional_design_recommendation_only": true,
+          "release_decision": "BLOCKED_PENDING_INDEPENDENT_ELECTRICAL_MECHANICAL_AND_FUNCTIONAL_PROOF"
+        },
+        "independent_evidence_audit": {
+          "schema_version": "hardware_splicer.source_bound_candidate_oracle.v1",
+          "functional_architecture_oracle": {
+            "schema_version": "hardware_splicer.functional_architecture_oracle.v1",
+            "passes_bounded_requirement_check": true,
+            "failures": [],
+            "functional_blocks_checked": 5,
+            "physical_validity_demonstrated": false,
+            "release_authorized": false
+          },
+          "source_metadata_integrity_checked": 6,
+          "source_claim_bindings_checked": 9,
+          "claim_graph_conflicts_checked": 0,
+          "engineering_decisions_checked": 2,
+          "passes_independent_evidence_integrity": true,
+          "passes_independent_architecture_relevance": true,
+          "conditional_candidate_accepted": true,
+          "explicit_topology_rejection_was_honestly_recorded": false,
+          "failures": [],
+          "physically_validated": false,
+          "fabrication_authorized": false
+        },
+        "conditional_architecture_accepted": true,
+        "physical_build_authorized": false
+      },
+      "tool_ok": true,
+      "tool_result_sha256": "1745f649c1b90f62c83a5daf07f9d5eb24cd28f1d67b76e9f1721bb1137218a8"
+    },
+    {
+      "step": 4,
+      "model_action": "finish",
+      "model_reason": "The supplied audit supports a conditional stationary functional architecture. Further casing work cannot resolve missing interface, power, motion or independent-stop evidence, and no authenticated geometry supports it.",
+      "model_response_sha256": "98604373465f84c217b69b330c5ddb5a21b9221975f5df0bd025f2a1f6493991"
+    }
+  ],
+  "final_proposal": {
+    "scenario_id": "unfamiliar_tabletop_label_feeder_holdout",
+    "status": "CONDITIONAL_ARCHITECTURE_ONLY_PHYSICAL_RELEASE_BLOCKED",
+    "hypotheses": [
+      {
+        "function": "barcode_decoding",
+        "candidate": "seller-listed LS2208 with severed cable",
+        "source_ids": [
+          "ruten_22623851402690",
+          "zebra_ls2208_spec"
+        ],
+        "allocation": "Hypothetically provide decoded barcode events to the NAS; specimen identity, functionality and interface remain unverified."
+      },
+      {
+        "function": "decision_and_logging",
+        "candidate": "seller-listed bare QNAP TS-219P II PCB",
+        "source_ids": [
+          "ruten_22606139676402",
+          "qnap_ts219pii_spec"
+        ],
+        "allocation": "Hypothetically validate barcode events, request indexing and record requested versus confirmed outcomes; bootability, software support and persistent storage remain unverified."
+      },
+      {
+        "function": "material_indexing",
+        "candidate": "seller-listed faulty Epson LQ-680",
+        "source_ids": [
+          "ruten_21447795842755",
+          "epson_lq680_manual"
+        ],
+        "allocation": "Hypothetically supply recoverable feed motion; mechanism, driver, feedback and label compatibility remain unverified."
+      }
+    ],
+    "conceptual_flow": [
+      "Decoded barcode event reaches the hypothetical NAS application.",
+      "Application records the event and issues a bounded indexing request only under a verified motion contract.",
+      "Index completion requires verified feedback; a command alone does not establish movement or successful indexing."
+    ],
+    "interface_contradictions_and_gaps": [
+      "LS2208 model-family USB, RS232 and Keyboard Wedge labels describe alternatives; they do not identify the severed cable, pinout, electrical levels or configured protocol.",
+      "Shared USB labels do not establish host/device roles, scanner class support or NAS application compatibility. RS232 and Keyboard Wedge cannot be treated as direct USB connections.",
+      "QNAP interface labels do not establish a motor-control interface or compatible Epson command path. The supplied Epson page title establishes no electrical or control contract.",
+      "Recoverable printer motion does not establish label pitch accuracy, position feedback, limits or jam detection.",
+      "No supplied evidence allocates an independent stop or verified protected power system to these three listings. The exclusive donor constraint therefore leaves mandatory functions unsupported."
+    ],
+    "independent_stop_requirement": {
+      "allocation": "UNRESOLVED",
+      "concept": "A separately validated hardware stop path must inhibit hazardous motion independently of NAS software and communications, with defined fault behavior and deliberate restart.",
+      "evidence_needed": [
+        "Risk-appropriate stop architecture and component suitability",
+        "Verified motion energy and driver inhibit contracts",
+        "Evidence of stopping behavior under controller failure, communication loss and power restoration"
+      ],
+      "satisfied": false
+    },
+    "unresolved_evidence": [
+      "Actual specimen custody, identity and revision continuity from each listing to any future component allocation",
+      "Original functionality and recoverability of each proposed subsystem",
+      "Scanner cable mapping, protocol and NAS peripheral compatibility",
+      "NAS supply requirements, boot environment and logging storage",
+      "Printer motor, driver, mechanism, feedback and control interfaces",
+      "Power ratings, protection, isolation and independent stopping behavior",
+      "Authenticated geometry and mechanical suitability"
+    ],
+    "evidence_limits": {
+      "basis": "Supplied source claims and prior receipts only; no independent verification performed.",
+      "declared_source_conflicts": 0,
+      "interpretation": "No declared source conflict does not establish interface compatibility or physical feasibility.",
+      "verified_usable_donors": 0,
+      "physical_measurements_authenticated": false,
+      "working_assembly_established": false
+    },
+    "authorization": {
+      "wiring": false,
+      "power": false,
+      "motor_actuation": false,
+      "firmware_flashing": false,
+      "fabrication": false,
+      "printing": false
+    }
+  },
+  "source_scenario_sha256": "9b9b0b363d9ad780d8ae71ba58dcbe1efcce8622e1852417772d5627aed93e45",
+  "tool_names_allowed": [
+    "audit_candidate",
+    "derive_functions",
+    "inspect_sources",
+    "propose_printed_casing"
+  ],
+  "physically_authenticated_observations": false,
+  "autonomous_physical_execution": false,
+  "fabrication_authorized": false,
+  "power_authorized": false,
+  "physical_release": false,
+  "codex_chatgpt_cli_invoked": true,
+  "separate_api_key_used": false,
+  "any_real_model_actions": true
+}
