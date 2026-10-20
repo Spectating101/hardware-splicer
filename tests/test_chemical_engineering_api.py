@@ -130,3 +130,16 @@ def test_thermo_without_optional_package_fails_closed(client):
         payload = response.json()
         assert payload["properties"]["density_kg_m3"] is not None
         assert not payload["material_compatibility_verified"]
+
+
+def test_chemical_check_executes_via_canonical_mcp_gateway(client):
+    import asyncio
+    from hardware_splicer.mcp_backend_gateway import dispatch_operation
+    op = next(row for row in operation_catalog(client.app)
+              if row["path"] == "/v1/engineering/chemical/process/mass-balance")
+    response = asyncio.run(dispatch_operation(
+        op["operation_id"], app=client.app, json_body={"streams": _streams()}
+    ))
+    assert response["status_code"] == 200
+    assert response["body"]["result"] == "consistent_declared_flows"
+    assert response["body"]["release_authorized"] is False
