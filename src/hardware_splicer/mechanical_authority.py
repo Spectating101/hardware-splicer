@@ -104,6 +104,19 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
     measured = _measurement_status(measurement_capture)
     bench = _bench_status(bench_capture)
 
+    structural = _first_dict(
+        mechanism_analysis.get("structural_screening"),
+        mechanism_bundle.get("structural_screening"),
+        _dict(body.get("mechanism_pack")).get("structural_screening"),
+        _dict(engineering_body.get("mechanism_pack")).get("structural_screening"),
+    )
+    structural_blocked = bool(
+        structural
+        and structural.get("status") != "not_applicable"
+        # This numerical screening cannot grant production release, even
+        # when deliberately disabled or when its packet is later edited.
+    )
+
     stages = _stages(
         candidate_available=evidence_counts["candidate_sources"] > 0,
         reference_available=bool(outputs) and not blockers["dfm"],
@@ -113,6 +126,26 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         bench=bench,
         release=release,
     )
+    # Product CAD/simulation can be numerically operational while release
+    # is explicitly denied by an attached, inconclusive structural study.
+    # Never promote a known failed structural screen through unrelated
+    # DFM, bench or administrative release artifacts.
+    if structural_blocked:
+        for stage in stages:
+            if stage["stage_id"] == "production_mechanical_release":
+                stage["status"] = "open"
+                stage["blockers"] = list(dict.fromkeys([
+                    "Structural contact/FEM review does not authorize load-bearing release.",
+                    *[
+                        str(block) for block in structural.get("blockers", [])[:6]
+                    ],
+                    *stage.get("blockers", []),
+                ]))[:12]
+                stage["next_unlock"] = (
+                    "Resolve stress/contact convergence and obtain measured "
+                    "material, assembled fixture and physical-load evidence."
+                )
+                break
     current_level = _current_level(stages)
     score = STAGE_SCORES.get(current_level, 0.0) if current_level else 0.0
     production_authorized = current_level == "production_mechanical_release"
@@ -122,6 +155,8 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         "current_authority_level": current_level or "no_mechanical_authority",
         "authority_score": round(score, 2),
         "production_authorized": production_authorized,
+        "structural_screening": structural,
+        "structural_release_blocked": structural_blocked,
         "release_decision": "authorized_scoped_mechanical_release" if production_authorized else "evidence_required_before_release",
         "next_action_id": _next_action_id(stages),
         "stages": stages,
@@ -138,6 +173,7 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
             "dfm_blockers": len(blockers["dfm"]),
             "simulation_blockers": len(blockers["simulation"]),
             "safety_blockers": len(blockers["safety"]),
+            "structural_release_blocked": int(structural_blocked),
             "dfm_findings": len(dfm_rows),
             "simulation_findings": len(simulation_rows),
             "safety_findings": len(safety_rows),

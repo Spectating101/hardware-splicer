@@ -247,6 +247,8 @@ def run_mechanism_pack(
             "bundle_dir": str(target) if target else None,
             "simulation": bundle.get("simulation") or [],
             "dfm": bundle.get("dfm") or [],
+            "structural_screening": bundle.get("structural_screening") or {},
+            "structural_release_blocked": bundle.get("structural_release_blocked", True),
         }
     )
     try:
@@ -272,6 +274,8 @@ def write_mechanism_pack_artifacts(pack: Mapping[str, Any], out_dir: str | Path)
         "outputs": pack.get("outputs") or [],
         "degraded_reason": pack.get("degraded_reason"),
         "claim_boundary": pack.get("claim_boundary"),
+        "structural_screening": pack.get("structural_screening") or {},
+        "structural_release_blocked": pack.get("structural_release_blocked", True),
     }
     (root / "MECHATRONICS_PACK.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return path
@@ -293,6 +297,7 @@ def attach_mechatronics_authority(
                 "outputs": mechanism_pack.get("outputs") or [],
                 "dfm": mechanism_pack.get("dfm") or [],
                 "simulation": mechanism_pack.get("simulation") or [],
+                "structural_screening": mechanism_pack.get("structural_screening") or {},
                 "kind": mechanism_pack.get("kind"),
                 "status": mechanism_pack.get("status"),
             }
@@ -303,6 +308,7 @@ def attach_mechatronics_authority(
     body = {
         "goal": build_id,
         "mechanism": {"kind": mechanism_pack.get("kind")},
+        "mechanism_pack": dict(mechanism_pack),
         "firmware_scaffold": fw,
         "resolved_modules": salvage_package.get("resolved_modules"),
         # Minimal machine context so the ledger can see an electrical side exists
@@ -323,6 +329,8 @@ def attach_mechatronics_authority(
         "ready": mech_ok and fw_ok,
         "mechanism_kind": mechanism_pack.get("kind"),
         "mechanism_status": mechanism_pack.get("status"),
+        "structural_screening": mechanism_pack.get("structural_screening") or {},
+        "structural_release_blocked": bool(mechanism_pack.get("structural_release_blocked", True)),
         "firmware_filename": (fw or {}).get("filename"),
         "claim_boundary": (
             "Starter elec+mech+fw pack from salvage — not production mechatronics release."
