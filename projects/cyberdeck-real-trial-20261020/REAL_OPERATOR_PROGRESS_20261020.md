@@ -39,3 +39,7 @@ The printed category sum does not reconcile with the advertised total, and its u
 **What now needs work, in order:** actual component sourcing with source-specific specifications and manufacturer interfaces; CAD/enclosure fit and a project-specific wiring plan; validated power budget and current margins; model-driven software repair/revision; independent device-level acceptance. A better unit-test count or more scenario inventories are *not* substitutes.
 
 This is not a second synthetic benchmark. It is an ongoing practical cyberdeck engineering assignment with real external CAD, rule checks, and AI-to-tool actions, still failing the original deliverable.
+
+## Network HTTP reproduction of the same HS project
+
+After the test-client trial and its source processing, a separate real `uvicorn` instance of the production HS product API was started on `127.0.0.1:8831` against the same isolated project store. A `curl` POST to `/v1/projects/cyberdeck-source-project-20261020/engineering/source-bundle/check` at current project revision **11** returned HTTP **200**, `ok:true`, `registered:false` (idempotent), and the persisted **43 ERC**, **16 DRC** and alternative reference BOM upper bound **US$270**. The temporary server was stopped after the probe. This verifies the route is usable over actual local HTTP, not only from an in-process test client; it does **not** establish a completed design.
