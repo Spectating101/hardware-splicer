@@ -1,0 +1,42 @@
+{
+  "project_id": "hs-drone-build-20261020",
+  "objective": "Engineer a useful, affordable quadcopter from obtainable parts, using buy/build/salvage/adaptation based on evidence rather than forcing any one technique.",
+  "constraints": {"location": "Taiwan", "budget_usd": null, "payload_goal_g": null, "flight_time_goal_min": null, "user_owned_parts": "none identified", "physical_build_authorized": false},
+  "strategies": [
+    {
+      "id": "reference_development_kit", "label": "Holybro X500 V2 complete Pixhawk 6C development kit", "known_usd": 579.0, "cost_basis": "listed manufacturer retail option SKU30188/30189", "cost_complete": false,
+      "included": ["X500 V2 frame", "4 motors", "4 ESCs", "PDB", "6 propellers", "Pixhawk 6C", "PM02 V3", "GPS", "telemetry"],
+      "missing": ["compatible 4S battery", "RC transmitter/receiver or justified alternate", "charging and bench-safety equipment", "shipping/taxes"],
+      "engineering_status": "documented_integrated_reference", "procurement_status": "not ordered", "risk": "low_design_uncertainty_not_flight_proven",
+      "source": "https://holybro.com/products/px4-development-kit-x500-v2?variant=43018371530941"
+    },
+    {
+      "id": "x500_arf_plus_autopilot", "label": "X500 V2 ARF frame/motors/ESC plus separately sourced control and radios", "known_usd": 260.99, "cost_basis": "manufacturer ARF option SKU30125", "cost_complete": false,
+      "included": ["X500 V2 frame", "4 motors", "4 ESCs", "PDB", "6 propellers"],
+      "missing": ["flight controller", "compatible power module", "GPS", "telemetry", "battery", "RC", "charging and bench-safety equipment", "shipping/taxes"],
+      "engineering_status": "reference_powertrain_with_open_avionics", "procurement_status": "manufacturer currently lists sold out", "risk": "medium_supply_and_integration_uncertainty",
+      "source": "https://holybro.com/collections/multicopter-kit/products/x500-v2-kits"
+    },
+    {
+      "id": "frame_only_custom", "label": "X500 V2 frame only plus independently selected propulsion and control", "known_usd": 122.99, "cost_basis": "manufacturer frame-only SKU30120", "cost_complete": false,
+      "included": ["X500 V2 frame kit"],
+      "missing": ["4 motors", "4 ESCs", "PDB", "propellers", "flight controller", "power module", "GPS", "radio/control", "battery", "charging and bench-safety equipment", "shipping/taxes"],
+      "engineering_status": "design_requires_compatibility_selection", "procurement_status": "manufacturer lists frame option available", "risk": "medium_high_selection_and_verification",
+      "source": "https://holybro.com/collections/multicopter-kit/products/x500-v2-kits"
+    },
+    {
+      "id": "multi_donor_custom", "label": "S500 open frame design and mixed salvaged/open electronics", "known_usd": null, "cost_basis": "no verified bill of materials or supply quotes", "cost_complete": false,
+      "included": ["public S500 OpenSCAD frame source", "open STM32-controller and ESC design source"],
+      "missing": ["manufacturing cost", "fabrication process and tolerances", "physical interface dimensions", "controller firmware validation", "4 certified ESCs", "4 motors", "power and wiring", "battery", "flight equipment"],
+      "engineering_status": "research_prototype_not_build_ready", "procurement_status": "no parts identified on hand", "risk": "high_unknown_fit_and_validation",
+      "source": "https://github.com/colgecen/DroneSkeleton"
+    }
+  ],
+  "decision": {
+    "selected_for_first_reference": "reference_development_kit",
+    "selected_for_custom_splicing_investigation": "multi_donor_custom",
+    "procurement_approved": false,
+    "rationale": "Use a published integrated design as technical control while comparing costs and constraints of mixed-donor alternatives. The lowest known partial price is not the cheapest complete drone; no custom or salvage cost is yet verifiable. Do not force a purchase or claim an optimized design.",
+    "decision_revisit_triggers": ["exact objective and payload fixed", "actual on-hand inventory supplied", "part-by-part supplier quotes", "flight-critical interface specifications validated", "sourced thrust/current and frame mass figures"]
+  }
+}
