@@ -107,3 +107,7 @@ retain chemical blockers in the existing findings and hash-bound review packet
 after a submitted acceptance. It does NOT certify or independently verify
 a repair. See docs/PRACTICAL_CHEMISTRY_HS_WORKFLOW_AUDIT.md for the 4-case
 integration test, remaining global release gate gap, and limitations.
+
+## Later release enforcement
+
+The release-readiness, audited physical-authorization and engineering-plan persistence enforcement implementation is documented in docs/PRACTICAL_CHEMISTRY_RELEASE_ENFORCEMENT.md. It does not establish independent chemical clearance.

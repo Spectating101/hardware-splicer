@@ -115,3 +115,7 @@ physical workflow gate. The next acceptance step should verify real
 sources/measurements, downstream release gating, authenticated reviews and a
 guided UI with independent technicians, then measure actual time and repair
 outcomes. Freeze unrelated general chemistry features until those gaps close.
+
+## Later release-gate hardening
+
+Saved-project release and physical authorization are now actively blocked by unverified chemistry assessments. See docs/PRACTICAL_CHEMISTRY_RELEASE_ENFORCEMENT.md for scope, tested bypass resistance and the remaining independent clearance blocker.

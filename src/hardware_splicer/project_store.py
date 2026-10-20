@@ -165,6 +165,47 @@ class ProjectStore:
 
         manifest = self._manifest_or_default(safe_id)
         current = int(manifest.get("latest_revision") or 0)
+        # Once practical chemistry has been recorded for a component, no
+        # generic snapshot overwrite, other discipline tool, or accepted
+        # review may silently erase that component's unresolved chemistry.
+        # Replacement assessments for the SAME component are permitted but
+        # remain under the derived fail-closed project chemistry gate.
+        if current:
+            preceding = self.load(safe_id, revision=current)["snapshot"]
+            previous = preceding.get("practicalChemistryAssessments")
+            if previous is not None and not isinstance(previous, list):
+                raise RevisionConflict(
+                    "malformed prior chemistry record requires explicit recovery; "
+                    "it cannot be silently dropped in a new revision"
+                )
+            old_findings = preceding.get("engineeringFindings")
+            if isinstance(old_findings, list) and any(
+                isinstance(row, Mapping)
+                and row.get("producer") == "practical_chemistry_assessment"
+                for row in old_findings
+            ) and not previous:
+                raise RevisionConflict(
+                    "orphaned prior chemistry findings require explicit recovery; "
+                    "they cannot be silently dropped in a new revision"
+                )
+            if isinstance(previous, list) and previous:
+                replacement = snapshot.get("practicalChemistryAssessments")
+                prior_ids = {
+                    str(row["component_id"])
+                    for row in previous
+                    if isinstance(row, Mapping) and row.get("component_id")
+                }
+                replacement_ids = {
+                    str(row["component_id"])
+                    for row in replacement
+                    if isinstance(row, Mapping) and row.get("component_id")
+                } if isinstance(replacement, list) else set()
+                if len(prior_ids) != len(previous) or not prior_ids.issubset(replacement_ids):
+                    raise RevisionConflict(
+                        "project snapshot cannot erase recorded practical "
+                        "chemistry components; independent clearance is not "
+                        "implemented, and retaining this evidence is mandatory"
+                    )
         if expected_revision is not None and int(expected_revision) != current:
             raise RevisionConflict(
                 f"project {safe_id!r} is at revision {current}, expected {expected_revision}"

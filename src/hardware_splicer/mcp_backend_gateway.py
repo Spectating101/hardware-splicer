@@ -33,6 +33,7 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/projects/{project_id}/reviews"),
         ("GET", "/v1/projects/{project_id}/reviews"),
         ("GET", "/v1/projects/{project_id}/findings"),
+        ("GET", "/v1/projects/{project_id}/engineering/release-gate"),
         ("GET", "/v1/projects/{project_id}/review-packet"),
         ("GET", "/v1/engineering/chemical/engines"),
         ("POST", "/v1/engineering/chemical/materials/compare"),

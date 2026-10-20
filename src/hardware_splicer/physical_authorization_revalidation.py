@@ -16,6 +16,9 @@ from .attested_audited_physical_evidence import (
 )
 from .audited_physical_evidence import assess_audited_physical_authorization
 from .machine_project import MachineProject
+from .project_chemistry_release_gate import (
+    evaluate_project_chemistry_gate, block_audited_physical_authorization,
+)
 from .physical_evidence import PhysicalOperation
 from .scoped_release import assess_scoped_release
 
@@ -158,6 +161,22 @@ def revalidate_physical_authorization_state(
             message=f"Fresh physical authorization revalidation failed: {exc}",
         )
 
+    chemistry_gate = evaluate_project_chemistry_gate(
+        updated, project_id=str(_mapping(updated.get("machine_project")).get("project_id") or ""),
+    )
+    if chemistry_gate["blocked"]:
+        messages = [
+            "Practical chemistry gate blocks physical authorization: " + row["code"]
+            for row in chemistry_gate["blockers"]
+        ]
+        revalidated = block_audited_physical_authorization(revalidated, chemistry_gate)
+        if release is not None:
+            release = release.model_copy(update={
+                "allowed": False,
+                "allowed_operations": [],
+                "status": "blocked",
+                "blockers": list(dict.fromkeys([*release.blockers, *messages])),
+            })
     revalidated_metadata = dict(revalidated.metadata)
     revalidated_metadata.update(
         {
@@ -195,6 +214,7 @@ def revalidate_physical_authorization_state(
         ),
         "server_attestation_required": server_attestation_required,
         "automatic_authorization": False,
+        "chemistry_release_gate": chemistry_gate,
         "authorization_carries_across_revisions": False,
     }
     return updated
