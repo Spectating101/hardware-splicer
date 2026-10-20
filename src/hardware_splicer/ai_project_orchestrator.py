@@ -271,7 +271,11 @@ def build_ai_project_prompt(context: Mapping[str, Any], *, max_actions: int) -> 
         "- architecture_candidates: array of at most 3 objects with id, title, summary, "
         "tradeoffs, assumptions, source_ids\n"
         f"- actions: array of at most {int(max_actions)} objects with action_type, title, "
-        "rationale, inputs, source_ids\n\n"
+        "rationale, inputs, source_ids\n"
+        "IMPORTANT: action.inputs MUST always be a JSON object (use {} when unknown), "
+        "never a string, list, or prose. Each requirement and architecture candidate "
+        "must be a JSON object. Empty evidence source_ids must be [] rather than "
+        "invented document references.\n\n"
         f"Allowed action_type values: {action_types}.\n"
         "Every action is a proposal only. Never emit shell commands, arbitrary URLs, secrets, "
         "raw file content, device operations, fabrication orders, flashing, power-on, or motion.\n\n"
@@ -391,7 +395,10 @@ def parse_ai_project_response(
             raise InvalidAIProjectResponse(
                 f"actions[{index}] requires title and rationale"
             )
-        inputs = _sanitize_value(dict(row.get("inputs") or {}))
+        raw_inputs = row.get("inputs")
+        if raw_inputs is not None and not isinstance(raw_inputs, Mapping):
+            raise InvalidAIProjectResponse(f"actions[{index}].inputs must be an object")
+        inputs = _sanitize_value(dict(raw_inputs or {}))
         _validate_no_authority_elevation(inputs, path=f"actions[{index}].inputs")
         identity_seed = {
             "session_id": session_id,

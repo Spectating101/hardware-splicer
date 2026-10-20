@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from .copilot_cli_text_client import call_copilot_cli_chat, copilot_cli_configured
 from typing import Any, Dict, List, Optional
 
 from ..env_local import load_env_local
@@ -16,18 +17,20 @@ from .qwen_text_client import _call_qwen_http, qwen_configured
 def llm_provider_mode() -> str:
     load_env_local()
     raw = str(os.getenv("HARDWARE_SPLICER_LLM_PROVIDER") or "qwen_then_agy").strip().lower()
-    if raw in {"qwen", "agy", "qwen_then_agy", "agy_then_qwen"}:
+    if raw in {"qwen", "agy", "qwen_then_agy", "agy_then_qwen", "copilot_cli"}:
         return raw
     return "qwen_then_agy"
 
 
 def llm_configured() -> bool:
     load_env_local()
-    return qwen_configured() or agy_configured()
+    return qwen_configured() or agy_configured() or (llm_provider_mode() == "copilot_cli" and copilot_cli_configured())
 
 
 def _provider_chain() -> List[str]:
     mode = llm_provider_mode()
+    if mode == "copilot_cli":
+        return ["copilot_cli"]
     if mode == "qwen":
         return ["qwen"]
     if mode == "agy":
@@ -69,11 +72,13 @@ def call_llm_chat(
     stage_name = str(stage or "general")
     providers = _provider_chain()
     qwen_models = qwen_text_model_candidates(model, stage=stage) if qwen_configured() else []
-    primary_model = qwen_models[0] if qwen_models else str(model or os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-2.5-flash")
+    primary_model = qwen_models[0] if qwen_models else str(model or ("auto" if providers == ["copilot_cli"] else os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-2.5-flash"))
 
     last_error: Dict[str, Any] = {"ok": False, "error": "no_llm_provider"}
     for index, provider in enumerate(providers):
-        if provider == "qwen":
+        if provider == "copilot_cli":
+            selected_probe = str(model or "auto")
+        elif provider == "qwen":
             selected_probe = primary_model
         else:
             selected_probe = str(model or os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-2.5-flash")
@@ -100,7 +105,10 @@ def call_llm_chat(
                 )
                 return {**cached, "cached": True, "cache_key": key}
 
-        if provider == "qwen":
+        if provider == "copilot_cli":
+            result = call_copilot_cli_chat(prompt, model=model, stage=stage_name, temperature=temperature, json_mode=json_mode, timeout_s=timeout_s, system=system)
+            selected_model = str(result.get("model") or selected_probe)
+        elif provider == "qwen":
             if not qwen_configured():
                 last_error = {"ok": False, "error": "missing_api_key", "message": "Set DASHSCOPE_API_KEY or QWEN_API_KEY."}
                 if index < len(providers) - 1:
