@@ -64,6 +64,36 @@ def _parse(content:str)->dict:
     return data
 
 
+def _physical_claim_violations(value:Any, prefix:str="result")->list[str]:
+    """Reject unobserved measured/release claims in freeform model proposals."""
+    if isinstance(value, Mapping):
+        issues=[]
+        for key, item in value.items():
+            label=str(key).strip().lower().replace("-","_")
+            path=prefix+"."+label
+            if label in {
+                "physical_release","fabrication_authorized","physical_build_authorized",
+                "power_authorized","power_on_authorized","motion_authorized",
+                "firmware_flash_authorized","mechanical_production_release",
+                "physical_assembly_verified","physical_testing_completed",
+                "specimens_measured","physical_measurements_authenticated",
+            } and item is True:
+                issues.append(path)
+            if label in {"verified_donors","verified_usable_donor_count",
+                         "measured_donor_count","actually_recovered_donors"} and (
+                isinstance(item,(int,float)) and not isinstance(item,bool) and item>0
+            ):
+                issues.append(path)
+            issues.extend(_physical_claim_violations(item,path))
+        return issues
+    if isinstance(value,list):
+        return [
+            issue for i,item in enumerate(value)
+            for issue in _physical_claim_violations(item,f"{prefix}[{i}]")
+        ]
+    return []
+
+
 def run_engineering_reasoning_agent(
     scenario:Mapping[str,Any],
     *,
@@ -123,11 +153,33 @@ def run_engineering_reasoning_agent(
             receipt["tool_ok"]=False
             receipt["tool_error"]=str(exc)[:800]
         transcript.append(receipt)
+    candidate_audits=[
+        x["tool_output"] for x in transcript
+        if x.get("model_action")=="audit_candidate" and x.get("tool_ok")
+    ]
+    independent=candidate_audits[-1] if candidate_audits else {}
+    final_audit={
+        "candidate_audit_executed":bool(candidate_audits),
+        "source_integrity_passed":bool(
+            (independent.get("independent_evidence_audit") or {}).get("passes_independent_evidence_integrity")
+        ) if independent else None,
+        "conditional_architecture_accepted":independent.get("conditional_architecture_accepted") if independent else None,
+        "physical_build_authorized":False,
+        "final_model_proposal_is_unverified":True,
+        "fabrication_or_motion_release":False,
+    }
+    physical_claim_violations=_physical_claim_violations(final) if final is not None else []
+    final_audit["unsafe_model_physical_claims"]=physical_claim_violations
+    final_audit["model_claims_safe_for_conditional_review"]=not physical_claim_violations
     return {
         "schema_version":"hardware_splicer.engineering_reasoning_agent.v1",
-        "status":"MODEL_FINISHED" if final is not None else "STEP_BUDGET_EXHAUSTED",
+        "independent_engineering_assessment":final_audit,
+        "status":(
+            "MODEL_PROPOSAL_AUTHORITY_VIOLATION" if physical_claim_violations
+            else "MODEL_FINISHED" if final is not None else "STEP_BUDGET_EXHAUSTED"
+        ),
         "model_was_called":True,
-        "model_is_test_double":llm_callable is not None,
+        "model_is_test_double":llm_callable is not None and not getattr(llm_callable,"is_live_model",False),
         "steps":transcript,
         "final_proposal":final,
         "source_scenario_sha256":_digest(scenario),
