@@ -14,6 +14,8 @@ No second agent or engineering-release system is created.
 | POST /v1/engineering/chemical/properties/inspect | thermo (optional) | Density, heat capacity, viscosity and thermal conductivity at T/P |
 | POST /v1/engineering/chemical/materials/composition | pymatgen-core (optional) | Elemental mass/atomic fractions and reduced formula |
 | POST /v1/engineering/chemical/materials/evidence-check | HS MachineProject | Read-only property/limit reconciliation across chemical, mechanical and electrical constraints |
+| POST /v1/engineering/chemical/materials/compare | HS MachineProject | Fairness-gated comparison across candidates; rejects unequal screening requirements |
+| POST /v1/engineering/chemical/materials/document-claim/evidence-draft | HS canonical document-claim adapter | Parsed ISO75 HDT quote to proposed MachineProject EvidenceRef, with page/hash locator and no authority promotion |
 | POST /v1/engineering/chemical/gas/state | Cantera (optional) | Bounded air-model thermophysical state and TP equilibrium |
 | POST /v1/engineering/chemical/process/mass-balance | HS engine | Declared overall and nonreactive component mass-flow checks |
 | POST /v1/engineering/chemical/battery/discharge | PyBaMM (optional) | Reference Li-ion SPM discharge curve (Chen2020 parameter set) |
@@ -46,12 +48,23 @@ authorization or long-running background tasks.
    a source ref and metadata for identical material_id, material_property, unit,
    and value.
 4. Run materials/evidence-check. Identity mismatch, unit mismatch, source gaps,
-   numeric failures and conflicting values block the report. Matching numeric
+   numeric failures and conflicting values block the report. For ISO 75 heat
+   deflection evidence, the method and test load (0.45 MPa or 1.80 MPa) must
+   match EXACTLY. No converting from HDT into a generic max service temperature.
+   The evidence must include a source SHA256 and page locator; these are
+   asserted by the caller, not re-fetched in this comparator. Matching numeric
    limits are only numerically_consistent_but_unverified.
-5. Independent source verification, domain review and physical validation remain
+5. Compare candidates through materials/compare, which rejects incomparable
+   criteria even if one candidate's smaller checklist passes.
+6. For PDF provenance, use HS's existing project-scoped source ingestion,
+   hash-reverified document pages, and page-anchored document claims, then
+   request a proposed evidence draft using the chemical bridge. This bridge
+   checks ISO75 quote/value agreement, but it does not itself re-read the PDF.
+7. Independent source verification, domain review and physical validation remain
    separate, required gates. No claim receives implicit promotion.
 
-Supported material metric units: density=kg/m3; youngs_modulus=Pa;
+Supported material metric units: heat_deflection_temperature=K (ISO75 with
+0.45 or 1.80 MPa load), density=kg/m3; youngs_modulus=Pa;
 thermal_conductivity=W/(m*K); electrical_resistivity=ohm*m;
 max_service_temperature=K; specific_heat_capacity=J/(kg*K).
 
@@ -86,3 +99,15 @@ source refs are POINTERS rather than authenticated evidence.
 Later isolated candidates: DWSIM (separate GPLv3 process flowsheet program)
 and Open Reaction Database (experimental reaction records). Neither is
 embedded in HS here.
+
+## Reproducible real-source evaluation
+
+- Evaluation script: eval/chemical_materials/prusa_enclosure_screen_v1.py.
+  Ten authored cases, not a blinded dataset or statistical accuracy claim.
+- Optional source verifier: eval/chemical_materials/verify_prusa_tds.py.
+  Verifies original Prusa ASA / PC Blend PDF SHA256 and page-2 ISO 75 values.
+- Registered-source integration: eval/chemical_materials/registered_pdf_end_to_end.py.
+  In a temporary isolated ProjectStore, exercises HS source PDF ingestion,
+  hash-reverified document reading, page-anchored claim registration, proposed
+  EvidenceRef conversion and read-only material screening.
+- Detailed limitations and benchmark findings: docs/CHEMICAL_ENGINEERING_EVALUATION.md.

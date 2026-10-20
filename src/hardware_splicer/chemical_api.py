@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field
 from .chemical_gas import gas_state_report
 from .chemical_battery import battery_discharge_report
 from .chemical_materials import solid_composition_report
-from .material_evidence import evaluate_material_evidence
+from .chemical_source_bridge import draft_iso75_evidence
+from .material_evidence import evaluate_material_evidence, compare_material_candidates
 from .machine_project import MachineProject
 from .chemical_engineering import (
     EngineUnavailable,
@@ -60,6 +61,18 @@ class MaterialEvidenceRequest(BaseModel):
     component_id: str = Field(min_length=1, max_length=128)
 
 
+class MaterialDocumentClaimRequest(BaseModel):
+    claim: dict[str, Any]
+    component_id: str = Field(min_length=1, max_length=128)
+    constraint_id: str = Field(min_length=1, max_length=128)
+    material_id: str = Field(min_length=1, max_length=128)
+
+
+class MaterialCompareRequest(BaseModel):
+    project: MachineProject
+    component_ids: list[str] = Field(min_length=2, max_length=20)
+
+
 class BatteryDischargeRequest(BaseModel):
     c_rate: float = Field(ge=0.1, le=1.0)
     duration_s: float = Field(ge=60, le=3600)
@@ -102,6 +115,15 @@ def create_chemical_router() -> APIRouter:
     @router.post("/materials/evidence-check")
     def review_material_evidence(request: MaterialEvidenceRequest) -> dict[str, Any]:
         return _call(evaluate_material_evidence, request.project, request.component_id)
+
+    @router.post("/materials/document-claim/evidence-draft")
+    def draft_material_document_evidence(request: MaterialDocumentClaimRequest) -> dict[str, Any]:
+        return _call(draft_iso75_evidence, request.claim, component_id=request.component_id,
+                     constraint_id=request.constraint_id, material_id=request.material_id)
+
+    @router.post("/materials/compare")
+    def compare_materials(request: MaterialCompareRequest) -> dict[str, Any]:
+        return _call(compare_material_candidates, request.project, request.component_ids)
 
     @router.post("/battery/discharge")
     def model_battery_discharge(request: BatteryDischargeRequest) -> dict[str, Any]:

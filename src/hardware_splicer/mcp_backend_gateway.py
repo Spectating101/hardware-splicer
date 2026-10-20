@@ -27,10 +27,19 @@ _SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
 _TASK_OPERATION_PATHS = {
     "chemical_material_review": (
         ("GET", "/v1/engineering/chemical/engines"),
+        ("GET", "/v1/projects/{project_id}"),
+        ("PUT", "/v1/projects/{project_id}/snapshot"),
+        ("POST", "/v1/projects/{project_id}/sources/ingest"),
+        ("GET", "/v1/projects/{project_id}/sources/{source_id}/document"),
+        ("GET", "/v1/projects/{project_id}/sources/{source_id}/document/search"),
+        ("GET", "/v1/projects/{project_id}/sources/{source_id}/document/pages/{page_number}"),
+        ("POST", "/v1/projects/{project_id}/sources/{source_id}/document/claims"),
         ("POST", "/v1/engineering/chemical/molecule/inspect"),
         ("POST", "/v1/engineering/chemical/properties/inspect"),
         ("POST", "/v1/engineering/chemical/materials/composition"),
+        ("POST", "/v1/engineering/chemical/materials/document-claim/evidence-draft"),
         ("POST", "/v1/engineering/chemical/materials/evidence-check"),
+        ("POST", "/v1/engineering/chemical/materials/compare"),
     ),
     "chemical_process_review": (
         ("GET", "/v1/engineering/chemical/engines"),
