@@ -62,3 +62,7 @@ Current status as of freeze: HS has substantial individual engineering tools and
 This charter specifies **future product direction and work selection**, not a claim that those capabilities exist today. Existing `README.md`/`docs/product/` descriptions of the bounded SPI adapter product and evidence/authority contracts remain accurate for their specific validated scope. `docs/MACHINE_PROJECT_SPINE.md` and `docs/INTEGRATION_STACK.md` continue to control engineering truth and physical authority. This charter changes neither their evidence rules nor any safety permissions.
 
 **Short form:** *HS must solve engineering objectives by intelligently using and integrating engineering capabilities, then deliver verifiable physical-world designs or repairs. A better toolbox, another score, or a prettier checklist is not the objective.*
+
+## Explicit project-selection tracks (2026-10-20)
+
+The [engineering opportunity portfolio](../projects/engineering-opportunity-portfolio/README.md) separates: (1) actual drone/cyberdeck engineering integration proof, (2) financially ranked repair/build/resale arbitrage, and (3) independently ranked practical-use and current-need engineering candidates. Never conflate profit with utility or imply that any listing spread is realized profit.
