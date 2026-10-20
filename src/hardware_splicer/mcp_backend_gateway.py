@@ -47,10 +47,28 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/engineering/chemical/materials/evidence-check"),
         ("POST", "/v1/engineering/chemical/materials/compare"),
     ),
+    "chemical_reaction_analysis": (
+        ("GET", "/v1/engineering/chemical/engines"),
+        ("POST", "/v1/engineering/chemical/reactions/stoichiometry"),
+        ("POST", "/v1/engineering/chemical/reactions/kinetics/reference"),
+        ("POST", "/v1/engineering/chemical/reactions/thermodynamics/reference"),
+        ("POST", "/v1/engineering/chemical/process/mass-balance"),
+        ("POST", "/v1/engineering/chemical/gas/state"),
+    ),
+    "chemical_phase_equilibrium": (
+        ("GET", "/v1/engineering/chemical/engines"),
+        ("GET", "/v1/engineering/chemical/phases/reference-systems"),
+        ("POST", "/v1/engineering/chemical/phases/flash"),
+        ("POST", "/v1/engineering/chemical/phases/water-properties"),
+        ("POST", "/v1/engineering/chemical/phases/water-crosscheck"),
+    ),
     "chemical_process_review": (
         ("GET", "/v1/engineering/chemical/engines"),
+        ("POST", "/v1/engineering/chemical/reactions/stoichiometry"),
+        ("POST", "/v1/engineering/chemical/phases/flash"),
         ("POST", "/v1/engineering/chemical/gas/state"),
         ("POST", "/v1/engineering/chemical/process/mass-balance"),
+        ("POST", "/v1/engineering/chemical/process/network/validate"),
     ),
     "chemical_battery_model_review": (
         ("GET", "/v1/engineering/chemical/engines"),

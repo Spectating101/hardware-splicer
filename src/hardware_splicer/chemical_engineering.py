@@ -17,6 +17,7 @@ ENGINES = (
     ("cantera", "cantera", "kinetics_and_equilibrium"),
     ("pybamm", "pybamm", "battery_electrochemistry"),
     ("pymatgen", "pymatgen", "solid_materials"),
+    ("coolprop", "CoolProp", "water_reference_properties"),
 )
 NON_AUTHORITY = {
     "source_authority": "computed_or_declared_only",
@@ -39,7 +40,7 @@ def engines_report() -> dict[str, Any]:
         "engines": [
             {"id": name, "package": package, "purpose": purpose,
              "installed": importlib.util.find_spec(package) is not None,
-             "adapter_implemented": name in {"rdkit", "thermo", "cantera", "pybamm", "pymatgen"}}
+             "adapter_implemented": name in {"rdkit", "thermo", "cantera", "pybamm", "pymatgen", "coolprop"}}
             for name, package, purpose in ENGINES
         ],
         "interpretation": "Presence is not validation or project evidence.",

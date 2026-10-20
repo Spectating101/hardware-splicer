@@ -1,5 +1,10 @@
 # Chemical engineering — computational integration and evidence boundaries
 
+The standalone scientific capabilities take priority. See
+docs/CHEMICAL_SCIENCE_CORE.md and eval/chemical_science before treating
+cross-disciplinary material packaging as the full chemistry layer.
+
+
 HS represents chemical disciplines in the canonical MachineProject, alongside
 mechanical, electrical, firmware and other domains. The existing HS project
 store, source graph, revision reviews and MCP gateway remain authoritative.
@@ -10,6 +15,13 @@ No second agent or engineering-release system is created.
 | Endpoint | Backend | Actual scope |
 |---|---|---|
 | GET /v1/engineering/chemical/engines | HS probe | Installed vs implemented scientific adapters |
+| POST /v1/engineering/chemical/reactions/stoichiometry | HS native | Neutral formula elemental conservation and conditional material inventory |
+| POST /v1/engineering/chemical/reactions/thermodynamics/reference | Cantera | Selected GRI30 delta H/G/S and K |
+| POST /v1/engineering/chemical/reactions/kinetics/reference | Cantera | Fixed reference kinetic time trajectory |
+| POST /v1/engineering/chemical/phases/flash | thermo/PRMIX | Vapor/liquid equilibrium and component balance of reference systems |
+| POST /v1/engineering/chemical/phases/water-properties | CoolProp | Water phase/saturation and specialist fluid properties |
+| POST /v1/engineering/chemical/phases/water-crosscheck | CoolProp plus thermo | Conflict blocking on water phase disagreement |
+| POST /v1/engineering/chemical/process/network/validate | HS native | Directed mixer/splitter/transfer stream conservation graph |
 | POST /v1/engineering/chemical/molecule/inspect | RDKit (optional) | SMILES formula, molecular weight, charge |
 | POST /v1/engineering/chemical/properties/inspect | thermo (optional) | Density, heat capacity, viscosity and thermal conductivity at T/P |
 | POST /v1/engineering/chemical/materials/composition | pymatgen-core (optional) | Elemental mass/atomic fractions and reduced formula |
@@ -27,6 +39,7 @@ Install only the needed optional dependencies:
     pip install -e '.[chemical-process]'
     pip install -e '.[chemical-battery]'
     pip install -e '.[chemical-materials]'
+    pip install -e '.[chemical-fluids]'
 
 Optional engines return HTTP 503 when absent; HS never fabricates solver outputs
 to hide a missing dependency. Routes appear in canonical OpenAPI and are callable

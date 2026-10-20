@@ -125,6 +125,7 @@ _PYTHON_PROBES: dict[str, str] = {
     "cantera": "cantera",
     "pybamm": "pybamm",
     "pymatgen": "pymatgen",
+    "coolprop": "CoolProp",
 }
 
 _PROJECT_ARTIFACTS: dict[str, tuple[str, ...]] = {

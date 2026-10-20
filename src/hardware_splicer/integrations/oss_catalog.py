@@ -6,6 +6,17 @@ from typing import Any, Dict, List
 
 OSS_CATALOG: List[Dict[str, Any]] = [
     {
+        "id": "coolprop",
+        "layer": "chemical",
+        "name": "Specialist water/steam physical properties and saturation reference",
+        "url": "https://github.com/CoolProp/CoolProp",
+        "license": "MIT",
+        "status": "opt_in",
+        "priority": "P0",
+        "hook": "POST /v1/engineering/chemical/phases/water-crosscheck",
+        "claim": "Numerical water property reference; cross-model conflict blocking, no physical authority",
+    },
+    {
         "id": "rdkit",
         "layer": "chemical",
         "name": "Molecular structure and descriptors",
