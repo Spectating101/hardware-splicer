@@ -53,7 +53,8 @@ def _should_try_next_provider(result: Dict[str, Any]) -> bool:
             return True
         if "quota" in detail or "allocationquota" in detail or "free tier" in detail:
             return True
-    if err in {"agy_timeout", "agy_nonzero_exit", "agy_empty_response"}:
+    if err in {"agy_timeout", "agy_nonzero_exit", "agy_empty_response",
+               "agy_quota_exhausted", "agy_provider_error", "agy_invalid_json"}:
         return True
     return False
 
@@ -72,7 +73,7 @@ def call_llm_chat(
     stage_name = str(stage or "general")
     providers = _provider_chain()
     qwen_models = qwen_text_model_candidates(model, stage=stage) if qwen_configured() else []
-    primary_model = qwen_models[0] if qwen_models else str(model or ("auto" if providers == ["copilot_cli"] else os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-2.5-flash"))
+    primary_model = qwen_models[0] if qwen_models else str(model or ("auto" if providers == ["copilot_cli"] else os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-3.8-flash-medium"))
 
     last_error: Dict[str, Any] = {"ok": False, "error": "no_llm_provider"}
     for index, provider in enumerate(providers):
@@ -81,7 +82,7 @@ def call_llm_chat(
         elif provider == "qwen":
             selected_probe = primary_model
         else:
-            selected_probe = str(model or os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-2.5-flash")
+            selected_probe = str(model or os.getenv("HARDWARE_SPLICER_AGY_MODEL") or "gemini-3.8-flash-medium")
 
         key = cache_key(
             stage=stage_name,
