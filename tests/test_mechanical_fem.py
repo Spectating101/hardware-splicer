@@ -6,6 +6,11 @@ import math
 
 import pytest
 
+# Numerical FEM is an optional extra. Core-only CI must not falsely require
+# NumPy/SciPy; dedicated mechanical CI installs both and runs these cases.
+pytest.importorskip("numpy")
+pytest.importorskip("scipy")
+
 from hardware_splicer.mechanical_fem import FemInput, solve_linear_tetra_fem
 
 
