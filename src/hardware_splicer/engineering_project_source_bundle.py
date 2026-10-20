@@ -177,9 +177,6 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
             'Unknown physical measurements, safety and procurement remain blocked.',
         ]
         return result
-    if not shutil.which('kicad-cli'):
-        result['reason'] = 'kicad-cli unavailable'
-        return result
     bases = sorted({name[:-10] for name, kind in formats.items() if kind == 'kicad_board'})
     if not bases:
         result['reason'] = 'no KiCad board in source bundle'
@@ -197,6 +194,11 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
         result['project_context'] = 'partial'
         return result
     result['project_context'] = 'source_bundle_sibling_files_present'
+    # Report missing project companions before evaluating tool availability;
+    # source-context errors must be stable on developer hosts and CI machines.
+    if not shutil.which('kicad-cli'):
+        result['reason'] = 'kicad-cli unavailable'
+        return result
     with tempfile.TemporaryDirectory(prefix='hs-registered-kicad-project-') as scratch:
         for name, content in named.items():
             if name in formats and formats[name].startswith('kicad_'):
