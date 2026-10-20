@@ -12,6 +12,8 @@ def main():
  ap.add_argument('--revised',type=Path,required=True)
  ap.add_argument('--native-fingers',type=Path,required=True)
  ap.add_argument('--out',type=Path,required=True)
+ ap.add_argument('--agent-trace',type=Path)
+ ap.add_argument('--rejected-agent-trace',type=Path)
  args=ap.parse_args()
  if args.out.exists():raise FileExistsError(args.out)
  original=json.loads((args.initial/'LIVE_ARM_DESIGN_EVALUATION.json').read_text())
@@ -58,6 +60,24 @@ def main():
   'docs/ROBOT_ARM_OPERATOR_HANDOFF.md':BASE/'docs/integrations/ROBOTIC_ARM_SPLICING_OPERATOR_HANDOFF_2026-10-20.md',
   'docs/TRIAL_RESULT.md':BASE/'docs/evaluations/ASSUMED_ROBOT_ARM_SPLICING_TRIAL_2026-10-20.md',
  }
+ if args.agent_trace is not None:
+  live=json.loads(args.agent_trace.read_text())
+  assert live['status']=='MODEL_FINISHED' and not live.get('model_is_test_double',True)
+  assert [x['model_action'] for x in live['steps']]==[
+    'inspect_robot_arm_campaign','evaluate_assumed_robot_arm',
+    'evaluate_assumed_robot_arm','finish'
+  ]
+  assert any(x['model_action']=='evaluate_assumed_robot_arm' and x.get('tool_ok') and
+       x['tool_output']['stress_analysis']['result']=='PROVISIONAL_STATIC_SCREEN_ONLY'
+       for x in live['steps'])
+  assert live['physical_release'] is False
+  source_map['agent_loop/final_live_codex_arm_agent_trace.json']=args.agent_trace
+ if args.rejected_agent_trace is not None:
+  failed=json.loads(args.rejected_agent_trace.read_text())
+  assert failed['status']=='STEP_BUDGET_EXHAUSTED'
+  assert any(x['model_action']=='evaluate_assumed_robot_arm' and x.get('tool_ok') is False
+       for x in failed['steps'])
+  source_map['agent_loop/initial_live_codex_tool_contract_failure.json']=args.rejected_agent_trace
  for name,p in source_map.items():
   if not p.is_file():raise FileNotFoundError(name+' -> '+str(p))
  manifest={
@@ -65,6 +85,8 @@ def main():
   'date':'2026-10-20',
   'live_llm_used':True,
   'two_live_model_arm_designs':True,
+  'additional_live_robotics_agent_completed_with_revision':args.agent_trace is not None,
+  'failed_model_tool_call_preserved':args.rejected_agent_trace is not None,
   'actual_pybullet_installed_and_called':True,
   'actual_solidcraft_and_partcad_called':True,
   'actual_prusaslicer_executed':True,

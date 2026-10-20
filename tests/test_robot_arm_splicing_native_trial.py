@@ -17,7 +17,7 @@ def test_reproducibility_archive_checks_all_file_hashes_and_authority():
  with zipfile.ZipFile(BUNDLE) as z:
   assert z.testzip() is None
   manifest=read(z,'MANIFEST.json')
-  assert len(manifest['included_files'])==28
+  assert len(manifest['included_files'])==30
   for name,data in manifest['included_files'].items():
    assert hashlib.sha256(z.read(name)).hexdigest()==data['sha256']
   assert manifest['two_live_model_arm_designs']
@@ -100,3 +100,28 @@ def test_mismatched_product_gcode_cannot_be_reused_as_robot_jaws(tmp_path):
   p.write_bytes(z.read('printer/MK4S_FINGER_PRINT_UNAPPROVED.gcode'))
  with pytest.raises(ValueError,match='object identity'):
   audit_offline_gcode(p)  # default expected casing parts
+
+
+def test_real_agent_tool_feedback_corrected_arm_candidate():
+ with zipfile.ZipFile(BUNDLE) as z:
+  trace=read(z,'agent_loop/final_live_codex_arm_agent_trace.json')
+  baseline=read(z,'agent_loop/initial_live_codex_tool_contract_failure.json')
+  manifest=read(z,'MANIFEST.json')
+ assert manifest['additional_live_robotics_agent_completed_with_revision']
+ assert trace['status']=='MODEL_FINISHED'
+ assert trace.get('model_is_test_double') is False
+ assert [x['model_action'] for x in trace['steps']]==[
+    'inspect_robot_arm_campaign','evaluate_assumed_robot_arm',
+    'evaluate_assumed_robot_arm','finish'
+ ]
+ first_eval=trace['steps'][1]
+ second_eval=trace['steps'][2]
+ assert first_eval['tool_ok'] is False
+ assert second_eval['tool_ok'] is True
+ assert second_eval['tool_output']['stress_analysis']['result']=='PROVISIONAL_STATIC_SCREEN_ONLY'
+ assert second_eval['tool_output']['stress_analysis']['proposed_geometric_chain_length_mm']==440.0
+ assert trace['final_proposal']['decision']=='DIGITAL_CANDIDATE_ONLY_PHYSICAL_RELEASE_BLOCKED'
+ assert not trace['physical_release']
+ assert not trace['independent_engineering_assessment']['unsafe_model_physical_claims']
+ assert baseline['status']=='STEP_BUDGET_EXHAUSTED'
+ assert any(x.get('tool_ok') is False for x in baseline['steps'])

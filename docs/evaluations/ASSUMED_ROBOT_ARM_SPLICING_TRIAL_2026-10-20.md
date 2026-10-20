@@ -13,3 +13,22 @@ ALL motor, mass, print-mechanical properties and tolerances are labeled BENCHMAR
 See docs/integrations/ROBOTIC_ARM_SPLICING_OPERATOR_HANDOFF_2026-10-20.md for the practical manufacture-and-commission process. The self-contained ZIP provides both design iterations, assumed catalog, URDFs, PyBullet results, manufactured CAD/STL/3MF, real G-code, PartCAD BOM and source hashes.
 
 Verdict: robotic arm design, kinematic simulation, and candidate printer files are real digital capabilities. The entire physical arm, collision-safe trajectory, actual actuator compatibility and robotic assembly remain unproven.
+
+## Live agent correction (independent of earlier design submissions)
+
+The agent-facing arm tools were exercised through a third actual
+ChatGPT-authenticated Codex run. An initial three-step run exhausted
+its budget after returning a malformed arm evaluation argument.
+The failure was preserved and the tool contract made more precise.
+
+In the corrected four-step live run, Codex independently chose:
+inspect_robot_arm_campaign, evaluate_assumed_robot_arm (failed typed
+validation: overlong end-effector description), evaluate_assumed_robot_arm
+(corrected; stress calculation executed and provisionally passed), and
+finish. The final concept had 440 mm nominal geometric chain length
+with stronger hypothetical actuator classes. The final agent expressly
+left new geometry IK/collision verification UNPROVEN.
+
+This demonstrates actual engineering-tool feedback/repair, NOT
+construction of a robot, and both successful and failed raw model/tool
+traces are retained in the ZIP.
