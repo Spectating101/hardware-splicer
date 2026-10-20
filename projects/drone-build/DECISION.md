@@ -31,3 +31,9 @@ Manufacturer sources: [development kit](https://holybro.com/products/px4-develop
 5. **Simulation, then supervised physical verification:** select tested PX4 configuration and exercise SITL; physical assembly, powered tests and flight require separate safety/operational approval.
 
 **Current state:** reference architecture documented; economic choice remains provisional, hybrid design not fabricated or independently verified; no parts purchased and no flight authorization.
+
+## First actual source-design acquisition (2026-10-20)
+
+Downloaded the **manufacturer X500 V2 STEP frame** from the manufacturer product page's published 3D CAD download into Optiplex temporary workspace. It is approximately 24 MB, ISO-10303-21 STEP AP214, SHA256 `e7ccd422cf7825b61ad8270a98d8fbbbc12aced102cc6a20ed17ee66b816c360`. An inspectable source manifest is saved as [`geometry-source.json`](./geometry-source.json). The vendor file itself is not republished in the HS Git repository.
+
+The current environment has no usable FreeCAD/CadQuery/OpenCascade CAD kernel, so the STEP was **acquired but not geometrically parsed**. No bounding boxes, clearance measurements, adapters or mechanical fit are claimed. The next actual integration is to provision/use a CAD kernel and extract measured interface geometry from this STEP, then compare the donor S500 frame. This is a real upstream engineering design input, not yet a verified design modification.
