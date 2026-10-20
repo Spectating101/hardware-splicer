@@ -5,8 +5,12 @@ from __future__ import annotations
 import json
 import math
 
-import numpy as np
 import pytest
+
+# Structural/FEM extras are opt-in. Generic HS CI deliberately installs
+# only the core dependencies; the dedicated CAD/FEM job exercises this suite.
+np = pytest.importorskip("numpy")
+pytest.importorskip("scipy")
 
 from hardware_splicer.mechanical_cad_fem import mesh_cad_solid
 from hardware_splicer.mechanical_quadratic_fem import (
