@@ -33,6 +33,8 @@ backend-mcp = ["mcp>=2,<3"]
 dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
 # Bounded structural FEM screening; intentionally optional for lighter installs.
 physics = ["numpy>=1.26", "scipy>=1.11"]
+# Gmsh's OCC kernel meshes STEP and closed STL for local structural screening.
+cad-meshing = ["gmsh>=4.14,<5"]
 
 [project.scripts]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"
