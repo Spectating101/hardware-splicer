@@ -227,7 +227,7 @@ def test_tool_schema_is_fail_closed(tmp_path: Path) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["executable_preview_actions"] == ["run_guided_plan", "run_compose", "run_erc", "run_drc", "inspect_registered_sources", "generate_board_carrier_candidate", "review_mechanical_layer", "review_practical_chemistry", "prepare_printed_enclosure_concept", "research_engineering_context"]
+    assert body["executable_preview_actions"] == ["run_guided_plan", "run_compose", "run_erc", "run_drc", "inspect_registered_sources", "generate_board_carrier_candidate", "generate_board_edge_retention_candidate", "review_mechanical_layer", "review_practical_chemistry", "prepare_printed_enclosure_concept", "research_engineering_context"]
     assert body["requires_explicit_acceptance"] is True
     assert body["automatic_execution"] is False
     assert body["allow_llm_first_compose"] is False

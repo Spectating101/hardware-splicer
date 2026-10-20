@@ -1,0 +1,43 @@
+{
+  "validation_schema": "hs_independent_edge_retention_check.v1",
+  "original_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "independent_KiCad_STEP_reexport_sha256": "sha256:e3e85d9a7694cdbe1834554ebbf47033cb3398559cbfe86d997c3ae5ac920bbb",
+  "worker_original_KiCad_STEP_sha256": "sha256:2a68964508ffa635ffcf9fda666a731f57aaa94e809d6294159275a7d4472245",
+  "source_board_original_bytes_sha256_match": true,
+  "STEP_export_binary_hashes_need_not_match_due_to_exporter_metadata": true,
+  "nominal_step_intersections": {
+    "original_board_against_base_mm3": 0.0,
+    "original_board_against_lid_mm3": 0.0,
+    "base_against_lid_mm3": 0.0,
+    "base_step_valid": true,
+    "base_solid_volume_mm3": 12059.488,
+    "lid_step_valid": true,
+    "lid_solid_volume_mm3": 6798.9524
+  },
+  "source_pad_exclusions_mm3": 0.0,
+  "step_stl_generated_sha256s_verified": {
+    "source_edge_capture_base.step": true,
+    "source_edge_capture_lid.step": true,
+    "source_edge_capture_base.stl": true,
+    "source_edge_capture_lid.stl": true
+  },
+  "independent_stl_manifold_edge_incidence": {
+    "source_edge_capture_base": {
+      "triangles": 3468,
+      "edge_count": 5202,
+      "non_manifold_edges": 0,
+      "degenerate_triangles": 0,
+      "closed_two_incident_edges_necessary_condition": true
+    },
+    "source_edge_capture_lid": {
+      "triangles": 2568,
+      "edge_count": 3852,
+      "non_manifold_edges": 0,
+      "degenerate_triangles": 0,
+      "closed_two_incident_edges_necessary_condition": true
+    }
+  },
+  "software_geometry_screen_passed": true,
+  "comprehensive_copper_and_populated_component_fit_proven": false,
+  "print_mechanical_authority_granted": false
+}

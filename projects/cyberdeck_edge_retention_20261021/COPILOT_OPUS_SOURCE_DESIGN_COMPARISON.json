@@ -1,0 +1,104 @@
+{
+  "copilot": {
+    "model": "auto",
+    "model_provider": "copilot_cli",
+    "same_original_board_source_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+    "original_board_source_url": "https://github.com/sector07-dev/RPI_DEV",
+    "engineering_approach_summaries": [
+      {
+        "title": "Perimeter screw-retained enclosure with independently defined standoffs",
+        "summary": "Propose an enclosure using the source-extracted board AABB for initial packaging, with retention points defined outside the PCB until explicit mounting evidence is available.",
+        "tradeoffs": [
+          "Can avoid misclassifying the Q1 drill as a mounting hole.",
+          "Requires a separately specified retention interface and may need a larger perimeter than the provisional envelope.",
+          "Cannot establish fit or print readiness without contour, height, and clearance evidence."
+        ]
+      },
+      {
+        "title": "Board-supported enclosure concept with verified interface added later",
+        "summary": "Propose a provisional enclosure envelope around the extracted AABB while deferring standoffs and screw locations until a mounting-interface review resolves the retention layout.",
+        "tradeoffs": [
+          "Minimizes unsupported mechanical assumptions.",
+          "Delays screw-retention definition and may require enclosure revision.",
+          "The AABB is not an exact contour and does not establish component or connector clearance."
+        ]
+      }
+    ],
+    "candidate_actions": [
+      {
+        "title": "Provide the persisted enclosure engineering-layer request",
+        "action_type": "clarify_requirement"
+      },
+      {
+        "title": "Resolve mounting and retention evidence",
+        "action_type": "identify_missing_evidence"
+      },
+      {
+        "title": "Check provisional enclosure interface against board geometry",
+        "action_type": "prepare_verification"
+      }
+    ],
+    "source_id_unknown_count": 0
+  },
+  "opus55": {
+    "model": "claude-opus-5-5-high",
+    "model_provider": "agy",
+    "same_original_board_source_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+    "original_board_source_url": "https://github.com/sector07-dev/RPI_DEV",
+    "engineering_approach_summaries": [
+      {
+        "title": "Edge-captured retention (no board holes required)",
+        "summary": "The board is held by perimeter ledges or slots, plus a lid-side compression rib or clip, sized from the exact Edge.Cuts contour. This does not depend on mounting holes the source does not show. Screws only fasten the lid to the base.",
+        "tradeoffs": [
+          "Pro: works with the board as extracted (no explicit mounting footprints).",
+          "Pro: needs no PCB change.",
+          "Con: needs the exact contour and the edge keep-out zones (components or copper near edges), which have not been extracted.",
+          "Con: retention force and vibration behaviour have not been demonstrated.",
+          "Con: this is not true board-to-enclosure screw retention, so it may not meet a strict 'screw-retained board' reading of the mission."
+        ]
+      },
+      {
+        "title": "PCB revision adding explicit mounting-hole footprints",
+        "summary": "Add dedicated mounting-hole footprints (for example near the corners of the 90.95 x 61.35 mm envelope) in a new board revision, then design standoffs to match the revised, re-extracted geometry.",
+        "tradeoffs": [
+          "Pro: gives true screw retention with traceable source geometry.",
+          "Con: changes the PCB, which is outside the current single-source revision and needs new placement, DRC and re-extraction.",
+          "Con: free corner area has not been confirmed, since component placement near corners is not in the supplied context."
+        ]
+      },
+      {
+        "title": "Hybrid: Q1 tab-hole screw point plus edge supports",
+        "summary": "Use the existing Q1 NPTH (3.6 mm at x=78.64, y=58.5) as one screw or boss location, combined with perimeter edge supports for the remaining constraint.",
+        "tradeoffs": [
+          "Pro: uses the only drilled non-plated feature in the source.",
+          "Con: the hole belongs to the Q1 TO-247 footprint, so sharing it with enclosure retention may conflict with heatsink or tab attachment and with thermal or electrical intent. Unverified.",
+          "Con: a single interior point plus edges is less constrained than a multi-point screw layout.",
+          "Con: the Q1 body height and tab orientation (TabDown) affect boss height and are unresolved."
+        ]
+      }
+    ],
+    "candidate_actions": [
+      {
+        "title": "Resolve retention strategy and persist an enclosure engineeringLayerRequest",
+        "action_type": "clarify_requirement"
+      },
+      {
+        "title": "Re-inspect RPI_Dev_1.kicad_pcb for the exact contour and all drilled features",
+        "action_type": "inspect_registered_sources"
+      },
+      {
+        "title": "Collect component height, Q1 body envelope and connector clearance evidence",
+        "action_type": "identify_missing_evidence"
+      },
+      {
+        "title": "Verification plan to formally refute or confirm the four-corner-M3 claim",
+        "action_type": "prepare_verification"
+      },
+      {
+        "title": "Compare A1/A2/A3 once contour and height evidence is available",
+        "action_type": "compare_architectures"
+      }
+    ],
+    "source_id_unknown_count": 0
+  }
+}

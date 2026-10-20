@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 from .compose_dispatch import compose_dispatch
 from .engineering_project_source_bundle import analyze_registered_project_bundle
 from .engineering_cad_carrier import generate_registered_pcb_carrier
+from .engineering_cad_edge_retention import generate_registered_pcb_edge_retention_candidate
 from .engineering_web_research import research_engineering_gap, research_request_sha256
 from .engineering_layer_reviews import screen_declared_mechanics, screen_declared_chemistry, prepare_declared_enclosure
 from .guided_engineering_planner import plan_guided_engineering_project
@@ -36,6 +37,7 @@ EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "run_drc",
     "inspect_registered_sources",
     "generate_board_carrier_candidate",
+    "generate_board_edge_retention_candidate",
     "review_mechanical_layer",
     "review_practical_chemistry",
     "prepare_printed_enclosure_concept",
@@ -407,6 +409,30 @@ def execute_ai_project_action_preview(
                 'native_cad_executed':False,
                 'physical_fit_verified':False,
                 'print_authorized':False,
+            }
+            artifact_name=artifact_path.name
+        elif action_type == "generate_board_edge_retention_candidate":
+            output_dir=run_dir/'source_derived_edge_retention'
+            generated=generate_registered_pcb_edge_retention_candidate(
+                project_id,_rows(snapshot.get('engineeringSources')),
+                output_dir,project_root=store.root,
+            )
+            artifact_path=run_dir/'source_edge_retention_manifest.json'
+            artifact=_atomic_write_json(artifact_path,generated)
+            summary={
+                'ok':True,
+                'status':generated['status'],
+                'original_board_sha256':generated['source_board_sha256'],
+                'board_outline_vertices':generated['source_outline_vertex_count'],
+                'geometry_checks':generated['geometric_clearance_checks'],
+                'enclosure_outer_mm':generated['enclosure_outer_mm'],
+                'generated_artifacts':generated['generated_artifacts'],
+                'artifact_dir_relative':f'{relative_run_dir}/source_derived_edge_retention',
+                'screw_centres_outside_board_envelope':True,
+                'actual_part_components_and_copper_clearance_verified':False,
+                'physical_fit_verified':False,
+                'manufacturing_or_print_authorized':False,
+                'automatic_execution':False,
             }
             artifact_name=artifact_path.name
         elif action_type == "generate_board_carrier_candidate":

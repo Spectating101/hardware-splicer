@@ -1,0 +1,110 @@
+{
+  "status": "generated_collision_screened_edge_retention_candidate",
+  "registered_source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "derived_source_board_step_sha256": "sha256:2a68964508ffa635ffcf9fda666a731f57aaa94e809d6294159275a7d4472245",
+  "source_outline_vertex_count": 33,
+  "source_contour_contains_tessellated_arc": true,
+  "source_step_y_axis_flipped_from_kicad_mm": true,
+  "nominal_board_bbox_step_mm": {
+    "xmin": 20.0,
+    "xmax": 110.9,
+    "ymin": -81.0,
+    "ymax": -19.7,
+    "thickness": 1.51
+  },
+  "candidate_type": "two_piece_exterior_screw_closed_edge_capture",
+  "external_lid_screw_centres_mm": [
+    {
+      "x": 15.5,
+      "y": -85.5
+    },
+    {
+      "x": 15.5,
+      "y": -15.2
+    },
+    {
+      "x": 115.4,
+      "y": -85.5
+    },
+    {
+      "x": 115.4,
+      "y": -15.2
+    }
+  ],
+  "enclosure_outer_mm": {
+    "x": 106.9,
+    "y": 77.3,
+    "z": 6.46
+  },
+  "nominal_design_parameters": {
+    "board_pocket_xy_gap_mm": 0.85,
+    "edge_capture_overlap_nominal_mm": 1.2,
+    "outer_perimeter_margin_mm": 8.0,
+    "board_top_z_freedom_mm": 0.25,
+    "bottom_support_height_mm": 2.5,
+    "lid_ring_height_mm": 2.2,
+    "external_screw_offset_from_board_AABB_mm": 4.5,
+    "base_pilot_hole_diameter_mm": 2.7,
+    "lid_clearance_hole_diameter_mm": 3.3
+  },
+  "geometric_clearance_checks": {
+    "original_board_to_base_overlap_mm3": 0.0,
+    "original_board_to_lid_overlap_mm3": 0.0,
+    "base_to_lid_overlap_mm3": 0.0,
+    "board_only_zero_interference_pass": true,
+    "all_four_screw_centres_outside_board_AABB": true,
+    "source_pad_keepout_count": 23,
+    "uncorrected_pad_keepout_overlap_mm3": 42.5469,
+    "corrected_pad_keepout_overlap_mm3": 0.0,
+    "source_pad_projection_no_lip_overlap_pass": true,
+    "pcb_component_models_included": false,
+    "fastener_clamping_tested": false
+  },
+  "source_hole_misclassification_avoided": true,
+  "board_corner_M3_holes_assumed": false,
+  "design_assembled_physically": false,
+  "connector_access_verified": false,
+  "copper_edge_keepout_verified": false,
+  "pad_bounding_regions_excluded_from_candidate_lip": true,
+  "component_height_or_pad_clearance_verified": false,
+  "edge_support_contact_pressure_verified": false,
+  "material_and_print_orientation_qualified": false,
+  "thermal_and_electrical_isolation_verified": false,
+  "structural_FEM_or_drop_test_passed": false,
+  "manufacturing_or_print_authorized": false,
+  "generated_artifacts": [
+    {
+      "filename": "source_edge_capture_base.step",
+      "sha256": "sha256:7153728711c237391da1dd8d94035d49db4c9332fd52fb8f1d5300a3008be722",
+      "size_bytes": 545319
+    },
+    {
+      "filename": "source_edge_capture_lid.step",
+      "sha256": "sha256:0cbcfbc4cb3982427076adbeb096b31f96591cc3a4d8a22f2afad87a644895eb",
+      "size_bytes": 378436
+    },
+    {
+      "filename": "source_edge_capture_base.stl",
+      "sha256": "sha256:001234d43c6a94f3525fa29f7c1042c16c7ae359a5e37ca72758809c1fa8c10a",
+      "size_bytes": 173484
+    },
+    {
+      "filename": "source_edge_capture_lid.stl",
+      "sha256": "sha256:41aedd4bd135affb95f9ff2b45d8b0249abc49a8ee31b9a1aa95786c0e073456",
+      "size_bytes": 128484
+    }
+  ],
+  "source_project_config_sha256": "sha256:de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3",
+  "source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "source_geometry_trace": {
+    "original_board_filename": "RPI_Dev_1.kicad_pcb",
+    "edge_cuts_profile_vertex_count": 33,
+    "source_component_count": 26,
+    "verified_board_mounting_footprints": [],
+    "source_npht_feature_references": [
+      "Q1"
+    ]
+  },
+  "software_only_proposal": true,
+  "released_for_fabrication": false
+}

@@ -36,6 +36,7 @@ ALLOWED_AI_ACTION_TYPES = (
     "run_drc",
     "inspect_registered_sources",
     "generate_board_carrier_candidate",
+    "generate_board_edge_retention_candidate",
     "review_mechanical_layer",
     "review_practical_chemistry",
     "prepare_printed_enclosure_concept",
@@ -375,9 +376,16 @@ def build_ai_project_prompt(context: Mapping[str, Any], *, max_actions: int) -> 
         "tradeoffs, assumptions, source_ids\n"
         f"- actions: array of at most {int(max_actions)} objects with action_type, title, "
         "rationale, inputs, source_ids\n"
-        "For mechanical, chemical and enclosure engineering actions, the executor uses ONLY "
-        "the persisted engineeringLayerRequests from project_summary, not model-supplied "
-        "physical measurements or arbitrary paths. A missing layer request requires clarification. "
+        "For review_mechanical_layer, review_practical_chemistry and "
+        "prepare_printed_enclosure_concept the executor uses ONLY persisted "
+        "engineeringLayerRequests. If missing, request clarification. "
+        "EXCEPTION: generate_board_carrier_candidate and "
+        "generate_board_edge_retention_candidate are fixed-parameter, source-only "
+        "SOFTWARE CAD prototypes on hash-verified registered .kicad_pcb and .kicad_pro. "
+        "They do NOT require engineeringLayerRequests and are allowed to be proposed "
+        "with empty inputs {} even when physical measurements are unavailable. "
+        "Neither prototype verifies component fit, copper keepout, mechanical loading, "
+        "material performance, manufacturing or device operation. Those remain blocked. "
         "When external context is missing, propose research_engineering_context with "
         "inputs.research_request_id equal to one already in engineeringResearchRequests. "
         "If the same research request already has fetched publisher documents in "

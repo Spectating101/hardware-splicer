@@ -1,0 +1,73 @@
+{
+  "project": "hs-cyberdeck-edge-retention-proof",
+  "native_source_stored": true,
+  "model_provider": "copilot_cli",
+  "model": "auto",
+  "session_id": "ai-session-59242feb272944019abb475ece97b0d0",
+  "summary": "Propose a software-only, fixed-parameter two-piece PCB edge-retention CAD candidate derived from the hash-verified RPI_DEV KiCad sources. The candidate should follow the supplied 33-vertex Edge.Cuts profile, account for the notch, exclude all identified nominal pad bounding boxes from retaining lips, and check intersections against the original-board STEP representation if available. This does not establish component fit, copper clearance, mechanical strength, material suitability, manufacturing readiness, or physical retention.",
+  "action_types": [
+    "generate_board_edge_retention_candidate",
+    "identify_missing_evidence",
+    "prepare_verification"
+  ],
+  "proposed_cad": true,
+  "execution_status": "succeeded",
+  "physical_authority": false,
+  "execution_summary": {
+    "ok": true,
+    "status": "generated_collision_screened_edge_retention_candidate",
+    "original_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+    "board_outline_vertices": 33,
+    "geometry_checks": {
+      "original_board_to_base_overlap_mm3": 0.0,
+      "original_board_to_lid_overlap_mm3": 0.0,
+      "base_to_lid_overlap_mm3": 0.0,
+      "board_only_zero_interference_pass": true,
+      "all_four_screw_centres_outside_board_AABB": true,
+      "source_pad_keepout_count": 23,
+      "uncorrected_pad_keepout_overlap_mm3": 42.5469,
+      "corrected_pad_keepout_overlap_mm3": 0.0,
+      "source_pad_projection_no_lip_overlap_pass": true,
+      "pcb_component_models_included": false,
+      "fastener_clamping_tested": false
+    },
+    "enclosure_outer_mm": {
+      "x": 106.9,
+      "y": 77.3,
+      "z": 6.46
+    },
+    "generated_artifacts": [
+      {
+        "filename": "source_edge_capture_base.step",
+        "sha256": "sha256:7153728711c237391da1dd8d94035d49db4c9332fd52fb8f1d5300a3008be722",
+        "size_bytes": 545319
+      },
+      {
+        "filename": "source_edge_capture_lid.step",
+        "sha256": "sha256:0cbcfbc4cb3982427076adbeb096b31f96591cc3a4d8a22f2afad87a644895eb",
+        "size_bytes": 378436
+      },
+      {
+        "filename": "source_edge_capture_base.stl",
+        "sha256": "sha256:001234d43c6a94f3525fa29f7c1042c16c7ae359a5e37ca72758809c1fa8c10a",
+        "size_bytes": 173484
+      },
+      {
+        "filename": "source_edge_capture_lid.stl",
+        "sha256": "sha256:41aedd4bd135affb95f9ff2b45d8b0249abc49a8ee31b9a1aa95786c0e073456",
+        "size_bytes": 128484
+      }
+    ],
+    "artifact_dir_relative": "ai_tool_runs/ai-session-59242feb272944019abb475ece97b0d0/action-f21255f55f619efb/source_derived_edge_retention",
+    "screw_centres_outside_board_envelope": true,
+    "actual_part_components_and_copper_clearance_verified": false,
+    "physical_fit_verified": false,
+    "manufacturing_or_print_authorized": false,
+    "automatic_execution": false
+  },
+  "artifact": {
+    "project_relative_path": "ai_tool_runs/ai-session-59242feb272944019abb475ece97b0d0/action-f21255f55f619efb/source_edge_retention_manifest.json",
+    "sha256": "880be96b95c618b07fc1f57bc55b06df2bfb31ebdf1cfde9fc6cca03a8cde5a5",
+    "size_bytes": 3761
+  }
+}

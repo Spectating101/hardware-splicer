@@ -11,3 +11,6 @@ examples/printed_casing/native_trial/*.solidcraft -diff -whitespace
 projects/unified_engineering_20261021/artifacts/structural_calibration/*.step -diff -whitespace
 # Numerical solver CSV uses the producer's CRLF bytes; keep evidence exact.
 projects/unified_engineering_20261021/artifacts/structural_calibration/*.csv -text -diff -whitespace
+# Source-derived HS candidate geometry. Keep OCCT export bytes unchanged.
+projects/cyberdeck_edge_retention_20261021/*.step -diff -whitespace
+projects/cyberdeck_edge_retention_20261021/*.stl -diff -whitespace
