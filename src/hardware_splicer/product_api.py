@@ -32,6 +32,7 @@ from .engineering_execution_anchored_api import (
     create_engineering_execution_router,
 )
 from .engineering_package_api import create_engineering_package_router
+from .engineering_project_source_bundle_api import create_project_source_bundle_router
 from .engineering_package_download_api import create_engineering_package_download_router
 from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
@@ -137,6 +138,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_upload_session_router(resolved_store))
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
+    app.include_router(create_project_source_bundle_router(resolved_store))
     app.include_router(create_document_evidence_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
