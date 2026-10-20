@@ -1,0 +1,169 @@
+{
+  "case_id": "unfamiliar_multidonor_optical_sorting_machine",
+  "date": "2026-10-20",
+  "design": {
+    "allocations": [
+      {
+        "donor_id": "D_PRINTER",
+        "function_id": "advance_to_camera",
+        "hypothetical_use": "Reuse measured/verified feed rollers or carriage only if actual mechanism exists and is serviceable",
+        "observed_compatible": false,
+        "physical_stock_owned": false,
+        "source_capability_quote": "Paper-feeding or carriage-motion mechanism may exist"
+      },
+      {
+        "donor_id": "D_CAMERA",
+        "function_id": "capture_image",
+        "hypothetical_use": "Use a working USB camera sensor/lens only after independent enumeration and image-quality testing",
+        "observed_compatible": false,
+        "physical_stock_owned": false,
+        "source_capability_quote": "May contain optical image sensor, lens and USB interface"
+      },
+      {
+        "donor_id": "D_ROUTER",
+        "function_id": "decide_category",
+        "hypothetical_use": "Potential embedded compute if it boots, supports an accessible runtime, and can interface with working camera; otherwise reject",
+        "observed_compatible": false,
+        "physical_stock_owned": false,
+        "source_capability_quote": "Possible computing board or power conversion hardware"
+      },
+      {
+        "donor_id": "NEW_COMPONENT_REQUIRED",
+        "function_id": "divert_item",
+        "hypothetical_use": "Verified actuator driver/servo and independent motor inhibit; do not wire unknown fan motor",
+        "observed_compatible": false,
+        "physical_stock_owned": false
+      },
+      {
+        "donor_id": "NEW_COMPONENT_REQUIRED",
+        "function_id": "stop_and_isolate",
+        "hypothetical_use": "Hardware inhibit / interlock independent of the inference process with separately checked power boundary",
+        "observed_compatible": false,
+        "physical_stock_owned": false
+      }
+    ],
+    "alternatives": [
+      {
+        "name": "Overhead moving camera on printer gantry",
+        "tradeoff": "Eliminates singulation demand for some objects, but adds moving cable routing and positioning calibration"
+      },
+      {
+        "name": "Single-axis sliding gate with gravity feed",
+        "tradeoff": "Fewer reusable motion parts; requires reliable gate timing and robust jam sensing"
+      }
+    ],
+    "architecture_name": "Vertical singulation + indexed inspection + two-way chute",
+    "concept": "An enclosed tabletop cell singulates small objects from a gravity-fed hopper, advances them one at a time using a proposed recovered printer feed mechanism, observes the item at a fixed imaging window, then sends it to one of two bins using a newly sourced low-voltage diverter actuator. The diverted pathway stays unpowered until motor and interlock tests. A broken router or fan is not assumed usable.",
+    "fabrication_approved": false,
+    "functions": [
+      {
+        "id": "singulate_items",
+        "purpose": "Prevent double-feeding and meter one small item per inspection cycle"
+      },
+      {
+        "id": "advance_to_camera",
+        "purpose": "Use a verified-motion mechanism to place each item repeatably in the field of view"
+      },
+      {
+        "id": "capture_image",
+        "purpose": "Generate calibrated optical images with constant lighting and exposure"
+      },
+      {
+        "id": "decide_category",
+        "purpose": "Classify visible category with confidence and fallback unknown bin policy"
+      },
+      {
+        "id": "divert_item",
+        "purpose": "Operate a single low-voltage gated diverter to select between two destinations"
+      },
+      {
+        "id": "stop_and_isolate",
+        "purpose": "Independent hardware stop cuts actuator energy regardless of host software"
+      },
+      {
+        "id": "protect_and_power",
+        "purpose": "Separately rated low-voltage rails, current-limit, isolation and jam detection"
+      }
+    ],
+    "interfaces": [
+      {
+        "from_function": "advance_to_camera",
+        "medium": "Event-driven item-position observation, unknown sensor timing/trigger",
+        "to_function": "capture_image",
+        "verified": false
+      },
+      {
+        "from_function": "capture_image",
+        "medium": "Unknown actual USB/UVC data interface; video stream not demonstrated",
+        "to_function": "decide_category",
+        "verified": false
+      },
+      {
+        "from_function": "decide_category",
+        "medium": "Isolated digital command into rated driver, logic level/timing undetermined",
+        "to_function": "divert_item",
+        "verified": false
+      },
+      {
+        "from_function": "stop_and_isolate",
+        "medium": "Independent hardwired energy inhibition, actual stop relay and rating TBD",
+        "to_function": "divert_item",
+        "verified": false
+      }
+    ],
+    "machine_domain": "stationary_mechatronic_cell",
+    "measurement_requests": [
+      {
+        "decision_affected": "Whether feed mechanism is physically/electrically reusable and what driver is required",
+        "donor_id": "D_PRINTER",
+        "method": "Identify model and visually examine unpowered mechanics, measure with DMM and current-limited characterization by authorized bench operator",
+        "quantity": "Motor type, winding resistance, stall/current limits, transport travel and roller geometry"
+      },
+      {
+        "decision_affected": "Whether inspection through a fixed window is viable",
+        "donor_id": "D_CAMERA",
+        "method": "Visual connector inspection, bounded USB enumeration on isolated host, controlled optical field-of-view tests",
+        "quantity": "USB enumeration, focus distance, image signal, frame rate and achievable lighting"
+      },
+      {
+        "decision_affected": "Accept as onboard compute only if system image and ports are usable",
+        "donor_id": "D_ROUTER",
+        "method": "Identify board revision, inspect for damage, separately authorized safe supply and nonintrusive serial/USB console readings",
+        "quantity": "Bootability, accessible software stack, USB host and camera compatibility"
+      },
+      {
+        "decision_affected": "Decide whether to reject the fan entirely; likely unsuitable for low-voltage motion",
+        "donor_id": "D_FAN",
+        "method": "Identify original fan nameplate and model, inspect mains wiring; prohibit energizing until electrical review",
+        "quantity": "Motor winding/drive category, voltage class, coil isolation and rotor suitability"
+      }
+    ],
+    "physical_build_authorized": false,
+    "physical_verified": false,
+    "physically_tested": false,
+    "real_donor_measured": false,
+    "safe_to_power": false
+  },
+  "functional_machine_constructed": false,
+  "general_machine_synthesis_proven": false,
+  "grounding_verification": "Every reused donor hypothesis quotes an exact original claimed capability, not sensor-verified data",
+  "independent_structural_evidence_audit": {
+    "different_donors_reused_hypothetically": 3,
+    "issues": [],
+    "measurements_request_count": 4,
+    "passes_bounded_evidence_and_structure": true,
+    "physical_build_authorized": false,
+    "physical_measurements_observed": 0,
+    "practical_feasibility_independently_verified": false,
+    "schema_version": "hardware_splicer.independent_agent_design_oracle.v1",
+    "warnings": [
+      "Engineering feasibility and physical behavior are not independently verified.",
+      "A passing bounded audit is NOT a verified repair, assembled product, or safe print."
+    ]
+  },
+  "physical_compatibility_proven": false,
+  "physical_observations": 0,
+  "producer": "GPT-6 design authored as live assistant work, NOT generated by local Ollama runtime",
+  "schema_version": "hardware_splicer.chat_model_reference_design_trial.v1",
+  "status": "REFERENCE_CONDITIONAL_DESIGN_ONLY"
+}

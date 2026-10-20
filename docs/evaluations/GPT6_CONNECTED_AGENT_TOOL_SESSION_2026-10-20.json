@@ -1,0 +1,173 @@
+{
+  "actual_mcp_tool_handler_invoked": true,
+  "autonomous_unsupervised_model_inference_performed": false,
+  "bounded_design_accepted": true,
+  "concept_cad_rejected_no_measured_or_declared_geometry": true,
+  "conditional_candidate_architecture": "Vertical singulation + indexed inspection + two-way chute",
+  "donor_count": 4,
+  "full_tool_receipts": [
+    {
+      "host_tool_receipt": {
+        "donors": [
+          {
+            "condition": "Damaged, exact model/revision and motion health unknown",
+            "id": "D_PRINTER",
+            "original_device": "Unowned old inkjet printer advertised for parts",
+            "reported_capabilities": [
+              "Paper-feeding or carriage-motion mechanism may exist",
+              "May contain stepper or DC motor and limit sensing"
+            ],
+            "source_claims": [
+              "Device category from seller listing, not model-specific engineering data"
+            ],
+            "specimen_verified": false,
+            "verified_measurements": []
+          },
+          {
+            "condition": "Advertised not working, USB enumeration unknown",
+            "id": "D_CAMERA",
+            "original_device": "Unowned defective USB webcam",
+            "reported_capabilities": [
+              "May contain optical image sensor, lens and USB interface",
+              "Fault could make all optical modules unusable"
+            ],
+            "source_claims": [
+              "Generic webcam design knowledge, not an authenticated pinout"
+            ],
+            "specimen_verified": false,
+            "verified_measurements": []
+          },
+          {
+            "condition": "Broken housing, motor and driver type/ratings unknown",
+            "id": "D_FAN",
+            "original_device": "Unowned damaged desk fan",
+            "reported_capabilities": [
+              "May contain a motor and rotor",
+              "Motor may be mains-powered and unsuitable for this low-voltage objective"
+            ],
+            "source_claims": [
+              "Category identification only; motor winding/current data absent"
+            ],
+            "specimen_verified": false,
+            "verified_measurements": []
+          },
+          {
+            "condition": "Powers unpredictably; revision, OS and board interfaces unknown",
+            "id": "D_ROUTER",
+            "original_device": "Unowned faulty home router",
+            "reported_capabilities": [
+              "Possible computing board or power conversion hardware",
+              "Board may not expose a useful software or camera interface"
+            ],
+            "source_claims": [
+              "Generic router electronics category; bootability and I/O unverified"
+            ],
+            "specimen_verified": false,
+            "verified_measurements": []
+          }
+        ],
+        "evidence_warning": "Names and public listings are reported hypotheses, NOT observed usable donor components.",
+        "tool": "inspect_donors"
+      },
+      "model_selected_action": "inspect_donors",
+      "source_case_digest": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+    },
+    {
+      "host_tool_receipt": {
+        "cad_parameters_source": "Only case.concept_envelope_mm if supplied, never infer geometry from seller claim.",
+        "constraints": {
+          "donor_specimens_owned": false,
+          "fabrication_release": false,
+          "independent_hardware_stop_required": true,
+          "no_unverified_wiring": true,
+          "stationary_only": true,
+          "two_output_bins": true
+        },
+        "goal": "Design, on paper, a stationary tabletop low-voltage machine that presents miscellaneous small items to a camera, distinguishes visible categories, and diverts them into two bins. Investigate whether parts from four unrelated *faulty/unowned* devices could support it. Describe a functional architecture, alternate topology, electrical and mechanical interfaces, uncertainties, and an actual measurement plan. No device may be powered or claimed reusable.",
+        "safety": {
+          "fabrication": false,
+          "physical_power": false,
+          "unattended_motor_operation": false
+        },
+        "tool": "inspect_requirements",
+        "unknowns": [
+          "No donor acquired or measured",
+          "No verified electrical ratings or mounting geometry"
+        ]
+      },
+      "model_selected_action": "inspect_requirements",
+      "source_case_digest": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+    },
+    {
+      "host_tool_receipt": {
+        "candidate_has_measured_physical_donors": false,
+        "independent_design_audit": {
+          "different_donors_reused_hypothetically": 3,
+          "issues": [],
+          "measurements_request_count": 4,
+          "passes_bounded_evidence_and_structure": true,
+          "physical_build_authorized": false,
+          "physical_measurements_observed": 0,
+          "practical_feasibility_independently_verified": false,
+          "schema_version": "hardware_splicer.independent_agent_design_oracle.v1",
+          "warnings": [
+            "Engineering feasibility and physical behavior are not independently verified.",
+            "A passing bounded audit is NOT a verified repair, assembled product, or safe print."
+          ]
+        },
+        "tool": "evaluate_design"
+      },
+      "model_selected_action": "evaluate_design",
+      "source_case_digest": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+    },
+    {
+      "host_tool_receipt": {
+        "reason": "No separately declared geometric concept envelope in source case",
+        "status": "BLOCKED",
+        "tool": "prepare_concept_cad"
+      },
+      "model_selected_action": "prepare_concept_cad",
+      "source_case_digest": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+    },
+    {
+      "host_tool_receipt": {
+        "actual_electrical_mechanical_feasibility_validated": false,
+        "bounded_conditional_architecture_ready": true,
+        "physical_product_built": false,
+        "tool": "finish"
+      },
+      "model_selected_action": "finish",
+      "source_case_digest": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+    }
+  ],
+  "independent_design_integrity_audit": {
+    "different_donors_reused_hypothetically": 3,
+    "issues": [],
+    "measurements_request_count": 4,
+    "passes_bounded_evidence_and_structure": true,
+    "physical_build_authorized": false,
+    "physical_measurements_observed": 0,
+    "practical_feasibility_independently_verified": false,
+    "schema_version": "hardware_splicer.independent_agent_design_oracle.v1",
+    "warnings": [
+      "Engineering feasibility and physical behavior are not independently verified.",
+      "A passing bounded audit is NOT a verified repair, assembled product, or safe print."
+    ]
+  },
+  "model_actions": [
+    "inspect_donors",
+    "inspect_requirements",
+    "evaluate_design",
+    "prepare_concept_cad",
+    "finish"
+  ],
+  "model_decision_origin": "GPT-6 conversation-authoritative prompt decisions; replayed through real HS MCP server handler",
+  "model_decision_steps": 5,
+  "model_runtime_blocker": "Claude Code OAuth expired; Gemini CLI timed out; local Ollama Qwen 7B and 1.5B both timed out on memory-saturated Optiplex",
+  "physical_build_authorized": false,
+  "physical_donor_evidence_authenticated": false,
+  "physical_product_functionally_proven": false,
+  "scenario": "unfamiliar_multidonor_optical_sorting_machine",
+  "schema_version": "hardware_splicer.gpt6_connected_engineering_session_evidence.v1",
+  "source_case_sha256": "5c1368468d0cfcf834cd31e5e2dd4d9f2cdeac88674ec97c90bdf5b946bb0a27"
+}

@@ -1,0 +1,50 @@
+{
+  "scenario_id": "unfamiliar_multidonor_optical_sorting_machine",
+  "goal": "Design, on paper, a stationary tabletop low-voltage machine that presents miscellaneous small items to a camera, distinguishes visible categories, and diverts them into two bins. Investigate whether parts from four unrelated *faulty/unowned* devices could support it. Describe a functional architecture, alternate topology, electrical and mechanical interfaces, uncertainties, and an actual measurement plan. No device may be powered or claimed reusable.",
+  "constraints": {
+    "stationary_only": true,
+    "two_output_bins": true,
+    "independent_hardware_stop_required": true,
+    "no_unverified_wiring": true,
+    "donor_specimens_owned": false,
+    "fabrication_release": false
+  },
+  "donors": [
+    {
+      "id": "D_PRINTER",
+      "original_device": "Unowned old inkjet printer advertised for parts",
+      "condition": "Damaged, exact model/revision and motion health unknown",
+      "specimen_verified": false,
+      "reported_capabilities": ["Paper-feeding or carriage-motion mechanism may exist", "May contain stepper or DC motor and limit sensing"],
+      "source_claims": ["Device category from seller listing, not model-specific engineering data"],
+      "measured_interfaces": []
+    },
+    {
+      "id": "D_CAMERA",
+      "original_device": "Unowned defective USB webcam",
+      "condition": "Advertised not working, USB enumeration unknown",
+      "specimen_verified": false,
+      "reported_capabilities": ["May contain optical image sensor, lens and USB interface", "Fault could make all optical modules unusable"],
+      "source_claims": ["Generic webcam design knowledge, not an authenticated pinout"],
+      "measured_interfaces": []
+    },
+    {
+      "id": "D_FAN",
+      "original_device": "Unowned damaged desk fan",
+      "condition": "Broken housing, motor and driver type/ratings unknown",
+      "specimen_verified": false,
+      "reported_capabilities": ["May contain a motor and rotor", "Motor may be mains-powered and unsuitable for this low-voltage objective"],
+      "source_claims": ["Category identification only; motor winding/current data absent"],
+      "measured_interfaces": []
+    },
+    {
+      "id": "D_ROUTER",
+      "original_device": "Unowned faulty home router",
+      "condition": "Powers unpredictably; revision, OS and board interfaces unknown",
+      "specimen_verified": false,
+      "reported_capabilities": ["Possible computing board or power conversion hardware", "Board may not expose a useful software or camera interface"],
+      "source_claims": ["Generic router electronics category; bootability and I/O unverified"],
+      "measured_interfaces": []
+    }
+  ]
+}

@@ -132,6 +132,43 @@ def suggest_modules(goal: str) -> Dict[str, Any]:
     }
 
 
+def engineering_agent_session(*, engineering_case: Mapping[str, Any] | None = None,
+                              session_state: Mapping[str, Any] | None = None,
+                              model_decision: Mapping[str, Any] | None = None) -> Dict[str, Any]:
+    """Agent-managed engineering session; LLM connects via HS SDK or MCP.
+
+    Supply case to start, or state+model_decision to advance. Decisions only
+    affect symbolic engineering investigation and independent evaluation.
+    """
+    from .engineering_agent_session import (
+        start_engineering_session,engineering_session_step,
+    )
+    if engineering_case is not None and session_state is None and model_decision is None:
+        return start_engineering_session(engineering_case)
+    if session_state is not None and model_decision is not None and engineering_case is None:
+        return engineering_session_step(session_state,model_decision)
+    raise ValueError("Provide engineering_case to start OR session_state + model_decision to continue")
+
+
+def run_local_engineering_agent(
+    *,
+    engineering_case: Mapping[str, Any],
+    ollama_model: str = "qwen2.5:7b-instruct",
+    max_rounds: int = 6,
+) -> Dict[str, Any]:
+    """Genuine local-LLM, bounded read-only engineering decision loop.
+
+    No external tool may grant physical testing, build or power authority.
+    Native CAD/fabrication execution remains a separate measured,
+    instrument-controlled operation.
+    """
+    from .engineering_agent_trial import OllamaJsonPolicy,run_agent_trial
+    if ollama_model not in {"qwen2.5:7b-instruct","qwen2.5:1.5b-instruct","llama3.2:3b"}:
+        raise ValueError("Only explicitly approved local Ollama model names are allowed")
+    return run_agent_trial(dict(engineering_case),OllamaJsonPolicy(model=ollama_model),
+                           max_rounds=max_rounds)
+
+
 def prepare_printed_casing(*, casing_spec: Mapping[str, Any]) -> Dict[str, Any]:
     """Agent-safe 3D printable casing CAD plan; never automatically slice or print.
 

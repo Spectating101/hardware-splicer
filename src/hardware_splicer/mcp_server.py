@@ -125,6 +125,53 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_engineering_agent_session",
+            description=(
+                "Start or advance a bounded HS engineering session with a"
+                " CONNECTED LLM choosing each investigation/design action."
+                " Unlike local Ollama no on-host inference or API key needed."
+                " Start with engineering_case; on subsequent calls send the"
+                " returned session_state plus model_decision(action,reason,"
+                " optional design). Actions inspect donors/requirements,"
+                " evaluate a proposed machine under independent audit,"
+                " request CAD plan with explicit dimensions or finish."
+                " No shell, device access, physical authority or printing."
+            ),
+            inputSchema={
+                "type":"object",
+                "properties":{
+                    "engineering_case":{"type":"object"},
+                    "session_state":{"type":"object"},
+                    "model_decision":{"type":"object"}
+                },
+            },
+        ),
+        Tool(
+            name="hs_run_local_engineering_agent",
+            description=(
+                "Run a bounded real local LLM-controlled investigation of an"
+                " unfamiliar hypothetical multi-donor machine objective."
+                " The model selects inspection, requirements, independent"
+                " design evaluation and guarded conceptual CAD-plan actions."
+                " This is a slow, CPU-intensive local Ollama planning trial."
+                " No model-generated command execution, real component"
+                " verification, physical power, fabrication or printer IO."
+            ),
+            inputSchema={
+                "type":"object",
+                "properties":{
+                    "engineering_case":{"type":"object"},
+                    "ollama_model":{
+                        "type":"string",
+                        "enum":["qwen2.5:7b-instruct","qwen2.5:1.5b-instruct","llama3.2:3b"],
+                        "default":"qwen2.5:7b-instruct",
+                    },
+                    "max_rounds":{"type":"integer","minimum":2,"maximum":12,"default":6}
+                },
+                "required":["engineering_case"],
+            },
+        ),
+        Tool(
             name="hs_prepare_printed_casing",
             description=(
                 "Prepare a real SolidCraft parametric printable housing: hollow"
@@ -655,6 +702,22 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result = await asyncio.to_thread(
             sdk.validate_virtual_splice_feasibility,
             source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
+    if name == "hs_engineering_agent_session":
+        result=await asyncio.to_thread(
+            sdk.engineering_agent_session,
+            engineering_case=args.get("engineering_case"),
+            session_state=args.get("session_state"),
+            model_decision=args.get("model_decision"),
+        )
+        return _tool_result(result)
+    if name == "hs_run_local_engineering_agent":
+        result=await asyncio.to_thread(
+            sdk.run_local_engineering_agent,
+            engineering_case=args.get("engineering_case"),
+            ollama_model=args.get("ollama_model","qwen2.5:7b-instruct"),
+            max_rounds=args.get("max_rounds",6),
         )
         return _tool_result(result)
     if name == "hs_prepare_printed_casing":
