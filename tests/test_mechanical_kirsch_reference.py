@@ -7,8 +7,12 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
+
+# Structural/FEM extras are opt-in. Generic HS CI deliberately installs
+# only the core dependencies; the dedicated CAD/FEM job exercises this suite.
+np = pytest.importorskip("numpy")
+pytest.importorskip("scipy")
 
 from hardware_splicer.mechanical_kirsch_reference import (
     kirsch_stress,

@@ -158,8 +158,13 @@ def _stages(
     _stage(
         stages,
         "production_mechatronics_release",
-        _passed(stages, "integrated_bench_authority") and release["release_ready"] and electrical["release_ready"] and not trace_gaps,
+        _passed(stages, "integrated_bench_authority")
+        and release["release_ready"] and electrical["release_ready"]
+        and not mechanical.get("structural_release_blocked", False)
+        and not trace_gaps,
         release["blockers"]
+        + (["Attached mechanical structural screening does not authorize load-bearing release."]
+           if mechanical.get("structural_release_blocked", False) else [])
         + ([] if electrical["release_ready"] else ["Circuit/electrical subsystem release is not closed."])
         + trace_gaps,
         "No remaining action for this scoped Hardware-Splicer release.",

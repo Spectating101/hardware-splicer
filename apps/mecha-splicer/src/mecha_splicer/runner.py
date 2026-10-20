@@ -31,6 +31,10 @@ def run(
     openscad_docker_image: Optional[str] = None,
     report_currency: str = "TWD",
     simulation_fidelity: Optional[str] = None,
+    structural_screening: str = "advisory",
+    structural_mesh_sizes_mm: tuple[float, ...] = (8., 6., 5.),
+    structural_pin_drive_mm: float = .02,
+    structural_radial_clearance_mm: float = .005,
 ) -> Dict[str, Any]:
     """
     High-level runner:
@@ -52,6 +56,39 @@ def run(
     bundle["simulation"] = run_simulation_summary(project, fidelity=project.simulation_fidelity)
     bundle["control_profile"] = synthesize_control_profile(project)
     bundle["safety"] = evaluate_safety_checks(project)
+
+    # The mechanical solver is an OPTIONAL, LOCAL bounded capability.
+    # Every ordinary Mecha build receives an explicit advisory; only the
+    # opt-in "run" mode pays for Gmsh/FEM or writes structural artifacts.
+    if structural_screening not in {"off", "advisory", "run"}:
+        raise ValueError("structural_screening must be off, advisory, or run")
+    if structural_screening == "run" and out_dir is None:
+        raise ValueError("structural_screening='run' requires out_dir")
+    try:
+        from hardware_splicer.mechanical_workflow_integration import screen_mecha_project
+        structural = screen_mecha_project(
+            project.model_dump(mode="json"),
+            out_dir=out_dir if out_dir is not None else ".",
+            mode=structural_screening,
+            mesh_sizes_mm=structural_mesh_sizes_mm,
+            pin_drive_mm=structural_pin_drive_mm,
+            clearance_mm=structural_radial_clearance_mm,
+        )
+    except ImportError as exc:
+        structural = {
+            "schema_version": "hardware_splicer.mechanical_workflow_bridge.v1",
+            "status": "capability_unavailable",
+            "blockers": ["hardware_splicer_mechanical_bridge_not_installed"],
+            "failure_detail": str(exc)[:250],
+            "structural_safety_verified": False,
+            "fabrication_authorized": False,
+            "release_authorized": False,
+        }
+    bundle["structural_screening"] = structural
+    bundle["structural_release_blocked"] = bool(
+        project.bracket is not None or
+        structural.get("status") in {"solver_blocked", "unsupported_mechanical_topology"}
+    )
 
     commerce = estimate_digital_pack(price_usd=29.0, support_minutes=10.0).to_dict()
     bundle["commerce"] = {"digital_pack": commerce, "assumptions": {"price_usd": 29.0, "support_minutes": 10.0}}
@@ -276,6 +313,19 @@ def _render_mech_check(bundle: Dict[str, Any]) -> str:
     if not (bundle.get("dfm") or []):
         lines.append("- ✅ No DFM warnings emitted by heuristic checks.")
 
+    structural = bundle.get("structural_screening") or {}
+    if structural.get("status") not in {"not_applicable", "disabled_by_request"}:
+        lines.extend([
+            "",
+            "## Structural FEM / Contact Evidence",
+            f"- Status: {structural.get('status')}",
+            "- No numerical structural screen authorizes load-bearing fabrication.",
+        ])
+        for blocker in structural.get("blockers") or []:
+            lines.append(f"- [block] {blocker}")
+        artifacts = structural.get("artifacts") or {}
+        if artifacts.get("review_html"):
+            lines.append(f"- Open investigation review: {artifacts['review_html']}")
     sim = bundle.get("simulation") or []
     if sim:
         lines.append("")
@@ -317,6 +367,14 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
     lines.append("")
     lines.append("## Evidence Bundle")
     lines.append("- `DESIGN_DECISIONS.md`")
+    structural = bundle.get("structural_screening") or {}
+    if structural.get("status") not in {"not_applicable", "disabled_by_request"}:
+        lines.append("- Structural contact analysis: " + str(structural.get("status")))
+        artifacts = structural.get("artifacts") or {}
+        if artifacts.get("review_html"):
+            lines.append("- Structural review: " + str(artifacts["review_html"]))
+        else:
+            lines.append("- Obtain a bounded structural analysis before any load-bearing claims.")
     lines.append("- `SIM_RESULTS.json`")
     lines.append("- `RISK_REGISTER.md`")
     lines.append("- `REVISION_NOTES.md`")
@@ -376,6 +434,8 @@ def _write_evidence_bundle(out_dir: Path, bundle: Dict[str, Any], project: Proje
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "simulation": bundle.get("simulation") or [],
         "severity_counts": _severity_counts(bundle.get("simulation") or []),
+        "structural_screening": bundle.get("structural_screening") or {},
+        "structural_release_blocked": bundle.get("structural_release_blocked", True),
     }
     sim_path = out_dir / "SIM_RESULTS.json"
     sim_path.write_text(json.dumps(sim_summary, indent=2), encoding="utf-8")
@@ -449,6 +509,14 @@ def _render_risk_register(bundle: Dict[str, Any]) -> str:
     emit(bundle.get("dfm") or [], "dfm")
     emit(bundle.get("simulation") or [], "simulation")
     emit(bundle.get("safety") or [], "safety")
+    structural = bundle.get("structural_screening") or {}
+    for blocker in structural.get("blockers") or []:
+        # Candidate/advisory/solver blockers are not material strength evidence.
+        msg = str(blocker).replace("|","/").replace("\n"," ")[:240]
+        lines.append(
+            f"| structural_fem | block | {msg} | "
+            "Collect reliable structural and physical evidence before release. |"
+        )
 
     if len(lines) == 3:
         lines.append("| n/a | info | No warn/block risks emitted. | Continue with prototype validation checklist. |")

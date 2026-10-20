@@ -7,6 +7,12 @@ import sys
 from pathlib import Path
 
 import pytest
+
+# KKT physics requires optional scipy/numpy; general HS installs do not.
+# These tests always execute in dedicated CAD/FEM CI with physics extras.
+pytest.importorskip("numpy")
+pytest.importorskip("scipy")
+
 from hardware_splicer.mechanical_contact_complementarity import (
     benchmark_contact_spring,
     solve_contact_quadratic_program,
