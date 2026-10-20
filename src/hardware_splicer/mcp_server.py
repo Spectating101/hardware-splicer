@@ -125,6 +125,20 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_run_reasoning_engineering_agent",
+            description=(
+                "Run a bounded LLM-driven engineering reasoning loop. The model chooses"
+                " read-only evidence inspection, function decomposition, candidate audit,"
+                " and source-declared concept casing tools. Tool results are returned to"
+                " the model between rounds. No firmware, printer, power, or motion actions."
+                " Returns explicit MODEL_UNAVAILABLE when no model is configured."
+            ),
+            inputSchema={"type":"object","properties":{
+                "scenario":{"type":"object"},
+                "max_steps":{"type":"integer","minimum":1,"maximum":6}
+            },"required":["scenario"]},
+        ),
+        Tool(
             name="hs_prepare_printed_casing",
             description=(
                 "Prepare a real SolidCraft parametric printable housing: hollow"
@@ -655,6 +669,13 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         result = await asyncio.to_thread(
             sdk.validate_virtual_splice_feasibility,
             source_research=args.get("source_research"),
+        )
+        return _tool_result(result)
+    if name == "hs_run_reasoning_engineering_agent":
+        result=await asyncio.to_thread(
+            sdk.run_reasoning_engineering_agent,
+            scenario=args.get("scenario"),
+            max_steps=args.get("max_steps",6),
         )
         return _tool_result(result)
     if name == "hs_prepare_printed_casing":
