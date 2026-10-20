@@ -26,10 +26,17 @@ DEFAULT_CASES = [
 
 def main(argv: list[str] | None = None) -> int:
     args = list(argv or sys.argv[1:])
+    engineering_lane = "--engineering-planner" in args
+    args = [value for value in args if value != "--engineering-planner"]
     paths = [Path(value) for value in args] if args else DEFAULT_CASES
+    planner = None
+    if engineering_lane:
+        from hardware_splicer.engineering_planner import plan_engineering_project
+        planner = plan_engineering_project
     suite = evaluate_source_agnostic_suite(
-        load_source_agnostic_scenario(path) for path in paths
+        (load_source_agnostic_scenario(path) for path in paths), planner=planner
     )
+    suite["planner_lane"] = "engineering" if engineering_lane else "legacy_intake"
     print(json.dumps(suite, indent=2))
     return 0
 

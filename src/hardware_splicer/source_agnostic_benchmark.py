@@ -215,19 +215,26 @@ def evaluate_source_agnostic_scenario(
     )
 
     expected_conflicts = int(challenge.get("expected_conflict_count") or 0)
-    conflicts_visible = expected_conflicts == 0 or (
-        _contains_key(
-            plan,
-            {"conflict_id", "contradiction_id", "source_disagreement", "incompatible_claim"},
-        )
-        and _contains_key(
-            plan,
-            {"disposition", "selected_claim", "blocked_by_conflict", "resolution_status"},
+    conflict_rows = _sequence(plan.get("source_conflicts"))
+    if not conflict_rows:
+        conflict_rows = _sequence(_mapping(plan.get("reference_sources")).get("conflicts"))
+    # Merely exposing the field "disposition" does NOT resolve an engineering
+    # disagreement. The review must select/accept a variant and unblock it.
+    # Absent review, an explicit blocking conflict is the safe result.
+    resolved_dispositions = {"selected", "accepted_variant", "rejected"}
+    conflicts_resolved = expected_conflicts == 0 or (
+        len(conflict_rows) >= expected_conflicts
+        and all(
+            isinstance(row, Mapping)
+            and str(row.get("disposition") or "").lower() in resolved_dispositions
+            and row.get("blocking") is False
+            and bool(row.get("reason"))
+            for row in conflict_rows
         )
     )
     record(
         "conflict_resolution",
-        conflicts_visible,
+        conflicts_resolved,
         "source_conflicts_not_resolved",
         "conflict identity and explicit disposition",
     )

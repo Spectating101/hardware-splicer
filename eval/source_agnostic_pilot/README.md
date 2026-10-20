@@ -51,3 +51,26 @@ or actual hardware safety.
    reviewed expected engineering invariants, not model-authored solutions.
 4. Score correctness of specific electrical/mechanical recommendations and
    safe abstention, not merely presence of structural JSON keys.
+
+## Comparison lane: canonical engineering planner
+
+The original pilot calls the historical project intake planner. To assess
+existing *source-aware* engineering infrastructure, run:
+
+```bash
+.venv/bin/python scripts/run_source_agnostic_pilot.py --engineering-planner /tmp/hs_pilot_engineering.json
+```
+
+This routes the same cases and source records through
+`plan_engineering_project`, which builds typed source/claim/conflict graphs,
+identity maps, and change-impact records. The comparison does **not**
+constitute independent proof that a repair recommendation is electrically
+or mechanically correct. Conflict resolution receives credit only if all
+required conflicts have an explicit nonblocking reviewed disposition, not
+merely because a field called `disposition` exists. A blocked conflict is a
+safe and desirable output when no measurements can justify a choice.
+
+The benchmark's `source_provenance` dimension measures carried source
+metadata, not whether URL contents were independently downloaded and
+validated. Likewise, a source `version` label such as `web-2026-10-20`
+is not an archive checksum or proof of its retrieval date.

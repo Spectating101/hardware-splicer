@@ -18,6 +18,8 @@ CASES = ROOT / "eval" / "source_agnostic_pilot"
 SCRIPT = ROOT / "scripts" / "benchmark_source_agnostic_engineering.py"
 
 def main() -> int:
+    lane = "engineering" if "--engineering-planner" in sys.argv[1:] else "legacy_intake"
+    destination_args = [value for value in sys.argv[1:] if value != "--engineering-planner"]
     paths = sorted(CASES.glob("*.json"))
     if not paths:
         raise SystemExit("No pilot cases found")
@@ -26,7 +28,7 @@ def main() -> int:
     env["HARDWARE_SPLICER_OFFLINE_SALVAGE"] = "1"
     env["PYTHONHASHSEED"] = "0"
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), *(str(path) for path in paths)],
+        [sys.executable, str(SCRIPT), *(["--engineering-planner"] if lane == "engineering" else []), *(str(path) for path in paths)],
         cwd=ROOT, env=env, capture_output=True, text=True, check=False,
     )
     if proc.returncode:
@@ -36,6 +38,7 @@ def main() -> int:
     manifest = {
         "schema_version": "hardware_splicer.source_agnostic_pilot.v1",
         "run_mode": "offline_no_live_vision",
+        "planner_lane": lane,
         "physical_validation": False,
         "source_material": "vendor-guide claims transcribed into local cases",
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
@@ -44,7 +47,7 @@ def main() -> int:
         },
         "suite": result,
     }
-    destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/hardware_splicer_pilot_results.json")
+    destination = Path(destination_args[0]) if destination_args else Path("/tmp/hardware_splicer_pilot_results.json")
     destination.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "output": str(destination),

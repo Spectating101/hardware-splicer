@@ -202,3 +202,17 @@ def test_zero_source_scenario_stays_zero_source() -> None:
     result = evaluate_source_agnostic_scenario(scenario, planner=spy)
     assert result["source_handoff_count"] == 0
     assert result["declared_conflict_handoff_count"] == 0
+
+
+def test_unresolved_conflict_is_not_miscounted_as_resolved() -> None:
+    scenario = load_source_agnostic_scenario(CASE_DIR / "donor_repair_rover.json")
+    def planner(intake, *, skip_vision):
+        return {"goal": intake["goal"], "missing_info": ["more evidence"],
+                "source_conflicts": [{"conflict_id": "motor_population",
+                    "disposition": "blocked_pending_measurement", "reason": "Unknown motor",
+                    "blocking": True}, {"conflict_id": "driver_current",
+                    "disposition": "blocked_pending_measurement", "reason": "Unknown current",
+                    "blocking": True}]}
+    result = evaluate_source_agnostic_scenario(scenario, planner=planner)
+    assert not result["dimensions"]["conflict_resolution"]["satisfied"]
+    assert "source_conflicts_not_resolved" in result["gaps"]
