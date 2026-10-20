@@ -25,6 +25,12 @@ _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 _PATH_PARAM_RE = re.compile(r"\{([^{}]+)\}")
 _SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
 _TASK_OPERATION_PATHS = {
+    "practical_chemistry_repair": (
+        ("GET", "/v1/engineering/chemical/practical/catalog"),
+        ("POST", "/v1/engineering/chemical/practical/assess"),
+        ("GET", "/v1/engineering/chemical/engines"),
+        ("POST", "/v1/engineering/chemical/materials/compare"),
+    ),
     "chemical_enclosure_assembly": (
         ("POST", "/v1/engineering/chemical/enclosure/assembly-review"),
         ("POST", "/v1/engineering/chemical/materials/compare"),

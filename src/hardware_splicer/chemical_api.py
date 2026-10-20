@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from .chemical_gas import gas_state_report
+from .practical_chemistry import assess_practical_chemistry, practical_catalog_summary
 from .chemical_stoichiometry import stoichiometry_report
 from .chemical_kinetics import kinetic_reference_report
 from .chemical_reaction_thermodynamics import reaction_reference_thermodynamics
@@ -29,6 +30,38 @@ from .chemical_engineering import (
     molecule_report,
     property_report,
 )
+
+
+class PracticalChemistryQuote(BaseModel):
+    consumables_cost: float = Field(ge=0)
+    labor_minutes: float = Field(ge=0)
+    hourly_labor_cost: float = Field(ge=0)
+    testing_cost: float = Field(ge=0)
+    equipment_allocation: float = Field(ge=0)
+    replacement_cost: float | None = Field(default=None, ge=0)
+    probability_of_success: float | None = Field(default=None, ge=0, le=1)
+    failed_attempt_disposal_cost: float | None = Field(default=None, ge=0)
+
+
+class PracticalChemistryAssessmentRequest(BaseModel):
+    task: Literal["clean_flux", "clean_contacts", "bond_joint", "coat_pcb", "finish_surface", "assess_corrosion"]
+    primary_material: Literal["FR4", "metal_contact", "gold_contact", "ABS", "ASA", "PC", "PP", "PE",
+                              "PETG", "acrylic", "unknown"]
+    material_identity: Literal["verified", "claimed", "unknown"]
+    adjacent_materials: list[Literal["FR4", "metal_contact", "gold_contact", "ABS", "ASA",
+                                     "PC", "PP", "PE", "PETG", "acrylic", "unknown"]] = Field(
+                                         default_factory=list, max_length=20)
+    electrical_state: Literal["off", "energized", "unknown"] = "unknown"
+    battery_status: Literal["none", "removed", "installed", "damaged", "unknown"] = "unknown"
+    duty: Literal["cosmetic", "normal", "high_load", "safety_critical"] = "cosmetic"
+    exposure: list[Literal["moisture", "uv", "heat_cycle", "chemical_exposure", "vibration", "none"]] = Field(
+        default_factory=list, max_length=10)
+    rework_required: bool = False
+    residue_tolerance: Literal["none", "allowed", "unknown"] = "unknown"
+    keepouts_confirmed: bool = False
+    service_temperature_c: float | None = Field(default=None, ge=-50, le=300)
+    cost_quotes: dict[str, PracticalChemistryQuote] = Field(default_factory=dict, max_length=100)
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
 
 
 class MoleculeInspectRequest(BaseModel):
@@ -170,6 +203,29 @@ def _call(engine: Any, *args: Any, **kwargs: Any) -> dict[str, Any]:
 
 def create_chemical_router() -> APIRouter:
     router = APIRouter(prefix="/v1/engineering/chemical", tags=["engineering", "chemical"])
+
+    @router.get("/practical/catalog")
+    def get_practical_chemistry_catalog() -> dict[str, Any]:
+        return practical_catalog_summary()
+
+    @router.post("/practical/assess")
+    def practical_chemistry_assessment(request: PracticalChemistryAssessmentRequest) -> dict[str, Any]:
+        return _call(assess_practical_chemistry,
+                     task=request.task,
+                     primary_material=request.primary_material,
+                     material_identity=request.material_identity,
+                     adjacent_materials=request.adjacent_materials,
+                     electrical_state=request.electrical_state,
+                     battery_status=request.battery_status,
+                     duty=request.duty,
+                     exposure=request.exposure,
+                     rework_required=request.rework_required,
+                     residue_tolerance=request.residue_tolerance,
+                     keepouts_confirmed=request.keepouts_confirmed,
+                     service_temperature_c=request.service_temperature_c,
+                     cost_quotes={key:value.model_dump(exclude_none=True)
+                                  for key,value in request.cost_quotes.items()},
+                     currency=request.currency)
 
     @router.get("/engines")
     def list_chemical_engines() -> dict[str, Any]:

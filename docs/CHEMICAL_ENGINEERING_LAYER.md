@@ -1,5 +1,8 @@
 # Chemical engineering — computational integration and evidence boundaries
 
+For product-facing repair/material decisions, prefer the practical chemistry
+advisor documented in docs/PRACTICAL_CHEMISTRY_ENGINE.md.
+
 The standalone scientific capabilities take priority. See
 docs/CHEMICAL_SCIENCE_CORE.md and eval/chemical_science before treating
 cross-disciplinary material packaging as the full chemistry layer.
@@ -15,6 +18,8 @@ No second agent or engineering-release system is created.
 | Endpoint | Backend | Actual scope |
 |---|---|---|
 | GET /v1/engineering/chemical/engines | HS probe | Installed vs implemented scientific adapters |
+| GET /v1/engineering/chemical/practical/catalog | HS curated catalog | Scope-limited practical methods and manufacturer sources |
+| POST /v1/engineering/chemical/practical/assess | HS practical advisor | Product/material compatibility, hazards, unknowns, test gates and repair costs |
 | POST /v1/engineering/chemical/reactions/stoichiometry | HS native | Neutral formula elemental conservation and conditional material inventory |
 | POST /v1/engineering/chemical/reactions/thermodynamics/reference | Cantera | Selected GRI30 delta H/G/S and K |
 | POST /v1/engineering/chemical/reactions/kinetics/reference | Cantera | Fixed reference kinetic time trajectory |

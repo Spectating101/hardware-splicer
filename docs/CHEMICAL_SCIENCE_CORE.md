@@ -1,5 +1,8 @@
 # Hardware Splicer chemistry — standalone scientific core
 
+Practical repair/manufacturing use is the primary new product workflow.
+See docs/PRACTICAL_CHEMISTRY_ENGINE.md. Numerical science remains opt-in.
+
 Status: computational prototype. Branch: agent/chemical-engineering-v0.
 Scope: chemistry and chemical engineering, independent of CAD or electronics.
 
