@@ -26,6 +26,8 @@ def audit_two_pin_contact(
     force_tolerance: float = .04,
     local_peak_tolerance: float = .10,
     local_rms_tolerance: float = .06,
+    local_p95_tolerance: float = .10,
+    sampled_gap_tolerance_um: float = .10,
     numerical_gauge_values_n_m: Sequence[float] = (.001,.01,.1),
     activation_values_n_m: Sequence[float] = (1e6,1e7,1e8),
 ) -> dict[str, Any]:
@@ -42,9 +44,14 @@ def audit_two_pin_contact(
         ("force_tolerance", force_tolerance),
         ("local_peak_tolerance", local_peak_tolerance),
         ("local_rms_tolerance", local_rms_tolerance),
+        ("local_p95_tolerance", local_p95_tolerance),
     ]:
         if not math.isfinite(tol) or not 0 < tol <= .25:
             raise ValueError(f"{name} must be finite in (0,0.25]")
+    if not math.isfinite(sampled_gap_tolerance_um) or not (
+        .001 <= sampled_gap_tolerance_um <= 5
+    ):
+        raise ValueError("sampled gap tolerance must be [0.001,5] micrometres")
     for name,values in [
         ("numerical_gauge_values_n_m",numerical_gauge_values_n_m),
         ("activation_values_n_m",activation_values_n_m),
@@ -73,6 +80,15 @@ def audit_two_pin_contact(
         raise ValueError("STEP changed during two-bore study")
     comparisons=[]
     blockers=[]
+    for level in levels:
+        for probe in level["between_node_surface_gap_probes"]:
+            if (
+                probe["largest_sampled_between_node_penetration_m"]
+                > sampled_gap_tolerance_um * 1e-6
+            ):
+                blockers.append(
+                    f"hole_{probe['hole_index']}_between_node_overlap_exceeds_tolerance"
+                )
     for coarse,fine in zip(levels,levels[1:]):
         force_error=abs(
             fine["transmitted_force_scale_n"]-coarse["transmitted_force_scale_n"]
@@ -81,6 +97,21 @@ def audit_two_pin_contact(
             blockers.append("pin_force_mesh_sensitive")
         if fine["quadratic_dof_count"] / coarse["quadratic_dof_count"] < 1.08:
             blockers.append("insufficient_quadratic_refinement")
+        # A larger volume DOF count does NOT demonstrate a finer contact
+        # surface. The original 8/6/5 case keeps ~122 contact nodes/hole.
+        contact_node_growth = []
+        for before, after in zip(coarse["per_pin"], fine["per_pin"]):
+            ratio = after["contact_node_count"] / max(
+                before["contact_node_count"], 1
+            )
+            contact_node_growth.append({
+                "hole_index": before["hole_index"],
+                "effective_surface_node_growth_ratio": ratio,
+            })
+            if ratio < 1.08:
+                blockers.append(
+                    f"hole_{before['hole_index']}_contact_surface_resolution_not_refined"
+                )
         holecomparisons=[]
         for left,right in zip(coarse["per_hole_stress"],fine["per_hole_stress"]):
             peak=abs(
@@ -89,7 +120,16 @@ def audit_two_pin_contact(
             rms=abs(
                 right["weighted_rms_von_mises_pa"]-left["weighted_rms_von_mises_pa"]
             )/max(right["weighted_rms_von_mises_pa"],left["weighted_rms_von_mises_pa"],1e-6)
+            p95 = abs(
+                right["p95_quadrature_von_mises_pa"] -
+                left["p95_quadrature_von_mises_pa"]
+            ) / max(
+                right["p95_quadrature_von_mises_pa"],
+                left["p95_quadrature_von_mises_pa"], 1e-6
+            )
             idx=left["hole_index"]
+            if p95 > local_p95_tolerance:
+                blockers.append(f"hole_{idx}_p95_stress_not_converged")
             if peak > local_peak_tolerance:
                 blockers.append(f"hole_{idx}_peak_stress_not_converged")
             if rms > local_rms_tolerance:
@@ -98,12 +138,14 @@ def audit_two_pin_contact(
                 "hole_index":idx,
                 "peak_stress_relative_change":peak,
                 "rms_stress_relative_change":rms,
+                "p95_sampled_stress_relative_change":p95,
             })
         comparisons.append({
             "coarse_mm":coarse["mesh_target_mm"],
             "fine_mm":fine["mesh_target_mm"],
             "force_relative_change":force_error,
             "per_hole":holecomparisons,
+            "per_hole_contact_resolution_growth": contact_node_growth,
         })
     # Stage two: numerical gauge is NOT contact penalty and should not
     # materially contribute force to this nominally unrestrained joint.
@@ -159,6 +201,9 @@ def audit_two_pin_contact(
         "mesh_force_tolerance":force_tolerance,
         "local_peak_stress_tolerance":local_peak_tolerance,
         "local_rms_stress_tolerance":local_rms_tolerance,
+        "local_p95_stress_tolerance":local_p95_tolerance,
+        "sampled_between_node_overlap_tolerance_um":sampled_gap_tolerance_um,
+        "between_node_gap_sampled_not_proven_everywhere":True,
         "blockers":blockers,
         "selected_nodal_nonpenetration_verified":True,
         "continuous_contact_surface_verified":False,

@@ -164,7 +164,9 @@ def test_two_pin_audit_detects_stress_instability(refined_study):
     r=refined_study
     assert r["status"]=="inconclusive_two_pin_contact_stress"
     assert r["blockers"]==[
+        "hole_0_contact_surface_resolution_not_refined",
         "hole_0_peak_stress_not_converged",
+        "hole_1_contact_surface_resolution_not_refined",
         "hole_1_peak_stress_not_converged",
     ]
     assert len(r["mesh_levels"])==3
