@@ -13,7 +13,7 @@ from skfem.models.elasticity import lame_parameters,linear_elasticity
 from screen_cyberdeck_open_source_fem import mesh_existing_gmsh
 from hs_exact_p2_traction import exact_planar_traction
 
-def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0,hotspot_xy_mm=None,hotspot_mesh_mm=None,collar_outer_radius_mm=None):
+def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0,hotspot_xy_mm=None,hotspot_mesh_mm=None,collar_outer_radius_mm=None,support_mode="fully_fixed"):
     begin=time.monotonic()
     if part not in ('lid','base') or not all(math.isfinite(x) for x in (size,E,nu,force_magnitude_n)):
         raise ValueError('unsupported part or nonfinite FEM input')
@@ -63,7 +63,23 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
         ring=np.flatnonzero((radial>=radius[0])&(radial<=radius[1]))
         if len(ring)<12:raise ValueError('quadratic screw collar underresolved')
         counts.append(len(ring));keep.extend(ring.tolist())
-    D=np.unique(keep)
+    if support_mode == 'fully_fixed':
+        D=np.unique(keep)
+    elif support_mode == 'normal_only':
+        # Frictionless vertical fixture idealization. Minimal in-plane
+        # anchors remove exactly the 3 residual planar rigid-body modes.
+        # They are NOT a contact or preload model (z also cannot lift off).
+        z_dofs=set(np.hstack((basis.nodal_dofs[2],basis.edge_dofs[2])).tolist())
+        x_dofs=set(np.hstack((basis.nodal_dofs[0],basis.edge_dofs[0])).tolist())
+        y_dofs=set(np.hstack((basis.nodal_dofs[1],basis.edge_dofs[1])).tolist())
+        vertical=[i for i in keep if i in z_dofs]
+        first=next(i for i in keep if i in x_dofs)
+        first_xy=basis.doflocs[:2,first]
+        second=max((i for i in keep if i in y_dofs),key=lambda i:abs(basis.doflocs[0,i]-first_xy[0]))
+        first_y=next(i for i in keep if i in y_dofs and np.linalg.norm(basis.doflocs[:2,i]-first_xy)<1e-8)
+        D=np.unique([*vertical, first, first_y, second])
+    else:
+        raise ValueError('unsupported fixture support mode')
     if np.max(np.abs(F[D]))>1e-7:raise ValueError('quadratic applied contact load intersects Dirichlet screw collar')
     lam,mu=lame_parameters(E,nu)
     t=time.monotonic()
@@ -98,6 +114,7 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
             'integration_patch_area_mm2':quad_area*1e6,
             'screw_clamped_DOF_count':len(D),
             'support_collars_xy_radius_mm':list(radius),
+            'support_mode':support_mode,
             'source_derived_board_seating_z_mm':board_box.zmin,
             'modelled_contact_plane_z_mm':zplane*1000,
             'applied_total_force_z_n':requested_load_z,'screw_collar_dof_counts':counts,
@@ -123,6 +140,7 @@ if __name__=='__main__':
     a.add_argument('--part',choices=['lid','base'],required=True)
     a.add_argument('--sizes',type=float,nargs='+',default=[10,8,6])
     a.add_argument('--hotspot-xy-mm',type=float,nargs=2,default=None)
+    a.add_argument('--support-mode',choices=['fully_fixed','normal_only'],default='fully_fixed')
     a.add_argument('--collar-outer-radius-mm',type=float,default=None)
     a.add_argument('--hotspot-mesh-mm',type=float,default=None)
     a.add_argument('--force-n',type=float,default=1.0)
@@ -139,7 +157,7 @@ if __name__=='__main__':
         row=inspect(o.part,size,folder,geometry,o.original_board_step,
                     E=o.E_pa,nu=o.poisson,force_magnitude_n=o.force_n,
                     hotspot_xy_mm=o.hotspot_xy_mm,hotspot_mesh_mm=o.hotspot_mesh_mm,
-                    collar_outer_radius_mm=o.collar_outer_radius_mm)
+                    collar_outer_radius_mm=o.collar_outer_radius_mm,support_mode=o.support_mode)
         rows.append(row)
         print('QUADRATIC_FEM',o.part,size,'tetra',row['num_elements'],
               'displacement_mm',round(row['displacement_mm'],7),
@@ -162,6 +180,7 @@ if __name__=='__main__':
        'schema':'hardware_splicer.quadratic_structural_screen.v1',
        'part':o.part,'local_refinement':{'hotspot_xy_mm':o.hotspot_xy_mm,'hotspot_mesh_mm':o.hotspot_mesh_mm},
        'collar_outer_radius_mm':o.collar_outer_radius_mm,
+       'support_mode':o.support_mode,
        'original_kicad_pcb_sha256':geometry['source_sha256'],
        'original_board_step_sha256':'sha256:'+hashlib.sha256(o.original_board_step.read_bytes()).hexdigest(),
        'cad_step_sha256':rows[0]['source_lid_or_base_step_sha256'],
