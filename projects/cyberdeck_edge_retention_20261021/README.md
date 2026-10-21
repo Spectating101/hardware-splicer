@@ -4,6 +4,21 @@
 model and accepted-action replay. This remains a SOFTWARE-ONLY DESIGN PROTOTYPE
 and is **not print-ready or approved for physical electrical operation**.
 
+## Product acceptance correction: published revision is NOT component-clear (Oct 21)
+
+An independent acceptance re-run on the **actual STEP hashes checked into this
+package** found **1.584 mm³ interference between SW1 and the retaining lid**.
+The other six available original 3D component placements are nominally clear.
+The old 7/7 clearance report was generated against a **different CAD revision**,
+so it could not certify these files. The checked-in
+[`INDEPENDENT_COMPONENT_AUDIT.json`](./INDEPENDENT_COMPONENT_AUDIT.json) now
+records the failure and exact checked-in base/lid hashes. Repeat it with
+`scripts/recheck_hs_cyberdeck_published_models.py` and the original model
+exports. **The currently published CAD must not be used as a cleared physical
+fit.** A separate local candidate clears all seven modelled placements but
+has not been integrated into this branch yet. Nineteen footprint envelopes
+remain incomplete in either case.
+
 ## Original engineering failure and agent comparison
 
 The original project is the real public [sector07-dev/RPI_DEV](https://github.com/sector07-dev/RPI_DEV)
