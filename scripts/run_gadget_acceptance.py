@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import os
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from hardware_splicer.assembly_plan import build_assembly_plan
 from hardware_splicer.build_compiler import compile_catalog_build
 from hardware_splicer.catalog import CATALOG_BUILD_IDS
 from hardware_splicer.device_splice_feasibility import assess_device_splice
@@ -136,6 +138,72 @@ def _run_feasibility() -> list[dict]:
                          "pass": False, "error": f"{type(exc).__name__}: {exc}"[:400]})
     return rows
 
+def _catalog_assembly(pcb_path: Path, folder: Path) -> dict:
+    """Feed the actual generated KiCad layout into HS assembly and fit engines.
+
+    The new enclosure is a *proposed* clearance envelope sized from source
+    geometry, not a previously manufactured or physically measured case.
+    """
+    raw = pcb_path.read_text(encoding="utf-8")
+    digest = "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    plan = build_assembly_plan(raw, pcb_sha256=digest)
+    width, depth = plan["board"]["size_mm"]
+    thickness = plan["board"]["thickness_mm"]
+    bbox = plan["board"]["outline"]["bbox"]
+    center_x = (bbox["x0"] + bbox["x1"]) / 2
+    center_y = (bbox["y0"] + bbox["y1"]) / 2
+    components = []
+    for part in plan["parts"]:
+        if part["do_not_populate"] or part["kind"] == "mounting_hole":
+            continue
+        corners = part["corners"]
+        if not corners:
+            continue
+        xs = [float(p[0]) for p in corners]
+        ys = [float(p[1]) for p in corners]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+        components.append({
+            "ref": part["id"],
+            "center_xy_mm": [(min_x + max_x) / 2 - center_x,
+                             (min_y + max_y) / 2 - center_y],
+            "size_xyz_mm": [max_x - min_x, max_y - min_y, part["height_mm"]],
+            "layer": "B.Cu" if part["side"] == "back" else "F.Cu",
+            "rotation_deg": 0,
+        })
+    max_height = max((p["height_mm"] for p in plan["parts"]
+                      if not p["do_not_populate"]), default=0)
+    # 10 mm XY allowance for access and tolerances; overhead is illustrative.
+    inner = {"w": width + 20, "d": depth + 20,
+             "h": max(25.0, 17 + max_height)}
+    placement = {
+        "source_mode": "generated_kicad_courtyard_and_typical_heights",
+        "board": {"dimensions_mm": {"w": width, "d": depth, "t": thickness}},
+        "components": components,
+    }
+    assembly = {
+        "enclosure": {"inner_dimensions_mm": inner, "floor_mm": 2},
+        "placements": {"pcb": {"origin_xyz_mm": [0, 0, 6]}},
+    }
+    fit = screen_board_enclosure_fit(placement, assembly)
+    (folder / "ASSEMBLY_PLAN.json").write_text(
+        json.dumps(plan, indent=2, allow_nan=False) + "\\n", encoding="utf-8")
+    (folder / "PROPOSED_ENCLOSURE_FIT.json").write_text(
+        json.dumps(fit, indent=2, allow_nan=False) + "\\n", encoding="utf-8")
+    return {
+        "pcb_source_sha256": digest,
+        "source_board_size_mm": [width, depth, thickness],
+        "source_footprints": plan["counts"]["parts"],
+        "assembly_steps": plan["counts"]["steps"],
+        "fitted_component_envelopes": len(components),
+        "proposed_enclosure_inner_dimensions_mm": inner,
+        "enclosure_fit_status": fit["status"],
+        "enclosure_fit_blockers": fit["blocker_count"],
+        "component_heights_physically_measured": False,
+        "exact_3d_collision_verified": False,
+        "part_identity_and_connector_mating_verified": False,
+    }
+
 def _run_catalog(out_root: Path, all_catalog: bool) -> list[dict]:
     cases = ({name: name for name in CATALOG_BUILD_IDS}
              if all_catalog else GADGETS)
@@ -152,7 +220,9 @@ def _run_catalog(out_root: Path, all_catalog: bool) -> list[dict]:
             pcb = Path(result.kicad_pcb_file) if result.kicad_pcb_file else None
             board_exists = bool(pcb and pcb.is_file() and
                                 pcb.read_text(encoding="utf-8").startswith("(kicad_pcb"))
-            row.update({
+            assembly_check = (_catalog_assembly(pcb, out_root / "catalog" / family)
+                              if board_exists else None)
+            row.update({"source_bound_assembly": assembly_check,
                 "compile_ok": bool(result.ok), "build_graph_compiled": quality.get("build_graph_compiled"),
                 "drc_pass": quality.get("drc_pass"),
                 "electrical_safety_pass": quality.get("electrical_safety_pass"),
@@ -160,7 +230,9 @@ def _run_catalog(out_root: Path, all_catalog: bool) -> list[dict]:
                 "gerber_exported": False,
                 "pass": all((result.ok, quality.get("build_graph_compiled"),
                              quality.get("drc_pass"), quality.get("electrical_safety_pass"),
-                             board_exists)),
+                             board_exists, assembly_check is not None,
+                             assembly_check is not None and
+                             assembly_check["enclosure_fit_blockers"] == 0)),
                 "error": result.error,
             })
         except Exception as exc:
