@@ -39,7 +39,7 @@ jobs:
 
       - name: Run gadget compilation and donor splice acceptance
         run: |
-          python scripts/run_gadget_acceptance.py --out "$RUNNER_TEMP/hs-gadget-acceptance"
+          python scripts/run_gadget_acceptance.py --all-catalog --out "$RUNNER_TEMP/hs-gadget-acceptance"
 
       - name: Save complete capability evidence
         if: always()
