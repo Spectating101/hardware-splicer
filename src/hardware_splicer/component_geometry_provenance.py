@@ -7,6 +7,9 @@ electrical DRC and from physical build authorization.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from functools import lru_cache
+import json
+from pathlib import Path
 
 from .pcb.module_registry import (
     find_module, resolve_module_body_mm, resolve_module_footprint, resolve_module_pads,
@@ -14,6 +17,13 @@ from .pcb.module_registry import (
 
 SCHEMA = "hardware_splicer.component_geometry_provenance.v1"
 MAX_NODES = 1000
+
+
+@lru_cache(maxsize=1)
+def _serialized_footprint_ids() -> frozenset[str]:
+    source = Path(__file__).parent / "data" / "engine_pcb_data.json"
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    return frozenset((payload.get("module_footprints") or {}).keys())
 
 
 def assess_build_graph_geometry(graph: Mapping) -> dict:
@@ -26,6 +36,8 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
     missing = []
     fallback = []
     explicit = []
+    python_only = []
+    serialized_ids = _serialized_footprint_ids()
     for index, node in enumerate(nodes):
         if not isinstance(node, Mapping):
             raise ValueError("build node must be an object")
@@ -42,6 +54,9 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
         elif body is None or named.startswith("Circuit.AI:"):
             geometry = "synthetic_fallback"
             fallback.append(module_id)
+        elif module_id not in serialized_ids:
+            geometry = "python_registry_only_unverified"
+            python_only.append(module_id)
         else:
             geometry = "curated_unverified"
             explicit.append(module_id)
@@ -50,6 +65,7 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
             "module_id": module_id,
             "geometry_class": geometry,
             "footprint_identifier": named,
+            "serialized_footprint_record_exists": module_id in serialized_ids,
             "has_declared_body_dimensions": body is not None,
             "pad_definition_count": len(pad_data or []),
             "vendor_footprint_authenticated": False,
@@ -59,6 +75,7 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
     status = (
         "missing_module_identity" if missing else
         "synthetic_geometry_present" if fallback else
+        "registry_source_divergence_present" if python_only else
         "curated_geometry_requires_validation"
     )
     actions = []
@@ -66,7 +83,9 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
         actions.append("Identify unsupported module and obtain an authoritative electrical and mechanical data package.")
     if fallback:
         actions.append("Replace synthetic footprint and pad layout with validated manufacturer datasheet or source CAD/footprint.")
-    if explicit:
+    if python_only:
+        actions.append("Reconcile Python-only geometry definitions against the serialized component geometry library and confirm product-path parity.")
+    if explicit or python_only:
         actions.append("Compare curated footprints, pin 1, pinout, dimensions and heights against actual purchased component variants.")
     actions.append("Verify connector mating, mounting holes, assembly clearances and physical test evidence before fabrication.")
     return {
@@ -74,6 +93,8 @@ def assess_build_graph_geometry(graph: Mapping) -> dict:
         "status": status,
         "node_count": len(rows),
         "curated_unverified_count": len(explicit),
+        "python_registry_only_count": len(python_only),
+        "serialized_footprint_registry_count": len(serialized_ids),
         "synthetic_fallback_count": len(fallback),
         "missing_module_count": len(missing),
         "modules": rows,
