@@ -1,0 +1,136 @@
+{
+  "schema": "hardware_splicer.quadratic_structural_screen.v1",
+  "part": "base",
+  "local_refinement": {
+    "hotspot_xy_mm": null,
+    "hotspot_mesh_mm": null
+  },
+  "collar_outer_radius_mm": null,
+  "support_mode": "normal_only",
+  "original_kicad_pcb_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "original_board_step_sha256": "sha256:e3e85d9a7694cdbe1834554ebbf47033cb3398559cbfe86d997c3ae5ac920bbb",
+  "cad_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+  "original_board_interface_z_mm": 0.0,
+  "applied_force_z_n": -1.0,
+  "hypothetical_force_and_material": true,
+  "implemented_with_existing": [
+    "Gmsh",
+    "scikit-fem",
+    "Shapely/GEOS"
+  ],
+  "new_general_purpose_FEM_solver_written": false,
+  "quadratic_P2_surface_exact_integration": true,
+  "mesh_results": [
+    {
+      "part": "base",
+      "mesh_size_mm": 8.0,
+      "num_elements": 8362,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 43857,
+      "integration_patch_area_mm2": 299.981487899573,
+      "screw_clamped_DOF_count": 401,
+      "support_collars_xy_radius_mm": [
+        1.25,
+        1.9
+      ],
+      "support_mode": "normal_only",
+      "source_derived_board_seating_z_mm": 0.0,
+      "modelled_contact_plane_z_mm": 0.0,
+      "applied_total_force_z_n": -1.0,
+      "screw_collar_dof_counts": [
+        294,
+        291,
+        321,
+        288
+      ],
+      "displacement_mm": 0.01954987434195182,
+      "peak_von_mises_mpa": 0.9791846843325773,
+      "volume_integrated_von_mises_rms_mpa": 0.053796897060928286,
+      "quadrature_point_95_percentile_von_mises_mpa": 0.0948416717812247,
+      "peak_quadrature_location_mm": [
+        113.81745537043628,
+        -85.31475376487619,
+        -1.7098154610929632
+      ],
+      "peak_distance_to_nearest_screw_xy_mm": 1.5933498273099174,
+      "outside_4mm_screw_xy_peak_von_mises_mpa": 0.38475646689449117,
+      "outside_4mm_screw_xy_rms_von_mises_mpa": 0.04805597093555305,
+      "root_mean_square_displacement_mm": 0.010912285447576544,
+      "compliance_n_m": 7.971575202485928e-06,
+      "strain_energy_j": 3.985787601242964e-06,
+      "source_lid_or_base_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+      "material_E_pa_assumed": 1500000000.0,
+      "poisson_ratio_assumed": 0.35,
+      "reaction_z_balance_error_n": 5.877520692365579e-13,
+      "hypothetical_force_and_material": true,
+      "release_authorized": false,
+      "elapsed_s": 22.26
+    },
+    {
+      "part": "base",
+      "mesh_size_mm": 6.0,
+      "num_elements": 10685,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 55002,
+      "integration_patch_area_mm2": 299.98148789957366,
+      "screw_clamped_DOF_count": 531,
+      "support_collars_xy_radius_mm": [
+        1.25,
+        1.9
+      ],
+      "support_mode": "normal_only",
+      "source_derived_board_seating_z_mm": 0.0,
+      "modelled_contact_plane_z_mm": 0.0,
+      "applied_total_force_z_n": -1.0,
+      "screw_collar_dof_counts": [
+        384,
+        399,
+        399,
+        402
+      ],
+      "displacement_mm": 0.019086112587445307,
+      "peak_von_mises_mpa": 0.8931681990840499,
+      "volume_integrated_von_mises_rms_mpa": 0.05310249049320803,
+      "quadrature_point_95_percentile_von_mises_mpa": 0.09502322487750527,
+      "peak_quadrature_location_mm": [
+        16.674990652846127,
+        -84.69625486455419,
+        0.7737792746093664
+      ],
+      "peak_distance_to_nearest_screw_xy_mm": 1.423590277091189,
+      "outside_4mm_screw_xy_peak_von_mises_mpa": 0.2867473684516262,
+      "outside_4mm_screw_xy_rms_von_mises_mpa": 0.04754371654895151,
+      "root_mean_square_displacement_mm": 0.01057323007385304,
+      "compliance_n_m": 7.547557490298123e-06,
+      "strain_energy_j": 3.7737787451490613e-06,
+      "source_lid_or_base_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+      "material_E_pa_assumed": 1500000000.0,
+      "poisson_ratio_assumed": 0.35,
+      "reaction_z_balance_error_n": 2.5981439222277913e-12,
+      "hypothetical_force_and_material": true,
+      "release_authorized": false,
+      "elapsed_s": 28.13
+    }
+  ],
+  "mesh_comparisons": [
+    {
+      "coarse_mm": 8.0,
+      "fine_mm": 6.0,
+      "tetra_growth": 1.277804353025592,
+      "maximum_displacement_change": 0.02372198134856205,
+      "rms_volume_stress_change": 0.012907929744234064,
+      "local_peak_stress_change": 0.08784500679476742,
+      "compliance_change": 0.05319120768697959
+    }
+  ],
+  "global_elastic_response_stable_in_tested_window": false,
+  "local_peak_stress_stable_in_tested_window": false,
+  "single_favorable_refinement_window_is_not_release_evidence": true,
+  "real_fastener_preload_modelled": false,
+  "nonlinear_contact_modelled": false,
+  "print_layer_anisotropy_modelled": false,
+  "structural_material_strength_verified": false,
+  "full_product_assembly_3d_fit_verified": false,
+  "fabrication_authorized": false,
+  "operational_safety_verified": false
+}
