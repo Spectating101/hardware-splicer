@@ -76,6 +76,13 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
     sx,sy,sz=stress[0,0],stress[1,1],stress[2,2]
     vm=np.sqrt(.5*((sx-sy)**2+(sy-sz)**2+(sz-sx)**2)+3*(stress[0,1]**2+stress[0,2]**2+stress[1,2]**2))
     vm_rms=float(np.sqrt(np.sum(vm*vm*basis.dx)/np.sum(basis.dx)))
+    # Peak localization uses the same volume quadrature points as the stress
+    # calculation; it does not imply pointwise stress convergence or strength.
+    peak_element,peak_q=np.unravel_index(int(np.argmax(vm)),vm.shape)
+    # Physical coordinates of the selected P2 quadrature point via mapped basis.
+    qp_xyz=mesh.mapping().F(basis.X, tind=np.array([peak_element]))
+    peak_location_mm=(qp_xyz[:,0,peak_q]*1000).tolist()
+    screw_distances_mm=[float(np.hypot(peak_location_mm[0]-v['x'],peak_location_mm[1]-v['y'])) for v in screw]
     vm_q95=float(np.quantile(vm,0.95))
     reactions=(K@U-F)[D]
     z_dofs=set(np.hstack((basis.nodal_dofs[2],basis.edge_dofs[2])).tolist())
@@ -93,6 +100,8 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
             'peak_von_mises_mpa':float(vm.max())/1e6,
             'volume_integrated_von_mises_rms_mpa':vm_rms/1e6,
             'quadrature_point_95_percentile_von_mises_mpa':vm_q95/1e6,
+            'peak_quadrature_location_mm':peak_location_mm,
+            'peak_distance_to_nearest_screw_xy_mm':min(screw_distances_mm),
             'root_mean_square_displacement_mm':float(np.sqrt(np.mean(nodal_disp**2)))*1000,
             'compliance_n_m':float(F@U),
             'strain_energy_j':.5*float(F@U),
