@@ -23,6 +23,12 @@ REQUIRED_LAYERS = (
     "F_Cu", "B_Cu", "F_Mask", "B_Mask", "F_Paste", "B_Paste",
     "F_Silkscreen", "Edge_Cuts",
 )
+# KiCad defaults to industry Protel extensions (GT(L/B), soldermask,
+# silkscreen, G(M)1). Both Protel and .gbr naming are valid Gerber.
+GERBER_EXTENSIONS = (
+    ".gbr", ".ger", ".gtl", ".gbl", ".gtp", ".gbp",
+    ".gto", ".gts", ".gbs", ".gm1",
+)
 
 
 def _digest(blob: bytes) -> str:
@@ -99,7 +105,7 @@ def inspect_spi_native_cam_archive(archive_path: str | Path) -> dict:
         except (ValueError, TypeError, AttributeError):
             errors.append("unparseable native verification receipt")
     gerbers = sorted(name for name in content if name.startswith("manufacturing/")
-                     and name.endswith((".gbr", ".ger")))
+                     and name.lower().endswith(GERBER_EXTENSIONS))
     drills = sorted(name for name in content if name.startswith("manufacturing/")
                     and name.lower().endswith(".drl"))
     missing_layers = [
