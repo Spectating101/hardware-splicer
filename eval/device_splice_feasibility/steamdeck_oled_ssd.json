@@ -1,0 +1,82 @@
+{
+  "schema": "hardware_splicer.device_splice_candidate.v1",
+  "id": "steamdeck_oled_ssd_reference_intake",
+  "context": "Based only on existing HS evaluation leads, not a physically inspected Steam Deck or SSD.",
+  "components": [
+    {
+      "id": "oled_host"
+    },
+    {
+      "id": "replacement_ssd"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ifixit_lead",
+      "basis": "source_document",
+      "locator": "https://www.ifixit.com/Guide/Steam+Deck+OLED+SSD+Replacement/168255"
+    }
+  ],
+  "required_domains": [
+    "power",
+    "signal",
+    "mechanical",
+    "firmware",
+    "thermal",
+    "assembly"
+  ],
+  "interfaces": [
+    {
+      "id": "ssd_form_factor",
+      "domain": "mechanical",
+      "from": "replacement_ssd",
+      "to": "oled_host",
+      "provided": {
+        "form_factor": "m2_2230_single_sided"
+      },
+      "required": {
+        "accepted_form_factors": [
+          "m2_2230_single_sided"
+        ]
+      },
+      "evidence_refs": [
+        "ifixit_lead"
+      ]
+    },
+    {
+      "id": "ssd_signaling",
+      "domain": "signal",
+      "from": "oled_host",
+      "to": "replacement_ssd",
+      "provided": {
+        "protocol": "NVMe"
+      },
+      "required": {},
+      "evidence_refs": [
+        "ifixit_lead"
+      ]
+    },
+    {
+      "id": "ssd_power",
+      "domain": "power",
+      "from": "oled_host",
+      "to": "replacement_ssd",
+      "provided": {},
+      "required": {},
+      "evidence_refs": [
+        "ifixit_lead"
+      ]
+    },
+    {
+      "id": "recovery_software",
+      "domain": "firmware",
+      "from": "oled_host",
+      "to": "replacement_ssd",
+      "provided": {},
+      "required": {},
+      "evidence_refs": [
+        "ifixit_lead"
+      ]
+    }
+  ]
+}
