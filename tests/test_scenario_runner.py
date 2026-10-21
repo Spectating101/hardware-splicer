@@ -87,7 +87,7 @@ def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
     not (FULL_3D_RUNTIME and KICAD_RUNTIME),
     reason="closed pan/tilt STEP authority requires full 3D and KiCad runtimes",
 )
-def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path):
+def test_closed_pan_tilt_scenario_generates_3d_but_preserves_unvalidated_release_gates(tmp_path):
     scenario = load_hardware_scenario(PAN_TILT_SCENARIO)
 
     result = run_hardware_scenario(scenario, out_dir=tmp_path / "pan-tilt", start_splicer=True, request_id="scenario-pan-tilt")
@@ -99,16 +99,22 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     step_report = json.loads(Path(result["artifacts"]["kicad_step_assembly_report"]).read_text(encoding="utf-8"))
     step_placement = json.loads(Path(result["artifacts"]["kicad_step_placement"]).read_text(encoding="utf-8"))
 
+    # CAD generation is substantial but does NOT prove measured fixture
+    # stiffness, load-bearing contact, or integrated hardware bench release.
+    # The scenario's aspirational production target must stay *blocked*.
     assert result["compile_ok"] is True
-    assert result["ok"] is True
-    assert authority["claimable"] is True
-    assert authority["project_authority_level"] == "production_ready_project_package"
-    assert authority["dashboard"]["simulation_ready"] is True
-    assert authority["dashboard"]["robotics_project_release"] is True
-    assert authority["dashboard"]["hardware_splicer_release"] is True
-    assert authority["blockers"] == []
-    assert metrics["production_ready"] is True
-    assert metrics["gates_passed"] == metrics["gates_total"] == 9
+    assert result["ok"] is False
+    assert authority["claimable"] is False
+    assert authority["project_authority_level"] != "production_ready_project_package"
+    assert authority["dashboard"]["simulation_ready"] is False
+    assert authority["dashboard"]["robotics_project_release"] is False
+    assert authority["dashboard"]["hardware_splicer_release"] is False
+    assert authority["blockers"]
+    assert metrics["production_ready"] is False
+    assert 0 < metrics["gates_passed"] < metrics["gates_total"] == 9
+    assert "mechanical_release" in metrics["evidence_gap_ids"]
+    assert "integrated_bench" in metrics["evidence_gap_ids"]
+    assert metrics["what_blocks_production"]
     assert Path(result["artifacts"]["splicer3d_script"]).exists()
     assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
     assert Path(result["artifacts"]["kicad_step_assembly_model"]).exists()
