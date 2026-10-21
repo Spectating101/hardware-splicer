@@ -103,6 +103,15 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
     qp_xyz=mesh.mapping().F(basis.X, tind=np.array([peak_element]))
     peak_location_mm=(qp_xyz[:,0,peak_q]*1000).tolist()
     screw_distances_mm=[float(np.hypot(peak_location_mm[0]-v['x'],peak_location_mm[1]-v['y'])) for v in screw]
+    # Split local support singularities from the rest of the part without
+    # replacing the global maximum, which remains in every report.
+    qp_all_mm=mesh.mapping().F(basis.X)*1000
+    nearest_screw_xy=np.minimum.reduce([np.hypot(qp_all_mm[0]-v['x'],qp_all_mm[1]-v['y']) for v in screw])
+    away_mask=nearest_screw_xy>=4.0
+    if not np.any(away_mask):
+        raise ValueError('no stress quadrature outside screw-neighborhood exclusion')
+    away_peak=float(vm[away_mask].max())/1e6
+    away_rms=float(np.sqrt(np.sum(vm[away_mask]**2*basis.dx[away_mask])/np.sum(basis.dx[away_mask])))/1e6
     vm_q95=float(np.quantile(vm,0.95))
     reactions=(K@U-F)[D]
     z_dofs=set(np.hstack((basis.nodal_dofs[2],basis.edge_dofs[2])).tolist())
@@ -124,6 +133,8 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
             'quadrature_point_95_percentile_von_mises_mpa':vm_q95/1e6,
             'peak_quadrature_location_mm':peak_location_mm,
             'peak_distance_to_nearest_screw_xy_mm':min(screw_distances_mm),
+            'outside_4mm_screw_xy_peak_von_mises_mpa':away_peak,
+            'outside_4mm_screw_xy_rms_von_mises_mpa':away_rms,
             'root_mean_square_displacement_mm':float(np.sqrt(np.mean(nodal_disp**2)))*1000,
             'compliance_n_m':float(F@U),
             'strain_energy_j':.5*float(F@U),
