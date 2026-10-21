@@ -13,7 +13,7 @@ from skfem.models.elasticity import lame_parameters,linear_elasticity
 from screen_cyberdeck_open_source_fem import mesh_existing_gmsh
 from hs_exact_p2_traction import exact_planar_traction
 
-def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0):
+def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0,hotspot_xy_mm=None,hotspot_mesh_mm=None):
     begin=time.monotonic()
     if part not in ('lid','base') or not all(math.isfinite(x) for x in (size,E,nu,force_magnitude_n)):
         raise ValueError('unsupported part or nonfinite FEM input')
@@ -26,7 +26,7 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
         raise ValueError('source STEP hash differs from original report')
     if report['source_board_sha256'] != outline['source_sha256']:
         raise ValueError('original PCB source hash differs')
-    gm=mesh_existing_gmsh(cad,size)
+    gm=mesh_existing_gmsh(cad,size,hotspot_xy_mm=hotspot_xy_mm,hotspot_mesh_mm=hotspot_mesh_mm)
     mesh=MeshTet(gm['nodes_m'].T,gm['elements'].T)
     xyz=mesh.p
     surface=mesh.facets
@@ -117,6 +117,8 @@ if __name__=='__main__':
     a.add_argument('original_board_step',type=Path)
     a.add_argument('--part',choices=['lid','base'],required=True)
     a.add_argument('--sizes',type=float,nargs='+',default=[10,8,6])
+    a.add_argument('--hotspot-xy-mm',type=float,nargs=2,default=None)
+    a.add_argument('--hotspot-mesh-mm',type=float,default=None)
     a.add_argument('--force-n',type=float,default=1.0)
     a.add_argument('--E-pa',type=float,default=1.5e9)
     a.add_argument('--poisson',type=float,default=.35)
@@ -129,7 +131,8 @@ if __name__=='__main__':
     rows=[]
     for size in o.sizes:
         row=inspect(o.part,size,folder,geometry,o.original_board_step,
-                    E=o.E_pa,nu=o.poisson,force_magnitude_n=o.force_n)
+                    E=o.E_pa,nu=o.poisson,force_magnitude_n=o.force_n,
+                    hotspot_xy_mm=o.hotspot_xy_mm,hotspot_mesh_mm=o.hotspot_mesh_mm)
         rows.append(row)
         print('QUADRATIC_FEM',o.part,size,'tetra',row['num_elements'],
               'displacement_mm',round(row['displacement_mm'],7),
@@ -150,7 +153,8 @@ if __name__=='__main__':
     peak_stable=all(c['local_peak_stress_change']<=.05 for c in comparisons)
     payload={
        'schema':'hardware_splicer.quadratic_structural_screen.v1',
-       'part':o.part,'original_kicad_pcb_sha256':geometry['source_sha256'],
+       'part':o.part,'local_refinement':{'hotspot_xy_mm':o.hotspot_xy_mm,'hotspot_mesh_mm':o.hotspot_mesh_mm},
+       'original_kicad_pcb_sha256':geometry['source_sha256'],
        'original_board_step_sha256':'sha256:'+hashlib.sha256(o.original_board_step.read_bytes()).hexdigest(),
        'cad_step_sha256':rows[0]['source_lid_or_base_step_sha256'],
        'original_board_interface_z_mm':rows[0]['source_derived_board_seating_z_mm'],

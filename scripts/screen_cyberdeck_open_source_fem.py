@@ -27,7 +27,7 @@ from hardware_splicer.mechanical_fem import solve_linear_tetra_fem
 def sha(path:Path)->str:return 'sha256:'+hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def mesh_existing_gmsh(step:Path,mesh_size_mm:float)->dict:
+def mesh_existing_gmsh(step:Path,mesh_size_mm:float,*,hotspot_xy_mm=None,hotspot_mesh_mm=None)->dict:
     if not 1.0 <= mesh_size_mm <= 30:raise ValueError('bounded mesh target required')
     gmsh.initialize()
     try:
@@ -37,9 +37,28 @@ def mesh_existing_gmsh(step:Path,mesh_size_mm:float)->dict:
         importeds=gmsh.model.occ.importShapes(str(step))
         gmsh.model.occ.synchronize()
         if len(gmsh.model.getEntities(3))!=1:raise ValueError('source CAD must contain exactly one solid')
-        gmsh.option.setNumber('Mesh.MeshSizeMin',mesh_size_mm)
+        gmsh.option.setNumber('Mesh.MeshSizeMin',hotspot_mesh_mm if hotspot_xy_mm is not None and hotspot_mesh_mm is not None else mesh_size_mm)
         gmsh.option.setNumber('Mesh.MeshSizeMax',mesh_size_mm)
         gmsh.option.setNumber('Mesh.ElementOrder',1)
+        if hotspot_xy_mm is not None:
+            if (hotspot_mesh_mm is None or not 0.5 <= hotspot_mesh_mm < mesh_size_mm
+                    or len(hotspot_xy_mm) != 2 or not all(math.isfinite(v) for v in hotspot_xy_mm)):
+                raise ValueError('invalid bounded local hotspot mesh parameters')
+            # A point-distance field avoids altering the hash-bound STEP solid.
+            # Refinement is local to the suspected screw-collar hotspot.
+            bb=gmsh.model.getBoundingBox(3,gmsh.model.getEntities(3)[0][1])
+            zmid=(bb[2]+bb[5])/2
+            point=gmsh.model.geo.addPoint(float(hotspot_xy_mm[0]),float(hotspot_xy_mm[1]),zmid)
+            gmsh.model.geo.synchronize()
+            dist=gmsh.model.mesh.field.add('Distance')
+            gmsh.model.mesh.field.setNumbers(dist,'PointsList',[point])
+            threshold=gmsh.model.mesh.field.add('Threshold')
+            for key,val in [('InField',dist),('SizeMin',hotspot_mesh_mm),
+                            ('SizeMax',mesh_size_mm),('DistMin',2.),('DistMax',9.)]:
+                gmsh.model.mesh.field.setNumber(threshold,key,val)
+            gmsh.model.mesh.field.setAsBackgroundMesh(threshold)
+            gmsh.option.setNumber('Mesh.MeshSizeFromPoints',0)
+            gmsh.option.setNumber('Mesh.MeshSizeFromCurvature',0)
         gmsh.model.mesh.generate(3)
         tags,xyz,_=gmsh.model.mesh.getNodes()
         types,_,connect=gmsh.model.mesh.getElements(dim=3)
