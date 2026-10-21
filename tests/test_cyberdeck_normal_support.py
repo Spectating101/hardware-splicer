@@ -23,3 +23,11 @@ def test_short_base_window_does_not_override_global_release_block():
     assert trial['local_peak_stress_stable_in_tested_window'] is True
     assert trial['single_favorable_refinement_window_is_not_release_evidence'] is True
     assert trial['fabrication_authorized'] is False
+
+def test_refined_base_invalidates_short_window_peak_convergence():
+    d=json.loads((P/'P2_BASE_NORMAL_ONLY_REFINEMENT_8_6_4.json').read_text())
+    assert [r['mesh_size_mm'] for r in d['mesh_results']]==[8.0,6.0,4.0]
+    assert d['local_peak_stress_stable_in_tested_window'] is False
+    assert d['global_elastic_response_stable_in_tested_window'] is False
+    assert d['fabrication_authorized'] is False
+    assert all(x['reaction_z_balance_error_n']<1e-8 for x in d['mesh_results'])
