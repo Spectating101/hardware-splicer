@@ -47,6 +47,7 @@ def _result(tmp_path, *, compile_ok=True, claimable=False,
             "schema_version":"hardware_splicer.project_authority.v1",
             "claimable":claimable,
             "project_authority_level":level,
+            "blockers":[] if claimable else ["Mechanical release unverified"],
             "production_release_metrics":{"production_ready":production_ready,
                 "schema_version":"hardware_splicer.production_release_metrics.v1",
                 "gates_passed":passed,"gates_total":total,"evidence_gap_ids":gaps},
@@ -157,3 +158,20 @@ def test_schema_mismatch_cannot_pass(harness,tmp_path):
     ok,detail=harness._scenario_passes(Path('rover_project.json'),path,_proc(1))
     assert not ok
     assert 'schema' in detail
+
+
+def test_claimed_production_ready_but_unpassed_gates_must_fail(harness,tmp_path):
+    path=_result(tmp_path,claimable=True,production_ready=True,passed=7,total=9)
+    ok,detail=harness._scenario_passes(Path('alleged_ready.json'),path,_proc(0))
+    assert not ok
+    assert 'inconsistent release evidence' in detail
+
+
+def test_malformed_nested_metrics_cannot_pass(harness,tmp_path):
+    path=_result(tmp_path)
+    body=json.loads(path.read_text())
+    body['project_authority']['production_release_metrics']=['malformed']
+    path.write_text(json.dumps(body))
+    ok,detail=harness._scenario_passes(Path('rover.json'),path,_proc(1))
+    assert not ok
+    assert 'malformed mirrored' in detail

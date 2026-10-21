@@ -163,14 +163,13 @@ def _scenario_passes(scenario_path: Path, result_path: Path, proc: subprocess.Co
     if not compile_ok:
         return False, prefix + "; compilation failed"
 
-    if claimable and production_ready and scenario_ok and proc.returncode == 0 and not negative:
-        return True, prefix + "; outcome=production_authorized"
-
+    mirrored_metrics = authority.get("production_release_metrics") or {}
+    if not isinstance(mirrored_metrics, dict):
+        return False, prefix + "; malformed mirrored project authority metrics"
     gaps = metrics.get("evidence_gap_ids")
     blockers = metrics.get("what_blocks_production")
     passed = metrics.get("gates_passed")
     total = metrics.get("gates_total")
-    mirrored_metrics = authority.get("production_release_metrics") or {}
     mirrored = mirrored_metrics.get("production_ready")
     mirrors_agree = (
         mirrored_metrics.get("schema_version") == metrics.get("schema_version")
@@ -179,6 +178,16 @@ def _scenario_passes(scenario_path: Path, result_path: Path, proc: subprocess.Co
         and mirrored_metrics.get("evidence_gap_ids") == gaps
     )
     release_level = authority.get("project_authority_level")
+    authorized_consistently = (
+        claimable and production_ready and scenario_ok and proc.returncode == 0 and not negative
+        and type(passed) is int and type(total) is int and total > 0 and passed == total
+        and gaps == [] and (metrics.get("what_blocks_production") or []) == []
+        and mirrored is True and mirrors_agree
+        and release_level == "production_ready_project_package"
+        and authority.get("blockers") == []
+    )
+    if authorized_consistently:
+        return True, prefix + f"; outcome=production_authorized gates={passed}/{total}"
     blocked_consistently = (
         not claimable and not production_ready and not scenario_ok
         and isinstance(gaps, list) and bool(gaps)
