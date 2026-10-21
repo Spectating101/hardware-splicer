@@ -85,3 +85,11 @@ def test_invalid_input_fails_closed(change):
     change(candidate)
     with pytest.raises(ValueError):
         assess_device_splice(candidate)
+
+def test_missing_power_evidence_does_not_crash_shared_rail_accounting():
+    case = load("controller_display_demo.json")
+    case["interfaces"][0].pop("evidence_refs")
+    case["interfaces"][2].pop("evidence_refs")
+    report = assess_device_splice(case)
+    assert report["overall_status"] == "unknown"
+    assert not report["fabrication_authorized"]
