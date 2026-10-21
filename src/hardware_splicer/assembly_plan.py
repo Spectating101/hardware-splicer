@@ -427,11 +427,19 @@ def _step_text(kind: str, side: str, parts: list[dict[str, Any]]) -> tuple[str, 
     noun = one if count == 1 else many
     where = "on the front" if side == "front" else "on the back"
     if kind == "mounting_hole":
-        title = f"Fit the {count} mounting {'hole' if count == 1 else 'holes'}: {refs}"
-        text = f"Fit mounting hardware at {refs}. Use hardware that matches the hole size on the drawing."
+        title = f"Inspect the {count} mounting {'hole' if count == 1 else 'holes'}: {refs}"
+        text = (
+            f"Confirm board-hole positions, diameters and enclosure alignment at {refs}. "
+            "A hole is board geometry, not a part to solder. "
+            "Specify and verify any separate fasteners in the mechanical BOM before fitting them."
+        )
     elif kind == "testpoint":
-        title = f"Add {count} test {'point' if count == 1 else 'points'}: {refs}"
-        text = f"Solder the {count} test {'point' if count == 1 else 'points'} {refs} {where}. They stay unconnected to anything else."
+        title = f"Inspect the {count} test {'point' if count == 1 else 'points'}: {refs}"
+        text = (
+            f"Identify {refs} {where} and verify accessible pad locations and net labels. "
+            "Bare copper test pads are fabricated with the PCB, not components to solder. "
+            "If a test loop or socket is specified, separately verify its part identity and assembly BOM."
+        )
     elif kind == "connector":
         title = f"Solder the {label}{noun} {refs}" if count == 1 else f"Solder {count} {label}{noun}: {refs}"
         text = f"Seat {refs} flat against the board {where}, then solder every pin. Pin 1 is marked on the drawing."
@@ -631,6 +639,16 @@ def build_assembly_plan(pcb_text: str, *, pcb_sha256: str | None = None) -> dict
         "steps": steps,
         "not_fitted": not_fitted,
         "connections": _connections(fitted),
-        "counts": {"parts": len(public), "fitted": len(fitted), "steps": len(steps)},
+        "counts": {
+            "parts": len(public),
+            "fitted": len(fitted),  # Historical non-DNP footprint count, including PCB features.
+            "steps": len(steps),
+            "physical_component_candidate_footprints": sum(
+                not p["do_not_populate"] and p["kind"] not in {"testpoint", "mounting_hole"}
+                for p in public
+            ),
+            "testpoint_footprints": sum(p["kind"] == "testpoint" for p in public),
+            "mounting_hole_footprints": sum(p["kind"] == "mounting_hole" for p in public),
+        },
         "warnings": warnings,
     }
