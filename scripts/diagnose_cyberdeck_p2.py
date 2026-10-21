@@ -13,7 +13,7 @@ from skfem.models.elasticity import lame_parameters,linear_elasticity
 from screen_cyberdeck_open_source_fem import mesh_existing_gmsh
 from hs_exact_p2_traction import exact_planar_traction
 
-def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0,hotspot_xy_mm=None,hotspot_mesh_mm=None):
+def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,force_magnitude_n=1.0,hotspot_xy_mm=None,hotspot_mesh_mm=None,collar_outer_radius_mm=None):
     begin=time.monotonic()
     if part not in ('lid','base') or not all(math.isfinite(x) for x in (size,E,nu,force_magnitude_n)):
         raise ValueError('unsupported part or nonfinite FEM input')
@@ -53,6 +53,10 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
     quad_area=contact['clipped_lip_area_mm2']*1e-6
     screw=report['external_lid_screw_centres_mm']
     radius=(1.55,2.10) if part=='lid' else (1.25,1.90)
+    if collar_outer_radius_mm is not None:
+        if not (radius[0]+0.15 <= collar_outer_radius_mm <= radius[1]+1.0):
+            raise ValueError('alternative collar outer radius outside bounded study')
+        radius=(radius[0],collar_outer_radius_mm)
     keep=[];counts=[]
     for v in screw:
         radial=np.hypot(basis.doflocs[0]*1000-v['x'],basis.doflocs[1]*1000-v['y'])
@@ -93,6 +97,7 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
             'scalar_polynomial_degree':2,'displacement_dof_count':int(basis.N),
             'integration_patch_area_mm2':quad_area*1e6,
             'screw_clamped_DOF_count':len(D),
+            'support_collars_xy_radius_mm':list(radius),
             'source_derived_board_seating_z_mm':board_box.zmin,
             'modelled_contact_plane_z_mm':zplane*1000,
             'applied_total_force_z_n':requested_load_z,'screw_collar_dof_counts':counts,
@@ -118,6 +123,7 @@ if __name__=='__main__':
     a.add_argument('--part',choices=['lid','base'],required=True)
     a.add_argument('--sizes',type=float,nargs='+',default=[10,8,6])
     a.add_argument('--hotspot-xy-mm',type=float,nargs=2,default=None)
+    a.add_argument('--collar-outer-radius-mm',type=float,default=None)
     a.add_argument('--hotspot-mesh-mm',type=float,default=None)
     a.add_argument('--force-n',type=float,default=1.0)
     a.add_argument('--E-pa',type=float,default=1.5e9)
@@ -132,7 +138,8 @@ if __name__=='__main__':
     for size in o.sizes:
         row=inspect(o.part,size,folder,geometry,o.original_board_step,
                     E=o.E_pa,nu=o.poisson,force_magnitude_n=o.force_n,
-                    hotspot_xy_mm=o.hotspot_xy_mm,hotspot_mesh_mm=o.hotspot_mesh_mm)
+                    hotspot_xy_mm=o.hotspot_xy_mm,hotspot_mesh_mm=o.hotspot_mesh_mm,
+                    collar_outer_radius_mm=o.collar_outer_radius_mm)
         rows.append(row)
         print('QUADRATIC_FEM',o.part,size,'tetra',row['num_elements'],
               'displacement_mm',round(row['displacement_mm'],7),
@@ -154,6 +161,7 @@ if __name__=='__main__':
     payload={
        'schema':'hardware_splicer.quadratic_structural_screen.v1',
        'part':o.part,'local_refinement':{'hotspot_xy_mm':o.hotspot_xy_mm,'hotspot_mesh_mm':o.hotspot_mesh_mm},
+       'collar_outer_radius_mm':o.collar_outer_radius_mm,
        'original_kicad_pcb_sha256':geometry['source_sha256'],
        'original_board_step_sha256':'sha256:'+hashlib.sha256(o.original_board_step.read_bytes()).hexdigest(),
        'cad_step_sha256':rows[0]['source_lid_or_base_step_sha256'],
