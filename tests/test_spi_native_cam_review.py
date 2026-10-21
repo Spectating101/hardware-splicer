@@ -19,9 +19,9 @@ def _make_archive(path: Path, changes=None, *, missing=()):
     smt_refs = ["C1", "C2", "C3", "C4", "C5", "C6",
                 "R2", "R3", "R5", "R6", "R7", "U1", "U2", "U3"]
     files["BOM.csv"] = (
-        "References,Initial Assembly\\n"
-        + " ".join(smt_refs) + ",FIT\\n"
-        + "J1 JP1,FIT\\nR1 R4,DNP\\n"
+        "References,Initial Assembly\n"
+        + " ".join(smt_refs) + ",FIT\n"
+        + "J1 JP1,FIT\nR1 R4,DNP\n"
     ).encode()
     receipt = {
         "result": "pass",
@@ -43,8 +43,8 @@ def _make_archive(path: Path, changes=None, *, missing=()):
     files["manufacturing/spi_flash_adapter_v1-PTH.drl"] = b"M48\nM30\n"
     files["manufacturing/spi_flash_adapter_v1-NPTH.drl"] = b"M48\nM30\n"
     files["manufacturing/spi_flash_adapter_v1-positions.csv"] = (
-        "Ref,Val,X,Y,Side\\n"
-        + "".join(f"{ref},component,1,2,top\\n" for ref in smt_refs)
+        "Ref,Val,X,Y,Side\n"
+        + "".join(f"{ref},component,1,2,top\n" for ref in smt_refs)
     ).encode()
     files["review/spi_flash_adapter_v1-schematic.pdf"] = b"%PDF-1.5 synthetic"
     files["review/spi_flash_adapter_v1-front-assembly.pdf"] = b"%PDF-1.5 synthetic"
@@ -141,7 +141,7 @@ def test_native_protel_gerber_extension_naming_is_accepted(tmp_path):
         "F_Silkscreen": "gto", "Edge_Cuts": "gm1",
     }
     extra = {f"manufacturing/spi_flash_adapter_v1-{name}.{ext}":
-             b"%FSLAX46Y46*%\\nM02*\\n"
+             b"%FSLAX46Y46*%\nM02*\n"
              for name, ext in extensions.items()}
     missing = [f"manufacturing/spi_flash_adapter_v1-{name}.gbr" for name in extensions]
     result = inspect_spi_native_cam_archive(_make_archive(
@@ -151,8 +151,8 @@ def test_native_protel_gerber_extension_naming_is_accepted(tmp_path):
 
 
 def test_incomplete_surface_mount_placement_is_rejected(tmp_path):
-    raw = "Ref,Val,X,Y,Side\\n" + "".join(
-        f"{ref},component,1,2,top\\n" for ref in
+    raw = "Ref,Val,X,Y,Side\n" + "".join(
+        f"{ref},component,1,2,top\n" for ref in
         ["C1", "C2", "C3", "C4", "C5", "C6",
          "R2", "R3", "R5", "R6", "R7", "U1", "U2"]
     )
