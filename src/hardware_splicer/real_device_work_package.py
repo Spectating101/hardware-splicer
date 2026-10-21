@@ -10,7 +10,8 @@ from typing import Any, Mapping
 
 def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                          *, planner: Mapping[str, Any] | None = None,
-                         reverse_engineering: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                         reverse_engineering: Mapping[str, Any] | None = None,
+                         splice_candidate: Mapping[str, Any] | None = None) -> dict[str, Any]:
     model = dict(review.get('operator_casefile') or review)
     plan = dict(planner or {})
     requirements = [
@@ -55,6 +56,31 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                           'instruction':'Review REA static findings against PCB observations and physical interfaces; validate candidate behavior on an isolated bench.',
                           'status':'proposed_not_executed',
                           'evidence_refs':[str(investigation.get('rea_evidence_id') or investigation.get('artifact_sha256'))]})
+    splice_report = None
+    if splice_candidate is not None:
+        from .device_splice_feasibility import assess_device_splice
+        splice_report = assess_device_splice(splice_candidate)
+        for work in splice_report["required_actions"]:
+            tasks.append({
+                "id": f"step-{len(tasks)+1:02d}",
+                "instruction": work["action"],
+                "status": "proposed_not_executed",
+                "evidence_refs": [],
+                "interface_id": work["interface_id"],
+            })
+            unknowns.append({
+                "id": f"gap-{len(unknowns)+1:02d}",
+                "description": work["reason"] or work["action"],
+                "status": "open",
+                "resolution_evidence": None,
+                "interface_id": work["interface_id"],
+            })
+        safety_gates.append({
+            "id": f"gate-{len(safety_gates)+1:02d}",
+            "criterion": "Independently verify all donor specifications, electrical wiring, actual 3D fit, and isolated bench operation before build authorization.",
+            "status": "not_accepted",
+            "evidence_refs": [],
+        })
     candidate = plan.get('recommended_build_id')
     approved = set(case.get('approved_catalog_build_ids', []))
     return {
@@ -70,6 +96,7 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                                 'evidence_id':investigation.get('rea_evidence_id'),
                                 'source_sha256':investigation.get('artifact_sha256') or investigation.get('input_tree_sha256'),
                                 'behavior_physically_verified':False},
+        'device_splice_feasibility': splice_report,
         'requirements': requirements, 'work_steps': tasks,
         'critical_unknowns': unknowns, 'acceptance_gates': safety_gates,
         'required_parts': [{'requirement': str(item), 'verified_part_number': None,
