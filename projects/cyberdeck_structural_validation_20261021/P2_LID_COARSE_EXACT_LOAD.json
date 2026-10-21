@@ -1,0 +1,74 @@
+{
+  "results": [
+    {
+      "part": "lid",
+      "mesh_size_mm": 10.0,
+      "num_elements": 3422,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 19452,
+      "integration_patch_area_mm2": 297.2814878995727,
+      "screw_clamped_DOF_count": 618,
+      "screw_collar_dof_counts": [
+        156,
+        156,
+        150,
+        156
+      ],
+      "displacement_mm": 0.07901863227570195,
+      "peak_von_mises_mpa": 1.7862412144668685,
+      "root_mean_square_displacement_mm": 0.03958221390978561,
+      "compliance_n_m": 2.7896974218221562e-05,
+      "reaction_z_balance_error_n": 7.607248164731573e-12,
+      "hypothetical_1N_load": true,
+      "release_authorized": false,
+      "elapsed_s": 4.1
+    },
+    {
+      "part": "lid",
+      "mesh_size_mm": 8.0,
+      "num_elements": 3754,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 21930,
+      "integration_patch_area_mm2": 297.28148789957214,
+      "screw_clamped_DOF_count": 645,
+      "screw_collar_dof_counts": [
+        156,
+        153,
+        165,
+        171
+      ],
+      "displacement_mm": 0.08047871317412378,
+      "peak_von_mises_mpa": 1.41813733358107,
+      "root_mean_square_displacement_mm": 0.04010356703110706,
+      "compliance_n_m": 2.8587527571385432e-05,
+      "reaction_z_balance_error_n": 5.292433158388121e-12,
+      "hypothetical_1N_load": true,
+      "release_authorized": false,
+      "elapsed_s": 3.69
+    },
+    {
+      "part": "lid",
+      "mesh_size_mm": 6.0,
+      "num_elements": 8281,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 42894,
+      "integration_patch_area_mm2": 297.2814878995727,
+      "screw_clamped_DOF_count": 711,
+      "screw_collar_dof_counts": [
+        165,
+        153,
+        192,
+        201
+      ],
+      "displacement_mm": 0.08281367748289079,
+      "peak_von_mises_mpa": 1.723408860717552,
+      "root_mean_square_displacement_mm": 0.04326878168674777,
+      "compliance_n_m": 2.9456285553958907e-05,
+      "reaction_z_balance_error_n": 5.543565606558332e-12,
+      "hypothetical_1N_load": true,
+      "release_authorized": false,
+      "elapsed_s": 17.82
+    }
+  ],
+  "structural_validated": false
+}

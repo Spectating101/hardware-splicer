@@ -4,6 +4,59 @@
 structural-validation *research study*, **not** a real load rating, a validated
 manufactured device, or a recommendation to fabricate/use a loaded cyberdeck.
 
+## Numerical repair — quadratic tetrahedra and exact traction (same day)
+
+The preceding first-order (P1) pilot *correctly* rejected mesh-independent
+structural approval. We subsequently identified and corrected two numerical
+issues **without replacing the existing open-source solver**:
+
+1. The first-order tetrahedral displacement approximation is too stiff for
+   much of this thin-retaining-shell bending problem. Existing scikit-fem
+   `ElementTetP2` quadratic interpolation yields substantially different and
+   more stable **global deformation** results. The new code reuses scikit-fem;
+   it is not a new element stiffness or material solver.
+2. The earlier pressure load selected whole mesh facet area based on clipped
+   geometry but assigned every facet's clipped area equally to its corner
+   nodes. For the quadratic formulation, we now use Shapely/GEOS to clip each
+   actual CAD face with the original KiCad board contour, integrate P2 shape
+   polynomials **exactly** over the clipped planar polygon, and distribute
+   the resulting forces to original tetra vertices and edge DOFs. The nominal
+   load patch is **identical between tested meshes**, and total applied force
+   balances the support reactions.
+
+The base's loading plane was independently audited and set explicitly to the
+**original PCB's lower face at Z=0 mm**, with 1 N pointing **down**. The lid
+is loaded 1 N **up** on its lower retaining-lip surface. Earlier exploratory
+base load cases acting on the outside bottom wall are **not evidence for the
+PCB seating interface**.
+
+Under **hypothetical E=1.5 GPa, Poisson=0.35, total absolute load=1 N, and
+fully fixed external screw collars**:
+
+| Measured software output | Base (10 / 8 / 6 mm target) | Lid (4 / 3 mm target) |
+| --- | ---: | ---: |
+| Maximum displacement | 0.01434 / 0.01420 / 0.01434 mm | 0.08315 / 0.08269 mm |
+| Volume RMS von Mises | 0.0467 / 0.0467 / 0.0470 MPa | 0.1536 / 0.1532 MPa |
+| Peak element/quadrature stress | 0.550 / 0.531 / 0.480 MPa | 1.413 / 1.434 MPa |
+| Planar source contact patch | 299.9815 mm² throughout | 297.2815 mm² throughout |
+| Global deformation spread | about **0.99%** | about **0.54%** |
+
+The displacement outputs are **not** a rated maximum load or verified
+structural stiffness. Local peak stress on the base remains noticeably
+sensitive to meshing; there is no measured material strength, physical bolt
+preload, true nonlinear board contact, thermal/creep test or complete 3D
+component-population fit. We do NOT report structural safety as passed.
+
+See [`P2_CORRECT_LOAD_VALIDATION.json`](./P2_CORRECT_LOAD_VALIDATION.json),
+[`P2_BASE_CORRECT_PCB_SEAT.json`](./P2_BASE_CORRECT_PCB_SEAT.json), and
+[`P2_LID_FINE_EXACT_LOAD.json`](./P2_LID_FINE_EXACT_LOAD.json). The standalone
+runner is [`scripts/diagnose_cyberdeck_p2.py`](../../scripts/diagnose_cyberdeck_p2.py)
+and uses `scripts/hs_exact_p2_traction.py`. A checkable regression suite is
+`tests/test_hs_exact_quadratic_cad_traction.py`.
+
+**Classification: Improved, internally checked virtual linear-elastic
+screening. Real-world structural qualification remains BLOCKED.**
+
 ## What was actually tested
 
 We reused three established open-source projects instead of writing another
