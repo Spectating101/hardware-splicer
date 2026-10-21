@@ -1,0 +1,378 @@
+{
+  "status": "generated_collision_screened_edge_retention_candidate",
+  "registered_source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "derived_source_board_step_sha256": "sha256:739823a49f519a395ae20b2aa5002ab49defea73f17393d08de8987bafd0d135",
+  "source_outline_vertex_count": 33,
+  "source_contour_contains_tessellated_arc": true,
+  "source_step_y_axis_flipped_from_kicad_mm": true,
+  "nominal_board_bbox_step_mm": {
+    "xmin": 20.0,
+    "xmax": 110.9,
+    "ymin": -81.0,
+    "ymax": -19.7,
+    "thickness": 1.51
+  },
+  "candidate_type": "two_piece_exterior_screw_closed_edge_capture",
+  "external_lid_screw_centres_mm": [
+    {
+      "x": 15.5,
+      "y": -85.5
+    },
+    {
+      "x": 15.5,
+      "y": -15.2
+    },
+    {
+      "x": 115.4,
+      "y": -85.5
+    },
+    {
+      "x": 115.4,
+      "y": -15.2
+    }
+  ],
+  "enclosure_outer_mm": {
+    "x": 106.9,
+    "y": 77.3,
+    "z": 6.46
+  },
+  "nominal_design_parameters": {
+    "board_pocket_xy_gap_mm": 0.85,
+    "edge_capture_overlap_nominal_mm": 1.2,
+    "outer_perimeter_margin_mm": 8.0,
+    "board_top_z_freedom_mm": 0.25,
+    "bottom_support_height_mm": 2.5,
+    "lid_ring_height_mm": 2.2,
+    "external_screw_offset_from_board_AABB_mm": 4.5,
+    "base_pilot_hole_diameter_mm": 2.7,
+    "lid_clearance_hole_diameter_mm": 3.3
+  },
+  "geometric_clearance_checks": {
+    "original_board_to_base_overlap_mm3": 0.0,
+    "original_board_to_lid_overlap_mm3": 0.0,
+    "base_to_lid_overlap_mm3": 0.0,
+    "board_only_zero_interference_pass": true,
+    "all_four_screw_centres_outside_board_AABB": true,
+    "source_pad_keepout_count": 23,
+    "uncorrected_pad_keepout_overlap_mm3": 42.5469,
+    "corrected_pad_keepout_overlap_mm3": 0.0,
+    "source_pad_projection_no_lip_overlap_pass": true,
+    "source_trace_via_count_checked": 456,
+    "source_pcb_copper_zone_count": 0,
+    "source_trace_via_lip_risk_count": 7,
+    "initial_track_keepout_overlap_mm3": 29.4863,
+    "corrected_track_keepout_overlap_mm3": 0.0,
+    "source_tracks_and_vias_projected_keepouts_pass": true,
+    "pcb_component_models_included": false,
+    "fastener_clamping_tested": false
+  },
+  "component_model_clearance": {
+    "status": "source_model_partial_assembly_screen_passed",
+    "official_model_repository": "https://github.com/KiCad/kicad-packages3D",
+    "official_model_repository_commit": "b8b3cfdfad88ba66f21002b3de51dc6f7d55ba5a",
+    "resolved_component_models": 7,
+    "original_source_model_reference_total": 11,
+    "unresolved_component_fits": [
+      {
+        "reference": "J2",
+        "declared_path": "Connector_FFC-FPC.3dshapes/Omron_XF2M-4015-1A-1MP_P0.5mm_Horizontal.wrl",
+        "reason": "exact_original_model_not_available_in_verified_official_cache"
+      },
+      {
+        "reference": "J1",
+        "declared_path": "Connector_FFC-FPC.3dshapes/Omron_XF2M-4015-1A-1MP_P0.5mm_Horizontal.wrl",
+        "reason": "exact_original_model_not_available_in_verified_official_cache"
+      },
+      {
+        "reference": "J12",
+        "declared_path": "Connector_JST.3dshapes/JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal.wrl",
+        "reason": "exact_original_model_not_available_in_verified_official_cache"
+      },
+      {
+        "reference": "Q1",
+        "declared_path": "Package_TO_SOT_THT.3dshapes/TO-247-3_Horizontal_TabDown.wrl",
+        "reason": "exact_original_model_not_available_in_verified_official_cache"
+      }
+    ],
+    "footprints_without_original_source_model": [
+      "J16",
+      "J19",
+      "J9",
+      "J18",
+      "J11",
+      "J15",
+      "J6",
+      "J13",
+      "J10",
+      "J3",
+      "J5",
+      "J8",
+      "J4",
+      "J14",
+      "J17"
+    ],
+    "full_source_3d_coverage": false,
+    "component_references_screened": [
+      {
+        "reference": "SW5",
+        "official_wrl_sha256": "sha256:41023da664561197b3e9af581b4696cc4dcdd680f36c247ac965a04be0fd8f38",
+        "official_step_sha256": "sha256:17a30b1f0ab3fd5384a1231e3c63c394888d5b952c542a8c189e023ed3467464",
+        "component_only_KiCad_step_sha256": "sha256:f227f04080bf8300e11ed3df8a1f2de48a2a52e851f16eddaf315c00d06d2e06",
+        "component_3d_envelope_mm": {
+          "xmin": 48.5615,
+          "xmax": 67.7385,
+          "ymin": -55.127,
+          "ymax": -47.253,
+          "zmin": -1.67,
+          "zmax": 5.31
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "SW2",
+        "official_wrl_sha256": "sha256:e3d5eea48da9007e521edffe043c2dfedb7fb7c57c1607d650a90b69c2a48341",
+        "official_step_sha256": "sha256:eb2ba2737299cc764145d8d10ea26d992f819ff5522fb3c0dfa2605b8221f9d6",
+        "component_only_KiCad_step_sha256": "sha256:dd31f7e7dba106efca88ac9ee90be5da43cd798535e448497afc6732817024fb",
+        "component_3d_envelope_mm": {
+          "xmin": 23.9628,
+          "xmax": 31.1372,
+          "ymin": -42.55,
+          "ymax": -36.55,
+          "zmin": -1.87,
+          "zmax": 5.93
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "SW4",
+        "official_wrl_sha256": "sha256:e3d5eea48da9007e521edffe043c2dfedb7fb7c57c1607d650a90b69c2a48341",
+        "official_step_sha256": "sha256:eb2ba2737299cc764145d8d10ea26d992f819ff5522fb3c0dfa2605b8221f9d6",
+        "component_only_KiCad_step_sha256": "sha256:d9ec15a8abb2d8133e06e91176b12e9a0c092049379c13f2442f713a9a1818dd",
+        "component_3d_envelope_mm": {
+          "xmin": 23.9628,
+          "xmax": 31.1372,
+          "ymin": -74.55,
+          "ymax": -68.55,
+          "zmin": -1.87,
+          "zmax": 5.93
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "R1",
+        "official_wrl_sha256": "sha256:fd1e45a3ad518b96159257b98228b98775f69cf56040c56fb9725bf700f4b34b",
+        "official_step_sha256": "sha256:f5d1ea5c47935091292bd1c6c698e0df88d3d4bbf92bf66b4c97e49df5be9ebc",
+        "component_only_KiCad_step_sha256": "sha256:da307f3b09136ee5ce6015435897f9d745e2edb0223e9d7158f687a55c688ca7",
+        "component_3d_envelope_mm": {
+          "xmin": 93.8851,
+          "xmax": 97.0851,
+          "ymin": -47.2931,
+          "ymax": -45.6931,
+          "zmin": 1.63,
+          "zmax": 2.18
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "R2",
+        "official_wrl_sha256": "sha256:fd1e45a3ad518b96159257b98228b98775f69cf56040c56fb9725bf700f4b34b",
+        "official_step_sha256": "sha256:f5d1ea5c47935091292bd1c6c698e0df88d3d4bbf92bf66b4c97e49df5be9ebc",
+        "component_only_KiCad_step_sha256": "sha256:a2c6cfd826f80dfa0dfb220834b5ed70beb72f7151bd00778f003d0d233a7fc1",
+        "component_3d_envelope_mm": {
+          "xmin": 98.9375,
+          "xmax": 102.1375,
+          "ymin": -47.3,
+          "ymax": -45.7,
+          "zmin": 1.63,
+          "zmax": 2.18
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "SW1",
+        "official_wrl_sha256": "sha256:e3d5eea48da9007e521edffe043c2dfedb7fb7c57c1607d650a90b69c2a48341",
+        "official_step_sha256": "sha256:eb2ba2737299cc764145d8d10ea26d992f819ff5522fb3c0dfa2605b8221f9d6",
+        "component_only_KiCad_step_sha256": "sha256:a6d8b74e4a70ccfb94f92efddb03a99376b678e05a6410d96d54d68bc73ed7f8",
+        "component_3d_envelope_mm": {
+          "xmin": 23.9628,
+          "xmax": 31.1372,
+          "ymin": -26.55,
+          "ymax": -20.55,
+          "zmin": -1.87,
+          "zmax": 5.93
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 1.584,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": true,
+        "model_to_manufactured_component_identity_confirmed": false
+      },
+      {
+        "reference": "SW3",
+        "official_wrl_sha256": "sha256:e3d5eea48da9007e521edffe043c2dfedb7fb7c57c1607d650a90b69c2a48341",
+        "official_step_sha256": "sha256:eb2ba2737299cc764145d8d10ea26d992f819ff5522fb3c0dfa2605b8221f9d6",
+        "component_only_KiCad_step_sha256": "sha256:95976d54f378216f5b3bd477f27d5d5b6d14dff6c9cece11c3fbc5b156db0fe1",
+        "component_3d_envelope_mm": {
+          "xmin": 23.9628,
+          "xmax": 31.1372,
+          "ymin": -58.55,
+          "ymax": -52.55,
+          "zmin": -1.87,
+          "zmax": 5.93
+        },
+        "uncorrected_collision_base_mm3": 0.0,
+        "uncorrected_collision_lid_mm3": 0.0,
+        "corrected_collision_base_mm3": 0.0,
+        "corrected_collision_lid_mm3": 0.0,
+        "source_model_based_clearance_cut_applied": false,
+        "model_to_manufactured_component_identity_confirmed": false
+      }
+    ],
+    "original_source_unresolved_footprint_courtyard_exclusions": [
+      {
+        "reference": "J2",
+        "source_courtyard": {
+          "xmin": 81.345,
+          "ymin": 20.125,
+          "width": 26.81,
+          "height": 6.73,
+          "source_layer_kind": "source_footprint_courtyard_projection_not_component_3d"
+        },
+        "pad_around_source_courtyard_mm": 0.35,
+        "uncorrected_base_courtyard_overlap_mm3": 77.371875,
+        "uncorrected_lid_courtyard_overlap_mm3": 68.08725,
+        "corrected_base_courtyard_overlap_mm3": 0.0,
+        "corrected_lid_courtyard_overlap_mm3": 0.0,
+        "actual_component_3d_fit_or_connector_access_verified": false
+      },
+      {
+        "reference": "J1",
+        "source_courtyard": {
+          "xmin": 51.845,
+          "ymin": 20.175,
+          "width": 26.81,
+          "height": 6.73,
+          "source_layer_kind": "source_footprint_courtyard_projection_not_component_3d"
+        },
+        "pad_around_source_courtyard_mm": 0.35,
+        "uncorrected_base_courtyard_overlap_mm3": 73.933125,
+        "uncorrected_lid_courtyard_overlap_mm3": 65.06115,
+        "corrected_base_courtyard_overlap_mm3": 0.0,
+        "corrected_lid_courtyard_overlap_mm3": 0.0,
+        "actual_component_3d_fit_or_connector_access_verified": false
+      },
+      {
+        "reference": "J12",
+        "source_courtyard": {
+          "xmin": 40.875,
+          "ymin": 20.195,
+          "width": 7.85,
+          "height": 6.61,
+          "source_layer_kind": "source_footprint_courtyard_projection_not_component_3d"
+        },
+        "pad_around_source_courtyard_mm": 0.35,
+        "uncorrected_base_courtyard_overlap_mm3": 24.201562,
+        "uncorrected_lid_courtyard_overlap_mm3": 21.297375,
+        "corrected_base_courtyard_overlap_mm3": 0.0,
+        "corrected_lid_courtyard_overlap_mm3": 0.0,
+        "actual_component_3d_fit_or_connector_access_verified": false
+      },
+      {
+        "reference": "Q1",
+        "source_courtyard": {
+          "xmin": 72.195,
+          "ymin": 50.275,
+          "width": 28.83,
+          "height": 16.45,
+          "source_layer_kind": "source_footprint_courtyard_projection_not_component_3d"
+        },
+        "pad_around_source_courtyard_mm": 0.35,
+        "uncorrected_base_courtyard_overlap_mm3": 0.0,
+        "uncorrected_lid_courtyard_overlap_mm3": 0.0,
+        "corrected_base_courtyard_overlap_mm3": 0.0,
+        "corrected_lid_courtyard_overlap_mm3": 0.0,
+        "actual_component_3d_fit_or_connector_access_verified": false
+      }
+    ],
+    "nominal_clearance_box_margin_mm": 0.55,
+    "all_resolved_models_zero_interference": true,
+    "source_model_library_no_fabrication_authority": true,
+    "actual_installed_hardware_verified": false,
+    "mechanical_fabrication_authorized": false
+  },
+  "source_hole_misclassification_avoided": true,
+  "board_corner_M3_holes_assumed": false,
+  "design_assembled_physically": false,
+  "connector_access_verified": false,
+  "copper_edge_keepout_verified": false,
+  "pad_bounding_regions_excluded_from_candidate_lip": true,
+  "source_trace_segment_regions_excluded_from_candidate_lip": true,
+  "component_height_or_pad_clearance_verified": false,
+  "edge_support_contact_pressure_verified": false,
+  "material_and_print_orientation_qualified": false,
+  "thermal_and_electrical_isolation_verified": false,
+  "structural_FEM_or_drop_test_passed": false,
+  "manufacturing_or_print_authorized": false,
+  "generated_artifacts": [
+    {
+      "filename": "source_edge_capture_base.step",
+      "sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+      "size_bytes": 607867
+    },
+    {
+      "filename": "source_edge_capture_lid.step",
+      "sha256": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1",
+      "size_bytes": 439413
+    },
+    {
+      "filename": "source_edge_capture_base.stl",
+      "sha256": "sha256:971d085e8514c6f3b6ad67339562c6015dbb26b7be382de418fc9ffc8c12dc28",
+      "size_bytes": 187084
+    },
+    {
+      "filename": "source_edge_capture_lid.stl",
+      "sha256": "sha256:c3d3c71afec6db6a469b4f1f923a112e947c5b7d63cbabde0fe2a0f0fb22f168",
+      "size_bytes": 142084
+    }
+  ],
+  "source_project_config_sha256": "sha256:de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3",
+  "offline_exact_publisher_models_used": true,
+  "source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "source_geometry_trace": {
+    "original_board_filename": "RPI_Dev_1.kicad_pcb",
+    "edge_cuts_profile_vertex_count": 33,
+    "source_component_count": 26,
+    "verified_board_mounting_footprints": [],
+    "source_npht_feature_references": [
+      "Q1"
+    ]
+  },
+  "software_only_proposal": true,
+  "released_for_fabrication": false
+}

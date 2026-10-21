@@ -1,0 +1,417 @@
+{
+  "schema": "hardware_splicer.open_source_cyberdeck_case_FEM.v1",
+  "external_upstream_planar_geometry": "https://github.com/shapely/shapely",
+  "external_upstream_mesh": "https://gmsh.info",
+  "external_upstream_fem": "https://github.com/kinnala/scikit-fem",
+  "no_original_FEM_solver_implemented": true,
+  "case_results": [
+    {
+      "part": "lid",
+      "source_step_sha256": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1",
+      "source_pcb_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+      "mesh_sizes_mm": [
+        10.0,
+        6.0,
+        4.0,
+        3.0,
+        2.5,
+        2.0
+      ],
+      "case_idealizations": {
+        "material_E_pa": 1500000000.0,
+        "poisson": 0.35,
+        "hypothetical_uniform_board_force_z_n": 1.0,
+        "idealized_fixed_screw_collars": true,
+        "no_bolt_preload_friction_contacts": true,
+        "unqualified_polymer_print_orientation": true
+      },
+      "meshes": [
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.007317443032006346,
+          "max_von_mises_mpa": 0.14157711331751355,
+          "peak_stress_at_mm": [
+            17.977148816648395,
+            -85.66832661531093,
+            3.135823262454959
+          ],
+          "force_equilibrium_residual_n": 4.260950339408612e-13,
+          "force_fixed_nodes": 84,
+          "tetrahedral_count": 3422,
+          "mesh_node_count": 1088,
+          "boundary_area_mm2": 297.28148789957197,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 497,
+          "target_mm": 10.0,
+          "mesh_volume_error_fraction": 0.0011096509560974297,
+          "hs_bounded_comparison": {
+            "status": "same_tetra_boundary_and_material_comparison",
+            "relative_max_displacement_difference": 2.6441255783855806e-12,
+            "relative_max_von_mises_difference": 1.6332562165978304e-12,
+            "hs_equilibrium_residual_n": 1.9145139023608612e-13,
+            "agrees_within_1_percent": true
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.012492967634206462,
+          "max_von_mises_mpa": 0.2311084061776093,
+          "peak_stress_at_mm": [
+            17.076534396069444,
+            -83.88339255819822,
+            3.6862001535744886
+          ],
+          "force_equilibrium_residual_n": 1.3936418115538758e-12,
+          "force_fixed_nodes": 84,
+          "tetrahedral_count": 8281,
+          "mesh_node_count": 2233,
+          "boundary_area_mm2": 297.2814878995728,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 857,
+          "target_mm": 6.0,
+          "mesh_volume_error_fraction": 0.001109635326853092,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.018864241543270953,
+          "max_von_mises_mpa": 0.3368442441238721,
+          "peak_stress_at_mm": [
+            113.46503366378994,
+            -84.84689545809482,
+            2.0352969509425836
+          ],
+          "force_equilibrium_residual_n": 5.846607294071432e-13,
+          "force_fixed_nodes": 84,
+          "tetrahedral_count": 7210,
+          "mesh_node_count": 2231,
+          "boundary_area_mm2": 297.28148789957265,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 749,
+          "target_mm": 4.0,
+          "mesh_volume_error_fraction": 0.001109647642356193,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.021893038371580666,
+          "max_von_mises_mpa": 0.26876293351008174,
+          "peak_stress_at_mm": [
+            17.879711906808264,
+            -85.86171695036731,
+            3.135823262454958
+          ],
+          "force_equilibrium_residual_n": 8.304357620089692e-13,
+          "force_fixed_nodes": 84,
+          "tetrahedral_count": 9744,
+          "mesh_node_count": 2973,
+          "boundary_area_mm2": 297.28148789957277,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 876,
+          "target_mm": 3.0,
+          "mesh_volume_error_fraction": 0.001109635326853092,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.023428915720329048,
+          "max_von_mises_mpa": 0.2950234086756637,
+          "peak_stress_at_mm": [
+            113.6798097981806,
+            -84.09123509848202,
+            3.682583597270557
+          ],
+          "force_equilibrium_residual_n": 1.1712016345968374e-12,
+          "force_fixed_nodes": 84,
+          "tetrahedral_count": 11694,
+          "mesh_node_count": 3570,
+          "boundary_area_mm2": 297.2814878995729,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 990,
+          "target_mm": 2.5,
+          "mesh_volume_error_fraction": 0.0011096509560974297,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.02601716592112694,
+          "max_von_mises_mpa": 0.3473552094072015,
+          "peak_stress_at_mm": [
+            17.271171118101645,
+            -84.94933585864747,
+            3.395183039006196
+          ],
+          "force_equilibrium_residual_n": 7.711856946661872e-13,
+          "force_fixed_nodes": 88,
+          "tetrahedral_count": 12525,
+          "mesh_node_count": 4238,
+          "boundary_area_mm2": 297.2814878995727,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1083,
+          "target_mm": 2.0,
+          "mesh_volume_error_fraction": 0.0010905819890193135,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "coarse_target_mm": 10.0,
+          "fine_target_mm": 6.0,
+          "tetra_count_growth": 2.419929865575687,
+          "loaded_area_relative_change": 2.868161381108808e-15,
+          "max_disp_relative_change": 0.41427503486275213,
+          "peak_von_mises_relative_change": 0.3873995513226377
+        },
+        {
+          "coarse_target_mm": 6.0,
+          "fine_target_mm": 4.0,
+          "tetra_count_growth": 0.8706677937447168,
+          "loaded_area_relative_change": 5.736322762217616e-16,
+          "max_disp_relative_change": 0.3377434440950096,
+          "peak_von_mises_relative_change": 0.3139012757106195
+        },
+        {
+          "coarse_target_mm": 4.0,
+          "fine_target_mm": 3.0,
+          "tetra_count_growth": 1.3514563106796116,
+          "loaded_area_relative_change": 3.824215174811745e-16,
+          "max_disp_relative_change": 0.1383452025663734,
+          "peak_von_mises_relative_change": 0.20211510750575254
+        },
+        {
+          "coarse_target_mm": 3.0,
+          "fine_target_mm": 2.5,
+          "tetra_count_growth": 1.2001231527093597,
+          "loaded_area_relative_change": 3.8242151748117436e-16,
+          "max_disp_relative_change": 0.0655547771430035,
+          "peak_von_mises_relative_change": 0.08901149669262891
+        },
+        {
+          "coarse_target_mm": 2.5,
+          "fine_target_mm": 2.0,
+          "tetra_count_growth": 1.0710620831195485,
+          "loaded_area_relative_change": 5.736322762217615e-16,
+          "max_disp_relative_change": 0.09948240360400414,
+          "peak_von_mises_relative_change": 0.15065788367143704
+        }
+      ],
+      "sufficient_mesh_convergence_demonstrated": false,
+      "physical_material_strength_verified": false,
+      "fabrication_authorized": false,
+      "status": "hypothetical_software_FEM_screen_only"
+    },
+    {
+      "part": "base",
+      "source_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+      "source_pcb_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+      "mesh_sizes_mm": [
+        10.0,
+        6.0,
+        4.0,
+        3.0,
+        2.5,
+        2.0
+      ],
+      "case_idealizations": {
+        "material_E_pa": 1500000000.0,
+        "poisson": 0.35,
+        "hypothetical_uniform_board_force_z_n": 1.0,
+        "idealized_fixed_screw_collars": true,
+        "no_bolt_preload_friction_contacts": true,
+        "unqualified_polymer_print_orientation": true
+      },
+      "meshes": [
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.0026065311093566544,
+          "max_von_mises_mpa": 0.08526027800825335,
+          "peak_stress_at_mm": [
+            17.254357613723233,
+            -83.77707872836056,
+            -1.4941917191078644
+          ],
+          "force_equilibrium_residual_n": 3.0064642131416e-13,
+          "force_fixed_nodes": 128,
+          "tetrahedral_count": 6590,
+          "mesh_node_count": 1867,
+          "boundary_area_mm2": 299.98148789957315,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 972,
+          "target_mm": 10.0,
+          "mesh_volume_error_fraction": 0.0009345690086092601,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.005227007134512389,
+          "max_von_mises_mpa": 0.12229329954949386,
+          "peak_stress_at_mm": [
+            114.87054603067318,
+            -84.13827440416487,
+            -1.974120795247862
+          ],
+          "force_equilibrium_residual_n": 1.466247857312405e-13,
+          "force_fixed_nodes": 128,
+          "tetrahedral_count": 10685,
+          "mesh_node_count": 2830,
+          "boundary_area_mm2": 299.9814878995727,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1065,
+          "target_mm": 6.0,
+          "mesh_volume_error_fraction": 0.0009128435811199575,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.005978788473101849,
+          "max_von_mises_mpa": 0.12717496594053224,
+          "peak_stress_at_mm": [
+            16.705771335929917,
+            -84.1656908692715,
+            1.5085776467115943
+          ],
+          "force_equilibrium_residual_n": 2.7343795265658977e-13,
+          "force_fixed_nodes": 116,
+          "tetrahedral_count": 11194,
+          "mesh_node_count": 3215,
+          "boundary_area_mm2": 299.9814878995727,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1163,
+          "target_mm": 4.0,
+          "mesh_volume_error_fraction": 0.0015752145557812744,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.006347336954894869,
+          "max_von_mises_mpa": 0.15473882162533298,
+          "peak_stress_at_mm": [
+            113.75196586069062,
+            -84.47513723945899,
+            1.1342762837300246
+          ],
+          "force_equilibrium_residual_n": 1.2095944895295184e-13,
+          "force_fixed_nodes": 116,
+          "tetrahedral_count": 14986,
+          "mesh_node_count": 4159,
+          "boundary_area_mm2": 299.9814878995727,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1205,
+          "target_mm": 3.0,
+          "mesh_volume_error_fraction": 0.0015323906936289804,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.006474654395734714,
+          "max_von_mises_mpa": 0.13285493313480912,
+          "peak_stress_at_mm": [
+            113.69989466561998,
+            -85.91627149673883,
+            -2.2324428056301033
+          ],
+          "force_equilibrium_residual_n": 1.071650969607549e-13,
+          "force_fixed_nodes": 118,
+          "tetrahedral_count": 16311,
+          "mesh_node_count": 4689,
+          "boundary_area_mm2": 299.98148789957276,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1270,
+          "target_mm": 2.5,
+          "mesh_volume_error_fraction": 0.0014774813272946585,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        },
+        {
+          "solver": "scikit-fem v11 open-source P1 elastic tetra",
+          "max_displacement_mm": 0.008802607913903896,
+          "max_von_mises_mpa": 0.16860959418294563,
+          "peak_stress_at_mm": [
+            113.81094443012873,
+            -84.59255659519651,
+            1.1560929329514291
+          ],
+          "force_equilibrium_residual_n": 3.9764676480208396e-13,
+          "force_fixed_nodes": 144,
+          "tetrahedral_count": 18143,
+          "mesh_node_count": 5619,
+          "boundary_area_mm2": 299.98148789957224,
+          "load_patch_intersection_library": "Shapely 2.1.2 GEOS",
+          "boundary_facet_count": 1405,
+          "target_mm": 2.0,
+          "mesh_volume_error_fraction": 0.0008525078401594947,
+          "hs_bounded_comparison": {
+            "status": "outside_HS_bounded_budget"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "coarse_target_mm": 10.0,
+          "fine_target_mm": 6.0,
+          "tetra_count_growth": 1.6213960546282247,
+          "loaded_area_relative_change": 1.515918045711884e-15,
+          "max_disp_relative_change": 0.5013339292868959,
+          "peak_von_mises_relative_change": 0.30282134571283453
+        },
+        {
+          "coarse_target_mm": 6.0,
+          "fine_target_mm": 4.0,
+          "tetra_count_growth": 1.0476368741226019,
+          "loaded_area_relative_change": 0.0,
+          "max_disp_relative_change": 0.1257414176754491,
+          "peak_von_mises_relative_change": 0.03838543501809209
+        },
+        {
+          "coarse_target_mm": 4.0,
+          "fine_target_mm": 3.0,
+          "tetra_count_growth": 1.3387529033410757,
+          "loaded_area_relative_change": 0.0,
+          "max_disp_relative_change": 0.0580634814902661,
+          "peak_von_mises_relative_change": 0.1781314824248871
+        },
+        {
+          "coarse_target_mm": 3.0,
+          "fine_target_mm": 2.5,
+          "tetra_count_growth": 1.0884158547978113,
+          "loaded_area_relative_change": 1.8948975571398575e-16,
+          "max_disp_relative_change": 0.019663974794348435,
+          "peak_von_mises_relative_change": 0.1414246810248499
+        },
+        {
+          "coarse_target_mm": 2.5,
+          "fine_target_mm": 2.0,
+          "tetra_count_growth": 1.1123168413953775,
+          "loaded_area_relative_change": 1.7054078014258718e-15,
+          "max_disp_relative_change": 0.26446179824641886,
+          "peak_von_mises_relative_change": 0.21205591070542412
+        }
+      ],
+      "sufficient_mesh_convergence_demonstrated": false,
+      "physical_material_strength_verified": false,
+      "fabrication_authorized": false,
+      "status": "hypothetical_software_FEM_screen_only"
+    }
+  ],
+  "manufactured_device_tested": false,
+  "release_authorized": false
+}

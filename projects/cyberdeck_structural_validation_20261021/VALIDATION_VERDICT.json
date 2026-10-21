@@ -1,0 +1,114 @@
+{
+  "schema": "hardware_splicer.cyberdeck_virtual_mechanics_review.v1",
+  "executed_date": "2026-10-21",
+  "candidate_release_status": "software_only_unreleased_case_revision",
+  "cad": {
+    "source_edge_capture_base.step": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+    "source_edge_capture_lid.step": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1"
+  },
+  "source_kicad_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "existing_HS_solver_hard_limits": {
+    "nodes": 2000,
+    "tetrahedra": 5000
+  },
+  "existing_HS_solver_lid_10mm": {
+    "tetrahedra": 3422,
+    "nodes": 1088,
+    "works": true
+  },
+  "existing_HS_solver_base_10mm": {
+    "tetrahedra": 6590,
+    "works": false,
+    "reason": "correctly rejected fixed bound"
+  },
+  "published_upstream_reuse": [
+    {
+      "name": "Gmsh",
+      "repo": "https://gitlab.onelab.info/gmsh/gmsh",
+      "role": "external CAD mesher",
+      "tested": true
+    },
+    {
+      "name": "scikit-fem",
+      "repo": "https://github.com/kinnala/scikit-fem",
+      "role": "existing 3d linear elasticity solver",
+      "tested": true
+    },
+    {
+      "name": "Shapely",
+      "repo": "https://github.com/shapely/shapely",
+      "role": "exact source-contour load-patch intersections",
+      "tested": true,
+      "version": "2.1.2"
+    },
+    {
+      "name": "CalculiX/pygccx",
+      "repo": "https://github.com/calculix/pygccx",
+      "role": "possible nonlinear contact and pretension expansion",
+      "tested": false,
+      "local_solver_binary_installed": false
+    },
+    {
+      "name": "SfePy",
+      "repo": "https://github.com/sfepy/sfepy",
+      "role": "alternative coupled PDE/thermoelastic backend",
+      "tested": false
+    },
+    {
+      "name": "pycalculix",
+      "repo": "https://github.com/spacether/pycalculix",
+      "role": "older 2d alternative, archived",
+      "tested": false
+    }
+  ],
+  "load_case": {
+    "loading_direction": "+z on lid / -z on base",
+    "hypothetical_total_force_n": 1.0,
+    "hypothetical_isotropic_E_pa": 1500000000.0,
+    "hypothetical_poisson_ratio": 0.35,
+    "four_case_screw_collars_fixed": true,
+    "force_or_material_properties_measured": false,
+    "nonlinear_contact_modelled": false,
+    "real_print_anisotropy_measured": false
+  },
+  "source_load_patch_area_mm2": {
+    "base": 299.981,
+    "lid": 297.281
+  },
+  "independent_HS_vs_scikit_same_mesh": {
+    "model": "lid mesh target 10mm, 1N, E=1.5GPa",
+    "max_relative_displacement_difference": 2.6441255783855806e-12,
+    "max_relative_von_mises_difference": 1.6332562165978304e-12,
+    "same_mesh_agrees": true
+  },
+  "fine_results": {
+    "lid": {
+      "fine_target_mm": 1.5,
+      "tetra": 17971,
+      "displacement_mm": 0.02661427054645349,
+      "max_von_mises_mpa": 0.33060188452521716,
+      "apparent_3mesh_convergence": true,
+      "real_material_validation": false
+    },
+    "base": {
+      "fine_target_mm": 1.5,
+      "tetra": 30708,
+      "displacement_mm": 0.01000748866805094,
+      "max_von_mises_mpa": 0.16300336825831127,
+      "apparent_3mesh_convergence": false,
+      "real_material_validation": false
+    }
+  },
+  "material_safety_factor_or_product_load_rating_validated": false,
+  "structural_release_authorized": false,
+  "physical_product_functional_confirmed": false,
+  "extended_lid_result": {
+    "mesh_target_mm": 1.2,
+    "elements": 31053,
+    "displacement_mm": 0.047040037840863115,
+    "peak_von_mises_mpa": 0.47018137234166285,
+    "finer_mesh_overturns_apparent_3mesh_convergence": true,
+    "displacement_change_vs_previous_fine_percent": 76.74742487778416
+  },
+  "overall_numerical_mesh_convergence_accepted": false
+}
