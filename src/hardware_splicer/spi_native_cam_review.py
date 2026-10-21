@@ -125,14 +125,36 @@ def inspect_spi_native_cam_archive(archive_path: str | Path) -> dict:
     if len(position_files) != 1:
         errors.append("expected exactly one initial FIT pick-and-place CSV")
     position_rows = []
+    actual_placement_refs: list[str] = []
+    expected_placement_refs: list[str] = []
+    if "BOM.csv" in content:
+        bom_rows = list(csv.DictReader(io.StringIO(content["BOM.csv"].decode("utf-8-sig"))))
+        for row in bom_rows:
+            if row.get("Initial Assembly") == "FIT":
+                refs = (row.get("References") or "").split()
+                expected_placement_refs.extend(ref for ref in refs if ref not in {"J1", "JP1"})
+        if len(expected_placement_refs) != 14 or len(set(expected_placement_refs)) != 14:
+            errors.append("reference BOM does not define fourteen unique SMT assembly positions")
     if len(position_files) == 1:
         raw = content[position_files[0]].decode("utf-8-sig", errors="replace")
         position_rows = list(csv.reader(io.StringIO(raw)))
-        cells = {cell.strip().upper() for row in position_rows[1:] for cell in row}
-        if {"R1", "R4"} & cells:
-            errors.append("initially DNP rail link appears in placement")
         if not position_rows or len(position_rows) < 2:
             errors.append("placement export has no placed components")
+        elif "Ref" not in position_rows[0]:
+            errors.append("placement export has no KiCad Ref column")
+        else:
+            idx = position_rows[0].index("Ref")
+            for row in position_rows[1:]:
+                if idx >= len(row) or not row[idx].strip():
+                    errors.append("placement export contains missing reference")
+                else:
+                    actual_placement_refs.append(row[idx].strip())
+            if len(set(actual_placement_refs)) != len(actual_placement_refs):
+                errors.append("placement file contains duplicate references")
+            if {"R1", "R4"} & set(actual_placement_refs):
+                errors.append("initially DNP rail link appears in placement")
+            if set(actual_placement_refs) != set(expected_placement_refs):
+                errors.append("pick-and-place reference set disagrees with the initial FIT surface-mount BOM")
     review_outputs = [p for p in content if p.startswith("review/")]
     if not any(p.endswith("-schematic.pdf") for p in review_outputs):
         errors.append("schematic PDF missing")
@@ -149,6 +171,8 @@ def inspect_spi_native_cam_archive(archive_path: str | Path) -> dict:
         "drill_files": drills,
         "position_file": position_files[0] if len(position_files) == 1 else None,
         "placement_csv_rows_including_header": len(position_rows),
+        "placement_references": sorted(actual_placement_refs),
+        "expected_surface_mount_references": sorted(expected_placement_refs),
         "review_outputs": review_outputs,
         "native_receipt_kicad_cli_version": native_receipt.get("toolchain", {}).get("kicad_cli"),
         "native_receipt_pass": native_receipt.get("result") == "pass",
