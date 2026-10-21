@@ -176,11 +176,95 @@
     "schema": "hardware_splicer.electromechanical_envelope_fit.v1",
     "status": "envelope_screen_clear_unverified",
     "source_mode": "synthetic_declared",
-    "checks": [],
+    "checks": [
+      {
+        "ref": "PCB",
+        "axis": "x",
+        "remaining_mm": 5,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "y",
+        "remaining_mm": 5,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "z_lower",
+        "remaining_mm": 3.2,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "z_upper",
+        "remaining_mm": 10.2,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "J1",
+        "axis": "x",
+        "remaining_mm": 11,
+        "status": "pass",
+        "basis": "approximate_component_envelope"
+      },
+      {
+        "ref": "J1",
+        "axis": "y",
+        "remaining_mm": 12,
+        "status": "pass",
+        "basis": "approximate_component_envelope"
+      },
+      {
+        "ref": "J1",
+        "axis": "z_upper",
+        "remaining_mm": 5.2,
+        "status": "pass",
+        "basis": "approximate_component_height"
+      },
+      {
+        "ref": "J1",
+        "axis": "z_lower",
+        "remaining_mm": 4.8,
+        "status": "pass",
+        "basis": "approximate_component_height"
+      }
+    ],
     "blocker_count": 0,
     "exact_3d_collision_verified": false,
     "connector_mating_verified": false,
     "electrical_operation_verified": false,
-    "fabrication_authorized": false
+    "fabrication_authorized": false,
+    "synthetic_screen_inputs": {
+      "pcb_dimensions_mm": [
+        40,
+        20,
+        1.6
+      ],
+      "enclosure_inner_dimensions_mm": [
+        50,
+        30,
+        15
+      ],
+      "enclosure_floor_mm": 2,
+      "pcb_origin_xyz_mm": [
+        0,
+        0,
+        6
+      ],
+      "connector_center_xy_mm": [
+        10,
+        0
+      ],
+      "connector_size_xyz_mm": [
+        8,
+        6,
+        5
+      ]
+    }
   }
 }
