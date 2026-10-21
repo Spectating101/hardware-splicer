@@ -313,7 +313,30 @@ def write_fabrication_artifacts(
     out_path = Path(out_dir)
     build_dir = out_path / "build_compilation"
     design_quality = dict(compile_payload.get("design_quality") or {})
+    # Keep the actual module geometry pedigree with normal compilation outputs.
+    # Curated footprints are NOT manufacturer-authenticated source CAD.
+    from .component_geometry_provenance import assess_build_graph_geometry
+
+    graph_file = compile_payload.get("build_graph_file")
+    geometry_report: Dict[str, Any]
+    try:
+        if not graph_file or not Path(str(graph_file)).is_file():
+            raise ValueError("compiled build graph artifact missing")
+        raw_graph = json.loads(Path(str(graph_file)).read_text(encoding="utf-8"))
+        geometry_report = assess_build_graph_geometry(raw_graph)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        geometry_report = {
+            "schema": "hardware_splicer.component_geometry_provenance.v1",
+            "status": "unavailable",
+            "error_type": type(exc).__name__,
+            "source_geometry_authenticated": False,
+            "fabrication_authorized": False,
+            "production_release_authorized": False,
+        }
+    geometry_path = out_path / "GEOMETRY_PROVENANCE.json"
+    geometry_path.write_text(json.dumps(geometry_report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     artifact_inputs: Dict[str, Any] = {
+        "geometry_provenance": str(geometry_path),
         "build_graph": compile_payload.get("build_graph_file"),
         "build_kicad_pcb": compile_payload.get("kicad_pcb_file"),
         "fab_package_zip": design_quality.get("fab_package_zip")
@@ -339,6 +362,8 @@ def write_fabrication_artifacts(
         "fabrication_inspection": str(insp_path),
         "functional_delivery_score": functional.get("functional_delivery_score"),
         "honest_fabrication_ready": functional.get("honest_fabrication_ready"),
+        "geometry_provenance": str(geometry_path),
+        "geometry_provenance_status": geometry_report["status"],
     }
 
 

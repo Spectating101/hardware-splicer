@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from hardware_splicer.assembly_plan import build_assembly_plan
 from hardware_splicer.build_compiler import compile_catalog_build
+from hardware_splicer.component_geometry_provenance import assess_build_graph_geometry
 from hardware_splicer.catalog import CATALOG_BUILD_IDS
 from hardware_splicer.device_splice_feasibility import assess_device_splice
 from hardware_splicer.electromechanical_fit import screen_board_enclosure_fit
@@ -222,12 +223,24 @@ def _run_catalog(out_root: Path, all_catalog: bool) -> list[dict]:
             result = compile_catalog_build(build_id, out_root / "catalog" / family,
                                            export_gerber=False)
             quality = result.design_quality
+            graph_file = Path(result.build_graph_file) if result.build_graph_file else None
+            geometry_truth = (assess_build_graph_geometry(_read(graph_file))
+                              if graph_file and graph_file.is_file() else None)
+            if geometry_truth is not None:
+                (out_root / "catalog" / family / "GEOMETRY_PROVENANCE.json").write_text(
+                    json.dumps(geometry_truth, indent=2, allow_nan=False) + "\n",
+                    encoding="utf-8",
+                )
             pcb = Path(result.kicad_pcb_file) if result.kicad_pcb_file else None
             board_exists = bool(pcb and pcb.is_file() and
                                 pcb.read_text(encoding="utf-8").startswith("(kicad_pcb"))
             assembly_check = (_catalog_assembly(pcb, out_root / "catalog" / family)
                               if board_exists else None)
             row.update({"source_bound_assembly": assembly_check,
+                        "geometry_provenance_status": geometry_truth["status"] if geometry_truth else "not_checked",
+                        "synthetic_footprint_modules": geometry_truth["synthetic_fallback_count"] if geometry_truth else None,
+                        "unsupported_footprint_modules": geometry_truth["missing_module_count"] if geometry_truth else None,
+                        "fabrication_geometry_authenticated": False,
                 "compile_ok": bool(result.ok), "build_graph_compiled": quality.get("build_graph_compiled"),
                 "drc_pass": quality.get("drc_pass"),
                 "electrical_safety_pass": quality.get("electrical_safety_pass"),
