@@ -47,6 +47,7 @@ GADGETS = {
     "printer_plotter_stage": "plotter_motion_stage",
 }
 DONOR_IDS = ("robot_drive_from_rc_toy", "printer_motion_stage")
+REAL_DEVICE_IDS = ("steamdeck_oled_ssd", "psp3000_umd_repair", "drone_px4_quad")
 
 def _read(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -269,12 +270,44 @@ def _run_donors(out_root: Path) -> list[dict]:
         print(f"DONOR {case_id}: {'pass' if row['pass'] else 'blocked'}", flush=True)
     return rows
 
+def _run_real_device_triage() -> list[dict]:
+    """Unverified actual-device casefiles; planning only, no donor bench run."""
+    root = ROOT / "eval" / "real_hardware_projects"
+    results = []
+    for name in REAL_DEVICE_IDS:
+        try:
+            case = _read(root / f"{name}.json")
+            review = _read(root / "reports" / f"{name}.json")
+            package = compile_work_package(case, review, planner=review.get("hs_raw_plan"))
+            ok = (package["engineering_readiness"] == "blocked" and
+                  package["physical_validation_performed"] is False and
+                  package["build_or_repair_completed"] is False and
+                  all(row["status"] == "not_accepted"
+                      for row in package["acceptance_gates"]))
+            results.append({
+                "gadget": name, "device": case["device"],
+                "project_kind": case["kind"],
+                "work_steps_proposed": len(package["work_steps"]),
+                "required_parts_unverified": len(package["required_parts"]),
+                "technical_unknowns": len(package["critical_unknowns"]),
+                "acceptance_gates": len(package["acceptance_gates"]),
+                "pass": ok,
+                "actual_device_test_performed": False,
+                "source_documents_authenticated": False,
+                "release_authorized": False,
+            })
+        except Exception as exc:
+            results.append({"gadget": name, "pass": False,
+                            "error": f"{type(exc).__name__}: {exc}"[:450]})
+    return results
+
 def run(out_root: Path, all_catalog: bool, skip_compile: bool, skip_donors: bool) -> dict:
     out_root.mkdir(parents=True, exist_ok=True)
     feasibility = _run_feasibility()
     builds = [] if skip_compile else _run_catalog(out_root, all_catalog)
     donors = [] if skip_donors else _run_donors(out_root)
-    total = feasibility + builds + donors
+    real_device_triage = _run_real_device_triage()
+    total = feasibility + builds + donors + real_device_triage
     result = {
         "schema": "hardware_splicer.gadget_capability_acceptance.v1",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -284,10 +317,12 @@ def run(out_root: Path, all_catalog: bool, skip_compile: bool, skip_donors: bool
             "feasibility_scenarios": len(feasibility),
             "catalog_compilations": len(builds),
             "donor_splice_cases": len(donors),
+            "real_device_triage_cases": len(real_device_triage),
             "passed": sum(bool(row["pass"]) for row in total),
             "failed": sum(not row["pass"] for row in total),
         },
         "feasibility": feasibility, "catalog": builds, "donor_splice": donors,
+        "real_device_triage": real_device_triage,
         "physical_assembly_validated": False, "fabrication_authorized": False,
         "device_operation_verified": False, "release_authorized": False,
     }
