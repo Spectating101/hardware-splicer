@@ -91,3 +91,22 @@ def test_enclosure_only_changes_screening_not_authority(tmp_path):
     assert a["electromechanical_fit"]["status"] == "envelope_collision_detected"
     assert b["electromechanical_fit"]["status"] == "envelope_screen_clear_unverified"
     assert not small["release_authorized"] and not large["release_authorized"]
+
+def test_generic_assembly_plan_does_not_mistake_board_features_for_parts(tmp_path):
+    from hardware_splicer.assembly_plan import build_assembly_plan
+    source = (CANON / "spi_flash_adapter_v1.kicad_pcb").read_text()
+    plan = build_assembly_plan(source)
+    counts = plan["counts"]
+    assert counts["fitted"] == 38  # Backward-compatible non-DNP footprint count.
+    assert counts["physical_component_candidate_footprints"] == 16
+    assert counts["testpoint_footprints"] == 18
+    assert counts["mounting_hole_footprints"] == 4
+    features = [row for row in plan["steps"] if row["kind"] in {"testpoint", "mounting_hole"}]
+    assert features
+    for row in features:
+        assert "inspect" in row["title"].lower()
+        assert "solder the" not in row["instruction"].lower()
+    pads = [row for row in features if row["kind"] == "testpoint"]
+    assert pads and all("net labels" in row["instruction"] for row in pads)
+    holes = [row for row in features if row["kind"] == "mounting_hole"]
+    assert holes and all("mechanical BOM" in row["instruction"] for row in holes)
