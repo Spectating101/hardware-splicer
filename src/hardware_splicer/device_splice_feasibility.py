@@ -187,7 +187,7 @@ def assess_device_splice(candidate: Mapping) -> dict:
                        "status": state, "findings": notes,
                        "source_rating_a": readings[0] if readings and readings[0] is not None else None,
                        "aggregate_required_a": total,
-                       "evidence_refs": sorted(set(ref for item in loads for ref in item["evidence_refs"])),
+                       "evidence_refs": sorted(set(ref for item in loads for ref in item.get("evidence_refs", []))),
                        "adaptation_id": None, "verification_level": "declared_shared_rail_budget"})
     fit = candidate.get("electromechanical_fit")
     if fit is not None:
