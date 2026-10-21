@@ -337,6 +337,12 @@ def physical_assessment_plan(
             ],
         },
     }
+    # Keep the persisted chemistry gate inputs alongside physical assessment
+    # when the canonical stored project contains these records. They are
+    # screening blockers, never new evidence of physical safety.
+    if "practicalChemistryAssessments" in snapshot:
+        plan["practicalChemistryAssessments"] = deepcopy(snapshot["practicalChemistryAssessments"])
+        plan["engineeringFindings"] = deepcopy(snapshot.get("engineeringFindings", []))
     audit = prior.get("audited_physical_evidence")
     if isinstance(audit, Mapping):
         plan["audited_physical_evidence"] = deepcopy(dict(audit))

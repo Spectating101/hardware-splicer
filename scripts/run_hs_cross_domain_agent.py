@@ -14,7 +14,9 @@ from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
 from run_hs_cross_domain_engineering import CASES
 
-SOFTWARE_READ_ONLY={'inspect_registered_sources','run_erc','run_drc'}
+SOFTWARE_READ_ONLY={'inspect_registered_sources','run_erc','run_drc',
+                    'review_mechanical_layer','review_practical_chemistry',
+                    'prepare_printed_enclosure_concept'}
 
 
 def run(name:str,root:Path):
@@ -26,12 +28,15 @@ def run(name:str,root:Path):
     rev=current['revision']
     mission=case['mission'] + (' Choose software source verification and actual engineering next actions. '
              ' The tool inspect_registered_sources can invoke relevant KiCad, CAD or repair-guide readers on registered files. '
+             ' If useful, request review_mechanical_layer and review_practical_chemistry '
+             ' for the already-persisted engineeringLayerRequests on this exact project. '
+             ' For a cyberdeck enclosure, request prepare_printed_enclosure_concept. '
              ' Do not fabricate findings, prices, compatibility, or physical approval. '
              'Do not treat interpretation or fixture templates as verified device construction.')
     response=client.post(f'/v1/projects/{pid}/ai-sessions',json={
         'mission':mission,'model_profile':'deep_synthesis',
         'constraints':{'software_only':True,'human_hardware_validation_required':True},
-        'max_actions':5,'expected_revision':rev})
+        'max_actions':8,'expected_revision':rev})
     outcome={'case':name,'project':pid,'model_http_status':response.status_code}
     if response.status_code!=200:
         outcome['error']=str(response.json().get('detail'))[:500]

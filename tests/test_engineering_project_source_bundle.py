@@ -62,3 +62,16 @@ def test_actual_source_bundle_works_when_available():
     assert r['netlist']['net_count']==47
     assert r['geometry']['Front Case.stl']['status']=='parsed_raw_bounds'
     assert not r['release_authorized']
+
+
+def test_missing_companion_project_is_reported_without_kicad_cli(monkeypatch):
+    """Source context errors must be stable in minimal/hosted CI environments."""
+    from hardware_splicer import engineering_project_source_bundle as source_bundle
+    monkeypatch.setattr(source_bundle.shutil, "which", lambda _: None)
+    result = source_bundle.analyze_project_bundle({
+        "missing_project.kicad_pcb": b"(kicad_pcb (version 2024))",
+    })
+    assert result["project_context"] == "missing"
+    assert "companion .kicad_pro absent" in result["reason"]
+    assert result["software_checks"] == {}
+    assert not result["manufacturing_approved"]

@@ -123,7 +123,24 @@ def _assert_evidence_references_resolve(session: Mapping[str, Any]) -> None:
         raise CleanroomContractError("embedded operator session is missing sanitized context")
     known = _known_source_ids(context)
     referenced = _referenced_source_ids(session)
-    invented = sorted(referenced - known)
+    # The general-purpose agent keeps operating after discarding unknown source
+    # references (and explicitly records them). A cleanroom evaluation cannot
+    # silently accept that loss: the model's original invented citations are a
+    # hard contract failure, even if their normalized source_ids were removed.
+    unrecognized = {
+        str(identity).strip()
+        for identity in session.get("unrecognized_source_references") or []
+        if str(identity).strip()
+    }
+    for family in ("requirements", "architecture_candidates", "actions"):
+        for row in session.get(family) or []:
+            if isinstance(row, Mapping):
+                unrecognized.update(
+                    str(identity).strip()
+                    for identity in row.get("unrecognized_source_ids") or []
+                    if str(identity).strip()
+                )
+    invented = sorted((referenced - known) | unrecognized)
     if invented:
         raise CleanroomContractError(
             "embedded operator invented product evidence identities: " + ", ".join(invented)

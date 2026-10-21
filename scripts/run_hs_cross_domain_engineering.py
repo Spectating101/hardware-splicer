@@ -49,6 +49,26 @@ CASES={
     'result_type':'real device repair-guide source'},
 }
 
+# Independent evaluator supplies these explicitly declared jobs. The AI cannot
+# fabricate physical measurements while selecting their software assessments.
+CASES['cyberdeck']['engineering_layer_requests'] = {
+ 'mechanical':{'design':{'enclosure':{'name':'RPI_DEV_cover_not_mated_to_PCB'}},'mode':'advisory'},
+ 'chemistry':{'task':'manage_thermal_interface','primary_material':'unknown',
+             'material_identity':'unknown','electrical_state':'unknown',
+             'battery_status':'unknown'},
+ 'enclosure':json.loads((ROOT/'examples/printed_casing/conceptual_salvage_controller.json').read_text()),
+}
+CASES['drone']['engineering_layer_requests'] = {
+ 'mechanical':{'design':{'assembly':{'name':'X500_frame_and_S500_arm_unverified_join'}},
+               'mode':'advisory'},
+}
+CASES['psp']['engineering_layer_requests'] = {
+ 'chemistry':{'task':'clean_contacts','primary_material':'unknown',
+             'material_identity':'unknown','electrical_state':'unknown',
+             'battery_status':'unknown'},
+ 'mechanical':{'design':{'assembly':{'name':'PSP_UMD_drive_access'}} ,'mode':'advisory'},
+}
+
 
 def run_case(case_name:str, root:Path):
     case=CASES[case_name]
@@ -59,6 +79,7 @@ def run_case(case_name:str, root:Path):
         raise ValueError('refusing to overwrite existing trial project; use new root')
     initial={'projectId':project_id,'projectName':project_id,'mission':case['mission'],
              'constraints':case.get('constraints',{}),
+             'engineeringLayerRequests':case.get('engineering_layer_requests',{}),
              'approved_catalog_build_ids':[],
              'fabrication_authorized':False,'power_on_authorized':False,
              'release_authorized':False}

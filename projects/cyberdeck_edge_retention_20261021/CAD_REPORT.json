@@ -1,0 +1,117 @@
+{
+  "status": "generated_collision_screened_edge_retention_candidate",
+  "registered_source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "derived_source_board_step_sha256": "sha256:6ce31608674a7beaa8cfe28a1c36fdb61e510a8fdf397a2b9e42152496c96c01",
+  "source_outline_vertex_count": 33,
+  "source_contour_contains_tessellated_arc": true,
+  "source_step_y_axis_flipped_from_kicad_mm": true,
+  "nominal_board_bbox_step_mm": {
+    "xmin": 20.0,
+    "xmax": 110.9,
+    "ymin": -81.0,
+    "ymax": -19.7,
+    "thickness": 1.51
+  },
+  "candidate_type": "two_piece_exterior_screw_closed_edge_capture",
+  "external_lid_screw_centres_mm": [
+    {
+      "x": 15.5,
+      "y": -85.5
+    },
+    {
+      "x": 15.5,
+      "y": -15.2
+    },
+    {
+      "x": 115.4,
+      "y": -85.5
+    },
+    {
+      "x": 115.4,
+      "y": -15.2
+    }
+  ],
+  "enclosure_outer_mm": {
+    "x": 106.9,
+    "y": 77.3,
+    "z": 6.46
+  },
+  "nominal_design_parameters": {
+    "board_pocket_xy_gap_mm": 0.85,
+    "edge_capture_overlap_nominal_mm": 1.2,
+    "outer_perimeter_margin_mm": 8.0,
+    "board_top_z_freedom_mm": 0.25,
+    "bottom_support_height_mm": 2.5,
+    "lid_ring_height_mm": 2.2,
+    "external_screw_offset_from_board_AABB_mm": 4.5,
+    "base_pilot_hole_diameter_mm": 2.7,
+    "lid_clearance_hole_diameter_mm": 3.3
+  },
+  "geometric_clearance_checks": {
+    "original_board_to_base_overlap_mm3": 0.0,
+    "original_board_to_lid_overlap_mm3": 0.0,
+    "base_to_lid_overlap_mm3": 0.0,
+    "board_only_zero_interference_pass": true,
+    "all_four_screw_centres_outside_board_AABB": true,
+    "source_pad_keepout_count": 23,
+    "uncorrected_pad_keepout_overlap_mm3": 42.5469,
+    "corrected_pad_keepout_overlap_mm3": 0.0,
+    "source_pad_projection_no_lip_overlap_pass": true,
+    "source_trace_via_count_checked": 456,
+    "source_pcb_copper_zone_count": 0,
+    "source_trace_via_lip_risk_count": 7,
+    "initial_track_keepout_overlap_mm3": 29.4863,
+    "corrected_track_keepout_overlap_mm3": 0.0,
+    "source_tracks_and_vias_projected_keepouts_pass": true,
+    "pcb_component_models_included": false,
+    "fastener_clamping_tested": false
+  },
+  "source_hole_misclassification_avoided": true,
+  "board_corner_M3_holes_assumed": false,
+  "design_assembled_physically": false,
+  "connector_access_verified": false,
+  "copper_edge_keepout_verified": false,
+  "pad_bounding_regions_excluded_from_candidate_lip": true,
+  "source_trace_segment_regions_excluded_from_candidate_lip": true,
+  "component_height_or_pad_clearance_verified": false,
+  "edge_support_contact_pressure_verified": false,
+  "material_and_print_orientation_qualified": false,
+  "thermal_and_electrical_isolation_verified": false,
+  "structural_FEM_or_drop_test_passed": false,
+  "manufacturing_or_print_authorized": false,
+  "generated_artifacts": [
+    {
+      "filename": "source_edge_capture_base.step",
+      "sha256": "sha256:45f03352e7d5cbc2ba027358508113e925d3c5def6bff68cc72dfe056a659286",
+      "size_bytes": 591419
+    },
+    {
+      "filename": "source_edge_capture_lid.step",
+      "sha256": "sha256:5b45102bf3e1161a9d7792aa2c392decd76d6952e3745e16c4618bdc1c36cd12",
+      "size_bytes": 423419
+    },
+    {
+      "filename": "source_edge_capture_base.stl",
+      "sha256": "sha256:1bc63b66ed81563de53c3d189c5ad194b29a8301d86a5fb09d95712f3bae8fc4",
+      "size_bytes": 186284
+    },
+    {
+      "filename": "source_edge_capture_lid.stl",
+      "sha256": "sha256:adb60cf9be80623ffb2a42de0715b5b8805dd071e10bc06419ad7453d4891af0",
+      "size_bytes": 141284
+    }
+  ],
+  "source_project_config_sha256": "sha256:de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3",
+  "source_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "source_geometry_trace": {
+    "original_board_filename": "RPI_Dev_1.kicad_pcb",
+    "edge_cuts_profile_vertex_count": 33,
+    "source_component_count": 26,
+    "verified_board_mounting_footprints": [],
+    "source_npht_feature_references": [
+      "Q1"
+    ]
+  },
+  "software_only_proposal": true,
+  "released_for_fabrication": false
+}

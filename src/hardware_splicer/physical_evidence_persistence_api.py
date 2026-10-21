@@ -31,6 +31,9 @@ from .physical_evidence_ledger import (
     PhysicalEvidenceEnvelope,
 )
 from .physical_evidence_plan_update import apply_physical_evidence_to_plan
+from .project_chemistry_release_gate import (
+    apply_chemistry_hold_to_plan, evaluate_project_chemistry_gate,
+)
 from .project_store import (
     ProjectNotFound,
     ProjectStore,
@@ -143,6 +146,20 @@ def _anchored_base_plan(
     return stored_plan, resolved_project_id, "stored_revision"
 
 
+def _apply_stored_chemistry_gate(
+    project_store: ProjectStore, project_id: str,
+    plan: Dict[str, Any],
+) -> Dict[str, Any]:
+    try:
+        envelope = project_store.load_latest_with_recovery(project_id)
+    except ProjectNotFound:
+        return dict(plan)
+    gate = evaluate_project_chemistry_gate(
+        envelope["snapshot"], project_id=project_id,
+    )
+    return apply_chemistry_hold_to_plan(plan, gate)
+
+
 def _audited_response(
     *,
     plan: Dict[str, Any],
@@ -216,6 +233,9 @@ def create_physical_evidence_persistence_router(
                 requested_operations=request.requested_operations,
                 as_of=request.as_of,
             )
+            plan = _apply_stored_chemistry_gate(
+                project_store, resolved_project_id, plan,
+            )
             envelope = save_engineering_plan(
                 project_store,
                 plan,
@@ -285,6 +305,9 @@ def create_physical_evidence_persistence_router(
                     "submitted audit package does not preserve the persisted "
                     "append-only evidence and authorization history"
                 )
+            plan = _apply_stored_chemistry_gate(
+                project_store, resolved_project_id, plan,
+            )
             envelope = save_engineering_plan(
                 project_store,
                 plan,

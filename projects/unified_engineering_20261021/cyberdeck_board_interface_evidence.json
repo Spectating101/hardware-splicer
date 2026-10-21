@@ -1,0 +1,330 @@
+{
+  "status": "extracted_kicad_source_geometry",
+  "board_outline_aabb_mm": {
+    "xmin": 19.975,
+    "ymin": 19.675,
+    "width": 90.95,
+    "height": 61.35
+  },
+  "outline_is_actual_exact_contour": false,
+  "footprint_count": 26,
+  "footprint_placements": [
+    {
+      "reference": "J16",
+      "value": "0V Hout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 90.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J19",
+      "value": "SW",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 55.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "SW5",
+      "value": "SW_DIP_x08",
+      "footprint": "DIP-16_W7.62mm",
+      "position_mm": {
+        "x": 49.26,
+        "y": 55.0
+      },
+      "pad_count": 16,
+      "board_side": "top"
+    },
+    {
+      "reference": "J2",
+      "value": "Conn_01x40_MountingPin",
+      "footprint": "Omron_XF2M-4015-1A_1x40-1MP_P0.5mm_Horizontal",
+      "position_mm": {
+        "x": 94.75,
+        "y": 23.95
+      },
+      "pad_count": 42,
+      "board_side": "top"
+    },
+    {
+      "reference": "J9",
+      "value": "DT",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 45.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J18",
+      "value": "0V RPIout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 95.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J11",
+      "value": "GND",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 35.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "SW2",
+      "value": "SW_Push_Dual_x2",
+      "footprint": "SW_PUSH_6mm",
+      "position_mm": {
+        "x": 24.4,
+        "y": 37.3
+      },
+      "pad_count": 4,
+      "board_side": "top"
+    },
+    {
+      "reference": "J1",
+      "value": "Conn_01x40_MountingPin",
+      "footprint": "Omron_XF2M-4015-1A_1x40-1MP_P0.5mm_Horizontal",
+      "position_mm": {
+        "x": 65.25,
+        "y": 24.0
+      },
+      "pad_count": 42,
+      "board_side": "top"
+    },
+    {
+      "reference": "J15",
+      "value": "+5V Hout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 65.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J12",
+      "value": "Conn_01x04",
+      "footprint": "JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal",
+      "position_mm": {
+        "x": 44.8,
+        "y": 23.5
+      },
+      "pad_count": 6,
+      "board_side": "top"
+    },
+    {
+      "reference": "J6",
+      "value": "Trigger IN",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 105.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "Q1",
+      "value": "IRLB8721PBF",
+      "footprint": "TO-247-3_Horizontal_TabDown",
+      "position_mm": {
+        "x": 98.5,
+        "y": 63.95
+      },
+      "pad_count": 4,
+      "board_side": "top"
+    },
+    {
+      "reference": "J13",
+      "value": "+5V Fout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 60.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "SW4",
+      "value": "SW_Push_Dual_x2",
+      "footprint": "SW_PUSH_6mm",
+      "position_mm": {
+        "x": 24.4,
+        "y": 69.3
+      },
+      "pad_count": 4,
+      "board_side": "top"
+    },
+    {
+      "reference": "J10",
+      "value": "3v",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 50.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J3",
+      "value": "5V MAIN",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 80.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J5",
+      "value": "Trigger OUT",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 75.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "R1",
+      "value": "10 ohm",
+      "footprint": "R_1206_3216Metric",
+      "position_mm": {
+        "x": 95.4851,
+        "y": 46.4931
+      },
+      "pad_count": 2,
+      "board_side": "top"
+    },
+    {
+      "reference": "J8",
+      "value": "CLK",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 40.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "R2",
+      "value": "10k ohm",
+      "footprint": "R_1206_3216Metric",
+      "position_mm": {
+        "x": 100.5375,
+        "y": 46.5
+      },
+      "pad_count": 2,
+      "board_side": "top"
+    },
+    {
+      "reference": "J4",
+      "value": "0V Main",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 100.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "SW1",
+      "value": "SW_Push_Dual_x2",
+      "footprint": "SW_PUSH_6mm",
+      "position_mm": {
+        "x": 24.4,
+        "y": 21.3
+      },
+      "pad_count": 4,
+      "board_side": "top"
+    },
+    {
+      "reference": "J14",
+      "value": "0V Fout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 85.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "J17",
+      "value": "+5V RPIout",
+      "footprint": "SolderWirePad_3x4_SMD_1x2mm",
+      "position_mm": {
+        "x": 70.0,
+        "y": 76.0
+      },
+      "pad_count": 1,
+      "board_side": "top"
+    },
+    {
+      "reference": "SW3",
+      "value": "SW_Push_Dual_x2",
+      "footprint": "SW_PUSH_6mm",
+      "position_mm": {
+        "x": 24.4,
+        "y": 53.3
+      },
+      "pad_count": 4,
+      "board_side": "top"
+    }
+  ],
+  "nonplated_drill_features": [
+    {
+      "reference": "Q1",
+      "pad_number": "",
+      "centre_mm": {
+        "x": 78.64,
+        "y": 58.5
+      },
+      "drill_mm": {
+        "x": 3.6,
+        "y": 3.6
+      },
+      "footprint": "TO-247-3_Horizontal_TabDown"
+    }
+  ],
+  "plated_drill_count": 35,
+  "explicit_mounting_footprint_refs": [],
+  "mechanical_hole_centres_verified": false,
+  "screw_retention_layout_resolved": false,
+  "source_has_explicit_mounting_footprints": false,
+  "connector_mating_clearance_verified": false,
+  "component_height_verified": false,
+  "board_source_coordinates_only": true,
+  "warning": "Non-plated drill features may belong to components, not structural fasteners. Only independently designated/checked mounting centres can support standoffs.",
+  "physical_fit_authorized": false,
+  "source_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "reference_repository": "https://github.com/sector07-dev/RPI_DEV",
+  "upstream_commit": "ebdfcff",
+  "reference_archive": "RPI DEV PCB Files.zip",
+  "reference_board_path": "RPI Dev/RPI_Dev_1/RPI_Dev_1.kicad_pcb",
+  "validation_scope": "PCB source geometry and component/drill positions only; no physical measurements"
+}

@@ -159,3 +159,26 @@ def test_cleanroom_context_is_invariant_to_source_upload_order() -> None:
     assert [
         row["source_id"] for row in second_session["context"]["registered_sources"]
     ] == ["source-1", "source-2"]
+
+
+def test_cleanroom_accepts_canonical_source_alias_not_invented_evidence() -> None:
+    """Known numbered aliases resolve to registered source IDs before review."""
+    result = run_embedded_operator_turn(
+        "project-1", 3, _snapshot(),
+        mission="Review persisted engineering source facts.",
+        llm_callable=_fake_llm(_proposal_response(source_id="S1")),
+    )
+    assert result["operator_session"]["actions"][0]["source_ids"] == ["source-1"]
+    assert result["operator_session"]["unrecognized_source_references"] == []
+
+
+def test_cleanroom_rejects_unknown_source_alias_even_when_other_ids_resolve() -> None:
+    """One legitimate citation cannot launder a second hallucinated identifier."""
+    proposal = _proposal_response(source_id="source-1")
+    proposal["actions"][0]["source_ids"] = ["source-1", "S999"]
+    with pytest.raises(CleanroomContractError, match="S999"):
+        run_embedded_operator_turn(
+            "project-1", 3, _snapshot(),
+            mission="Review persisted engineering source facts.",
+            llm_callable=_fake_llm(proposal),
+        )

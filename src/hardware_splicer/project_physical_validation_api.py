@@ -31,6 +31,9 @@ from .remote_physical_validation import (
     audit_remote_physical_return,
     build_remote_physical_handoff,
 )
+from .project_chemistry_release_gate import (
+    evaluate_project_chemistry_gate, block_audited_physical_authorization,
+)
 from .project_store import (
     CorruptProject,
     ProjectNotFound,
@@ -135,6 +138,9 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                 project_id=project_id,
                 revision=int(envelope["revision"]),
             )
+            chemistry_gate = evaluate_project_chemistry_gate(
+                envelope["snapshot"], project_id=project_id,
+            )
         except Exception as exc:
             raise _error(exc) from exc
         return {
@@ -143,6 +149,8 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
             "revision": envelope["revision"],
             "recovery": envelope.get("recovery"),
             "physical_validation_packet": packet,
+            "chemistry_release_gate": chemistry_gate,
+            "physical_operation_clearance_blocked_by_chemistry": chemistry_gate["blocked"],
             "physical_correctness": "UNPROVEN",
             "physical_authority_granted": False,
         }
@@ -284,11 +292,19 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                 if isinstance(prior_validation, Mapping)
                 else {}
             )
+            chemistry_gate = evaluate_project_chemistry_gate(
+                snapshot, project_id=project_id,
+            )
+            # A pre-chemistry scoped permission MUST NOT be reused to perform
+            # a later powered capture on a newly blocked project revision.
+            # Block at the prerequisite gate as well as the final report.
             validate_packet_evidence(
                 packet,
                 request.envelopes,
-                prior_authorized_operations=list(
-                    prior_validation.get("scoped_authorized_operations") or []
+                prior_authorized_operations=(
+                    []
+                    if chemistry_gate["blocked"]
+                    else list(prior_validation.get("scoped_authorized_operations") or [])
                 ),
             )
             plan = physical_assessment_plan(
@@ -303,6 +319,7 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                 as_of=request.as_of,
             )
             gate_assessment = build_gate_assessment(packet, request.envelopes)
+            audited = block_audited_physical_authorization(audited, chemistry_gate)
             requested = [value.value for value in request.requested_operations]
             applicable_operations = [
                 value.value
@@ -325,6 +342,7 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                 "scoped_authorized_operations": (
                     applicable_operations if audited.applicable else []
                 ),
+                "chemistry_release_gate": chemistry_gate,
                 "physical_correctness": "UNPROVEN",
                 "automatic_authorization": False,
                 "global_authority_flags_unchanged": True,
@@ -356,6 +374,7 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
             "revision": saved["revision"],
             "physical_validation": physical_validation,
             "authorization_applicable": audited.applicable,
+            "chemistry_release_gate": chemistry_gate,
             "scoped_authorized_operations": physical_validation[
                 "scoped_authorized_operations"
             ],

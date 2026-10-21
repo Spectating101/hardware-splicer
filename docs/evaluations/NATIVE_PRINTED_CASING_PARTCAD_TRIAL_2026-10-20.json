@@ -1,0 +1,299 @@
+{
+  "3d_print_mesh_geometry_prepared": true,
+  "artifacts": {
+    "CASE_ASSEMBLED.png": {
+      "bytes": 52018,
+      "sha256": "b0a8d93f508c088553ff0bdd07d40a4aa09e0a3de1f7c49f637785ce91387e60"
+    },
+    "CASE_ASSEMBLED.solidcraft": {
+      "bytes": 2364,
+      "sha256": "55224ff3a1bd94659f941f0466696ba0d9d1db71b01f86deab63e470a183fdff"
+    },
+    "CASE_ASSEMBLED.step": {
+      "bytes": 139868,
+      "sha256": "82f65d3863a8dfeb9533e11c6d9229c177ee60f703ded2075eb31e9e2f3a02db"
+    },
+    "CASE_PRINT_LAYOUT.3mf": {
+      "bytes": 126049,
+      "sha256": "69412936ae8f8066babdc3bd70443c09b9a7b498e46dbe1cc6d923138800a678"
+    },
+    "CASE_PRINT_LAYOUT.png": {
+      "bytes": 76499,
+      "sha256": "5e7c4dbc7599f1265080c90d9cc4c285079dd699d15a3ab487748abf0b6f0037"
+    },
+    "CASE_PRINT_LAYOUT.solidcraft": {
+      "bytes": 2268,
+      "sha256": "0a4490b365b111fa954933d0847a07cdead6537a0eb1df0b5c105222515702e0"
+    },
+    "CASE_PRINT_LAYOUT.step": {
+      "bytes": 140708,
+      "sha256": "a08c44e82722386f14c09101452a69408a17041eca61ec9a78561ef1e56eb49c"
+    },
+    "HS_Casing_Base.step": {
+      "bytes": 81895,
+      "sha256": "a496e8c066862048e657da8e328f3926ea69e882892d81b9305e95f7d8065088"
+    },
+    "HS_Casing_Base.stl": {
+      "bytes": 594484,
+      "sha256": "8c2a8316a7a6f16ef2a56ebb00b983a3f1013fbb35276cfd10e66f92140d336b"
+    },
+    "HS_Casing_Lid.step": {
+      "bytes": 58401,
+      "sha256": "73c4c3cba22a673e69f786f377e99ee3d6941a3a3952084a36ee4eb5f48f9316"
+    },
+    "HS_Casing_Lid.stl": {
+      "bytes": 90684,
+      "sha256": "3a3de47f626b80b79fef043ce3f79a4347a12272fb977f89ef6fd6b0067229fb"
+    },
+    "SOLIDCRAFT_CASING_DESKTOP.png": {
+      "bytes": 235434,
+      "sha256": "de64a27a0dd8f1389668f22f76b800318c16405b4548a248debc04aa8c910109"
+    },
+    "partcad/HS_Casing_Base.step": {
+      "bytes": 81895,
+      "sha256": "a496e8c066862048e657da8e328f3926ea69e882892d81b9305e95f7d8065088"
+    },
+    "partcad/HS_Casing_Lid.step": {
+      "bytes": 58401,
+      "sha256": "73c4c3cba22a673e69f786f377e99ee3d6941a3a3952084a36ee4eb5f48f9316"
+    },
+    "partcad/PartCAD_Casing_Assembly.step": {
+      "bytes": 559565,
+      "sha256": "c56965ab3354595b3b2605f92be60163f25f35d9cd754a8a0159f36471940917"
+    },
+    "partcad/casing_assembled.assy": {
+      "bytes": 180,
+      "sha256": "e06dddadca60baa9adb914d97a536494bead019d4117d3332ff909ad6d34a2a1"
+    },
+    "partcad/casing_print_layout.assy": {
+      "bytes": 167,
+      "sha256": "919586ab9eb1a21ab40b5a9572eee89f28ad3edbb9a2daa54ffc37628dd93f3b"
+    },
+    "partcad/partcad.yaml": {
+      "bytes": 527,
+      "sha256": "cdd55a60e6bc6751c49af91bbde5e7b4877e6a6404111c5ea906d8a74ddcd3dd"
+    }
+  },
+  "assembled_solidcraft_bodies": [
+    {
+      "bbox": {
+        "max": [
+          100.0,
+          75.0,
+          35.0
+        ],
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "name": "HS_Casing_Base",
+      "volume_mm3": 50244.99019939494
+    },
+    {
+      "bbox": {
+        "max": [
+          100.0,
+          75.0,
+          37.400000000000006
+        ],
+        "min": [
+          -1.4210854715202004e-14,
+          0.0,
+          33.199999999999996
+        ]
+      },
+      "name": "HS_Casing_Lid",
+      "volume_mm3": 29464.148802742722
+    }
+  ],
+  "assembly_reexport_body_names_preserved": false,
+  "cable_port_mm": {
+    "face": "+X",
+    "height": 7.0,
+    "width": 14.0,
+    "y_centre": 37.5,
+    "z_centre": 17.5
+  },
+  "case_dimensions_mm": {
+    "base_height": 35.0,
+    "depth": 75.0,
+    "lid_thickness": 2.4,
+    "wall": 2.4,
+    "width": 100.0
+  },
+  "cavity_dimensions_xy_mm": [
+    95.2,
+    70.2
+  ],
+  "concept_spec_path": "examples/printed_casing/conceptual_salvage_controller.json",
+  "critical_remaining_evidence": [
+    "Actual donor dimensions, tolerances, mounting hole centres, connector mating shape and cable strain relief",
+    "Printer bed/material/nozzle/layer width/profile and slicer-generated G-code plus toolpath inspection",
+    "Physical first-article fit, screw engagement, board standoff match and post-print warping",
+    "Thermal, ventilation, electrical insulation, EMI and ingress safety"
+  ],
+  "declared_concept_only_not_donor_measured": true,
+  "environment": "Optiplex Linux",
+  "fabrication_or_power_authorized": false,
+  "filament_printer_settings_verified": false,
+  "gcode_generated": false,
+  "input_spec_sha256": "3410d0a41e4abbd6d70d80cb2de5fc18e2c78d70c162fb83178277c8862d3714",
+  "lip_clearance_per_side_mm": 0.35,
+  "native_feature_timeline_preserved_in_solidcraft": true,
+  "native_solidcraft_desktop_evidence": "examples/printed_casing/native_trial/SOLIDCRAFT_CASING_DESKTOP.png",
+  "native_solidcraft_desktop_gui_loaded": true,
+  "partcad_bom_exact": {
+    "casing_base": 1,
+    "casing_lid": 1,
+    "physical_owned_donor_count": 0
+  },
+  "partcad_native_export_succeeded": true,
+  "partcad_reexport_geometry_comparisons": [
+    {
+      "partcad_bbox": {
+        "max": [
+          100.0,
+          75.0,
+          37.400000000000006
+        ],
+        "min": [
+          0.0,
+          0.0,
+          33.19999999999952
+        ]
+      },
+      "partcad_volume": 29464.14665932128,
+      "source_bbox": {
+        "max": [
+          100.0,
+          75.0,
+          37.400000000000006
+        ],
+        "min": [
+          -1.4210854715202004e-14,
+          0.0,
+          33.199999999999996
+        ]
+      },
+      "source_volume": 29464.148802742722,
+      "within_tolerance": true
+    },
+    {
+      "partcad_bbox": {
+        "max": [
+          100.0,
+          75.0,
+          35.0
+        ],
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "partcad_volume": 50245.08441396857,
+      "source_bbox": {
+        "max": [
+          100.0,
+          75.0,
+          35.0
+        ],
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source_volume": 50244.99019939494,
+      "within_tolerance": true
+    }
+  ],
+  "partcad_version": "0.8.220",
+  "physical_fit_or_prototype_printed": false,
+  "print_layout_3mf": {
+    "mesh_objects": 2,
+    "model_file": "3D/3dmodel.model",
+    "model_units": "millimeter",
+    "valid_3mf": true
+  },
+  "printer_attached": false,
+  "real_native_partcad_executed": true,
+  "real_native_solidcraft_executed": true,
+  "sample_board_standoffs": 4,
+  "sample_lid_screw_bosses": 4,
+  "schema_version": "hardware_splicer.native_parametric_printed_casing_evidence.v1",
+  "slicer_run": false,
+  "solidcraft_body_measurements": [
+    {
+      "bbox": {
+        "max": [
+          100.0,
+          75.0,
+          35.0
+        ],
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "edges": 68,
+      "faces": 47,
+      "name": "HS_Casing_Base",
+      "volume_mm3": 50244.99019939494
+    },
+    {
+      "bbox": {
+        "max": [
+          212.0,
+          75.0,
+          4.1999999999999975
+        ],
+        "min": [
+          111.99999999999999,
+          0.0,
+          0.0
+        ]
+      },
+      "edges": 44,
+      "faces": 31,
+      "name": "HS_Casing_Lid",
+      "volume_mm3": 29464.148802742737
+    }
+  ],
+  "solidcraft_version": "0.16.2",
+  "stl_independent_manifold_tests": {
+    "base": {
+      "independent_meshing_volume_difference_mm3": -18.5,
+      "native_solid_volume_mm3": 50244.99019939494,
+      "report": {
+        "closed_manifold": true,
+        "size_mm": [
+          100.0,
+          75.0,
+          35.0
+        ],
+        "triangles": 11888,
+        "volume_mm3": 50226.49
+      }
+    },
+    "lid": {
+      "independent_meshing_volume_difference_mm3": 2.711,
+      "native_solid_volume_mm3": 29464.148802742737,
+      "report": {
+        "closed_manifold": true,
+        "size_mm": [
+          100.0,
+          75.0,
+          4.2
+        ],
+        "triangles": 1812,
+        "volume_mm3": 29466.86
+      }
+    }
+  },
+  "trial_date": "2026-10-20",
+  "ventilation_holes": 6
+}

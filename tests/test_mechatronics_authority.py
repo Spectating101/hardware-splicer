@@ -209,3 +209,26 @@ def test_mechatronics_authority_api_returns_packet():
     data = response.json()
     assert data["schema_version"] == "hardware_splicer.mechatronics_authority.v1"
     assert data["production_authorized"] is True
+
+
+
+def test_inconclusive_structural_screen_blocks_hardware_splicer_product_release():
+    closed = build_mechatronics_authority(_closed_spec(), engineering=_engineering())
+    assert closed["production_authorized"] is True
+    analysis = _engineering()
+    analysis["analysis"]["mechanism"]["structural_screening"] = {
+        "schema_version": "hardware_splicer.mechanical_workflow_bridge.v1",
+        "status": "screened_inconclusive",
+        "blockers": ["hole_1_peak_stress_not_converged"],
+        "fabrication_authorized": False,
+        "release_authorized": False,
+    }
+    guarded = build_mechatronics_authority(_closed_spec(), engineering=analysis)
+    assert guarded["production_authorized"] is False
+    assert guarded["current_authority_level"] != "production_mechatronics_release"
+    assert guarded["stages"][-1]["status"] == "open"
+    assert guarded["subsystems"]["mechanical"]["production_authorized"] is False
+    assert any(
+        "structural screening" in str(x).lower()
+        for x in guarded["stages"][-1]["blockers"]
+    )

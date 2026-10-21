@@ -282,6 +282,25 @@ def create_ai_project_tool_executor_router(
             session["physical_authority_unchanged"] = True
             sessions[session_index] = session
             snapshot["engineeringAiSessions"] = sessions
+            if (action.get("action_type") == "research_engineering_context"
+                    and tool_result.get("status") == "succeeded"):
+                # Persist only bounded cited excerpts from the executed source
+                # action so the *next* AI session can reason over evidence.
+                research_summary = _mapping(tool_result.get("summary"))
+                history = _rows(snapshot.get("engineeringWebResearchRuns"))
+                if len(history) >= 12:
+                    history=history[-11:]
+                history.append({
+                    'request_id':research_summary.get('research_request_id'),
+                    'request_sha256':research_summary.get('request_sha256'),
+                    'searched_at_utc':research_summary.get('searched_at_utc'),
+                    'research_status':research_summary.get('research_status'),
+                    'sources':research_summary.get('sources',[])[:3],
+                    'tool_action_id':action_id,
+                    'session_id':session_id,
+                    'authority_ceiling':'unverified_external_source',
+                })
+                snapshot['engineeringWebResearchRuns']=history
             # Findings come from the executed tool_result gate, never from the
             # request body. The request carries only expected_revision.
             snapshot = _record_design_quality_findings(snapshot, action_id, tool_result)

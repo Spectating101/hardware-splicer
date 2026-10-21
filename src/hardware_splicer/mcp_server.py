@@ -85,6 +85,15 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_prepare_printed_casing",
+            description="Prepare declared-concept SolidCraft casing instructions; no physical printer or fit approval.",
+            inputSchema={
+                "type": "object",
+                "properties": {"casing_spec": {"type": "object"}},
+                "required": ["casing_spec"],
+            },
+        ),
+        Tool(
             name="hs_plan_salvage",
             description=(
                 "Plan salvage splice from goal + inventory without KiCad compile (~fast). "
@@ -543,6 +552,10 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
         return _tool_result(sdk.resolve_inventory_parts(args.get("parts") or []))
     if name == "hs_suggest_modules":
         return _tool_result(sdk.suggest_modules(str(args.get("goal") or "")))
+    if name == "hs_prepare_printed_casing":
+        return _tool_result(await asyncio.to_thread(
+            sdk.prepare_printed_casing, casing_spec=args.get("casing_spec") or {}
+        ))
     if name == "hs_plan_salvage":
         return _tool_result(
             sdk.plan_salvage(

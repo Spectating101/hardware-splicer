@@ -32,6 +32,16 @@ mcp = ["mcp>=1.2,<2"]
 # Canonical whole-product MCP gateway targets the current stable SDK line.
 backend-mcp = ["mcp>=2,<3"]
 dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
+# Bounded structural FEM screening; optional on lightweight installations.
+physics = ["numpy>=1.26", "scipy>=1.11"]
+cad-meshing = ["gmsh>=4.14,<5"]
+physics-validation = ["scikit-fem>=11,<12"]
+# Chemistry science backends are opt-in; practical chemistry uses core dependencies.
+chemical = ["rdkit>=2024.9", "thermo>=0.4", "chemicals>=1.3"]
+chemical-process = ["cantera>=3.1,<4"]
+chemical-battery = ["pybamm>=26.4,<27"]
+chemical-materials = ["pymatgen-core>=2026.7"]
+chemical-fluids = ["CoolProp>=7.1,<8"]
 
 [project.scripts]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"
@@ -40,6 +50,7 @@ hs-mcp = "hardware_splicer.cli_entry:main_mcp"
 hs-backend-mcp = "hardware_splicer.cli_entry:main_backend_mcp"
 hs-capability-freeze = "hardware_splicer.cli_entry:main_capability_freeze"
 hs-derive = "hardware_splicer.cli_entry:main_derive"
+hs-mechanical = "hardware_splicer.cli_entry:main_mechanical"
 
 [tool.setuptools.packages.find]
 where = ["src"]

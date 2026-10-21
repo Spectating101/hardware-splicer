@@ -1,0 +1,6 @@
+1. Measure actual pin and bore diameters with traceable instruments
+2. Test multiple physical specimens in at least two print orientations
+3. Log force-displacement curves and observed failure locations
+4. Match actual fastening fixture and material properties to the FEM case
+5. Re-evaluate bore-surface contact stresses using refined contact integration
+6. Obtain independent engineering sign-off before any load-bearing release

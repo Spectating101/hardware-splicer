@@ -127,23 +127,93 @@ def _splicer_cadquery_note() -> str:
 
 
 def _scenario_passes(scenario_path: Path, result_path: Path, proc: subprocess.CompletedProcess[str]) -> tuple[bool, str]:
+    """Check software execution AND preservation of production safety gates.
+
+    `scenario` CLI exits 1 if a project compiles but cannot obtain production
+    authority. That is an EXPECTED safety outcome for an exploration/smoke
+    harness, not an exception or an incomplete compile. It must still produce
+    consistent, inspectable blocked-release evidence. This does NOT approve
+    release, override any gate, or change a scenario's expected authority.
+    """
     if not result_path.is_file():
         return False, proc.stderr.strip()[-200:] or "missing SCENARIO_RESULT.json"
-    body = json.loads(result_path.read_text(encoding="utf-8"))
-    compile_ok = bool(body.get("compile_ok"))
-    claimable = bool((body.get("project_authority") or {}).get("claimable"))
+    try:
+        body = json.loads(result_path.read_text(encoding="utf-8"))
+        if not isinstance(body, dict):
+            raise ValueError("scenario result must be an object")
+    except (ValueError, OSError) as exc:
+        return False, f"invalid SCENARIO_RESULT.json: {exc}"
+
+    if body.get("schema_version") != "hardware_splicer.scenario_result.v1":
+        return False, "scenario result schema version missing or unsupported"
+    compile_ok = body.get("compile_ok") is True
+    authority = body.get("project_authority") or {}
+    metrics = body.get("production_release_metrics") or {}
+    if not isinstance(authority, dict) or not isinstance(metrics, dict):
+        return False, "scenario authority and production metrics must be objects"
+    if (authority.get("schema_version") != "hardware_splicer.project_authority.v1"
+            or metrics.get("schema_version") != "hardware_splicer.production_release_metrics.v1"):
+        return False, "scenario authority or production gate schema missing or unsupported"
+    claimable = authority.get("claimable") is True
+    production_ready = metrics.get("production_ready") is True
+    scenario_ok = body.get("ok") is True
     negative = "bad_speed" in scenario_path.stem or "bad" in scenario_path.stem
-    if negative:
-        ok = compile_ok and not claimable
-        detail = f"negative_test compile_ok={compile_ok} claimable={claimable}"
-        return ok, detail
-    ok = compile_ok and (proc.returncode == 0 or claimable)
-    detail = f"compile_ok={compile_ok} claimable={claimable} exit={proc.returncode}"
-    if not ok:
+
+    prefix = f"compile_ok={compile_ok} claimable={claimable} exit={proc.returncode}"
+    if not compile_ok:
+        return False, prefix + "; compilation failed"
+
+    mirrored_metrics = authority.get("production_release_metrics") or {}
+    if not isinstance(mirrored_metrics, dict):
+        return False, prefix + "; malformed mirrored project authority metrics"
+    gaps = metrics.get("evidence_gap_ids")
+    blockers = metrics.get("what_blocks_production")
+    passed = metrics.get("gates_passed")
+    total = metrics.get("gates_total")
+    mirrored = mirrored_metrics.get("production_ready")
+    mirrors_agree = (
+        mirrored_metrics.get("schema_version") == metrics.get("schema_version")
+        and mirrored_metrics.get("gates_passed") == passed
+        and mirrored_metrics.get("gates_total") == total
+        and mirrored_metrics.get("evidence_gap_ids") == gaps
+    )
+    release_level = authority.get("project_authority_level")
+    authorized_consistently = (
+        claimable and production_ready and scenario_ok and proc.returncode == 0 and not negative
+        and type(passed) is int and type(total) is int and total > 0 and passed == total
+        and gaps == [] and (metrics.get("what_blocks_production") or []) == []
+        and mirrored is True and mirrors_agree
+        and release_level == "production_ready_project_package"
+        and authority.get("blockers") == []
+    )
+    if authorized_consistently:
+        return True, prefix + f"; outcome=production_authorized gates={passed}/{total}"
+    blocked_consistently = (
+        not claimable and not production_ready and not scenario_ok
+        and isinstance(gaps, list) and bool(gaps)
+        and all(isinstance(g, str) and bool(g) for g in gaps)
+        and isinstance(blockers, list) and bool(blockers)
+        and all(isinstance(v, str) and bool(v) for v in blockers)
+        and type(passed) is int and type(total) is int
+        and 0 <= passed < total
+        and total - passed == len(gaps)
+        and mirrored is False and mirrors_agree
+        and release_level != "production_ready_project_package"
+        and proc.returncode in (0, 1)
+    )
+    if blocked_consistently:
+        kind = "negative_safety_scenario" if negative else "compiled_release_blocked"
+        return True, prefix + f"; outcome={kind} gates={passed}/{total} gap_ids={','.join(gaps)}"
+
+    detail = prefix + (
+        f"; inconsistent release evidence (production_ready={production_ready}, "
+        f"scenario_ok={scenario_ok}, gates={passed}/{total}, gap_ids={gaps})"
+    )
+    if not negative:
         note = _splicer_cadquery_note()
         if note:
             detail += "; " + note
-    return ok, detail
+    return False, detail
 
 
 def test_scenarios(rows: List[Dict[str, Any]]) -> None:
@@ -168,8 +238,26 @@ def test_scenarios(rows: List[Dict[str, Any]]) -> None:
                 text=True,
                 timeout=300,
             )
-            ok, detail = _scenario_passes(scenario, target / "SCENARIO_RESULT.json", proc)
-            rows.append(_row("scenario", name, ok, detail))
+            result_path = target / "SCENARIO_RESULT.json"
+            ok, detail = _scenario_passes(scenario, result_path, proc)
+            # A passing exploration row does NOT assert production readiness.
+            # Keep release authority separately queryable in the JSON report.
+            extra: Dict[str, Any] = {}
+            if result_path.is_file():
+                try:
+                    result = json.loads(result_path.read_text(encoding="utf-8"))
+                    m = result.get("production_release_metrics") or {}
+                    extra = {
+                        "software_compile_ok": result.get("compile_ok") is True,
+                        "scenario_release_authorized": result.get("ok") is True,
+                        "production_ready": m.get("production_ready") is True,
+                        "production_evidence_gap_ids": m.get("evidence_gap_ids") or [],
+                        "gates_passed": m.get("gates_passed"),
+                        "gates_total": m.get("gates_total"),
+                    }
+                except (OSError, ValueError, AttributeError):
+                    extra = {"result_unreadable": True}
+            rows.append(_row("scenario", name, ok, detail, extra))
         except Exception as exc:
             rows.append(_row("scenario", name, False, str(exc)))
 

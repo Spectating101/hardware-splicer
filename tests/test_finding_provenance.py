@@ -206,9 +206,14 @@ def test_failed_check_deterministic_only_for_executor_registry() -> None:
                         "1.8 V DUT interface is not protected from 3.3 V controller",
                     ),
                     _failed_action(
-                        "action-unknown-tool",
+                        "action-erc",
                         "run_erc",
-                        "ERC adapter is not implemented.",
+                        "ERC ran and returned a failed rule check.",
+                    ),
+                    _failed_action(
+                        "action-unknown-tool",
+                        "invented_preview",
+                        "This action is not a registered executor tool.",
                     ),
                 ],
             )
@@ -220,6 +225,10 @@ def test_failed_check_deterministic_only_for_executor_registry() -> None:
 
     assert by_id["action-compose"]["category"] == "failed_check"
     assert by_id["action-compose"]["provenance"]["kind"] == "deterministic"
+    # ERC is now in the explicit executor allowlist, unlike the old fixture.
+    assert "run_erc" in EXECUTABLE_AI_PREVIEW_ACTIONS
+    assert by_id["action-erc"]["provenance"]["kind"] == "deterministic"
+    # Unregistered actions must still remain unknown; do not bless any name.
     assert by_id["action-unknown-tool"]["provenance"]["kind"] == "unknown"
 
 

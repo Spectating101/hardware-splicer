@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 
 from .stored_source_parser import read_registered_source_bytes
 from .engineering_reference_bom_audit import audit_markdown_reference_bom
+from .engineering_kicad_interface import inspect_board_interface_bytes
 from .engineering_multidomain_sources import inspect_step_brep, inspect_repair_guide_html, inspect_scad_polyhedron
 from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
 
@@ -177,9 +178,6 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
             'Unknown physical measurements, safety and procurement remain blocked.',
         ]
         return result
-    if not shutil.which('kicad-cli'):
-        result['reason'] = 'kicad-cli unavailable'
-        return result
     bases = sorted({name[:-10] for name, kind in formats.items() if kind == 'kicad_board'})
     if not bases:
         result['reason'] = 'no KiCad board in source bundle'
@@ -197,6 +195,12 @@ def analyze_project_bundle(named: Mapping[str, bytes], *, source_identity: Mappi
         result['project_context'] = 'partial'
         return result
     result['project_context'] = 'source_bundle_sibling_files_present'
+    result['board_interface_geometry'] = inspect_board_interface_bytes(named[base + '.kicad_pcb'])
+    # Report missing project companions before evaluating tool availability;
+    # source-context errors must be stable on developer hosts and CI machines.
+    if not shutil.which('kicad-cli'):
+        result['reason'] = 'kicad-cli unavailable'
+        return result
     with tempfile.TemporaryDirectory(prefix='hs-registered-kicad-project-') as scratch:
         for name, content in named.items():
             if name in formats and formats[name].startswith('kicad_'):

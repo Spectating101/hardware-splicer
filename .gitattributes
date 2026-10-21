@@ -1,0 +1,16 @@
+# Native CAD export data: preserve exact bytes and source SHA-256.
+# STEP emitters may contain significant internal spacing/OCCT formatting.
+examples/partcad/native_trial/*.step -diff -whitespace
+# Native 3D-print/casing binary and STEP artifacts: preserve publisher output.
+examples/printed_casing/native_trial/*.step -diff -whitespace
+examples/printed_casing/native_trial/partcad/*.step -diff -whitespace
+examples/printed_casing/native_trial/*.stl -diff -whitespace
+examples/printed_casing/native_trial/*.3mf -diff -whitespace
+examples/printed_casing/native_trial/*.solidcraft -diff -whitespace
+# Saved mechanical calibration STEP is generated geometry, not hand-authored prose.
+projects/unified_engineering_20261021/artifacts/structural_calibration/*.step -diff -whitespace
+# Numerical solver CSV uses the producer's CRLF bytes; keep evidence exact.
+projects/unified_engineering_20261021/artifacts/structural_calibration/*.csv -text -diff -whitespace
+# Source-derived HS candidate geometry. Keep OCCT export bytes unchanged.
+projects/cyberdeck_edge_retention_20261021/*.step -diff -whitespace
+projects/cyberdeck_edge_retention_20261021/*.stl -diff -whitespace

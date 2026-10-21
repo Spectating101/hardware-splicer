@@ -30,24 +30,24 @@ def test_scenario_to_compile_spec_resolves_relative_spec_path():
 
 
 @pytest.mark.skipif(not FULL_3D_RUNTIME, reason="production scenario authority requires full 3D runtime")
-def test_rover_scenario_generates_claimable_project_authority(tmp_path):
+def test_rover_scenario_preserves_compilation_but_blocks_unverified_release(tmp_path):
     scenario = load_hardware_scenario(ROVER_SCENARIO)
 
     result = run_hardware_scenario(scenario, out_dir=tmp_path / "rover", start_splicer=False, request_id="scenario-rover")
 
     authority = result["project_authority"]
     assert result["compile_ok"] is True
-    assert result["ok"] is True
+    assert result["ok"] is False
     assert authority["schema_version"] == "hardware_splicer.project_authority.v1"
-    assert authority["claimable"] is True
-    assert authority["project_authority_level"] == "production_ready_project_package"
-    assert authority["dashboard"]["simulation_ready"] is True
-    assert authority["dashboard"]["robotics_project_release"] is True
-    assert authority["dashboard"]["hardware_splicer_release"] is True
-    assert authority["dashboard"]["production_readiness_score"] == 1.0
-    assert authority["production_release_metrics"]["production_ready"] is True
+    assert authority["claimable"] is False
+    assert authority["project_authority_level"] != "production_ready_project_package"
+    assert authority["dashboard"]["simulation_ready"] is False
+    assert authority["dashboard"]["robotics_project_release"] is False
+    assert authority["dashboard"]["hardware_splicer_release"] is False
+    assert authority["dashboard"]["production_readiness_score"] < 1.0
+    assert authority["production_release_metrics"]["production_ready"] is False
     assert authority["dashboard"]["required_artifacts_present"] is True
-    assert authority["blockers"] == []
+    assert authority["blockers"]
     assert Path(result["artifacts"]["project_authority"]).exists()
     assert Path(result["artifacts"]["production_release_metrics"]).exists()
     assert Path(result["artifacts"]["scenario_summary"]).exists()
@@ -55,10 +55,12 @@ def test_rover_scenario_generates_claimable_project_authority(tmp_path):
 
     saved = json.loads(Path(result["artifacts"]["project_authority"]).read_text(encoding="utf-8"))
     metrics = json.loads(Path(result["artifacts"]["production_release_metrics"]).read_text(encoding="utf-8"))
-    assert saved["claimable"] is True
-    assert saved["subsystem_authority"]["robotics_simulation"]["blocking_finding_count"] == 0
-    assert metrics["production_ready"] is True
-    assert metrics["gates_passed"] == metrics["gates_total"]
+    assert saved["claimable"] is False
+    assert saved["subsystem_authority"]["mechanical"]["production_authorized"] is False
+    assert metrics["production_ready"] is False
+    assert metrics["gates_passed"] < metrics["gates_total"]
+    assert "mechanical_release" in metrics["evidence_gap_ids"]
+    assert "integrated_bench" in metrics["evidence_gap_ids"]
 
 
 def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
@@ -85,7 +87,7 @@ def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
     not (FULL_3D_RUNTIME and KICAD_RUNTIME),
     reason="closed pan/tilt STEP authority requires full 3D and KiCad runtimes",
 )
-def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path):
+def test_closed_pan_tilt_scenario_generates_3d_but_preserves_unvalidated_release_gates(tmp_path):
     scenario = load_hardware_scenario(PAN_TILT_SCENARIO)
 
     result = run_hardware_scenario(scenario, out_dir=tmp_path / "pan-tilt", start_splicer=True, request_id="scenario-pan-tilt")
@@ -97,16 +99,22 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     step_report = json.loads(Path(result["artifacts"]["kicad_step_assembly_report"]).read_text(encoding="utf-8"))
     step_placement = json.loads(Path(result["artifacts"]["kicad_step_placement"]).read_text(encoding="utf-8"))
 
+    # CAD generation is substantial but does NOT prove measured fixture
+    # stiffness, load-bearing contact, or integrated hardware bench release.
+    # The scenario's aspirational production target must stay *blocked*.
     assert result["compile_ok"] is True
-    assert result["ok"] is True
-    assert authority["claimable"] is True
-    assert authority["project_authority_level"] == "production_ready_project_package"
-    assert authority["dashboard"]["simulation_ready"] is True
-    assert authority["dashboard"]["robotics_project_release"] is True
-    assert authority["dashboard"]["hardware_splicer_release"] is True
-    assert authority["blockers"] == []
-    assert metrics["production_ready"] is True
-    assert metrics["gates_passed"] == metrics["gates_total"] == 9
+    assert result["ok"] is False
+    assert authority["claimable"] is False
+    assert authority["project_authority_level"] != "production_ready_project_package"
+    assert authority["dashboard"]["simulation_ready"] is False
+    assert authority["dashboard"]["robotics_project_release"] is False
+    assert authority["dashboard"]["hardware_splicer_release"] is False
+    assert authority["blockers"]
+    assert metrics["production_ready"] is False
+    assert 0 < metrics["gates_passed"] < metrics["gates_total"] == 9
+    assert "mechanical_release" in metrics["evidence_gap_ids"]
+    assert "integrated_bench" in metrics["evidence_gap_ids"]
+    assert metrics["what_blocks_production"]
     assert Path(result["artifacts"]["splicer3d_script"]).exists()
     assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
     assert Path(result["artifacts"]["kicad_step_assembly_model"]).exists()
@@ -155,7 +163,9 @@ def test_scenario_run_api_returns_project_authority(tmp_path, monkeypatch):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["ok"] is True
-    assert data["project_authority"]["claimable"] is True
-    assert data["production_release_metrics"]["production_ready"] is True
+    assert data["compile_ok"] is True
+    assert data["ok"] is False
+    assert data["project_authority"]["claimable"] is False
+    assert data["production_release_metrics"]["production_ready"] is False
+    assert "mechanical_release" in data["production_release_metrics"]["evidence_gap_ids"]
     assert Path(data["artifacts"]["project_authority"]).exists()

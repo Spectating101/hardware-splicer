@@ -1,0 +1,99 @@
+{
+  "schema": "hs.independent_partial_3d_clearance.v2",
+  "status": "packaged_case_component_collision_found",
+  "cad_case_step_sha256s": {
+    "base": "sha256:45f03352e7d5cbc2ba027358508113e925d3c5def6bff68cc72dfe056a659286",
+    "lid": "sha256:5b45102bf3e1161a9d7792aa2c392decd76d6952e3745e16c4618bdc1c36cd12"
+  },
+  "original_kicad_pcb_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "original_kicad_reexport_board_sha256": "sha256:e3e85d9a7694cdbe1834554ebbf47033cb3398559cbfe86d997c3ae5ac920bbb",
+  "publisher_3d_reference_coverage": {
+    "modelled": 7,
+    "expected_models": 11,
+    "no_3d_model": 15
+  },
+  "prior_model_reference_manifest_original_case_step_sha256s": {
+    "base": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+    "lid": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1"
+  },
+  "prior_reference_audit_matches_exact_packaged_cad_sha256s": false,
+  "prior_audit_result_reused": false,
+  "all_seven_original_model_placements_nominally_clear": false,
+  "independent_model_collisions": [
+    {
+      "reference": "SW5",
+      "component_step_sha256": "sha256:4c767b0f6ac99494e0a17b32538063f5b6d455ac728a9645461426e528e4e3d7",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    },
+    {
+      "reference": "SW2",
+      "component_step_sha256": "sha256:c419fa25532283a303d26e1e54c711595009d52fe07f6b165abb95f3aaa93bb2",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    },
+    {
+      "reference": "SW4",
+      "component_step_sha256": "sha256:5d8224aeccc85ddf7042ad82527dc822eb258c61ea834e4f7e6b67572e5a5f10",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    },
+    {
+      "reference": "R1",
+      "component_step_sha256": "sha256:70f1b60ffb37031d6a81d7f3fda07ad869f665f0ae51717691068e5b006ed47e",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    },
+    {
+      "reference": "R2",
+      "component_step_sha256": "sha256:e3f7df9b87b69c0d7c3095adf6e2d474b2a71aebd6e51c1b1a02f73fd65519b4",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    },
+    {
+      "reference": "SW1",
+      "component_step_sha256": "sha256:3ac9e29357ba4055597a08c46cdc7fd227201fcd3800408680d7a21722681e9e",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 1.584,
+      "both_halves_nominally_clear": false
+    },
+    {
+      "reference": "SW3",
+      "component_step_sha256": "sha256:86c043b9e55f28c5d059e76b91895df18d7126a5d8b21fb07ea2f80c647d0e10",
+      "base_intersection_mm3": 0.0,
+      "lid_intersection_mm3": 0.0,
+      "both_halves_nominally_clear": true
+    }
+  ],
+  "unresolved_model_references": [
+    "J2",
+    "J1",
+    "J12",
+    "Q1"
+  ],
+  "untested_unmodelled_footprints": [
+    "J16",
+    "J19",
+    "J9",
+    "J18",
+    "J11",
+    "J15",
+    "J6",
+    "J13",
+    "J10",
+    "J3",
+    "J5",
+    "J8",
+    "J4",
+    "J14",
+    "J17"
+  ],
+  "other_assembly_and_mating_clearance_verified": false,
+  "print_or_fabrication_authorized": false,
+  "source_original_model_hashes_verified": true
+}

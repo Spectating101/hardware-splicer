@@ -26,15 +26,22 @@ FULL_3D_RUNTIME = importlib.util.find_spec("cadquery") is not None
         ("examples/intakes/plant_watering_tier5_brief.json", 9),
     ],
 )
-def test_plant_release_briefs_hit_nine_of_nine_gates(tmp_path, brief_rel, expected_gates):
+def test_plant_release_briefs_do_not_fake_nine_of_nine_without_mechanical_closure(tmp_path, brief_rel, expected_gates):
     intake = load_project_intake(ROOT / brief_rel)
     vision = dict(intake.get("vision_assistance") or {})
     vision["live"] = False
     intake["vision_assistance"] = vision
-    run_project_intake(intake, out_dir=tmp_path / "intake", start_splicer=False)
+    result = run_project_intake(intake, out_dir=tmp_path / "intake", start_splicer=False)
     card = scorecard_from_artifacts(tmp_path / "intake")
-    assert int(card.get("gates_passed") or 0) >= expected_gates
-    assert float(card.get("production_readiness_score") or 0) >= 0.99
+    assert result["compile_ok"] is True
+    assert result["ok"] is False
+    assert card["production_ready"] is False
+    assert int(card.get("gates_total") or 0) == expected_gates
+    assert 0 < int(card.get("gates_passed") or 0) < expected_gates
+    assert float(card.get("production_readiness_score") or 0) < 1.0
+    assert "mechanical_release" in card["evidence_gap_ids"]
+    assert "integrated_bench" in card["evidence_gap_ids"]
+    assert result["project_authority"]["claimable"] is False
 
 
 def test_annotated_vision_brief_closes_more_mechanical_evidence_than_brief_only(tmp_path):

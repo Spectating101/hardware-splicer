@@ -5,10 +5,12 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import json
+import tempfile
 from typing import Any, Dict, Optional
 
 
-DEFAULT_AGY_MODEL = "gemini-2.5-flash"
+DEFAULT_AGY_MODEL = "gemini-3.8-flash-medium"
 DEFAULT_AGY_TIMEOUT_S = 600
 
 
@@ -68,26 +70,37 @@ def call_agy_chat(
     parts.append(user_prompt)
     full_prompt = "\n\n".join(part for part in parts if part)
 
+    # Current agy parses --print as an optional-value flag: spelling it as
+    # a standalone argument consumes the following --model switch as text.
+    # `--print=<prompt>` is required. Sandbox + isolated cwd reduce ambient
+    # file/tool access; agy does not yet advertise a strict no-tools switch.
+    # Only the separate HS preview executor may mutate project artifacts.
+    if len(full_prompt.encode("utf-8")) > 100_000:
+        return {"ok": False, "error": "agy_prompt_too_large_for_cli", "model": selected_model}
     cmd = [
         agy_binary(),
-        "--print",
-        "--model",
-        selected_model,
-        "--print-timeout",
-        f"{wait_s}s",
-        full_prompt,
+        "--model", selected_model,
+        "--mode", "plan",
+        "--sandbox",
+        "--disable-slash-commands",
+        "--print-timeout", f"{wait_s}s",
+        "--print=" + full_prompt,
     ]
     if temperature <= 0:
         pass  # agy defaults; no stable temperature flag documented
 
     try:
-        completed = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=wait_s + 30,
-            check=False,
-        )
+        # The model is a reasoning backend, not the engineering tool runner.
+        # Isolate its workspace so agy's own context cannot read the HS repo.
+        with tempfile.TemporaryDirectory(prefix="hs-agy-model-only-") as scratch:
+            completed = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=wait_s + 30,
+                check=False,
+                cwd=scratch,
+            )
     except subprocess.TimeoutExpired:
         return {
             "ok": False,
@@ -100,16 +113,39 @@ def call_agy_chat(
 
     stdout = str(completed.stdout or "").strip()
     stderr = str(completed.stderr or "").strip()
-    if completed.returncode != 0 and not stdout:
+    # agy can return a non-empty stdout JSON envelope for provider HTTP 429
+    # while exiting nonzero. Never report that as a successful model answer.
+    provider_failure=('quota' in (stdout+stderr).lower() or
+        'RESOURCE_EXHAUSTED' in (stdout+stderr) or
+        'Individual quota reached' in (stdout+stderr))
+    if completed.returncode != 0:
         return {
             "ok": False,
-            "error": "agy_nonzero_exit",
+            "error": "agy_quota_exhausted" if provider_failure else "agy_nonzero_exit",
             "status": completed.returncode,
-            "detail": stderr[:800],
+            "detail": (stderr or stdout)[:800],
             "model": selected_model,
         }
 
     content = stdout
+    if content.startswith('{') and '"conversation_id"' in content[:350]:
+        try:
+            envelope=json.loads(content)
+            if envelope.get('status')=='ERROR' or envelope.get('error'):
+                return {'ok':False,'error':'agy_quota_exhausted' if provider_failure else 'agy_provider_error',
+                    'model':selected_model,
+                    'detail':str(envelope.get('error'))[:500]}
+        except (ValueError,TypeError):
+            pass
+    if json_mode:
+        candidate=content
+        if candidate.startswith('```json') or candidate.startswith('```'):
+            candidate=candidate.partition('\n')[2].rsplit('```',1)[0].strip()
+        try:
+            json.loads(candidate)
+        except (json.JSONDecodeError, ValueError):
+            return {'ok':False,'error':'agy_invalid_json',
+                'model':selected_model,'detail':'provider text was not a parseable JSON object'}
     if not content:
         return {
             "ok": False,

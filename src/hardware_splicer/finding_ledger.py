@@ -15,7 +15,7 @@ from .engineering_review_identity import AUTHORITY_CEILING
 from .finding_provenance import finding_id
 
 ENGINEERING_FINDINGS_KEY = "engineeringFindings"
-DETERMINISTIC_PRODUCERS = frozenset({"design_quality_gate", "release_assessment"})
+DETERMINISTIC_PRODUCERS = frozenset({"design_quality_gate", "release_assessment", "practical_chemistry_assessment"})
 FINDING_CATEGORIES = frozenset({"failed_check", "object_blocker", "release_blocker"})
 MAX_FINDING_TEXT = 1000
 LEDGER_ENTRY_KEYS = frozenset(

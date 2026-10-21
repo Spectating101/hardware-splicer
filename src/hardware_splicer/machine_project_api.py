@@ -207,6 +207,10 @@ def create_machine_project_router() -> APIRouter:
             "ok": True,
             "assessment": assessment.model_dump(mode="json"),
             "allowed": assessment_allows(assessment),
+            "scope": "standalone_machine_model_only",
+            "persistent_project_chemistry_checked": False,
+            "project_physical_authority_granted": False,
+            "project_scoped_release_route": "/v1/projects/{project_id}/engineering/release-gate",
         }
 
     return router
