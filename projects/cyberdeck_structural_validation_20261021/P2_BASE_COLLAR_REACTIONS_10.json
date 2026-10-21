@@ -1,0 +1,51 @@
+{
+  "part": "base",
+  "mesh_size_mm": 10.0,
+  "num_elements": 6590,
+  "scalar_polynomial_degree": 2,
+  "displacement_dof_count": 35241,
+  "integration_patch_area_mm2": 299.981487899573,
+  "screw_clamped_DOF_count": 373,
+  "support_collars_xy_radius_mm": [
+    1.25,
+    1.9
+  ],
+  "support_mode": "normal_only",
+  "source_derived_board_seating_z_mm": 0.0,
+  "modelled_contact_plane_z_mm": 0.0,
+  "applied_total_force_z_n": -1.0,
+  "screw_collar_dof_counts": [
+    261,
+    282,
+    276,
+    291
+  ],
+  "displacement_mm": 0.02018951112742265,
+  "peak_von_mises_mpa": 0.9653035360092014,
+  "volume_integrated_von_mises_rms_mpa": 0.05445554603421541,
+  "quadrature_point_95_percentile_von_mises_mpa": 0.09762491414515971,
+  "peak_quadrature_location_mm": [
+    113.93748242456509,
+    -85.86018549875728,
+    -0.18291992483413802
+  ],
+  "peak_distance_to_nearest_screw_xy_mm": 1.5062175314246782,
+  "outside_4mm_screw_xy_peak_von_mises_mpa": 0.431713183113044,
+  "outside_4mm_screw_xy_rms_von_mises_mpa": 0.048356888673585875,
+  "root_mean_square_displacement_mm": 0.010969281942971807,
+  "compliance_n_m": 8.165091313366513e-06,
+  "strain_energy_j": 4.0825456566832565e-06,
+  "source_lid_or_base_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+  "material_E_pa_assumed": 1500000000.0,
+  "poisson_ratio_assumed": 0.35,
+  "fixed_z_reaction_by_collar_n": [
+    0.2960703307876525,
+    0.25633722898358,
+    0.2893367863123743,
+    0.1582556539142761
+  ],
+  "reaction_z_balance_error_n": 2.1171953079601735e-12,
+  "hypothetical_force_and_material": true,
+  "release_authorized": false,
+  "elapsed_s": 14.83
+}

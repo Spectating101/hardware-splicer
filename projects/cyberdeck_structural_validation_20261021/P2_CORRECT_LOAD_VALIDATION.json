@@ -1,0 +1,109 @@
+{
+  "schema": "hardware_splicer.corrected_cyberdeck_quadratic_FEM.v1",
+  "executed_at": "2026-10-21",
+  "work_branch": "experiment/hs-cyberdeck-physics-20261021",
+  "case": "actual-source-derived RPI_DEV PCB enclosure candidate, software only",
+  "original_published_cad_known_SW1_collision_mm3": 1.584,
+  "case_improved_but_unreleased_and_partial_3d_fit": true,
+  "source_original_kicad_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "CAD_SHA256s": {
+    "source_edge_capture_base.step": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+    "source_edge_capture_lid.step": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1"
+  },
+  "existing_upstream_integrations": [
+    {
+      "name": "Gmsh",
+      "repo": "https://gitlab.onelab.info/gmsh/gmsh"
+    },
+    {
+      "name": "scikit-fem",
+      "repo": "https://github.com/kinnala/scikit-fem"
+    },
+    {
+      "name": "Shapely GEOS",
+      "repo": "https://github.com/shapely/shapely"
+    }
+  ],
+  "new_physics_solver_implemented": false,
+  "force_assumption_total_abs_N": 1.0,
+  "polymer_assumed_E_pa": 1500000000.0,
+  "assumed_nu": 0.35,
+  "load_and_material_measured": false,
+  "number_of_actual_physical_specimens_tested": 0,
+  "lid_load_faces_to_positive_z_n": 1.0,
+  "corrected_base_load_on_original_pcb_bottom_z_mm": 0.0,
+  "base_load_faces_to_negative_z_n": -1.0,
+  "boundary_support": "four idealized fully fixed case screw collars; NOT real bolt preload or friction",
+  "P1_vs_P2_bending_response_is_significantly_different": true,
+  "contact_area_lid_mm2": 297.28148789957254,
+  "contact_area_base_mm2": 299.981487899573,
+  "source_derived_load_area_constant_with_refinement": true,
+  "base_corrected_top_face_results": {
+    "source_step_sha256": "sha256:3c2f82a6c8efcfcdaed67945bcf81bb2442a701ddb000054d8a04b544fec003c",
+    "samples": [
+      {
+        "mesh_size_mm": 10.0,
+        "quadratic_dof": 35241,
+        "maximum_displacement_mm": 0.014342832163306144,
+        "peak_von_mises_mpa": 0.5501230727163083,
+        "rms_von_mises_mpa": 0.04671369532755026,
+        "force_reaction_error_n": 3.851918783936981e-12
+      },
+      {
+        "mesh_size_mm": 8.0,
+        "quadratic_dof": 43857,
+        "maximum_displacement_mm": 0.01420150513778077,
+        "peak_von_mises_mpa": 0.530518099491089,
+        "rms_von_mises_mpa": 0.046650550324310064,
+        "force_reaction_error_n": 4.008016141199278e-12
+      },
+      {
+        "mesh_size_mm": 6.0,
+        "quadratic_dof": 55002,
+        "maximum_displacement_mm": 0.014339174245168243,
+        "peak_von_mises_mpa": 0.47952374858360625,
+        "rms_von_mises_mpa": 0.04702834899926413,
+        "force_reaction_error_n": 1.780575686893826e-12
+      }
+    ],
+    "relative_max_displacement_spread_in_tested_window": 0.009853495036143302,
+    "peak_local_stress_convergence_accepted": false
+  },
+  "lid_quadratic_results": {
+    "source_step_sha256": "sha256:61fca49f7447b2f6e93cf9097a51daa2bd6ee541d497d43b98dcb993dc0b0cf1",
+    "samples": [
+      {
+        "mesh_size_mm": 4.0,
+        "quadratic_dof": 40536,
+        "maximum_displacement_mm": 0.08314585928183352,
+        "peak_von_mises_mpa": 1.412897914230902,
+        "rms_von_mises_mpa": 0.15362439922133458,
+        "force_reaction_error_n": 1.5005774400833616e-12
+      },
+      {
+        "mesh_size_mm": 3.0,
+        "quadratic_dof": 54420,
+        "maximum_displacement_mm": 0.08269473697384479,
+        "peak_von_mises_mpa": 1.4342558666688865,
+        "rms_von_mises_mpa": 0.15317612222520063,
+        "force_reaction_error_n": 3.820721516945014e-12
+      }
+    ],
+    "relative_max_displacement_spread_in_tested_window": 0.005425673772395487,
+    "physical_structural_clearance_granted": false
+  },
+  "remaining_unverified": [
+    "real screw preload/friction/clamp compliance",
+    "full PCB components/connector cable keepouts",
+    "source model coverage for 19 footprints",
+    "material anisotropy",
+    "thermal/creep/fatigue and shock",
+    "credible load magnitudes",
+    "repeatably converged local peak stress",
+    "physical first-article validation"
+  ],
+  "fabrication_authorized": false,
+  "operational_safety_verified": false,
+  "product_functional_confirmed": false,
+  "prior_initial_P1_stress_and_deflection_accepted_for_release": false
+}

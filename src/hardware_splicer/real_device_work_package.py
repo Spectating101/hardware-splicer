@@ -9,7 +9,8 @@ from typing import Any, Mapping
 
 
 def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
-                         *, planner: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                         *, planner: Mapping[str, Any] | None = None,
+                         reverse_engineering: Mapping[str, Any] | None = None) -> dict[str, Any]:
     model = dict(review.get('operator_casefile') or review)
     plan = dict(planner or {})
     requirements = [
@@ -32,6 +33,28 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
          'status': 'not_accepted', 'evidence_refs': []}
         for n, item in enumerate(case.get('acceptance', []))
     ]
+    investigation = dict(reverse_engineering or {})
+    rea_status = investigation.get('status')
+    if investigation:
+        allowed = {'static_analysis_available_unverified','analysis_available_unverified','blocked','unavailable'}
+        if investigation.get('schema') not in {'hardware_splicer.rea_javascript_intake.v1',
+                                               'hardware_splicer.rea_investigation.v1'} or rea_status not in allowed:
+            raise ValueError('unsupported reverse-engineering evidence')
+        if any(investigation.get(flag) is True for flag in
+               ('release_authorized','fabrication_authorized','firmware_flash_authorized','source_executed')):
+            raise ValueError('reverse-engineering evidence cannot confer authority')
+        if rea_status.endswith('_unverified') and not (
+                investigation.get('rea_evidence_id') or investigation.get('artifact_sha256')):
+            raise ValueError('successful REA investigation requires source evidence reference')
+        if rea_status in {'blocked','unavailable'}:
+            unknowns.append({'id':f'gap-{len(unknowns)+1:02d}',
+                             'description':'Reverse-engineering investigation unavailable or unsupported; identify compatible format/provider.',
+                             'status':'open','resolution_evidence':None})
+        else:
+            tasks.append({'id':f'step-{len(tasks)+1:02d}',
+                          'instruction':'Review REA static findings against PCB observations and physical interfaces; validate candidate behavior on an isolated bench.',
+                          'status':'proposed_not_executed',
+                          'evidence_refs':[str(investigation.get('rea_evidence_id') or investigation.get('artifact_sha256'))]})
     candidate = plan.get('recommended_build_id')
     approved = set(case.get('approved_catalog_build_ids', []))
     return {
@@ -43,6 +66,10 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
         'source_leads': [{'source_id': item['source_id'], 'uri': item['uri'],
                           'verified_full_document': False, 'content_hash': None}
                          for item in case.get('sources', [])],
+        'reverse_engineering': {'status':rea_status or 'not_provided',
+                                'evidence_id':investigation.get('rea_evidence_id'),
+                                'source_sha256':investigation.get('artifact_sha256') or investigation.get('input_tree_sha256'),
+                                'behavior_physically_verified':False},
         'requirements': requirements, 'work_steps': tasks,
         'critical_unknowns': unknowns, 'acceptance_gates': safety_gates,
         'required_parts': [{'requirement': str(item), 'verified_part_number': None,

@@ -1,0 +1,57 @@
+{
+  "results": [
+    {
+      "part": "lid",
+      "mesh_size_mm": 4.0,
+      "num_elements": 7210,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 40536,
+      "integration_patch_area_mm2": 297.28148789957254,
+      "screw_clamped_DOF_count": 675,
+      "screw_collar_dof_counts": [
+        156,
+        153,
+        177,
+        189
+      ],
+      "displacement_mm": 0.08314585928183352,
+      "peak_von_mises_mpa": 1.412897914230902,
+      "volume_integrated_von_mises_rms_mpa": 0.15362439922133458,
+      "quadrature_point_95_percentile_von_mises_mpa": 0.27339299971663644,
+      "root_mean_square_displacement_mm": 0.04029761935637259,
+      "compliance_n_m": 2.957034665168872e-05,
+      "strain_energy_j": 1.478517332584436e-05,
+      "reaction_z_balance_error_n": 1.5005774400833616e-12,
+      "hypothetical_1N_load": true,
+      "release_authorized": false,
+      "elapsed_s": 12.07
+    },
+    {
+      "part": "lid",
+      "mesh_size_mm": 3.0,
+      "num_elements": 9744,
+      "scalar_polynomial_degree": 2,
+      "displacement_dof_count": 54420,
+      "integration_patch_area_mm2": 297.28148789957265,
+      "screw_clamped_DOF_count": 786,
+      "screw_collar_dof_counts": [
+        201,
+        198,
+        201,
+        186
+      ],
+      "displacement_mm": 0.08269473697384479,
+      "peak_von_mises_mpa": 1.4342558666688865,
+      "volume_integrated_von_mises_rms_mpa": 0.15317612222520063,
+      "quadrature_point_95_percentile_von_mises_mpa": 0.28287827852876146,
+      "root_mean_square_displacement_mm": 0.03901373058774012,
+      "compliance_n_m": 2.9560566894682908e-05,
+      "strain_energy_j": 1.4780283447341454e-05,
+      "reaction_z_balance_error_n": 3.820721516945014e-12,
+      "hypothetical_1N_load": true,
+      "release_authorized": false,
+      "elapsed_s": 15.18
+    }
+  ],
+  "structural_validated": false
+}

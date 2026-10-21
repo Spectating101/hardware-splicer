@@ -282,6 +282,10 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
 
     placement = _board_component_placement(board, physical_assembly, board_path=board_path if is_kicad_pcb else None)
     placement_path.write_text(json.dumps(placement, indent=2), encoding="utf-8")
+    from .electromechanical_fit import screen_board_enclosure_fit
+    fit_report=screen_board_enclosure_fit(placement,physical_assembly)
+    fit_path=target_dir/"ELECTROMECHANICAL_FIT.json"
+    fit_path.write_text(json.dumps(fit_report,indent=2)+"\n",encoding="utf-8")
     outline_delta = _board_outline_delta_mm(physical_assembly, placement)
 
     if _skip_native_kicad_step_export():
@@ -343,6 +347,8 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
         },
     ]
     blockers = [str(row.get("message")) for row in checks if row.get("status") == "block"]
+    if fit_report["blocker_count"]:
+        blockers.append(f"Electromechanical envelope screen detected {fit_report['blocker_count']} geometric interferences.")
     warnings = [str(row.get("message")) for row in checks if row.get("status") == "warn"]
     if is_kicad_pcb and kicad_export.get("attempted") and not kicad_export.get("ready"):
         blockers.append("Native KiCad board STEP export failed for the supplied .kicad_pcb file.")
@@ -350,6 +356,7 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
     artifacts = [
         {"id": "kicad_step_assembly_report", "path": str(report_path)},
         {"id": "kicad_step_placement", "path": str(placement_path)},
+        {"id": "electromechanical_fit", "path": str(fit_path)},
         {"id": "kicad_step_assembly_source", "path": str(source_path)},
     ]
     if assembly_step_ready:
@@ -371,6 +378,7 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
             "native_kicad_step": str(kicad_step_path) if kicad_export.get("ready") else "",
         },
         "artifacts": artifacts,
+        "electromechanical_fit": {"status":fit_report["status"],"blocker_count":fit_report["blocker_count"],"exact_3d_collision_verified":False},
         "placement": {
             "source_mode": placement.get("source_mode"),
             "component_count": len(_list_dicts(placement.get("components"))),
@@ -397,6 +405,7 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
     output_names = [
         "kicad_step_assembly/KICAD_STEP_ASSEMBLY_REPORT.json",
         "kicad_step_assembly/board_component_placement.json",
+        "kicad_step_assembly/ELECTROMECHANICAL_FIT.json",
         "kicad_step_assembly/assembly_source.py",
     ]
     if assembly_step_ready:

@@ -72,12 +72,26 @@ def structural_capability_for_design(project: Mapping[str, Any]) -> dict[str, An
             "fabrication_authorized":False,
             "release_authorized":False,
         }
+    practical_actions=[]
+    if 'enclosure' in kinds:
+        practical_actions.extend(['Confirm donor/component envelope measurements, including PCB, ports and keep-outs.',
+                                  'Produce and inspect complete CAD assembly for collisions and assembly access.',
+                                  'Confirm printing orientation, wall thickness, clearances and fastening access.'])
+    if any(kind in kinds for kind in ('servo_mount','rotary_joint','pan_tilt','linear_axis','leadscrew_axis','belt_reduction','gripper')):
+        practical_actions.extend(['Verify actuator travel, load envelope and hard-stop clearance.',
+                                  'Check fastener retention, interference and accessible assembly order.'])
+    if 'assembly' in kinds:
+        practical_actions.append('Run a multi-part fit/collision and assembly-sequence check.')
+    if not practical_actions:
+        practical_actions.append('Measure physical interfaces and generate CAD/DFM evidence before selecting a load model.')
     return {
         "schema_version":STRUCTURAL_BRIDGE_SCHEMA,
         "status":"unsupported_mechanical_topology",
         "supported_for_contact":False,
         "candidate_kinds":kinds,
         "blockers":["no_validated_contact_case_for_these_mechanical_parts"],
+        "practical_next_checks":practical_actions,
+        "mechanical_build_ready":False,
         "next_action":"Use CAD/DFM prototype tools; implement a matched load case before attempting structural FEM.",
         "structural_safety_verified":False,
         "fabrication_authorized":False,
