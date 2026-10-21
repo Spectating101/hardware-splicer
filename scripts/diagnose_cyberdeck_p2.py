@@ -57,12 +57,13 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
         if not (radius[0]+0.15 <= collar_outer_radius_mm <= radius[1]+1.0):
             raise ValueError('alternative collar outer radius outside bounded study')
         radius=(radius[0],collar_outer_radius_mm)
-    keep=[];counts=[]
+    keep=[];counts=[];collar_dofs=[]
     for v in screw:
         radial=np.hypot(basis.doflocs[0]*1000-v['x'],basis.doflocs[1]*1000-v['y'])
         ring=np.flatnonzero((radial>=radius[0])&(radial<=radius[1]))
         if len(ring)<12:raise ValueError('quadratic screw collar underresolved')
-        counts.append(len(ring));keep.extend(ring.tolist())
+        counts.append(len(ring));keep.extend(ring.tolist());collar_dofs.append(ring)
+    z_dofs=set(np.hstack((basis.nodal_dofs[2],basis.edge_dofs[2])).tolist())
     if support_mode == 'fully_fixed':
         D=np.unique(keep)
     elif support_mode == 'normal_only':
@@ -116,6 +117,15 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
     reactions=(K@U-F)[D]
     z_dofs=set(np.hstack((basis.nodal_dofs[2],basis.edge_dofs[2])).tolist())
     reaction_z=sum(reaction for dof,reaction in zip(D,reactions) if dof in z_dofs)
+    # Reaction attribution to individual screw collars; unlike a full bolt
+    # model this only quantifies the imposed fixture constraints.
+    full_reactions=K@U-F
+    fixed_z_by_collar=[]
+    for ring in collar_dofs:
+        fixed_vertical=np.intersect1d(np.intersect1d(ring,D),np.fromiter(z_dofs,dtype=int))
+        fixed_z_by_collar.append(float(np.sum(full_reactions[fixed_vertical])))
+    if abs(sum(fixed_z_by_collar)+requested_load_z)>1e-5:
+        raise ValueError('collar reaction partition does not balance applied load')
     res=abs(float(reaction_z)+requested_load_z)
     if res>1e-5:raise ValueError('reaction does not balance applied force')
     return {'part':part,'mesh_size_mm':size,'num_elements':len(gm['elements']),
@@ -140,6 +150,7 @@ def inspect(part,size,case_dir,outline,original_board_step,*, E=1.5e9,nu=.35,for
             'strain_energy_j':.5*float(F@U),
             'source_lid_or_base_step_sha256':'sha256:'+hashlib.sha256(cad.read_bytes()).hexdigest(),
             'material_E_pa_assumed':E,'poisson_ratio_assumed':nu,
+            'fixed_z_reaction_by_collar_n':fixed_z_by_collar,
             'reaction_z_balance_error_n':res,'hypothetical_force_and_material':True,
             'release_authorized':False,'elapsed_s':round(time.monotonic()-begin,2)}
 
