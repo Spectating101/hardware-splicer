@@ -1,0 +1,50 @@
+name: HS Gadget Acceptance Matrix
+
+on:
+  push:
+    branches:
+      - experiment/hs-device-splice-feasibility-20261021
+  pull_request:
+    branches:
+      - experiment/hs-cyberdeck-physics-20261021
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gadget-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install HS and test dependencies
+        run: python -m pip install -e '.[dev]'
+
+      - name: Verify cross-domain feasibility and work-package integration
+        run: |
+          python -m pytest -q \
+            tests/test_device_splice_feasibility.py \
+            tests/test_device_splice_feasibility_api.py \
+            tests/test_real_device_splice_feasibility_bridge.py \
+            tests/test_real_device_rea_bridge.py \
+            tests/test_electromechanical_fit.py
+
+      - name: Run gadget compilation and donor splice acceptance
+        run: |
+          python scripts/run_gadget_acceptance.py --all-catalog --out "$RUNNER_TEMP/hs-gadget-acceptance"
+
+      - name: Save complete capability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-gadget-capability-acceptance
+          path: ${{ runner.temp }}/hs-gadget-acceptance/GADGET_CAPABILITY_ACCEPTANCE.json
+          if-no-files-found: warn

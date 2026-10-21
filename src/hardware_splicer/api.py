@@ -510,6 +510,9 @@ def create_app() -> FastAPI:
     )
     app.state.job_backend = job_backend
 
+    from .device_splice_feasibility_api import create_device_splice_feasibility_router
+    app.include_router(create_device_splice_feasibility_router())
+
     from fastapi.middleware.cors import CORSMiddleware
 
     app.add_middleware(

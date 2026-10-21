@@ -1,0 +1,270 @@
+{
+  "schema": "hardware_splicer.device_splice_candidate.v1",
+  "id": "synthetic_controller_display_enclosure_demo",
+  "context": "Fully synthetic component specifications to test splicing logic; not a real BOM or validated design.",
+  "required_domains": [
+    "power",
+    "signal",
+    "mechanical",
+    "firmware",
+    "thermal",
+    "assembly"
+  ],
+  "components": [
+    {
+      "id": "supply_5v"
+    },
+    {
+      "id": "controller"
+    },
+    {
+      "id": "display"
+    },
+    {
+      "id": "case"
+    },
+    {
+      "id": "regulator_candidate"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "declared_supply",
+      "basis": "user_declared",
+      "locator": "synthetic://5v-power-source"
+    },
+    {
+      "id": "declared_controller",
+      "basis": "user_declared",
+      "locator": "synthetic://controller"
+    },
+    {
+      "id": "declared_display",
+      "basis": "user_declared",
+      "locator": "synthetic://display"
+    },
+    {
+      "id": "declared_adapter",
+      "basis": "user_declared",
+      "locator": "synthetic://buck-regulator"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "controller_power",
+      "domain": "power",
+      "from": "supply_5v",
+      "to": "controller",
+      "provided": {
+        "voltage_min_v": 5,
+        "voltage_max_v": 5,
+        "current_max_a": 2,
+        "rail_id": "5v_main"
+      },
+      "required": {
+        "voltage_min_v": 4.5,
+        "voltage_max_v": 5.5,
+        "current_required_a": 0.8
+      },
+      "evidence_refs": [
+        "declared_supply",
+        "declared_controller"
+      ]
+    },
+    {
+      "id": "display_signal",
+      "domain": "signal",
+      "from": "controller",
+      "to": "display",
+      "provided": {
+        "protocol": "SPI",
+        "logic_voltage_v": 3.3
+      },
+      "required": {
+        "protocol": "SPI",
+        "logic_voltage_v": 3.3
+      },
+      "evidence_refs": [
+        "declared_controller",
+        "declared_display"
+      ]
+    },
+    {
+      "id": "display_power",
+      "domain": "power",
+      "from": "supply_5v",
+      "to": "display",
+      "provided": {
+        "voltage_min_v": 5,
+        "voltage_max_v": 5,
+        "current_max_a": 2,
+        "rail_id": "5v_main"
+      },
+      "required": {
+        "voltage_min_v": 3.2,
+        "voltage_max_v": 3.4,
+        "current_required_a": 0.3
+      },
+      "evidence_refs": [
+        "declared_supply",
+        "declared_display"
+      ],
+      "adaptation": {
+        "id": "buck_5_to_3v3",
+        "kind": "voltage_regulator",
+        "description": "Synthetic 5V-to-3.3V regulator candidate",
+        "input_voltage_min_v": 4.5,
+        "input_voltage_max_v": 5.5,
+        "output_voltage_min_v": 3.25,
+        "output_voltage_max_v": 3.35,
+        "output_current_max_a": 0.5,
+        "input_current_required_a": 0.25,
+        "efficiency_fraction": 0.9,
+        "evidence_refs": [
+          "declared_adapter"
+        ]
+      }
+    },
+    {
+      "id": "board_mount",
+      "domain": "mechanical",
+      "from": "controller",
+      "to": "case",
+      "provided": {
+        "form_factor": "pcb_40x20"
+      },
+      "required": {
+        "accepted_form_factors": [
+          "pcb_40x20"
+        ]
+      },
+      "evidence_refs": [
+        "declared_controller"
+      ]
+    },
+    {
+      "id": "display_driver",
+      "domain": "firmware",
+      "from": "controller",
+      "to": "display",
+      "provided": {},
+      "required": {
+        "driver_available": true
+      },
+      "evidence_refs": [
+        "declared_controller",
+        "declared_display"
+      ]
+    },
+    {
+      "id": "thermal_envelope",
+      "domain": "thermal",
+      "from": "controller",
+      "to": "case",
+      "provided": {
+        "dissipation_w": 1
+      },
+      "required": {
+        "cooling_capacity_w": 3
+      },
+      "evidence_refs": [
+        "declared_controller"
+      ]
+    }
+  ],
+  "electromechanical_fit": {
+    "schema": "hardware_splicer.electromechanical_envelope_fit.v1",
+    "status": "envelope_screen_clear_unverified",
+    "source_mode": "synthetic_declared",
+    "checks": [
+      {
+        "ref": "PCB",
+        "axis": "x",
+        "remaining_mm": 5,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "y",
+        "remaining_mm": 5,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "z_lower",
+        "remaining_mm": 3.2,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "PCB",
+        "axis": "z_upper",
+        "remaining_mm": 10.2,
+        "status": "pass",
+        "basis": "board_dimension"
+      },
+      {
+        "ref": "J1",
+        "axis": "x",
+        "remaining_mm": 11,
+        "status": "pass",
+        "basis": "approximate_component_envelope"
+      },
+      {
+        "ref": "J1",
+        "axis": "y",
+        "remaining_mm": 12,
+        "status": "pass",
+        "basis": "approximate_component_envelope"
+      },
+      {
+        "ref": "J1",
+        "axis": "z_upper",
+        "remaining_mm": 5.2,
+        "status": "pass",
+        "basis": "approximate_component_height"
+      },
+      {
+        "ref": "J1",
+        "axis": "z_lower",
+        "remaining_mm": 4.8,
+        "status": "pass",
+        "basis": "approximate_component_height"
+      }
+    ],
+    "blocker_count": 0,
+    "exact_3d_collision_verified": false,
+    "connector_mating_verified": false,
+    "electrical_operation_verified": false,
+    "fabrication_authorized": false,
+    "synthetic_screen_inputs": {
+      "pcb_dimensions_mm": [
+        40,
+        20,
+        1.6
+      ],
+      "enclosure_inner_dimensions_mm": [
+        50,
+        30,
+        15
+      ],
+      "enclosure_floor_mm": 2,
+      "pcb_origin_xyz_mm": [
+        0,
+        0,
+        6
+      ],
+      "connector_center_xy_mm": [
+        10,
+        0
+      ],
+      "connector_size_xyz_mm": [
+        8,
+        6,
+        5
+      ]
+    }
+  }
+}
