@@ -122,8 +122,8 @@ def inspect_spi_native_cam_archive(archive_path: str | Path) -> dict:
     if len(position_files) == 1:
         raw = content[position_files[0]].decode("utf-8-sig", errors="replace")
         position_rows = list(csv.reader(io.StringIO(raw)))
-        text = raw.upper()
-        if "R1" in text.split(",") or "R4" in text.split(","):
+        cells = {cell.strip().upper() for row in position_rows[1:] for cell in row}
+        if {"R1", "R4"} & cells:
             errors.append("initially DNP rail link appears in placement")
         if not position_rows or len(position_rows) < 2:
             errors.append("placement export has no placed components")
