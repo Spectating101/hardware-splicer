@@ -71,3 +71,25 @@ def test_python_footprint_and_serialized_library_are_not_equivalent():
     assert fan["serialized_footprint_record_exists"] is False
     assert display["geometry_class"] == "synthetic_fallback"
     assert report["serialized_footprint_registry_count"] == 27
+
+def test_real_compiler_persists_geometry_truth_alongside_fabrication_output(tmp_path):
+    import json
+    from hardware_splicer.build_compiler import compile_catalog_build
+    result = compile_catalog_build("usb_fume_extractor", tmp_path, export_gerber=False)
+    assert result.ok
+    output = tmp_path / "GEOMETRY_PROVENANCE.json"
+    assert output.is_file()
+    report = json.loads(output.read_text())
+    assert report["status"] == "registry_source_divergence_present"
+    assert report["python_registry_only_count"] >= 1
+    assert not report["fabrication_authorized"]
+
+def test_missing_compiler_source_writes_unavailable_provenance(tmp_path):
+    import json
+    from hardware_splicer.build_compiler import write_fabrication_artifacts
+    write_fabrication_artifacts(tmp_path, {
+        "ok": False, "build_graph_file": None, "design_quality": {},
+    })
+    report = json.loads((tmp_path / "GEOMETRY_PROVENANCE.json").read_text())
+    assert report["status"] == "unavailable"
+    assert not report["production_release_authorized"]
