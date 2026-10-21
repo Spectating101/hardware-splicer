@@ -96,9 +96,17 @@ def _reference_pinout_issues(assembly_plan: Mapping) -> list[str]:
     j1 = next((row for row in assembly_plan["connections"] if row["ref"] == "J1"), None)
     if j1 is None:
         return ["J1 missing from source KiCad connector topology"]
+    # KiCad emits a leading / on root-sheet net names. Remove precisely
+    # that root prefix; names with further hierarchy remain distinct.
+    def root_net(value: object) -> object:
+        if isinstance(value, str) and value.startswith("/") and value.count("/") == 1:
+            return value[1:]
+        return value
+
     actual = {str(row["pin"]): row["net"] for row in j1["pins"]}
     return [f"J1 pin {pin}: source net {actual.get(pin)!r}, expected {net!r}"
-            for pin, net in J1_PIN_NETS.items() if actual.get(pin) != net]
+            for pin, net in J1_PIN_NETS.items()
+            if root_net(actual.get(pin)) != net]
 
 
 def build_spi_reference_handoff(
