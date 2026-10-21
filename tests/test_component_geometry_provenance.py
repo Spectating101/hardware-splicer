@@ -44,8 +44,9 @@ def test_real_catalog_recipe_variants_are_classified_separately():
         graph, _, _, _ = splice_plan_to_build_graph({"target": {"recommended_build_id": build_id}})
         rows[build_id] = assess_build_graph_geometry(graph)
     assert set(rows) == set(CATALOG_BUILD_IDS)
-    assert rows["usb_fume_extractor"]["synthetic_fallback_count"] >= 1
+    assert rows["usb_fume_extractor"]["python_registry_only_count"] >= 1
     assert rows["room_display_station"]["synthetic_fallback_count"] >= 1
+    assert rows["usb_fume_extractor"]["status"] == "registry_source_divergence_present"
     assert rows["sensor_logger"]["synthetic_fallback_count"] == 0
     assert all(not row["fabrication_authorized"] for row in rows.values())
 
@@ -59,3 +60,14 @@ def test_real_catalog_recipe_variants_are_classified_separately():
 def test_malformed_graph_rejected(bad):
     with pytest.raises(ValueError):
         assess_build_graph_geometry(bad)
+
+def test_python_footprint_and_serialized_library_are_not_equivalent():
+    report = assess_build_graph_geometry({"nodes": [
+        {"moduleId": "cooling_fan_5v"},
+        {"moduleId": "ili9341_tft"},
+    ]})
+    fan, display = report["modules"]
+    assert fan["geometry_class"] == "python_registry_only_unverified"
+    assert fan["serialized_footprint_record_exists"] is False
+    assert display["geometry_class"] == "synthetic_fallback"
+    assert report["serialized_footprint_registry_count"] == 27
