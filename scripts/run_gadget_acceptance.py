@@ -16,6 +16,10 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Repository scripts/hardware_splicer.py must not shadow the installed package.
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+
 from hardware_splicer.assembly_plan import build_assembly_plan
 from hardware_splicer.build_compiler import compile_catalog_build
 from hardware_splicer.catalog import CATALOG_BUILD_IDS
