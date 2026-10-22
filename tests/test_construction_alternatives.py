@@ -10,6 +10,7 @@ import pytest
 from hardware_splicer.construction_alternatives import (
     CONNECTOR_SOURCES, evaluate_construction_alternatives, render_construction_plan,
     summarize_fabrication_benchmark,
+    verify_git_blob_asset, inspect_local_connector_assets,
 )
 
 
@@ -357,3 +358,55 @@ def test_exact_three_build_comparison_print_cardstock_clip_os_plywood_moduframe(
     }
     assert b["construction_method_selected"] is None
     assert b["release_authorized"] is False
+
+
+def test_git_blob_identity_matches_gits_actual_object_header():
+    import hashlib
+    payload = b"STL coupon for deterministic unit test"
+    header = b"blob " + str(len(payload)).encode("ascii") + bytes([0])
+    expected = hashlib.sha1(header + payload).hexdigest()
+    assert verify_git_blob_asset(payload,expected) is True
+    assert verify_git_blob_asset(payload+b"!",expected) is False
+    assert verify_git_blob_asset(b"bad",expected) is False
+
+
+def test_known_filename_local_connector_asset_staging_is_strict(tmp_path,monkeypatch):
+    import hashlib
+    from hardware_splicer import construction_alternatives as module
+    fixture=b"mock binary connector coupon"
+    expected=hashlib.sha1(
+        b"blob " + str(len(fixture)).encode("ascii") + bytes([0]) + fixture
+    ).hexdigest()
+    reference={
+        "name":"test-controlled",
+        "pinned_revision":"a"*40,
+        "verified_repository_assets":[{
+            "name":"clip-o_90_moreflexy.stl",
+            "git_blob_sha1":expected,
+            "revision_url":"https://example.org/revision-pin",
+        }],
+    }
+    monkeypatch.setitem(module.CONNECTOR_SOURCES,"clip_os",reference)
+    source=tmp_path/"SOURCE_ASSETS"
+    source.mkdir()
+    target=source/"clip-o_90_moreflexy.stl"
+    target.write_bytes(b"incorrect downloaded STL")
+    invalid=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
+    assert invalid["assets"][0]["status"]=="source_hash_mismatch"
+    assert invalid["assets_usable_for_manufacturing"] is False
+    target.write_bytes(fixture)
+    verified=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
+    assert verified["assets"][0]["status"]=="exact_git_blob_match"
+    assert verified["assets"][0]["geometry_and_fit_verified"] is False
+    assert verified["assets_usable_for_manufacturing"] is False
+
+
+def test_symlink_is_not_followed_for_local_asset_provenance(tmp_path):
+    source=tmp_path/"SOURCE_ASSETS"
+    source.mkdir()
+    outside=tmp_path/"arbitrary_private_file"
+    outside.write_text("do not inspect")
+    (source/"clip-o_90_moreflexy.stl").symlink_to(outside)
+    inspected=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
+    assert inspected["assets"][0]["status"]=="refused_symlink"
+    assert inspected["assets_usable_for_manufacturing"] is False
