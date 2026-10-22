@@ -144,15 +144,17 @@ export function normalizeHsProjectPackage(pkg, session = {}) {
   const parts = lines.map((line, i) => {
     const original = text(line.ref || line.module_id, 120) || `part-${i + 1}`;
     let id = original;
-    while (seen.has(id)) id = `${original}-${i + 1}`;
+    let suffix = 2;
+    while (seen.has(id)) id = `${original}-${suffix++}`;
     seen.add(id);
     const rawPrice = line.estimated_unit_usd ?? line.unit_price_usd ?? line.price_usd;
+    const parsedPrice = rawPrice == null ? null : Number(rawPrice);
     return normalizePart({
       id, name: line.description || line.module_id || line.ref || id,
       role: line.source || "BOM entry", description: line.description || "",
       category: "module", domain: "electrical",
       qty: line.qty ?? 1,
-      unitCost: rawPrice == null ? undefined : Number(rawPrice),
+      unitCost: Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : undefined,
       source: line.source || "hs_bom",
     }, i, "hs_bom");
   });
