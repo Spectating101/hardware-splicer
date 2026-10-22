@@ -188,3 +188,29 @@ def test_cavity_point_checks_must_bind_to_actual_step_hash(tmp_path):
     path.write_text(json.dumps(topology))
     with pytest.raises(ValueError, match="topology proof"):
         _assess(tmp_path, provider=provider)
+
+def test_native_kiCad_cad_interface_goes_into_hs_device_work_package(tmp_path):
+    from hardware_splicer.real_device_work_package import compile_work_package
+    report = _assess(tmp_path)
+    case = {
+        "id": "spi_adapter_housing", "device": "SPI adapter with proposed open shell",
+        "kind": "new_build", "deliverables": ["KiCad PCB", "native STEP", "shell interface review"],
+        "acceptance": ["independent physical bench check"],
+    }
+    review = {"operator_casefile": {
+        "build_or_repair_sequence": ["Inspect source KiCad board and STEP shell"],
+        "critical_technical_unknowns": ["No physical enclosure made"],
+        "compatible_parts_or_requirements": ["Mounts and connector openings"],
+    }}
+    package = compile_work_package(case, review, crossdomain_device_assessment=report)
+    assert package["engineering_readiness"] == "blocked"
+    assert package["crossdomain_device_assessment"]["interface_blocker_count"] == 0
+    assert len(package["crossdomain_device_assessment"]["mounting_holes"]) == 4
+    assert len(package["crossdomain_device_assessment"]["fitted_connectors"]) == 2
+    assert any("exact PCB-to-enclosure mounting" in row["criterion"]
+               for row in package["acceptance_gates"])
+    assert len([row for row in package["work_steps"]
+                if row.get("source_domain") == "crossdomain_device"]) >= 4
+    forged = {**report, "release_authorized": True}
+    with pytest.raises(ValueError, match="authority"):
+        compile_work_package(case, review, crossdomain_device_assessment=forged)
