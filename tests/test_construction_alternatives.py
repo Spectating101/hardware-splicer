@@ -77,6 +77,9 @@ def test_sourced_material_mass_cost_geometry_and_thermochemistry():
     assert result["hypothetical_full_print_minus_hybrid_mass_g"] == pytest.approx(18.358,abs=.002)
     assert result["hypothetical_material_cost_difference"] is not None
     assert result["thermal_screen"]["panel"] == "below_reported_limit_not_validated"
+    assert result["material_property_evidence"]["panel"]["density_kg_m3"] == 550
+    assert result["material_property_evidence"]["panel"]["conductivity_used_in_thermal_solver"] is False
+    assert result["material_property_evidence"]["panel"]["modulus_used_in_assembly_stress_solver"] is False
     assert result["chemical_screen"]["panel"] == {"humidity":"unknown"}
     assert "chemical_compatibility_unverified" in hybrid["blockers"]
     assert "external_connector_revision_unpinned" in hybrid["blockers"]
