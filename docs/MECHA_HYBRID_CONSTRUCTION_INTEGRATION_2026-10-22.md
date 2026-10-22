@@ -194,3 +194,19 @@ safety or professional sign-off. The files remain in the operator's own
 The source code never accepts an arbitrary user-chosen file path or fetches
 remote source URLs. Unpinned ModuFrame/BOSL2 sources remain reference-only
 until their actual assets are registered and checked.
+
+
+## Construction-method authority behavior
+
+The comparison runs in `preference=auto` as **evidence only**. It leaves
+the original `enclosure.scad` unchanged and does not revoke unrelated
+release authority merely because it considered hybrid methods.
+
+If a downstream user explicitly requests `preference=sheet_hybrid`
+or `preference=off_the_shelf`, HS mechanical production authority is
+blocked until a separate human-reviewed validation route exists. This
+cannot be bypassed by editing a client-side `release_authorized=true`
+flag. Whole-device mechatronics authority inherits the mechanical
+release decision. This safety gate is intentionally conservative:
+neither matching a supplier STL's Git checksum nor an operator-reported
+cost comparison authenticates measured performance.
