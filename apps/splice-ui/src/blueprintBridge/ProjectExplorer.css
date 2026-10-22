@@ -29,3 +29,11 @@
 .blueprint-import { margin-top: 16px; padding-top: 16px; border-top: 1px solid #dbe1e7; }
 .blueprint-import input[type="file"] { max-width: 100%; }
 .blueprint-import__error { color: #b91c1c; font-size: 13px; }
+
+.blueprint-explorer__pin-node { width: 220px; border: 1px solid #94a3b8; border-radius: 9px; padding: 12px 15px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.04); display: grid; gap: 5px; }
+.blueprint-explorer__pin-node > strong { font-size: 12px; }
+.blueprint-explorer__pin-node > span { font-size: 11px; }
+.blueprint-explorer__pin-row { position: relative; min-height: 24px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 4px; font-size: 11px; }
+.blueprint-explorer__pin-row .react-flow__handle-left { left: -20px; }
+.blueprint-explorer__pin-row .react-flow__handle-right { right: -20px; }
+.blueprint-explorer__pin-handle { width: 9px; height: 9px; background: #0f766e; border: 1px solid #fff; }
