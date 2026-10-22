@@ -165,6 +165,10 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
                 stage["next_unlock"] = (
                     "Resolve stress/contact convergence and obtain measured "
                     "material, assembled fixture and physical-load evidence."
+                    if structural_blocked else
+                    "Record actual panel and connector dimensions, verify "
+                    "temperature/chemical suitability, and physically test "
+                    "the intended hybrid or purchased assembly."
                 )
                 break
     current_level = _current_level(stages)
