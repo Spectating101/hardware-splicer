@@ -253,6 +253,9 @@ def build_donor_to_device_review(*, intake_path: str | Path,
         evaluate_donor_capture(
             capture_path=donor_capture_path, intake_sha256=intake_sha,
             fixture_sha256=donor_sha, board_id=donor["board_id"],
+            declared_motor_rated_v={
+                "left":ratings[0]["rated_v"], "right":ratings[1]["rated_v"],
+            },
         ) if donor_capture_path is not None else None
     )
     capture_template = create_donor_capture_template(
