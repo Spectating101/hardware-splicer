@@ -24,7 +24,7 @@ jobs:
       - name: Install HS orchestration runtime
         run: python -m pip install -e '.[dev]'
       - name: Test software-level KiCad/CAD interface blocking
-        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py tests/test_pcb_mounting_cad.py tests/test_mounted_device_acceptance.py
+        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py tests/test_pcb_mounting_cad.py tests/test_mounted_device_acceptance.py tests/test_connector_access_plan.py
       - name: Install official SolidCraft 0.18.4 binary with checksum
         run: |
           set -euo pipefail
@@ -114,6 +114,20 @@ jobs:
             --out examples/external_engines/cad/spi_adapter_with_mounts.json \
             --manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json"
 
+      - name: Prove KiCad header pin nets and open-top boss/cavity access
+        run: |
+          set -euo pipefail
+          python scripts/assess_spi_connector_access.py \
+            --mount-manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json" \
+            --out "$RUNNER_TEMP/hs-spi-connector-access.json"
+          python - "$RUNNER_TEMP/hs-spi-connector-access.json" <<'PY'
+          import json,sys
+          payload=json.load(open(sys.argv[1]))
+          assert payload["status"]=="nominal_open_top_projection_clear_unverified",payload
+          assert {x["ref"] for x in payload["connectors"]}=={"J1","JP1"}
+          assert not payload["release_authorized"]
+          PY
+
       - name: Native SolidCraft mounts with FreeCAD solid-bore measurements
         run: |
           set -euo pipefail
@@ -155,4 +169,5 @@ jobs:
             ${{ runner.temp }}/hs-spi-mounted-native/
             ${{ runner.temp }}/hs-spi-mounted-assessment/
             ${{ runner.temp }}/hs-spi-mount-requirements.json
+            ${{ runner.temp }}/hs-spi-connector-access.json
           if-no-files-found: warn
