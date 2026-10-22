@@ -164,3 +164,18 @@ def test_missing_mating_photo_never_authenticates_real_donor(tmp_path):
     result=inspect(tmp_path,baseline,packet)
     assert not result["source_attestations"]
     assert not result["all_measurement_evidence_independently_authenticated"]
+
+def test_voltage_conflict_uses_declared_motor_ratings_not_hardcoded_6v(tmp_path):
+    baseline, packet=prepare(tmp_path)
+    set_reading(packet,"battery_open_circuit_v",7.6)
+    capture=tmp_path/"capture.json"
+    capture.write_text(json.dumps(packet))
+    report=evaluate_donor_capture(
+        capture_path=capture,
+        intake_sha256=baseline["source"]["intake_sha256"],
+        fixture_sha256=baseline["source"]["donor_fixture_sha256"],
+        declared_motor_rated_v={"left":8.0,"right":8.0},
+    )
+    assert report["status"]=="partial_instrument_readings_review_required"
+    assert not report["conflicts"]
+    assert not report["power_on_authorized"]
