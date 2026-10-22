@@ -68,11 +68,15 @@ def _relative_path(value: Any, label: str) -> Path:
 
 
 def _contained(root: Path, relative: Path, *, existing: bool = True) -> Path:
-    target = (root / relative).resolve()
+    untrusted = root / relative
+    if any((root / Path(*relative.parts[:n])).is_symlink()
+           for n in range(1, len(relative.parts) + 1)):
+        raise EnginePlanError("symlinked source or artifact path is not allowed")
+    target = untrusted.resolve()
     if not target.is_relative_to(root.resolve()):
         raise EnginePlanError("file escapes declared workspace")
-    if existing and (not target.is_file() or target.is_symlink()):
-        raise EnginePlanError("required source file missing or a symlink")
+    if existing and not target.is_file():
+        raise EnginePlanError("required source file missing")
     return target
 
 
@@ -241,6 +245,14 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                 # Native electronics commands discover project config from
                 # their local entrypoint directory, not the HS root.
                 native_cwd = src.parent if engine in {"atopile", "tscircuit"} else root
+                # A native tool may leave last run's outputs in the project.
+                # Capture their generation times to reject stale artifacts.
+                prior_outputs = {}
+                for rel in task["artifact_paths"]:
+                    target = _contained(root, Path(rel), existing=False)
+                    prior_outputs[str(target)] = (
+                        target.stat().st_mtime_ns if target.is_file() else None
+                    )
                 completed = subprocess.run(cmd, cwd=str(native_cwd), capture_output=True,
                                            text=True, timeout=timeout_s, check=False,
                                            env={**os.environ, "CI": "1"})
@@ -258,6 +270,10 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                 for file in required + requested:
                     if not file.is_file() or file.is_symlink() or file.stat().st_size == 0 or file.stat().st_size > _MAX_ARTIFACT:
                         status = "blocked_missing_or_invalid_output"
+                        break
+                    if (str(file) in prior_outputs and prior_outputs[str(file)] is not None
+                            and file.stat().st_mtime_ns <= prior_outputs[str(file)]):
+                        status = "blocked_stale_project_artifact"
                         break
                     if file == (task_dir / "model.step") and not file.read_bytes()[:100].lstrip().startswith(b"ISO-10303-21;"):
                         status = "blocked_not_step_export"
