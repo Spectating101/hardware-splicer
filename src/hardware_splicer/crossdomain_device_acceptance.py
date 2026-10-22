@@ -174,6 +174,39 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
            geometry["nominal_shell_material_volume_mm3"]) > 0.05:
         raise ValueError("native CAD does not contain modeled cavity volume")
 
+    # A STEP with the right volume and bounds can still put the void in the
+    # wrong place. Native FreeCAD point-in-solid probes prove that this *one*
+    # generated shell has material in the floor/walls and emptiness at the
+    # PCB cavity and open top, without claiming exact PCB-to-shell collision.
+    topopath = run_root / "SHELL_TOPOLOGY.json"
+    probe_bytes = _read(topopath)
+    probe = json.loads(probe_bytes)
+    expected_points = [
+        ("floor_center_material", [55,35,1], True),
+        ("left_wall_material", [1,35,12], True),
+        ("rear_wall_material", [55,69,12], True),
+        ("pcb_cavity_void", [55,35,12], False),
+        ("top_opening_void", [55,35,24], False),
+        ("outside_void", [125,80,12], False),
+    ]
+    if (not isinstance(probe, dict) or
+            probe.get("schema") != "hardware_splicer.native_shell_topology.v1" or
+            probe.get("source_step_sha256") != expected_step_sha or
+            probe.get("engine") != "FreeCAD Part.Shape.isInside" or
+            probe.get("shape_valid") is not True or
+            probe.get("solid_count") != 1 or
+            probe.get("all_samples_match") is not True or
+            not isinstance(probe.get("samples"), list) or
+            len(probe["samples"]) != len(expected_points)):
+        raise ValueError("native cavity topology proof missing or invalid")
+    for sample, (name, coords, expected) in zip(probe["samples"], expected_points):
+        if (not isinstance(sample, Mapping) or
+                sample.get("id") != name or sample.get("point_mm") != coords or
+                sample.get("expected_material") is not expected or
+                sample.get("actual_material") is not expected or
+                sample.get("pass") is not True):
+            raise ValueError("native cavity floor/wall/void probe failed")
+
     if receipt.get("result") != "pass" or receipt.get("authority",{}).get("fabrication_ready") is not False:
         raise ValueError("source KiCad verification receipt cannot support the device")
     if receipt.get("artifact_sha256", {}).get("pcb") != hashlib.sha256(pcb_bytes).hexdigest():
@@ -209,6 +242,13 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
             "native_step_sha256": expected_step_sha,
             "freecad_report_sha256": expected_proof_sha,
             "native_freecad_geometry": measured,
+            "native_shell_topology": {
+                "source_step_sha256": probe["source_step_sha256"],
+                "topology_report_sha256": _sha(probe_bytes),
+                "point_samples_passed": len(expected_points),
+                "engine": probe["engine"],
+                "geometry_sampling_authority": "source_cavity_review_only",
+            },
             "source_shell_model": geometry,
             "exact_connector_openings_verified": False,
             "mechanical_mounting_points_verified": False,
