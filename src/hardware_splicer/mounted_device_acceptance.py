@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .pcb_mounting_cad import generate_pcb_mounted_shell
 from .reference_device_dossier import build_reference_device_dossier
+from .connector_access_plan import inspect_connector_access
 
 SCHEMA="hardware_splicer.native_mounted_device_review.v1"
 
@@ -128,6 +129,16 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
     fit=original["electromechanical_fit"]
     if fit is None or fit["blocker_count"]!=0:
         raise ValueError("native mounted shell does not screen-clear source PCB")
+    # A top-open vertical header has no side cutout requirement. However,
+    # the exact KiCad courtyard and source pin positions must project into
+    # the actual cavity without colliding with the source-driven bosses.
+    access = inspect_connector_access(
+        pcb_path=source,
+        mounting_manifest_path=requirements,
+        output_path=out/"CONNECTOR_ACCESS_REVIEW.json",
+    )
+    if access["status"] != "nominal_open_top_projection_clear_unverified":
+        raise ValueError("source connector access conflicts with cavity or mounting bosses")
     result={
         "schema":SCHEMA,
         "status":"native_boss_and_bore_geometry_validated_assembly_unverified",
@@ -139,9 +150,13 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
         "mount_count":manifest["mount_count"],
         "native_3d_material_void_checks":count,
         "source_pcb_envelope_blockers":fit["blocker_count"],
+        "connector_access_status":access["status"],
+        "connector_count":access["connector_count"],
+        "connector_access_sha256":_digest((out/"CONNECTOR_ACCESS_REVIEW.json").read_bytes()),
         "source_pcb_nominal_support_height_mm":5.2,
         "fastener_mechanics_verified":False,
         "connector_mating_or_access_verified":False,
+        "nominal_open_top_connector_projection_checked":True,
         "PCB_physically_fitted":False,
         "fabrication_authorized":False,
         "power_on_authorized":False,
