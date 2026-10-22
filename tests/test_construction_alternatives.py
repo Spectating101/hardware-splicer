@@ -419,3 +419,17 @@ def test_symlinked_external_asset_directory_is_not_read(tmp_path):
     r=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
     assert r["status"]=="refused_symlink_asset_directory"
     assert r["assets_usable_for_manufacturing"] is False
+
+
+def test_boxkit_source_is_pinned_but_not_licensed_or_fit_proven():
+    p=_project()
+    p["construction"]["connector_family"]="boxkit"
+    r=evaluate_construction_alternatives(p)
+    source=_hybrid(r)["connector_source"]
+    assert source["revision_pinned"] is True
+    assert source["pinned_revision"] == "63fb6bee6d81962456ed2403538fe4d83644b122"
+    assert source["verified_repository_assets"][0]["git_blob_sha1"] == "650d587d10570b17ef13f9dae990290ebfccee72"
+    assert "BOSL (original" in source["source_dependencies"][0]
+    assert source["source_license_review_required"] is True
+    assert source["local_asset_validated"] is False
+    assert r["release_authorized"] is False
