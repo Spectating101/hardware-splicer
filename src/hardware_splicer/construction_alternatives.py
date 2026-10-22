@@ -120,6 +120,125 @@ def _mass_g(volume_mm3: float, density_kg_m3: float | None) -> float | None:
     return round(volume_mm3 * 1e-6 * density_kg_m3, 3)
 
 
+def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
+    """Summarize user-provided observations, never invent shop measurements.
+
+    Costs use the operator's consistent currency; energy and labor must be
+    recorded explicitly before a complete total can be compared.
+    """
+    from statistics import median
+
+    if trials is None or trials == []:
+        return {
+            "status": "awaiting_real_measurements",
+            "sample_count": 0,
+            "method_results": [],
+            "observed_cost_order": [],
+            "physical_results_authenticated": False,
+            "construction_method_selected": None,
+        }
+    if not isinstance(trials, list) or len(trials) > 60:
+        raise ValueError("benchmark_trials must be a bounded list")
+    valid_methods = ("full_print", "sheet_hybrid", "off_the_shelf")
+    required = ("finished_mass_g", "printing_minutes", "cutting_minutes",
+                "assembly_minutes", "consumed_material_cost",
+                "purchased_hardware_cost")
+    grouped: dict[str, list[dict[str, Any]]] = {m: [] for m in valid_methods}
+    seen: set[str] = set()
+    for trial in trials:
+        if not isinstance(trial, Mapping):
+            raise ValueError("benchmark trial must be an object")
+        method = trial.get("method")
+        specimen = str(trial.get("specimen_id") or "").strip()
+        if method not in grouped or not specimen or specimen in seen:
+            raise ValueError("benchmark method or distinct specimen ID invalid")
+        seen.add(specimen)
+        uri = trial.get("record_uri")
+        if not isinstance(uri,str) or not uri.strip() or len(uri)>500:
+            raise ValueError("benchmark evidence record URI required")
+        evidence = trial.get("evidence_kind")
+        if evidence not in ("operator_reported", "synthetic_fixture"):
+            raise ValueError("benchmark must declare synthetic or operator reported evidence")
+        for key in required:
+            _valid_positive(trial.get(key), key, permit_zero=(key!="finished_mass_g"))
+        if trial.get("panel_scrap_mass_g") is not None:
+            _valid_positive(trial["panel_scrap_mass_g"], "scrap mass", permit_zero=True)
+        energy = trial.get("energy_cost")
+        labor = trial.get("labor_cost")
+        for key,value in (("energy_cost",energy),("labor_cost",labor)):
+            if value is not None:
+                _valid_positive(value,key,permit_zero=True)
+        total_cost = (
+            round(sum(float(trial[key]) for key in
+                      ("consumed_material_cost","purchased_hardware_cost"))+
+                  float(energy)+float(labor),3)
+            if energy is not None and labor is not None else None
+        )
+        grouped[method].append({
+            "specimen_id": specimen,
+            "record_uri": uri,
+            "evidence_kind": evidence,
+            "finished_mass_g": float(trial["finished_mass_g"]),
+            "fabrication_minutes": round(
+                sum(float(trial[key]) for key in
+                    ("printing_minutes","cutting_minutes","assembly_minutes")),2
+            ),
+            "reported_total_cost": total_cost,
+            "panel_scrap_mass_g": trial.get("panel_scrap_mass_g"),
+            "fit_passed": trial.get("fit_passed"),
+            "attachment_test_passed": trial.get("attachment_test_passed"),
+            "thermal_check_passed": trial.get("thermal_check_passed"),
+        })
+    method_results = []
+    for method,records in grouped.items():
+        if not records:
+            continue
+        complete_cost = all(x["reported_total_cost"] is not None for x in records)
+        method_results.append({
+            "method":method,
+            "specimen_count":len(records),
+            "specimens":records,
+            "median_finished_mass_g":round(median(x["finished_mass_g"] for x in records),3),
+            "median_fabrication_minutes":round(median(x["fabrication_minutes"] for x in records),3),
+            "median_reported_total_cost":(
+                round(median(x["reported_total_cost"] for x in records),3)
+                if complete_cost else None
+            ),
+            "evidence_only_operator_reports":all(
+                x["evidence_kind"]=="operator_reported" for x in records
+            ),
+            "all_declared_check_results_pass":all(
+                x["fit_passed"] is True and
+                x["attachment_test_passed"] is True and
+                x["thermal_check_passed"] is True for x in records
+            ),
+        })
+    complete = (
+        len(method_results)==3 and
+        all(x["median_reported_total_cost"] is not None and
+            x["evidence_only_operator_reports"] and
+            x["all_declared_check_results_pass"]
+            for x in method_results)
+    )
+    order = (
+        [x["method"] for x in sorted(
+            method_results,key=lambda x:x["median_reported_total_cost"]
+        )] if complete else []
+    )
+    return {
+        "status": "operator_reported_three_way_comparison_not_independently_verified" if complete
+                  else "partial_or_synthetic_measurement_inventory",
+        "sample_count":len(seen),
+        "method_results":method_results,
+        "observed_cost_order":order,
+        "physical_results_authenticated":False,
+        "statistical_reliability_proven":False,
+        "construction_method_selected":None,
+        "release_authorized":False,
+        "disclosure":"Provided values are operator-reported or synthetic, not authenticated test evidence. Reported pass flags are not engineering approval.",
+    }
+
+
 def evaluate_construction_alternatives(
     project: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -335,6 +454,9 @@ def evaluate_construction_alternatives(
     return {
         "schema_version": SCHEMA,
         "status": "comparison_produced_research_only",
+        "fabrication_benchmark": summarize_fabrication_benchmark(
+            construction.get("benchmark_trials")
+        ),
         "requested_preference": preference,
         "enclosure_outer_dimensions_mm": list(outer),
         "materials": {
@@ -432,7 +554,27 @@ def render_construction_plan(report: Mapping[str, Any]) -> str:
                         " mm; hole diameter must be verified from the original instructions/tools."
                     )
         lines.append("")
+    benchmark = report.get("fabrication_benchmark") or {}
     lines.extend([
+        "## Reported fabrication benchmark",
+        "- Status: " + str(benchmark.get("status", "not requested")),
+        "- Measured specimen entries: " + str(benchmark.get("sample_count",0)),
+        "- No measurements are authenticated or allowed to certify production.",
+    ])
+    for sample in benchmark.get("method_results") or []:
+        lines.append(
+            "- " + sample["method"] + ": " + str(sample["specimen_count"]) +
+            " specimens, median finished mass " +
+            str(sample["median_finished_mass_g"]) + " g; reported total cost " +
+            str(sample["median_reported_total_cost"]) +
+            " (currency as supplied; may be incomplete)"
+        )
+    if benchmark.get("observed_cost_order"):
+        lines.append(
+            "- Conditional reported cost order (not a build recommendation): " +
+            ", ".join(benchmark["observed_cost_order"])
+        )
+    lines.extend(["",
         "## Before selecting a method",
         "- Measure actual sheet and fastener dimensions; check purchased hardware first.",
         "- Confirm service temperature, cooling, electrical/fire safety and chemical exposures.",
