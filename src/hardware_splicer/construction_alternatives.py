@@ -147,6 +147,12 @@ def inspect_local_connector_assets(
 
     source = CONNECTOR_SOURCES.get(construction.get("connector_family"))
     root = Path(output_dir) / "SOURCE_ASSETS"
+    if root.is_symlink():
+        return {
+            "status": "refused_symlink_asset_directory",
+            "assets": [],
+            "assets_usable_for_manufacturing": False,
+        }
     if not source or not source.get("verified_repository_assets"):
         return {
             "status": "no_pinned_source_assets",
