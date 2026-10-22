@@ -39,6 +39,8 @@ def test_existing_rc_rover_donor_generates_real_sourced_review_with_all_gates_op
     assert report["donor_inventory_count"]==5
     assert report["electrical"]["two_motor_running_current_claim_a"]==0.9
     assert report["electrical"]["two_motor_stall_current_claim_a"]==1.8
+    assert report["electrical"]["driver_design_requirements_from_unverified_intake"]["required_motor_channels"]==2
+    assert report["electrical"]["driver_design_requirements_from_unverified_intake"]["declared_per_channel_stall_current_min_a"]==0.9
     assert report["electrical"]["direct_battery_to_motor_voltage_mismatch"] is True
     assert len(report["reuse_actions"])==3
     assert report["reuse_actions"][2]["action"]=="do_not_cut_or_reuse_yet"
@@ -196,3 +198,30 @@ def test_out_of_run_splice_artifact_cannot_masquerade_as_our_board(tmp_path):
     assert r["carrier_compilation"]["status"]=="demo_drc_reported_artifact_unbound"
     assert r["carrier_compilation"]["carrier_artifact_sha256"] is None
     assert not r["power_on_authorized"]
+
+def test_existing_firmware_and_mechanical_output_artifact_hashes_are_preserved(tmp_path):
+    fw=tmp_path/"firmware"
+    fw.mkdir()
+    (fw/"FIRMWARE_SCAFFOLD.json").write_text('{"candidate":"unverified"}')
+    project=tmp_path/"MECHANISM_PACK.json"
+    project.write_text('{"candidate":"mechanical"}')
+    receipt={
+        "schema_version":"hardware_splicer.splice_demo_result.v1",
+        "case_id":"robot_drive_from_rc_toy",
+        "evaluation":{"passed":True},
+        "metrics":{
+            "build_id":"robot_drive_base","drc_pass":True,
+            "artifacts":{
+                "firmware_scaffold":str(fw/"FIRMWARE_SCAFFOLD.json"),
+                "mechanism_pack":str(project),
+            },
+        },
+    }
+    path=tmp_path/"SPLICE_DEMO_RESULT.json"
+    path.write_text(json.dumps(receipt))
+    review=evaluate(tmp_path,splice=path)
+    emitted=review["carrier_compilation"]["subsystem_artifacts"]
+    assert set(emitted)=={"firmware_scaffold","mechanism_pack"}
+    assert emitted["firmware_scaffold"]["sha256"].startswith("sha256:")
+    assert not emitted["firmware_scaffold"]["validated_against_physical_donor"]
+    assert not review["motor_motion_authorized"]
