@@ -103,7 +103,8 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                     'blocked_execution_failure', 'blocked_missing_or_invalid_output',
                     'blocked_not_step_export', 'blocked_no_output_evidence',
                     'blocked_stale_project_artifact',
-                    'blocked_missing_circuit_json', 'blocked_circuit_json_interchange'}
+                    'blocked_missing_circuit_json', 'blocked_circuit_json_interchange',
+                    'blocked_invalid_geometry'}
         if any(not isinstance(row, Mapping) or row.get('status') not in statuses
                or not isinstance(row.get('id'), str) for row in rows):
             raise ValueError('invalid external-engine task results')
@@ -115,6 +116,11 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                        'canonical_electrical_interchange': (
                            dict(row.get('canonical_electrical_interchange'))
                            if isinstance(row.get('canonical_electrical_interchange'), Mapping)
+                           else None
+                       ),
+                       'native_geometry_validation': (
+                           dict(row.get('native_geometry_validation'))
+                           if isinstance(row.get('native_geometry_validation'), Mapping)
                            else None
                        ),
                        'artifact_sha256': [artifact.get('sha256')
