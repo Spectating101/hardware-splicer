@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Any
 
 from .device_splice_feasibility import assess_device_splice
+from .donor_characterization_v1 import (
+    create_donor_capture_template, evaluate_donor_capture,
+)
 from .real_device_work_package import compile_work_package
 
 SCHEMA = "hardware_splicer.donor_to_device_review.v1"
@@ -115,6 +118,7 @@ def _splice_compilation(result_path: str | Path | None, *, expected_case: str,
 def build_donor_to_device_review(*, intake_path: str | Path,
                                  donor_fixture_path: str | Path,
                                  splice_result_path: str | Path | None = None,
+                                 donor_capture_path: str | Path | None = None,
                                  output_dir: str | Path | None = None) -> dict:
     intake, intake_sha = _json_file(intake_path)
     donor, donor_sha = _json_file(donor_fixture_path)
@@ -245,6 +249,16 @@ def build_donor_to_device_review(*, intake_path: str | Path,
         {"category":"safety_control","specification":"physical enable/e-stop and bounded motor commands",
          "verified_mpn":None, "unit_price_ntd":None},
     ]
+    characterization = (
+        evaluate_donor_capture(
+            capture_path=donor_capture_path, intake_sha256=intake_sha,
+            fixture_sha256=donor_sha, board_id=donor["board_id"],
+        ) if donor_capture_path is not None else None
+    )
+    capture_template = create_donor_capture_template(
+        intake_sha256=intake_sha, fixture_sha256=donor_sha,
+        donor_board_id=donor["board_id"],
+    )
     compile_evidence = _splice_compilation(splice_result_path, expected_case=ROVER_CASE,
                                             expected_build=EXPECTED_BUILD)
     case = {
@@ -296,15 +310,24 @@ def build_donor_to_device_review(*, intake_path: str | Path,
         },
         "splice_feasibility":feasible,
         "carrier_compilation":compile_evidence,
+        "physical_donor_characterization":characterization,
+        "physical_capture_template_schema":"bench_topology_capture.v1",
         "engineering_modules": {
             "electrical":"existing_circuit_ai_salvage_and_kicad_carrier_compile",
             "mechanical":"solidcraft_freecad_requires_actual_donor_dimensions",
             "firmware":"unimplemented_pinmap_and_safety_evidence",
             "economic":"cost_model_requires_real_quotes_and_validated_yield",
         },
-        "mechanical_inputs":{"wheel_diameter_mm":None,"axle_spacing_mm":None,
-                             "motor_shaft_and_mount_mm":None,"chassis_envelope_mm":None,
-                             "cad_model_generated":False},
+        "mechanical_inputs":{
+            "wheel_diameter_mm":None, "axle_spacing_mm":None,
+            "motor_shaft_and_mount_mm":None,"chassis_envelope_mm":None,
+            "operator_reported_geometry":({
+                key: dict(item)
+                for key,item in characterization["accepted_readings"].items()
+                if item["domain"] == "mechanical"
+            } if characterization else {}),
+            "cad_model_generated":False,
+        },
         "missing_components_and_sourcing":missing,
         "estimated_replacement_cost_ntd":None,
         "estimated_resale_value_ntd":None,
@@ -324,6 +347,9 @@ def build_donor_to_device_review(*, intake_path: str | Path,
             ("DONOR_DEVICE_REVIEW.json",report),
             ("DONOR_DEVICE_WORK_PACKAGE.json",handoff),
             ("DONOR_EVIDENCE_GATES.json",{"gates":bench_gates,"all_closed":False}),
+            ("DONOR_CAPTURE_TEMPLATE.json",capture_template),
+            *(([("DONOR_CAPTURE_AUDIT.json",characterization)]
+               if characterization is not None else [])),
         ):
             (out/name).write_text(json.dumps(data,indent=2,allow_nan=False)+"\n",encoding="utf-8")
         summary = [
@@ -352,6 +378,10 @@ def build_donor_to_device_review(*, intake_path: str | Path,
             "- Native CAD: blocked for missing true donor dimensions.",
             "- Pricing/market value: not estimated; missing qualified MPN/quotes.",
             "- Real physical assembly: not performed.",
+            "- Physical donor capture: " + (
+                characterization["status"] if characterization else "not_supplied"
+            ),
+            "- Operator-provided readings remain review-only and do not close independent physical gates.",
         ]
         (out/"DONOR_DEVICE_README.md").write_text("\n".join(summary)+"\n",encoding="utf-8")
     return report
