@@ -431,5 +431,6 @@ def test_boxkit_source_is_pinned_but_not_licensed_or_fit_proven():
     assert source["verified_repository_assets"][0]["git_blob_sha1"] == "650d587d10570b17ef13f9dae990290ebfccee72"
     assert "BOSL (original" in source["source_dependencies"][0]
     assert source["source_license_review_required"] is True
+    assert "external_connector_license_not_verified" in _hybrid(r)["blockers"]
     assert source["local_asset_validated"] is False
     assert r["release_authorized"] is False
