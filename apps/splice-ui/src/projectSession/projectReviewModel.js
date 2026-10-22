@@ -28,19 +28,28 @@ function label(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function normalizeSha256(value) {
+  const raw = label(value);
+  if (!raw) return null;
+  const digest = raw.replace(/^sha256:/i, "");
+  return /^[0-9a-f]{64}$/i.test(digest) ? digest.toLowerCase() : null;
+}
+
 function sourceRows(pkg) {
   const sources = [
     ...rows(pkg.sources),
     ...rows(pkg.source_descriptors),
     ...rows(object(pkg.evidence).sources),
+    ...Object.entries(object(pkg.source))
+      .filter(([key]) => key.endsWith("_sha256"))
+      .map(([key, sha256]) => ({ source_id: key, sha256 })),
   ];
   const seen = new Set();
   return sources.flatMap((entry) => {
     const source = object(entry);
-    const sha256 = label(source.sha256) || label(source.content_hash);
+    const key = normalizeSha256(source.sha256) || normalizeSha256(source.content_hash);
     // A source label without a valid content identity must not look verified.
-    if (!sha256 || !/^[0-9a-f]{64}$/i.test(sha256)) return [];
-    const key = sha256.toLowerCase();
+    if (!key) return [];
     if (seen.has(key)) return [];
     seen.add(key);
     return [{
