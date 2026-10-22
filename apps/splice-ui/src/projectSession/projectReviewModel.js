@@ -92,5 +92,8 @@ export function deriveProjectReview(session = {}) {
       : truth.design.state === "drc_errors" ? "Check failed"
         : "Not checked",
     physicalCheck: "Not established by this review",
+    benchSummary: truth.bench.state === "physical_authorized"
+      ? "Authorization reported; inspect revision-bound bench evidence"
+      : truth.bench.label,
   };
 }
