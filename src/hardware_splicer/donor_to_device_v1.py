@@ -90,7 +90,8 @@ def _splice_compilation(result_path: str | Path | None, *, expected_case: str,
     if isinstance(artifacts, dict):
         root = Path(result_path).resolve().parent
         for name in ("firmware_scaffold", "mechanism_pack", "mechatronics_pack",
-                     "mechatronics_authority", "bringup_card", "build_graph"):
+                     "mechatronics_authority", "bringup_card", "build_graph",
+                     "bench_capture_template"):
             location = artifacts.get(name)
             if not isinstance(location, str) or not location.endswith(".json"):
                 continue
