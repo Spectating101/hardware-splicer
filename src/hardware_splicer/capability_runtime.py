@@ -64,6 +64,17 @@ _INTERNAL_CAPABILITIES: list[dict[str, Any]] = [
         "implementation_path": "src/hardware_splicer/manufacturing_reconciliation.py",
     },
     {
+        "id": "sourced-hybrid-construction-evaluator",
+        "layer": "mechanical",
+        "name": "Material-aware construction alternatives",
+        "status": "core",
+        "priority": "P1",
+        "license": "MIT",
+        "hook": "Mecha-Splicer construction spec and operator bundle",
+        "claim": "Source-aware print/sheet/buy comparison only; no certified joins or thermal simulations",
+        "implementation_path": "src/hardware_splicer/construction_alternatives.py",
+    },
+    {
         "id": "curved-mechanical-contact-fem",
         "layer": "mechanical",
         "name": "Bounded curved structural and two-pin contact screening",
