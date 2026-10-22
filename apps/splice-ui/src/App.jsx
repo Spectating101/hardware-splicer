@@ -12,6 +12,8 @@ import {
   renderProjectPackage,
 } from "./api.js";
 import BuildOverlay from "./components/BuildOverlay.jsx";
+import ProjectExplorer from "./blueprintBridge/ProjectExplorer.jsx";
+import { normalizeOpenBlueprintDesign } from "./blueprintBridge/designPackage.js";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
@@ -74,7 +76,7 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk, version }) {
+function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImportDesign, importError, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
@@ -119,6 +121,22 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
           <button type="button" className="ghost large" onClick={onExample} disabled={!apiOk}>
             Browse examples
           </button>
+        </div>
+        <div className="blueprint-import" data-testid="openblueprint-import">
+          <label className="field-label" htmlFor="openblueprint-json">
+            Inspect an OpenBlueprint DesignPackage
+          </label>
+          <input id="openblueprint-json" type="file" accept=".json,application/json"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onImportDesign(file);
+              event.target.value = "";
+            }} />
+          <p className="muted small">
+            JSON only · local read-only preview · no upload or engineering approval.
+            This works even when the HS engine is offline.
+          </p>
+          {importError && <p className="blueprint-import__error" role="alert">{importError}</p>}
         </div>
         {!apiOk && (
           <div className="offline-box">
@@ -215,6 +233,8 @@ export default function App() {
   const [loadError, setLoadError] = useState(null);
   const [toast, setToast] = useState("");
   const [previewContext, setPreviewContext] = useState(null);
+  const [importedDesign, setImportedDesign] = useState(null);
+  const [importError, setImportError] = useState("");
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
 
   const spliceJob = useSpliceJob();
@@ -223,6 +243,21 @@ export default function App() {
     dispatch,
     enabled: Boolean(health?.ok),
   });
+
+  const handleImportBlueprint = async (file) => {
+    setImportError("");
+    try {
+      if (!file || file.size > 1024 * 1024) {
+        throw new Error("Choose a JSON file smaller than 1 MiB");
+      }
+      const payload = JSON.parse(await file.text());
+      const design = normalizeOpenBlueprintDesign(payload);
+      setImportedDesign(design);
+      setView(VIEWS.imported);
+    } catch (error) {
+      setImportError(error instanceof SyntaxError ? "Invalid JSON file" : error.message);
+    }
+  };
 
   const uniqueRecentJobs = useMemo(() => {
     const seen = new Set();
@@ -512,6 +547,12 @@ export default function App() {
           >
             Project
           </button>
+          {importedDesign && (
+            <button type="button" className={`nav-button ${view === VIEWS.imported ? "active" : ""}`}
+              data-testid="nav-imported-design" onClick={() => setView(VIEWS.imported)}>
+              Imported design
+            </button>
+          )}
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
@@ -636,7 +677,20 @@ export default function App() {
               onResume={resumeProject}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
+              onImportDesign={handleImportBlueprint}
+              importError={importError}
             />
+          )}
+
+          {view === VIEWS.imported && importedDesign && (
+            <div className="panel-stack" data-testid="imported-design-workspace">
+              <div className="preview-toolbar">
+                <button type="button" className="ghost" onClick={() => setView(VIEWS.home)}>
+                  ← Home
+                </button>
+              </div>
+              <ProjectExplorer design={importedDesign} />
+            </div>
           )}
 
           {view === VIEWS.workspace && (
