@@ -118,6 +118,12 @@ def test_frozen_spi_pcb_and_shell_are_consistent_on_software_envelope_only(tmp_p
     assert not report["mechanical"]["exact_3d_part_collision_verified"]
     assert (tmp_path/"assessment/CROSS_DOMAIN_DEVICE_ASSESSMENT.json").is_file()
     assert (tmp_path/"assessment/electrical/REFERENCE_ASSEMBLY_PLAN.json").is_file()
+    features = report["mechanical_feature_requirements"]
+    assert len(features["mounting_holes"]) == 4
+    assert {x["ref"] for x in features["fitted_connectors"]} == {"J1", "JP1"}
+    assert not features["shell_bosses_generated"]
+    assert not features["connector_access_cutouts_generated"]
+    assert (tmp_path/"assessment/MECHANICAL_FEATURE_REQUIREMENTS.json").is_file()
 
 
 @pytest.mark.parametrize("mutate", [
