@@ -105,9 +105,22 @@ def run(
                 "release_authorized": False,
             }
         else:
+            from hardware_splicer.construction_alternatives import inspect_local_connector_assets
             bundle["construction_alternatives"] = evaluate_construction_alternatives(
                 project.model_dump(mode="json")
             )
+            if out_dir is not None:
+                bundle["construction_alternatives"]["external_asset_integrity"] = (
+                    inspect_local_connector_assets(
+                        project.construction.model_dump(mode="json"),out_dir
+                    )
+                )
+            else:
+                bundle["construction_alternatives"]["external_asset_integrity"] = {
+                    "status": "not_checked_no_local_build_folder",
+                    "assets": [],
+                    "assets_usable_for_manufacturing": False,
+                }
 
     commerce = estimate_digital_pack(price_usd=29.0, support_minutes=10.0).to_dict()
     bundle["commerce"] = {"digital_pack": commerce, "assumptions": {"price_usd": 29.0, "support_minutes": 10.0}}
