@@ -289,7 +289,7 @@ def test_operator_reported_complete_observations_can_be_ordered_not_certified():
         _trial("off_the_shelf",12,90,kind="operator_reported"),
     ]
     report = summarize_fabrication_benchmark(items)
-    assert report["status"] == "operator_reported_three_way_comparison_not_independently_verified"
+    assert report["status"] == "operator_reported_multi_variant_comparison_not_independently_verified"
     assert report["observed_cost_order"] == [
         "sheet_hybrid", "full_print", "off_the_shelf"
     ]
@@ -334,3 +334,26 @@ def test_evaluator_carries_operator_record_inventory_into_mecha_plan():
     assert r["fabrication_benchmark"]["sample_count"] == 3
     assert r["fabrication_benchmark"]["observed_cost_order"] == []
     assert "Reported fabrication benchmark" in render_construction_plan(r)
+
+
+def test_exact_three_build_comparison_print_cardstock_clip_os_plywood_moduframe():
+    baseline = _trial("full_print", 10, 70, kind="operator_reported")
+    card = _trial("sheet_hybrid", 4, 53, kind="operator_reported")
+    card["specimen_id"] = "card-01"
+    card["variant_id"] = "cardboard_clip_os"
+    plywood = _trial("sheet_hybrid", 6, 63, kind="operator_reported")
+    plywood["specimen_id"] = "wood-01"
+    plywood["variant_id"] = "plywood_moduframe"
+    b = summarize_fabrication_benchmark([baseline,card,plywood])
+    assert b["status"] == "operator_reported_multi_variant_comparison_not_independently_verified"
+    assert b["observed_cost_order"] == [
+        "sheet_hybrid:cardboard_clip_os",
+        "sheet_hybrid:plywood_moduframe",
+        "full_print",
+    ]
+    assert {m["variant_key"] for m in b["method_results"]} == {
+        "full_print", "sheet_hybrid:cardboard_clip_os",
+        "sheet_hybrid:plywood_moduframe",
+    }
+    assert b["construction_method_selected"] is None
+    assert b["release_authorized"] is False
