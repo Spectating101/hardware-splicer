@@ -110,11 +110,23 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         _dict(body.get("mechanism_pack")).get("structural_screening"),
         _dict(engineering_body.get("mechanism_pack")).get("structural_screening"),
     )
+    # The dedicated contact solver models one specific two-hole plate.
+    # Its *inapplicability* must not veto an unrelated assembly whose
+    # measured geometry, controlled physical bench and scoped release are
+    # already accepted by the independent pre-existing HS authority gates.
+    # All applicable non-convergent/failed/disabled numerical screens still
+    # fail closed, regardless of later physical paperwork.
+    outside_solver_domain_with_independent_release = bool(
+        structural.get("status") == "unsupported_mechanical_topology"
+        and structural.get("supported_for_contact") is False
+        and measured["geometry_verified"]
+        and bench["bench_verified"]
+        and not _release_blockers(release)
+    )
     structural_blocked = bool(
         structural
         and structural.get("status") != "not_applicable"
-        # This numerical screening cannot grant production release, even
-        # when deliberately disabled or when its packet is later edited.
+        and not outside_solver_domain_with_independent_release
     )
     construction = _first_dict(
         mechanism_analysis.get("construction_alternatives"),
