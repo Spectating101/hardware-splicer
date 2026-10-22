@@ -60,6 +60,27 @@ def _run(tmp_path: Path, *, actual_box=None, actual_volume=None,
         ],
     }
     (output / "ENGINE_ORCHESTRATION_REPORT.json").write_text(json.dumps(report))
+    points = [
+        ("floor_center_material", [55,35,1], True),
+        ("left_wall_material", [1,35,12], True),
+        ("rear_wall_material", [55,69,12], True),
+        ("pcb_cavity_void", [55,35,12], False),
+        ("top_opening_void", [55,35,24], False),
+        ("outside_void", [125,80,12], False),
+    ]
+    topology = {
+        "schema": "hardware_splicer.native_shell_topology.v1",
+        "source_step_sha256": _sha(step),
+        "engine": "FreeCAD Part.Shape.isInside",
+        "shape_valid": True, "solid_count": 1,
+        "samples": [
+            {"id": name, "point_mm": coords, "expected_material": mat,
+             "actual_material": mat, "pass": True}
+            for name, coords, mat in points
+        ],
+        "all_samples_match": True,
+    }
+    (output / "SHELL_TOPOLOGY.json").write_text(json.dumps(topology))
     return output
 
 
@@ -141,3 +162,23 @@ def test_restrict_cavity_dimensions_yields_explicit_fit_blocker(tmp_path):
     assert result["status"] == "envelope_collision_detected"
     assert any(x["ref"] == "PCB" and x["axis"] == "x" and x["status"] == "block"
                for x in result["checks"])
+
+def test_actual_native_cavity_missing_or_failed_probe_blocks_acceptance(tmp_path):
+    provider = _run(tmp_path)
+    path = provider / "SHELL_TOPOLOGY.json"
+    topology = json.loads(path.read_text())
+    topology["samples"][3]["actual_material"] = True
+    topology["samples"][3]["pass"] = False
+    path.write_text(json.dumps(topology))
+    with pytest.raises(ValueError, match="cavity floor/wall/void"):
+        _assess(tmp_path, provider=provider)
+
+
+def test_cavity_point_checks_must_bind_to_actual_step_hash(tmp_path):
+    provider = _run(tmp_path)
+    path = provider / "SHELL_TOPOLOGY.json"
+    topology = json.loads(path.read_text())
+    topology["source_step_sha256"] = _sha(b"a different model")
+    path.write_text(json.dumps(topology))
+    with pytest.raises(ValueError, match="topology proof"):
+        _assess(tmp_path, provider=provider)
