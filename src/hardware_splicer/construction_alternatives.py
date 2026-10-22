@@ -129,7 +129,7 @@ def verify_git_blob_asset(data: bytes, expected_sha1: str) -> bool:
     if not isinstance(expected_sha1, str) or len(expected_sha1) != 40:
         return False
     actual = hashlib.sha1(
-        ("blob " + str(len(data)) + "\\0").encode("ascii") + data
+        ("blob " + str(len(data)) + "\0").encode("ascii") + data
     ).hexdigest()
     return actual == expected_sha1
 
