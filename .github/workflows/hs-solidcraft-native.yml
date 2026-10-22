@@ -21,6 +21,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install HS dependencies for orchestration CLI
+        run: python -m pip install -e '.[dev]'
+
       - name: Pin and fetch independent SolidCraft CLI v0.18.4
         run: |
           set -euo pipefail
