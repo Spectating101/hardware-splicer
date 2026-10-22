@@ -2555,3 +2555,32 @@ button.primary:disabled {
 .ok-text {
   color: #6ee7b7;
 }
+
+
+/* Project-first engineering review: readable without engineering tool vocabulary. */
+.product-review { padding: 1.2rem; }
+.product-review__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.product-review__header h2 { margin: 0 0 .35rem; }
+.product-review__tabs { display: flex; flex-wrap: wrap; gap: .25rem; border-bottom: 1px solid var(--line); margin: 1rem 0; }
+.product-review__tabs button { border: 0; background: transparent; color: var(--muted); padding: .65rem .8rem; cursor: pointer; border-bottom: 2px solid transparent; }
+.product-review__tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 700; }
+.product-review__tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.product-review__content { min-height: 11rem; }
+.product-review__goal { font-size: 1.1rem; line-height: 1.5; margin: 0 0 1rem; }
+.product-review__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .7rem; margin: .5rem 0 1rem; }
+.product-review__facts > div { background: var(--surface-2); padding: .8rem; border: 1px solid var(--line); border-radius: .45rem; min-width: 0; }
+.product-review__facts dt { color: var(--muted); font-size: .8rem; margin-bottom: .35rem; }
+.product-review__facts dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; }
+.product-review__missing { padding: .75rem 0; }
+.product-review__blockers { border-left: 3px solid var(--danger); padding: .5rem .9rem; margin: 1rem 0; background: #fff7f6; }
+.product-review__blockers h3 { margin: 0 0 .4rem; }
+.product-review__blockers ul { margin: .25rem 0; padding-left: 1.3rem; }
+.product-review__sources { list-style: none; padding: 0; }
+.product-review__sources li { display: grid; gap: .3rem; margin-bottom: .65rem; }
+.product-review__sources code { font-size: .78rem; overflow-wrap: anywhere; }
+.product-review__code { overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 22rem; background: var(--surface-2); padding: 1rem; }
+.product-review__handoff { display: grid; justify-items: start; gap: .65rem; margin-top: 1rem; }
+@media (max-width: 700px) {
+  .product-review__header { flex-direction: column; }
+  .product-review__tabs button { padding: .55rem .65rem; }
+}

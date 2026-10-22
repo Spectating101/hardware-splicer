@@ -521,6 +521,8 @@ export default function ProjectWizard({
                   id="battery-v"
                   type="number"
                   step="0.1"
+                  min="0.1"
+                  placeholder="Unknown / not specified"
                   value={wizard.batteryVoltage}
                   onChange={(e) => patchWizard({ batteryVoltage: e.target.value })}
                 />
@@ -584,7 +586,7 @@ export default function ProjectWizard({
               <div>
                 <dt>Power</dt>
                 <dd>
-                  {wizard.batteryVoltage} V · {wizard.runtimeMin} min runtime
+                  {wizard.batteryVoltage === "" ? "Battery voltage not specified" : `${wizard.batteryVoltage} V`} · {wizard.runtimeMin} min target runtime
                 </dd>
               </div>
               {wizard.donorVisionReport && (

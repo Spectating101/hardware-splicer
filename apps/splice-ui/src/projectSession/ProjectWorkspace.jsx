@@ -6,6 +6,7 @@ import MachineAuthoringPanel from "../components/MachineAuthoringPanel.jsx";
 import MachineEvidencePanel from "../components/MachineEvidencePanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
+import ProductReview from "../components/ProductReview.jsx";
 import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
 import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
 import TabNav from "../components/TabNav.jsx";
@@ -97,6 +98,8 @@ export default function ProjectWorkspace({
         currentRevision={session.snapshotRevision}
         onToast={onToast}
       />
+
+      {(session.intakeComplete || hasPkg) && <ProductReview key={session.projectId || "review"} session={session} />}
 
       <TabNav tabs={stageTabs} activeId={stage} onChange={handleStageChange} badges={badges} />
 

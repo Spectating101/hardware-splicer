@@ -34,7 +34,7 @@ const INITIAL_WIZARD = {
   visionLive: false,
   designStrategy: "llm",
   selectedModuleIds: ["usb-power-5v", "esp32-devkit", "dht22"],
-  batteryVoltage: 7.4,
+  batteryVoltage: "",
   runtimeMin: 20,
   massKg: "",
   answers: {},
@@ -47,6 +47,12 @@ function stripDataUrl(dataUrl) {
   return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
 }
 
+function optionalPositiveNumber(value) {
+  if (value === "" || value == null) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function buildPartRow(row) {
   const part = {
     name: String(row.name || "").trim(),
@@ -55,10 +61,8 @@ function buildPartRow(row) {
   };
   const notes = String(row.notes || "").trim();
   if (notes) part.notes = notes;
-  if (row.type === "dc_motor") {
-    part.voltage_v = 6.0;
-    part.current_a = 0.45;
-  }
+  // Donor voltage and current are unknown until the user supplies evidence.
+  // Never turn a generic motor category into measured electrical ratings.
   return part;
 }
 
@@ -69,6 +73,7 @@ export function buildIntakeFromWizard(
   const base = visionEnrichedIntake || enrichedIntent || {};
   const goal = String(wizard.goal || base.goal || "").trim();
   const projectName = slugify(wizard.projectName || goal);
+  const batteryVoltage = optionalPositiveNumber(wizard.batteryVoltage);
 
   const intake = {
     ...base,
@@ -81,7 +86,7 @@ export function buildIntakeFromWizard(
     constraints: {
       ...(base.constraints || {}),
       runtime_min: Number(wizard.runtimeMin) || 20,
-      battery_voltage_v: Number(wizard.batteryVoltage) || 7.4,
+      ...(batteryVoltage !== null ? { battery_voltage_v: batteryVoltage } : {}),
     },
   };
 
@@ -153,9 +158,10 @@ export function buildIntakeFromWizard(
 
 export function buildComposePayloadFromWizard(wizard, { enrichedIntent = null } = {}) {
   const goal = String(wizard.goal || enrichedIntent?.goal || "").trim();
+  const batteryVoltage = optionalPositiveNumber(wizard.batteryVoltage);
   const constraints = {
     runtime_min: Number(wizard.runtimeMin) || 20,
-    battery_voltage_v: Number(wizard.batteryVoltage) || 7.4,
+    ...(batteryVoltage !== null ? { battery_voltage_v: batteryVoltage } : {}),
   };
   if (wizard.massKg) constraints.mass_kg = Number(wizard.massKg);
 
