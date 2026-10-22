@@ -1,0 +1,181 @@
+"""Executable adapter contract tests (simulated executables, no native engines installed).
+
+All simulated output is explicitly distinguished from native SolidCraft/ato/tsci.
+"""
+import json
+from pathlib import Path
+from unittest.mock import patch
+from types import SimpleNamespace
+import pytest
+from fastapi.testclient import TestClient
+from hardware_splicer.api import create_app
+from hardware_splicer.product_api import create_product_app
+from hardware_splicer.external_engine_orchestration import (
+    EnginePlanError, SCHEMA, validate_plan, preview_engine_plan,
+    run_external_engine_plan,
+)
+
+def plan(*tasks):
+    return {"schema": SCHEMA, "id": "rover-e2e", "tasks": list(tasks)}
+
+CAD = {"id": "envelope", "engine": "solidcraft", "operation": "run_script",
+       "source": "cad/envelope.json"}
+CHECK = {"id": "inspect", "engine": "freecad", "operation": "inspect_step",
+         "source_task": "envelope"}
+ATO = {"id": "board", "engine": "atopile", "operation": "build",
+       "source": "eda/board.ato", "artifact_paths": ["eda/build/board.kicad_pcb"]}
+TSCI = {"id": "tsx_board", "engine": "tscircuit", "operation": "build",
+        "source": "tsx/index.tsx", "artifact_paths": ["tsx/dist/circuit.json"]}
+
+
+def test_plan_supports_cross_engine_step_handoff():
+    p = validate_plan(plan(CAD, CHECK))
+    assert p["tasks"][1]["depends_on"] == ["envelope"]
+    assert p["tasks"][1]["source"] is None
+    assert p["tasks"][1]["source_task"] == "envelope"
+
+
+@pytest.mark.parametrize("bad", [
+    lambda p: p["tasks"][0].update({"source": "../escape.json"}),
+    lambda p: p["tasks"][0].update({"operation": "execute_shell"}),
+    lambda p: p["tasks"][0].update({"source": "/etc/passwd"}),
+    lambda p: p["tasks"][0].update({"artifact_paths": ["../../leak.step"]}),
+    lambda p: p["tasks"][0].update({"extra_shell": "rm -rf /"}),
+    lambda p: p["tasks"][0].update({"engine": "unknown"}),
+])
+def test_reject_invalid_or_untrusted_actions(bad):
+    p = plan(dict(CAD))
+    bad(p)
+    with pytest.raises(EnginePlanError):
+        validate_plan(p)
+
+
+def test_wrong_format_cannot_silently_route_ato_to_tscircuit():
+    bad = dict(TSCI, source="eda/board.ato")
+    with pytest.raises(EnginePlanError):
+        validate_plan(plan(bad))
+
+
+def test_execution_requires_explicit_operator_approval(tmp_path):
+    with pytest.raises(EnginePlanError, match="opt-in"):
+        run_external_engine_plan(plan(CAD), workspace=tmp_path,
+                                 output_dir=tmp_path / "output", confirm_execute=False)
+
+
+def test_native_engine_absence_is_reported_not_faked(monkeypatch):
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda x: None)
+    result = preview_engine_plan(plan(CAD, CHECK, ATO, TSCI))
+    assert all(x["status"] == "blocked_missing_external_engine" for x in result["tasks"])
+    assert result["fabrication_authorized"] is False
+
+
+def test_solidcraft_to_freecad_real_workflow_contract_with_mocked_executables(tmp_path, monkeypatch):
+    workspace = tmp_path / "inputs"
+    (workspace / "cad").mkdir(parents=True)
+    (workspace / "cad/envelope.json").write_text(json.dumps({"commands": []}))
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/usr/bin/" + name)
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        assert kwargs["cwd"] == str(workspace.resolve())
+        if cmd[0].endswith("solidcraft-cli"):
+            assert cmd[1:3] == ["run", str((workspace / "cad/envelope.json").resolve())]
+            Path(cmd[cmd.index("--out") + 1]).write_text("ISO-10303-21;\nEND-ISO-10303-21;")
+            Path(cmd[cmd.index("--json-out") + 1]).write_text('{"volume": 200}')
+        elif cmd[0].endswith("FreeCADCmd"):
+            script = Path(cmd[1]).read_text()
+            assert "model.step" in script and "Part.Shape()" in script
+            result_file = Path(cmd[1]).parent / "step_inspection.json"
+            result_file.write_text(json.dumps({"shape_valid": True, "volume_mm3": 200}))
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake_run)
+    out = tmp_path / "proof"
+    report = run_external_engine_plan(plan(CAD, CHECK), workspace=workspace,
+                                      output_dir=out, confirm_execute=True)
+    assert len(calls) == 2
+    assert report["completed"] == 2 and report["blocked"] == 0
+    assert report["tasks"][1]["artifacts"][0]["path"] == "inspect/step_inspection.json"
+    assert report["plan_sha256"].startswith("sha256:")
+    assert not report["fabrication_authorized"]
+    assert json.loads((out / "ENGINE_ORCHESTRATION_REPORT.json").read_text()) == report
+
+
+def test_provider_failure_cascades_and_never_calls_freecad(tmp_path, monkeypatch):
+    root = tmp_path / "source"
+    (root / "cad").mkdir(parents=True)
+    (root / "cad/envelope.json").write_text('{"commands":[]}')
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/fake/" + name)
+    commands = []
+
+    def fail(cmd, **kwargs):
+        commands.append(cmd)
+        return SimpleNamespace(returncode=1, stdout="", stderr="CAD kernel error")
+
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fail)
+    report = run_external_engine_plan(plan(CAD, CHECK), workspace=root,
+                                      output_dir=tmp_path / "results", confirm_execute=True)
+    assert report["blocked"] == 2
+    assert report["tasks"][0]["status"] == "blocked_tool_error"
+    assert report["tasks"][1]["status"] == "blocked_dependency"
+    assert len(commands) == 1
+
+
+@pytest.mark.parametrize("item,expected", [
+    (ATO, ["ato", "build"]),
+    (TSCI, ["tsci", "build"]),
+])
+def test_electronics_providers_own_build_and_artifacts(tmp_path, monkeypatch, item, expected):
+    root = tmp_path / "source"
+    source = root / item["source"]
+    source.parent.mkdir(parents=True)
+    source.write_text("synthetic source for orchestration tests")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda x: "/bin/" + x)
+    def fake(cmd, **kwargs):
+        assert Path(cmd[0]).name == expected[0] and cmd[1:] == expected[1:]
+        output = root / item["artifact_paths"][0]
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text("(kicad_pcb)" if item["engine"] == "atopile" else "[]")
+        return SimpleNamespace(returncode=0, stdout="exported", stderr="")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake)
+    report = run_external_engine_plan(plan(item), workspace=root,
+                                      output_dir=tmp_path / "report", confirm_execute=True)
+    assert report["completed"] == 1
+    assert report["tasks"][0]["artifacts"][0]["sha256"].startswith("sha256:")
+    assert report["source_evidence_authenticated"] is False
+
+
+def test_zero_output_never_promotes_success(tmp_path, monkeypatch):
+    root = tmp_path / "source"
+    source = root / ATO["source"]
+    source.parent.mkdir(parents=True)
+    source.write_text("test")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda x: "/bin/" + x)
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run",
+                        lambda *a, **kw: SimpleNamespace(returncode=0, stdout="ok", stderr=""))
+    result = run_external_engine_plan(plan(ATO), workspace=root,
+                                      output_dir=tmp_path / "report", confirm_execute=True)
+    assert result["completed"] == 0
+    assert result["tasks"][0]["status"] == "blocked_missing_or_invalid_output"
+
+
+def test_api_discovery_preview_only_no_execution_endpoint():
+    for app in (create_app(), create_product_app()):
+        client = TestClient(app)
+        got = client.get("/v1/external-engines")
+        assert got.status_code == 200, got.text
+        assert {p["id"] for p in got.json()["engines"]} == {
+            "solidcraft", "freecad", "atopile", "tscircuit"}
+        assert all("executable" not in p for p in got.json()["engines"])
+        preview = client.post("/v1/external-engines/preview", json=plan(CAD, CHECK))
+        assert preview.status_code == 200, preview.text
+        assert not preview.json()["preview"]["execution_authorized"]
+        assert client.post("/v1/external-engines/execute", json=plan(CAD)).status_code == 404
+        assert client.post("/v1/external-engines/preview",
+                           json=plan(dict(CAD, operation="arbitrary"))).status_code == 422
