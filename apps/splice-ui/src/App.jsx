@@ -79,16 +79,18 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>AI-assisted KiCad design — canvas to DRC truth to bench-ready package</h1>
+        <h1>What do you want to build, repair, or turn into something new?</h1>
         <p className="lead">
-          <strong>Agents and humans</strong> share one spine: MCP/HTTP compose → KiCad DRC fix loop →{" "}
-          <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
+          Start with an idea or hardware you already have. See a real project with parts, wiring,
+          mechanical details, code, build steps and verification status as those outputs become available.
+          Unknowns stay visible until supported by evidence.
         </p>
         <div className="readiness-pitch">
-          <strong>Durable project first. Auditable machine lifecycle next.</strong>
+          <strong>One project, from first idea to reviewable build package.</strong>
           <p className="muted small">
-            One project workspace: Intake → Design → Verify → Bench → Package. Projects autosave as
-            versioned server snapshots and reopen into the same editable source state.
+            Create a project, review the actual engineering outputs and download the generated package.
+            Donor photos are supported during salvage intake; other evidence imports remain in specialist tools.
+            A software check is not a physical safety clearance.
           </p>
         </div>
         <PipelineVisual />
