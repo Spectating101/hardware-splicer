@@ -53,6 +53,8 @@ describe("OpenBlueprint DesignPackage integration", () => {
     expect(() => normalizeOpenBlueprintDesign(badNet)).toThrow("unbound connection");
     const badPrice = sample(); badPrice.parts[0].unitCost = -50;
     expect(() => normalizeOpenBlueprintDesign(badPrice)).toThrow("Invalid price");
+    const badPin = sample(); badPin.connections[0].to.pin = "NONEXISTENT";
+    expect(() => normalizeOpenBlueprintDesign(badPin)).toThrow("undeclared part pin");
     const badAssembly = sample(); badAssembly.assembly[0].children[0].part = "unknown";
     expect(() => normalizeOpenBlueprintDesign(badAssembly)).toThrow("assembly");
   });
