@@ -210,3 +210,30 @@ flag. Whole-device mechatronics authority inherits the mechanical
 release decision. This safety gate is intentionally conservative:
 neither matching a supplier STL's Git checksum nor an operator-reported
 cost comparison authenticates measured performance.
+
+
+## BoxKit: source-pinned parametric hinges/corners without source redistribution
+
+[BoxKit](https://github.com/zef/BoxKit) is a particularly close existing
+solution to HS's low-waste box goal: parametric corners for plywood/acrylic/
+MDF sheet stock, optional hinged lids, filament-pin/ball hinges, latches,
+dividers and magnets. The source explicitly recommends test-fitting sheet
+stock and local nozzle/perimeter-specific clearances rather than assuming
+universal fits.
+
+Pinned upstream revision:
+`63fb6bee6d81962456ed2403538fe4d83644b122`.
+
+* `BoxKit.scad`: Git blob SHA-1
+  `650d587d10570b17ef13f9dae990290ebfccee72`.
+* Source requires **original BOSL** and **Round-Anything**, not just BOSL2.
+* A README describes the project as open source, but no explicit
+  `LICENSE`, `LICENSE.md` or `LICENSE.txt` was confirmed at the
+  pinned revision. **Do not copy or redistribute its source** from HS
+  without clarifying the actual license/grant from the creator.
+* If manually staged into `SOURCE_ASSETS/BoxKit.scad`, HS checks bytes
+  against the pinned Git blob identity. This is not a runtime build,
+  dependency verification, license clearance, fit validation or safety test.
+
+BoxKit is therefore an optional **linked/pinned construction alternative**,
+not an embedded code dependency or source of validated mechanical strength.
