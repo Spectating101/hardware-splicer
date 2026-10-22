@@ -89,6 +89,29 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
             or not isinstance(samples,list) or len(samples)!=count
             or any(item.get("pass") is not True for item in samples)):
         raise ValueError("actual native mounting bore/boss topology not verified")
+    expected_samples=[
+        ("shell","floor_center",[55,35,1],True),
+        ("shell","open_cavity",[55,35,12],False),
+    ]
+    for mount in manifest["mounts"]:
+        x,y=mount["cad_shell_center_xy_mm"]
+        expected_samples.extend([
+            (mount["ref"],"boss_annulus",[x+2.4,y,4],True),
+            (mount["ref"],"pilot_hole",[x,y,4],False),
+            (mount["ref"],"floor_through_hole",[x,y,1],False),
+        ])
+    for sample,(ref,kind,location,occupied) in zip(samples,expected_samples):
+        if (not isinstance(sample,Mapping) or sample.get("ref")!=ref
+                or sample.get("kind")!=kind
+                or sample.get("sample_xyz_mm")!=location
+                or sample.get("expected_material") is not occupied
+                or sample.get("measured_material") is not occupied
+                or sample.get("pass") is not True):
+            raise ValueError("native mounting hole/boss topology sample mismatch")
+    if (not isinstance(measured.get("bbox_mm"),list)
+            or len(measured["bbox_mm"])!=3
+            or any(abs(float(a)-b)>0.02 for a,b in zip(measured["bbox_mm"],(110,70,25)))):
+        raise ValueError("native mounted shell outer bounds mismatch")
     if measured.get("shape_valid") is not True or measured.get("solid_count")!=1:
         raise ValueError("independent FreeCAD measurement invalid")
     if abs(float(measured.get("volume_mm3",0))-float(topology["volume_mm3"]))>0.1:
