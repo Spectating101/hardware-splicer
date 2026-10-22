@@ -167,6 +167,7 @@ def run_mechanism_pack(
     out_dir: str | Path | None = None,
     pcb_w_mm: float = 70.0,
     pcb_h_mm: float = 50.0,
+    construction: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Build + run mecha-splicer offline. Never raises — returns degraded pack on failure."""
     selected = build_mecha_project_spec(
@@ -179,6 +180,8 @@ def run_mechanism_pack(
     )
     kind = str(selected["kind"])
     project_spec = dict(selected["project_spec"])
+    if construction is not None:
+        project_spec["construction"] = dict(construction)
     pack: Dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "status": "pending",
