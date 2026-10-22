@@ -113,6 +113,10 @@ describe("App navigation integration", () => {
     expect(screen.getByText("Physical release not established")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Verify" }));
     expect(screen.getByTestId("blueprint-evidence")).toHaveTextContent("not authorized");
+    await user.click(screen.getByTestId("openblueprint-to-hs-intake"));
+    expect(await screen.findByTestId("stage-intake")).toBeInTheDocument();
+    expect(screen.getByTestId("wizard-initial-goal")).toHaveTextContent("Imported bench light");
+    expect(screen.getByTestId("wizard-initial-goal")).toHaveTextContent("Proposed, unverified parts");
   });
 
   it("Interface Lab is reachable only through Advanced", async () => {
