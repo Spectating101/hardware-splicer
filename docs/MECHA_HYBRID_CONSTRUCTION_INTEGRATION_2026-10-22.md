@@ -100,3 +100,66 @@ pin revision/hash and terms, print a coupon for each actual connector,
 measure fit and pull-through, and benchmark real grams, assembly time,
 service temperature and cost. Until those observations exist, the
 planner is a sourced *proposal* engine, not a manufactured product.
+
+
+## Verified upstream file identifiers: Clip-Os (2026-10-22 source check)
+
+Upstream Git commit: `348bad8ba0553be79f24d5ac12a7d4081d7759c8`
+
+* `fab/clip-o_90_moreflexy.stl`: Git blob SHA-1
+  `eda0c9041d229c050296a313af5e4bd1a07892ea`
+* `fab/clip-o_180_moreflexy.stl`: Git blob SHA-1
+  `fab8122d82c96237fa819429a50dc2cbcc99291f`
+
+These are verified **Git object identities** at a pinned upstream revision,
+not downloaded STL files, independently computed SHA-256 hashes, sliced
+meshes or tested printed parts. Fetch from
+[the source revision](https://github.com/zakqwy/Clip-Os/tree/348bad8ba0553be79f24d5ac12a7d4081d7759c8/fab).
+The author specifies nominal 1/16-inch (approximately 1.6 mm) sheet stock
+and a mounting-hole center inset 1/2-inch (12.7 mm) from the edge; follow
+the original instructions and verify the actual hole punch and part fit.
+License is CC BY-SA 4.0; preserve attribution and applicable ShareAlike
+conditions on distributions/adaptations.
+
+ModuFrame is **still a linked 3 mm nominal source**, not a pinned/binary
+verified downloaded model. HS therefore reports its source revision as
+unverified and requires physical-fit validation before adoption.
+
+## Three *different* construction variants — measured shop protocol
+
+Use the blank, **not yet completed** worksheet:
+
+`examples/mechanical/hybrid_three_way_trial_template.json`
+
+The comparison is:
+1. `full_print` — the existing Mecha-generated enclosure
+2. `sheet_hybrid:cardboard_clip_os` — a real measured 1.6 mm stock/Clip-Os build
+3. `sheet_hybrid:plywood_moduframe` — a real measured 3.0 mm stock/ModuFrame build
+
+These three methods should satisfy the *same functional dimensions,
+electrical interfaces, fastening requirements and usage scenario*.
+Photograph/record source files, actual slice outputs, finished assembly,
+materials used, sheet scrap, labor time, electrical and thermal checks.
+Retain each observation using a distinct specimen ID and a
+`record_uri` (the URI is **not authenticated** by the tool).
+
+Copy completed rows under `construction.benchmark_trials` inside the
+Mecha project spec. Fields include measured finished mass (g), print/cut/
+assembly minutes, consumed material cost, purchased hardware cost,
+energy cost, labor cost, recorded fit and attachment observations, and
+thermal-check outcome. Use one **consistent currency** for every cost
+entry, and do not mistake a zero cost for an unrecorded expense.
+
+A three-way **reported cost order** is available only if all three
+distinct alternatives are represented, all costs (including energy and
+labor) have explicit values, all declared fit, attachment and thermal
+checks are true, and every row is marked `operator_reported`.
+Synthetic/missing/incomplete observations yield no such ranking.
+Even a complete reported comparison is **not** externally
+authenticated, does not demonstrate repeatability, and never selects
+a manufacturing method automatically.
+
+The comparison does not optimize panel nesting and **cannot certify
+manufactured objects**. It remains a decision aide. Future empirical
+validation needs actual trials, ideally replicates per method and
+independent review for safety-critical use.
