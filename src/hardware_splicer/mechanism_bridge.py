@@ -248,6 +248,7 @@ def run_mechanism_pack(
             "simulation": bundle.get("simulation") or [],
             "dfm": bundle.get("dfm") or [],
             "structural_screening": bundle.get("structural_screening") or {},
+            "construction_alternatives": bundle.get("construction_alternatives") or {},
             "structural_release_blocked": bundle.get("structural_release_blocked", True),
         }
     )
@@ -275,6 +276,7 @@ def write_mechanism_pack_artifacts(pack: Mapping[str, Any], out_dir: str | Path)
         "degraded_reason": pack.get("degraded_reason"),
         "claim_boundary": pack.get("claim_boundary"),
         "structural_screening": pack.get("structural_screening") or {},
+        "construction_alternatives": pack.get("construction_alternatives") or {},
         "structural_release_blocked": pack.get("structural_release_blocked", True),
     }
     (root / "MECHATRONICS_PACK.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
