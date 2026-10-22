@@ -90,6 +90,10 @@ def test_synthetic_operator_readings_remain_unverified_with_source_provenance(tm
     assert len(integrated["acceptance_gates"])==7
     assert all(g["state"]=="open" for g in integrated["acceptance_gates"])
     assert (tmp_path/"integrated/DONOR_CAPTURE_AUDIT.json").is_file()
+    assert integrated["device_work_package"]["physical_donor_evidence"]["capture_sha256"].startswith("sha256:")
+    assert any(w.get("source_domain")=="donor_characterization"
+               for w in integrated["device_work_package"]["work_steps"])
+    assert integrated["device_work_package"]["engineering_readiness"]=="blocked"
     assert not integrated["release_authorized"]
 
 
