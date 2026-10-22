@@ -410,3 +410,12 @@ def test_symlink_is_not_followed_for_local_asset_provenance(tmp_path):
     inspected=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
     assert inspected["assets"][0]["status"]=="refused_symlink"
     assert inspected["assets_usable_for_manufacturing"] is False
+
+
+def test_symlinked_external_asset_directory_is_not_read(tmp_path):
+    directory=tmp_path/"other"
+    directory.mkdir()
+    (tmp_path/"SOURCE_ASSETS").symlink_to(directory,target_is_directory=True)
+    r=inspect_local_connector_assets({"connector_family":"clip_os"},tmp_path)
+    assert r["status"]=="refused_symlink_asset_directory"
+    assert r["assets_usable_for_manufacturing"] is False
