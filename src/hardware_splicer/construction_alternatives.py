@@ -68,6 +68,30 @@ CONNECTOR_SOURCES: dict[str, dict[str, Any]] = {
         "license": "verify_source_and_revision",
         "requires_external_asset": True,
     },
+    "boxkit": {
+        "name": "BoxKit",
+        "url": "https://github.com/zef/BoxKit",
+        "interface": "external parametric sheet-box corners, pinned hinges and latches",
+        "nominal_panel_thickness_mm": None,
+        "license": "license_not_verified; link_only_do_not_redistribute",
+        "requires_external_asset": True,
+        "pinned_revision": "63fb6bee6d81962456ed2403538fe4d83644b122",
+        "verified_repository_assets": [
+            {
+                "name": "BoxKit.scad",
+                "repository_path": "BoxKit.scad",
+                "git_blob_sha1": "650d587d10570b17ef13f9dae990290ebfccee72",
+                "revision_url": "https://github.com/zef/BoxKit/blob/63fb6bee6d81962456ed2403538fe4d83644b122/BoxKit.scad",
+                "local_file_installed": False,
+                "mesh_validated_in_hs": False,
+            }
+        ],
+        "source_dependencies": [
+            "revarbat/BOSL (original, not BOSL2)",
+            "Irev-Dev/Round-Anything"
+        ],
+        "source_license_review_required": True,
+    },
     "boxes_py": {
         "name": "Boxes.py",
         "url": "https://github.com/florianfesti/boxes",
