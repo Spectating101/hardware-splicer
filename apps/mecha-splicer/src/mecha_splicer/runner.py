@@ -90,6 +90,14 @@ def run(
         structural.get("status") in {"solver_blocked", "unsupported_mechanical_topology"}
     )
 
+    # Existing Mecha output remains the fallback. This is a zero-dependency
+    # construction comparison, not a new generator or production approval.
+    if project.construction is not None:
+        from hardware_splicer.construction_alternatives import evaluate_construction_alternatives
+        bundle["construction_alternatives"] = evaluate_construction_alternatives(
+            project.model_dump(mode="json")
+        )
+
     commerce = estimate_digital_pack(price_usd=29.0, support_minutes=10.0).to_dict()
     bundle["commerce"] = {"digital_pack": commerce, "assumptions": {"price_usd": 29.0, "support_minutes": 10.0}}
 
@@ -173,6 +181,15 @@ def run(
         (outp / "BUILD_RECIPE.md").write_text(_render_build_recipe(bundle), encoding="utf-8")
         (outp / "PARTS.json").write_text(json.dumps(bundle.get("parts") or [], indent=2), encoding="utf-8")
         (outp / "PRINT_PLAN.md").write_text(_render_print_plan(bundle), encoding="utf-8")
+        if bundle.get("construction_alternatives"):
+            from hardware_splicer.construction_alternatives import render_construction_plan
+            construction = bundle["construction_alternatives"]
+            (outp / "CONSTRUCTION_ALTERNATIVES.json").write_text(
+                json.dumps(construction, indent=2, allow_nan=False), encoding="utf-8"
+            )
+            (outp / "CONSTRUCTION_PLAN.md").write_text(
+                render_construction_plan(construction), encoding="utf-8"
+            )
 
         if render_openscad_stl:
             from .engines.render import render_openscad_to_stl
@@ -326,6 +343,13 @@ def _render_mech_check(bundle: Dict[str, Any]) -> str:
         artifacts = structural.get("artifacts") or {}
         if artifacts.get("review_html"):
             lines.append(f"- Open investigation review: {artifacts['review_html']}")
+    construction = bundle.get("construction_alternatives") or {}
+    if construction:
+        lines.extend(["", "## Construction and Material Alternatives",
+                      f"- Status: {construction.get('status')}",
+                      "- Thermal/chemical compatibility and joint strength are not certified."])
+        for method in construction.get("alternatives") or []:
+            lines.append(f"- {method['method']}: {method['status']}")
     sim = bundle.get("simulation") or []
     if sim:
         lines.append("")
@@ -367,6 +391,9 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
     lines.append("")
     lines.append("## Evidence Bundle")
     lines.append("- `DESIGN_DECISIONS.md`")
+    if bundle.get("construction_alternatives"):
+        lines.extend(["- `CONSTRUCTION_ALTERNATIVES.json`", "- `CONSTRUCTION_PLAN.md`",
+                      "- Construction suggestions do not replace existing enclosure CAD."])
     structural = bundle.get("structural_screening") or {}
     if structural.get("status") not in {"not_applicable", "disabled_by_request"}:
         lines.append("- Structural contact analysis: " + str(structural.get("status")))
@@ -381,6 +408,9 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
 
     lines.append("")
     lines.append("## Assembly (prototype-grade)")
+    if bundle.get("construction_alternatives"):
+        lines.append("- Review `CONSTRUCTION_PLAN.md` before deciding whether to print entire walls.")
+        lines.append("- Sheet panels and external connector files are NOT generated or verified by this comparison.")
     lines.append("- Print base + lid; test-fit PCB/module with clearance.")
     lines.append("- Install heat-set inserts (optional) and fasteners.")
     lines.append("- Verify connector cutouts and cable strain relief.")
@@ -436,6 +466,7 @@ def _write_evidence_bundle(out_dir: Path, bundle: Dict[str, Any], project: Proje
         "severity_counts": _severity_counts(bundle.get("simulation") or []),
         "structural_screening": bundle.get("structural_screening") or {},
         "structural_release_blocked": bundle.get("structural_release_blocked", True),
+        "construction_alternatives": bundle.get("construction_alternatives"),
     }
     sim_path = out_dir / "SIM_RESULTS.json"
     sim_path.write_text(json.dumps(sim_summary, indent=2), encoding="utf-8")
@@ -459,6 +490,8 @@ def _render_design_decisions(bundle: Dict[str, Any], project: ProjectSpec) -> st
     lines.append(f"- Mode: `{project.mode}`")
     lines.append(f"- Process: `{project.process}`")
     lines.append(f"- Simulation Fidelity: `{project.simulation_fidelity}`")
+    if bundle.get("construction_alternatives"):
+        lines.append("- Construction alternatives: evidence-only, no automatic redesign or approval.")
 
     composition = bundle.get("composition") or {}
     lines.append("")
@@ -509,6 +542,13 @@ def _render_risk_register(bundle: Dict[str, Any]) -> str:
     emit(bundle.get("dfm") or [], "dfm")
     emit(bundle.get("simulation") or [], "simulation")
     emit(bundle.get("safety") or [], "safety")
+    construction = bundle.get("construction_alternatives") or {}
+    sheet = next((x for x in construction.get("alternatives") or []
+                  if x.get("method") == "sheet_hybrid"), {})
+    for blocker in sheet.get("blockers") or []:
+        message = str(blocker).replace("|", "/").replace("\n", " ")[:160]
+        lines.append(f"| construction | block | {message} | "
+                     "Obtain sourced material/fit evidence before changing fabrication. |")
     structural = bundle.get("structural_screening") or {}
     for blocker in structural.get("blockers") or []:
         # Candidate/advisory/solver blockers are not material strength evidence.
