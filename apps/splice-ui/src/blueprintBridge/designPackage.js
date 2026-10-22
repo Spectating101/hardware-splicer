@@ -156,14 +156,20 @@ export function normalizeHsProjectPackage(pkg, session = {}) {
     seen.add(id);
     const rawPrice = line.estimated_unit_usd ?? line.unit_price_usd ?? line.price_usd;
     const parsedPrice = rawPrice == null ? null : Number(rawPrice);
-    return normalizePart({
+    const hasDomain = DOMAINS.has(line.domain);
+    const hasCategory = CATEGORIES.has(line.category);
+    const normalized = normalizePart({
       id, name: line.description || line.module_id || line.ref || id,
       role: line.source || "BOM entry", description: line.description || "",
-      category: "module", domain: "electrical",
+      category: hasCategory ? line.category : "misc",
+      domain: hasDomain ? line.domain : "electrical",
       qty: line.qty ?? 1,
       unitCost: Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : undefined,
       source: line.source || "hs_bom",
     }, i, "hs_bom");
+    // Never claim a generic HS BOM line is a compute or mechanical block.
+    return hasCategory && hasDomain ? normalized :
+      { ...normalized, category: "unclassified", domain: "unclassified" };
   });
   const steps = array(pkg.instructions?.assembly_steps, 100).map((s, i) => ({
     id: String(i + 1), title: text(s?.title || `Step ${i + 1}`, 250),
