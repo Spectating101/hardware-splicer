@@ -1,8 +1,9 @@
+// Deliberately passive integration smoke: checks compiler and connectivity.
+// Not an electrically useful or approved standalone gadget.
 export default () => (
-  <board width="18mm" height="12mm">
+  <board width="20mm" height="12mm">
     <resistor name="R1" resistance="1k" footprint="0402" pcbX={-4} />
-    <led name="D1" color="red" footprint="0603" pcbX={4} />
-    <trace from=".R1 > .pin2" to=".D1 > .anode" />
-    <trace from=".D1 > .cathode" to=".R1 > .pin1" />
+    <resistor name="R2" resistance="2.2k" footprint="0402" pcbX={4} />
+    <trace name="R1_to_R2" from=".R1 > .pin2" to=".R2 > .pin1" />
   </board>
 )
