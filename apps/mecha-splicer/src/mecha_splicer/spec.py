@@ -477,6 +477,27 @@ class ConstructionMaterial(BaseModel):
     chemical_compatibility: dict[str, Literal["compatible", "incompatible", "unknown"]] = Field(default_factory=dict)
 
 
+class ConstructionBenchmarkTrial(BaseModel):
+    """Operator-entered build measurements; never independently authenticated."""
+
+    specimen_id: str = Field(min_length=1, max_length=100)
+    method: Literal["full_print", "sheet_hybrid", "off_the_shelf"]
+    record_uri: str = Field(min_length=1, max_length=500)
+    evidence_kind: Literal["operator_reported", "synthetic_fixture"] = "synthetic_fixture"
+    finished_mass_g: Annotated[float, Field(gt=0)]
+    printing_minutes: Annotated[float, Field(ge=0)]
+    cutting_minutes: Annotated[float, Field(ge=0)]
+    assembly_minutes: Annotated[float, Field(ge=0)]
+    consumed_material_cost: Annotated[float, Field(ge=0)]
+    purchased_hardware_cost: Annotated[float, Field(ge=0)]
+    energy_cost: Optional[Annotated[float, Field(ge=0)]] = None
+    labor_cost: Optional[Annotated[float, Field(ge=0)]] = None
+    panel_scrap_mass_g: Optional[Annotated[float, Field(ge=0)]] = None
+    fit_passed: Optional[bool] = None
+    attachment_test_passed: Optional[bool] = None
+    thermal_check_passed: Optional[bool] = None
+
+
 class ConstructionSpec(BaseModel):
     """Opt-in comparison; never replaces generated CAD without human choice."""
 
@@ -490,6 +511,7 @@ class ConstructionSpec(BaseModel):
     connector_count: int = Field(default=8, ge=0, le=100)
     connector_print_volume_cm3: Optional[Annotated[float, Field(ge=0)]] = None
     printed_material_fraction: Optional[Annotated[float, Field(gt=0, le=1)]] = None
+    benchmark_trials: list[ConstructionBenchmarkTrial] = Field(default_factory=list)
 
 
 class ProjectSpec(BaseModel):
