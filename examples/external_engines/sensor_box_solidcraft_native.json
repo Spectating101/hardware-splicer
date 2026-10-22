@@ -1,0 +1,12 @@
+{
+  "schema": "hardware_splicer.external_engine_plan.v1",
+  "id": "sensor_box_solidcraft_native",
+  "tasks": [
+    {
+      "id": "cad_step",
+      "engine": "solidcraft",
+      "operation": "run_script",
+      "source": "cad/enclosure-envelope.json"
+    }
+  ]
+}
