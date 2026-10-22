@@ -26,7 +26,10 @@ describe("product-first engineering review", () => {
     expect(screen.getByText(/physical measurements/i)).toBeInTheDocument();
 
     await user.click(screen.getByTestId("review-tab-parts"));
+    expect(screen.getByTestId("review-safety-hold")).toHaveTextContent(/not authorization to connect power/i);
     expect(screen.getByText("Motor driver")).toBeInTheDocument();
+    await user.click(screen.getByTestId("review-tab-wiring"));
+    expect(screen.getByTestId("review-safety-hold")).toBeInTheDocument();
     await user.click(screen.getByTestId("review-tab-mechanical"));
     expect(screen.getByText(/No mechanical design or measured donor dimensions/i)).toBeInTheDocument();
     await user.click(screen.getByTestId("review-tab-code"));
