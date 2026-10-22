@@ -704,6 +704,25 @@ export default function App() {
                   ← Home
                 </button>
               </div>
+              <section className="card">
+                <h3>Continue with HS engineering</h3>
+                <p className="muted small">
+                  Start a new HS intake using this imported idea and proposed parts.
+                  Imported wires, costs and geometry remain unverified; they do not become
+                  a schematic, a BOM approval or a physical authorization.
+                </p>
+                <button type="button" className="primary" disabled={!health?.ok}
+                  data-testid="openblueprint-to-hs-intake"
+                  onClick={() => {
+                    const proposed = importedDesign.parts.map((p) => p.name).slice(0, 30).join(", ");
+                    startProject(
+                      `${importedDesign.name}: ${importedDesign.summary}. Proposed, unverified parts: ${proposed}`
+                        .slice(0, 4000),
+                    );
+                  }}>
+                  Start HS engineering intake
+                </button>
+              </section>
               <ProjectExplorer design={importedDesign} />
             </div>
           )}
