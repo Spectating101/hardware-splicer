@@ -482,6 +482,7 @@ class ConstructionBenchmarkTrial(BaseModel):
 
     specimen_id: str = Field(min_length=1, max_length=100)
     method: Literal["full_print", "sheet_hybrid", "off_the_shelf"]
+    variant_id: Optional[str] = Field(default=None, max_length=80)
     record_uri: str = Field(min_length=1, max_length=500)
     evidence_kind: Literal["operator_reported", "synthetic_fixture"] = "synthetic_fixture"
     finished_mass_g: Annotated[float, Field(gt=0)]
