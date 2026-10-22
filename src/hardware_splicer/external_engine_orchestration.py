@@ -219,8 +219,8 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
             binary = str(discovered[engine]["executable"])
             task_dir = out / ident
             task_dir.mkdir(exist_ok=False)
-            src = (out / task["source_task"] / "model.step").resolve()
-                  if task["source_task"] is not None else sources[ident]
+            src = ((out / task["source_task"] / "model.step").resolve()
+                   if task["source_task"] is not None else sources[ident])
             if engine == "solidcraft":
                 # Immutable authored CAD recipe, separate model export and results.
                 model = task_dir / "model.step"
