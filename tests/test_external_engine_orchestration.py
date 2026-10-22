@@ -103,6 +103,8 @@ def test_solidcraft_to_freecad_real_workflow_contract_with_mocked_executables(tm
     assert report["completed"] == 2 and report["blocked"] == 0
     assert report["tasks"][1]["artifacts"][0]["path"] == "inspect/step_inspection.json"
     assert report["plan_sha256"].startswith("sha256:")
+    assert report["tasks"][0]["source_sha256"].startswith("sha256:")
+    assert report["tasks"][1]["source_sha256"] == report["tasks"][0]["artifacts"][0]["sha256"]
     assert not report["fabrication_authorized"]
     assert json.loads((out / "ENGINE_ORCHESTRATION_REPORT.json").read_text()) == report
 
