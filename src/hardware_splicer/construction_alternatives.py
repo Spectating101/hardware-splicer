@@ -143,7 +143,7 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
     required = ("finished_mass_g", "printing_minutes", "cutting_minutes",
                 "assembly_minutes", "consumed_material_cost",
                 "purchased_hardware_cost")
-    grouped: dict[str, list[dict[str, Any]]] = {m: [] for m in valid_methods}
+    grouped: dict[str, list[dict[str, Any]]] = {}
     seen: set[str] = set()
     for trial in trials:
         if not isinstance(trial, Mapping):
@@ -153,6 +153,14 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
         if method not in grouped or not specimen or specimen in seen:
             raise ValueError("benchmark method or distinct specimen ID invalid")
         seen.add(specimen)
+        variant = trial.get("variant_id")
+        if variant is not None and (
+            not isinstance(variant,str) or not variant.strip() or len(variant)>80 or
+            any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for c in variant)
+        ):
+            raise ValueError("variant_id must be a short safe slug")
+        variant = variant.strip() if variant is not None else None
+        group_key = method + (":" + variant if variant else "")
         uri = trial.get("record_uri")
         if not isinstance(uri,str) or not uri.strip() or len(uri)>500:
             raise ValueError("benchmark evidence record URI required")
@@ -174,8 +182,10 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
                   float(energy)+float(labor),3)
             if energy is not None and labor is not None else None
         )
-        grouped[method].append({
+        grouped.setdefault(group_key, []).append({
             "specimen_id": specimen,
+            "variant_id": variant,
+            "method": method,
             "record_uri": uri,
             "evidence_kind": evidence,
             "finished_mass_g": float(trial["finished_mass_g"]),
@@ -190,12 +200,14 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
             "thermal_check_passed": trial.get("thermal_check_passed"),
         })
     method_results = []
-    for method,records in grouped.items():
+    for variant_key,records in grouped.items():
+        method = records[0]["method"]
         if not records:
             continue
         complete_cost = all(x["reported_total_cost"] is not None for x in records)
         method_results.append({
             "method":method,
+            "variant_key":variant_key,
             "specimen_count":len(records),
             "specimens":records,
             "median_finished_mass_g":round(median(x["finished_mass_g"] for x in records),3),
@@ -214,19 +226,20 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
             ),
         })
     complete = (
-        len(method_results)==3 and
+        len(method_results)>=3 and
+        any(x["method"] == "full_print" for x in method_results) and
         all(x["median_reported_total_cost"] is not None and
             x["evidence_only_operator_reports"] and
             x["all_declared_check_results_pass"]
             for x in method_results)
     )
     order = (
-        [x["method"] for x in sorted(
+        [x["variant_key"] for x in sorted(
             method_results,key=lambda x:x["median_reported_total_cost"]
         )] if complete else []
     )
     return {
-        "status": "operator_reported_three_way_comparison_not_independently_verified" if complete
+        "status": "operator_reported_multi_variant_comparison_not_independently_verified" if complete
                   else "partial_or_synthetic_measurement_inventory",
         "sample_count":len(seen),
         "method_results":method_results,
@@ -563,7 +576,7 @@ def render_construction_plan(report: Mapping[str, Any]) -> str:
     ])
     for sample in benchmark.get("method_results") or []:
         lines.append(
-            "- " + sample["method"] + ": " + str(sample["specimen_count"]) +
+            "- " + sample["variant_key"] + ": " + str(sample["specimen_count"]) +
             " specimens, median finished mass " +
             str(sample["median_finished_mass_g"]) + " g; reported total cost " +
             str(sample["median_reported_total_cost"]) +
