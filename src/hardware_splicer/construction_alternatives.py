@@ -150,7 +150,7 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
             raise ValueError("benchmark trial must be an object")
         method = trial.get("method")
         specimen = str(trial.get("specimen_id") or "").strip()
-        if method not in grouped or not specimen or specimen in seen:
+        if method not in valid_methods or not specimen or specimen in seen:
             raise ValueError("benchmark method or distinct specimen ID invalid")
         seen.add(specimen)
         variant = trial.get("variant_id")
@@ -201,9 +201,9 @@ def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
         })
     method_results = []
     for variant_key,records in grouped.items():
-        method = records[0]["method"]
         if not records:
             continue
+        method = records[0]["method"]
         complete_cost = all(x["reported_total_cost"] is not None for x in records)
         method_results.append({
             "method":method,
