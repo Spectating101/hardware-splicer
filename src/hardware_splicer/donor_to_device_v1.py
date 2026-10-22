@@ -83,10 +83,30 @@ def _splice_compilation(result_path: str | Path | None, *, expected_case: str,
                 blob = candidate.read_bytes()
                 if blob.lstrip().startswith(b"(kicad_pcb"):
                     board_sha = "sha256:" + hashlib.sha256(blob).hexdigest()
+    # Reuse firmware/mechanical/bring-up artifacts already produced by HS.
+    # Their identities are evidence of emitted candidate files, not validation
+    # that they will work on an uncharacterized RC donor.
+    emitted = {}
+    if isinstance(artifacts, dict):
+        root = Path(result_path).resolve().parent
+        for name in ("firmware_scaffold", "mechanism_pack", "mechatronics_pack",
+                     "mechatronics_authority", "bringup_card", "build_graph"):
+            location = artifacts.get(name)
+            if not isinstance(location, str) or not location.endswith(".json"):
+                continue
+            file = Path(location)
+            file = (file if file.is_absolute() else root / file).resolve()
+            if file.is_relative_to(root) and file.is_file() and not file.is_symlink():
+                if 0 < file.stat().st_size <= MAX_BYTES:
+                    emitted[name] = {
+                        "sha256": "sha256:" + hashlib.sha256(file.read_bytes()).hexdigest(),
+                        "validated_against_physical_donor": False,
+                    }
     return {"status": ("source_bound_carrier_drc_reported" if board_sha
                        else "demo_drc_reported_artifact_unbound"),
             "receipt_sha256": receipt_hash,
             "carrier_drc_pass": True, "carrier_artifact_sha256": board_sha,
+            "subsystem_artifacts": emitted,
             "native_kicad_receipt_independently_rechecked": False,
             "physically_built": False}
 
@@ -254,6 +274,15 @@ def build_donor_to_device_review(*, intake_path: str | Path,
         "donor_inventory_count":len(inventory),
         "reuse_actions":reuse,
         "electrical": {
+            "driver_design_requirements_from_unverified_intake": {
+                "required_motor_channels": 2,
+                "declared_motor_rail_target_v": max(x["rated_v"] for x in ratings),
+                "declared_per_channel_stall_current_min_a": max(x["stall_a"] for x in ratings),
+                "declared_combined_stall_current_min_a": round(aggregate, 5),
+                "minimum_actual_component_rating_verified": False,
+                "needs_confirmed_peak_surge_thermal_margin": True,
+                "needs_safe_logic_level_and_braking_protocol": True,
+            },
             "nominal_battery_claim_v":voltage,"battery_capacity_claim_mah":capacity,
             "two_motor_running_current_claim_a":round(running_total,5),
             "two_motor_stall_current_claim_a":round(aggregate,5),
