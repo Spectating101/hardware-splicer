@@ -109,6 +109,66 @@ Run the separate inspection CLI after generating the mounting manifest:
 python scripts/assess_spi_connector_access.py --mount-manifest
 /tmp/hs-spi-mount-requirements.json --out /tmp/hs-spi-connector-access.json
 
+## Real header dimensions and provisional 3D mating/service envelope
+
+The exact fitted header identities are in the KiCad reference BOM:
+
+- J1: Samtec TSW-106-07-T-S, vertical, 6 pins at 2.54 mm pitch.
+- JP1: Samtec TSW-102-07-T-S, vertical, 2 pins at 2.54 mm pitch.
+- For both: 2.54 mm header insulator height and 5.84 mm mating post length
+  (source: Samtec's part pages and independent DigiKey part attributes).
+
+The male header tip nominally reaches Z=15.18 mm (PCB underside
+Z=5.2, PCB thickness 1.6, header insulator 2.54, mating post 5.84).
+That puts the male pin tips **9.82 mm below the shell's 25 mm top rim**.
+A suitable female connector therefore needs an accessible vertical
+insertion path; the courtyard alone cannot prove this.
+
+Provisional references for envelope investigation ONLY:
+
+- Samtec SSW-106-02-T-S and SSW-102-02-T-S, 2.54 mm pitch single-row
+  receptacles with 8.51 mm nominal insulator height. These are
+  through-hole PCB-tail sockets, **not a selected cable harness**.
+- The service approach corridor uses the actual KiCad connector courtyard
+  expanded by an authored 2 mm review allowance, extending from above
+  the header insulation to 10 mm above the open shell's rim.
+- The provisional socket top would be approximately Z=17.85 mm on
+  a simplified seating assumption; this is NOT a verified mated height.
+
+Engineering truth, unlike guessed integration claims:
+
+1. The male header dimensions are backed by named manufacturer parts.
+2. The approximate 3D service corridor is an authored design hypothesis,
+   not a supplier-certified female socket/cable geometry.
+3. HS screens this corridor against actual PCB component-height
+   approximations, proposed mounting bosses and cavity boundaries.
+4. A native FreeCAD script uses a boolean intersection of the corridor
+   with the actual mounted SolidCraft STEP geometry.
+5. The result remains BLOCKED for qualified mating, cable routing,
+   strain relief, plug orientation, insertion force and real assembly.
+
+Commands after generating the mounted-shell manifest and native STEP:
+
+python scripts/assess_spi_mating_volume.py --mount-manifest
+/tmp/hs-spi-mount-requirements.json --out
+/tmp/hs-spi-mounted-native/CONNECTOR_MATING_VOLUME.json
+
+Set HS_MOUNTED_SHELL_STEP to the actual native mounted-shell STEP, set
+HS_MATING_VOLUME_REPORT to CONNECTOR_MATING_VOLUME.json, and
+HS_NATIVE_MATING_COLLISION_REPORT to an output JSON path.
+Then run FreeCADCmd scripts/probe_spi_connector_access_native.py.
+
+Documentation/data sources:
+
+- https://www.samtec.com/products/tsw-106-07-t-s
+- https://www.samtec.com/products/tsw-102-07-t-s
+- https://www.digikey.com/en/products/detail/samtec-inc/TSW-106-07-T-S/1101618
+- https://www.digikey.com/en/products/detail/samtec-inc/SSW-106-02-T-S/1112794
+- https://www.digikey.com/en/products/detail/samtec-inc/SSW-102-02-T-S/1112798
+
+No model should authorize printing, assembly, power or product release
+until an actual mating hardware assembly is specified and checked.
+
 ## Still required for a physical prototype
 
 Independent confirmation of fastener geometry, screw head/washer and assembly
