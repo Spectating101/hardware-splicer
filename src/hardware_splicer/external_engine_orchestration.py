@@ -90,19 +90,32 @@ def validate_plan(plan: Mapping[str, Any]) -> dict:
     for raw in raw_tasks:
         if not isinstance(raw, Mapping):
             raise EnginePlanError("task must be a mapping")
-        if set(raw) - {"id", "engine", "operation", "source", "depends_on", "artifact_paths"}:
+        if set(raw) - {"id", "engine", "operation", "source", "source_task", "depends_on", "artifact_paths"}:
             raise EnginePlanError("unsupported task key")
         tid, engine, op = raw.get("id"), raw.get("engine"), raw.get("operation")
         if not isinstance(tid, str) or not _ID.fullmatch(tid) or tid in seen:
             raise EnginePlanError("invalid or duplicate task id")
         if engine not in ENGINES or op not in ENGINES[engine]["operations"]:
             raise EnginePlanError("unsupported external engine operation")
-        source = _relative_path(raw.get("source"), "source")
-        if source.suffix.lower() not in ENGINES[engine]["source_ext"]:
-            raise EnginePlanError("source extension incompatible with selected tool")
+        source_from = raw.get("source_task")
+        if source_from is not None:
+            if engine != "freecad" or op != "inspect_step" or source_from not in seen:
+                raise EnginePlanError("only FreeCAD STEP inspection may consume a preceding task output")
+            parent = next(item for item in tasks if item["id"] == source_from)
+            if parent["engine"] != "solidcraft" or parent["operation"] != "run_script":
+                raise EnginePlanError("FreeCAD source task must be SolidCraft's STEP export")
+            if raw.get("source") is not None:
+                raise EnginePlanError("cannot specify source and source_task together")
+            source = None
+        else:
+            source = _relative_path(raw.get("source"), "source")
+            if source.suffix.lower() not in ENGINES[engine]["source_ext"]:
+                raise EnginePlanError("source extension incompatible with selected tool")
         deps = raw.get("depends_on", [])
         if not isinstance(deps, list) or len(set(deps)) != len(deps) or any(dep not in seen for dep in deps):
             raise EnginePlanError("dependencies must refer to preceding tasks (acyclic order)")
+        if source_from is not None and source_from not in deps:
+            deps = [*deps, source_from]
         artifact_paths = raw.get("artifact_paths", [])
         if not isinstance(artifact_paths, list) or len(artifact_paths) > 12:
             raise EnginePlanError("too many expected artifacts")
@@ -112,7 +125,8 @@ def validate_plan(plan: Mapping[str, Any]) -> dict:
         if engine in {"atopile", "tscircuit"} and not artifacts:
             raise EnginePlanError("electronics tasks must declare expected native output artifacts")
         tasks.append({"id": tid, "engine": engine, "operation": op,
-                      "source": source.as_posix(), "depends_on": list(deps),
+                      "source": source.as_posix() if source is not None else None,
+                      "source_task": source_from, "depends_on": list(deps),
                       "artifact_paths": [p.as_posix() for p in artifacts]})
         seen.add(tid)
     return {"schema": SCHEMA, "id": ident, "tasks": tasks}
@@ -183,6 +197,8 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
     # Preflight all source paths before executing any provider.
     sources: dict[str, Path] = {}
     for item in valid["tasks"]:
+        if item["source_task"] is not None:
+            continue
         source = _contained(root, Path(item["source"]))
         if source.stat().st_size > _MAX_SOURCE:
             raise EnginePlanError("external source file exceeds size ceiling")
@@ -203,7 +219,8 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
             binary = str(discovered[engine]["executable"])
             task_dir = out / ident
             task_dir.mkdir(exist_ok=False)
-            src = sources[ident]
+            src = (out / task["source_task"] / "model.step").resolve()
+                  if task["source_task"] is not None else sources[ident]
             if engine == "solidcraft":
                 # Immutable authored CAD recipe, separate model export and results.
                 model = task_dir / "model.step"
@@ -231,8 +248,10 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                 status, diag, exit_code = "blocked_execution_failure", type(exc).__name__, None
             artifacts = []
             if status == "executed":
-                requested = [_contained(root, Path(p), existing=True)
-                             for p in task["artifact_paths"]] if task["artifact_paths"] else []
+                requested = []
+                for rel in task["artifact_paths"]:
+                    file = _contained(root, Path(rel), existing=False)
+                    requested.append(file)
                 for file in required + requested:
                     if not file.is_file() or file.is_symlink() or file.stat().st_size == 0 or file.stat().st_size > _MAX_ARTIFACT:
                         status = "blocked_missing_or_invalid_output"
