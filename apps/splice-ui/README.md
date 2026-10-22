@@ -31,6 +31,20 @@ npm run dev
 
 Open http://127.0.0.1:5178
 
+## OpenBlueprint compatibility (experimental)
+
+The home screen accepts a plain-English goal and carries it into the existing
+HS clarification wizard. It can also import the **MIT OpenBlueprint**
+`DesignPackage` JSON file (`design.json` inside an OpenBlueprint export ZIP)
+for a local, read-only inspection — **no backend required**. Imported proposals
+can start a new HS intake, but do not become verified circuits, real CAD or
+authorized hardware. Compiled native HS projects get the same Overview / Parts /
+Architecture / Wiring / Mechanical / Code / Build / Verify explorer, backed by
+actual HS package and evidence state.
+
+See [OpenBlueprint bridge and nonclaims](../../docs/OPENBLUEPRINT_BRIDGE.md).
+This is not a Blueprint.io integration or an OpenBlueprint generator fork.
+
 ## Consumer flow
 
 1. **Home** — value prop + “Start a project” / “Try an example”
