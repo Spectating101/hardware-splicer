@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Background, Controls, ReactFlow, ReactFlowProvider } from "@xyflow/react";
+import { Background, Controls, Handle, Position, ReactFlow, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./ProjectExplorer.css";
 
@@ -14,24 +14,43 @@ const LANE = {
 };
 const NET_COLORS = { data: "#2563eb", power: "#b45309", ground: "#475569" };
 
+function PinPartNode({ data }) {
+  const part = data.part;
+  return (
+    <div className="blueprint-explorer__pin-node">
+      <strong>{part.name}</strong>
+      <span className="muted small">{part.role || part.category}</span>
+      {part.pins.map((pin) => (
+        <div key={pin} className="blueprint-explorer__pin-row">
+          <Handle type="target" position={Position.Left} id={`in:${pin}`}
+            className="blueprint-explorer__pin-handle" />
+          <span>{pin}</span>
+          <Handle type="source" position={Position.Right} id={`out:${pin}`}
+            className="blueprint-explorer__pin-handle" />
+        </div>
+      ))}
+    </div>
+  );
+}
+const NODE_TYPES = { pinPart: PinPartNode };
+
 function WireGraph({ design }) {
   const graph = useMemo(() => {
-    const lanes = { Sense: 0, Compute: 0, Act: 0, Power: 0, Mechanical: 0 };
-    const positions = { Sense: 0, Compute: 260, Act: 520, Power: 780, Mechanical: 1040 };
+    const laneHeights = { Sense: 0, Compute: 0, Act: 0, Power: 0, Mechanical: 0 };
+    const positions = { Sense: 0, Compute: 280, Act: 560, Power: 840, Mechanical: 1120 };
     const nodes = design.parts.map((part) => {
       const lane = LANE[part.category] || "Mechanical";
-      const row = lanes[lane]++;
+      const y = laneHeights[lane];
+      laneHeights[lane] += 72 + Math.max(part.pins.length, 1) * 30 + 28;
       return {
-        id: part.id, position: { x: positions[lane], y: row * 110 },
-        data: { label: `${part.name}\n${part.role || part.category}` },
-        style: { width: 208, whiteSpace: "pre-line", borderRadius: 8,
-          border: "1px solid #94a3b8", padding: 9, fontSize: 12, background: "#fff" },
-        draggable: false,
+        id: part.id, type: "pinPart", position: { x: positions[lane], y },
+        data: { part }, draggable: false,
       };
     });
     const edges = design.connections.map((c) => ({
       id: c.id, source: c.from.part, target: c.to.part,
-      label: `${c.from.pin} → ${c.to.pin}${c.label ? ` · ${c.label}` : ""}`,
+      sourceHandle: `out:${c.from.pin}`, targetHandle: `in:${c.to.pin}`,
+      label: c.label || c.net,
       style: { stroke: NET_COLORS[c.net] || "#475569", strokeWidth: 2 },
       labelStyle: { fontSize: 10 },
       type: "smoothstep",
@@ -40,7 +59,7 @@ function WireGraph({ design }) {
   }, [design]);
   return (
     <div className="blueprint-explorer__flow" data-testid="blueprint-pin-wiring">
-      <ReactFlow nodes={graph.nodes} edges={graph.edges} fitView nodesDraggable={false}
+      <ReactFlow nodes={graph.nodes} edges={graph.edges} nodeTypes={NODE_TYPES} fitView nodesDraggable={false}
         nodesConnectable={false} elementsSelectable={true} edgesReconnectable={false}
         deleteKeyCode={null} minZoom={0.15} maxZoom={1.5}>
         <Background gap={20} size={1} />
