@@ -28,7 +28,7 @@ def fixture(tmp_path):
     manifest=generate_pcb_mounted_shell(
         pcb_path=PCB,seed_recipe_path=SEED,
         output_recipe_path=recipe,output_manifest_path=req)
-    model=b"ISO-10303-21;\\nSYNTHETIC-NOT-REAL-CAD\\nEND-ISO-10303-21;"
+    model=b"ISO-10303-21;\nSYNTHETIC-NOT-REAL-CAD\nEND-ISO-10303-21;"
     step=native/"mounted_shell/model.step"
     step.write_bytes(model)
     volume=39412+4*(math.pi*3.3**2*3.2-math.pi*1.65**2*5.2)
@@ -109,7 +109,7 @@ def test_fake_hole_void_cannot_pass_report_flag(tmp_path):
 def test_stale_cad_or_modified_recipe_cannot_reuse_old_proof(tmp_path):
     paths=fixture(tmp_path)
     recipe=paths[0]
-    recipe.write_text(recipe.read_text()+"\\n")
+    recipe.write_text(recipe.read_text()+"\n")
     with pytest.raises(ValueError,match="hash mismatch"):
         assess(tmp_path,paths)
 
