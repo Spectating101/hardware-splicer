@@ -102,7 +102,8 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                     'blocked_missing_external_engine', 'blocked_tool_error',
                     'blocked_execution_failure', 'blocked_missing_or_invalid_output',
                     'blocked_not_step_export', 'blocked_no_output_evidence',
-                    'blocked_stale_project_artifact'}
+                    'blocked_stale_project_artifact',
+                    'blocked_missing_circuit_json', 'blocked_circuit_json_interchange'}
         if any(not isinstance(row, Mapping) or row.get('status') not in statuses
                or not isinstance(row.get('id'), str) for row in rows):
             raise ValueError('invalid external-engine task results')
@@ -111,6 +112,11 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
             'plan_sha256': data.get('plan_sha256'),
             'tasks': [{'id': row['id'], 'engine': row.get('engine'),
                        'status': row['status'],
+                       'canonical_electrical_interchange': (
+                           dict(row.get('canonical_electrical_interchange'))
+                           if isinstance(row.get('canonical_electrical_interchange'), Mapping)
+                           else None
+                       ),
                        'artifact_sha256': [artifact.get('sha256')
                                             for artifact in (row.get('artifacts') or [])
                                             if isinstance(artifact, Mapping)]}
