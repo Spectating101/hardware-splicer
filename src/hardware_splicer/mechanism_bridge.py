@@ -303,6 +303,7 @@ def attach_mechatronics_authority(
                 "dfm": mechanism_pack.get("dfm") or [],
                 "simulation": mechanism_pack.get("simulation") or [],
                 "structural_screening": mechanism_pack.get("structural_screening") or {},
+                "construction_alternatives": mechanism_pack.get("construction_alternatives") or {},
                 "kind": mechanism_pack.get("kind"),
                 "status": mechanism_pack.get("status"),
             }
@@ -336,6 +337,7 @@ def attach_mechatronics_authority(
         "mechanism_status": mechanism_pack.get("status"),
         "structural_screening": mechanism_pack.get("structural_screening") or {},
         "structural_release_blocked": bool(mechanism_pack.get("structural_release_blocked", True)),
+        "construction_alternatives": mechanism_pack.get("construction_alternatives") or {},
         "firmware_filename": (fw or {}).get("filename"),
         "claim_boundary": (
             "Starter elec+mech+fw pack from salvage — not production mechatronics release."
