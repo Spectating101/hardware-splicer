@@ -13,6 +13,11 @@ const LANE = {
   actuator: "Act", display: "Act", power: "Power",
 };
 const NET_COLORS = { data: "#2563eb", power: "#b45309", ground: "#475569" };
+function laneOf(part) {
+  if (part.category === "unclassified" || part.domain === "unclassified") return "Unclassified";
+  if (part.domain === "mechanical") return "Mechanical";
+  return LANE[part.category] || "Unclassified";
+}
 
 function PinPartNode({ data }) {
   const part = data.part;
@@ -36,10 +41,10 @@ const NODE_TYPES = { pinPart: PinPartNode };
 
 function WireGraph({ design }) {
   const graph = useMemo(() => {
-    const laneHeights = { Sense: 0, Compute: 0, Act: 0, Power: 0, Mechanical: 0 };
-    const positions = { Sense: 0, Compute: 280, Act: 560, Power: 840, Mechanical: 1120 };
+    const laneHeights = { Sense: 0, Compute: 0, Act: 0, Power: 0, Mechanical: 0, Unclassified: 0 };
+    const positions = { Sense: 0, Compute: 280, Act: 560, Power: 840, Mechanical: 1120, Unclassified: 1400 };
     const nodes = design.parts.map((part) => {
-      const lane = LANE[part.category] || "Mechanical";
+      const lane = laneOf(part);
       const y = laneHeights[lane];
       laneHeights[lane] += 72 + Math.max(part.pins.length, 1) * 30 + 28;
       return {
@@ -197,8 +202,8 @@ export default function ProjectExplorer({ design }) {
 
       {tab === "architecture" && (
         <div className="blueprint-explorer__lanes" data-testid="blueprint-architecture">
-          {["Sense", "Compute", "Act", "Power", "Mechanical"].map((lane) => {
-            const parts = design.parts.filter((p) => (LANE[p.category] || "Mechanical") === lane);
+          {["Sense", "Compute", "Act", "Power", "Mechanical", "Unclassified"].map((lane) => {
+            const parts = design.parts.filter((p) => laneOf(p) === lane);
             return (
               <section key={lane}>
                 <h3>{lane}</h3>
