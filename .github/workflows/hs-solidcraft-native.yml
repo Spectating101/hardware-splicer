@@ -1,0 +1,74 @@
+name: HS SolidCraft Native STEP Smoke
+
+on:
+  push:
+    branches:
+      - experiment/hs-external-engine-orchestration-20261022
+  pull_request:
+    branches:
+      - experiment/hs-spi-native-cam-review-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  solidcraft-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS dependencies for orchestration CLI
+        run: python -m pip install -e '.[dev]'
+
+      - name: Pin and fetch independent SolidCraft CLI v0.18.4
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/solidcraft-install"
+          cd "$RUNNER_TEMP/solidcraft-install"
+          curl -fLsS --retry 3 --retry-all-errors \
+            -o solidcraft.tar.gz \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/solidcraft-0.18.4-linux-x86_64.tar.gz
+          curl -fLsS --retry 3 --retry-all-errors \
+            -o SHA256SUMS.txt \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/SHA256SUMS.txt
+          SHA="$(grep 'solidcraft-0.18.4-linux-x86_64.tar.gz' SHA256SUMS.txt | head -1)"
+          if [ -z "$SHA" ]; then echo "No pinned release checksum" >&2; exit 1; fi
+          echo "$SHA" | sed 's/solidcraft-0.18.4-linux-x86_64.tar.gz/solidcraft.tar.gz/' | sha256sum -c
+          tar -xzf solidcraft.tar.gz
+          CLI="$(find "$RUNNER_TEMP/solidcraft-install" -type f -name solidcraft-cli | head -1)"
+          test -n "$CLI"
+          chmod +x "$CLI"
+          echo "$(dirname "$CLI")" >> "$GITHUB_PATH"
+          "$CLI" --version
+
+      - name: Run HS external orchestrator against actual SolidCraft native binary
+        run: |
+          set -euo pipefail
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/sensor_box_solidcraft_native.json \
+            --workspace examples/external_engines \
+            --out "$RUNNER_TEMP/hs-real-solidcraft-run" \
+            --execute --timeout 150
+          python - "$RUNNER_TEMP/hs-real-solidcraft-run" <<'PY'
+          import json, pathlib, sys
+          root=pathlib.Path(sys.argv[1])
+          report=json.loads((root/"ENGINE_ORCHESTRATION_REPORT.json").read_text())
+          assert report["completed"]==1 and report["blocked"]==0, report
+          assert not report["fabrication_authorized"] and not report["release_authorized"]
+          solid=(root/"cad_step/model.step").read_bytes()
+          assert solid.lstrip().startswith(b"ISO-10303-21;")
+          assert len(solid)>100
+          print("Real SolidCraft STEP generated:",len(solid),"bytes")
+          PY
+
+      - name: Retain binary-generated geometry, evidence hashes and outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-solidcraft-real-native-step
+          path: ${{ runner.temp }}/hs-real-solidcraft-run/
+          if-no-files-found: warn

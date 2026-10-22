@@ -1,0 +1,79 @@
+name: HS Native SolidCraft to FreeCAD STEP Handoff
+
+on:
+  push:
+    branches:
+      - experiment/hs-external-engine-orchestration-20261022
+  pull_request:
+    branches:
+      - experiment/hs-spi-native-cam-review-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  solidcraft-freecad-native:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS orchestration runtime
+        run: python -m pip install -e '.[dev]'
+      - name: Install official SolidCraft 0.18.4 binary with checksum
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cad-bin"
+          cd "$RUNNER_TEMP/cad-bin"
+          curl -fLsS --retry 3 -o solidcraft.tar.gz \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/solidcraft-0.18.4-linux-x86_64.tar.gz
+          curl -fLsS --retry 3 -o SHA256SUMS.txt \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/SHA256SUMS.txt
+          grep 'solidcraft-0.18.4-linux-x86_64.tar.gz' SHA256SUMS.txt \
+            | sed 's/solidcraft-0.18.4-linux-x86_64.tar.gz/solidcraft.tar.gz/' \
+            | sha256sum -c
+          tar -xzf solidcraft.tar.gz
+          find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli -exec chmod +x {} \;
+          CLI="$(find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli | head -1)"
+          test -n "$CLI"
+          echo "$(dirname "$CLI")" >> "$GITHUB_PATH"
+      - name: Install native FreeCAD geometry kernel and headless CLI
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends freecad-python3
+          mkdir -p "$RUNNER_TEMP/cad-bin/compat"
+          FREECAD="$(command -v FreeCADCmd || command -v freecadcmd || find /usr/lib -type f -name FreeCADCmd -print -quit)"
+          test -n "$FREECAD"
+          ln -s "$FREECAD" "$RUNNER_TEMP/cad-bin/compat/FreeCADCmd"
+          echo "$RUNNER_TEMP/cad-bin/compat" >> "$GITHUB_PATH"
+      - name: Execute native SolidCraft STEP then headless FreeCAD shape inspection
+        run: |
+          set -euo pipefail
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/sensor_box_workflow.json \
+            --workspace examples/external_engines \
+            --out "$RUNNER_TEMP/hs-cross-cad" --execute --timeout 180
+          python - "$RUNNER_TEMP/hs-cross-cad" <<'PY'
+          import json, pathlib, sys
+          root=pathlib.Path(sys.argv[1])
+          report=json.loads((root/"ENGINE_ORCHESTRATION_REPORT.json").read_text())
+          assert report["completed"]==2 and report["blocked"]==0,report
+          geom=json.loads((root/"cad_inspection/step_inspection.json").read_text())
+          assert geom["shape_valid"] is True,geom
+          assert geom["solid_count"]>=1,geom
+          assert abs(geom["volume_mm3"]-116875)<1e-3,geom
+          assert all(abs(x-y)<1e-3 for x,y in zip(geom["bbox_mm"],[85,55,25])),geom
+          assert not report["fabrication_authorized"]
+          print("SolidCraft -> FreeCAD native handoff validated:",geom)
+          PY
+      - name: Upload native CAD artifacts and proof report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-native-solidcraft-freecad
+          path: ${{ runner.temp }}/hs-cross-cad/
+          if-no-files-found: warn

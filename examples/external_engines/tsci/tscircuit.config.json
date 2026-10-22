@@ -1,0 +1,9 @@
+{
+  "mainEntrypoint": "index.tsx",
+  "build": {
+    "circuitJson": true,
+    "kicadProject": false,
+    "glbs": false,
+    "previewImages": false
+  }
+}
