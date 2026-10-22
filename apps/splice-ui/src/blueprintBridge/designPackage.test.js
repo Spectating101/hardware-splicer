@@ -79,6 +79,7 @@ describe("OpenBlueprint DesignPackage integration", () => {
       gates: { compile_ok: true },
     }, { buildDir: "/tmp/rover", designQuality: { kicad_drc_errors: 0 } });
     expect(hs.parts[0].unitCost).toBeNull();
+    expect(hs.parts[0].category).toBe("unclassified");
     expect(hs.connections).toEqual([]); // HS topology != pin-level wiring
     expect(hs.topologyOperators).toHaveLength(1);
     expect(hs.evidence.design).toBe("kicad_drc_reported_clean");
