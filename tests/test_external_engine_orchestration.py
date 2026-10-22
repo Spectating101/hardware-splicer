@@ -210,3 +210,44 @@ def test_external_specialist_results_feed_real_device_work_package_without_autho
     forged = dict(third_party, release_authorized=True)
     with pytest.raises(ValueError, match="authority"):
         compile_work_package(case, review, external_engine_execution=forged)
+
+def test_preexisting_native_output_is_not_proof_of_current_build(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    entry = source / "eda" / "board.ato"
+    entry.parent.mkdir(parents=True)
+    entry.write_text("test")
+    old = source / "eda" / "build" / "board.kicad_pcb"
+    old.parent.mkdir(parents=True)
+    old.write_text("(kicad_pcb old result)")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/usr/bin/" + name)
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run",
+                        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="success", stderr=""))
+    result = run_external_engine_plan(plan(ATO), workspace=source, output_dir=tmp_path / "results",
+                                      confirm_execute=True)
+    assert result["completed"] == 0
+    assert result["tasks"][0]["status"] == "blocked_stale_project_artifact"
+    assert not result["fabrication_authorized"]
+
+
+def test_symlinked_project_input_denied_before_any_tool_launch(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    (source / "cad").mkdir(parents=True)
+    (source / "cad" / "original.json").write_text('{"commands":[]}')
+    (source / "cad" / "envelope.json").symlink_to("original.json")
+    with pytest.raises(EnginePlanError, match="symlink"):
+        run_external_engine_plan(plan(CAD), workspace=source, output_dir=tmp_path / "results",
+                                 confirm_execute=True)
+
+
+def test_path_symlink_output_cannot_be_used_to_claim_compilation(tmp_path, monkeypatch):
+    root = tmp_path / "source"
+    source = root / ATO["source"]
+    source.parent.mkdir(parents=True)
+    source.write_text("test")
+    (root / "eda" / "build").symlink_to(source.parent, target_is_directory=True)
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/bin/" + name)
+    with pytest.raises(EnginePlanError, match="symlink"):
+        run_external_engine_plan(plan(ATO), workspace=root, output_dir=tmp_path / "out",
+                                 confirm_execute=True)
