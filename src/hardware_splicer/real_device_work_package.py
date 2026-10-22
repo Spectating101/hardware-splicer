@@ -11,7 +11,8 @@ from typing import Any, Mapping
 def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                          *, planner: Mapping[str, Any] | None = None,
                          reverse_engineering: Mapping[str, Any] | None = None,
-                         splice_candidate: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                         splice_candidate: Mapping[str, Any] | None = None,
+                         external_engine_execution: Mapping[str, Any] | None = None) -> dict[str, Any]:
     model = dict(review.get('operator_casefile') or review)
     plan = dict(planner or {})
     requirements = [
@@ -81,6 +82,58 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
             "status": "not_accepted",
             "evidence_refs": [],
         })
+    # External CAD/EDA engines are optional subordinate sources of *candidate*
+    # evidence. An external tool report cannot grant build or release authority.
+    external_engines = None
+    if external_engine_execution is not None:
+        from .external_engine_orchestration import REPORT_SCHEMA
+        data = external_engine_execution
+        if not isinstance(data, Mapping) or data.get('schema') != REPORT_SCHEMA:
+            raise ValueError('unsupported external-engine execution report')
+        if any(data.get(key) is True for key in (
+            'fabrication_authorized', 'power_on_authorized', 'release_authorized',
+            'electrical_operation_verified', 'exact_mechanical_assembly_verified',
+        )):
+            raise ValueError('external report attempts to confer physical authority')
+        rows = data.get('tasks')
+        if not isinstance(rows, list) or not 1 <= len(rows) <= 12:
+            raise ValueError('bounded external task results required')
+        statuses = {'tool_passed_artifact_observed', 'blocked_dependency',
+                    'blocked_missing_external_engine', 'blocked_tool_error',
+                    'blocked_execution_failure', 'blocked_missing_or_invalid_output',
+                    'blocked_not_step_export', 'blocked_no_output_evidence'}
+        if any(not isinstance(row, Mapping) or row.get('status') not in statuses
+               or not isinstance(row.get('id'), str) for row in rows):
+            raise ValueError('invalid external-engine task results')
+        external_engines = {
+            'status': 'external_outputs_unverified_for_physical_readiness',
+            'plan_sha256': data.get('plan_sha256'),
+            'tasks': [{'id': row['id'], 'engine': row.get('engine'),
+                       'status': row['status'],
+                       'artifact_sha256': [artifact.get('sha256')
+                                            for artifact in (row.get('artifacts') or [])
+                                            if isinstance(artifact, Mapping)]}
+                      for row in rows],
+            'archive_bytes_independently_verified': False,
+            'provider_outputs_physically_verified': False,
+            'power_on_authorized': False,
+            'release_authorized': False,
+        }
+        for task in external_engines['tasks']:
+            tasks.append({
+                'id': f'step-{len(tasks)+1:02d}',
+                'instruction': ('Resolve external provider failure and rerun: '
+                                if task['status'] != 'tool_passed_artifact_observed'
+                                else 'Independently validate external engineering output: ')
+                               + str(task['engine']) + '/' + str(task['id']),
+                'status': 'proposed_not_executed', 'evidence_refs': [],
+                'external_task_id': task['id'],
+            })
+        safety_gates.append({
+            'id': f'gate-{len(safety_gates)+1:02d}',
+            'criterion': 'Validate all specialist CAD/EDA outputs against source files, assembly interfaces, and physical bench evidence before release.',
+            'status': 'not_accepted', 'evidence_refs': [],
+        })
     candidate = plan.get('recommended_build_id')
     approved = set(case.get('approved_catalog_build_ids', []))
     return {
@@ -97,6 +150,7 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                                 'source_sha256':investigation.get('artifact_sha256') or investigation.get('input_tree_sha256'),
                                 'behavior_physically_verified':False},
         'device_splice_feasibility': splice_report,
+        'external_engine_execution': external_engines,
         'requirements': requirements, 'work_steps': tasks,
         'critical_unknowns': unknowns, 'acceptance_gates': safety_gates,
         'required_parts': [{'requirement': str(item), 'verified_part_number': None,
