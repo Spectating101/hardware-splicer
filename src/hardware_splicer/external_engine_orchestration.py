@@ -286,9 +286,28 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                     status = "blocked_no_output_evidence"
                 elif status == "executed":
                     status = "tool_passed_artifact_observed"
+            interchange = None
+            if status == "tool_passed_artifact_observed" and engine == "tscircuit":
+                # A generic nonempty JSON file is not proof of a usable board.
+                # Pass native Circuit JSON through HS's own canonical identity
+                # importer before treating this provider task as successful.
+                from .external_engine_electrical_truth import inspect_native_circuit_json
+                json_outputs = [file for file in requested if file.name == "circuit.json"]
+                if len(json_outputs) != 1:
+                    status = "blocked_missing_circuit_json"
+                else:
+                    try:
+                        interchange = inspect_native_circuit_json(
+                            json_outputs[0], project_id=valid["id"],
+                        )
+                    except (TypeError, ValueError, OSError) as exc:
+                        status = "blocked_circuit_json_interchange"
+                        diag = (diag + "; Circuit JSON projection: " +
+                                type(exc).__name__ + ": " + str(exc))[-2200:]
             row = {"id": ident, "engine": engine, "operation": operation, "status": status,
                    "exit_code": exit_code, "command_identity": info_bin_name(binary),
                    "diagnostic_tail": diag, "artifacts": artifacts,
+                   "canonical_electrical_interchange": interchange,
                    "physical_validation_performed": False}
         states[ident] = row["status"]
         results.append(row)
