@@ -34,7 +34,7 @@ describe("product-first engineering review", () => {
     await user.click(screen.getByTestId("review-tab-build"));
     expect(screen.getByText(/No build instructions are available/i)).toBeInTheDocument();
     await user.click(screen.getByTestId("review-tab-verify"));
-    expect(screen.getByText(/not a physical clearance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/not a physical clearance/i)).not.toBeInTheDocument();
     expect(screen.getByText(/does not verify physical safety/i)).toBeInTheDocument();
   });
 
