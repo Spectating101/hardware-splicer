@@ -1,0 +1,45 @@
+{
+  "project_name": "hybrid-electronics-enclosure-study",
+  "mode": "prototype",
+  "process": "fdm",
+  "enclosure": {
+    "name": "panel-or-print-box",
+    "inner_w_mm": 100,
+    "inner_d_mm": 80,
+    "inner_h_mm": 30,
+    "wall_mm": 2,
+    "floor_mm": 2,
+    "lid_mm": 2
+  },
+  "construction": {
+    "preference": "auto",
+    "operating_temp_c": 35,
+    "chemical_exposures": [
+      "humidity"
+    ],
+    "panel_thickness_mm": 3,
+    "connector_family": "moduframe",
+    "connector_count": 4,
+    "connector_print_volume_cm3": 0.6,
+    "filament_material": {
+      "material_id": "example-filament-NOT-MEASURED",
+      "evidence_kind": "assumed",
+      "density_kg_m3": 1250,
+      "max_service_temp_c": 65,
+      "cost_per_kg": 25,
+      "chemical_compatibility": {
+        "humidity": "unknown"
+      }
+    },
+    "panel_material": {
+      "material_id": "example-3mm-sheet-NOT-MEASURED",
+      "evidence_kind": "assumed",
+      "density_kg_m3": 550,
+      "max_service_temp_c": 50,
+      "cost_per_m2": 12,
+      "chemical_compatibility": {
+        "humidity": "unknown"
+      }
+    }
+  }
+}
