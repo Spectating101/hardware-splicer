@@ -30,6 +30,17 @@ describe("product review projection", () => {
     expect(review.revisionBound).toBe(true);
   });
 
+  it("recognizes source-prefixed donor audit hashes without claiming measurement", () => {
+    const digest = "b".repeat(64);
+    const session = createEmptySession({
+      projectId: "donor-review", intakeComplete: true,
+      projectPackage: { source: { intake_sha256: `sha256:${digest}` }, gates: { build_ready: false } },
+    });
+    const review = deriveProjectReview(session);
+    expect(review.sources).toEqual([{ id: "intake_sha256", sha256: digest }]);
+    expect(review.physicalCheck).toBe("Not established by this review");
+  });
+
   it("leaves donor specifications and missing source hashes unknown", () => {
     const session = createEmptySession({
       projectId: "project-b",
