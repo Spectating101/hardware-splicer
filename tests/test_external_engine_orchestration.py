@@ -179,3 +179,34 @@ def test_api_discovery_preview_only_no_execution_endpoint():
         assert client.post("/v1/external-engines/execute", json=plan(CAD)).status_code == 404
         assert client.post("/v1/external-engines/preview",
                            json=plan(dict(CAD, operation="arbitrary"))).status_code == 422
+
+def test_external_specialist_results_feed_real_device_work_package_without_authority():
+    from hardware_splicer.real_device_work_package import compile_work_package
+    case = {"id": "rover", "device": "Salvaged drive rover", "kind": "new_build",
+            "deliverables": ["CAD and PCB"], "acceptance": ["bench test"]}
+    review = {"operator_casefile": {
+        "build_or_repair_sequence": ["Inspect donor motors"],
+        "critical_technical_unknowns": ["Unknown winding current"],
+        "compatible_parts_or_requirements": ["Power controller"],
+    }}
+    third_party = {
+        "schema": "hardware_splicer.external_engine_execution.v1",
+        "plan_id": "rover-cad",
+        "plan_sha256": "sha256:" + "0" * 64,
+        "tasks": [
+            {"id": "cad", "engine": "solidcraft",
+             "status": "tool_passed_artifact_observed",
+             "artifacts": [{"sha256": "sha256:" + "1"*64}]},
+            {"id": "pcb", "engine": "atopile",
+             "status": "blocked_missing_external_engine", "artifacts": []},
+        ],
+        "fabrication_authorized": False, "release_authorized": False,
+    }
+    package = compile_work_package(case, review, external_engine_execution=third_party)
+    assert package["engineering_readiness"] == "blocked"
+    assert package["external_engine_execution"]["status"] == "external_outputs_unverified_for_physical_readiness"
+    assert sum("external_task_id" in row for row in package["work_steps"]) == 2
+    assert any("specialist CAD/EDA" in gate["criterion"] for gate in package["acceptance_gates"])
+    forged = dict(third_party, release_authorized=True)
+    with pytest.raises(ValueError, match="authority"):
+        compile_work_package(case, review, external_engine_execution=forged)
