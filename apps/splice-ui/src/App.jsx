@@ -77,14 +77,16 @@ function formatSavedAt(value) {
 }
 
 function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImportDesign, importError, apiOk, version }) {
+  const [goal, setGoal] = useState("");
   return (
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>AI-assisted KiCad design — canvas to DRC truth to bench-ready package</h1>
+        <h1>What do you want to build, repair, or turn into something new?</h1>
         <p className="lead">
-          <strong>Agents and humans</strong> share one spine: MCP/HTTP compose → KiCad DRC fix loop →{" "}
-          <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
+          Describe a hardware goal, bring existing parts, or investigate a donor device.
+          HS turns your intake into an engineering project with parts, wiring, build steps
+          and explicit evidence gaps — never assumed physical approval.
         </p>
         <div className="readiness-pitch">
           <strong>Durable project first. Auditable machine lifecycle next.</strong>
@@ -93,6 +95,19 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImpo
             versioned server snapshots and reopen into the same editable source state.
           </p>
         </div>
+        <form className="blueprint-import" onSubmit={(event) => {
+          event.preventDefault();
+          if (goal.trim().length >= 12 && apiOk) onStart(goal.trim());
+        }} data-testid="home-prompt-intake">
+          <label className="field-label" htmlFor="hs-home-goal">Describe your project</label>
+          <textarea id="hs-home-goal" className="field-textarea" rows={3}
+            value={goal} onChange={(event) => setGoal(event.target.value)}
+            placeholder="e.g. Reuse two RC toy motors and an ESP32 to build an inspection rover" />
+          <button type="submit" className="primary" disabled={!apiOk || goal.trim().length < 12}>
+            Continue with this idea
+          </button>
+          <p className="muted small">Starts the existing HS intake and clarification workflow. No design is generated until the engine runs.</p>
+        </form>
         <PipelineVisual />
         <div className="hero-actions">
           {canResume ? (
@@ -100,7 +115,7 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImpo
               <button type="button" className="primary large" onClick={onResume} disabled={!apiOk}>
                 Resume project
               </button>
-              <button type="button" className="secondary large" onClick={onStart} disabled={!apiOk}>
+              <button type="button" className="secondary large" onClick={() => onStart("")} disabled={!apiOk}>
                 Start new project
               </button>
             </>
@@ -108,7 +123,7 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImpo
             <button
               type="button"
               className="primary large"
-              onClick={onStart}
+              onClick={() => onStart("")}
               disabled={!apiOk}
               data-testid="home-start-project"
             >
@@ -349,8 +364,8 @@ export default function App() {
     return bench;
   }, [session.buildDir]);
 
-  const startProject = () => {
-    dispatch({ type: ACTIONS.START_PROJECT });
+  const startProject = (goal = "") => {
+    dispatch({ type: ACTIONS.START_PROJECT, goal: typeof goal === "string" ? goal : "" });
     setView(VIEWS.workspace);
   };
 
