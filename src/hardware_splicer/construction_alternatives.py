@@ -422,7 +422,9 @@ def evaluate_construction_alternatives(
     for label,record in (("filament",print_record),("panel",panel_record)):
         if record is None:
             thermal_checks[label] = "missing_material_record"
-            chemical_checks[label] = "missing_material_record"
+            # Keep the chemical status a mapping even when the record is absent.
+            # Missing evidence means unknown, never a compatible result.
+            chemical_checks[label] = {exposure: "unknown" for exposure in exposures}
             continue
         if temp is None or record.get("max_service_temp_c") is None:
             thermal_checks[label] = "unknown"
