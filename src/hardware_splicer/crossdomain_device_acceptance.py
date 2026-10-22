@@ -308,7 +308,7 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
         "release_authorized": False,
     }
     (output / "MECHANICAL_FEATURE_REQUIREMENTS.json").write_text(
-        json.dumps(result["mechanical_feature_requirements"], indent=2) + "\\n",
+        json.dumps(result["mechanical_feature_requirements"], indent=2) + "\n",
         encoding="utf-8",
     )
     (output / "CROSS_DOMAIN_DEVICE_ASSESSMENT.json").write_text(
