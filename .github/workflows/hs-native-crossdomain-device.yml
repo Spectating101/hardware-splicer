@@ -24,7 +24,7 @@ jobs:
       - name: Install HS orchestration runtime
         run: python -m pip install -e '.[dev]'
       - name: Test software-level KiCad/CAD interface blocking
-        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py tests/test_pcb_mounting_cad.py
+        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py tests/test_pcb_mounting_cad.py tests/test_mounted_device_acceptance.py
       - name: Install official SolidCraft 0.18.4 binary with checksum
         run: |
           set -euo pipefail
