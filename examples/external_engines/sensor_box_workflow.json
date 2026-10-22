@@ -1,0 +1,18 @@
+{
+  "schema": "hardware_splicer.external_engine_plan.v1",
+  "id": "sensor_box_cad_external",
+  "tasks": [
+    {
+      "id": "cad_step",
+      "engine": "solidcraft",
+      "operation": "run_script",
+      "source": "cad/enclosure-envelope.json"
+    },
+    {
+      "id": "cad_inspection",
+      "engine": "freecad",
+      "operation": "inspect_step",
+      "source_task": "cad_step"
+    }
+  ]
+}
