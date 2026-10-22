@@ -59,8 +59,10 @@ vi.mock("./components/PipelineVisual.jsx", () => ({
 }));
 
 vi.mock("./components/ProjectWizard.jsx", () => ({
-  default: function MockWizard() {
-    return <div data-testid="mock-home-intake">Project intake</div>;
+  default: function MockWizard({ initialGoal }) {
+    return <div data-testid="mock-home-intake">Project intake
+      <span data-testid="wizard-initial-goal">{initialGoal || ""}</span>
+    </div>;
   },
 }));
 
@@ -82,6 +84,39 @@ describe("App navigation integration", () => {
     await userEvent.click(screen.getByTestId("home-start-project"));
     expect(await screen.findByTestId("stage-intake")).toBeInTheDocument();
     expect(screen.getByText(/Project intake/i)).toBeInTheDocument();
+  });
+
+  it("starts existing intake with a home prompt, without generating an unverified project", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId("home-start-project")).toBeEnabled());
+    const prompt = screen.getByLabelText("Describe your project");
+    await user.type(prompt, "Build a rover from a salvaged RC toy and ESP32");
+    await user.click(screen.getByRole("button", { name: "Continue with this idea" }));
+    expect(await screen.findByTestId("stage-intake")).toBeInTheDocument();
+    expect(screen.getByTestId("wizard-initial-goal")).toHaveTextContent("salvaged RC toy");
+  });
+
+  it("imports OpenBlueprint design.json locally into the read-only HS viewer", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const data = {
+      name: "Imported bench light", summary: "OpenBlueprint proposal",
+      parts: [{ id: "led", name: "LED", qty: 1, unitCost: 0.5, category: "actuator" }],
+      connections: [], assembly: [], instructions: [], tags: [], tools: [], assumptions: [],
+    };
+    const file = new File([JSON.stringify(data)], "design.json", { type: "application/json" });
+    Object.defineProperty(file, "text", { value: async () => JSON.stringify(data) });
+    await user.upload(screen.getByLabelText("Inspect an OpenBlueprint DesignPackage"), file);
+    expect(await screen.findByTestId("imported-design-workspace")).toBeInTheDocument();
+    expect(screen.getByTestId("blueprint-project-explorer")).toHaveTextContent("Imported bench light");
+    expect(screen.getByText("Physical release not established")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+    expect(screen.getByTestId("blueprint-evidence")).toHaveTextContent("not authorized");
+    await user.click(screen.getByTestId("openblueprint-to-hs-intake"));
+    expect(await screen.findByTestId("stage-intake")).toBeInTheDocument();
+    expect(screen.getByTestId("wizard-initial-goal")).toHaveTextContent("Imported bench light");
+    expect(screen.getByTestId("wizard-initial-goal")).toHaveTextContent("Proposed, unverified parts");
   });
 
   it("Interface Lab is reachable only through Advanced", async () => {

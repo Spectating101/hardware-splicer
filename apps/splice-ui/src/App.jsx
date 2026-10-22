@@ -12,6 +12,8 @@ import {
   renderProjectPackage,
 } from "./api.js";
 import BuildOverlay from "./components/BuildOverlay.jsx";
+import ProjectExplorer from "./blueprintBridge/ProjectExplorer.jsx";
+import { normalizeOpenBlueprintDesign } from "./blueprintBridge/designPackage.js";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
@@ -74,15 +76,17 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk, version }) {
+function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onImportDesign, importError, apiOk, version }) {
+  const [goal, setGoal] = useState("");
   return (
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>AI-assisted KiCad design — canvas to DRC truth to bench-ready package</h1>
+        <h1>What do you want to build, repair, or turn into something new?</h1>
         <p className="lead">
-          <strong>Agents and humans</strong> share one spine: MCP/HTTP compose → KiCad DRC fix loop →{" "}
-          <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
+          Describe a hardware goal, bring existing parts, or investigate a donor device.
+          HS turns your intake into an engineering project with parts, wiring, build steps
+          and explicit evidence gaps — never assumed physical approval.
         </p>
         <div className="readiness-pitch">
           <strong>Durable project first. Auditable machine lifecycle next.</strong>
@@ -91,6 +95,19 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
             versioned server snapshots and reopen into the same editable source state.
           </p>
         </div>
+        <form className="blueprint-import" onSubmit={(event) => {
+          event.preventDefault();
+          if (goal.trim().length >= 12 && apiOk) onStart(goal.trim());
+        }} data-testid="home-prompt-intake">
+          <label className="field-label" htmlFor="hs-home-goal">Describe your project</label>
+          <textarea id="hs-home-goal" className="field-textarea" rows={3}
+            value={goal} onChange={(event) => setGoal(event.target.value)}
+            placeholder="e.g. Reuse two RC toy motors and an ESP32 to build an inspection rover" />
+          <button type="submit" className="primary" disabled={!apiOk || goal.trim().length < 12}>
+            Continue with this idea
+          </button>
+          <p className="muted small">Starts the existing HS intake and clarification workflow. No design is generated until the engine runs.</p>
+        </form>
         <PipelineVisual />
         <div className="hero-actions">
           {canResume ? (
@@ -98,7 +115,7 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
               <button type="button" className="primary large" onClick={onResume} disabled={!apiOk}>
                 Resume project
               </button>
-              <button type="button" className="secondary large" onClick={onStart} disabled={!apiOk}>
+              <button type="button" className="secondary large" onClick={() => onStart("")} disabled={!apiOk}>
                 Start new project
               </button>
             </>
@@ -106,7 +123,7 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
             <button
               type="button"
               className="primary large"
-              onClick={onStart}
+              onClick={() => onStart("")}
               disabled={!apiOk}
               data-testid="home-start-project"
             >
@@ -119,6 +136,22 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
           <button type="button" className="ghost large" onClick={onExample} disabled={!apiOk}>
             Browse examples
           </button>
+        </div>
+        <div className="blueprint-import" data-testid="openblueprint-import">
+          <label className="field-label" htmlFor="openblueprint-json">
+            Inspect an OpenBlueprint DesignPackage
+          </label>
+          <input id="openblueprint-json" type="file" accept=".json,application/json"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onImportDesign(file);
+              event.target.value = "";
+            }} />
+          <p className="muted small">
+            JSON only · local read-only preview · no upload or engineering approval.
+            This works even when the HS engine is offline.
+          </p>
+          {importError && <p className="blueprint-import__error" role="alert">{importError}</p>}
         </div>
         {!apiOk && (
           <div className="offline-box">
@@ -215,6 +248,8 @@ export default function App() {
   const [loadError, setLoadError] = useState(null);
   const [toast, setToast] = useState("");
   const [previewContext, setPreviewContext] = useState(null);
+  const [importedDesign, setImportedDesign] = useState(null);
+  const [importError, setImportError] = useState("");
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
 
   const spliceJob = useSpliceJob();
@@ -223,6 +258,21 @@ export default function App() {
     dispatch,
     enabled: Boolean(health?.ok),
   });
+
+  const handleImportBlueprint = async (file) => {
+    setImportError("");
+    try {
+      if (!file || file.size > 1024 * 1024) {
+        throw new Error("Choose a JSON file smaller than 1 MiB");
+      }
+      const payload = JSON.parse(await file.text());
+      const design = normalizeOpenBlueprintDesign(payload);
+      setImportedDesign(design);
+      setView(VIEWS.imported);
+    } catch (error) {
+      setImportError(error instanceof SyntaxError ? "Invalid JSON file" : error.message);
+    }
+  };
 
   const uniqueRecentJobs = useMemo(() => {
     const seen = new Set();
@@ -314,8 +364,8 @@ export default function App() {
     return bench;
   }, [session.buildDir]);
 
-  const startProject = () => {
-    dispatch({ type: ACTIONS.START_PROJECT });
+  const startProject = (goal = "") => {
+    dispatch({ type: ACTIONS.START_PROJECT, goal: typeof goal === "string" ? goal : "" });
     setView(VIEWS.workspace);
   };
 
@@ -512,6 +562,12 @@ export default function App() {
           >
             Project
           </button>
+          {importedDesign && (
+            <button type="button" className={`nav-button ${view === VIEWS.imported ? "active" : ""}`}
+              data-testid="nav-imported-design" onClick={() => setView(VIEWS.imported)}>
+              Imported design
+            </button>
+          )}
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
@@ -636,7 +692,39 @@ export default function App() {
               onResume={resumeProject}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
+              onImportDesign={handleImportBlueprint}
+              importError={importError}
             />
+          )}
+
+          {view === VIEWS.imported && importedDesign && (
+            <div className="panel-stack" data-testid="imported-design-workspace">
+              <div className="preview-toolbar">
+                <button type="button" className="ghost" onClick={() => setView(VIEWS.home)}>
+                  ← Home
+                </button>
+              </div>
+              <section className="card">
+                <h3>Continue with HS engineering</h3>
+                <p className="muted small">
+                  Start a new HS intake using this imported idea and proposed parts.
+                  Imported wires, costs and geometry remain unverified; they do not become
+                  a schematic, a BOM approval or a physical authorization.
+                </p>
+                <button type="button" className="primary" disabled={!health?.ok}
+                  data-testid="openblueprint-to-hs-intake"
+                  onClick={() => {
+                    const proposed = importedDesign.parts.map((p) => p.name).slice(0, 30).join(", ");
+                    startProject(
+                      `${importedDesign.name}: ${importedDesign.summary}. Proposed, unverified parts: ${proposed}`
+                        .slice(0, 4000),
+                    );
+                  }}>
+                  Start HS engineering intake
+                </button>
+              </section>
+              <ProjectExplorer design={importedDesign} />
+            </div>
           )}
 
           {view === VIEWS.workspace && (

@@ -1,0 +1,38 @@
+name: HS OpenBlueprint bridge
+
+on:
+  push:
+    branches:
+      - experiment/hs-openblueprint-bridge-20261023
+  pull_request:
+    branches:
+      - experiment/hs-donor-to-device-v1-20261022
+
+permissions:
+  contents: read
+
+jobs:
+  project_explorer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/splice-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/splice-ui/package-lock.json
+      - name: Install exact frontend dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test HS frontend and OpenBlueprint bridge
+        run: npm test
+      - name: Build existing HS consumer app with imported viewer
+        run: npm run build
+      - name: Assert built viewer and source package contract
+        run: |
+          test -s dist/index.html
+          test -f src/blueprintBridge/designPackage.js
+          test -f src/blueprintBridge/ProjectExplorer.jsx

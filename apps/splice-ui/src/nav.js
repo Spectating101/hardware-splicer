@@ -2,6 +2,7 @@
 
 export const VIEWS = Object.freeze({
   home: "home",
+  imported: "imported",
   workspace: "workspace",
   advanced: "advanced",
   example: "example",

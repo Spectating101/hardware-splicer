@@ -42,8 +42,9 @@ export default function ProjectWizard({
   buildError,
   stageLabel,
   embedded = false,
+  initialGoal = "",
 }) {
-  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD });
+  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD, goal: initialGoal || "" });
   const [stepId, setStepId] = useState("goal");
   const [clarifyLoading, setClarifyLoading] = useState(false);
   const [clarifyError, setClarifyError] = useState(null);

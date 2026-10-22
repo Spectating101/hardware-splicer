@@ -168,7 +168,7 @@ export function projectSessionReducer(state, action) {
       return createEmptySession({
         projectId: newProjectId(),
         projectName: action.projectName || "New project",
-        goal: "",
+        goal: typeof action.goal === "string" ? action.goal.trim().slice(0, 4000) : "",
         mode: "greenfield",
         currentStage: STAGES.intake,
         dirty: false,
