@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -286,6 +287,27 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                     status = "blocked_no_output_evidence"
                 elif status == "executed":
                     status = "tool_passed_artifact_observed"
+            # FreeCAD must affirm a real positive-volume solid. A JSON
+            # report plus zero exit code does not certify successful geometry.
+            geometry_validation = None
+            if status == "tool_passed_artifact_observed" and engine == "freecad":
+                try:
+                    geometry_validation = json.loads((task_dir / "step_inspection.json").read_text())
+                    bounds = geometry_validation.get("bbox_mm")
+                    volume = geometry_validation.get("volume_mm3")
+                    if (geometry_validation.get("shape_valid") is not True
+                            or type(geometry_validation.get("solid_count")) is not int
+                            or geometry_validation["solid_count"] < 1
+                            or not isinstance(volume, (int, float))
+                            or isinstance(volume, bool) or not math.isfinite(volume)
+                            or volume <= 0 or not isinstance(bounds, list)
+                            or len(bounds) != 3
+                            or any(not isinstance(x, (int, float))
+                                   or isinstance(x, bool) or not math.isfinite(x)
+                                   or x <= 0 for x in bounds)):
+                        status = "blocked_invalid_geometry"
+                except (OSError, TypeError, ValueError, KeyError, AttributeError):
+                    status = "blocked_invalid_geometry"
             interchange = None
             if status == "tool_passed_artifact_observed" and engine == "tscircuit":
                 # A generic nonempty JSON file is not proof of a usable board.
@@ -308,6 +330,7 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                    "exit_code": exit_code, "command_identity": info_bin_name(binary),
                    "diagnostic_tail": diag, "artifacts": artifacts,
                    "canonical_electrical_interchange": interchange,
+                   "native_geometry_validation": geometry_validation,
                    "physical_validation_performed": False}
         states[ident] = row["status"]
         results.append(row)
