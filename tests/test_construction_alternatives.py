@@ -9,6 +9,7 @@ import pytest
 
 from hardware_splicer.construction_alternatives import (
     CONNECTOR_SOURCES, evaluate_construction_alternatives, render_construction_plan,
+    summarize_fabrication_benchmark,
 )
 
 
@@ -218,3 +219,118 @@ def test_hs_mechanism_pack_propagates_requested_construction(tmp_path):
     assert construction["selected_manufacturing_method"] is None
     assert construction["release_authorized"] is False
     assert (tmp_path/"mecha_bundle"/"CONSTRUCTION_PLAN.md").exists()
+
+
+def test_pinned_real_clip_os_assets_reference_actual_git_blobs():
+    p = _project()
+    p["construction"]["connector_family"] = "clip_os"
+    p["construction"]["panel_thickness_mm"] = 1.6
+    report = evaluate_construction_alternatives(p)
+    hybrid = _hybrid(report)
+    connector = hybrid["connector_source"]
+    assert connector["revision_pinned"] is True
+    assert connector["local_asset_validated"] is False
+    assert connector["pinned_revision"] == "348bad8ba0553be79f24d5ac12a7d4081d7759c8"
+    assert {x["git_blob_sha1"] for x in connector["verified_repository_assets"]} == {
+        "eda0c9041d229c050296a313af5e4bd1a07892ea",
+        "fab8122d82c96237fa819429a50dc2cbcc99291f",
+    }
+    assert "external_connector_revision_unpinned" not in hybrid["blockers"]
+    assert "connector_files_not_validated_or_installed" in hybrid["blockers"]
+    assert connector["recommended_hole_center_from_edge_mm"] == 12.7
+    assert "Pinned Git revision" in render_construction_plan(report)
+
+
+def _trial(method, cost, mass, kind="synthetic_fixture"):
+    return {
+        "specimen_id": "fixture-" + method,
+        "method": method,
+        "record_uri": "fixture://" + method,
+        "evidence_kind": kind,
+        "finished_mass_g": mass,
+        "printing_minutes": 25 if method != "off_the_shelf" else 0,
+        "cutting_minutes": 12 if method == "sheet_hybrid" else 0,
+        "assembly_minutes": 8,
+        "consumed_material_cost": cost,
+        "purchased_hardware_cost": 0,
+        "energy_cost": 0,
+        "labor_cost": 0,
+        "fit_passed": True,
+        "attachment_test_passed": True,
+        "thermal_check_passed": True,
+    }
+
+
+def test_no_measured_specimens_refuses_economic_ranking():
+    report = summarize_fabrication_benchmark([])
+    assert report["sample_count"] == 0
+    assert report["observed_cost_order"] == []
+    assert report["construction_method_selected"] is None
+
+
+def test_synthetic_fixture_never_ranked_as_real_evidence():
+    items = [
+        _trial("full_print",10,70),
+        _trial("sheet_hybrid",4,50),
+        _trial("off_the_shelf",12,90),
+    ]
+    report = summarize_fabrication_benchmark(items)
+    assert report["sample_count"] == 3
+    assert report["status"] == "partial_or_synthetic_measurement_inventory"
+    assert report["observed_cost_order"] == []
+    assert report["physical_results_authenticated"] is False
+    assert report["release_authorized"] is False
+
+
+def test_operator_reported_complete_observations_can_be_ordered_not_certified():
+    items = [
+        _trial("full_print",10,70,kind="operator_reported"),
+        _trial("sheet_hybrid",4,50,kind="operator_reported"),
+        _trial("off_the_shelf",12,90,kind="operator_reported"),
+    ]
+    report = summarize_fabrication_benchmark(items)
+    assert report["status"] == "operator_reported_three_way_comparison_not_independently_verified"
+    assert report["observed_cost_order"] == [
+        "sheet_hybrid", "full_print", "off_the_shelf"
+    ]
+    assert report["construction_method_selected"] is None
+    assert report["physical_results_authenticated"] is False
+    assert report["statistical_reliability_proven"] is False
+    assert report["release_authorized"] is False
+
+
+def test_incomplete_cost_or_failed_joint_test_disables_ordering():
+    items = [
+        _trial("full_print",10,70,kind="operator_reported"),
+        _trial("sheet_hybrid",4,50,kind="operator_reported"),
+        _trial("off_the_shelf",12,90,kind="operator_reported"),
+    ]
+    items[1]["labor_cost"] = None
+    assert summarize_fabrication_benchmark(items)["observed_cost_order"] == []
+    items[1]["labor_cost"] = 0
+    items[1]["attachment_test_passed"] = False
+    assert summarize_fabrication_benchmark(items)["observed_cost_order"] == []
+
+
+def test_repeated_or_untraceable_trials_refused():
+    items = [_trial("full_print",8,65)]
+    items.append({**items[0]})
+    with pytest.raises(ValueError, match="specimen"):
+        summarize_fabrication_benchmark(items)
+    items = [_trial("full_print",8,65)]
+    items[0]["record_uri"] = ""
+    with pytest.raises(ValueError, match="URI"):
+        summarize_fabrication_benchmark(items)
+
+
+def test_evaluator_carries_operator_record_inventory_into_mecha_plan():
+    p = _project()
+    p["construction"]["benchmark_trials"] = [
+        _trial("full_print",10,70),
+        _trial("sheet_hybrid",4,50),
+        _trial("off_the_shelf",12,90),
+    ]
+    r = evaluate_construction_alternatives(p)
+    assert r["fabrication_benchmark"]["sample_count"] == 3
+    assert r["fabrication_benchmark"]["observed_cost_order"] == []
+    assert "Reported fabrication benchmark" in render_construction_plan(r)
