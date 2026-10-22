@@ -1,0 +1,18 @@
+{
+  "schema": "hardware_splicer.external_engine_plan.v1",
+  "id": "spi_adapter_native_crossdomain_v1",
+  "tasks": [
+    {
+      "id": "shell_cad",
+      "engine": "solidcraft",
+      "operation": "run_script",
+      "source": "cad/spi_adapter_shell.json"
+    },
+    {
+      "id": "shell_inspection",
+      "engine": "freecad",
+      "operation": "inspect_step",
+      "source_task": "shell_cad"
+    }
+  ]
+}
