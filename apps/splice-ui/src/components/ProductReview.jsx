@@ -141,7 +141,7 @@ export default function ProductReview({ session }) {
             <dl className="product-review__facts">
               <Details title="Software verification" value={model.softwareCheck} />
               <Details title="Copper" value={model.truth.copper.label} />
-              <Details title="Bench" value={model.truth.bench.label} />
+              <Details title="Bench" value={model.benchSummary} />
               <Details title="Physical proof" value={model.physicalCheck} />
             </dl>
             <p className="muted small">A clean KiCad DRC or simulated bench result does not verify physical safety. Use the separate Bench stage for evidence and authorization.</p>
