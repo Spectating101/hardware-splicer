@@ -1,3 +1,6 @@
+import { useState } from "react";
+import ProjectExplorer from "../blueprintBridge/ProjectExplorer.jsx";
+import { normalizeHsProjectPackage } from "../blueprintBridge/designPackage.js";
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
@@ -64,6 +67,16 @@ export default function ProjectWorkspace({
   const next = nextStageAction(session);
   const truth = deriveProjectTruth(session);
   const handoff = derivePackageHandoff(session);
+  const [showExplorer, setShowExplorer] = useState(true);
+  let explorerDesign = null;
+  let explorerError = "";
+  if (hasPkg) {
+    try {
+      explorerDesign = normalizeHsProjectPackage(pkg, session);
+    } catch (error) {
+      explorerError = error.message;
+    }
+  }
 
   const openGateCount = truth.bench.openGateCount;
 
@@ -91,6 +104,18 @@ export default function ProjectWorkspace({
           onToast?.("Share link copied — download package for reviewers");
         }}
       />
+
+      {hasPkg && (
+        <div className="blueprint-explorer__launch" data-testid="hs-explorer-launch">
+          <button type="button" className="secondary" onClick={() => setShowExplorer((value) => !value)}>
+            {showExplorer ? "Hide project explorer" : "Explore project · Parts / Wiring / Build / Verify"}
+          </button>
+          {showExplorer && explorerDesign && <ProjectExplorer design={explorerDesign} />}
+          {showExplorer && explorerError && (
+            <p className="error" role="alert">Project explorer could not read this package: {explorerError}</p>
+          )}
+        </div>
+      )}
 
       <ProjectReviewPanel
         projectId={session.projectId}
