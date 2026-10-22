@@ -55,10 +55,8 @@ function buildPartRow(row) {
   };
   const notes = String(row.notes || "").trim();
   if (notes) part.notes = notes;
-  if (row.type === "dc_motor") {
-    part.voltage_v = 6.0;
-    part.current_a = 0.45;
-  }
+  // Donor voltage and current are unknown until the user supplies evidence.
+  // Never turn a generic motor category into measured electrical ratings.
   return part;
 }
 
