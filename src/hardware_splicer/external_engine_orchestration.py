@@ -238,7 +238,10 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                 cmd = [binary, operation]
                 required = []
             try:
-                completed = subprocess.run(cmd, cwd=str(root), capture_output=True,
+                # Native electronics commands discover project config from
+                # their local entrypoint directory, not the HS root.
+                native_cwd = src.parent if engine in {"atopile", "tscircuit"} else root
+                completed = subprocess.run(cmd, cwd=str(native_cwd), capture_output=True,
                                            text=True, timeout=timeout_s, check=False,
                                            env={**os.environ, "CI": "1"})
                 status = "executed" if completed.returncode == 0 else "blocked_tool_error"
