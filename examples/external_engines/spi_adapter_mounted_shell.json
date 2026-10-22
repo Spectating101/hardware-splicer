@@ -1,0 +1,18 @@
+{
+  "schema": "hardware_splicer.external_engine_plan.v1",
+  "id": "spi_adapter_mounted_shell_v1",
+  "tasks": [
+    {
+      "id": "mounted_shell",
+      "engine": "solidcraft",
+      "operation": "run_script",
+      "source": "cad/spi_adapter_with_mounts.json"
+    },
+    {
+      "id": "mounted_shell_measurement",
+      "engine": "freecad",
+      "operation": "inspect_step",
+      "source_task": "mounted_shell"
+    }
+  ]
+}

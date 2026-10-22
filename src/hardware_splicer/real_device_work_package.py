@@ -12,7 +12,8 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                          *, planner: Mapping[str, Any] | None = None,
                          reverse_engineering: Mapping[str, Any] | None = None,
                          splice_candidate: Mapping[str, Any] | None = None,
-                         external_engine_execution: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                         external_engine_execution: Mapping[str, Any] | None = None,
+                         crossdomain_device_assessment: Mapping[str, Any] | None = None) -> dict[str, Any]:
     model = dict(review.get('operator_casefile') or review)
     plan = dict(planner or {})
     requirements = [
@@ -148,6 +149,55 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
             'criterion': 'Validate all specialist CAD/EDA outputs against source files, assembly interfaces, and physical bench evidence before release.',
             'status': 'not_accepted', 'evidence_refs': [],
         })
+    # Actual KiCad↔native CAD interface screens are evidence and unfinished
+    # work, never a blanket release decision. This also allows downstream
+    # product flows to consume requirements for mounts/cutouts.
+    crossdomain = None
+    if crossdomain_device_assessment is not None:
+        from .crossdomain_device_acceptance import SCHEMA as CROSS_SCHEMA
+        assessment = crossdomain_device_assessment
+        if (not isinstance(assessment, Mapping) or
+                assessment.get('schema') != CROSS_SCHEMA or
+                assessment.get('status') not in (
+                    'source_linked_envelope_clear_unverified',
+                    'blocked_interface_envelope',
+                )):
+            raise ValueError('unsupported cross-domain device assessment')
+        if any(assessment.get(key) is True for key in (
+            'fabrication_authorized', 'power_on_authorized', 'release_authorized',
+            'electrical_operation_verified', 'physical_board_tested',
+        )):
+            raise ValueError('cross-domain assessment cannot grant physical authority')
+        interface = assessment.get('interface_screen')
+        features = assessment.get('mechanical_feature_requirements')
+        if not isinstance(interface, Mapping) or not isinstance(features, Mapping):
+            raise ValueError('cross-domain assessment requires interface and mechanical features')
+        if (assessment['status'] == 'source_linked_envelope_clear_unverified'
+                and interface.get('blocker_count') != 0):
+            raise ValueError('cross-domain clearance is contradicted by a fit blocker')
+        crossdomain = {
+            'status': assessment['status'],
+            'pcb_sha256': (assessment.get('electrical') or {}).get('source_pcb_sha256'),
+            'step_sha256': (assessment.get('mechanical') or {}).get('native_step_sha256'),
+            'interface_blocker_count': interface.get('blocker_count'),
+            'mounting_holes': list(features.get('mounting_holes') or []),
+            'fitted_connectors': list(features.get('fitted_connectors') or []),
+            'manufacturability_verified': False, 'physical_clearance_verified': False,
+            'release_authorized': False,
+        }
+        for problem in assessment.get('open_gates') or []:
+            if not isinstance(problem, str):
+                raise ValueError('invalid cross-domain gate')
+            tasks.append({
+                'id': f'step-{len(tasks)+1:02d}', 'instruction': problem,
+                'status': 'proposed_not_executed', 'evidence_refs': [],
+                'source_domain': 'crossdomain_device',
+            })
+        safety_gates.append({
+            'id': f'gate-{len(safety_gates)+1:02d}',
+            'criterion': 'Verify exact PCB-to-enclosure mounting, connector access, component clearance and independently tested physical operation.',
+            'status': 'not_accepted', 'evidence_refs': [],
+        })
     candidate = plan.get('recommended_build_id')
     approved = set(case.get('approved_catalog_build_ids', []))
     return {
@@ -165,6 +215,7 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
                                 'behavior_physically_verified':False},
         'device_splice_feasibility': splice_report,
         'external_engine_execution': external_engines,
+        'crossdomain_device_assessment': crossdomain,
         'requirements': requirements, 'work_steps': tasks,
         'critical_unknowns': unknowns, 'acceptance_gates': safety_gates,
         'required_parts': [{'requirement': str(item), 'verified_part_number': None,

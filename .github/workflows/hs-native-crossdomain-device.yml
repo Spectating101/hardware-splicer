@@ -1,0 +1,200 @@
+name: HS Native Cross-Domain SPI Device Acceptance
+
+on:
+  push:
+    branches:
+      - experiment/hs-native-crossdomain-device-20261022
+  pull_request:
+    branches:
+      - experiment/hs-external-engine-orchestration-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spi-native-device:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS orchestration runtime
+        run: python -m pip install -e '.[dev]'
+      - name: Test software-level KiCad/CAD interface blocking
+        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py tests/test_pcb_mounting_cad.py tests/test_mounted_device_acceptance.py tests/test_connector_access_plan.py tests/test_connector_mating_volume.py
+      - name: Install official SolidCraft 0.18.4 binary with checksum
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cad-bin"
+          cd "$RUNNER_TEMP/cad-bin"
+          curl -fLsS --retry 3 -o solidcraft.tar.gz \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/solidcraft-0.18.4-linux-x86_64.tar.gz
+          curl -fLsS --retry 3 -o SHA256SUMS.txt \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/SHA256SUMS.txt
+          grep 'solidcraft-0.18.4-linux-x86_64.tar.gz' SHA256SUMS.txt \
+            | sed 's/solidcraft-0.18.4-linux-x86_64.tar.gz/solidcraft.tar.gz/' \
+            | sha256sum -c
+          tar -xzf solidcraft.tar.gz
+          find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli -exec chmod +x {} \;
+          CLI="$(find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli | head -1)"
+          test -n "$CLI"
+          echo "$(dirname "$CLI")" >> "$GITHUB_PATH"
+      - name: Install native FreeCAD geometry kernel and headless CLI
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends freecad-python3
+          mkdir -p "$RUNNER_TEMP/cad-bin/compat"
+          FREECAD="$(command -v FreeCADCmd || command -v freecadcmd || find /usr/lib -type f -name FreeCADCmd -print -quit)"
+          test -n "$FREECAD"
+          ln -s "$FREECAD" "$RUNNER_TEMP/cad-bin/compat/FreeCADCmd"
+          echo "$RUNNER_TEMP/cad-bin/compat" >> "$GITHUB_PATH"
+      - name: Execute real SolidCraft open shell and independent FreeCAD geometry measurement
+        run: |
+          set -euo pipefail
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/spi_adapter_crossdomain.json \
+            --workspace examples/external_engines \
+            --out "$RUNNER_TEMP/hs-spi-native-shell" --execute --timeout 180
+
+      - name: Prove native shell has a floor, walls and open cavity using FreeCAD
+        run: |
+          set -euo pipefail
+          export HS_SHELL_STEP="$RUNNER_TEMP/hs-spi-native-shell/shell_cad/model.step"
+          export HS_SHELL_TOPOLOGY_REPORT="$RUNNER_TEMP/hs-spi-native-shell/SHELL_TOPOLOGY.json"
+          FreeCADCmd scripts/probe_spi_shell_native.py
+          test -s "$HS_SHELL_TOPOLOGY_REPORT"
+
+      - name: Cross-check actual KiCad PCB against native CAD cavity, lineage and assembly envelopes
+        run: |
+          set -euo pipefail
+          python scripts/assess_crossdomain_device.py \
+            --engines "$RUNNER_TEMP/hs-spi-native-shell" \
+            --out "$RUNNER_TEMP/hs-spi-native-assessment"
+          python - "$RUNNER_TEMP/hs-spi-native-assessment" <<'PY'
+          import json, pathlib, sys
+          root=pathlib.Path(sys.argv[1])
+          data=json.loads((root/"CROSS_DOMAIN_DEVICE_ASSESSMENT.json").read_text())
+          assert data["status"]=="source_linked_envelope_clear_unverified",data
+          assert data["interface_screen"]["blocker_count"]==0,data["interface_screen"]
+          assert data["mechanical"]["native_shell_topology"]["point_samples_passed"]==6
+          assert data["electrical"]["board_size_mm"]==[90.0,50.0,1.6]
+          assert not data["release_authorized"]
+          shell=data["mechanical"]["source_shell_model"]
+          assert shell["nominal_cavity_dimensions_mm"]==[104.0,64.0,23.0]
+          assert abs(shell["nominal_shell_material_volume_mm3"]-39412)<0.1
+          print("Native STEP + verified KiCad PCB: initial envelope screen passed, physical readiness blocked")
+          PY
+
+      - name: Build consolidated HS review package from native electrical and mechanical evidence
+        run: |
+          set -euo pipefail
+          python scripts/build_crossdomain_device_package.py \
+            --assessment "$RUNNER_TEMP/hs-spi-native-assessment/CROSS_DOMAIN_DEVICE_ASSESSMENT.json" \
+            --external-engines "$RUNNER_TEMP/hs-spi-native-shell/ENGINE_ORCHESTRATION_REPORT.json" \
+            --out "$RUNNER_TEMP/hs-spi-native-assessment/DEVICE_WORK_PACKAGE.json"
+          python - "$RUNNER_TEMP/hs-spi-native-assessment/DEVICE_WORK_PACKAGE.json" <<'PY'
+          import json, sys
+          data=json.load(open(sys.argv[1]))
+          assert data["engineering_readiness"]=="blocked"
+          assert not data["physical_validation_performed"]
+          assert len(data["crossdomain_device_assessment"]["mounting_holes"])==4
+          assert len(data["crossdomain_device_assessment"]["fitted_connectors"])==2
+          assert len(data["acceptance_gates"])>0
+          print("Engineering work package remains review-only")
+          PY
+
+      - name: Derive M3 PCB support bosses from KiCad source rather than hardcoded CAD points
+        run: |
+          set -euo pipefail
+          python scripts/generate_spi_mounting_cad.py \
+            --out examples/external_engines/cad/spi_adapter_with_mounts.json \
+            --manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json"
+
+      - name: Prove KiCad header pin nets and open-top boss/cavity access
+        run: |
+          set -euo pipefail
+          python scripts/assess_spi_connector_access.py \
+            --mount-manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json" \
+            --out "$RUNNER_TEMP/hs-spi-connector-access.json"
+          python - "$RUNNER_TEMP/hs-spi-connector-access.json" <<'PY'
+          import json,sys
+          payload=json.load(open(sys.argv[1]))
+          assert payload["status"]=="nominal_open_top_projection_clear_unverified",payload
+          assert {x["ref"] for x in payload["connectors"]}=={"J1","JP1"}
+          assert not payload["release_authorized"]
+          PY
+
+      - name: Native SolidCraft mounts with FreeCAD solid-bore measurements
+        run: |
+          set -euo pipefail
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/spi_adapter_mounted_shell.json \
+            --workspace examples/external_engines \
+            --out "$RUNNER_TEMP/hs-spi-mounted-native" --execute --timeout 180
+          export HS_MOUNTED_SHELL_STEP="$RUNNER_TEMP/hs-spi-mounted-native/mounted_shell/model.step"
+          export HS_MOUNTING_REQUIREMENTS="$RUNNER_TEMP/hs-spi-mount-requirements.json"
+          export HS_MOUNTED_SHELL_TOPOLOGY="$RUNNER_TEMP/hs-spi-mounted-native/MOUNTED_SHELL_TOPOLOGY.json"
+          FreeCADCmd scripts/probe_spi_mounted_shell_native.py
+          test -s "$HS_MOUNTED_SHELL_TOPOLOGY"
+
+      - name: Check BOM-identified Samtec header insertion geometry (female harness unqualified)
+        run: |
+          set -euo pipefail
+          python scripts/assess_spi_mating_volume.py \
+            --mount-manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json" \
+            --out "$RUNNER_TEMP/hs-spi-mounted-native/CONNECTOR_MATING_VOLUME.json"
+          python - "$RUNNER_TEMP/hs-spi-mounted-native/CONNECTOR_MATING_VOLUME.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1]))
+          assert r["status"]=="blocked_unqualified_mating_hardware_despite_nominal_3d_clearance"
+          assert r["examined_connector_count"]==2
+          assert all(x["source_male_pin_tip_z_mm"]==15.18 for x in r["connectors"])
+          assert not r["qualified_mating_geometry_verified"]
+          PY
+
+      - name: Native FreeCAD intersects 3D insertion corridors with actual SolidCraft shell
+        run: |
+          set -euo pipefail
+          export HS_MOUNTED_SHELL_STEP="$RUNNER_TEMP/hs-spi-mounted-native/mounted_shell/model.step"
+          export HS_MATING_VOLUME_REPORT="$RUNNER_TEMP/hs-spi-mounted-native/CONNECTOR_MATING_VOLUME.json"
+          export HS_NATIVE_MATING_COLLISION_REPORT="$RUNNER_TEMP/hs-spi-mounted-native/NATIVE_MATING_COLLISION.json"
+          FreeCADCmd scripts/probe_spi_connector_access_native.py
+          test -s "$HS_NATIVE_MATING_COLLISION_REPORT"
+
+      - name: Gate native mounting bosses through independent HS-to-KiCad source audit
+        run: |
+          set -euo pipefail
+          python scripts/assess_spi_mounted_device.py \
+            --engines "$RUNNER_TEMP/hs-spi-mounted-native" \
+            --manifest "$RUNNER_TEMP/hs-spi-mount-requirements.json" \
+            --cad-recipe examples/external_engines/cad/spi_adapter_with_mounts.json \
+            --out "$RUNNER_TEMP/hs-spi-mounted-assessment"
+          python - "$RUNNER_TEMP/hs-spi-mounted-assessment/MOUNTED_DEVICE_REVIEW.json" <<'PY'
+          import json,sys
+          result=json.load(open(sys.argv[1]))
+          assert result["mount_count"]==4
+          assert result["native_3d_material_void_checks"]==14
+          assert result["source_pcb_envelope_blockers"]==0
+          assert result["native_connector_shell_collision_checked"] is True
+          assert result["connector_mating_status"]=="blocked_unqualified_mating_hardware_despite_nominal_3d_clearance"
+          assert not result["counterpart_harness_selected"]
+          assert not result["release_authorized"]
+          PY
+
+      - name: Upload cross-domain source hashes, native STEP and board-fit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-native-spi-crossdomain-device
+          path: |
+            ${{ runner.temp }}/hs-spi-native-shell/
+            ${{ runner.temp }}/hs-spi-native-assessment/
+            ${{ runner.temp }}/hs-spi-mounted-native/
+            ${{ runner.temp }}/hs-spi-mounted-assessment/
+            ${{ runner.temp }}/hs-spi-mount-requirements.json
+            ${{ runner.temp }}/hs-spi-connector-access.json
+          if-no-files-found: warn
