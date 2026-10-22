@@ -99,6 +99,13 @@ export function normalizeOpenBlueprintDesign(input) {
   const partIds = new Set(parts.map((p) => p.id));
   if (partIds.size !== parts.length) throw new Error("Duplicate part ID");
   const connections = normalizeConnections(raw.connections, partIds);
+  const pinIndex = new Map(parts.map((p) => [p.id, new Set(p.pins)]));
+  for (const connection of connections) {
+    if (!pinIndex.get(connection.from.part).has(connection.from.pin) ||
+        !pinIndex.get(connection.to.part).has(connection.to.pin)) {
+      throw new Error(`Connection ${connection.id} references an undeclared part pin`);
+    }
+  }
   const assembly = checkAssembly(raw.assembly, partIds);
   const instructions = normalizeInstructions(raw.instructions);
   for (const phase of instructions) {
