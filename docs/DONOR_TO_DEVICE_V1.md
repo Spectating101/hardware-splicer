@@ -66,6 +66,58 @@ When the compiler produces a same-run `.kicad_pcb`, the handoff
 records its SHA-256. A reported DRC pass is not a fresh independent KiCad
 receipt and is certainly not evidence of an assembled device.
 
+## Physical donor characterization (next phase)
+
+The new `donor_characterization_v1.py` consumes an operator report in the
+**existing** `bench_topology_capture.v1` format; it does not invent a parallel
+bench system. Every fresh `build_donor_to_device_review.py` output contains an
+initially empty `DONOR_CAPTURE_TEMPLATE.json`.
+
+1. Record the **specific physical donor ID** and operator; set `simulated:
+   false`, a timestamp with timezone, and actual instrument metadata.
+2. Fill **only measurements actually obtained**; leave the other rows open.
+   Rows include battery open-circuit voltage, individual motor winding
+   resistance and no-load current at recorded test voltage, wheel diameters,
+   axle spacing and chassis dimensions. Do not perform uncontrolled motor
+   stall-current tests. Never connect the declared 7.4 V battery directly
+   to the unverified 6 V motors.
+3. Include photo/instrument-log URI plus exact SHA-256 when available. The
+   program records those as claimed provenance, not independently
+   authenticated visual evidence.
+4. Re-run this same compiler with the filled packet:
+
+```bash
+python scripts/build_donor_to_device_review.py \
+  --donor-capture /path/to/filled_DONOR_CAPTURE_TEMPLATE.json \
+  --out /tmp/hs-rover-captured-donor-review
+```
+
+This produces `DONOR_CAPTURE_AUDIT.json`, storing the packet hash,
+the exact donor-board and intake binding, each qualified operator-reported
+reading, instrument claims, missing/invalid rows and conflicts. Source
+hashes prevent an unrelated donor capture being silently adopted.
+
+A battery voltage above the intake's 6 V motor rating triggers a direct
+connection hold. A motor-to-motor winding-resistance ratio above 1.5
+requires quarantining the pair pending investigation (screening threshold,
+not a rejection specification). Missing motor-driver part identity,
+logic voltage, current/thermal limits and protection design STILL block
+motor motion. The source cannot certify the instrument or that a human
+actually performed the reported measurement; an independent engineer
+must review provenance and physical evidence.
+
+Dimensions from capture are carried as `operator_reported_geometry`,
+**not** converted to approved CAD until motor shaft/gearbox fixing
+patterns and real enclosure constraints are available. This avoids
+repeating the premature SPI-shell exercise.
+
+The result intentionally stays
+`blocked_until_donor_characterization` even when some readings exist.
+Power-on, motor motion, fabrication and release flags remain false.
+The existing S3 `splice_bench` workflow still handles actual hardware
+gate closure; a donor-characterization packet is an input, not an
+authorization bypass.
+
 ### Physical and economic decision boundary
 
 Full practical viability requires: identifying **the actual** H-bridge,
