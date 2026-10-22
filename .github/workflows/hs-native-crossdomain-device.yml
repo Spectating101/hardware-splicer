@@ -1,0 +1,91 @@
+name: HS Native Cross-Domain SPI Device Acceptance
+
+on:
+  push:
+    branches:
+      - experiment/hs-native-crossdomain-device-20261022
+  pull_request:
+    branches:
+      - experiment/hs-external-engine-orchestration-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spi-native-device:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS orchestration runtime
+        run: python -m pip install -e '.[dev]'
+      - name: Test software-level KiCad/CAD interface blocking
+        run: python -m pytest -q tests/test_crossdomain_device_acceptance.py
+      - name: Install official SolidCraft 0.18.4 binary with checksum
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cad-bin"
+          cd "$RUNNER_TEMP/cad-bin"
+          curl -fLsS --retry 3 -o solidcraft.tar.gz \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/solidcraft-0.18.4-linux-x86_64.tar.gz
+          curl -fLsS --retry 3 -o SHA256SUMS.txt \
+            https://github.com/tangency-labs/solidcraft/releases/download/v0.18.4/SHA256SUMS.txt
+          grep 'solidcraft-0.18.4-linux-x86_64.tar.gz' SHA256SUMS.txt \
+            | sed 's/solidcraft-0.18.4-linux-x86_64.tar.gz/solidcraft.tar.gz/' \
+            | sha256sum -c
+          tar -xzf solidcraft.tar.gz
+          find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli -exec chmod +x {} \;
+          CLI="$(find "$RUNNER_TEMP/cad-bin" -type f -name solidcraft-cli | head -1)"
+          test -n "$CLI"
+          echo "$(dirname "$CLI")" >> "$GITHUB_PATH"
+      - name: Install native FreeCAD geometry kernel and headless CLI
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends freecad-python3
+          mkdir -p "$RUNNER_TEMP/cad-bin/compat"
+          FREECAD="$(command -v FreeCADCmd || command -v freecadcmd || find /usr/lib -type f -name FreeCADCmd -print -quit)"
+          test -n "$FREECAD"
+          ln -s "$FREECAD" "$RUNNER_TEMP/cad-bin/compat/FreeCADCmd"
+          echo "$RUNNER_TEMP/cad-bin/compat" >> "$GITHUB_PATH"
+      - name: Execute real SolidCraft open shell and independent FreeCAD geometry measurement
+        run: |
+          set -euo pipefail
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/spi_adapter_crossdomain.json \
+            --workspace examples/external_engines \
+            --out "$RUNNER_TEMP/hs-spi-native-shell" --execute --timeout 180
+
+      - name: Cross-check actual KiCad PCB against native CAD cavity, lineage and assembly envelopes
+        run: |
+          set -euo pipefail
+          python scripts/assess_crossdomain_device.py \
+            --engines "$RUNNER_TEMP/hs-spi-native-shell" \
+            --out "$RUNNER_TEMP/hs-spi-native-assessment"
+          python - "$RUNNER_TEMP/hs-spi-native-assessment" <<'PY'
+          import json, pathlib, sys
+          root=pathlib.Path(sys.argv[1])
+          data=json.loads((root/"CROSS_DOMAIN_DEVICE_ASSESSMENT.json").read_text())
+          assert data["status"]=="source_linked_envelope_clear_unverified",data
+          assert data["interface_screen"]["blocker_count"]==0,data["interface_screen"]
+          assert data["electrical"]["board_size_mm"]==[90.0,50.0,1.6]
+          assert not data["release_authorized"]
+          shell=data["mechanical"]["source_shell_model"]
+          assert shell["nominal_cavity_dimensions_mm"]==[104.0,64.0,23.0]
+          assert abs(shell["nominal_shell_material_volume_mm3"]-39412)<0.1
+          print("Native STEP + verified KiCad PCB: initial envelope screen passed, physical readiness blocked")
+          PY
+
+      - name: Upload cross-domain source hashes, native STEP and board-fit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-native-spi-crossdomain-device
+          path: |
+            ${{ runner.temp }}/hs-spi-native-shell/
+            ${{ runner.temp }}/hs-spi-native-assessment/
+          if-no-files-found: warn
