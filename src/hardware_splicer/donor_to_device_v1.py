@@ -281,6 +281,31 @@ def build_donor_to_device_review(*, intake_path: str | Path,
         "compatible_parts_or_requirements":[x["specification"] for x in missing],
     }}
     handoff = compile_work_package(case, review, splice_candidate=splice)
+    if characterization is not None:
+        handoff["physical_donor_evidence"] = {
+            "review_status": characterization["status"],
+            "capture_sha256": characterization["source_capture_sha256"],
+            "specific_donor_id": characterization["physical_donor_id"],
+            "operator_reported_readings": characterization["input_fields_observed"],
+            "unqualified_readings": characterization["unqualified_readings"],
+            "identified_conflicts": characterization["conflicts"],
+            "independently_authenticated": False,
+            "build_authorized": False,
+        }
+        for conflict in characterization["conflicts"]:
+            description = conflict["action"]
+            handoff["work_steps"].append({
+                "id":f"step-{len(handoff['work_steps'])+1:02d}",
+                "instruction":description,
+                "status":"proposed_not_executed",
+                "evidence_refs":[characterization["source_capture_sha256"]],
+                "source_domain":"donor_characterization",
+            })
+            handoff["critical_unknowns"].append({
+                "id":f"gap-{len(handoff['critical_unknowns'])+1:02d}",
+                "description":f"Review reported physical donor conflict: {conflict['id']}",
+                "status":"open","resolution_evidence":None,
+            })
     report = {
         "schema":SCHEMA, "case_id":ROVER_CASE,"target_build_id":EXPECTED_BUILD,
         "status":"blocked_until_donor_characterization",
