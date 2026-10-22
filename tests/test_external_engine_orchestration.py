@@ -89,7 +89,10 @@ def test_solidcraft_to_freecad_real_workflow_contract_with_mocked_executables(tm
             script = Path(cmd[1]).read_text()
             assert "model.step" in script and "Part.Shape()" in script
             result_file = Path(cmd[1]).parent / "step_inspection.json"
-            result_file.write_text(json.dumps({"shape_valid": True, "volume_mm3": 200}))
+            result_file.write_text(json.dumps({
+                "shape_valid": True, "solid_count": 1,
+                "volume_mm3": 200, "bbox_mm": [10, 5, 4]
+            }))
         return SimpleNamespace(returncode=0, stdout="ok", stderr="")
 
     monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake_run)
@@ -289,3 +292,24 @@ def test_circuit_json_projection_preserves_review_only_identity():
     assert result["canonical_net_count"] == 3
     assert result["source_sha256"].startswith("sha256:")
     assert not result["fabrication_authorized"]
+
+def test_freecad_invalid_shape_is_blocked_even_if_cli_exits_zero(tmp_path, monkeypatch):
+    workspace = tmp_path / "inputs"
+    (workspace / "part.step").write_bytes(b"ISO-10303-21;\\nEND-ISO-10303-21;")
+    job = {"id": "geometry", "engine": "freecad", "operation": "inspect_step",
+           "source": "part.step"}
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/bin/" + name)
+    def fake_run(command, **kwargs):
+        worker = Path(command[1])
+        (worker.parent / "step_inspection.json").write_text(json.dumps({
+            "shape_valid": False, "solid_count": 1, "volume_mm3": 2,
+            "bbox_mm": [1, 1, 2]
+        }))
+        return SimpleNamespace(returncode=0, stdout="run okay", stderr="")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake_run)
+    report = run_external_engine_plan(plan(job), workspace=workspace,
+                                      output_dir=tmp_path / "out", confirm_execute=True)
+    assert report["tasks"][0]["status"] == "blocked_invalid_geometry"
+    assert report["blocked"] == 1 and report["completed"] == 0
+    assert not report["release_authorized"]
