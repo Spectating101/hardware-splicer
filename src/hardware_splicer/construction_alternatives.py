@@ -324,6 +324,22 @@ def evaluate_construction_alternatives(
         },
         "thermal_screen": thermal_checks,
         "chemical_screen": chemical_checks,
+        "material_property_evidence": {
+            role: (
+                {
+                    "material_id": record.get("material_id"),
+                    "source_uri": record.get("source_uri"),
+                    "evidence_kind": record.get("evidence_kind"),
+                    "density_kg_m3": record.get("density_kg_m3"),
+                    "elastic_modulus_mpa": record.get("elastic_modulus_mpa"),
+                    "thermal_conductivity_w_mk": record.get("thermal_conductivity_w_mk"),
+                    "max_service_temp_c": record.get("max_service_temp_c"),
+                    "conductivity_used_in_thermal_solver": False,
+                    "modulus_used_in_assembly_stress_solver": False,
+                } if record else None
+            )
+            for role,record in (("filament",print_record),("panel",panel_record))
+        },
         "alternatives": alternatives,
         "hypothetical_full_print_minus_hybrid_mass_g": delta_mass,
         "hypothetical_material_cost_difference": delta_cost,
