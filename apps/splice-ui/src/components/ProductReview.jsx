@@ -23,6 +23,9 @@ export default function ProductReview({ session }) {
   const hasMechanical = Object.keys(model.mechanism).length > 0;
   const hasCode = Object.keys(model.firmware).length > 0;
   const steps = Array.isArray(model.instructions.assembly_steps) ? model.instructions.assembly_steps : [];
+  const criticalOpen = Number.isInteger(pkg?.gates?.critical_open_count) && pkg.gates.critical_open_count > 0
+    ? pkg.gates.critical_open_count : null;
+  const engineeringHold = model.hasPackage && (pkg?.gates?.build_ready !== true || model.blockers.length > 0);
 
   return (
     <section className="card product-review" data-testid="product-review" aria-label="Engineering review">
@@ -37,6 +40,13 @@ export default function ProductReview({ session }) {
         </div>
         <span className="chip">{model.mode}</span>
       </header>
+      {engineeringHold && (
+        <p className="product-review__blockers" role="status" data-testid="review-safety-hold">
+          <strong>Engineering hold.</strong>{" "}
+          {criticalOpen !== null ? `${criticalOpen} critical bench gate(s) open. ` : "Build readiness is not established. "}
+          Proposed wiring and assembly steps are not authorization to connect power or operate hardware.
+        </p>
+      )}
       <div className="product-review__tabs" role="tablist" aria-label="Project disciplines">
         {PROJECT_REVIEW_TABS.map((item) => (
           <button
