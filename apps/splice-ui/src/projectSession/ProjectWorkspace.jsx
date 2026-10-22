@@ -168,6 +168,7 @@ export default function ProjectWorkspace({
             <ProjectWizard
               key={session.projectId || "intake"}
               embedded
+              initialGoal={session.goal}
               donorFixtures={donorFixtures}
               visionCapabilities={visionCapabilities}
               llmPolicy={llmPolicy}
