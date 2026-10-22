@@ -69,11 +69,24 @@ def _splice_compilation(result_path: str | Path | None, *, expected_case: str,
         return {"status": "blocked_compile_or_drc", "receipt_sha256": receipt_hash,
                 "carrier_drc_pass": False, "carrier_artifact_sha256": None,
                 "physically_built": False}
-    # SPLICE_DEMO_RESULT.json deliberately does not embed a board digest, so
-    # no source-to-file assertion can be made without the original artifact.
-    return {"status": "demo_drc_reported_artifact_unbound",
+    # Bind the carrier PCB to this exact run if its demo output still exists.
+    # This is a local source fingerprint, NOT an independent KiCad DRC rerun.
+    artifacts = metrics.get("artifacts")
+    board_location = artifacts.get("kicad_pcb") if isinstance(artifacts, dict) else None
+    board_sha = None
+    if isinstance(board_location, str) and board_location.endswith(".kicad_pcb"):
+        root = Path(result_path).resolve().parent
+        candidate = Path(board_location)
+        candidate = (candidate if candidate.is_absolute() else root / candidate).resolve()
+        if candidate.is_relative_to(root) and candidate.is_file() and not candidate.is_symlink():
+            if 0 < candidate.stat().st_size <= 32_000_000:
+                blob = candidate.read_bytes()
+                if blob.lstrip().startswith(b"(kicad_pcb"):
+                    board_sha = "sha256:" + hashlib.sha256(blob).hexdigest()
+    return {"status": ("source_bound_carrier_drc_reported" if board_sha
+                       else "demo_drc_reported_artifact_unbound"),
             "receipt_sha256": receipt_hash,
-            "carrier_drc_pass": True, "carrier_artifact_sha256": None,
+            "carrier_drc_pass": True, "carrier_artifact_sha256": board_sha,
             "native_kicad_receipt_independently_rechecked": False,
             "physically_built": False}
 
