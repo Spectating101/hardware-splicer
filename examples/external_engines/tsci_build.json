@@ -1,0 +1,15 @@
+{
+  "schema": "hardware_splicer.external_engine_plan.v1",
+  "id": "tsci_led_native",
+  "tasks": [
+    {
+      "id": "led_board",
+      "engine": "tscircuit",
+      "operation": "build",
+      "source": "tsci/index.tsx",
+      "artifact_paths": [
+        "tsci/dist/index/circuit.json"
+      ]
+    }
+  ]
+}
