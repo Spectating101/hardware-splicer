@@ -198,3 +198,20 @@ def test_typed_construction_spec_rejects_negative_geometry():
                 "panel_thickness_mm": -2,
             },
         })
+
+
+def test_hs_mechanism_pack_propagates_requested_construction(tmp_path):
+    from hardware_splicer.mechanism_bridge import run_mechanism_pack
+    record = run_mechanism_pack(
+        project_name="salvaged-sensor",
+        build_id="sensor_logger",
+        out_dir=tmp_path,
+        construction=_project()["construction"],
+    )
+    assert record["status"] == "ok"
+    assert record["project_spec"]["construction"]["connector_family"] == "moduframe"
+    construction = record["construction_alternatives"]
+    assert construction["status"] == "comparison_produced_research_only"
+    assert construction["selected_manufacturing_method"] is None
+    assert construction["release_authorized"] is False
+    assert (tmp_path/"mecha_bundle"/"CONSTRUCTION_PLAN.md").exists()
