@@ -25,16 +25,20 @@ React 19/Next.js 15 application. Vendoring it wholesale would create another
 frontend, duplicate parts and wiring UIs, and separate project authority from
 the actual HS engine.
 
-Instead, this bridge adds **two working paths**:
+Instead, this bridge adds **three connected paths**:
 
-1. **OpenBlueprint import**: download an OpenBlueprint project ZIP and extract
+1. **Prompt-first HS home**: describe a goal directly on the landing page.
+   It is carried into the existing HS project session and clarification wizard.
+   This is real intake state, not a claim that an AI has already designed or
+   validated a device.
+2. **OpenBlueprint import**: download an OpenBlueprint project ZIP and extract
    `design.json` (the upstream `buildProjectZip` export writes that filename).
    In the HS Home view choose `Inspect an OpenBlueprint DesignPackage` and
    select that JSON. This is local, requires no HS API, and shows Overview,
    Parts, Architecture, Wiring, Mechanical, Code, Build, Verify. Only
    source-supplied pin-level connections render as wires. The input never
    becomes an HS project, modifies source history, or opens safety gates.
-2. **Native HS explorer**: compile or load an existing HS project. The existing
+3. **Native HS explorer**: compile or load an existing HS project. The existing
    project workspace shows a unified explorer above the current Intake/Design/
    Verify/Bench/Package workflow. This explorer normalizes the actual
    `PROJECT_PACKAGE` BOM, topology, assembly steps, firmware scaffold and
