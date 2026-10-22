@@ -101,7 +101,8 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
         statuses = {'tool_passed_artifact_observed', 'blocked_dependency',
                     'blocked_missing_external_engine', 'blocked_tool_error',
                     'blocked_execution_failure', 'blocked_missing_or_invalid_output',
-                    'blocked_not_step_export', 'blocked_no_output_evidence'}
+                    'blocked_not_step_export', 'blocked_no_output_evidence',
+                    'blocked_stale_project_artifact'}
         if any(not isinstance(row, Mapping) or row.get('status') not in statuses
                or not isinstance(row.get('id'), str) for row in rows):
             raise ValueError('invalid external-engine task results')
