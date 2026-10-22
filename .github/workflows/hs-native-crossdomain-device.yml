@@ -60,6 +60,14 @@ jobs:
             --workspace examples/external_engines \
             --out "$RUNNER_TEMP/hs-spi-native-shell" --execute --timeout 180
 
+      - name: Prove native shell has a floor, walls and open cavity using FreeCAD
+        run: |
+          set -euo pipefail
+          export HS_SHELL_STEP="$RUNNER_TEMP/hs-spi-native-shell/shell_cad/model.step"
+          export HS_SHELL_TOPOLOGY_REPORT="$RUNNER_TEMP/hs-spi-native-shell/SHELL_TOPOLOGY.json"
+          FreeCADCmd scripts/probe_spi_shell_native.py
+          test -s "$HS_SHELL_TOPOLOGY_REPORT"
+
       - name: Cross-check actual KiCad PCB against native CAD cavity, lineage and assembly envelopes
         run: |
           set -euo pipefail
@@ -72,6 +80,7 @@ jobs:
           data=json.loads((root/"CROSS_DOMAIN_DEVICE_ASSESSMENT.json").read_text())
           assert data["status"]=="source_linked_envelope_clear_unverified",data
           assert data["interface_screen"]["blocker_count"]==0,data["interface_screen"]
+          assert data["mechanical"]["native_shell_topology"]["point_samples_passed"]==6
           assert data["electrical"]["board_size_mm"]==[90.0,50.0,1.6]
           assert not data["release_authorized"]
           shell=data["mechanical"]["source_shell_model"]
