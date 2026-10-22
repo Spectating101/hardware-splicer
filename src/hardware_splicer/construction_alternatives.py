@@ -21,6 +21,28 @@ CONNECTOR_SOURCES: dict[str, dict[str, Any]] = {
         "nominal_panel_thickness_mm": 1.6,
         "license": "CC-BY-SA-4.0",
         "requires_external_asset": True,
+        "pinned_revision": "348bad8ba0553be79f24d5ac12a7d4081d7759c8",
+        "verified_repository_assets": [
+            {
+                "name": "clip-o_90_moreflexy.stl",
+                "repository_path": "fab/clip-o_90_moreflexy.stl",
+                "git_blob_sha1": "eda0c9041d229c050296a313af5e4bd1a07892ea",
+                "revision_url": "https://github.com/zakqwy/Clip-Os/blob/348bad8ba0553be79f24d5ac12a7d4081d7759c8/fab/clip-o_90_moreflexy.stl",
+                "local_file_installed": False,
+                "mesh_validated_in_hs": False,
+            },
+            {
+                "name": "clip-o_180_moreflexy.stl",
+                "repository_path": "fab/clip-o_180_moreflexy.stl",
+                "git_blob_sha1": "fab8122d82c96237fa819429a50dc2cbcc99291f",
+                "revision_url": "https://github.com/zakqwy/Clip-Os/blob/348bad8ba0553be79f24d5ac12a7d4081d7759c8/fab/clip-o_180_moreflexy.stl",
+                "local_file_installed": False,
+                "mesh_validated_in_hs": False,
+            },
+        ],
+        "recommended_hole_center_from_edge_mm": 12.7,
+        "hole_diameter_mm": None,
+        "nominal_sheet_fit_physically_verified_by_hs": False,
     },
     "moduframe": {
         "name": "ModuFrame",
@@ -167,7 +189,7 @@ def evaluate_construction_alternatives(
     connector = dict(CONNECTOR_SOURCES[connector_key]) if connector_key!="unselected" else None
     if connector is not None:
         connector["id"] = connector_key
-        connector["revision_pinned"] = False
+        connector["revision_pinned"] = bool(connector.get("pinned_revision"))
         connector["local_asset_validated"] = False
         connector["fit_physically_verified"] = False
     temp = construction.get("operating_temp_c")
@@ -237,8 +259,9 @@ def evaluate_construction_alternatives(
     if print_record and print_record.get("evidence_kind") == "assumed":
         panel_blockers.append("filament_material_properties_assumed")
     if connector:
-        panel_blockers.extend(("external_connector_revision_unpinned",
-                               "connector_files_not_validated_or_installed"))
+        if not connector["revision_pinned"]:
+            panel_blockers.append("external_connector_revision_unpinned")
+        panel_blockers.append("connector_files_not_validated_or_installed")
     print_mass_g = _mass_g(
         shell_envelope_mm3 * fill if fill is not None else shell_envelope_mm3,
         print_record.get("density_kg_m3") if print_record else None,
@@ -394,6 +417,20 @@ def render_construction_plan(report: Mapping[str, Any]) -> str:
                     f"- Upstream license/notice: {source['license']}",
                     "- Verify exact revision, download licensing, fit and real attachment strength.",
                 ])
+                if source.get("pinned_revision"):
+                    lines.append("- Pinned Git revision: " + str(source["pinned_revision"]))
+                    for asset in source.get("verified_repository_assets") or []:
+                        lines.append(
+                            "- Upstream STL (not downloaded): " +
+                            asset["name"] + " — " + asset["revision_url"] +
+                            " (Git blob " + asset["git_blob_sha1"] + ")"
+                        )
+                if source.get("recommended_hole_center_from_edge_mm"):
+                    lines.append(
+                        "- Upstream recommended mounting hole center inset: " +
+                        str(source["recommended_hole_center_from_edge_mm"]) +
+                        " mm; hole diameter must be verified from the original instructions/tools."
+                    )
         lines.append("")
     lines.extend([
         "## Before selecting a method",
