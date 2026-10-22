@@ -158,3 +158,41 @@ def test_nonempty_destination_must_not_be_overwritten(tmp_path):
     with pytest.raises(ValueError,match="empty"):
         evaluate(tmp_path,out=dest)
     assert (dest/"other-agents-work.json").read_text()=='{"untouched":true}'
+
+def test_real_carrier_file_is_hashed_only_within_same_splice_run_directory(tmp_path):
+    assembly=tmp_path/"build_compilation"
+    assembly.mkdir()
+    pcb=assembly/"main_ctrl_build.kicad_pcb"
+    pcb.write_text("(kicad_pcb\\n(version 20241229)\\n)")
+    receipt={
+        "schema_version":"hardware_splicer.splice_demo_result.v1",
+        "case_id":"robot_drive_from_rc_toy",
+        "evaluation":{"passed":True},
+        "metrics":{"build_id":"robot_drive_base","drc_pass":True,
+                   "artifacts":{"kicad_pcb":str(pcb)}},
+    }
+    path=tmp_path/"SPLICE_DEMO_RESULT.json"
+    path.write_text(json.dumps(receipt))
+    r=evaluate(tmp_path,splice=path)
+    assert r["carrier_compilation"]["status"]=="source_bound_carrier_drc_reported"
+    assert r["carrier_compilation"]["carrier_artifact_sha256"].startswith("sha256:")
+    assert not r["carrier_compilation"]["native_kicad_receipt_independently_rechecked"]
+    assert not r["fabrication_authorized"]
+
+
+def test_out_of_run_splice_artifact_cannot_masquerade_as_our_board(tmp_path):
+    outside=tmp_path.parent/"unrelated-carrier.kicad_pcb"
+    outside.write_text("(kicad_pcb)")
+    evidence={
+        "schema_version":"hardware_splicer.splice_demo_result.v1",
+        "case_id":"robot_drive_from_rc_toy",
+        "evaluation":{"passed":True},
+        "metrics":{"build_id":"robot_drive_base","drc_pass":True,
+                   "artifacts":{"kicad_pcb":str(outside)}},
+    }
+    receipt=tmp_path/"SPLICE_DEMO_RESULT.json"
+    receipt.write_text(json.dumps(evidence))
+    r=evaluate(tmp_path,splice=receipt)
+    assert r["carrier_compilation"]["status"]=="demo_drc_reported_artifact_unbound"
+    assert r["carrier_compilation"]["carrier_artifact_sha256"] is None
+    assert not r["power_on_authorized"]
