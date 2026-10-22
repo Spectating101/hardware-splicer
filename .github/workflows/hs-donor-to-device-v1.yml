@@ -40,7 +40,8 @@ jobs:
           assert x["electrical"]["direct_battery_to_motor_voltage_mismatch"]
           assert x["device_work_package"]["engineering_readiness"]=="blocked"
           assert not x["motor_motion_authorized"]
-          template=json.load(open("$RUNNER_TEMP/rover-donor-review/DONOR_CAPTURE_TEMPLATE.json"))
+          import os,pathlib
+          template=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"rover-donor-review/DONOR_CAPTURE_TEMPLATE.json").read_text())
           assert template["schema_version"]=="bench_topology_capture.v1"
           assert template["simulated"] is None
           assert all(row["status"]=="open" and row["value"] is None for row in template["measurements"])
