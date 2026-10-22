@@ -253,3 +253,17 @@ checklist. Expected nonzero screening status is **not** numerical failure,
 and a numerical pass is **not** an engineering load rating.
 
 [Integrated Mecha/HS workflow and scope](docs/MECHANICAL_HS_CORE_INTEGRATION_2026-10-20.md)
+
+
+### Material-aware hybrid fabrication (optional)
+
+Mecha-Splicer can now compare its existing fully printed enclosure concept
+with sheet-panel/connector construction and off-the-shelf sourcing, using
+**user-supplied** density, service-temperature, chemical compatibility,
+material price and panel-thickness evidence. The report includes public
+connector references (Clip-Os, ModuFrame, BOSL2, Modular Clip, Boxes.py)
+but does **not** copy their designs, select an unvalidated construction
+method or approve production. No geometry replacement is automatic.
+
+See [hybrid material construction example and limits](docs/MECHA_HYBRID_CONSTRUCTION_INTEGRATION_2026-10-22.md)
+and [illustrative assumptions JSON](examples/mechanical/hybrid_enclosure_assumptions.json).
