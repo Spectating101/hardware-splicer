@@ -497,6 +497,8 @@ def evaluate_construction_alternatives(
     if connector:
         if not connector["revision_pinned"]:
             panel_blockers.append("external_connector_revision_unpinned")
+        if connector.get("source_license_review_required"):
+            panel_blockers.append("external_connector_license_not_verified")
         panel_blockers.append("connector_files_not_validated_or_installed")
     print_mass_g = _mass_g(
         shell_envelope_mm3 * fill if fill is not None else shell_envelope_mm3,
