@@ -1,0 +1,103 @@
+name: HS Donor-to-Device v1 — RC Rover
+
+on:
+  push:
+    branches:
+      - experiment/hs-donor-to-device-v1-20261022
+  pull_request:
+    branches:
+      - experiment/hs-spi-native-cam-review-20261022
+      - experiment/hs-external-engine-orchestration-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  donor_review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Test donor evidence, voltage/current math and false-acceptance gates
+        run: |
+          python -m compileall -q src/hardware_splicer/donor_to_device_v1.py src/hardware_splicer/donor_characterization_v1.py
+          python -m pytest -q tests/test_donor_to_device_v1.py tests/test_donor_characterization_v1.py tests/test_device_splice_feasibility.py tests/test_real_device_splice_feasibility_bridge.py
+      - name: Generate review package from the existing canonical RC toy intake and donor fixture
+        run: |
+          set -euo pipefail
+          python scripts/build_donor_to_device_review.py --out "$RUNNER_TEMP/rover-donor-review"
+          python - "$RUNNER_TEMP/rover-donor-review/DONOR_DEVICE_REVIEW.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          assert x["status"]=="blocked_until_donor_characterization"
+          assert x["electrical"]["two_motor_stall_current_claim_a"]==1.8
+          assert x["electrical"]["direct_battery_to_motor_voltage_mismatch"]
+          assert x["device_work_package"]["engineering_readiness"]=="blocked"
+          assert not x["motor_motion_authorized"]
+          import os,pathlib
+          template=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"rover-donor-review/DONOR_CAPTURE_TEMPLATE.json").read_text())
+          assert template["schema_version"]=="bench_topology_capture.v1"
+          assert template["simulated"] is None
+          assert all(row["status"]=="open" and row["value"] is None for row in template["measurements"])
+          assert x["estimated_replacement_cost_ntd"] is None
+          print("HS donor review generated with physical and economic gates OPEN")
+          PY
+      - name: Preserve structured donor-to-device review artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-rc-rover-source-bound-review
+          path: ${{ runner.temp }}/rover-donor-review/
+          if-no-files-found: warn
+
+  splice_carrier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS source compiler dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run the existing canonical RC donor -> carrier splice build
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: '0'
+          HARDWARE_SPLICER_DRC_FIX_LOOP: '1'
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: '1'
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: '1'
+        run: |
+          set -euo pipefail
+          python scripts/splice_demo.py --case robot_drive_from_rc_toy --out "$RUNNER_TEMP/rover-splice"
+      - name: Join compiled carrier and donor review with SHA-bound evidence
+        run: |
+          set -euo pipefail
+          python scripts/build_donor_to_device_review.py \
+            --splice-result "$RUNNER_TEMP/rover-splice/SPLICE_DEMO_RESULT.json" \
+            --out "$RUNNER_TEMP/rover-compiled-handoff"
+          python - "$RUNNER_TEMP/rover-compiled-handoff/DONOR_DEVICE_REVIEW.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          carrier=x["carrier_compilation"]
+          assert carrier["carrier_drc_pass"],carrier
+          assert carrier["status"]=="source_bound_carrier_drc_reported",carrier
+          assert carrier["carrier_artifact_sha256"].startswith("sha256:"),carrier
+          assert x["status"]=="blocked_until_donor_characterization"
+          assert not x["release_authorized"]
+          print("Carrier source-hash tied to canonical splice build; physical acceptance still BLOCKED")
+          PY
+      - name: Upload actual HS splice outputs and integrated donor handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-rc-rover-splice-and-handoff
+          path: |
+            ${{ runner.temp }}/rover-splice/
+            ${{ runner.temp }}/rover-compiled-handoff/
+          if-no-files-found: warn
