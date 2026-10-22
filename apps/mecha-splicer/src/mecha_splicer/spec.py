@@ -508,7 +508,7 @@ class ConstructionSpec(BaseModel):
     panel_thickness_mm: Optional[MmPos] = None
     operating_temp_c: Optional[float] = None
     chemical_exposures: list[str] = Field(default_factory=list)
-    connector_family: Literal["unselected", "clip_os", "moduframe", "bosl2", "modular_clip", "boxes_py"] = "unselected"
+    connector_family: Literal["unselected", "clip_os", "moduframe", "bosl2", "modular_clip", "boxes_py", "boxkit"] = "unselected"
     connector_count: int = Field(default=8, ge=0, le=100)
     connector_print_volume_cm3: Optional[Annotated[float, Field(ge=0)]] = None
     printed_material_fraction: Optional[Annotated[float, Field(gt=0, le=1)]] = None
