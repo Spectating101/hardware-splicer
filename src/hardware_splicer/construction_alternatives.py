@@ -120,6 +120,78 @@ def _mass_g(volume_mm3: float, density_kg_m3: float | None) -> float | None:
     return round(volume_mm3 * 1e-6 * density_kg_m3, 3)
 
 
+def verify_git_blob_asset(data: bytes, expected_sha1: str) -> bool:
+    """Compare exact Git blob SHA-1 against a pinned public source object."""
+    import hashlib
+
+    if not isinstance(data, bytes) or len(data) > 4_000_000:
+        return False
+    if not isinstance(expected_sha1, str) or len(expected_sha1) != 40:
+        return False
+    actual = hashlib.sha1(
+        ("blob " + str(len(data)) + "\\0").encode("ascii") + data
+    ).hexdigest()
+    return actual == expected_sha1
+
+
+def inspect_local_connector_assets(
+    construction: Mapping[str, Any],
+    output_dir: str | Any,
+) -> dict[str, Any]:
+    """Read ONLY allowlisted filenames under this build's SOURCE_ASSETS folder.
+
+    Never follows symlinks or user supplied file paths. This is provenance
+    validation, not a geometry, print quality or load-bearing test.
+    """
+    from pathlib import Path
+
+    source = CONNECTOR_SOURCES.get(construction.get("connector_family"))
+    root = Path(output_dir) / "SOURCE_ASSETS"
+    if not source or not source.get("verified_repository_assets"):
+        return {
+            "status": "no_pinned_source_assets",
+            "assets": [],
+            "assets_usable_for_manufacturing": False,
+        }
+    results = []
+    for item in source["verified_repository_assets"]:
+        local = root / item["name"]
+        if local.is_symlink():
+            status = "refused_symlink"
+        elif not local.is_file():
+            status = "not_supplied"
+        else:
+            try:
+                if local.stat().st_size > 4_000_000:
+                    status = "refused_oversized_file"
+                else:
+                    status = (
+                        "exact_git_blob_match"
+                        if verify_git_blob_asset(local.read_bytes(),item["git_blob_sha1"])
+                        else "source_hash_mismatch"
+                    )
+            except OSError:
+                status = "file_read_error"
+        results.append({
+            "filename":item["name"],
+            "expected_git_blob_sha1":item["git_blob_sha1"],
+            "status":status,
+            "relative_path":"SOURCE_ASSETS/" + item["name"],
+            "source_revision_url":item["revision_url"],
+            "geometry_and_fit_verified":False,
+        })
+    return {
+        "status": (
+            "source_bytes_verified_not_fit_tested"
+            if any(x["status"] == "exact_git_blob_match" for x in results)
+            else "source_assets_missing_or_invalid"
+        ),
+        "assets":results,
+        "assets_usable_for_manufacturing":False,
+        "all_asset_fit_and_strength_tests_passed":False,
+    }
+
+
 def summarize_fabrication_benchmark(trials: Any) -> dict[str, Any]:
     """Summarize user-provided observations, never invent shop measurements.
 
@@ -566,6 +638,16 @@ def render_construction_plan(report: Mapping[str, Any]) -> str:
                         str(source["recommended_hole_center_from_edge_mm"]) +
                         " mm; hole diameter must be verified from the original instructions/tools."
                     )
+        lines.append("")
+    integrity = report.get("external_asset_integrity") or {}
+    if integrity:
+        lines.append("## Supplied external connector asset integrity")
+        lines.append("- " + str(integrity.get("status")))
+        for file in integrity.get("assets") or []:
+            lines.append(
+                "- " + file["relative_path"] + ": " + file["status"] +
+                "; physical connector fit not verified."
+            )
         lines.append("")
     benchmark = report.get("fabrication_benchmark") or {}
     lines.extend([
