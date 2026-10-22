@@ -93,10 +93,21 @@ def run(
     # Existing Mecha output remains the fallback. This is a zero-dependency
     # construction comparison, not a new generator or production approval.
     if project.construction is not None:
-        from hardware_splicer.construction_alternatives import evaluate_construction_alternatives
-        bundle["construction_alternatives"] = evaluate_construction_alternatives(
-            project.model_dump(mode="json")
-        )
+        try:
+            from hardware_splicer.construction_alternatives import evaluate_construction_alternatives
+        except ImportError:
+            # Mecha-Splicer can also be installed without the HS package.
+            bundle["construction_alternatives"] = {
+                "status": "capability_unavailable",
+                "blockers": ["hardware_splicer_construction_evaluator_not_installed"],
+                "alternatives": [],
+                "fabrication_authorized": False,
+                "release_authorized": False,
+            }
+        else:
+            bundle["construction_alternatives"] = evaluate_construction_alternatives(
+                project.model_dump(mode="json")
+            )
 
     commerce = estimate_digital_pack(price_usd=29.0, support_minutes=10.0).to_dict()
     bundle["commerce"] = {"digital_pack": commerce, "assumptions": {"price_usd": 29.0, "support_minutes": 10.0}}
