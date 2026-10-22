@@ -226,6 +226,11 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
             task_dir.mkdir(exist_ok=False)
             src = ((out / task["source_task"] / "model.step").resolve()
                    if task["source_task"] is not None else sources[ident])
+            # Hash the actual source *bytes*, not only the plan path. A recipe
+            # can change without changing its orchestration task identifier.
+            if not src.is_file() or src.is_symlink() or src.stat().st_size > _MAX_ARTIFACT:
+                raise EnginePlanError("source changed or unavailable during provider handoff")
+            source_sha256 = _sha(src.read_bytes())
             if engine == "solidcraft":
                 # Immutable authored CAD recipe, separate model export and results.
                 model = task_dir / "model.step"
@@ -328,6 +333,7 @@ def run_external_engine_plan(plan: Mapping[str, Any], *, workspace: str | Path,
                                 type(exc).__name__ + ": " + str(exc))[-2200:]
             row = {"id": ident, "engine": engine, "operation": operation, "status": status,
                    "exit_code": exit_code, "command_identity": info_bin_name(binary),
+                   "source_sha256": source_sha256,
                    "diagnostic_tail": diag, "artifacts": artifacts,
                    "canonical_electrical_interchange": interchange,
                    "native_geometry_validation": geometry_validation,
