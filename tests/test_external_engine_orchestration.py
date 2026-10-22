@@ -140,7 +140,11 @@ def test_electronics_providers_own_build_and_artifacts(tmp_path, monkeypatch, it
         assert Path(cmd[0]).name == expected[0] and cmd[1:] == expected[1:]
         output = root / item["artifact_paths"][0]
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text("(kicad_pcb)" if item["engine"] == "atopile" else "[]")
+        if item["engine"] == "atopile":
+            output.write_text("(kicad_pcb)")
+        else:
+            example = Path(__file__).parent / "fixtures" / "upstream_circuit_json.json"
+            output.write_bytes(example.read_bytes())
         return SimpleNamespace(returncode=0, stdout="exported", stderr="")
     monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake)
     report = run_external_engine_plan(plan(item), workspace=root,
@@ -148,6 +152,11 @@ def test_electronics_providers_own_build_and_artifacts(tmp_path, monkeypatch, it
     assert report["completed"] == 1
     assert report["tasks"][0]["artifacts"][0]["sha256"].startswith("sha256:")
     assert report["source_evidence_authenticated"] is False
+    if item["engine"] == "tscircuit":
+        projected = report["tasks"][0]["canonical_electrical_interchange"]
+        assert projected["canonical_component_count"] >= 3
+        assert projected["canonical_net_count"] >= 1
+        assert not projected["fabrication_authorized"]
 
 
 def test_zero_output_never_promotes_success(tmp_path, monkeypatch):
@@ -251,3 +260,32 @@ def test_path_symlink_output_cannot_be_used_to_claim_compilation(tmp_path, monke
     with pytest.raises(EnginePlanError, match="symlink"):
         run_external_engine_plan(plan(ATO), workspace=root, output_dir=tmp_path / "out",
                                  confirm_execute=True)
+
+def test_invalid_tscircuit_json_is_not_accepted_as_electronics_proof(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    entry = source / TSCI["source"]
+    entry.parent.mkdir(parents=True)
+    entry.write_text("// placeholder")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.shutil.which",
+                        lambda name: "/usr/bin/" + name)
+    def fake(cmd, **kw):
+        artifact = source / TSCI["artifact_paths"][0]
+        artifact.parent.mkdir(parents=True)
+        artifact.write_text("[]")
+        return SimpleNamespace(returncode=0, stdout="built", stderr="")
+    monkeypatch.setattr("hardware_splicer.external_engine_orchestration.subprocess.run", fake)
+    report = run_external_engine_plan(plan(TSCI), workspace=source,
+                                      output_dir=tmp_path / "run", confirm_execute=True)
+    assert report["blocked"] == 1
+    assert report["tasks"][0]["status"] == "blocked_circuit_json_interchange"
+    assert not report["release_authorized"]
+
+
+def test_circuit_json_projection_preserves_review_only_identity():
+    from hardware_splicer.external_engine_electrical_truth import inspect_native_circuit_json
+    doc = Path(__file__).parent / "fixtures" / "upstream_circuit_json.json"
+    result = inspect_native_circuit_json(doc, project_id="test-independent-ingestion")
+    assert result["canonical_component_count"] == 3
+    assert result["canonical_net_count"] == 3
+    assert result["source_sha256"].startswith("sha256:")
+    assert not result["fabrication_authorized"]
