@@ -220,6 +220,36 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
     )
     # Screen is in cavity-centered XY, board center at 0, and the physical
     # board is located above nominal 2 mm floor. Not a collision proof.
+    # Translate the actual KiCad board into requirements for the next
+    # mechanical revision. Hole geometry and connector positions are NOT
+    # fixtures already present in this open shell.
+    assembly_plan = _json(output / "electrical" / "REFERENCE_ASSEMBLY_PLAN.json")
+    bounds = assembly_plan["board"]["outline"]["bbox"]
+    center_x = (bounds["x0"] + bounds["x1"]) / 2
+    center_y = (bounds["y0"] + bounds["y1"]) / 2
+    mount_features = []
+    access_features = []
+    for item in assembly_plan["parts"]:
+        if item["kind"] not in ("mounting_hole", "connector"):
+            continue
+        record = {
+            "ref": item["ref"],
+            "center_relative_to_pcb_mm": [
+                round(item["x"] - center_x, 3),
+                round(item["y"] - center_y, 3),
+            ],
+            "pcb_side": item["side"],
+            "footprint": item["footprint"],
+            "outline_source": item["outline_basis"],
+        }
+        if item["kind"] == "mounting_hole":
+            record["fastener_sizing_verified"] = False
+            record["aligned_shell_boss_present"] = False
+            mount_features.append(record)
+        elif not item["do_not_populate"]:
+            record["connector_mating_direction_verified"] = False
+            record["shell_cutout_present"] = False
+            access_features.append(record)
     fit = dossier["electromechanical_fit"]
     if fit is None:
         raise ValueError("physical envelope screen unavailable")
@@ -255,6 +285,13 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
             "exact_3d_part_collision_verified": False,
         },
         "interface_screen": fit,
+        "mechanical_feature_requirements": {
+            "mounting_holes": mount_features,
+            "fitted_connectors": access_features,
+            "shell_bosses_generated": False,
+            "connector_access_cutouts_generated": False,
+            "positions_basis": "actual_kicad_board_relative_to_board_bbox_center",
+        },
         "external_orchestration_plan_sha256": run.get("plan_sha256"),
         "open_gates": [
             "Open shell has no PCB mounting bosses, fasteners, connector cutouts, lid or strain relief",
@@ -270,6 +307,10 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
         "power_on_authorized": False,
         "release_authorized": False,
     }
+    (output / "MECHANICAL_FEATURE_REQUIREMENTS.json").write_text(
+        json.dumps(result["mechanical_feature_requirements"], indent=2) + "\\n",
+        encoding="utf-8",
+    )
     (output / "CROSS_DOMAIN_DEVICE_ASSESSMENT.json").write_text(
         json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8",
     )
