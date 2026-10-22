@@ -1,0 +1,42 @@
+name: HS External Engine Orchestration Contract
+
+on:
+  push:
+    branches:
+      - experiment/hs-external-engine-orchestration-20261022
+  pull_request:
+    branches:
+      - experiment/hs-spi-native-cam-review-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and native test contracts
+        run: python -m pip install -e '.[dev]'
+      - name: Verify fail-closed execution, provider routing and API
+        run: |
+          python -m compileall -q src/hardware_splicer/external_engine_orchestration.py src/hardware_splicer/external_engine_api.py
+          python -m pytest -q tests/test_external_engine_orchestration.py tests/test_device_splice_feasibility.py tests/test_real_device_splice_feasibility_bridge.py
+      - name: Preview SolidCraft-to-FreeCAD handoff without execution
+        run: |
+          python scripts/run_external_engine_plan.py \
+            examples/external_engines/sensor_box_workflow.json \
+            --workspace examples/external_engines \
+            > "$RUNNER_TEMP/EXTERNAL_ENGINE_PREVIEW.json"
+          python -c 'import json,sys; j=json.load(open(sys.argv[1])); assert len(j["tasks"])==2 and not j["execution_authorized"]' "$RUNNER_TEMP/EXTERNAL_ENGINE_PREVIEW.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hs-external-engine-discovery-preview
+          path: ${{ runner.temp }}/EXTERNAL_ENGINE_PREVIEW.json
+          if-no-files-found: warn
