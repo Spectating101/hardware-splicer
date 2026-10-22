@@ -87,9 +87,18 @@ not an independently validated, manufacturable, physically tested device.
 - **Tested:** Python plan validation, provider discovery, mocked executable
   contracts and chained SolidCraft→FreeCAD artifact transfer, dependency failure
   propagation, API preview security and artifact hashing.
-- **Not yet claimed:** true native SolidCraft→FreeCAD or atopile/tscircuit
-  execution against installed third-party binaries in HS CI; human-verified
-  mechanical or electrical correctness.
+- **Native evidence confirmed:** pinned SolidCraft 0.18.4 actually exported
+  an 85 × 55 × 25 mm STEP solid, and headless FreeCAD independently accepted
+  it as one valid positive-volume solid. Two native tasks passed, with
+  volume 116,875 mm³. See GitHub Actions run 39744814099.
+- **Native electronics evidence currently blocked:** a real tsci build ran
+  and emitted Circuit JSON but rejected a wrong LED polarity assumption in
+  the originally authored sample. It correctly failed rather than conferring
+  false engineering success. A neutral passive fixture and electrical
+  identity import gate have been committed; final native smoke pending.
+- **Not yet claimed:** successful real atopile compiler execution, successful
+  real tsci→HS electrical import on the new fixture, manufacturer-authenticated
+  materials, a verified enclosure with standoffs, or physical device operation.
 - **Future:** Pin tested provider versions, add native integration CI smoke
   and expose linked outputs in the retained project evidence graph after
   verifying lineage, authorization and upstream output schemas.
