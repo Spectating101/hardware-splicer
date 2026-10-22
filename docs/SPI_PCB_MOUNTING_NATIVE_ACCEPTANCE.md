@@ -80,6 +80,35 @@ clearance, printer/tool process tolerances, strength and insulation remain
 separate requirements. Missing or stale outputs, changed source KiCad holes,
 invalid material samples or unbound FreeCAD inputs block the review.
 
+## Source-driven connector access
+
+The shell is currently OPEN TOP. Both fitted PCB connectors are vertical
+through-hole headers: J1 (six host SPI pins) and JP1 (two enable pins).
+No side-wall slots are required for this un-lidded model.
+
+The new connector-access checker reads actual KiCad pad identities/nets,
+source courtyard corners, and the KiCad-derived mounting-boss manifest.
+It inflates connector courtyards by a nominal 2 mm review-only margin
+and screens them against the 104 × 64 mm cavity and proposed bosses.
+
+Reference-board shell coordinates and source-footprint envelopes:
+
+- J1 center (15,30) mm; inflated XY rectangle X=11.23..18.77,
+  Y=26.23..46.47 mm; nearest boss center separation 9.53 mm.
+- JP1 center (57,48) mm; inflated XY rectangle X=53.23..60.77,
+  Y=44.23..54.32 mm; nearest boss center separation 35.27 mm.
+- Nominal vertical room above the top of the PCB: 18.2 mm, which
+  does NOT validate the height of the actual mating header/harness.
+
+The source footprints indicate upward mating orientation. This does
+NOT authenticate connector body geometry, cable bend radius, plug
+insertion force, strain relief, or any top cover/lid. Larger connector
+keepout margins are intentionally allowed to fail the source review.
+
+Run the separate inspection CLI after generating the mounting manifest:
+python scripts/assess_spi_connector_access.py --mount-manifest
+/tmp/hs-spi-mount-requirements.json --out /tmp/hs-spi-connector-access.json
+
 ## Still required for a physical prototype
 
 Independent confirmation of fastener geometry, screw head/washer and assembly
