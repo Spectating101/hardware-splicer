@@ -179,7 +179,7 @@ def assess_crossdomain_reference(*, pcb_path: str | Path,
     if receipt.get("artifact_sha256", {}).get("pcb") != hashlib.sha256(pcb_bytes).hexdigest():
         raise ValueError("electrical KiCad PCB changed after original native verification")
 
-    output.mkdir(parents=True, exist_ok=False)
+    output.mkdir(parents=True, exist_ok=True)
     dossier = build_reference_device_dossier(
         pcb_path, output_dir=output / "electrical",
         declared_internal_enclosure_mm=dict(
