@@ -101,7 +101,14 @@ def create_donor_capture_template(*, intake_sha256: str, fixture_sha256: str,
 
 def evaluate_donor_capture(*, capture_path: str | Path,
                            intake_sha256: str, fixture_sha256: str,
-                           board_id: str = "donor_rc_car_ctrl") -> dict:
+                           board_id: str = "donor_rc_car_ctrl",
+                           declared_motor_rated_v: Mapping[str, float] | None = None) -> dict:
+    motor_ratings = declared_motor_rated_v or {"left": 6.0, "right": 6.0}
+    if not isinstance(motor_ratings, Mapping) or set(motor_ratings) != {"left", "right"}:
+        raise ValueError("motor rated voltage mapping required for both donor motors")
+    if any(isinstance(v,bool) or not isinstance(v,(int,float)) or
+           not math.isfinite(v) or v <= 0 for v in motor_ratings.values()):
+        raise ValueError("invalid declared donor motor ratings")
     packet, source_sha = _load(capture_path)
     capture = extract_bench_capture(packet)
     if not capture or capture.get("schema_version") != CAPTURE:
@@ -207,12 +214,13 @@ def evaluate_donor_capture(*, capture_path: str | Path,
                               "action":"quarantine motor pair pending investigation"})
     if all(x in observations for x in ("motor_left_test_voltage_v","motor_right_test_voltage_v")):
         for ref in ("left","right"):
-            if observations[f"motor_{ref}_test_voltage_v"]>6.0:
+            if observations[f"motor_{ref}_test_voltage_v"]>motor_ratings[ref]:
                 conflicts.append({"id":f"motor_{ref}_overvoltage",
                                   "action":"do not rely on test: declared motor rating 6 V"})
-    if "battery_open_circuit_v" in observations and observations["battery_open_circuit_v"]>6.0:
+    if ("battery_open_circuit_v" in observations and
+            any(observations["battery_open_circuit_v"]>rated for rated in motor_ratings.values())):
         conflicts.append({"id":"battery_exceeds_declared_motor_rating",
-                          "action":"never route battery directly to donor 6 V motors"})
+                          "action":"never route source battery directly to motors without a rated, verified drive rail"})
     readiness = ("measured_inputs_with_conflicts_review_required" if conflicts
                  else "partial_instrument_readings_review_required" if accepted
                  else "no_qualified_instrument_readings")
@@ -229,6 +237,7 @@ def evaluate_donor_capture(*, capture_path: str | Path,
         "input_fields_expected":len(FIELDS),
         "input_fields_observed":len(accepted),
         "instruments_declared":len(instruments),
+        "declared_motor_rated_v":dict(motor_ratings),
         "accepted_readings":accepted,
         "unqualified_readings":quarantined,
         "source_attestations":traceable,
