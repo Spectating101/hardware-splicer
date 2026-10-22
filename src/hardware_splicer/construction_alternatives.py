@@ -343,3 +343,49 @@ def evaluate_construction_alternatives(
         "fabrication_authorized": False,
         "release_authorized": False,
     }
+
+
+def render_construction_plan(report: Mapping[str, Any]) -> str:
+    """Human-readable concepts, measurement gaps and upstream attribution."""
+    if report.get("status") == "not_requested":
+        return "# Construction alternatives\n\nNot requested.\n"
+    lines = [
+        "# Construction alternatives (research screening only)",
+        "",
+        "No manufacturing method has been auto-selected or approved.",
+        f"- Status: {report.get('status')}",
+        f"- Preference: {report.get('requested_preference', 'n/a')}",
+        "- The existing fully printed CAD remains unchanged.",
+        "- All mass and cost numbers are estimates, not slicer or shop measurements.",
+        "",
+    ]
+    for a in report.get("alternatives") or []:
+        lines.extend([
+            f"## {a['method']}",
+            f"- Status: {a['status']}",
+            f"- Estimated material-only cost (provided input units): {a.get('material_cost_only')}",
+            f"- Blockers: {', '.join(a.get('blockers') or []) or 'none recorded'}",
+        ])
+        if a["method"] == "sheet_hybrid":
+            lines.append("- Preliminary panel cut rectangles, without kerf, joints or nesting:")
+            for part in a.get("panel_cuts") or []:
+                lines.append(f"  - {part['quantity']} x {part['size_mm'][0]} x {part['size_mm'][1]} mm")
+            source = a.get("connector_source")
+            if source:
+                lines.extend([
+                    f"- External connector: {source['name']}",
+                    f"- Official source: {source['url']}",
+                    f"- Upstream license/notice: {source['license']}",
+                    "- Verify exact revision, download licensing, fit and real attachment strength.",
+                ])
+        lines.append("")
+    lines.extend([
+        "## Before selecting a method",
+        "- Measure actual sheet and fastener dimensions; check purchased hardware first.",
+        "- Confirm service temperature, cooling, electrical/fire safety and chemical exposures.",
+        "- Confirm material datasheets or physical measurement source for every property.",
+        "- Verify joints and connector pull-through with the intended load and orientation.",
+        "- Compare actual printer slicing, panel nesting, sourcing, assembly time and prices.",
+        "",
+    ])
+    return "\n".join(lines)
