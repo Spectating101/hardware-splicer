@@ -9,6 +9,7 @@ from pathlib import Path
 from .pcb_mounting_cad import generate_pcb_mounted_shell
 from .reference_device_dossier import build_reference_device_dossier
 from .connector_access_plan import inspect_connector_access
+from .connector_mating_volume import inspect_mating_volume
 
 SCHEMA="hardware_splicer.native_mounted_device_review.v1"
 
@@ -139,6 +140,39 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
     )
     if access["status"] != "nominal_open_top_projection_clear_unverified":
         raise ValueError("source connector access conflicts with cavity or mounting bosses")
+    # Qualify the *known* male Samtec headers separately from the unknown
+    # female plug/cable. An open-top clearance result can never authorize
+    # physical mating or call the shell a finished assembly.
+    mating = inspect_mating_volume(
+        pcb_path=source,
+        bom_path=source.parent/"BOM.csv",
+        mounting_manifest_path=requirements,
+        output_path=out/"CONNECTOR_MATING_VOLUME.json",
+    )
+    if mating["status"] == "blocked_nominal_3d_insertion_geometry":
+        raise ValueError("3D header insertion volume intersects a modeled obstacle")
+    native_mating_collision = None
+    native_probe_path = root/"NATIVE_MATING_COLLISION.json"
+    if native_probe_path.is_file():
+        native_mating_collision = json.loads(native_probe_path.read_text())
+        actual_mating_hash = _digest((out/"CONNECTOR_MATING_VOLUME.json").read_bytes())
+        required = (
+            native_mating_collision.get("schema") ==
+                "hardware_splicer.native_connector_access_collision.v1"
+            and native_mating_collision.get("engine")=="FreeCAD Part.Shape.common"
+            and native_mating_collision.get("source_step_sha256")==step_sha
+            and native_mating_collision.get("source_connector_report_sha256")==actual_mating_hash
+            and native_mating_collision.get("shape_valid") is True
+            and native_mating_collision.get("connector_count")==2
+            and native_mating_collision.get("nominal_corridors_shell_clear") is True
+            and isinstance(native_mating_collision.get("checks"),list)
+            and {r.get("ref") for r in native_mating_collision["checks"]}=={"J1","JP1"}
+            and all(r.get("no_shell_material_in_access_corridor") is True
+                    and float(r.get("clash_volume_mm3",1))<0.001
+                    for r in native_mating_collision["checks"])
+        )
+        if not required:
+            raise ValueError("native STEP connector corridor intersections missing or invalid")
     result={
         "schema":SCHEMA,
         "status":"native_boss_and_bore_geometry_validated_assembly_unverified",
@@ -153,6 +187,13 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
         "connector_access_status":access["status"],
         "connector_count":access["connector_count"],
         "connector_access_sha256":_digest((out/"CONNECTOR_ACCESS_REVIEW.json").read_bytes()),
+        "connector_mating_status":mating["status"],
+        "connector_mating_report_sha256":_digest((out/"CONNECTOR_MATING_VOLUME.json").read_bytes()),
+        "native_connector_shell_collision_checked":native_mating_collision is not None,
+        "native_connector_shell_collision_report_sha256":(
+            _digest(native_probe_path.read_bytes()) if native_mating_collision is not None else None
+        ),
+        "counterpart_harness_selected":False,
         "source_pcb_nominal_support_height_mm":5.2,
         "fastener_mechanics_verified":False,
         "connector_mating_or_access_verified":False,
@@ -163,7 +204,7 @@ def assess_native_mounted_reference(*,pcb_path:str|Path,seed_path:str|Path,
         "release_authorized":False,
         "next_actions":[
             "Check exact screw/washer dimensions, insulation and printed boss tolerances",
-            "Verify connector mating and wiring accessibility in the open top",
+            "Select and authenticate a real mating female header/cable assembly; verify plug body, bend radius and service insertion",
             "Run exact 3D STEP-vs-board-body intersection rather than nominal courtyard screens",
             "Independent EE/manufacturer review and controlled physical assembly"
         ],
