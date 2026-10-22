@@ -127,7 +127,8 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
     construction_blocked = bool(
         construction
         and construction.get("requested_preference") in ("sheet_hybrid", "off_the_shelf")
-        and construction.get("release_authorized") is not True
+        # A client-edited release_authorized boolean cannot bypass the gate.
+        # Actual release needs independently reviewed assembly evidence.
     )
 
     stages = _stages(
