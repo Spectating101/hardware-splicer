@@ -513,6 +513,9 @@ def create_app() -> FastAPI:
     from .device_splice_feasibility_api import create_device_splice_feasibility_router
     app.include_router(create_device_splice_feasibility_router())
 
+    from .external_engine_api import create_external_engine_router
+    app.include_router(create_external_engine_router())
+
     from fastapi.middleware.cors import CORSMiddleware
 
     app.add_middleware(
