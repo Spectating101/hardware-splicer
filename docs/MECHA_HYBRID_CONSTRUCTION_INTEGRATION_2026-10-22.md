@@ -163,3 +163,34 @@ The comparison does not optimize panel nesting and **cannot certify
 manufactured objects**. It remains a decision aide. Future empirical
 validation needs actual trials, ideally replicates per method and
 independent review for safety-critical use.
+
+
+## Verified local external-file handoff (no automatic downloads)
+
+The Mecha runner can now inspect **exact pinned upstream connector bytes**
+staged manually under the current build output folder:
+
+```text
+my-build/
+  SOURCE_ASSETS/
+    clip-o_90_moreflexy.stl
+    clip-o_180_moreflexy.stl
+```
+
+Select `construction.connector_family="clip_os"`; download the exact
+files from the pinned upstream revision listed above into the
+`SOURCE_ASSETS` directory, then generate the normal Mecha bundle.
+The `external_asset_integrity` result inside
+`CONSTRUCTION_ALTERNATIVES.json` records whether each local file matches
+the **Git blob SHA-1 identity** at the pinned upstream revision.
+
+This is a byte identity check. Wrong file bytes, absent files, local symlinks
+and oversized data are refused or marked missing. Neither correct file
+bytes nor the source author's reported fit guarantee manufacturable
+geometry, print orientation, material strength, dimensional match,
+safety or professional sign-off. The files remain in the operator's own
+`SOURCE_ASSETS` folder and are not copied into HS's source tree.
+
+The source code never accepts an arbitrary user-chosen file path or fetches
+remote source URLs. Unpinned ModuFrame/BOSL2 sources remain reference-only
+until their actual assets are registered and checked.
