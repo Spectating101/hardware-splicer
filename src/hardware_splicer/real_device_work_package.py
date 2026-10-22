@@ -113,6 +113,7 @@ def compile_work_package(case: Mapping[str, Any], review: Mapping[str, Any],
             'plan_sha256': data.get('plan_sha256'),
             'tasks': [{'id': row['id'], 'engine': row.get('engine'),
                        'status': row['status'],
+                       'source_sha256': row.get('source_sha256'),
                        'canonical_electrical_interchange': (
                            dict(row.get('canonical_electrical_interchange'))
                            if isinstance(row.get('canonical_electrical_interchange'), Mapping)
