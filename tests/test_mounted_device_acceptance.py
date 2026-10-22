@@ -92,6 +92,10 @@ def test_synthetic_fixture_proves_acceptance_contract_only(tmp_path):
     assert result["status"]=="native_boss_and_bore_geometry_validated_assembly_unverified"
     assert result["mount_count"]==4 and result["native_3d_material_void_checks"]==14
     assert result["source_pcb_envelope_blockers"]==0
+    assert result["connector_mating_status"]=="blocked_unqualified_mating_hardware_despite_nominal_3d_clearance"
+    assert result["native_connector_shell_collision_checked"] is False
+    assert result["counterpart_harness_selected"] is False
+    assert (tmp_path/"assessed/CONNECTOR_MATING_VOLUME.json").is_file()
     assert not result["release_authorized"]
     assert (tmp_path/"assessed/MOUNTED_DEVICE_REVIEW.json").is_file()
 
@@ -122,4 +126,20 @@ def test_replayed_step_export_rejected_if_freecad_saw_different_bytes(tmp_path):
     report["tasks"][1]["source_sha256"]=digest(b"wrong-step")
     path.write_text(json.dumps(report))
     with pytest.raises(ValueError,match="lineage"):
+        assess(tmp_path,paths)
+
+def test_native_collision_cannot_be_claimed_without_matching_source_hash(tmp_path):
+    paths=fixture(tmp_path)
+    native=paths[2]
+    (native/"NATIVE_MATING_COLLISION.json").write_text(json.dumps({
+        "schema":"hardware_splicer.native_connector_access_collision.v1",
+        "engine":"FreeCAD Part.Shape.common",
+        "source_step_sha256":digest(b"other-step"),
+        "source_connector_report_sha256":digest(b"other-report"),
+        "shape_valid":True,"connector_count":2,
+        "nominal_corridors_shell_clear":True,
+        "checks":[{"ref":"J1","no_shell_material_in_access_corridor":True,"clash_volume_mm3":0},
+                  {"ref":"JP1","no_shell_material_in_access_corridor":True,"clash_volume_mm3":0}],
+    }))
+    with pytest.raises(ValueError,match="native STEP connector corridor"):
         assess(tmp_path,paths)
