@@ -152,3 +152,31 @@ def test_main_hs_intake_preserves_construction_intent_in_compiler_spec():
     from hardware_splicer.schemas import HardwareCompileSpec
     typed=HardwareCompileSpec.from_dict(plan["scenario"]["compile_spec"])
     assert typed.mechanism["construction"]["connector_family"]=="moduframe"
+
+
+@pytest.mark.parametrize("fixture,expected_thickness,source", [
+    ("hybrid_cardstock_clip_os.json",1.6,"clip_os"),
+    ("hybrid_plywood_moduframe.json",3.0,"moduframe"),
+])
+def test_real_operator_example_variants_run_with_same_internal_dims(
+    tmp_path,fixture,expected_thickness,source,
+):
+    from pathlib import Path
+    from hardware_splicer.mechanism_bridge import _ensure_mecha_on_path
+    if not _ensure_mecha_on_path():
+        pytest.skip("Mecha unavailable")
+    from mecha_splicer.runner import run
+    root=Path(__file__).resolve().parents[1]
+    project=json.loads((root/"examples"/"mechanical"/fixture).read_text())
+    r=run(project,out_dir=tmp_path)
+    comparison=r["construction_alternatives"]
+    assert comparison["requested_preference"]=="sheet_hybrid"
+    assert comparison["selected_manufacturing_method"] is None
+    assert comparison["fabrication_authorized"] is False
+    assert comparison["hybrid_sheet_geometry"]["target_internal_dimensions_mm"]==[100,80,30]
+    assert comparison["hybrid_sheet_geometry"]["panel_thickness_mm"]==expected_thickness
+    assert next(a for a in comparison["alternatives"] if a["method"]=="sheet_hybrid")[
+        "connector_source"]["id"]==source
+    assert (tmp_path/"HYBRID_PANEL_CUTS.csv").exists()
+    assert (tmp_path/"HYBRID_PANEL_BLANKS.svg").exists()
+    assert comparison["hypothetical_material_cost_difference"] is None
