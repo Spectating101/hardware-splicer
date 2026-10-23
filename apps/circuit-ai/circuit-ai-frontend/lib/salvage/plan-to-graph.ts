@@ -980,6 +980,74 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     );
   }
 
+  // A two-motor rover must have two *physical* load instances, not merely
+  // one motor part in the BOM. Preserve them in the graph with independent
+  // L298N output pairs. Never infer that a donor has a 12 V supply.
+  if (buildId === "robot_drive_base" && plan?.resolved_modules?.length) {
+    const declaredMotors = plan.resolved_modules.filter((row) =>
+      ["dc_motor_3v_6v", "dc_geared_motor_12v"].includes(String(row.module_id || "")),
+    );
+    const driver = adaptedRecipe.modules.find((m) => m.role === "drv");
+    if (declaredMotors.length && driver?.moduleId === "l298n") {
+      const connected = declaredMotors.slice(0, 2);
+      for (const [index, motor] of connected.entries()) {
+        const role = `motor_${index + 1}`;
+        adaptedRecipe.modules.push({ role, moduleId: motor.module_id! });
+        const outputs = index === 0 ? ["OUT1", "OUT2"] : ["OUT3", "OUT4"];
+        adaptedRecipe.wires.push(
+          { from: { role: "drv", pin: outputs[0] }, to: { role, pin: "VCC" } },
+          { from: { role: "drv", pin: outputs[1] }, to: { role, pin: "GND" } },
+        );
+      }
+      if (declaredMotors.length > 2) {
+        warnings.push(`Only two L298N motor channels exist; ${declaredMotors.length - 2} declared motors remain unconnected.`);
+        for (const [index, motor] of declaredMotors.slice(2).entries()) {
+          adaptedRecipe.modules.push({ role: `motor_unconnected_${index + 3}`, moduleId: motor.module_id! });
+        }
+      }
+      const mcu = adaptedRecipe.modules.find((m) => m.role === "mcu");
+      if (mcu?.moduleId === "esp32-devkit") {
+        // The ESP32 catalog exposes GPIOs, not Arduino Nano D2/D3 pins.
+        adaptedRecipe.wires = adaptedRecipe.wires.filter((wire) =>
+          !(wire.from.role === "mcu" && wire.to.role === "drv" &&
+            ["IN1", "IN2", "IN3", "IN4"].includes(wire.to.pin)),
+        );
+        for (const [input, gpio] of [
+          ["IN1", "GPIO16"], ["IN2", "GPIO17"], ["IN3", "GPIO18"], ["IN4", "GPIO23"],
+        ] as const) {
+          adaptedRecipe.wires.push({
+            from: { role: "mcu", pin: gpio }, to: { role: "drv", pin: input },
+          });
+        }
+      } else if (connected.length > 1) {
+        warnings.push("Second H-bridge channel control pins require a compatible verified MCU mapping.");
+      }
+      notes.push(`Retained ${declaredMotors.length} source motor instance(s) in rover graph; power and motor ratings remain unverified.`);
+
+      // The legacy recipe's 12 V barrel and MP1584 are not evidence of a
+      // donor's supply. Remove their wiring unless a matching physical
+      // power module was separately identified in the intake.
+      const presentSources = new Set(plan.resolved_modules.map((r) => String(r.module_id || "")));
+      if (!presentSources.has("dc-barrel-12v")) {
+        const rolesToRemove = new Set(["pwr", "mot_psu"]);
+        adaptedRecipe.modules = adaptedRecipe.modules.filter((m) => !rolesToRemove.has(m.role));
+        adaptedRecipe.wires = adaptedRecipe.wires.filter((w) =>
+          !rolesToRemove.has(w.from.role) && !rolesToRemove.has(w.to.role),
+        );
+        warnings.push("Unverified donor 12 V supply/MP1584 path omitted; measure and characterize VMOTOR before connecting power.");
+      }
+      if (!presentSources.has("usb-power-5v")) {
+        adaptedRecipe.modules = adaptedRecipe.modules.filter((m) => m.role !== "usb");
+        adaptedRecipe.wires = adaptedRecipe.wires.filter((w) =>
+          w.from.role !== "usb" && w.to.role !== "usb",
+        );
+        warnings.push("Unverified USB supply omitted; MCU power remains pending source verification.");
+      }
+    } else if (declaredMotors.length) {
+      warnings.push("Rover motor count is known but driver channel topology is unresolved.");
+    }
+  }
+
   const idOf = new Map<string, string>();
   const nodes = adaptedRecipe.modules.map((m, i) => {
     const nodeId = `n${i + 1}`;
