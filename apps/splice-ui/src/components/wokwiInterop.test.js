@@ -109,10 +109,12 @@ describe("documented Wokwi-to-HS provider bridge", () => {
     expect(result.original_part_count).toBe(2);
     expect(result.mapped_part_count).toBe(2);
     expect(result.original_connection_count).toBe(5);
-    expect(result.mapped_connection_count).toBe(2);
+    expect(result.mapped_connection_count).toBe(3);
     expect(result.connections[0].to.source_endpoint_kind).toBe("wokwi_serial_monitor_virtual");
-    expect(result.unmapped_connections).toHaveLength(3);
-    expect(result.connections[4].to.hs_pin_candidate).toBeNull(); // GPIO14 lacks an HS verified pad mapping
+    expect(result.unmapped_connections).toHaveLength(0);
+    expect(result.virtual_connection_count).toBe(2);
+    expect(result.physical_connection_count).toBe(3);
+    expect(result.connections[4].to.hs_pin_candidate).toBe("GPIO14"); // Added to verified HS board family contract
     expect(result.status).toBe("partial_mapping");
   });
 
@@ -139,7 +141,7 @@ describe("documented Wokwi-to-HS provider bridge", () => {
 
   it("blocks partial Wokwi drafts and fake unmapped catalog pins",()=>{
     const doc=diagram();
-    doc.connections.push(["display:VCC","esp:D14","red",[]]);
+    doc.connections.push(["display:VCC","esp:D35","red",[]]);
     const proposal=parseWokwiDiagramArtifact(JSON.stringify(doc));
     expect(()=>buildWokwiStudioDraft(proposal,[])).toThrow(/incomplete/);
     const complete=parseWokwiDiagramArtifact(JSON.stringify(diagram()));
