@@ -1,0 +1,14 @@
+{
+  "name": "hs-external-kicad-import-probe",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "convert": "node convert.mjs"
+  },
+  "dependencies": {
+    "kicad-to-circuit-json": "0.0.144",
+    "@tscircuit/circuit-json-util": "latest",
+    "kicadts": "latest"
+  }
+}
