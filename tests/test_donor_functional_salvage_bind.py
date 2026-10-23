@@ -79,7 +79,15 @@ def test_enabot_lite_intake_keeps_donor_drive(tmp_path: Path) -> None:
         export_gerber=False,
         request_id="enabot_lite",
     )
-    assert result.get("ok") is True
+    # Source preservation may succeed while actual power and optional sensor
+    # topology remain unresolved. Do not report a physically complete robot.
+    assert result.get("ok") is False
+    import json
+    built = json.loads((tmp_path / "enabot_lite" / "PROJECT_PACKAGE.json").read_text(encoding="utf-8"))
+    assert built["gates"]["power_on_authorized"] is False
+    assert built["gates"]["build_ready"] is False
+    assert built["rover_power_evidence"]["status"] == "blocked"
+
     package = result.get("salvage_package") or {}
     resolved = list(package.get("resolved_modules") or [])
     assert not any(r.get("source") == "gap_fill" and r.get("module_id") == "l298n" for r in resolved)
