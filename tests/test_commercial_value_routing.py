@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
+from pathlib import Path
+import subprocess
+import sys
 
 from hardware_splicer.commercial_value_routing import (
-    evaluate_commercial_case, evaluate_route,
+    evaluate_commercial_case, evaluate_route, evaluate_portfolio,
     normalize_product_factory_run, normalize_salvage_opportunities,
 )
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
@@ -260,3 +264,47 @@ def test_nested_circuit_ai_report_is_ingested_without_price_promotion():
     assert len(out) == 1
     assert out[0]["value_hypothesis_usd"]["amount"] == 40
     assert out[0]["commercial_status"] == "UNPRICED"
+
+
+def test_mixed_operating_npv_and_sales_do_not_rank_without_comparable_horizon():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    del r["failure_proceeds"]
+    r["monthly_net_cashflows"] = [money(500)]
+    r["terminal_value"] = money(0)
+    r["monthly_discount_rate"] = 0
+    screen = case()
+    screen["routes"] = [route(), r]
+    screen["routes"][1]["route_id"] = "operate"
+    x = evaluate_commercial_case(screen)
+    assert x["best_screening_route"] is None
+    assert x["screening_rank"] == []
+    assert "mixed_operating_npv_and_sales_contribution" in x["comparability_blockers"]
+
+
+def test_portfolio_keeps_cny_and_twd_rankings_separate():
+    tw = case(route())
+    cn = case(route(currency="CNY"))
+    cn["candidate_id"] = "CN-LOT-01"
+    cn["currency"] = "CNY"
+    x = evaluate_portfolio([tw, cn])
+    assert set(x["native_currency_rankings"]) == {"TWD", "CNY"}
+    assert x["native_currency_rankings"]["TWD"][0]["candidate_id"] == "TW-USED-001"
+    assert x["native_currency_rankings"]["CNY"][0]["candidate_id"] == "CN-LOT-01"
+    assert x["purchase_authorized"] is False
+
+
+def test_source_convergence_cli_reads_actual_circuit_ai_report():
+    root = Path(__file__).resolve().parents[1]
+    command = [
+        sys.executable, str(root / "scripts" / "converge_commercial_sources.py"),
+        "--case", str(root / "examples" / "commercial_value_case_twd.json"),
+        "--salvage-report", str(root / "apps" / "circuit-ai" / "eval" / "salvage_workflow_report.json"),
+    ]
+    completed = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=45)
+    assert completed.returncode == 0, completed.stderr
+    report = json.loads(completed.stdout)
+    assert report["schema_version"] == "hardware_splicer.commercial_convergence_dossier.v0"
+    assert report["purchase_authorized"] is False
+    assert report["commercial_cases"]["cases"][0]["currency"] == "TWD"
+    assert len(report["salvage_discovery_reports"]) == 1
