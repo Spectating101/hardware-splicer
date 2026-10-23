@@ -39,7 +39,9 @@ PYTHONPATH=src python scripts/evaluate_commercial_value.py examples/commercial_v
 PYTHONPATH=src python scripts/converge_commercial_sources.py --case examples/commercial_value_case_twd.json --salvage-report apps/circuit-ai/eval/salvage_workflow_report.json
 # End-to-end source snapshots (from open PR #110 and PR #148, unmerged):
 PYTHONPATH=src python scripts/converge_commercial_sources.py \
+    --pf-run examples/commercial_pf001_proofpod_snapshot.json \
     --pf-run examples/commercial_pf002_benchhmi_snapshot.json \
+    --pf-run examples/commercial_pf003_fielddeck_snapshot.json \
     --donor-discovery examples/commercial_tw_donor_discovery_snapshot_2026-10-19.json \
     --case examples/commercial_pf002_itemized_scenario_twd.json
 # Once PR #147/#148 exports are available locally, add:
