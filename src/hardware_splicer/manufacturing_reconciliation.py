@@ -246,6 +246,7 @@ _MULTI_INSTANCE_INTAKE_ROLES = frozenset({"mot", "act", "svo", "load", "sns"})
 def reconcile_intake_quantities_to_build_graph(
     intake: Mapping[str, Any] | None,
     build_graph: Mapping[str, Any] | None,
+    bom_lines: Sequence[Mapping[str, Any]] | None = None,
 ) -> Dict[str, Any]:
     """Detect known selected multi-instance inventory lost in project synthesis.
 
@@ -269,11 +270,20 @@ def reconcile_intake_quantities_to_build_graph(
         for row in nodes
         if _text(row.get("moduleId") or row.get("module_id"))
     )
-    if not parts or not nodes:
+    bom_counts: Counter[str] = Counter()
+    for row in (bom_lines or []):
+        if not isinstance(row, Mapping):
+            continue
+        module = _text(row.get("module_id") or row.get("moduleId"))
+        qty, error = _quantity(row.get("qty"))
+        if module and not error:
+            bom_counts[module] += qty or 0
+    if not parts or (not nodes and not bom_counts):
         return {
             "status": "not_evaluable",
             "source_counts": {},
             "graph_counts": dict(sorted(graph_counts.items())),
+            "bom_counts": dict(sorted(bom_counts.items())),
             "blockers": [],
             "warnings": [],
         }
@@ -301,29 +311,34 @@ def reconcile_intake_quantities_to_build_graph(
     blockers = []
     warnings = []
     for module_id, expected in sorted(source_counts.items()):
-        actual = int(graph_counts.get(module_id, 0))
-        if actual == 0:
+        actual_graph = int(graph_counts.get(module_id, 0))
+        actual_bom = int(bom_counts.get(module_id, 0))
+        # A BOM-selected motor absent from the graph is still selected hardware,
+        # not an optional spare. A missing graph and an under-counted BOM are both
+        # review blockers: the system must not claim the requested unit count.
+        if actual_graph == 0 and actual_bom == 0:
             warnings.append({
                 "code": "inventory_module_not_selected",
                 "module_id": module_id,
                 "inventory_quantity": int(expected),
                 "message": (
-                    f"Inventory contains {expected} × {module_id!r}, but this "
-                    "module is not selected into the graph; confirm it was optional."
+                    f"Inventory contains {expected} × {module_id!r}, but no "
+                    "matching module appears in the graph or BOM; confirm intentional omission."
                 ),
             })
-        elif actual < expected:
+        elif actual_graph < expected or (actual_bom and actual_bom < expected):
             blockers.append({
-                "code": "intake_graph_quantity_underrepresented",
+                "code": "intake_selected_quantity_underrepresented",
                 "module_id": module_id,
                 "intake_quantity": int(expected),
-                "actual_graph_instances": actual,
-                "missing_instances": int(expected - actual),
+                "actual_graph_instances": actual_graph,
+                "actual_bom_quantity": actual_bom,
+                "missing_graph_instances": int(max(0, expected - actual_graph)),
+                "missing_bom_units": int(max(0, expected - actual_bom)),
                 "message": (
-                    f"Source inventory includes {expected} × {module_id!r}, "
-                    f"but the generated graph contains only {actual}; "
-                    "confirm whether remaining parts are intentionally unused "
-                    "before treating this as a complete design."
+                    f"Source inventory contains {expected} × {module_id!r}; "
+                    f"generated graph has {actual_graph} and BOM has {actual_bom}. "
+                    "Confirm any intentionally unused units before release."
                 ),
             })
 
@@ -331,6 +346,7 @@ def reconcile_intake_quantities_to_build_graph(
         "status": "blocked" if blockers else "clear",
         "source_counts": dict(sorted(source_counts.items())),
         "graph_counts": dict(sorted(graph_counts.items())),
+        "bom_counts": dict(sorted(bom_counts.items())),
         "blockers": blockers,
         "warnings": warnings,
     }
@@ -356,7 +372,7 @@ def apply_manufacturing_reconciliation(
         [row for row in (bom.get("lines") or []) if isinstance(row, Mapping)],
     )
     result["manufacturing_reconciliation"] = reconciliation
-    intake_reconciliation = reconcile_intake_quantities_to_build_graph(intake, build_graph)
+    intake_reconciliation = reconcile_intake_quantities_to_build_graph(intake, build_graph, bom.get("lines"))
     result["intake_quantity_reconciliation"] = intake_reconciliation
 
     gates = dict(result.get("gates") or {})
