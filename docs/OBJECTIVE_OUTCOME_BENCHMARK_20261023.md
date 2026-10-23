@@ -65,3 +65,45 @@ Software CI and successful file exchange are *prerequisites*, **not substitutes*
 - Unit + integration tests cover two motors lost, valid two-motor representation, spare inventory, explicit quantities and package verdicts.
 
 **Measured quality gain is detection of this specific defect, not correction of design generation.** Keep this branch in draft until a corrected rover output and a second greenfield negative-control case prove actual improvement.
+
+
+---
+
+## Follow-up engineering outcome correction — dual-motor rover
+
+**Code:** `fix/rover-two-motor-outcome-20261023`, based on the intake integrity PR #198. This section supersedes the earlier "not achieved" motor-quantity row **for the explicitly offline salvage rover test only**.
+
+The previous quality audit isolated two independent defects:
+
+1. `merge_truth_rows` dropped multiple physically distinct inventory rows with the same module ID when `instance_id` was absent. The legacy rover carried just one `dc_motor_3v_6v` into `SPLICE_PLAN.json`.
+2. `robot_drive_base`'s catalog recipe included an L298N driver but **zero motor load nodes**. It also inserted an undeclared 12 V barrel/MP1584 and USB path.
+
+### Same-input artifact benchmark
+
+The `examples/intakes/splice_robot_drive_brief.json` original example was run against the earlier branch and this correction, each with `export_gerber=False` and no real physical devices.
+
+| Measured item | Before outcome repair | After outcome repair | Assessment |
+| --- | ---: | ---: | --- |
+| Source motor units | 2 | 2 | Same original input |
+| Resolved donor motor instances | 1 | **2** | Actual identity preservation improved |
+| Compiled motor nodes | 0 | **2** | Actual circuit representation improved |
+| Motor units in project BOM | 1 | **2** | Quantity fidelity improved |
+| L298N output ports connected to motor loads | 0 | **OUT1–OUT4** across 2 motor nodes | Proposed two-channel wiring included |
+| Motor control signals from ESP32 | Existing IN1/IN2 only | **IN1–IN4** | Both driver control channels represented |
+| Unsupported fixed 12 V barrel, USB and MP1584 source nodes | 3 | **0** | No automatic fictional supply assertion |
+| Source→graph→BOM quantity gate | Blocked | **Clear** | Specific count defect resolved |
+| Electrical power verified | No | **No** | Remains unresolved |
+| Software job `ok` | True (despite incorrect topology) | **False** (incomplete unpowered design) | Not an overall success-rate gain |
+| Physical build-ready | False | **False** | Correctly held |
+
+The correct display label for a motor terminal connected to L298N OUT2/OUT4 is a **switched H-bridge terminal, not common ground**; this was also repaired in the bring-up wiring narrative.
+
+### Scope and remaining engineering blockers
+
+**This is evidence of better generation fidelity on one real previously failing software case**, not proof the rover can be built, powered or driven. The unmeasured donor power source has intentionally been omitted; the resulting design is electrically incomplete, with two electrical errors (power connections to ESP32 and L298N). No battery-to-buck design, shared-ground plan or enable/driver-thermal path has been independently specified or validated. The example input contains a declared 7.4 V battery constraint, **not** an identified, measured donor supply. A 6 V motor is not thereby approved for 7.4 V operation.
+
+The compiler may produce KiCad documents and wiring proposals; these are **not** power-on instructions.
+
+The follow-up needs actual power-source characterization, L298N losses/current/thermal assessment versus measured motors, enable/control and MCU power checks, mechanical load and firmware verification. Independent physical validation remains required. Until that evidence exists, `build_ready` must remain false.
+
+**Negative control:** `examples/intakes/sensor_logger_brief.json` remained successful, did not acquire motor nodes, and retained clear source-quantity reconciliation. No third-party head-to-head comparative improvement is claimed.

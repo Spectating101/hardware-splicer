@@ -109,3 +109,28 @@ def test_usb_plant_watering_topology_variant(build_id: str) -> None:
     assert "usb-power-5v" in module_ids
     assert "dc-barrel-12v" not in module_ids
     assert "buck-mp1584" not in module_ids
+
+
+def test_two_motor_rover_python_typescript_parity_without_unverified_power() -> None:
+    """The compiled Python engine and TS editor must agree on real donor instances."""
+    plan = {
+        "target": {"recommended_build_id": "robot_drive_base"},
+        "resolved_modules": [
+            {"module_id": "dc_motor_3v_6v", "part_name": "left donor motor", "role": "mot", "source": "user_inventory"},
+            {"module_id": "dc_motor_3v_6v", "part_name": "right donor motor", "role": "mot", "source": "user_inventory"},
+            {"module_id": "esp32-devkit", "role": "mcu", "source": "user_inventory"},
+            {"module_id": "l298n", "role": "drv", "source": "gap_fill"},
+        ],
+        "module_overrides": {"mcu": "esp32-devkit", "drv": "l298n"},
+    }
+    python_graph, _, _, warnings = splice_plan_to_build_graph(plan)
+    ids = [node["moduleId"] for node in python_graph["nodes"]]
+    assert ids.count("dc_motor_3v_6v") == 2
+    assert not {"dc-barrel-12v", "usb-power-5v", "buck-mp1584"}.intersection(ids)
+    assert any("not been identified" in text for text in warnings)
+
+    typescript_runtime = _typescript_runtime_path()
+    if not typescript_runtime:
+        pytest.skip("TypeScript runtime unavailable")
+    ts_graph = _ts_splice_plan_to_graph(plan, typescript_runtime=typescript_runtime)
+    assert ts_graph == python_graph
