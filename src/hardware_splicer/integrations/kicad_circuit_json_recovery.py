@@ -117,6 +117,28 @@ def recover_connected_source_circuit_json(
         raise ValueError("Component identity/count changed on Circuit JSON reimport")
     converter = list(external_converter_docs or [])
     converter_types = Counter(str(doc.get("type")) for doc in converter)
+    upstream_names = [
+        str(doc.get("name") or "")
+        for doc in converter if doc.get("type") == "source_net"
+    ]
+    # Root-sheet KiCad names carry a leading "/" while the converter may
+    # omit it. Normalize only that root-sheet prefix for a *name audit*.
+    # This does NOT associate converter source_port IDs with KiCad pins.
+    root_source_names = [name[1:] if name.startswith("/") else name
+                         for name in connected_nets]
+    unique_names = (
+        len(set(root_source_names)) == len(root_source_names)
+        and len(set(upstream_names)) == len(upstream_names)
+    )
+    converter_net_name_audit = (
+        sorted(upstream_names) == sorted(root_source_names) if converter and unique_names
+        else None
+    )
+    extra_power_flags = sum(
+        doc.get("type") == "source_component"
+        and str(doc.get("name") or "") == "power:PWR_FLAG"
+        for doc in converter
+    )
     # Critically, converter comparison is descriptive; its 40 components do
     # not get merged with 36 KiCad source components without a validated
     # reference/designator mapping.
@@ -140,6 +162,9 @@ def recover_connected_source_circuit_json(
             "source_nets": converter_types["source_net"],
             "source_traces": converter_types["source_trace"],
             "schematic_geometry_traces": converter_types["schematic_trace"],
+            "root_sheet_net_names_correspond_only": converter_net_name_audit,
+            "converter_power_flag_symbol_count": extra_power_flags,
+            "power_flag_symbols_excluded_from_authoritative_bom": True,
             "geometry_and_component_identity_reconciled": False,
             "original_converter_topology_approved": False,
         },
