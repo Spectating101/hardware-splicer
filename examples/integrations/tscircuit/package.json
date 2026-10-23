@@ -1,0 +1,13 @@
+{
+  "name": "hs-tscircuit-interop-probe",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "@tscircuit/core": "0.0.2199",
+    "react": "19.3.1"
+  }
+}
