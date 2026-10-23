@@ -52,6 +52,16 @@ def audit_converter_geometry_identity(
     source = parse_kicad_netlist(kicad_export_text)
     if not source.components or not source.nets:
         raise ValueError("KiCad electrical source components and nets required")
+    # The current upstream converter has neither original KiCad designators
+    # nor a sheet-instance UUID/path. Even a globally unique symbol/value
+    # pair from a multi-sheet source cannot authenticate its visual instance.
+    hierarchy = source.metadata.get("kicad_export", {})
+    sheets = hierarchy.get("sheets") or []
+    if (len(sheets) > 1 or any(
+        c.metadata.get("kicad_sheet_name") not in ("", "/")
+        for c in source.components
+    )):
+        raise ValueError("multi-sheet visual identity requires converter-side sheet UUID/path; refuse geometry correlation")
     tree, next_index = _parse_sexpr(_tokenize_sexpr(kicad_export_text))
     if not isinstance(tree, list) or tree[0] != "export":
         raise ValueError("Expected actual KiCad netlist export")
@@ -182,6 +192,7 @@ def audit_converter_geometry_identity(
         str(ext_components[cid].get("manufacturer_part_number") or "")) not in by_source_key
     )
     source_ref_list = sorted({x.ref for x in source.components})
+    converter_counts = Counter(str(x.get("type") or "") for x in converter_docs)
     # A positive candidate match is never permission to merge image coordinates
     # or infer pin-to-net traces; this is explicit audit metadata only.
     return {
@@ -191,6 +202,10 @@ def audit_converter_geometry_identity(
         "converter_docs_sha256": hashlib.sha256(json.dumps(converter_docs,sort_keys=True).encode()).hexdigest(),
         "source_component_count": len(source_ref_list),
         "converter_source_component_count": len(ext_components),
+        "converter_source_trace_count": converter_counts["source_trace"],
+        "converter_visual_trace_count": converter_counts["schematic_trace"],
+        "converter_schematic_component_count": converter_counts["schematic_component"],
+        "source_scope": "single_sheet_only_no_uuid_based_identity",
         "source_nets": len(source.nets),
         "unique_candidate_matches": len(matches),
         "matched_source_pin_numbers": sum(len(x["matching_pin_numbers"]) for x in matches),
