@@ -40,6 +40,10 @@ def test_declared_7v4_battery_two_6v_motors_is_not_verified_power():
     assert r["declared"]["simultaneous_stall_current_a"] == 1.8
     assert r["power_on_authorized"] is False
     assert r["measured"]["motor_rail_v"] is None
+    # Vendor limits are reference facts, NOT extrapolated 0.9A motor voltage.
+    assert r["manufacturer_reference"]["logic_supply_v_range"] == [4.5, 7.0]
+    assert r["manufacturer_reference"]["total_bridge_drop_at_1a_test_v"] == {"min": 1.8, "max": 3.2}
+    assert "NOT a measured value" in r["manufacturer_reference"]["drop_test_conditions"]
     codes = {x["code"] for x in r["blockers"]}
     assert {
         "motor_rail_not_derived",
@@ -122,6 +126,11 @@ def test_real_rover_project_emits_power_tasks_but_no_unsafe_readiness(tmp_path, 
     assert not pkg["gates"]["power_on_authorized"]
     assert not pkg["gates"]["build_ready"]
     assert not pkg["gates"]["fabrication_ready"]
+    page = (tmp_path / "rover/PROJECT_PAGE.md").read_text(encoding="utf-8")
+    assert "NOT AUTHORIZED TO ENERGIZE" in page
+    assert "1.8" in page
+    assert "physical_bench_authorization_missing" in page
+    assert "not physical measurements" in page
 
 
 def test_real_control_project_stays_non_rover(tmp_path, monkeypatch):
