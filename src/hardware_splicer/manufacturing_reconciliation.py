@@ -363,9 +363,10 @@ def apply_manufacturing_reconciliation(
     gates["manufacturing_reconciliation_status"] = reconciliation["status"]
     gates["intake_quantity_reconciliation_status"] = intake_reconciliation["status"]
     gates["package_ready"] = (
-        reconciliation.get("package_ready")
-        if reconciliation["status"] != "not_evaluable"
-        else None
+        False if intake_reconciliation["status"] == "blocked" else (
+            reconciliation.get("package_ready")
+            if reconciliation["status"] != "not_evaluable" else None
+        )
     )
     if reconciliation["status"] == "blocked" or intake_reconciliation["status"] == "blocked":
         gates["verdict"] = "BLOCKED"
