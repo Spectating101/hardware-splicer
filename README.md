@@ -267,3 +267,14 @@ method or approve production. No geometry replacement is automatic.
 
 See [hybrid material construction example and limits](docs/MECHA_HYBRID_CONSTRUCTION_INTEGRATION_2026-10-22.md)
 and [illustrative assumptions JSON](examples/mechanical/hybrid_enclosure_assumptions.json).
+
+Mecha enclosure projects now receive an **automatic evidence-only construction
+comparison**. Two matching-envelope user-facing study inputs are provided:
+[cardstock + pinned Clip-Os](examples/mechanical/hybrid_cardstock_clip_os.json)
+and [plywood + ModuFrame](examples/mechanical/hybrid_plywood_moduframe.json).
+These use **nominal (unmeasured) stock thickness** and do not fabricate a
+connector or authorize manufacturing. Providing measured stock thickness
+produces a panel CSV, an SVG reference drawing, a hybrid-only parts schedule
+and explicit untransformed port/attachment review. Main HS project intake
+also forwards an optional `construction` object to the Mecha workflow.
+Run targeted checks: `python -m pytest -q tests/test_construction_sheet_geometry.py tests/test_construction_alternatives.py`.
