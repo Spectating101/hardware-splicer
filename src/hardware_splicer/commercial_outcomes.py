@@ -34,9 +34,10 @@ def _measured_value(item: Any, label: str, errors: list[str]) -> float | None:
 def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) -> dict[str, Any]:
     """Create a new ledger snapshot, never rewrite or silently upgrade old estimates.
 
-    A measured transaction must have its own source-backed receipts. A deposit
-    or unaccepted offer is not a sale. Operating output without monetization
-    should be recorded as a quantified benefit with a separate measurement.
+    A measured transaction must have its own source-backed receipts and settled
+    payment evidence. An invoice, deposit or unaccepted offer is not collected
+    revenue. Later warranty spending remains unresolved, so this is provisional
+    collected contribution rather than final lifetime profit.
     """
     errors: list[str] = []
     if ledger.get("schema_version") != SCHEMA:
@@ -65,6 +66,10 @@ def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) ->
         errors.append("unaccepted_transaction")
     if not str(transaction.get("acceptance_reference") or "").strip():
         errors.append("missing_acceptance_reference")
+    if transaction.get("payment_status") != "SETTLED":
+        errors.append("unsettled_revenue")
+    if not str(transaction.get("payment_reference") or "").strip():
+        errors.append("missing_payment_reference")
     revenue = _measured_value(transaction.get("revenue"), "revenue", errors)
     costs = transaction.get("costs")
     if not isinstance(costs, Mapping) or not costs:
@@ -77,7 +82,7 @@ def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) ->
     # Financial receipt set must account for all expected cost categories explicitly;
     # the transaction supplies which categories apply, with zero-cost items recorded.
     required = {"acquisition", "materials", "engineering", "labor", "quality",
-                "logistics_and_tax", "fees", "warranty_reserve"}
+                "logistics_and_tax", "fees", "warranty_cash_spent"}
     if not required.issubset(costs.keys()):
         errors.append("incomplete_cost_coverage")
     if errors:
@@ -93,12 +98,15 @@ def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) ->
         "currency": currency,
         "acceptance_status": "ACCEPTED",
         "acceptance_reference": transaction["acceptance_reference"],
+        "payment_status": "SETTLED",
+        "payment_reference": transaction["payment_reference"],
         "revenue": dict(transaction["revenue"]),
         "costs": {name: dict(item) for name, item in costs.items()},
         "total_actual_cost": round(spent, 2),
-        "realized_contribution": round(contribution, 2),
-        "realized_margin": round(contribution / revenue, 6) if revenue > 0 else None,
-        "measurement_scope": "single_accepted_transaction_not_repeat_profitability",
+        "collected_contribution_to_date": round(contribution, 2),
+        "observed_cash_margin_to_date": round(contribution / revenue, 6) if revenue > 0 else None,
+        "warranty_liability_finalized": False,
+        "measurement_scope": "accepted_and_collected_transaction_only_future_claims_open",
     }
     result = dict(ledger)
     result["transactions"] = [*original, entry]
