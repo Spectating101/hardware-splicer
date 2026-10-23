@@ -1,0 +1,123 @@
+{
+  "schema_version": "hardware_splicer.kicad_geometry_identity_audit.v1",
+  "source_netlist_sha256": "e740117880414ed843c35517ac6d3df5eed2a5dfe45a74356c16c4992c530c0c",
+  "source_schematic_sha256": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+  "converter_docs_sha256": "942b1701db1b48abe76efb7e40118100910517fc7c689884f7777bcd24670d81",
+  "source_component_count": 36,
+  "converter_source_component_count": 40,
+  "converter_source_trace_count": 0,
+  "converter_visual_trace_count": 87,
+  "unique_candidate_matches": 21,
+  "matched_source_pin_numbers": 52,
+  "unmatched_kicad_references": [
+    "C1",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "TP17",
+    "TP18",
+    "TP4"
+  ],
+  "converter_only_component_ids": [
+    "source_component_36",
+    "source_component_37",
+    "source_component_38",
+    "source_component_39"
+  ],
+  "evidence_level": "partial_metadata_and_exact_pin_set_correlation_not_uuid_identity",
+  "visual_geometry_merged": false,
+  "automatic_fabrication_authorized": false,
+  "candidate_refs": [
+    "C2",
+    "J1",
+    "JP1",
+    "TP1",
+    "TP10",
+    "TP11",
+    "TP12",
+    "TP13",
+    "TP14",
+    "TP15",
+    "TP16",
+    "TP2",
+    "TP3",
+    "TP5",
+    "TP6",
+    "TP7",
+    "TP8",
+    "TP9",
+    "U1",
+    "U2",
+    "U3"
+  ],
+  "ambiguous_groups": [
+    {
+      "library_and_value": [
+        "Connector:TestPoint",
+        "GND"
+      ],
+      "refs": [
+        "TP17",
+        "TP18",
+        "TP4"
+      ],
+      "reason": "not_one_to_one_unique_symbol_and_display_value"
+    },
+    {
+      "library_and_value": [
+        "Device:C",
+        "100nF 16V X7R"
+      ],
+      "refs": [
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "reason": "not_one_to_one_unique_symbol_and_display_value"
+    },
+    {
+      "library_and_value": [
+        "Device:C",
+        "1uF 10V X7R"
+      ],
+      "refs": [
+        "C1",
+        "C6"
+      ],
+      "reason": "not_one_to_one_unique_symbol_and_display_value"
+    },
+    {
+      "library_and_value": [
+        "Device:R",
+        "0R"
+      ],
+      "refs": [
+        "R1",
+        "R4"
+      ],
+      "reason": "not_one_to_one_unique_symbol_and_display_value"
+    },
+    {
+      "library_and_value": [
+        "Device:R",
+        "10k"
+      ],
+      "refs": [
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "R7"
+      ],
+      "reason": "not_one_to_one_unique_symbol_and_display_value"
+    }
+  ]
+}
