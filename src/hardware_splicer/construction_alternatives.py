@@ -401,7 +401,17 @@ def evaluate_construction_alternatives(
     from .construction_sheet_geometry import make_panel_schedule
     # Unlike the fully printed baseline, the hybrid package is sized
     # from required INNER clearances and actual stock thickness.
-    sheet_schedule = make_panel_schedule(enclosure,construction)
+    try:
+        sheet_schedule = make_panel_schedule(enclosure,construction)
+    except ValueError as exc:
+        # A bounded sheet planner must never break original full-print CAD.
+        sheet_schedule = {
+            "status":"sheet_planner_outside_supported_scope",
+            "reason":str(exc),
+            "panels":[],
+            "blockers":["review_panel_geometry_and_dimensional_limits"],
+            "fabrication_authorized":False,
+        }
     sheet_area_mm2 = sheet_schedule.get("unoptimized_total_panel_area_mm2")
     print_record = _material(construction.get("filament_material"), "filament_material")
     panel_record = _material(construction.get("panel_material"), "panel_material")
@@ -472,6 +482,8 @@ def evaluate_construction_alternatives(
     panel_blockers = []
     if panel_record is None or thickness is None:
         panel_blockers.append("sheet_material_or_measured_thickness_missing")
+    if sheet_schedule.get("status") != "dimensioned_blank_cut_proposal":
+        panel_blockers.append("sheet_panel_cut_schedule_not_ready")
     if connector is None:
         panel_blockers.append("no_external_connector_selected")
     elif connector["nominal_panel_thickness_mm"] is not None:
