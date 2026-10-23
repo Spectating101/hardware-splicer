@@ -6,8 +6,8 @@ import {
 } from "../api.js";
 import LabResultCard from "./LabResultCard.jsx";
 import {
-  classifyExternalArtifact,
   parseBomCsvArtifact,
+  reconcileExternalBomProposal,
   parseCircuitJsonArtifact,
   validateExternalFile,
 } from "./externalArtifactIntake.js";
@@ -17,7 +17,7 @@ import {
  * The public inspection never mutates a persisted HS project; all external
  * content is proposed, not measured or release-authorized.
  */
-export default function ExternalArtifactIntake({ onOpenDesignPreview }) {
+export default function ExternalArtifactIntake({ onOpenDesignPreview, session = null }) {
   const [selected, setSelected] = useState(null);
   const [parsed, setParsed] = useState(null);
   const [sourceSha, setSourceSha] = useState(null);
@@ -92,6 +92,10 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview }) {
     finally { setBusy(""); }
   };
 
+  const bomReconciliation = selected?.kind === "bom-csv" && parsed
+    ? reconcileExternalBomProposal(parsed, session?.projectPackage?.bom?.lines)
+    : null;
+
   const canCompile = selected?.kind === "kicad-netlist"
     || (selected?.kind === "circuit-json" && report?.compilable === true);
 
@@ -153,6 +157,19 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview }) {
               External BOM proposal: {parsed.parts.length} lines, {parsed.itemCount} units.
               Quantities were parsed, not reconciled with a real machine or approved for purchasing.
             </p>
+          )}
+          {bomReconciliation && (
+            <div role="status">
+              <p><strong>Against current HS BOM: {bomReconciliation.status}</strong></p>
+              <p className="muted small">{bomReconciliation.note}</p>
+              <p>Exact matches: {bomReconciliation.matches}; quantity conflicts: {bomReconciliation.conflicts.length};
+                {" "}unmatched external: {bomReconciliation.unmatched.length}; missing HS lines: {bomReconciliation.missing.length}</p>
+              {bomReconciliation.conflicts.slice(0, 8).map((row) => (
+                <p className="error" key={row.part}>
+                  Quantity mismatch: {row.part} — external {row.externalQuantity}, HS {row.hsQuantity}
+                </p>
+              ))}
+            </div>
           )}
           {selected.kind === "kicad-netlist" && (
             <p>KiCad netlist loaded as a source proposal. Only compile if you trust this input and wish to create a draft design.</p>
