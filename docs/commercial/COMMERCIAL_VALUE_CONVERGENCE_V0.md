@@ -34,10 +34,10 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 
 ```bash
 PYTHONPATH=src python scripts/evaluate_commercial_value.py examples/commercial_value_case_twd.json
-PYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
+PYTHONPATH=src python scripts/converge_commercial_sources.py --case examples/commercial_value_case_twd.json --salvage-report apps/circuit-ai/eval/salvage_workflow_report.json\nPYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
 ```
 
-The example contains **hypothetical**, not scraped/quoted, Taiwanese monetary inputs and compares *refurbish-and-sell* with *operate the asset*. An apparently positive screen must **not** be used for purchasing.
+The example contains **hypothetical**, not scraped/quoted, Taiwanese monetary inputs and compares *refurbish-and-sell* with *operate the asset*. The router deliberately does **not** select an overall best option when operating NPV and completed-sale contribution have incomparable time horizons. An apparently positive screen must **not** be used for purchasing. The convergence command accepts repeated `--pf-run`, `--salvage-report` and `--case` paths and produces a read-only consolidated dossier. Source PR files must be exported from their branches first; no silent cherry-picking.
 
 ## Case contract (minimal)
 
@@ -74,7 +74,7 @@ The example contains **hypothetical**, not scraped/quoted, Taiwanese monetary in
 
 For all eight expenses, zero must be explicitly represented, never inferred. The mean resale proceeds are `p * realized-sale-price-assumption + (1-p) * failed-item-recovery-assumption`; total expense is deducted once. Returns/yield and labor are mandatory screens, not zero defaults.
 
-Operating routes supply `monthly_net_cashflows` (negative amounts explicitly permitted), `terminal_value`, `monthly_discount_rate`, and `success_probability: 1`; uncertainty should be represented as separately documented operating scenarios. Do not compare the output with sale margins, and never compare different horizons without adjustment.
+Operating routes supply `monthly_net_cashflows` (negative amounts explicitly permitted), `terminal_value`, `monthly_discount_rate`, and `success_probability: 1`; uncertainty should be represented as separately documented operating scenarios. Operating readiness requires referenced `site_or_use_rights_cleared` and `operational_benefit_verified` gates, NOT a customer sale or `buyer_committed`. Do not compare operating NPV with sale margins, and never compare different horizons without adjustment.
 
 Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `INVALID`. A quoted or measured input needs a nonempty reference. Only the latter two can advance core cost evidence. An accepted transaction needs measured receipts to enter the outcome ledger. Evidence labels are not a substitute for validating sources.
 
