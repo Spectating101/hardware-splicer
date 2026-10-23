@@ -43,6 +43,38 @@ export default function RoverPowerEvidencePanel({ report }) {
           <ul>{actions.map((action) => <li key={action}>{action}</li>)}</ul>
         </>
       )}
+      {Array.isArray(report.driver_options?.options) && report.driver_options.options.length > 0 && (
+        <div data-testid="motor-driver-comparison">
+          <h4>Driver alternatives — datasheet comparison, not an approved redesign</h4>
+          <p className="small muted">
+            Same declared two-motor load. Thermal and current ratings depend on exact
+            package, supply voltage, PCB and duty. A stall current is NOT continuous draw.
+            No candidate is selected for a physical build.
+          </p>
+          <table>
+            <thead><tr>
+              <th>Driver and package</th><th>Reference current / bridge</th>
+              <th>Nominal supply</th><th>Selection status</th>
+            </tr></thead>
+            <tbody>
+              {report.driver_options.options.map((option) => (
+                <tr key={option.id}>
+                  <td><a href={option.reference_url} target="_blank" rel="noreferrer">
+                    {option.part}
+                  </a></td>
+                  <td>{option.max_current_continuous_a_at_reference} A at specified conditions</td>
+                  <td>{option.supply_nominal_within_spec == null
+                    ? "not established"
+                    : option.supply_nominal_within_spec ? "nominal within device range" : "outside rated range"}
+                  </td>
+                  <td>{option.selection.replaceAll("_", " ")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="small muted">{report.driver_options.recommended_next_evaluation}</p>
+        </div>
+      )}
       {report.sources?.l298_datasheet && (
         <p className="small">
           Manufacturer data: <a href={report.sources.l298_datasheet} target="_blank" rel="noreferrer">
