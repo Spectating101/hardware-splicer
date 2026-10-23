@@ -162,7 +162,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.design && (
           <div className="panel-stack" data-testid="stage-design">
-            <ExternalArtifactIntake />
+            <ExternalArtifactIntake session={session} />
             <MachineAuthoringPanel session={session} onToast={onToast} />
             <MachineArchitecturePanel
               project={session.machineProject}
