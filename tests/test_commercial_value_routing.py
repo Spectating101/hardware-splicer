@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import csv
 from pathlib import Path
 import subprocess
 import sys
@@ -13,6 +14,7 @@ from hardware_splicer.commercial_value_routing import (
     normalize_donor_discovery, normalize_salvage_purchase_screen,
 )
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
+from hardware_splicer.commercial_materials import evaluate_material_plan
 
 
 def money(amount, evidence_class="ESTIMATED", reference=None):
@@ -453,3 +455,90 @@ def test_real_branch_snapshots_flow_into_action_queue():
     assert pf[0]["candidate_id"] == "benchhmi-v0"
     assert pf[0]["earliest_unclosed_stage"] == "SELECT"
     assert report["product_factory_experiments"][0]["physical_status"] == "UNPROVEN"
+
+
+def test_pf002_source_bom_sum_exposes_original_summary_arithmetic_error():
+    root = Path(__file__).resolve().parents[1]
+    with (root / "examples" / "commercial_pf002_screening_bom_source_snapshot.csv").open(
+        encoding="utf-8", newline=""
+    ) as handle:
+        rows = list(csv.DictReader(handle))
+    lines = [r for r in rows if r["category"] != "TOTAL"]
+    asserted = next(r for r in rows if r["category"] == "TOTAL")
+    one_unit = sum(int(r["qty"]) * int(r["screening_unit_twd_1up"]) for r in lines)
+    ten_unit = sum(int(r["qty"]) * int(r["screening_unit_twd_10up"]) for r in lines)
+    assert len(lines) == 13
+    assert one_unit == 1936
+    assert ten_unit == 1462
+    assert int(asserted["screening_unit_twd_1up"]) == 1726
+    assert int(asserted["screening_unit_twd_10up"]) == 1357
+    assert one_unit - int(asserted["screening_unit_twd_1up"]) == 210
+    assert ten_unit - int(asserted["screening_unit_twd_10up"]) == 105
+
+
+def test_itemized_pf002_financial_screen_exposes_assumptions_and_loss():
+    root = Path(__file__).resolve().parents[1]
+    scenario = json.loads((
+        root / "examples" / "commercial_pf002_itemized_scenario_twd.json"
+    ).read_text(encoding="utf-8"))
+    r = evaluate_commercial_case(scenario)["routes"][0]
+    assert r["total_cost"] == 6436
+    assert r["expected_proceeds"] == 6383
+    assert r["net_value"] == -53
+    assert r["material_plan"]["total"] == 1936
+    assert r["material_plan"]["parts_count"] == 13
+    assert r["material_plan"]["status"] == "SCREENING_ONLY"
+    assert "unverified_material_quotes" in r["blockers"]
+    assert "economics_below_gate" in r["blockers"]
+    assert r["purchase_authorized"] is False
+    assert r["evpi_upper_bound"] == 1787.8
+
+
+def test_owned_hardware_requires_reconciled_itemized_material_plan():
+    owned = route(action="build_product")
+    first = evaluate_commercial_case(case(owned))["routes"][0]
+    assert first["status"] == "INVALID"
+    assert "missing_material_plan" in first["errors"]
+    owned["material_plan"] = {
+        "currency": "TWD",
+        "line_items": [{"part_id": "board", "quantity": 1,
+                        "unit_cost": money(80), "material_state": "new"}],
+        "fabrication_service": money(20),
+    }
+    assert evaluate_commercial_case(case(owned))["routes"][0]["material_plan"]["total"] == 100
+    owned["material_plan"]["line_items"][0]["unit_cost"] = money(40)
+    unmatched = evaluate_commercial_case(case(owned))["routes"][0]
+    assert unmatched["status"] == "INVALID"
+    assert "material_total_does_not_reconcile" in unmatched["errors"]
+
+
+def test_unverified_salvaged_materials_require_donor_provenance_and_test():
+    plan = {
+        "currency": "TWD",
+        "line_items": [{
+            "part_id": "used-fan", "quantity": 1, "unit_cost": money(40),
+            "material_state": "salvaged_unverified", "donor_asset_ref": "donor-001",
+        }],
+        "fabrication_service": money(60),
+        "recovery_labor_cost_location": "expenses.labor",
+    }
+    report = evaluate_material_plan(plan, currency="TWD", expected_cost=100)
+    assert report["status"] == "SCREENING_ONLY"
+    assert "salvaged_component_unverified:0" in report["blockers"]
+    plan["line_items"][0]["material_state"] = "salvaged_bench_verified"
+    plan["line_items"][0]["test_reference"] = "bench-record-17"
+    assert "salvaged_component_unverified:0" not in evaluate_material_plan(
+        plan, currency="TWD", expected_cost=100
+    )["blockers"]
+
+
+def test_pf002_mismatched_material_total_cannot_be_silent():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((
+        root / "examples" / "commercial_pf002_itemized_scenario_twd.json"
+    ).read_text(encoding="utf-8"))
+    raw["routes"][0]["expenses"]["material_and_fab"]["amount"] = 1726
+    x = evaluate_commercial_case(raw)["routes"][0]
+    assert x["status"] == "INVALID"
+    assert "material_total_does_not_reconcile" in x["errors"]
+    assert x["purchase_authorized"] is False
