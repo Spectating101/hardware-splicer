@@ -322,3 +322,44 @@ def normalize_salvage_opportunities(report: Mapping[str, Any], *, source_ref: st
             "purchase_authorized": False,
         })
     return out
+
+
+def evaluate_portfolio(cases: list[Mapping[str, Any]]) -> dict[str, Any]:
+    """Group screenings by native currency, never aggregate incompatible FX units.
+
+    A per-unit screening rank is not a return-on-capital, procurement approval,
+    supply-volume forecast, or comparable operating annuity.
+    """
+    results = [evaluate_commercial_case(case) for case in cases]
+    by_currency: dict[str, list[dict[str, Any]]] = {}
+    for item in results:
+        currency = item.get("currency")
+        if currency not in CURRENCIES or item.get("status") == "INVALID":
+            continue
+        best_id = item.get("best_screening_route")
+        matching = [route for route in item["routes"] if route["route_id"] == best_id]
+        if not matching:
+            continue
+        best = matching[0]
+        by_currency.setdefault(currency, []).append({
+            "candidate_id": item["candidate_id"],
+            "route_id": best_id,
+            "expected_net_per_asset": best["net_value"],
+            "metric": best["metric"],
+            "evidence_status": best["status"],
+            "purchase_authorized": False,
+        })
+    for rows in by_currency.values():
+        rows.sort(key=lambda x: x["expected_net_per_asset"], reverse=True)
+    return {
+        "status": "SCREENING_ONLY",
+        "cases": results,
+        "native_currency_rankings": by_currency,
+        "purchase_authorized": False,
+        "limitations": [
+            "no FX comparison or conversion performed",
+            "per-asset expected net is not volume-adjusted profit or return on capital",
+            "operating NPV and sales contribution require matched horizon assumptions",
+            "rankings cannot grant purchasing or manufacturing authority",
+        ],
+    }
