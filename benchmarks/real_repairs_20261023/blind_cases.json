@@ -15,7 +15,74 @@
           "Check installed Kingston drive internally: absent",
           "Swap to Hitachi internally: absent",
           "Swap back to original Toshiba internally: detected"
-        ]
+        ],
+        "path_evidence": {
+          "components": [
+            {
+              "id": "kingston_ssd",
+              "label": "Kingston SSD",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "hitachi_hdd",
+              "label": "Hitachi HDD",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "toshiba_original_hdd",
+              "label": "Original Toshiba HDD",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "internal_flex",
+              "label": "internal storage flex interconnect",
+              "service_cost_rank": 1,
+              "reversible_test_available": true
+            },
+            {
+              "id": "sata_host_port",
+              "label": "logic-board SATA port and controller",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "A-1",
+              "observation": "New Kingston SATA III SSD not detected internally",
+              "outcome": "fail",
+              "path": [
+                "kingston_ssd",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            },
+            {
+              "id": "A-2",
+              "observation": "Hitachi HDD not detected internally",
+              "outcome": "fail",
+              "path": [
+                "hitachi_hdd",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            },
+            {
+              "id": "A-3",
+              "observation": "Original Toshiba drive recognized internally",
+              "outcome": "pass",
+              "path": [
+                "toshiba_original_hdd",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            }
+          ],
+          "interventions": []
+        }
       },
       "components": [
         {
@@ -98,7 +165,85 @@
           "Boot same disk successfully over USB",
           "Repeat failed internal boot after first cable replacement",
           "Repeat failed internal boot after second cable replacement"
-        ]
+        ],
+        "path_evidence": {
+          "components": [
+            {
+              "id": "original_hdd",
+              "label": "boot hard disk",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "internal_flex",
+              "label": "internal storage flex interconnect",
+              "service_cost_rank": 1,
+              "reversible_test_available": true
+            },
+            {
+              "id": "sata_host_port",
+              "label": "logic-board SATA connector and host path",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            },
+            {
+              "id": "usb_adapter",
+              "label": "external USB drive enclosure",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "usb_host_port",
+              "label": "USB storage host path",
+              "service_cost_rank": 4,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "B-1",
+              "observation": "Same HDD not detected as internal boot disk, first cable replacement",
+              "outcome": "fail",
+              "path": [
+                "original_hdd",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            },
+            {
+              "id": "B-2",
+              "observation": "Same HDD not detected internally with second replacement cable",
+              "outcome": "fail",
+              "path": [
+                "original_hdd",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            },
+            {
+              "id": "B-3",
+              "observation": "HDD boots externally by USB",
+              "outcome": "pass",
+              "path": [
+                "original_hdd",
+                "usb_adapter",
+                "usb_host_port"
+              ]
+            }
+          ],
+          "interventions": [
+            {
+              "component_id": "internal_flex",
+              "outcome": "no_change",
+              "description": "New cable replaced once; fault remained"
+            },
+            {
+              "component_id": "internal_flex",
+              "outcome": "no_change",
+              "description": "Second cable also failed to restore internal boot"
+            }
+          ]
+        }
       },
       "components": [
         {
@@ -190,7 +335,80 @@
           "Suspect disk fails internally",
           "Same suspect disk fails externally over USB",
           "Known good disk works internally"
-        ]
+        ],
+        "path_evidence": {
+          "components": [
+            {
+              "id": "suspect_drive",
+              "label": "suspect storage device",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "known_good_drive",
+              "label": "working storage device",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "internal_flex",
+              "label": "internal storage cable",
+              "service_cost_rank": 1,
+              "reversible_test_available": true
+            },
+            {
+              "id": "sata_host_port",
+              "label": "SATA controller",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "usb_adapter",
+              "label": "USB storage enclosure",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "usb_host_port",
+              "label": "USB host controller",
+              "service_cost_rank": 4,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "C-1",
+              "observation": "Suspect disk not recognized inside laptop",
+              "outcome": "fail",
+              "path": [
+                "suspect_drive",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            },
+            {
+              "id": "C-2",
+              "observation": "Same suspect disk not recognized over USB enclosure",
+              "outcome": "fail",
+              "path": [
+                "suspect_drive",
+                "usb_adapter",
+                "usb_host_port"
+              ]
+            },
+            {
+              "id": "C-3",
+              "observation": "Known-good disk recognized using internal SATA route",
+              "outcome": "pass",
+              "path": [
+                "known_good_drive",
+                "internal_flex",
+                "sata_host_port"
+              ]
+            }
+          ],
+          "interventions": []
+        }
       },
       "components": [
         {
@@ -274,7 +492,42 @@
         "when_it_fails": "controller operation",
         "repro_steps": [
           "Observe stick drift at neutral"
-        ]
+        ],
+        "path_evidence": {
+          "components": [
+            {
+              "id": "contaminated_contact",
+              "label": "contamination of potentiometer contacts",
+              "service_cost_rank": 1,
+              "reversible_test_available": true
+            },
+            {
+              "id": "worn_wiper",
+              "label": "mechanical wear in analog stick",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "calibration",
+              "label": "controller input calibration/settings",
+              "service_cost_rank": 1,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "D-1",
+              "observation": "Analog stick drifts with neutral input",
+              "outcome": "fail",
+              "path": [
+                "contaminated_contact",
+                "worn_wiper",
+                "calibration"
+              ]
+            }
+          ],
+          "interventions": []
+        }
       },
       "components": [
         {
