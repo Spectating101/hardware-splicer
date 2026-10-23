@@ -250,6 +250,10 @@ def evaluate_commercial_case(case: Mapping[str, Any]) -> dict[str, Any]:
         [r for r in evaluations if r["net_value"] is not None],
         key=lambda r: r["net_value"], reverse=True,
     )
+    metric_families = {r["metric"] for r in ranked}
+    # A discounted stream of productive use is not directly ranked against a
+    # one-off completed sale, even if the reported units are both NT dollars.
+    mutually_comparable = len(metric_families) <= 1
     return {
         "candidate_id": candidate_id,
         "currency": currency,
@@ -260,8 +264,9 @@ def evaluate_commercial_case(case: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "errors": errors,
         "routes": evaluations,
-        "screening_rank": [r["route_id"] for r in ranked],
-        "best_screening_route": ranked[0]["route_id"] if ranked else None,
+        "screening_rank": [r["route_id"] for r in ranked] if mutually_comparable else [],
+        "best_screening_route": ranked[0]["route_id"] if ranked and mutually_comparable else None,
+        "comparability_blockers": [] if mutually_comparable else ["mixed_operating_npv_and_sales_contribution"],
         "purchase_authorized": False,
         "limitations": [
             "screening ranks are not purchase, sale, or physical authorization",
