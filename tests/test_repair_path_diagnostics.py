@@ -100,3 +100,19 @@ def test_plain_repair_intake_without_structured_paths_does_not_invent_a_diagnosi
     intake = {"repair_intake": {"device_hint": "Unknown device", "symptoms": ["Does not start"]}}
     output = apply_repair_intake_context(intake)
     assert "repair_path_diagnostic" not in output
+
+
+def test_repeating_same_observation_cannot_fake_independent_path_support():
+    case = copy.deepcopy(cases()["case_A_2013"])
+    a = rank_repair_hypotheses(case)
+    case["path_tests"].append(copy.deepcopy(case["path_tests"][0]))
+    b = rank_repair_hypotheses(case)
+    assert b["source_test_count"] == a["source_test_count"] + 1
+    assert b["independent_path_signature_count"] == a["independent_path_signature_count"]
+    assert b["candidates"] == a["candidates"]
+
+
+def test_confirmed_repair_case_top_selection_uses_serviceability_not_unique_causation():
+    report = rank_repair_hypotheses(cases()["case_A_2013"])
+    assert report["highest_evidence_score_tie_count"] >= 2
+    assert report["top_selection_basis"] == "serviceability_tiebreak_not_unique_causal_identification"
