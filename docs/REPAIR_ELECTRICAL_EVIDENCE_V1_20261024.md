@@ -1,6 +1,6 @@
 # Repair Challenge 04 — Source-bound electrical observations from KiCad netlists
 
-**Status:** executed digital integration trial; **not** physical measurements, repair success, safe power-on, manufacturer/ERC signoff, or a competitor victory. Date: 2026-10-24.
+**Status:** executed digital integration trial; **not** physical measurements, repair success, safe power-on, fabrication signoff, or a competitor victory. Date: 2026-10-24.
 
 ## Why this matters
 
@@ -15,10 +15,13 @@ The corrected `src/hardware_splicer/netlist/import_kicad.py` reads actual nested
 | Real `REF.PIN` memberships | **0** | **40** |
 | `J1.1` maps to VBUS; `U3.1` to GND | No | **Yes** |
 | PCB router fed original wire connectivity | No | **Yes** |
-| Hard copper shorts in resulting in-repo route | Hidden by missing wiring | **2 exposed** |
-| Can assert complete board/fabrication readiness | **No**, previous fixture incorrectly treated it as success | **No — DRC blocked** |
+| Internal fallback copper-crossing reports (without KiCad CLI) | Hidden by missing wiring | **2 errors, 1 warning** |
+| Independent KiCad CLI PCB DRC (properly installed/configured) | Not meaningful on dropped connectivity | **Passes (0 KiCad DRC errors)** |
+| Fabrication authorized | **No** | **No — no independent KiCad ERC approval for this compiled netlist** |
 
-Example detected violations from the actual compile: crossing `Net-2` with `Net-11` on F.Cu and crossing `Net-2` with `Net-1` on B.Cu. One separate copper-clearance warning also appears. Internal model quality now records `build_graph_compiled=true`, `wire_count=26`, `electrical_safety_pass=true`, `drc_pass=false`, `fabrication_ready=false`. There is *not* an automatic router repair in this PR. Other originally routing-green fixtures continue to be checked independently.
+**Checker disagreement matters:** When KiCad CLI is unavailable, HS's fallback geometry checker flags crossings between `Net-2` and `Net-11` on F.Cu, and `Net-2` and `Net-1` on B.Cu. Once actual KiCad 9.0.8 is installed, its PCB DRC reports **0 errors** on the compiled layout, although the compilation remains `fabrication_ready=false` and `fab_recommendation=blocked_erc`. We must NOT describe those fallback crossing warnings as independently proven physical shorts. This is **two verification methods disagreeing**; any manufacturing conclusion requires real KiCad DRC/ERC evidence, source verification and a review of routing. The previous fixture's clean result with fake pin identities was still misleading.
+
+On both tested configurations `build_graph_compiled=true`, `wire_count=26` and `fabrication_ready=false`. No router redesign was implemented here.
 
 ## Source-bound measurement ingestion
 
@@ -75,16 +78,22 @@ kicad-cli sch export netlist \
 
 Official KiCad command reference: https://docs.kicad.org/master/en/cli/cli.html .
 
-This trial parses a **repository fixture**, not a new independent KiCad CLI export from the sandbox; `kicad-cli` was not installed in the isolated environment. The fixture demonstrates actual S-expression semantics but is not proof of arbitrary KiCad input compatibility or manufacturer-netlist provenance.
+**A second, genuinely independent KiCad test was executed.** I installed KiCad CLI **9.0.8** in an isolated sandbox and invoked its actual netlist exporter on the unchanged checked-in `hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_sch`. The KiCad-produced `/tmp/hs-spi-flash-kicad.net` contained **36 schematic components, 19 named nets and 79 REF.PIN memberships**, all mapped by the corrected HS importer with no unknown component references.
+
+HS also ingested **two deliberately synthetic** measurement rows on `C2.1` of KiCad net `/1V8` (1.8 V and 1.6 V), producing an arithmetic **-0.2 V** delta and explicitly **no physical measurement authentication or fault diagnosis**.
+
+After installing and configuring the official KiCad schematic-symbol and footprint library tables, the KiCad **schematic ERC reported 0 violations on the original SPI-flash schematic**. An initial ERC run without these library assets reported 74 environment-related warnings, so this result requires a properly provisioned KiCad installation. ERC on this **SPI-flash schematic** does not certify the **separate ESP32/servo netlist's PCB routing**, nor physical manufacturability.
+
+This direct official KiCad export is materially stronger interoperability evidence than our previous experimental KiCad-to-Circuit-JSON converter run, which kept components but lost all HS-imported nets. The alternate converter's original component count (40) also differs from KiCad's (36); we have **not** reconciled that external converter's extra records, and make no claim its output has reached parity. The source schematic is a real maintained HS repository design, not an independent vendor-supplied schematic.
 
 ## Acceptance and remaining work
 
-**91 focused regression tests passed** covering corrected netlist import, explicit pass/fail of routing verification, operator CSV input validation, demo condition deltas, original repair workflow, fault-isolation cases, and prior package boundaries. The originally false-green KiCad compiler fixtures were updated to require a **DRC block on the actual copper shorts**, not silently to remove routing checks.
+**91 focused regression tests initially passed** on the fixture with the fallback verification path. The subsequent optional KiCad 9.0.8 source-export integration added its own pass, and the full focused suite is rerun with both verification methods. The KiCad compiler fixture assertions now distinguish between fallback geometry warnings and independently installed KiCad DRC results, **requiring fabrication to remain blocked until valid KiCad ERC evidence is available**; they do not falsely claim either algorithm's error count is a physical measurement.
 
 Future engineering requirements:
 
-1. Repair the actual routing shorts using a proper router / KiCad checks, and confirm identical named nets and `REF.PIN` counts before/after.
-2. Validate against a fresh `kicad-cli` export of a third-party authorized schematic plus independent netlist assertions.
+1. Reconcile fallback geometry warnings against actual KiCad PCB DRC and schematic ERC; do not manufacture based on either preview alone.
+2. Repeat the successful KiCad CLI export with a **third-party authorized schematic**, and independently compare its netlist `REF.PIN` counts. Reconcile the alternate Circuit JSON converter's differing component counts and lost connectivity.
 3. Connect authenticated instrument captures or independent professional measurement reviews, rather than treating operator CSV values as self-proving measurements.
 4. Only when the physical path and context have independently corroborated evidence, propose diagnostically discriminating measurements and score them against prospective repair outcomes.
 5. Run the same artifacts in a genuine competing tool; no competitor was executed in this PR.
