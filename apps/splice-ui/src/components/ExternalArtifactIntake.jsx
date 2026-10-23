@@ -3,9 +3,10 @@ import {
   inspectExternalCircuitJson,
   projectExternalCircuitElectricalDesign,
   netlistCompile,
+  fetchModuleCatalog,
 } from "../api.js";
 import LabResultCard from "./LabResultCard.jsx";
-import { isWokwiDiagramObject, parseWokwiDiagramArtifact, compareWokwiCandidateToHsBom } from "./wokwiInterop.js";
+import { isWokwiDiagramObject, parseWokwiDiagramArtifact, compareWokwiCandidateToHsBom, buildWokwiStudioDraft } from "./wokwiInterop.js";
 import {
   parseBomCsvArtifact,
   reconcileExternalBomProposal,
@@ -19,7 +20,7 @@ import {
  * The public inspection never mutates a persisted HS project; all external
  * content is proposed, not measured or release-authorized.
  */
-export default function ExternalArtifactIntake({ onOpenDesignPreview, session = null }) {
+export default function ExternalArtifactIntake({ onOpenDesignPreview, session = null, onImportStudioDraft = null }) {
   const [selected, setSelected] = useState(null);
   const [parsed, setParsed] = useState(null);
   const [sourceSha, setSourceSha] = useState(null);
@@ -132,6 +133,24 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
     }
   };
 
+  const canApplyWokwi = selected?.kind === "wokwi-diagram" &&
+    parsed?.status === "family_mapping_only" && onImportStudioDraft &&
+    session?.mode !== "salvage" && session?.designEditable !== false &&
+    !session?.projectPackage && (session?.graph?.nodes?.length || 0) === 0;
+
+  const importWokwiStudioDraft = async () => {
+    setBusy("import-wokwi");
+    setError("");
+    try {
+      if (!canApplyWokwi) throw new Error("This is not an empty editable project or the Wokwi diagram is partial.");
+      const catalog = await fetchModuleCatalog();
+      const draft = buildWokwiStudioDraft(parsed, catalog.modules || []);
+      onImportStudioDraft(draft);
+      setCopyStatus("Review-only draft transferred to HS Studio. Compile and verify separately.");
+    } catch (err) { setError(err.message || "Wokwi draft could not be imported."); }
+    finally { setBusy(""); }
+  };
+
   const canCompile = selected?.kind === "kicad-netlist"
     || (selected?.kind === "circuit-json" && report?.compilable === true);
 
@@ -209,6 +228,11 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
                   {" "}{wokwiComparison.excess.length} Wokwi quantities absent from HS.
                   {" "}{wokwiComparison.note}
                 </p>
+              )}
+              {canApplyWokwi && (
+                <button type="button" disabled={Boolean(busy)} onClick={importWokwiStudioDraft}>
+                  {busy === "import-wokwi" ? "Importing…" : "Import complete draft to HS Studio (review only)"}
+                </button>
               )}
               <button type="button" className="secondary" onClick={copyWokwiProposal}>
                 Copy normalized source proposal
