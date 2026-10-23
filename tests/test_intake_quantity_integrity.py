@@ -29,8 +29,8 @@ def test_detects_selected_second_motor_lost_from_graph():
     assert report["status"] == "blocked"
     assert report["source_counts"]["dc_motor_3v_6v"] == 2
     assert report["graph_counts"]["dc_motor_3v_6v"] == 1
-    assert report["blockers"][0]["code"] == "intake_graph_quantity_underrepresented"
-    assert report["blockers"][0]["missing_instances"] == 1
+    assert report["blockers"][0]["code"] == "intake_selected_quantity_underrepresented"
+    assert report["blockers"][0]["missing_graph_instances"] == 1
 
 
 def test_two_graph_motors_preserve_complete_inventory():
@@ -64,7 +64,7 @@ def test_selected_graph_quantity_is_a_package_blocker_even_if_bom_matches_graph(
     assert result["gates"]["package_ready"] is False
     assert result["gates"]["build_ready"] is False
     assert result["gates"]["fabrication_ready"] is False
-    assert any("Source inventory includes 2" in x for x in result["gates"]["blockers"])
+    assert any("Source inventory contains 2" in x for x in result["gates"]["blockers"])
 
 
 def test_non_evaluable_source_is_not_automatically_declared_verified():
@@ -77,3 +77,17 @@ def test_explicit_quantity_kept_when_inventory_has_one_line_with_two_motors():
     result = reconcile_intake_quantities_to_build_graph(intake, _graph(1))
     assert result["source_counts"]["dc_motor_3v_6v"] == 2
     assert result["status"] == "blocked"
+
+def test_bom_only_single_motor_does_not_hide_both_missing_graph_motors():
+    report = reconcile_intake_quantities_to_build_graph(
+        _two_motor_intake(),
+        {"nodes": [{"id": "controller", "moduleId": "esp32-devkit"}]},
+        [{"module_id": "dc_motor_3v_6v", "qty": 1}],
+    )
+    assert report["status"] == "blocked"
+    assert report["source_counts"]["dc_motor_3v_6v"] == 2
+    assert report["graph_counts"].get("dc_motor_3v_6v", 0) == 0
+    assert report["bom_counts"]["dc_motor_3v_6v"] == 1
+    assert report["blockers"][0]["missing_graph_instances"] == 2
+    assert report["blockers"][0]["missing_bom_units"] == 1
+
