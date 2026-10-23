@@ -189,7 +189,7 @@ def schedule_parts(
 def schedule_scad_preview(schedule: Mapping[str,Any]) -> str:
     """Assembly geometry visualization only: no connector joints or ports."""
     if schedule.get("status") != "dimensioned_blank_cut_proposal":
-        return "// No measured sheet thickness; no hybrid preview available.\\n"
+        return "// No measured sheet thickness; no hybrid preview available.\n"
     dims=schedule["hybrid_outer_dimensions_mm"]
     inside=schedule["target_internal_dimensions_mm"]
     t=schedule["panel_thickness_mm"]
@@ -219,4 +219,4 @@ def schedule_scad_preview(schedule: Mapping[str,Any]) -> str:
             f"  color({tint}) translate([{x:g},{y:g},{z:g}]) cube([{w:g},{d:g},{h:g}],center=false);",
         ])
     lines.extend(["}","hybrid_panel_envelope_reference();",""])
-    return "\\n".join(lines)
+    return "\n".join(lines)
