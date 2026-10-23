@@ -139,3 +139,16 @@ def test_standalone_mecha_without_hs_construction_evaluator_is_graceful(tmp_path
     assert (tmp_path/"CONSTRUCTION_PLAN.md").exists()
     assert "not installed" in (tmp_path/"CONSTRUCTION_PLAN.md").read_text()
     assert (tmp_path/"enclosure.scad").exists()
+
+
+def test_main_hs_intake_preserves_construction_intent_in_compiler_spec():
+    from pathlib import Path
+    from hardware_splicer.project_intake import load_project_intake,plan_project_from_intake
+    root=Path(__file__).resolve().parents[1]
+    intake=load_project_intake(root/"examples"/"intakes"/"plant_watering_brief.json")
+    intake["construction"]=_construction()
+    plan=plan_project_from_intake(intake,skip_vision=True)
+    assert plan["scenario"]["compile_spec"]["mechanism"]["construction"] == _construction()
+    from hardware_splicer.schemas import HardwareCompileSpec
+    typed=HardwareCompileSpec.from_dict(plan["scenario"]["compile_spec"])
+    assert typed.mechanism["construction"]["connector_family"]=="moduframe"
