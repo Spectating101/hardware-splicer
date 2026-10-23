@@ -153,3 +153,39 @@ def test_real_cli_audits_same_schematic_kicad_export_and_upstream_converter(pair
 def test_fails_without_actual_converter_documents():
     with pytest.raises(ValueError,match="array"):
         audit_converter_geometry_identity("(export (components) (nets))",{})
+
+
+def test_upstream_converter_geometry_is_not_mistaken_for_source_trace_wiring(paired_sources):
+    source,docs,_=paired_sources
+    report=_result(source,docs)
+    assert report["converter_source_trace_count"] == 0
+    assert report["converter_visual_trace_count"] == 87
+    assert report["converter_schematic_component_count"] == 40
+    assert report["source_scope"] == "single_sheet_only_no_uuid_based_identity"
+    assert report["visual_geometry_merged"] is False
+
+
+def test_multisheet_visual_matching_is_rejected_without_converter_sheet_uuid(paired_sources):
+    source,docs,_=paired_sources
+    # This tests a synthetic addition of a child sheet declaration on top
+    # of a real KiCad-exported source. Real demo export testing is separate.
+    mutated=source.replace(
+        '(design',
+        '(design (sheet (number "2") (name "/CH1/") (tstamps "/uuid/"))',
+        1,
+    )
+    with pytest.raises(ValueError, match="multi-sheet visual identity"):
+        _result(mutated,docs)
+
+
+def test_swapping_visual_component_geometry_without_changing_identity_is_not_authorized(paired_sources):
+    source,docs,_=paired_sources
+    altered=copy.deepcopy(docs)
+    visuals=[x for x in altered if x["type"]=="schematic_component"]
+    visuals[0]["center"],visuals[1]["center"]=visuals[1]["center"],visuals[0]["center"]
+    report=_result(source,altered)
+    # The identity correlation is invariant to positions because positions
+    # ARE NOT VERIFIED AGAINST KICAD'S NATIVE SCHEMATIC.
+    assert report["unique_candidate_matches"] == 21
+    assert report["visual_geometry_merged"] is False
+    assert all(not m["kicad_symbol_uuid_authenticated"] for m in report["candidate_matches"])
