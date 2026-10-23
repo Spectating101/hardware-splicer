@@ -5,6 +5,7 @@ import {
   netlistCompile,
 } from "../api.js";
 import LabResultCard from "./LabResultCard.jsx";
+import { isWokwiDiagramObject, parseWokwiDiagramArtifact, compareWokwiCandidateToHsBom } from "./wokwiInterop.js";
 import {
   parseBomCsvArtifact,
   reconcileExternalBomProposal,
@@ -26,6 +27,7 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
   const [electricalReport, setElectricalReport] = useState(null);
   const [compile, setCompile] = useState(null);
   const [error, setError] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
   const [busy, setBusy] = useState("");
 
   const onSelect = async (event) => {
@@ -37,9 +39,10 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
     setElectricalReport(null);
     setCompile(null);
     setError("");
+    setCopyStatus("");
     if (!file) return;
     try {
-      const kind = validateExternalFile(file);
+      let kind = validateExternalFile(file);
       const bytes = await file.arrayBuffer();
       let sha = null;
       if (typeof crypto !== "undefined" && crypto.subtle?.digest) {
@@ -48,8 +51,17 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
       }
       const text = ["circuit-json", "bom-csv", "kicad-netlist", "firmware-reference"].includes(kind)
         ? new TextDecoder("utf-8", { fatal: true }).decode(bytes) : null;
-      const value = kind === "circuit-json"
-        ? parseCircuitJsonArtifact(text)
+      // Wokwi diagrams also use .json, but are not tscircuit Circuit JSON.
+      // Detect the actual document envelope, never an inferred vendor API.
+      if (kind === "circuit-json") {
+        let raw = null;
+        try { raw = JSON.parse(text); } catch { /* Circuit JSON parser gives a precise error */ }
+        if (isWokwiDiagramObject(raw)) kind = "wokwi-diagram";
+      }
+      const value = kind === "wokwi-diagram"
+        ? parseWokwiDiagramArtifact(text)
+        : kind === "circuit-json"
+          ? parseCircuitJsonArtifact(text)
         : kind === "bom-csv"
           ? parseBomCsvArtifact(text)
           : kind === "mechanical-reference" && file.name.toLowerCase().endsWith(".stl")
@@ -99,6 +111,27 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
     ? reconcileExternalBomProposal(parsed, session?.projectPackage?.bom?.lines)
     : null;
 
+  const wokwiComparison = selected?.kind === "wokwi-diagram" && parsed
+    ? compareWokwiCandidateToHsBom(parsed, session?.projectPackage?.bom?.lines)
+    : null;
+
+  const copyWokwiProposal = async () => {
+    if (!parsed || selected?.kind !== "wokwi-diagram") return;
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard unavailable; inspect the source JSON locally.");
+      }
+      await navigator.clipboard.writeText(JSON.stringify({
+        source_file: selected.name,
+        source_sha256: sourceSha,
+        ...parsed,
+      }, null, 2));
+      setCopyStatus("Source-preserving proposal copied for engineering review.");
+    } catch (err) {
+      setCopyStatus(`Copy unavailable: ${err.message}`);
+    }
+  };
+
   const canCompile = selected?.kind === "kicad-netlist"
     || (selected?.kind === "circuit-json" && report?.compilable === true);
 
@@ -106,8 +139,8 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
     <section className="card" aria-label="External engineering artifact intake">
       <h3>External tools → HS engineering review</h3>
       <p className="muted">
-        Use designs exported from tscircuit, atopile, SKiDL, KiCad or other legitimate sources.
-        Circuit JSON goes through HS source-graph and electrical-identity review. BOMs are checked
+        Use legitimate exports from tscircuit, Wokwi, Flux BOM CSV, KiCad, atopile and other engineering tools.
+        Circuit JSON goes through HS electrical identity review; Wokwi diagrams retain part/wire identities for comparison. BOMs are checked
         for structure and quantities. Mechanical and firmware files remain source references.
         Nothing here authorizes fabrication, flashing, power-on or bench operation.
       </p>
@@ -154,6 +187,38 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
                 </div>
               )}
             </>
+          )}
+          {selected.kind === "wokwi-diagram" && (
+            <div role="status" data-testid="wokwi-source-review">
+              <h4>Wokwi diagram.json → HS source proposal</h4>
+              <p>{parsed.original_part_count} source components, {parsed.original_connection_count} connections;
+                {" "}{parsed.mapped_part_count} functional-family candidates and {parsed.mapped_connection_count} pin pairs mapped.
+              </p>
+              <p><strong>Status: {parsed.status}</strong> — not a physical circuit or simulation result.</p>
+              <p className="muted">{parsed.note}</p>
+              {parsed.unmapped_part_ids.length > 0 && (
+                <p>Unsupported components retained: {parsed.unmapped_part_ids.join(", ")}</p>
+              )}
+              {parsed.unmapped_connections.length > 0 && (
+                <p>Connections requiring pin/identity mapping: {parsed.unmapped_connections.length}</p>
+              )}
+              {wokwiComparison && (
+                <p>Compared with current HS BOM: <strong>{wokwiComparison.status}</strong>.
+                  {" "}{wokwiComparison.matches.length} matching part families;
+                  {" "}{wokwiComparison.missing.length} HS quantities absent from Wokwi;
+                  {" "}{wokwiComparison.excess.length} Wokwi quantities absent from HS.
+                  {" "}{wokwiComparison.note}
+                </p>
+              )}
+              <button type="button" className="secondary" onClick={copyWokwiProposal}>
+                Copy normalized source proposal
+              </button>
+              {copyStatus && <p className="muted small">{copyStatus}</p>}
+              <p className="muted small">
+                Wokwi can simulate supported MCU/sensor circuits; this diagram has not been run in its simulator.
+                Unmapped motors and driver chips cannot be presented as validated just because their wiring is imported.
+              </p>
+            </div>
           )}
           {selected.kind === "bom-csv" && (
             <p role="status">
