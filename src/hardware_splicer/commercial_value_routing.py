@@ -368,3 +368,68 @@ def evaluate_portfolio(cases: list[Mapping[str, Any]]) -> dict[str, Any]:
             "rankings cannot grant purchasing or manufacturing authority",
         ],
     }
+
+
+def normalize_donor_discovery(catalog: Mapping[str, Any], *, source_ref: str) -> list[dict[str, Any]]:
+    """Import PR #148 discovery records without pretending to own the donor."""
+    if catalog.get("schema_version") != "hardware_splicer.commerce_donor_discovery.v1":
+        raise ValueError("requires the exact donor discovery schema")
+    rows = catalog.get("records")
+    if not isinstance(rows, list):
+        raise ValueError("missing donor discovery records")
+    out = []
+    known: set[str] = set()
+    for row in rows:
+        if not isinstance(row, Mapping) or row.get("status") != "DISCOVERY_ONLY":
+            raise ValueError("cannot promote donor discovery to tested inventory")
+        uid = str(row.get("listing_id") or "")
+        if not uid or uid in known:
+            raise ValueError("missing or duplicate listing id")
+        known.add(uid)
+        low = row.get("advertised_ask_twd_min")
+        high = row.get("advertised_ask_twd_max")
+        if (isinstance(low, bool) or isinstance(high, bool)
+                or not isinstance(low, (int, float))
+                or not isinstance(high, (int, float))
+                or not math.isfinite(low) or not math.isfinite(high)
+                or low < 0 or high < low):
+            raise ValueError("invalid advertised ask range")
+        out.append({
+            "candidate_id": uid,
+            "origin": "taiwan_marketplace_donor_discovery",
+            "family": row.get("family"),
+            "source_ref": source_ref,
+            "listing_url": row.get("source_url"),
+            "currency": "TWD",
+            "advertised_ask_range": [low, high],
+            "ask_evidence_class": "HYPOTHESIS",
+            "potential_parts_unverified": row.get("parts_hypotheses_unverified") or [],
+            "commercial_status": "DISCOVERY_ONLY",
+            "purchase_authorized": False,
+        })
+    return out
+
+
+def normalize_salvage_purchase_screen(screen: Mapping[str, Any], *, source_ref: str) -> dict[str, Any]:
+    """Preserve PR #147's granular bid math; do not rerun or reinterpret it."""
+    if screen.get("schema_version") != "hardware_splicer.salvage_purchase_screen.v1":
+        raise ValueError("requires the exact salvage purchase screen schema")
+    if screen.get("purchase_authorized") is not False:
+        raise ValueError("purchase screen cannot provide purchase authority")
+    return {
+        "candidate_id": screen.get("id"),
+        "origin": "taiwan_salvage_purchase_screen",
+        "source_ref": source_ref,
+        "currency": "TWD",
+        "priced_outcome": {
+            "expected_net_per_acquired_unit": screen.get("expected_net_per_acquired_unit_twd"),
+            "break_even_max_bid": screen.get("break_even_max_purchase_twd"),
+            "target_profit_max_bid": screen.get("max_purchase_for_target_profit_twd"),
+            "evidence_class": "ESTIMATED",
+            "reference": source_ref,
+        },
+        "price_basis": screen.get("acquisition_price_basis"),
+        "limitations": screen.get("required_evidence") or [],
+        "commercial_status": "SCREENING_ONLY",
+        "purchase_authorized": False,
+    }
