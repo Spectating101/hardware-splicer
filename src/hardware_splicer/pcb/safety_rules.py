@@ -43,11 +43,21 @@ def _effective_role(graph: BuildGraph, resolved: Mapping[str, Any]) -> str:
     node = dict(resolved.get("node") or {})
     pin = dict(resolved.get("pin") or {})
     semantic = _terminal_semantics(graph, str(node.get("id") or ""), str(pin.get("id") or ""))
-    return str(semantic.get("role") or pin.get("role") or "")
+    role = str(semantic.get("role") or pin.get("role") or "")
+    module_id = str((resolved.get("moduleSpec") or {}).get("id") or node.get("moduleId") or "")
+    # A DC motor's legacy VCC/GND pin labels name its TWO winding terminals.
+    # Neither terminal is inherently chassis/common ground. An H-bridge drives
+    # both high and low; the catalog GND label must not create a false short.
+    if not semantic and module_id in {"dc_motor_3v_6v", "dc_geared_motor_12v"} and str(pin.get("id") or "") in {"VCC", "GND"}:
+        return "floating_motor_terminal"
+    return role
 
 
 def _effective_pin_role(graph: BuildGraph, node: Mapping[str, Any], pin: Mapping[str, Any]) -> str:
     semantic = _terminal_semantics(graph, str(node.get("id") or ""), str(pin.get("id") or ""))
+    module_id = str(node.get("moduleId") or "")
+    if not semantic and module_id in {"dc_motor_3v_6v", "dc_geared_motor_12v"} and str(pin.get("id") or "") in {"VCC", "GND"}:
+        return "floating_motor_terminal"
     return str(semantic.get("role") or pin.get("role") or "")
 
 
@@ -88,7 +98,11 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         b_role = _effective_role(graph, b)
         a_gnd = a_role == "gnd"
         b_gnd = b_role == "gnd"
-        if a_gnd != b_gnd:
+        # A winding terminal is not a power-rail ground by definition. Direct
+        # DC supply return AND two-ended H-bridge switching are both possible.
+        # Only actual logic/power ground mismatch remains a hard error.
+        motor_terminal = "floating_motor_terminal"
+        if a_gnd != b_gnd and motor_terminal not in {a_role, b_role}:
             warnings.append(
                 {
                     "id": f"{w['id']}-gnd",
