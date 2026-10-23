@@ -46,6 +46,8 @@ try {
       preserved_connection_count: parsed.connections.length,
       mapped_part_families: parsed.mapped_part_count,
       mapped_pin_connections: parsed.mapped_connection_count,
+      original_physical_connections: parsed.physical_connection_count,
+      virtual_simulator_connections_retained: parsed.virtual_connection_count,
       unmatched_part_ids: parsed.unmapped_part_ids,
       unmatched_connections: parsed.unmapped_connections,
       draft_import_eligible: parsed.status === "family_mapping_only",
