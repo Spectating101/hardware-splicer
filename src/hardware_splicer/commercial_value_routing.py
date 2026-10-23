@@ -144,6 +144,10 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         metric_name = "net_present_value"
     else:
         metric_name = "expected_contribution"
+    if cost is not None and not math.isfinite(cost):
+        errors.append("nonfinite_aggregated_cost")
+    if discounted_proceeds is not None and not math.isfinite(discounted_proceeds):
+        errors.append("nonfinite_aggregated_proceeds")
     result: dict[str, Any] = {
         "route_id": route_id,
         "action": action,
@@ -154,14 +158,17 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         "blockers": blockers,
         "purchase_authorized": False,
         "ready_for_human_commercial_review": False,
-        "expected_proceeds": round(discounted_proceeds, 2) if discounted_proceeds is not None else None,
-        "total_cost": round(cost, 2) if cost is not None else None,
+        "expected_proceeds": round(discounted_proceeds, 2) if discounted_proceeds is not None and math.isfinite(discounted_proceeds) else None,
+        "total_cost": round(cost, 2) if cost is not None and math.isfinite(cost) else None,
         "net_value": None,
         "margin": None,
         "break_even_bid": None,
         "bid_ceiling_at_target_margin": None,
         "sale_price_minus_20pct": None,
         "sale_price_plus_20pct": None,
+        "success_net_if_acquired": None,
+        "failure_net_if_acquired": None,
+        "evpi_upper_bound": None,
     }
     if errors or cost is None or discounted_proceeds is None or min_margin is None:
         return result
@@ -169,6 +176,17 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
     net = discounted_proceeds - cost
     result["net_value"] = round(net, 2)
     result["break_even_bid"] = round(max(0, discounted_proceeds - (cost - amounts["acquisition"])), 2)
+    if action != "operate" and p is not None and sale_value is not None and failure_value is not None:
+        success_net = sale_value - cost
+        failure_net = failure_value - cost
+        # Decision-theoretic value of PERFECT pre-purchase knowledge, when a
+        # no-buy outcome costs exactly zero. This is a theoretical upper bound
+        # on information spending, not a forecast of AI recognition value.
+        perfect_info = p * max(0.0, success_net) + (1 - p) * max(0.0, failure_net)
+        evpi = max(0.0, perfect_info - max(0.0, net))
+        result["success_net_if_acquired"] = round(success_net, 2)
+        result["failure_net_if_acquired"] = round(failure_net, 2)
+        result["evpi_upper_bound"] = round(evpi, 2)
     if action != "operate" and discounted_proceeds > 0 and p is not None and sale_value is not None:
         result["margin"] = round(net / discounted_proceeds, 6)
         result["bid_ceiling_at_target_margin"] = round(
