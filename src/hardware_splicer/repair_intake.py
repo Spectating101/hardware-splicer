@@ -94,6 +94,7 @@ def apply_repair_intake_context(intake: Mapping[str, Any]) -> Dict[str, Any]:
     # Repair-path observations are explicit evidence, never inferred from a
     # symptom string. Only opt-in structured path tests produce ranked
     # diagnostic hypotheses. This is not a physical repair authorization.
+    repair = body.get("repair_intake") if isinstance(body.get("repair_intake"), Mapping) else {}
     path_evidence = repair.get("path_evidence")
     if isinstance(path_evidence, Mapping):
         from .repair_path_diagnostics import rank_repair_hypotheses
