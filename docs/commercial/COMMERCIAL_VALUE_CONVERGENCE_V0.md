@@ -22,7 +22,8 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 ## What this branch actually implements
 
 - `commercial_value_routing.evaluate_commercial_case`: compare **resell / refurbish / parts recovery / build / operate / replicate / recycle** for the same candidate and native currency, with explicit costs and evidence classes.
-- Expected resale contribution uses success probability and failure recovery value, not the full asking price. It computes sensitivity to sale-price changes and a break-even/target-contribution acquisition ceiling. These are **screens**, not purchase approval.
+- Expected resale contribution uses success probability and failure recovery value, not the full asking price. It computes sensitivity to sale-price changes, a break-even/target-contribution acquisition ceiling, and a **perfect-information upper bound (EVPI)** on how much additional pre-purchase screening could theoretically be worth. EVPI is NOT realized gains, reliable predictive accuracy, or a spend authorization.
+- Owned `build_product` and `replicate` routes require an itemized, finite, traceable material plan with quantities, original/new/salvaged state, outsourced fabrication costs, test/donor provenance, and a reconciled `material_and_fab` total. Unverified donor components and quotations remain explicit blockers.
 - Operating assets have a separate discounted monthly net-cashflow calculation. It is labeled NPV, not gross sales margin, and needs explicit terminal value and discount assumptions.
 - `normalize_product_factory_run`: read actual PF run snapshots while preserving target MSRP and modeled COGS as **hypotheses**, not sales or measured cost.
 - `normalize_salvage_opportunities`: read actual Circuit-AI workflow report nesting and scores as discovery inputs. A score does not imply verified yield or a transaction.
@@ -36,6 +37,11 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 ```bash
 PYTHONPATH=src python scripts/evaluate_commercial_value.py examples/commercial_value_case_twd.json
 PYTHONPATH=src python scripts/converge_commercial_sources.py --case examples/commercial_value_case_twd.json --salvage-report apps/circuit-ai/eval/salvage_workflow_report.json
+# End-to-end source snapshots (from open PR #110 and PR #148, unmerged):
+PYTHONPATH=src python scripts/converge_commercial_sources.py \\
+    --pf-run examples/commercial_pf002_benchhmi_snapshot.json \\
+    --donor-discovery examples/commercial_tw_donor_discovery_snapshot_2026-10-19.json \\
+    --case examples/commercial_pf002_itemized_scenario_twd.json
 # Once PR #147/#148 exports are available locally, add:
 # --donor-discovery path/to/tw_donor_discovery.json
 # --purchase-screen path/to/a_completed_salvage_purchase_screen_result.json\nPYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
@@ -93,6 +99,7 @@ Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `I
 ## Known limitations / next engineering work
 
 - The router does not fetch live Taiwan/China/Indonesia marketplaces, bid on e-commerce listings, contact suppliers, assert ownership of customer data, operate hardware, or independently verify legal compliance.
+- The acquisition `expected_contribution` screen conservatively charges every specified expense once whether the asset succeeds or fails; **state-dependent repair time** is modeled more accurately by existing PR #147 and must not be silently overwritten. The EVPI bound assumes perfect information is available *before* deciding whether to buy; actual diagnostics can be noisy and costly.
 - It does not replace PR #147's more detailed per-acquisition salvage statistics. Store purchase-screen output as associated evidence when that PR is reconciled.
 - Pre-purchase gross-value ranking can favor high upside with low probability; use downside thresholds, inspection opportunity cost and available capital before committing.
 - Operating NPV depends on a common horizon, utilization, terminal-value evidence, measured output and discount assumptions.
@@ -103,3 +110,28 @@ Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `I
 ## Real success criteria
 
 A first physical donor or hardware-product case needs: exact device identity, legitimate ownership, acquisition receipt, qualified technical assessment, physical acceptance evidence, all-in costs in native currency, documented customer sale/acceptance **or** measured operating output, recorded yield/failure, and reconciled actual contribution. Only then can HS claim that its integrated intelligence identified and delivered real economic value.
+
+
+## Executed paper-data audit: PF-002, not a sale or physical validation
+
+The original PR #110 source `hardware/reference_designs/benchhmi_v0/BENCHIO_BOM_SCREENING.csv` has a numeric inconsistency:
+
+| BOM method | 1-unit tier (TWD) | 10-unit tier, per unit (TWD) |
+| --- | ---: | ---: |
+| Source `TOTAL` row | 1,726 | 1,357 |
+| Sum of 13 line items (quantity × unit) | **1,936** | **1,462** |
+| Source undercount | **210** | **105** |
+
+`examples/commercial_pf002_screening_bom_source_snapshot.csv` preserves the original source data. The reconciled cost is independently enforced by `commercial_materials.evaluate_material_plan`. This fixes the *financial screening input* only; it does NOT modify the upstream, unmerged engineering design or establish live vendor prices.
+
+`examples/commercial_pf002_itemized_scenario_twd.json` uses **13 original screening-price items** and fully synthetic other costs, a hypothetical 70% usable yield, a NT$8,990 unvalidated selling price and NT$300 failure recovery. Under those assumptions it finds:
+
+- expected proceeds = NT$6,383 (0.7 × 8,990 + 0.3 × 300)
+- total modeled cost = NT$6,436, including the correctly itemized NT$1,936
+- expected contribution = **–NT$53** per donor
+- EVPI theoretical ceiling = **NT$1,787.80**, if a perfect pre-purchase inspection were possible and free
+- current decision = **HOLD**. No actual unit purchase, observed yield, sale, recovered benefit, or verified supplier quote exists.
+
+This example demonstrates the strategic point: a product can show attractive headline MSRP-versus-parts spread yet fail after probability, labor, freight, warranty and integration; at the same time, better technical inspection can have theoretical decision value. Do not convert that theoretical value into a claim that HS has generated money.
+
+The convergence dossier's `investigation_queue` consolidates source-backed Taiwan listings, product-factory progress, salvage hypotheses and priced route blockers into next evidence tasks, while never authorizing physical work.
