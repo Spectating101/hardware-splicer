@@ -546,6 +546,15 @@ def _donor_harness_connections(
 
 
 def _wire_purpose(from_mod: str, from_pin: str, to_mod: str, to_pin: str) -> str:
+    # A motor's legacy "GND" pad name denotes its *second terminal*, not
+    # chassis/common ground when driven by an H-bridge OUT pin. Labeling
+    # OUT2/OUT4 as ground is electrically misleading and potentially unsafe.
+    if (
+        from_mod in {"l298n", "drv8833-motor", "l9110-motor", "tb6612fng-motor"}
+        and re.fullmatch(r"OUT[1-4]", from_pin, flags=re.I)
+        and to_mod in {"dc_motor_3v_6v", "dc_geared_motor_12v"}
+    ):
+        return "H-bridge switched motor terminal — NOT common ground"
     text = f"{from_mod} {from_pin} {to_mod} {to_pin}".lower()
     if "gnd" in text:
         return "common ground"
