@@ -1,3 +1,4 @@
+import { useState } from "react";
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import ExternalArtifactIntake from "../components/ExternalArtifactIntake.jsx";
@@ -59,6 +60,7 @@ export default function ProjectWorkspace({
   onToast,
   activeJobId,
 }) {
+  const [draftImportRevision, setDraftImportRevision] = useState(0);
   const pkg = session.projectPackage;
   const buildDir = session.buildDir || pkg?.build_dir || null;
   const stage = session.currentStage || STAGES.intake;
@@ -163,7 +165,19 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.design && (
           <div className="panel-stack" data-testid="stage-design">
-            <ExternalArtifactIntake session={session} />
+            <ExternalArtifactIntake
+              session={session}
+              onImportStudioDraft={onGraphSync ? (draft) => {
+                // Source import changes only the editable canvas: no built
+                // artifact, physical verification, or bench authorization.
+                onGraphSync({
+                  nodes: draft.nodes, edges: draft.edges,
+                  phrase: draft.phrase, composeMode: draft.composeMode,
+                });
+                setDraftImportRevision((value) => value + 1);
+                onToast?.("Wokwi wiring imported as an unverified Studio draft.");
+              } : null}
+            />
             <MachineAuthoringPanel session={session} onToast={onToast} />
             <MachineArchitecturePanel
               project={session.machineProject}
@@ -186,7 +200,7 @@ export default function ProjectWorkspace({
               </section>
             ) : (
               <DesignStudioPanel
-                key={session.projectId || "studio"}
+                key={`${session.projectId || "studio"}:${draftImportRevision}`}
                 apiOk={apiOk}
                 llmReady={llmReady}
                 initialPhrase={session.graph.phrase || session.goal || ""}
