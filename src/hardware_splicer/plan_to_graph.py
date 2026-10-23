@@ -30,80 +30,6 @@ def supported_build_ids() -> List[str]:
 
 
 def recipe_to_build_graph(recipe: Mapping[str, Any]) -> Dict[str, Any]:
-    # A rover with two *identified* donor motors needs two distinct loads.
-    # Keep both in the actual Python compilation path, not only the TS UI
-    # translator. Driver output pairing is a proposal, not power authorization.
-    if build_id == "robot_drive_base" and plan.get("resolved_modules"):
-        motor_rows = [
-            row for row in (plan.get("resolved_modules") or [])
-            if isinstance(row, Mapping)
-            and str(row.get("module_id") or "") in {"dc_motor_3v_6v", "dc_geared_motor_12v"}
-        ]
-        modules = list(adapted_recipe.get("modules") or [])
-        connections = list(adapted_recipe.get("wires") or [])
-        driver = next((m for m in modules if m.get("role") == "drv"), None)
-        if motor_rows and driver and driver.get("moduleId") == "l298n":
-            for index, motor in enumerate(motor_rows):
-                role = f"motor_{index + 1}"
-                modules.append({"role": role, "moduleId": motor["module_id"]})
-                if index < 2:
-                    output_a, output_b = (("OUT1", "OUT2") if index == 0 else ("OUT3", "OUT4"))
-                    connections.extend([
-                        {"from": {"role": "drv", "pin": output_a}, "to": {"role": role, "pin": "VCC"}},
-                        {"from": {"role": "drv", "pin": output_b}, "to": {"role": role, "pin": "GND"}},
-                    ])
-                else:
-                    warnings.append(f"Motor instance {index + 1} exceeds two available L298N channels; connection unresolved.")
-
-            mcu = next((m for m in modules if m.get("role") == "mcu"), None)
-            if mcu and mcu.get("moduleId") == "esp32-devkit":
-                connections = [
-                    w for w in connections
-                    if not (
-                        (w.get("from") or {}).get("role") == "mcu"
-                        and (w.get("to") or {}).get("role") == "drv"
-                        and (w.get("to") or {}).get("pin") in {"IN1", "IN2", "IN3", "IN4"}
-                    )
-                ]
-                for pin, gpio in (("IN1", "GPIO16"), ("IN2", "GPIO17"),
-                                  ("IN3", "GPIO18"), ("IN4", "GPIO23")):
-                    connections.append({
-                        "from": {"role": "mcu", "pin": gpio},
-                        "to": {"role": "drv", "pin": pin},
-                    })
-            elif len(motor_rows) > 1:
-                warnings.append("Motor channel 2 requires an independently verified MCU control-pin mapping.")
-
-            physical_sources = {
-                str(row.get("module_id") or "") for row in (plan.get("resolved_modules") or [])
-                if isinstance(row, Mapping)
-            }
-            if "dc-barrel-12v" not in physical_sources:
-                remove_roles = {"pwr", "mot_psu"}
-                modules = [m for m in modules if m.get("role") not in remove_roles]
-                connections = [
-                    w for w in connections
-                    if (w.get("from") or {}).get("role") not in remove_roles
-                    and (w.get("to") or {}).get("role") not in remove_roles
-                ]
-                warnings.append("Legacy 12 V barrel/buck omitted: donor VMOTOR supply has not been identified or measured.")
-            if "usb-power-5v" not in physical_sources:
-                modules = [m for m in modules if m.get("role") != "usb"]
-                connections = [
-                    w for w in connections
-                    if (w.get("from") or {}).get("role") != "usb"
-                    and (w.get("to") or {}).get("role") != "usb"
-                ]
-                warnings.append("Legacy USB supply omitted: independent controller power not verified.")
-            notes.append(
-                f"Source-bound motor instances preserved: {len(motor_rows)}; "
-                "power and physical wiring authorization remain open."
-            )
-            adapted_recipe["modules"] = modules
-            adapted_recipe["wires"] = connections
-        elif motor_rows:
-            warnings.append("Motor inventory exists but compatible driver channel mapping is unverified.")
-
     id_of: Dict[str, str] = {}
     nodes = []
     for i, m in enumerate(recipe.get("modules") or []):
@@ -225,6 +151,80 @@ def splice_plan_to_build_graph(
     new_len = len(adapted_recipe.get("modules") or [])
     if new_len != orig_len:
         notes.append(f"Inventory topology: {new_len} modules (was {orig_len}).")
+
+    # A rover with two *identified* donor motors needs two distinct loads.
+    # Keep both in the actual Python compilation path, not only the TS UI
+    # translator. Driver output pairing is a proposal, not power authorization.
+    if build_id == "robot_drive_base" and plan.get("resolved_modules"):
+        motor_rows = [
+            row for row in (plan.get("resolved_modules") or [])
+            if isinstance(row, Mapping)
+            and str(row.get("module_id") or "") in {"dc_motor_3v_6v", "dc_geared_motor_12v"}
+        ]
+        modules = list(adapted_recipe.get("modules") or [])
+        connections = list(adapted_recipe.get("wires") or [])
+        driver = next((m for m in modules if m.get("role") == "drv"), None)
+        if motor_rows and driver and driver.get("moduleId") == "l298n":
+            for index, motor in enumerate(motor_rows):
+                role = f"motor_{index + 1}"
+                modules.append({"role": role, "moduleId": motor["module_id"]})
+                if index < 2:
+                    output_a, output_b = (("OUT1", "OUT2") if index == 0 else ("OUT3", "OUT4"))
+                    connections.extend([
+                        {"from": {"role": "drv", "pin": output_a}, "to": {"role": role, "pin": "VCC"}},
+                        {"from": {"role": "drv", "pin": output_b}, "to": {"role": role, "pin": "GND"}},
+                    ])
+                else:
+                    warnings.append(f"Motor instance {index + 1} exceeds two available L298N channels; connection unresolved.")
+
+            mcu = next((m for m in modules if m.get("role") == "mcu"), None)
+            if mcu and mcu.get("moduleId") == "esp32-devkit":
+                connections = [
+                    w for w in connections
+                    if not (
+                        (w.get("from") or {}).get("role") == "mcu"
+                        and (w.get("to") or {}).get("role") == "drv"
+                        and (w.get("to") or {}).get("pin") in {"IN1", "IN2", "IN3", "IN4"}
+                    )
+                ]
+                for pin, gpio in (("IN1", "GPIO16"), ("IN2", "GPIO17"),
+                                  ("IN3", "GPIO18"), ("IN4", "GPIO23")):
+                    connections.append({
+                        "from": {"role": "mcu", "pin": gpio},
+                        "to": {"role": "drv", "pin": pin},
+                    })
+            elif len(motor_rows) > 1:
+                warnings.append("Motor channel 2 requires an independently verified MCU control-pin mapping.")
+
+            physical_sources = {
+                str(row.get("module_id") or "") for row in (plan.get("resolved_modules") or [])
+                if isinstance(row, Mapping)
+            }
+            if "dc-barrel-12v" not in physical_sources:
+                remove_roles = {"pwr", "mot_psu"}
+                modules = [m for m in modules if m.get("role") not in remove_roles]
+                connections = [
+                    w for w in connections
+                    if (w.get("from") or {}).get("role") not in remove_roles
+                    and (w.get("to") or {}).get("role") not in remove_roles
+                ]
+                warnings.append("Legacy 12 V barrel/buck omitted: donor VMOTOR supply has not been identified or measured.")
+            if "usb-power-5v" not in physical_sources:
+                modules = [m for m in modules if m.get("role") != "usb"]
+                connections = [
+                    w for w in connections
+                    if (w.get("from") or {}).get("role") != "usb"
+                    and (w.get("to") or {}).get("role") != "usb"
+                ]
+                warnings.append("Legacy USB supply omitted: independent controller power not verified.")
+            notes.append(
+                f"Source-bound motor instances preserved: {len(motor_rows)}; "
+                "power and physical wiring authorization remain open."
+            )
+            adapted_recipe["modules"] = modules
+            adapted_recipe["wires"] = connections
+        elif motor_rows:
+            warnings.append("Motor inventory exists but compatible driver channel mapping is unverified.")
 
     id_of: Dict[str, str] = {}
     nodes = []
