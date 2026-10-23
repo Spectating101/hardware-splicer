@@ -55,8 +55,16 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
             "next_test_strategy": "Obtain at least two comparable path observations with known test outcomes; do not infer a root cause from a generic symptom.",
             "limitations": ["Insufficient substitution/path evidence to prioritize a particular part."],
         }
-    failed = Counter(c for obs in observations if obs["outcome"] == "fail" for c in set(obs["path"]))
-    passed = Counter(c for obs in observations if obs["outcome"] == "pass" for c in set(obs["path"]))
+    # Repeating the same route after a part swap is useful intervention
+    # evidence, but cannot count as a new independent failure topology.
+    # Otherwise a user could game the score by duplicating observations.
+    distinct_observations = {}
+    for observation in observations:
+        signature = (observation["outcome"], tuple(sorted(set(observation["path"]))))
+        distinct_observations[signature] = observation
+    unique_paths = list(distinct_observations.values())
+    failed = Counter(c for obs in unique_paths if obs["outcome"] == "fail" for c in set(obs["path"]))
+    passed = Counter(c for obs in unique_paths if obs["outcome"] == "pass" for c in set(obs["path"]))
     tested = Counter(x["component_id"] for x in interventions if x["outcome"] == "no_change")
     rows: list[dict[str, Any]] = []
     for cid, spec in parts.items():
@@ -97,11 +105,20 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
         r["service_cost_rank"],
         r["component_id"],
     ))
+    top_score = rows[0]["triage_evidence_score_not_probability"] if rows else None
+    ties = sum(r["triage_evidence_score_not_probability"] == top_score for r in rows)
     return {
         "schema_version": "hardware_splicer.repair_path_diagnostics.v0",
         "case_id": str(intake.get("case_id") or ""),
         "authority": "symptom_and_test_evidence_only",
         "verdict": "triage_hypothesis_only",
+        "source_test_count": len(observations),
+        "independent_path_signature_count": len(unique_paths),
+        "highest_evidence_score_tie_count": ties,
+        "top_selection_basis": (
+            "serviceability_tiebreak_not_unique_causal_identification"
+            if ties > 1 else "distinct_evidence_score_not_confirmed_causation"
+        ),
         "known_successful_repair": False,
         "physical_repair_verified": False,
         "model_inference_used": False,
