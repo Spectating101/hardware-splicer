@@ -63,6 +63,7 @@ def build_project_package(
     return apply_manufacturing_reconciliation(
         package,
         build_graph=_build_graph(root, result),
+        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
     )
 
 
@@ -85,6 +86,7 @@ def write_project_package_artifacts(
     package = apply_manufacturing_reconciliation(
         dict(output.get("package") or {}),
         build_graph=_build_graph(root, result),
+        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
     )
 
     package_path = root / "PROJECT_PACKAGE.json"
