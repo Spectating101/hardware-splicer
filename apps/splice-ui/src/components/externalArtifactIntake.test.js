@@ -48,7 +48,7 @@ describe("read-only upstream artifact intake", () => {
     expect(() => parseBomCsvArtifact("Name,Qty\nMotor,2,EXTRA\n")).toThrow(/column count/);
   });
   it("catches the two-motor versus one-motor regression without guessing part identity", () => {
-    const upstream = parseBomCsvArtifact("Name,Qty\\nDC motor,2\\nESP32,1\\n");
+    const upstream = parseBomCsvArtifact("Name,Qty\nDC motor,2\nESP32,1\n");
     const compared = reconcileExternalBomProposal(upstream, [
       {description:"DC motor",qty:1},
       {description:"ESP32",qty:1},
@@ -58,7 +58,7 @@ describe("read-only upstream artifact intake", () => {
     expect(compared.conflicts).toEqual([{part:"DC motor",externalQuantity:2,hsQuantity:1}]);
   });
   it("preserves authority gaps when product BOM is absent or aliases do not match", () => {
-    const upstream = parseBomCsvArtifact("Name,Qty\\nRecovered motor,2\\n");
+    const upstream = parseBomCsvArtifact("Name,Qty\nRecovered motor,2\n");
     const absent = reconcileExternalBomProposal(upstream, null);
     expect(absent.status).toBe("unavailable");
     const unknown = reconcileExternalBomProposal(upstream, [{description:"Motor, donor A",qty:2}]);
@@ -67,7 +67,7 @@ describe("read-only upstream artifact intake", () => {
     expect(unknown.missing).toContain("Motor, donor A");
   });
   it("does not turn matching quantities into engineering validation", () => {
-    const result = reconcileExternalBomProposal(parseBomCsvArtifact("Name,Qty\\nMotor,2\\n"), [
+    const result = reconcileExternalBomProposal(parseBomCsvArtifact("Name,Qty\nMotor,2\n"), [
       {description:"Motor",qty:2},
     ]);
     expect(result.status).toBe("exact_label_parity");
