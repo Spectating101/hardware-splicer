@@ -5,7 +5,6 @@
     {
       "case_id": "R01",
       "device_category": "iPhone XS Max",
-      "source_url": "https://www.ifixit.com/Answers/View/763538/%5B%2BSolved%5D%2BPanic%2BFull%2Bi2c0%2BCheckBusStatus%2BSCL%2Bis%2Bstuck%2Blow%2Bissue",
       "repair_intake": {
         "device_hint": "iPhone XS Max",
         "symptoms": [
@@ -37,7 +36,7 @@
             {
               "id": "R01-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "charger_flex",
                 "main_board",
@@ -47,7 +46,7 @@
             {
               "id": "R01-pass-0",
               "outcome": "pass",
-              "observation": "reported functional path",
+              "observation": "Reported successful operation on declared comparison route",
               "path": [
                 "main_board",
                 "battery"
@@ -61,7 +60,6 @@
     {
       "case_id": "R02",
       "device_category": "iPhone XS",
-      "source_url": "https://www.ifixit.com/Answers/View/699930/iPhone%2BXS%2Bautomatically%2Bshuts%2Bdown%2Bonce%2Bplugged%2Bto%2Bcharger",
       "repair_intake": {
         "device_hint": "iPhone XS",
         "symptoms": [
@@ -93,7 +91,7 @@
             {
               "id": "R02-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "charger_flex",
                 "main_board",
@@ -103,7 +101,7 @@
             {
               "id": "R02-pass-0",
               "outcome": "pass",
-              "observation": "reported functional path",
+              "observation": "Reported successful operation on declared comparison route",
               "path": [
                 "main_board",
                 "battery"
@@ -117,7 +115,6 @@
     {
       "case_id": "R03",
       "device_category": "iPhone 6",
-      "source_url": "https://www.ifixit.com/Answers/View/536701/Ear%2Bspeaker%2Bstopped%2Bworking%2Bafter%2Bbattery%2Breplacement",
       "repair_intake": {
         "device_hint": "iPhone 6",
         "symptoms": [
@@ -149,7 +146,7 @@
             {
               "id": "R03-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "earpiece",
                 "front_camera_flex",
@@ -164,7 +161,6 @@
     {
       "case_id": "R04",
       "device_category": "Lenovo ThinkPad P17 Gen 2",
-      "source_url": "https://www.ifixit.com/Answers/View/934998/Laptop%2BWon%27t%2BPower%2BOn",
       "repair_intake": {
         "device_hint": "Lenovo ThinkPad P17 Gen 2",
         "symptoms": [
@@ -202,7 +198,7 @@
             {
               "id": "R04-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "embedded_controller",
                 "charger_path",
@@ -218,7 +214,6 @@
     {
       "case_id": "R05",
       "device_category": "iPhone 4S",
-      "source_url": "https://www.ifixit.com/Answers/View/378113/Replaced%2BBattery%2C%2Bwill%2Bnot%2Bcharge%2Beven%2Bthough%2Bit%2Bshows%2Bit%2Bis.",
       "repair_intake": {
         "device_hint": "iPhone 4S",
         "symptoms": [
@@ -262,7 +257,7 @@
             {
               "id": "R05-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "replacement_battery",
                 "dock_port",
@@ -273,7 +268,7 @@
             {
               "id": "R05-fail-1",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "replacement_battery",
                 "dock_port",
@@ -289,7 +284,6 @@
     {
       "case_id": "R06",
       "device_category": "MacBook Pro Mid 2010",
-      "source_url": "https://www.ifixit.com/Answers/View/645248/Battery%2Bindicator%2Bworks%2Bbut%2Bdoes%2Bnot%2Bcharge%2Bor%2Bget%2Brecognized",
       "repair_intake": {
         "device_hint": "MacBook Pro Mid 2010",
         "symptoms": [
@@ -327,7 +321,7 @@
             {
               "id": "R06-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "battery_pack",
                 "battery_connector",
@@ -337,7 +331,7 @@
             {
               "id": "R06-pass-0",
               "outcome": "pass",
-              "observation": "reported functional path",
+              "observation": "Reported successful operation on declared comparison route",
               "path": [
                 "ac_adapter",
                 "logic_board"
@@ -351,7 +345,6 @@
     {
       "case_id": "R07",
       "device_category": "MacBook Pro 13-inch 2017",
-      "source_url": "https://www.ifixit.com/Answers/View/839128/MBP%2Bshuts%2Bdown%2Bwhen%2Bcharge%2Bhits%2B80%25",
       "repair_intake": {
         "device_hint": "MacBook Pro 13-inch 2017",
         "symptoms": [
@@ -383,7 +376,7 @@
             {
               "id": "R07-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "battery_pack",
                 "power_controller",
@@ -398,7 +391,6 @@
     {
       "case_id": "R08",
       "device_category": "PlayStation 5",
-      "source_url": "https://www.ifixit.com/Answers/View/924602/Missing%2Bpiece%2Breassembling%2Bps5%2C%2Bnow%2Boverheating",
       "repair_intake": {
         "device_hint": "PlayStation 5",
         "symptoms": [
@@ -414,42 +406,36 @@
               "reversible_test_available": true
             },
             {
-              "id": "console_load",
-              "label": "High-load electronics",
-              "service_cost_rank": 3,
-              "reversible_test_available": true
-            },
-            {
-              "id": "console_idle",
-              "label": "Low-load electronics",
-              "service_cost_rank": 3,
-              "reversible_test_available": true
-            },
-            {
               "id": "cooling_path",
               "label": "Cooling and thermal interface",
               "service_cost_rank": 3,
               "reversible_test_available": true
+            },
+            {
+              "id": "console_power_path",
+              "label": "Console power circuits",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
             }
           ],
           "path_tests": [
             {
               "id": "R08-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Gaming/high-load operating condition failed",
               "path": [
                 "aftermarket_psu",
-                "console_load",
+                "console_power_path",
                 "cooling_path"
               ]
             },
             {
               "id": "R08-pass-0",
               "outcome": "pass",
-              "observation": "reported functional path",
+              "observation": "Reported to remain on at idle/low-load condition",
               "path": [
                 "aftermarket_psu",
-                "console_idle",
+                "console_power_path",
                 "cooling_path"
               ]
             }
@@ -461,7 +447,6 @@
     {
       "case_id": "R09",
       "device_category": "PlayStation 4 Slim",
-      "source_url": "https://www.ifixit.com/Answers/View/677558/Power%2BSupply%2BUnit%2BCUH-2102A%2BPS4",
       "repair_intake": {
         "device_hint": "PlayStation 4 Slim",
         "symptoms": [
@@ -493,7 +478,7 @@
             {
               "id": "R09-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "psu",
                 "motherboard",
@@ -508,7 +493,6 @@
     {
       "case_id": "R10",
       "device_category": "iPhone 4",
-      "source_url": "https://www.ifixit.com/Answers/View/62844/iPhone%2B4%2Bwon%27t%2Bcharge%21",
       "repair_intake": {
         "device_hint": "iPhone 4",
         "symptoms": [
@@ -540,7 +524,7 @@
             {
               "id": "R10-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "battery_pack",
                 "dock_connector",
@@ -555,7 +539,6 @@
     {
       "case_id": "R11",
       "device_category": "MacBook Pro Early 2015",
-      "source_url": "https://www.ifixit.com/Answers/View/670558/Replaced%2BTrackpad%2BCable%2BNow%2Bbattery%2Bis%2Bnot%2Bworking",
       "repair_intake": {
         "device_hint": "MacBook Pro Early 2015",
         "symptoms": [
@@ -567,8 +550,8 @@
             {
               "id": "trackpad_keyboard_flex",
               "label": "Trackpad interconnect ribbon",
-              "service_cost_rank": 5,
-              "reversible_test_available": false
+              "service_cost_rank": 2,
+              "reversible_test_available": true
             },
             {
               "id": "trackpad",
@@ -593,7 +576,7 @@
             {
               "id": "R11-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "trackpad_keyboard_flex",
                 "trackpad",
@@ -603,7 +586,7 @@
             {
               "id": "R11-fail-1",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "trackpad_keyboard_flex",
                 "keyboard",
@@ -618,7 +601,6 @@
     {
       "case_id": "R12",
       "device_category": "iPhone 14 Pro",
-      "source_url": "https://www.ifixit.com/Answers/View/953710/iPhone%2B14%2Bpro%2Brandomly%2Breboots%2Bafter%2Bbattery%2Breplacement",
       "repair_intake": {
         "device_hint": "iPhone 14 Pro",
         "symptoms": [
@@ -656,7 +638,7 @@
             {
               "id": "R12-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "new_battery",
                 "charger_flex",
@@ -672,7 +654,6 @@
     {
       "case_id": "R13",
       "device_category": "iPhone 15",
-      "source_url": "https://www.ifixit.com/Answers/View/874876/iPhone%2B15%2C%2Brestarting%2Bevery%2B3%2Bmiutes%2C%2BI%2Battached%2Bthe%2Bcrash%2Blog",
       "repair_intake": {
         "device_hint": "iPhone 15",
         "symptoms": [
@@ -704,7 +685,7 @@
             {
               "id": "R13-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "charger_flex",
                 "main_board",
@@ -726,7 +707,6 @@
     {
       "case_id": "R14",
       "device_category": "Samsung Galaxy S8+",
-      "source_url": "https://www.ifixit.com/Answers/View/724966/phone%2Bwont%2Bturn%2Bon%2Bunless%2Bplugged%2Bbattery%2Bwas%2Breplaced%2Bwith%2Borginal",
       "repair_intake": {
         "device_hint": "Samsung Galaxy S8+",
         "symptoms": [
@@ -764,7 +744,7 @@
             {
               "id": "R14-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "battery_pack",
                 "charging_port",
@@ -774,7 +754,7 @@
             {
               "id": "R14-pass-0",
               "outcome": "pass",
-              "observation": "reported functional path",
+              "observation": "Reported successful operation on declared comparison route",
               "path": [
                 "external_power",
                 "board_power_path"
@@ -801,7 +781,6 @@
     {
       "case_id": "R15",
       "device_category": "Xbox Series X",
-      "source_url": "https://www.ifixit.com/Answers/View/855785/Why%2Bwon%E2%80%99t%2Bmy%2BXbox%2BSeries%2BX%2Bturn%2Bon",
       "repair_intake": {
         "device_hint": "Xbox Series X",
         "symptoms": [
@@ -833,7 +812,7 @@
             {
               "id": "R15-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "psu",
                 "motherboard_power",
@@ -855,7 +834,6 @@
     {
       "case_id": "R16",
       "device_category": "Nintendo Switch Joy-Con",
-      "source_url": "https://www.ifixit.com/Troubleshooting/Joy-Con/Nintendo+Switch+Joy-Con+Drift/481780",
       "repair_intake": {
         "device_hint": "Nintendo Switch Joy-Con",
         "symptoms": [
@@ -887,7 +865,7 @@
             {
               "id": "R16-fail-0",
               "outcome": "fail",
-              "observation": "reported failed functional path",
+              "observation": "Reported failure on declared functional route",
               "path": [
                 "stick_wear",
                 "stick_contamination",
