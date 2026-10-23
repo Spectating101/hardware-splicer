@@ -112,9 +112,22 @@ def verify_converter_uuid_provenance(
         d["schematic_component_id"]:d for d in docs if d.get("type")=="schematic_component"
     }
     ports_by_component:dict[str,set[str]]={}
+    source_ports_by_id:dict[str,dict]={}
+    schematic_ports_by_source_id:dict[str,dict]={}
+    for item in docs:
+        if item.get("type")!="schematic_port":
+            continue
+        spid=str(item.get("source_port_id") or "")
+        if not spid or spid in schematic_ports_by_source_id:
+            raise ValueError("Missing/duplicate converted visual port identity")
+        schematic_ports_by_source_id[spid]=item
     for port in docs:
         if port.get("type")!="source_port":
             continue
+        pid=str(port.get("source_port_id") or "")
+        if not pid or pid in source_ports_by_id:
+            raise ValueError("Missing/duplicate source port identity")
+        source_ports_by_id[pid]=port
         cid=str(port.get("source_component_id") or "")
         number=port.get("pin_number")
         if cid not in source_components or number is None:
@@ -123,6 +136,8 @@ def verify_converter_uuid_provenance(
         if str(number) in pins:
             raise ValueError("Duplicate converted pin number")
         pins.add(str(number))
+    if set(source_ports_by_id)!=set(schematic_ports_by_source_id):
+        raise ValueError("Converter source ports and visual schematic ports are not one-to-one")
     actual_pins:dict[str,set[str]]={}
     for n in official.nets:
         for p in n.pins:
@@ -168,6 +183,13 @@ def verify_converter_uuid_provenance(
         declared=row.get("source_pin_numbers")
         if not isinstance(declared,list) or set(declared)!=ports_by_component.get(cid,set()) or len(declared)!=len(set(declared)):
             raise ValueError("Source pin numbers disagree with converted port records")
+        for port_id,port in source_ports_by_id.items():
+            if port["source_component_id"]!=cid:
+                continue
+            visual_port=schematic_ports_by_source_id[port_id]
+            if (visual_port.get("schematic_component_id")!=vid or
+                str(visual_port.get("pin_number"))!=str(port["pin_number"])):
+                raise ValueError("Original converter pin-to-visual identity disagrees with runtime UUID link")
         if ref in physical_refs:
             if uuid not in (official_by_ref[ref].metadata.get("kicad_symbol_tstamps") or []):
                 raise ValueError("Original native UUID is absent from independent KiCad netlist export")
