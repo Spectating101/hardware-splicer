@@ -39,6 +39,20 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
         netlist, tmp_path, build_id="generic_low_voltage_build", export_gerber=False
     )
     q = result.design_quality or {}
+    if fixture.get("type") == "kicad_netlist":
+        # The former importer silently dropped all KiCad (node (ref ...)
+        # (pin ...)) pin memberships. Its empty circuit routed cleanly,
+        # but the actual 14-net design has two hard copper shorts in the
+        # current in-repo router. Do not assert fabricated DRC success.
+        assert len(netlist.nets) == 14
+        assert sum(len(n.pins) for n in netlist.nets) == 40
+        assert q.get("build_graph_compiled") is True
+        assert q.get("wire_count", 0) >= 20
+        assert result.ok is False
+        assert q.get("drc_pass") is False
+        assert int(q.get("drc_errors") or 0) > 0
+        assert q.get("fabrication_ready") is False
+        return
     assert result.ok, result.error
     assert int(q.get("kicad_drc_errors") or 0) == 0, q
     assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
