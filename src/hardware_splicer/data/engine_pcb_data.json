@@ -51,6 +51,13 @@
           "voltage": "3.3V"
         },
         {
+          "id": "GPIO14",
+          "label": "GPIO14",
+          "role": "digital_io",
+          "voltage": "3.3V",
+          "notes": "ESP32 DevKitC pin / JTAG MTMS: availability must be checked on the exact donor board"
+        },
+        {
           "id": "GPIO15",
           "label": "GPIO15",
           "role": "digital_io",
