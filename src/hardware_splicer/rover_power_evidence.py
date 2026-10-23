@@ -234,7 +234,7 @@ def compare_motor_driver_options(
     for item in data:
         max_peak = item.get("current_peak_a_at_reference")
         item["declared_peak_below_manufacturer_peak_ref"] = (
-            peak_max_a <= max_peak if peak_max is not None and max_peak is not None else None
+            peak_max_a <= max_peak if peak_max_a is not None and max_peak is not None else None
         )
         item["usable_without_physical_checks"] = False
         item["motor_terminal_voltage_derived"] = False
