@@ -542,3 +542,24 @@ def test_pf002_mismatched_material_total_cannot_be_silent():
     assert x["status"] == "INVALID"
     assert "material_total_does_not_reconcile" in x["errors"]
     assert x["purchase_authorized"] is False
+
+
+def test_all_three_source_branch_product_factory_runs_are_preserved():
+    root = Path(__file__).resolve().parents[1]
+    names = [
+        "commercial_pf001_proofpod_snapshot.json",
+        "commercial_pf002_benchhmi_snapshot.json",
+        "commercial_pf003_fielddeck_snapshot.json",
+    ]
+    products = {}
+    for name in names:
+        payload = json.loads((root / "examples" / name).read_text(encoding="utf-8"))
+        report = normalize_product_factory_run(payload, source_ref=name)
+        products[report["run_id"]] = report
+        assert report["commercial_status"] == "DISCOVERY_ONLY"
+        assert report["purchase_authorized"] is False
+        assert report["stage_states"]["PROVE"] != "PASS"
+    assert set(products) == {"PF-001", "PF-002", "PF-003"}
+    assert products["PF-001"]["price_hypotheses"]["target_board_msrp_usd"]["evidence_class"] == "HYPOTHESIS"
+    assert products["PF-002"]["price_hypotheses"]["target_msrp_twd"]["evidence_class"] == "HYPOTHESIS"
+    assert products["PF-003"]["price_hypotheses"]["target_msrp_twd"]["evidence_class"] == "HYPOTHESIS"
