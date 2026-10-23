@@ -39,6 +39,22 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
     # A restored result is a post-repair outcome (label leakage), so forbid it in blind mode.
     if any(x["outcome"] == "restored" for x in interventions):
         raise ValueError("Do not provide known successful repair interventions in blind input")
+    # Single symptoms (e.g. generic joystick drift) usually cannot isolate a
+    # repair component; require two actual independent path observations.
+    if len(observations) < 2 or not any(obs["outcome"] == "fail" for obs in observations):
+        return {
+            "schema_version": "hardware_splicer.repair_path_diagnostics.v0",
+            "case_id": str(intake.get("case_id") or ""),
+            "authority": "symptom_and_test_evidence_only",
+            "verdict": "insufficient_discriminating_evidence",
+            "known_successful_repair": False,
+            "physical_repair_verified": False,
+            "model_inference_used": False,
+            "candidate_count": 0,
+            "candidates": [],
+            "next_test_strategy": "Obtain at least two comparable path observations with known test outcomes; do not infer a root cause from a generic symptom.",
+            "limitations": ["Insufficient substitution/path evidence to prioritize a particular part."],
+        }
     failed = Counter(c for obs in observations if obs["outcome"] == "fail" for c in set(obs["path"]))
     passed = Counter(c for obs in observations if obs["outcome"] == "pass" for c in set(obs["path"]))
     tested = Counter(x["component_id"] for x in interventions if x["outcome"] == "no_change")
