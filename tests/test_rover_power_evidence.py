@@ -158,6 +158,8 @@ def test_competitive_driver_comparison_keeps_package_deratings_and_uncertainty()
     assert options["ti_drv8833_pwp_rty"]["max_current_continuous_a_at_reference"] == 1.5
     assert options["ti_drv8833_pw"]["max_current_continuous_a_at_reference"] == 0.5
     assert options["l298n_existing"]["reference_driver_loss_w_at_1a"] == [1.8, 3.2]
+    assert options["l298n_existing"]["max_current_continuous_a_at_reference"] is None
+    assert options["l298n_existing"]["absolute_dc_current_limit_a"] == 2.0
     assert options["ti_drv8833_pwp_rty"]["reference_driver_loss_w_at_1a"] == [0.36, 0.36]
     assert report["scenario"]["continuous_motor_current_a"] is None
     assert all(item["usable_without_physical_checks"] is False for item in options.values())
