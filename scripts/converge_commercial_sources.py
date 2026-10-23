@@ -21,6 +21,7 @@ from hardware_splicer.commercial_value_routing import (
     normalize_salvage_opportunities, normalize_donor_discovery,
     normalize_salvage_purchase_screen,
 )
+from hardware_splicer.commercial_investigation import build_investigation_queue
 
 
 def load(path: Path) -> dict:
@@ -88,6 +89,7 @@ def main() -> int:
             "Do not compare economics across TWD/CNY/IDR without explicit FX modeling",
         ],
     }
+    output["investigation_queue"] = build_investigation_queue(output)
     text = json.dumps(output, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
