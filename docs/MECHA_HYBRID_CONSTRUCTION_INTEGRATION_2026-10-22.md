@@ -258,6 +258,9 @@ standard Mecha runner also emits:
   for the proposed panel topology, quantities, thickness and notes.
 * `HYBRID_PANEL_BLANKS.svg` — one dimensioned 1:1-mm outline of each
   unique blank **for review**, not a licensed CNC/laser toolpath.
+* `HYBRID_ASSEMBLY_PREVIEW.scad` — 3D reference of six sheet blanks
+  in the proposed panel layout. No connector seats, cutouts, support
+  joints, load rating or verified fabricated geometry are represented.
 * `HYBRID_PARTS.json` — a distinct sheet, connector and required
   attachment schedule rather than silently mixing with the original
   fully printed enclosure BOM.
