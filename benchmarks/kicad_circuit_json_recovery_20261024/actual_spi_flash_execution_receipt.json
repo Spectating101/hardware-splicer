@@ -1,0 +1,41 @@
+{
+  "authority": "kicad_export_netlist_only",
+  "source_sha256": "83d0ff5f6a8001a47c41f21c984c42a341ca63faf7b979e0a8ee731190c19ae4",
+  "components": 36,
+  "source_nets": 19,
+  "source_pin_memberships": 79,
+  "connected_multi_pin_nets": 16,
+  "source_single_pin_nets": {
+    "unconnected-(U1-NC-Pad6)": [
+      "U1.6"
+    ],
+    "unconnected-(U1-NC-Pad9)": [
+      "U1.9"
+    ],
+    "unconnected-(U3-NC-Pad4)": [
+      "U3.4"
+    ]
+  },
+  "imported_components": 36,
+  "imported_multi_pin_nets": 16,
+  "imported_multi_pin_memberships": 76,
+  "topology_exact_multi_pin_match": true,
+  "external_converter": {
+    "provided": true,
+    "document_count": 679,
+    "source_components": 40,
+    "source_ports": 83,
+    "source_nets": 16,
+    "source_traces": 0,
+    "schematic_geometry_traces": 87,
+    "root_sheet_net_names_correspond_only": true,
+    "converter_power_flag_symbol_count": 4,
+    "power_flag_symbols_excluded_from_authoritative_bom": true,
+    "geometry_and_component_identity_reconciled": false,
+    "original_converter_topology_approved": false
+  },
+  "physical_evidence": false,
+  "pcb_erc_or_drc_certified": false,
+  "manufacturing_authorized": false,
+  "claim": "Source-level KiCad connectivity preserved using a separate authoritative export; original converter geometry and its component identities remain unverified."
+}
