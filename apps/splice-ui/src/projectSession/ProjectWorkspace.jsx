@@ -31,6 +31,7 @@ import {
 } from "./stageAvailability.js";
 import { deriveProjectTruth } from "./deriveProjectTruth.js";
 import { derivePackageHandoff } from "./packageHandoff.js";
+import RoverPowerEvidencePanel from "./RoverPowerEvidencePanel.jsx";
 
 /**
  * Project workspace shell — stages wrap existing panels while the durable
@@ -202,6 +203,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.verify && (
           <div className="panel-stack" data-testid="stage-verify">
+            <RoverPowerEvidencePanel report={pkg?.rover_power_evidence} />
             <MachineEvidencePanel session={session} onToast={onToast} />
             {session.mode === "salvage" && (
               <EvidenceWorkbenchPanel
@@ -239,6 +241,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.bench && (
           <div className="panel-stack" data-testid="stage-bench">
+            <RoverPowerEvidencePanel report={pkg?.rover_power_evidence} />
             {(truth.bench.simulated ||
               truth.bench.state === "authorization_pending" ||
               truth.bench.state === "gates_open" ||

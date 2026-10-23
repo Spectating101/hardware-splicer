@@ -16,9 +16,50 @@ from typing import Any, Dict, Mapping
 
 from . import project_package_core as _core
 from .manufacturing_reconciliation import apply_manufacturing_reconciliation
+from .rover_power_evidence import apply_rover_power_evidence_gate
 
 SCHEMA_VERSION = _core.SCHEMA_VERSION
-render_project_page_md = _core.render_project_page_md
+def render_project_page_md(package: Mapping[str, Any]) -> str:
+    """Append auditable physical-power tasks to the existing project page."""
+    base = _core.render_project_page_md(package)
+    report = package.get("rover_power_evidence") or {}
+    if not isinstance(report, Mapping) or report.get("status") != "blocked":
+        return base
+    declared = dict(report.get("declared") or {})
+    lines = [
+        "",
+        "## MOTOR POWER EVIDENCE — NOT AUTHORIZED TO ENERGIZE",
+        "",
+        "The following are **user-declared specifications, not physical measurements**.",
+        "",
+        f"- Battery nominal (declared): `{declared.get('battery_nominal_v')}` V",
+        f"- Battery capacity (declared): `{declared.get('battery_capacity_mah')}` mAh",
+        f"- Motor count (declared): `{declared.get('motor_count')}`",
+        f"- Simultaneous stated motor stall-current sum: `{declared.get('simultaneous_stall_current_a')}` A (not a measured pack or driver capability)",
+        "",
+        "**Measurements authenticated in this report:** none. "
+        "Bench-session records require separate instrumentation and review.",
+        "",
+        "### Unresolved power and thermal requirements",
+    ]
+    for issue in report.get("blockers") or []:
+        if not isinstance(issue, Mapping):
+            continue
+        lines.append(f"- **{issue.get('code')}**: {issue.get('message')}")
+    lines.extend([
+        "",
+        "### Required evidence before considering any power-on",
+    ])
+    for action in report.get("next_actions") or []:
+        lines.append(f"- {action}")
+    lines.extend([
+        "",
+        "L298 manufacturer reference: https://www.st.com/resource/en/datasheet/l298.pdf "
+        "(table 4 is conditional test data, not this rover's measured voltage drop).",
+        "",
+    ])
+    return base.rstrip() + "\n" + "\n".join(lines)
+
 
 
 def _build_graph(
@@ -60,11 +101,10 @@ def build_project_package(
 
     root = Path(build_dir).resolve()
     package = _core.build_project_package(root, result=result, source=source)
-    return apply_manufacturing_reconciliation(
-        package,
-        build_graph=_build_graph(root, result),
-        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
-    )
+    intake = _core._read_json(root / "PROJECT_INTAKE.json")
+    graph = _build_graph(root, result)
+    checked = apply_manufacturing_reconciliation(package, build_graph=graph, intake=intake)
+    return apply_rover_power_evidence_gate(checked, intake=intake, graph=graph)
 
 
 def write_project_package_artifacts(
@@ -83,11 +123,12 @@ def write_project_package_artifacts(
         source=source,
         candidate=candidate,
     )
-    package = apply_manufacturing_reconciliation(
-        dict(output.get("package") or {}),
-        build_graph=_build_graph(root, result),
-        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
+    intake = _core._read_json(root / "PROJECT_INTAKE.json")
+    graph = _build_graph(root, result)
+    checked = apply_manufacturing_reconciliation(
+        dict(output.get("package") or {}), build_graph=graph, intake=intake
     )
+    package = apply_rover_power_evidence_gate(checked, intake=intake, graph=graph)
 
     package_path = root / "PROJECT_PACKAGE.json"
     page_path = root / "PROJECT_PAGE.md"
@@ -97,7 +138,7 @@ def write_project_package_artifacts(
     )
     _atomic_write_text(
         page_path,
-        _core.render_project_page_md(package),
+        render_project_page_md(package),
     )
 
     output["package"] = package
