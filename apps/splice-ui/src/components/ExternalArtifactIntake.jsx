@@ -8,6 +8,7 @@ import LabResultCard from "./LabResultCard.jsx";
 import {
   parseBomCsvArtifact,
   reconcileExternalBomProposal,
+  inspectBinaryStlArtifact,
   parseCircuitJsonArtifact,
   validateExternalFile,
 } from "./externalArtifactIntake.js";
@@ -51,7 +52,9 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
         ? parseCircuitJsonArtifact(text)
         : kind === "bom-csv"
           ? parseBomCsvArtifact(text)
-          : text;
+          : kind === "mechanical-reference" && file.name.toLowerCase().endsWith(".stl")
+            ? inspectBinaryStlArtifact(bytes)
+            : text;
       setSelected({ name: file.name, size: file.size, kind });
       setSourceSha(sha);
       setParsed(value);
@@ -175,7 +178,17 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
             <p>KiCad netlist loaded as a source proposal. Only compile if you trust this input and wish to create a draft design.</p>
           )}
           {selected.kind === "mechanical-reference" && (
-            <p>CAD reference detected. HS has not checked STEP/STL geometry, fit, clearances, or manufacturability; file remains local to this view.</p>
+            <div>
+              {parsed?.triangles && (
+                <p role="status">
+                  Binary STL: {parsed.triangles} triangles; bounding extents
+                  {" "}{parsed.bounds.extent.map((n) => n.toFixed(2)).join(" × ")}
+                  {" "}file units (STL does not specify mm/inches).
+                </p>
+              )}
+              <p>CAD source only. HS has not checked fit, clearances, print tolerances,
+                source dimensions, or manufacturability; the file remains local to this view.</p>
+            </div>
           )}
           {selected.kind === "firmware-reference" && (
             <p>Firmware reference loaded. It has not been compiled, checked for MCU pin alignment, or authorized to flash; file remains local to this view.</p>
