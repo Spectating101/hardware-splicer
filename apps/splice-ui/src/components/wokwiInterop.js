@@ -166,3 +166,55 @@ export function compareWokwiCandidateToHsBom(proposal, bomLines) {
     note:"Family-level quantity comparison. Physical donor identity, power, wiring and unmodelled peripherals still require review.",
   };
 }
+
+
+/**
+ * Explicit *draft only* bridge to HS's editable Studio canvas. Never import
+ * partially mapped designs: missing donors, nets or GPIOs must not vanish.
+ * Catalog pins are validated against the CURRENT HS module catalog.
+ */
+export function buildWokwiStudioDraft(proposal, catalogModules) {
+  if (!proposal || proposal.status !== "family_mapping_only"
+      || proposal.mapped_part_count !== proposal.original_part_count
+      || proposal.mapped_connection_count !== proposal.original_connection_count) {
+    throw new Error("Wokwi design contains unmapped parts or wires: cannot import an incomplete draft.");
+  }
+  const library = new Map((catalogModules || []).filter(x=>x?.id).map(x=>[x.id,x]));
+  const nodes = proposal.nodes.map((node, i) => {
+    const spec = library.get(node.hs_module_candidate);
+    if (!spec || !Array.isArray(spec.pins) || !spec.pins.length) {
+      throw new Error(`Missing real HS catalog identity/pins for ${node.source_part_id}; do not fabricate a module.`);
+    }
+    return {
+      id: node.source_part_id, type: "module",
+      position: { x: 100+(i%3)*320, y: 80+Math.floor(i/3)*280 },
+      data: { moduleId: spec.id, spec, external_source: {
+        provider: "wokwi", part_id: node.source_part_id, type: node.source_type,
+        match_authority: node.match_authority,
+      }},
+    };
+  });
+  const byId = new Map(nodes.map(n=>[n.id,n]));
+  const edges = proposal.connections.map((wire)=>{
+    const from=wire.from, to=wire.to;
+    const a=byId.get(from.source_part_id), b=byId.get(to.source_part_id);
+    if(!a || !b) throw new Error("Cannot import a Wokwi connection referencing an unknown HS node.");
+    if(!a.data.spec.pins.some(p=>p.id===from.hs_pin_candidate) ||
+       !b.data.spec.pins.some(p=>p.id===to.hs_pin_candidate)) {
+      throw new Error(`Pin ${from.source_endpoint} → ${to.source_endpoint} absent from HS catalog.`);
+    }
+    return {
+      id: wire.id, source: a.id, target: b.id,
+      sourceHandle: from.hs_pin_candidate,
+      targetHandle: to.hs_pin_candidate,
+      animated: true, className: "studio-wire",
+      data: { provider: "wokwi", source_wire_id: wire.id },
+    };
+  });
+  return {
+    nodes, edges, phrase: "Wokwi-derived draft for independent HS review",
+    composeMode: "canvas",
+    authority: "external_simulation_proposal",
+    physical_verification: false,
+  };
+}
