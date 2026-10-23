@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  compareWokwiCandidateToHsBom, isWokwiDiagramObject, parseWokwiDiagramArtifact,
+  compareWokwiCandidateToHsBom, isWokwiDiagramObject, parseWokwiDiagramArtifact, buildWokwiStudioDraft,
 } from "./wokwiInterop.js";
 
 const diagram = () => ({
@@ -114,6 +114,38 @@ describe("documented Wokwi-to-HS provider bridge", () => {
     expect(result.unmapped_connections).toHaveLength(3);
     expect(result.connections[4].to.hs_pin_candidate).toBeNull(); // GPIO14 lacks an HS verified pad mapping
     expect(result.status).toBe("partial_mapping");
+  });
+
+  it("imports only complete family-mapped Wokwi parts into real editable HS canvas nodes and wires",()=>{
+    const p=parseWokwiDiagramArtifact(JSON.stringify(diagram()));
+    const catalog=[
+      {id:"esp32-devkit",label:"ESP32",category:"mcu",pins:[
+        {id:"3V3"},{id:"GND"},{id:"GPIO4"},{id:"GPIO21"},{id:"GPIO22"},
+      ]},
+      {id:"dht22",label:"DHT22",category:"sensor",pins:[{id:"VCC"},{id:"GND"},{id:"DATA"}]},
+      {id:"ssd1306-128x64",label:"OLED",category:"display",pins:[
+        {id:"VCC"},{id:"GND"},{id:"SCL"},{id:"SDA"},
+      ]},
+    ];
+    const d=buildWokwiStudioDraft(p,catalog);
+    expect(d.nodes).toHaveLength(3);
+    expect(d.edges).toHaveLength(7);
+    expect(d.nodes[0].data.external_source.part_id).toBe("esp");
+    expect(d.edges.find(e=>e.source==="temperature" && e.targetHandle==="GPIO4").sourceHandle).toBe("DATA");
+    expect(d.authority).toBe("external_simulation_proposal");
+    expect(d.physical_verification).toBe(false);
+    expect(d.nodes.every(x=>x.type==="module"&&x.data.spec.pins.length)).toBe(true);
+  });
+
+  it("blocks partial Wokwi drafts and fake unmapped catalog pins",()=>{
+    const doc=diagram();
+    doc.connections.push(["display:VCC","esp:D14","red",[]]);
+    const proposal=parseWokwiDiagramArtifact(JSON.stringify(doc));
+    expect(()=>buildWokwiStudioDraft(proposal,[])).toThrow(/incomplete/);
+    const complete=parseWokwiDiagramArtifact(JSON.stringify(diagram()));
+    expect(()=>buildWokwiStudioDraft(complete,[
+      {id:"esp32-devkit",pins:[{id:"GND"},{id:"3V3"}]},
+    ])).toThrow(/catalog/);
   });
 
 });
