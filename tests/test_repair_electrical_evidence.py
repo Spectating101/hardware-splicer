@@ -115,3 +115,45 @@ def test_unknown_source_net_rejected_without_guessing_from_shared_ground(tmp_pat
     p.write_text('(export (components (comp (ref "U1") (value "IC"))) (nets (net (code "1") (name "PWR") (node (ref "U2") (pin "1")))))')
     with pytest.raises(ValueError,match="unknown component"):
         capture_repair_evidence(p,measurements(tmp_path,[row(ref="U1")]))
+
+
+
+def test_combined_hs_repair_cli_generates_triage_and_source_bound_measurements(tmp_path):
+    import subprocess
+    import sys
+    cases=json.loads((ROOT/"benchmarks/repair_corpus_v2_20261023/blind_observations.json").read_text())["cases"]
+    ps5=next(c for c in cases if c["case_id"]=="R08")
+    input_json=tmp_path/"repair.json"
+    input_json.write_text(json.dumps(ps5),encoding="utf-8")
+    csv_file=measurements(tmp_path,[row(),row(identifier="obs2",value="4.8",
+        stamp="2026-10-01T09:10:00+08:00",condition="under_load")])
+    output=tmp_path/"report"
+    process=subprocess.run([
+        sys.executable,"-m","hardware_splicer.repair_triage_cli",
+        str(input_json),str(output),"--netlist",str(NET),"--measurements-csv",str(csv_file),
+    ],capture_output=True,text=True,timeout=20,check=True)
+    receipt=json.loads(process.stdout)
+    assert receipt["verdict"]=="insufficient_discriminating_evidence"
+    assert receipt["netlist_pin_count"]==40
+    assert receipt["physical_measurements_authenticated"] is False
+    assert not receipt["power_on_authorized"]
+    evidence=json.loads((output/"REPAIR_ELECTRICAL_EVIDENCE.json").read_text())
+    triage=json.loads((output/"REPAIR_TRIAGE.json").read_text())
+    assert evidence["condition_changes"][0]["delta"]==-0.3
+    assert triage["repair_path_diagnostic"]["candidates"]==[]
+    assert evidence["failed_component_identified"] is False
+    assert (output/"REPAIR_TRIAGE.md").is_file()
+    assert (output/"REPAIR_ELECTRICAL_EVIDENCE.md").is_file()
+
+
+def test_combined_cli_refuses_partial_source_information(tmp_path):
+    import subprocess
+    import sys
+    payload=tmp_path/"input.json"
+    payload.write_text('{"repair_intake":{"symptoms":["fails"]}}',encoding="utf-8")
+    r=subprocess.run([
+        sys.executable,"-m","hardware_splicer.repair_triage_cli",
+        str(payload),str(tmp_path/"out"),"--netlist",str(NET),
+    ],capture_output=True,text=True,timeout=20)
+    assert r.returncode!=0
+    assert "--netlist and --measurements-csv" in r.stderr
