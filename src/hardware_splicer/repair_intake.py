@@ -91,10 +91,28 @@ def apply_repair_intake_context(intake: Mapping[str, Any]) -> Dict[str, Any]:
         body["circuit"] = circuit
 
     body["repair_intake_context"] = ctx
+    # Repair-path observations are explicit evidence, never inferred from a
+    # symptom string. Only opt-in structured path tests produce ranked
+    # diagnostic hypotheses. This is not a physical repair authorization.
+    path_evidence = repair.get("path_evidence")
+    if isinstance(path_evidence, Mapping):
+        from .repair_path_diagnostics import rank_repair_hypotheses
+
+        evidence = dict(path_evidence)
+        evidence.setdefault("case_id", str(body.get("case_id") or ""))
+        body["repair_path_diagnostic"] = rank_repair_hypotheses(evidence)
     return body
 
 
 def repair_intake_report(intake: Mapping[str, Any]) -> Dict[str, Any]:
     """Standalone report for agents inspecting repair context."""
     ctx = extract_repair_context(intake)
-    return {**ctx, "applied": bool(ctx["symptoms"] or ctx["when_it_fails"] or ctx["device_hint"])}
+    result = {**ctx, "applied": bool(ctx["symptoms"] or ctx["when_it_fails"] or ctx["device_hint"])}
+    evidence = dict(intake.get("repair_intake") or {}).get("path_evidence")
+    if isinstance(evidence, Mapping):
+        from .repair_path_diagnostics import rank_repair_hypotheses
+
+        case = dict(evidence)
+        case.setdefault("case_id", str(intake.get("case_id") or ""))
+        result["repair_path_diagnostic"] = rank_repair_hypotheses(case)
+    return result
