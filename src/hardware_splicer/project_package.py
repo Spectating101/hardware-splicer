@@ -16,6 +16,7 @@ from typing import Any, Dict, Mapping
 
 from . import project_package_core as _core
 from .manufacturing_reconciliation import apply_manufacturing_reconciliation
+from .rover_power_evidence import apply_rover_power_evidence_gate
 
 SCHEMA_VERSION = _core.SCHEMA_VERSION
 render_project_page_md = _core.render_project_page_md
@@ -60,11 +61,10 @@ def build_project_package(
 
     root = Path(build_dir).resolve()
     package = _core.build_project_package(root, result=result, source=source)
-    return apply_manufacturing_reconciliation(
-        package,
-        build_graph=_build_graph(root, result),
-        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
-    )
+    intake = _core._read_json(root / "PROJECT_INTAKE.json")
+    graph = _build_graph(root, result)
+    checked = apply_manufacturing_reconciliation(package, build_graph=graph, intake=intake)
+    return apply_rover_power_evidence_gate(checked, intake=intake, graph=graph)
 
 
 def write_project_package_artifacts(
@@ -83,11 +83,12 @@ def write_project_package_artifacts(
         source=source,
         candidate=candidate,
     )
-    package = apply_manufacturing_reconciliation(
-        dict(output.get("package") or {}),
-        build_graph=_build_graph(root, result),
-        intake=_core._read_json(root / "PROJECT_INTAKE.json"),
+    intake = _core._read_json(root / "PROJECT_INTAKE.json")
+    graph = _build_graph(root, result)
+    checked = apply_manufacturing_reconciliation(
+        dict(output.get("package") or {}), build_graph=graph, intake=intake
     )
+    package = apply_rover_power_evidence_gate(checked, intake=intake, graph=graph)
 
     package_path = root / "PROJECT_PACKAGE.json"
     page_path = root / "PROJECT_PAGE.md"
