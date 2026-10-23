@@ -129,6 +129,11 @@ def evaluate_rover_power(
             "l298_datasheet": "https://www.st.com/resource/en/datasheet/l298.pdf",
             "l298_datasheet_revision": "DS0218 Rev 5, October 2023, tables 3 and 4",
         },
+        "driver_options": compare_motor_driver_options(
+            battery_nominal_v=battery_v,
+            motor_stall_current_a=stall,
+            motor_count=motor_count,
+        ),
         "manufacturer_reference": {
             "applicable_only_if_actual_driver_is_l298": True,
             "logic_supply_v_range": [4.5, 7.0],
@@ -159,6 +164,97 @@ def evaluate_rover_power(
         },
         "blockers": missing,
         "next_actions": [x["next_action"] for x in missing],
+    }
+
+
+
+def compare_motor_driver_options(
+    *,
+    battery_nominal_v: float | None,
+    motor_stall_current_a: list[float | None],
+    motor_count: int,
+) -> dict[str, Any]:
+    """Manufacturer-spec decision aid, never an automatic component substitution.
+
+    Stall current is a transient worst-case declaration, not a continuous
+    load. Do NOT compare stall amps to continuous ratings as a firm pass/fail.
+    Ratings for DRV8833 are package- AND thermal- AND supply-dependent.
+    """
+    data = [
+        {
+            "id": "l298n_existing",
+            "manufacturer": "ST",
+            "part": "L298 dual full-bridge (existing graph)",
+            "reference_url": "https://www.st.com/resource/en/datasheet/l298.pdf",
+            "bridge_count": 2,
+            "supply_nominal_within_spec": None,
+            "max_current_continuous_a_at_reference": 2.0,
+            "reference_conditions": "L298 datasheet; chip-level limits depend on heatsink, package, supply and junction temperature.",
+            "loss_reference": "At 1 A, ST specifies 1.8–3.2 V total saturation drop, at VS=42 V, VSS=5 V, Tj=25 C.",
+            "reference_driver_loss_w_at_1a": [1.8, 3.2],
+            "reuse": "Only if the exact donor driver is independently identified as an L298; an unknown H-bridge is not an L298.",
+            "tradeoff": "Potential salvage reuse, but comparatively high bipolar bridge drop and heat at load.",
+            "selection": "conditional_incumbent",
+        },
+        {
+            "id": "ti_drv8833_pwp_rty",
+            "manufacturer": "Texas Instruments",
+            "part": "DRV8833 PWP/RTY (HTSSOP or WQFN)",
+            "reference_url": "https://www.ti.com/lit/ds/symlink/drv8833.pdf",
+            "bridge_count": 2,
+            "supply_nominal_within_spec": (2.7 <= battery_nominal_v <= 10.8) if battery_nominal_v is not None else None,
+            "max_current_continuous_a_at_reference": 1.5,
+            "current_peak_a_at_reference": 2.0,
+            "reference_conditions": "VM=5 V, 25 C, PWP/RTY with adequate thermal design; NOT independently established at this battery, duty or board.",
+            "loss_reference": "TI lists 360 mΩ high-side plus low-side on-resistance; 0.36 W at 1 A is an idealized R*I² reference only, not measured heat.",
+            "reference_driver_loss_w_at_1a": [0.36, 0.36],
+            "reuse": "New candidate purchase; not an automatic drop-in replacement for an L298N daughterboard.",
+            "tradeoff": "Strong lower-loss FET bridge candidate; verify peak-duration, PCB/heatsink, VM range, logic, nSLEEP/current-limit and motor rail.",
+            "selection": "candidate_for_validation",
+        },
+        {
+            "id": "ti_drv8833_pw",
+            "manufacturer": "Texas Instruments",
+            "part": "DRV8833 PW (TSSOP)",
+            "reference_url": "https://www.ti.com/lit/ds/symlink/drv8833.pdf",
+            "bridge_count": 2,
+            "supply_nominal_within_spec": (2.7 <= battery_nominal_v <= 10.8) if battery_nominal_v is not None else None,
+            "max_current_continuous_a_at_reference": 0.5,
+            "current_peak_a_at_reference": 2.0,
+            "reference_conditions": "VM=5 V, 25 C; PW derated to 0.5 A RMS/DC continuous per bridge. Peak duration and thermal limits unproven.",
+            "loss_reference": "Same die-class FET path, but lower continuous thermal allowance in PW packaging.",
+            "reference_driver_loss_w_at_1a": None,
+            "reuse": "New candidate purchase with restrictive continuous-current rating.",
+            "tradeoff": "Do not select while actual motor running current, PWM duty and thermal behavior are unknown.",
+            "selection": "needs_continuous_load_evidence",
+        },
+    ]
+    stalls = [v for v in motor_stall_current_a if v is not None]
+    peak_max_a = max(stalls) if stalls and len(stalls) == len(motor_stall_current_a) and motor_count > 0 else None
+    for item in data:
+        max_peak = item.get("current_peak_a_at_reference")
+        item["declared_peak_below_manufacturer_peak_ref"] = (
+            peak_max_a <= max_peak if peak_max is not None and max_peak is not None else None
+        )
+        item["usable_without_physical_checks"] = False
+        item["motor_terminal_voltage_derived"] = False
+    return {
+        "status": "requires_physical_evidence",
+        "scenario": {
+            "battery_nominal_declared_v": battery_nominal_v,
+            "motor_count": motor_count,
+            "max_declared_motor_stall_a": peak_max_a,
+            "continuous_motor_current_a": None,
+            "actual_battery_voltage_range_v": None,
+            "note": "Nominal VM compatibility is not battery full-charge compatibility or proof of acceptable 6-V motor-terminal voltage.",
+        },
+        "options": data,
+        "recommended_next_evaluation": (
+            "Compare a specifically identified donor L298 module against a DRV8833 PWP/RTY implementation "
+            "on measured motor running/stall currents, loaded terminal voltage, heat, control and incremental cost. "
+            "No candidate is selected for build."
+        ),
+        "competitive_value": "Explicit package-specific alternatives and conditional calculations replace a single unexamined catalog driver recipe.",
     }
 
 
