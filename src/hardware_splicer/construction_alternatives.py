@@ -398,7 +398,11 @@ def evaluate_construction_alternatives(
     base_envelope_mm3 = (ow*od*base_h - iw*idepth*ih)
     lid_envelope_mm3 = ow*od*lid
     shell_envelope_mm3 = base_envelope_mm3 + lid_envelope_mm3
-    sheet_area_mm2 = 2*(ow*od + ow*oh + od*oh)
+    from .construction_sheet_geometry import make_panel_schedule
+    # Unlike the fully printed baseline, the hybrid package is sized
+    # from required INNER clearances and actual stock thickness.
+    sheet_schedule = make_panel_schedule(enclosure,construction)
+    sheet_area_mm2 = sheet_schedule.get("unoptimized_total_panel_area_mm2")
     print_record = _material(construction.get("filament_material"), "filament_material")
     panel_record = _material(construction.get("panel_material"), "panel_material")
     thickness = construction.get("panel_thickness_mm")
@@ -505,8 +509,8 @@ def evaluate_construction_alternatives(
         print_record.get("density_kg_m3") if print_record else None,
     )
     sheet_mass_g = _mass_g(
-        sheet_area_mm2*thickness if thickness is not None else 0,
-        panel_record.get("density_kg_m3") if panel_record and thickness is not None else None,
+        sheet_area_mm2*thickness if sheet_area_mm2 is not None and thickness is not None else 0,
+        panel_record.get("density_kg_m3") if panel_record and thickness is not None and sheet_area_mm2 is not None else None,
     )
     connector_mass_g = _mass_g(
         (connector_volume_cm3 or 0)*1000 * connector_count,
@@ -525,7 +529,7 @@ def evaluate_construction_alternatives(
     hybrid_cost = (
         round(sheet_area_mm2*1e-6*panel_record["cost_per_m2"]+
               connector_mass_g/1000*print_record["cost_per_kg"],3)
-        if (panel_record and print_record and connector_mass_g is not None
+        if (sheet_area_mm2 is not None and panel_record and print_record and connector_mass_g is not None
             and panel_record.get("cost_per_m2") is not None
             and print_record.get("cost_per_kg") is not None)
         else None
@@ -550,12 +554,14 @@ def evaluate_construction_alternatives(
         {
             "method": "sheet_hybrid",
             "status": "candidate_for_manual_validation" if not panel_blockers else "blocked_pending_evidence",
-            "panel_area_mm2_unoptimized": round(sheet_area_mm2,2),
+            "panel_area_mm2_unoptimized": sheet_area_mm2,
             "panel_cuts": [
-                {"size_mm":[ow,od],"quantity":2},
-                {"size_mm":[ow,oh],"quantity":2},
-                {"size_mm":[od,oh],"quantity":2},
+                {"part_id":part["part_id"],
+                 "size_mm":[part["width_mm"],part["height_mm"]],
+                 "quantity":part["quantity"]}
+                for part in sheet_schedule.get("panels") or []
             ],
+            "sheet_schedule":sheet_schedule,
             "panel_mass_g": sheet_mass_g,
             "connector_printed_mass_g": connector_mass_g,
             "combined_estimated_mass_g": mass_hybrid,
@@ -578,6 +584,8 @@ def evaluate_construction_alternatives(
         ),
         "requested_preference": preference,
         "enclosure_outer_dimensions_mm": list(outer),
+        "hybrid_panel_envelope_mm":sheet_schedule.get("hybrid_outer_dimensions_mm"),
+        "hybrid_sheet_geometry":sheet_schedule,
         "materials": {
             "panel_id": panel_record.get("material_id") if panel_record else None,
             "filament_id": print_record.get("material_id") if print_record else None,
