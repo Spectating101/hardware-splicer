@@ -55,3 +55,30 @@ def test_winding_ground_label_not_a_ground_requirement():
     }
     issues = analyze_build(graph)
     assert not any("no GND connection" in item["message"] for item in issues)
+
+
+def test_direct_gpio_to_motor_winding_is_rejected():
+    graph = {
+        "nodes": [
+            {"id": "mcu", "moduleId": "esp32-devkit"},
+            {"id": "motor", "moduleId": "dc_motor_3v_6v"},
+        ],
+        "wires": _wires((("mcu", "GPIO16"), ("motor", "VCC"))),
+    }
+    issues = analyze_build(graph)
+    assert any(
+        i["level"] == "error" and "directly to an MCU output" in i["message"]
+        for i in issues
+    )
+
+
+def test_motor_return_through_mcu_ground_is_not_silently_recommended():
+    graph = {
+        "nodes": [
+            {"id": "mcu", "moduleId": "esp32-devkit"},
+            {"id": "motor", "moduleId": "dc_motor_3v_6v"},
+        ],
+        "wires": _wires((("mcu", "GND"), ("motor", "GND"))),
+    }
+    issues = analyze_build(graph)
+    assert any("high-current ground path" in i["message"] for i in issues)
