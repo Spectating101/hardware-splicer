@@ -1,0 +1,4 @@
+observation_id,observed_at,component_ref,pin,measurement_kind,value,unit,instrument_id,operator_id,condition
+SYNTH_001,2026-10-01T09:00:00+08:00,J1,1,dc_voltage,5.10,V,SYNTHETIC_NOT_PHYSICAL,SYNTHETIC_DEMO,no_load
+SYNTH_002,2026-10-01T09:10:00+08:00,J1,1,dc_voltage,4.80,V,SYNTHETIC_NOT_PHYSICAL,SYNTHETIC_DEMO,under_load
+SYNTH_003,2026-10-01T09:12:00+08:00,U3,1,continuity,1,boolean,SYNTHETIC_NOT_PHYSICAL,SYNTHETIC_DEMO,not_powered
