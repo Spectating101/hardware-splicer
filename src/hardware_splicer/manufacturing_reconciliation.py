@@ -235,10 +235,111 @@ def reconcile_bom_to_build_graph(
     }
 
 
+
+# Explicit multi-instance source inventory is not interchangeable with a single
+# graph node: two donor motors and one generated motor is an engineering loss.
+# Extra unused inventory is *not* an error; only under-counted modules actually
+# selected into the compiled graph are guarded.
+_MULTI_INSTANCE_INTAKE_ROLES = frozenset({"mot", "act", "svo", "load", "sns"})
+
+
+def reconcile_intake_quantities_to_build_graph(
+    intake: Mapping[str, Any] | None,
+    build_graph: Mapping[str, Any] | None,
+) -> Dict[str, Any]:
+    """Detect known selected multi-instance inventory lost in project synthesis.
+
+    Optional available parts not selected into the graph are intentionally not
+    blockers. Only a selected module ID with fewer instances than the intake
+    demands is blocked pending reconciliation or an operator disposition.
+    This checks *representation*, not circuit compatibility or part verification.
+    """
+    from .module_resolver import resolve_parts_to_modules
+
+    source = dict(intake or {})
+    parts = source.get("normalized_parts") or source.get("available_parts") or []
+    if not isinstance(parts, list):
+        parts = []
+    nodes = [
+        row for row in ((build_graph or {}).get("nodes") or [])
+        if isinstance(row, Mapping)
+    ]
+    graph_counts: Counter[str] = Counter(
+        _text(row.get("moduleId") or row.get("module_id"))
+        for row in nodes
+        if _text(row.get("moduleId") or row.get("module_id"))
+    )
+    if not parts or not nodes:
+        return {
+            "status": "not_evaluable",
+            "source_counts": {},
+            "graph_counts": dict(sorted(graph_counts.items())),
+            "blockers": [],
+            "warnings": [],
+        }
+
+    source_counts: Counter[str] = Counter()
+    for part in parts:
+        if not isinstance(part, Mapping):
+            continue
+        candidates = resolve_parts_to_modules([part])
+        if not candidates:
+            continue
+        candidate = next(
+            (row for row in candidates if row.get("module_id")), {}
+        )
+        module_id = _text(candidate.get("module_id"))
+        role = _text(candidate.get("role"))
+        if not module_id or role not in _MULTI_INSTANCE_INTAKE_ROLES:
+            continue
+        quantity, error = _quantity(part.get("quantity", part.get("qty", 1)))
+        # Invalid quantities cannot become asserted inventory facts.
+        if error:
+            continue
+        source_counts[module_id] += quantity or 0
+
+    blockers = []
+    warnings = []
+    for module_id, expected in sorted(source_counts.items()):
+        actual = int(graph_counts.get(module_id, 0))
+        if actual == 0:
+            warnings.append({
+                "code": "inventory_module_not_selected",
+                "module_id": module_id,
+                "inventory_quantity": int(expected),
+                "message": (
+                    f"Inventory contains {expected} × {module_id!r}, but this "
+                    "module is not selected into the graph; confirm it was optional."
+                ),
+            })
+        elif actual < expected:
+            blockers.append({
+                "code": "intake_graph_quantity_underrepresented",
+                "module_id": module_id,
+                "intake_quantity": int(expected),
+                "actual_graph_instances": actual,
+                "missing_instances": int(expected - actual),
+                "message": (
+                    f"Source inventory includes {expected} × {module_id!r}, "
+                    f"but the generated graph contains only {actual}; "
+                    "confirm whether remaining parts are intentionally unused "
+                    "before treating this as a complete design."
+                ),
+            })
+
+    return {
+        "status": "blocked" if blockers else "clear",
+        "source_counts": dict(sorted(source_counts.items())),
+        "graph_counts": dict(sorted(graph_counts.items())),
+        "blockers": blockers,
+        "warnings": warnings,
+    }
+
 def apply_manufacturing_reconciliation(
     package: Mapping[str, Any],
     *,
     build_graph: Mapping[str, Any] | None,
+    intake: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Attach reconciliation and make contradictions package-blocking.
 
@@ -255,20 +356,23 @@ def apply_manufacturing_reconciliation(
         [row for row in (bom.get("lines") or []) if isinstance(row, Mapping)],
     )
     result["manufacturing_reconciliation"] = reconciliation
+    intake_reconciliation = reconcile_intake_quantities_to_build_graph(intake, build_graph)
+    result["intake_quantity_reconciliation"] = intake_reconciliation
 
     gates = dict(result.get("gates") or {})
     gates["manufacturing_reconciliation_status"] = reconciliation["status"]
+    gates["intake_quantity_reconciliation_status"] = intake_reconciliation["status"]
     gates["package_ready"] = (
         reconciliation.get("package_ready")
         if reconciliation["status"] != "not_evaluable"
         else None
     )
-    if reconciliation["status"] == "blocked":
+    if reconciliation["status"] == "blocked" or intake_reconciliation["status"] == "blocked":
         gates["verdict"] = "BLOCKED"
         gates["build_ready"] = False
         gates["fabrication_ready"] = False
         existing = [str(value) for value in (gates.get("blockers") or [])]
-        for blocker in reconciliation["blockers"]:
+        for blocker in reconciliation["blockers"] + intake_reconciliation["blockers"]:
             message = str(blocker.get("message") or blocker.get("code"))
             if message not in existing:
                 existing.append(message)
