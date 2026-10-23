@@ -114,8 +114,8 @@ describe("documented Wokwi-to-HS provider bridge", () => {
     expect(result.unmapped_connections).toHaveLength(0);
     expect(result.virtual_connection_count).toBe(2);
     expect(result.physical_connection_count).toBe(3);
-    expect(result.connections[4].to.hs_pin_candidate).toBe("GPIO14"); // Added to verified HS board family contract
-    expect(result.status).toBe("partial_mapping");
+    expect(result.connections[4].to.hs_pin_candidate).toBe("GPIO14"); // Source-family candidate, physical variant still unverified
+    expect(result.status).toBe("family_mapping_only");
   });
 
   it("imports only complete family-mapped Wokwi parts into real editable HS canvas nodes and wires",()=>{
