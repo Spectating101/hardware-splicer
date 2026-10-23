@@ -74,3 +74,9 @@ Official references: https://docs.wokwi.com/diagram-format, https://docs.wokwi.c
 - **Bench and independent outcome:** one verified low-voltage build with source authentication, measured supply and motor currents, driver thermal data, and reproducible test plan. Until then power-on remains blocked.
 
 HS should win by **combining external generation and simulation strengths with genuine hardware reuse and evidence-based engineering resolution**. The present work makes the challenge executable, not won.
+
+## Final real-source Studio import and software checks
+
+Unmodified public Wokwi ESP32/DHT22 example `potentialhades/ESP32_Simulation_Sensor_DHT22`, loaded against the actual HS `engine_pcb_data.json` module library: **2 source parts → 2 real HS Studio nodes; 5 source connections → 3 valid HS physical pin edges plus 2 retained virtual serial-monitor references**. Wiring is DHT GND→ESP GND, DHT VCC→ESP 3V3, and DHT data→ESP GPIO14. GPIO14 was added to the HS structured ESP32 DevKit module and physical pad registry with an exact-board-variant caveat. Studio draft authority remains proposed and physically unverified; no firmware, Wokwi simulation or PCB fabrication was performed.
+
+Final isolated checks: **107/107 frontend tests**, successful Vite build, **9/9 Python module registry/golden controls**. Wider GitHub CI is not complete for this stacked change, and parent draft #201 has failures. Do not merge without repairing/clearing those checks.
