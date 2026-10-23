@@ -93,3 +93,54 @@ export function validateExternalFile(file) {
   }
   return kind;
 }
+
+
+/**
+ * Conservative BOM quantity cross-check. Strict exact-label matching only:
+ * guesses about donor IDs or equivalent part families never close a mismatch.
+ * A matching BOM is NOT an electrical or manufacturing verification.
+ */
+export function reconcileExternalBomProposal(parsedBom, canonicalRows) {
+  if (!Array.isArray(canonicalRows) || canonicalRows.length === 0) {
+    return { status: "unavailable", matches: 0, conflicts: [], unmatched: [], missing: [],
+      note: "No current HS compiled BOM exists for comparison." };
+  }
+  const normalized = (name) => String(name ?? "").trim().toLowerCase().replace(/\\s+/g, " ");
+  const index = new Map();
+  const canonical = canonicalRows.map((line, i) => ({
+    name: String(line?.description || line?.module_id || line?.name || line?.ref || `row ${i + 1}`),
+    quantity: Number(line?.qty ?? line?.quantity ?? 1),
+  }));
+  canonical.forEach((line, i) => {
+    const key = normalized(line.name);
+    if (!index.has(key)) index.set(key, []);
+    index.get(key).push(i);
+  });
+  const seen = new Set();
+  const conflicts = [], unmatched = [];
+  let matches = 0;
+  for (const part of parsedBom?.parts || []) {
+    const indices = index.get(normalized(part.name)) || [];
+    if (indices.length !== 1 || seen.has(indices[0])) {
+      unmatched.push(part.name);
+      continue;
+    }
+    const i = indices[0];
+    seen.add(i);
+    if (canonical[i].quantity !== part.quantity) {
+      conflicts.push({
+        part: part.name,
+        externalQuantity: part.quantity,
+        hsQuantity: canonical[i].quantity,
+      });
+    } else {
+      matches++;
+    }
+  }
+  const missing = canonical.filter((_, i) => !seen.has(i)).map((row) => row.name);
+  return {
+    status: conflicts.length || unmatched.length || missing.length ? "review_required" : "exact_label_parity",
+    matches, conflicts, unmatched, missing,
+    note: "Exact-label and quantity comparison only; donor identity, substitutions, voltage and manufacturing are unverified.",
+  };
+}
