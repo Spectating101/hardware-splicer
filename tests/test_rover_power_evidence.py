@@ -190,3 +190,27 @@ def test_full_rover_report_includes_reusable_evidence_comparison():
     assert report["driver_options"]["scenario"]["max_declared_motor_stall_a"] == 0.9
     assert report["driver_options"]["status"] == "requires_physical_evidence"
     assert report["power_on_authorized"] is False
+
+
+def test_catalog_driver_identity_is_not_assumed_from_unknown_donor_hbridge():
+    report = evaluate_rover_power(
+        intake=_real_intake(), graph=_graph(), project_build_id="robot_drive_base"
+    )
+    codes = {row["code"] for row in report["blockers"]}
+    assert "catalog_driver_identity_not_source_bound" in codes
+    assert report["power_on_authorized"] is False
+
+
+def test_explicitly_declared_l298_part_reduces_identity_question_not_thermal_risk():
+    intake = _real_intake()
+    intake["available_parts"].append({
+        "name": "L298N driver board", "module_id": "l298n",
+        "type": "motor_driver", "quantity": 1,
+    })
+    report = evaluate_rover_power(
+        intake=intake, graph=_graph(), project_build_id="robot_drive_base"
+    )
+    codes = {row["code"] for row in report["blockers"]}
+    assert "catalog_driver_identity_not_source_bound" not in codes
+    assert "driver_current_thermal_unverified" in codes
+    assert report["power_on_authorized"] is False
