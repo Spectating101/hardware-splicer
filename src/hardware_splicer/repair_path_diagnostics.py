@@ -10,6 +10,11 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Mapping
 
+from .repair_discrimination import (
+    evaluate_path_evidence,
+    propose_next_repair_tests,
+)
+
 
 def _rows(items: Any) -> list[dict]:
     return [dict(x) for x in items] if isinstance(items, list) and all(isinstance(x, Mapping) for x in items) else []
@@ -39,21 +44,33 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
     # A restored result is a post-repair outcome (label leakage), so forbid it in blind mode.
     if any(x["outcome"] == "restored" for x in interventions):
         raise ValueError("Do not provide known successful repair interventions in blind input")
-    # Single symptoms (e.g. generic joystick drift) usually cannot isolate a
-    # repair component; require two actual independent path observations.
-    if len(observations) < 2 or not any(obs["outcome"] == "fail" for obs in observations):
+    quality = evaluate_path_evidence(observations)
+    if not quality["discriminating_topology_supported"]:
+        tests = propose_next_repair_tests(
+            components=topology,
+            observations=observations,
+            interventions=interventions,
+            evidence_quality=quality,
+        )
         return {
             "schema_version": "hardware_splicer.repair_path_diagnostics.v0",
             "case_id": str(intake.get("case_id") or ""),
             "authority": "symptom_and_test_evidence_only",
             "verdict": "insufficient_discriminating_evidence",
+            "reason": quality["status"],
+            "evidence_quality": quality,
+            "recommended_tests": tests,
             "known_successful_repair": False,
             "physical_repair_verified": False,
             "model_inference_used": False,
             "candidate_count": 0,
             "candidates": [],
-            "next_test_strategy": "Obtain at least two comparable path observations with known test outcomes; do not infer a root cause from a generic symptom.",
-            "limitations": ["Insufficient substitution/path evidence to prioritize a particular part."],
+            "next_test_strategy": tests[0]["proposed_observation"] if tests else
+                "Obtain another independent, comparable functional path observation.",
+            "limitations": [
+                "Functional path or operating-condition evidence is not sufficient to identify a component.",
+                "No independently verified physical measurement or successful intervention is supplied.",
+            ],
         }
     # Repeating the same route after a part swap is useful intervention
     # evidence, but cannot count as a new independent failure topology.
@@ -107,11 +124,20 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
     ))
     top_score = rows[0]["triage_evidence_score_not_probability"] if rows else None
     ties = sum(r["triage_evidence_score_not_probability"] == top_score for r in rows)
+    next_tests = propose_next_repair_tests(
+        components=topology,
+        observations=observations,
+        interventions=interventions,
+        evidence_quality=quality,
+        ranked_candidates=rows,
+    )
     return {
         "schema_version": "hardware_splicer.repair_path_diagnostics.v0",
         "case_id": str(intake.get("case_id") or ""),
         "authority": "symptom_and_test_evidence_only",
         "verdict": "triage_hypothesis_only",
+        "evidence_quality": quality,
+        "recommended_tests": next_tests,
         "source_test_count": len(observations),
         "independent_path_signature_count": len(unique_paths),
         "highest_evidence_score_tie_count": ties,
@@ -125,9 +151,8 @@ def rank_repair_hypotheses(intake: Mapping[str, Any]) -> dict[str, Any]:
         "candidate_count": len(rows),
         "candidates": rows,
         "next_test_strategy": (
-            "Prefer a reversible discrimination test on the highest-ranked shared failure path. "
-            "A single symptom cannot prove one component; do not erase storage, replace a "
-            "high-cost assembly or declare a repair completed without confirming the fault."
+            next_tests[0]["proposed_observation"] if next_tests else
+            "Collect independent reversible observations before selecting components."
         ),
         "limitations": [
             "User-supplied path membership is a functional hypothesis, not a measured wiring map.",
