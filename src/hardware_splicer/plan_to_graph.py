@@ -223,6 +223,19 @@ def splice_plan_to_build_graph(
             )
             adapted_recipe["modules"] = modules
             adapted_recipe["wires"] = connections
+            # Do not preserve recipe prose that describes sources we removed.
+            # These legacy notes otherwise falsely instruct a user to hook up
+            # a 12 V barrel/USB rail absent from the newly compiled graph.
+            declared_ids = {str(m.get("moduleId") or "") for m in modules}
+            old_notes = list(adapted_recipe.get("notes") or [])
+            if "dc-barrel-12v" not in declared_ids:
+                old_notes = [
+                    note for note in old_notes
+                    if "12V barrel" not in str(note) and "motor buck" not in str(note)
+                ]
+            if "usb-power-5v" not in declared_ids:
+                old_notes = [note for note in old_notes if "USB 5V feeds" not in str(note)]
+            adapted_recipe["notes"] = old_notes
         elif motor_rows:
             warnings.append("Motor inventory exists but compatible driver channel mapping is unverified.")
 
