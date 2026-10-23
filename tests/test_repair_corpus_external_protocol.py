@@ -2,6 +2,7 @@
 from __future__ import annotations
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import pytest
 from hardware_splicer.repair_intake import apply_repair_intake_context
@@ -10,6 +11,8 @@ ROOT=Path(__file__).resolve().parents[1]/"benchmarks/repair_corpus_v2_20261023"
 
 
 def _load(name):
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0,str(ROOT))
     spec=importlib.util.spec_from_file_location(name,ROOT/(name+".py"))
     module=importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
