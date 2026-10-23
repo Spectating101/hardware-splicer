@@ -387,3 +387,30 @@ export async function donorBoardVision(intake) {
   });
   return parseJson(res);
 }
+
+
+/**
+ * Review externally generated Circuit JSON without changing the canonical
+ * project, fabrication readiness or physical/bench authorization.
+ */
+export async function inspectExternalCircuitJson(documents, sourceLabel = "external-upload") {
+  const res = await fetch(`${API_BASE}/v1/interchange/circuit-json/inspect`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ documents, source_label: sourceLabel }),
+  });
+  return parseJson(res);
+}
+
+export async function projectExternalCircuitElectricalDesign(documents, sourceLabel = "external-upload") {
+  const res = await fetch(`${API_BASE}/v1/interchange/circuit-json/electrical-design`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      project_id: "external-review-only",
+      documents,
+      source_label: sourceLabel,
+    }),
+  });
+  return parseJson(res);
+}
