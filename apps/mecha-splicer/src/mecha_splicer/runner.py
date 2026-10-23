@@ -221,10 +221,10 @@ def run(
             except ImportError:
                 # Mecha must remain usable standalone without the HS package.
                 content = (
-                    "# Construction alternatives unavailable\\n\\n"
+                    "# Construction alternatives unavailable\n\n"
                     "HS's optional construction evaluator is not installed; "
-                    "no alternative manufacturing method is approved.\\n"
-                ).replace("\\\\n","\\n")
+                    "no alternative manufacturing method is approved.\n"
+                )
             else:
                 content = render_construction_plan(construction)
             (outp / "CONSTRUCTION_PLAN.md").write_text(content, encoding="utf-8")
