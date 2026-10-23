@@ -68,10 +68,12 @@ def test_real_donor_rover_preserves_both_motors_and_refuses_unverified_power(tmp
     assert not package["gates"]["build_ready"]
     assert not result["ok"]
     assert "12V barrel feeds" not in package["wiring"]["narrative_markdown"]
-    assert "common ground" not in "\n".join(
+    motor_wiring_lines = [
         line for line in package["wiring"]["narrative_markdown"].splitlines()
         if "motor driver (OUT" in line
-    )
+    ]
+    assert len(motor_wiring_lines) == 4
+    assert all("NOT common ground" in line for line in motor_wiring_lines)
 
 
 def test_nonrover_sensor_logger_does_not_inherit_rover_motor_or_power_modifications(tmp_path, monkeypatch):
