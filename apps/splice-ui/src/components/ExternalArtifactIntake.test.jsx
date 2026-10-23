@@ -90,7 +90,7 @@ describe("project-first external tool intake UI", () => {
     const report = await screen.findByTestId("wokwi-source-review");
     expect(report.textContent).toContain("2 source components, 4 connections");
     expect(report.textContent).toContain("2 functional-family candidates");
-    expect(report.textContent).toContain("3 pin pairs mapped");
+    expect(report.textContent).toContain("3 physical pin pairs mapped");
     expect(report.textContent).toContain("family_quantity_parity");
     expect(report.textContent).toContain("not a physical circuit");
     expect(netlistCompile).not.toHaveBeenCalled();
@@ -114,7 +114,7 @@ describe("project-first external tool intake UI", () => {
     render(<ExternalArtifactIntake session={{mode:"greenfield",designEditable:true,
       graph:{nodes:[]}}} onImportStudioDraft={callback}/>);
     await user.upload(screen.getByLabelText(/Choose an exported file/),upstreamFile(diagram,"diagram.json"));
-    expect(await screen.findByText(/3 pin pairs mapped/)).toBeTruthy();
+    expect(await screen.findByText(/3 physical pin pairs mapped/)).toBeTruthy();
     expect(callback).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button",{name:/Import complete draft to HS Studio/}));
     await waitFor(()=>expect(callback).toHaveBeenCalledTimes(1));
