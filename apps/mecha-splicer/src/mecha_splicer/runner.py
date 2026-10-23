@@ -49,6 +49,12 @@ def run(
     project = _auto_fill_from_electronics(project)
     project = _apply_mode_defaults(project)
     project, composition = compose_project(project)
+    # An enclosure always gets a no-assumptions construction comparison.
+    # This is advisory only: no alternative CAD is auto-selected.
+    if project.enclosure is not None and project.construction is None:
+        project = ProjectSpec.model_validate({
+            **project.model_dump(), "construction": {"preference":"auto"},
+        })
 
     bundle = _generate_bundle(project.model_dump(), out_dir=out_dir)
     bundle["parts"] = [p.to_dict() for p in build_parts_meta(project, bundle.get("outputs") or [])]
@@ -206,14 +212,46 @@ def run(
         (outp / "PARTS.json").write_text(json.dumps(bundle.get("parts") or [], indent=2), encoding="utf-8")
         (outp / "PRINT_PLAN.md").write_text(_render_print_plan(bundle), encoding="utf-8")
         if bundle.get("construction_alternatives"):
-            from hardware_splicer.construction_alternatives import render_construction_plan
             construction = bundle["construction_alternatives"]
             (outp / "CONSTRUCTION_ALTERNATIVES.json").write_text(
                 json.dumps(construction, indent=2, allow_nan=False), encoding="utf-8"
             )
-            (outp / "CONSTRUCTION_PLAN.md").write_text(
-                render_construction_plan(construction), encoding="utf-8"
-            )
+            try:
+                from hardware_splicer.construction_alternatives import render_construction_plan
+            except ImportError:
+                # Mecha must remain usable standalone without the HS package.
+                content = (
+                    "# Construction alternatives unavailable\\n\\n"
+                    "HS's optional construction evaluator is not installed; "
+                    "no alternative manufacturing method is approved.\\n"
+                ).replace("\\\\n","\\n")
+            else:
+                content = render_construction_plan(construction)
+            (outp / "CONSTRUCTION_PLAN.md").write_text(content, encoding="utf-8")
+            schedule = construction.get("hybrid_sheet_geometry") or {}
+            if schedule.get("status")=="dimensioned_blank_cut_proposal":
+                from hardware_splicer.construction_sheet_geometry import (
+                    schedule_csv, schedule_svg, schedule_parts,
+                )
+                (outp / "HYBRID_PANEL_CUTS.csv").write_text(
+                    schedule_csv(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_PANEL_BLANKS.svg").write_text(
+                    schedule_svg(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_PARTS.json").write_text(
+                    json.dumps(schedule_parts(
+                        schedule,project.construction.model_dump(mode="json")
+                    ),indent=2),encoding="utf-8"
+                )
+                (outp / "HYBRID_INTERFACE_REVIEW.json").write_text(
+                    json.dumps({
+                        "geometry":schedule["untransformed_interfaces"],
+                        "status":"requires_manual_connector_and_cutout_layout",
+                        "fabrication_authorized":False,
+                        "warning":"Preliminary panel dimensions only. No actual joint seats, fasteners or port toolpaths.",
+                    },indent=2),encoding="utf-8"
+                )
 
         if render_openscad_stl:
             from .engines.render import render_openscad_to_stl
@@ -418,6 +456,14 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
     if bundle.get("construction_alternatives"):
         lines.extend(["- `CONSTRUCTION_ALTERNATIVES.json`", "- `CONSTRUCTION_PLAN.md`",
                       "- Construction suggestions do not replace existing enclosure CAD."])
+        schedule = (bundle.get("construction_alternatives") or {}).get("hybrid_sheet_geometry") or {}
+        if schedule.get("status")=="dimensioned_blank_cut_proposal":
+            lines.extend([
+                "- `HYBRID_PANEL_CUTS.csv` (blank sizes, not validated cut paths)",
+                "- `HYBRID_PANEL_BLANKS.svg` (dimensioned reference drawing, NOT CAM)",
+                "- `HYBRID_PARTS.json` (separate hybrid-only parts schedule)",
+                "- `HYBRID_INTERFACE_REVIEW.json` (untransformed ports/mounts and missing connectors)",
+            ])
     structural = bundle.get("structural_screening") or {}
     if structural.get("status") not in {"not_applicable", "disabled_by_request"}:
         lines.append("- Structural contact analysis: " + str(structural.get("status")))
