@@ -64,22 +64,48 @@ def recover_connected_source_circuit_json(
     connected_nets = {name: pins for name, pins in net_pins.items() if len(pins) >= 2}
     single_pin = {name: pins for name, pins in net_pins.items() if len(pins) == 1}
     empty_nets = [name for name, pins in net_pins.items() if not pins]
-    if empty_nets:
-        raise ValueError(f"KiCad source nets missing any pins: {empty_nets[:5]}")
+    # Real KiCad can export an unnumbered mounting-hole no-connect terminal
+    # as (pin "") on a 1-node unconnected net. The parser records its raw
+    # identity instead of assigning a fabricated pin identifier. No other
+    # empty or electrically connected net may disappear.
+    special = list(
+        source.metadata.get("kicad_export", {}).get("unnumbered_no_connect_terminals", [])
+    )
+    special_by_net = {x["net"]: x for x in special}
+    if len(special_by_net) != len(special):
+        raise ValueError("Duplicate unnumbered source terminal references")
+    unnumbered_only = {name: special_by_net[name] for name in empty_nets
+                       if name in special_by_net}
+    unsupported_empty = sorted(set(empty_nets) - set(unnumbered_only))
+    if unsupported_empty:
+        raise ValueError(f"KiCad source nets missing any pins: {unsupported_empty[:5]}")
     if not connected_nets:
         raise ValueError("KiCad source export provides no connected electrical nets")
 
     docs: list[dict[str, Any]] = []
     port_ids: dict[str, str] = {}
+    source_instances = {}
     for comp in source.components:
-        docs.append({
+        hierarchy_path = comp.metadata.get("kicad_sheet_name") or ""
+        if hierarchy_path:
+            source_instances[comp.ref] = {
+                "sheet_name": hierarchy_path,
+                "sheet_uuid_path": comp.metadata.get("kicad_sheet_uuid_path") or "",
+                "symbol_tstamps": comp.metadata.get("kicad_symbol_tstamps") or [],
+            }
+        entry = {
             "type": "source_component",
             "source_component_id": f"kicad_component_{comp.ref}",
             "name": comp.ref,
             "ftype": "simple_chip",
             "display_value": comp.value or comp.ref,
             "footprint": comp.footprint,
-        })
+        }
+        # Circuit JSON importer supports subcircuit_id and preserves it in
+        # ComponentInstance.metadata; do not lose original KiCad instances.
+        if hierarchy_path:
+            entry["subcircuit_id"] = hierarchy_path
+        docs.append(entry)
     for refpin in sorted(mapped):
         ref, pin = refpin.rsplit(".", 1)
         pid = f"kicad_port_{ref}_{pin}"
@@ -115,6 +141,13 @@ def recover_connected_source_circuit_json(
         raise ValueError(f"Source connectivity did not survive Circuit JSON reimport: {diff}")
     if len(imported.components) != len(source.components):
         raise ValueError("Component identity/count changed on Circuit JSON reimport")
+    imported_components = {x.ref: x for x in imported.components}
+    if set(imported_components) != set(refs):
+        raise ValueError("Component reference identities changed on Circuit JSON reimport")
+    for ref, item in source_instances.items():
+        mapped = imported_components[ref].metadata.get("subcircuit_id") or ""
+        if mapped != item["sheet_name"]:
+            raise ValueError(f"Component {ref} lost its KiCad sheet-instance scope")
     converter = list(external_converter_docs or [])
     converter_types = Counter(str(doc.get("type")) for doc in converter)
     upstream_names = [
@@ -150,6 +183,17 @@ def recover_connected_source_circuit_json(
         "source_pin_memberships": sum(len(pins) for pins in net_pins.values()),
         "connected_multi_pin_nets": len(connected_nets),
         "source_single_pin_nets": single_pin,
+        "source_unnumbered_no_connect_nets": unnumbered_only,
+        "hierarchy": {
+            "sheet_count": len(source.metadata.get("kicad_export", {}).get("sheets", [])),
+            "sheets": source.metadata.get("kicad_export", {}).get("sheets", []),
+            "component_instances_with_sheet_path": len(source_instances),
+            "component_instance_provenance": source_instances,
+            "source_sheet_scopes_preserved": all(
+                imported_components[ref].metadata.get("subcircuit_id") == info["sheet_name"]
+                for ref, info in source_instances.items()
+            ),
+        },
         "imported_components": len(imported.components),
         "imported_multi_pin_nets": len(imported.nets),
         "imported_multi_pin_memberships": sum(len(n.pins) for n in imported.nets),
