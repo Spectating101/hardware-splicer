@@ -76,7 +76,7 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
         # Every pin declared by the structured ESP32 DevKit contract must have a
         # physical pad. Omitting valid pins lets recipe wires disappear before DRC.
         "pads": _dual_col(
-            ["VIN", "GND", "GPIO4", "GPIO5", "GPIO16", "GPIO17", "GPIO18"],
+            ["VIN", "GND", "GPIO4", "GPIO5", "GPIO14", "GPIO16", "GPIO17", "GPIO18"],
             ["3V3", "GPIO2", "GPIO15", "GPIO21", "GPIO22", "GPIO23", "GPIO34"],
             _P * 5,
         ),
