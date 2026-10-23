@@ -18,7 +18,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from hardware_splicer.commercial_value_routing import (
     evaluate_portfolio, normalize_product_factory_run,
-    normalize_salvage_opportunities,
+    normalize_salvage_opportunities, normalize_donor_discovery,
+    normalize_salvage_purchase_screen,
 )
 
 
@@ -34,10 +35,13 @@ def main() -> int:
     parser.add_argument("--case", action="append", type=Path, default=[])
     parser.add_argument("--pf-run", action="append", type=Path, default=[])
     parser.add_argument("--salvage-report", action="append", type=Path, default=[])
+    parser.add_argument("--donor-discovery", action="append", type=Path, default=[])
+    parser.add_argument("--purchase-screen", action="append", type=Path, default=[])
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    if not (args.case or args.pf_run or args.salvage_report):
-        parser.error("at least one --case, --pf-run or --salvage-report required")
+    if not (args.case or args.pf_run or args.salvage_report
+            or args.donor_discovery or args.purchase_screen):
+        parser.error("at least one supported source required")
 
     try:
         cases = [load(path) for path in args.case]
@@ -54,6 +58,17 @@ def main() -> int:
             }
             for path in args.salvage_report
         ]
+        donor = [
+            {
+                "source_ref": str(path),
+                "listings": normalize_donor_discovery(load(path), source_ref=str(path)),
+            }
+            for path in args.donor_discovery
+        ]
+        purchase = [
+            normalize_salvage_purchase_screen(load(path), source_ref=str(path))
+            for path in args.purchase_screen
+        ]
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
@@ -62,6 +77,8 @@ def main() -> int:
         "commercial_cases": evaluate_portfolio(cases),
         "product_factory_experiments": pf,
         "salvage_discovery_reports": salvage,
+        "donor_discovery_catalogs": donor,
+        "salvage_purchase_screens": purchase,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
