@@ -165,3 +165,19 @@ def test_adding_extra_duplicate_observations_does_not_promote_abstention():
     after=rank_repair_hypotheses(extended)
     assert before["verdict"]==after["verdict"]=="insufficient_discriminating_evidence"
     assert before["candidate_count"]==after["candidate_count"]==0
+
+
+def test_disjoint_failed_paths_cannot_be_assigned_one_causal_component():
+    case=_case(
+        ("battery_path","radio_path","display_path","sensor_path"),
+        [
+            (["battery_path","radio_path"],"fail","link"),
+            (["display_path","sensor_path"],"fail","screen"),
+        ],
+    )
+    report=rank_repair_hypotheses(case)
+    assert report["verdict"]=="insufficient_discriminating_evidence"
+    assert report["reason"]=="disjoint_failure_paths"
+    assert report["candidate_count"]==0
+    assert report["recommended_tests"][0]["code"]=="separate_fault_path_investigation"
+    assert not report["recommended_tests"][0]["power_on_authorized"]
