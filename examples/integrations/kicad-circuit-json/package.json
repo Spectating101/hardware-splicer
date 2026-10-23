@@ -4,7 +4,8 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
-    "convert": "node convert.mjs"
+    "convert": "node convert.mjs",
+    "convert:provenance": "node convert_with_provenance.mjs"
   },
   "dependencies": {
     "kicad-to-circuit-json": "0.0.144",
