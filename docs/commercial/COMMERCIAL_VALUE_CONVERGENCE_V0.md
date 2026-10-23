@@ -25,7 +25,8 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 - Expected resale contribution uses success probability and failure recovery value, not the full asking price. It computes sensitivity to sale-price changes and a break-even/target-contribution acquisition ceiling. These are **screens**, not purchase approval.
 - Operating assets have a separate discounted monthly net-cashflow calculation. It is labeled NPV, not gross sales margin, and needs explicit terminal value and discount assumptions.
 - `normalize_product_factory_run`: read actual PF run snapshots while preserving target MSRP and modeled COGS as **hypotheses**, not sales or measured cost.
-- `normalize_salvage_opportunities`: read Circuit-AI scores as discovery inputs. A score does not imply verified yield or a transaction.
+- `normalize_salvage_opportunities`: read actual Circuit-AI workflow report nesting and scores as discovery inputs. A score does not imply verified yield or a transaction.
+- `normalize_donor_discovery` and `normalize_salvage_purchase_screen`: ingest PR #148's 17 Taiwan donor observations and PR #147's already-computed bid screens once exported, without reopening their math or promoting listings to real inventory.
 - `commercial_outcomes.append_outcome`: append-only accepted-transaction ledger with receipt-referenced **measured** values and explicit costs. It refuses unaccepted deposits and estimates.
 - Native price/cost units: **TWD** (Taiwan), **CNY** (mainland China), **IDR** (Indonesia), **USD**. No invisible FX conversion or cross-currency ranking.
 - Every proposed route has `purchase_authorized: false`, including when modeled inputs would otherwise pass margin and evidence checks. Human authority and legal/technical checks are external to this routing code.
@@ -34,10 +35,13 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 
 ```bash
 PYTHONPATH=src python scripts/evaluate_commercial_value.py examples/commercial_value_case_twd.json
-PYTHONPATH=src python scripts/converge_commercial_sources.py --case examples/commercial_value_case_twd.json --salvage-report apps/circuit-ai/eval/salvage_workflow_report.json\nPYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
+PYTHONPATH=src python scripts/converge_commercial_sources.py --case examples/commercial_value_case_twd.json --salvage-report apps/circuit-ai/eval/salvage_workflow_report.json
+# Once PR #147/#148 exports are available locally, add:
+# --donor-discovery path/to/tw_donor_discovery.json
+# --purchase-screen path/to/a_completed_salvage_purchase_screen_result.json\nPYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
 ```
 
-The example contains **hypothetical**, not scraped/quoted, Taiwanese monetary inputs and compares *refurbish-and-sell* with *operate the asset*. The router deliberately does **not** select an overall best option when operating NPV and completed-sale contribution have incomparable time horizons. An apparently positive screen must **not** be used for purchasing. The convergence command accepts repeated `--pf-run`, `--salvage-report` and `--case` paths and produces a read-only consolidated dossier. Source PR files must be exported from their branches first; no silent cherry-picking.
+The example contains **hypothetical**, not scraped/quoted, Taiwanese monetary inputs and compares *refurbish-and-sell* with *operate the asset*. The router deliberately does **not** select an overall best option when operating NPV and completed-sale contribution have incomparable time horizons. An apparently positive screen must **not** be used for purchasing. The convergence command accepts repeated `--pf-run`, `--salvage-report`, `--donor-discovery`, `--purchase-screen` and `--case` paths and produces a read-only consolidated dossier. Source PR files must be exported from their branches first; no silent cherry-picking.
 
 ## Case contract (minimal)
 
