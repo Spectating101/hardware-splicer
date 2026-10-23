@@ -558,9 +558,24 @@ def merge_truth_rows(*collections: Sequence[Mapping[str, Any]]) -> list[Dict[str
     for collection in collections:
         for raw in collection:
             row = deepcopy(dict(raw))
-            key = (str(row.get("instance_id") or ""), str(row.get("module_id") or ""), str(row.get("source") or ""))
+            source = str(row.get("source") or "")
+            module_id = str(row.get("module_id") or "")
+            instance = str(row.get("instance_id") or "")
+            # Two separately named inventory objects may share a module type
+            # without sharing physical identity. Historical offline rows have
+            # no instance_id: collapsing on (module_id, source) loses motors.
+            # A part_index is stronger than a name where present.
+            if not instance and source in {"user_inventory", "model_identity_proposed"}:
+                index = row.get("part_index")
+                if index is not None:
+                    instance = f"intake-index:{index}"
+                elif row.get("part_name"):
+                    instance = f"intake-name:{str(row['part_name']).strip().lower()}"
+            key = (instance, module_id, source)
             if key in seen:
                 continue
             seen.add(key)
+            if instance and not row.get("instance_id"):
+                row["instance_id"] = instance
             rows.append(row)
     return rows
