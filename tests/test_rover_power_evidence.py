@@ -8,6 +8,7 @@ from hardware_splicer.project_intake import splice_and_build_from_intake
 from hardware_splicer.rover_power_evidence import (
     apply_rover_power_evidence_gate,
     evaluate_rover_power,
+    compare_motor_driver_options,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -142,3 +143,76 @@ def test_real_control_project_stays_non_rover(tmp_path, monkeypatch):
     assert result["ok"] is True
     assert package["rover_power_evidence"]["status"] == "not_applicable"
     assert package["intake_quantity_reconciliation"]["status"] == "clear"
+
+
+def test_competitive_driver_comparison_keeps_package_deratings_and_uncertainty():
+    report = compare_motor_driver_options(
+        battery_nominal_v=7.4, motor_stall_current_a=[0.9, 0.9], motor_count=2
+    )
+    assert report["status"] == "requires_physical_evidence"
+    options = {row["id"]: row for row in report["options"]}
+    assert set(options) == {
+        "l298n_existing", "ti_drv8833_pwp_rty", "ti_drv8833_pw"
+    }
+    assert options["ti_drv8833_pwp_rty"]["supply_nominal_within_spec"] is True
+    assert options["ti_drv8833_pwp_rty"]["max_current_continuous_a_at_reference"] == 1.5
+    assert options["ti_drv8833_pw"]["max_current_continuous_a_at_reference"] == 0.5
+    assert options["l298n_existing"]["reference_driver_loss_w_at_1a"] == [1.8, 3.2]
+    assert options["l298n_existing"]["max_current_continuous_a_at_reference"] is None
+    assert options["l298n_existing"]["absolute_dc_current_limit_a"] == 2.0
+    assert options["ti_drv8833_pwp_rty"]["reference_driver_loss_w_at_1a"] == [0.36, 0.36]
+    assert report["scenario"]["continuous_motor_current_a"] is None
+    assert all(item["usable_without_physical_checks"] is False for item in options.values())
+    assert all(item["motor_terminal_voltage_derived"] is False for item in options.values())
+
+
+def test_nominal_voltage_outside_drv8833_range_must_be_flagged():
+    report = compare_motor_driver_options(
+        battery_nominal_v=12.0, motor_stall_current_a=[0.9, 0.9], motor_count=2
+    )
+    options = {row["id"]: row for row in report["options"]}
+    assert options["ti_drv8833_pwp_rty"]["supply_nominal_within_spec"] is False
+    assert options["ti_drv8833_pw"]["supply_nominal_within_spec"] is False
+    assert all(item["usable_without_physical_checks"] is False for item in options.values())
+
+
+def test_missing_stall_current_prevents_unsafe_peak_comparison():
+    report = compare_motor_driver_options(
+        battery_nominal_v=7.4, motor_stall_current_a=[None, 0.9], motor_count=2
+    )
+    assert report["scenario"]["max_declared_motor_stall_a"] is None
+    for item in report["options"]:
+        assert item["declared_peak_below_manufacturer_peak_ref"] is None
+
+
+def test_full_rover_report_includes_reusable_evidence_comparison():
+    report = evaluate_rover_power(
+        intake=_real_intake(), graph=_graph(), project_build_id="robot_drive_base"
+    )
+    assert report["driver_options"]["scenario"]["max_declared_motor_stall_a"] == 0.9
+    assert report["driver_options"]["status"] == "requires_physical_evidence"
+    assert report["power_on_authorized"] is False
+
+
+def test_catalog_driver_identity_is_not_assumed_from_unknown_donor_hbridge():
+    report = evaluate_rover_power(
+        intake=_real_intake(), graph=_graph(), project_build_id="robot_drive_base"
+    )
+    codes = {row["code"] for row in report["blockers"]}
+    assert "catalog_driver_identity_not_source_bound" in codes
+    assert report["power_on_authorized"] is False
+
+
+def test_explicitly_declared_l298_part_reduces_identity_question_not_thermal_risk():
+    intake = _real_intake()
+    intake["available_parts"].append({
+        "name": "L298N driver board", "module_id": "l298n",
+        "type": "motor_driver", "quantity": 1,
+    })
+    report = evaluate_rover_power(
+        intake=intake, graph=_graph(), project_build_id="robot_drive_base"
+    )
+    codes = {row["code"] for row in report["blockers"]}
+    assert "catalog_driver_identity_not_source_bound" not in codes
+    assert "driver_current_thermal_unverified" in codes
+    assert report["power_on_authorized"] is False
