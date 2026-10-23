@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   classifyExternalArtifact, parseCircuitJsonArtifact,
-  parseBomCsvArtifact, reconcileExternalBomProposal, validateExternalFile,
+  parseBomCsvArtifact, reconcileExternalBomProposal, inspectBinaryStlArtifact, validateExternalFile,
 } from "./externalArtifactIntake.js";
 
 describe("read-only upstream artifact intake", () => {
@@ -72,6 +72,29 @@ describe("read-only upstream artifact intake", () => {
     ]);
     expect(result.status).toBe("exact_label_parity");
     expect(result.note).toContain("unverified");
+  });
+  it("reads real binary STL triangle geometry without inventing length units", () => {
+    const bytes = new ArrayBuffer(134);
+    const view = new DataView(bytes);
+    view.setUint32(80, 1, true);
+    const vertices = [[1,2,3],[4,2,3],[1,8,3]];
+    vertices.flat().forEach((n,i) => view.setFloat32(96+i*4,n,true));
+    const mesh = inspectBinaryStlArtifact(bytes);
+    expect(mesh.triangles).toBe(1);
+    expect(mesh.bounds.extent).toEqual([3,6,0]);
+    expect(mesh.units).toContain("unknown");
+    expect(mesh.manufacturable).toBe(false);
+    expect(mesh.physicallyVerified).toBe(false);
+  });
+  it("rejects malformed, truncated or infinite STL geometry", () => {
+    expect(() => inspectBinaryStlArtifact(new ArrayBuffer(5))).toThrow(/84-byte/);
+    const incomplete = new ArrayBuffer(134);
+    const view = new DataView(incomplete);
+    view.setUint32(80, 2, true);
+    expect(() => inspectBinaryStlArtifact(incomplete)).toThrow(/triangle count/);
+    view.setUint32(80, 1, true);
+    view.setFloat32(96,Infinity,true);
+    expect(() => inspectBinaryStlArtifact(incomplete)).toThrow(/nonfinite/);
   });
   it("refuses unsupported, empty or too large files", () => {
     expect(() => validateExternalFile({name:"design.exe",size:10})).toThrow(/Supported/);
