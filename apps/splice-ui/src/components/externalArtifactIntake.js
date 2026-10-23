@@ -72,6 +72,8 @@ export function parseBomCsvArtifact(text) {
   const parts = [];
   for (const [index, row] of rows.entries()) {
     if (row.length !== columns.length) throw new Error(`BOM CSV row ${index + 2} has incorrect column count.`);
+    // Some generators add a final summary row: it is not an extra physical part.
+    if (row[0]?.trim().toUpperCase() === "TOTAL" && row[qtyIdx]?.trim() === "") continue;
     const qty = Number(row[qtyIdx]?.trim());
     const name = row[partIdx]?.trim() || "";
     if (!name || !Number.isSafeInteger(qty) || qty < 1) {
