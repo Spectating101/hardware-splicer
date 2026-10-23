@@ -30,11 +30,18 @@ def evaluate_path_evidence(observations: Sequence[Mapping[str, Any]]) -> dict[st
     ]
     distinct_routes = len(route_outcomes)
     failures = any("fail" in result for result in route_outcomes.values())
+    failed_routes = [set(path) for path, outcomes in route_outcomes.items() if "fail" in outcomes]
+    common_failed_components = set.intersection(*failed_routes) if failed_routes else set()
+    # Never assign ONE repair component to independent, disjoint failure paths.
+    # Multiple faults or unrepresented upstream infrastructure may be present.
+    disjoint_failures = len(failed_routes) > 1 and not common_failed_components
     # Never mark a state-dependent same-route change as component-isolating.
     # Mixed contradictory observations need condition-level isolation first,
     # even if other routes exist; a stable functional state is unproven.
     if conflicting:
         status = "operating_condition_confounded"
+    elif disjoint_failures:
+        status = "disjoint_failure_paths"
     elif distinct_routes < 2 or len(observations) < 2 or not failures:
         status = "insufficient_distinct_routes"
     else:
@@ -44,6 +51,7 @@ def evaluate_path_evidence(observations: Sequence[Mapping[str, Any]]) -> dict[st
         "status": status,
         "reported_observation_count": len(observations),
         "distinct_component_route_count": distinct_routes,
+        "shared_failed_component_ids": sorted(common_failed_components),
         "contradictory_same_route_observations": conflicting,
         "discriminating_topology_supported": status == "distinct_route_evidence",
         "has_observed_failure": failures,
@@ -107,6 +115,17 @@ def propose_next_repair_tests(
             "element while keeping operating conditions comparable.",
             "If the originally failing behavior disappears only with the "
             "known-good path, that element becomes a stronger candidate.",
+        )
+    elif status == "disjoint_failure_paths":
+        propose(
+            "separate_fault_path_investigation",
+            "Avoid attributing multiple disjoint failures to a single component.",
+            "Review whether separate failures are independent; verify the stated "
+            "functional-path inventory and look for an omitted shared upstream "
+            "connector, supply, external cause or prior intervention. Use only "
+            "existing, non-destructive observations with professional review.",
+            "Confirming a shared actual upstream path may reveal a common cause; "
+            "otherwise investigate each route separately.",
         )
     elif status == "insufficient_distinct_routes":
         propose(
