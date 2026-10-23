@@ -118,6 +118,34 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         if a_gnd and b_gnd:
             continue
 
+        # A DC winding lead is electrically floating, but still an inductive,
+        # potentially high-current LOAD. It cannot be driven from an MCU GPIO
+        # or its 3V3/5V power-out pin as if it were a sensor or logic input.
+        motor_end = a if a_role == motor_terminal else b if b_role == motor_terminal else None
+        other_end = b if motor_end is a else a if motor_end is b else None
+        other_role = b_role if motor_end is a else a_role
+        if motor_end and other_end and other_end["moduleSpec"].get("category") == "mcu":
+            if other_role != "gnd":
+                warnings.append({
+                    "id": f"{w['id']}-motorFromMCU",
+                    "level": "error",
+                    "message": (
+                        "A motor winding is connected directly to an MCU output. "
+                        "Use a rated H-bridge/power driver and separately verified load supply."
+                    ),
+                    "wireId": w["id"],
+                })
+            else:
+                warnings.append({
+                    "id": f"{w['id']}-motorReturnThroughMCU",
+                    "level": "warn",
+                    "message": (
+                        "A motor returns through an MCU GND pad; verify a safe common-return "
+                        "and high-current ground path outside the controller PCB."
+                    ),
+                    "wireId": w["id"],
+                })
+
         if a_role == "power_in" and b_role == "power_in":
             warnings.append(
                 {
