@@ -216,3 +216,47 @@ def test_deposit_and_hypothetical_revenue_never_count_as_sale():
     assert "not_measured:revenue" in append_outcome(
         {"schema_version": OUTCOME_SCHEMA, "transactions": []}, t
     )["errors"]
+
+
+def test_operating_asset_has_use_and_output_gates_not_buyer_gate():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    del r["failure_proceeds"]
+    r["monthly_net_cashflows"] = [money(400, "MEASURED", "meter-log-1")]
+    r["terminal_value"] = money(100, "QUOTED", "disposal-quote-1")
+    r["monthly_discount_rate"] = 0
+    r["probability_evidence"] = "MEASURED"
+    for key in ("acquisition", "material_and_fab"):
+        r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-3")
+    gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",
+             "procurement_verified", "site_or_use_rights_cleared", "operational_benefit_verified")
+    r["gates"] = {gate: True for gate in gates}
+    r["gate_references"] = {gate: f"evidence-{gate}" for gate in gates}
+    result = evaluate_commercial_case(case(r))["routes"][0]
+    assert result["net_value"] == 190
+    assert result["status"] == "REVIEW_READY"
+    assert result["purchase_authorized"] is False
+    assert "unproven_gate:buyer_committed" not in result["blockers"]
+
+
+def test_operating_forecasts_do_not_count_as_measured_output():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    r["monthly_net_cashflows"] = [money(400, "ESTIMATED")]
+    r["terminal_value"] = money(100, "ESTIMATED")
+    r["monthly_discount_rate"] = 0
+    result = evaluate_commercial_case(case(r))["routes"][0]
+    assert "unverified_operating_output" in result["blockers"]
+
+
+def test_nested_circuit_ai_report_is_ingested_without_price_promotion():
+    report = {
+        "final_report": {"opportunity_report": {"opportunities": [
+            {"id": "donor-2", "type": "build_from_salvage",
+             "score": 0.8, "estimated_output_value_usd": 40}
+        ]}}
+    }
+    out = normalize_salvage_opportunities(report, source_ref="salvage_workflow_report.json")
+    assert len(out) == 1
+    assert out[0]["value_hypothesis_usd"]["amount"] == 40
+    assert out[0]["commercial_status"] == "UNPRICED"
