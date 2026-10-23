@@ -124,7 +124,19 @@ def evaluate_rover_power(
         "status": "blocked",
         "authority": "declared_inputs_and_catalog_topology_only",
         "power_on_authorized": False,
-        "sources": {"l298_manufacturer": L298_VENDOR},
+        "sources": {
+            "l298_manufacturer": L298_VENDOR,
+            "l298_datasheet": "https://www.st.com/resource/en/datasheet/l298.pdf",
+            "l298_datasheet_revision": "DS0218 Rev 5, October 2023, tables 3 and 4",
+        },
+        "manufacturer_reference": {
+            "applicable_only_if_actual_driver_is_l298": True,
+            "logic_supply_v_range": [4.5, 7.0],
+            "enable_inputs": 2,
+            "total_bridge_drop_at_1a_test_v": {"min": 1.8, "max": 3.2},
+            "drop_test_conditions": "L298 datasheet table 4: VS=42V, VSS=5V, Tj=25C; load current=1A. NOT a measured value or prediction for this 0.9A motor.",
+            "thermal_and_board_limits": "not characterized for the user's module or heatsink",
+        } if "l298n" in active_drivers else None,
         "declared": {
             "battery_nominal_v": battery_v,
             "battery_capacity_mah": battery_mah,
