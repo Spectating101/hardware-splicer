@@ -74,6 +74,10 @@ def recover_connected_source_circuit_json(
     special_by_net = {x["net"]: x for x in special}
     if len(special_by_net) != len(special):
         raise ValueError("Duplicate unnumbered source terminal references")
+    if any(x["ref"] not in refs for x in special):
+        raise ValueError("Unnumbered disconnected source contact has no component reference")
+    if any(name not in empty_nets for name in special_by_net):
+        raise ValueError("Unnumbered contact unexpectedly has mapped electrical pins")
     unnumbered_only = {name: special_by_net[name] for name in empty_nets
                        if name in special_by_net}
     unsupported_empty = sorted(set(empty_nets) - set(unnumbered_only))
@@ -106,9 +110,11 @@ def recover_connected_source_circuit_json(
         if hierarchy_path:
             entry["subcircuit_id"] = hierarchy_path
         docs.append(entry)
-    for refpin in sorted(mapped):
+    for index, refpin in enumerate(sorted(mapped)):
         ref, pin = refpin.rsplit(".", 1)
-        pid = f"kicad_port_{ref}_{pin}"
+        # Use stable ordinal IDs, not ambiguous ref + "_" + pin strings:
+        # ("U_1", "2") and ("U", "1_2") must never collapse to one ID.
+        pid = f"kicad_port_{index}"
         port_ids[refpin] = pid
         docs.append({
             "type": "source_port",
