@@ -231,13 +231,16 @@ def run(
             schedule = construction.get("hybrid_sheet_geometry") or {}
             if schedule.get("status")=="dimensioned_blank_cut_proposal":
                 from hardware_splicer.construction_sheet_geometry import (
-                    schedule_csv, schedule_svg, schedule_parts,
+                    schedule_csv, schedule_svg, schedule_parts, schedule_scad_preview,
                 )
                 (outp / "HYBRID_PANEL_CUTS.csv").write_text(
                     schedule_csv(schedule),encoding="utf-8"
                 )
                 (outp / "HYBRID_PANEL_BLANKS.svg").write_text(
                     schedule_svg(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_ASSEMBLY_PREVIEW.scad").write_text(
+                    schedule_scad_preview(schedule),encoding="utf-8"
                 )
                 (outp / "HYBRID_PARTS.json").write_text(
                     json.dumps(schedule_parts(
@@ -466,6 +469,7 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
             lines.extend([
                 "- `HYBRID_PANEL_CUTS.csv` (blank sizes, not validated cut paths)",
                 "- `HYBRID_PANEL_BLANKS.svg` (dimensioned reference drawing, NOT CAM)",
+                "- `HYBRID_ASSEMBLY_PREVIEW.scad` (virtual panels only, not manufacture-ready)",
                 "- `HYBRID_PARTS.json` (separate hybrid-only parts schedule)",
                 "- `HYBRID_INTERFACE_REVIEW.json` (untransformed ports/mounts and missing connectors)",
             ])
