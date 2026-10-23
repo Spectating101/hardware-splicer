@@ -47,7 +47,9 @@ def apply_repair_intake_context(intake: Mapping[str, Any]) -> Dict[str, Any]:
     """Merge repair-café fields into intake evidence and vision hints."""
     body: Dict[str, Any] = dict(intake)
     ctx = extract_repair_context(body)
-    if not any([ctx["symptoms"], ctx["when_it_fails"], ctx["device_hint"], ctx["repro_steps"], ctx["operator_notes"]]):
+    repair = body.get("repair_intake") if isinstance(body.get("repair_intake"), Mapping) else {}
+    structured_tests_present = isinstance(repair.get("path_evidence"), Mapping)
+    if not any([ctx["symptoms"], ctx["when_it_fails"], ctx["device_hint"], ctx["repro_steps"], ctx["operator_notes"]]) and not structured_tests_present:
         return body
 
     notes = list(body.get("evidence_notes") or [])
