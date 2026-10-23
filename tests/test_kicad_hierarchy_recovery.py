@@ -119,3 +119,35 @@ def test_do_not_suppress_missing_real_pin_on_connected_or_unverified_nets(netnam
              (net (code "2") (name "{netname}") {nodes})))'''
     with pytest.raises(ValueError, match="Malformed KiCad net node"):
         parse_kicad_netlist(text)
+
+
+def test_source_port_ids_cannot_collide_when_ref_and_pin_both_have_underscores():
+    text='''(export
+      (components
+        (comp (ref "U_1") (value "Chip"))
+        (comp (ref "U") (value "Chip")))
+      (nets
+        (net (code "1") (name "X")
+             (node (ref "U_1") (pin "2"))
+             (node (ref "U") (pin "1_2")))
+        (net (code "2") (name "Y")
+             (node (ref "U_1") (pin "3"))
+             (node (ref "U") (pin "4")))))'''
+    result=recover_connected_source_circuit_json(text)
+    ports=[x for x in result["documents"] if x["type"]=="source_port"]
+    assert len(ports)==4
+    assert len({p["source_port_id"] for p in ports})==4
+    assert result["receipt"]["topology_exact_multi_pin_match"]
+
+
+def test_unnumbered_source_contact_must_belong_to_real_exported_component():
+    text='''(export
+      (components (comp (ref "U1") (value "Chip")))
+      (nets
+        (net (code "1") (name "X")
+             (node (ref "U1") (pin "2"))
+             (node (ref "U1") (pin "3")))
+        (net (code "2") (name "unconnected-(HOLE1-1-Pad)")
+             (node (ref "HOLE1") (pin "") (pintype "passive+no_connect")))))'''
+    with pytest.raises(ValueError, match="no component reference"):
+        recover_connected_source_circuit_json(text)
