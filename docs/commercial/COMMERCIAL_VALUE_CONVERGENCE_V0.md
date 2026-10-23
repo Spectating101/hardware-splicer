@@ -27,7 +27,7 @@ This is a routing/evidence layer *over* HS's existing engineering and salvage in
 - `normalize_product_factory_run`: read actual PF run snapshots while preserving target MSRP and modeled COGS as **hypotheses**, not sales or measured cost.
 - `normalize_salvage_opportunities`: read actual Circuit-AI workflow report nesting and scores as discovery inputs. A score does not imply verified yield or a transaction.
 - `normalize_donor_discovery` and `normalize_salvage_purchase_screen`: ingest PR #148's 17 Taiwan donor observations and PR #147's already-computed bid screens once exported, without reopening their math or promoting listings to real inventory.
-- `commercial_outcomes.append_outcome`: append-only accepted-transaction ledger with receipt-referenced **measured** values and explicit costs. It refuses unaccepted deposits and estimates.
+- `commercial_outcomes.append_outcome`: append-only **accepted and settled** transaction ledger with payment reconciliation and receipt-referenced **measured** values and explicit costs. It refuses unpaid invoices, unaccepted deposits and estimates. Its collected contribution is provisional while future warranty liability remains open.
 - Native price/cost units: **TWD** (Taiwan), **CNY** (mainland China), **IDR** (Indonesia), **USD**. No invisible FX conversion or cross-currency ranking.
 - Every proposed route has `purchase_authorized: false`, including when modeled inputs would otherwise pass margin and evidence checks. Human authority and legal/technical checks are external to this routing code.
 
@@ -80,7 +80,7 @@ For all eight expenses, zero must be explicitly represented, never inferred. The
 
 Operating routes supply `monthly_net_cashflows` (negative amounts explicitly permitted), `terminal_value`, `monthly_discount_rate`, and `success_probability: 1`; uncertainty should be represented as separately documented operating scenarios. Operating readiness requires referenced `site_or_use_rights_cleared` and `operational_benefit_verified` gates, NOT a customer sale or `buyer_committed`. Do not compare operating NPV with sale margins, and never compare different horizons without adjustment.
 
-Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `INVALID`. A quoted or measured input needs a nonempty reference. Only the latter two can advance core cost evidence. An accepted transaction needs measured receipts to enter the outcome ledger. Evidence labels are not a substitute for validating sources.
+Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `INVALID`. A quoted or measured input needs a nonempty reference. Only the latter two can advance core cost evidence. An accepted transaction needs measured cost receipts AND payment status `SETTLED` with a reconciliation reference to enter the outcome ledger; it records `warranty_cash_spent`, not a speculative reserve. Future claims make this provisional cash contribution, not final lifetime product profit. Evidence labels are not a substitute for validating sources.
 
 ## Merge sequencing
 
@@ -97,7 +97,7 @@ Evidence classes: `UNKNOWN`, `HYPOTHESIS`, `ESTIMATED`, `QUOTED`, `MEASURED`, `I
 - Pre-purchase gross-value ranking can favor high upside with low probability; use downside thresholds, inspection opportunity cost and available capital before committing.
 - Operating NPV depends on a common horizon, utilization, terminal-value evidence, measured output and discount assumptions.
 - No automatic sale/release gate. A positive computed result is only **ready for human commercial review** when supported by evidence and references; it still has `purchase_authorized: false`.
-- Actual purchase/recycling compliance, buyer contracts, and export/consumer-protection/warranty obligations remain external decisions.
+- Actual purchase/recycling compliance, buyer contracts, and export/consumer-protection/warranty obligations remain external decisions. The accepted-sales ledger requires a separately confirmed payment, but deferred warranty/return exposure must still be measured later.
 - PF-001/002/003 prices, COGS, and regional source observations are hypotheses, not established manufacturing margins.
 
 ## Real success criteria
