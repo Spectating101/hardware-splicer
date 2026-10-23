@@ -107,7 +107,15 @@ def test_enabot_post_compile_bringup_matches_graph(tmp_path: Path) -> None:
         export_gerber=False,
         request_id="enabot_bringup",
     )
-    assert result.get("ok") is True
+    # Source preservation may succeed while actual power and optional sensor
+    # topology remain unresolved. Do not report a physically complete robot.
+    assert result.get("ok") is False
+    import json
+    built = json.loads((tmp_path / "enabot" / "PROJECT_PACKAGE.json").read_text(encoding="utf-8"))
+    assert built["gates"]["power_on_authorized"] is False
+    assert built["gates"]["build_ready"] is False
+    assert built["rover_power_evidence"]["status"] == "blocked"
+
     bringup = result.get("bringup_card") or {}
     assert bringup.get("sourced_from_graph") is True
 
