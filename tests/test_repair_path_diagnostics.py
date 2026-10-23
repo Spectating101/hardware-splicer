@@ -81,3 +81,22 @@ def test_no_new_device_or_power_authority_claimed():
         assert report["physical_repair_verified"] is False
         assert "POWER_ON_AUTHORIZED" not in str(report)
         assert "fabrication_authorized" not in str(report)
+
+
+def test_real_repair_intake_workflow_surfaces_hypotheses_only_from_structured_tests():
+    from hardware_splicer.repair_intake import (
+        apply_repair_intake_context, repair_intake_report
+    )
+    for case in cases().values():
+        enriched = apply_repair_intake_context(case)
+        report = repair_intake_report(case)
+        assert enriched["repair_path_diagnostic"] == report["repair_path_diagnostic"]
+        assert report["repair_path_diagnostic"]["physical_repair_verified"] is False
+        assert report["repair_path_diagnostic"]["authority"] == "symptom_and_test_evidence_only"
+
+
+def test_plain_repair_intake_without_structured_paths_does_not_invent_a_diagnosis():
+    from hardware_splicer.repair_intake import apply_repair_intake_context
+    intake = {"repair_intake": {"device_hint": "Unknown device", "symptoms": ["Does not start"]}}
+    output = apply_repair_intake_context(intake)
+    assert "repair_path_diagnostic" not in output
