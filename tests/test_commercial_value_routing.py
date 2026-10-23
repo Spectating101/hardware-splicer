@@ -10,6 +10,7 @@ import sys
 from hardware_splicer.commercial_value_routing import (
     evaluate_commercial_case, evaluate_route, evaluate_portfolio,
     normalize_product_factory_run, normalize_salvage_opportunities,
+    normalize_donor_discovery, normalize_salvage_purchase_screen,
 )
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
 
@@ -308,3 +309,76 @@ def test_source_convergence_cli_reads_actual_circuit_ai_report():
     assert report["purchase_authorized"] is False
     assert report["commercial_cases"]["cases"][0]["currency"] == "TWD"
     assert len(report["salvage_discovery_reports"]) == 1
+
+
+def test_taiwan_donor_discovery_stays_advertised_not_purchased():
+    rows = {
+        "schema_version": "hardware_splicer.commerce_donor_discovery.v1",
+        "records": [{
+            "listing_id": "qnap-650", "family": "network_board",
+            "status": "DISCOVERY_ONLY", "source_url": "https://www.ruten.com.tw/item/example/",
+            "advertised_ask_twd_min": 650, "advertised_ask_twd_max": 650,
+            "parts_hypotheses_unverified": ["ethernet"],
+        }],
+    }
+    out = normalize_donor_discovery(rows, source_ref="HS #148 discovery export")
+    assert out[0]["advertised_ask_range"] == [650, 650]
+    assert out[0]["ask_evidence_class"] == "HYPOTHESIS"
+    assert out[0]["purchase_authorized"] is False
+    rows["records"][0]["status"] = "TESTED"
+    try:
+        normalize_donor_discovery(rows, source_ref="HS #148")
+    except ValueError as exc:
+        assert "cannot promote" in str(exc)
+    else:
+        raise AssertionError("unverified donor incorrectly promoted")
+
+
+def test_salvage_purchase_screen_preserves_own_bid_math():
+    base = {
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "id": "tw-thermal-printer",
+        "expected_net_per_acquired_unit_twd": 339,
+        "break_even_max_purchase_twd": 839,
+        "max_purchase_for_target_profit_twd": 539,
+        "acquisition_price_basis": "advertised_asking_price",
+        "purchase_authorized": False,
+    }
+    out = normalize_salvage_purchase_screen(base, source_ref="PR147-model-output")
+    assert out["priced_outcome"]["target_profit_max_bid"] == 539
+    assert out["priced_outcome"]["evidence_class"] == "ESTIMATED"
+    assert out["purchase_authorized"] is False
+    base["purchase_authorized"] = True
+    try:
+        normalize_salvage_purchase_screen(base, source_ref="PR147")
+    except ValueError as exc:
+        assert "purchase authority" in str(exc)
+    else:
+        raise AssertionError("purchase authorization silently accepted")
+
+
+def test_convergence_cli_ingests_donor_catalog_and_purchase_screen(tmp_path):
+    donor = tmp_path / "donor.json"
+    donor.write_text(json.dumps({
+        "schema_version": "hardware_splicer.commerce_donor_discovery.v1",
+        "records": [{
+            "listing_id": "unused-printer", "status": "DISCOVERY_ONLY",
+            "advertised_ask_twd_min": 50, "advertised_ask_twd_max": 100
+        }],
+    }), encoding="utf-8")
+    screen = tmp_path / "screen.json"
+    screen.write_text(json.dumps({
+        "schema_version": "hardware_splicer.salvage_purchase_screen.v1",
+        "id": "unused-printer",
+        "purchase_authorized": False,
+        "expected_net_per_acquired_unit_twd": 10,
+    }), encoding="utf-8")
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run([
+        sys.executable, str(root / "scripts" / "converge_commercial_sources.py"),
+        "--donor-discovery", str(donor), "--purchase-screen", str(screen),
+    ], cwd=root, capture_output=True, text=True, timeout=45)
+    assert result.returncode == 0, result.stderr
+    doc = json.loads(result.stdout)
+    assert len(doc["donor_discovery_catalogs"][0]["listings"]) == 1
+    assert doc["salvage_purchase_screens"][0]["purchase_authorized"] is False
