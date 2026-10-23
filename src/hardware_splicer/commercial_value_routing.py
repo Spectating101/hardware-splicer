@@ -279,8 +279,15 @@ def normalize_product_factory_run(run: Mapping[str, Any], *, source_ref: str) ->
 
 def normalize_salvage_opportunities(report: Mapping[str, Any], *, source_ref: str) -> list[dict[str, Any]]:
     """Bridge Circuit-AI proposals; its estimated USD values are not market evidence."""
+    source: Mapping[str, Any] = report
+    if isinstance(report.get("final_report"), Mapping):
+        source = report["final_report"]
+    elif isinstance(report.get("report"), Mapping):
+        source = report["report"]
+    if isinstance(source.get("opportunity_report"), Mapping):
+        source = source["opportunity_report"]
     out = []
-    for item in report.get("opportunities") or []:
+    for item in source.get("opportunities") or []:
         if not isinstance(item, Mapping):
             continue
         out.append({
