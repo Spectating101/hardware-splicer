@@ -211,10 +211,13 @@ export default function ExternalArtifactIntake({ onOpenDesignPreview, session = 
             <div role="status" data-testid="wokwi-source-review">
               <h4>Wokwi diagram.json → HS source proposal</h4>
               <p>{parsed.original_part_count} source components, {parsed.original_connection_count} connections;
-                {" "}{parsed.mapped_part_count} functional-family candidates and {parsed.mapped_connection_count} pin pairs mapped.
+                {" "}{parsed.mapped_part_count} functional-family candidates and {parsed.mapped_connection_count} physical pin pairs mapped;{" "}{parsed.virtual_connection_count} simulator-only serial connections preserved.
               </p>
               <p><strong>Status: {parsed.status}</strong> — not a physical circuit or simulation result.</p>
               <p className="muted">{parsed.note}</p>
+              {parsed.virtual_connection_count > 0 && (
+                <p className="muted small">Serial monitor links are virtual simulator endpoints, not physical copper wires or HS Studio edges.</p>
+              )}
               {parsed.unmapped_part_ids.length > 0 && (
                 <p>Unsupported components retained: {parsed.unmapped_part_ids.join(", ")}</p>
               )}
