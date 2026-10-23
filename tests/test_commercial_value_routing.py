@@ -396,3 +396,60 @@ def test_accepted_but_unpaid_invoice_never_counts_as_collected_revenue():
     transaction_data["payment_status"] = "SETTLED"
     del transaction_data["payment_reference"]
     assert "missing_payment_reference" in append_outcome(ledger, transaction_data)["errors"]
+
+
+def test_perfect_information_value_is_a_ceiling_not_an_authorization():
+    r = evaluate_commercial_case(case())["routes"][0]
+    assert r["success_net_if_acquired"] == 290
+    assert r["failure_net_if_acquired"] == -290
+    assert r["evpi_upper_bound"] == 58  # .8 * 290 - max(0, expected 174)
+    assert r["purchase_authorized"] is False
+    certain = route(p=1)
+    certain["failure_proceeds"] = money(0)
+    assert evaluate_commercial_case(case(certain))["routes"][0]["evpi_upper_bound"] == 0
+
+
+def test_huge_finite_line_items_cannot_create_infinite_cost_or_profit():
+    r = route()
+    for name in r["expenses"]:
+        r["expenses"][name] = money(1e308)
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert x["status"] == "INVALID"
+    assert "nonfinite_aggregated_cost" in x["errors"]
+    assert x["net_value"] is None
+
+
+def test_actual_17_donor_snapshot_is_ingested_only_as_discovery():
+    root = Path(__file__).resolve().parents[1]
+    donor = json.loads((
+        root / "examples" / "commercial_tw_donor_discovery_snapshot_2026-10-19.json"
+    ).read_text(encoding="utf-8"))
+    imported = normalize_donor_discovery(donor, source_ref=donor["source_pr_url"])
+    assert len(imported) == 17
+    assert all(row["currency"] == "TWD" for row in imported)
+    assert all(row["commercial_status"] == "DISCOVERY_ONLY" for row in imported)
+    assert all(not row["purchase_authorized"] for row in imported)
+    assert all(row["listing_url"].startswith("https://www.ruten.com.tw/item/") for row in imported)
+
+
+def test_real_branch_snapshots_flow_into_action_queue():
+    root = Path(__file__).resolve().parents[1]
+    command = [
+        sys.executable, str(root / "scripts" / "converge_commercial_sources.py"),
+        "--pf-run", str(root / "examples" / "commercial_pf002_benchhmi_snapshot.json"),
+        "--donor-discovery", str(root / "examples" /
+                               "commercial_tw_donor_discovery_snapshot_2026-10-19.json"),
+        "--case", str(root / "examples" / "commercial_value_case_twd.json"),
+    ]
+    completed = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=45)
+    assert completed.returncode == 0, completed.stderr
+    report = json.loads(completed.stdout)
+    queue = report["investigation_queue"]
+    assert queue["purchase_authorized"] is False
+    assert queue["status"] == "EVIDENCE_GATHERING_ONLY"
+    assert sum(x["origin"] == "taiwan_donor_discovery" for x in queue["tasks"]) == 17
+    pf = [x for x in queue["tasks"] if x["origin"] == "product_factory"]
+    assert len(pf) == 1
+    assert pf[0]["candidate_id"] == "benchhmi-v0"
+    assert pf[0]["earliest_unclosed_stage"] == "SELECT"
+    assert report["product_factory_experiments"][0]["physical_status"] == "UNPROVEN"
