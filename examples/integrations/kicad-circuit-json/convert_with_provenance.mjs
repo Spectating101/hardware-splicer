@@ -59,8 +59,8 @@ for (const symbol of symbols) {
     (project.paths ?? []).map(path => ({
       project: project.name,
       sheet_uuid_path: path.value,
-      ref: path.reference?.value ?? "",
-      unit: path.unit?.value ?? null,
+      ref: path.reference ?? "",
+      unit: path.unit ?? null,
     }))
   );
   if (projectPaths.length !== 1 || !projectPaths[0].sheet_uuid_path ||
