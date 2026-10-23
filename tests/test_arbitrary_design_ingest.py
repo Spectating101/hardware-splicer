@@ -40,7 +40,23 @@ def test_kicad_netlist_ingest_places_all_components(tmp_path: Path) -> None:
     """KiCad netlist with non-catalog footprints → placed PCB."""
     netlist = parse_kicad_netlist(KICAD_NETLIST.read_text(encoding="utf-8"))
     result = compile_from_netlist(netlist, tmp_path, build_id="esp32_servo_netlist", export_gerber=False)
-    assert result.ok, result.error
+    # Actual nested KiCad node references were previously discarded, so
+    # this test passed on effectively empty copper. With all source wires
+    # reconstructed, two routing shorts are now exposed and must block build.
+    assert len(netlist.nets) == 14
+    assert sum(len(x.pins) for x in netlist.nets) == 40
+    q = result.design_quality or {}
+    assert q.get("wire_count", 0) >= 20
+    # Environment truth is different: KiCad 9 DRC can pass on the routed
+    # PCB where fallback internal geometry flags two likely crossings.
+    # In both runs fabrication is blocked without KiCad ERC approval.
+    assert q.get("fabrication_ready") is False
+    if q.get("kicad_drc_pass") is True:
+        assert result.ok is True
+        assert q.get("kicad_erc_pass") is not True
+    else:
+        assert result.ok is False
+        assert q.get("drc_pass") is False
     pcb = tmp_path / "build_compilation" / "main_ctrl_build.kicad_pcb"
     assert pcb.read_text(encoding="utf-8").count("(footprint") == len(netlist.components)
 

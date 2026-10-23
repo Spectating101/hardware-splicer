@@ -68,6 +68,12 @@ def _module_id_from_fields(fields: List[Any]) -> Optional[str]:
     return None
 
 
+def _child_text(node: List[Any], key: str) -> str:
+    """Extract standard nested KiCad s-expression child scalars."""
+    child = _find_child(node, key)
+    return str(child[1]) if child and len(child) > 1 else ""
+
+
 def parse_kicad_netlist(text: str) -> CircuitNetlist:
     """Parse KiCad `(export ...)` netlist into IR."""
     tokens = _tokenize_sexpr(text)
@@ -107,12 +113,29 @@ def parse_kicad_netlist(text: str) -> CircuitNetlist:
         for net in nets_section[1:]:
             if not isinstance(net, list) or not net or net[0] != "net":
                 continue
-            code = str(net[1]) if len(net) > 1 else ""
-            name = str(net[2]) if len(net) > 2 else code
+            # KiCad CLI uses (net (code "1") (name "GND")
+            # (node (ref "U1") (pin "2")) ...). The old importer was
+            # stringifying entire child arrays and silently importing ZERO
+            # pins; read the nested fields rather than array positions.
+            name = _child_text(net, "name") or _child_text(net, "code")
+            # Keep compatibility with historical flattened net fixtures.
+            if not name and len(net) > 2 and isinstance(net[2], str):
+                name = str(net[2])
             pins: List[PinRef] = []
-            for node in net[3:]:
-                if isinstance(node, list) and len(node) >= 3 and node[0] == "node":
-                    pins.append(PinRef(component_ref=str(node[1]), pin=str(node[2])))
+            for node in net[1:]:
+                if not isinstance(node, list) or not node or node[0] != "node":
+                    continue
+                ref = _child_text(node, "ref") or (
+                    str(node[1]) if len(node) > 2 and isinstance(node[1], str) else ""
+                )
+                pin = _child_text(node, "pin") or (
+                    str(node[2]) if len(node) > 2 and isinstance(node[2], str) else ""
+                )
+                if not ref or not pin:
+                    raise ValueError(f"Malformed KiCad net node on {name!r}: {node!r}")
+                pins.append(PinRef(component_ref=ref, pin=pin))
+            if not name:
+                raise ValueError("KiCad net missing code and name")
             nets.append(Net(name=name, pins=pins))
 
     return CircuitNetlist(source="kicad_netlist", components=components, nets=nets)

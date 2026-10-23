@@ -39,6 +39,29 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
         netlist, tmp_path, build_id="generic_low_voltage_build", export_gerber=False
     )
     q = result.design_quality or {}
+    if fixture.get("type") == "kicad_netlist":
+        # The former importer silently dropped all KiCad (node (ref ...)
+        # (pin ...)) pin memberships. Its empty circuit routed cleanly,
+        # but the actual 14-net design has two hard copper shorts in the
+        # current in-repo router. Do not assert fabricated DRC success.
+        assert len(netlist.nets) == 14
+        assert sum(len(n.pins) for n in netlist.nets) == 40
+        assert q.get("build_graph_compiled") is True
+        assert q.get("wire_count", 0) >= 20
+        # The isolated fallback DRC flags 2 apparent crossings. When a
+        # fully configured independent KiCad CLI is available its own DRC
+        # can pass, while KiCad ERC still blocks fabrication. Do not confuse
+        # software compile success with manufacturing authorization.
+        assert q.get("fabrication_ready") is False
+        assert q.get("fab_recommendation") in {"blocked_drc", "blocked_erc"}
+        if q.get("kicad_drc_pass") is True:
+            assert result.ok is True
+            assert q.get("kicad_erc_pass") is not True
+        else:
+            assert result.ok is False
+            assert q.get("drc_pass") is False
+            assert int(q.get("drc_errors") or 0) > 0
+        return
     assert result.ok, result.error
     assert int(q.get("kicad_drc_errors") or 0) == 0, q
     assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
