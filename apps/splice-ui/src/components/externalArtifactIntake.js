@@ -144,3 +144,42 @@ export function reconcileExternalBomProposal(parsedBom, canonicalRows) {
     note: "Exact-label and quantity comparison only; donor identity, substitutions, voltage and manufacturing are unverified.",
   };
 }
+
+
+/**
+ * Read binary STL triangles directly from a local artifact, e.g. from
+ * build123d/CadQuery/FreeCAD. STL has no unit or coordinate-frame metadata:
+ * bounds are numerical file units, NOT measured millimetres.
+ * This is geometric sanity inspection, not a fit/manufacturing approval.
+ */
+export function inspectBinaryStlArtifact(buffer) {
+  if (!(buffer instanceof ArrayBuffer) || buffer.byteLength < 84) {
+    throw new Error("Binary STL requires an 84-byte header.");
+  }
+  const view = new DataView(buffer);
+  const triangles = view.getUint32(80, true);
+  if (triangles < 1 || triangles > 100000) throw new Error("STL has an invalid triangle count.");
+  const expected = 84 + triangles * 50;
+  if (expected !== buffer.byteLength) {
+    throw new Error("Binary STL triangle count does not match file length (ASCII STL unsupported).");
+  }
+  const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < triangles; i++) {
+    const base = 84 + i * 50 + 12; // skip normal, read 3 vertices
+    for (let vertex = 0; vertex < 3; vertex++) {
+      for (let axis = 0; axis < 3; axis++) {
+        const value = view.getFloat32(base + vertex * 12 + axis * 4, true);
+        if (!Number.isFinite(value)) throw new Error("STL contains a nonfinite vertex.");
+        min[axis] = Math.min(min[axis], value);
+        max[axis] = Math.max(max[axis], value);
+      }
+    }
+  }
+  return {
+    triangles,
+    bounds: { min, max, extent: min.map((v, axis) => max[axis] - v) },
+    units: "unknown (STL is unitless)",
+    physicallyVerified: false,
+    manufacturable: false,
+  };
+}
