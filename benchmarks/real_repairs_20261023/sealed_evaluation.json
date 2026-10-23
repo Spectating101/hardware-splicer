@@ -1,0 +1,39 @@
+{
+  "schema_version": "hardware_splicer.blind_repair_gold.v1",
+  "note": "Evaluation outcomes are never loaded into rank_repair_hypotheses.",
+  "cases": [
+    {
+      "case_id": "case_A_2013",
+      "source_url": "https://www.ifixit.com/Answers/View/155102/SSD+not+recognized+in+system",
+      "evidence": "The original responder confirmed: changed SATA cable and it worked.",
+      "expected_first_component": "internal_flex",
+      "gold_strength": "poster_confirmed_component_replacement_success",
+      "case_design": "source based, diagnosis removed from intake"
+    },
+    {
+      "case_id": "case_B_2014",
+      "source_url": "https://www.ifixit.com/Answers/View/195252/Won't+recognize+the+hard+drive+(flashing+folder-question+mark)",
+      "evidence": "Poster reported two cable replacements did not restore the drive; a chosen answer hypothesized a logic-board fault but no physical repair confirmation.",
+      "expected_first_component": "sata_host_port",
+      "gold_strength": "expert_hypothesis_not_confirmed",
+      "case_design": "source based, failed repairs kept in intake; do not score as proven correct physical root cause"
+    },
+    {
+      "case_id": "case_C_synthetic",
+      "source_url": null,
+      "evidence": "Explicit counterfactual of a failed drive on two independent data paths.",
+      "expected_first_component": "suspect_drive",
+      "gold_strength": "synthetic_negative_control",
+      "case_design": "synthetic; not real-world repair evidence"
+    },
+    {
+      "case_id": "case_D_2025",
+      "source_url": "https://www.ifixit.com/Troubleshooting/Joy-Con/Nintendo+Switch+Joy-Con+Drift/481780",
+      "evidence": "Generic drift has multiple plausible causes; source does not pin down this individual unit's cause.",
+      "expected_first_component": null,
+      "expected_verdict": "insufficient_discriminating_evidence",
+      "gold_strength": "real_generic_symptom_underdetermined",
+      "case_design": "source based; deliberately no repair outcome"
+    }
+  ]
+}
