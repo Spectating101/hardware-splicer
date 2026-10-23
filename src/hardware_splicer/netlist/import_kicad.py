@@ -81,6 +81,20 @@ def parse_kicad_netlist(text: str) -> CircuitNetlist:
     if not isinstance(tree, list) or not tree or tree[0] != "export":
         raise ValueError("not a KiCad export netlist")
 
+    # KiCad records sheet instance paths on both design sheets and components.
+    # A repeated channel may share its source schematic but have distinct
+    # exported references and distinct sheet instance paths. Preserve this
+    # provenance rather than merging symbols with identical library IDs.
+    design = _find_child(tree, "design")
+    sheets: List[dict[str, str]] = []
+    for sheet in (design or [])[1:]:
+        if isinstance(sheet, list) and sheet and sheet[0] == "sheet":
+            sheets.append({
+                "name": _child_text(sheet, "name"),
+                "uuid_path": _child_text(sheet, "tstamps"),
+                "source_filename": _child_text(_find_child(sheet, "title_block") or [], "source"),
+            })
+
     components: List[ComponentInstance] = []
     comp_section = _find_child(tree, "components")
     if comp_section:
@@ -103,11 +117,25 @@ def parse_kicad_netlist(text: str) -> CircuitNetlist:
                 elif item[0] == "fields":
                     fields.append(item)
             module_id = _module_id_from_fields(fields) or (value if re.match(r"^[a-z0-9_-]+$", value) else None)
+            instance = _find_child(comp, "sheetpath") or []
+            # Actual KiCad 9 emits (sheetpath (names "/CH2/")
+            # (tstamps "/uuid/")) plus (tstamps "symbol-uuid"...).
+            # Do not use symbol-library names as instance identifiers.
+            sheet_name = _child_text(instance, "names")
+            sheet_uuids = _child_text(instance, "tstamps")
+            symbol_uuids = _find_child(comp, "tstamps") or []
+            metadata = {
+                "kicad_sheet_name": sheet_name,
+                "kicad_sheet_uuid_path": sheet_uuids,
+                "kicad_symbol_tstamps": [str(x) for x in symbol_uuids[1:]],
+            }
             components.append(
-                ComponentInstance(ref=ref, value=value, footprint=footprint, module_id=module_id)
+                ComponentInstance(ref=ref, value=value, footprint=footprint,
+                                  module_id=module_id, metadata=metadata)
             )
 
     nets: List[Net] = []
+    unnumbered_no_connect: List[dict[str, str]] = []
     nets_section = _find_child(tree, "nets")
     if nets_section:
         for net in nets_section[1:]:
@@ -132,10 +160,36 @@ def parse_kicad_netlist(text: str) -> CircuitNetlist:
                     str(node[2]) if len(node) > 2 and isinstance(node[2], str) else ""
                 )
                 if not ref or not pin:
+                    pin_field = _find_child(node, "pin")
+                    pintype = _child_text(node, "pintype")
+                    # Official KiCad flat-hierarchy demos include mounting
+                    # holes with (pin "") (pinfunction "1")
+                    # (pintype "passive+no_connect"). This is an explicitly
+                    # *unnumbered* NC terminal, not a fabricated REF.PIN.
+                    # Preserve the original source evidence separately.
+                    if (
+                        ref and pin_field is not None and len(pin_field) > 1
+                        and pin_field[1] == "" and "no_connect" in pintype
+                        and name.startswith("unconnected-")
+                        and sum(isinstance(n, list) and n and n[0] == "node"
+                                for n in net[1:]) == 1
+                    ):
+                        unnumbered_no_connect.append({
+                            "net": name, "ref": ref,
+                            "pin": "", "pinfunction": _child_text(node, "pinfunction"),
+                            "pintype": pintype,
+                        })
+                        continue
                     raise ValueError(f"Malformed KiCad net node on {name!r}: {node!r}")
                 pins.append(PinRef(component_ref=ref, pin=pin))
             if not name:
                 raise ValueError("KiCad net missing code and name")
             nets.append(Net(name=name, pins=pins))
 
-    return CircuitNetlist(source="kicad_netlist", components=components, nets=nets)
+    return CircuitNetlist(
+        source="kicad_netlist", components=components, nets=nets,
+        metadata={"kicad_export": {
+            "sheets": sheets,
+            "unnumbered_no_connect_terminals": unnumbered_no_connect,
+        }},
+    )
