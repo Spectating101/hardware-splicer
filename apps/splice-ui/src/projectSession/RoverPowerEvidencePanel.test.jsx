@@ -26,7 +26,7 @@ describe("evidence-first rover power review UI", () => {
     expect(screen.getByText(/No authenticated measurement/)).toBeTruthy();
     expect(screen.getByText(/Motor-terminal rail not established/)).toBeTruthy();
     expect(screen.getByText(/1.8/)).toBeTruthy();
-    expect(screen.getByText(/2/)).toBeTruthy();
+    expect(screen.getByText("2")).toBeTruthy();
     expect(container.querySelector("button")).toBeNull();
     expect(screen.getByRole("link", { name: /ST L298 datasheet/ }).getAttribute("href"))
       .toBe(report.sources.l298_datasheet);
