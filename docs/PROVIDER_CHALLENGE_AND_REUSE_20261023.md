@@ -34,13 +34,13 @@ This is a valid interoperability *coverage failure*, not an integration win. Ori
 | Source components / wiring connections | 2 / 5 |
 | Components / connections preserved by HS | **2 / 5** |
 | HS recognized part families | **2 / 2** |
-| HS catalog pin links mapped | **2 / 5** |
-| Remaining links | 2 virtual Wokwi serial-monitor links (not physical PCB nets); 1 ESP32 D14↔DHT22 data link unsupported by the current HS ESP32 board pad map |
-| Verdict | **Partial**; no Studio import until missing physical pin contract resolved |
+| HS catalog pin links mapped | **3 / 3 physical** (5 total source links including 2 virtual serial endpoints) |
+| Remaining links | 2 virtual Wokwi serial-monitor links (not physical PCB nets); no unmapped physical wire |
+| Verdict | **Functional-family mapping complete for this public sensor project**; opt-in Studio draft permitted after cross-check against actual HS catalog, while exact board variant/physical connection safety remains unverified |
 
-This is an objectively measurable interoperability gap to prioritize based on third-party real-project coverage, not internal sample design aesthetics.
+Originally the public DHT22 example exposed a missing GPIO14 in HS. We expanded the structured ESP32 DevKit family and its physical pad map based on Espressif-documented GPIO14 availability, then reran the unmodified Wokwi source: **2/2 parts, 3/3 physical pin links mapped**. The two virtual Wokwi serial-monitor connections are retained in provenance but intentionally excluded from the electrical copper draft. This is a measured external-artifact coverage improvement, not certification of a specific donor DevKit PCB.
 
-**Documented-schema control (authored by HS for tests, not a public competitor output):** 3 components (ESP32 + DHT22 + SSD1306), 7 connections, **3/3 recognized and 7/7 pin mapped**. Can become a draft Studio canvas after real catalog pin validation. This proves round-trip *structure*, **not simulation**, firmware execution, component delivery or a finished sensor product.
+**Documented-schema control (authored by HS for tests, not a public competitor output):** 3 components (ESP32 + DHT22 + SSD1306), 7 connections, **3/3 recognized and 7/7 pin mapped**. Can become a draft Studio canvas after real catalog pin validation. This proves internal round-trip *structure*, **not simulation**, firmware execution, component delivery or a finished sensor product.
 
 ## Repeatable provider challenge
 
