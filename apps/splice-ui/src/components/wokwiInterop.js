@@ -57,13 +57,15 @@ const endpoint = (value, index, partsById) => {
   const i = value.indexOf(":");
   const partId = value.slice(0,i);
   const pin = value.slice(i+1);
-  if (!partId || !pin || !partsById.has(partId)) {
+  const virtual = partId === "$serialMonitor" && (pin === "RX" || pin === "TX");
+  if (!partId || !pin || (!partsById.has(partId) && !virtual)) {
     throw new Error(`Wokwi connection ${index + 1} refers to an unknown part or missing pin.`);
   }
   const part = partsById.get(partId);
   return {
     source_endpoint: value, source_part_id: partId, source_pin: pin,
-    hs_pin_candidate: normalizePin(part.type, pin),
+    source_endpoint_kind: virtual ? "wokwi_serial_monitor_virtual" : "component",
+    hs_pin_candidate: virtual ? null : normalizePin(part.type, pin),
   };
 };
 
