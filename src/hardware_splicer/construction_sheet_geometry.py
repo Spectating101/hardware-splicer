@@ -150,7 +150,11 @@ def schedule_svg(schedule: Mapping[str,Any]) -> str:
     return "\n".join(xml)+"\n"
 
 
-def schedule_parts(schedule: Mapping[str,Any],construction:Mapping[str,Any]) -> list[dict[str,Any]]:
+def schedule_parts(
+    schedule: Mapping[str,Any],
+    construction:Mapping[str,Any],
+    source:Mapping[str,Any] | None = None,
+) -> list[dict[str,Any]]:
     """Alternative-specific component schedule, NOT the existing full-print BOM."""
     if schedule.get("status")!="dimensioned_blank_cut_proposal":
         return []
@@ -169,6 +173,10 @@ def schedule_parts(schedule: Mapping[str,Any],construction:Mapping[str,Any]) -> 
             "kind":"external_connector_reference",
             "source_key":construction.get("connector_family","unselected"),
             "quantity":n,"file_verified":False,"fit_verified":False,
+            "source_url":(source or {}).get("url"),
+            "pinned_revision":(source or {}).get("pinned_revision"),
+            "upstream_license":(source or {}).get("license"),
+            "downloaded_files_repackaged":False,
         })
     parts.append({
         "kind":"external_fasteners_or_joint_support",
