@@ -157,3 +157,55 @@ def test_provenance_not_a_netlist_or_physical_repair_certificate(real_sources):
     assert item["original_converter_output_modified"] is False
     assert item["capture"]=="upstream_converter_ctx_symbolUuidToComponentId"
     assert all(x["native_symbol_uuid"] for x in item["records"])
+
+
+
+def test_uuid_verified_source_overlay_labels_all_visual_components_and_kicad_pins(real_sources):
+    from hardware_splicer.integrations.kicad_runtime_uuid_provenance import (
+        build_uuid_linked_source_overlay,
+    )
+    schematic,net,docs,receipt,_=real_sources
+    overlay=build_uuid_linked_source_overlay(
+        schematic.read_bytes(),net.read_text(),docs.read_bytes(),receipt.read_bytes()
+    )
+    assert overlay["total_visual_components"]==40
+    assert overlay["total_visual_pins"]==83
+    assert overlay["physical_components"]==36
+    assert overlay["physical_pins_with_source_net"]==79
+    physical=next(x for x in overlay["visual_component_labels"] if x["native_reference"]=="U1")
+    pin=next(p for p in physical["pins"] if p["pin_number"]=="1")
+    assert pin["authoritative_kicad_net_name"]=="/3V3"
+    power=next(x for x in overlay["visual_component_labels"] if x["native_reference"]=="#FLG01")
+    assert power["physical_component"] is False
+    assert power["pins"][0]["authoritative_kicad_net_name"] is None
+    assert overlay["converter_wire_trace_coordinates_verified"] is False
+    assert overlay["visual_electrical_merge_authorized"] is False
+
+
+def test_visual_port_parent_forgery_rejected_even_with_updated_sha(real_sources):
+    schematic,net,docs,receipt,_=real_sources
+    original=json.loads(docs.read_text())
+    p=next(x for x in original if x["type"]=="schematic_port")
+    p["schematic_component_id"]="schematic_component_999"
+    altered=json.dumps(original,indent=2).encode()+b"\n"
+    side=json.loads(receipt.read_text())
+    side["converter_output_sha256"]=hashlib.sha256(altered).hexdigest()
+    with pytest.raises(ValueError,match="pin-to-visual identity"):
+        _validate(schematic,net,altered,side)
+
+
+def test_real_uuid_provenance_verifier_cli_outputs_read_only_overlay(real_sources,tmp_path):
+    schematic,net,docs,receipt,_=real_sources
+    import sys
+    script=TOOLS/"verify_uuid_overlay.py"
+    out=tmp_path/"source-labels.json"
+    result=subprocess.run([
+        sys.executable,str(script),"--schematic",str(schematic),
+        "--circuit-json",str(docs),"--provenance",str(receipt),"--out",str(out),
+    ],capture_output=True,text=True,timeout=120,check=True)
+    summary=json.loads(result.stdout)
+    assert summary["native_uuid_links_verified"]==40
+    assert summary["visual_components"]==40
+    assert summary["physical_pins_with_independent_net"]==79
+    assert summary["fabrication_authorized"] is False
+    assert json.loads(out.read_text())["purpose"]=="visual_label_crosswalk_only_no_automatic_wire_graph"
