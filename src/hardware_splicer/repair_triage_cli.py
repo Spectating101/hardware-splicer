@@ -117,11 +117,28 @@ def main(argv: list[str] | None = None) -> int:
     parser=argparse.ArgumentParser(description="Report physical fault hypotheses without unsafe action authority")
     parser.add_argument("intake_json",type=Path)
     parser.add_argument("output_directory",type=Path)
+    parser.add_argument("--netlist", type=Path, help="KiCad exported .net file, not .kicad_sch")
+    parser.add_argument("--measurements-csv", type=Path, help="Operator-attributed measurement CSV")
     args=parser.parse_args(argv)
+    if bool(args.netlist) != bool(args.measurements_csv):
+        parser.error("--netlist and --measurements-csv are both required for source-bound measurements")
     body=json.loads(args.intake_json.read_text(encoding="utf-8"))
     if not isinstance(body,dict):
         parser.error("repair intake must be a JSON object")
+    # Validate optional evidence first: malformed source/measurement inputs
+    # must not quietly produce a plausible-looking triage receipt.
+    evidence = None
+    if args.netlist is not None:
+        from .repair_electrical_evidence import capture_repair_evidence, write_repair_evidence
+
+        evidence = capture_repair_evidence(args.netlist, args.measurements_csv)
     result=write_repair_triage_package(body,args.output_directory)
+    if evidence is not None:
+        write_repair_evidence(args.netlist, args.measurements_csv, args.output_directory)
+        result["electrical_evidence"] = str(args.output_directory / "REPAIR_ELECTRICAL_EVIDENCE.json")
+        result["netlist_pin_count"] = evidence["netlist"]["pins_mapped"]
+        result["physical_measurements_authenticated"] = False
+        result["physical_repair_verified"] = False
     print(json.dumps(result,indent=2))
     return 0
 
