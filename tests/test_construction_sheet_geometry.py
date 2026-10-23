@@ -10,7 +10,7 @@ import json
 import pytest
 
 from hardware_splicer.construction_sheet_geometry import (
-    make_panel_schedule, schedule_csv, schedule_svg, schedule_parts,
+    make_panel_schedule, schedule_csv, schedule_svg, schedule_parts, schedule_scad_preview,
 )
 
 
@@ -103,6 +103,12 @@ def test_mecha_exports_shop_packet_and_does_not_cut_ports(tmp_path):
     assert interface["geometry"][0]["label"]=="USB"
     assert interface["geometry"][0]["status"]=="untransformed_mark_for_review_not_cut"
     assert "HYBRID_PANEL_BLANKS.svg" in (tmp_path/"BUILD_RECIPE.md").read_text()
+    assert (tmp_path/"HYBRID_ASSEMBLY_PREVIEW.scad").exists()
+    preview=(tmp_path/"HYBRID_ASSEMBLY_PREVIEW.scad").read_text()
+    assert preview.count("cube([")==6
+    assert "translate([0,0,0]) cube([106,3,36]" in preview
+    assert "translate([3,3,3]) cube([100,80,3]" in preview
+    assert "NO CONNECTOR SEATS" in preview
     assert result["construction_alternatives"]["selected_manufacturing_method"] is None
 
 
@@ -180,3 +186,12 @@ def test_real_operator_example_variants_run_with_same_internal_dims(
     assert (tmp_path/"HYBRID_PANEL_CUTS.csv").exists()
     assert (tmp_path/"HYBRID_PANEL_BLANKS.svg").exists()
     assert comparison["hypothetical_material_cost_difference"] is None
+
+
+def test_three_dimensional_proposal_preview_is_never_manufacturing_claim():
+    r=make_panel_schedule(_enclosure(),_construction())
+    scad=schedule_scad_preview(r)
+    assert scad.count("cube([")==6
+    assert "DO NOT EXPORT THIS AS AN APPROVED MANUFACTURING MODEL" in scad
+    assert scad.count("\n")>=10
+    assert "render_stl" not in scad
