@@ -1,5 +1,6 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
+import ExternalArtifactIntake from "../components/ExternalArtifactIntake.jsx";
 import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
 import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx";
 import MachineAuthoringPanel from "../components/MachineAuthoringPanel.jsx";
@@ -161,6 +162,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.design && (
           <div className="panel-stack" data-testid="stage-design">
+            <ExternalArtifactIntake session={session} />
             <MachineAuthoringPanel session={session} onToast={onToast} />
             <MachineArchitecturePanel
               project={session.machineProject}

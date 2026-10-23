@@ -8,6 +8,7 @@ import {
 } from "../api.js";
 import LabResultCard from "./LabResultCard.jsx";
 import IntegrationsCatalog from "./IntegrationsPanel.jsx";
+import ExternalArtifactIntake from "./ExternalArtifactIntake.jsx";
 
 const DEMO_NODES = [
   { id: "n1", moduleId: "usb-power-5v" },
@@ -383,6 +384,7 @@ export default function InterfaceLabPanel({ llmPolicy, onOpenDesignPreview, onRu
         )}
       </section>
 
+      <ExternalArtifactIntake onOpenDesignPreview={onOpenDesignPreview} />
       <IntegrationsCatalog />
     </div>
   );
