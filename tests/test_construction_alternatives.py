@@ -72,11 +72,11 @@ def test_sourced_material_mass_cost_geometry_and_thermochemistry():
     hybrid=_hybrid(result)
     assert full["estimated_solid_envelope_mm3"] == pytest.approx(57024)
     assert full["estimated_printed_mass_g"] == pytest.approx(71.28)
-    assert hybrid["panel_area_mm2_unoptimized"] == pytest.approx(30256)
-    assert hybrid["panel_mass_g"] == pytest.approx(49.9224,abs=.001)
+    assert hybrid["panel_area_mm2_unoptimized"] == pytest.approx(29392)
+    assert hybrid["panel_mass_g"] == pytest.approx(48.4968,abs=.001)
     assert hybrid["connector_printed_mass_g"] == pytest.approx(3)
-    assert hybrid["combined_estimated_mass_g"] == pytest.approx(52.922,abs=.002)
-    assert result["hypothetical_full_print_minus_hybrid_mass_g"] == pytest.approx(18.358,abs=.002)
+    assert hybrid["combined_estimated_mass_g"] == pytest.approx(51.497,abs=.002)
+    assert result["hypothetical_full_print_minus_hybrid_mass_g"] == pytest.approx(19.783,abs=.002)
     assert result["hypothetical_material_cost_difference"] is not None
     assert result["thermal_screen"]["panel"] == "below_reported_limit_not_validated"
     assert result["material_property_evidence"]["panel"]["density_kg_m3"] == 550
@@ -177,6 +177,13 @@ def test_mecha_runner_integrates_risk_recipe_and_keeps_original_cad(tmp_path):
     assert not (tmp_path/"panel_connector.scad").exists()
     assert (tmp_path/"CONSTRUCTION_ALTERNATIVES.json").exists()
     assert (tmp_path/"CONSTRUCTION_PLAN.md").exists()
+    assert (tmp_path/"HYBRID_PANEL_CUTS.csv").exists()
+    assert (tmp_path/"HYBRID_PANEL_BLANKS.svg").exists()
+    assert (tmp_path/"HYBRID_PARTS.json").exists()
+    assert (tmp_path/"HYBRID_INTERFACE_REVIEW.json").exists()
+    assert 'front_back' in (tmp_path/"HYBRID_PANEL_CUTS.csv").read_text()
+    assert 'NOT VERIFIED CAM' in (tmp_path/"HYBRID_PANEL_BLANKS.svg").read_text()
+    assert bundle["construction_alternatives"]["hybrid_panel_envelope_mm"] == [106,86,36]
     assert "ModuFrame" in (tmp_path/"CONSTRUCTION_PLAN.md").read_text()
     assert "chemical_compatibility_unverified" in (tmp_path/"RISK_REGISTER.md").read_text()
     assert "CONSTRUCTION_PLAN.md" in (tmp_path/"BUILD_RECIPE.md").read_text()
