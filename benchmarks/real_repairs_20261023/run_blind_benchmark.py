@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from hardware_splicer.repair_intake import repair_intake_report
+from hardware_splicer.repair_intake import repair_intake_report, extract_repair_context, apply_repair_intake_context
 from hardware_splicer.repair_path_diagnostics import rank_repair_hypotheses
 
 
@@ -20,13 +20,18 @@ def run(root: Path) -> dict:
     predictions = {}
     for case in cases:
         identifier = case["case_id"]
-        intake = repair_intake_report(case)
+        intake = extract_repair_context(case)
         baseline[identifier] = {
             "symptoms_extracted": len(intake["symptoms"]),
             "physical_root_cause_rankings": 0,
             "physical_repair_diagnosis_present": False,
         }
-        predictions[identifier] = rank_repair_hypotheses(case)
+        # Exercise the actual HS repair-intake API, not only an isolated helper.
+        enriched = apply_repair_intake_context(case)
+        inspection = repair_intake_report(case)
+        assert enriched["repair_path_diagnostic"] == inspection["repair_path_diagnostic"]
+        assert enriched["repair_path_diagnostic"] == rank_repair_hypotheses(case)
+        predictions[identifier] = enriched["repair_path_diagnostic"]
     # No inference can read the reference outcome above this line.
     gold = json.loads((root / "sealed_evaluation.json").read_text(encoding="utf-8"))
     scored = {}
