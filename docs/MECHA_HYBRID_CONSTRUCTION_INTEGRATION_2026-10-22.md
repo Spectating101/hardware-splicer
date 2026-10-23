@@ -61,11 +61,17 @@ and optional explicitly supplied material occupancy assumption, not real
 sliced G-code. It excludes cutouts, standoffs, supports, failed-print
 waste, printer energy and labor.
 
-The hybrid estimate approximates six **uncut outer bounding rectangles**.
-It multiplies total sheet area by panel thickness and an explicitly
-supplied density, and adds `connector_count × measured/assumed connector
-printed volume × filament density`. This does not handle nesting, panel
-overlaps, kerf, slots, material kerf loss or fastener hardware mass.
+The hybrid estimate now uses **six dimensioned blank panels that
+preserve the specified internal clearance**, recalculating its outer
+dimensions from the actual supplied sheet thickness (which may differ
+from the 3D-printed enclosure wall). It assumes two full-width front/
+back panels, two side panels in between, and an inset floor/lid. This
+is a preliminary butt-panel topology and **does not establish how
+corners, the floor, or the lid attach**. It multiplies the resulting
+unoptimized stock area by thickness and supplied density, then adds
+`connector_count × measured/assumed connector printed volume × filament
+density`. It does not handle nesting, kerf, joint geometry, port holes,
+panel scrap, adhesive or metal fastener mass.
 If any needed property is absent, the related mass/cost is `null`.
 
 Cost only includes sheet cost/m² and filament cost/kg **supplied by the
@@ -237,3 +243,41 @@ Pinned upstream revision:
 
 BoxKit is therefore an optional **linked/pinned construction alternative**,
 not an embedded code dependency or source of validated mechanical strength.
+
+## Mecha output after shop-packet integration (2026-10-23)
+
+Every Mecha run containing an enclosure now receives the **advisory**
+comparison by default; `ProjectSpec.construction` remains optional.
+Unknown material properties remain unknown, and no alternative is chosen
+implicitly. The ordinary `enclosure.scad` stays unchanged.
+
+When the operator provides a measured `panel_thickness_mm`, the
+standard Mecha runner also emits:
+
+* `HYBRID_PANEL_CUTS.csv` — exact named rectangular blank dimensions
+  for the proposed panel topology, quantities, thickness and notes.
+* `HYBRID_PANEL_BLANKS.svg` — one dimensioned 1:1-mm outline of each
+  unique blank **for review**, not a licensed CNC/laser toolpath.
+* `HYBRID_PARTS.json` — a distinct sheet, connector and required
+  attachment schedule rather than silently mixing with the original
+  fully printed enclosure BOM.
+* `HYBRID_INTERFACE_REVIEW.json` — existing port/cutout coordinates
+  identified as *untransformed* references. It does **not** cut them.
+* Updated `CONSTRUCTION_PLAN.md`, `BUILD_RECIPE.md`,
+  `CONSTRUCTION_ALTERNATIVES.json` and existing mechanical risk reports.
+
+These names are fixed; no arbitrary source model or user-provided path
+is copied to the generated build directory. Connector fit, panel
+support, cutouts, fasteners and heat/strength evidence are explicit
+open issues. If no measured thickness is provided, HS offers the
+alternative but does not export a fictitious cut pattern.
+
+The same construction preference can be supplied in the main
+Hardware-Splicer project-intake object as `construction` and is forwarded
+into the Mecha mechanism inside normal scenario or salvage builds.
+No separate app is required to request it.
+
+Mecha's standalone installation continues operating without importing
+HS by returning a clearly unavailable comparison instead of failing
+during report export.
+
