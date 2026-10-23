@@ -1,0 +1,221 @@
+{
+  "schema_version": "hardware_splicer.commercial_value_case.v1",
+  "candidate_id": "benchhmi-v0-pf002-line-item-scenario",
+  "market": "Taiwan",
+  "currency": "TWD",
+  "target_contribution_margin": 0.3,
+  "source_pr_url": "https://github.com/Spectating101/hardware-splicer/pull/110",
+  "source_label": "ALL revenues, repair yields, nonmaterial costs, and disposal values are ILLUSTRATIVE. Materials are original PF-002 screening estimates, not procurement quotes. Not authorized for manufacturing or acquisition.",
+  "routes": [
+    {
+      "route_id": "remanufacture-and-resell",
+      "action": "build_product",
+      "currency": "TWD",
+      "success_probability": 0.7,
+      "probability_evidence": "HYPOTHESIS",
+      "sale_proceeds": {
+        "amount": 8990,
+        "evidence_class": "HYPOTHESIS"
+      },
+      "failure_proceeds": {
+        "amount": 300,
+        "evidence_class": "HYPOTHESIS"
+      },
+      "expenses": {
+        "acquisition": {
+          "amount": 1000,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "material_and_fab": {
+          "amount": 1936,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "engineering": {
+          "amount": 1200,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "labor": {
+          "amount": 900,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "quality": {
+          "amount": 400,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "freight_and_tax": {
+          "amount": 300,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "sales_and_payment": {
+          "amount": 250,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "warranty_and_returns": {
+          "amount": 450,
+          "evidence_class": "HYPOTHESIS"
+        }
+      },
+      "material_plan": {
+        "currency": "TWD",
+        "line_items": [
+          {
+            "part_id": "STM32G0B1CBT6",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 156,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "MCU"
+          },
+          {
+            "part_id": "ISO1410BDWR",
+            "quantity": 2,
+            "unit_cost": {
+              "amount": 174,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "RS485"
+          },
+          {
+            "part_id": "ISO1042",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 150,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "CAN"
+          },
+          {
+            "part_id": "ISO1212SDBQR",
+            "quantity": 2,
+            "unit_cost": {
+              "amount": 56,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "DIGITAL_INPUT"
+          },
+          {
+            "part_id": "TPS4H160BQPWPRQ1",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 114,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "DIGITAL_OUTPUT"
+          },
+          {
+            "part_id": "ISO6740DWR",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 96,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "DIGITAL_ISOLATION"
+          },
+          {
+            "part_id": "B0505S-2WR3_or_equivalent",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 120,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "ISOLATED_POWER"
+          },
+          {
+            "part_id": "3V3_regulator_and_USB_power_switch",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 80,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "POWER"
+          },
+          {
+            "part_id": "USB-C_receptacle_ESD_CC_passives",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 100,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "USB"
+          },
+          {
+            "part_id": "TVS_termination_reverse_protection_fuse_network",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 180,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "FIELD_PROTECTION"
+          },
+          {
+            "part_id": "pluggable_terminal_blocks_headers_testpoints",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 180,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "CONNECTORS"
+          },
+          {
+            "part_id": "decoupling_bias_current_limit_misc",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 120,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "PASSIVES"
+          },
+          {
+            "part_id": "4_layer_100x80_or_smaller",
+            "quantity": 1,
+            "unit_cost": {
+              "amount": 180,
+              "evidence_class": "ESTIMATED",
+              "reference": "HS PR #110 BOM 2026-09; not a current supplier quote"
+            },
+            "material_state": "new",
+            "source_hint": "PCB"
+          }
+        ],
+        "fabrication_service": {
+          "amount": 0,
+          "evidence_class": "HYPOTHESIS"
+        },
+        "recovery_labor_cost_location": "expenses.labor (illustrative)",
+        "source": "HS PR #110 BENCHIO_BOM_SCREENING.csv"
+      },
+      "gates": {
+        "physical_test_passed": false,
+        "rights_cleared": false,
+        "compliance_cleared": false,
+        "procurement_verified": false,
+        "buyer_committed": false
+      }
+    }
+  ]
+}
