@@ -17,7 +17,7 @@ def _inputs():
 def test_inputs_are_separate_from_outcomes_and_all_sources_present():
     x=_inputs()
     assert len(x)==16 and len({c["case_id"] for c in x})==16
-    assert all(c["source_url"].startswith("https://www.ifixit.com/") for c in x)
+    assert all("source_url" not in c for c in x)\n    # Public question titles/URLs can reveal the eventual solution to an AI baseline.
     for case in x:
         assert not {"gold","resolution","answer_key","confirmed_root_cause"} & set(case)
         assert "physical_repair_verified" not in str(case)
