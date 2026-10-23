@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   classifyExternalArtifact, parseCircuitJsonArtifact,
-  parseBomCsvArtifact, validateExternalFile,
+  parseBomCsvArtifact, reconcileExternalBomProposal, validateExternalFile,
 } from "./externalArtifactIntake.js";
 
 describe("read-only upstream artifact intake", () => {
@@ -46,6 +46,32 @@ describe("read-only upstream artifact intake", () => {
     expect(() => parseBomCsvArtifact("Name,Qty\nMotor,2.5\n")).toThrow(/quantity/);
     expect(() => parseBomCsvArtifact("Thing,Cost\nMotor,2\n")).toThrow(/quantity column/);
     expect(() => parseBomCsvArtifact("Name,Qty\nMotor,2,EXTRA\n")).toThrow(/column count/);
+  });
+  it("catches the two-motor versus one-motor regression without guessing part identity", () => {
+    const upstream = parseBomCsvArtifact("Name,Qty\\nDC motor,2\\nESP32,1\\n");
+    const compared = reconcileExternalBomProposal(upstream, [
+      {description:"DC motor",qty:1},
+      {description:"ESP32",qty:1},
+    ]);
+    expect(compared.status).toBe("review_required");
+    expect(compared.matches).toBe(1);
+    expect(compared.conflicts).toEqual([{part:"DC motor",externalQuantity:2,hsQuantity:1}]);
+  });
+  it("preserves authority gaps when product BOM is absent or aliases do not match", () => {
+    const upstream = parseBomCsvArtifact("Name,Qty\\nRecovered motor,2\\n");
+    const absent = reconcileExternalBomProposal(upstream, null);
+    expect(absent.status).toBe("unavailable");
+    const unknown = reconcileExternalBomProposal(upstream, [{description:"Motor, donor A",qty:2}]);
+    expect(unknown.status).toBe("review_required");
+    expect(unknown.unmatched).toContain("Recovered motor");
+    expect(unknown.missing).toContain("Motor, donor A");
+  });
+  it("does not turn matching quantities into engineering validation", () => {
+    const result = reconcileExternalBomProposal(parseBomCsvArtifact("Name,Qty\\nMotor,2\\n"), [
+      {description:"Motor",qty:2},
+    ]);
+    expect(result.status).toBe("exact_label_parity");
+    expect(result.note).toContain("unverified");
   });
   it("refuses unsupported, empty or too large files", () => {
     expect(() => validateExternalFile({name:"design.exe",size:10})).toThrow(/Supported/);
