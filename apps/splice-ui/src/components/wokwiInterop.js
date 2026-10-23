@@ -44,7 +44,7 @@ function normalizePin(type, raw) {
   if (type === "wokwi-esp32-devkit-v1" || type === "board-esp32-devkit-c-v4") {
     if (pin === "GND" || /^GND\.\d+$/.test(pin)) return "GND";
     if (pin === "3V3" || pin === "VIN") return pin;
-    const m = /^(?:GPIO|D)(2|4|5|15|16|17|18|21|22|23|34)$/.exec(pin);
+    const m = /^(?:GPIO|D)(2|4|5|14|15|16|17|18|21|22|23|34)$/.exec(pin);
     return m ? `GPIO${m[1]}` : null; // no unsupported pad aliases
   }
   return null;
@@ -110,6 +110,7 @@ export function parseWokwiDiagramArtifact(text) {
     return {
       id: `wokwi-wire-${i+1}`,
       from, to,
+      virtual_only: from.source_endpoint_kind === "wokwi_serial_monitor_virtual" || to.source_endpoint_kind === "wokwi_serial_monitor_virtual",
       mapping_complete: Boolean(from.hs_pin_candidate && to.hs_pin_candidate
         && PARTS[source.get(from.source_part_id).type]
         && PARTS[source.get(to.source_part_id).type]),
@@ -117,9 +118,11 @@ export function parseWokwiDiagramArtifact(text) {
     };
   });
   const mapped = nodes.filter(n=>n.hs_module_candidate);
-  const mappedConnections = connections.filter(w=>w.mapping_complete);
+  const nonphysicalConnections = connections.filter(w=>w.virtual_only);
+  const physicalConnections = connections.filter(w=>!w.virtual_only);
+  const mappedConnections = physicalConnections.filter(w=>w.mapping_complete);
   const unresolved = nodes.filter(n=>!n.hs_module_candidate).map(n=>n.source_part_id);
-  const unresolvedPins = connections.filter(w=>!w.mapping_complete)
+  const unresolvedPins = physicalConnections.filter(w=>!w.mapping_complete)
     .map(w=>({ wire: w.id, from: w.from.source_endpoint, to: w.to.source_endpoint }));
   return {
     provider: "wokwi",
@@ -129,6 +132,9 @@ export function parseWokwiDiagramArtifact(text) {
     original_connection_count: connections.length,
     mapped_part_count: mapped.length,
     mapped_connection_count: mappedConnections.length,
+    physical_connection_count: physicalConnections.length,
+    virtual_connection_count: nonphysicalConnections.length,
+    virtual_connections: nonphysicalConnections.map(w=>({wire:w.id,from:w.from.source_endpoint,to:w.to.source_endpoint})),
     unmapped_part_ids: unresolved,
     unmapped_connections: unresolvedPins,
     status: unresolved.length || unresolvedPins.length ? "partial_mapping" : "family_mapping_only",
@@ -176,7 +182,7 @@ export function compareWokwiCandidateToHsBom(proposal, bomLines) {
 export function buildWokwiStudioDraft(proposal, catalogModules) {
   if (!proposal || proposal.status !== "family_mapping_only"
       || proposal.mapped_part_count !== proposal.original_part_count
-      || proposal.mapped_connection_count !== proposal.original_connection_count) {
+      || proposal.mapped_connection_count !== proposal.physical_connection_count) {
     throw new Error("Wokwi design contains unmapped parts or wires: cannot import an incomplete draft.");
   }
   const library = new Map((catalogModules || []).filter(x=>x?.id).map(x=>[x.id,x]));
@@ -191,11 +197,13 @@ export function buildWokwiStudioDraft(proposal, catalogModules) {
       data: { moduleId: spec.id, spec, external_source: {
         provider: "wokwi", part_id: node.source_part_id, type: node.source_type,
         match_authority: node.match_authority,
+        virtual_connections: proposal.virtual_connections.filter(w=>
+          w.from.startsWith(node.source_part_id+":") || w.to.startsWith(node.source_part_id+":")),
       }},
     };
   });
   const byId = new Map(nodes.map(n=>[n.id,n]));
-  const edges = proposal.connections.map((wire)=>{
+  const edges = proposal.connections.filter(w=>!w.virtual_only).map((wire)=>{
     const from=wire.from, to=wire.to;
     const a=byId.get(from.source_part_id), b=byId.get(to.source_part_id);
     if(!a || !b) throw new Error("Cannot import a Wokwi connection referencing an unknown HS node.");
