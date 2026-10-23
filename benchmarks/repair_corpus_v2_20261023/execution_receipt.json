@@ -1,0 +1,133 @@
+{
+  "schema_version": "hs.repair_benchmark_summary.v2",
+  "frozen_engine_commit": "be06210bf06db8bc6a2068cfda71b52c47749565",
+  "input_sha256": "e00078c8e2ea6fba3598cb28511e60a75ed15c298d7c623511a5e5826e441068",
+  "totals": {
+    "all_cases": 16,
+    "owner_confirmed_reference_cases": 10,
+    "owner_confirmed_with_at_least_two_distinct_routes": 5,
+    "owner_confirmed_inadmissible_route_cases": 5,
+    "hs_confirmed_top1_matches_admissible": 3,
+    "naive_confirmed_top1_matches_admissible": 0,
+    "hs_total_owner_confirmed_matches_counting_missing_evidence_as_fail": 3,
+    "naive_total_owner_confirmed_matches_counting_missing_evidence_as_fail": 0,
+    "no_confirmed_outcome_cases": 6,
+    "hs_abstentions": 9,
+    "non_discriminating_inputs": 10
+  },
+  "cases": {
+    "R01": [
+      1,
+      "charger_flex",
+      "battery",
+      1,
+      "poster_confirmed_fix"
+    ],
+    "R02": [
+      1,
+      "charger_flex",
+      "battery",
+      1,
+      "poster_confirmed_fix"
+    ],
+    "R03": [
+      0,
+      null,
+      "earpiece",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R04": [
+      0,
+      null,
+      "battery_path",
+      0,
+      "poster_confirmed_action"
+    ],
+    "R05": [
+      1,
+      "dock_port",
+      "charge_controller",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R06": [
+      1,
+      "battery_connector",
+      "battery_connector",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R07": [
+      0,
+      null,
+      "battery_pack",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R08": [
+      0,
+      "aftermarket_psu",
+      "aftermarket_psu",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R09": [
+      0,
+      null,
+      "motherboard",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R10": [
+      0,
+      null,
+      "battery_pack",
+      0,
+      "commenter_confirmed_fix"
+    ],
+    "R11": [
+      1,
+      "trackpad_keyboard_flex",
+      "logic_board",
+      1,
+      "poster_confirmed_fix"
+    ],
+    "R12": [
+      0,
+      null,
+      "charger_flex",
+      0,
+      "poster_confirmed_fix"
+    ],
+    "R13": [
+      0,
+      null,
+      "charger_flex",
+      0,
+      "unresolved_after_failed_intervention"
+    ],
+    "R14": [
+      1,
+      "board_power_path",
+      "battery_pack",
+      0,
+      "unresolved_after_failed_intervention"
+    ],
+    "R15": [
+      0,
+      null,
+      "motherboard_power",
+      0,
+      "unresolved_after_failed_intervention"
+    ],
+    "R16": [
+      0,
+      null,
+      "calibration_state",
+      0,
+      "generic_symptom_no_confirmed_failure"
+    ]
+  },
+  "external_model_invoked": false
+}

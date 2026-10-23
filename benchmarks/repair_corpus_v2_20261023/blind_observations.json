@@ -1,0 +1,881 @@
+{
+  "schema_version": "hardware_splicer.repair_corpus.v2",
+  "benchmark_status": "developer_curated_not_truly_held_out",
+  "cases": [
+    {
+      "case_id": "R01",
+      "device_category": "iPhone XS Max",
+      "repair_intake": {
+        "device_hint": "iPhone XS Max",
+        "symptoms": [
+          "Phone turns off shortly after charger connection; unplugging permits restart."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "charger_flex",
+              "label": "Charging-port flex cable",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "main_board",
+              "label": "Main board power/communication path",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "battery",
+              "label": "Battery",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R01-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "charger_flex",
+                "main_board",
+                "battery"
+              ]
+            },
+            {
+              "id": "R01-pass-0",
+              "outcome": "pass",
+              "observation": "Reported successful operation on declared comparison route",
+              "path": [
+                "main_board",
+                "battery"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R02",
+      "device_category": "iPhone XS",
+      "repair_intake": {
+        "device_hint": "iPhone XS",
+        "symptoms": [
+          "Phone shuts down when charging cable is inserted, but otherwise runs unplugged."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "charger_flex",
+              "label": "Charging-port flex cable",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "main_board",
+              "label": "Main-board power path",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "battery",
+              "label": "Battery",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R02-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "charger_flex",
+                "main_board",
+                "battery"
+              ]
+            },
+            {
+              "id": "R02-pass-0",
+              "outcome": "pass",
+              "observation": "Reported successful operation on declared comparison route",
+              "path": [
+                "main_board",
+                "battery"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R03",
+      "device_category": "iPhone 6",
+      "repair_intake": {
+        "device_hint": "iPhone 6",
+        "symptoms": [
+          "Ear speaker stopped working immediately after battery replacement."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "earpiece",
+              "label": "Earpiece speaker",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "front_camera_flex",
+              "label": "Front camera and sensor ribbon assembly",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "logic_board",
+              "label": "Audio path on logic board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R03-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "earpiece",
+                "front_camera_flex",
+                "logic_board"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R04",
+      "device_category": "Lenovo ThinkPad P17 Gen 2",
+      "repair_intake": {
+        "device_hint": "Lenovo ThinkPad P17 Gen 2",
+        "symptoms": [
+          "Laptop does not turn on. No distinct successful alternate power path reported before the remedy."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "embedded_controller",
+              "label": "Embedded controller state",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charger_path",
+              "label": "External charger path",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "rtc_state",
+              "label": "RTC/BIOS state",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "battery_path",
+              "label": "Battery path",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R04-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "embedded_controller",
+                "charger_path",
+                "rtc_state",
+                "battery_path"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R05",
+      "device_category": "iPhone 4S",
+      "repair_intake": {
+        "device_hint": "iPhone 4S",
+        "symptoms": [
+          "A just-installed replacement battery does not charge; two power adapters/cables tried and charge indicator behaves inconsistently."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "replacement_battery",
+              "label": "Replacement battery pack",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "dock_port",
+              "label": "Dock/charging connector",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charge_controller",
+              "label": "Charge controller",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charger_a",
+              "label": "First power adapter",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charger_b",
+              "label": "Second power adapter",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R05-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "replacement_battery",
+                "dock_port",
+                "charge_controller",
+                "charger_a"
+              ]
+            },
+            {
+              "id": "R05-fail-1",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "replacement_battery",
+                "dock_port",
+                "charge_controller",
+                "charger_b"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R06",
+      "device_category": "MacBook Pro Mid 2010",
+      "repair_intake": {
+        "device_hint": "MacBook Pro Mid 2010",
+        "symptoms": [
+          "Computer runs on charger, but powers off immediately if charger is unplugged; resetting SMC did not restore battery operation."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "battery_pack",
+              "label": "Laptop battery pack",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "battery_connector",
+              "label": "Battery connector/cable",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "logic_board",
+              "label": "Logic board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "ac_adapter",
+              "label": "AC adapter",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R06-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "battery_pack",
+                "battery_connector",
+                "logic_board"
+              ]
+            },
+            {
+              "id": "R06-pass-0",
+              "outcome": "pass",
+              "observation": "Reported successful operation on declared comparison route",
+              "path": [
+                "ac_adapter",
+                "logic_board"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R07",
+      "device_category": "MacBook Pro 13-inch 2017",
+      "repair_intake": {
+        "device_hint": "MacBook Pro 13-inch 2017",
+        "symptoms": [
+          "MacBook powers off abruptly at roughly 80% battery. No comparative battery data in supplied initial observations."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "battery_pack",
+              "label": "Battery pack",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "power_controller",
+              "label": "Battery power-control circuitry",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            },
+            {
+              "id": "power_management_firmware",
+              "label": "Power firmware",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R07-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "battery_pack",
+                "power_controller",
+                "power_management_firmware"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R08",
+      "device_category": "PlayStation 5",
+      "repair_intake": {
+        "device_hint": "PlayStation 5",
+        "symptoms": [
+          "After fitting aftermarket PSU, console overheats/shuts down when playing games; cleaning fan and reseating a missing EMI piece did not resolve it."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "aftermarket_psu",
+              "label": "Aftermarket power supply",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "cooling_path",
+              "label": "Cooling and thermal interface",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "console_power_path",
+              "label": "Console power circuits",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R08-fail-0",
+              "outcome": "fail",
+              "observation": "Gaming/high-load operating condition failed",
+              "path": [
+                "aftermarket_psu",
+                "console_power_path",
+                "cooling_path"
+              ]
+            },
+            {
+              "id": "R08-pass-0",
+              "outcome": "pass",
+              "observation": "Reported to remain on at idle/low-load condition",
+              "path": [
+                "aftermarket_psu",
+                "console_power_path",
+                "cooling_path"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R09",
+      "device_category": "PlayStation 4 Slim",
+      "repair_intake": {
+        "device_hint": "PlayStation 4 Slim",
+        "symptoms": [
+          "PS4 Slim beeps once and does not turn on; owner suspects power supply without testing an alternate source."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "psu",
+              "label": "Internal power supply",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "motherboard",
+              "label": "Logic board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "startup_logic",
+              "label": "Startup controls",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R09-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "psu",
+                "motherboard",
+                "startup_logic"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R10",
+      "device_category": "iPhone 4",
+      "repair_intake": {
+        "device_hint": "iPhone 4",
+        "symptoms": [
+          "Charge chime sounds but phone fails to charge; restarts and resets did not resolve the symptom."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "battery_pack",
+              "label": "Battery pack",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "dock_connector",
+              "label": "Dock connector",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charge_controller",
+              "label": "Charging IC",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R10-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "battery_pack",
+                "dock_connector",
+                "charge_controller"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R11",
+      "device_category": "MacBook Pro Early 2015",
+      "repair_intake": {
+        "device_hint": "MacBook Pro Early 2015",
+        "symptoms": [
+          "Before later unrelated battery trouble, trackpad and keyboard stopped responding simultaneously."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "trackpad_keyboard_flex",
+              "label": "Trackpad interconnect ribbon",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "trackpad",
+              "label": "Trackpad assembly",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "keyboard",
+              "label": "Keyboard assembly",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "logic_board",
+              "label": "Main logic board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R11-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "trackpad_keyboard_flex",
+                "trackpad",
+                "logic_board"
+              ]
+            },
+            {
+              "id": "R11-fail-1",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "trackpad_keyboard_flex",
+                "keyboard",
+                "logic_board"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R12",
+      "device_category": "iPhone 14 Pro",
+      "repair_intake": {
+        "device_hint": "iPhone 14 Pro",
+        "symptoms": [
+          "After battery replacement, phone reboots in about 2–4 minutes, timing varies with activity. No before/after charging-path comparison given."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "new_battery",
+              "label": "Recently installed battery",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charger_flex",
+              "label": "Charge-port interconnect",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "main_board",
+              "label": "Logic board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "sensor_bus",
+              "label": "Peripheral sensor bus",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R12-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "new_battery",
+                "charger_flex",
+                "main_board",
+                "sensor_bus"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    },
+    {
+      "case_id": "R13",
+      "device_category": "iPhone 15",
+      "repair_intake": {
+        "device_hint": "iPhone 15",
+        "symptoms": [
+          "Phone restarts every few minutes with panic trace; charging-port flex from donor replaced without removing failure."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "charger_flex",
+              "label": "Charging-port flex",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "main_board",
+              "label": "Main board",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "sensor_path",
+              "label": "Other sensor communication path",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R13-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "charger_flex",
+                "main_board",
+                "sensor_path"
+              ]
+            }
+          ],
+          "interventions": [
+            {
+              "component_id": "charger_flex",
+              "outcome": "no_change",
+              "description": "Reported attempted intervention that did not restore function",
+              "source_event_index": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "R14",
+      "device_category": "Samsung Galaxy S8+",
+      "repair_intake": {
+        "device_hint": "Samsung Galaxy S8+",
+        "symptoms": [
+          "Phone only remains powered with charger; battery and charge port were replaced but symptom remained."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "battery_pack",
+              "label": "Battery",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "charging_port",
+              "label": "Charging port",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "board_power_path",
+              "label": "Board-side power management",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "external_power",
+              "label": "External charging supply",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R14-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "battery_pack",
+                "charging_port",
+                "board_power_path"
+              ]
+            },
+            {
+              "id": "R14-pass-0",
+              "outcome": "pass",
+              "observation": "Reported successful operation on declared comparison route",
+              "path": [
+                "external_power",
+                "board_power_path"
+              ]
+            }
+          ],
+          "interventions": [
+            {
+              "component_id": "battery_pack",
+              "outcome": "no_change",
+              "description": "Reported attempted intervention that did not restore function",
+              "source_event_index": 0
+            },
+            {
+              "component_id": "charging_port",
+              "outcome": "no_change",
+              "description": "Reported attempted intervention that did not restore function",
+              "source_event_index": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "R15",
+      "device_category": "Xbox Series X",
+      "repair_intake": {
+        "device_hint": "Xbox Series X",
+        "symptoms": [
+          "Console shut down suddenly and will not power; replaced power supply without restoring startup."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "psu",
+              "label": "Power supply",
+              "service_cost_rank": 2,
+              "reversible_test_available": true
+            },
+            {
+              "id": "motherboard_power",
+              "label": "Board power converters",
+              "service_cost_rank": 5,
+              "reversible_test_available": false
+            },
+            {
+              "id": "startup_controller",
+              "label": "Startup controller",
+              "service_cost_rank": 5,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R15-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "psu",
+                "motherboard_power",
+                "startup_controller"
+              ]
+            }
+          ],
+          "interventions": [
+            {
+              "component_id": "psu",
+              "outcome": "no_change",
+              "description": "Reported attempted intervention that did not restore function",
+              "source_event_index": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "R16",
+      "device_category": "Nintendo Switch Joy-Con",
+      "repair_intake": {
+        "device_hint": "Nintendo Switch Joy-Con",
+        "symptoms": [
+          "Stick registers movement at neutral; no module-isolating test observations supplied."
+        ],
+        "when_it_fails": "See observed path tests",
+        "path_evidence": {
+          "components": [
+            {
+              "id": "stick_wear",
+              "label": "Analog stick mechanical wear",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "stick_contamination",
+              "label": "Contamination inside sensor",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            },
+            {
+              "id": "calibration_state",
+              "label": "Calibration state",
+              "service_cost_rank": 3,
+              "reversible_test_available": true
+            }
+          ],
+          "path_tests": [
+            {
+              "id": "R16-fail-0",
+              "outcome": "fail",
+              "observation": "Reported failure on declared functional route",
+              "path": [
+                "stick_wear",
+                "stick_contamination",
+                "calibration_state"
+              ]
+            }
+          ],
+          "interventions": []
+        }
+      }
+    }
+  ]
+}
