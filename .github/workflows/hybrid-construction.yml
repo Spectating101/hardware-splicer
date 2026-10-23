@@ -1,0 +1,47 @@
+name: Hybrid construction shop-packet integration
+
+on:
+  push:
+    paths:
+      - "src/hardware_splicer/construction_alternatives.py"
+      - "src/hardware_splicer/construction_sheet_geometry.py"
+      - "src/hardware_splicer/mechanism_bridge.py"
+      - "src/hardware_splicer/mechanical_authority.py"
+      - "src/hardware_splicer/mechatronics_authority.py"
+      - "src/hardware_splicer/project_intake.py"
+      - "apps/mecha-splicer/src/mecha_splicer/runner.py"
+      - "apps/mecha-splicer/src/mecha_splicer/spec.py"
+      - "tests/test_construction_alternatives.py"
+      - "tests/test_construction_sheet_geometry.py"
+      - ".github/workflows/hybrid-construction.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/construction_alternatives.py"
+      - "src/hardware_splicer/construction_sheet_geometry.py"
+      - "src/hardware_splicer/mechanism_bridge.py"
+      - "src/hardware_splicer/mechanical_authority.py"
+      - "src/hardware_splicer/mechatronics_authority.py"
+      - "src/hardware_splicer/project_intake.py"
+      - "apps/mecha-splicer/src/mecha_splicer/runner.py"
+      - "apps/mecha-splicer/src/mecha_splicer/spec.py"
+      - "tests/test_construction_alternatives.py"
+      - "tests/test_construction_sheet_geometry.py"
+      - ".github/workflows/hybrid-construction.yml"
+
+jobs:
+  shop-packet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install existing HS development dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Test hybrid cutting alternatives, full Mecha package, intake and standalone fallback
+        env:
+          PYTHONPATH: apps/mecha-splicer/src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          python -m pytest -q tests/test_construction_sheet_geometry.py tests/test_construction_alternatives.py
