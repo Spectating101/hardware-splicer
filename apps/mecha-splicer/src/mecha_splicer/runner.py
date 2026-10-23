@@ -241,7 +241,12 @@ def run(
                 )
                 (outp / "HYBRID_PARTS.json").write_text(
                     json.dumps(schedule_parts(
-                        schedule,project.construction.model_dump(mode="json")
+                        schedule,
+                        project.construction.model_dump(mode="json"),
+                        next((
+                            row.get("connector_source") for row in construction.get("alternatives") or []
+                            if row.get("method")=="sheet_hybrid"
+                        ),None)
                     ),indent=2),encoding="utf-8"
                 )
                 (outp / "HYBRID_INTERFACE_REVIEW.json").write_text(
