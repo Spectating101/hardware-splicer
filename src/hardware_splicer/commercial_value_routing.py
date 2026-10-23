@@ -9,6 +9,8 @@ from __future__ import annotations
 import math
 from typing import Any, Mapping
 
+from .commercial_materials import evaluate_material_plan
+
 SCHEMA = "hardware_splicer.commercial_value_case.v1"
 CURRENCIES = frozenset({"TWD", "CNY", "IDR", "USD"})
 ACTIONS = frozenset({
@@ -104,6 +106,15 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
     # Prevent a missing line-item from silently becoming zero.
     cost = sum(amounts.values()) if len(amounts) == len(COSTS) else None
 
+    material_report = None
+    if action in {"build_product", "replicate"} and "material_and_fab" in amounts:
+        material_report = evaluate_material_plan(
+            route.get("material_plan"),
+            currency=currency,
+            expected_cost=amounts["material_and_fab"],
+        )
+        errors.extend(material_report.get("errors") or [])
+
     p = _fraction(route.get("success_probability"), "success_probability", errors)
     probability_evidence = route.get("probability_evidence")
     if probability_evidence not in EVIDENCE or probability_evidence in {"UNKNOWN", "INVALID"}:
@@ -169,6 +180,7 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         "success_net_if_acquired": None,
         "failure_net_if_acquired": None,
         "evpi_upper_bound": None,
+        "material_plan": material_report,
     }
     if errors or cost is None or discounted_proceeds is None or min_margin is None:
         return result
@@ -225,7 +237,8 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
             and bool(str(buyer.get("reference") or "").strip())
         )
     result["blockers"] = blockers + (
-        ([] if strong_cost else ["unquoted_core_cost"])
+        ([] if material_report is None else material_report.get("blockers") or [])
+        + ([] if strong_cost else ["unquoted_core_cost"])
         + ([] if strong_proceeds else [
             "unverified_operating_output" if action == "operate" else "unverified_buyer_price"
         ])
