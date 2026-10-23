@@ -90,4 +90,30 @@ describe("documented Wokwi-to-HS provider bridge", () => {
     expect(compareWokwiCandidateToHsBom(x,null).status).toBe("unavailable");
     expect(isWokwiDiagramObject([{type:"source_component"}])).toBe(false);
   });
+  it("accepts documented Wokwi virtual serial monitor endpoints and preserves unmapped GPIO14",()=>{
+    const doc = {
+      version:1, author:"public Wokwi format", editor:"wokwi",
+      parts:[
+        {type:"wokwi-esp32-devkit-v1",id:"esp",attrs:{}},
+        {type:"wokwi-dht22",id:"dht1",attrs:{}},
+      ],
+      connections:[
+        ["esp:TX0","$serialMonitor:RX","",[]],
+        ["esp:RX0","$serialMonitor:TX","",[]],
+        ["dht1:GND","esp:GND.1","black",[]],
+        ["dht1:VCC","esp:3V3","red",[]],
+        ["dht1:SDA","esp:D14","green",[]],
+      ],
+    };
+    const result=parseWokwiDiagramArtifact(JSON.stringify(doc));
+    expect(result.original_part_count).toBe(2);
+    expect(result.mapped_part_count).toBe(2);
+    expect(result.original_connection_count).toBe(5);
+    expect(result.mapped_connection_count).toBe(2);
+    expect(result.connections[0].to.source_endpoint_kind).toBe("wokwi_serial_monitor_virtual");
+    expect(result.unmapped_connections).toHaveLength(3);
+    expect(result.connections[4].to.hs_pin_candidate).toBeNull(); // GPIO14 lacks an HS verified pad mapping
+    expect(result.status).toBe("partial_mapping");
+  });
+
 });
