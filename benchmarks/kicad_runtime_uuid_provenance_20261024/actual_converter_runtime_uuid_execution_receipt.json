@@ -1,0 +1,22 @@
+{
+  "schema_version": "hardware_splicer.uuid_runtime_provenance_execution_receipt.v1",
+  "upstream_converter_version": "0.0.144",
+  "source_sha256": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+  "converter_docs_sha256": "75d9f058c112e6c7242dd2f97b7b929c39a0fe4a1b72b71107b7b97410de7399",
+  "runtime_symbol_map_entries": 40,
+  "verified_native_uuids": 40,
+  "verified_physical_components": 36,
+  "nonphysical_power_flag_symbols": 4,
+  "verified_native_sheet_instance_paths": 40,
+  "visual_components_labeled": 40,
+  "visual_ports_labeled": 83,
+  "physical_ports_labeled_from_official_netlist": 79,
+  "original_circuit_json_unchanged": true,
+  "direct_runtime_uuid_capture": true,
+  "runtime_capture_not_signed": true,
+  "source_net_names_from_official_kicad": true,
+  "converted_wire_geometry_authenticated": false,
+  "visual_electrical_merge_authorized": false,
+  "fabrication_authorized": false,
+  "test_suite": "131 focused Python regression tests passed with KiCad 9.0.8, kicad-demos and upstream converter 0.0.144"
+}
