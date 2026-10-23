@@ -167,6 +167,7 @@ def run_mechanism_pack(
     out_dir: str | Path | None = None,
     pcb_w_mm: float = 70.0,
     pcb_h_mm: float = 50.0,
+    construction: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Build + run mecha-splicer offline. Never raises — returns degraded pack on failure."""
     selected = build_mecha_project_spec(
@@ -179,6 +180,8 @@ def run_mechanism_pack(
     )
     kind = str(selected["kind"])
     project_spec = dict(selected["project_spec"])
+    if construction is not None:
+        project_spec["construction"] = dict(construction)
     pack: Dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "status": "pending",
@@ -248,6 +251,7 @@ def run_mechanism_pack(
             "simulation": bundle.get("simulation") or [],
             "dfm": bundle.get("dfm") or [],
             "structural_screening": bundle.get("structural_screening") or {},
+            "construction_alternatives": bundle.get("construction_alternatives") or {},
             "structural_release_blocked": bundle.get("structural_release_blocked", True),
         }
     )
@@ -275,6 +279,7 @@ def write_mechanism_pack_artifacts(pack: Mapping[str, Any], out_dir: str | Path)
         "degraded_reason": pack.get("degraded_reason"),
         "claim_boundary": pack.get("claim_boundary"),
         "structural_screening": pack.get("structural_screening") or {},
+        "construction_alternatives": pack.get("construction_alternatives") or {},
         "structural_release_blocked": pack.get("structural_release_blocked", True),
     }
     (root / "MECHATRONICS_PACK.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -298,6 +303,7 @@ def attach_mechatronics_authority(
                 "dfm": mechanism_pack.get("dfm") or [],
                 "simulation": mechanism_pack.get("simulation") or [],
                 "structural_screening": mechanism_pack.get("structural_screening") or {},
+                "construction_alternatives": mechanism_pack.get("construction_alternatives") or {},
                 "kind": mechanism_pack.get("kind"),
                 "status": mechanism_pack.get("status"),
             }
@@ -331,6 +337,7 @@ def attach_mechatronics_authority(
         "mechanism_status": mechanism_pack.get("status"),
         "structural_screening": mechanism_pack.get("structural_screening") or {},
         "structural_release_blocked": bool(mechanism_pack.get("structural_release_blocked", True)),
+        "construction_alternatives": mechanism_pack.get("construction_alternatives") or {},
         "firmware_filename": (fw or {}).get("filename"),
         "claim_boundary": (
             "Starter elec+mech+fw pack from salvage — not production mechatronics release."

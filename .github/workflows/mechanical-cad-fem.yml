@@ -18,6 +18,9 @@ on:
       - "src/hardware_splicer/mechanical_contact_workbench.py"
       - "src/hardware_splicer/mechanical_contact_sweep.py"
       - "src/hardware_splicer/mechanical_workflow_integration.py"
+      - "src/hardware_splicer/construction_sheet_geometry.py"
+      - "src/hardware_splicer/construction_alternatives.py"
+      - "apps/mecha-splicer/src/mecha_splicer/spec.py"
       - "src/hardware_splicer/mechanical_authority.py"
       - "src/hardware_splicer/mechatronics_authority.py"
       - "src/hardware_splicer/mechanism_bridge.py"
@@ -38,6 +41,8 @@ on:
       - "tests/test_mechanical_contact_complementarity.py"
       - "tests/test_mechanical_contact_workbench.py"
       - "tests/test_mechanical_workflow_integration.py"
+      - "tests/test_construction_sheet_geometry.py"
+      - "tests/test_construction_alternatives.py"
       - "tests/test_mechanical_authority.py"
       - "tests/test_mechatronics_authority.py"
       - "pyproject.toml"
@@ -59,6 +64,9 @@ on:
       - "src/hardware_splicer/mechanical_contact_workbench.py"
       - "src/hardware_splicer/mechanical_contact_sweep.py"
       - "src/hardware_splicer/mechanical_workflow_integration.py"
+      - "src/hardware_splicer/construction_sheet_geometry.py"
+      - "src/hardware_splicer/construction_alternatives.py"
+      - "apps/mecha-splicer/src/mecha_splicer/spec.py"
       - "src/hardware_splicer/mechanical_authority.py"
       - "src/hardware_splicer/mechatronics_authority.py"
       - "src/hardware_splicer/mechanism_bridge.py"
@@ -79,6 +87,8 @@ on:
       - "tests/test_mechanical_contact_complementarity.py"
       - "tests/test_mechanical_contact_workbench.py"
       - "tests/test_mechanical_workflow_integration.py"
+      - "tests/test_construction_sheet_geometry.py"
+      - "tests/test_construction_alternatives.py"
       - "tests/test_mechanical_authority.py"
       - "tests/test_mechatronics_authority.py"
       - "pyproject.toml"
@@ -102,4 +112,4 @@ jobs:
       - name: Prove STEP/STL meshing and structural screening
         env:
           PYTHONPATH: apps/mecha-splicer/src
-        run: python -m pytest -q tests/test_mechanical_cad_fem.py tests/test_mechanical_cad_convergence.py tests/test_mechanical_cad_local_refinement.py tests/test_mechanical_fem.py tests/test_mechanical_fem_crosscheck.py tests/test_mechanical_quadratic_fem.py tests/test_mechanical_curved_fem.py tests/test_mechanical_kirsch_reference.py tests/test_mechanical_fastener_bearing.py tests/test_mechanical_unilateral_pin_contact.py tests/test_mechanical_contact_complementarity.py tests/test_mechanical_contact_workbench.py tests/test_mechanical_workflow_integration.py tests/test_mechanical_authority.py tests/test_mechatronics_authority.py
+        run: python -m pytest -q tests/test_mechanical_cad_fem.py tests/test_mechanical_cad_convergence.py tests/test_mechanical_cad_local_refinement.py tests/test_mechanical_fem.py tests/test_mechanical_fem_crosscheck.py tests/test_mechanical_quadratic_fem.py tests/test_mechanical_curved_fem.py tests/test_mechanical_kirsch_reference.py tests/test_mechanical_fastener_bearing.py tests/test_mechanical_unilateral_pin_contact.py tests/test_mechanical_contact_complementarity.py tests/test_mechanical_contact_workbench.py tests/test_mechanical_workflow_integration.py tests/test_construction_alternatives.py tests/test_construction_sheet_geometry.py tests/test_mechanical_authority.py tests/test_mechatronics_authority.py

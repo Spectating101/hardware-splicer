@@ -110,11 +110,37 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         _dict(body.get("mechanism_pack")).get("structural_screening"),
         _dict(engineering_body.get("mechanism_pack")).get("structural_screening"),
     )
+    # The dedicated contact solver models one specific two-hole plate.
+    # Its *inapplicability* must not veto an unrelated assembly whose
+    # measured geometry, controlled physical bench and scoped release are
+    # already accepted by the independent pre-existing HS authority gates.
+    # All applicable non-convergent/failed/disabled numerical screens still
+    # fail closed, regardless of later physical paperwork.
+    outside_solver_domain_with_independent_release = bool(
+        structural.get("status") == "unsupported_mechanical_topology"
+        and structural.get("supported_for_contact") is False
+        and measured["geometry_verified"]
+        and bench["bench_verified"]
+        and not _release_blockers(release)
+    )
     structural_blocked = bool(
         structural
         and structural.get("status") != "not_applicable"
-        # This numerical screening cannot grant production release, even
-        # when deliberately disabled or when its packet is later edited.
+        and not outside_solver_domain_with_independent_release
+    )
+    construction = _first_dict(
+        mechanism_analysis.get("construction_alternatives"),
+        mechanism_bundle.get("construction_alternatives"),
+        _dict(body.get("mechanism_pack")).get("construction_alternatives"),
+        _dict(engineering_body.get("mechanism_pack")).get("construction_alternatives"),
+    )
+    # The comparison itself is non-authoritative. Only an explicit requested
+    # switch away from the existing CAD affects release, not auto/preview.
+    construction_blocked = bool(
+        construction
+        and construction.get("requested_preference") in ("sheet_hybrid", "off_the_shelf")
+        # A client-edited release_authorized boolean cannot bypass the gate.
+        # Actual release needs independently reviewed assembly evidence.
     )
 
     stages = _stages(
@@ -130,20 +156,31 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
     # is explicitly denied by an attached, inconclusive structural study.
     # Never promote a known failed structural screen through unrelated
     # DFM, bench or administrative release artifacts.
-    if structural_blocked:
+    if structural_blocked or construction_blocked:
         for stage in stages:
             if stage["stage_id"] == "production_mechanical_release":
                 stage["status"] = "open"
                 stage["blockers"] = list(dict.fromkeys([
-                    "Structural contact/FEM review does not authorize load-bearing release.",
+                    *(
+                        ["Structural contact/FEM review does not authorize load-bearing release."]
+                        if structural_blocked else []
+                    ),
                     *[
                         str(block) for block in structural.get("blockers", [])[:6]
                     ],
+                    *(
+                        ["Requested alternative construction has unverified material, thermal, chemical or connector evidence."]
+                        if construction_blocked else []
+                    ),
                     *stage.get("blockers", []),
                 ]))[:12]
                 stage["next_unlock"] = (
                     "Resolve stress/contact convergence and obtain measured "
                     "material, assembled fixture and physical-load evidence."
+                    if structural_blocked else
+                    "Record actual panel and connector dimensions, verify "
+                    "temperature/chemical suitability, and physically test "
+                    "the intended hybrid or purchased assembly."
                 )
                 break
     current_level = _current_level(stages)
@@ -157,6 +194,8 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         "production_authorized": production_authorized,
         "structural_screening": structural,
         "structural_release_blocked": structural_blocked,
+        "construction_alternatives": construction,
+        "construction_release_blocked": construction_blocked,
         "release_decision": "authorized_scoped_mechanical_release" if production_authorized else "evidence_required_before_release",
         "next_action_id": _next_action_id(stages),
         "stages": stages,
@@ -174,6 +213,7 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
             "simulation_blockers": len(blockers["simulation"]),
             "safety_blockers": len(blockers["safety"]),
             "structural_release_blocked": int(structural_blocked),
+            "construction_release_blocked": int(construction_blocked),
             "dfm_findings": len(dfm_rows),
             "simulation_findings": len(simulation_rows),
             "safety_findings": len(safety_rows),

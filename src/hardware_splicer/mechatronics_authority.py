@@ -161,10 +161,13 @@ def _stages(
         _passed(stages, "integrated_bench_authority")
         and release["release_ready"] and electrical["release_ready"]
         and not mechanical.get("structural_release_blocked", False)
+        and not mechanical.get("construction_release_blocked", False)
         and not trace_gaps,
         release["blockers"]
         + (["Attached mechanical structural screening does not authorize load-bearing release."]
            if mechanical.get("structural_release_blocked", False) else [])
+        + (["Requested alternative construction lacks physical material and joint validation."]
+           if mechanical.get("construction_release_blocked", False) else [])
         + ([] if electrical["release_ready"] else ["Circuit/electrical subsystem release is not closed."])
         + trace_gaps,
         "No remaining action for this scoped Hardware-Splicer release.",
@@ -765,6 +768,8 @@ def _subsystem_summary(packet: Dict[str, Any]) -> Dict[str, Any]:
         "authority_level": packet.get("current_authority_level"),
         "authority_score": packet.get("authority_score"),
         "production_authorized": bool(packet.get("production_authorized")),
+        "structural_release_blocked": bool(packet.get("structural_release_blocked", False)),
+        "construction_release_blocked": bool(packet.get("construction_release_blocked", False)),
         "next_action_id": packet.get("next_action_id"),
     }
 

@@ -253,3 +253,28 @@ checklist. Expected nonzero screening status is **not** numerical failure,
 and a numerical pass is **not** an engineering load rating.
 
 [Integrated Mecha/HS workflow and scope](docs/MECHANICAL_HS_CORE_INTEGRATION_2026-10-20.md)
+
+
+### Material-aware hybrid fabrication (optional)
+
+Mecha-Splicer can now compare its existing fully printed enclosure concept
+with sheet-panel/connector construction and off-the-shelf sourcing, using
+**user-supplied** density, service-temperature, chemical compatibility,
+material price and panel-thickness evidence. The report includes public
+connector references (Clip-Os, ModuFrame, BOSL2, Modular Clip, Boxes.py)
+but does **not** copy their designs, select an unvalidated construction
+method or approve production. No geometry replacement is automatic.
+
+See [hybrid material construction example and limits](docs/MECHA_HYBRID_CONSTRUCTION_INTEGRATION_2026-10-22.md)
+and [illustrative assumptions JSON](examples/mechanical/hybrid_enclosure_assumptions.json).
+
+Mecha enclosure projects now receive an **automatic evidence-only construction
+comparison**. Two matching-envelope user-facing study inputs are provided:
+[cardstock + pinned Clip-Os](examples/mechanical/hybrid_cardstock_clip_os.json)
+and [plywood + ModuFrame](examples/mechanical/hybrid_plywood_moduframe.json).
+These use **nominal (unmeasured) stock thickness** and do not fabricate a
+connector or authorize manufacturing. Providing measured stock thickness
+produces a panel CSV, an SVG reference drawing, a hybrid-only parts schedule
+and explicit untransformed port/attachment review. Main HS project intake
+also forwards an optional `construction` object to the Mecha workflow.
+Run targeted checks: `python -m pytest -q tests/test_construction_sheet_geometry.py tests/test_construction_alternatives.py`.

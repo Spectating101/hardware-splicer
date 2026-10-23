@@ -122,6 +122,13 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
         base_dir,
         salvage_package=salvage_package,
     )
+    # Preserve the user's hybrid material/connector intent from the main
+    # HS project intake; do not require them to invoke Mecha manually.
+    construction_intent = body.get("construction",constraints.get("construction"))
+    if construction_intent is not None:
+        if not isinstance(construction_intent,Mapping):
+            raise ValueError("intake.construction must be an object")
+        spec.setdefault("mechanism",{})["construction"] = dict(construction_intent)
     scenario = {
         "scenario_name": f"{project_name}_{archetype}",
         "intent": goal,
@@ -223,6 +230,9 @@ def splice_and_build_from_intake(
         goal=goal,
         resolved_modules=list(salvage_package.get("resolved_modules") or []),
         out_dir=out_path,
+        construction=(
+            (plan.get("scenario") or {}).get("compile_spec",{}).get("mechanism",{}).get("construction")
+        ),
     )
     salvage_package["mechanism_pack"] = mechanism_pack
     salvage_package["mechatronics_authority"] = attach_mechatronics_authority(
@@ -256,7 +266,7 @@ def splice_and_build_from_intake(
         "salvage_verdict": plan.get("salvage_verdict"),
         "salvage_package_summary": salvage_summary,
     }
-    for key in ("circuit", "functional_salvage", "evidence_notes", "available_parts", "salvage_mode", "constraints"):
+    for key in ("circuit", "functional_salvage", "evidence_notes", "available_parts", "salvage_mode", "constraints", "construction"):
         if key in intake and intake.get(key) is not None:
             intake_snapshot[key] = intake[key]
     intake_file.write_text(json.dumps(intake_snapshot, indent=2), encoding="utf-8")

@@ -1,0 +1,69 @@
+{
+  "status": "TEMPLATE_ONLY_NOT_EXPERIMENTAL_EVIDENCE",
+  "readme": "Enter actual build data into construction.benchmark_trials after each physical build. Null placeholders cannot be submitted as measurements. Costs must use same currency and account for filament/panels, hardware, energy and labor consistently.",
+  "units": {
+    "finished_mass_g": "g",
+    "times": "minutes",
+    "costs": "consistent local currency",
+    "record_uri": "file/URL locating operator's retained raw evidence"
+  },
+  "trial_templates": [
+    {
+      "method": "full_print",
+      "variant_id": "original_enclosure",
+      "specimen_id": "REPLACE-FULL-001",
+      "record_uri": null,
+      "evidence_kind": "synthetic_fixture",
+      "finished_mass_g": null,
+      "printing_minutes": null,
+      "cutting_minutes": null,
+      "assembly_minutes": null,
+      "consumed_material_cost": null,
+      "purchased_hardware_cost": null,
+      "energy_cost": null,
+      "labor_cost": null,
+      "panel_scrap_mass_g": null,
+      "fit_passed": null,
+      "attachment_test_passed": null,
+      "thermal_check_passed": null
+    },
+    {
+      "method": "sheet_hybrid",
+      "variant_id": "cardboard_clip_os",
+      "specimen_id": "REPLACE-CARD-001",
+      "record_uri": null,
+      "evidence_kind": "synthetic_fixture",
+      "finished_mass_g": null,
+      "printing_minutes": null,
+      "cutting_minutes": null,
+      "assembly_minutes": null,
+      "consumed_material_cost": null,
+      "purchased_hardware_cost": null,
+      "energy_cost": null,
+      "labor_cost": null,
+      "panel_scrap_mass_g": null,
+      "fit_passed": null,
+      "attachment_test_passed": null,
+      "thermal_check_passed": null
+    },
+    {
+      "method": "sheet_hybrid",
+      "variant_id": "plywood_moduframe",
+      "specimen_id": "REPLACE-WOOD-001",
+      "record_uri": null,
+      "evidence_kind": "synthetic_fixture",
+      "finished_mass_g": null,
+      "printing_minutes": null,
+      "cutting_minutes": null,
+      "assembly_minutes": null,
+      "consumed_material_cost": null,
+      "purchased_hardware_cost": null,
+      "energy_cost": null,
+      "labor_cost": null,
+      "panel_scrap_mass_g": null,
+      "fit_passed": null,
+      "attachment_test_passed": null,
+      "thermal_check_passed": null
+    }
+  ]
+}

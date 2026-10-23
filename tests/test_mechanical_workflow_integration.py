@@ -266,3 +266,76 @@ def test_real_mecha_runner_with_opt_in_solver_packages_review(tmp_path):
         "structural_release_blocked"
     ] is True
     assert structural["fabrication_authorized"] is False
+
+
+def test_explicit_hybrid_switch_cannot_gain_mechanical_release_by_editing_flags():
+    spec,eng = _closed_authority_inputs()
+    original = build_mechanical_authority(spec,engineering=eng)
+    assert original["production_authorized"] is True
+    eng["analysis"]["mechanism"]["construction_alternatives"] = {
+        "status":"comparison_produced_research_only",
+        "requested_preference":"sheet_hybrid",
+        "release_authorized":True,  # untrusted client claim MUST NOT bypass
+        "fabrication_authorized":True,
+        "alternatives":[],
+    }
+    guarded=build_mechanical_authority(spec,engineering=eng)
+    assert guarded["production_authorized"] is False
+    assert guarded["construction_release_blocked"] is True
+    assert guarded["stages"][-1]["status"]=="open"
+    assert any("alternative construction" in b.lower()
+               for b in guarded["stages"][-1]["blockers"])
+
+
+def test_comparison_only_auto_does_not_revoke_original_mechanical_release():
+    spec,eng = _closed_authority_inputs()
+    eng["analysis"]["mechanism"]["construction_alternatives"] = {
+        "status":"comparison_produced_research_only",
+        "requested_preference":"auto",
+        "release_authorized":False,
+        "fabrication_authorized":False,
+    }
+    guarded=build_mechanical_authority(spec,engineering=eng)
+    assert guarded["construction_release_blocked"] is False
+    assert guarded["production_authorized"] is True
+
+
+
+def test_inapplicable_plate_solver_does_not_veto_independently_measured_mechanism():
+    spec,engineering = _closed_authority_inputs()
+    assert build_mechanical_authority(spec,engineering=engineering)["production_authorized"]
+    engineering["analysis"]["mechanism"]["structural_screening"]={
+        "schema_version":"hardware_splicer.mechanical_workflow_bridge.v1",
+        "status":"unsupported_mechanical_topology",
+        "supported_for_contact":False,
+        "release_authorized":False,
+        "blockers":["no_validated_contact_case_for_these_mechanical_parts"],
+    }
+    result=build_mechanical_authority(spec,engineering=engineering)
+    assert result["structural_release_blocked"] is False
+    assert result["production_authorized"] is True
+
+
+def test_inapplicable_fem_requires_independent_real_bench_before_exemption():
+    spec,engineering=_closed_authority_inputs()
+    engineering["analysis"]["mechanism"]["structural_screening"]={
+        "status":"unsupported_mechanical_topology",
+        "supported_for_contact":False,
+        "blockers":["no_validated_contact_case_for_these_mechanical_parts"],
+    }
+    spec["mechanical_bench_capture"]={}
+    result=build_mechanical_authority(spec,engineering=engineering)
+    assert result["structural_release_blocked"] is True
+    assert result["production_authorized"] is False
+
+
+def test_failed_applicable_contact_solver_still_blocks_even_with_bench_evidence():
+    spec,engineering=_closed_authority_inputs()
+    engineering["analysis"]["mechanism"]["structural_screening"]={
+        "status":"solver_blocked",
+        "supported_for_contact":True,
+        "blockers":["structural_contact_solver_failed_or_unavailable"],
+    }
+    result=build_mechanical_authority(spec,engineering=engineering)
+    assert result["structural_release_blocked"] is True
+    assert result["production_authorized"] is False
