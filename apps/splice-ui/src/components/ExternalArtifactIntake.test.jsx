@@ -63,4 +63,34 @@ describe("project-first external tool intake UI", () => {
     expect(screen.getByText(/Against current HS BOM: review_required/)).toBeTruthy();
     expect(netlistCompile).not.toHaveBeenCalled();
   });
+  it("recognizes authentic Wokwi JSON and never mistakes it for tscircuit nor silently builds", async () => {
+    const user = userEvent.setup();
+    const diagram = JSON.stringify({
+      version: 1, editor: "wokwi",
+      parts: [
+        {id:"esp",type:"wokwi-esp32-devkit-v1"},
+        {id:"dht",type:"wokwi-dht22"},
+      ],
+      connections: [
+        ["dht:VCC","esp:3V3","red",[]],
+        ["dht:GND","esp:GND.1","black",[]],
+        ["dht:SDA","esp:D14","green",[]],
+        ["esp:TX0","$serialMonitor:RX","",[]],
+      ],
+    });
+    render(<ExternalArtifactIntake session={{projectPackage:{bom:{lines:[
+      {module_id:"esp32-devkit",qty:1},{module_id:"dht22",qty:1},
+    ]}}}} />);
+    await user.upload(screen.getByLabelText(/Choose an exported file/), upstreamFile(diagram,"diagram.json"));
+    const report = await screen.findByTestId("wokwi-source-review");
+    expect(report.textContent).toContain("2 source components, 4 connections");
+    expect(report.textContent).toContain("2 functional-family candidates");
+    expect(report.textContent).toContain("2 pin pairs mapped");
+    expect(report.textContent).toContain("family_quantity_parity");
+    expect(report.textContent).toContain("not a physical circuit");
+    expect(netlistCompile).not.toHaveBeenCalled();
+    expect(inspectExternalCircuitJson).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button",{name:/Explicitly compile draft/})).toBeNull();
+  });
+
 });
