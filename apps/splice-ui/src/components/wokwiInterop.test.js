@@ -56,7 +56,9 @@ describe("documented Wokwi-to-HS provider bridge", () => {
     const x=parseWokwiDiagramArtifact(JSON.stringify(doc));
     const r=compareWokwiCandidateToHsBom(x,[{module_id:"dht22",qty:1}]);
     expect(r.status).toBe("review_required");
-    expect(r.excess).toEqual([{module:"dht22",wokwi:2,hs:1}]);
+    expect(r.excess).toContainEqual({module:"dht22",wokwi:2,hs:1});
+    expect(r.excess).toContainEqual({module:"esp32-devkit",wokwi:1,hs:0});
+    expect(r.excess).toContainEqual({module:"ssd1306-128x64",wokwi:1,hs:0});
   });
 
   it("preserves unsupported components and unmapped pin references, never silently removes wires",()=>{
