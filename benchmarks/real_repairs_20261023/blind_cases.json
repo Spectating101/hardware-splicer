@@ -1,0 +1,314 @@
+{
+  "schema_version": "hardware_splicer.blind_repair_inputs.v1",
+  "cases": [
+    {
+      "case_id": "case_A_2013",
+      "repair_intake": {
+        "device_hint": "MacBook Pro 13-inch Unibody Mid 2012 (A1278)",
+        "symptoms": [
+          "New Kingston SATA III SSD not detected inside the machine, including Disk Utility",
+          "Another Hitachi HDD is not detected internally",
+          "The original Toshiba HDD is detected internally"
+        ],
+        "when_it_fails": "internal-storage detection and boot",
+        "repro_steps": [
+          "Check installed Kingston drive internally: absent",
+          "Swap to Hitachi internally: absent",
+          "Swap back to original Toshiba internally: detected"
+        ]
+      },
+      "components": [
+        {
+          "id": "kingston_ssd",
+          "label": "Kingston SSD",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "hitachi_hdd",
+          "label": "Hitachi HDD",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "toshiba_original_hdd",
+          "label": "Original Toshiba HDD",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "internal_flex",
+          "label": "internal storage flex interconnect",
+          "service_cost_rank": 1,
+          "reversible_test_available": true
+        },
+        {
+          "id": "sata_host_port",
+          "label": "logic-board SATA port and controller",
+          "service_cost_rank": 5,
+          "reversible_test_available": false
+        }
+      ],
+      "path_tests": [
+        {
+          "id": "A-1",
+          "observation": "New Kingston SATA III SSD not detected internally",
+          "outcome": "fail",
+          "path": [
+            "kingston_ssd",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        },
+        {
+          "id": "A-2",
+          "observation": "Hitachi HDD not detected internally",
+          "outcome": "fail",
+          "path": [
+            "hitachi_hdd",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        },
+        {
+          "id": "A-3",
+          "observation": "Original Toshiba drive recognized internally",
+          "outcome": "pass",
+          "path": [
+            "toshiba_original_hdd",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        }
+      ],
+      "interventions": []
+    },
+    {
+      "case_id": "case_B_2014",
+      "repair_intake": {
+        "device_hint": "MacBook Pro 15-inch Unibody",
+        "symptoms": [
+          "Internal boot disk missing; flashing question-mark folder",
+          "Boot disk runs in external USB enclosure",
+          "Replacing the internal drive cable twice has not restored internal detection"
+        ],
+        "when_it_fails": "internal storage boot",
+        "repro_steps": [
+          "Observe failure to see internal boot disk",
+          "Boot same disk successfully over USB",
+          "Repeat failed internal boot after first cable replacement",
+          "Repeat failed internal boot after second cable replacement"
+        ]
+      },
+      "components": [
+        {
+          "id": "original_hdd",
+          "label": "boot hard disk",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "internal_flex",
+          "label": "internal storage flex interconnect",
+          "service_cost_rank": 1,
+          "reversible_test_available": true
+        },
+        {
+          "id": "sata_host_port",
+          "label": "logic-board SATA connector and host path",
+          "service_cost_rank": 5,
+          "reversible_test_available": true
+        },
+        {
+          "id": "usb_adapter",
+          "label": "external USB drive enclosure",
+          "service_cost_rank": 2,
+          "reversible_test_available": true
+        },
+        {
+          "id": "usb_host_port",
+          "label": "USB storage host path",
+          "service_cost_rank": 4,
+          "reversible_test_available": true
+        }
+      ],
+      "path_tests": [
+        {
+          "id": "B-1",
+          "observation": "Same HDD not detected as internal boot disk, first cable replacement",
+          "outcome": "fail",
+          "path": [
+            "original_hdd",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        },
+        {
+          "id": "B-2",
+          "observation": "Same HDD not detected internally with second replacement cable",
+          "outcome": "fail",
+          "path": [
+            "original_hdd",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        },
+        {
+          "id": "B-3",
+          "observation": "HDD boots externally by USB",
+          "outcome": "pass",
+          "path": [
+            "original_hdd",
+            "usb_adapter",
+            "usb_host_port"
+          ]
+        }
+      ],
+      "interventions": [
+        {
+          "component_id": "internal_flex",
+          "outcome": "no_change",
+          "description": "New cable replaced once; fault remained"
+        },
+        {
+          "component_id": "internal_flex",
+          "outcome": "no_change",
+          "description": "Second cable also failed to restore internal boot"
+        }
+      ]
+    },
+    {
+      "case_id": "case_C_synthetic",
+      "repair_intake": {
+        "device_hint": "Generic serviceable laptop with SATA disk",
+        "symptoms": [
+          "Suspect disk cannot boot inside or over external USB",
+          "Known-good disk boots internally"
+        ],
+        "when_it_fails": "drive detection",
+        "repro_steps": [
+          "Suspect disk fails internally",
+          "Same suspect disk fails externally over USB",
+          "Known good disk works internally"
+        ]
+      },
+      "components": [
+        {
+          "id": "suspect_drive",
+          "label": "suspect storage device",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "known_good_drive",
+          "label": "working storage device",
+          "service_cost_rank": 3,
+          "reversible_test_available": true
+        },
+        {
+          "id": "internal_flex",
+          "label": "internal storage cable",
+          "service_cost_rank": 1,
+          "reversible_test_available": true
+        },
+        {
+          "id": "sata_host_port",
+          "label": "SATA controller",
+          "service_cost_rank": 5,
+          "reversible_test_available": false
+        },
+        {
+          "id": "usb_adapter",
+          "label": "USB storage enclosure",
+          "service_cost_rank": 2,
+          "reversible_test_available": true
+        },
+        {
+          "id": "usb_host_port",
+          "label": "USB host controller",
+          "service_cost_rank": 4,
+          "reversible_test_available": true
+        }
+      ],
+      "path_tests": [
+        {
+          "id": "C-1",
+          "observation": "Suspect disk not recognized inside laptop",
+          "outcome": "fail",
+          "path": [
+            "suspect_drive",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        },
+        {
+          "id": "C-2",
+          "observation": "Same suspect disk not recognized over USB enclosure",
+          "outcome": "fail",
+          "path": [
+            "suspect_drive",
+            "usb_adapter",
+            "usb_host_port"
+          ]
+        },
+        {
+          "id": "C-3",
+          "observation": "Known-good disk recognized using internal SATA route",
+          "outcome": "pass",
+          "path": [
+            "known_good_drive",
+            "internal_flex",
+            "sata_host_port"
+          ]
+        }
+      ],
+      "interventions": []
+    },
+    {
+      "case_id": "case_D_2025",
+      "repair_intake": {
+        "device_hint": "Nintendo Switch Joy-Con",
+        "symptoms": [
+          "Analog joystick reports input when untouched"
+        ],
+        "when_it_fails": "controller operation",
+        "repro_steps": [
+          "Observe stick drift at neutral"
+        ]
+      },
+      "components": [
+        {
+          "id": "contaminated_contact",
+          "label": "contamination of potentiometer contacts",
+          "service_cost_rank": 1,
+          "reversible_test_available": true
+        },
+        {
+          "id": "worn_wiper",
+          "label": "mechanical wear in analog stick",
+          "service_cost_rank": 2,
+          "reversible_test_available": true
+        },
+        {
+          "id": "calibration",
+          "label": "controller input calibration/settings",
+          "service_cost_rank": 1,
+          "reversible_test_available": true
+        }
+      ],
+      "path_tests": [
+        {
+          "id": "D-1",
+          "observation": "Analog stick drifts with neutral input",
+          "outcome": "fail",
+          "path": [
+            "contaminated_contact",
+            "worn_wiper",
+            "calibration"
+          ]
+        }
+      ],
+      "interventions": []
+    }
+  ]
+}
