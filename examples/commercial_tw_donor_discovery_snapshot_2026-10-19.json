@@ -1,0 +1,360 @@
+{
+  "family_counts": {
+    "barcode_scanner": 2,
+    "dotmatrix_printer": 1,
+    "human_input": 1,
+    "laptop": 1,
+    "nas_chassis": 1,
+    "network_ap": 1,
+    "network_board": 1,
+    "robot_lidar_spares": 1,
+    "robot_vacuum": 4,
+    "thermal_printer": 4
+  },
+  "listing_count": 17,
+  "observed_date": "2026-10-19",
+  "records": [
+    {
+      "advertised_ask_twd_max": 50,
+      "advertised_ask_twd_min": 50,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "barcode_scanner",
+      "inspection_questions": "Exact cut lead, PCB markings, safe interface mapping",
+      "listing_id": "ls2208",
+      "parts_hypotheses_unverified": [
+        "scanner engine",
+        "trigger",
+        "optics",
+        "controller board"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Cable cut; untested; label 5 V/0.2 A; sold for parts",
+      "source_url": "https://www.ruten.com.tw/item/22623851402690/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 200,
+      "advertised_ask_twd_min": 100,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "barcode_scanner",
+      "inspection_questions": "Selected option, battery, dock, original protocol",
+      "listing_id": "unitech-ms920",
+      "parts_hypotheses_unverified": [
+        "optical scanner",
+        "trigger",
+        "dock",
+        "input PCB"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Untested, random variant; dock/cover and battery not assured; 3 options",
+      "source_url": "https://www.ruten.com.tw/item/22535705728769/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 350,
+      "advertised_ask_twd_min": 300,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "thermal_printer",
+      "inspection_questions": "Actual included parts, printhead and charger",
+      "listing_id": "sewoo-lkp12ii",
+      "parts_hypotheses_unverified": [
+        "thermal head",
+        "paper feed motor",
+        "controller",
+        "shell"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Failed/parts; two variants; no full function established",
+      "source_url": "https://www.ruten.com.tw/item/22015429323610/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 300,
+      "advertised_ask_twd_min": 300,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "dotmatrix_printer",
+      "inspection_questions": "Physical motor/rail completeness and exact model",
+      "listing_id": "epson-lq680",
+      "parts_hypotheses_unverified": [
+        "rails",
+        "paper-feed gearing",
+        "stepper motors",
+        "switches"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Guaranteed faulty; NO printhead, top cover, consumables or cables; randomly supplied",
+      "source_url": "https://www.ruten.com.tw/item/21447795842755/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 1800,
+      "advertised_ask_twd_min": 1200,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "thermal_printer",
+      "inspection_questions": "Printer self-test/printhead, correct option price",
+      "listing_id": "zebra-zt230",
+      "parts_hypotheses_unverified": [
+        "roller motor",
+        "printhead",
+        "label sensors",
+        "mechanical frame"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller reports power response, can't operate; single vs bundle options",
+      "source_url": "https://www.ruten.com.tw/item/22529245521997/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 3606,
+      "advertised_ask_twd_min": 2803,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "thermal_printer",
+      "inspection_questions": "Exact unit, included parts and price option",
+      "listing_id": "max-lm370",
+      "parts_hypotheses_unverified": [
+        "thermal printer",
+        "wire feed",
+        "key/display panel"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Requires repair; variant dependent; no working verification",
+      "source_url": "https://www.ruten.com.tw/item/22637593145388/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 2328,
+      "advertised_ask_twd_min": 2328,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "thermal_printer",
+      "inspection_questions": "Missing axis/shaft geometry; print sample; included cables",
+      "listing_id": "postek-g3106",
+      "parts_hypotheses_unverified": [
+        "printhead",
+        "controller",
+        "motors",
+        "frame"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller says power response; casing/axis missing, printer not demonstrated",
+      "source_url": "https://www.ruten.com.tw/item/22631255090926/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "incomplete_unit"
+    },
+    {
+      "advertised_ask_twd_max": 650,
+      "advertised_ask_twd_min": 650,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "network_board",
+      "inspection_questions": "Power supply and board revision, actual functional proof",
+      "listing_id": "qnap-ts219pii",
+      "parts_hypotheses_unverified": [
+        "embedded processor",
+        "SATA",
+        "Ethernet",
+        "indicator circuits"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller claims boot/network discovery with Qfinder; PCB+daugherboard only; no PSU, HDD, chassis or cables",
+      "source_url": "https://www.ruten.com.tw/item/22606139676402/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "board_only"
+    },
+    {
+      "advertised_ask_twd_max": 350,
+      "advertised_ask_twd_min": 350,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "nas_chassis",
+      "inspection_questions": "Confirm local pickup and actual board/trays",
+      "listing_id": "thecus-n2200",
+      "parts_hypotheses_unverified": [
+        "drive trays",
+        "NAS shell",
+        "buttons",
+        "potential network PCB"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller did not test (no supply/HDD); shell and two drive trays reportedly present; pickup",
+      "source_url": "https://www.ruten.com.tw/item/22622803064195/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "incomplete_unit"
+    },
+    {
+      "advertised_ask_twd_max": 500,
+      "advertised_ask_twd_min": 500,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "network_ap",
+      "inspection_questions": "Power/PoE, model revision, cloud lifecycle and account state",
+      "listing_id": "cisco-mr32",
+      "parts_hypotheses_unverified": [
+        "antennas",
+        "PoE/network PCB",
+        "casing"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Advertised faulty / parts only; condition unspecified and no return",
+      "source_url": "https://www.ruten.com.tw/item/22528148249681/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 500,
+      "advertised_ask_twd_min": 500,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "human_input",
+      "inspection_questions": "Actual keyboard function, batteries, exact HID pairing with consent",
+      "listing_id": "apple-a1314",
+      "parts_hypotheses_unverified": [
+        "key matrix",
+        "mouse switches",
+        "optical sensor (reported failed)",
+        "Bluetooth PCB"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller says keyboard complete, mouse left/right buttons OK but optical tracking fails; no accessories",
+      "source_url": "https://www.ruten.com.tw/item/22613329448846/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 399,
+      "advertised_ask_twd_min": 399,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "laptop",
+      "inspection_questions": "Model/PCB ID, battery/storage and screen part numbers",
+      "listing_id": "benq-dh5000",
+      "parts_hypotheses_unverified": [
+        "optical drive",
+        "keyboard",
+        "fan",
+        "potential display"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Parts-only and broken; DVD drive stated present; rest unknown",
+      "source_url": "https://www.ruten.com.tw/item/22011344916171/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 2000,
+      "advertised_ask_twd_min": 2000,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "robot_vacuum",
+      "inspection_questions": "Exact series model; pack state; sensor/drive function",
+      "listing_id": "neato-botvac-d",
+      "parts_hypotheses_unverified": [
+        "wheel motor",
+        "brushes",
+        "LiDAR hypothesis",
+        "bump switches"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Seller says dead battery, shell/wheels/brushes look good; no attachments",
+      "source_url": "https://www.ruten.com.tw/item/22048094434606/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 2000,
+      "advertised_ask_twd_min": 2000,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "robot_vacuum",
+      "inspection_questions": "Model and included-dock photos, board state",
+      "listing_id": "narwal-yjcc001",
+      "parts_hypotheses_unverified": [
+        "wheel drive",
+        "charging pads",
+        "shell",
+        "optical navigation hypotheses"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Battery unable to charge, reportedly removed; other circuits untested",
+      "source_url": "https://www.ruten.com.tw/item/22533588662820/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 2500,
+      "advertised_ask_twd_min": 2500,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "robot_vacuum",
+      "inspection_questions": "LDS, motors and electronics test provenance",
+      "listing_id": "neato-xv21",
+      "parts_hypotheses_unverified": [
+        "LDS assembly",
+        "drive motors",
+        "shell",
+        "bump switches"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Won't start, battery defective per seller; other faults unknown",
+      "source_url": "https://www.ruten.com.tw/item/22613355963960/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    },
+    {
+      "advertised_ask_twd_max": 1320,
+      "advertised_ask_twd_min": 520,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "robot_lidar_spares",
+      "inspection_questions": "Actual selected option, model match and protocol",
+      "listing_id": "xiaomi-lds-spares",
+      "parts_hypotheses_unverified": [
+        "rotating distance sensor",
+        "replacement motor"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Replacement-part options, salvaged LDS or aftermarket motor; NOT a failed complete donor",
+      "source_url": "https://www.ruten.com.tw/item/22507753741654/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "spare_parts_not_ewaste"
+    },
+    {
+      "advertised_ask_twd_max": 1500,
+      "advertised_ask_twd_min": 1500,
+      "authorized_for_fabrication": false,
+      "donor_contract": null,
+      "family": "robot_vacuum",
+      "inspection_questions": "Exact SKU, battery and complete assembly",
+      "listing_id": "lg-robot-vacuum",
+      "parts_hypotheses_unverified": [
+        "cleaning drive",
+        "wheels",
+        "navigation sensors",
+        "shell"
+      ],
+      "physical_evidence": null,
+      "seller_condition_claim": "Sold as faulty as-is, no testing or working guarantee",
+      "source_url": "https://www.ruten.com.tw/item/22637614322783/",
+      "status": "DISCOVERY_ONLY",
+      "supply_kind": "broken_unit"
+    }
+  ],
+  "schema_version": "hardware_splicer.commerce_donor_discovery.v1",
+  "scope": "seller-claimed marketplace listing, NOT an HS verified/owned donor",
+  "source_scope": "Frozen prior research snapshot from open HS PR #148 (0b406d4); unmerged; publicly advertised seller statements dated 2026-10-19, not live or available inventory",
+  "source_pr_url": "https://github.com/Spectating101/hardware-splicer/pull/148",
+  "source_path": "docs/research/commerce/tw_donor_discovery_2026-10-19.json",
+  "source_commit": "0b406d4ede85c074457cef731948122a7f571943"
+}
