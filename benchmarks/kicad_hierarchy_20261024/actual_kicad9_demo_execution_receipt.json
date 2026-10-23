@@ -1,0 +1,50 @@
+{
+  "schema_version": "hardware_splicer.kicad_hierarchy_execution_receipt.v1",
+  "reference_receipt_sha256": "07d480ef1c30853133314bac3341079ffd1e71f7f064bf054a343be52ae5677e",
+  "kicad_version": "9.0.8",
+  "project_count": 3,
+  "projects": {
+    "complex_hierarchy": {
+      "source_components": 68,
+      "source_nets": 52,
+      "source_numbered_pin_memberships": 164,
+      "connected_multi_pin_nets": 50,
+      "imported_connected_pin_memberships": 162,
+      "instanced_sheets": 3,
+      "unnumbered_disconnected_contacts": 0,
+      "source_topology_exact_match": true,
+      "sheet_instance_identity_preserved": true,
+      "interchange_only_compilable": true,
+      "physical_build_authorized": false
+    },
+    "flat_hierarchy": {
+      "source_components": 64,
+      "source_nets": 117,
+      "source_numbered_pin_memberships": 238,
+      "connected_multi_pin_nets": 34,
+      "imported_connected_pin_memberships": 161,
+      "instanced_sheets": 3,
+      "unnumbered_disconnected_contacts": 6,
+      "source_topology_exact_match": true,
+      "sheet_instance_identity_preserved": true,
+      "interchange_only_compilable": true,
+      "physical_build_authorized": false
+    },
+    "multichannel": {
+      "source_components": 114,
+      "source_nets": 80,
+      "source_numbered_pin_memberships": 280,
+      "connected_multi_pin_nets": 79,
+      "imported_connected_pin_memberships": 279,
+      "instanced_sheets": 5,
+      "unnumbered_disconnected_contacts": 0,
+      "source_topology_exact_match": true,
+      "sheet_instance_identity_preserved": true,
+      "interchange_only_compilable": true,
+      "physical_build_authorized": false
+    }
+  },
+  "source_reference": "official KiCad 9 kicad-demos installed package",
+  "converter_geometry_mapped": false,
+  "fabrication_authorized": false
+}
