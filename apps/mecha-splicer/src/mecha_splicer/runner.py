@@ -483,12 +483,20 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
 
     lines.append("")
     lines.append("## Assembly (prototype-grade)")
-    if bundle.get("construction_alternatives"):
-        lines.append("- Review `CONSTRUCTION_PLAN.md` before deciding whether to print entire walls.")
-        lines.append("- Sheet panels and external connector files are NOT generated or verified by this comparison.")
-    lines.append("- Print base + lid; test-fit PCB/module with clearance.")
-    lines.append("- Install heat-set inserts (optional) and fasteners.")
-    lines.append("- Verify connector cutouts and cable strain relief.")
+    construction = bundle.get("construction_alternatives") or {}
+    preference = construction.get("requested_preference", "auto")
+    if construction:
+        lines.append("- Review `CONSTRUCTION_PLAN.md` before selecting a construction method.")
+        lines.append("- Sheet panels and connector source models are not approved for fabrication.")
+        if (construction.get("hybrid_sheet_geometry") or {}).get("status") == "dimensioned_blank_cut_proposal":
+            lines.append("- Before cutting, review `HYBRID_INTERFACE_REVIEW.json` for missing ports, support and connector geometry.")
+    if preference in {"sheet_hybrid","off_the_shelf"}:
+        lines.append("- Requested alternative is a proposal only; do NOT assume the full-print CAD is the selected build.")
+        lines.append("- Complete physical panel/connector fit, thermal and fastening evidence before choosing this alternative.")
+    else:
+        lines.append("- Existing printable baseline: print base + lid; test-fit PCB/module with clearance.")
+        lines.append("- Install heat-set inserts (optional) and fasteners.")
+        lines.append("- Verify connector cutouts and cable strain relief.")
 
     has_gt2_axis = any(n in outputs for n in ("motor_mount.scad", "idler_mount.scad", "carriage.scad"))
     has_leadscrew_axis = any(str(n).startswith("ls_") for n in outputs)
