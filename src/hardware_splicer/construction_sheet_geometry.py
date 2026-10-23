@@ -184,3 +184,39 @@ def schedule_parts(
         "notes":"Determine physical retention, panel attachment and lid support by test",
     })
     return parts
+
+
+def schedule_scad_preview(schedule: Mapping[str,Any]) -> str:
+    """Assembly geometry visualization only: no connector joints or ports."""
+    if schedule.get("status") != "dimensioned_blank_cut_proposal":
+        return "// No measured sheet thickness; no hybrid preview available.\\n"
+    dims=schedule["hybrid_outer_dimensions_mm"]
+    inside=schedule["target_internal_dimensions_mm"]
+    t=schedule["panel_thickness_mm"]
+    ow,od,oh=dims
+    iw,idepth,ih=inside
+    # full-width front/back, in-between sidewalls, inset base and lid:
+    cubes=[
+        ("front",0,0,0,ow,t,oh),
+        ("back",0,od-t,0,ow,t,oh),
+        ("left",0,t,0,t,idepth,oh),
+        ("right",ow-t,t,0,t,idepth,oh),
+        ("floor",t,t,t,iw,idepth,t),
+        ("lid",t,t,oh-2*t,iw,idepth,t),
+    ]
+    lines=[
+        "// HS hybrid assembly geometry - VISUAL STUDY ONLY",
+        "// NO CONNECTOR SEATS, PORT CUTOUTS, FASTENER HOLES OR STRUCTURAL VALIDATION",
+        "// DO NOT EXPORT THIS AS AN APPROVED MANUFACTURING MODEL",
+        "module hybrid_panel_envelope_reference() {",
+    ]
+    for index,(name,x,y,z,w,d,h) in enumerate(cubes):
+        tint=["[0.30,0.55,0.85,0.55]","[0.30,0.55,0.85,0.55]",
+              "[0.90,0.60,0.30,0.55]","[0.90,0.60,0.30,0.55]",
+              "[0.35,0.80,0.50,0.55]","[0.35,0.80,0.50,0.55]"][index]
+        lines.extend([
+            f"  // {name}: theoretical blank envelope",
+            f"  color({tint}) translate([{x:g},{y:g},{z:g}]) cube([{w:g},{d:g},{h:g}],center=false);",
+        ])
+    lines.extend(["}","hybrid_panel_envelope_reference();",""])
+    return "\\n".join(lines)
