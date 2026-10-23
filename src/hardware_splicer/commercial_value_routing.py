@@ -23,8 +23,10 @@ EVIDENCE = frozenset({"UNKNOWN", "HYPOTHESIS", "ESTIMATED", "QUOTED", "MEASURED"
 STRONG_EVIDENCE = frozenset({"QUOTED", "MEASURED"})
 RELEASE_GATES = (
     "physical_test_passed", "rights_cleared", "compliance_cleared",
-    "buyer_committed", "procurement_verified",
+    "procurement_verified",
 )
+SALES_GATES = ("buyer_committed",)
+OPERATE_GATES = ("site_or_use_rights_cleared", "operational_benefit_verified")
 
 
 def _amount(item: Any, field: str, errors: list[str], *, signed: bool = False) -> float | None:
@@ -70,11 +72,12 @@ def _fraction(item: Any, field: str, errors: list[str], default: float | None = 
     return num
 
 
-def _gate_blockers(route: Mapping[str, Any]) -> list[str]:
+def _gate_blockers(route: Mapping[str, Any], *, action: str) -> list[str]:
     gates = route.get("gates") if isinstance(route.get("gates"), Mapping) else {}
     refs = route.get("gate_references") if isinstance(route.get("gate_references"), Mapping) else {}
     missing = []
-    for gate in RELEASE_GATES:
+    required = RELEASE_GATES + (OPERATE_GATES if action == "operate" else SALES_GATES)
+    for gate in required:
         if gates.get(gate) is not True or not str(refs.get(gate) or "").strip():
             missing.append(f"unproven_gate:{gate}")
     return missing
@@ -135,7 +138,7 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         if p is not None and sale_value is not None and failure_value is not None:
             discounted_proceeds = p * sale_value + (1 - p) * failure_value
 
-    blockers = _gate_blockers(route)
+    blockers = _gate_blockers(route, action=action)
     if action == "operate":
         # Operating output is not a confirmed sale and cannot use sale-margin terminology.
         metric_name = "net_present_value"
@@ -185,15 +188,29 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         for key in ("acquisition", "material_and_fab")
     )
     buyer = route.get("sale_proceeds") if isinstance(route.get("sale_proceeds"), Mapping) else {}
-    strong_proceeds = (
-        action == "operate" or (
+    if action == "operate":
+        flows = route.get("monthly_net_cashflows") or []
+        terminal = route.get("terminal_value") or {}
+        strong_proceeds = (
+            bool(flows) and all(
+                isinstance(x, Mapping) and x.get("evidence_class") == "MEASURED"
+                and str(x.get("reference") or "").strip()
+                for x in flows
+            )
+            and isinstance(terminal, Mapping)
+            and terminal.get("evidence_class") in STRONG_EVIDENCE
+            and bool(str(terminal.get("reference") or "").strip())
+        )
+    else:
+        strong_proceeds = (
             buyer.get("evidence_class") in STRONG_EVIDENCE
             and bool(str(buyer.get("reference") or "").strip())
         )
-    )
     result["blockers"] = blockers + (
         ([] if strong_cost else ["unquoted_core_cost"])
-        + ([] if strong_proceeds else ["unverified_buyer_price"])
+        + ([] if strong_proceeds else [
+            "unverified_operating_output" if action == "operate" else "unverified_buyer_price"
+        ])
         + ([] if probability_evidence in STRONG_EVIDENCE else ["unverified_yield"])
         + ([] if (net > 0 and (action == "operate" or result["margin"] >= min_margin))
          else ["economics_below_gate"])
