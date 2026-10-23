@@ -195,3 +195,29 @@ def test_three_dimensional_proposal_preview_is_never_manufacturing_claim():
     assert "DO NOT EXPORT THIS AS AN APPROVED MANUFACTURING MODEL" in scad
     assert scad.count("\n")>=10
     assert "render_stl" not in scad
+
+
+def test_actual_hs_intake_compiler_delivers_hybrid_shop_packet(tmp_path,monkeypatch):
+    import shutil
+    from pathlib import Path
+    if not shutil.which("node"):
+        pytest.skip("Node build tooling unavailable")
+    monkeypatch.setenv("HARDWARE_SPLICER_SKIP_VISION_LIVE","1")
+    from hardware_splicer.project_intake import (
+        load_project_intake,run_project_intake,
+    )
+    root=Path(__file__).resolve().parents[1]
+    intake=load_project_intake(root/"examples"/"intakes"/"plant_watering_brief.json")
+    intake["construction"]=_construction()
+    target=tmp_path/"compiled-project"
+    result=run_project_intake(intake,out_dir=target,start_splicer=False)
+    assert result["compile_ok"] is True
+    mecha=target/"mecha_bundle"
+    assert (mecha/"enclosure.scad").exists()
+    assert (mecha/"HYBRID_PANEL_CUTS.csv").exists()
+    assert (mecha/"HYBRID_ASSEMBLY_PREVIEW.scad").exists()
+    assert (mecha/"HYBRID_INTERFACE_REVIEW.json").exists()
+    report=json.loads((mecha/"CONSTRUCTION_ALTERNATIVES.json").read_text())
+    assert report["requested_preference"]=="auto"
+    assert report["selected_manufacturing_method"] is None
+    assert report["release_authorized"] is False
