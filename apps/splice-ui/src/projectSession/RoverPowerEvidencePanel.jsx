@@ -62,7 +62,9 @@ export default function RoverPowerEvidencePanel({ report }) {
                   <td><a href={option.reference_url} target="_blank" rel="noreferrer">
                     {option.part}
                   </a></td>
-                  <td>{option.max_current_continuous_a_at_reference} A at specified conditions</td>
+                  <td>{option.max_current_continuous_a_at_reference == null
+                    ? "Not established; consult thermal limits"
+                    : `${option.max_current_continuous_a_at_reference} A at reference conditions`}</td>
                   <td>{option.supply_nominal_within_spec == null
                     ? "not established"
                     : option.supply_nominal_within_spec ? "nominal within device range" : "outside rated range"}
