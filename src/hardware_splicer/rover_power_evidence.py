@@ -108,6 +108,19 @@ def evaluate_rover_power(
             "Driver current/voltage-drop and thermal margins are not verified for the actual motor load.",
             "Check manufacturer data for the actual driver/package/heatsink, then measure driver drop and heating under a controlled load.")
     if "l298n" in active_drivers:
+        # The planner may pick L298N as an engineering *candidate* even when
+        # an unidentified donor H-bridge exists. A catalog node does not prove
+        # an owned physical part's chip identity, pinout, or availability.
+        declared_exact_driver = any(
+            isinstance(p, Mapping) and str(p.get("module_id") or "").strip() == "l298n"
+            for p in parts
+        )
+        if not declared_exact_driver:
+            require(
+                "catalog_driver_identity_not_source_bound",
+                "The graph contains an L298 candidate, but the source inventory does not establish that an L298 is owned or procured.",
+                "Inspect donor-chip markings and driver pinout; distinguish proposed catalog substitution from physically identified hardware.",
+            )
         require("l298_enable_and_logic_supply_unverified",
                 "L298 uses separate motor and logic supplies and two enable controls; the catalog pin map does not prove real board ENA/ENB jumpers, current sensing or logic level margins.",
                 "Inspect the exact driver board, verify ENA/ENB, logic VSS, motor VS, sense connections and ESP32-level compatibility.")
