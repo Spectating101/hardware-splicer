@@ -231,3 +231,87 @@ def verify_files(schematic:Path,netlist:Path,converted:Path,provenance:Path)->di
         schematic.read_bytes(), netlist.read_text(encoding="utf-8"),
         converted.read_bytes(), provenance.read_bytes()
     )
+
+
+def build_uuid_linked_source_overlay(
+    native_schematic_bytes: bytes,
+    exported_netlist_text: str,
+    circuit_json_bytes: bytes,
+    provenance_bytes: bytes,
+) -> dict[str,Any]:
+    """Produce read-only KiCad REF.PIN/net labels for actual converter visuals.
+
+    Never claims schematic drawn wires or junctions correspond to these nets.
+    The overlay is a standalone artifact, not a mutation of Circuit JSON.
+    """
+    validation=verify_converter_uuid_provenance(
+        native_schematic_bytes, exported_netlist_text,
+        circuit_json_bytes, provenance_bytes,
+    )
+    sidecar=json.loads(provenance_bytes)
+    docs=json.loads(circuit_json_bytes)
+    official=parse_kicad_netlist(exported_netlist_text)
+    actual_pin_to_net={}
+    for net in official.nets:
+        for pin in net.pins:
+            pair=(pin.component_ref,str(pin.pin))
+            if pair in actual_pin_to_net:
+                raise ValueError("Independent KiCad source pin belongs to multiple nets")
+            actual_pin_to_net[pair]=net.name
+    visual_by_source={
+        x["source_port_id"]:x for x in docs if x.get("type")=="schematic_port"
+    }
+    ports_by_component={}
+    for port in docs:
+        if port.get("type")=="source_port":
+            ports_by_component.setdefault(port["source_component_id"],[]).append(port)
+    labels=[]
+    for row in sidecar["records"]:
+        ref=row["native_reference"]
+        physical=not ref.startswith("#FLG")
+        port_labels=[]
+        for port in sorted(ports_by_component.get(row["source_component_id"],[]),
+                           key=lambda x:str(x["pin_number"])):
+            number=str(port["pin_number"])
+            visual=visual_by_source[port["source_port_id"]]
+            mapped=actual_pin_to_net.get((ref,number))
+            if physical and mapped is None:
+                raise ValueError("Physical source port is not mapped to any KiCad export net")
+            if not physical and mapped is not None:
+                raise ValueError("Schematic-only source item has unexpected physical net membership")
+            port_labels.append({
+                "pin_number":number,
+                "source_port_id":port["source_port_id"],
+                "schematic_port_id":visual["schematic_port_id"],
+                "authoritative_kicad_net_name":mapped,
+                "net_name_source":"official_kicad_export" if mapped else "not_physical_component",
+                "converter_schematic_trace_geometry_verified":False,
+            })
+        labels.append({
+            "native_uuid":row["native_symbol_uuid"],
+            "native_reference":ref,
+            "native_sheet_uuid_path":row["native_sheet_uuid_path"],
+            "visual_schematic_component_id":row["schematic_component_id"],
+            "converter_source_component_id":row["source_component_id"],
+            "physical_component":physical,
+            "pins":port_labels,
+        })
+    if sum(len(x["pins"]) for x in labels)!=len(visual_by_source):
+        raise ValueError("Some converted schematic ports were not labeled")
+    return {
+        "schema_version":"hardware_splicer.kicad_uuid_linked_visual_source_overlay.v1",
+        "verification":validation,
+        "visual_component_labels":labels,
+        "total_visual_components":len(labels),
+        "total_visual_pins":sum(len(x["pins"]) for x in labels),
+        "physical_components":sum(x["physical_component"] for x in labels),
+        "physical_pins_with_source_net":sum(
+            p["authoritative_kicad_net_name"] is not None
+            for row in labels for p in row["pins"]
+        ),
+        "purpose":"visual_label_crosswalk_only_no_automatic_wire_graph",
+        "source_net_names_authoritative":True,
+        "converter_wire_trace_coordinates_verified":False,
+        "visual_electrical_merge_authorized":False,
+        "fabrication_authorized":False,
+    }
