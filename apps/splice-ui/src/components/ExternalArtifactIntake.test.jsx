@@ -90,7 +90,7 @@ describe("project-first external tool intake UI", () => {
     const report = await screen.findByTestId("wokwi-source-review");
     expect(report.textContent).toContain("2 source components, 4 connections");
     expect(report.textContent).toContain("2 functional-family candidates");
-    expect(report.textContent).toContain("2 pin pairs mapped");
+    expect(report.textContent).toContain("3 pin pairs mapped");
     expect(report.textContent).toContain("family_quantity_parity");
     expect(report.textContent).toContain("not a physical circuit");
     expect(netlistCompile).not.toHaveBeenCalled();
