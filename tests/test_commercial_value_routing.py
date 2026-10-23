@@ -189,11 +189,12 @@ def test_salvage_estimated_values_never_become_sold_comps():
 
 def transaction():
     keys = ("acquisition", "materials", "engineering", "labor", "quality",
-            "logistics_and_tax", "fees", "warranty_reserve")
+            "logistics_and_tax", "fees", "warranty_cash_spent")
     return {
         "transaction_id": "accepted-001", "candidate_id": "benchhmi-v0",
         "route_id": "refurbish", "currency": "TWD",
         "acceptance_status": "ACCEPTED", "acceptance_reference": "acceptance-signed-1",
+        "payment_status": "SETTLED", "payment_reference": "bank-reconciliation-1",
         "revenue": money(10000, "MEASURED", "invoice-1"),
         "costs": {k: money(100, "MEASURED", "receipts-1") for k in keys},
     }
@@ -205,7 +206,8 @@ def test_measured_outcomes_append_once_without_mutating_source():
     first = append_outcome(ledger, transaction())
     assert first["status"] == "RECORDED"
     assert len(first["ledger"]["transactions"]) == 1
-    assert first["transaction"]["realized_contribution"] == 9200
+    assert first["transaction"]["collected_contribution_to_date"] == 9200
+    assert first["transaction"]["warranty_liability_finalized"] is False
     assert ledger == original
     second = append_outcome(first["ledger"], transaction())
     assert second["status"] == "INVALID"
@@ -382,3 +384,15 @@ def test_convergence_cli_ingests_donor_catalog_and_purchase_screen(tmp_path):
     doc = json.loads(result.stdout)
     assert len(doc["donor_discovery_catalogs"][0]["listings"]) == 1
     assert doc["salvage_purchase_screens"][0]["purchase_authorized"] is False
+
+
+def test_accepted_but_unpaid_invoice_never_counts_as_collected_revenue():
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    transaction_data = transaction()
+    transaction_data["payment_status"] = "INVOICED"
+    result = append_outcome(ledger, transaction_data)
+    assert result["status"] == "INVALID"
+    assert "unsettled_revenue" in result["errors"]
+    transaction_data["payment_status"] = "SETTLED"
+    del transaction_data["payment_reference"]
+    assert "missing_payment_reference" in append_outcome(ledger, transaction_data)["errors"]
