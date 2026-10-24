@@ -595,6 +595,19 @@ def generate_firmware_scaffold(
     elif "dht22" in module_ids and any("esp32" in mid for mid in module_ids):
         body = _dht22_esp32_sketch(build_id, module_ids, pin_map)
         filename = f"{build_id}.ino"
+    elif (
+        family == "esp32"
+        and pin_map.get("sourced_from_graph")
+        and pin_map.get("servo_pan") is not None
+        and pin_map.get("servo_tilt") is not None
+    ):
+        # Both servo pins come from the wiring; a single or unwired servo gets no invented pins.
+        body = (
+            "// Pins come from this design's wiring. Check them on the bench before powering the servos:\n"
+            "// they start moving as soon as the sketch runs.\n"
+            + _pan_tilt_esp32(build_id, module_ids, pin_map)
+        )
+        filename = f"{build_id}.ino"
     else:
         body = sketch_fn(build_id, module_ids, pin_map)
         filename = f"{build_id}.ino"
