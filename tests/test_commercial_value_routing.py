@@ -15,6 +15,7 @@ from hardware_splicer.commercial_value_routing import (
 )
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
 from hardware_splicer.commercial_materials import evaluate_material_plan
+from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
 
 
@@ -669,3 +670,125 @@ def test_portfolio_report_runner_produces_two_real_artifacts(tmp_path):
     assert "not a market forecast" in markdown
     assert dossier["investigation_queue"]["task_count"] == 32
     assert dossier["cohort_review"]["positive_modeled_salvage_screens"] == 2
+
+
+def test_historical_tsc_listing_is_not_a_settled_sold_comparable():
+    root = Path(__file__).resolve().parents[1]
+    record = json.loads((root / "examples" / "commercial_market_evidence_tsc_historical.json").read_text(encoding="utf-8"))
+    screen = evaluate_market_evidence(
+        record, candidate_id=record["candidate_id"], market="Taiwan",
+        currency="TWD", exact_model="TSC TTP-244 Plus", latest_day="2026-10-25",
+    )
+    assert screen["status"] == "NO_VERIFIED_SOLD_COMPS"
+    assert screen["sold_median"] is None
+    assert screen["excluded_evidence"][0]["reason"] == "model_or_variant_unverified"
+    assert screen["purchase_authorized"] is False
+
+
+def test_actual_settled_exact_model_comp_is_scoped_and_still_review_required():
+    base = {
+        "schema_version": "hardware_splicer.market_evidence.v1",
+        "records": [
+            {"evidence_id": "sale-1", "event_kind": "verified_settled_sale",
+             "unit_price": 1800, "currency": "TWD", "market": "Taiwan",
+             "exact_model": "Test Model 123", "variant_verified": True,
+             "condition_class": "working_tested", "observed_date": "2026-10-18",
+             "source_ref": "receipt-test-1", "settlement_verified": True,
+             "settlement_reference": "bank-test-1"},
+            {"evidence_id": "sale-2", "event_kind": "verified_settled_sale",
+             "unit_price": 2200, "currency": "TWD", "market": "Taiwan",
+             "exact_model": "Test Model 123", "variant_verified": True,
+             "condition_class": "working_tested", "observed_date": "2026-10-19",
+             "source_ref": "receipt-test-2", "settlement_verified": True,
+             "settlement_reference": "bank-test-2"},
+        ],
+    }
+    result = evaluate_market_evidence(
+        base, candidate_id="test-only", market="Taiwan", currency="TWD",
+        exact_model="Test Model 123", latest_day="2026-10-25",
+    )
+    assert result["sold_median"] == 2000
+    assert result["status"] == "SOLD_COMPS_TO_AUDIT"
+    assert result["independent_receipt_review_complete"] is False
+    assert result["purchase_authorized"] is False
+
+
+def test_market_comps_fail_closed_on_sold_badge_wrong_variant_and_fx():
+    records = []
+    for i, attrs in enumerate([
+        {"event_kind": "sold_marker_without_price_proof"},
+        {"event_kind": "verified_settled_sale", "settlement_verified": False},
+        {"event_kind": "verified_settled_sale", "exact_model": "Different Model"},
+        {"event_kind": "verified_settled_sale", "currency": "CNY"},
+        {"event_kind": "verified_settled_sale", "observed_date": "2025-01-01"},
+    ]):
+        record = {
+            "evidence_id": f"x-{i}", "event_kind": "advertised_ask",
+            "unit_price": 500, "currency": "TWD", "market": "Taiwan",
+            "exact_model": "Target A", "variant_verified": True,
+            "condition_class": "working_tested", "observed_date": "2026-10-20",
+            "source_ref": f"listing-or-receipt-{i}",
+            "settlement_verified": True, "settlement_reference": f"receipt-{i}",
+        }
+        record.update(attrs)
+        records.append(record)
+    result = evaluate_market_evidence(
+        {"schema_version": "hardware_splicer.market_evidence.v1", "records": records},
+        candidate_id="test", market="Taiwan", currency="TWD",
+        exact_model="Target A", latest_day="2026-10-25",
+    )
+    assert result["sold_median"] is None
+    assert len(result["excluded_evidence"]) == 4
+    assert len(result["ask_observations"]) == 1
+    assert result["purchase_authorized"] is False
+
+
+def test_market_evidence_invalid_duplicate_and_nonfinite_prices():
+    sample = {
+        "schema_version": "hardware_splicer.market_evidence.v1",
+        "records": [
+            {"evidence_id": "a", "event_kind": "advertised_ask",
+             "unit_price": 100, "currency": "TWD", "market": "Taiwan",
+             "exact_model": "A", "variant_verified": True,
+             "condition_class": "untested", "observed_date": "2026-10-20",
+             "source_ref": "seller-link"},
+            {"evidence_id": "a", "event_kind": "advertised_ask",
+             "unit_price": float("inf"), "currency": "TWD", "market": "Taiwan",
+             "exact_model": "A", "variant_verified": True,
+             "condition_class": "untested", "observed_date": "2026-10-20",
+             "source_ref": "seller-link"},
+        ],
+    }
+    x = evaluate_market_evidence(
+        sample, candidate_id="a", market="Taiwan", currency="TWD",
+        exact_model="A", latest_day="2026-10-25",
+    )
+    assert x["status"] == "INVALID"
+    assert "missing_or_duplicate_id:1" in x["errors"]
+
+
+def test_backlog_covers_all_concepts_and_diversifies_first_evidence_wave(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    x = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert x.returncode == 0, x.stderr
+    result = json.loads(x.stdout)
+    assert result["deduplicated_validation_cases"] == 30
+    assert result["first_evidence_wave_count"] == 8
+    doc = json.loads((tmp_path / "commercial_cohort_replay.json").read_text(encoding="utf-8"))
+    backlog = doc["validation_backlog"]
+    assert backlog["record_count"] == 30
+    assert backlog["source_records_covered"] == 31
+    assert backlog["unpriced_concepts"] == 25
+    assert len(backlog["first_evidence_wave"]) == 8
+    assert len(set(backlog["first_evidence_wave"])) == 8
+    assert "tsc-ttp244plus-budget-fault" in backlog["first_evidence_wave"]
+    assert "proofpod-v0" in backlog["first_evidence_wave"]
+    assert backlog["verified_profitable_concepts"] == 0
+    assert all(v["purchase_authorized"] is False for v in backlog["entries"])
+    tsc = next(row for row in backlog["entries"]
+               if row["concept_id"] == "tsc-ttp244plus-budget-fault")
+    assert tsc["market_sold_median"] is None
+    assert tsc["market_sold_evidence_status"] == "NO_VERIFIED_SOLD_COMPS"
