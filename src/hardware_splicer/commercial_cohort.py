@@ -54,14 +54,12 @@ def build_commercial_cohort(dossier: Mapping[str, Any]) -> dict[str, Any]:
             "price_evidence": item["price_quality"],
             "modeled_net": item["modeled_expected_net_twd"],
             "modeled_bid_at_target_profit": item["modeled_target_profit_max_bid_twd"],
+            "original_profit_target_twd": item["original_target_profit_per_acquired_unit_twd"],
             "source_ask": item["source_ask_twd"],
             "downside_wins_of_nine": sum(1 for point in item["nine_point_sensitivity"]
                                            if point["expected_net_twd"] > 0),
             "failure_mode_gate": item["failure_mode_gate"],
-            "decision": (
-                "RESEARCH_ONLY_POSITIVE_MODEL" if item["modeled_expected_net_twd"] > 0
-                else "REJECT_CURRENT_MODEL"
-            ),
+            "decision": item["current_decision"],
             "missing_evidence": [
                 "same-model completed sales not advertised prices",
                 "verified repair yield and actual defect",
@@ -135,6 +133,9 @@ def build_commercial_cohort(dossier: Mapping[str, Any]) -> dict[str, Any]:
         "by_decision": dict(sorted(counts.items())),
         "historically_priced_salvage_screens": len(screened),
         "positive_modeled_salvage_screens": sum(x["modeled_net"] > 0 for x in screened),
+        "historical_models_meeting_original_profit_target": sum(
+            x["modeled_net"] >= x["original_profit_target_twd"] for x in screened
+        ),
         "nonpositive_modeled_salvage_screens": sum(x["modeled_net"] <= 0 for x in screened),
         "records": all_records,
         "explicitly_unsupported_proofs": validation,
