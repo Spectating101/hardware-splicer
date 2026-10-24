@@ -99,3 +99,52 @@ GitHub Actions workflow `HS Commercial Portfolio Replay` publishes the executed,
 3. Some original PF-002 BOM sums are inconsistent: source TOTAL NT$1,726 versus rows NT$1,936 at one unit, and NT$1,357 versus NT$1,462 at ten-unit tier. A source-preserving regression test now catches both.
 4. PR #147/#148 and PF #109/#110/#111 are still separately open; do not merge/rebase them without verifying their branch prerequisites.
 5. External e-commerce sources need freshness checks; the current benchmark measures **software integrity and research coverage**, not a profitable hardware enterprise.
+
+
+## Follow-on: transaction evidence and 30-case validation backlog
+
+PR #214 adds `commercial_market_evidence.py` and `commercial_validation_backlog.py`.
+
+**Market evidence rules.** Records have an exact model and verified variant, date, market and native currency, condition, event type, and a reference. Only a record explicitly marked `verified_settled_sale` with price and settlement reference is admitted to the candidate's *preliminary* sold-comparable median. Even then, independent receipt review remains `false` until someone verifies the underlying proof. A marketplace 'sold' badge, generic listing ask, different model, stale evidence and cross-currency price are excluded. **Do not equate user-submitted settlement metadata with an independently authenticated sale.**
+
+The historical faulty TSC record is included in `examples/commercial_market_evidence_tsc_historical.json`. Its original ask is NT$500, the option/variant is unverified, and it is therefore **not** admissible as a completed-sale comparable. The earlier +NT$339 profit is still only a hypothesis.
+
+**Deduplicated backlog.** `build_validation_backlog` consolidates 31 source records to 30 named concepts, with an evidence status, references, validation task and no purchase authority. The diversified *first evidence wave* is:
+
+| Concept ID | Workstream | Validation target |
+| --- | --- | --- |
+| tsc-ttp244plus-budget-fault | Historic Taiwan salvage hypothesis | Same-model settled-sale prices; printhead/failure condition |
+| proofpod-v0 | Original Product Factory hardware | Native schematic/physical gates and priced BOM; actual use/sales case |
+| ls2208 | Low-cost Taiwan donor | Confirm model/condition and recovered scanner-engine value |
+| qnap-ts219pii | Taiwan used electronics | Confirm actual board revision/power and technical usefulness |
+| TW-PF-EDGE-001 | Taiwan BenchGateway | Qualify thin-client lot, interface BOM, productive use |
+| TW-PF-ARK-001 | Taiwan Refurbished Lab Controller | Verify donor variants, real quote and non-safety-critical tasks |
+| CN-PF-HMI-001 | Mainland China TouchLab | Validate ¥ sourcing/finished-unit economics without implied Taiwan FX |
+| CN-PF-EDGE-001 | Mainland China ThinEdge | Test against ¥-priced commodity substitutes |
+
+This selection intentionally mixes product manufacturing, reuse, donor discovery and mainland Chinese sourcing. **These are market/engineering research targets, not purchase recommendations**, and are not ranked by imaginary profit.
+
+### Fresh Taiwan seller-market signals (Oct 25 review)
+
+The Ruten Taiwan listing aggregation presently displays **faulty TSC TTP-244 Plus asking at NT$500–1,500** and a separate **untested Brother QL-800 at NT$500**; a related TSC TTP244Pro appears at NT$1,960. These are seller offers/aggregated observations, not exact completed resale transactions or verified current inventory. The TTP244Pro must **not** substitute for TTP-244 Plus in price matching.
+
+- TSC seller-market search: https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B%E6%A8%99%E7%B1%A4%E6%A9%9F/?sort=ords%2Fdc
+- Taiwan untested printer search: https://www.ruten.com.tw/search/%E4%BA%8C%E6%89%8B/?cateid=0011002800010007
+- Mainland China HP T620 price observation of ¥60–70 was described in a March **2025** community article, not a verified October 2026 supplier quote; it is **too stale** to substantiate current sourcing. https://post.smzdm.com/p/az7n9ddo/
+
+Nothing in those sources proves a gross or net margin for any repaired product.
+
+### Running the extended replay
+
+```bash
+PYTHONPATH=src python -m pytest -q tests/test_commercial_value_routing.py
+PYTHONPATH=src python scripts/replay_hs_commercial_portfolio.py --output-dir artifacts/commercial
+PYTHONPATH=src python scripts/converge_commercial_sources.py \
+    --donor-discovery examples/commercial_tw_donor_discovery_snapshot_2026-10-19.json \
+    --purchase-report examples/commercial_tw_salvage_five_screen_snapshot.json \
+    --regional-scan examples/commercial_tw_cn_regional_scan_snapshot.json \
+    --market-evidence examples/commercial_market_evidence_tsc_historical.json \
+    --as-of 2026-10-25
+```
+
+The full replay now emits market evidence screens and the 30-entry validation backlog, including an eight-concept evidence-first wave. Do not promote any opportunity to investment approval until procurement, ownership/compliance, test evidence, real selling price or metered usage, and all attributable costs are substantiated.
