@@ -36,7 +36,7 @@ def _independent_scikit_fem(case: FemInput) -> dict[str, Any]:
         np.asarray(case.elements, dtype=int).T,
     )
     basis = Basis(mesh, ElementVector(ElementTetP1()))
-    mu, lam = lame_parameters(
+    lam, mu = lame_parameters(
         case.youngs_modulus_pa, case.poisson_ratio
     )
     stiffness = asm(linear_elasticity(Lambda=lam, Mu=mu), basis)
