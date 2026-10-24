@@ -75,12 +75,16 @@ def build_investigation_queue(dossier: Mapping[str, Any]) -> dict[str, Any]:
             "source_ref": raw.get("source_ref"),
             "modeled_expected_net_twd": net,
             "modeled_target_profit_max_bid_twd": bid,
+            "original_target_profit_per_unit_twd": raw.get("original_target_profit_per_acquired_unit_twd"),
             "positive_downside_scenarios": sum(
                 1 for scenario in raw.get("nine_point_sensitivity") or []
                 if scenario.get("expected_net_twd", 0) > 0
             ),
-            "status": "HOLD_FOR_MATCHED_SALES_AND_FAULT_EVIDENCE"
-                      if net is not None and net > 0 else "REJECT_CURRENT_ECONOMIC_MODEL",
+            "status": (
+                "TARGET_PAPER_PASS_NO_PURCHASE" if raw.get("current_decision") == "MODELED_TARGET_PASS_UNVERIFIED"
+                else "BELOW_TARGET_HOLD" if net is not None and net > 0
+                else "REJECT_CURRENT_ECONOMIC_MODEL"
+            ),
             "hard_stop": raw.get("failure_mode_gate"),
             "next_evidence": [
                 "Prove same exact model: comparable sold transactions, not retail asks",
