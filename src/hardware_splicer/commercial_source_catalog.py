@@ -115,6 +115,12 @@ def normalize_historical_purchase_report(report: Mapping[str, Any]) -> list[dict
         bid = model.get("max_purchase_for_target_profit_twd")
         if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in (net, bid)):
             raise ValueError("malformed purchase screen values")
+        required_target = (
+            model.get("break_even_max_purchase_twd") -
+            model.get("max_purchase_for_target_profit_twd")
+        )
+        if required_target < 0:
+            raise ValueError("malformed target profit")
         if model.get("acquisition_price_basis") == "advertised_asking_price":
             demand_status = "UNVERIFIED_SOLD_COMPS"
         else:
@@ -128,6 +134,7 @@ def normalize_historical_purchase_report(report: Mapping[str, Any]) -> list[dict
             "currency": "TWD",
             "modeled_expected_net_twd": net,
             "modeled_target_profit_max_bid_twd": bid,
+            "original_target_profit_per_acquired_unit_twd": required_target,
             "modeled_sale_twd_not_observed": model.get("modeled_sale_twd_not_observed"),
             "source_ask_twd": model.get("source_ask_twd"),
             "source_market_links": list(item.get("source_urls") or []),
@@ -138,8 +145,11 @@ def normalize_historical_purchase_report(report: Mapping[str, Any]) -> list[dict
             "nine_point_sensitivity": sensitivity,
             "failure_mode_gate": item.get("failure_mode_gate"),
             "source_confidence": item.get("source_confidence"),
-            "current_decision": "SCREEN_POSITIVE_UNVALIDATED" if net > 0 and bid > 0
-                                else "SCREEN_REJECTED_OR_ZERO",
+            "current_decision": (
+                "MODELED_TARGET_PASS_UNVERIFIED" if net >= required_target and bid > 0
+                else "BELOW_PROFIT_TARGET_UNVERIFIED" if net > 0
+                else "REJECT_CURRENT_ECONOMIC_MODEL"
+            ),
             "purchase_authorized": False,
         })
     return rows
