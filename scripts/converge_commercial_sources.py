@@ -27,6 +27,7 @@ from hardware_splicer.commercial_source_catalog import (
     normalize_historical_regional_scan,
 )
 from hardware_splicer.commercial_cohort import build_commercial_cohort
+from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 
 
 def load(path: Path) -> dict:
@@ -45,11 +46,13 @@ def main() -> int:
     parser.add_argument("--purchase-screen", action="append", type=Path, default=[])
     parser.add_argument("--purchase-report", action="append", type=Path, default=[])
     parser.add_argument("--regional-scan", action="append", type=Path, default=[])
+    parser.add_argument("--market-evidence", action="append", type=Path, default=[])
+    parser.add_argument("--as-of", default="2026-10-25")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not (args.case or args.pf_run or args.salvage_report
             or args.donor_discovery or args.purchase_screen
-            or args.purchase_report or args.regional_scan):
+            or args.purchase_report or args.regional_scan or args.market_evidence):
         parser.error("at least one supported source required")
 
     try:
@@ -88,6 +91,17 @@ def main() -> int:
             for path in args.regional_scan
             for result in normalize_historical_regional_scan(load(path))
         ]
+        market_evidence = []
+        for path in args.market_evidence:
+            payload = load(path)
+            market_evidence.append(evaluate_market_evidence(
+                payload,
+                candidate_id=payload.get("candidate_id"),
+                market=payload.get("market"),
+                currency=payload.get("currency"),
+                exact_model=payload.get("exact_model"),
+                latest_day=args.as_of,
+            ))
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
@@ -100,6 +114,7 @@ def main() -> int:
         "salvage_purchase_screens": purchase,
         "historical_salvage_economics": purchase_reports,
         "regional_product_concepts": regional,
+        "market_evidence_screens": market_evidence,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
@@ -117,7 +132,8 @@ def main() -> int:
         args.output.write_text(text, encoding="utf-8")
     else:
         print(text, end="")
-    return 2 if any(c["status"] == "INVALID" for c in output["commercial_cases"]["cases"]) else 0
+    return 2 if (any(c["status"] == "INVALID" for c in output["commercial_cases"]["cases"])
+                 or any(c["status"] == "INVALID" for c in market_evidence)) else 0
 
 
 if __name__ == "__main__":
