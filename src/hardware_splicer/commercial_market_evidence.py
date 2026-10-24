@@ -132,9 +132,12 @@ def evaluate_market_evidence(
             "observed_date": observed, "event_kind": kind, "source_ref": ref,
             "condition_class": item["condition_class"],
         }
-        if kind in ASK_KINDS or kind in {
-            "seller_quote", "supplier_quotation", "sold_marker_without_price_proof",
-        }:
+        if kind == "sold_marker_without_price_proof":
+            # Even marketplace "sold" badges are NOT observations of paid
+            # transaction amounts. Keep them separate from ordinary price asks.
+            holds.append({"evidence_id": eid, "reason": "unverified_sold_marker"})
+            continue
+        if kind in ASK_KINDS or kind in {"seller_quote", "supplier_quotation"}:
             asks.append(normalized)
             continue
         if item.get("settlement_verified") is not True or not str(item.get("settlement_reference") or "").strip():
