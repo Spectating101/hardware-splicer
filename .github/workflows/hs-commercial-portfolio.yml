@@ -1,0 +1,44 @@
+name: HS Commercial Portfolio Replay
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/commercial_**"
+      - "scripts/converge_commercial_sources.py"
+      - "scripts/replay_hs_commercial_portfolio.py"
+      - "examples/commercial_**"
+      - "tests/test_commercial_value_routing.py"
+      - ".github/workflows/hs-commercial-portfolio.yml"
+  workflow_dispatch:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and regression dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Validate full commercial cohort
+        env:
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          HARDWARE_SPLICER_OFFLINE_LLM: "1"
+          HARDWARE_SPLICER_OFFLINE_VISION: "1"
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+        run: PYTHONPATH=src python -m pytest -q --tb=short tests/test_commercial_value_routing.py
+      - name: Replay frozen Taiwan and China portfolio
+        run: PYTHONPATH=src python scripts/replay_hs_commercial_portfolio.py --output-dir artifacts/commercial
+      - name: Publish source-bound report
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-commercial-portfolio-replay
+          path: |
+            artifacts/commercial/commercial_cohort_replay.json
+            artifacts/commercial/commercial_cohort_replay.md
+          if-no-files-found: error
+          retention-days: 30
