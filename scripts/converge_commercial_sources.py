@@ -28,6 +28,7 @@ from hardware_splicer.commercial_source_catalog import (
 )
 from hardware_splicer.commercial_cohort import build_commercial_cohort
 from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
+from hardware_splicer.commercial_validation_backlog import build_validation_backlog
 
 
 def load(path: Path) -> dict:
@@ -126,6 +127,7 @@ def main() -> int:
     }
     output["investigation_queue"] = build_investigation_queue(output)
     output["cohort_review"] = build_commercial_cohort(output)
+    output["validation_backlog"] = build_validation_backlog(output)
     text = json.dumps(output, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
