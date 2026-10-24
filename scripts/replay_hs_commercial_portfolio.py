@@ -100,7 +100,7 @@ def markdown(report: dict) -> str:
         label = row["candidate_id"]
         if link:
             label = f"[{label}]({link})"
-        lines.append(f"| {label} | {row['source_class']} | {range_text} | UNPRICED / verify donor and sold comparables |")
+        lines.append(f"| {label} | {row.get('family') or 'unknown'} | {range_text} | UNPRICED / verify donor and sold comparables |")
     lines += [
         "",
         "## Product Factory and wider Taiwan/China routes",
