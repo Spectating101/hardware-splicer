@@ -65,7 +65,7 @@ def markdown(report: dict) -> str:
         "",
         f"- Source records: **{c['total_source_records']}**; lineage-deduplicated named concepts: **{c['distinct_named_concepts_after_known_lineage_aliases']}**.",
         f"- Taiwan marketplace donor observations (unpriced): **{len(donors)}**.",
-        f"- Taiwan modeled salvage acquisition cases: **{len(salvage)}**, of which **{c['positive_modeled_salvage_screens']}** have positive *hypothetical* expected contribution.",
+        f"- Taiwan modeled salvage acquisition cases: **{len(salvage)}**; **{c['positive_modeled_salvage_screens']}** show positive paper contribution, but only **{c['historical_models_meeting_original_profit_target']}** reaches the original NT$300 target, before real sold-price/yield verification.",
         f"- Product Factory experiments: **{len(pf)}**; regional Taiwan/China concepts: **{len(regional)}**.",
         "- The PF-002 itemized scenario is a separate **modeled route** for an already counted concept, not another independent business.",
         "",
@@ -169,6 +169,7 @@ def main() -> int:
         "unique_named_concepts": report["cohort_review"]["distinct_named_concepts_after_known_lineage_aliases"],
         "priced_salvage_models": report["cohort_review"]["historically_priced_salvage_screens"],
         "modeled_positive": report["cohort_review"]["positive_modeled_salvage_screens"],
+        "modeled_at_target": report["cohort_review"]["historical_models_meeting_original_profit_target"],
         "purchase_authorized": False,
         "output_dir": str(outdir),
     }, sort_keys=True))
