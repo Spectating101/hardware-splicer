@@ -8,11 +8,6 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Mapping
 
-from .commercial_source_catalog import (
-    normalize_historical_purchase_report,
-    normalize_historical_regional_scan,
-)
-
 # Manually reviewed lineage equivalence. No automatic fuzzy deduplication:
 # similar device names do not establish equivalent models or underlying lots.
 KNOWN_CONCEPT_ALIASES = {
@@ -34,6 +29,8 @@ def build_commercial_cohort(dossier: Mapping[str, Any]) -> dict[str, Any]:
                 "currency": "TWD",
                 "source_ref": item.get("source_ref"),
                 "source_url": item.get("listing_url"),
+                "family": item.get("family"),
+                "source_ask_range": item.get("advertised_ask_range"),
                 "price_evidence": "HISTORICAL_ADVERTISED_ASK_ONLY",
                 "modeled_net": None,
                 "decision": "UNPRICED_DISCOVERY",
