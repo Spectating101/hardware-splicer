@@ -581,6 +581,9 @@ def test_five_historical_taiwan_salvage_screens_preserve_full_downside():
     by_id = {r["candidate_id"]: r for r in screens}
     assert by_id["tsc-ttp244plus-budget-fault"]["modeled_expected_net_twd"] == 339
     assert by_id["brother-ql800-untested"]["modeled_expected_net_twd"] == 24.25
+    assert by_id["tsc-ttp244plus-budget-fault"]["original_target_profit_per_acquired_unit_twd"] == 300
+    assert by_id["tsc-ttp244plus-budget-fault"]["current_decision"] == "MODELED_TARGET_PASS_UNVERIFIED"
+    assert by_id["brother-ql800-untested"]["current_decision"] == "BELOW_PROFIT_TARGET_UNVERIFIED"
     assert by_id["hp-p1505n-failed"]["modeled_expected_net_twd"] == -476
     assert by_id["acer-sa241y-broken-display"]["modeled_expected_net_twd"] == -480
     assert by_id["old-parts-only-laptop"]["modeled_expected_net_twd"] == -667
@@ -630,9 +633,14 @@ def test_full_portfolio_replay_has_31_source_records_but_no_verified_sales():
     }
     assert cohort["historically_priced_salvage_screens"] == 5
     assert cohort["positive_modeled_salvage_screens"] == 2
+    assert cohort["historical_models_meeting_original_profit_target"] == 1
     assert cohort["nonpositive_modeled_salvage_screens"] == 3
     assert cohort["purchase_authorized"] is False
     assert doc["investigation_queue"]["task_count"] == 32
+    decisions = [t for t in doc["investigation_queue"]["tasks"]
+                 if t["origin"] == "historical_salvage_economics"]
+    assert sum(t["status"] == "TARGET_PAPER_PASS_NO_PURCHASE" for t in decisions) == 1
+    assert sum(t["status"] == "BELOW_TARGET_HOLD" for t in decisions) == 1
     assert sum(t["origin"] == "historical_salvage_economics"
                for t in doc["investigation_queue"]["tasks"]) == 5
     assert sum(t["origin"] == "regional_product_concept"
