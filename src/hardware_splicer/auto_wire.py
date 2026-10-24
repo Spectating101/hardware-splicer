@@ -109,7 +109,63 @@ def _alloc_pin_by_role(mcu: ModuleSpec, used: Set[str], role: str) -> Optional[s
     return None
 
 
+_PER_INSTANCE_SIGNAL_ROLES = frozenset(
+    {"digital_io", "digital_in", "digital_out", "pwm", "analog_in", "uart_rx", "uart_tx"}
+)
+
+
 def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
+    """Wire the unique modules, then give each repeated module its own wired instance.
+
+    The wiring below identifies a module by its id, so two of the same module would
+    collapse onto one and leave the other floating. Repeats are added afterwards by
+    copying the first instance's wiring.
+    """
+    unique: List[ModuleSpec] = []
+    repeats: List[ModuleSpec] = []
+    seen: Set[str] = set()
+    for module in modules:
+        module_id = str(module.get("id"))
+        (repeats if module_id in seen else unique).append(module)
+        seen.add(module_id)
+    recipe = _auto_wire_unique_modules(unique)
+    for module in repeats:
+        _add_repeated_instance(recipe, unique, module)
+    return recipe
+
+
+def _add_repeated_instance(recipe: Recipe, modules: List[ModuleSpec], repeat: ModuleSpec) -> None:
+    roles = recipe["modules"]
+    wires = recipe["wires"]
+    module_id = repeat["id"]
+    first_role = next((r["role"] for r in roles if r["moduleId"] == module_id), None)
+    mcu = next((m for m in modules if m.get("category") == "mcu"), None)
+    mcu_role = next((r["role"] for r in roles if mcu and r["moduleId"] == mcu["id"]), None)
+    new_role = f"m{len(roles) + 1}"
+    roles.append({"role": new_role, "moduleId": module_id})
+    if first_role is None:
+        return
+    pin_roles = {p.get("id"): p.get("role") for p in (mcu or {}).get("pins") or []}
+    used = {end["pin"] for w in wires for end in (w["from"], w["to"]) if end["role"] == mcu_role}
+    for wire in list(wires):
+        side = "from" if wire["from"]["role"] == first_role else "to" if wire["to"]["role"] == first_role else None
+        if side is None:
+            continue
+        other = "to" if side == "from" else "from"
+        clone = {"from": dict(wire["from"]), "to": dict(wire["to"])}
+        clone[side]["role"] = new_role
+        if wire[other]["role"] == mcu_role and pin_roles.get(wire[other]["pin"]) in _PER_INSTANCE_SIGNAL_ROLES:
+            pin = _alloc_gpio(mcu, used)
+            if pin is None:
+                recipe.setdefault("notes", []).append(
+                    f"No free microcontroller pin for the repeated {module_id}: its signal is unwired."
+                )
+                continue
+            clone[other]["pin"] = pin
+        wires.append(clone)
+
+
+def _auto_wire_unique_modules(modules: List[ModuleSpec]) -> Recipe:
     roles = [{"role": f"m{i + 1}", "moduleId": m["id"]} for i, m in enumerate(modules)]
     role_of = {m["id"]: f"m{i + 1}" for i, m in enumerate(modules)}
     wires: List[Dict[str, Any]] = []

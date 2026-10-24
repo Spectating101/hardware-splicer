@@ -117,14 +117,15 @@ def merge_goal_modules_with_inventory(
     return list(by_id.values())
 
 
-def module_ids_from_resolved(resolved_modules: Sequence[Mapping[str, Any]] | None) -> List[str]:
-    return list(
-        dict.fromkeys(
-            str(row.get("module_id")).strip()
-            for row in (resolved_modules or [])
-            if isinstance(row, Mapping) and str(row.get("module_id") or "").strip()
-        )
+def module_ids_from_resolved(
+    resolved_modules: Sequence[Mapping[str, Any]] | None, *, keep_repeats: bool = False
+) -> List[str]:
+    ids = (
+        str(row.get("module_id")).strip()
+        for row in (resolved_modules or [])
+        if isinstance(row, Mapping) and str(row.get("module_id") or "").strip()
     )
+    return list(ids) if keep_repeats else list(dict.fromkeys(ids))
 
 
 def resolved_rows_for_module_ids(
