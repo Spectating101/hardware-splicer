@@ -7,6 +7,7 @@ from typing import Any, Dict, Iterable, List, Mapping
 
 from .build_compiler import compile_catalog_build, resolve_build_id
 from .design_quality import build_design_quality_gate
+from .request_fidelity import assess_request_fidelity
 from .fabrication_inspection import inspect_fabrication_package
 from .functional_delivery import build_functional_delivery_score
 from .evidence_extractor import _merge_evidence, enrich_intake_with_extracted_evidence
@@ -164,6 +165,16 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
     }
 
 
+
+def _read_build_graph(path: str | Path | None) -> Dict[str, Any] | None:
+    if not path:
+        return None
+    try:
+        graph = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return graph if isinstance(graph, dict) else None
+
 def splice_and_build_from_intake(
     intake: Mapping[str, Any],
     *,
@@ -296,7 +307,10 @@ def splice_and_build_from_intake(
             splice_plan=graph_input if isinstance(graph_input, dict) else None,
             resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
         )
-    gate = build_design_quality_gate(compile_result.design_quality)
+    fidelity = assess_request_fidelity(
+        plan.get("normalized_parts") or [], _read_build_graph(compile_result.build_graph_file)
+    )
+    gate = build_design_quality_gate(compile_result.design_quality, request_fidelity=fidelity)
     gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
     gate_path.parent.mkdir(parents=True, exist_ok=True)
     gate_path.write_text(json.dumps(gate, indent=2), encoding="utf-8")

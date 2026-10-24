@@ -55,3 +55,21 @@ def test_a_matching_comparison_does_not_block() -> None:
 
     assert gate["build_ready"] is True
     assert gate["request_fidelity"]["status"] == "matches"
+
+
+def test_the_pan_tilt_demo_request_is_not_build_ready_because_the_second_servo_was_dropped(tmp_path) -> None:
+    import json
+    from pathlib import Path
+
+    from hardware_splicer import load_project_intake
+    from hardware_splicer.project_intake import splice_and_build_from_intake
+
+    root = Path(__file__).resolve().parents[1]
+    intake = load_project_intake(root / "examples" / "intakes" / "splice_physical_pan_tilt_loop.json")
+
+    splice_and_build_from_intake(intake, out_dir=tmp_path / "pan_tilt", export_gerber=False)
+
+    gate = json.loads((tmp_path / "pan_tilt" / "build_compilation" / "DESIGN_QUALITY_GATE.json").read_text())
+    assert gate["request_fidelity"]["status"] == "mismatch"
+    assert gate["build_ready"] is False
+    assert any("sg90" in blocker and "requested 2" in blocker for blocker in gate["blockers"])
