@@ -206,7 +206,7 @@ def solve_pin_to_bore_contact(
     ex = (coords[0] - centers[1][0] * .001) / radial_distance
     ey = (coords[1] - centers[1][1] * .001) / radial_distance
 
-    mu, lam = lame_parameters(youngs_pa, poisson)
+    lam, mu = lame_parameters(youngs_pa, poisson)
     bulk = asm(linear_elasticity(Lambda=lam, Mu=mu), basis)
     displacement = np.zeros(basis.N)
     old_active = None

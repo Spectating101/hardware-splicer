@@ -167,7 +167,7 @@ def solve_two_pin_contact(
         (coefficients, (row_ids, column_ids)),
         shape=(len(contact_data), basis.N),
     ).tocsr()
-    mu, lam = lame_parameters(youngs_pa, poisson)
+    lam, mu = lame_parameters(youngs_pa, poisson)
     physical_stiffness = asm(
         linear_elasticity(Lambda=lam, Mu=mu), basis,
     ).tocsc()

@@ -247,7 +247,7 @@ def run_quadratic_cad_screening(
     ):
         raise ValueError("quadratic face traction failed force conservation")
 
-    mu, lam = lame_parameters(
+    lam, mu = lame_parameters(
         case.youngs_modulus_pa, case.poisson_ratio
     )
     stiffness = asm(

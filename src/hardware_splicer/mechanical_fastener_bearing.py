@@ -217,7 +217,7 @@ def solve_bore_bearing_case(
             "bearing traction produces >5% lateral force; refine mesh"
         )
 
-    mu, lam = lame_parameters(youngs_pa, poisson)
+    lam, mu = lame_parameters(youngs_pa, poisson)
     stiffness = asm(
         linear_elasticity(Lambda=lam, Mu=mu), basis
     )
