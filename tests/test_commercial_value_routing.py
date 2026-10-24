@@ -15,6 +15,7 @@ from hardware_splicer.commercial_value_routing import (
 )
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
 from hardware_splicer.commercial_materials import evaluate_material_plan
+from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
 
 
 def money(amount, evidence_class="ESTIMATED", reference=None):
@@ -563,3 +564,73 @@ def test_all_three_source_branch_product_factory_runs_are_preserved():
     assert products["PF-001"]["price_hypotheses"]["target_board_msrp_usd"]["evidence_class"] == "HYPOTHESIS"
     assert products["PF-002"]["price_hypotheses"]["target_msrp_twd"]["evidence_class"] == "HYPOTHESIS"
     assert products["PF-003"]["price_hypotheses"]["target_msrp_twd"]["evidence_class"] == "HYPOTHESIS"
+
+
+def test_five_historical_taiwan_salvage_screens_preserve_full_downside():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((
+        root / "examples" / "commercial_tw_salvage_five_screen_snapshot.json"
+    ).read_text(encoding="utf-8"))
+    screens = normalize_historical_purchase_report(raw)
+    assert len(screens) == 5
+    assert {r["candidate_id"] for r in screens} == {
+        "tsc-ttp244plus-budget-fault", "brother-ql800-untested",
+        "hp-p1505n-failed", "acer-sa241y-broken-display",
+        "old-parts-only-laptop",
+    }
+    by_id = {r["candidate_id"]: r for r in screens}
+    assert by_id["tsc-ttp244plus-budget-fault"]["modeled_expected_net_twd"] == 339
+    assert by_id["brother-ql800-untested"]["modeled_expected_net_twd"] == 24.25
+    assert by_id["hp-p1505n-failed"]["modeled_expected_net_twd"] == -476
+    assert by_id["acer-sa241y-broken-display"]["modeled_expected_net_twd"] == -480
+    assert by_id["old-parts-only-laptop"]["modeled_expected_net_twd"] == -667
+    assert all(not p["purchase_authorized"] for p in screens)
+
+
+def test_six_taiwan_china_sourcing_theses_preserve_native_currency():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((
+        root / "examples" / "commercial_tw_cn_regional_scan_snapshot.json"
+    ).read_text(encoding="utf-8"))
+    routes = normalize_historical_regional_scan(raw)
+    assert len(routes) == 6
+    assert sum(r["currency"] == "TWD" for r in routes) == 3
+    assert sum(r["currency"] == "CNY" for r in routes) == 3
+    assert all(r["business_status"] == "UNPRICED_REQUIRES_MATCHED_BOM_AND_BUYER"
+               for r in routes)
+    assert all(not r["purchase_authorized"] for r in routes)
+
+
+def test_full_portfolio_replay_has_31_source_records_but_no_verified_sales():
+    root = Path(__file__).resolve().parents[1]
+    args = [
+        sys.executable, str(root / "scripts" / "converge_commercial_sources.py"),
+        "--donor-discovery",
+        str(root / "examples" / "commercial_tw_donor_discovery_snapshot_2026-10-19.json"),
+        "--purchase-report",
+        str(root / "examples" / "commercial_tw_salvage_five_screen_snapshot.json"),
+        "--regional-scan",
+        str(root / "examples" / "commercial_tw_cn_regional_scan_snapshot.json"),
+        "--pf-run", str(root / "examples" / "commercial_pf001_proofpod_snapshot.json"),
+        "--pf-run", str(root / "examples" / "commercial_pf002_benchhmi_snapshot.json"),
+        "--pf-run", str(root / "examples" / "commercial_pf003_fielddeck_snapshot.json"),
+        "--case", str(root / "examples" / "commercial_pf002_itemized_scenario_twd.json"),
+    ]
+    replay = subprocess.run(args, cwd=root, capture_output=True, text=True, timeout=45)
+    assert replay.returncode == 0, replay.stderr
+    doc = json.loads(replay.stdout)
+    cohort = doc["cohort_review"]
+    assert cohort["total_source_records"] == 31
+    assert cohort["distinct_named_concepts_after_known_lineage_aliases"] == 30
+    assert cohort["by_source_class"] == {
+        "historical_regional_product_route": 6,
+        "product_factory": 3,
+        "salvage_economics": 5,
+        "used_equipment_marketplace": 17,
+    }
+    assert cohort["historically_priced_salvage_screens"] == 5
+    assert cohort["positive_modeled_salvage_screens"] == 2
+    assert cohort["nonpositive_modeled_salvage_screens"] == 3
+    assert cohort["purchase_authorized"] is False
+    assert sum(1 for r in cohort["records"] if r["modeled_net"] is not None) == 5
+    assert all(v == 0 for v in cohort["explicitly_unsupported_proofs"].values())
