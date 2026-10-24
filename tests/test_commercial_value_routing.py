@@ -738,8 +738,9 @@ def test_market_comps_fail_closed_on_sold_badge_wrong_variant_and_fx():
         exact_model="Target A", latest_day="2026-10-25",
     )
     assert result["sold_median"] is None
-    assert len(result["excluded_evidence"]) == 4
-    assert len(result["ask_observations"]) == 1
+    assert len(result["excluded_evidence"]) == 5
+    assert len(result["ask_observations"]) == 0
+    assert any(row["reason"] == "unverified_sold_marker" for row in result["excluded_evidence"])
     assert result["purchase_authorized"] is False
 
 
@@ -792,3 +793,21 @@ def test_backlog_covers_all_concepts_and_diversifies_first_evidence_wave(tmp_pat
                if row["concept_id"] == "tsc-ttp244plus-budget-fault")
     assert tsc["market_sold_median"] is None
     assert tsc["market_sold_evidence_status"] == "NO_VERIFIED_SOLD_COMPS"
+
+
+def test_paid_acquisition_is_not_an_observed_resale_price():
+    item = {
+        "evidence_id": "purchase-1", "event_kind": "verified_paid_purchase",
+        "unit_price": 600, "currency": "TWD", "market": "Taiwan",
+        "exact_model": "Device Q", "variant_verified": True,
+        "condition_class": "working_tested", "observed_date": "2026-10-20",
+        "source_ref": "my-supplier-invoice-1",
+        "settlement_verified": True, "settlement_reference": "my-bank-ref-1",
+    }
+    data = {"schema_version": "hardware_splicer.market_evidence.v1", "records": [item]}
+    out = evaluate_market_evidence(data, candidate_id="Q", market="Taiwan",
+                                   currency="TWD", exact_model="Device Q", latest_day="2026-10-25")
+    assert len(out["verified_acquisition_records"]) == 1
+    assert out["sold_median"] is None
+    assert out["transaction_pricing_verified_in_source"] is False
+    assert out["purchase_authorized"] is False
