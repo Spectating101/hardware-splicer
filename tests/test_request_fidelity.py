@@ -81,3 +81,10 @@ def test_the_result_states_what_it_does_not_check() -> None:
     assert result["schema_version"] == "hardware_splicer.request_fidelity.v1"
     for limit in ("wiring", "firmware", "function"):
         assert limit in result["claim_boundary"]
+
+
+def test_with_no_compiled_graph_no_part_is_reported_missing() -> None:
+    result = assess_request_fidelity(PAN_TILT_REQUEST, None)
+
+    assert result["status"] == "not_assessable"
+    assert result["missing_parts"] == []

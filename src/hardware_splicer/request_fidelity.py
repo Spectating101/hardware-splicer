@@ -45,7 +45,7 @@ def assess_request_fidelity(
             "in_design": in_design[module_id],
         }
         for module_id, count in requested.items()
-        if in_design[module_id] < count
+        if build_graph is not None and in_design[module_id] < count
     ]
     unrequested = [
         {"module_id": module_id, "count": count}
