@@ -62,6 +62,55 @@ def build_investigation_queue(dossier: Mapping[str, Any]) -> dict[str, Any]:
             "purchase_authorized": False,
             "costly_work_authorized": False,
         })
+    for raw in dossier.get("historical_salvage_economics") or []:
+        cid = str(raw.get("candidate_id") or "")
+        if not cid:
+            raise ValueError("historical salvage screen without ID")
+        net = raw.get("modeled_expected_net_twd")
+        bid = raw.get("modeled_target_profit_max_bid_twd")
+        tasks.append({
+            "candidate_id": cid,
+            "origin": "historical_salvage_economics",
+            "currency": "TWD",
+            "source_ref": raw.get("source_ref"),
+            "modeled_expected_net_twd": net,
+            "modeled_target_profit_max_bid_twd": bid,
+            "positive_downside_scenarios": sum(
+                1 for scenario in raw.get("nine_point_sensitivity") or []
+                if scenario.get("expected_net_twd", 0) > 0
+            ),
+            "status": "HOLD_FOR_MATCHED_SALES_AND_FAULT_EVIDENCE"
+                      if net is not None and net > 0 else "REJECT_CURRENT_ECONOMIC_MODEL",
+            "hard_stop": raw.get("failure_mode_gate"),
+            "next_evidence": [
+                "Prove same exact model: comparable sold transactions, not retail asks",
+                "Verify reported fault and identify safety or costly failed component",
+                "Re-estimate repair/parts yield and conditional hours from measured samples",
+                "Do not treat modeled maximum bid as authority to buy",
+            ],
+            "purchase_authorized": False,
+            "costly_work_authorized": False,
+        })
+    for raw in dossier.get("regional_product_concepts") or []:
+        cid = str(raw.get("candidate_id") or "")
+        if not cid:
+            raise ValueError("regional product thesis without ID")
+        tasks.append({
+            "candidate_id": cid,
+            "origin": "regional_product_concept",
+            "currency": raw.get("currency"),
+            "market": raw.get("market"),
+            "source_ref": raw.get("source_ref"),
+            "status": "HOLD_FOR_LOCAL_SUPPLIER_AND_BUYER_PRICING",
+            "next_evidence": [
+                "Obtain exact local donor model availability and compatible quantities",
+                "Prepare materials/BOM and engineering effort for full landed cost",
+                "Establish real local buyer budget or measured productive internal use",
+                "Do not infer cross-border margins from target price and COGS spreads",
+            ],
+            "purchase_authorized": False,
+            "costly_work_authorized": False,
+        })
     for pf in dossier.get("product_factory_experiments") or []:
         stages = pf.get("stage_states") or {}
         open_stages = [
