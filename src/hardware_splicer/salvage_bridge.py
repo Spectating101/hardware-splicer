@@ -481,7 +481,7 @@ def build_intake_salvage_package(
         ),
         "strategy_mode": strategy_mode,
         "graph_mode": graph_mode,
-        "compose_module_ids": module_ids_from_resolved(merged_modules) if use_scratch else [],
+        "compose_module_ids": module_ids_from_resolved(merged_modules, keep_repeats=True) if use_scratch else [],
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
         "build_selection": build_selection,
@@ -555,7 +555,7 @@ def resolve_salvage_compose_inputs(
     ]
     compose_ids = list(module_ids or []) or list(pkg.get("compose_module_ids") or [])
     if not compose_ids and graph_mode == "scratch":
-        compose_ids = module_ids_from_resolved(resolved)
+        compose_ids = module_ids_from_resolved(resolved, keep_repeats=True)
 
     compose: Dict[str, Any] = {
         "phrase": effective_goal,

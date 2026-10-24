@@ -94,37 +94,39 @@ def merge_goal_modules_with_inventory(
 
     from .module_resolver import donor_has_bound_driver
 
-    by_id: Dict[str, Dict[str, Any]] = {}
-    for row in inventory_rows:
-        module_id = str(row.get("module_id") or "").strip()
-        if module_id:
-            by_id[module_id] = dict(row)
-    if constrained and by_id:
-        return list(by_id.values())
+    # Every identified inventory row is kept: two of the same part are two instances.
+    merged = [dict(row) for row in inventory_rows if str(row.get("module_id") or "").strip()]
+    if constrained and merged:
+        return merged
+    present = {str(row["module_id"]).strip() for row in merged}
     donor_drv = donor_has_bound_driver(inventory_rows)
     pick = pick_modules_for_goal(goal)
     for index, module_id in enumerate(pick.module_ids):
-        if module_id in by_id:
+        if module_id in present:
             continue
         # Do not catalog-inject a second driver when donor FS already bound one.
         if donor_drv and module_id in _GOAL_PICKER_DRIVER_IDS:
             continue
-        by_id[module_id] = {
-            "module_id": module_id,
-            "role": f"g{index + 1}",
-            "source": "goal_picker",
-        }
-    return list(by_id.values())
-
-
-def module_ids_from_resolved(resolved_modules: Sequence[Mapping[str, Any]] | None) -> List[str]:
-    return list(
-        dict.fromkeys(
-            str(row.get("module_id")).strip()
-            for row in (resolved_modules or [])
-            if isinstance(row, Mapping) and str(row.get("module_id") or "").strip()
+        present.add(module_id)
+        merged.append(
+            {
+                "module_id": module_id,
+                "role": f"g{index + 1}",
+                "source": "goal_picker",
+            }
         )
+    return merged
+
+
+def module_ids_from_resolved(
+    resolved_modules: Sequence[Mapping[str, Any]] | None, *, keep_repeats: bool = False
+) -> List[str]:
+    ids = (
+        str(row.get("module_id")).strip()
+        for row in (resolved_modules or [])
+        if isinstance(row, Mapping) and str(row.get("module_id") or "").strip()
     )
+    return list(ids) if keep_repeats else list(dict.fromkeys(ids))
 
 
 def resolved_rows_for_module_ids(
@@ -192,7 +194,7 @@ def build_scratch_splice_plan(
         or constraints_map.get("compose_from_inventory") is True
     )
     merged = merge_goal_modules_with_inventory(goal, resolved_modules, constrained=constrained)
-    ids = module_ids_from_resolved(merged)
+    ids = module_ids_from_resolved(merged, keep_repeats=True)
     mode = resolve_material_mode(constraints=constraints, salvage_mode=salvage_mode)
     return {
         "target": {"recommended_build_id": build_id or "generic_low_voltage_build"},
@@ -223,7 +225,7 @@ def _deterministic_fixup(
     *,
     material_mode: MaterialMode = "scratch",
 ) -> List[str]:
-    ids = list(dict.fromkeys(module_ids))
+    ids = list(module_ids)
     messages = " ".join(str(m) for m in quality.get("safety_error_messages") or []).lower()
 
     if attempt == 0:
@@ -238,7 +240,7 @@ def _deterministic_fixup(
     if attempt == 3 and ("5v" in messages or "level" in messages):
         if "esp32-devkit" in ids and "usb-power-5v" not in ids:
             ids.insert(0, "usb-power-5v")
-    return list(dict.fromkeys(ids))
+    return ids
 
 
 def _write_scratch_failure_casefile(
@@ -298,14 +300,14 @@ def compile_scratch_build(
     constraints_map = dict(constraints or {})
     material_mode: MaterialMode = resolve_material_mode(constraints=constraints_map, salvage_mode=salvage_mode)
     if module_ids:
-        ids = list(dict.fromkeys(str(mid) for mid in module_ids if str(mid).strip()))
+        ids = [str(mid) for mid in module_ids if str(mid).strip()]
     elif goal:
         constrained = (
             str(constraints_map.get("strategy_mode") or "") == "constrained"
             or constraints_map.get("compose_from_inventory") is True
         )
         merged = merge_goal_modules_with_inventory(goal, resolved_modules, constrained=constrained)
-        ids = module_ids_from_resolved(merged)
+        ids = module_ids_from_resolved(merged, keep_repeats=True)
         resolved_modules = merged
     else:
         return ScratchCompileResult(ok=False, build_id="generic_low_voltage_build", module_ids=[], error="goal or module_ids required")

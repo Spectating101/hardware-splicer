@@ -89,13 +89,7 @@ def splice_plan_to_build_graph(
     if plan.get("compose_from_inventory") and plan.get("resolved_modules"):
         from .auto_wire import compose_build_graph_from_module_ids
 
-        ids = list(
-            dict.fromkeys(
-                str(r.get("module_id"))
-                for r in plan.get("resolved_modules") or []
-                if r.get("module_id")
-            )
-        )
+        ids = [str(r.get("module_id")) for r in plan.get("resolved_modules") or [] if r.get("module_id")]
         if len(ids) >= 2:
             composed = compose_build_graph_from_module_ids(ids)
             notes.append("Inventory-composed graph via Python auto-wire.")
