@@ -26,6 +26,8 @@ def dossier() -> dict:
         "--pf-run", str(EXAMPLES / "commercial_pf002_benchhmi_snapshot.json"),
         "--pf-run", str(EXAMPLES / "commercial_pf003_fielddeck_snapshot.json"),
         "--case", str(EXAMPLES / "commercial_pf002_itemized_scenario_twd.json"),
+        "--market-evidence", str(EXAMPLES / "commercial_market_evidence_tsc_historical.json"),
+        "--as-of", "2026-10-25",
     ]
     done = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=60)
     if done.returncode:
@@ -130,6 +132,30 @@ def markdown(report: dict) -> str:
             lines.append(
                 f"- Missing: {', '.join((route.get('blockers') or [])[:10])}."
             )
+    backlog = report["validation_backlog"]
+    lines += [
+        "",
+        "## Diversified validation wave (research, not inventory acquisition)",
+        "",
+        f"After source-lineage consolidation: **{backlog['record_count']} named concepts**, "
+        f"**{backlog['unpriced_concepts']} without an economic model**. "
+        "All remain unverified business hypotheses.",
+        "",
+        "| Concept | Native currency | Review priority | Next evidence |",
+        "| --- | --- | --- | --- |",
+    ]
+    indexed = {row["concept_id"]: row for row in backlog["entries"]}
+    for cid in backlog["first_evidence_wave"]:
+        row = indexed[cid]
+        lines.append(
+            f"| {cid} | {', '.join(row['native_currencies']) or 'unknown'} | "
+            f"{row['priority_tier']} | {row['next_verification']} |"
+        )
+    lines += [
+        "",
+        "Price observations with unverified variants, marketplace sold markers "
+        "without settlement evidence, or unrelated models are excluded from verified comparisons.",
+    ]
     lines += [
         "",
         "## Near-term execution order",
@@ -170,6 +196,8 @@ def main() -> int:
         "priced_salvage_models": report["cohort_review"]["historically_priced_salvage_screens"],
         "modeled_positive": report["cohort_review"]["positive_modeled_salvage_screens"],
         "modeled_at_target": report["cohort_review"]["historical_models_meeting_original_profit_target"],
+        "deduplicated_validation_cases": report["validation_backlog"]["record_count"],
+        "first_evidence_wave_count": len(report["validation_backlog"]["first_evidence_wave"]),
         "purchase_authorized": False,
         "output_dir": str(outdir),
     }, sort_keys=True))
