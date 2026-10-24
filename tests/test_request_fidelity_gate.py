@@ -73,3 +73,26 @@ def test_the_pan_tilt_demo_request_is_not_build_ready_because_the_second_servo_w
     assert gate["request_fidelity"]["status"] == "mismatch"
     assert gate["build_ready"] is False
     assert any("sg90" in blocker and "requested 2" in blocker for blocker in gate["blockers"])
+
+
+def test_the_pan_tilt_demo_builds_both_servos_and_matches_the_request(tmp_path, monkeypatch) -> None:
+    import json
+
+    # The shared test setup forces the offline catalog route, which builds one fixed servo
+    # whatever the request says. The demo and the product use the composing route.
+    for name in ("HARDWARE_SPLICER_OFFLINE_SALVAGE", "HARDWARE_SPLICER_OFFLINE_COMPOSE"):
+        monkeypatch.setenv(name, "0")
+    from pathlib import Path
+
+    from hardware_splicer import load_project_intake
+    from hardware_splicer.project_intake import splice_and_build_from_intake
+
+    root = Path(__file__).resolve().parents[1]
+    intake = load_project_intake(root / "examples" / "intakes" / "splice_physical_pan_tilt_loop.json")
+
+    result = splice_and_build_from_intake(intake, out_dir=tmp_path / "pan_tilt_fixed", export_gerber=False)
+
+    graph = json.loads(Path(result["artifacts"]["build_graph"]).read_text())
+    assert [n["moduleId"] for n in graph["nodes"]].count("sg90") == 2
+    gate = json.loads((tmp_path / "pan_tilt_fixed" / "build_compilation" / "DESIGN_QUALITY_GATE.json").read_text())
+    assert gate["request_fidelity"]["status"] == "matches"
