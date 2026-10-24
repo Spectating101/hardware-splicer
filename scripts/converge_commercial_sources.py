@@ -22,6 +22,11 @@ from hardware_splicer.commercial_value_routing import (
     normalize_salvage_purchase_screen,
 )
 from hardware_splicer.commercial_investigation import build_investigation_queue
+from hardware_splicer.commercial_source_catalog import (
+    normalize_historical_purchase_report,
+    normalize_historical_regional_scan,
+)
+from hardware_splicer.commercial_cohort import build_commercial_cohort
 
 
 def load(path: Path) -> dict:
@@ -38,10 +43,13 @@ def main() -> int:
     parser.add_argument("--salvage-report", action="append", type=Path, default=[])
     parser.add_argument("--donor-discovery", action="append", type=Path, default=[])
     parser.add_argument("--purchase-screen", action="append", type=Path, default=[])
+    parser.add_argument("--purchase-report", action="append", type=Path, default=[])
+    parser.add_argument("--regional-scan", action="append", type=Path, default=[])
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not (args.case or args.pf_run or args.salvage_report
-            or args.donor_discovery or args.purchase_screen):
+            or args.donor_discovery or args.purchase_screen
+            or args.purchase_report or args.regional_scan):
         parser.error("at least one supported source required")
 
     try:
@@ -70,6 +78,16 @@ def main() -> int:
             normalize_salvage_purchase_screen(load(path), source_ref=str(path))
             for path in args.purchase_screen
         ]
+        purchase_reports = [
+            result
+            for path in args.purchase_report
+            for result in normalize_historical_purchase_report(load(path))
+        ]
+        regional = [
+            result
+            for path in args.regional_scan
+            for result in normalize_historical_regional_scan(load(path))
+        ]
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
@@ -80,6 +98,8 @@ def main() -> int:
         "salvage_discovery_reports": salvage,
         "donor_discovery_catalogs": donor,
         "salvage_purchase_screens": purchase,
+        "historical_salvage_economics": purchase_reports,
+        "regional_product_concepts": regional,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
@@ -90,6 +110,7 @@ def main() -> int:
         ],
     }
     output["investigation_queue"] = build_investigation_queue(output)
+    output["cohort_review"] = build_commercial_cohort(output)
     text = json.dumps(output, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
