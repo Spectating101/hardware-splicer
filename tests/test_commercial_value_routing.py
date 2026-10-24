@@ -632,5 +632,32 @@ def test_full_portfolio_replay_has_31_source_records_but_no_verified_sales():
     assert cohort["positive_modeled_salvage_screens"] == 2
     assert cohort["nonpositive_modeled_salvage_screens"] == 3
     assert cohort["purchase_authorized"] is False
+    assert doc["investigation_queue"]["task_count"] == 32
+    assert sum(t["origin"] == "historical_salvage_economics"
+               for t in doc["investigation_queue"]["tasks"]) == 5
+    assert sum(t["origin"] == "regional_product_concept"
+               for t in doc["investigation_queue"]["tasks"]) == 6
     assert sum(1 for r in cohort["records"] if r["modeled_net"] is not None) == 5
     assert all(v == 0 for v in cohort["explicitly_unsupported_proofs"].values())
+
+
+def test_portfolio_report_runner_produces_two_real_artifacts(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    execution = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert execution.returncode == 0, execution.stderr
+    result = json.loads(execution.stdout)
+    assert result["source_records"] == 31
+    assert result["unique_named_concepts"] == 30
+    assert result["priced_salvage_models"] == 5
+    assert result["purchase_authorized"] is False
+    markdown = (tmp_path / "commercial_cohort_replay.md").read_text(encoding="utf-8")
+    dossier = json.loads((tmp_path / "commercial_cohort_replay.json").read_text(encoding="utf-8"))
+    assert "tsc-ttp244plus-budget-fault" in markdown
+    assert "CN-PF-EDGE-001" in markdown
+    assert "ls2208" in markdown
+    assert "not a market forecast" in markdown
+    assert dossier["investigation_queue"]["task_count"] == 32
+    assert dossier["cohort_review"]["positive_modeled_salvage_screens"] == 2
