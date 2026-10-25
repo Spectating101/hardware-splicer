@@ -105,3 +105,9 @@ def test_the_intake_build_reports_the_gap_when_the_firmware_ignores_the_servos(t
 
     assert result["firmware_coverage"]["status"] == "gaps"
     assert sorted(row["pin"] for row in result["firmware_coverage"]["uncovered_pins"]) == ["GPIO15", "GPIO16"]
+
+
+def test_the_project_package_carries_the_firmware_coverage_the_interface_reads(tmp_path, monkeypatch) -> None:
+    result = _build_pan_tilt(tmp_path, monkeypatch)
+
+    assert result["project_package"]["firmware_coverage"] == result["firmware_coverage"]

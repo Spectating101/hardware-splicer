@@ -386,6 +386,8 @@ def build_project_package(
         "firmware_scaffold": payload.get("firmware_scaffold")
         or _read_json(root / "firmware" / "FIRMWARE_SCAFFOLD.json")
         or (splice_plan.get("firmware_scaffold") if isinstance(splice_plan, dict) else None),
+        "firmware_coverage": payload.get("firmware_coverage")
+        or _read_json(root / "firmware" / "FIRMWARE_COVERAGE.json"),
         "mechanism_pack": payload.get("mechanism_pack")
         or _read_json(root / "MECHANISM_PACK.json")
         or (splice_plan.get("mechanism_pack") if isinstance(splice_plan, dict) else None),
