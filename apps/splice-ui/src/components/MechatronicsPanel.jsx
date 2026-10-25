@@ -14,7 +14,7 @@ function FirmwareCoverageNote({ coverage }) {
   const uncovered = Array.isArray(coverage.uncovered_pins) ? coverage.uncovered_pins : [];
   return (
     <div
-      className="small"
+      className={coverage.status === "gaps" ? "small honesty-card honesty-card--fail" : "small"}
       data-testid="firmware-coverage"
       data-status={coverage.status}
       role={coverage.status === "gaps" ? "alert" : undefined}
