@@ -106,6 +106,29 @@ export function deriveProjectTruth(session = {}) {
   const electricalError = !requestMismatch && electricalErrors.length > 0;
   if (electricalError) designState = "electrical_error";
   const electricalDetail = electricalError ? electricalErrors.map((issue) => issue.message).join(" ") : "";
+  // Each problem as data, so a panel can show it in plain view and say who can fix it.
+  const problems = [
+    ...(requestMismatch
+      ? (fidelity.missing_parts || []).map((row) => ({
+          message: `Design leaves out requested part ${row.module_id}: requested ${row.requested}, design has ${row.in_design} (${(row.names || []).join(", ")}).${
+            row.unknown_module_id
+              ? ` ${row.module_id} is not a part id HS knows.${row.did_you_mean?.length ? ` Did you mean ${row.did_you_mean.join(" or ")}?` : " Look the part up in the module catalog."}`
+              : ""
+          }`,
+          repairs: [],
+        }))
+      : []),
+    ...(electricalError
+      ? electricalErrors.map((issue) => ({
+          message: issue.message,
+          repairs: (issue.repairs || []).map((repair) => ({
+            summary: repair.summary,
+            requiresPerson: Boolean(repair.requires_person),
+            steps: repair.physical_steps || [],
+          })),
+        }))
+      : []),
+  ];
   const requestDetail = requestMismatch
     ? (fidelity.missing_parts || [])
         .map(
@@ -232,6 +255,7 @@ export function deriveProjectTruth(session = {}) {
       errors,
       warnings,
       detail: requestDetail || electricalDetail,
+      problems,
       label: designLabel(designState, errors),
     },
     copper: {

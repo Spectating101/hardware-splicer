@@ -37,6 +37,32 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
             Bench: {truth.bench.label}
           </span>
         </div>
+        {truth.design.problems?.length > 0 && (
+          <ul className="clean-list small" data-testid="design-problems">
+            {truth.design.problems.map((problem) => (
+              <li key={problem.message}>
+                <p>{problem.message}</p>
+                {problem.repairs.filter((r) => !r.requiresPerson).map((r) => (
+                  <p key={r.summary} className="muted" data-testid="repair-hs">
+                    HS can fix this: {r.summary}
+                  </p>
+                ))}
+                {problem.repairs.filter((r) => r.requiresPerson).map((r) => (
+                  <div key={r.summary} className="muted" data-testid="repair-person">
+                    <p>Needs you: {r.summary}</p>
+                    {r.steps.length > 0 && (
+                      <ul>
+                        {r.steps.map((step) => (
+                          <li key={step}>{step}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </li>
+            ))}
+          </ul>
+        )}
         {evidence.applicable && evidence.state === "blocked" && (
           <p className="small muted" data-testid="readiness-evidence-note">
             {evidence.detail} Open Verify to inspect the exact donor-interface blockers before using generated firmware.
@@ -56,7 +82,7 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
 
 function toneForDesign(state) {
   if (state === "drc_clean") return "ok";
-  if (state === "drc_errors") return "fail";
+  if (state === "drc_errors" || state === "request_mismatch" || state === "electrical_error") return "fail";
   return "neutral";
 }
 
