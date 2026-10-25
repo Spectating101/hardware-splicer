@@ -23,6 +23,7 @@ def build_design_quality_gate(
     electrical_pass = bool(body.get("electrical_safety_pass"))
     gerber_ready = bool(body.get("gerber_ready"))
     electrical_warnings = int(body.get("electrical_warnings") or 0)
+    electrical_issues = [i for i in body.get("electrical_issues") or [] if isinstance(i, Mapping)]
     bom_ready = bool(body.get("bom_ready"))
 
     blockers = []
@@ -30,6 +31,10 @@ def build_design_quality_gate(
         blockers.append("Catalog build graph did not compile.")
     if not electrical_pass:
         blockers.append("Electrical safety checks failed on the compiled build graph.")
+        # Say what is wrong, in the finding's own words, so the person or agent reading this knows.
+        for issue in electrical_issues:
+            if issue.get("level") == "error" and issue.get("message"):
+                blockers.append(str(issue["message"]))
     if drc_pass and electrical_pass and electrical_warnings > 0:
         blockers.append(f"Electrical safety has {electrical_warnings} warning(s) — resolve before fabrication.")
     if not drc_pass:
@@ -81,6 +86,8 @@ def build_design_quality_gate(
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
         "blockers": blockers,
+        # Findings that come with repair options, for an agent to choose from and HS to re-verify.
+        "repairable_findings": [i for i in electrical_issues if i.get("repairs")],
         "summary": body,
     }
     if request_fidelity is not None:
