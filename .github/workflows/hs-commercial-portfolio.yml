@@ -40,5 +40,6 @@ jobs:
           path: |
             artifacts/commercial/commercial_cohort_replay.json
             artifacts/commercial/commercial_cohort_replay.md
+            artifacts/commercial/commercial_validation_packets.json
           if-no-files-found: error
           retention-days: 30
