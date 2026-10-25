@@ -523,6 +523,9 @@ def splice_and_build_from_intake(
         except Exception:
             pass
 
+    # A build that never reached firmware still says so, so "not checked" is never mistaken for "absent".
+    result_body.setdefault("firmware_coverage", assess_firmware_coverage(None, None))
+
     from .project_package import write_project_package_artifacts
 
     package_write = write_project_package_artifacts(out_path, result=result_body, source="splice_build")

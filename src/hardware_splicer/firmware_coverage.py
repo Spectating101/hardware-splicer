@@ -20,7 +20,23 @@ CLAIM_BOUNDARY = (
 )
 # Pins the firmware must mention by number. Bus and power roles are excluded on purpose.
 _SIGNAL_ROLES = frozenset({"digital_io", "digital_in", "digital_out", "pwm", "analog_in"})
-_COMMENTS = re.compile(r"/\*.*?\*/|//[^\n]*|#[^\n]*", re.DOTALL)
+# `#` starts a comment in MicroPython but also begins #define/#include in a sketch, so keep those.
+_COMMENTS = re.compile(
+    r"/\*.*?\*/|//[^\n]*|#(?!\s*(?:define|include|if|ifdef|ifndef|else|elif|endif|pragma|undef)\b)[^\n]*",
+    re.DOTALL,
+)
+# Functions that take a pin as their first argument.
+_PIN_FUNCTIONS = (
+    "pinMode", "digitalWrite", "digitalRead", "analogRead", "analogWrite", "ledcAttachPin", "ledcAttach",
+    "attach", "tone", "noTone", "pulseIn", "touchRead", "dacWrite", "analogReadMilliVolts", "Pin", "ADC", "PWM",
+)
+_CONSTANT = re.compile(
+    r"(?:#define\s+(?P<d>[A-Za-z_]\w*)\s+(?P<dv>\d+)\b)"
+    r"|(?:\b(?:const|constexpr|static|int|uint8_t|byte|unsigned)\b[\w\s]*?\b(?P<c>[A-Za-z_]\w*)\s*=\s*(?P<cv>\d+)\s*[;,])"
+)
+# `DHT dht(DHT_PIN, DHT_TYPE);` hands the pin to a library object instead of a pin function.
+_CONSTRUCTOR = re.compile(r"\b[A-Z]\w*\s+\w+\s*\(([^()]*)\)\s*;")
+_PIN_CALL = re.compile(r"\b(?:%s)\s*\(\s*(?:Pin\s*\(\s*)?([A-Za-z_]\w*|\d+)" % "|".join(_PIN_FUNCTIONS))
 
 
 def assess_firmware_coverage(
@@ -79,8 +95,21 @@ def _carries_signal(mcu_role: str, partner_role: str) -> bool:
     return False
 
 
+def _pins_used(code: str) -> tuple[set[str], set[str]]:
+    """Return (numbers and identifiers passed to a pin function, GPIO-style tokens in the code)."""
+    values = {m.group("d") or m.group("c"): m.group("dv") or m.group("cv") for m in _CONSTANT.finditer(code)}
+    used: set[str] = set()
+    for match in _PIN_CALL.finditer(code):
+        arg = match.group(1)
+        used.add(values.get(arg, arg) if not arg.isdigit() else arg)
+    for match in _CONSTRUCTOR.finditer(code):
+        for arg in (a.strip() for a in match.group(1).split(",")):
+            if arg in values:
+                used.add(values[arg])
+    return used, set(re.findall(r"(?<![\w.])((?:GPIO|GP|IO)\d+)(?![\w.])", code))
+
+
 def _names_pin(code: str, pin_id: str) -> bool:
-    if re.search(rf"(?<![\w.]){re.escape(pin_id)}(?![\w.])", code):
-        return True
+    used, tokens = _pins_used(code)
     digits = "".join(ch for ch in pin_id if ch.isdigit())
-    return bool(digits) and re.search(rf"(?<![\w.]){digits}(?![\w.])", code) is not None
+    return pin_id in tokens or pin_id in used or (bool(digits) and digits in used)
