@@ -164,7 +164,7 @@ def markdown(report: dict) -> str:
             f"expected net under the stated conditional assumptions; **{item['status']}**. "
             f"[Parts listing]({item['source_url']})."
         )
-        backlog = report["validation_backlog"]
+    backlog = report["validation_backlog"]
     lines += [
         "",
         "## Diversified validation wave (research, not inventory acquisition)",
