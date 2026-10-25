@@ -55,3 +55,31 @@ def apply_graph_patch(graph: Mapping[str, Any], patch: Mapping[str, Any]) -> Dic
 
     out["wires"] = wires
     return out
+
+
+def auto_repair_i2c(graph: Mapping[str, Any], *, max_steps: int = 4) -> tuple[Dict[str, Any], list[str]]:
+    """Apply the I2C repairs that need no person, one at a time, until none is left.
+
+    Used when HS composes a design itself, with no agent to choose. A repair that needs a person
+    (an address strap) is never applied here, and a clash with no automatic repair is left as the
+    error it is. Returns the design and a plain-language note for each repair made.
+    """
+    from .i2c_bus_analysis import i2c_findings
+
+    current: Dict[str, Any] = deepcopy(dict(graph))
+    notes: list[str] = []
+    for _ in range(max_steps):
+        chosen = None
+        for finding in i2c_findings(current):
+            if finding.get("code") != "i2c_address_clash":
+                continue
+            repair = next((r for r in finding.get("repairs") or [] if not r.get("requires_person")), None)
+            if repair:
+                chosen = (finding, repair)
+                break
+        if chosen is None:
+            break
+        finding, repair = chosen
+        current = apply_graph_patch(current, repair["graph_patch"])
+        notes.append(f"{repair['summary']} Both would otherwise answer at {finding['address']}. {repair['firmware_effect']}")
+    return current, notes

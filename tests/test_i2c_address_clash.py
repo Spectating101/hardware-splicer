@@ -10,7 +10,7 @@ from hardware_splicer.pcb.safety_rules import analyze_build
 
 
 def _graph(*module_ids: str) -> dict:
-    return compose_build_graph_from_module_ids(list(module_ids))["graph"]
+    return compose_build_graph_from_module_ids(list(module_ids), auto_repair=False)["graph"]
 
 
 def _findings(graph: dict, code: str) -> list[dict]:

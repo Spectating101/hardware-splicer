@@ -660,7 +660,7 @@ def pick_modules_for_requirements(req_any: List[List[str]]) -> List[ModuleSpec]:
     return chosen
 
 
-def compose_build_graph_from_module_ids(module_ids: List[str]) -> ComposeResult:
+def compose_build_graph_from_module_ids(module_ids: List[str], *, auto_repair: bool = True) -> ComposeResult:
     modules = [find_module(mid) for mid in module_ids]
     modules = [m for m in modules if m]
     if len(modules) < 2:
@@ -671,10 +671,18 @@ def compose_build_graph_from_module_ids(module_ids: List[str]) -> ComposeResult:
             "warnings": ["Need at least two known module ids to compose a graph."],
         }
     recipe = auto_wire_picked_modules(modules)
+    graph = _recipe_to_build_graph(recipe)
+    notes = list(recipe.get("notes") or [])
+    if auto_repair:
+        # HS composing on its own does not hand out a design it can already see is broken.
+        from .graph_patch import auto_repair_i2c
+
+        graph, repair_notes = auto_repair_i2c(graph)
+        notes.extend(repair_notes)
     return {
-        "graph": _recipe_to_build_graph(recipe),
+        "graph": graph,
         "build_id": "generic_low_voltage_build",
-        "notes": list(recipe.get("notes") or []),
+        "notes": notes,
         "warnings": [],
     }
 

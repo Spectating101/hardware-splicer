@@ -11,7 +11,7 @@ TWO_SENSORS = ["esp32-devkit", "bme280", "bme280", "usb-power-5v"]
 
 
 def _quality(tmp_path) -> dict:
-    graph = compose_build_graph_from_module_ids(TWO_SENSORS)["graph"]
+    graph = compose_build_graph_from_module_ids(TWO_SENSORS, auto_repair=False)["graph"]
     result = compile_canvas_build(out_dir=str(tmp_path / "b"), nodes=graph["nodes"], wires=graph["wires"], export_gerber=False)
     return result.compile_result.design_quality
 
