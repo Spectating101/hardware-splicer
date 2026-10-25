@@ -90,3 +90,34 @@ def test_the_canvas_path_returns_a_compact_verdict_the_agent_can_act_on(client) 
     kinds = {r["kind"] for f in verdict["repairable_findings"] for r in f["repairs"]}
     assert kinds == {"second_i2c_bus", "strap_alternate_address"}
     assert len(json.dumps(verdict)) < 7000
+
+
+GENERIC = "Electrical safety checks failed on the compiled build graph."
+
+
+def test_the_verdict_drops_the_generic_failure_line_when_specific_findings_explain_it(client) -> None:
+    verdict = client.post(
+        "/v1/splice-and-build", json={"intake": _intake(THREE_SENSORS), "export_gerber": False, "compact": True}
+    ).json()
+
+    assert GENERIC not in verdict["blockers"]
+    assert any("cannot both work" in b for b in verdict["blockers"])
+
+
+def test_the_verdict_keeps_the_generic_line_when_nothing_more_specific_is_known() -> None:
+    from hardware_splicer.build_verdict import agent_verdict
+
+    verdict = agent_verdict({"ok": False, "design_quality_gate": {"blockers": [GENERIC], "summary": {"electrical_issues": []}}})
+
+    assert verdict["blockers"] == [GENERIC]
+
+
+def test_the_full_gate_still_carries_the_generic_line_for_the_records_that_read_it() -> None:
+    from hardware_splicer.design_quality import build_design_quality_gate
+
+    gate = build_design_quality_gate(
+        {"build_graph_compiled": True, "electrical_safety_pass": False, "drc_pass": True,
+         "electrical_issues": [{"level": "error", "message": "two devices clash", "code": "i2c_address_clash"}]}
+    )
+
+    assert GENERIC in gate["blockers"] and "two devices clash" in gate["blockers"]

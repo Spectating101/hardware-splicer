@@ -25,7 +25,7 @@ def agent_verdict(result: Mapping[str, Any]) -> Dict[str, Any]:
         "ok": bool(result.get("ok")),
         "build_ready": bool(gate.get("build_ready")),
         "fabrication_ready": bool(gate.get("fabrication_ready")),
-        "blockers": list(gate.get("blockers") or []),
+        "blockers": _blockers(gate, issues),
         # Findings with repair options: an exact wire patch each, and whether a person must act.
         "repairable_findings": list(gate.get("repairable_findings") or []),
         # What only a person can do or confirm; HS cannot see or verify these.
@@ -37,6 +37,21 @@ def agent_verdict(result: Mapping[str, Any]) -> Dict[str, Any]:
         "claim_boundary": "Software checks only. Nothing here shows the design works on real hardware.",
         "out_dir": _out_dir(result),
     }
+
+
+_GENERIC_ELECTRICAL = "Electrical safety checks failed on the compiled build graph."
+
+
+def _blockers(gate: Mapping[str, Any], issues: List[Mapping[str, Any]]) -> List[str]:
+    """The gate's blockers, minus the generic electrical line when specific errors explain it.
+
+    Left in, an agent read the generic line as a second, unexplained problem. The full gate keeps it,
+    because records that read the gate expect it.
+    """
+    blockers = [str(b) for b in gate.get("blockers") or []]
+    if any(i.get("level") == "error" and i.get("message") for i in issues):
+        blockers = [b for b in blockers if b != _GENERIC_ELECTRICAL]
+    return blockers
 
 
 def _needs_a_person(issues: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
