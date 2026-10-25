@@ -9,7 +9,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
@@ -673,10 +673,26 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc)) from exc
 
     @app.get("/v1/modules/catalog")
-    def modules_catalog() -> Dict[str, Any]:
+    def modules_catalog(
+        q: str | None = Query(default=None, description="Keep parts whose id or label contains this text (case-insensitive). Returns the compact form."),
+        compact: bool = Query(default=False, description="List each part as id, label, category and any sourced I2C addresses only."),
+    ) -> Dict[str, Any]:
+        from .i2c_addresses import i2c_addresses_for
         from .pcb.module_registry import list_canvas_modules
 
         modules = list_canvas_modules()
+        if q:
+            needle = q.strip().lower()
+            modules = [m for m in modules if needle in str(m.get("id", "")).lower() or needle in str(m.get("label", "")).lower()]
+        if compact or q:
+            slim = []
+            for m in modules:
+                row = {"id": m.get("id"), "label": m.get("label"), "category": m.get("category")}
+                addresses = i2c_addresses_for(str(m.get("id")))
+                if addresses:
+                    row["i2c_addresses"] = addresses["addresses"]
+                slim.append(row)
+            modules = slim
         return {
             "ok": True,
             "count": len(modules),
