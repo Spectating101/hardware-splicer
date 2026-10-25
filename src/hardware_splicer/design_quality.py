@@ -50,10 +50,18 @@ def build_design_quality_gate(
 
     if request_fidelity and request_fidelity.get("status") == "mismatch":
         for row in request_fidelity.get("missing_parts") or []:
-            blockers.append(
+            text = (
                 f"Design leaves out requested part {row['module_id']}: requested {row['requested']}, "
                 f"design has {row['in_design']} ({', '.join(row['names'])})."
             )
+            if row.get("unknown_module_id"):
+                hint = (
+                    f" Did you mean {' or '.join(row['did_you_mean'])}?"
+                    if row.get("did_you_mean")
+                    else " Look the part up in the module catalog."
+                )
+                text += f" {row['module_id']!r} is not a part id HS knows.{hint}"
+            blockers.append(text)
 
     fabrication_blockers = list(blockers)
     if not gerber_ready:
