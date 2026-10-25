@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from .build_verdict import agent_verdict
 from .compose_dispatch import compose_dispatch
 from .build_files import (
     build_package_archive,
@@ -102,6 +103,10 @@ class SpliceAndBuildRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(
+        default=False,
+        description="Return only the agent verdict (build_ready, blockers, repairable findings, notes) instead of the full result.",
+    )
 
 
 class SpliceBenchStatusRequest(BaseModel):
@@ -204,6 +209,7 @@ class ComposeRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(default=False, description="Return only the agent verdict instead of the full result.")
     wire_only: bool = Field(
         default=False,
         description="Return wired graph only (skip KiCad compile). For editor auto-wire.",
@@ -255,6 +261,7 @@ class ComposeCanvasRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(default=False, description="Return only the agent verdict instead of the full result.")
     wire_only: bool = False
 
 
@@ -1186,7 +1193,8 @@ def create_app() -> FastAPI:
             )
             if payload.get("wire_only"):
                 return payload
-            return _attach_inline_graph(payload)
+            payload = _attach_inline_graph(payload)
+            return agent_verdict(payload) if request.compact else payload
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
@@ -1207,6 +1215,7 @@ def create_app() -> FastAPI:
             request_id=request.request_id,
             export_gerber=request.export_gerber,
             wire_only=request.wire_only,
+            compact=request.compact,
         )
         return compose(wrapped)
 
@@ -1423,12 +1432,13 @@ def create_app() -> FastAPI:
                     f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
                     "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
                 )
-            return splice_and_build_from_intake(
+            built = splice_and_build_from_intake(
                 request.intake,
                 out_dir=resolved,
                 export_gerber=bool(request.export_gerber),
                 request_id=request_id,
             )
+            return agent_verdict(built) if request.compact else built
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
