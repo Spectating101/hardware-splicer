@@ -111,3 +111,12 @@ def test_two_clock_chips_on_a_board_with_one_bus_keep_both_and_say_there_is_no_a
     assert [n["moduleId"] for n in graph["nodes"]].count("ds3231_rtc") == 2
     assert gate["build_ready"] is False
     assert any("no automatic repair" in blocker for blocker in gate["blockers"])
+
+
+def test_the_note_says_what_hs_did_in_the_past_tense_so_it_is_not_read_as_a_suggestion() -> None:
+    result = compose_build_graph_from_module_ids(["esp32-devkit", "bme280", "bme280", "usb-power-5v"])
+    [note] = [n for n in result["notes"] if "I2C" in n]
+
+    assert note.startswith("HS moved ")
+    assert "second I2C bus" in note and "0x77" in note and "Wire1.begin" in note
+    assert not note.startswith("Move ")

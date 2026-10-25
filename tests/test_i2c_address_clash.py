@@ -123,3 +123,11 @@ def test_a_design_with_no_i2c_devices_gets_no_i2c_findings() -> None:
     codes = {w.get("code") for w in analyze_build(_graph("esp32-devkit", "sg90", "usb-power-5v"))}
 
     assert not {c for c in codes if c and c.startswith("i2c_")}
+
+
+def test_a_repair_offers_a_past_tense_summary_for_when_it_has_been_applied() -> None:
+    [clash] = _findings(_graph("esp32-devkit", "bme280", "bme280", "usb-power-5v"), "i2c_address_clash")
+    repair = next(r for r in clash["repairs"] if r["kind"] == "second_i2c_bus")
+
+    assert repair["summary"].startswith("Move ")
+    assert repair["applied_summary"].startswith("Moved ")

@@ -210,6 +210,7 @@ def _second_bus_repair(bus: Bus, moved: str, nodes, specs, wires, buses) -> Opti
         "kind": "second_i2c_bus",
         "moves_node": moved,
         "summary": f"Move {_label(specs[moved], moved)} to a second I2C bus on {sda_pin} (SDA) and {scl_pin} (SCL).",
+        "applied_summary": f"Moved {_label(specs[moved], moved)} to a second I2C bus on {sda_pin} (SDA) and {scl_pin} (SCL).",
         "requires_person": False,
         "graph_patch": {"remove_wires": remove, "add_wires": add, "set_node_fields": {}},
         "firmware_effect": (

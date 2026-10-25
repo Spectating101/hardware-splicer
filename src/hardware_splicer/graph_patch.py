@@ -81,5 +81,8 @@ def auto_repair_i2c(graph: Mapping[str, Any], *, max_steps: int = 4) -> tuple[Di
             break
         finding, repair = chosen
         current = apply_graph_patch(current, repair["graph_patch"])
-        notes.append(f"{repair['summary']} Both would otherwise answer at {finding['address']}. {repair['firmware_effect']}")
+        notes.append(
+            f"HS moved the later device: {repair.get('applied_summary', repair['summary'])} "
+            f"Both would otherwise answer at {finding['address']}. {repair['firmware_effect']}"
+        )
     return current, notes
