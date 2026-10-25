@@ -30,6 +30,8 @@ from hardware_splicer.commercial_cohort import build_commercial_cohort
 from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 from hardware_splicer.commercial_validation_backlog import build_validation_backlog
 from hardware_splicer.commercial_validation_packets import build_validation_packets
+from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
+from hardware_splicer.commercial_repair_stress import repair_cost_stress
 
 
 def load(path: Path) -> dict:
@@ -49,12 +51,15 @@ def main() -> int:
     parser.add_argument("--purchase-report", action="append", type=Path, default=[])
     parser.add_argument("--regional-scan", action="append", type=Path, default=[])
     parser.add_argument("--market-evidence", action="append", type=Path, default=[])
+    parser.add_argument("--identity-claims", action="append", type=Path, default=[])
+    parser.add_argument("--repair-stress", action="append", type=Path, default=[])
     parser.add_argument("--as-of", default="2026-10-25")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not (args.case or args.pf_run or args.salvage_report
             or args.donor_discovery or args.purchase_screen
-            or args.purchase_report or args.regional_scan or args.market_evidence):
+            or args.purchase_report or args.regional_scan or args.market_evidence
+            or args.identity_claims or args.repair_stress):
         parser.error("at least one supported source required")
 
     try:
@@ -93,6 +98,17 @@ def main() -> int:
             for path in args.regional_scan
             for result in normalize_historical_regional_scan(load(path))
         ]
+        identity_reports = [reconcile_identity_claims(load(path)) for path in args.identity_claims]
+        repair_reports = []
+        for path in args.repair_stress:
+            proposal = load(path)
+            found = [row for row in purchase_reports if row["candidate_id"] == proposal.get("candidate_id")]
+            if len(found) != 1:
+                raise ValueError("repair stress needs one existing historical screen")
+            repair_reports.append(repair_cost_stress({
+                "id": found[0]["candidate_id"],
+                "expected_net_per_acquired_unit_twd": found[0]["modeled_expected_net_twd"],
+            }, proposal))
         market_evidence = []
         for path in args.market_evidence:
             payload = load(path)
@@ -117,6 +133,8 @@ def main() -> int:
         "historical_salvage_economics": purchase_reports,
         "regional_product_concepts": regional,
         "market_evidence_screens": market_evidence,
+        "identity_audits": identity_reports,
+        "repair_cost_stress_tests": repair_reports,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
