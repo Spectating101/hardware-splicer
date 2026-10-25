@@ -9,6 +9,44 @@ function pinEntries(pins) {
   );
 }
 
+function FirmwareCoverageNote({ coverage }) {
+  if (!coverage || !coverage.status) return null;
+  const uncovered = Array.isArray(coverage.uncovered_pins) ? coverage.uncovered_pins : [];
+  return (
+    <div
+      className={coverage.status === "gaps" ? "small honesty-card honesty-card--fail" : "small"}
+      data-testid="firmware-coverage"
+      data-status={coverage.status}
+      role={coverage.status === "gaps" ? "alert" : undefined}
+    >
+      {coverage.status === "gaps" && (
+        <>
+          <p>
+            <strong>This firmware leaves wired parts unused.</strong>
+          </p>
+          <ul className="clean-list">
+            {uncovered.map((row) => (
+              <li key={row.pin}>
+                Firmware does not use <span className="mono">{row.pin}</span>, which the wiring connects to{" "}
+                <span className="mono">{row.drives}</span>.
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {coverage.status === "covers" && (
+        <p className="muted">
+          The firmware names every pin the wiring uses for a signal. That is not proof it works: it has not been
+          compiled or run here.
+        </p>
+      )}
+      {coverage.status === "not_assessable" && (
+        <p className="muted">Could not check the firmware against the wiring for this design.</p>
+      )}
+    </div>
+  );
+}
+
 export default function MechatronicsPanel({ pkg }) {
   const fw = pkg?.firmware_scaffold || pkg?.mechatronics?.firmware_scaffold || null;
   const mech = pkg?.mechanism_pack || pkg?.mechatronics?.mechanism_pack || null;
@@ -52,6 +90,7 @@ export default function MechatronicsPanel({ pkg }) {
         <div className="mechatronics-block" data-testid="mechatronics-firmware">
           <h4>Firmware</h4>
           <p className="mono small">{fw.filename || "sketch"}</p>
+          <FirmwareCoverageNote coverage={pkg?.firmware_coverage} />
           {pins.length > 0 && (
             <ul className="clean-list small">
               {pins.map(([k, v]) => (

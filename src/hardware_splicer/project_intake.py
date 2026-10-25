@@ -7,6 +7,7 @@ from typing import Any, Dict, Iterable, List, Mapping
 
 from .build_compiler import compile_catalog_build, resolve_build_id
 from .design_quality import build_design_quality_gate
+from .firmware_coverage import assess_firmware_coverage
 from .request_fidelity import assess_request_fidelity
 from .fabrication_inspection import inspect_fabrication_package
 from .functional_delivery import build_functional_delivery_score
@@ -497,6 +498,11 @@ def splice_and_build_from_intake(
             write_firmware_scaffold(build_id=build_id, build_graph=build_graph, out_dir=out_path)
             salvage_package["firmware_scaffold"] = fw_graph
             result_body["firmware_scaffold"] = fw_graph
+            firmware_coverage = assess_firmware_coverage(build_graph, fw_graph.get("source"))
+            result_body["firmware_coverage"] = firmware_coverage
+            (out_path / "firmware" / "FIRMWARE_COVERAGE.json").write_text(
+                json.dumps(firmware_coverage, indent=2), encoding="utf-8"
+            )
 
             graph_bringup = build_bringup_card(
                 goal=goal,
@@ -516,6 +522,9 @@ def splice_and_build_from_intake(
             splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
         except Exception:
             pass
+
+    # A build that never reached firmware still says so, so "not checked" is never mistaken for "absent".
+    result_body.setdefault("firmware_coverage", assess_firmware_coverage(None, None))
 
     from .project_package import write_project_package_artifacts
 

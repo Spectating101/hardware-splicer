@@ -349,6 +349,8 @@ def _pan_tilt_esp32(build_id: str, modules: List[str], pins: Mapping[str, Any]) 
     pan = _pin("servo_pan", "servo1", default=18)
     tilt = _pin("servo_tilt", "servo2", default=19)
     return f"""// {build_id} — dual SG90 pan/tilt (LEDC PWM, no lib required)
+// Builds on arduino-esp32 2.x and 3.x: 2.x writes PWM by channel, 3.x removed ledcSetup and
+// ledcAttachPin and writes by pin.
 #include <Arduino.h>
 
 const int PAN_PIN = {pan};
@@ -358,28 +360,37 @@ const int PWM_RES = 16;
 const int PAN_CH = 0;
 const int TILT_CH = 1;
 
-void writeServoUs(int channel, int us) {{
+void writeServoUs(int pin, int channel, int us) {{
   uint32_t duty = (uint32_t)((us / 20000.0) * ((1 << PWM_RES) - 1));
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  ledcWrite(pin, duty);
+#else
   ledcWrite(channel, duty);
+#endif
 }}
 
 void setup() {{
   Serial.begin(115200);
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  ledcAttach(PAN_PIN, PWM_FREQ, PWM_RES);
+  ledcAttach(TILT_PIN, PWM_FREQ, PWM_RES);
+#else
   ledcSetup(PAN_CH, PWM_FREQ, PWM_RES);
   ledcSetup(TILT_CH, PWM_FREQ, PWM_RES);
   ledcAttachPin(PAN_PIN, PAN_CH);
   ledcAttachPin(TILT_PIN, TILT_CH);
-  writeServoUs(PAN_CH, 1500);
-  writeServoUs(TILT_CH, 1500);
+#endif
+  writeServoUs(PAN_PIN, PAN_CH, 1500);
+  writeServoUs(TILT_PIN, TILT_CH, 1500);
   Serial.printf("pan=%d tilt=%d\\n", PAN_PIN, TILT_PIN);
 }}
 
 void loop() {{
-  writeServoUs(PAN_CH, 1200);
-  writeServoUs(TILT_CH, 1200);
+  writeServoUs(PAN_PIN, PAN_CH, 1200);
+  writeServoUs(TILT_PIN, TILT_CH, 1200);
   delay(800);
-  writeServoUs(PAN_CH, 1800);
-  writeServoUs(TILT_CH, 1800);
+  writeServoUs(PAN_PIN, PAN_CH, 1800);
+  writeServoUs(TILT_PIN, TILT_CH, 1800);
   delay(800);
 }}
 """
@@ -594,6 +605,19 @@ def generate_firmware_scaffold(
         filename = f"{build_id}.ino"
     elif "dht22" in module_ids and any("esp32" in mid for mid in module_ids):
         body = _dht22_esp32_sketch(build_id, module_ids, pin_map)
+        filename = f"{build_id}.ino"
+    elif (
+        family == "esp32"
+        and pin_map.get("sourced_from_graph")
+        and pin_map.get("servo_pan") is not None
+        and pin_map.get("servo_tilt") is not None
+    ):
+        # Both servo pins come from the wiring; a single or unwired servo gets no invented pins.
+        body = (
+            "// Pins come from this design's wiring. Check them on the bench before powering the servos:\n"
+            "// they start moving as soon as the sketch runs.\n"
+            + _pan_tilt_esp32(build_id, module_ids, pin_map)
+        )
         filename = f"{build_id}.ino"
     else:
         body = sketch_fn(build_id, module_ids, pin_map)
