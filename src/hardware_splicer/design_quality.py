@@ -37,6 +37,9 @@ def build_design_quality_gate(
                 blockers.append(str(issue["message"]))
     if drc_pass and electrical_pass and electrical_warnings > 0:
         blockers.append(f"Electrical safety has {electrical_warnings} warning(s) — resolve before fabrication.")
+        for issue in electrical_issues:
+            if issue.get("level") == "warn" and issue.get("message"):
+                blockers.append(str(issue["message"]))
     if not drc_pass:
         blockers.append(f"DRC failed with {body.get('drc_errors', 0)} error(s).")
     compiler_verified = bool(body.get("compiler_verified")) or (

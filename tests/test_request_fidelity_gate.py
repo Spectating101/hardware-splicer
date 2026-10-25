@@ -96,3 +96,21 @@ def test_the_pan_tilt_demo_builds_both_servos_and_matches_the_request(tmp_path, 
     assert [n["moduleId"] for n in graph["nodes"]].count("sg90") == 2
     gate = json.loads((tmp_path / "pan_tilt_fixed" / "build_compilation" / "DESIGN_QUALITY_GATE.json").read_text())
     assert gate["request_fidelity"]["status"] == "matches"
+
+
+def test_a_warning_blocker_says_what_the_warning_is_not_only_how_many() -> None:
+    quality = {
+        **CLEAN_BOARD,
+        "electrical_warnings": 1,
+        "electrical_issues": [
+            {"level": "warn", "message": "ESP32 DevKit has no power connection yet.", "node_id": "n1"},
+            {"level": "info", "message": "I2C bus: confirm 4.7k pull-ups to VCC exist."},
+        ],
+    }
+
+    gate = build_design_quality_gate(quality)
+
+    assert gate["build_ready"] is False
+    assert "Electrical safety has 1 warning(s) — resolve before fabrication." in gate["blockers"]
+    assert "ESP32 DevKit has no power connection yet." in gate["blockers"]
+    assert not any("pull-ups" in blocker for blocker in gate["blockers"]), "notes are not blockers"
