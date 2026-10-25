@@ -72,3 +72,42 @@ def test_the_intake_build_for_two_identical_sensors_is_electrically_clean_and_fi
     assert gate["request_fidelity"]["status"] == "matches"
     assert not [i for i in gate["summary"]["electrical_issues"] if i.get("code") == "i2c_address_clash"]
     assert result["firmware_coverage"]["status"] == "gaps", "firmware does not start the second bus, and HS says so"
+
+
+def _build(tmp_path, monkeypatch, module_ids: list[str], name: str):
+    from hardware_splicer import load_project_intake
+    from hardware_splicer.project_intake import splice_and_build_from_intake
+
+    for env in ("HARDWARE_SPLICER_OFFLINE_SALVAGE", "HARDWARE_SPLICER_OFFLINE_COMPOSE"):
+        monkeypatch.setenv(env, "0")
+    root = Path(__file__).resolve().parents[1]
+    intake = load_project_intake(root / "examples" / "intakes" / "splice_physical_pan_tilt_loop.json")
+    intake["available_parts"] = [
+        {"name": f"{mid} {i}", "module_id": mid, "type": "part", "condition": "salvaged"} for i, mid in enumerate(module_ids)
+    ]
+    intake["goal"] = f"Build a board with exactly these parts: {', '.join(module_ids)}."
+    result = splice_and_build_from_intake(intake, out_dir=tmp_path / name, export_gerber=False)
+    gate = json.loads((tmp_path / name / "build_compilation" / "DESIGN_QUALITY_GATE.json").read_text())
+    graph = json.loads(Path(result["artifacts"]["build_graph"]).read_text())
+    return result, gate, graph
+
+
+def test_a_clash_no_repair_can_fix_is_reported_not_hidden_by_quietly_dropping_a_device(tmp_path, monkeypatch) -> None:
+    """The retry loop used to delete the duplicate devices until the safety check passed."""
+    _result, gate, graph = _build(
+        tmp_path, monkeypatch, ["esp32-devkit", "bme280", "bme280", "bme280", "usb-power-5v"], "three_bme"
+    )
+
+    assert [n["moduleId"] for n in graph["nodes"]].count("bme280") == 3
+    assert gate["request_fidelity"]["status"] == "matches"
+    assert gate["build_ready"] is False
+    assert any("0x77" in blocker and "cannot both work" in blocker for blocker in gate["blockers"])
+    assert [f["code"] for f in gate["repairable_findings"]] == ["i2c_address_clash"]
+
+
+def test_two_clock_chips_on_a_board_with_one_bus_keep_both_and_say_there_is_no_automatic_repair(tmp_path, monkeypatch) -> None:
+    _result, gate, graph = _build(tmp_path, monkeypatch, ["arduino-nano", "ds3231_rtc", "ds3231_rtc", "usb-power-5v"], "two_rtc")
+
+    assert [n["moduleId"] for n in graph["nodes"]].count("ds3231_rtc") == 2
+    assert gate["build_ready"] is False
+    assert any("no automatic repair" in blocker for blocker in gate["blockers"])
