@@ -16,6 +16,9 @@ from hardware_splicer.commercial_value_routing import (
 from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
 from hardware_splicer.commercial_materials import evaluate_material_plan
 from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
+from hardware_splicer.commercial_repair_stress import repair_cost_stress
+from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
+from hardware_splicer.commercial_validation_packets import build_validation_packets
 from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
 
 
@@ -811,3 +814,68 @@ def test_paid_acquisition_is_not_an_observed_resale_price():
     assert out["sold_median"] is None
     assert out["transaction_pricing_verified_in_source"] is False
     assert out["purchase_authorized"] is False
+
+
+def test_tsc_printhead_replacement_can_destroy_modeled_profit():
+    root = Path(__file__).resolve().parents[1]
+    cases = json.loads((root / "examples" /
+        "commercial_tw_salvage_five_screen_snapshot.json").read_text(encoding="utf-8"))
+    tsc = next(x["modeled_unit_economics"] for x in cases["evaluations"]
+               if x["id"] == "tsc-ttp244plus-budget-fault")
+    scenario = json.loads((root / "examples" /
+        "commercial_tsc_printhead_cost_stress_2026-10-26.json").read_text(encoding="utf-8"))
+    result = repair_cost_stress(tsc, scenario)
+    assert result["historical_expected_net"] == 339
+    assert result["model_assumed_success_parts"] == 300
+    assert result["modeled_profit_if_head_required_on_each_success"] == [-711.0, -466.0]
+    assert result["maximum_success_parts_to_meet_original_profit_target"] == 355.71
+    assert result["status"] == "HOLD_PRINTHEAD_CONDITION_OR_COST_REJECT"
+    assert result["purchase_authorized"] is False
+
+
+def test_t620_intel_j1900_listing_conflicts_with_oem_amd_config():
+    root = Path(__file__).resolve().parents[1]
+    payload = json.loads((root / "examples" /
+        "commercial_t620_identity_conflict_2026-10-26.json").read_text(encoding="utf-8"))
+    report = reconcile_identity_claims(payload)
+    assert report["status"] == "HOLD_IDENTITY_CONFLICT"
+    assert report["conflicts"][0]["attribute"] == "cpu_family"
+    assert report["conflicts"][0]["seller_claim"] == "Intel J1900"
+    assert report["physical_identity_verified"] is False
+    assert report["purchase_authorized"] is False
+
+
+def test_identity_without_technical_discrepancy_is_still_not_physically_verified():
+    claim = {
+        "schema_version": "hardware_splicer.commercial_identity_claims.v1",
+        "candidate_id": "test-only",
+        "source_groups": [
+            {"source_role": "manufacturer_spec", "source_url": "https://example.org/oem",
+             "claims": [{"attribute": "cpu_family", "value": "AMD GX series"}]},
+            {"source_role": "seller_listing", "source_url": "https://example.org/seller",
+             "claims": [{"attribute": "cpu_family", "value": "AMD GX Series"}]},
+        ],
+    }
+    r = reconcile_identity_claims(claim)
+    assert r["status"] == "NO_CONTRADICTION_FOUND"
+    assert r["physical_identity_verified"] is False
+    assert r["purchase_authorized"] is False
+
+
+def test_eight_source_specific_packets_require_materials_and_physical_validation(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    run = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert run.returncode == 0, run.stderr
+    doc = json.loads((tmp_path / "commercial_cohort_replay.json").read_text(encoding="utf-8"))
+    packets = build_validation_packets(doc)
+    assert packets["count"] == 8
+    assert len(packets["packets"]) == 8
+    assert (tmp_path / "commercial_validation_packets.json").is_file()
+    assert all(p["materials_and_supplier_quotes"] and p["hard_stop_conditions"]
+               and p["physical_acceptance_plan"] for p in packets["packets"])
+    assert all(p["purchase_authorized"] is False for p in packets["packets"])
+    assert doc["identity_audits"][0]["status"] == "HOLD_IDENTITY_CONFLICT"
+    assert doc["repair_cost_stress_tests"][0]["status"] == "HOLD_PRINTHEAD_CONDITION_OR_COST_REJECT"
