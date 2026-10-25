@@ -27,6 +27,8 @@ def dossier() -> dict:
         "--pf-run", str(EXAMPLES / "commercial_pf003_fielddeck_snapshot.json"),
         "--case", str(EXAMPLES / "commercial_pf002_itemized_scenario_twd.json"),
         "--market-evidence", str(EXAMPLES / "commercial_market_evidence_tsc_historical.json"),
+        "--identity-claims", str(EXAMPLES / "commercial_t620_identity_conflict_2026-10-26.json"),
+        "--repair-stress", str(EXAMPLES / "commercial_tsc_printhead_cost_stress_2026-10-26.json"),
         "--as-of", "2026-10-25",
     ]
     done = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=60)
@@ -132,7 +134,37 @@ def markdown(report: dict) -> str:
             lines.append(
                 f"- Missing: {', '.join((route.get('blockers') or [])[:10])}."
             )
-    backlog = report["validation_backlog"]
+    identity = report.get("identity_audits") or []
+    repair = report.get("repair_cost_stress_tests") or []
+    lines += [
+        "",
+        "## Explicit price and machine-identity disqualifiers",
+        "",
+    ]
+    for item in identity:
+        lines.append(
+            f"- Device {item['candidate_id']}: **{item['status']}**; "
+            f"{len(item['conflicts'])} source conflicts and no physical verification."
+        )
+        for conflict in item["conflicts"]:
+            lines.append(
+                f"  - {conflict['attribute']}: seller claims "
+                f"{conflict['seller_claim']} vs technical reference "
+                f"{conflict['manufacturer_claim']}. "
+                f"[Seller]({conflict['seller_source']}) / "
+                f"[Reference]({conflict['manufacturer_source']})."
+            )
+    for item in repair:
+        lines.append(
+            f"- {item['candidate_id']}: replacement part listing "
+            f"NT$ {item['listing_replacement_range'][0]:,.0f}–"
+            f"{item['listing_replacement_range'][1]:,.0f} would imply "
+            f"NT$ {item['modeled_profit_if_head_required_on_each_success'][0]:,.0f} to "
+            f"{item['modeled_profit_if_head_required_on_each_success'][1]:,.0f} "
+            f"expected net under the stated conditional assumptions; **{item['status']}**. "
+            f"[Parts listing]({item['source_url']})."
+        )
+        backlog = report["validation_backlog"]
     lines += [
         "",
         "## Diversified validation wave (research, not inventory acquisition)",
@@ -190,6 +222,10 @@ def main() -> int:
         encoding="utf-8",
     )
     (outdir / "commercial_cohort_replay.md").write_text(markdown(report), encoding="utf-8")
+    (outdir / "commercial_validation_packets.json").write_text(
+        json.dumps(report.get("validation_packets") or {}, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps({
         "source_records": report["cohort_review"]["total_source_records"],
         "unique_named_concepts": report["cohort_review"]["distinct_named_concepts_after_known_lineage_aliases"],
