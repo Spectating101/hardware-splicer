@@ -88,3 +88,45 @@ def test_with_no_compiled_graph_no_part_is_reported_missing() -> None:
 
     assert result["status"] == "not_assessable"
     assert result["missing_parts"] == []
+
+
+def _unknown_row(module_id: str, name: str = "part") -> dict:
+    result = assess_request_fidelity([{"module_id": module_id, "name": name}], _graph("esp32-devkit"))
+    [row] = result["missing_parts"]
+    return row
+
+
+def test_an_id_hs_does_not_know_is_flagged_and_given_the_ids_it_was_probably_meant_to_be() -> None:
+    for guess, expected in (
+        ("usb-5v", "usb-power-5v"),
+        ("usb-5v-supply", "usb-power-5v"),
+        ("ds3231", "ds3231_rtc"),
+        ("ds3231-module", "ds3231_rtc"),
+        ("rtc-ds3231", "ds3231_rtc"),
+        ("bme-280", "bme280"),
+    ):
+        row = _unknown_row(guess)
+
+        assert row["unknown_module_id"] is True, guess
+        assert expected in row["did_you_mean"], (guess, row["did_you_mean"])
+
+
+def test_a_suggestion_is_never_a_part_that_only_shares_a_generic_word() -> None:
+    assert "esp32-cam-module" not in _unknown_row("ds3231-module")["did_you_mean"]
+    assert "ds1307_rtc" not in _unknown_row("ds3231-rtc")["did_you_mean"]
+    assert "bmp280" not in _unknown_row("bme-280")["did_you_mean"]
+
+
+def test_an_id_with_nothing_plausible_gets_no_suggestion_rather_than_a_wrong_one() -> None:
+    row = _unknown_row("zzz-qq", "mystery part")
+
+    assert row["unknown_module_id"] is True
+    assert row["did_you_mean"] == []
+
+
+def test_a_real_part_that_is_simply_missing_from_the_design_is_not_called_unknown() -> None:
+    result = assess_request_fidelity([{"module_id": "sg90", "name": "servo"}], _graph("esp32-devkit"))
+    [row] = result["missing_parts"]
+
+    assert row["unknown_module_id"] is False
+    assert row["did_you_mean"] == []

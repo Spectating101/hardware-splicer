@@ -23,6 +23,7 @@ def build_design_quality_gate(
     electrical_pass = bool(body.get("electrical_safety_pass"))
     gerber_ready = bool(body.get("gerber_ready"))
     electrical_warnings = int(body.get("electrical_warnings") or 0)
+    electrical_issues = [i for i in body.get("electrical_issues") or [] if isinstance(i, Mapping)]
     bom_ready = bool(body.get("bom_ready"))
 
     blockers = []
@@ -30,8 +31,15 @@ def build_design_quality_gate(
         blockers.append("Catalog build graph did not compile.")
     if not electrical_pass:
         blockers.append("Electrical safety checks failed on the compiled build graph.")
+        # Say what is wrong, in the finding's own words, so the person or agent reading this knows.
+        for issue in electrical_issues:
+            if issue.get("level") == "error" and issue.get("message"):
+                blockers.append(str(issue["message"]))
     if drc_pass and electrical_pass and electrical_warnings > 0:
         blockers.append(f"Electrical safety has {electrical_warnings} warning(s) — resolve before fabrication.")
+        for issue in electrical_issues:
+            if issue.get("level") == "warn" and issue.get("message"):
+                blockers.append(str(issue["message"]))
     if not drc_pass:
         blockers.append(f"DRC failed with {body.get('drc_errors', 0)} error(s).")
     compiler_verified = bool(body.get("compiler_verified")) or (
@@ -42,10 +50,18 @@ def build_design_quality_gate(
 
     if request_fidelity and request_fidelity.get("status") == "mismatch":
         for row in request_fidelity.get("missing_parts") or []:
-            blockers.append(
+            text = (
                 f"Design leaves out requested part {row['module_id']}: requested {row['requested']}, "
                 f"design has {row['in_design']} ({', '.join(row['names'])})."
             )
+            if row.get("unknown_module_id"):
+                hint = (
+                    f" Did you mean {' or '.join(row['did_you_mean'])}?"
+                    if row.get("did_you_mean")
+                    else " Look the part up in the module catalog."
+                )
+                text += f" {row['module_id']!r} is not a part id HS knows.{hint}"
+            blockers.append(text)
 
     fabrication_blockers = list(blockers)
     if not gerber_ready:
@@ -81,6 +97,8 @@ def build_design_quality_gate(
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
         "blockers": blockers,
+        # Findings that come with repair options, for an agent to choose from and HS to re-verify.
+        "repairable_findings": [i for i in electrical_issues if i.get("repairs")],
         "summary": body,
     }
     if request_fidelity is not None:

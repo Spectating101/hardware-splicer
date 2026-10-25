@@ -77,7 +77,7 @@ export default function ProjectStatusHeader({ session, onShare }) {
 
 function chipTone(designState) {
   if (designState === "drc_clean") return "ok";
-  if (designState === "drc_errors" || designState === "request_mismatch") return "fail";
+  if (designState === "drc_errors" || designState === "request_mismatch" || designState === "electrical_error") return "fail";
   return "neutral";
 }
 

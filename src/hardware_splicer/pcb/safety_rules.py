@@ -291,4 +291,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                     }
                 )
 
+    from ..i2c_bus_analysis import i2c_findings
+
+    warnings.extend(i2c_findings(graph))
     return warnings

@@ -83,7 +83,9 @@ def expand_module_ids_for_safety(
     constraints: Mapping[str, Any] | None = None,
 ) -> List[str]:
     """Add support modules when material budget allows (open scratch or salvage purchases)."""
-    ids = list(dict.fromkeys(str(m) for m in module_ids if str(m).strip()))
+    # Keep repeats: two of the same part are two parts. Collapsing them here made the retry loop see
+    # "the list changed" and carry on with a smaller design, deleting devices until a check passed.
+    ids = [str(m) for m in module_ids if str(m).strip()]
     inventory = list(inventory_ids or ids)
     text = " ".join(str(m) for m in safety_messages).lower()
 

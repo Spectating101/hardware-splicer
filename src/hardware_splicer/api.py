@@ -9,10 +9,11 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from .build_verdict import agent_verdict
 from .compose_dispatch import compose_dispatch
 from .build_files import (
     build_package_archive,
@@ -102,6 +103,10 @@ class SpliceAndBuildRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(
+        default=False,
+        description="Return only the agent verdict (build_ready, blockers, repairable findings, notes) instead of the full result.",
+    )
 
 
 class SpliceBenchStatusRequest(BaseModel):
@@ -204,6 +209,7 @@ class ComposeRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(default=False, description="Return only the agent verdict instead of the full result.")
     wire_only: bool = Field(
         default=False,
         description="Return wired graph only (skip KiCad compile). For editor auto-wire.",
@@ -255,6 +261,7 @@ class ComposeCanvasRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    compact: bool = Field(default=False, description="Return only the agent verdict instead of the full result.")
     wire_only: bool = False
 
 
@@ -666,10 +673,26 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc)) from exc
 
     @app.get("/v1/modules/catalog")
-    def modules_catalog() -> Dict[str, Any]:
+    def modules_catalog(
+        q: str | None = Query(default=None, description="Keep parts whose id or label contains this text (case-insensitive). Returns the compact form."),
+        compact: bool = Query(default=False, description="List each part as id, label, category and any sourced I2C addresses only."),
+    ) -> Dict[str, Any]:
+        from .i2c_addresses import i2c_addresses_for
         from .pcb.module_registry import list_canvas_modules
 
         modules = list_canvas_modules()
+        if q:
+            needle = q.strip().lower()
+            modules = [m for m in modules if needle in str(m.get("id", "")).lower() or needle in str(m.get("label", "")).lower()]
+        if compact or q:
+            slim = []
+            for m in modules:
+                row = {"id": m.get("id"), "label": m.get("label"), "category": m.get("category")}
+                addresses = i2c_addresses_for(str(m.get("id")))
+                if addresses:
+                    row["i2c_addresses"] = addresses["addresses"]
+                slim.append(row)
+            modules = slim
         return {
             "ok": True,
             "count": len(modules),
@@ -1186,7 +1209,8 @@ def create_app() -> FastAPI:
             )
             if payload.get("wire_only"):
                 return payload
-            return _attach_inline_graph(payload)
+            payload = _attach_inline_graph(payload)
+            return agent_verdict(payload) if request.compact else payload
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
@@ -1207,6 +1231,7 @@ def create_app() -> FastAPI:
             request_id=request.request_id,
             export_gerber=request.export_gerber,
             wire_only=request.wire_only,
+            compact=request.compact,
         )
         return compose(wrapped)
 
@@ -1423,12 +1448,13 @@ def create_app() -> FastAPI:
                     f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
                     "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
                 )
-            return splice_and_build_from_intake(
+            built = splice_and_build_from_intake(
                 request.intake,
                 out_dir=resolved,
                 export_gerber=bool(request.export_gerber),
                 request_id=request_id,
             )
+            return agent_verdict(built) if request.compact else built
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:

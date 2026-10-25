@@ -96,3 +96,46 @@ def test_the_pan_tilt_demo_builds_both_servos_and_matches_the_request(tmp_path, 
     assert [n["moduleId"] for n in graph["nodes"]].count("sg90") == 2
     gate = json.loads((tmp_path / "pan_tilt_fixed" / "build_compilation" / "DESIGN_QUALITY_GATE.json").read_text())
     assert gate["request_fidelity"]["status"] == "matches"
+
+
+def test_a_warning_blocker_says_what_the_warning_is_not_only_how_many() -> None:
+    quality = {
+        **CLEAN_BOARD,
+        "electrical_warnings": 1,
+        "electrical_issues": [
+            {"level": "warn", "message": "ESP32 DevKit has no power connection yet.", "node_id": "n1"},
+            {"level": "info", "message": "I2C bus: confirm 4.7k pull-ups to VCC exist."},
+        ],
+    }
+
+    gate = build_design_quality_gate(quality)
+
+    assert gate["build_ready"] is False
+    assert "Electrical safety has 1 warning(s) — resolve before fabrication." in gate["blockers"]
+    assert "ESP32 DevKit has no power connection yet." in gate["blockers"]
+    assert not any("pull-ups" in blocker for blocker in gate["blockers"]), "notes are not blockers"
+
+
+def test_the_blocker_for_an_unknown_part_id_says_so_and_names_the_likely_id() -> None:
+    mismatch = {
+        "status": "mismatch",
+        "missing_parts": [
+            {"module_id": "usb-5v", "names": ["USB supply"], "requested": 1, "in_design": 0, "unknown_module_id": True, "did_you_mean": ["usb-power-5v"]}
+        ],
+    }
+    gate = build_design_quality_gate(CLEAN_BOARD, request_fidelity=mismatch)
+    [blocker] = gate["blockers"]
+
+    assert "usb-5v" in blocker and "not a part id HS knows" in blocker and "usb-power-5v" in blocker
+
+
+def test_the_blocker_for_an_unknown_id_with_no_suggestion_points_at_the_catalog() -> None:
+    mismatch = {
+        "status": "mismatch",
+        "missing_parts": [
+            {"module_id": "zzz", "names": ["x"], "requested": 1, "in_design": 0, "unknown_module_id": True, "did_you_mean": []}
+        ],
+    }
+    [blocker] = build_design_quality_gate(CLEAN_BOARD, request_fidelity=mismatch)["blockers"]
+
+    assert "module catalog" in blocker

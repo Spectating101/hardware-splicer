@@ -29,6 +29,9 @@ def _autoroute_enabled() -> bool:
     )
 
 
+_STRUCTURED_ISSUE_KEYS = ("code", "nodes", "address", "address_basis", "bus", "repairs", "requires_person")
+
+
 def compile_graph_to_artifacts(
     build_id: str,
     out_dir: str | Path,
@@ -153,6 +156,9 @@ def compile_graph_to_artifacts(
                 "message": w.get("message"),
                 "wire_id": w.get("wireId"),
                 "node_id": w.get("nodeId"),
+                # Structured findings (a code, the nodes involved, repair options) pass through
+                # whole so an agent can act on them; plain findings keep their old four fields.
+                **{key: w[key] for key in _STRUCTURED_ISSUE_KEYS if key in w},
             }
             for w in electrical
         ],
