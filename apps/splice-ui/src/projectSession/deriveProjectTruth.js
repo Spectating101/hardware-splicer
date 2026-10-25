@@ -50,6 +50,23 @@ export function hasAffirmativePhysicalEvidence(bench, gates = {}) {
   return false;
 }
 
+function designLabel(designState, errors) {
+  switch (designState) {
+    case "not_compiled":
+      return "Not compiled";
+    case "electrical_error":
+      return "Electrical problem";
+    case "request_mismatch":
+      return "Missing requested part";
+    case "drc_errors":
+      return `${errors ?? "?"} DRC error(s)`;
+    case "drc_clean":
+      return "DRC clean";
+    default:
+      return "DRC unknown";
+  }
+}
+
 export function deriveProjectTruth(session = {}) {
   const pkg = session.projectPackage || {};
   const gates = pkg.gates || {};
@@ -80,6 +97,15 @@ export function deriveProjectTruth(session = {}) {
   const fidelity = session.displayResult?.design_quality_gate?.request_fidelity;
   const requestMismatch = sessionHasBuild(session) && fidelity?.status === "mismatch";
   if (requestMismatch) designState = "request_mismatch";
+  // A design the electrical check rejects is not a DRC failure; say what it found, in its own words.
+  const electricalErrors = sessionHasBuild(session)
+    ? (session.displayResult?.design_quality_gate?.summary?.electrical_issues || []).filter(
+        (issue) => issue?.level === "error" && issue?.message,
+      )
+    : [];
+  const electricalError = !requestMismatch && electricalErrors.length > 0;
+  if (electricalError) designState = "electrical_error";
+  const electricalDetail = electricalError ? electricalErrors.map((issue) => issue.message).join(" ") : "";
   const requestDetail = requestMismatch
     ? (fidelity.missing_parts || [])
         .map(
@@ -162,6 +188,10 @@ export function deriveProjectTruth(session = {}) {
     overallState = "needs_design";
     headline = "Design and compile the board";
     nextAction = { label: "Open Design", stage: STAGES.design };
+  } else if (designState === "electrical_error") {
+    overallState = "needs_verification";
+    headline = "The design has an electrical problem";
+    nextAction = { label: "Open Verify", stage: STAGES.verify };
   } else if (designState === "request_mismatch") {
     overallState = "needs_verification";
     headline = "The design leaves out a part you asked for";
@@ -201,17 +231,8 @@ export function deriveProjectTruth(session = {}) {
       state: designState,
       errors,
       warnings,
-      detail: requestDetail,
-      label:
-        designState === "not_compiled"
-          ? "Not compiled"
-          : designState === "request_mismatch"
-            ? "Missing requested part"
-            : designState === "drc_errors"
-            ? `${errors ?? "?"} DRC error(s)`
-            : designState === "drc_clean"
-              ? "DRC clean"
-              : "DRC unknown",
+      detail: requestDetail || electricalDetail,
+      label: designLabel(designState, errors),
     },
     copper: {
       state: copperState,
