@@ -32,6 +32,7 @@ from hardware_splicer.commercial_validation_backlog import build_validation_back
 from hardware_splicer.commercial_validation_packets import build_validation_packets
 from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
+from hardware_splicer.commercial_external_evidence import evaluate_external_observations
 
 
 def load(path: Path) -> dict:
@@ -53,13 +54,14 @@ def main() -> int:
     parser.add_argument("--market-evidence", action="append", type=Path, default=[])
     parser.add_argument("--identity-claims", action="append", type=Path, default=[])
     parser.add_argument("--repair-stress", action="append", type=Path, default=[])
+    parser.add_argument("--external-observations", action="append", type=Path, default=[])
     parser.add_argument("--as-of", default="2026-10-25")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not (args.case or args.pf_run or args.salvage_report
             or args.donor_discovery or args.purchase_screen
             or args.purchase_report or args.regional_scan or args.market_evidence
-            or args.identity_claims or args.repair_stress):
+            or args.identity_claims or args.repair_stress or args.external_observations):
         parser.error("at least one supported source required")
 
     try:
@@ -99,6 +101,7 @@ def main() -> int:
             for result in normalize_historical_regional_scan(load(path))
         ]
         identity_reports = [reconcile_identity_claims(load(path)) for path in args.identity_claims]
+        external_reports = [evaluate_external_observations(load(path)) for path in args.external_observations]
         repair_reports = []
         for path in args.repair_stress:
             proposal = load(path)
@@ -135,6 +138,7 @@ def main() -> int:
         "market_evidence_screens": market_evidence,
         "identity_audits": identity_reports,
         "repair_cost_stress_tests": repair_reports,
+        "external_market_observation_reports": external_reports,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
@@ -156,7 +160,8 @@ def main() -> int:
     else:
         print(text, end="")
     return 2 if (any(c["status"] == "INVALID" for c in output["commercial_cases"]["cases"])
-                 or any(c["status"] == "INVALID" for c in market_evidence)) else 0
+                 or any(c["status"] == "INVALID" for c in market_evidence)
+                 or any(c["status"] == "INVALID" for c in external_reports)) else 0
 
 
 if __name__ == "__main__":
