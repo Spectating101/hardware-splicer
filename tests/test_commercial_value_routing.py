@@ -19,6 +19,7 @@ from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
 from hardware_splicer.commercial_external_evidence import evaluate_external_observations
 from hardware_splicer.commercial_institutional_auctions import evaluate_disposal_sources
+from hardware_splicer.commercial_procurement_quote import qualify_procurement_quote, qualify_observation_not_quote
 from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_validation_packets import build_validation_packets
 from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
@@ -995,3 +996,89 @@ def test_commercial_replay_exports_auction_diligence(tmp_path):
     assert x[0]["bid_authorized"] is False
     memo = (tmp_path / "commercial_cohort_replay.md").read_text(encoding="utf-8")
     assert "Institutional surplus" in memo
+
+
+def test_public_market_ads_create_unqualified_rfq_register_not_procurement_bids(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    replay = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert replay.returncode == 0, replay.stderr
+    doc = json.loads((tmp_path / "commercial_cohort_replay.json").read_text(encoding="utf-8"))
+    assert len(doc["external_rfq_register"]) == 21
+    assert doc["procurement_quote_screens"] == []
+    assert all(entry["status"] == "RFQ_REQUIRED" for entry in doc["external_rfq_register"])
+    assert all(entry["landed_cost_per_unit"] is None for entry in doc["external_rfq_register"])
+    assert all(not entry["purchase_authorized"] for entry in doc["external_rfq_register"])
+
+
+def _test_only_supplier_quote():
+    return {
+        "schema_version": "hardware_splicer.procurement_quote.v1",
+        "candidate_id": "TW-PF-ARK-001", "market": "Taiwan", "currency": "TWD",
+        "quantity": 1, "quote_date": "2026-10-25",
+        "quote_kind": "direct_written_seller_quote",
+        "seller_id": "SYNTHETIC-SELLER-DO-NOT-CONTACT",
+        "written_quote_reference": "synthetic-fixture-quote",
+        "exact_sku": "Advantech ARK-1123",
+        "variant_photo_or_serial_reference": "synthetic-fixture-label",
+        "condition_or_test_reference": "synthetic-fixture-power-test",
+        "stock_confirmed_for_quantity": True,
+        "stock_evidence_reference": "synthetic-fixture-stock",
+        "warranty_and_return_terms_reference": "synthetic-fixture-returns",
+        "delivery_commitment_reference": "synthetic-fixture-delivery",
+        "lawful_ownership_review": True, "regulated_waste_review": True,
+        "line_item_currency": "TWD",
+        "total_includes_per_unit_fees": True,
+        "per_unit_costs": {
+            "device_and_options": 2499, "shipping": 60, "tax_and_duties": 0,
+            "test_labor": 150, "repair_and_parts": 0, "data_sanitization": 80,
+            "return_and_warranty": 150, "environmental_handling": 0,
+        },
+    }
+
+
+def test_synthetic_direct_quote_can_pass_cost_review_but_never_authorizes_purchase():
+    evidence = _test_only_supplier_quote()
+    x = qualify_procurement_quote(evidence, as_of="2026-10-26")
+    assert x["status"] == "QUOTE_REVIEW_READY"
+    assert x["landed_cost_per_unit"] == 2939
+    assert x["estimated_landed_total"] == 2939
+    assert x["physical_test_passed_by_this_screen"] is False
+    assert x["purchase_authorized"] is False
+    assert x["value_claim"] == "NO_VALIDATED_ARBITRAGE_MARGIN"
+
+
+def test_market_ad_cannot_be_promoted_by_only_entering_price_and_seller():
+    r = _test_only_supplier_quote()
+    r["quote_kind"] = "marketplace_advertisement"
+    r["written_quote_reference"] = ""
+    r["stock_confirmed_for_quantity"] = False
+    r["condition_or_test_reference"] = ""
+    x = qualify_procurement_quote(r, as_of="2026-10-26")
+    assert x["status"] == "RESEARCH_ONLY"
+    assert "not_a_direct_seller_quote" in x["blockers"]
+    assert "stock_quantity_unconfirmed" in x["blockers"]
+    assert "working_condition_unproven" in x["blockers"]
+
+
+def test_procurement_quote_invalid_if_costs_missing_cross_currency_or_future():
+    r = _test_only_supplier_quote()
+    del r["per_unit_costs"]["shipping"]
+    r["line_item_currency"] = "CNY"
+    r["quote_date"] = "2026-11-26"
+    x = qualify_procurement_quote(r, as_of="2026-10-26")
+    assert x["status"] == "INVALID"
+    assert "missing_cost:shipping" in x["errors"]
+    assert "item_currency_mismatch" in x["errors"]
+    assert "future_dated_quote" in x["errors"]
+
+
+def test_stale_vendor_quote_cannot_enter_current_ready_queue():
+    r = _test_only_supplier_quote()
+    r["quote_date"] = "2025-10-25"
+    x = qualify_procurement_quote(r, as_of="2026-10-26")
+    assert x["status"] == "RESEARCH_ONLY"
+    assert "stale_quote" in x["blockers"]
+    assert not x["purchase_authorized"]
