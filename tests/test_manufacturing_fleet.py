@@ -28,7 +28,7 @@ class FakeDriver:
         self.probes.append(machine_id)
         return MachineObservation(
             machine_id=machine_id, controller="test-driver", state=self.state,
-            identity_confirmed=self.verified,
+            controller_protocol_verified=self.verified,
             capabilities=MachineCapabilities(
                 machine_type=self.machine_type,
                 file_formats=(".gcode",) if self.machine_type == "fdm" else (".stl",),
@@ -71,7 +71,7 @@ def test_busy_unavailable_or_uncertain_printer_is_rejected(state):
 def test_unknown_controller_is_not_trusted():
     fleet = ManufacturingFleet()
     fleet.enroll("fake", FakeDriver(verified=False))
-    with pytest.raises(ManufacturingRefusal, match="identity"):
+    with pytest.raises(ManufacturingRefusal, match="protocol"):
         fleet.inspect("fake")
 
 
