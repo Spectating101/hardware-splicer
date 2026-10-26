@@ -18,6 +18,7 @@ from hardware_splicer.commercial_materials import evaluate_material_plan
 from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
 from hardware_splicer.commercial_external_evidence import evaluate_external_observations
+from hardware_splicer.commercial_institutional_auctions import evaluate_disposal_sources
 from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_validation_packets import build_validation_packets
 from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
@@ -948,3 +949,49 @@ def test_executed_portfolio_replay_writes_external_source_data_report(tmp_path):
     assert "TW-EXT-007" in markdown
     assert "CN-EXT-019" in markdown
     assert "NT$" in markdown
+
+
+def test_institutional_auction_research_is_time_bounded_and_license_gated():
+    root = Path(__file__).resolve().parents[1]
+    sample = json.loads((root / "examples" /
+        "commercial_taiwan_institutional_auctions_2026-10-26.json"
+    ).read_text(encoding="utf-8"))
+    outcome = evaluate_disposal_sources(sample, as_of="2026-10-26")
+    assert outcome["count"] == 3
+    ttu = next(x for x in outcome["auctions"] if x["source_id"] == "TW-AUCTION-001")
+    assert ttu["status"] == "CLOSED_OR_PAST_NOTICE"
+    assert ttu["deposit_twd"] == 10000
+    assert ttu["eligibility"]["recycling_license_required"] is True
+    bli = next(x for x in outcome["auctions"] if x["source_id"] == "TW-AUCTION-002")
+    assert bli["reserve_price_twd_bulk_not_units"] == 388620
+    feed = next(x for x in outcome["auctions"] if x["source_id"] == "TW-AUCTION-FEED-001")
+    assert feed["status"] == "DISCOVERY_FEED_ONLY"
+    assert outcome["licensed_waste_handling_authorized"] is False
+    assert outcome["bid_authorized"] is False
+
+
+def test_new_auction_without_license_is_not_a_purchase_opportunity():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((root / "examples" /
+        "commercial_taiwan_institutional_auctions_2026-10-26.json"
+    ).read_text(encoding="utf-8"))
+    raw["records"][0]["event_date"] = "2026-11-30"
+    x = evaluate_disposal_sources(raw, as_of="2026-10-26")
+    assert x["auctions"][0]["status"] == "LICENSE_ELIGIBILITY_HOLD"
+    assert x["auctions"][0]["bid_authorized"] is False
+
+
+def test_commercial_replay_exports_auction_diligence(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    run = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert run.returncode == 0, run.stderr
+    x = json.loads((tmp_path / "institutional_disposal_diligence.json"
+                   ).read_text(encoding="utf-8"))
+    assert len(x) == 1
+    assert x[0]["count"] == 3
+    assert x[0]["bid_authorized"] is False
+    memo = (tmp_path / "commercial_cohort_replay.md").read_text(encoding="utf-8")
+    assert "Institutional surplus" in memo
