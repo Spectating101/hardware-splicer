@@ -64,7 +64,7 @@ class MoonrakerDriver:
             state = "offline"
         return MachineObservation(
             machine_id=machine_id, controller="moonraker",
-            state=state, identity_confirmed=True,
+            state=state, controller_protocol_verified=True,
             capabilities=MachineCapabilities(
                 machine_type="fdm", file_formats=(".gcode",),
                 can_read_status=True, can_monitor_job=True,
