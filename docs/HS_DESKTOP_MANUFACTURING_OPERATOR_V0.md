@@ -64,3 +64,24 @@ The first real-world benchmark should be a **non-load-bearing mechanical bracket
 - **PCB fab:** output manufacturing package for a board house is usually the primary path; 3D printers handle housings, fixtures and some mechanical parts, *not* typical commercial PCB fabrication.
 
 No proprietary Blueprint implementation or private API is incorporated or represented as available.
+
+## Executable CAD → toolpath bridge (added)
+
+`manufacturing_operator.cad_pipeline` adds two concrete, opt-in local operations:
+
+- `render_openscad(source.scad, target.stl)` invokes installed OpenSCAD to export a mesh and returns input/output digests. It does **not** independently prove a manifold or dimensionally acceptable part.
+- `slice_prusaslicer(mesh.stl, reviewed_profile.ini, output.gcode, profile_reviewed_by_operator=True)` invokes PrusaSlicer's documented `--export-gcode --load ... --output ...` CLI. Both inputs and output are hashed; output is not authorized to print, and this is not a temperature/volume/firmware safety check.
+
+Example Python usage after creating an appropriate HS SCAD design:
+
+```python
+from pathlib import Path
+from hardware_splicer.manufacturing_operator import render_openscad, slice_prusaslicer
+
+mesh = render_openscad(Path("part.scad"), Path("part.stl"))
+plan = slice_prusaslicer(Path("part.stl"), Path("trusted-printer.ini"),
+                         Path("part.gcode"), profile_reviewed_by_operator=True)
+# No print starts. Inspect/approve the actual job before the local upload step.
+```
+
+The CAD/slicer bridge is independent of the OctoPrint adapter, so it can later target Moonraker, PrusaLink or a manufacturing service without rewriting CAD generation. Tests use **mock executables**. No real slicer execution is claimed in this PR.
