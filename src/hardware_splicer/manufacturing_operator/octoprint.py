@@ -34,9 +34,9 @@ def validate_local_printer_url(base_url: str) -> str:
             address = ipaddress.ip_address(parsed.hostname)
         except ValueError as exc:
             raise ManufacturingRefusal("Use localhost or a numeric private/loopback/LAN IP address") from exc
-        if not (address.is_private or address.is_loopback or address.is_link_local):
+        if not (address.is_private or address.is_loopback):
             raise ManufacturingRefusal("Public printer endpoints are not allowed")
-        if address.is_multicast or address.is_unspecified or address.is_reserved:
+        if address.is_multicast or address.is_unspecified or address.is_reserved or address.is_link_local:
             raise ManufacturingRefusal("Unusable printer endpoint")
     if parsed.port is not None and not (1 <= parsed.port <= 65535):
         raise ManufacturingRefusal("Invalid local printer port")
