@@ -40,6 +40,8 @@ def connect_enrolled_controller(
                     return OctoPrintDriver(OctoPrintOperator(
                         base_url=base, api_key=api_key, transport=transport,
                     ))
+        except ManufacturingRefusal:
+            raise
         except (httpx.RequestError, ValueError):
             pass
         try:
