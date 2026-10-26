@@ -1,7 +1,9 @@
 """Local OctoPrint manufacturing adapter — stage-only, never auto-start.
 
 This is a real adapter for a desktop agent's constrained tool surface, not
-proof of fabrication. It intentionally exposes no arbitrary G-code commands,
+proof of fabrication. Upload is disabled until a local operator explicitly
+enables it and reviews auto-start plugins, some of which can start printing
+immediately on file upload. It exposes no arbitrary G-code commands,
 heater control, motor movement, or print-start operation.
 """
 from __future__ import annotations
@@ -72,11 +74,14 @@ class OctoPrintOperator:
         base_url: str,
         api_key: str,
         transport: httpx.BaseTransport | None = None,
+        upload_enabled_by_local_operator: bool = False,
+        auto_start_plugins_checked: bool = False,
     ) -> None:
         origin = validate_local_printer_url(base_url)
         if not api_key or api_key.isspace():
             raise ManufacturingRefusal("A locally configured OctoPrint API key is required")
         self.endpoint = origin
+        self._upload_allowed = upload_enabled_by_local_operator and auto_start_plugins_checked
         self._http = httpx.Client(
             base_url=origin,
             headers={"X-Api-Key": api_key},
@@ -104,11 +109,25 @@ class OctoPrintOperator:
             raise ManufacturingRefusal("Printer did not supply a recognized state")
         return payload
 
+    def current_job(self) -> dict:
+        """Read the active print job; monitoring only."""
+        response = self._http.get("/api/job")
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict) or not isinstance(payload.get("state"), str):
+            raise ManufacturingRefusal("Unrecognized OctoPrint job state")
+        return {"state": payload["state"], "progress": payload.get("progress"),
+                "job": payload.get("job")}
+
     def stage_gcode(self, gcode: Path) -> StagedPrintReceipt:
         """Upload without selecting or starting; requires a separate trusted UI to start.
 
         A successful stage does NOT mean that the G-code is safe or printable.
         """
+        if not self._upload_allowed:
+            raise ManufacturingRefusal(
+                "Local operator must enable upload and confirm auto-start plugins are disabled"
+            )
         path = Path(gcode)
         if not path.is_file() or path.suffix.lower() not in (".gcode", ".gco"):
             raise ManufacturingRefusal("A pre-sliced local G-code file is required")
