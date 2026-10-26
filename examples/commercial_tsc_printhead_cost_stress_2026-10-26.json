@@ -1,0 +1,14 @@
+{
+  "candidate_id": "tsc-ttp244plus-budget-fault",
+  "currency": "TWD",
+  "old_expected_net": 339,
+  "old_success_parts": 300,
+  "success_yield": 0.7,
+  "target_profit": 300,
+  "replacement_cost_low": 1450,
+  "replacement_cost_high": 1800,
+  "source_url": "https://www.ruten.com.tw/find/?q=tsc+%E7%B6%AD%E4%BF%AE",
+  "source_date": "2026-10-26",
+  "listing_note": "Aggregated Taiwan asking-price range for TSC TTP 244 PRO/PLUS printheads, with multiple selectable variants. NOT a model-exact vendor quotation or proof of compatibility. The stress case conditionally assumes required printhead replacement after successful donor diagnosis.",
+  "purchase_authorized": false
+}
