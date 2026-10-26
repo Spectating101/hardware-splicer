@@ -82,8 +82,13 @@ def evaluate_external_observations(payload: Mapping[str, Any]) -> dict[str, Any]
             errors.append(f"missing_source_quality:{ident}")
         if not isinstance(row.get("qualification"), str) or not row["qualification"]:
             errors.append(f"missing_qualification:{ident}")
+        group = row.get("observed_offer_group") or ident
+        if not isinstance(group, str) or not group.strip():
+            errors.append(f"invalid_offer_group:{ident}")
+            group = ident
         output.append({
             "evidence_id": ident,
+            "observed_offer_group": group,
             "candidate_id": cid,
             "market": market,
             "currency": currency,
@@ -107,10 +112,16 @@ def evaluate_external_observations(payload: Mapping[str, Any]) -> dict[str, Any]
     by_candidate: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for obs in output:
         by_candidate[obs["candidate_id"]].append(obs)
+    grouped_offers: dict[str, list[str]] = defaultdict(list)
+    for obs in output:
+        grouped_offers[obs["observed_offer_group"]].append(obs["evidence_id"])
+    cross_listed = {k: v for k, v in grouped_offers.items() if len(v) > 1}
     return {
         "schema_version": "hardware_splicer.external_market_diligence.v1",
         "status": "RESEARCH_LEADS_ONLY",
         "total_observations": len(output),
+        "known_distinct_offer_groups": len(grouped_offers),
+        "known_cross_listed_offer_groups": cross_listed,
         "distinct_candidates_with_observations": len(by_candidate),
         "market_counts": dict(Counter(r["market"] for r in output)),
         "type_counts": dict(Counter(r["kind"] for r in output)),
@@ -124,7 +135,8 @@ def evaluate_external_observations(payload: Mapping[str, Any]) -> dict[str, Any]
         "caveats": [
             "marketplace asking prices and seller stock claims are not completed transactions",
             "indexed web pages may lag seller updates and listing stock",
-            "one seller may cross-list the same device on multiple platforms",
+            "known cross-listings are merged by explicitly recorded offer-group IDs",
+            "other listings may still be same seller or inventory, so group count is NOT an independently audited supply count",
             "components and finished systems cannot be compared as substitutable goods",
             "no landed cost, warranty, repair yield, taxes, freight or approved use is established",
         ],
