@@ -27,6 +27,7 @@ def dossier() -> dict:
         "--pf-run", str(EXAMPLES / "commercial_pf003_fielddeck_snapshot.json"),
         "--case", str(EXAMPLES / "commercial_pf002_itemized_scenario_twd.json"),
         "--market-evidence", str(EXAMPLES / "commercial_market_evidence_tsc_historical.json"),
+        "--external-observations", str(EXAMPLES / "commercial_external_market_observations_2026-10-26.json"),
         "--identity-claims", str(EXAMPLES / "commercial_t620_identity_conflict_2026-10-26.json"),
         "--repair-stress", str(EXAMPLES / "commercial_tsc_printhead_cost_stress_2026-10-26.json"),
         "--as-of", "2026-10-25",
@@ -164,7 +165,34 @@ def markdown(report: dict) -> str:
             f"expected net under the stated conditional assumptions; **{item['status']}**. "
             f"[Parts listing]({item['source_url']})."
         )
-    backlog = report["validation_backlog"]
+    observations = report.get("external_market_observation_reports") or []
+    lines += ["", "## Newly procured public market data — 2026-10-26", ""]
+    for observed in observations:
+        lines += [
+            f"- **{observed['total_observations']}** distinct source-price observations "
+            f"covering **{observed['distinct_candidates_with_observations']}** hardware concepts.",
+            f"- Native markets: {observed['market_counts']}. "
+            f"Seller-advertised prices and retailer catalog prices only; **0 verified sold transactions, 0 signed supplier quotes, 0 authenticated stock**.",
+            "",
+            "| Observation | Candidate | Market | Type | Indexed price | Source |",
+            "| --- | --- | --- | --- | ---: | --- |",
+        ]
+        for item in observed["records"]:
+            lo = item["price_min"]
+            hi = item["price_max"]
+            amt = (f"{_fmt(lo)}+" if hi is None else _fmt(lo) if lo == hi
+                   else f"{_fmt(lo)}–{_fmt(hi)}")
+            lines.append(
+                f"| {item['evidence_id']} | {item['candidate_id']} | {item['currency']} | "
+                f"{item['kind']} | {amt} | [Seller / catalog]({item['source_url']}) |"
+            )
+        lines += [
+            "",
+            "**None of these records is an accepted resale comparable or purchase quote.** "
+            "Taobao aggregators and old listings cannot establish viable arbitrage without "
+            "exact condition, unit option, shipping, landed costs and delivered-sale verification.",
+        ]
+        backlog = report["validation_backlog"]
     lines += [
         "",
         "## Diversified validation wave (research, not inventory acquisition)",
@@ -222,6 +250,11 @@ def main() -> int:
         encoding="utf-8",
     )
     (outdir / "commercial_cohort_replay.md").write_text(markdown(report), encoding="utf-8")
+    (outdir / "commercial_external_market_diligence.json").write_text(
+        json.dumps(report.get("external_market_observation_reports") or [], sort_keys=True,
+                   indent=2, ensure_ascii=False) + "\\n",
+        encoding="utf-8",
+    )
     (outdir / "commercial_validation_packets.json").write_text(
         json.dumps(report.get("validation_packets") or {}, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
