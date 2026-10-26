@@ -893,6 +893,9 @@ def test_public_tw_cn_sourcebook_is_pricebook_not_sold_sales():
     assert out["total_observations"] == 21
     assert out["distinct_candidates_with_observations"] == 8
     assert out["market_counts"] == {"Taiwan": 17, "China": 4}
+    assert out["known_distinct_offer_groups"] == 19
+    assert len(out["known_cross_listed_offer_groups"]) == 2
+    assert out["known_cross_listed_offer_groups"]["TW-ARK-1123-SAME-SELLER"] == ["TW-EXT-007", "TW-EXT-008"]
     assert out["verified_settled_sales"] == 0
     assert out["verified_supplier_quotes"] == 0
     assert out["verified_stock"] == 0
@@ -1010,6 +1013,11 @@ def test_public_market_ads_create_unqualified_rfq_register_not_procurement_bids(
     assert doc["procurement_quote_screens"] == []
     assert all(entry["status"] == "RFQ_REQUIRED" for entry in doc["external_rfq_register"])
     assert all(entry["landed_cost_per_unit"] is None for entry in doc["external_rfq_register"])
+    assert {r["observed_offer_group"] for r in doc["external_rfq_register"]}.__len__() == 19
+    with (tmp_path / "commercial_rfq_register.csv").open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    assert len(rows) == 21
+    assert all(r["status"] == "RFQ_REQUIRED" for r in rows)
     assert all(not entry["purchase_authorized"] for entry in doc["external_rfq_register"])
 
 
