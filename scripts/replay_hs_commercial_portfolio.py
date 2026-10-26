@@ -192,7 +192,7 @@ def markdown(report: dict) -> str:
             "Taobao aggregators and old listings cannot establish viable arbitrage without "
             "exact condition, unit option, shipping, landed costs and delivered-sale verification.",
         ]
-        backlog = report["validation_backlog"]
+    backlog = report["validation_backlog"]
     lines += [
         "",
         "## Diversified validation wave (research, not inventory acquisition)",
@@ -252,7 +252,7 @@ def main() -> int:
     (outdir / "commercial_cohort_replay.md").write_text(markdown(report), encoding="utf-8")
     (outdir / "commercial_external_market_diligence.json").write_text(
         json.dumps(report.get("external_market_observation_reports") or [], sort_keys=True,
-                   indent=2, ensure_ascii=False) + "\\n",
+                   indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
     (outdir / "commercial_validation_packets.json").write_text(
