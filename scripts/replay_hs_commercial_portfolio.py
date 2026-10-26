@@ -28,6 +28,7 @@ def dossier() -> dict:
         "--case", str(EXAMPLES / "commercial_pf002_itemized_scenario_twd.json"),
         "--market-evidence", str(EXAMPLES / "commercial_market_evidence_tsc_historical.json"),
         "--external-observations", str(EXAMPLES / "commercial_external_market_observations_2026-10-26.json"),
+        "--institutional-disposal", str(EXAMPLES / "commercial_taiwan_institutional_auctions_2026-10-26.json"),
         "--identity-claims", str(EXAMPLES / "commercial_t620_identity_conflict_2026-10-26.json"),
         "--repair-stress", str(EXAMPLES / "commercial_tsc_printhead_cost_stress_2026-10-26.json"),
         "--as-of", "2026-10-25",
@@ -192,6 +193,22 @@ def markdown(report: dict) -> str:
             "Taobao aggregators and old listings cannot establish viable arbitrage without "
             "exact condition, unit option, shipping, landed costs and delivered-sale verification.",
         ]
+    disposal = report.get("institutional_disposal_reports") or []
+    lines += ["", "## Institutional surplus and regulated waste-auction sourcing", ""]
+    for report_a in disposal:
+        lines.append(
+            f"Research records: **{report_a['count']}**, all source-evidence only; "
+            "0 authorized auction bids or licensed handling permissions."
+        )
+        for item in report_a["auctions"]:
+            lines.append(
+                f"- {item['agency']}: **{item['status']}**, "
+                f"{item['asset_class']} — [agency/notice]({item['source_url']})."
+            )
+    lines.append(
+        "Some closed school scrap tenders require registered qualified recycling businesses "
+        "and deposits; a public scrap lot is not automatically an accessible used-product purchase."
+    )
     backlog = report["validation_backlog"]
     lines += [
         "",
@@ -250,6 +267,11 @@ def main() -> int:
         encoding="utf-8",
     )
     (outdir / "commercial_cohort_replay.md").write_text(markdown(report), encoding="utf-8")
+    (outdir / "institutional_disposal_diligence.json").write_text(
+        json.dumps(report.get("institutional_disposal_reports") or [], sort_keys=True,
+                   indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     (outdir / "commercial_external_market_diligence.json").write_text(
         json.dumps(report.get("external_market_observation_reports") or [], sort_keys=True,
                    indent=2, ensure_ascii=False) + "\n",
