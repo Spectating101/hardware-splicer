@@ -46,7 +46,7 @@ class MachineObservation:
     controller: str
     state: str
     capabilities: MachineCapabilities
-    identity_confirmed: bool
+    controller_protocol_verified: bool
     detail: str = ""
 
     def __post_init__(self):
@@ -103,8 +103,8 @@ class ManufacturingFleet:
         if driver is None:
             raise ManufacturingRefusal("Machine is not locally enrolled")
         observation = driver.inspect(machine_id)
-        if observation.machine_id != machine_id or not observation.identity_confirmed:
-            raise ManufacturingRefusal("Live controller identity could not be verified")
+        if observation.machine_id != machine_id or not observation.controller_protocol_verified:
+            raise ManufacturingRefusal("Enrolled controller protocol could not be verified")
         return observation
 
     def inspect_all(self) -> list[MachineObservation]:
@@ -163,7 +163,7 @@ class OctoPrintDriver:
             state = "offline"
         return MachineObservation(
             machine_id=machine_id, controller="octoprint", state=state,
-            identity_confirmed=True,
+            controller_protocol_verified=True,
             capabilities=MachineCapabilities(
                 machine_type="fdm", file_formats=(".gcode", ".gco"),
                 can_read_status=True, can_monitor_job=True,
