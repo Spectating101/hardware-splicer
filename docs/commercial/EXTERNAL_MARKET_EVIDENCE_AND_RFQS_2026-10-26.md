@@ -78,3 +78,16 @@ Sources (examples):
 For a **verified acquisition**: exact model and condition, latest seller offer, definitive quantity, tested sample/return terms, itemized all-in delivered cost and legal ownership. For a **verified product**: documented design, authorized parts, manufacturing quotation, physical tests, firmware acceptance and failure/warranty plan. For a **verified sale**: actual completed settlement with accepted customer unit and return exposure. For **own-operation**: measured output/usefulness, power, maintenance and the opportunity cost of occupying equipment/space. No future or current output is assumed merely because a machine powers on.
 
 No outreach, payments, purchases or shipments were made. These texts are supplier contact drafts and must be reviewed before sending.
+
+
+## Institutional surplus: second supply lane, NOT automatically eligible e-waste
+
+The sourcing sweep also recovered three **separately classified public-auction references**; see `examples/commercial_taiwan_institutional_auctions_2026-10-26.json` and `commercial_institutional_auctions.py`. These are not mixed into the 21 item/catalog prices.
+
+1. **National Taitung University**, Oct 22, 2026, disposal of obsolete computers and IT equipment: <https://dga.nttu.edu.tw/p/406-1008-180365%2Cr677.php?Lang=zh-tw>. The particular auction required a certified waste recycler, business registration and NT$10,000 deposit, with rapid removal after payment. The event is **closed**. We cannot simply call this accessible personal used-equipment arbitrage.
+2. **Bureau of Labor Insurance**, notice May 28, 2026: <https://www.bli.gov.tw/0109912.html>. Mixed metal shelving and electrical goods lot, **NT$388,620 starting reserve**, the notice describes broader bidder eligibility including individuals. The reserve is an entire mixed lot—not an electronic device resale price, a final settled bid, or a suitable pilot-scale acquisition.
+3. **Cross-agency surplus notices index:** <https://www.taiwanbuying.com.tw/Query_PTYCompany.ASP>, a discovery channel only. Lot qualification, asset inventory, deposits, transport and any recycler licensing depend on each tender's actual rules.
+
+Taiwan's Ministry of Finance publicly documents the legal process for disposal/valuation of approved retired state property: <https://law-out.mof.gov.tw/LawContent.aspx?id=FL037175>. Institutional auctions may produce substantial supply, but lawful ownership, dismantling/recycling licenses, data wiping, bid eligibility and *whole-lot* freight dominate the economics. **Our recommended first pilot remains ordinary lawful secondhand intact hardware, not unlicensed e-waste handling.**
+
+The auction feed is replayed, but currently it yields no eligible upcoming lot and no unit-level financial arbitrage claims.
