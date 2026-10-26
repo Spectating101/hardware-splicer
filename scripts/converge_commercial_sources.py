@@ -33,6 +33,7 @@ from hardware_splicer.commercial_validation_packets import build_validation_pack
 from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
 from hardware_splicer.commercial_external_evidence import evaluate_external_observations
+from hardware_splicer.commercial_institutional_auctions import evaluate_disposal_sources
 
 
 def load(path: Path) -> dict:
@@ -55,13 +56,15 @@ def main() -> int:
     parser.add_argument("--identity-claims", action="append", type=Path, default=[])
     parser.add_argument("--repair-stress", action="append", type=Path, default=[])
     parser.add_argument("--external-observations", action="append", type=Path, default=[])
+    parser.add_argument("--institutional-disposal", action="append", type=Path, default=[])
     parser.add_argument("--as-of", default="2026-10-25")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not (args.case or args.pf_run or args.salvage_report
             or args.donor_discovery or args.purchase_screen
             or args.purchase_report or args.regional_scan or args.market_evidence
-            or args.identity_claims or args.repair_stress or args.external_observations):
+            or args.identity_claims or args.repair_stress or args.external_observations
+            or args.institutional_disposal):
         parser.error("at least one supported source required")
 
     try:
@@ -102,6 +105,7 @@ def main() -> int:
         ]
         identity_reports = [reconcile_identity_claims(load(path)) for path in args.identity_claims]
         external_reports = [evaluate_external_observations(load(path)) for path in args.external_observations]
+        disposal_reports = [evaluate_disposal_sources(load(path), as_of=args.as_of) for path in args.institutional_disposal]
         repair_reports = []
         for path in args.repair_stress:
             proposal = load(path)
@@ -139,6 +143,7 @@ def main() -> int:
         "identity_audits": identity_reports,
         "repair_cost_stress_tests": repair_reports,
         "external_market_observation_reports": external_reports,
+        "institutional_disposal_reports": disposal_reports,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
