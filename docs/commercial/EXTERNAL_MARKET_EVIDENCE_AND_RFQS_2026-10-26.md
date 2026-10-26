@@ -1,6 +1,6 @@
 # HS source-backed hardware procurement diligence — 2026-10-26
 
-**Scope:** 21 external observations, 8 active first-wave concepts, native TWD/CNY; **0 actual purchases, verified completed sales, written supplier quotations, authenticated stock, customer contracts or measured profit**. Seller adverts are not execution authority.
+**Scope:** 21 external observations (17 Taiwan, 4 mainland China), 8 active first-wave concepts, native TWD/CNY; **0 actual purchases, verified completed sales, written supplier quotations, authenticated stock, customer contracts or measured profit**. Seller adverts are not execution authority.
 
 Source snapshot: [commercial_external_market_observations_2026-10-26.json](../../examples/commercial_external_market_observations_2026-10-26.json). Machine grader: `src/hardware_splicer/commercial_external_evidence.py`. To replay: `PYTHONPATH=src python scripts/replay_hs_commercial_portfolio.py --output-dir artifacts/commercial`.
 
