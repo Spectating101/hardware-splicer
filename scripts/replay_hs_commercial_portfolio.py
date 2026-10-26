@@ -6,6 +6,7 @@ No network, purchases, scraping, supplier communication, or fabrication.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import subprocess
 import sys
@@ -272,6 +273,17 @@ def main() -> int:
                    indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
+    with (outdir / "commercial_rfq_register.csv").open(
+        "w", encoding="utf-8", newline=""
+    ) as handle:
+        fields = [
+            "candidate_id", "evidence_id", "observed_offer_group", "currency",
+            "source_url", "source_price_min", "source_price_max",
+            "status", "landed_cost_per_unit", "purchase_authorized",
+        ]
+        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(report.get("external_rfq_register") or [])
     (outdir / "commercial_external_market_diligence.json").write_text(
         json.dumps(report.get("external_market_observation_reports") or [], sort_keys=True,
                    indent=2, ensure_ascii=False) + "\n",
