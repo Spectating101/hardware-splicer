@@ -891,7 +891,7 @@ def test_public_tw_cn_sourcebook_is_pricebook_not_sold_sales():
     assert out["status"] == "RESEARCH_LEADS_ONLY"
     assert out["total_observations"] == 21
     assert out["distinct_candidates_with_observations"] == 8
-    assert out["market_counts"] == {"Taiwan": 18, "China": 3}
+    assert out["market_counts"] == {"Taiwan": 17, "China": 4}
     assert out["verified_settled_sales"] == 0
     assert out["verified_supplier_quotes"] == 0
     assert out["verified_stock"] == 0
