@@ -17,6 +17,7 @@ from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCO
 from hardware_splicer.commercial_materials import evaluate_material_plan
 from hardware_splicer.commercial_market_evidence import evaluate_market_evidence
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
+from hardware_splicer.commercial_external_evidence import evaluate_external_observations
 from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_validation_packets import build_validation_packets
 from hardware_splicer.commercial_source_catalog import (normalize_historical_purchase_report, normalize_historical_regional_scan)
@@ -879,3 +880,71 @@ def test_eight_source_specific_packets_require_materials_and_physical_validation
     assert all(p["purchase_authorized"] is False for p in packets["packets"])
     assert doc["identity_audits"][0]["status"] == "HOLD_IDENTITY_CONFLICT"
     assert doc["repair_cost_stress_tests"][0]["status"] == "HOLD_PRINTHEAD_CONDITION_OR_COST_REJECT"
+
+
+def test_public_tw_cn_sourcebook_is_pricebook_not_sold_sales():
+    root = Path(__file__).resolve().parents[1]
+    payload = json.loads((root / "examples" /
+        "commercial_external_market_observations_2026-10-26.json").read_text(encoding="utf-8"))
+    out = evaluate_external_observations(payload)
+    assert out["status"] == "RESEARCH_LEADS_ONLY"
+    assert out["total_observations"] == 21
+    assert out["distinct_candidates_with_observations"] == 8
+    assert out["market_counts"] == {"Taiwan": 18, "China": 3}
+    assert out["verified_settled_sales"] == 0
+    assert out["verified_supplier_quotes"] == 0
+    assert out["verified_stock"] == 0
+    assert out["procurement_authorized"] is False
+    assert len(out["by_candidate"]["TW-PF-ARK-001"]) == 3
+    tsc = next(x for x in out["records"] if x["evidence_id"] == "TW-EXT-002")
+    assert tsc["price_min"] == 1450
+    assert tsc["price_max"] == 1800
+    assert tsc["kind"] == "replacement_part_list_price"
+
+
+def test_market_book_prevents_unearned_transaction_or_supplier_quote_upgrade():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((root / "examples" /
+        "commercial_external_market_observations_2026-10-26.json").read_text(encoding="utf-8"))
+    raw["records"][0]["verified_completed_sale"] = True
+    x = evaluate_external_observations(raw)
+    assert x["status"] == "INVALID"
+    assert "illegally_promoted_evidence:TW-EXT-001:verified_completed_sale" in x["errors"]
+    raw["records"][0]["verified_completed_sale"] = False
+    raw["records"][0]["verified_stock"] = True
+    x = evaluate_external_observations(raw)
+    assert x["status"] == "INVALID"
+    assert "illegally_promoted_evidence:TW-EXT-001:verified_stock" in x["errors"]
+
+
+def test_external_book_rejects_fake_fx_price_and_duplicate_evidence_id():
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((root / "examples" /
+        "commercial_external_market_observations_2026-10-26.json").read_text(encoding="utf-8"))
+    raw["records"][0]["currency"] = "CNY"
+    out = evaluate_external_observations(raw)
+    assert "currency_or_market_mismatch:TW-EXT-001" in out["errors"]
+    raw["records"][0]["currency"] = "TWD"
+    raw["records"][1]["evidence_id"] = raw["records"][0]["evidence_id"]
+    out = evaluate_external_observations(raw)
+    assert "duplicate_or_missing_evidence_id:1" in out["errors"]
+
+
+def test_executed_portfolio_replay_writes_external_source_data_report(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    proc = subprocess.run([
+        sys.executable, str(root / "scripts" / "replay_hs_commercial_portfolio.py"),
+        "--output-dir", str(tmp_path),
+    ], cwd=root, capture_output=True, text=True, timeout=60)
+    assert proc.returncode == 0, proc.stderr
+    external = json.loads((
+        tmp_path / "commercial_external_market_diligence.json"
+    ).read_text(encoding="utf-8"))
+    assert len(external) == 1
+    assert external[0]["total_observations"] == 21
+    assert external[0]["verified_supplier_quotes"] == 0
+    assert external[0]["procurement_authorized"] is False
+    markdown = (tmp_path / "commercial_cohort_replay.md").read_text(encoding="utf-8")
+    assert "TW-EXT-007" in markdown
+    assert "CN-EXT-019" in markdown
+    assert "NT$" in markdown
