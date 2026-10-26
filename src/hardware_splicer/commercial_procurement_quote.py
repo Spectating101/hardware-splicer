@@ -147,6 +147,7 @@ def qualify_observation_not_quote(observation: Mapping[str, Any]) -> dict[str, A
     return {
         "candidate_id": observation.get("candidate_id"),
         "evidence_id": observation.get("evidence_id"),
+        "observed_offer_group": observation.get("observed_offer_group"),
         "currency": observation.get("currency"),
         "source_url": observation.get("source_url"),
         "status": "RFQ_REQUIRED",
