@@ -34,6 +34,7 @@ from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
 from hardware_splicer.commercial_repair_stress import repair_cost_stress
 from hardware_splicer.commercial_external_evidence import evaluate_external_observations
 from hardware_splicer.commercial_institutional_auctions import evaluate_disposal_sources
+from hardware_splicer.commercial_procurement_quote import qualify_procurement_quote, qualify_observation_not_quote
 
 
 def load(path: Path) -> dict:
@@ -57,6 +58,7 @@ def main() -> int:
     parser.add_argument("--repair-stress", action="append", type=Path, default=[])
     parser.add_argument("--external-observations", action="append", type=Path, default=[])
     parser.add_argument("--institutional-disposal", action="append", type=Path, default=[])
+    parser.add_argument("--supplier-quote", action="append", type=Path, default=[])
     parser.add_argument("--as-of", default="2026-10-25")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -64,7 +66,7 @@ def main() -> int:
             or args.donor_discovery or args.purchase_screen
             or args.purchase_report or args.regional_scan or args.market_evidence
             or args.identity_claims or args.repair_stress or args.external_observations
-            or args.institutional_disposal):
+            or args.institutional_disposal or args.supplier_quote):
         parser.error("at least one supported source required")
 
     try:
@@ -106,6 +108,10 @@ def main() -> int:
         identity_reports = [reconcile_identity_claims(load(path)) for path in args.identity_claims]
         external_reports = [evaluate_external_observations(load(path)) for path in args.external_observations]
         disposal_reports = [evaluate_disposal_sources(load(path), as_of=args.as_of) for path in args.institutional_disposal]
+        quote_screens = [qualify_procurement_quote(load(path), as_of=args.as_of) for path in args.supplier_quote]
+        rfq_register = [qualify_observation_not_quote(obs)
+                        for book in external_reports if book.get("status") != "INVALID"
+                        for obs in book.get("records", [])]
         repair_reports = []
         for path in args.repair_stress:
             proposal = load(path)
@@ -144,6 +150,8 @@ def main() -> int:
         "repair_cost_stress_tests": repair_reports,
         "external_market_observation_reports": external_reports,
         "institutional_disposal_reports": disposal_reports,
+        "procurement_quote_screens": quote_screens,
+        "external_rfq_register": rfq_register,
         "purchase_authorized": False,
         "physical_authority_granted": False,
         "external_market_demand_proven": False,
@@ -166,7 +174,8 @@ def main() -> int:
         print(text, end="")
     return 2 if (any(c["status"] == "INVALID" for c in output["commercial_cases"]["cases"])
                  or any(c["status"] == "INVALID" for c in market_evidence)
-                 or any(c["status"] == "INVALID" for c in external_reports)) else 0
+                 or any(c["status"] == "INVALID" for c in external_reports)
+                 or any(c["status"] == "INVALID" for c in quote_screens)) else 0
 
 
 if __name__ == "__main__":
