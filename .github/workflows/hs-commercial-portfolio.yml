@@ -42,5 +42,6 @@ jobs:
             artifacts/commercial/commercial_cohort_replay.md
             artifacts/commercial/commercial_validation_packets.json
             artifacts/commercial/commercial_external_market_diligence.json
+            artifacts/commercial/institutional_disposal_diligence.json
           if-no-files-found: error
           retention-days: 30
