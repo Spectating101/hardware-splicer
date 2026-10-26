@@ -91,3 +91,18 @@ The sourcing sweep also recovered three **separately classified public-auction r
 Taiwan's Ministry of Finance publicly documents the legal process for disposal/valuation of approved retired state property: <https://law-out.mof.gov.tw/LawContent.aspx?id=FL037175>. Institutional auctions may produce substantial supply, but lawful ownership, dismantling/recycling licenses, data wiping, bid eligibility and *whole-lot* freight dominate the economics. **Our recommended first pilot remains ordinary lawful secondhand intact hardware, not unlicensed e-waste handling.**
 
 The auction feed is replayed, but currently it yields no eligible upcoming lot and no unit-level financial arbitrage claims.
+
+
+## Phase 2: seller-written quote intake (consolidation update)
+
+The first 21 price records cover **17 Taiwan and four China market observations**. This is not 21 independent sellers or units. In particular:
+
+- `TW-EXT-007` (Ruten ARK-1123) and `TW-EXT-008` (Shopee ARK-1123) are tagged as the **same apparent merchant/inventory pool**.
+- `TW-EXT-012` and `TW-EXT-018` are the **same Meiya Waveshare RS-485 product reference** reused in two HS workstreams.
+- The remaining 17 records have not been independently established as separate seller inventories either. There are **19 known observation groups**, not 19 confirmed available asset lots.
+
+`commercial_external_evidence.py` now preserves this source-linkage information. `commercial_procurement_quote.py` keeps marketplace observations as RFQ leads until a direct written quote supplies exact model, variant evidence, source, tested condition, dated offer, confirmed quantity, warranty and delivery commitments. For each quote, it requires explicit per-unit costs for hardware, shipping, tax/duties, inspection/test time, materials/repair, data sanitization, warranty and environmental handling. Missing expense fields do NOT become free costs.
+
+The portfolio replay publishes `commercial_rfq_register.csv`, one row per price observation with `observed_offer_group`; this is a **source verification work queue**, not an order sheet. It also accepts repeated `--supplier-quote /path/to/dated_quote.json` inputs, but there are currently **zero actual signed/direct supplier quote files**. Synthetic test fixtures prove only the parser and rules, never ownership, contact, supply or profit.
+
+A completed quote screen can at most be `QUOTE_REVIEW_READY`, and always reports `purchase_authorized: false`. Subsequent physical acceptance and validated end-use or sold-price evidence are still separate.
