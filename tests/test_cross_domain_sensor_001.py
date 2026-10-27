@@ -26,6 +26,12 @@ def test_real_components_produce_shared_spec_package(tmp_path):
     assert (out / "FIRMWARE_SOURCE.zip").stat().st_size > 2000
     assert (out / "enclosure.scad").read_text().count("module base()") == 1
     assert "usb_cable_access" in (out / "ENCLOSURE_INPUT.json").read_text()
+    assert "module vented_lid()" in (out / "enclosure.scad").read_text()
+    vents = json.loads((out / "VENTILATION_PLAN.json").read_text())
+    assert vents["slot_count"] == 4
+    assert vents["nominal_lid_material_removed_mm3"] == pytest.approx(76.8)
+    assert vents["catalog_footprints_nonoverlapping"]
+    assert not vents["sensor_airflow_validated"]
     plan = json.loads((out / "DEVICE_PLAN.json").read_text())
     enc = json.loads((out / "ENCLOSURE_INPUT.json").read_text())
     assert enc["inner_w_mm"] == plan["case"]["inner_mm"]["x"]
@@ -69,3 +75,32 @@ def test_usb_cutout_boundary_conflict_refused_without_geometry(tmp_path):
     plan["case"]["usb_cutout"]["z"] = 10_000.0
     with pytest.raises(ValueError, match="USB aperture"):
         module._enclosure_from_plan(plan)
+
+
+def test_sensor_vents_refuse_bad_module_envelope():
+    plan = build_device_plan(module.sensor_only_spec())
+    envelope, source = module._enclosure_from_plan(plan)
+    sensor = next(x for x in plan["modules"] if x["id"] == "sensor")
+    # Simulate a catalog variant too small to support the requested ventilation pattern.
+    sensor["box"]["x1"] = sensor["box"]["x0"] + 7
+    with pytest.raises(ValueError, match="vent pattern"):
+        module._add_sensor_ventilation(plan, envelope, source)
+
+
+def test_sensor_vents_reject_cross_domain_board_overlap():
+    plan = build_device_plan(module.sensor_only_spec())
+    envelope, source = module._enclosure_from_plan(plan)
+    boards = {x["id"]: x for x in plan["modules"]}
+    boards["sensor"]["box"] = dict(boards["mcu"]["box"])
+    with pytest.raises(ValueError, match="footprints overlap"):
+        module._add_sensor_ventilation(plan, envelope, source)
+
+
+def test_sensor_vents_do_not_authorize_manufacture(tmp_path):
+    result = module.build_cross_domain_package(module.sensor_only_spec(), tmp_path / "proposal")
+    assert result["sensor_ventilation_geometry_proposed"]
+    assert not result["enclosure_mounted_and_ventilated"]
+    assert not result["fabrication_authorized"]
+    manifest = json.loads((tmp_path / "proposal/VENTILATION_PLAN.json").read_text())
+    assert manifest["mechanical_mounting_validated"] is False
+    assert manifest["physical_dimensions_measured"] is False
