@@ -42,10 +42,17 @@ def _render(source: str, target: Path, workdir: Path, openscad: str) -> None:
 def _only_component(source: str, component: str) -> str:
     if component not in ("base", "lid"):
         raise ValueError("Only declared enclosure components are supported")
-    matches = re.findall(r"(?m)^enclosure\(\);\s*$", source)
-    if len(matches) != 1:
-        raise ValueError("Cannot safely isolate exactly one enclosure() call")
-    return re.sub(r"(?m)^enclosure\(\);\s*$", f"{component}();", source)
+    # Both ordinary Mecha source and sensor-vented source have one final entrypoint.
+    lines = source.splitlines(keepends=True)
+    entries = [i for i, line in enumerate(lines) if line.strip() in (
+        "enclosure();", "vented_enclosure();"
+    )]
+    if len(entries) != 1:
+        raise ValueError("Cannot safely isolate exactly one enclosure entry point")
+    is_vented = lines[entries[0]].strip() == "vented_enclosure();"
+    call = "vented_lid();" if is_vented and component == "lid" else component + "();"
+    lines[entries[0]] = call + "\n"
+    return "".join(lines)
 
 
 def _read_mesh(path: Path, expected_mm: list[float]) -> dict:
