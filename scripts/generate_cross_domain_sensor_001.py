@@ -133,10 +133,14 @@ def _add_sensor_ventilation(plan: dict, envelope: dict, original_scad: str) -> t
             "x_mm": round(lx + wall, 3), "y_mm": round(ly + wall, 3),
             "width_mm": 8.0, "depth_mm": 1.2,
         })
-    original_tail = "enclosure();\n"
-    if not original_scad.endswith(original_tail) or original_scad.count("\nenclosure();\n") != 1:
+    # Mecha Splicer emits an extra trailing blank line; isolate the final call
+    # by its exact line rather than assuming a particular newline count.
+    lines = original_scad.splitlines(keepends=True)
+    entrypoints = [i for i, line in enumerate(lines) if line.strip() == "enclosure();"]
+    if len(entrypoints) != 1:
         raise ValueError("Mecha-generated enclosure source has an unrecognized final call")
-    scad = original_scad[:-len(original_tail)]
+    lines[entrypoints[0]] = ""
+    scad = "".join(lines)
     scad += "\n// Ventilation tied to the measured-or-declared HS sensor footprint.\n"
     scad += "module vented_lid() {\n  difference() {\n    lid();\n"
     for slot in slots:
