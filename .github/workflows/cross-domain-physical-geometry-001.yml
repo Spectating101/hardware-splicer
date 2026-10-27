@@ -101,5 +101,7 @@ jobs:
             .cache/hs-sensor-firmware-001/CROSS_DOMAIN_RECEIPT.json
             .cache/hs-sensor-firmware-001/FIRMWARE_TARGET_COMPILE_EVIDENCE.json
             .cache/hs-sensor-firmware-001/PLATFORMIO_COMPILE.log
+            .cache/hs-sensor-firmware-001/platformio-application/.pio/build/application/firmware.elf
+            .cache/hs-sensor-firmware-001/platformio-application/.pio/build/application/firmware.bin
           retention-days: 14
           if-no-files-found: warn
