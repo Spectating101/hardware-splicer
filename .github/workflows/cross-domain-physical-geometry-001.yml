@@ -44,6 +44,10 @@ jobs:
           assert evidence["base"]["watertight"] and evidence["lid"]["watertight"]
           assert evidence["base"]["consistent_winding"] and evidence["lid"]["consistent_winding"]
           assert evidence["usb_opening"]["observed_3d_subtraction"]
+          assert evidence["ventilation_openings"]["count"] == 4
+          assert evidence["ventilation_openings"]["vent_cuts_independently_verified"]
+          assert not evidence["ventilation_openings"]["ambient_airflow_performance_verified"]
+          assert evidence["catalog_module_envelope_checks"]
           assert evidence["physical_fit_verified"] is False
           assert evidence["manufacturing_authorized"] is False
           print("Independent mesh evidence present; no physical fit or fabrication claim.")
@@ -55,6 +59,7 @@ jobs:
           path: |
             .cache/hs-sensor-geometry-001/CROSS_DOMAIN_RECEIPT.json
             .cache/hs-sensor-geometry-001/ENCLOSURE_INPUT.json
+            .cache/hs-sensor-geometry-001/VENTILATION_PLAN.json
             .cache/hs-sensor-geometry-001/enclosure.scad
             .cache/hs-sensor-geometry-001/enclosure_base.stl
             .cache/hs-sensor-geometry-001/enclosure_lid.stl
