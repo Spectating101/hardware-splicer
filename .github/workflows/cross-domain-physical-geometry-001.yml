@@ -1,0 +1,140 @@
+name: Cross-Domain Physical Geometry + ESP32 Compile
+
+on:
+  pull_request:
+    paths:
+      - "scripts/generate_cross_domain_sensor_001.py"
+      - "scripts/verify_cross_domain_geometry_001.py"
+      - "scripts/generate_sensor_retention_001.py"
+      - "scripts/verify_sensor_retention_001.py"
+      - "tests/test_sensor_retention_001.py"
+      - "scripts/verify_cross_domain_firmware_target_001.py"
+      - "apps/mecha-splicer/src/**"
+      - ".github/workflows/cross-domain-physical-geometry-001.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mesh-render-and-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install actual OpenSCAD renderer and Python geometry checker
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends openscad
+          python -m pip install -e '.[dev]' 'trimesh==4.8.3' 'numpy<3'
+      - name: Generate matched electrical/firmware/mechanical source
+        run: python scripts/generate_cross_domain_sensor_001.py --output .cache/hs-sensor-geometry-001
+      - name: Render actual base and lid, check watertightness, dimensions and USB cutout volume
+        run: python scripts/verify_cross_domain_geometry_001.py --project .cache/hs-sensor-geometry-001
+      - name: Validate published geometry evidence
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root = Path(".cache/hs-sensor-geometry-001")
+          evidence = json.loads((root / "GEOMETRY_EVIDENCE.json").read_text())
+          provenance = json.loads((root / "CROSS_DOMAIN_RECEIPT.json").read_text())
+          assert evidence["source_spec_sha256"] == provenance["source_spec_sha256"]
+          assert evidence["base"]["watertight"] and evidence["lid"]["watertight"]
+          assert evidence["base"]["consistent_winding"] and evidence["lid"]["consistent_winding"]
+          assert evidence["usb_opening"]["observed_3d_subtraction"]
+          assert evidence["ventilation_openings"]["count"] == 4
+          assert evidence["ventilation_openings"]["vent_cuts_independently_verified"]
+          assert not evidence["ventilation_openings"]["ambient_airflow_performance_verified"]
+          assert evidence["catalog_module_envelope_checks"]
+          assert evidence["physical_fit_verified"] is False
+          assert evidence["manufacturing_authorized"] is False
+          print("Independent mesh evidence present; no physical fit or fabrication claim.")
+      - name: Test source-bound lid mechanical retention proposal
+        run: |
+          pytest -q tests/test_sensor_retention_001.py
+          python scripts/generate_sensor_retention_001.py --project .cache/hs-sensor-geometry-001
+          python scripts/verify_sensor_retention_001.py --project .cache/hs-sensor-geometry-001
+      - name: Refuse physical authority while checking actual bolt-ear meshes
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root = Path(".cache/hs-sensor-geometry-001")
+          manifest = json.loads((root / "LID_RETENTION_PLAN.json").read_text())
+          geometry = json.loads((root / "LID_RETENTION_GEOMETRY_EVIDENCE.json").read_text())
+          assert geometry["retention_ear_and_hole_geometry_verified"]
+          assert geometry["source_spec_sha256"] == manifest["source_spec_sha256"]
+          assert manifest["board_mounting"]["status"] == "BLOCKED_UNVERIFIED_BOARD_MOUNT_HOLES"
+          for key in ("assembly_authorized", "manufacturing_authorized",
+                      "board_mounting_verified", "lid_fastener_strength_verified"):
+              assert geometry[key] is False
+          print("Rendered lid-fastener holes + outer lugs verified, physical retention still unproven.")
+      - name: Upload cross-domain CAD mesh evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sensor-001-geometry-evidence
+          path: |
+            .cache/hs-sensor-geometry-001/CROSS_DOMAIN_RECEIPT.json
+            .cache/hs-sensor-geometry-001/ENCLOSURE_INPUT.json
+            .cache/hs-sensor-geometry-001/VENTILATION_PLAN.json
+            .cache/hs-sensor-geometry-001/enclosure.scad
+            .cache/hs-sensor-geometry-001/enclosure_base.stl
+            .cache/hs-sensor-geometry-001/enclosure_lid.stl
+            .cache/hs-sensor-geometry-001/GEOMETRY_EVIDENCE.json
+            .cache/hs-sensor-geometry-001/LID_RETENTION_PLAN.json
+            .cache/hs-sensor-geometry-001/enclosure_retained.scad
+            .cache/hs-sensor-geometry-001/retained_base.stl
+            .cache/hs-sensor-geometry-001/retained_lid.stl
+            .cache/hs-sensor-geometry-001/LID_RETENTION_GEOMETRY_EVIDENCE.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  compile-actual-esp32-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install pinned PlatformIO Core and HS deps
+        run: |
+          python -m pip install -e '.[dev]' 'platformio==6.1.18'
+          pio --version
+      - name: Generate matching cross-domain source
+        run: python scripts/generate_cross_domain_sensor_001.py --output .cache/hs-sensor-firmware-001
+      - name: Compile the exact generated ESP32 firmware ZIP
+        run: python scripts/verify_cross_domain_firmware_target_001.py --project .cache/hs-sensor-firmware-001
+      - name: Verify target compile evidence and authority boundaries
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root = Path(".cache/hs-sensor-firmware-001")
+          evidence = json.loads((root / "FIRMWARE_TARGET_COMPILE_EVIDENCE.json").read_text())
+          provenance = json.loads((root / "CROSS_DOMAIN_RECEIPT.json").read_text())
+          assert evidence["source_spec_sha256"] == provenance["source_spec_sha256"]
+          assert evidence["firmware_source_zip_sha256"] == provenance["artifacts"]["FIRMWARE_SOURCE.zip"]["sha256"]
+          assert evidence["compile_pass"] and len(evidence["compiled_artifacts"]) == 2
+          assert not evidence["real_hardware_flashing"] and not evidence["firmware_authorized"]
+          print("Real cross-compiled ESP32 application matched source revision, no real device tested.")
+      - name: Upload generated firmware compile evidence and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sensor-001-target-compile-evidence
+          path: |
+            .cache/hs-sensor-firmware-001/CROSS_DOMAIN_RECEIPT.json
+            .cache/hs-sensor-firmware-001/FIRMWARE_TARGET_COMPILE_EVIDENCE.json
+            .cache/hs-sensor-firmware-001/PLATFORMIO_COMPILE.log
+            .cache/hs-sensor-firmware-001/platformio-application/.pio/build/application/firmware.elf
+            .cache/hs-sensor-firmware-001/platformio-application/.pio/build/application/firmware.bin
+          retention-days: 14
+          if-no-files-found: warn
