@@ -20,7 +20,8 @@ def generate_candidate(output: Path) -> dict:
         "candidate": "hs_build_challenge_001_lm2596_fixed5",
         "origin": "hs_generated_topology_proposal",
         "reference_basis": DATASHEET,
-        "reference_design_reused": True,\n        "reference_reuse_scope": "TI published fixed-output example topology, not a copied finished PCB",
+        "reference_design_reused": True,
+        "reference_reuse_scope": "TI published fixed-output example topology, not a copied finished PCB",
         "target": {"input_nominal_v": 24, "output_v": 5, "load_max_a": 0.5,
                    "source": "isolated current-limited bench supply"},
         "components": [
