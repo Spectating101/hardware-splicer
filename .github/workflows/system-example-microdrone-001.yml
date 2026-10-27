@@ -1,0 +1,58 @@
+name: HS Microdrone System Example 001
+
+on:
+  pull_request:
+    paths:
+      - "examples/system_examples/microdrone_sensor_deck_001.json"
+      - "examples/robotics_guidance/crazyflie_custom_sensor_deck.json"
+      - "src/hardware_splicer/system_example_microdrone.py"
+      - "scripts/generate_microdrone_system_001.py"
+      - "tests/test_system_example_microdrone.py"
+      - ".github/workflows/system-example-microdrone-001.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engineering-system-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install HS dev dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Execute adversarial engineering constraints
+        run: pytest -q tests/test_system_example_microdrone.py
+      - name: Compile actual system design evidence package
+        run: python scripts/generate_microdrone_system_001.py --output .cache/hs-system-microdrone-001
+      - name: Verify provenance and no physical authority
+        shell: python
+        run: |
+          import hashlib
+          import json
+          from pathlib import Path
+          project = Path(".cache/hs-system-microdrone-001")
+          receipt = json.loads((project / "PACKAGE_RECEIPT.json").read_text())
+          assessment = json.loads((project / "MICRODRONE_ASSESSMENT.json").read_text())
+          for filename, record in receipt["files"].items():
+              data = (project / filename).read_bytes()
+              assert hashlib.sha256(data).hexdigest() == record["sha256"]
+              assert len(data) == record["bytes"]
+          assert assessment["preliminary_checks_pass"]
+          assert assessment["verdict"] == "DESIGN_REVIEW_BLOCKED"
+          assert assessment["mass_and_power"]["flight_time_projection_min"] is None
+          for key, authorized in assessment["artifact_authority"].items():
+              assert authorized is False, key
+          print("Offline microdrone cross-domain design package verified; flight, flashing, manufacturing blocked.")
+      - name: Retain cross-domain design evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-microdrone-system-example-001
+          path: .cache/hs-system-microdrone-001/
+          retention-days: 14
+          if-no-files-found: error
