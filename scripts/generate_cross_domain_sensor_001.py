@@ -15,10 +15,14 @@ import sys
 import zipfile
 from pathlib import Path
 
+# Direct execution from scripts/ otherwise imports the legacy scripts/hardware_splicer.py
+# instead of the installed src/hardware_splicer package.
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
 from hardware_splicer.device_application import build_device_application
 from hardware_splicer.device_plan import build_device_plan, example_specs
 
-ROOT = Path(__file__).resolve().parents[1]
 MECHA_SRC = ROOT / "apps/mecha-splicer/src"
 
 
