@@ -133,19 +133,19 @@ def _add_sensor_ventilation(plan: dict, envelope: dict, original_scad: str) -> t
             "x_mm": round(lx + wall, 3), "y_mm": round(ly + wall, 3),
             "width_mm": 8.0, "depth_mm": 1.2,
         })
-    original_tail = "enclosure();\\n"
-    if not original_scad.endswith(original_tail) or original_scad.count("\\nenclosure();\\n") != 1:
+    original_tail = "enclosure();\n"
+    if not original_scad.endswith(original_tail) or original_scad.count("\nenclosure();\n") != 1:
         raise ValueError("Mecha-generated enclosure source has an unrecognized final call")
     scad = original_scad[:-len(original_tail)]
-    scad += "\\n// Ventilation tied to the measured-or-declared HS sensor footprint.\\n"
-    scad += "module vented_lid() {\\n  difference() {\\n    lid();\\n"
+    scad += "\n// Ventilation tied to the measured-or-declared HS sensor footprint.\n"
+    scad += "module vented_lid() {\n  difference() {\n    lid();\n"
     for slot in slots:
         scad += (f'    translate([{slot["x_mm"]}, {slot["y_mm"]}, -1]) '
-                 f'cube([{slot["width_mm"]}, {slot["depth_mm"]}, lid_t + 2], center=false);\\n')
-    scad += "  }\\n}\\n"
-    scad += (f"module vented_enclosure() {{\\n  base();\\n  translate([0, 0, "
-             f"{round(inner_h + wall + 1.0, 3)}]) vented_lid();\\n}}\\n"
-             "vented_enclosure();\\n")
+                 f'cube([{slot["width_mm"]}, {slot["depth_mm"]}, lid_t + 2], center=false);\n')
+    scad += "  }\n}\n"
+    scad += (f"module vented_enclosure() {{\n  base();\n  translate([0, 0, "
+             f"{round(inner_h + wall + 1.0, 3)}]) vented_lid();\n}}\n"
+             "vented_enclosure();\n")
     manifest = {
         "schema_version": "hardware_splicer.cross_domain_sensor_ventilation.v1",
         "source_revision": "derived_from_DEVICE_PLAN_and_ENCLOSURE_INPUT",
