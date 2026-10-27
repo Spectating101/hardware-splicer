@@ -19,6 +19,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "apps/mecha-splicer/src"))
 
 
@@ -78,7 +79,7 @@ def _read_mesh(path: Path, expected_mm: list[float]) -> dict:
 def inspect_enclosure(project: Path, *, openscad: str = "openscad") -> dict:
     project = Path(project).resolve()
     record = json.loads((project / "CROSS_DOMAIN_RECEIPT.json").read_text())
-    paths = ("ENCLOSURE_INPUT.json", "enclosure.scad", "DEVICE_SPEC.json")
+    paths = ("ENCLOSURE_INPUT.json", "VENTILATION_PLAN.json", "enclosure.scad", "DEVICE_SPEC.json", "DEVICE_PLAN.json")
     for name in paths:
         if sha((project / name).read_bytes()) != record["artifacts"][name]["sha256"]:
             raise ValueError(f"Source artifact hash mismatch: {name}")
@@ -92,9 +93,30 @@ def inspect_enclosure(project: Path, *, openscad: str = "openscad") -> dict:
 
     envelope = json.loads((project / "ENCLOSURE_INPUT.json").read_text())
     validated = EnclosureSpec.model_validate(envelope)
+    # Recompute the intended assembly and vents from the hashed device source;
+    # do not trust user-supplied ventilation-plan or STL metadata.
+    import importlib.util
+    from hardware_splicer.device_plan import build_device_plan
+
+    spec = json.loads((project / "DEVICE_SPEC.json").read_text())
+    plan = json.loads((project / "DEVICE_PLAN.json").read_text())
+    if build_device_plan(spec) != plan:
+        raise ValueError("Device plan does not derive from the source specification")
+    generator_path = ROOT / "scripts/generate_cross_domain_sensor_001.py"
+    generator_spec = importlib.util.spec_from_file_location("hs_sensor_geometry_bridge", generator_path)
+    generator = importlib.util.module_from_spec(generator_spec)
+    generator_spec.loader.exec_module(generator)
+    expected_envelope, basic_source = generator._enclosure_from_plan(plan)
+    expected_vent, expected_scad = generator._add_sensor_ventilation(
+        plan, expected_envelope, basic_source
+    )
+    if expected_envelope != envelope or expected_vent != json.loads(
+        (project / "VENTILATION_PLAN.json").read_text()
+    ):
+        raise ValueError("Enclosure or ventilation manifest is inconsistent with device plan")
     generated = (project / "enclosure.scad").read_text()
-    if generate_enclosure_scad(validated) != generated:
-        raise ValueError("Actual CAD source disagrees with bound enclosure parameters")
+    if expected_scad != generated:
+        raise ValueError("Actual CAD source disagrees with bound enclosure and vents")
     w, d, h = validated.inner_w_mm, validated.inner_d_mm, validated.inner_h_mm
     wall, floor = validated.wall_mm, validated.floor_mm
     base_dims = [w + 2 * wall, d + 2 * wall, h + floor]
@@ -116,6 +138,19 @@ def inspect_enclosure(project: Path, *, openscad: str = "openscad") -> dict:
         _render(_only_component(generate_enclosure_scad(no_hole_model), "base"),
                 reference, work, binary)
         reference_result = _read_mesh(reference, base_dims)
+        blank_lid = work / "unvented_lid.stl"
+        _render(_only_component(basic_source, "lid"), blank_lid, work, binary)
+        unvented_lid_result = _read_mesh(blank_lid, lid_dims)
+
+    vent_removed = unvented_lid_result["volume_mm3"] - lid_result["volume_mm3"]
+    intended_vent_removed = expected_vent["nominal_lid_material_removed_mm3"]
+    if intended_vent_removed <= 0 or not math.isclose(
+        vent_removed, intended_vent_removed, rel_tol=0.025, abs_tol=0.5
+    ):
+        raise ValueError(
+            "3D lid vents do not remove the expected material: "
+            f"{vent_removed:.2f} vs {intended_vent_removed:.2f} mm3"
+        )
 
     cuts = validated.cutouts
     if len(cuts) != 1 or cuts[0].kind != "rect" or cuts[0].face != "left":
@@ -143,6 +178,15 @@ def inspect_enclosure(project: Path, *, openscad: str = "openscad") -> dict:
             "observed_removed_mm3": round(actual_removed, 3),
             "observed_3d_subtraction": True,
         },
+        "ventilation_openings": {
+            "count": len(expected_vent["lid_slots_mm"]),
+            "nominal_removed_mm3": intended_vent_removed,
+            "observed_removed_mm3": round(vent_removed, 3),
+            "vent_cuts_independently_verified": True,
+            "ambient_airflow_performance_verified": False,
+        },
+        "catalog_module_envelope_checks": True,
+        "mechanical_retention_verified": False,
         "checked_source_artifact_hashes": True,
         "physical_fit_verified": False,
         "mechanical_strength_verified": False,
