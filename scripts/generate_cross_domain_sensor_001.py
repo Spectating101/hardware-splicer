@@ -77,13 +77,103 @@ def _enclosure_from_plan(plan: dict) -> tuple[dict, str]:
     return envelope, generate_enclosure_scad(cad)
 
 
+
+def _add_sensor_ventilation(plan: dict, envelope: dict, original_scad: str) -> tuple[dict, str]:
+    """Project plan's placed boards to the Mecha case and cut sensor-facing lid slots.
+
+    Deterministic *catalog-envelope* check only; no measured mounting, air
+    exchange or sensor accuracy is inferred. Uses the HS-centered XYZ mapping.
+    """
+    dims = plan["case"]["inner_mm"]
+    inner_w, inner_d, inner_h = dims["x"], dims["z"], dims["y"]
+    wall = envelope["wall_mm"]
+    components = []
+    for module in plan["modules"]:
+        box = module["box"]
+        x0, x1 = box["x0"] + inner_w / 2, box["x1"] + inner_w / 2
+        y0, y1 = box["z0"] + inner_d / 2, box["z1"] + inner_d / 2
+        z0 = module["base_y"] - module["below_board_mm"]
+        z1 = module["base_y"] + module["pcb_mm"]["z"] + module["above_board_mm"]
+        if min(x0, y0, z0) < -0.01 or x1 > inner_w + 0.01 or y1 > inner_d + 0.01 or z1 > wall + inner_h + 0.01:
+            raise ValueError(f"Catalog component {module['id']} extends past declared enclosure bounds")
+        components.append({
+            "id": module["id"], "module": module["module"], "kind": module["kind"],
+            "board_xy_mm": [round(x0, 3), round(y0, 3), round(x1, 3), round(y1, 3)],
+            "height_mm": [round(z0, 3), round(z1, 3)],
+            "dimension_basis": "catalog_and_declared_overrides_not_measured",
+        })
+    for index, first in enumerate(components):
+        a = first["board_xy_mm"]
+        for second in components[index + 1:]:
+            b = second["board_xy_mm"]
+            if min(a[2], b[2]) > max(a[0], b[0]) and min(a[3], b[3]) > max(a[1], b[1]):
+                raise ValueError("Declared PCB footprints overlap: " + first["id"] + "/" + second["id"])
+    sensors = [x for x in components if x["module"] == "adafruit-bme280-stemma-qt"]
+    if len(sensors) != 1:
+        raise ValueError("BME280 ventilation fixture requires exactly one sensor module")
+    sx0, sy0, sx1, sy1 = sensors[0]["board_xy_mm"]
+    cx, cy = (sx0 + sx1) / 2, (sy0 + sy1) / 2
+    # Four narrow 8 x 1.2 mm vents entirely over the BME280 breakout region.
+    # These *do not* prove ambient response, humidity accuracy or FDM clearance.
+    slots = []
+    for offset in (-4.8, -1.6, 1.6, 4.8):
+        lx, ly = round(cx - 4.0, 3), round(cy + offset - 0.6, 3)
+        if not (sx0 + 2 <= lx and lx + 8 <= sx1 - 2 and
+                sy0 + 2 <= ly and ly + 1.2 <= sy1 - 2):
+            raise ValueError("Sensor vent pattern cannot fit within breakout footprint")
+        if not (lx >= 2 and ly >= 2 and lx + 8 <= inner_w - 2 and ly + 1.2 <= inner_d - 2):
+            raise ValueError("Sensor vent too close to enclosure rim")
+        for component in components:
+            if component["id"] == sensors[0]["id"]:
+                continue
+            a, b, c, d = component["board_xy_mm"]
+            if min(lx + 8, c) > max(lx, a) and min(ly + 1.2, d) > max(ly, b):
+                raise ValueError("Sensor vents overlap another component footprint")
+        slots.append({
+            "x_mm": round(lx + wall, 3), "y_mm": round(ly + wall, 3),
+            "width_mm": 8.0, "depth_mm": 1.2,
+        })
+    original_tail = "enclosure();\\n"
+    if not original_scad.endswith(original_tail) or original_scad.count("\\nenclosure();\\n") != 1:
+        raise ValueError("Mecha-generated enclosure source has an unrecognized final call")
+    scad = original_scad[:-len(original_tail)]
+    scad += "\\n// Ventilation tied to the measured-or-declared HS sensor footprint.\\n"
+    scad += "module vented_lid() {\\n  difference() {\\n    lid();\\n"
+    for slot in slots:
+        scad += (f'    translate([{slot["x_mm"]}, {slot["y_mm"]}, -1]) '
+                 f'cube([{slot["width_mm"]}, {slot["depth_mm"]}, lid_t + 2], center=false);\\n')
+    scad += "  }\\n}\\n"
+    scad += (f"module vented_enclosure() {{\\n  base();\\n  translate([0, 0, "
+             f"{round(inner_h + wall + 1.0, 3)}]) vented_lid();\\n}}\\n"
+             "vented_enclosure();\\n")
+    manifest = {
+        "schema_version": "hardware_splicer.cross_domain_sensor_ventilation.v1",
+        "source_revision": "derived_from_DEVICE_PLAN_and_ENCLOSURE_INPUT",
+        "catalog_component_envelopes": components,
+        "sensor_id": sensors[0]["id"],
+        "lid_slots_mm": slots,
+        "slot_count": len(slots),
+        "nominal_lid_material_removed_mm3": round(
+            sum(x["width_mm"] * x["depth_mm"] * envelope["lid_mm"] for x in slots), 3
+        ),
+        "catalog_footprints_nonoverlapping": True,
+        "catalog_component_envelopes_within_case": True,
+        "lid_vent_slots_over_sensor_footprint": True,
+        "sensor_airflow_validated": False,
+        "mechanical_mounting_validated": False,
+        "physical_dimensions_measured": False,
+    }
+    return manifest, scad
+
+
 def build_cross_domain_package(spec: dict, output: Path) -> dict:
     """Generate all artifacts from one input with an explicit provenance receipt."""
     # Both subsystems re-evaluate the same spec; no caller-supplied plan accepted.
     spec_bytes = _json(spec)
     plan = build_device_plan(spec)
     firmware_meta, firmware_zip = build_device_application(spec)
-    enclosure, scad = _enclosure_from_plan(plan)
+    enclosure, basic_scad = _enclosure_from_plan(plan)
+    ventilation, scad = _add_sensor_ventilation(plan, enclosure, basic_scad)
 
     with zipfile.ZipFile(io.BytesIO(firmware_zip)) as archive:
         firmware_declared_spec = json.loads(archive.read("DEVICE_SPEC.json"))
@@ -105,6 +195,7 @@ def build_cross_domain_package(spec: dict, output: Path) -> dict:
         "DEVICE_PLAN.json": _json(plan),
         "FIRMWARE_SOURCE.zip": firmware_zip,
         "ENCLOSURE_INPUT.json": _json(enclosure),
+        "VENTILATION_PLAN.json": _json(ventilation),
         "enclosure.scad": scad.encode(),
     }
     for filename, payload in files.items():
@@ -123,6 +214,7 @@ def build_cross_domain_package(spec: dict, output: Path) -> dict:
         "geometry_render_status": "NOT_RUN",
         "independent_fit_validation": False,
         "enclosure_mounted_and_ventilated": False,
+        "sensor_ventilation_geometry_proposed": True,
         "native_eda_artifacts_verified": False,
         "device_physically_assembled": False,
         "hardware_measurements_present": False,
@@ -132,7 +224,7 @@ def build_cross_domain_package(spec: dict, output: Path) -> dict:
         "unresolved": [
             "Board and breakout dimensions must be measured for exact purchased versions",
             "USB plug aperture placement and clearance require physical test-fit",
-            "Enclosure has no validated sensor ventilation or mechanical mounting",
+            "Enclosure now has derived vent cutouts, but airflow and mounting remain unvalidated",
             "Lid geometry lacks approved retention mechanism or tested seals",
             "No native original KiCad design or PCB, no electrical measurement",
             "No verified printer material profile, sliced toolpath or device authorization",
