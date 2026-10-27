@@ -49,6 +49,41 @@ jobs:
                        "power_on_authorized", "device_physically_assembled"):
               assert record[gate] is False
           print("Cross-domain source artifacts and digest provenance verified; no physical authority.")
+      - name: Compile and execute generated firmware host harness
+        shell: python
+        run: |
+          import json
+          import subprocess
+          import zipfile
+          from pathlib import Path
+
+          target = Path(".cache/hs-cross-domain-sensor-001")
+          extracted = Path(".cache/hs-cross-domain-host-test")
+          extracted.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(target / "FIRMWARE_SOURCE.zip") as bundle:
+              bundle.extractall(extracted)
+          compile_cmd = ["g++", "-std=c++17", "-Wall", "-Wextra", "-Werror",
+                         "-I", "src", "test/host/harness.cpp", "-o", "host-harness"]
+          compiled = subprocess.run(compile_cmd, cwd=extracted, capture_output=True, text=True, timeout=60)
+          report = {
+              "kind": "generated_firmware_host_model_test",
+              "compiler_command": compile_cmd,
+              "compiler_returncode": compiled.returncode,
+              "compiler_stderr": compiled.stderr[-2500:],
+              "hardware_executed": False,
+              "real_firmware_flashing": False,
+              "physical_behavior_verified": False,
+          }
+          if compiled.returncode == 0:
+              ran = subprocess.run(["./host-harness"], cwd=extracted,
+                                   capture_output=True, text=True, timeout=60)
+              report["harness_returncode"] = ran.returncode
+              report["stdout_tail"] = ran.stdout[-3000:]
+              report["stderr_tail"] = ran.stderr[-1500:]
+          (target / "HOST_HARNESS_EVIDENCE.json").write_text(json.dumps(report, indent=2) + "\n")
+          assert compiled.returncode == 0, compiled.stderr[-2500:]
+          assert report["harness_returncode"] == 0, report.get("stderr_tail")
+          print("Generated firmware host behavioral harness passed; no real hardware involved.")
       - name: Publish candidate artifacts for independent inspection
         uses: actions/upload-artifact@v4
         with:
