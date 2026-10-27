@@ -6,6 +6,7 @@ on:
       - "examples/system_examples/microdrone_sensor_deck_001.json"
       - "examples/system_examples/microdrone_firmware_app/**"
       - "scripts/prepare_microdrone_firmware_app.py"
+      - "scripts/audit_microdrone_deck_template.py"
       - "scripts/verify_microdrone_crazyflow.py"
       - ".github/workflows/microdrone-firmware-simulation.yml"
   workflow_dispatch:
@@ -14,6 +15,40 @@ permissions:
   contents: read
 
 jobs:
+  audit-pinned-crazyflie-ecad-template:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ECAD_SHA: d407886d21958346fb94a4e9fc28c5b41eb0f408
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the upstream historic KiCad expansion template
+        run: |
+          git clone --filter=blob:none https://github.com/bitcraze/crazyflie2-exp-template-electronics.git .cache/cf-deck-template
+          git -C .cache/cf-deck-template checkout --detach "$ECAD_SHA"
+          test "$(git -C .cache/cf-deck-template rev-parse HEAD)" = "$ECAD_SHA"
+      - name: Independently compare source netlist's real pins against HS deck requirements
+        run: |
+          python scripts/audit_microdrone_deck_template.py --vendor .cache/cf-deck-template --commit "$ECAD_SHA" --design examples/system_examples/microdrone_sensor_deck_001.json --out .cache/hs-deck-ecad-source
+      - name: Refuse to treat a verified connector as a routed working PCB
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          r=json.loads(Path(".cache/hs-deck-ecad-source/DECK_ECAD_UPSTREAM_AUDIT.json").read_text())
+          assert r["legacy_template_audit_pass"]
+          assert not r["new_sensor_circuit_authored"]
+          assert not r["modern_kicad_native_schematic_validated"]
+          assert not r["board_routed_or_drc_validated"]
+          assert not r["manufacturing_authorized"]
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hs-microdrone-deck-ecad-template-audit
+          path: .cache/hs-deck-ecad-source/
+          retention-days: 14
+          if-no-files-found: warn
+
   build-pinned-crazyflie-firmware:
     runs-on: ubuntu-22.04
     timeout-minutes: 40
