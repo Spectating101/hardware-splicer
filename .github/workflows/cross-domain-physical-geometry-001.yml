@@ -5,6 +5,9 @@ on:
     paths:
       - "scripts/generate_cross_domain_sensor_001.py"
       - "scripts/verify_cross_domain_geometry_001.py"
+      - "scripts/generate_sensor_retention_001.py"
+      - "scripts/verify_sensor_retention_001.py"
+      - "tests/test_sensor_retention_001.py"
       - "scripts/verify_cross_domain_firmware_target_001.py"
       - "apps/mecha-splicer/src/**"
       - ".github/workflows/cross-domain-physical-geometry-001.yml"
@@ -51,6 +54,26 @@ jobs:
           assert evidence["physical_fit_verified"] is False
           assert evidence["manufacturing_authorized"] is False
           print("Independent mesh evidence present; no physical fit or fabrication claim.")
+      - name: Test source-bound lid mechanical retention proposal
+        run: |
+          pytest -q tests/test_sensor_retention_001.py
+          python scripts/generate_sensor_retention_001.py --project .cache/hs-sensor-geometry-001
+          python scripts/verify_sensor_retention_001.py --project .cache/hs-sensor-geometry-001
+      - name: Refuse physical authority while checking actual bolt-ear meshes
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root = Path(".cache/hs-sensor-geometry-001")
+          manifest = json.loads((root / "LID_RETENTION_PLAN.json").read_text())
+          geometry = json.loads((root / "LID_RETENTION_GEOMETRY_EVIDENCE.json").read_text())
+          assert geometry["retention_ear_and_hole_geometry_verified"]
+          assert geometry["source_spec_sha256"] == manifest["source_spec_sha256"]
+          assert manifest["board_mounting"]["status"] == "BLOCKED_UNVERIFIED_BOARD_MOUNT_HOLES"
+          for key in ("assembly_authorized", "manufacturing_authorized",
+                      "board_mounting_verified", "lid_fastener_strength_verified"):
+              assert geometry[key] is False
+          print("Rendered lid-fastener holes + outer lugs verified, physical retention still unproven.")
       - name: Upload cross-domain CAD mesh evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -64,6 +87,11 @@ jobs:
             .cache/hs-sensor-geometry-001/enclosure_base.stl
             .cache/hs-sensor-geometry-001/enclosure_lid.stl
             .cache/hs-sensor-geometry-001/GEOMETRY_EVIDENCE.json
+            .cache/hs-sensor-geometry-001/LID_RETENTION_PLAN.json
+            .cache/hs-sensor-geometry-001/enclosure_retained.scad
+            .cache/hs-sensor-geometry-001/retained_base.stl
+            .cache/hs-sensor-geometry-001/retained_lid.stl
+            .cache/hs-sensor-geometry-001/LID_RETENTION_GEOMETRY_EVIDENCE.json
           retention-days: 14
           if-no-files-found: warn
 
