@@ -1,0 +1,127 @@
+name: HS Microdrone Upstream Firmware and Simulation
+
+on:
+  pull_request:
+    paths:
+      - "examples/system_examples/microdrone_sensor_deck_001.json"
+      - "examples/system_examples/microdrone_firmware_app/**"
+      - "scripts/prepare_microdrone_firmware_app.py"
+      - "scripts/verify_microdrone_crazyflow.py"
+      - ".github/workflows/microdrone-firmware-simulation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pinned-crazyflie-firmware:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    env:
+      UPSTREAM_SHA: b48aba18a675fe950a88d96586fd09e49d82a38b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ARM embedded toolchain and required utilities
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi make cmake ninja-build
+          python -m pip install -e '.[dev]'
+      - name: Check out the precise upstream Crazyflie firmware revision
+        run: |
+          git clone --filter=blob:none https://github.com/bitcraze/crazyflie-firmware.git .cache/crazyflie-firmware
+          git -C .cache/crazyflie-firmware checkout --detach "$UPSTREAM_SHA"
+          git -C .cache/crazyflie-firmware submodule update --init --recursive
+          test "$(git -C .cache/crazyflie-firmware rev-parse HEAD)" = "$UPSTREAM_SHA"
+      - name: Prepare source-bound non-actuating Crazyflie firmware app
+        run: |
+          python scripts/prepare_microdrone_firmware_app.py --upstream .cache/crazyflie-firmware --commit "$UPSTREAM_SHA" --out .cache/hs-cf-firmware-proof
+      - name: Compile firmware with Bitcraze's actual STM32 Kbuild
+        shell: bash
+        run: |
+          set -o pipefail
+          make -C .cache/crazyflie-firmware/examples/hs_sensor_deck cf2_defconfig 2>&1 | tee .cache/hs-cf-firmware-proof/CONFIGURE.log
+          make -C .cache/crazyflie-firmware/examples/hs_sensor_deck -j2 2>&1 | tee .cache/hs-cf-firmware-proof/BUILD.log
+      - name: Independently verify app object, source hash and compiler outputs
+        shell: python
+        run: |
+          import hashlib
+          import json
+          from pathlib import Path
+          root=Path(".cache/hs-cf-firmware-proof")
+          checked=Path(".cache/crazyflie-firmware")
+          manifest=json.loads((root/"FIRMWARE_APP_INPUT_RECEIPT.json").read_text())
+          source=checked/"examples/hs_sensor_deck"
+          for name,digest in manifest["app_sources"].items():
+              assert hashlib.sha256((source/name).read_bytes()).hexdigest()==digest
+          all_elf=list(checked.rglob("*.elf"))
+          assert all_elf, "Vendor firmware did not produce any ARM ELF"
+          all_obj=[p for p in checked.rglob("hs_sensor_deck.o") if p.is_file()]
+          assert all_obj, "Custom HS app never compiled into object code"
+          values={
+              "schema_version":"hardware_splicer.crazyflie_vendor_build_result.v1",
+              "upstream_commit":manifest["upstream_commit"],
+              "design_sha256":manifest["design_sha256"],
+              "custom_app_object_compiled":True,
+              "generated_elfs":[{"file":p.relative_to(checked).as_posix(),"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in all_elf[:6]],
+              "custom_app_object_sha256":hashlib.sha256(all_obj[0].read_bytes()).hexdigest(),
+              "upstream_vendor_firmware_built":True,
+              "real_sensor_driver_built":False,
+              "board_flashing_performed":False,
+              "motor_start_authorized":False,
+              "flight_authorized":False,
+          }
+          (root/"VENDOR_FIRMWARE_BUILD_EVIDENCE.json").write_text(json.dumps(values,indent=2)+"\n")
+          print(json.dumps(values,indent=2))
+      - name: Publish compiler proof and pinned revision metadata, not executable firmware
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-microdrone-stm32-build-proof
+          path: |
+            .cache/hs-cf-firmware-proof/FIRMWARE_APP_INPUT_RECEIPT.json
+            .cache/hs-cf-firmware-proof/VENDOR_FIRMWARE_BUILD_EVIDENCE.json
+            .cache/hs-cf-firmware-proof/CONFIGURE.log
+            .cache/hs-cf-firmware-proof/BUILD.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  run-real-crazyflow-reference-simulator:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      JAX_PLATFORM_NAME: cpu
+      XLA_PYTHON_CLIENT_PREALLOCATE: "false"
+      MUJOCO_GL: egl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned research simulator and numerical toolchain
+        run: |
+          python -m pip install crazyflow==0.4.0
+      - name: Run real Crazyflow single-drone dynamics smoke test
+        run: |
+          python scripts/verify_microdrone_crazyflow.py --design examples/system_examples/microdrone_sensor_deck_001.json --out .cache/hs-crazyflow-sim
+      - name: Reject flight/sensor-deck claims from stock simulator state
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          receipt=json.loads(Path(".cache/hs-crazyflow-sim/SIMULATION_SMOKE_EVIDENCE.json").read_text())
+          assert receipt["real_simulation_executed"]
+          assert receipt["finite_result"]
+          assert receipt["version"]=="0.4.0"
+          assert not receipt["deck_mass_override_executed"]
+          assert not receipt["flight_firmware_executed_in_simulation"]
+          assert not receipt["real_flight_authorized"]
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hs-microdrone-crazyflow-reference-smoke
+          path: .cache/hs-crazyflow-sim/
+          if-no-files-found: warn
+          retention-days: 14
