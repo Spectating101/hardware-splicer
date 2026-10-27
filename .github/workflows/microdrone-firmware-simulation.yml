@@ -77,8 +77,10 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          make -C .cache/crazyflie-firmware/examples/hs_sensor_deck cf2_defconfig 2>&1 | tee .cache/hs-cf-firmware-proof/CONFIGURE.log
-          make -C .cache/crazyflie-firmware/examples/hs_sensor_deck -j2 2>&1 | tee .cache/hs-cf-firmware-proof/BUILD.log
+          export EVIDENCE_DIR="$GITHUB_WORKSPACE/.cache/hs-cf-firmware-proof"
+          cd .cache/crazyflie-firmware/examples/hs_sensor_deck
+          make cf2_defconfig 2>&1 | tee "$EVIDENCE_DIR/CONFIGURE.log"
+          make -j2 2>&1 | tee "$EVIDENCE_DIR/BUILD.log"
       - name: Independently verify app object, source hash and compiler outputs
         shell: python
         run: |
