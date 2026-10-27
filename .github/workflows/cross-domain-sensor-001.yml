@@ -1,0 +1,58 @@
+name: Cross-Domain Sensor 001 Evidence
+
+on:
+  pull_request:
+    paths:
+      - "scripts/generate_cross_domain_sensor_001.py"
+      - "tests/test_cross_domain_sensor_001.py"
+      - "src/hardware_splicer/device_plan.py"
+      - "src/hardware_splicer/device_application.py"
+      - "apps/mecha-splicer/src/**"
+      - ".github/workflows/cross-domain-sensor-001.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install HS dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run cross-domain behavioral tests
+        run: pytest -q tests/test_cross_domain_sensor_001.py
+      - name: Generate actual cross-domain artifact outputs
+        run: python scripts/generate_cross_domain_sensor_001.py --output .cache/hs-cross-domain-sensor-001
+      - name: Verify file hashes, design authority and provenance
+        shell: python
+        run: |
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path(".cache/hs-cross-domain-sensor-001")
+          record = json.loads((root / "CROSS_DOMAIN_RECEIPT.json").read_text())
+          assert record["revision_consistent"] is True
+          assert record["firmware_package_status"] == "HOST_TESTABLE_PROPOSAL"
+          for name, metadata in record["artifacts"].items():
+              body = (root / name).read_bytes()
+              assert len(body) == metadata["bytes"]
+              assert hashlib.sha256(body).hexdigest() == metadata["sha256"]
+          for gate in ("fabrication_authorized", "flashing_authorized",
+                       "power_on_authorized", "device_physically_assembled"):
+              assert record[gate] is False
+          print("Cross-domain source artifacts and digest provenance verified; no physical authority.")
+      - name: Publish candidate artifacts for independent inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-cross-domain-sensor-001
+          path: .cache/hs-cross-domain-sensor-001/
+          retention-days: 14
+          if-no-files-found: error
