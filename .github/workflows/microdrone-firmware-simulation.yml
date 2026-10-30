@@ -132,14 +132,17 @@ jobs:
       JAX_PLATFORM_NAME: cpu
       SCIPY_ARRAY_API: "1"
       XLA_PYTHON_CLIENT_PREALLOCATE: "false"
-      MUJOCO_GL: egl
+      MUJOCO_GL: osmesa
+      PYOPENGL_PLATFORM: osmesa
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install pinned research simulator and numerical toolchain
+      - name: Install headless Mesa renderer and pinned simulator
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libosmesa6 libosmesa6-dev libgl1 libgl1-mesa-dev
           python -m pip install crazyflow==0.4.0
       - name: Run real Crazyflow single-drone dynamics smoke test
         run: |
