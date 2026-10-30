@@ -164,7 +164,7 @@ def validate_evidence(geometry_dir:Path,firmware_dir:Path)->tuple[dict,dict]:
       "schema_version":ATLAS_SCHEMA,
       "capability_id":report["capability_id"],
       "provenance":{"source_spec_sha256":report["source_spec_sha256"],
-                    "report_sha256":digest((json.dumps(report,sort_keys=True)+"\n").encode())},
+                    "report_sha256":digest((json.dumps(report,indent=2,sort_keys=True)+"\n").encode())},
       "supported_domains":report["verified_domains"],
       "entry_points":[
           "scripts/generate_cross_domain_sensor_001.py",
