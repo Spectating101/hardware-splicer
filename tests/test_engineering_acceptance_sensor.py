@@ -90,6 +90,30 @@ def fake_receipts(tmp_path):
         "real_hardware_flashing":False,"physical_behavior_verified":False,
         "firmware_authorized":False,"power_on_authorized":False,
     })
+    put(geom,"ELECTRICAL_PREFLIGHT.json",{
+       "schema_version":"hardware_splicer.sensor_electrical_preflight.v1",
+       "source_spec_sha256":receipt["source_spec_sha256"],
+       "firmware_source_zip_sha256":inputs["FIRMWARE_SOURCE.zip"]["sha256"],
+       "software_source_pin_consistency":True,
+       "symbolic_catalog_net_consistency":True,
+       "i2c_gpios":{"sda":21,"scl":22},
+       "native_kicad_erc_drc_executed":False,
+       "electrical_hardware_qualified":False,
+       "power_on_authorized":False,"fabrication_authorized":False,
+    })
+    put(geom,"BOM_PROVENANCE.json",{
+       "schema_version":"hardware_splicer.sensor_bom_provenance.v1",
+       "source_spec_sha256":receipt["source_spec_sha256"],
+       "parts":[
+         {"catalog_id":id,"sources":[{"url":"https://example.org/catalog"}],
+          "procurement_status":"UNQUALIFIED",
+          "electrical_ratings_verified_on_real_board":False}
+         for id in ("esp32-devkitc-v4","adafruit-bme280-stemma-qt")
+       ],
+       "bom_fabrication_ready":False,
+       "supplier_price_verified":False,
+       "supply_current_budget_measured":False,
+    })
     return geom,firm
 
 
@@ -139,4 +163,32 @@ def test_refuse_failed_compile_or_false_authority(tmp_path):
     body["assembly_authorized"]=True
     put(g,"LID_RETENTION_GEOMETRY_EVIDENCE.json",body)
     with pytest.raises(ValueError,match="promoted"):
+        validate_evidence(g,f)
+
+
+def test_refuse_bom_false_qualification_or_wrong_component(tmp_path):
+    g,f=fake_receipts(tmp_path)
+    p=g/"BOM_PROVENANCE.json"
+    record=json.loads(p.read_text())
+    record["parts"][0]["procurement_status"]="QUALIFIED"
+    put(g,"BOM_PROVENANCE.json",record)
+    with pytest.raises(ValueError,match="BOM falsely qualifies"):
+        validate_evidence(g,f)
+
+def test_refuse_forged_electrical_kicad_pass(tmp_path):
+    g,f=fake_receipts(tmp_path)
+    p=g/"ELECTRICAL_PREFLIGHT.json"
+    record=json.loads(p.read_text())
+    record["native_kicad_erc_drc_executed"]=True
+    put(g,"ELECTRICAL_PREFLIGHT.json",record)
+    with pytest.raises(ValueError,match="falsely claims"):
+        validate_evidence(g,f)
+
+def test_refuse_stale_electrical_firmware_source(tmp_path):
+    g,f=fake_receipts(tmp_path)
+    p=g/"ELECTRICAL_PREFLIGHT.json"
+    record=json.loads(p.read_text())
+    record["firmware_source_zip_sha256"]="a"*64
+    put(g,"ELECTRICAL_PREFLIGHT.json",record)
+    with pytest.raises(ValueError,match="Electrical audit is not bound"):
         validate_evidence(g,f)
