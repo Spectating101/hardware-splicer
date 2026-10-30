@@ -9,6 +9,9 @@ on:
       - "scripts/verify_sensor_retention_001.py"
       - "tests/test_sensor_retention_001.py"
       - "scripts/verify_cross_domain_firmware_target_001.py"
+      - "scripts/verify_cross_domain_acceptance_001.py"
+      - "src/hardware_splicer/engineering_acceptance_sensor.py"
+      - "tests/test_engineering_acceptance_sensor.py"
       - "apps/mecha-splicer/src/**"
       - ".github/workflows/cross-domain-physical-geometry-001.yml"
   workflow_dispatch:
@@ -81,6 +84,9 @@ jobs:
           name: hs-sensor-001-geometry-evidence
           path: |
             .cache/hs-sensor-geometry-001/CROSS_DOMAIN_RECEIPT.json
+            .cache/hs-sensor-geometry-001/DEVICE_SPEC.json
+            .cache/hs-sensor-geometry-001/DEVICE_PLAN.json
+            .cache/hs-sensor-geometry-001/FIRMWARE_SOURCE.zip
             .cache/hs-sensor-geometry-001/ENCLOSURE_INPUT.json
             .cache/hs-sensor-geometry-001/VENTILATION_PLAN.json
             .cache/hs-sensor-geometry-001/enclosure.scad
@@ -130,6 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hs-sensor-001-target-compile-evidence
+          include-hidden-files: true
           path: |
             .cache/hs-sensor-firmware-001/CROSS_DOMAIN_RECEIPT.json
             .cache/hs-sensor-firmware-001/FIRMWARE_TARGET_COMPILE_EVIDENCE.json
@@ -138,3 +145,54 @@ jobs:
             .cache/hs-sensor-firmware-001/platformio-application/.pio/build/application/firmware.bin
           retention-days: 14
           if-no-files-found: warn
+
+  reconcile-and-publish-capability:
+    needs:
+      - mesh-render-and-check
+      - compile-actual-esp32-target
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install contract verifier
+        run: python -m pip install -e '.[dev]'
+      - name: Execute adversarial contract regression
+        run: pytest -q tests/test_engineering_acceptance_sensor.py
+      - name: Retrieve independent native CAD and firmware artifacts from this exact run
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-sensor-001-geometry-evidence
+          path: .cache/acceptance-input/geometry
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-sensor-001-target-compile-evidence
+          path: .cache/acceptance-input/firmware
+      - name: Reconcile exact source and real toolchain outputs, or fail closed
+        run: |
+          python scripts/verify_cross_domain_acceptance_001.py \
+            --geometry .cache/acceptance-input/geometry \
+            --firmware .cache/acceptance-input/firmware \
+            --out .cache/hs-engineering-acceptance-001
+      - name: Enforce non-physical software-only acceptance boundary
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          root=Path(".cache/hs-engineering-acceptance-001")
+          evidence=json.loads((root/"ENGINEERING_ACCEPTANCE.json").read_text())
+          atlas=json.loads((root/"ATLAS_CAPABILITY.json").read_text())
+          assert evidence["cross_domain_consistency_pass"]
+          assert evidence["release_readiness"]=="software_candidate_only"
+          assert len(evidence["unresolved_blockers"]) >= 5
+          assert not any(evidence["physical_authority"].values())
+          assert atlas["atlas_runtime_required"] is False
+      - name: Publish reviewable acceptance and Atlas interchange contract
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-esp32-engineering-acceptance-atlas-v1
+          path: .cache/hs-engineering-acceptance-001/
+          retention-days: 30
+          if-no-files-found: error
