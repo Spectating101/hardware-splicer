@@ -135,23 +135,63 @@ def validate_evidence(geometry_dir:Path,firmware_dir:Path)->tuple[dict,dict]:
     check(set(compiled.get("compiled_artifacts",{}))=={"firmware.bin","firmware.elf"},
           "Unexpected or missing native target artifacts")
 
+    # Symbolic catalog/firmware source preflight is separate from native KiCad.
+    electrical=read_json(geometry_dir,"ELECTRICAL_PREFLIGHT.json")
+    bom=read_json(geometry_dir,"BOM_PROVENANCE.json")
+    check(electrical.get("schema_version")=="hardware_splicer.sensor_electrical_preflight.v1",
+          "Missing true electrical preflight schema")
+    check(bom.get("schema_version")=="hardware_splicer.sensor_bom_provenance.v1",
+          "Missing procurement traceability schema")
+    for record in (electrical,bom):
+        check(record.get("source_spec_sha256")==g_receipt["source_spec_sha256"],
+              "Electrical/BOM revision does not match compiled firmware and geometry")
+    check(electrical.get("firmware_source_zip_sha256")==artifacts["FIRMWARE_SOURCE.zip"]["sha256"],
+          "Electrical audit is not bound to the compiled firmware source")
+    check(electrical.get("software_source_pin_consistency") is True
+          and electrical.get("symbolic_catalog_net_consistency") is True,
+          "Symbolic electrical or source GPIO validation missing")
+    check(electrical.get("i2c_gpios")=={"sda":21,"scl":22},
+          "Unexpected tested ESP32 reference I2C pin contract")
+    check(electrical.get("native_kicad_erc_drc_executed") is False
+          and electrical.get("electrical_hardware_qualified") is False
+          and electrical.get("power_on_authorized") is False
+          and electrical.get("fabrication_authorized") is False,
+          "Electrical preflight falsely claims physical or native EDA authority")
+    check(len(bom.get("parts",[]))==2
+          and {p.get("catalog_id") for p in bom["parts"]}=={
+              "esp32-devkitc-v4","adafruit-bme280-stemma-qt"},
+          "BOM missing or identifying wrong catalog modules")
+    check(all(p.get("sources") and p.get("procurement_status")=="UNQUALIFIED"
+              and p.get("electrical_ratings_verified_on_real_board") is False
+              for p in bom["parts"]), "BOM falsely qualifies unknown vendor parts")
+    check(bom.get("bom_fabrication_ready") is False
+          and bom.get("supplier_price_verified") is False
+          and bom.get("supply_current_budget_measured") is False,
+          "BOM falsely claims procurement or electrical measurement authority")
+    for name in ("ELECTRICAL_PREFLIGHT.json","BOM_PROVENANCE.json"):
+        body=(geometry_dir/name).read_bytes()
+        artifacts[name]={"path":name,"sha256":digest(body),"bytes":len(body),"verified":True}
+
     report={
       "schema_version":SCHEMA,
       "capability_id":"hs.esp32_sensor_001.cross_domain_software",
       "source_spec_sha256":g_receipt["source_spec_sha256"],
       "verified_native_toolchains":["OpenSCAD + trimesh","PlatformIO Core 6.1.18 / Espressif32 6.10.0"],
       "verified_domains":{
-          "electrical":"catalog_module_wiring_plan_only",
+          "electrical":"catalog_wiring_and_firmware_pin_preflight_only",
           "firmware":"actual_esp32_target_cross_compile",
           "mechanical":"native_openscad_watertight_measured_meshes",
           "physical":"not_measured",
           "manufacturing":"not_executed",
+          "component_sourcing":"catalog_traced_unqualified",
       },
       "cross_domain_consistency_pass":True,
       "artifact_hashes_verified":artifacts,
       "release_readiness":"software_candidate_only",
       "unresolved_blockers":[
           "no_native_custom_kicad_board_or_verified_electrical_drc",
+          "no_qualified_manufacturer_orderable_revisions_or_verified_pricing",
+          "unverified_i2c_pullups_and_actual_supply_current",
           "no_actual_bme280_sensor_or_esp32_hardware_measurements",
           "no_measured_board_mounting_holes_or_assembly_fit",
           "no_firmware_flashing_or_real_sensor_behavior",
@@ -171,6 +211,7 @@ def validate_evidence(geometry_dir:Path,firmware_dir:Path)->tuple[dict,dict]:
           "scripts/verify_cross_domain_geometry_001.py",
           "scripts/verify_sensor_retention_001.py",
           "scripts/verify_cross_domain_firmware_target_001.py",
+          "scripts/verify_sensor_electrical_preflight_001.py",
       ],
       "input_requirements":{
           "source_format":"JSON with module identities and I2C pin bindings",
@@ -181,6 +222,7 @@ def validate_evidence(geometry_dir:Path,firmware_dir:Path)->tuple[dict,dict]:
       "artifact_types":[
           "device_wiring_plan_json","firmware_source_zip","esp32_elf","esp32_bin",
           "openscad_source","stl_mesh","geometry_evidence_json","sha256_receipt",
+          "symbolic_electrical_preflight_json","unqualified_bom_provenance_json",
       ],
       "reproduction_commands":[
           "python scripts/generate_cross_domain_sensor_001.py --output /tmp/hs-sensor-001",
