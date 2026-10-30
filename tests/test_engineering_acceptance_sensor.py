@@ -25,8 +25,8 @@ def put(root,name,data):
 def fake_receipts(tmp_path):
     geom=tmp_path/"geometry"
     firm=tmp_path/"firmware"
-    geom.mkdir()
-    firm.mkdir()
+    geom.mkdir(parents=True)
+    firm.mkdir(parents=True)
     spec={"modules":[{"id":"esp32"},{"id":"bme280"}]}
     plan={"modules":[{"id":"esp32"},{"id":"bme280"}]}
     inputs={
