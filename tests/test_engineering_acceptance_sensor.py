@@ -100,6 +100,10 @@ def test_acceptance_consistent_evidence_contract_without_claiming_physical(tmp_p
     assert report["release_readiness"]=="software_candidate_only"
     assert len(report["artifact_hashes_verified"])>=12
     assert atlas["atlas_runtime_required"] is False
+    assert len(atlas["reproduction_commands"]) >= 5
+    assert "external_dependencies" in atlas
+    assert atlas["input_requirements"]["source_spec_sha256"] == report["source_spec_sha256"]
+    assert atlas["human_authorization_requirements"]
     assert atlas["authorization"]["real_world_actuation"] is False
 
 def test_refuse_stale_firmware_job_revision(tmp_path):
