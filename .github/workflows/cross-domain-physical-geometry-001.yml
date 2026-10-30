@@ -11,6 +11,9 @@ on:
       - "scripts/verify_cross_domain_firmware_target_001.py"
       - "scripts/verify_cross_domain_acceptance_001.py"
       - "src/hardware_splicer/engineering_acceptance_sensor.py"
+      - "src/hardware_splicer/sensor_electrical_preflight.py"
+      - "scripts/verify_sensor_electrical_preflight_001.py"
+      - "tests/test_sensor_electrical_preflight.py"
       - "tests/test_engineering_acceptance_sensor.py"
       - "apps/mecha-splicer/src/**"
       - ".github/workflows/cross-domain-physical-geometry-001.yml"
@@ -36,6 +39,10 @@ jobs:
           python -m pip install -e '.[dev]' 'trimesh==4.8.3' 'numpy<3'
       - name: Generate matched electrical/firmware/mechanical source
         run: python scripts/generate_cross_domain_sensor_001.py --output .cache/hs-sensor-geometry-001
+      - name: Independently audit source-to-firmware I2C pins and unqualified BOM
+        run: |
+          pytest -q tests/test_sensor_electrical_preflight.py
+          python scripts/verify_sensor_electrical_preflight_001.py --project .cache/hs-sensor-geometry-001
       - name: Render actual base and lid, check watertightness, dimensions and USB cutout volume
         run: python scripts/verify_cross_domain_geometry_001.py --project .cache/hs-sensor-geometry-001
       - name: Validate published geometry evidence
@@ -89,6 +96,8 @@ jobs:
             .cache/hs-sensor-geometry-001/FIRMWARE_SOURCE.zip
             .cache/hs-sensor-geometry-001/ENCLOSURE_INPUT.json
             .cache/hs-sensor-geometry-001/VENTILATION_PLAN.json
+            .cache/hs-sensor-geometry-001/ELECTRICAL_PREFLIGHT.json
+            .cache/hs-sensor-geometry-001/BOM_PROVENANCE.json
             .cache/hs-sensor-geometry-001/enclosure.scad
             .cache/hs-sensor-geometry-001/enclosure_base.stl
             .cache/hs-sensor-geometry-001/enclosure_lid.stl
