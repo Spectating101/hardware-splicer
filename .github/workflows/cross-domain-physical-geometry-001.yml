@@ -136,6 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hs-sensor-001-target-compile-evidence
+          include-hidden-files: true
           path: |
             .cache/hs-sensor-firmware-001/CROSS_DOMAIN_RECEIPT.json
             .cache/hs-sensor-firmware-001/FIRMWARE_TARGET_COMPILE_EVIDENCE.json
