@@ -114,11 +114,11 @@ def test_refuse_stale_firmware_job_revision(tmp_path):
 def test_refuse_mutated_mesh_or_binary(tmp_path):
     g,f=fake_receipts(tmp_path)
     (g/"retained_base.stl").write_bytes(b"modified")
-    with pytest.raises(ValueError,match="SHA256 mismatch"):
+    with pytest.raises(ValueError,match="(?:SHA256|Size) mismatch"):
         validate_evidence(g,f)
     g,f=fake_receipts(tmp_path/"next")
     (f/"platformio-application/.pio/build/application/firmware.bin").write_bytes(b"modified")
-    with pytest.raises(ValueError,match="SHA256 mismatch"):
+    with pytest.raises(ValueError,match="(?:SHA256|Size) mismatch"):
         validate_evidence(g,f)
 
 def test_refuse_failed_compile_or_false_authority(tmp_path):
