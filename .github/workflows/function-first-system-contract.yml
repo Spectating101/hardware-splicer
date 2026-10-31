@@ -14,6 +14,9 @@ on:
       - "scripts/study_filter_components_001.py"
       - "scripts/verify_filter_clearance_geometry_001.py"
       - "tests/test_filter_component_preflight.py"
+      - "src/hardware_splicer/filter_assembly_gate.py"
+      - "scripts/audit_filter_assembly_interfaces_001.py"
+      - "tests/test_filter_assembly_gate.py"
       - ".github/workflows/function-first-system-contract.yml"
   workflow_dispatch:
 
@@ -219,5 +222,67 @@ jobs:
         with:
           name: hs-filter-manufacturer-component-clearance-001
           path: .cache/hs-filter-component-study/
+          retention-days: 30
+          if-no-files-found: error
+
+  assembly-interface-readiness:
+    needs: manufacturer-component-clearance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install HS function and evidence model
+        run: python -m pip install -e '.[dev]'
+      - name: Run adversarial contract tests without fabricated physical acceptance
+        run: pytest -q tests/test_filter_assembly_gate.py
+      - name: Retrieve actual component and native OpenSCAD/trimesh evidence from upstream same-run job
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-filter-manufacturer-component-clearance-001
+          path: .cache/hs-filter-component-study
+      - name: Independently audit fit, bracket, service, hydraulic and certification interfaces
+        run: |
+          python scripts/audit_filter_assembly_interfaces_001.py \
+            --component-package .cache/hs-filter-component-study \
+            --assembly-interfaces examples/functionality/water_filter_assembly_interfaces_001.json \
+            --out .cache/hs-filter-assembly-interface-gate
+      - name: Verify all unresolved fit and measurement gates remain closed
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-filter-assembly-interface-gate")
+          receipt=json.loads((root/"ASSEMBLY_RECEIPT.json").read_text())
+          report=json.loads((root/"ASSEMBLY_GATE.json").read_text())
+          work=json.loads((root/"EVIDENCE_REQUESTS.json").read_text())
+          for name,details in receipt["files"].items():
+              raw=(root/name).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==details["sha256"]
+              assert len(raw)==details["bytes"]
+          assert report["source_spec_sha256"]==receipt["source_spec_sha256"]==work["source_spec_sha256"]
+          assert report["assembly_source_sha256"]==receipt["assembly_source_sha256"]==work["assembly_source_sha256"]
+          assert len(report["interface_evidence_gates"])==6
+          assert len(report["accessory_candidates"])==3
+          assert all(x["exact_sku_fit_tier"]=="NOT_VERIFIED" for x in report["accessory_candidates"])
+          assert len(work["evidence_requests"])==7
+          assert all(x["status"]=="AWAITING_INDEPENDENT_EVIDENCE" and x["measured_value"] is None for x in work["evidence_requests"])
+          assert report["outcome"]=="ASSEMBLY_DESIGN_BLOCKED_PENDING_EVIDENCE"
+          assert report["hydraulic_pressure_at_target_flow_psi"] is None
+          assert report["service_clearance"]["manufacturer_minimum_verified_mm"] is None
+          assert not report["sku_specific_certification_verified"]
+          assert not report["validated_cartridge_housing_seat_fit"]
+          assert not report["verified_accessory_fit"]
+          assert not any(report["physical_authority"].values())
+          assert not receipt["fabrication_authorized"] and not receipt["treatment_verified"]
+          print("Native source verified; accessory compatibility, hydraulics, certification and physical operations all blocked pending evidence.")
+      - name: Preserve versioned assembly interface graph and measurement requests
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-filter-assembly-interfaces-and-evidence-gates-001
+          path: .cache/hs-filter-assembly-interface-gate/
           retention-days: 30
           if-no-files-found: error
