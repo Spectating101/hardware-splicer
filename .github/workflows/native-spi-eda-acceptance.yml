@@ -29,7 +29,7 @@ jobs:
           /usr/bin/python3 -c 'import pcbnew; print("pcbnew",pcbnew.Version())'
           test -d /usr/share/kicad/footprints/Package_SO.pretty
       - name: Execute adversarial receipt, ERC, DRC, BOM and authority-contract tests
-        run: /usr/bin/python3 -m pytest -q tests/test_native_spi_capability.py
+        run: /usr/bin/python3 -m pytest --noconftest -q tests/test_native_spi_capability.py
       - name: Rerun actual native ERC, DRC and schematic-to-PCB parity independently
         run: |
           /usr/bin/python3 scripts/verify_native_spi_capability.py \
