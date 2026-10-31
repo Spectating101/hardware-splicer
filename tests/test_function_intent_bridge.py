@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from hardware_splicer.function_intent_bridge import canonical, parse_intent, package_intent
+from hardware_splicer.function_intent_bridge import canonical, parse_intent, package_intent, discipline_work_packages
 
 ROOT=Path(__file__).resolve().parents[1]
 EXAMPLE=ROOT/"examples/functionality/water_filter_nonpotable_bench_001.json"
@@ -32,6 +32,11 @@ def test_water_filter_compiles_into_existing_machine_project_with_full_traceabil
     assert all(v.status.value=="planned" and not v.evidence_ids for v in project.verifications)
     assert all(not v for v in gate["physical_authority"].values())
     assert len(gate["machine_project_unresolved_interfaces"])==4
+    packets=discipline_work_packages(project)
+    assert len(packets["packages"])==5
+    assert packets["source_spec_sha256"]==gate["source_spec_sha256"]
+    assert all(not w["native_design_outputs_generated"] and w["human_review_required"] for w in packets["packages"])
+    assert any("seal_material" in w["required_parameter_evidence"] for w in packets["packages"])
     assert any(s.metadata["engineering_specialty"]=="separation process and materials"
                for s in project.subsystems)
     receipt=package_intent(brief,tmp_path/"out")
