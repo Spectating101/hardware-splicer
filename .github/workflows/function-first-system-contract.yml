@@ -10,6 +10,10 @@ on:
       - "src/hardware_splicer/function_technology_selection.py"
       - "scripts/compare_function_technologies_001.py"
       - "tests/test_function_technology_selection.py"
+      - "src/hardware_splicer/filter_component_preflight.py"
+      - "scripts/study_filter_components_001.py"
+      - "scripts/verify_filter_clearance_geometry_001.py"
+      - "tests/test_filter_component_preflight.py"
       - ".github/workflows/function-first-system-contract.yml"
   workflow_dispatch:
 
@@ -137,3 +141,83 @@ jobs:
           path: .cache/hs-filter-technology-study/
           if-no-files-found: error
           retention-days: 30
+
+  manufacturer-component-clearance:
+    needs: technology-option-screening
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install actual OpenSCAD toolchain, Python geometry inspector and HS model schema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends openscad
+          python -m pip install -e '.[dev]' trimesh==4.8.3
+          openscad --version
+      - name: Execute false-claim, wrong-part, source-tamper and clearance-contract tests
+        run: pytest -q tests/test_filter_component_preflight.py
+      - name: Download exact same-run functional input and accepted technology study
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-function-first-water-filter-concept-001
+          path: .cache/hs-function-first-water-001
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-water-filter-technology-study-001
+          path: .cache/hs-filter-technology-study
+      - name: Match exact published product references against source functional requirements
+        run: |
+          python scripts/study_filter_components_001.py \
+            --functional-package .cache/hs-function-first-water-001 \
+            --technology-study .cache/hs-filter-technology-study \
+            --components examples/functionality/water_filter_component_candidate_001.json \
+            --out .cache/hs-filter-component-study
+      - name: Render only external geometric clearance volumes using real native OpenSCAD
+        run: |
+          python scripts/verify_filter_clearance_geometry_001.py \
+            --project .cache/hs-filter-component-study
+      - name: Cross-check rendered native mesh, authorizations, and component provenance
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          p=Path(".cache/hs-filter-component-study")
+          receipt=json.loads((p/"COMPONENT_PACKAGE_RECEIPT.json").read_text())
+          report=json.loads((p/"COMPONENT_PREFLIGHT.json").read_text())
+          native=json.loads((p/"RENDERED_CLEARANCE_EVIDENCE.json").read_text())
+          bom=json.loads((p/"COMPONENT_BOM.json").read_text())
+          for name,row in receipt["files"].items():
+              raw=(p/name).read_bytes()
+              assert row["sha256"]==hashlib.sha256(raw).hexdigest()
+              assert row["bytes"]==len(raw)
+          assert receipt["source_spec_sha256"]==report["source_spec_sha256"]==native["source_spec_sha256"]==bom["source_spec_sha256"]
+          assert receipt["component_reference_sha256"]==report["component_reference_sha256"]==native["component_reference_sha256"]
+          for key,value in native["solids"].items():
+              raw=(p/value["stl_filename"]).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==value["sha256"]
+              assert len(raw)==value["bytes"]
+              assert value["watertight"] and value["winding_consistent"]
+          assert report["pressure_loss_at_target_flow_psi"] is None
+          assert report["measured_treatment_reduction_percent"] is None
+          assert len(bom["items"])==2 and bom["full_bom"] is False
+          assert not any([
+              report["physical_cartridge_to_housing_fit_validated"],
+              report["hydraulic_feasibility_validated"],
+              report["water_quality_claim_qualified"],
+              native["physical_fit_verified"],
+              native["pressure_containing_design_generated"],
+              native["manufacturing_authorized"],
+              native["human_consumption_authorized"],
+          ])
+          print("Component pair documentary candidate with native clearance mesh only. No treatment or build authorization.")
+      - name: Preserve source bound product, BOM and native CAD clearance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-filter-manufacturer-component-clearance-001
+          path: .cache/hs-filter-component-study/
+          retention-days: 30
+          if-no-files-found: error
