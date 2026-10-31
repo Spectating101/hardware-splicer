@@ -17,6 +17,10 @@ on:
       - "src/hardware_splicer/filter_assembly_gate.py"
       - "scripts/audit_filter_assembly_interfaces_001.py"
       - "tests/test_filter_assembly_gate.py"
+      - "src/hardware_splicer/whole_product_sample.py"
+      - "scripts/build_clearbench_product_001.py"
+      - "scripts/render_clearbench_product_001.py"
+      - "tests/test_whole_product_sample.py"
       - ".github/workflows/function-first-system-contract.yml"
   workflow_dispatch:
 
@@ -284,5 +288,78 @@ jobs:
         with:
           name: hs-filter-assembly-interfaces-and-evidence-gates-001
           path: .cache/hs-filter-assembly-interface-gate/
+          retention-days: 30
+          if-no-files-found: error
+
+  integrated-whole-product-sample:
+    needs: assembly-interface-readiness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install real OpenSCAD, headless product-renderer and mesh inspector
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends openscad xvfb fonts-liberation
+          python -m pip install -e '.[dev]' trimesh==4.8.3
+          openscad --version
+      - name: Independently test whole-device function, no-bypass, geometry, BOM and human-use gates
+        run: pytest -q tests/test_whole_product_sample.py
+      - name: Download the verified same-run assembly gate and source receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-filter-assembly-interfaces-and-evidence-gates-001
+          path: .cache/hs-filter-assembly-interface-gate
+      - name: Synthesize complete ClearBench S1 product-level digital prototype
+        run: |
+          python scripts/build_clearbench_product_001.py \
+            --assembly-package .cache/hs-filter-assembly-interface-gate \
+            --product examples/products/clearbench_s1_product.json \
+            --out .cache/clearbench-s1-product-sample
+      - name: Produce actual integrated product PNG and five independent native STL meshes
+        run: |
+          python scripts/render_clearbench_product_001.py \
+            --project .cache/clearbench-s1-product-sample
+      - name: Verify native product rendering, full functional bill of materials, and no physical release
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          p=Path(".cache/clearbench-s1-product-sample")
+          r=json.loads((p/"PRODUCT_RECEIPT.json").read_text())
+          report=json.loads((p/"PRODUCT_ARCHITECTURE.json").read_text())
+          render=json.loads((p/"PRODUCT_RENDER_EVIDENCE.json").read_text())
+          bom=json.loads((p/"PRODUCT_BOM.json").read_text())
+          flow=report["functional_flow_graph"]
+          for name,entry in r["files"].items():
+              raw=(p/name).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==entry["sha256"]
+              assert len(raw)==entry["bytes"]
+          assert r["product_spec_sha256"]==report["product_spec_sha256"]==render["product_spec_sha256"]
+          assert report["complete_visual_system_components_count"]==11
+          assert len(bom["items"])==11 and not bom["vendor_fully_qualified_bom"]
+          assert flow["every_symbolic_sample_path_traverses_filter"]
+          assert not flow["actual_hydraulic_connectivity_assembled"]
+          assert not any(report["physical_authority"].values())
+          assert render["complete_product_assembly_image"]["bytes"]>6000
+          assert len(render["independently_checked_native_geometry"])==5
+          for record in render["independently_checked_native_geometry"].values():
+              data=(p/record["file"]).read_bytes()
+              assert len(data)==record["bytes"]
+              assert hashlib.sha256(data).hexdigest()==record["sha256"]
+              assert record["watertight"] and record["winding_consistent"]
+          assert report["release_tier"]=="DIGITAL_PRODUCT_DEMONSTRATOR_ONLY"
+          assert not render["native_pressure_containment_created"]
+          assert not render["product_build_ready"]
+          print("COMPLETE PRODUCT-LEVEL DIGITAL DEMONSTRATOR VERIFIED. Physical filtration, mounting, safety and release remain blocked.")
+      - name: Publish reviewable product image, native CAD, complete BOM and product acceptance reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample/
           retention-days: 30
           if-no-files-found: error
