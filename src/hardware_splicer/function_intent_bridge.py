@@ -222,6 +222,59 @@ def parse_intent(intent: Mapping[str, Any]) -> tuple[MachineProject, dict[str, A
     return model,report
 
 
+def discipline_work_packages(model: MachineProject) -> dict[str, Any]:
+    """Create deterministic engineering assignments from the existing graph.
+
+    These are work orders for *future* independently verified tools, not
+    generated hardware, measured results or a competing project database.
+    """
+    requirements = {row.requirement_id:row for row in model.requirements}
+    functions = {row.function_id:row for row in model.functions}
+    verifications = {row.verification_id:row for row in model.verifications}
+    packages = []
+    for subsystem in model.subsystems:
+        requirement_ids = sorted(set(subsystem.requirement_ids))
+        tests = sorted({vid for rid in requirement_ids
+                        for vid in requirements[rid].verification_method_ids})
+        touching = [i for i in model.interfaces
+                    if subsystem.subsystem_id in
+                    [endpoint.object_id for endpoint in i.endpoints]]
+        unknowns = sorted({field for row in touching for ct in row.contracts
+                           for field in ct.unresolved_fields})
+        packages.append({
+            "subsystem_id":subsystem.subsystem_id,
+            "domain":subsystem.domain.value,
+            "engineering_specialty":subsystem.metadata["engineering_specialty"],
+            "purpose":subsystem.purpose,
+            "functions":[{"id":id_,"name":functions[id_].name,
+                          "physical_principle":functions[id_].metadata["physical_principle"]}
+                         for id_ in sorted(subsystem.function_ids)],
+            "requirements":[{"id":rid,"statement":requirements[rid].statement,
+                             "kind":requirements[rid].kind.value,
+                             "design_target":requirements[rid].metadata.get("target")}
+                            for rid in requirement_ids],
+            "interfaces":[{"id":item.interface_id,"medium":item.kind,
+                           "endpoints":[e.model_dump(mode="json") for e in item.endpoints]}
+                          for item in touching],
+            "planned_tests":[{"id":vid,"procedure":verifications[vid].procedure,
+                              "acceptance":verifications[vid].acceptance_criteria,
+                              "status":"planned"} for vid in tests],
+            "required_parameter_evidence":unknowns,
+            "native_design_outputs_generated":False,
+            "verification_status":"not_executed",
+            "component_selection_verified":False,
+            "human_review_required":True,
+        })
+    return {
+        "schema_version":"hardware_splicer.function_discipline_packages.v1",
+        "source_spec_sha256":model.metadata["source_spec_sha256"],
+        "project_id":model.project_id,
+        "packages":packages,
+        "engineering_authority":"proposal_only",
+        "physical_authority_granted":False,
+    }
+
+
 def package_intent(source: Mapping[str,Any],out:Path)->dict:
     model,gate=parse_intent(source)
     out=Path(out)
@@ -232,6 +285,7 @@ def package_intent(source: Mapping[str,Any],out:Path)->dict:
       "FUNCTIONAL_INPUT.json":canonical(source),
       "MACHINE_PROJECT.json":canonical(model.model_dump(mode="json")),
       "FUNCTIONAL_GATE.json":canonical(gate),
+      "DISCIPLINE_WORK_PACKAGES.json":canonical(discipline_work_packages(model)),
     }
     for name,payload in outputs.items():
         (out/name).write_bytes(payload)
