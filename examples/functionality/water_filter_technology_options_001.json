@@ -1,7 +1,6 @@
 {
   "schema_version": "hardware_splicer.function_technology_options.v1",
   "project_id": "water_filter_nonpotable_bench_001",
-  "source_brief_sha256": "PENDING_SOURCE_BIND",
   "catalog_status": "DESIGN_HYPOTHESES_NOT_VENDOR_RATED",
   "selection_policy": {
     "objective": "Shortlist a mechanism for independent non-potable bench design study; never claim 70% turbidity reduction from a nominal media category",
