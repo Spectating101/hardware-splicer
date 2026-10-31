@@ -1,0 +1,368 @@
+{
+  "schema_version": "hardware_splicer.product_demonstrator.v1",
+  "product_id": "clearbench_s1_nonpotable_001",
+  "product_name": "ClearBench S1 — Non-potable Sediment Filter Demonstrator",
+  "functional_project_id": "water_filter_nonpotable_bench_001",
+  "candidate_technology_id": "passive_replaceable_depth_media",
+  "intended_user": "supervised R&D bench operator",
+  "intended_use": "non_potable_particle_challenge_only",
+  "product_pitch": "Bench-top demonstration system for studying pressure restriction and controlled non-potable suspended-particle filtering, with removable commercial cartridge and sampling point. No water quality or drinking claims.",
+  "product_architecture": "manufacturer_pressure_containment_plus_unqualified_external_display_and_instrumentation",
+  "functional_target": {
+    "flow_l_min": 0.5,
+    "particle_turbidity_reduction_percent": 70,
+    "demonstrated": false,
+    "validated": false
+  },
+  "platform_envelope_mm": {
+    "width": 450,
+    "depth": 260,
+    "height": 740
+  },
+  "layout": {
+    "tray": {
+      "width_mm": 450,
+      "depth_mm": 260,
+      "height_mm": 14,
+      "origin_mm": [
+        -225,
+        -130,
+        0
+      ],
+      "type": "non_pressure_containing_concept"
+    },
+    "back_panel": {
+      "width_mm": 450,
+      "thickness_mm": 12,
+      "height_mm": 716,
+      "origin_mm": [
+        -225,
+        100,
+        14
+      ],
+      "type": "non_pressure_containing_concept"
+    },
+    "filter_housing": {
+      "center_x_mm": -65,
+      "center_y_mm": 0,
+      "bottom_z_mm": 228,
+      "diameter_mm": 118,
+      "height_mm": 308,
+      "component_ref": "158007",
+      "geometry": "external_envelope_not_vendor_cad"
+    },
+    "service_region": {
+      "center_x_mm": -65,
+      "center_y_mm": 0,
+      "bottom_z_mm": 78,
+      "height_mm": 150,
+      "diameter_mm": 118,
+      "qualified": false
+    },
+    "pressure_indicators": [
+      {
+        "id": "P_IN",
+        "center_mm": [
+          145,
+          10,
+          465
+        ],
+        "diameter_mm": 54,
+        "component_status": "symbolic_instrument_not_selected",
+        "function": "inlet_pressure_only"
+      },
+      {
+        "id": "P_OUT",
+        "center_mm": [
+          145,
+          10,
+          355
+        ],
+        "diameter_mm": 54,
+        "component_status": "symbolic_instrument_not_selected",
+        "function": "outlet_pressure_only"
+      }
+    ],
+    "sample_cup": {
+      "center_x_mm": 145,
+      "center_y_mm": -35,
+      "bottom_z_mm": 32,
+      "height_mm": 75,
+      "diameter_mm": 66,
+      "component_status": "conceptual_lab_sample_container"
+    },
+    "flow_paths": {
+      "upstream": [
+        [
+          -215,
+          0,
+          535
+        ],
+        [
+          -175,
+          0,
+          535
+        ],
+        [
+          -135,
+          0,
+          536
+        ]
+      ],
+      "downstream": [
+        [
+          -5,
+          0,
+          536
+        ],
+        [
+          50,
+          0,
+          536
+        ],
+        [
+          105,
+          0,
+          536
+        ],
+        [
+          145,
+          -35,
+          115
+        ]
+      ],
+      "pipe_diameter_visual_mm": 9,
+      "path_location_source": "diagrammatic_only_not_actual_housing_port_centers_or_rated_3_8in_NPT_fittings"
+    },
+    "mounting": {
+      "method": "candidate_pentair_244047_bracket_not_modeled_as_drillable_hardware",
+      "boss_pitch_mm": null,
+      "load_rating_newton": null,
+      "attachment_load_path_validated": false
+    }
+  },
+  "functional_flow_graph": {
+    "nodes": [
+      "nonpotable_feed",
+      "inlet_pressure_observation",
+      "manufacturer_filter_housing",
+      "outlet_pressure_observation",
+      "sampling_valve",
+      "nonpotable_sample_vessel"
+    ],
+    "edges": [
+      [
+        "nonpotable_feed",
+        "inlet_pressure_observation"
+      ],
+      [
+        "inlet_pressure_observation",
+        "manufacturer_filter_housing"
+      ],
+      [
+        "manufacturer_filter_housing",
+        "outlet_pressure_observation"
+      ],
+      [
+        "outlet_pressure_observation",
+        "sampling_valve"
+      ],
+      [
+        "sampling_valve",
+        "nonpotable_sample_vessel"
+      ]
+    ],
+    "required_treatment_node": "manufacturer_filter_housing",
+    "flow_path_is_symbolic_not_physical": true,
+    "bypass_prohibited": true
+  },
+  "product_bom": [
+    {
+      "ref": "H1",
+      "role": "manufacturer_pressure_containing_housing",
+      "part_number": "158007",
+      "manufacturer": "Pentair",
+      "quantity": 1,
+      "source_level": "manufacturer_documented_not_physically_verified",
+      "engineering_status": "CANDIDATE"
+    },
+    {
+      "ref": "F1",
+      "role": "sediment_media",
+      "part_number": "155014-43",
+      "manufacturer": "Pentair",
+      "quantity": 1,
+      "source_level": "manufacturer_documented_not_physically_verified",
+      "engineering_status": "CANDIDATE"
+    },
+    {
+      "ref": "B1",
+      "role": "mounting_bracket",
+      "part_number": "244047",
+      "manufacturer": "Pentair",
+      "quantity": 1,
+      "source_level": "family_accessory_listed_not_exact_sku_fit",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "W1",
+      "role": "service_wrench",
+      "part_number": "150539",
+      "manufacturer": "Pentair",
+      "quantity": 1,
+      "source_level": "family_accessory_listed_not_exact_sku_fit",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "S1",
+      "role": "replacement_oring",
+      "part_number": "151121",
+      "manufacturer": "Pentair",
+      "quantity": 1,
+      "source_level": "family_accessory_listed_not_exact_sku_fit",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "P1",
+      "role": "inlet_pressure_observation",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "not_selected",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "P2",
+      "role": "outlet_pressure_observation",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "not_selected",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "A1",
+      "role": "pressure_rated_fittings_and_tubing_set",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "not_selected",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "V1",
+      "role": "rated_sampling_valve",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "not_selected",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "C1",
+      "role": "nonpotable_lab_sampling_container",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "conceptual",
+      "engineering_status": "UNQUALIFIED"
+    },
+    {
+      "ref": "M1",
+      "role": "non_pressurized_back_panel_and_catch_tray",
+      "part_number": null,
+      "manufacturer": null,
+      "quantity": 1,
+      "source_level": "conceptual_cad_only",
+      "engineering_status": "UNQUALIFIED"
+    }
+  ],
+  "operator_workflow": [
+    {
+      "stage": "SETUP",
+      "objective": "identify non-potable source, filter element and unobstructed service space",
+      "state": "NOT_VERIFIED"
+    },
+    {
+      "stage": "CONNECT",
+      "objective": "use selected rated, tested 3/8-inch NPT adapters, secure bracket and supervised leak verification",
+      "state": "NOT_VERIFIED"
+    },
+    {
+      "stage": "MONITOR",
+      "objective": "read independent inlet/outlet pressure; do not infer particulate removal from differential pressure",
+      "state": "NOT_VERIFIED"
+    },
+    {
+      "stage": "SAMPLE",
+      "objective": "perform controlled paired influent/effluent turbidity measurement with calibrated tools",
+      "state": "NOT_VERIFIED"
+    },
+    {
+      "stage": "MAINTAIN",
+      "objective": "isolate and depressurize according to verified manufacturer procedure before media exchange",
+      "state": "NOT_VERIFIED"
+    }
+  ],
+  "product_acceptance": [
+    {
+      "id": "PA_VISUAL",
+      "kind": "native_cad",
+      "requirement": "complete coherent operator-facing demonstrator geometry",
+      "evidence": "native_openscad_render_and_bounded_stl",
+      "status": "PLANNED"
+    },
+    {
+      "id": "PA_FLOW_GRAPH",
+      "kind": "software",
+      "requirement": "no symbolic route bypasses the filter core",
+      "evidence": "directed_graph_validation",
+      "status": "PLANNED"
+    },
+    {
+      "id": "PA_MECHANICAL",
+      "kind": "physical",
+      "requirement": "rated bracket/load/fasteners and adequate actual service removal space",
+      "evidence": "manufacturer_drawing_and_measured_assembly",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "PA_HYDRAULIC",
+      "kind": "physical",
+      "requirement": "0.5 L/min feed operation with bounded differential pressure",
+      "evidence": "calibrated_supervised_hydraulic_test",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "PA_TREATMENT",
+      "kind": "physical",
+      "requirement": "70% specified non-potable particle turbidity reduction",
+      "evidence": "paired_calibrated_influent_effluent_challenge",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "PA_LEAK",
+      "kind": "physical",
+      "requirement": "verified zero external leaks under approved operating conditions",
+      "evidence": "supervised_manufacturer_appropriate_pressure_test",
+      "status": "BLOCKED"
+    }
+  ],
+  "source_integrity": {
+    "housing_part": "158007",
+    "filter_part": "155014-43",
+    "assembly_bracket_candidate": "244047",
+    "illustrative_wrench_clearance_mm": 150,
+    "manufacturer_pdf_bytes_archived": false,
+    "sku_compatible_fittings_selected": false
+  },
+  "physical_authority": {
+    "purchase": false,
+    "assembly": false,
+    "wet_operation": false,
+    "pressure_activation": false,
+    "manufacturing": false,
+    "human_consumption": false
+  },
+  "commercial_readiness": "UNQUALIFIED_DIGITAL_PRODUCT_SAMPLE_ONLY"
+}
