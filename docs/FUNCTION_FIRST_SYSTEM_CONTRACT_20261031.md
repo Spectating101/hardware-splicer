@@ -34,7 +34,7 @@ python scripts/compile_function_intent_001.py \
   --out /tmp/hs-function-water-001
 ```
 
-The generated `FUNCTIONAL_INPUT.json`, `MACHINE_PROJECT.json`, `FUNCTIONAL_GATE.json` and `PACKAGE_RECEIPT.json` are source-hashed. The original functional specification determines every requirement, function, subsystem, interface and test. The bridge intentionally refuses to import “passed” or “measured” claims from a proposed brief, refuses potable/certified claims, refuses missing tests and source/graph inconsistencies, and declines to overwrite prior evidence.
+The generated `FUNCTIONAL_INPUT.json`, `MACHINE_PROJECT.json`, `FUNCTIONAL_GATE.json`, `DISCIPLINE_WORK_PACKAGES.json`, and `PACKAGE_RECEIPT.json` are source-hashed. Every work package contains its allocated functions, requirements, planned verification procedures and unresolved cross-domain interface parameters. Work packages are design tasks, not completed engineering or validated physical systems. The original functional specification determines every requirement, function, subsystem, interface and test. The bridge intentionally refuses to import “passed” or “measured” claims from a proposed brief, refuses potable/certified claims, refuses missing tests and source/graph inconsistencies, and declines to overwrite prior evidence.
 
 The CI test also creates an unrelated **temperature-alarm device** through exactly the same bridge. This checks that the implementation is not just a hardcoded water-filter generator.
 
