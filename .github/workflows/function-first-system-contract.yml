@@ -1,0 +1,71 @@
+name: HS Function-First System Contract
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/function_intent_bridge.py"
+      - "examples/functionality/**"
+      - "scripts/compile_function_intent_001.py"
+      - "tests/test_function_intent_bridge.py"
+      - ".github/workflows/function-first-system-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  functional-system-traceability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install machine project model and test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Test function allocation, real MachineProject validation and rejection of false claims
+        run: pytest -q tests/test_function_intent_bridge.py
+      - name: Compile non-potable function-first reference
+        run: |
+          python scripts/compile_function_intent_001.py \
+            --brief examples/functionality/water_filter_nonpotable_bench_001.json \
+            --out .cache/hs-function-first-water-001
+      - name: Independently confirm source binding and closed real-world authority
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-function-first-water-001")
+          receipt=json.loads((root/"PACKAGE_RECEIPT.json").read_text())
+          gate=json.loads((root/"FUNCTIONAL_GATE.json").read_text())
+          machine=json.loads((root/"MACHINE_PROJECT.json").read_text())
+          for name,record in receipt["files"].items():
+              data=(root/name).read_bytes()
+              assert len(data)==record["bytes"] and hashlib.sha256(data).hexdigest()==record["sha256"]
+          assert receipt["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert machine["metadata"]["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert len(machine["requirements"])==gate["requirements_count"]
+          assert len(machine["functions"])==gate["functions_count"]
+          assert len(machine["verifications"])==gate["planned_independent_tests"]
+          packages=json.loads((root/"DISCIPLINE_WORK_PACKAGES.json").read_text())
+          assert packages["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert len(packages["packages"])==len(machine["subsystems"])
+          assert not packages["physical_authority_granted"]
+          assert all(not p["native_design_outputs_generated"] for p in packages["packages"])
+          assert all(p["verification_status"]=="not_executed" for p in packages["packages"])
+          assert gate["evidence_collected_count"]==0
+          assert not any(gate["physical_authority"].values())
+          assert machine["requested_release_state"]=="concept"
+          assert all(x["status"]=="planned" for x in machine["verifications"])
+          assert all(x["authority"]=="proposed" for x in machine["interfaces"])
+          assert all(x["contracts"][0]["unresolved_fields"] for x in machine["interfaces"])
+          print("MachineProject function-first traceability: validated concept; no water treatment, drinking, fabrication or activation authority.")
+      - name: Retain exact proposed functional package and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-function-first-water-filter-concept-001
+          path: .cache/hs-function-first-water-001/
+          retention-days: 30
+          if-no-files-found: error
