@@ -183,7 +183,7 @@ def parse_intent(intent: Mapping[str, Any]) -> tuple[MachineProject, dict[str, A
                   "importer":"function_intent_to_machine_project"},
     )
     issues=model.traceability_issues()
-    require(not any(i.severity=="error" for i in issues),
+    require(not any(i.code.startswith("invalid_ref") or i.code=="duplicate_id" for i in issues),
             "existing MachineProject identified bad graph references")
     authority={
         "design_ready":False, "build_ready":False,
@@ -203,6 +203,8 @@ def parse_intent(intent: Mapping[str, Any]) -> tuple[MachineProject, dict[str, A
                                  for s in model.subsystems},
         "interface_count":len(interfaces),
         "planned_independent_tests":len(verifications),
+        "machine_project_unresolved_interfaces":[i.message for i in issues
+                                                  if i.code=="unresolved_interface"],
         "evidence_collected_count":0,
         "status":"FUNCTIONAL_CONCEPT_ONLY",
         "machine_project_release_request":"concept",
