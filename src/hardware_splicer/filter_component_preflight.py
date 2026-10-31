@@ -123,6 +123,13 @@ def inspect_components(brief:Mapping[str,Any],components:Mapping[str,Any])->dict
                 and citation.get("url","").startswith("https://www.pentair.com/")
                 and bool(citation.get("revision")),
                 "manufacturer documentary evidence missing or spuriously pinned")
+    require(cartridge["source"]["url"]==
+                "https://www.pentair.com/content/dam/extranet/web/nam/pentek/spec-sheets/310060-pentek-p-series-spec-sheet.pdf"
+            and cartridge["source"]["revision"]=="310060 REV E SE16"
+            and housing["source"]["url"]==
+                "https://www.pentair.com/content/dam/extranet/nam/filtration/pentek/residential/spec-sheets/english/310050-pentek-slim-line-spec-sheet.pdf"
+            and housing["source"]["revision"]=="310050 JL25",
+            "manufacturer document URL or revision has changed; independent source re-review required")
     require(a.get("mounting_boss_positions_known") is False
             and a.get("media_cartridge_housing_fit_physically_checked") is False
             and a.get("rated_connectors_and_hoses_selected") is False
