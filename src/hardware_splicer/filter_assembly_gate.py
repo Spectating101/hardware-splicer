@@ -216,7 +216,7 @@ def verify_assembly(root: Path, source: Mapping[str, Any]) -> tuple[dict, dict]:
                     ("certification_for_selected_housing_currently_verified",
                      "certification_for_assembled_unit_verified",
                      "water_quality_performance_certified")),
-            "incorrect transfer of component NSF status or water-quality claims")
+            "incorrect transfer of component NSF certification status or water-quality claims")
     expected_roles = {"E_DIMENSIONS", "E_BRACKET", "E_SERVICE", "E_RATINGS",
                       "E_HYDRAULIC", "E_WATER_QUALITY", "E_COMPLIANCE"}
     roles = source.get("required_evidence_roles")
