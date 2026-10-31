@@ -1,0 +1,63 @@
+name: Native KiCad SPI Reference Acceptance
+
+on:
+  pull_request:
+    paths:
+      - "hardware/reference_designs/spi_flash_adapter_v1/**"
+      - "scripts/verify_native_spi_capability.py"
+      - "tests/test_native_spi_capability.py"
+      - ".github/workflows/native-spi-eda-acceptance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-kicad9-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native KiCad 9, pcbnew and complete symbol/footprint libraries
+        shell: bash
+        run: |
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update -qq
+          sudo apt-get install --yes --no-install-recommends \
+            kicad kicad-symbols kicad-footprints python3-pytest
+          kicad-cli --version | grep -E '^9\.'
+          /usr/bin/python3 -c 'import pcbnew; print("pcbnew",pcbnew.Version())'
+          test -d /usr/share/kicad/footprints/Package_SO.pretty
+      - name: Execute adversarial receipt, ERC, DRC, BOM and authority-contract tests
+        run: /usr/bin/python3 -m pytest --noconftest -q tests/test_native_spi_capability.py
+      - name: Rerun actual native ERC, DRC and schematic-to-PCB parity independently
+        run: |
+          /usr/bin/python3 scripts/verify_native_spi_capability.py \
+            --out .cache/hs-native-spi-acceptance
+      - name: Confirm Atlas contract does not promote simulated design to physical readiness
+        shell: python3 {0}
+        run: |
+          import hashlib
+          import json
+          from pathlib import Path
+          root=Path(".cache/hs-native-spi-acceptance")
+          report=json.loads((root/"NATIVE_EDA_ACCEPTANCE.json").read_text())
+          atlas=json.loads((root/"ATLAS_NATIVE_ELECTRONICS_CAPABILITY.json").read_text())
+          assert report["native_eda_executed"] and report["verified_native_erc"]
+          assert report["verified_native_drc"] and report["verified_schematic_pcb_parity"]
+          for path,digest in report["native_report_sha256"].items():
+              assert hashlib.sha256((root/path).read_bytes()).hexdigest()==digest
+          assert report["release_level"]=="MODELED_PRE_FAB_ONLY"
+          assert not report["fabrication_authorized"] and not report["power_on_authorized"]
+          assert not any(atlas["hardware_authority"].values())
+          assert atlas["atlas_runtime_required"] is False
+          assert atlas["verification"]["native_eda_acceptance_sha256"]==hashlib.sha256(
+              (root/"NATIVE_EDA_ACCEPTANCE.json").read_bytes()).hexdigest()
+      - name: Retain actual KiCad 9 reports, native design receipt and Atlas capability
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-native-spi-eda-acceptance-001
+          path: .cache/hs-native-spi-acceptance/
+          retention-days: 30
+          if-no-files-found: warn
