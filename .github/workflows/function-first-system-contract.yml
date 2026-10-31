@@ -49,6 +49,12 @@ jobs:
           assert len(machine["requirements"])==gate["requirements_count"]
           assert len(machine["functions"])==gate["functions_count"]
           assert len(machine["verifications"])==gate["planned_independent_tests"]
+          packages=json.loads((root/"DISCIPLINE_WORK_PACKAGES.json").read_text())
+          assert packages["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert len(packages["packages"])==len(machine["subsystems"])
+          assert not packages["physical_authority_granted"]
+          assert all(not p["native_design_outputs_generated"] for p in packages["packages"])
+          assert all(p["verification_status"]=="not_executed" for p in packages["packages"])
           assert gate["evidence_collected_count"]==0
           assert not any(gate["physical_authority"].values())
           assert machine["requested_release_state"]=="concept"
