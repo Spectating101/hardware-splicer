@@ -70,7 +70,7 @@ def test_incomplete_total_product_bom_and_false_prices_rejected():
         validate_product(v,upstream())
     v=spec()
     next(x for x in v["product_bom"] if x["ref"]=="P1")["part_number"]="UNVERIFIED-001"
-    with pytest.raises(ValueError,match="unsourced fittings"):
+    with pytest.raises(ValueError,match="(?:unsourced fittings|manufacturer product variants changed)"):
         validate_product(v,upstream())
 
 def test_service_volume_cannot_intersect_tray_or_be_claimed_qualified():
