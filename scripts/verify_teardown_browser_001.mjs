@@ -32,6 +32,7 @@ try {
     {timeout:45000});
   const initial=await page.evaluate(()=>window.HS_TEARDOWN.snapshot());
   if(initial.parts!==spec.parts.length)throw Error('Browser part inventory differs from HS input');
+  await page.screenshot({path:path.join(output,'assembled.png'),fullPage:true});
   const id=spec.parts[0].id;
   await page.locator('#hs-part-'+id).click();
   const selected=await page.evaluate(()=>window.HS_TEARDOWN.snapshot());
@@ -58,6 +59,8 @@ try {
   if(requests.length||errors.length)throw Error('Browser errors or external requests: '+JSON.stringify({errors,requests}));
   const png=path.join(output,'viewer.png');
   await page.screenshot({path:png,fullPage:true});
+  if(fs.readFileSync(path.join(output,'assembled.png')).equals(fs.readFileSync(png)))
+    throw Error('Assembled vs exploded browser screenshots are pixel identical');
   const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
   const proof={
     schema_version:'hardware_splicer.teardown_browser_proof.v1',
@@ -67,6 +70,8 @@ try {
     no_network_requests:requests.length===0,no_browser_errors:errors.length===0,
     physical_simulation_verified:false,
     html_sha256:sha(html),screenshot_sha256:sha(png),
+    assembled_screenshot_sha256:sha(path.join(output,'assembled.png')),
+    visual_states_differ:true,
     inspected_initial_mesh_x:initial.first_mesh_x,
     exploded_first_mesh_x:exploded.first_mesh_x
   };
