@@ -14,6 +14,7 @@ import {
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import ProductShowcase from "./components/ProductShowcase.jsx";
+import DetailedAssemblyReference from "./components/DetailedAssemblyReference.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
@@ -518,6 +519,14 @@ export default function App() {
           </button>
           <button
             type="button"
+            className={`nav-button ${view === VIEWS.reference ? "active" : ""}`}
+            data-testid="nav-complete-assembly"
+            onClick={() => setView(VIEWS.reference)}
+          >
+            Complete CAD assembly
+          </button>
+          <button
+            type="button"
             className={`nav-button ${view === VIEWS.showcase ? "active" : ""}`}
             data-testid="nav-product-explorer"
             onClick={() => setView(VIEWS.showcase)}
@@ -638,7 +647,7 @@ export default function App() {
       </aside>
 
       <main className="main">
-        <div className={`content ${inWorkspace || view === VIEWS.preview || view === VIEWS.showcase ? "content-results" : ""}`}>
+        <div className={`content ${inWorkspace || view === VIEWS.preview || view === VIEWS.showcase || view === VIEWS.reference ? "content-results" : ""}`}>
           {view === VIEWS.home && (
             <HomeHero
               apiOk={health?.ok}
@@ -653,6 +662,7 @@ export default function App() {
           )}
 
           {view === VIEWS.showcase && <ProductShowcase />}
+          {view === VIEWS.reference && <DetailedAssemblyReference />}
 
           {view === VIEWS.workspace && (
             <ProjectWorkspace
