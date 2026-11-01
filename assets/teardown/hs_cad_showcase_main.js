@@ -198,7 +198,7 @@ runSim({duration:24,fps:30,theme:'dark',accent:'#5edbff',
    const radial=pose.sub(center);
    if(radial.lengthSq()<.0001)radial.set(1,0,0);
    radial.normalize();
-   entry.node.position.copy(entry.origin).addScaledVector(radial,explosion*190);
+   entry.node.position.copy(entry.origin).addScaledVector(radial,explosion*135);
    previousPositions[p.id]=entry.node.position.toArray().map(x=>Number(x.toFixed(3)));
    const selected=state.selected===p.id;
    const fade=state.isolate&&state.selected&&!selected?.08:1;
@@ -213,10 +213,10 @@ runSim({duration:24,fps:30,theme:'dark',accent:'#5edbff',
   else if(state.view==='hero'){yaw=.71;pitch=.31;}
   else if(state.view==='front'){yaw=0;pitch=.06;}
   else if(state.view==='top'){yaw=.02;pitch=1.48;}
-  const rad=17*state.zoom;
+  const rad=(innerWidth<650?29:17+4.5*explosion)*state.zoom;
   camera.position.set(1.1+rad*Math.sin(yaw)*Math.cos(pitch),
     rad*Math.sin(pitch),rad*Math.cos(yaw)*Math.cos(pitch));
-  camera.lookAt(1.1,.05,0);
+  camera.lookAt(1.1,innerWidth<650?-.65:.05,0);
   renderer.render(scene,camera);
   const i=document.querySelector('.hs-progress-bar i');
   if(i)i.style.width=String((phase/24)*100)+'%';
@@ -234,7 +234,13 @@ runSim({duration:24,fps:30,theme:'dark',accent:'#5edbff',
      isolate:state.isolate,section:state.section,auto:state.auto,
      mesh_parts:nodes.size,positions:previousPositions,
      total_triangles:parts.reduce((a,p)=>a+p.mesh_triangles,0),
-     camera:camera.position.toArray().map(x=>Number(x.toFixed(3)))})
+     camera:camera.position.toArray().map(x=>Number(x.toFixed(3))),
+     projected_part_centers:Object.fromEntries([...nodes.entries()].map(([id,entry])=>{
+       entry.node.updateWorldMatrix(true,true);
+       const center=new THREE.Box3().setFromObject(entry.node).getCenter(new THREE.Vector3());
+       center.project(camera);
+       return [id,[Number(center.x.toFixed(4)),Number(center.y.toFixed(4)),Number(center.z.toFixed(4))]];
+     }))})
  };
  return {render,resize};
 });
