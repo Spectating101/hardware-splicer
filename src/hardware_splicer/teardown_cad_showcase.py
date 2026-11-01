@@ -185,6 +185,7 @@ def create(multicad: Path, cadclaw: Path, output: Path) -> dict:
         "assembly_bounds_mm":[round(float(v),3) for v in bbox],
         "assembly_center_mm":[round(float(v),3) for v in (lower+upper)/2],
         "parts":output_parts,
+        "release_blockers_count":len(assembly.get("not_built_yet",[])),
         "visualization_only":True,
         "physical_fit_verified":False,
         "real_operation_simulated":False,
@@ -193,6 +194,9 @@ def create(multicad: Path, cadclaw: Path, output: Path) -> dict:
     folder=root/"machine"
     folder.mkdir()
     (folder/"machine.glb").write_bytes(glb)
+    style_path=Path(__file__).resolve().parents[2]/"assets/teardown/hs_cad_showcase_style.css"
+    require(style_path.is_file(), "missing source-bound Teardown frontend theme")
+    (folder/"style.css").write_bytes(style_path.read_bytes())
     # JSX-like text is never interpolated from untrusted product information.
     embedded=json.dumps(payload,sort_keys=True,ensure_ascii=True).replace("</","<\\/")
     (folder/"main.js").write_text(template.replace(token,embedded))
@@ -203,6 +207,7 @@ def create(multicad: Path, cadclaw: Path, output: Path) -> dict:
         "product_id":payload["product_id"],
         "glb_sha256":digest(glb),
         "main_js_sha256":digest((folder/"main.js").read_bytes()),
+        "theme_sha256":digest((folder/"style.css").read_bytes()),
         "input_sha256":digest((root/"SHOWCASE_INPUT.json").read_bytes()),
         "part_count":len(output_parts),
         "browser_verified":False,
