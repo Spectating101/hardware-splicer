@@ -35,7 +35,7 @@ try {
   if(!frame)throw Error('Original iframe missing');
   const capture=async file=>{
     const png=await frame.evaluate(()=>{
-      const c=document.querySelector('#canvas3d');
+      const c=document.querySelector('#canvas3d canvas');
       if(!(c instanceof HTMLCanvasElement)||c.width<600||c.height<400)
         throw Error('upstream canvas has no native graphics');
       return c.toDataURL('image/png').split(',')[1];
