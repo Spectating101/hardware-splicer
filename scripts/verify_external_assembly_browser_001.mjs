@@ -22,6 +22,9 @@ try{
   const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url())});
+  // Upstream Teardown has a native capture mode: draw deterministically on demand
+  // instead of constantly saturating Chromium's software GPU with 542 CAD parts.
+  await page.addInitScript(() => { window.__CAPTURE=true; });
   await page.goto(pathToFileURL(path.resolve(htmlFile)).href,{waitUntil:'load',timeout:90000});
   await page.waitForFunction(()=>window.HS_EXTERNAL_ASSEMBLY?.ready===true&&window.SIM?.ready===true,
     null,{timeout:120000});
@@ -59,6 +62,9 @@ try{
   console.log('HIGH-FIDELITY ACTUAL CAD VIEW '+JSON.stringify({start,pixels}));
   await page.screenshot({path:path.join(output,'assembly-542-assembled.png'),fullPage:true});
   await page.locator('#hs-explode-all').click();
+  // Capture mode needs explicit frames to interpolate the real source metadata
+  // separation. This yields a stable frame rather than CPU-bound screenshot.
+  await page.evaluate(() => {for(let i=0;i<28;i++)window.SIM.render(0);});
   await page.waitForFunction(()=>window.HS_EXTERNAL_ASSEMBLY.snapshot().displayExplode>.75,
     null,{timeout:90000});
   const exploded=await page.evaluate(()=>window.HS_EXTERNAL_ASSEMBLY.snapshot());
@@ -70,6 +76,7 @@ try{
     throw Error('Original CAD component directory not interactive');
   await page.locator('#hs-isolate').click();
   await page.locator('#hs-xray').click();
+  await page.evaluate(() => window.SIM.render(0));
   await page.locator('#hs-reset').click();
   const reset=await page.evaluate(()=>window.HS_EXTERNAL_ASSEMBLY.snapshot());
   if(reset.selected!==null||reset.explode!==0)
