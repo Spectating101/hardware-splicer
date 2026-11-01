@@ -28,6 +28,13 @@ on:
       - "src/hardware_splicer/teardown_cad_mesh.py"
       - "scripts/build_teardown_cad_mesh_001.py"
       - "tests/test_teardown_cad_mesh.py"
+      - "apps/splice-ui/src/components/ProductShowcase.jsx"
+      - "apps/splice-ui/src/components/ProductShowcase.css"
+      - "apps/splice-ui/src/components/ProductShowcase.test.jsx"
+      - "apps/splice-ui/src/App.jsx"
+      - "apps/splice-ui/src/nav.js"
+      - "scripts/package_teardown_showcase_001.py"
+      - "scripts/verify_frontend_showcase_browser_001.mjs"
       - "assets/teardown/hs_machine_main.js"
       - "src/hardware_splicer/teardown_product.py"
       - "scripts/export_teardown_product_001.py"
@@ -659,6 +666,30 @@ jobs:
         run: |
           python scripts/verify_teardown_acceptance_001.py \
             --product .cache/hs-teardown-product
+      - name: Package evidence-qualified offline machine into the existing HS React frontend
+        run: |
+          python scripts/package_teardown_showcase_001.py \
+            --source .cache/hs-teardown-product \
+            --public apps/splice-ui/public/showcase
+          npm --prefix apps/splice-ui ci --no-audit --no-fund
+          npm --prefix apps/splice-ui run test -- src/components/ProductShowcase.test.jsx src/App.integration.test.jsx
+          npm --prefix apps/splice-ui run build
+          test -s apps/splice-ui/dist/showcase/machine.html
+          test -s apps/splice-ui/dist/showcase/manifest.json
+      - name: Open actual React frontend and interact with embedded Teardown in Chromium
+        run: |
+          npm --prefix apps/splice-ui run preview -- --host 127.0.0.1 --port 4173 \
+            > .cache/hs-teardown-product/FRONTEND_VITE.log 2>&1 &
+          node scripts/verify_frontend_showcase_browser_001.mjs \
+            .cache/teardown-upstream \
+            http://127.0.0.1:4173/
+      - name: Preserve native HS React showcase including verified offline CAD explorer
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-react-teardown-public-showcase-001
+          path: apps/splice-ui/dist/
+          if-no-files-found: error
+          retention-days: 30
       - name: Preserve native standalone HTML, browser screenshot and exact source evidence
         if: always()
         uses: actions/upload-artifact@v4
