@@ -13,6 +13,7 @@ import {
 } from "./api.js";
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
+import ProductShowcase from "./components/ProductShowcase.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
@@ -74,7 +75,7 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk, version }) {
+function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onExplore, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
@@ -113,6 +114,9 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
               Start a project
             </button>
           )}
+          <button type="button" className="secondary large" onClick={onExplore} data-testid="home-explore-cad">
+            Explore the 3D product
+          </button>
           <button type="button" className="secondary large" onClick={onQuickDemo} disabled={!apiOk}>
             Quick demo (1-click)
           </button>
@@ -514,6 +518,14 @@ export default function App() {
           </button>
           <button
             type="button"
+            className={`nav-button ${view === VIEWS.showcase ? "active" : ""}`}
+            data-testid="nav-product-explorer"
+            onClick={() => setView(VIEWS.showcase)}
+          >
+            Product explorer
+          </button>
+          <button
+            type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
             data-testid="nav-advanced"
             onClick={() => setView(VIEWS.advanced)}
@@ -626,7 +638,7 @@ export default function App() {
       </aside>
 
       <main className="main">
-        <div className={`content ${inWorkspace || view === VIEWS.preview ? "content-results" : ""}`}>
+        <div className={`content ${inWorkspace || view === VIEWS.preview || view === VIEWS.showcase ? "content-results" : ""}`}>
           {view === VIEWS.home && (
             <HomeHero
               apiOk={health?.ok}
@@ -636,8 +648,11 @@ export default function App() {
               onResume={resumeProject}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
+              onExplore={() => setView(VIEWS.showcase)}
             />
           )}
+
+          {view === VIEWS.showcase && <ProductShowcase />}
 
           {view === VIEWS.workspace && (
             <ProjectWorkspace
