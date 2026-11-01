@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/complete-assembly-visual-reference.yml"
       - "scripts/vendor_upstream_openarm_viewer_001.py"
+      - "scripts/import_upstream_robot_project_001.py"
       - "scripts/verify_upstream_openarm_browser_001.mjs"
       - "apps/splice-ui/src/App.jsx"
       - "apps/splice-ui/src/nav.js"
@@ -54,6 +55,19 @@ jobs:
           cmp "$ORIGINAL/libs/three.min.js" "$PUBLIC/libs/three.min.js"
           cmp "$ORIGINAL/models/openarm_follower.glb" "$PUBLIC/models/openarm_follower.glb"
           cmp "$ORIGINAL/models/openarm_leader.glb" "$PUBLIC/models/openarm_leader.glb"
+      - name: Import official upstream robot description with EXISTING HS engineering libraries
+        run: |
+          mkdir -p .cache/openarm-source
+          python -m pip install 'pydantic>=2,<3'
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+          PYTHONPATH=src python scripts/import_upstream_robot_project_001.py \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --upstream-viewer "$PUBLIC" \
+            --output "$PUBLIC/engineering"
+          python -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["hs_native_projection"]["mechanical_components"]>20 and p["reconciliation"]["same_assembly_topology_joined"] is False' \
+            "$PUBLIC/engineering/OPENARM_SOURCE_LINEAGE.json"
       - name: Build existing HS React frontend without replacing upstream implementation
         run: |
           npm --prefix apps/splice-ui ci --no-audit --no-fund
@@ -61,6 +75,8 @@ jobs:
           npm --prefix apps/splice-ui run build
           test -s apps/splice-ui/dist/reference-assemblies/openarm/index.html
           test -s apps/splice-ui/dist/reference-assemblies/openarm/models/openarm_leader.glb
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/engineering/OPENARM_MACHINE_PROJECT.json
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/engineering/OPENARM_SOURCE_LINEAGE.json
       - name: Install one off-the-shelf Chromium browser driver for smoke inspection
         run: |
           mkdir -p .cache/hs-browser
