@@ -20,9 +20,9 @@ function backgroundGradient(){
   canvas.width=4;canvas.height=512;
   const ctx=canvas.getContext('2d');
   const g=ctx.createLinearGradient(0,0,0,512);
-  g.addColorStop(0,'#dde4e9');
-  g.addColorStop(.56,'#c8d1d9');
-  g.addColorStop(1,'#a8b4c0');
+  g.addColorStop(0,'#26374a');
+  g.addColorStop(.56,'#2e4052');
+  g.addColorStop(1,'#405366');
   ctx.fillStyle=g;ctx.fillRect(0,0,4,512);
   const t=new THREE.CanvasTexture(canvas);
   t.colorSpace=THREE.SRGBColorSpace;
@@ -42,7 +42,7 @@ export function createProductStudio({renderer,scene,camera,bounds}) {
   const floorY=bounds.min.y-Math.max(.18,radius*.09);
   scene.background=backgroundGradient();
   const env=new THREE.Scene();
-  env.background=new THREE.Color('#aab7c4');
+  env.background=new THREE.Color('#c2cbd4');
   const size=Math.max(10,radius*8);
   softBox(env,size*.9,size*.85,-size*.43,size*.48,size*.32,2.65,'#f4faff');
   softBox(env,size*.45,size*.8,size*.48,size*.25,-size*.22,2.3,'#e5f3ff');
@@ -74,14 +74,14 @@ export function createProductStudio({renderer,scene,camera,bounds}) {
   scene.add(rim);
 
   const shadow=new THREE.Mesh(new THREE.PlaneGeometry(50,50),
-    new THREE.ShadowMaterial({color:'#3c5667',opacity:.28,polygonOffset:true,
+    new THREE.ShadowMaterial({color:'#101d29',opacity:.43,polygonOffset:true,
       polygonOffsetFactor:-4,polygonOffsetUnits:-8}));
   shadow.rotation.x=-Math.PI/2;
   shadow.position.y=floorY+.002;
   shadow.receiveShadow=true;scene.add(shadow);
 
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),
-    new THREE.MeshStandardMaterial({color:'#c7d1d7',roughness:.91,metalness:.05}));
+    new THREE.MeshStandardMaterial({color:'#3e5266',roughness:.89,metalness:.09}));
   floor.rotation.x=-Math.PI/2;floor.position.y=floorY;floor.receiveShadow=true;scene.add(floor);
 
   // The translucent shadow and floor are excluded from AO just like upstream Teardown's V8 stage.
@@ -103,9 +103,20 @@ export function createProductStudio({renderer,scene,camera,bounds}) {
   composer.addPass(gtao);
   composer.addPass(new Toggle(()=>{floor.visible=true;shadow.visible=true;}));
   composer.addPass(new OutputPass());
+  let adaptiveFallback=false;
   return {
     resize(w,h,ratio=1){composer.setPixelRatio(ratio);composer.setSize(w,h);},
-    render(){composer.render();},
-    summary(){return {material:'source-bound STEP PBR',stage:'softbox PMREM + shadows + GTAO',floorY};}
+    render(){
+      const start=performance.now();
+      composer.render();
+      // GTAO is GPU-heavy; in software/low-performance browsers downgrade
+      // to actual shadow maps + PBR IBL instead of leaving the UI frozen.
+      if(gtao.enabled && performance.now()-start>160){
+        gtao.enabled=false;
+        adaptiveFallback=true;
+      }
+    },
+    summary(){return {material:'source-bound STEP PBR',stage:'softbox PMREM + shadows + GTAO',
+      gtaoEnabled:gtao.enabled,adaptiveFallback,floorY};}
   };
 }
