@@ -1,6 +1,6 @@
 
 :root{color-scheme:dark}
-#app{position:relative;isolation:isolate;background:#060c16}
+#app{position:fixed;inset:0;width:100vw;height:100vh;overflow:hidden;isolation:isolate;background:#060c16}
 .hs-shell{position:absolute;inset:0;z-index:10;pointer-events:none;color:#e6f3ff;font:13px Inter,system-ui,Arial,sans-serif}
 .hs-shell *{box-sizing:border-box}.hs-shell button{cursor:pointer;pointer-events:auto}
 .hs-brand{position:absolute;top:26px;left:30px;display:flex;gap:12px;align-items:center;font-size:12px;font-weight:800;letter-spacing:.15em}
