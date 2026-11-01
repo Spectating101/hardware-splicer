@@ -162,7 +162,7 @@ def to_blueprint_spec(product:Mapping[str,Any],receipt:Mapping[str,Any])->dict:
                   "projection":"orthographic"},
                  {"id":"top","label":"TOP","az":0,"el":89,
                   "projection":"orthographic"}],
-        "motions":[{"id":"apart","label":"EXPLODE (CONCEPT)","set":{"apart":1}}],
+        "motions":[{"id":"apart","label":"EXPLODE","set":{"apart":1}}],
         "instruments":[{"label":"MODEL EXPLODE (NOT ACTUAL PRESSURE)",
                         "expr":"apart*100","format":"%.0f %%"}],
     }
