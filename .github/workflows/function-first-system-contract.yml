@@ -25,6 +25,10 @@ on:
       - "scripts/export_product_ecosystem_001.py"
       - "scripts/verify_product_ecosystem_execution_001.py"
       - "tests/test_product_ecosystem_bridge.py"
+      - "src/hardware_splicer/multicad_toolchain.py"
+      - "scripts/export_multicad_parts_001.py"
+      - "scripts/verify_multicad_partcad_001.py"
+      - "tests/test_multicad_toolchain.py"
       - "src/hardware_splicer/cadclaw_dry_product.py"
       - "scripts/compile_cadclaw_dry_assembly_001.py"
       - "scripts/verify_cadclaw_dry_assembly_001.py"
@@ -491,3 +495,74 @@ jobs:
           path: .cache/hs-cadclaw-dry-product/
           if-no-files-found: error
           retention-days: 30
+
+  multicad-native-build123d-partcad:
+    needs: cadclaw-native-dry-step-assembly
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      PC_OFFLINE: "true"
+      PC_TELEMETRY_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install native CAD authors and independent STEP importer
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m pip install "build123d==0.10.0" "cadquery==2.6.1" "PyYAML>=6,<7"
+          python -c "import build123d,cadquery; print('native CAD imports OK')"
+      - name: Reject source tampering and forged build / manufacturer claims
+        run: pytest -q tests/test_multicad_toolchain.py
+      - name: Retrieve exact product and CADCLAW original same-run STEP sources
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product
+      - name: Actually author new STEP solids in build123d and cross-check original CadQuery STEP
+        run: |
+          python scripts/export_multicad_parts_001.py \
+            --product .cache/clearbench-s1-product-sample \
+            --cadclaw .cache/hs-cadclaw-dry-product \
+            --out .cache/hs-multicad-parts
+      - name: Independently verify hashes, native geometry evidence and native PartCAD schema
+        shell: python
+        run: |
+          import json,hashlib,yaml
+          from pathlib import Path
+          from hardware_splicer.multicad_toolchain import check_native_outputs
+          root=Path(".cache/hs-multicad-parts")
+          evidence=check_native_outputs(root)
+          package=yaml.safe_load((root/"partcad/partcad.yaml").read_text())
+          assert len(evidence["parts"])==4
+          assert set(package["parts"])=={p["id"] for p in evidence["parts"]}
+          assert all(p["type"]=="step" and p["path"]=="parts/"+ident+".step"
+                     for ident,p in package["parts"].items())
+          assert not evidence["partcad_cli_executed"]
+          assert not evidence["physical_release_authorized"]
+          print("build123d/CadQuery native cross-check passed; PartCAD runtime NOT YET executed.")
+      - name: Install PartCAD 0.8.273 package manager in isolated environment
+        run: |
+          python -m pip install "partcad==0.8.273"
+          pc version
+      - name: Actually parse published STEP package with native PartCAD CLI
+        run: |
+          pc -p .cache/hs-multicad-parts/partcad list parts > .cache/hs-multicad-parts/PARTCAD_CLI.log 2>&1
+          cat .cache/hs-multicad-parts/PARTCAD_CLI.log
+          python scripts/verify_multicad_partcad_001.py \
+            --project .cache/hs-multicad-parts \
+            --cli-log .cache/hs-multicad-parts/PARTCAD_CLI.log
+      - name: Preserve truly source-bound CadQuery/build123d native STEP files and PartCAD execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-multicad-build123d-partcad-native-001
+          path: .cache/hs-multicad-parts/
+          retention-days: 30
+          if-no-files-found: warn
