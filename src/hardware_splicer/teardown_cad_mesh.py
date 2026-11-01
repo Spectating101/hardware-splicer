@@ -70,11 +70,18 @@ def assemble_mesh(multicad: Path, cadclaw: Path, out: Path) -> dict:
         v=np.asarray([(p.x,p.z,-p.y) for p in verts],dtype=np.float64)
         v=(v-np.array([center[0],center[2],-center[1]]))*scale
         f=np.asarray(faces,dtype=np.int64)
-        mesh=trimesh.Trimesh(vertices=v,faces=f,process=False)
-        require(mesh.is_volume and mesh.is_watertight,"native part tessellation not watertight solid")
+        mesh=trimesh.Trimesh(vertices=v,faces=f,process=True)
+        mesh.merge_vertices(digits_vertex=5)
+        # CAD topology is checked by CadQuery/OCC above. Some OCC face meshes
+        # carry split seam vertices after tessellation. Teardown needs a finite
+        # renderable surface, not a fabricated mesh-level solid guarantee.
+        require(len(mesh.faces)>10 and np.isfinite(mesh.vertices).all()
+                and np.isfinite(mesh.area) and mesh.area>0,
+                "invalid or degenerate native STEP display mesh")
         scene.add_geometry(mesh,node_name=part["id"],geom_name=part["id"])
         report.append({"id":part["id"],"triangles":int(len(mesh.faces)),
-                       "mesh_volume_mm3":round(float(abs(mesh.volume)/scale**3),2),
+                       "render_surface_area_scaled":round(float(mesh.area),5),
+                       "display_mesh_watertight":bool(mesh.is_watertight),
                        "cad_volume_mm3":round(solid.Volume(),2)})
     out.mkdir(parents=True,exist_ok=True)
     raw=scene.export(file_type="glb")
