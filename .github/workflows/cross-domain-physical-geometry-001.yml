@@ -16,6 +16,9 @@ on:
       - "tests/test_sensor_electrical_preflight.py"
       - "tests/test_engineering_acceptance_sensor.py"
       - "apps/mecha-splicer/src/**"
+      - "src/hardware_splicer/engineering_product_handoff.py"
+      - "scripts/export_sensor_machine_handoff_001.py"
+      - "tests/test_engineering_product_handoff.py"
       - ".github/workflows/cross-domain-physical-geometry-001.yml"
   workflow_dispatch:
 
@@ -203,5 +206,67 @@ jobs:
         with:
           name: hs-esp32-engineering-acceptance-atlas-v1
           path: .cache/hs-engineering-acceptance-001/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-canonical-sensor-machine:
+    needs: reconcile-and-publish-capability
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install canonical MachineProject and revalidation dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Exercise adversarial second-product mapping tests (synthetic only)
+        run: pytest -q tests/test_engineering_product_handoff.py
+      - name: Fetch independently executed geometry, electrical and firmware inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-sensor-001-geometry-evidence
+          path: .cache/sensor-machine-input/geometry
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-sensor-001-target-compile-evidence
+          path: .cache/sensor-machine-input/firmware
+      - name: Revalidate actual native source artifacts and publish canonical electronic product
+        run: |
+          python scripts/export_sensor_machine_handoff_001.py \
+            --geometry .cache/sensor-machine-input/geometry \
+            --firmware .cache/sensor-machine-input/firmware \
+            --out .cache/hs-sensor-machine-product-001
+      - name: Independently confirm MachineProject graph, receipts and closed physical release
+        shell: python
+        run: |
+          import json, hashlib
+          from pathlib import Path
+          from hardware_splicer.machine_project import MachineProject, ReleaseState
+          root=Path(".cache/hs-sensor-machine-product-001")
+          receipt=json.loads((root/"HANDOFF_RECEIPT.json").read_text())
+          report=json.loads((root/"PRODUCT_HANDOFF.json").read_text())
+          model=MachineProject.model_validate_json((root/"MACHINE_PROJECT.json").read_text())
+          native=json.loads((root/"ENGINEERING_ACCEPTANCE.json").read_text())
+          for filename, expected in receipt["files"].items():
+              raw=(root/filename).read_bytes()
+              assert len(raw)==expected["bytes"]
+              assert hashlib.sha256(raw).hexdigest()==expected["sha256"]
+          assert model.project_id==report["product_id"]=="esp32_bme280_sensor_001"
+          assert model.metadata["source_spec_sha256"]==native["source_spec_sha256"]==receipt["source_spec_sha256"]
+          assert len(model.subsystems)==3 and len(model.verifications)==5
+          assert sum(v.status.value=="passed" for v in model.verifications)==3
+          assert sum(v.status.value=="planned" for v in model.verifications)==2
+          assert not model.assess_release(ReleaseState.OPERATIONALLY_AUTHORIZED).allowed
+          assert "safety_not_closed" in report["release_blockers"]
+          assert not any([receipt["physical_authority_granted"], report["physical_assembly_complete"],
+                          report["manufacturing_authorized"], report["firmware_flashing_authorized"],
+                          report["operation_authorized"]])
+          print("Second distinct HS electronic product mapped to canonical machine with native receipts; physical release BLOCKED.")
+      - name: Archive portable machine graph and digital engineering evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-esp32-sensor-canonical-machine-product-001
+          path: .cache/hs-sensor-machine-product-001/
           retention-days: 30
           if-no-files-found: error
