@@ -27,7 +27,7 @@ def test_blueprint_is_one_complete_offline_product_not_parts_catalog():
     assert {"tray","panel","housing","service","sample","p_in","p_out","sample_valve"} <= {
         item["id"] for item in spec["parts"]}
     assert spec["explode"]["driver"]=="apart"
-    assert {"front","side","top","iso"} == {v["id"] for v in spec["views"]}
+    assert {"front","side","top","iso","rear","section"} == {v["id"] for v in spec["views"]}
     assert len(spec["annotations"]["callouts"])>=8
     housing=next(p for p in spec["parts"] if p["id"]=="housing")
     assert housing["shape"]["r"]==59
