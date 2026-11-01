@@ -51,6 +51,12 @@ try {
   pictures.assembled=await shoot('assembled');
   const exploded=await step('exploded');
   pictures.exploded=await shoot('exploded');
+  // Every part centroid must remain on screen in the showcased disassembly.
+  // This catches the former impressive-looking but cropped-out tray.
+  for(const [id,p] of Object.entries(exploded.projected_part_centers)){
+    if(Math.abs(p[0])>.94||Math.abs(p[1])>.9||p[2]>1)
+      throw Error('Exploded CAD part cropped beyond camera framing: '+id+' '+JSON.stringify(p));
+  }
   const id=product.parts[0].id;
   if(JSON.stringify(assembled.positions)===JSON.stringify(exploded.positions))
     throw Error('Real CAD nodes did not move relative to assembly datum');
@@ -89,6 +95,11 @@ try {
     throw Error('Interactive product controls inaccessible on mobile '+JSON.stringify(mobile));
   await page.screenshot({path:path.join(shots,'mobile.png'),fullPage:true});
   pictures.mobile=hash(path.join(shots,'mobile.png'));
+  const mobileModel=await page.evaluate(()=>window.HS_SHOWCASE.snapshot());
+  for(const [id,p] of Object.entries(mobileModel.projected_part_centers)){
+    if(Math.abs(p[0])>.96||Math.abs(p[1])>.96||p[2]>1)
+      throw Error('Mobile camera crops real CAD component '+id+' '+JSON.stringify(p));
+  }
   if(requests.length||errors.length)throw Error('Unexpected network or browser exception '+JSON.stringify({requests,errors}));
   const proof={
     schema_version:'hardware_splicer.teardown_visual_browser_proof.v2',
