@@ -69,7 +69,14 @@ try{
     null,{timeout:90000});
   const exploded=await page.evaluate(()=>window.HS_EXTERNAL_ASSEMBLY.snapshot());
   if(exploded.explode!==1||exploded.mapped<500)throw Error('Actual source parts did not explode');
-  await page.screenshot({path:path.join(output,'assembly-542-exploded.png'),fullPage:true});
+  // A 542-component exploded software-GPU scene can exceed Chromium's
+  // compositor screenshot timeout. Capture its real WebGL color buffer directly
+  // (preserveDrawingBuffer=true) instead of waiting on full-page compositing.
+  const explodedPng=await page.evaluate(()=>{
+    const canvas=document.querySelector('#gl');
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  fs.writeFileSync(path.join(output,'assembly-542-exploded.png'),Buffer.from(explodedPng,'base64'));
   await page.locator('#hs-search').fill('cover');
   await page.locator('#hs-parts button').first().click();
   if(!(await page.evaluate(()=>window.HS_EXTERNAL_ASSEMBLY.snapshot())).selected)
