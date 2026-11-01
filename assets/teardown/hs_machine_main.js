@@ -3,6 +3,8 @@
  * This is an interactive ANALYTIC GEOMETRY EXPLAINER, not physics simulation.
  */
 import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import glb64 from './machine.glb';
 import {runSim} from 'teardown-kit/runtime.js';
 
 const MODEL = __HS_TEARDOWN_MODEL_JSON__;
@@ -114,16 +116,22 @@ runSim({
   floor.position.y=-0.12;scene.add(floor);
   const clips=new THREE.Plane(new THREE.Vector3(0,-1,0),0);
   const meshes=[];
+  // Native CADCLAW assembly solids are tessellated and bundled as a real glTF.
+  // No generic bounding-box cylinders/cubes substitute for the actual STEP mesh.
+  const raw=Uint8Array.from(atob(glb64),c=>c.charCodeAt(0));
+  const gltf=await new GLTFLoader().parseAsync(raw.buffer,'');
+  const nodes=new Map();
+  gltf.scene.traverse(node=>{if(node.isMesh){nodes.set(node.name,node);}});
+  if(nodes.size!==parts.length || parts.some(p=>!nodes.has(p.id)))
+    throw Error('Native STEP mesh identities differ from source-bound HS parts');
   parts.forEach((part,i)=>{
-    const [dx,dy,dz]=part.extents_mm;
-    const geometry=part.shape==='box'
-      ? new THREE.BoxGeometry(dx*UNIT,dz*UNIT,dy*UNIT)
-      : new THREE.CylinderGeometry(dx*UNIT/2,dx*UNIT/2,dz*UNIT,40);
-    const material=new THREE.MeshStandardMaterial({color:palette[i%palette.length],
-      metalness:0.34,roughness:0.5,transparent:true,clippingPlanes:[]});
-    const mesh=new THREE.Mesh(geometry,material);
-    mesh.userData.partId=part.id;scene.add(mesh);meshes.push(mesh);
+    const mesh=nodes.get(part.id);
+    mesh.material=new THREE.MeshStandardMaterial({color:palette[i%palette.length],
+      metalness:0.35,roughness:0.5,side:THREE.DoubleSide,transparent:true,clippingPlanes:[]});
+    mesh.userData.partId=part.id;
+    scene.add(mesh);meshes.push(mesh);
   });
+  const savedPositions=meshes.map(m=>m.position.clone());
   const ray=new THREE.Raycaster();
   const pointer=new THREE.Vector2();
   let down=null;
@@ -151,7 +159,7 @@ runSim({
   const render=(t)=>{
     const explode=state.touched?state.explode:(0.34+0.34*Math.cos(t*Math.PI/15));
     for(let i=0;i<meshes.length;i++){
-      const origin=bases[i];
+      const origin=savedPositions[i];
       const outward=(i-(meshes.length-1)/2);
       const active=state.selected===parts[i].id;
       const delta=explode*outward*1.0;
@@ -180,7 +188,7 @@ runSim({
     ready:true,
     product_id:MODEL.product_id,
     source_spec_sha256:MODEL.source_spec_sha256,
-    geometry_basis:'independently checked analytic dimensions, not raw vendor STEP tessellation',
+    geometry_basis:'actual tessellated CADCLAW native assembly STEP with verified solid mapping',
     physical_kinematics_verified:false,
     snapshot:()=>({selected:state.selected,explode:state.explode,
       isolate:state.isolate,section:state.section,parts:meshes.length,
