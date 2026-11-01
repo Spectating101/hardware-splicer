@@ -129,6 +129,13 @@ def validate_native_browser(output: Path) -> dict:
             and proof.get("isolate_part") is True
             and proof.get("no_network_requests") is True
             and proof.get("no_browser_errors") is True
+            and proof.get("assembled_first") is True
+            and proof.get("guided_stages_operable") is True
+            and proof.get("full_screen_cad_visible") is True
+            and isinstance(proof.get("visible_cad_colored_samples"), int)
+            and proof["visible_cad_colored_samples"] >= 400
+            and isinstance(proof.get("css_canvas_height_px"), (int, float))
+            and proof["css_canvas_height_px"] >= 600
             and proof.get("physical_simulation_verified") is False
             and proof.get("html_sha256") == digest(raw)
             and proof.get("screenshot_sha256") == digest(screenshot.read_bytes()),
@@ -143,6 +150,8 @@ def validate_native_browser(output: Path) -> dict:
         "native_screenshot_sha256": proof["screenshot_sha256"],
         "parts_verified": len(source["parts"]),
         "visual_exploded_inspection": True,
+        "assembled_first_hero_and_guided_stages": True,
+        "actual_cad_pixels_observed": proof["visible_cad_colored_samples"],
         "real_mechanism_or_physics_verified": False,
         "real_equipment_operated": False,
         "physical_release_authorized": False,
