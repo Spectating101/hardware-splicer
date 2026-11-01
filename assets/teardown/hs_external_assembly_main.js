@@ -11,7 +11,7 @@ const state={explode:0,displayExplode:0,selected:null,isolate:false,xray:false,f
   yaw:.63,pitch:.20,zoom:1,frames:0};
 const parts=MODEL.parts;
 const byId=new Map(parts.map(p=>[p.id,p]));
-const css=String.raw
+const css=
   '#app{position:fixed!important;inset:0!important;width:100vw;height:100vh;overflow:hidden;background:#0d1725}'+
   '#gl{position:absolute;inset:0;width:100%;height:100%;display:block}'+
   '.hs-ui{position:absolute;inset:0;pointer-events:none;z-index:20;color:#e6f4ff;font:13px system-ui,sans-serif}'+
@@ -193,7 +193,7 @@ runSim({duration:60,fps:30,theme:'dark',accent:'#67d4ec',hud:{enabled:false},
       const isCover=/cover|casing|shell/i.test(row.part.category+' '+row.part.name);
       const isFast=/fastener|screw|bolt|washer|nut/i.test(row.part.category+' '+row.part.name);
       row.obj.visible=state.fasteners||!isFast;
-      const opacity=state.isolate&&state.selected&&!active?.07:state.xray&&isCover&&!active?.26:1;
+      const opacity=state.isolate&&state.selected&&!active ? 0.07 : state.xray&&isCover&&!active ? 0.26 : 1;
       for(const mesh of row.descendants){
         mesh.material.opacity=opacity;mesh.material.depthWrite=opacity>.4;
         mesh.material.emissive.setHex(active?0x1f516a:0x000000);
