@@ -25,6 +25,9 @@ on:
       - "scripts/export_product_ecosystem_001.py"
       - "scripts/verify_product_ecosystem_execution_001.py"
       - "tests/test_product_ecosystem_bridge.py"
+      - "src/hardware_splicer/teardown_cad_mesh.py"
+      - "scripts/build_teardown_cad_mesh_001.py"
+      - "tests/test_teardown_cad_mesh.py"
       - "assets/teardown/hs_machine_main.js"
       - "src/hardware_splicer/teardown_product.py"
       - "scripts/export_teardown_product_001.py"
@@ -607,7 +610,7 @@ jobs:
       - name: Install HS manifest verifier and execute adversarial Teardown contract tests
         run: |
           python -m pip install -e '.[dev]'
-          pytest -q tests/test_teardown_product.py
+          pytest -q tests/test_teardown_product.py tests/test_teardown_cad_mesh.py
       - name: Download actual independently built native STEP and PartCAD execution artifacts
         uses: actions/download-artifact@v4
         with:
@@ -618,6 +621,19 @@ jobs:
           python scripts/export_teardown_product_001.py \
             --multicad .cache/hs-multicad-parts \
             --out .cache/hs-teardown-product
+      - name: Download actual CADCLAW native assembled STEP geometry
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product
+      - name: Independently tessellate assembled native STEP into source-identified GLB solids
+        run: |
+          python -m pip install "cadquery==2.6.1" "trimesh==4.8.3" "numpy<3"
+          python scripts/build_teardown_cad_mesh_001.py \
+            --multicad .cache/hs-multicad-parts \
+            --cadclaw .cache/hs-cadclaw-dry-product \
+            --output .cache/hs-teardown-product/machine
+          test -s .cache/hs-teardown-product/machine/machine.glb
       - name: Clone exact Teardown upstream and install its locked native bundler/runtime
         run: |
           git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream
