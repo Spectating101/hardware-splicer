@@ -21,6 +21,10 @@ on:
       - "scripts/build_clearbench_product_001.py"
       - "scripts/render_clearbench_product_001.py"
       - "tests/test_whole_product_sample.py"
+      - "src/hardware_splicer/product_ecosystem_bridge.py"
+      - "scripts/export_product_ecosystem_001.py"
+      - "scripts/verify_product_ecosystem_execution_001.py"
+      - "tests/test_product_ecosystem_bridge.py"
       - ".github/workflows/function-first-system-contract.yml"
   workflow_dispatch:
 
@@ -361,5 +365,71 @@ jobs:
         with:
           name: hs-clearbench-s1-complete-product-sample-001
           path: .cache/clearbench-s1-product-sample/
+          retention-days: 30
+          if-no-files-found: error
+
+  interactive-product-and-disassembly-backends:
+    needs: integrated-whole-product-sample
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BLUEPRINT_COMMIT: 421c659ccbc0cad8e2343c0238e7a78e0422e46a
+      DECAD_COMMIT: 0c748e5b73810c18cee5ac187a9fb63feb16235c
+      PUPPETEER_SKIP_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS Python and execute fail-closed interoperability unit tests
+        run: |
+          python -m pip install -e '.[dev]'
+          pytest -q tests/test_product_ecosystem_bridge.py
+      - name: Download actual assembled product source, native CAD and approval receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - name: Export exact product revision into two external tool native schemas
+        run: |
+          python scripts/export_product_ecosystem_001.py \
+            --product-package .cache/clearbench-s1-product-sample \
+            --out .cache/hs-product-ecosystem
+      - name: Checkout exact third-party source revisions and install offline HTML builder
+        run: |
+          git clone --quiet https://github.com/lubocsu/blueprint-3d-sheet.git .cache/blueprint3d-upstream
+          git -C .cache/blueprint3d-upstream checkout --quiet --detach "$BLUEPRINT_COMMIT"
+          test "$(git -C .cache/blueprint3d-upstream rev-parse HEAD)" = "$BLUEPRINT_COMMIT"
+          npm --prefix .cache/blueprint3d-upstream ci --no-audit --no-fund
+      - name: Actually execute blueprint-3d-sheet validate and offline HTML build
+        run: |
+          node .cache/blueprint3d-upstream/bin/b2d.mjs validate \
+            .cache/hs-product-ecosystem/BLUEPRINT_ASSEMBLY_SPEC.json
+          node .cache/blueprint3d-upstream/bin/b2d.mjs build \
+            .cache/hs-product-ecosystem/BLUEPRINT_ASSEMBLY_SPEC.json \
+            --out .cache/hs-product-ecosystem/interactive
+          test -s .cache/hs-product-ecosystem/interactive/index.html
+      - name: Install pinned DeCAD implementation and run true OD-BOM schema validator
+        run: |
+          python -m pip install "git+https://github.com/daikiito-dk/DeCAD.git@$DECAD_COMMIT"
+          decad validate .cache/hs-product-ecosystem/DECAD_CONCEPT_ODBOM.json | \
+            tee .cache/hs-product-ecosystem/DECAD_VALIDATION.txt
+          decad summary .cache/hs-product-ecosystem/DECAD_CONCEPT_ODBOM.json > \
+            .cache/hs-product-ecosystem/DECAD_SUMMARY.txt
+      - name: Verify both executed outputs, immutable source and no false engineering promotion
+        run: |
+          python scripts/verify_product_ecosystem_execution_001.py \
+            --out .cache/hs-product-ecosystem \
+            --blueprint-sha "$BLUEPRINT_COMMIT" \
+            --decad-sha "$DECAD_COMMIT"
+      - name: Publish real offline interactive product, DeCAD OD-BOM and backend status
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-clearbench-ecosystem-visual-disassembly-001
+          path: .cache/hs-product-ecosystem/
           retention-days: 30
           if-no-files-found: error
