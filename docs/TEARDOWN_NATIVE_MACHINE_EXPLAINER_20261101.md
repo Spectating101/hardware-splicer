@@ -1,24 +1,39 @@
-# Native Teardown integration: source-bound HS machine explanation
+# HS product-facing native CAD explorer
 
-2026-11-01. Stacked on verified PR #244. External upstream: https://github.com/elvarofficial/teardown (MIT).
+## Scope
 
-## Scope and honest engineering classification
+This branch upgrades the earlier Teardown engine adapter from an invisible/primitive viewer into a real product-facing, **assembled-first native CAD viewer** built with the actual upstream Teardown runtime. All rendered parts come from source-bound CADCLAW assembly STEP tessellation with native BRep identity checks, and an offline glTF bundle; the release authority remains **blocked**.
 
-The **real upstream Teardown runtime and offline bundler** is used for an interactive, standalone HTML page with mesh picking, part isolation, exploded view, a section plane, alternate camera angles and source-linked dimension annotations. The machine description comes from HS's generic multi-CAD parts manifest. It does NOT pretend to be an independently measured machine mechanism or pressurized operating device.
+## Visual acceptance incident and correction
 
-- Input: actual source-bound CADCLAW -> independently authored build123d/CadQuery STEP -> PartCAD CLI-executed 4-part package, as proven in #244.
-- \`TEARDOWN_INPUT.json\` contains exactly those parts, original hashed STEP metadata and independently checked bounding dimensions.
-- Geometry in the viewer is **analytic box/cylinder reconstruction from verified extents**, NOT a tessellation of arbitrary vendor STEP and NOT validated physical assembly. User-visible text makes this explicit.
-- Output: \`machine/main.js\` imports \`teardown-kit/runtime.js\` from the exact pinned upstream repository. Their \`sims/build.mjs\` and npm-locked Three.js produce one offline self-contained \`dist/machine.html\`.
-- Native browser gate: Playwright uses Chromium to load the actual offline file, tests part buttons, exploded movement, section/isolation and rendered canvas, and captures a real screenshot. Refuse any remote network call or browser exception.
-- Source/Evidence: separate hashes of original spec, rendered HTML, screenshot, CLI evidence; test harness checks both provenance and that no physical authorization was promoted.
+PR #247's first green Chromium CI had a real defect: the previous HS CSS set `#app { position:relative }`, overriding upstream Teardown's fixed full-viewport root. The HTML and WebGL buffer existed but the visible stage collapsed. The screenshot showed UI buttons with no 3D geometry. The old test only checked canvas buffer width and JS interaction state, so it passed falsely.
 
-## Why this adds value
+The current test explicitly checks that the CSS canvas is full-height, samples the **actual WebGL framebuffer** in its model region for hundreds of illuminated CAD-colored pixels, validates the assembled-first state, checks guided steps and reset, and records both assembled and exploded real Chromium screenshots. The report must contain those successful checks before a native acceptance receipt can be signed.
 
-This reuses Teardown's existing offline packaging and shared animation/runtime interface to present machines to users and potential reviewers without HS building its own renderer. Unlike the static product sheet, the user can pick, isolate and inspect a source-bound part and animate an exploded visualization. It is reusable across HS products that produce independently verified analytic part manifests.
+## Product experience
 
-## What remains unproven
+- **Assembled-first hero:** actual source STEP arrangement; no automatic unexplained part separation.
+- **Real CAD geometry:** four source-identified BRep solids tessellated and loaded as native glTF meshes, not geometry reconstructed from bounding boxes.
+- **Interactive inspector:** model picking, dimensions and STEP hash excerpts, part-focused isolation, section clipping, orbit, top/3-4 views and zoom.
+- **Guided exploration:** stages from the verified parts manifest; smoothly interpolated disassembly visualization. This sequence is conceptual, NOT a verified service/assembly process.
+- **Evidence panel:** digital provenance, native part count and deliberately zero physical validation certificates.
+- **Actual HS frontend:** `apps/splice-ui` now includes a first-class Product explorer nav and home action. A **gated same-run packaging step** copies the verified offline Teardown HTML and evidence manifest into the React/Vite public directory, runs React tests, builds a static frontend, then checks embedded iframe controls in Chromium.
+- The published frontend bundle remains offline-capable as static files served over HTTP. It is a downloadable CI artifact; this PR does not silently deploy a publicly hosted site.
 
-Teardown's repo is a **Claude Code skill + browser runtime**, not a physics/FEA mechanism solver and not a verified CAD/STEP importer. Current HS integration intentionally does not invent hydraulic pressure, airflow, trajectories, contact constraints, vendor bracket fits or functional operation. To animate real motors, fluid actuators or gear trains, connect **validated motion models** before claiming a "functional simulator." A later adapter may consume verified glTF tessellations from native STEP BReps, explicit assembly transforms, calibrated kinematic models and field measurements. This PR does none of that.
+## Reproduce in the native CI
 
-No external source is vendored in HS; upstream Teardown is cloned and pinned in the CI job, MIT attribution retained upstream.
+```sh
+# Runs only after CADCLAW -> build123d -> PartCAD were verified in the same workflow.
+python scripts/export_teardown_product_001.py --multicad .cache/hs-multicad-parts --out .cache/hs-teardown-product
+python scripts/build_teardown_cad_mesh_001.py --multicad .cache/hs-multicad-parts --cadclaw .cache/hs-cadclaw-dry-product --output .cache/hs-teardown-product/machine
+node .cache/teardown-upstream/sims/build.mjs .cache/hs-teardown-product/machine
+node scripts/verify_teardown_browser_001.mjs .cache/teardown-upstream .cache/hs-teardown-product/dist/machine.html .cache/hs-teardown-product
+python scripts/verify_teardown_acceptance_001.py --product .cache/hs-teardown-product
+python scripts/package_teardown_showcase_001.py --source .cache/hs-teardown-product --public apps/splice-ui/public/showcase
+npm --prefix apps/splice-ui ci
+npm --prefix apps/splice-ui run build
+```
+
+## Remaining product/engineering gaps
+
+ClearBench remains a **conceptual four-solid dry reference**, not a realistic, manufacturer-qualified final hardware product; it lacks hoses, fasteners, internals and calibrated operating flow. The visual guided sequence uses scripted exploded offsets, not independently verified kinematics or a safe field-servicing order. There is no physical equipment simulation, customer acceptance test, manufacturing release or real utility measurement. To reach Teardown's flagship quality, next increase sourced assembly detail, authored materials and geometry fidelity, validated working mechanism models, controlled user feedback, and a public preview deployment.
