@@ -11,7 +11,7 @@ import {runSim} from 'teardown-kit/runtime.js';
 const MODEL = __HS_TEARDOWN_MODEL_JSON__;
 
 const parts = MODEL.parts;
-const palette = [0xbccbd5,0x586579,0x62a4c4,0xd2d9dd,0x9fadb5,0x4b667d];
+const palette = [0xb6c7d1,0xcbd5dc,0x53aebe,0xf4ae76,0x89a7bc,0x7c8f9b];
 const title = MODEL.product_id.replace(/_nonpotable.*$/,'').replace(/_001$/,'')
   .split('_').filter(Boolean).map(x=>x.toUpperCase()).join(' / ');
 const state = {
