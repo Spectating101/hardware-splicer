@@ -12,15 +12,14 @@ from .multicad_toolchain import validate_manifest, check_native_outputs, digest,
 
 
 def assemble_mesh(multicad: Path, cadclaw: Path, out: Path) -> dict:
-    import cadquery as cq
-    import trimesh
-    import numpy as np
-
     multicad=Path(multicad)
     cadclaw=Path(cadclaw)
     out=Path(out)
     manifest=validate_manifest(multicad)
     check_native_outputs(multicad)
+    import cadquery as cq
+    import trimesh
+    import numpy as np
     input_receipt=json.loads((cadclaw/"CADCLAW_INPUT_RECEIPT.json").read_text())
     require(input_receipt.get("source_spec_sha256")==manifest["source_spec_sha256"] and
             input_receipt.get("product_id")==manifest["product_id"] and
