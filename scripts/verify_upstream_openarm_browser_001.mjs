@@ -79,8 +79,18 @@ try {
     el.value='55';el.dispatchEvent(new Event('input',{bubbles:true}));
   });
   await capture('openarm-original-left-arm-exploded.png');
+  // Return to original assembled pose, then use the source viewer's
+  // built-in isometric camera preset for the distinct leader geometry.
+  await view.locator('#select-explode-scope').selectOption('ALL');
+  await view.locator('#explode-slider').evaluate(el=>{
+    el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   await view.locator('#btn-leader').click();
   await waitLoaded(516);
+  await frame.evaluate(()=>{
+    if(typeof setCameraPreset==='function')setCameraPreset('iso');
+  });
+  await page.waitForTimeout(950);
   await capture('openarm-original-leader.png');
   if(errors.length)throw Error('Source viewer JS exceptions: '+JSON.stringify(errors));
   const evidence={
