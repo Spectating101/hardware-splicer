@@ -75,9 +75,12 @@ try {
   await page.locator('#hs-explode').evaluate(el=>{
     el.value='100';el.dispatchEvent(new Event('input',{bubbles:true}));
   });
-  await page.waitForTimeout(150);
+  await page.waitForFunction((baseline)=>{
+    const now=window.HS_TEARDOWN.snapshot();
+    return now.explode===1 && Math.abs(now.first_mesh_x-baseline)>0.10;
+  },initial.first_mesh_x,{timeout:45000,polling:250});
   const exploded=await page.evaluate(()=>window.HS_TEARDOWN.snapshot());
-  if(exploded.explode!==1||Math.abs(initial.first_mesh_x-exploded.first_mesh_x)<0.01)
+  if(exploded.explode!==1||Math.abs(initial.first_mesh_x-exploded.first_mesh_x)<0.10)
     throw Error('Geometry explosion not moving real meshes');
   await page.locator('#hs-section').click();
   await page.locator('#hs-isolate').click();
