@@ -199,7 +199,11 @@ runSim({duration:60,fps:30,theme:'dark',accent:'#67d4ec',hud:{enabled:false},
         mesh.material.emissive.setHex(active?0x1f516a:0x000000);
       }
     }
-    const d=Math.max(radius*3.4,1)*state.zoom;
+    // Frame the complete authored explosion envelope, not only the assembled pose.
+    // This prevents hundreds of genuine parts from being clipped behind UI.
+    const maxOffset=Math.max(...mappings.map(r=>r.offset.length()),0);
+    const framedRadius=radius+maxOffset*state.displayExplode;
+    const d=Math.max(framedRadius*3.4,1)*state.zoom;
     camera.position.set(center.x+d*Math.sin(state.yaw)*Math.cos(state.pitch),
       center.y+d*Math.sin(state.pitch),center.z+d*Math.cos(state.yaw)*Math.cos(state.pitch));
     const active=mappings.find(r=>r.part.id===state.selected);
