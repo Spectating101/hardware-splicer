@@ -31,6 +31,9 @@ try {
   await page.waitForFunction(()=>window.HS_TEARDOWN?.ready===true && window.SIM?.ready===true,
     {timeout:45000});
   const initial=await page.evaluate(()=>window.HS_TEARDOWN.snapshot());
+  if(initial.studio?.stage!=='softbox PMREM + shadows + GTAO' ||
+     initial.studio?.material!=='source-bound STEP PBR')
+    throw Error('Native CAD viewer did not install actual product studio shading pipeline');
   if(initial.stage!==0 || initial.explode!==0 || initial.parts!==spec.parts.length)
     throw Error('Product must open assembled-first, with all source-bound CAD parts');
   // Inspect actual WebGL canvas image pixels, not JS state, HTML file size or
