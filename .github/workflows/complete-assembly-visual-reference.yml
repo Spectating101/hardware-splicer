@@ -1,28 +1,23 @@
-name: HS Complete Mechanical Assembly Visual Reference
+name: HS Original OpenArm Viewer Integration
 on:
   pull_request:
     paths:
       - ".github/workflows/complete-assembly-visual-reference.yml"
-      - "assets/teardown/hs_external_assembly_main.js"
-      - "scripts/prepare_external_assembly_001.py"
-      - "scripts/verify_external_assembly_browser_001.mjs"
-      - "scripts/package_external_assembly_001.py"
-      - "scripts/verify_external_assembly_frontend_001.mjs"
+      - "scripts/vendor_upstream_openarm_viewer_001.py"
+      - "scripts/verify_upstream_openarm_browser_001.mjs"
       - "apps/splice-ui/src/App.jsx"
       - "apps/splice-ui/src/nav.js"
       - "apps/splice-ui/src/components/DetailedAssemblyReference*"
   workflow_dispatch:
-
 jobs:
-  complete-cad-reference:
-    name: complete-real-cad-assembly
+  original-upstream-cad-viewer:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 35
     env:
-      OPENARM_REFERENCE_REV: 0c0852bd76ee7026f97875d6eac789d189a0012a
-      TEARDOWN_REV: a91262ac1109051e014662d42ecb0b7bc1f113b1
-      ASSEMBLY_OUTPUT: .cache/hs-external-assembly
-      TEARDOWN_OUT: .cache/hs-external-assembly
+      OPENARM_REV: 0c0852bd76ee7026f97875d6eac789d189a0012a
+      ORIGINAL: .cache/original-openarm
+      PUBLIC: apps/splice-ui/public/reference-assemblies/openarm
+      EVIDENCE: .cache/openarm-integration-evidence
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,76 +26,70 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Fetch original complete CAD model, metadata, and original hardware license
+      - name: Fetch exactly the original upstream viewer, two CAD models and libraries
         run: |
-          mkdir -p .cache/hs-original
-          base="https://raw.githubusercontent.com/Utsav92/openarm-3d-cad-assembly/$OPENARM_REFERENCE_REV/models"
-          curl -fLSs --retry 3 --retry-delay 2 "$base/openarm_follower.glb" -o .cache/hs-original/openarm_follower.glb
-          curl -fLSs --retry 3 --retry-delay 2 "$base/follower_metadata.json" -o .cache/hs-original/follower_metadata.json
-          curl -fLSs --retry 3 --retry-delay 2 \
+          mkdir -p "$ORIGINAL" "$EVIDENCE"
+          base="https://raw.githubusercontent.com/Utsav92/openarm-3d-cad-assembly/$OPENARM_REV"
+          for file in \
+            index.html README.md \
+            libs/three.min.js libs/GLTFLoader.js libs/OrbitControls.js \
+            libs/DRACOLoader.js libs/tailwind.min.js \
+            models/metadata.js models/follower_metadata.json \
+            models/leader_metadata.json \
+            models/openarm_follower.glb models/openarm_leader.glb
+          do
+            mkdir -p "$ORIGINAL/$(dirname "$file")"
+            curl -fLsS --retry 3 --retry-delay 2 "$base/$file" -o "$ORIGINAL/$file"
+          done
+          curl -fLsS --retry 3 \
             https://raw.githubusercontent.com/enactic/openarm_hardware/main/LICENSE.txt \
-            -o .cache/hs-original/CERN-OHL-S-2.0-LICENSE.txt
-          test "$(stat -c%s .cache/hs-original/openarm_follower.glb)" -gt 20000000
-          sha256sum .cache/hs-original/* | tee .cache/hs-original/SOURCE_CHECKSUMS.txt
-      - name: Import all original mechanical part identities and source-bound native GLB
+            -o "$ORIGINAL/CERN-OHL-S-2.0-LICENSE.txt"
+          test "$(stat -c%s "$ORIGINAL/models/openarm_follower.glb")" -gt 20000000
+          test "$(stat -c%s "$ORIGINAL/models/openarm_leader.glb")" -gt 20000000
+      - name: Package original code and geometry byte-for-byte, with attribution and hashes
         run: |
-          python scripts/prepare_external_assembly_001.py \
-            --glb .cache/hs-original/openarm_follower.glb \
-            --metadata .cache/hs-original/follower_metadata.json \
-            --output "$ASSEMBLY_OUTPUT" \
-            --min-parts 500 \
-            --source-repo https://github.com/Utsav92/openarm-3d-cad-assembly \
-            --source-ref "$OPENARM_REFERENCE_REV" \
-            --hardware-source https://github.com/enactic/openarm_hardware \
-            --hardware-license CERN-OHL-S-2.0
-      - name: Build native source-backed interactive renderer with pinned Teardown
+          python scripts/vendor_upstream_openarm_viewer_001.py \
+            --source "$ORIGINAL" --destination "$PUBLIC"
+          cmp "$ORIGINAL/index.html" "$PUBLIC/index.html"
+          cmp "$ORIGINAL/libs/three.min.js" "$PUBLIC/libs/three.min.js"
+          cmp "$ORIGINAL/models/openarm_follower.glb" "$PUBLIC/models/openarm_follower.glb"
+          cmp "$ORIGINAL/models/openarm_leader.glb" "$PUBLIC/models/openarm_leader.glb"
+      - name: Build existing HS React frontend without replacing upstream implementation
         run: |
-          git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream
-          git -C .cache/teardown-upstream checkout --quiet --detach "$TEARDOWN_REV"
-          test "$(git -C .cache/teardown-upstream rev-parse HEAD)" = "$TEARDOWN_REV"
-          npm --prefix .cache/teardown-upstream ci --no-audit --no-fund
-          node .cache/teardown-upstream/sims/build.mjs "$ASSEMBLY_OUTPUT/machine"
-          test -s "$ASSEMBLY_OUTPUT/dist/machine.html"
-      - name: Launch real Chromium and capture fully assembled and exploded mechanical geometry
-        run: |
-          cd .cache/teardown-upstream
-          npx playwright install --with-deps chromium
-          cd ../..
-          node scripts/verify_external_assembly_browser_001.mjs \
-            .cache/teardown-upstream \
-            "$ASSEMBLY_OUTPUT/dist/machine.html" "$ASSEMBLY_OUTPUT"
-      - name: Publish only a source-attributed visually inspected real product to HS React
-        run: |
-          python scripts/package_external_assembly_001.py \
-            --source "$ASSEMBLY_OUTPUT" \
-            --public apps/splice-ui/public/reference-assemblies/openarm \
-            --hardware-license .cache/hs-original/CERN-OHL-S-2.0-LICENSE.txt
           npm --prefix apps/splice-ui ci --no-audit --no-fund
           npm --prefix apps/splice-ui run test -- src/components/DetailedAssemblyReference.test.jsx src/App.integration.test.jsx
           npm --prefix apps/splice-ui run build
-          test -s apps/splice-ui/dist/reference-assemblies/openarm/machine.html
-          test -s apps/splice-ui/dist/reference-assemblies/openarm/CERN-OHL-S-2.0-LICENSE.txt
-      - name: Exercise complete React UI and the embedded complex native renderer in Chromium
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/index.html
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/models/openarm_leader.glb
+      - name: Install one off-the-shelf Chromium browser driver for smoke inspection
+        run: |
+          mkdir -p .cache/hs-browser
+          printf '{"private":true,"name":"hs-upstream-browser-check","version":"1.0.0"}\n' > .cache/hs-browser/package.json
+          npm --prefix .cache/hs-browser install --no-save --no-audit --no-fund playwright@1.58.0
+          node .cache/hs-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Use the original viewer's controls inside HS and capture real 542/516 CAD
         run: |
           npm --prefix apps/splice-ui run preview -- --host 127.0.0.1 --port 4173 \
-            > "$ASSEMBLY_OUTPUT/FRONTEND.log" 2>&1 &
-          node scripts/verify_external_assembly_frontend_001.mjs \
-            .cache/teardown-upstream http://127.0.0.1:4173/ "$ASSEMBLY_OUTPUT"
-      - name: Preserve source provenance, original 542-part CAD screenshots and viewer
+            > "$EVIDENCE/frontend.log" 2>&1 &
+          node scripts/verify_upstream_openarm_browser_001.mjs \
+            .cache/hs-browser http://127.0.0.1:4173/ "$EVIDENCE"
+          test -s "$EVIDENCE/UPSTREAM_BROWSER_PROOF.json"
+      - name: Preserve the original-source integration review and screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hs-complete-cad-assembly-visual-proof-001
+          name: hs-original-upstream-viewer-evidence-001
           path: |
-            .cache/hs-external-assembly/
-            .cache/hs-original/SOURCE_CHECKSUMS.txt
+            .cache/openarm-integration-evidence/
+            apps/splice-ui/public/reference-assemblies/openarm/manifest.json
+            apps/splice-ui/public/reference-assemblies/openarm/ATTRIBUTION.md
           retention-days: 30
           if-no-files-found: warn
-      - name: Publish complete working HS React app with real multi-part CAD inspection
+      - name: Publish the working HS UI containing original upstream viewer
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: hs-react-complete-cad-assembly-showcase-001
+          name: hs-react-original-upstream-cad-viewer-001
           path: apps/splice-ui/dist/
           retention-days: 30
           if-no-files-found: error
