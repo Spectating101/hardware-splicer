@@ -35,6 +35,7 @@ on:
       - "apps/splice-ui/src/nav.js"
       - "scripts/package_teardown_showcase_001.py"
       - "scripts/verify_frontend_showcase_browser_001.mjs"
+      - "assets/teardown/hs_product_studio.js"
       - "assets/teardown/hs_machine_main.js"
       - "src/hardware_splicer/teardown_product.py"
       - "scripts/export_teardown_product_001.py"
