@@ -25,6 +25,9 @@ on:
       - "scripts/export_product_ecosystem_001.py"
       - "scripts/verify_product_ecosystem_execution_001.py"
       - "tests/test_product_ecosystem_bridge.py"
+      - "src/hardware_splicer/cadclaw_dry_product.py"
+      - "scripts/compile_cadclaw_dry_assembly_001.py"
+      - "scripts/verify_cadclaw_dry_assembly_001.py"
       - ".github/workflows/function-first-system-contract.yml"
   workflow_dispatch:
 
@@ -433,3 +436,46 @@ jobs:
           path: .cache/hs-product-ecosystem/
           retention-days: 30
           if-no-files-found: error
+
+  cadclaw-native-dry-step-assembly:
+    needs: integrated-whole-product-sample
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CADCLAW_COMMIT: d6d371b154abfa011f843ede9f6d150119ef42c4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install official pinned CADCLAW assembly engine and real CadQuery STEP writer
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m pip install "git+https://github.com/sunnyday-technologies/CADCLAW.git@$CADCLAW_COMMIT"
+          cadclaw --help
+      - name: Retrieve the already rendered full HS product and source receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - name: Author real dry stand/component STEP sources from product data
+        run: |
+          python scripts/compile_cadclaw_dry_assembly_001.py \
+            --product-package .cache/clearbench-s1-product-sample \
+            --out .cache/hs-cadclaw-dry-product
+      - name: Validate real CADCLAW schema and solve/build native STEP constraint assembly
+        run: |
+          cadclaw assemble validate-spec .cache/hs-cadclaw-dry-product/assembly.yaml
+          cadclaw assemble build .cache/hs-cadclaw-dry-product/assembly.yaml
+      - name: Independently check actual CadQuery STEP parts and CADCLAW assembly placement
+        run: |
+          python scripts/verify_cadclaw_dry_assembly_001.py \
+            --assembly .cache/hs-cadclaw-dry-product
+      - name: Retain exact STEP parts, native assembly, constraint metadata and fail-closed receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product/
+          if-no-files-found: error
+          retention-days: 30
