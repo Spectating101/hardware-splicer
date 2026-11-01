@@ -466,7 +466,19 @@ jobs:
             --out .cache/hs-cadclaw-dry-product
       - name: Validate real CADCLAW schema and solve/build native STEP constraint assembly
         run: |
-          cadclaw assemble validate-spec .cache/hs-cadclaw-dry-product/assembly.yaml
+          set +e
+          cadclaw assemble validate-spec .cache/hs-cadclaw-dry-product/assembly.yaml \
+            > .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log 2>&1
+          validation_exit=$?
+          set -e
+          cat .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log
+          # CADCLAW returns 2 for the six *deliberate release blockers*,
+          # despite reporting zero schema/engineering validation failures.
+          # Demand exact evidence of 6 flagged blockers, otherwise fail closed.
+          test "$validation_exit" -eq 2
+          grep -Fq "0 pass, 6 warn, 0 fail. overall: WARN" \
+            .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log
+          test "$(grep -c assemble.not_built_yet .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log)" -eq 6
           cadclaw assemble build .cache/hs-cadclaw-dry-product/assembly.yaml
       - name: Independently check actual CadQuery STEP parts and CADCLAW assembly placement
         run: |
