@@ -25,6 +25,13 @@ on:
       - "scripts/export_product_ecosystem_001.py"
       - "scripts/verify_product_ecosystem_execution_001.py"
       - "tests/test_product_ecosystem_bridge.py"
+      - "assets/teardown/hs_cad_showcase_main.js"
+      - "assets/teardown/hs_cad_showcase_style.css"
+      - "src/hardware_splicer/teardown_cad_showcase.py"
+      - "scripts/export_teardown_cad_showcase_002.py"
+      - "scripts/verify_teardown_showcase_browser_002.mjs"
+      - "scripts/verify_teardown_cad_showcase_002.py"
+      - "tests/test_teardown_cad_showcase.py"
       - "assets/teardown/hs_machine_main.js"
       - "src/hardware_splicer/teardown_product.py"
       - "scripts/export_teardown_product_001.py"
@@ -649,5 +656,73 @@ jobs:
         with:
           name: hs-teardown-native-interactive-machine-001
           path: .cache/hs-teardown-product/
+          retention-days: 30
+          if-no-files-found: warn
+
+  teardown-source-cad-showroom:
+    needs: [teardown-native-machine-visualization, cadclaw-native-dry-step-assembly]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      TEARDOWN_COMMIT: a91262ac1109051e014662d42ecb0b7bc1f113b1
+      TEARDOWN_OUT: .cache/hs-teardown-showcase
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test actual source-frame assembly lowering and adversarial geometry placement
+        run: |
+          python -m pip install -e '.[dev]' "cadquery==2.6.1" "trimesh==4.9.0" "Pillow>=11,<13" "PyYAML>=6,<7"
+          pytest -q tests/test_teardown_cad_showcase.py
+      - name: Retrieve independently checked native CAD STEP evidence from same CI run
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-multicad-build123d-partcad-native-001
+          path: .cache/hs-multicad-parts
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product
+      - name: Tessellate actual CadQuery/OCC STEP geometry with CADCLAW verified assembly frames
+        run: |
+          python scripts/export_teardown_cad_showcase_002.py \
+            --multicad .cache/hs-multicad-parts \
+            --cadclaw .cache/hs-cadclaw-dry-product \
+            --out .cache/hs-teardown-showcase
+      - name: Install exact upstream Teardown native runtime and esbuild dependencies
+        run: |
+          git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream-v2
+          git -C .cache/teardown-upstream-v2 checkout --quiet --detach "$TEARDOWN_COMMIT"
+          test "$(git -C .cache/teardown-upstream-v2 rev-parse HEAD)" = "$TEARDOWN_COMMIT"
+          npm --prefix .cache/teardown-upstream-v2 ci --no-fund --no-audit
+      - name: Actually bundle real GLB mesh and responsive viewer into offline Teardown HTML
+        run: |
+          node .cache/teardown-upstream-v2/sims/build.mjs \
+            .cache/hs-teardown-showcase/machine
+          test -s .cache/hs-teardown-showcase/dist/machine.html
+      - name: Install browser for actual real-CAD interactive visual regression
+        run: |
+          cd .cache/teardown-upstream-v2
+          npx playwright install --with-deps chromium
+      - name: Drive exploded, top, section, isolation and mobile views in actual Chromium
+        run: |
+          node scripts/verify_teardown_showcase_browser_002.mjs \
+            .cache/teardown-upstream-v2 \
+            .cache/hs-teardown-showcase
+      - name: Independently compare actual screenshot pixels and full native evidence chain
+        run: |
+          python scripts/verify_teardown_cad_showcase_002.py \
+            --out .cache/hs-teardown-showcase
+      - name: Archive full visual product experience plus separate state screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-teardown-real-step-showcase-002
+          path: .cache/hs-teardown-showcase/
           retention-days: 30
           if-no-files-found: warn
