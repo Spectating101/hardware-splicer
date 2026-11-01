@@ -483,7 +483,22 @@ jobs:
           grep -Fq "0 pass, 6 warn, 0 fail. overall: WARN" \
             .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log
           test "$(grep -c assemble.not_built_yet .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log)" -eq 6
-          cadclaw assemble build .cache/hs-cadclaw-dry-product/assembly.yaml
+          set +e
+          cadclaw assemble build .cache/hs-cadclaw-dry-product/assembly.yaml \
+            > .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log 2>&1
+          build_exit=$?
+          set -e
+          cat .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log
+          # A native STEP may be generated while CADCLAW correctly returns WARN/2.
+          # Accept only the six real release blockers plus two floating concept
+          # components with no joint frames. Any FAIL, other warning or absent
+          # STEP is an engineering failure, not a tolerated warning.
+          test "$build_exit" -eq 2
+          grep -Fq "0 pass, 8 warn, 0 fail. overall: WARN" \
+            .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log
+          test "$(grep -c assemble.not_built_yet .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log)" -eq 6
+          test "$(grep -c assemble.connector_metadata_missing .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log)" -eq 2
+          test -s .cache/hs-cadclaw-dry-product/clearbench_s1_dry_reference.step
       - name: Independently check actual CadQuery STEP parts and CADCLAW assembly placement
         run: |
           python scripts/verify_cadclaw_dry_assembly_001.py \
