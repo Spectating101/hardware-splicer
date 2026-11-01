@@ -51,6 +51,24 @@ try {
       const c=document.querySelector('#canvas3d');
       if(!(c instanceof HTMLCanvasElement)||c.width<600||c.height<400)
         throw Error('upstream canvas has no native graphics');
+      // The upstream WebGLRenderer intentionally does NOT set
+      // preserveDrawingBuffer. toDataURL in a later task records black.
+      // Draw using upstream's own renderer and immediately read its
+      // framebuffer in the SAME JavaScript task. No rewritten rendering code.
+      if(typeof renderer==='undefined'||typeof scene==='undefined'||
+        typeof camera==='undefined') throw Error('original upstream Three.js engine unavailable');
+      renderer.render(scene,camera);
+      const sample=document.createElement('canvas');
+      sample.width=240;sample.height=150;
+      const ctx=sample.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(c,0,0,sample.width,sample.height);
+      const data=ctx.getImageData(0,0,sample.width,sample.height).data;
+      let visible=0;
+      for(let i=0;i<data.length;i+=4){
+        const [r,g,b]=[data[i],data[i+1],data[i+2]];
+        if(Math.max(r,g,b)>55 && Math.min(r,g,b)>8)visible++;
+      }
+      if(visible<1200)throw Error('original upstream machine not visibly rendered: '+visible+' pixels');
       return c.toDataURL('image/png').split(',')[1];
     });
     fs.writeFileSync(path.join(artifactDir,file),Buffer.from(png,'base64'));
