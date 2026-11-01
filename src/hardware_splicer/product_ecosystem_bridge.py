@@ -132,14 +132,93 @@ def to_blueprint_spec(product:Mapping[str,Any],receipt:Mapping[str,Any])->dict:
     parts.append(part("label","NON-POTABLE LABEL — CONCEPT",
         {"type":"box","size":[185,40,2]},coords(95,92,650),"plastic",
         "Never use or drink unverified output", [0,80,0]))
+    # Viewer density is substantive: expose the *whole product* as distinct
+    # conceptual interface / maintenance / documentation layers. These
+    # display primitives are NOT additional BOM or pressure-bearing items.
+    housing_center=coords(housing["center_x_mm"],housing["center_y_mm"],
+                          housing["bottom_z_mm"]+housing["height_mm"]/2)
+    additions=[
+      part("p5_media","PENTEK P5 MEDIA — DOCUMENTED ENVELOPE",
+           {"type":"cylinder","r":30.25,"h":251,"segments":40},
+           coords(housing["center_x_mm"],housing["center_y_mm"],386),
+           "plastic","Vendor P5 external media size only. Actual cartridge seating/seal UNVERIFIED",
+           [0,150,0]),
+      part("housing_cap_zone","HOUSING CAP REGION — ILLUSTRATIVE",
+           {"type":"cylinder","r":59,"h":24,"segments":48},
+           coords(housing["center_x_mm"],housing["center_y_mm"],521),
+           "plastic","Cap detail is illustrative; not a real vendor thread or attachment",
+           [0,180,0]),
+      part("feed_marker","INLET STATION — NOT CONNECTED",
+           {"type":"cylinder","r":9,"h":22,"segments":20},
+           coords(-201,0,535),"metal","Symbolic feed port location; no rated fittings",
+           [-120,0,0]),
+      part("outlet_marker","EFFLUENT STATION — NOT CONNECTED",
+           {"type":"cylinder","r":9,"h":22,"segments":20},
+           coords(118,0,535),"metal","Symbolic outlet; real 3/8-in NPT geometry not modeled",
+           [120,0,0]),
+      part("delta_label","PRESSURE DIFFERENCE — INFORMATION",
+           {"type":"box","size":[132,32,3]},coords(120,91,410),"plastic",
+           "Difference is an observation requirement, not treatment performance",
+           [140,70,0]),
+      part("feed_label","RAW NON-POTABLE INPUT — LABEL",
+           {"type":"box","size":[146,24,3]},coords(-137,91,575),"plastic",
+           "Input challenge is unspecified until independently tested",
+           [-90,60,0]),
+      part("sample_label","NON-POTABLE SAMPLE — LABEL",
+           {"type":"box","size":[138,26,3]},coords(144,90,245),"plastic",
+           "Sampling is not permission to use for drinking",
+           [150,60,0]),
+      part("service_label","SERVICE ACCESS UNVERIFIED — LABEL",
+           {"type":"box","size":[175,26,3]},coords(-80,91,168),"plastic",
+           "150 mm lower corridor is an illustrative allocation only",
+           [0,-120,0]),
+      part("service_control_glyph","SERVICE HANDLE POSITION — CONCEPT",
+           {"type":"box","size":[34,18,30]},coords(-65,0,207),"metal",
+           "No real wrench or bracket mounting details qualified",
+           [-80,-40,0]),
+      part("sample_bay","SAMPLE COLLECTION BAY — CONCEPT",
+           {"type":"box","size":[110,6,104]},coords(145,-34,28),"plastic",
+           "Non-loaded placement guide, not a manufactured tray fixture",
+           [90,-40,0]),
+      part("left_trim","LEFT DRY PANEL EDGE — CONCEPT",
+           {"type":"box","size":[12,710,12]},coords(-219,107,375),"metal",
+           "Dry panel styling. No strength or fastening claims",
+           [-70,0,0]),
+      part("right_trim","RIGHT DRY PANEL EDGE — CONCEPT",
+           {"type":"box","size":[12,710,12]},coords(219,107,375),"metal",
+           "Dry panel styling. No strength or fastening claims",
+           [70,0,0]),
+      part("water_warning","NO POTABLE WATER CLAIM — LABEL",
+           {"type":"box","size":[205,36,3]},coords(-8,90,690),"plastic",
+           "Actual water quality, leak safety and fit UNTESTED",
+           [0,120,0]),
+      part("test_port_label","SAMPLING TEST POINT — SYMBOLIC",
+           {"type":"box","size":[125,24,3]},coords(131,91,198),"plastic",
+           "Not a calibrated observation, no test data",
+           [120,0,0]),
+    ]
+    parts.extend(additions)
+    require(len(parts)>=24,"external viewer cannot represent the complete product")
+    # Actual animation channel(s), not just an inert driver shown in controls.
+    for item in parts:
+        if item["id"] in ("housing","p5_media","housing_cap_zone","sample","service",
+                          "sample_valve","feed_marker","outlet_marker","p_in","p_out"):
+            item["channels"]=[{"type":"explode","bind":"apart"}]
+    # Functional engraving-like detail is illustrative, NOT a bolt pattern.
+    for identifier in ("tray","panel","delta_label","sample_bay"):
+        next(x for x in parts if x["id"]==identifier)["details"]=[
+            {"kind":"panelLine","face":"front","count":2,"along":"u"}]
+    visible=[p for p in parts if p["id"]!="service"]
     annotations={"callouts":[
         {"n":i+1,"text":p["name"],"anchor":p["id"]}
-        for i,p in enumerate(parts) if p["id"]!="service"
+        for i,p in enumerate(visible) if i<24
     ],"dimensions":[
         {"label":"450 mm (concept)","from":[-225,0,-130],"to":[225,0,-130],
          "offset":[0,-45,0]},
         {"label":"740 mm (concept)","from":[-225,0,-130],"to":[-225,740,-130],
          "offset":[-50,0,0]},
+        {"label":"260 mm (concept)","from":[225,0,-130],"to":[225,0,130],
+         "offset":[50,0,0]},
     ]}
     return {
         "meta":{"id":"clearbench-s1","org":"HARDWARE SPLICER",
@@ -161,10 +240,19 @@ def to_blueprint_spec(product:Mapping[str,Any],receipt:Mapping[str,Any])->dict:
                  {"id":"side","label":"SIDE","az":90,"el":0,
                   "projection":"orthographic"},
                  {"id":"top","label":"TOP","az":0,"el":89,
-                  "projection":"orthographic"}],
-        "motions":[{"id":"apart","label":"EXPLODE","set":{"apart":1}}],
-        "instruments":[{"label":"MODEL EXPLODE (NOT ACTUAL PRESSURE)",
-                        "expr":"apart*100","format":"%.0f %%"}],
+                  "projection":"orthographic"},
+                 {"id":"rear","label":"REAR","az":180,"el":0,
+                  "projection":"orthographic"},
+                 {"id":"section","label":"SECTION","az":34,"el":18,
+                  "section":{"plane":"xy","at":0}}],
+        "motions":[{"id":"apart","label":"EXPLODE","set":{"apart":1}},
+                   {"id":"reset","label":"ASSEMBLE","set":{"apart":0}}],
+        "instruments":[
+            {"label":"ASSEMBLY EXPLODE (CONCEPT)","expr":"apart*100","format":"%.0f %"},
+            {"label":"PHYSICAL TESTS PASSED","expr":"apart*0","format":"%.0f"},
+            {"label":"PRESSURE READINGS VERIFIED","expr":"apart*0","format":"%.0f"},
+            {"label":"RELEASE AUTHORITY (0=NO)","expr":"apart*0","format":"%.0f"},
+        ],
     }
 
 
