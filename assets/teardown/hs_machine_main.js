@@ -4,13 +4,14 @@
  */
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {createProductStudio} from './hs_product_studio.js';
 import glb64 from './machine.glb';
 import {runSim} from 'teardown-kit/runtime.js';
 
 const MODEL = __HS_TEARDOWN_MODEL_JSON__;
 
 const parts = MODEL.parts;
-const palette = [0x53dbf7,0xffbb6a,0x718efa,0xb79dff,0x8ae5b4,0xff829e];
+const palette = [0xbccbd5,0x586579,0x62a4c4,0xd2d9dd,0x9fadb5,0x4b667d];
 const title = MODEL.product_id.replace(/_nonpotable.*$/,'').replace(/_001$/,'')
   .split('_').filter(Boolean).map(x=>x.toUpperCase()).join(' / ');
 const state = {
@@ -238,16 +239,13 @@ runSim({
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true,
     powerPreference:'default'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
-  renderer.setClearColor(0x081422);
+  renderer.setClearColor(0xc8d1d9);
   renderer.localClippingEnabled=true;
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x081422);
+  scene.background=new THREE.Color(0xc8d1d9);
   camera=new THREE.PerspectiveCamera(37,1,.05,500);
-  scene.add(new THREE.HemisphereLight(0xe5f5ff,0x182a43,2.1));
-  const key=new THREE.DirectionalLight(0xe6f8ff,2.9);
-  key.position.set(10,18,15);scene.add(key);
-  const rim=new THREE.DirectionalLight(0x59bfff,1.3);
-  rim.position.set(-12,7,-8);scene.add(rim);
+  // The exact same upstream Teardown softbox/PMREM/GTAO studio vocabulary
+  // is assembled after the native STEP GLB is loaded and measured.
   const raw=Uint8Array.from(atob(glb64),c=>c.charCodeAt(0));
   const gltf=await new GLTFLoader().parseAsync(raw.buffer,'');
   const nodes=new Map();
@@ -258,9 +256,10 @@ runSim({
   parts.forEach((p,i)=>{
     const mesh=nodes.get(p.id);
     mesh.material=new THREE.MeshStandardMaterial({
-      color:palette[i%palette.length],metalness:.35,roughness:.43,
-      side:THREE.DoubleSide,transparent:true,opacity:1,clippingPlanes:[]
+      color:palette[i%palette.length],metalness:i===1?.58:.22,roughness:i===1?.48:.53,
+      envMapIntensity:.85,side:THREE.DoubleSide,transparent:true,opacity:1,clippingPlanes:[]
     });
+    mesh.castShadow=true;mesh.receiveShadow=true;
     scene.add(mesh);meshes.push(mesh);
     mesh.updateMatrixWorld(true);
     bounds.expandByObject(mesh);
@@ -270,11 +269,9 @@ runSim({
   bounds.getBoundingSphere(sphere);
   modelRadius=sphere.radius;
   originals=meshes.map(m=>m.position.clone());
-  const floorY=bounds.min.y-.18;
-  ground=new THREE.GridHelper(28,24,0x304c66,0x192f46);
-  ground.position.set(modelCenter.x,floorY,modelCenter.z);
-  ground.material.transparent=true;
-  ground.material.opacity=.38;scene.add(ground);
+  // Build the studio after reading native BRep-derived mesh bounds;
+  // no material stage meshes are counted as machine engineering components.
+  const studio=createProductStudio({renderer,scene,camera,bounds});
   const cutPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),0);
   const ray=new THREE.Raycaster();
   const pointer=new THREE.Vector2();
@@ -352,12 +349,13 @@ runSim({
     const desiredTarget=selectedMesh&&state.isolate?selectedMesh.position:modelCenter;
     focusTarget.lerp(desiredTarget,.08);
     camera.lookAt(focusTarget);
-    renderer.render(scene,camera);
+    studio.render();
     return {};
   };
   const resize=()=>{
     const w=canvas.clientWidth||innerWidth,h=canvas.clientHeight||innerHeight;
     renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+    studio.resize(w,h,renderer.getPixelRatio());
   };
   window.HS_TEARDOWN={
     ready:true,product_id:MODEL.product_id,source_spec_sha256:MODEL.source_spec_sha256,
@@ -370,7 +368,8 @@ runSim({
       tour:state.tour,frames:state.frame,
       first_mesh_x:Number(meshes[0].position.x.toFixed(5)),
       bounds:[...bounds.min.toArray(),...bounds.max.toArray()],
-      viewport:[canvas.clientWidth,canvas.clientHeight]
+      viewport:[canvas.clientWidth,canvas.clientHeight],
+      studio:studio.summary()
     })
   };
   return {render,resize};
