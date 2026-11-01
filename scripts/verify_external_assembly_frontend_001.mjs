@@ -23,7 +23,7 @@ try{
   await page.getByTestId('real-assembly-reference').waitFor({state:'visible'});
   const frame=page.frameLocator('iframe[title="Complete OpenArm CAD interactive explorer"]');
   await frame.locator('#hs-external-ui').waitFor({state:'visible',timeout:120000});
-  if(await frame.locator('#hs-part-list button').count()<100)
+  if(await frame.locator('#hs-parts button').count()<100)
     throw Error('Complex CAD part directory not present in HS actual React app');
   await frame.locator('#hs-explode-all').click();
   await frame.locator('#hs-assembled').click();
