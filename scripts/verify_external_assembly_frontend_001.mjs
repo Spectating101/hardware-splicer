@@ -28,6 +28,11 @@ try{
   await frame.locator('#hs-explode-all').click();
   await frame.locator('#hs-assembled').click();
   if(errors.length)throw Error('React frontend errors '+JSON.stringify(errors));
-  await page.screenshot({path:path.join(output,'hs-complete-assembly-react-frontend.png'),fullPage:true});
+  // The complete 542-part 3D viewer is already captured separately with
+  // native Teardown. Avoid duplicating a full-page Chromium screenshot while
+  // a live software GPU is painting the complex iframe continuously.
+  const frameCount=await page.frame({url:/openarm\/machine\.html/}).evaluate(
+    ()=>window.HS_EXTERNAL_ASSEMBLY?.snapshot()?.frames||0);
+  if(frameCount<1)throw Error('Embedded React browser has not rendered the imported machine');
   console.log('HS FULL FRONTEND WITH 542-PART MECHANICAL REFERENCE VISIBLE');
 }finally{await browser.close()}
