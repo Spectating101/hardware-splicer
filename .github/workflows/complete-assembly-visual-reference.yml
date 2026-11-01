@@ -62,7 +62,7 @@ jobs:
           curl -fLsS --retry 3 --retry-delay 2 \
             https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
             -o .cache/openarm-source/openarm_v10.urdf
-          PYTHONPATH=src python scripts/import_upstream_robot_project_001.py \
+          PYTHONPATH=src python -m scripts.import_upstream_robot_project_001 \
             --urdf .cache/openarm-source/openarm_v10.urdf \
             --upstream-viewer "$PUBLIC" \
             --output "$PUBLIC/engineering"
