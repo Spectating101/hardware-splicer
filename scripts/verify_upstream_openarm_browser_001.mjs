@@ -20,6 +20,19 @@ try {
   const resp=await page.goto(siteUrl,{waitUntil:'domcontentloaded',timeout:30000});
   if(!resp.ok())throw Error('HS app not served');
   await page.getByTestId('nav-complete-assembly').click();
+  const engineering=page.getByTestId('upstream-robot-engineering');
+  await engineering.waitFor({state:'visible',timeout:30000});
+  if(!(await engineering.innerText()).includes('URDF links') ||
+     !(await engineering.innerText()).includes('HS engineering interfaces'))
+    throw Error('HS real upstream engineering project is not attached to original CAD viewer');
+  const lineage=await page.evaluate(async()=>{
+    const r=await fetch('/reference-assemblies/openarm/engineering/OPENARM_SOURCE_LINEAGE.json');
+    if(!r.ok)throw Error('engineering source lineage missing');
+    return r.json();
+  });
+  if(lineage.hs_native_projection.mechanical_components<20 ||
+     lineage.reconciliation.same_assembly_topology_joined!==false)
+    throw Error('No native multi-component HS engineering projection or variant mismatch disclosure');
   const view=page.frameLocator('iframe[title="Original OpenArm mechanical CAD viewer"]');
   const badge=view.locator('#parts-count-badge');
   const waitLoaded=async expected=>{
@@ -57,6 +70,10 @@ try {
     source_ref:'0c0852bd76ee7026f97875d6eac789d189a0012a',
     source_viewer_original:true,upstream_viewer_rendered:true,
     both_source_models_load:true,verified_part_counts:[542,516],
+    original_urdf_engineering_project_connected:true,
+    projected_engineering_components:lineage.hs_native_projection.mechanical_components,
+    topology_links:lineage.upstream_robot_description.published_links,
+    topology_joints:lineage.upstream_robot_description.published_joints,
     hs_reimplemented_controls:false,physical_motion_verified:false,
     screenshots:['openarm-original-follower.png','openarm-original-left-arm-exploded.png',
       'openarm-original-leader.png'].map(name=>({
