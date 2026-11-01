@@ -72,6 +72,9 @@ def export(multicad: Path, output: Path) -> dict:
     require(template.count(token) == 1, "invalid native Teardown JS template")
     encoded = json.dumps(model, sort_keys=True, ensure_ascii=True, allow_nan=False).replace("</", "<\\/")
     (machine / "main.js").write_text(template.replace(token, encoded))
+    studio_source=source.parent / "hs_product_studio.js"
+    require(studio_source.is_file(), "native HS studio stage module missing")
+    (machine/"hs_product_studio.js").write_bytes(studio_source.read_bytes())
     (out / "TEARDOWN_INPUT.json").write_bytes(canonical(model))
     receipt = {
         "schema_version": "hardware_splicer.teardown_export_receipt.v1",
@@ -79,6 +82,7 @@ def export(multicad: Path, output: Path) -> dict:
         "native_html_built": False,
         "native_browser_run": False,
         "machine_source_sha256": digest((machine/"main.js").read_bytes()),
+        "studio_source_sha256": digest((machine/"hs_product_studio.js").read_bytes()),
         "input_sha256": digest((out/"TEARDOWN_INPUT.json").read_bytes()),
         "physical_release_authorized": False,
     }
@@ -103,6 +107,7 @@ def validate_native_browser(output: Path) -> dict:
         and source.get("source_spec_sha256") == receipt.get("source_spec_sha256")
         and receipt.get("input_sha256") == digest((root/"TEARDOWN_INPUT.json").read_bytes())
         and receipt.get("machine_source_sha256") == digest((root/"machine/main.js").read_bytes())
+        and receipt.get("studio_source_sha256") == digest((root/"machine/hs_product_studio.js").read_bytes())
         and receipt.get("native_html_built") is False
         and receipt.get("native_browser_run") is False
         and receipt.get("physical_release_authorized") is False,
