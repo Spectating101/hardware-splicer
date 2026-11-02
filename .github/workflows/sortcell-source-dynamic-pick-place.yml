@@ -5,6 +5,7 @@ on:
       - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
       - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
+      - "scripts/verify_sortcell_dynamic_cycle_001.py"
       - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
       - "scripts/audit_sortcell_openarm_collision_timing_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
@@ -45,6 +46,12 @@ jobs:
             --urdf .cache/openarm-source/openarm_v10.urdf \
             --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
             --output .cache/sortcell-supported-grasp
+      - name: Independently enforce continuous original-source motor and free-object sorting cycle acceptance
+        run: |
+          python -m scripts.verify_sortcell_dynamic_cycle_001 \
+            --cycle .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
       - name: Validate source provenance and physical safety boundaries without asserting success
         run: |
           python - <<'PY'
@@ -94,6 +101,7 @@ jobs:
           path: |
             .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
             .cache/sortcell-dynamic-cycle/README.md
+            .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
             .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
             .cache/sortcell-supported-grasp/SCOPE.md
           retention-days: 30
