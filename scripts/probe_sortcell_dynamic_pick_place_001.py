@@ -27,7 +27,12 @@ OBJECT_MASS=.030
 FLOOR_XY=[.46,.50]  # existing SORTCELL tray floor footprint, 0.46 x 0.50 m
 FLOOR_DEPTH=.025
 
-def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
+def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
+        *,finger_margin_m:float=0.0,pickup_support_width_m:float=.46,
+        deposit_support_width_m:float=.46)->dict:
+    require(0<=finger_margin_m<=.006,"finger limit margin must be 0-6mm")
+    require(.035<=pickup_support_width_m<=.46,"candidate pickup support width outside allowed envelope")
+    require(.035<=deposit_support_width_m<=.46,"candidate deposit support width outside allowed envelope")
     import pybullet as p
     original=urdf.read_bytes()
     motion=json.loads(trajectory.read_text())
@@ -60,7 +65,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         require(len(home)==18,"unexpected robot DoFs")
         q_pick=dict(home)
         for n in home:
-            if "finger_joint" in n:q_pick[n]=.044
+            if "finger_joint" in n:q_pick[n]=.044-finger_margin_m
         q_pick.update(openarm_left_joint1=-2.8,openarm_left_joint2=-2.7,
                       openarm_left_joint4=.4)
         right_fingers=("openarm_right_finger_joint1","openarm_right_finger_joint2")
@@ -156,13 +161,17 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         install(q_pick)
         # Floor planes placed from published tray FLOOR size and a candidate
         # position derived from original source TCP center, *not* the viewer.
-        def station(name,xyz,orientation):
+        def station(name,xyz,orientation,footprint_x):
             # world up extent of an oriented cube; original plane is axis-aligned
             m=p.getMatrixFromQuaternion(orientation)
             vertical_half_extent=OBJECT_SIDE/2*sum(abs(m[6+i]) for i in range(3))
             floor_top=xyz[2]-vertical_half_extent-.002
+            # Engineering fixture alternative: an inset physical support pad,
+            # not a modification of the independently drawn SORTCELL viewer.
+            # The cube still rests on a gravity-collidable static surface.
+            footprint_y=FLOOR_XY[1] if footprint_x==.46 else footprint_x
             col=p.createCollisionShape(p.GEOM_BOX,halfExtents=[
-                FLOOR_XY[0]/2,FLOOR_XY[1]/2,FLOOR_DEPTH/2],
+                footprint_x/2,footprint_y/2,FLOOR_DEPTH/2],
                 physicsClientId=client)
             body=p.createMultiBody(baseMass=0,baseCollisionShapeIndex=col,
                 basePosition=[xyz[0],xyz[1],floor_top-FLOOR_DEPTH/2],
@@ -172,14 +181,18 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "surface_height_robot_z_m":floor_top,
                 "candidate_visual_stage_center_m":urdf_to_stage([
                     xyz[0],xyz[1],floor_top-FLOOR_DEPTH/2],spec),
-                "source_floor_size_stage_m":[.46,.025,.50]}
+                "source_floor_size_stage_m":[.46,.025,.50],
+                "simulated_proposed_support_size_m":[footprint_x,FLOOR_DEPTH,footprint_y],
+                "fixture_is_inset_support_alternative_not_original_stage":footprint_x<.46}
         # Source-supported grasp sweep proved a 60 mm tool-aligned cube,
         # positioned +20 mm in world X from the source TCP, can settle, close
         # and lift under gravity with sustained two-finger contacts.
         # Use EXACTLY that verified initialization; no object reposition later.
         pickup_cube_xyz=[pick_xyz[0]+.020,pick_xyz[1],pick_xyz[2]]
-        pickup=station("proposed_pick_station",pickup_cube_xyz,pick_orientation)
-        deposit=station("proposed_sort_station",place_xyz,place_orientation)
+        pickup=station("proposed_pick_station",pickup_cube_xyz,pick_orientation,
+                       pickup_support_width_m)
+        deposit=station("proposed_sort_station",place_xyz,place_orientation,
+                        deposit_support_width_m)
         # Original source joint space and original collision links.
         shape=p.createCollisionShape(p.GEOM_BOX,
               halfExtents=[OBJECT_SIDE/2]*3,physicsClientId=client)
@@ -217,7 +230,10 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         def set_motors(q,closure):
             for name,target in q.items():
                 j,meta=info[name]
-                if name in right_fingers:target=closure
+                if name in right_fingers:
+                    # Original source prismatic limits remain unchanged.
+                    # Target margin leaves servo/contact tracking headroom.
+                    target=(finger_margin_m if closure==0 else .044-finger_margin_m)
                 p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
                     targetPosition=target,force=min(40.0,float(meta[10])),
                     maxVelocity=.65 if "finger" not in name else .3,
@@ -342,6 +358,9 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "source_fk_high_transfer_candidates_tested":len(high_options),
                 "source_fk_validated_original_source_limits":True,
                 "proposed_fixture_stations":[pickup,deposit],
+                "candidate_fixture_footprints_m":[
+                     [pickup_support_width_m,pickup["simulated_proposed_support_size_m"][2]],
+                     [deposit_support_width_m,deposit["simulated_proposed_support_size_m"][2]]],
                 "same_as_existing_sortcell_viewer_layout":False,
                 "physical_mount_calibrated":False,
                 "visual_cad_v11_registered_to_urdf_v10":False,
@@ -354,6 +373,8 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "supported_grasp_seed_source":"strict passing trial 16 from source-supported grasp sweep",
                 "supported_grasp_cube_world_xy_offset_m":[.02,0],
                 "supported_grasp_cube_orientation":"source_tool_aligned",
+                "experimental_source_finger_limit_margin_m":finger_margin_m,
+                "original_source_finger_joint_hard_limits_unchanged":True,
                 "supported_grasp_stays_attached_to_physics_only":True,
                 "grasp_and_lift_stable":grasp_stable,
                 "clearance_maneuver_remained_off_pickup_floor":clearance_maintained,
@@ -416,8 +437,14 @@ if __name__=="__main__":
     ap.add_argument("--trajectory",type=Path,required=True)
     ap.add_argument("--stage",type=Path,required=True)
     ap.add_argument("--output",type=Path,required=True)
+    ap.add_argument("--finger-margin-m",type=float,default=0.0)
+    ap.add_argument("--pickup-support-width-m",type=float,default=.46)
+    ap.add_argument("--deposit-support-width-m",type=float,default=.46)
     args=ap.parse_args()
-    r=run(args.urdf,args.trajectory,args.stage,args.output)
+    r=run(args.urdf,args.trajectory,args.stage,args.output,
+          finger_margin_m=args.finger_margin_m,
+          pickup_support_width_m=args.pickup_support_width_m,
+          deposit_support_width_m=args.deposit_support_width_m)
     print(json.dumps({
       "source_meshes":r["source_collision_meshes"],
       "candidate_station_separation_m":r["candidate_layout"]["tcp_station_separation_m"],
