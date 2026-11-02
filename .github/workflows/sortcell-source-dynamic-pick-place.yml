@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
       - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
       - "scripts/audit_sortcell_openarm_collision_timing_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
@@ -38,6 +39,12 @@ jobs:
             --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
             --stage assets/teardown/hs_sort_workcell_main.js \
             --output .cache/sortcell-dynamic-cycle
+      - name: Sweep supported object grasps using original source finger geometry and gravity
+        run: |
+          python -m scripts.probe_sortcell_supported_grasp_sweep_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --output .cache/sortcell-supported-grasp
       - name: Validate source provenance and physical safety boundaries without asserting success
         run: |
           python - <<'PY'
@@ -59,6 +66,16 @@ jobs:
           assert r["cycle"]["no_object_pose_teleports_after_initialization"] is True
           assert r["cycle"]["no_object_attach_constraints"] is True
           assert r["cycle"]["physical_sorter_authorized"] is False
+          grasp=json.loads(Path(".cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json").read_text())
+          assert grasp["original_source_collision_mesh_count"]>=10
+          assert grasp["sweep"]["tested"]==18
+          assert grasp["cube_side_m"]==.06
+          assert grasp["original_sortcell_visual_cube_side_m"]==.115
+          assert grasp["authority"]["no_object_teleport_after_initialization"] is True
+          assert grasp["authority"]["no_attachments_or_fixed_grasp_constraint"] is True
+          assert grasp["authority"]["physical_robot_grasp_verified"] is False
+          print("SUPPORTED GRASP SWEEP:",grasp["sweep"]["strict_passes"],
+                "strict passes /",grasp["sweep"]["tested"],"trials")
           print("NUMERICAL CYCLE:", r["cycle"]["numerical_full_cycle_test_passed"])
           print("PICK, LIFT, TRANSFER, PLACE, RELEASE:",
                 [(s["phase"],s["last"]["relative_tcp_object_m"],
@@ -73,5 +90,7 @@ jobs:
           path: |
             .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
             .cache/sortcell-dynamic-cycle/README.md
+            .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
+            .cache/sortcell-supported-grasp/SCOPE.md
           retention-days: 30
           if-no-files-found: warn
