@@ -58,6 +58,14 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
         dest.parent.mkdir(exist_ok=True)
         dest.write_bytes(blob)
         vendor_hash[filename]=sha(blob)
+    source_licenses={}
+    for filename,expected in (("LICENSE-OpenArm.txt","Apache License"),
+                              ("LICENSE-ThreeJS.txt","MIT License")):
+        license_blob=(vendor/filename).read_bytes()
+        require(expected.encode() in license_blob and len(license_blob)>500,
+                "source license attribution missing: "+filename)
+        (output/filename).write_bytes(license_blob)
+        source_licenses[filename]=sha(license_blob)
     (output/"index.html").write_bytes(viewer_html.read_bytes())
     source_links=[]
     for link in original.findall("link"):
@@ -211,6 +219,7 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
                   "portable_URDF_only_collision_mesh_references_changed":True,
                   "original_joint_and_link_frames_not_modified":True,
                   "viewer_offline_vendor_module_hashes":vendor_hash,
+                  "pinned_open_source_license_notices_SHA256":source_licenses,
                   "physical_robot_approved":False}
         poses={"schema_version":"hardware_splicer.sortcell_source_collision_pose_replay.v1",
                "source_urdf_sha256":sha(source),"z_up":True,
