@@ -76,6 +76,27 @@ jobs:
               --finger-force-fraction "$force" \
               --output ".cache/source-motor-experiments/$variant"
           done
+      - name: Test manufacturer-declared single-master right-finger mimic with physics coupling
+        run: |
+          set -e
+          for variant in mimic-default mimic-lowforce; do
+            case "$variant" in
+              mimic-default) force="1.0" ;;
+              mimic-lowforce) force="0.5" ;;
+            esac
+            python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+              --urdf .cache/source-wrist-model/openarm_v10.urdf \
+              --trajectory .cache/source-wrist-reference/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+              --stage assets/teardown/hs_sort_workcell_main.js \
+              --finger-margin-m 0.003 \
+              --pickup-support-width-m 0.05 \
+              --deposit-support-width-m 0.46 \
+              --deposit-floor-drop-m 0.010 \
+              --reset-via-clearance \
+              --finger-force-fraction "$force" \
+              --enforce-source-right-finger-mimic \
+              --output ".cache/source-motor-experiments/$variant"
+          done
       - name: Independently score original-source robot joint-limit, contact retention, fixture and wrist evidence
         run: |
           python -m scripts.compare_sortcell_clearance_repair_trials_001 \
@@ -88,6 +109,8 @@ jobs:
               .cache/source-motor-experiments/speed-006/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/source-motor-experiments/force-050/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/source-motor-experiments/gain-speed/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/mimic-lowforce/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --output .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
       - name: Assert original geometry provenance and deny physical safety release
         run: |
@@ -102,7 +125,18 @@ jobs:
           assert all(v["sampled_source_wrist_poses"]>=50 for v in w["gridded_wrist_diagnosis"].values())
           assert w["scope"]["source_link5_link7_collision_not_whitelisted"] is True
           assert w["scope"]["physical_robot_control_authorized"] is False
-          assert m["number_tried"]==6
+          assert m["number_tried"]==8
+          from pathlib import Path
+          for variant in ("mimic-default","mimic-lowforce"):
+            obj=json.loads(Path(".cache/source-motor-experiments/"+variant+"/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json").read_text())
+            assert obj["cycle"]["manufacturer_source_right_finger2_mimics_finger1"] is True
+            assert obj["cycle"]["pybullet_source_mimic_constraint_installed"] is True
+            assert obj["cycle"]["source_mimic_only_master_motor_commanded"] is True
+            assert obj["cycle"]["finger_motor_modified_source_joint_hard_limits"] is False
+            assert obj["cycle"]["physical_sorter_authorized"] is False
+          print("MIMIC SOURCE TRIALS:",
+                [(variant,json.loads(Path(".cache/source-motor-experiments/"+variant+"/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json").read_text())["cycle"]["numerical_full_cycle_test_passed"])
+                 for variant in ("mimic-default","mimic-lowforce")])
           assert m["source_urdf_sha256"]==w["source_urdf_sha256"]
           assert m["physical_hardware_authorized"] is False
           assert m["source_self_collision_clearance_qualified"] is False
