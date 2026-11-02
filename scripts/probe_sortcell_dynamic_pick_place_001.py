@@ -192,19 +192,46 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                     s["relative_tcp_object_m"] for s in series),6),
                 "series_sample_count":len(series),
             }
-        sequence=[
-            phase("settle_open_gripper",q_pick,.044,80),
-            phase("grasp_close_source_fingers",q_pick,0,160),
-            phase("lift_under_gravity",q_lift,0,160),
+        sequence=[phase("settle_open_gripper",q_pick,.044,80)]
+        # The first trial proved that a cube settling onto a support under
+        # gravity shifts away from the hand TCP. Use the *simulated object pose*
+        # as a synthetic pose-sensor reading (NOT a real camera) and solve
+        # a source-native PyBullet IK approach; move only with original motors.
+        cube_position,_=p.getBasePositionAndOrientation(cube,physicsClientId=client)
+        moving=[(name,info[name]) for name in home]
+        lows=[float(meta[8]) for _,(_,meta) in moving]
+        highs=[float(meta[9]) for _,(_,meta) in moving]
+        solution=p.calculateInverseKinematics(
+            robot,tcp_idx,cube_position,
+            lowerLimits=lows,upperLimits=highs,
+            jointRanges=[h-l for l,h in zip(lows,highs)],
+            restPoses=[q_pick[name] for name,_ in moving],
+            maxNumIterations=650,residualThreshold=1e-7,physicsClientId=client)
+        require(len(solution)==len(moving),"approach IK did not return original 18 joints")
+        q_approach=dict(q_pick)
+        for index,(name,_) in enumerate(moving):
+            if name.startswith("openarm_right_joint"):
+                q_approach[name]=float(solution[index])
+        require(all(float(info[name][1][8])-1e-4<=v<=float(info[name][1][9])+1e-4
+                    for name,v in q_approach.items()),"approach IK violates source joint limits")
+        sequence.append(phase("approach_settled_cube_using_source_ik",q_approach,.044,240))
+        observed_approach_error=math.dist(
+            sequence[-1]["last"]["tcp_xyz_m"],cube_position)
+        q_lift=dict(q_approach,openarm_right_joint2=min(
+            float(info["openarm_right_joint2"][1][9])-.02,
+            q_approach["openarm_right_joint2"]+.14))
+        sequence.extend([
+            phase("grasp_close_source_fingers",q_approach,0,180),
+            phase("lift_under_gravity",q_lift,0,180),
             phase("transfer_under_gravity",q_transfer,0,400),
             phase("lower_to_proposed_sort_station",q_place,0,240),
             phase("release_open_source_fingers",q_place,.044,160),
             phase("reset_robot_without_object_attachment",q_pick,.044,180),
-        ]
+        ])
         final=sequence[-1]["last"]
         release=sequence[-2]["last"]
-        transported=sequence[3]["last"]
-        lift=sequence[2]["last"]
+        transported=sequence[4]["last"]
+        lift=sequence[3]["last"]
         cube_start=sequence[0]["last"]["object_xyz_m"]
         cube_place=release["object_xyz_m"]
         measured_displacement=math.dist(cube_start,cube_place)
@@ -213,7 +240,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         pick_clearance=sequence[2]["last"]["pickup_floor_contacts"]==0
         transfer_retent=transported["bilateral_finger_contact"] and transported["relative_tcp_object_m"]<.035
         full_candidate_success=(initial_overlap==0 and initial_floor_overlap==0 and
-             sequence[1]["bilateral_contact_samples"]>=5 and pick_clearance and transfer_retent
+             sequence[2]["bilateral_contact_samples"]>=5 and pick_clearance and transfer_retent
              and floor_contact and cube_deposit_distance<.10 and measured_displacement>.08)
         report={
             "schema_version":SCHEMA,
@@ -248,6 +275,9 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "stages":sequence,
                 "initial_robot_cube_overlap_contacts":initial_overlap,
                 "initial_cube_pick_floor_overlap_contacts":initial_floor_overlap,
+                "source_native_ik_approach_target_pose_m":[round(v,6) for v in cube_position],
+                "post_approach_tcp_to_settled_cube_error_m":round(observed_approach_error,6),
+                "approach_object_pose_from_simulated_ground_truth_not_real_vision":True,
                 "object_travel_m":round(measured_displacement,6),
                 "last_place_cube_distance_to_tcp_m":round(cube_deposit_distance,6),
                 "lift_clear_of_pickup_floor":pick_clearance,
@@ -266,6 +296,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "full source fixture collision and arm-safe staging across proposed cycle",
                 "physical workcell base calibration and sensor/tool/object tolerance",
                 "manufacturer servo torque/drive and gripper grasp-force validation",
+                "real object pose sensing and registered source-matched tool orientation",
                 "human safety, interlocks, collision envelopes and controls",
             ],
         }
