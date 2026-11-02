@@ -5,6 +5,9 @@ on:
       - ".github/workflows/sortcell-wrist-motor-gates.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
       - "scripts/probe_sortcell_source_wrist_mesh_diagnosis_001.py"
+      - "scripts/export_sortcell_source_collision_viewer_001.py"
+      - "scripts/verify_sortcell_source_collision_viewer_001.py"
+      - "assets/teardown/source_collision_engineering.html"
       - "scripts/verify_sortcell_original_source_mimic_001.py"
       - "scripts/compare_sortcell_clearance_repair_trials_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
@@ -120,6 +123,108 @@ jobs:
             --master .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --slave .cache/source-motor-experiments/mimic-lowforce/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --output .cache/source-motor-experiments/ORIGINAL_SOURCE_MIMIC_ACCEPTANCE.json
+      - name: Vendor exact Three.js modules locally for offline original-source engineering inspection
+        run: |
+          set -euo pipefail
+          mkdir -p .cache/source-collision-vendor
+          curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js             -o .cache/source-collision-vendor/three.module.js
+          curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/STLLoader.js             -o .cache/source-collision-vendor/STLLoader.js
+          curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js             -o .cache/source-collision-vendor/OrbitControls.js
+          curl -fLsS --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/LICENSE.txt \
+            -o .cache/source-collision-vendor/LICENSE-OpenArm.txt
+          curl -fLsS --retry 3 \
+            https://cdn.jsdelivr.net/npm/three@0.165.0/LICENSE \
+            -o .cache/source-collision-vendor/LICENSE-ThreeJS.txt
+          test "$(wc -c < .cache/source-collision-vendor/three.module.js)" -gt 10000
+      - name: Export original URDF collision mesh and actual free-object source-FK engineering replay
+        run: |
+          python -m scripts.export_sortcell_source_collision_viewer_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --cycle .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --wrist .cache/source-wrist-diagnosis/OPENARM_ORIGINAL_WRIST_COLLISION_DIAGNOSIS.json \
+            --meshes .cache/source-wrist-diagnosis/openarm_description \
+            --vendor .cache/source-collision-vendor \
+            --viewer-html assets/teardown/source_collision_engineering.html \
+            --output .cache/source-v10-collision-viewer
+      - name: Independently check all original manufacturer mesh hashes and source motor-frame consistency
+        run: |
+          python -m scripts.verify_sortcell_source_collision_viewer_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --cycle .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --package .cache/source-v10-collision-viewer \
+            --output .cache/source-v10-collision-viewer/SOURCE_VIEWER_ACCEPTANCE.json
+      - name: Actually reload relocatable original-source collision URDF using original PyBullet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pybullet as p
+          out=Path(".cache/source-v10-collision-viewer")
+          c=p.connect(p.DIRECT)
+          try:
+              flags=p.URDF_MAINTAIN_LINK_ORDER|p.URDF_USE_SELF_COLLISION|p.URDF_USE_SELF_COLLISION_EXCLUDE_PARENT
+              model=p.loadURDF(str(out/"manufacturer_collision_portable.urdf"),
+                               useFixedBase=True,flags=flags,physicsClientId=c)
+              info=[p.getJointInfo(model,j,physicsClientId=c)
+                    for j in range(p.getNumJoints(model,physicsClientId=c))]
+              movable=sum(i[2] in (p.JOINT_REVOLUTE,p.JOINT_PRISMATIC) for i in info)
+              assert movable==18, "portable manufacturer joint model is not source-complete"
+              collision_shapes=sum(bool(p.getCollisionShapeData(model,j,physicsClientId=c))
+                                   for j in range(-1,len(info)))
+              assert collision_shapes>=18, "portable original source collision geometry missing"
+              print("PORTABLE ORIGINAL OPENARM V1.0 RELOADED:",movable,
+                    "source joints,",collision_shapes,"collision-bearing source links")
+          finally:
+              p.disconnect(physicsClientId=c)
+          PY
+      - name: Browser smoke test the manufacturer-source 3D mesh viewer (no real hardware)
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          if [ -z "$BROWSER" ]; then
+            echo "No headless Chromium browser on CI runner; cannot claim viewer functional"
+            exit 1
+          fi
+          python -m http.server 8765 --directory .cache/source-v10-collision-viewer > /tmp/hs-sortcell-source-viewer-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          curl -fLsS http://127.0.0.1:8765/source_manifest.json > /dev/null
+          timeout 95 "$BROWSER" --headless=new --no-sandbox --disable-dev-shm-usage \
+            --disable-gpu --enable-webgl --enable-unsafe-swiftshader \
+            --use-gl=angle --use-angle=swiftshader \
+            --virtual-time-budget=15000 --window-size=1440,900 \
+            --dump-dom http://127.0.0.1:8765/ \
+            > .cache/source-v10-collision-viewer/BROWSER_SMOKE_DOM.html \
+            2> .cache/source-v10-collision-viewer/BROWSER_SMOKE_LOG.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          dom=Path(".cache/source-v10-collision-viewer/BROWSER_SMOKE_DOM.html").read_text()
+          m=re.search(r'<strong id="phase">([^<]+)</strong>',dom)
+          assert m, "viewer phase element missing in executed browser"
+          assert "LOADING" not in m.group(1).upper(), "browser did not finish loading source geometry"
+          assert "FAILED" not in m.group(1).upper(), "source viewer hit a runtime exception"
+          m2=re.search(r'<input id="scrub"[^>]*max="(\d+)"',dom)
+          assert m2 and int(m2.group(1))==277, "278 source-motor frames not loaded by browser"
+          print("ORIGINAL SOURCE COLLISION VIEWER BROWSER:",m.group(1))
+          print("BROWSER VERIFIED 278 source-motor states, correct original STL asset loading")
+          PY
+          timeout 95 "$BROWSER" --headless=new --no-sandbox --disable-dev-shm-usage \
+            --disable-gpu --enable-webgl --enable-unsafe-swiftshader \
+            --use-gl=angle --use-angle=swiftshader \
+            --virtual-time-budget=10000 --window-size=1440,900 \
+            --screenshot=.cache/source-v10-collision-viewer/SOURCE_VIEWER_BROWSER.png \
+            http://127.0.0.1:8765/ \
+            > /tmp/hs-sortcell-viewer-image.stdout \
+            2> /tmp/hs-sortcell-viewer-image.stderr
+          python - <<'PY'
+          from pathlib import Path
+          img=Path(".cache/source-v10-collision-viewer/SOURCE_VIEWER_BROWSER.png")
+          assert img.read_bytes()[:8]==b"\x89PNG\r\n\x1a\n"
+          assert img.stat().st_size>10000, "empty original source collision screenshot"
+          print("SOURCE VIEWER BROWSER SCREENSHOT:",img.stat().st_size,"bytes")
+          PY
       - name: Assert original geometry provenance and deny physical safety release
         run: |
           python - <<'PY'
@@ -170,6 +275,7 @@ jobs:
             .cache/source-wrist-diagnosis/SCOPE.md
             .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
             .cache/source-motor-experiments/ORIGINAL_SOURCE_MIMIC_ACCEPTANCE.json
+            .cache/source-v10-collision-viewer/**
             .cache/source-motor-experiments/*/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
           retention-days: 30
           if-no-files-found: warn

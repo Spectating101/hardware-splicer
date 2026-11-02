@@ -286,7 +286,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                         maxVelocity=.65 if "finger" not in name else .3,
                         physicsClientId=client)
         def measure(label,step):
-            xyz,_=p.getBasePositionAndOrientation(cube,physicsClientId=client)
+            xyz,object_quaternion=p.getBasePositionAndOrientation(cube,physicsClientId=client)
             tcp,_=pose()
             contacts=p.getContactPoints(bodyA=robot,bodyB=cube,physicsClientId=client)
             right_touch=sorted({info[name][0] for name in right_fingers
@@ -313,6 +313,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
             })
             item={
                 "phase":label,"frame":step,"object_xyz_m":[round(x,6) for x in xyz],
+                "object_quaternion_xyzw":[round(x,8) for x in object_quaternion],
                 "tcp_xyz_m":[round(x,6) for x in tcp],
                 "relative_tcp_object_m":round(math.dist(xyz,tcp),6),
                 "finger_touch_links":right_touch,"bilateral_finger_contact":len(right_touch)==2,
