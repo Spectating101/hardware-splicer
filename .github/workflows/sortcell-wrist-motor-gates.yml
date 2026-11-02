@@ -5,6 +5,7 @@ on:
       - ".github/workflows/sortcell-wrist-motor-gates.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
       - "scripts/probe_sortcell_source_wrist_mesh_diagnosis_001.py"
+      - "scripts/verify_sortcell_original_source_mimic_001.py"
       - "scripts/compare_sortcell_clearance_repair_trials_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
       - "scripts/audit_sortcell_openarm_collision_timing_001.py"
@@ -112,6 +113,13 @@ jobs:
               .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/source-motor-experiments/mimic-lowforce/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --output .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
+      - name: Independently verify manufacturer mimic relation, source-joint limit compliance and full contact-driven cycle
+        run: |
+          python -m scripts.verify_sortcell_original_source_mimic_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --master .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --slave .cache/source-motor-experiments/mimic-lowforce/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/source-motor-experiments/ORIGINAL_SOURCE_MIMIC_ACCEPTANCE.json
       - name: Assert original geometry provenance and deny physical safety release
         run: |
           python - <<'PY'
@@ -161,6 +169,7 @@ jobs:
             .cache/source-wrist-diagnosis/OPENARM_ORIGINAL_WRIST_COLLISION_DIAGNOSIS.json
             .cache/source-wrist-diagnosis/SCOPE.md
             .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
+            .cache/source-motor-experiments/ORIGINAL_SOURCE_MIMIC_ACCEPTANCE.json
             .cache/source-motor-experiments/*/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
           retention-days: 30
           if-no-files-found: warn
