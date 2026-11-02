@@ -130,6 +130,12 @@ jobs:
           curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js             -o .cache/source-collision-vendor/three.module.js
           curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/STLLoader.js             -o .cache/source-collision-vendor/STLLoader.js
           curl -fLsS --retry 3             https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js             -o .cache/source-collision-vendor/OrbitControls.js
+          curl -fLsS --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/LICENSE.txt \
+            -o .cache/source-collision-vendor/LICENSE-OpenArm.txt
+          curl -fLsS --retry 3 \
+            https://cdn.jsdelivr.net/npm/three@0.165.0/LICENSE \
+            -o .cache/source-collision-vendor/LICENSE-ThreeJS.txt
           test "$(wc -c < .cache/source-collision-vendor/three.module.js)" -gt 10000
       - name: Export original URDF collision mesh and actual free-object source-FK engineering replay
         run: |
@@ -203,6 +209,21 @@ jobs:
           assert m2 and int(m2.group(1))==277, "278 source-motor frames not loaded by browser"
           print("ORIGINAL SOURCE COLLISION VIEWER BROWSER:",m.group(1))
           print("BROWSER VERIFIED 278 source-motor states, correct original STL asset loading")
+          PY
+          timeout 95 "$BROWSER" --headless=new --no-sandbox --disable-dev-shm-usage \
+            --disable-gpu --enable-webgl --enable-unsafe-swiftshader \
+            --use-gl=angle --use-angle=swiftshader \
+            --virtual-time-budget=10000 --window-size=1440,900 \
+            --screenshot=.cache/source-v10-collision-viewer/SOURCE_VIEWER_BROWSER.png \
+            http://127.0.0.1:8765/ \
+            > /tmp/hs-sortcell-viewer-image.stdout \
+            2> /tmp/hs-sortcell-viewer-image.stderr
+          python - <<'PY'
+          from pathlib import Path
+          img=Path(".cache/source-v10-collision-viewer/SOURCE_VIEWER_BROWSER.png")
+          assert img.read_bytes()[:8]==b"\x89PNG\r\n\x1a\n"
+          assert img.stat().st_size>10000, "empty original source collision screenshot"
+          print("SOURCE VIEWER BROWSER SCREENSHOT:",img.stat().st_size,"bytes")
           PY
       - name: Assert original geometry provenance and deny physical safety release
         run: |
