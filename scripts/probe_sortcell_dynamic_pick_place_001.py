@@ -29,10 +29,12 @@ FLOOR_DEPTH=.025
 
 def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         *,finger_margin_m:float=0.0,pickup_support_width_m:float=.46,
-        deposit_support_width_m:float=.46)->dict:
+        deposit_support_width_m:float=.46,
+        deposit_floor_drop_m:float=0.0)->dict:
     require(0<=finger_margin_m<=.006,"finger limit margin must be 0-6mm")
     require(.035<=pickup_support_width_m<=.46,"candidate pickup support width outside allowed envelope")
     require(.035<=deposit_support_width_m<=.46,"candidate deposit support width outside allowed envelope")
+    require(0<=deposit_floor_drop_m<=.05,"candidate destination floor drop outside 0-50mm envelope")
     import pybullet as p
     original=urdf.read_bytes()
     motion=json.loads(trajectory.read_text())
@@ -161,11 +163,11 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         install(q_pick)
         # Floor planes placed from published tray FLOOR size and a candidate
         # position derived from original source TCP center, *not* the viewer.
-        def station(name,xyz,orientation,footprint_x):
+        def station(name,xyz,orientation,footprint_x,drop_m=0.0):
             # world up extent of an oriented cube; original plane is axis-aligned
             m=p.getMatrixFromQuaternion(orientation)
             vertical_half_extent=OBJECT_SIDE/2*sum(abs(m[6+i]) for i in range(3))
-            floor_top=xyz[2]-vertical_half_extent-.002
+            floor_top=xyz[2]-vertical_half_extent-.002-drop_m
             # Engineering fixture alternative: an inset physical support pad,
             # not a modification of the independently drawn SORTCELL viewer.
             # The cube still rests on a gravity-collidable static surface.
@@ -183,6 +185,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                     xyz[0],xyz[1],floor_top-FLOOR_DEPTH/2],spec),
                 "source_floor_size_stage_m":[.46,.025,.50],
                 "simulated_proposed_support_size_m":[footprint_x,FLOOR_DEPTH,footprint_y],
+                "experimental_station_floor_drop_m":drop_m,
                 "fixture_is_inset_support_alternative_not_original_stage":footprint_x<.46}
         # Source-supported grasp sweep proved a 60 mm tool-aligned cube,
         # positioned +20 mm in world X from the source TCP, can settle, close
@@ -192,7 +195,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         pickup=station("proposed_pick_station",pickup_cube_xyz,pick_orientation,
                        pickup_support_width_m)
         deposit=station("proposed_sort_station",place_xyz,place_orientation,
-                        deposit_support_width_m)
+                        deposit_support_width_m,deposit_floor_drop_m)
         # Original source joint space and original collision links.
         shape=p.createCollisionShape(p.GEOM_BOX,
               halfExtents=[OBJECT_SIDE/2]*3,physicsClientId=client)
@@ -358,6 +361,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                 "source_fk_high_transfer_candidates_tested":len(high_options),
                 "source_fk_validated_original_source_limits":True,
                 "proposed_fixture_stations":[pickup,deposit],
+                "candidate_deposit_floor_drop_m":deposit_floor_drop_m,
                 "candidate_fixture_footprints_m":[
                      [pickup_support_width_m,pickup["simulated_proposed_support_size_m"][2]],
                      [deposit_support_width_m,deposit["simulated_proposed_support_size_m"][2]]],
@@ -440,11 +444,13 @@ if __name__=="__main__":
     ap.add_argument("--finger-margin-m",type=float,default=0.0)
     ap.add_argument("--pickup-support-width-m",type=float,default=.46)
     ap.add_argument("--deposit-support-width-m",type=float,default=.46)
+    ap.add_argument("--deposit-floor-drop-m",type=float,default=0.0)
     args=ap.parse_args()
     r=run(args.urdf,args.trajectory,args.stage,args.output,
           finger_margin_m=args.finger_margin_m,
           pickup_support_width_m=args.pickup_support_width_m,
-          deposit_support_width_m=args.deposit_support_width_m)
+          deposit_support_width_m=args.deposit_support_width_m,
+          deposit_floor_drop_m=args.deposit_floor_drop_m)
     print(json.dumps({
       "source_meshes":r["source_collision_meshes"],
       "candidate_station_separation_m":r["candidate_layout"]["tcp_station_separation_m"],
