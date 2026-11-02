@@ -5,6 +5,7 @@ const file=(name)=>import.meta.env.BASE_URL+"sortcell/"+name;
 export default function SortingWorkcell(){
  const [ready,setReady]=useState(null);
  const [error,setError]=useState(false);
+ const [motion,setMotion]=useState(null);
  useEffect(()=>{
   const controller=new AbortController();
   fetch(file("manifest.json"),{signal:controller.signal,cache:"no-store"})
@@ -18,6 +19,17 @@ export default function SortingWorkcell(){
       ||data.fabrication_authorized!==false)
       throw Error("no source-authenticated original OpenArm CAD");
     setReady(data);
+    return fetch(file("robot_joint_trajectory.json"),{signal:controller.signal,cache:"no-store"})
+      .then(async response=>{
+        if(!response.ok)return;
+        const motion=await response.json();
+        if(motion.schema_version==="hardware_splicer.sortcell_openarm_pybullet_kinematics.v1" &&
+           motion.engine==="pybullet" &&
+           motion.motion?.numerical_kinematics_solved===true &&
+           motion.motion?.robot_commands_authorized===false &&
+           motion.task?.world_space_fixture_registration_verified===false)
+           setMotion(motion);
+      });
    }).catch(e=>{if(e.name!=="AbortError")setError(true)});
   return ()=>controller.abort();
  },[]);
@@ -35,6 +47,24 @@ export default function SortingWorkcell(){
     <iframe title="SORTCELL S1 original OpenArm CAD Teardown workcell"
      src={file("machine.html")} sandbox="allow-scripts allow-same-origin"
      referrerPolicy="no-referrer" />
+    {motion&&<section className="sw-motion-evidence" data-testid="sortcell-native-motion">
+      <div>
+        <p className="eyebrow">Next layer · Native robot kinematics</p>
+        <h2>PyBullet / Official OpenArm URDF</h2>
+        <p>Real numerical forward/inverse kinematics executed on the manufacturer's published joint
+        definitions. This is a separate <b>source URDF v1.0</b> motion track; the viewer uses
+        independently published v1.1 CAD and is <b>not mechanically registered to it yet</b>.</p>
+      </div>
+      <div className="sw-motion-stats">
+        <span><b>{motion.native_robot.movable_joint_count}</b> source movable joints</span>
+        <span><b>{motion.task.trajectory_samples}</b> computed joint samples</span>
+        <span><b>{Math.round(Math.max(...motion.task.reference_waypoints.map(p=>p.error_m))*1000*100)/100} mm</b> max IK error</span>
+        <a href={file("robot_joint_trajectory.json")} download>Download real source joint trajectory</a>
+      </div>
+      <p className="sw-motion-warning">The source joint path is not yet mapped to the physical sorting
+      fixtures or validated against matching CAD collision meshes. The illustrated workcell arm
+      remains a visual storyboard, not an executed PyBullet trajectory.</p>
+    </section>}
     <footer><b>Source geometry: original OpenArm CAD</b> · Visualization: Teardown
       <span>Scripted workflow only · No verified robotic IK, computer vision, safety or fabrication</span></footer>
    </>:<div className="sw-unavailable" role="status">
