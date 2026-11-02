@@ -36,6 +36,9 @@ jobs:
           assert p["task"]["trajectory_samples"]>=65
           assert p["task"]["achieved_grasp_to_place_distance_m"]>.1
           assert max(w["error_m"] for w in p["task"]["reference_waypoints"])<.012
+          assert len(p["workcell_reach_audit"]["targets"])==4
+          assert p["workcell_reach_audit"]["world_to_robot_mount_calibrated"] is False
+          assert all(t["calibrated_workcell_reach_verified"] is False for t in p["workcell_reach_audit"]["targets"])
           assert p["motion"]["robot_commands_authorized"] is False
           assert p["task"]["world_space_fixture_registration_verified"] is False
           print("SOURCE-NATIVE PYBULLET OK:",p["task"]["trajectory_samples"],"frames")
