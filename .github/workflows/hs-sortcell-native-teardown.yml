@@ -8,6 +8,7 @@ on:
       - "scripts/prepare_sort_workcell_001.py"
       - "scripts/verify_sort_workcell_browser_001.mjs"
       - "scripts/verify_sort_workcell_frontend_001.mjs"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
       - "apps/splice-ui/src/App.jsx"
       - "apps/splice-ui/src/nav.js"
       - "apps/splice-ui/src/components/SortingWorkcell*"
@@ -43,6 +44,15 @@ jobs:
             --glb .cache/hs-original/openarm_follower.glb \
             --metadata .cache/hs-original/follower_metadata.json \
             --out "$TEARDOWN_OUT"
+      - name: Solve official OpenArm URDF with external PyBullet IK and FK
+        run: |
+          python -m pip install --no-input 'pybullet==3.2.7'
+          curl --fail --location --silent --show-error --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            --output .cache/hs-original/openarm_v10.urdf
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/hs-original/openarm_v10.urdf \
+            --output "$TEARDOWN_OUT/source_motion"
       - name: Build using original Teardown runtime and its native offline HTML packaging
         run: |
           git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream
@@ -58,11 +68,14 @@ jobs:
           cp "$TEARDOWN_OUT/dist/machine.html" apps/splice-ui/public/sortcell/machine.html
           cp "$TEARDOWN_OUT/dist/robot.glb" apps/splice-ui/public/sortcell/robot.glb
           cp "$TEARDOWN_OUT/SOURCE_RECEIPT.json" apps/splice-ui/public/sortcell/manifest.json
+          cp "$TEARDOWN_OUT/source_motion/OPENARM_SOURCE_JOINT_TRAJECTORY.json" \
+            apps/splice-ui/public/sortcell/robot_joint_trajectory.json
           cp "$TEARDOWN_OUT/ATTRIBUTION.md" apps/splice-ui/public/sortcell/ATTRIBUTION.md
           npm --prefix apps/splice-ui ci --no-audit --no-fund
           npm --prefix apps/splice-ui run build
           test -s apps/splice-ui/dist/sortcell/machine.html
           test -s apps/splice-ui/dist/sortcell/robot.glb
+          test -s apps/splice-ui/dist/sortcell/robot_joint_trajectory.json
       - name: Install original Teardown Playwright browser driver
         run: |
           cd .cache/teardown-upstream
@@ -87,6 +100,7 @@ jobs:
           name: hs-real-openarm-teardown-sortcell-proof-001
           path: |
             .cache/hs-sortcell/SOURCE_RECEIPT.json
+            .cache/hs-sortcell/source_motion/
             .cache/hs-sortcell/ATTRIBUTION.md
             .cache/hs-sortcell/proof/
             .cache/hs-sortcell/VITE_FRONTEND.log
