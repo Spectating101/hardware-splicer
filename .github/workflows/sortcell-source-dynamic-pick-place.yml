@@ -6,6 +6,8 @@ on:
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
       - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
       - "scripts/verify_sortcell_dynamic_cycle_001.py"
+      - "scripts/audit_sortcell_dynamic_contact_safety_001.py"
+      - "scripts/gate_sortcell_physical_release_001.py"
       - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
       - "scripts/audit_sortcell_openarm_collision_timing_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
@@ -52,6 +54,19 @@ jobs:
             --cycle .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --urdf .cache/openarm-source/openarm_v10.urdf \
             --output .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
+      - name: Independently inspect actual full-cycle source robot self, stage fixture and non-gripper payload collisions
+        run: |
+          python -m scripts.audit_sortcell_dynamic_contact_safety_001 \
+            --cycle .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-dynamic-cycle/CONTACT_AND_REGISTRATION_AUDIT.json
+      - name: Enforce fail-closed engineering release decision from numerical and physical-source evidence
+        run: |
+          python -m scripts.gate_sortcell_physical_release_001 \
+            --numerical .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json \
+            --contact .cache/sortcell-dynamic-cycle/CONTACT_AND_REGISTRATION_AUDIT.json \
+            --output .cache/sortcell-dynamic-cycle/ENGINEERING_RELEASE_GATE.json
       - name: Validate source provenance and physical safety boundaries without asserting success
         run: |
           python - <<'PY'
@@ -87,6 +102,25 @@ jobs:
           assert grasp["authority"]["physical_robot_grasp_verified"] is False
           print("SUPPORTED GRASP SWEEP:",grasp["sweep"]["strict_passes"],
                 "strict passes /",grasp["sweep"]["tested"],"trials")
+          audit=json.loads(Path(".cache/sortcell-dynamic-cycle/CONTACT_AND_REGISTRATION_AUDIT.json").read_text())
+          assert audit["schema_version"]=="hardware_splicer.sortcell_dynamic_cycle_contact_safety_audit.v1"
+          assert audit["contact"]["motor_contact_samples"]>=150
+          assert audit["source_visual_revision_registration"]["source_urdf_visual_mesh_reference_count"]>=10
+          assert audit["authority"]["source_model_registered_with_visual_cad"] is False
+          assert audit["authority"]["all_fixture_geometry_included"] is False
+          assert audit["authority"]["self_collisions_dismissed_as_safe"] is False
+          assert audit["authority"]["physical_robot_motion_authorized"] is False
+          release=json.loads(Path(".cache/sortcell-dynamic-cycle/ENGINEERING_RELEASE_GATE.json").read_text())
+          assert release["numerical_sort_cycle_verdict"]=="passed_source_native_pybullet"
+          assert release["simulation_collision_qualification"]=="failed"
+          assert release["engineering_status"]=="numerical_proof_of_concept_only"
+          assert release["physical_build_or_fabrication_authorized"] is False
+          assert release["robot_control_authorized"] is False
+          assert release["blockers"]["source_model_registration"]["blocked"] is True
+          assert release["blockers"]["physical_validation_and_safety"]["blocked"] is True
+          print("ENGINEERING RELEASE DECISION:",release["engineering_status"],
+                "hardware blocked:",not release["robot_control_authorized"])
+          print("SOURCE FULL-CYCLE COLLISION DIAGNOSTICS:",audit["findings"])
           print("NUMERICAL CYCLE:", r["cycle"]["numerical_full_cycle_test_passed"])
           print("PICK, LIFT, TRANSFER, PLACE, RELEASE:",
                 [(s["phase"],s["last"]["relative_tcp_object_m"],
@@ -102,6 +136,8 @@ jobs:
             .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
             .cache/sortcell-dynamic-cycle/README.md
             .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
+            .cache/sortcell-dynamic-cycle/CONTACT_AND_REGISTRATION_AUDIT.json
+            .cache/sortcell-dynamic-cycle/ENGINEERING_RELEASE_GATE.json
             .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
             .cache/sortcell-supported-grasp/SCOPE.md
           retention-days: 30

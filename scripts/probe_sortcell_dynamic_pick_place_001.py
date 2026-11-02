@@ -196,6 +196,24 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         initial_floor_overlap=sum(1 for c in p.getContactPoints(bodyA=pickup["body"],
              bodyB=cube,physicsClientId=client) if c[8]<-1e-5)
         log=[]
+        # Actual motor-stepped collision/contact telemetry. The source robot
+        # retains its unchanged official meshes and link relationships.
+        p.performCollisionDetection(physicsClientId=client)
+        def pair_contacts():
+            found={}
+            for c in p.getContactPoints(bodyA=robot,bodyB=robot,physicsClientId=client):
+                if c[8]>=-1e-5:continue
+                la=("base" if c[3]<0 else
+                    p.getJointInfo(robot,c[3],physicsClientId=client)[12].decode())
+                lb=("base" if c[4]<0 else
+                    p.getJointInfo(robot,c[4],physicsClientId=client)[12].decode())
+                pair=tuple(sorted([la,lb]))
+                found[pair]=min(float(c[8]),found.get(pair,0))
+            return found
+        original_initial_self_contacts=pair_contacts()
+        source_link_names={
+            j:p.getJointInfo(robot,j,physicsClientId=client)[12].decode()
+            for j in range(p.getNumJoints(robot,physicsClientId=client))}
         def set_motors(q,closure):
             for name,target in q.items():
                 j,meta=info[name]
@@ -213,6 +231,23 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
             floor_contacts={name:len(p.getContactPoints(bodyA=cube,bodyB=station["body"],
                 physicsClientId=client)) for name,station in
                             (("pickup",pickup),("deposit",deposit))}
+            self_contacts=pair_contacts()
+            fixture_contacts={
+                name:[c for c in p.getContactPoints(bodyA=robot,bodyB=station["body"],
+                    physicsClientId=client) if c[8]<-1e-5]
+                for name,station in (("pickup",pickup),("deposit",deposit))}
+            # Joint values are sampled from PyBullet's actual simulated states,
+            # never the requested motor commands.
+            current_joint_positions={
+                name:round(p.getJointState(robot,meta[0],physicsClientId=client)[0],8)
+                for name,meta in info.items() if name in home
+            }
+            unexpected_payload_link_contacts=sorted({
+                source_link_names[c[3]] for c in contacts if c[3]>=0 and
+                c[8]<.002 and source_link_names[c[3]] not in (
+                   "openarm_right_hand",
+                   "openarm_right_left_finger","openarm_right_right_finger")
+            })
             item={
                 "phase":label,"frame":step,"object_xyz_m":[round(x,6) for x in xyz],
                 "tcp_xyz_m":[round(x,6) for x in tcp],
@@ -220,6 +255,15 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "finger_touch_links":right_touch,"bilateral_finger_contact":len(right_touch)==2,
                 "pickup_floor_contacts":floor_contacts["pickup"],
                 "deposit_floor_contacts":floor_contacts["deposit"],
+                "source_robot_joint_positions":current_joint_positions,
+                "source_robot_self_penetrations":[
+                    {"link_pair":list(pair),"depth_m":round(depth,7)}
+                    for pair,depth in sorted(self_contacts.items())],
+                "source_robot_fixture_penetrations":{
+                    name: [{"robot_link":source_link_names[c[3]] if c[3]>=0 else "base",
+                            "depth_m":round(float(c[8]),7)} for c in rows]
+                    for name,rows in fixture_contacts.items() if rows},
+                "unexpected_payload_robot_link_contacts":unexpected_payload_link_contacts,
             }
             return item
         def phase(label,q,fingers,steps):
@@ -321,6 +365,13 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "object_on_deposit_floor_after_release_and_reset":floor_contact,
                 "numerical_full_cycle_test_passed":full_candidate_success,
                 "contact_observations":log,
+                "original_source_initial_self_contact_pairs":[
+                    {"link_pair":list(pair),"depth_m":round(depth,7)}
+                    for pair,depth in sorted(original_initial_self_contacts.items())],
+                "actual_motor_joint_telemetry_recorded":True,
+                "original_source_self_collision_reported_not_suppressed":True,
+                "proposed_station_robot_fixture_contacts_reported":True,
+                "unexpected_robot_object_link_contacts_reported":True,
                 "no_object_pose_teleports_after_initialization":True,
                 "no_object_attach_constraints":True,
                 "real_robot_manipulation_verified":False,
