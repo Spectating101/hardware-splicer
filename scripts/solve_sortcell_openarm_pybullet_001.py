@@ -143,6 +143,39 @@ def execute(urdf:Path,output:Path,steps:int=12):
                     "joint_positions":{name:round(q[k],8) for k,name in enumerate(orderedNames)},
                 })
         require(len(samples)>=65,"incomplete native kinematics trajectory")
+        # Workcell reach audit uses the same assumed display mounting transform
+        # as SORTCELL, but the v1.0 URDF and v1.1 CAD are not identical.
+        # This must not be interpreted as verified physical fixture calibration.
+        scene_targets={
+            "conveyor_pick":[-.10,.62,.06],
+            "precision_tray":[.45,.56,.75],
+            "electronics_tray":[.97,.56,.75],
+            "reject_tray":[1.49,.56,.75],
+        }
+        reach_audit=[]
+        for label,target in scene_targets.items():
+            urdf_target=[(target[0]-.88)/.93,
+                         -(target[2]+.59)/.93,
+                         (target[1]-.603)/.93]
+            q=p.calculateInverseKinematics(
+                body,tcp,urdf_target,
+                lowerLimits=lows,upperLimits=highs,
+                jointRanges=[h-l for l,h in zip(lows,highs)],
+                restPoses=seeds["HOME"],
+                maxNumIterations=700,residualThreshold=1e-7,
+                physicsClientId=client)
+            require(len(q)==len(orderedIds),"workcell IK returned invalid degrees of freedom")
+            pose=fk(q)
+            error=dist(urdf_target,pose)
+            within=all(lo-1e-3<=v<=hi+1e-3 for v,lo,hi in zip(q,lows,highs))
+            reach_audit.append({
+                "fixture":label,"stage_xyz_m":target,
+                "candidate_urdf_xyz_m":vec3(urdf_target),
+                "solver_fk_xyz_m":pose,"numerical_error_m":round(error,7),
+                "joint_limits_respected":within,
+                "numerical_reach_demonstrated":error<.012 and within,
+                "calibrated_workcell_reach_verified":False,
+            })
         result={
             "schema_version":SCHEMA,"engine":"pybullet",
             "official_urdf":{"repository":URDF_REPO,"commit":URDF_REF,"path":URDF_PATH,
@@ -173,6 +206,14 @@ def execute(urdf:Path,output:Path,steps:int=12):
                       "robot_commands_authorized":False,
                       "physical_motion_verified":False,
                       "fabrication_authorized":False},
+            "workcell_reach_audit":{
+                "method":"PyBullet official URDF IK/FK + inverse of candidate viewer mounting transform",
+                "source_and_cad_versions_matched":False,
+                "world_to_robot_mount_calibrated":False,
+                "fixtures_physically_measured":False,
+                "target_nonconvergence_is_not_mathematical_unreachability":True,
+                "targets":reach_audit,
+            },
             "trajectory":samples,
         }
         (output/"OPENARM_SOURCE_JOINT_TRAJECTORY.json").write_text(json.dumps(result,indent=2)+"\n")
