@@ -148,6 +148,39 @@ jobs:
             --cycle .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --package .cache/source-v10-collision-viewer \
             --output .cache/source-v10-collision-viewer/SOURCE_VIEWER_ACCEPTANCE.json
+      - name: Browser smoke test the manufacturer-source 3D mesh viewer (no real hardware)
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome-stable || command -v google-chrome || command -v chromium || true)"
+          if [ -z "$BROWSER" ]; then
+            echo "No headless Chromium browser on CI runner; cannot claim viewer functional"
+            exit 1
+          fi
+          python -m http.server 8765 --directory .cache/source-v10-collision-viewer > /tmp/hs-sortcell-source-viewer-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          sleep 2
+          curl -fLsS http://127.0.0.1:8765/source_manifest.json > /dev/null
+          timeout 95 "$BROWSER" --headless=new --no-sandbox --disable-dev-shm-usage \
+            --disable-gpu --enable-webgl --enable-unsafe-swiftshader \
+            --use-gl=angle --use-angle=swiftshader \
+            --virtual-time-budget=15000 --window-size=1440,900 \
+            --dump-dom http://127.0.0.1:8765/ \
+            > .cache/source-v10-collision-viewer/BROWSER_SMOKE_DOM.html \
+            2> .cache/source-v10-collision-viewer/BROWSER_SMOKE_LOG.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          dom=Path(".cache/source-v10-collision-viewer/BROWSER_SMOKE_DOM.html").read_text()
+          m=re.search(r'<strong id="phase">([^<]+)</strong>',dom)
+          assert m, "viewer phase element missing in executed browser"
+          assert "LOADING" not in m.group(1).upper(), "browser did not finish loading source geometry"
+          assert "FAILED" not in m.group(1).upper(), "source viewer hit a runtime exception"
+          m2=re.search(r'<input id="scrub"[^>]*max="(\d+)"',dom)
+          assert m2 and int(m2.group(1))==277, "278 source-motor frames not loaded by browser"
+          print("ORIGINAL SOURCE COLLISION VIEWER BROWSER:",m.group(1))
+          print("BROWSER VERIFIED 278 source-motor states, correct original STL asset loading")
+          PY
       - name: Assert original geometry provenance and deny physical safety release
         run: |
           python - <<'PY'
