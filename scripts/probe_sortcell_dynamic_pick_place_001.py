@@ -30,7 +30,8 @@ FLOOR_DEPTH=.025
 def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         *,finger_margin_m:float=0.0,pickup_support_width_m:float=.46,
         deposit_support_width_m:float=.46,
-        deposit_floor_drop_m:float=0.0)->dict:
+        deposit_floor_drop_m:float=0.0,
+        reset_via_source_clearance:bool=False)->dict:
     require(0<=finger_margin_m<=.006,"finger limit margin must be 0-6mm")
     require(.035<=pickup_support_width_m<=.46,"candidate pickup support width outside allowed envelope")
     require(.035<=deposit_support_width_m<=.46,"candidate deposit support width outside allowed envelope")
@@ -311,10 +312,20 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
             phase("source_fk_clearance_transfer",q_high_transfer,0,480),
             phase("lower_to_proposed_sort_station",q_place,0,320),
             phase("release_open_source_fingers",q_place,.044,160),
-            phase("reset_robot_without_object_attachment",q_pick,.044,180),
         ]
+        if reset_via_source_clearance:
+            # Retrace the previously FK-checked lifted corridor after release,
+            # instead of moving directly across the fixture during reset.
+            # This changes only the source-valid joint motor path.
+            sequence.extend([
+                phase("reset_retract_to_source_clearance",q_high_transfer,.044,320),
+                phase("reset_reverse_source_transfer",q_high_lift,.044,480),
+                phase("reset_robot_without_object_attachment",q_pick,.044,180),
+            ])
+        else:
+            sequence.append(phase("reset_robot_without_object_attachment",q_pick,.044,180))
         final=sequence[-1]["last"]
-        release=sequence[-2]["last"]
+        release=sequence[6]["last"]
         transported=sequence[4]["last"]
         cube_start=sequence[0]["last"]["object_xyz_m"]
         cube_place=release["object_xyz_m"]
@@ -362,6 +373,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                 "source_fk_validated_original_source_limits":True,
                 "proposed_fixture_stations":[pickup,deposit],
                 "candidate_deposit_floor_drop_m":deposit_floor_drop_m,
+                "candidate_reset_via_source_clearance":reset_via_source_clearance,
                 "candidate_fixture_footprints_m":[
                      [pickup_support_width_m,pickup["simulated_proposed_support_size_m"][2]],
                      [deposit_support_width_m,deposit["simulated_proposed_support_size_m"][2]]],
@@ -445,12 +457,14 @@ if __name__=="__main__":
     ap.add_argument("--pickup-support-width-m",type=float,default=.46)
     ap.add_argument("--deposit-support-width-m",type=float,default=.46)
     ap.add_argument("--deposit-floor-drop-m",type=float,default=0.0)
+    ap.add_argument("--reset-via-clearance",action="store_true")
     args=ap.parse_args()
     r=run(args.urdf,args.trajectory,args.stage,args.output,
           finger_margin_m=args.finger_margin_m,
           pickup_support_width_m=args.pickup_support_width_m,
           deposit_support_width_m=args.deposit_support_width_m,
-          deposit_floor_drop_m=args.deposit_floor_drop_m)
+          deposit_floor_drop_m=args.deposit_floor_drop_m,
+          reset_via_source_clearance=args.reset_via_clearance)
     print(json.dumps({
       "source_meshes":r["source_collision_meshes"],
       "candidate_station_separation_m":r["candidate_layout"]["tcp_station_separation_m"],
