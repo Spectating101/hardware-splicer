@@ -1,0 +1,108 @@
+name: HS SORTCELL Source-Native Candidate Physics Pick Transfer Release
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
+      - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
+      - "scripts/verify_sortcell_dynamic_cycle_001.py"
+      - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
+      - "scripts/audit_sortcell_openarm_collision_timing_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+      - "assets/teardown/hs_sort_workcell_main.js"
+  workflow_dispatch:
+jobs:
+  openarm-source-native-cycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original PyBullet dynamics engine
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Download exact pinned official OpenArm source URDF
+        run: |
+          mkdir -p .cache/openarm-source
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+      - name: Generate original official 18-joint reference pose
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-kinematics
+      - name: Run physical-contact candidate pickup, transport, placement and release on real original OpenArm meshes
+        run: |
+          python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-dynamic-cycle
+      - name: Sweep supported object grasps using original source finger geometry and gravity
+        run: |
+          python -m scripts.probe_sortcell_supported_grasp_sweep_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --output .cache/sortcell-supported-grasp
+      - name: Independently enforce continuous original-source motor and free-object sorting cycle acceptance
+        run: |
+          python -m scripts.verify_sortcell_dynamic_cycle_001 \
+            --cycle .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
+      - name: Validate source provenance and physical safety boundaries without asserting success
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path(".cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json").read_text())
+          assert r["source_collision_meshes"]>=10
+          assert r["openarm_original_joint_count"]==18
+          assert r["workpiece"]["original_visual_cube_side_m"]==.115
+          assert r["workpiece"]["feasibility_cube_side_m"]==.06
+          assert r["workpiece"]["native_pybullet_free_dynamic_rigid_body"] is True
+          assert r["workpiece"]["fixed_attachment_constraint_added"] is False
+          assert r["candidate_layout"]["same_as_existing_sortcell_viewer_layout"] is False
+          assert r["candidate_layout"]["visual_cad_v11_registered_to_urdf_v10"] is False
+          assert r["candidate_layout"]["tcp_station_separation_m"]>.08
+          assert r["candidate_layout"]["source_fk_high_transfer_candidates_tested"]>=1
+          assert r["candidate_layout"]["source_fk_validated_original_source_limits"] is True
+          assert r["candidate_layout"]["source_fk_interpolated_transfer_min_tcp_z_m"]>0
+          assert len(r["cycle"]["stages"])==8
+          assert r["cycle"]["supported_grasp_cube_world_xy_offset_m"]==[.02,0]
+          assert r["cycle"]["supported_grasp_cube_orientation"]=="source_tool_aligned"
+          assert r["cycle"]["supported_grasp_stays_attached_to_physics_only"] is True
+          assert r["cycle"]["no_object_pose_teleports_after_initialization"] is True
+          assert r["cycle"]["no_object_attach_constraints"] is True
+          assert r["cycle"]["physical_sorter_authorized"] is False
+          grasp=json.loads(Path(".cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json").read_text())
+          assert grasp["original_source_collision_mesh_count"]>=10
+          assert grasp["sweep"]["tested"]==18
+          assert grasp["cube_side_m"]==.06
+          assert grasp["original_sortcell_visual_cube_side_m"]==.115
+          assert grasp["authority"]["no_object_teleport_after_initialization"] is True
+          assert grasp["authority"]["no_attachments_or_fixed_grasp_constraint"] is True
+          assert grasp["authority"]["physical_robot_grasp_verified"] is False
+          print("SUPPORTED GRASP SWEEP:",grasp["sweep"]["strict_passes"],
+                "strict passes /",grasp["sweep"]["tested"],"trials")
+          print("NUMERICAL CYCLE:", r["cycle"]["numerical_full_cycle_test_passed"])
+          print("PICK, LIFT, TRANSFER, PLACE, RELEASE:",
+                [(s["phase"],s["last"]["relative_tcp_object_m"],
+                  s["last"]["bilateral_finger_contact"],
+                  s["last"]["deposit_floor_contacts"]) for s in r["cycle"]["stages"]])
+          PY
+      - name: Attach replayable original-source dynamics traces and proposal
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-reachable-source-dynamic-pick-place-proposal
+          path: |
+            .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
+            .cache/sortcell-dynamic-cycle/README.md
+            .cache/sortcell-dynamic-cycle/STRICT_ACCEPTANCE.json
+            .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
+            .cache/sortcell-supported-grasp/SCOPE.md
+          retention-days: 30
+          if-no-files-found: warn
