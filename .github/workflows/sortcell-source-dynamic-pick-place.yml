@@ -60,7 +60,10 @@ jobs:
           assert r["candidate_layout"]["same_as_existing_sortcell_viewer_layout"] is False
           assert r["candidate_layout"]["visual_cad_v11_registered_to_urdf_v10"] is False
           assert r["candidate_layout"]["tcp_station_separation_m"]>.08
-          assert len(r["cycle"]["stages"])==7
+          assert r["candidate_layout"]["source_fk_high_transfer_candidates_tested"]>=1
+          assert r["candidate_layout"]["source_fk_validated_original_source_limits"] is True
+          assert r["candidate_layout"]["source_fk_interpolated_transfer_min_tcp_z_m"]>0
+          assert len(r["cycle"]["stages"])==8
           assert r["cycle"]["supported_grasp_cube_world_xy_offset_m"]==[.02,0]
           assert r["cycle"]["supported_grasp_cube_orientation"]=="source_tool_aligned"
           assert r["cycle"]["supported_grasp_stays_attached_to_physics_only"] is True
