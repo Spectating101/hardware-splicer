@@ -104,14 +104,55 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
         candidates.sort(key=lambda item:item[0])
         _,q_place,place_xyz,place_orientation=candidates[0]
         q_lift=dict(q_pick,openarm_right_joint2=q_pick["openarm_right_joint2"]+.14)
-        q_transfer=dict(q_place,openarm_right_joint2=min(
-            float(info["openarm_right_joint2"][1][9])-.02,
-            q_place["openarm_right_joint2"]+.14))
-        for cfg in (q_pick,q_lift,q_transfer,q_place):
-            for name,value in cfg.items():
-                joint=info[name][1]
-                require(float(joint[8])-1e-5<=value<=float(joint[9])+1e-5,
-                        "candidate joint violates original source limit "+name)
+        def source_limit_safe(cfg):
+            return all(float(info[name][1][8])-1e-5<=value<=float(info[name][1][9])+1e-5
+                       for name,value in cfg.items())
+        def source_fk(cfg):
+            install(cfg)
+            return pose()[0]
+        # The first complete replay showed the earlier transfer joint target
+        # actively descended through the pickup support (dropping the cube).
+        # Plan *source-FK-checked* high-clearance motor waypoints, not invented
+        # end-effector animation or a manually moved payload.
+        lift_candidates=[]
+        for delta in (.30,.42,.55,.70,.90,1.10):
+            cfg=dict(q_pick,openarm_right_joint2=q_pick["openarm_right_joint2"]+delta)
+            if not source_limit_safe(cfg):continue
+            xyz=source_fk(cfg)
+            if xyz[2]<pick_xyz[2]+.075:continue
+            if math.dist(xyz[:2],pick_xyz[:2])>.26:continue
+            lift_candidates.append((delta,cfg,xyz))
+        require(lift_candidates,"source FK cannot generate a stable higher clearance pickup lift")
+        lift_candidates.sort(key=lambda x:x[0])
+        _,q_high_lift,high_lift_tcp=lift_candidates[0]
+        def interpolated_z_profile(a,b):
+            low=float("inf")
+            for n in range(21):
+                t=n/20
+                cfg={name:a[name]+(b[name]-a[name])*t for name in a}
+                low=min(low,source_fk(cfg)[2])
+            return low
+        high_options=[]
+        for delta in (.25,.4,.55,.7,.85,1.05,1.25,1.45):
+            for elbow in (-.25,0,.2,.45,.7):
+                cfg=dict(q_place,
+                    openarm_right_joint2=q_place["openarm_right_joint2"]+delta,
+                    openarm_right_joint4=q_place["openarm_right_joint4"]+elbow)
+                if not source_limit_safe(cfg):continue
+                xyz=source_fk(cfg)
+                if xyz[2]<pick_xyz[2]+.075:continue
+                if math.dist(xyz[:2],place_xyz[:2])>.34:continue
+                min_z=interpolated_z_profile(q_high_lift,cfg)
+                if min_z < pick_xyz[2]+.055:continue
+                score=(math.dist(xyz[:2],place_xyz[:2])+
+                       .25*delta+.12*abs(elbow))
+                high_options.append((score,cfg,xyz,min_z))
+        require(high_options,
+                "no joint-interpolated original-source transfer waypoint preserves pickup clearance")
+        high_options.sort(key=lambda x:x[0])
+        _,q_high_transfer,high_transfer_tcp,transfer_path_min_z=high_options[0]
+        for cfg in (q_pick,q_lift,q_high_lift,q_high_transfer,q_place):
+            require(source_limit_safe(cfg),"candidate joint violates original source joint limit")
         install(q_pick)
         # Floor planes placed from published tray FLOOR size and a candidate
         # position derived from original source TCP center, *not* the viewer.
@@ -203,23 +244,27 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
             phase("settle_open_gripper",q_pick,.044,100),
             phase("grasp_close_source_fingers",q_pick,0,220),
             phase("lift_under_gravity",q_lift,0,180),
-            phase("transfer_under_gravity",q_transfer,0,400),
-            phase("lower_to_proposed_sort_station",q_place,0,240),
+            phase("raise_to_source_fk_clearance",q_high_lift,0,240),
+            phase("source_fk_clearance_transfer",q_high_transfer,0,480),
+            phase("lower_to_proposed_sort_station",q_place,0,320),
             phase("release_open_source_fingers",q_place,.044,160),
             phase("reset_robot_without_object_attachment",q_pick,.044,180),
         ]
         final=sequence[-1]["last"]
         release=sequence[-2]["last"]
-        transported=sequence[3]["last"]
+        transported=sequence[4]["last"]
         cube_start=sequence[0]["last"]["object_xyz_m"]
         cube_place=release["object_xyz_m"]
         measured_displacement=math.dist(cube_start,cube_place)
         floor_contact=final["deposit_floor_contacts"]>0
         cube_deposit_distance=math.dist(final["object_xyz_m"],place_xyz)
         pick_clearance=sequence[2]["last"]["pickup_floor_contacts"]==0
+        clearance_maintained=(sequence[3]["last"]["pickup_floor_contacts"]==0
+             and sequence[4]["last"]["pickup_floor_contacts"]==0)
         grasp_stable=(sequence[1]["bilateral_contact_samples"]>=18
             and sequence[2]["bilateral_contact_samples"]>=15
-            and pick_clearance)
+            and sequence[3]["bilateral_contact_samples"]>=15
+            and pick_clearance and clearance_maintained)
         transfer_retent=transported["bilateral_finger_contact"] and transported["relative_tcp_object_m"]<.035
         full_candidate_success=(initial_overlap==0 and initial_floor_overlap==0 and
              grasp_stable and transfer_retent and floor_contact
@@ -247,6 +292,11 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                     k:round(v,6) for k,v in q_place.items() if k.startswith("openarm_right_joint")},
                 "candidate_tcp_height_difference_m":round(abs(pick_xyz[2]-place_xyz[2]),6),
                 "tray_footprints_overlap_xy":False,
+                "source_fk_high_lift_tcp_m":[round(v,6) for v in high_lift_tcp],
+                "source_fk_high_transfer_tcp_m":[round(v,6) for v in high_transfer_tcp],
+                "source_fk_interpolated_transfer_min_tcp_z_m":round(transfer_path_min_z,6),
+                "source_fk_high_transfer_candidates_tested":len(high_options),
+                "source_fk_validated_original_source_limits":True,
                 "proposed_fixture_stations":[pickup,deposit],
                 "same_as_existing_sortcell_viewer_layout":False,
                 "physical_mount_calibrated":False,
@@ -262,6 +312,7 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "supported_grasp_cube_orientation":"source_tool_aligned",
                 "supported_grasp_stays_attached_to_physics_only":True,
                 "grasp_and_lift_stable":grasp_stable,
+                "clearance_maneuver_remained_off_pickup_floor":clearance_maintained,
                 "object_travel_m":round(measured_displacement,6),
                 "object_initial_center_robot_m":[round(x,6) for x in pickup_cube_xyz],
                 "last_place_cube_distance_to_tcp_m":round(cube_deposit_distance,6),
