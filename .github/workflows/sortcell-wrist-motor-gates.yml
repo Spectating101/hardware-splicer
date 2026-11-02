@@ -148,6 +148,29 @@ jobs:
             --cycle .cache/source-motor-experiments/mimic-default/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --package .cache/source-v10-collision-viewer \
             --output .cache/source-v10-collision-viewer/SOURCE_VIEWER_ACCEPTANCE.json
+      - name: Actually reload relocatable original-source collision URDF using original PyBullet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pybullet as p
+          out=Path(".cache/source-v10-collision-viewer")
+          c=p.connect(p.DIRECT)
+          try:
+              flags=p.URDF_MAINTAIN_LINK_ORDER|p.URDF_USE_SELF_COLLISION|p.URDF_USE_SELF_COLLISION_EXCLUDE_PARENT
+              model=p.loadURDF(str(out/"manufacturer_collision_portable.urdf"),
+                               useFixedBase=True,flags=flags,physicsClientId=c)
+              info=[p.getJointInfo(model,j,physicsClientId=c)
+                    for j in range(p.getNumJoints(model,physicsClientId=c))]
+              movable=sum(i[2] in (p.JOINT_REVOLUTE,p.JOINT_PRISMATIC) for i in info)
+              assert movable==18, "portable manufacturer joint model is not source-complete"
+              collision_shapes=sum(bool(p.getCollisionShapeData(model,j,physicsClientId=c))
+                                   for j in range(-1,len(info)))
+              assert collision_shapes>=18, "portable original source collision geometry missing"
+              print("PORTABLE ORIGINAL OPENARM V1.0 RELOADED:",movable,
+                    "source joints,",collision_shapes,"collision-bearing source links")
+          finally:
+              p.disconnect(physicsClientId=c)
+          PY
       - name: Browser smoke test the manufacturer-source 3D mesh viewer (no real hardware)
         run: |
           set -euo pipefail
