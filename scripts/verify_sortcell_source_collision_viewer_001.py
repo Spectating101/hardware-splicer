@@ -58,6 +58,26 @@ def run(urdf,cycle,package):
         raise ValueError("original source geometry must stay unmodified")
     if manifest["physical_robot_approved"] is not False:
         raise ValueError("cannot authorize hardware use")
+    pairs=manifest.get("source_wrist_visual_vs_collision_metadata",[])
+    if len(pairs)!=6 or not manifest.get("all_source_wrist_DAE_STL_URDF_origins_and_scales_identical"):
+        raise ValueError("manufacturer wrist source visual/collision transform check missing")
+    for part in pairs:
+        n=part["source_link"]
+        link=xml.find("./link[@name='"+n+"']")
+        if link is None:raise ValueError("original wrist link missing")
+        v=link.find("visual");c=link.find("collision")
+        vm=v.find(".//mesh");cm=c.find(".//mesh")
+        if (part["manufacturer_source_visual_DAE"]!=vm.get("filename") or
+            part["manufacturer_source_collision_STL"]!=cm.get("filename")):
+            raise ValueError("wrist mesh original reference mismatch")
+        if not vm.get("filename").endswith(".dae") or not cm.get("filename").endswith(".stl"):
+            raise ValueError("mixed source mesh formats changed")
+        if part["actual_visual_vs_collision_surface_geometry_compared"]:
+            raise ValueError("false source surface-clearance comparison claim")
+        if not part["source_URDF_visual_collision_transform_metadata_identical"]:
+            raise ValueError("source URDF wrist visual collision transforms differ")
+    if manifest["source_visual_DAE_vs_collision_STL_surface_clearance_comparison_done"]:
+        raise ValueError("not yet qualified original manufacturer visual and collision surfaces")
     if manifest["source_wrist_grid_samples_per_arm"]!=125:
         raise ValueError("original wrist evidence changed")
     if len(trace["supports"])!=2:raise ValueError("missing real candidate support planes")
@@ -77,6 +97,8 @@ def run(urdf,cycle,package):
        "independent_source_motor_world_pose_frames":len(rows),
        "every_source_joint_and_cube_frame_retained":True,
        "original_wrist_contact_evidence_retained":True,
+       "manufacturer_source_wrist_DAE_STL_transform_metadata_matched_for_six_links":True,
+       "actual_visual_collision_mesh_surface_comparison_executed":False,
        "all_three_offline_viewer_dependencies_hash_verified":True,
        "original_source_collision_geometry_not_visual_DAE":True,
        "visual_v11_GLb_to_source_v10_registered":False,
