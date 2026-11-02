@@ -31,11 +31,18 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         *,finger_margin_m:float=0.0,pickup_support_width_m:float=.46,
         deposit_support_width_m:float=.46,
         deposit_floor_drop_m:float=0.0,
-        reset_via_source_clearance:bool=False)->dict:
+        reset_via_source_clearance:bool=False,
+        finger_motor_force_fraction:float=1.0,
+        finger_motor_position_gain:float=0.1,
+        finger_motor_max_velocity_m_s:float=0.3,
+        enforce_right_source_finger_mimic:bool=False)->dict:
     require(0<=finger_margin_m<=.006,"finger limit margin must be 0-6mm")
     require(.035<=pickup_support_width_m<=.46,"candidate pickup support width outside allowed envelope")
     require(.035<=deposit_support_width_m<=.46,"candidate deposit support width outside allowed envelope")
     require(0<=deposit_floor_drop_m<=.05,"candidate destination floor drop outside 0-50mm envelope")
+    require(.1<=finger_motor_force_fraction<=1,"motor force fraction must be within .1-1")
+    require(.01<=finger_motor_position_gain<=.2,"original-source motor gain experiment outside allowed window")
+    require(.03<=finger_motor_max_velocity_m_s<=.3,"original-source finger speed experiment outside allowed window")
     import pybullet as p
     original=urdf.read_bytes()
     motion=json.loads(trajectory.read_text())
@@ -207,6 +214,26 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         for name in right_fingers:
             require(abs(info[name][1][9]-.044)<1e-6,
                     "manufacturer finger max extension changed")
+        source_mimic_joint=root.find("./joint[@name='openarm_right_finger_joint2']/mimic")
+        require(source_mimic_joint is not None,"manufacturer finger mimic disappeared")
+        require(source_mimic_joint.attrib.get("joint")=="openarm_right_finger_joint1",
+                "wrong original source mimic master finger")
+        require(abs(float(source_mimic_joint.attrib.get("multiplier","nan"))-1)<1e-8
+                and abs(float(source_mimic_joint.attrib.get("offset","nan")))<1e-8,
+                "unexpected manufacturer source mimic relation")
+        source_mimic_constraint=None
+        if enforce_right_source_finger_mimic:
+            # PyBullet does NOT auto-implement URDF mimic. Mirror the declared
+            # source equality q2=q1 using one master's motor and a simulated
+            # gear constraint; this is not a mechanical transmission certificate.
+            source_mimic_constraint=p.createConstraint(
+                robot,info["openarm_right_finger_joint1"][0],
+                robot,info["openarm_right_finger_joint2"][0],
+                p.JOINT_GEAR,[0,1,0],[0,0,0],[0,0,0],physicsClientId=client)
+            require(source_mimic_constraint>=0,"PyBullet could not create source mimic coupling")
+            p.changeConstraint(source_mimic_constraint,gearRatio=-1,
+                               erp=.5,maxForce=min(40.,float(info["openarm_right_finger_joint1"][1][10])),
+                               physicsClientId=client)
         p.performCollisionDetection(physicsClientId=client)
         initial_overlap=sum(1 for c in p.getContactPoints(bodyA=robot,bodyB=cube,
                                      physicsClientId=client) if c[8]<-1e-5)
@@ -238,10 +265,26 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                     # Original source prismatic limits remain unchanged.
                     # Target margin leaves servo/contact tracking headroom.
                     target=(finger_margin_m if closure==0 else .044-finger_margin_m)
-                p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
-                    targetPosition=target,force=min(40.0,float(meta[10])),
-                    maxVelocity=.65 if "finger" not in name else .3,
-                    physicsClientId=client)
+                # Original joints and URDF hard limits stay untouched. Vary only
+                # the simulated finger motor's tracking dynamics; do not clamp
+                # joint states or fabricate a successful contact outcome.
+                if enforce_right_source_finger_mimic and name=="openarm_right_finger_joint2":
+                    # Slave is passive; source URDF mimic gear transfers motion.
+                    p.setJointMotorControl2(robot,j,p.VELOCITY_CONTROL,
+                                             force=0,physicsClientId=client)
+                    continue
+                if name in right_fingers:
+                    p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
+                        targetPosition=target,
+                        force=min(40.0,float(meta[10]))*finger_motor_force_fraction,
+                        maxVelocity=finger_motor_max_velocity_m_s,
+                        positionGain=finger_motor_position_gain,
+                        physicsClientId=client)
+                else:
+                    p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
+                        targetPosition=target,force=min(40.0,float(meta[10])),
+                        maxVelocity=.65 if "finger" not in name else .3,
+                        physicsClientId=client)
         def measure(label,step):
             xyz,_=p.getBasePositionAndOrientation(cube,physicsClientId=client)
             tcp,_=pose()
@@ -390,6 +433,18 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                 "supported_grasp_cube_world_xy_offset_m":[.02,0],
                 "supported_grasp_cube_orientation":"source_tool_aligned",
                 "experimental_source_finger_limit_margin_m":finger_margin_m,
+                "experimental_source_finger_motor_force_fraction":finger_motor_force_fraction,
+                "experimental_source_finger_motor_position_gain":finger_motor_position_gain,
+                "experimental_source_finger_motor_max_velocity_m_s":finger_motor_max_velocity_m_s,
+                "manufacturer_source_right_finger2_mimics_finger1":True,
+                "manufacturer_source_mimic_multiplier":1,
+                "pybullet_source_mimic_constraint_installed":enforce_right_source_finger_mimic,
+                "source_mimic_only_master_motor_commanded":enforce_right_source_finger_mimic,
+                "max_original_source_mimic_joint_tracking_error_m":round(
+                     max(abs(item["source_robot_joint_positions"]["openarm_right_finger_joint1"]-
+                             item["source_robot_joint_positions"]["openarm_right_finger_joint2"])
+                         for item in log),8),
+                "finger_motor_modified_source_joint_hard_limits":False,
                 "original_source_finger_joint_hard_limits_unchanged":True,
                 "supported_grasp_stays_attached_to_physics_only":True,
                 "grasp_and_lift_stable":grasp_stable,
@@ -458,13 +513,21 @@ if __name__=="__main__":
     ap.add_argument("--deposit-support-width-m",type=float,default=.46)
     ap.add_argument("--deposit-floor-drop-m",type=float,default=0.0)
     ap.add_argument("--reset-via-clearance",action="store_true")
+    ap.add_argument("--finger-force-fraction",type=float,default=1.)
+    ap.add_argument("--finger-position-gain",type=float,default=.1)
+    ap.add_argument("--finger-max-velocity-m-s",type=float,default=.3)
+    ap.add_argument("--enforce-source-right-finger-mimic",action="store_true")
     args=ap.parse_args()
     r=run(args.urdf,args.trajectory,args.stage,args.output,
           finger_margin_m=args.finger_margin_m,
           pickup_support_width_m=args.pickup_support_width_m,
           deposit_support_width_m=args.deposit_support_width_m,
           deposit_floor_drop_m=args.deposit_floor_drop_m,
-          reset_via_source_clearance=args.reset_via_clearance)
+          reset_via_source_clearance=args.reset_via_clearance,
+          finger_motor_force_fraction=args.finger_force_fraction,
+          finger_motor_position_gain=args.finger_position_gain,
+          finger_motor_max_velocity_m_s=args.finger_max_velocity_m_s,
+          enforce_right_source_finger_mimic=args.enforce_source_right_finger_mimic)
     print(json.dumps({
       "source_meshes":r["source_collision_meshes"],
       "candidate_station_separation_m":r["candidate_layout"]["tcp_station_separation_m"],
