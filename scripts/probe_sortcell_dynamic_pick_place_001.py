@@ -63,16 +63,8 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
             if "finger_joint" in n:q_pick[n]=.044
         q_pick.update(openarm_left_joint1=-2.8,openarm_left_joint2=-2.7,
                       openarm_left_joint4=.4)
-        q_lift=dict(q_pick,openarm_right_joint2=q_pick["openarm_right_joint2"]+.14)
-        q_transfer=dict(q_lift,openarm_right_joint1=q_pick["openarm_right_joint1"]-.38)
-        q_place=dict(q_transfer,openarm_right_joint2=q_pick["openarm_right_joint2"]+.01)
         right_fingers=("openarm_right_finger_joint1","openarm_right_finger_joint2")
         tcp_idx=info["openarm_right_hand_tcp_joint"][0]
-        for cfg in (q_pick,q_lift,q_transfer,q_place):
-            for name,value in cfg.items():
-                joint=info[name][1]
-                require(float(joint[8])-1e-5<=value<=float(joint[9])+1e-5,
-                        "candidate joint violates original source limit "+name)
         def install(q):
             for name,value in q.items():
                 p.resetJointState(robot,info[name][0],float(value),physicsClientId=client)
@@ -81,12 +73,45 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
             return list(q[4]),list(q[5])
         install(q_pick)
         pick_xyz,pick_orientation=pose()
-        install(q_place)
-        place_xyz,place_orientation=pose()
-        require(math.dist(pick_xyz,place_xyz)>.08,
-                "candidate source-native station poses are not spatially distinct")
-        require(abs(pick_xyz[2]-place_xyz[2])<.12,
-                "derived station heights wildly separated")
+        # Find a feasible candidate station pair in *source joint space*.
+        # Require separated original tray footprints, similar TCP station heights,
+        # original mechanical joint limits, and genuine manufacturer URDF FK.
+        candidates=[]
+        tested=0
+        for j1 in (-1.25,-1.0,-.8,-.55,-.3,.4,.65,1.0,1.3):
+            for j2 in (.45,.7,.9,1.1,1.3,1.55):
+                for j3 in (-.35,0,.35):
+                    for j4 in (.8,1.05,1.3):
+                        cfg=dict(q_pick,openarm_right_joint1=j1,openarm_right_joint2=j2,
+                                 openarm_right_joint3=j3,openarm_right_joint4=j4)
+                        if any(not (float(info[name][1][8])<=value<=float(info[name][1][9]))
+                               for name,value in cfg.items()):
+                            continue
+                        tested+=1
+                        install(cfg)
+                        xyz,quat=pose()
+                        dx=abs(xyz[0]-pick_xyz[0]);dy=abs(xyz[1]-pick_xyz[1])
+                        if not (dx>.51 or dy>.55):continue
+                        if abs(xyz[2]-pick_xyz[2])>.12:continue
+                        if math.dist(xyz,pick_xyz)<.55:continue
+                        moved=(abs(j1-q_pick["openarm_right_joint1"]) +
+                               .65*abs(j2-q_pick["openarm_right_joint2"]) +
+                               .4*abs(j3-q_pick["openarm_right_joint3"]) +
+                               .4*abs(j4-q_pick["openarm_right_joint4"]))
+                        candidates.append((moved,cfg,xyz,quat))
+        require(bool(candidates),
+                "no candidate source-FK station pair with nonoverlapping tray floors and comparable heights")
+        candidates.sort(key=lambda item:item[0])
+        _,q_place,place_xyz,place_orientation=candidates[0]
+        q_lift=dict(q_pick,openarm_right_joint2=q_pick["openarm_right_joint2"]+.14)
+        q_transfer=dict(q_place,openarm_right_joint2=min(
+            float(info["openarm_right_joint2"][1][9])-.02,
+            q_place["openarm_right_joint2"]+.14))
+        for cfg in (q_pick,q_lift,q_transfer,q_place):
+            for name,value in cfg.items():
+                joint=info[name][1]
+                require(float(joint[8])-1e-5<=value<=float(joint[9])+1e-5,
+                        "candidate joint violates original source limit "+name)
         install(q_pick)
         # Floor planes placed from published tray FLOOR size and a candidate
         # position derived from original source TCP center, *not* the viewer.
@@ -171,8 +196,8 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
             phase("settle_open_gripper",q_pick,.044,80),
             phase("grasp_close_source_fingers",q_pick,0,160),
             phase("lift_under_gravity",q_lift,0,160),
-            phase("transfer_under_gravity",q_transfer,0,220),
-            phase("lower_to_proposed_sort_station",q_place,0,160),
+            phase("transfer_under_gravity",q_transfer,0,400),
+            phase("lower_to_proposed_sort_station",q_place,0,240),
             phase("release_open_source_fingers",q_place,.044,160),
             phase("reset_robot_without_object_attachment",q_pick,.044,180),
         ]
@@ -207,6 +232,12 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "pick_source_robot_tcp_m":[round(v,6) for v in pick_xyz],
                 "place_source_robot_tcp_m":[round(v,6) for v in place_xyz],
                 "tcp_station_separation_m":round(math.dist(pick_xyz,place_xyz),6),
+                "source_fk_station_poses_tested":tested,
+                "compatible_nonoverlapping_station_candidates":len(candidates),
+                "candidate_place_arm_joint_positions_rad":{
+                    k:round(v,6) for k,v in q_place.items() if k.startswith("openarm_right_joint")},
+                "candidate_tcp_height_difference_m":round(abs(pick_xyz[2]-place_xyz[2]),6),
+                "tray_footprints_overlap_xy":False,
                 "proposed_fixture_stations":[pickup,deposit],
                 "same_as_existing_sortcell_viewer_layout":False,
                 "physical_mount_calibrated":False,
