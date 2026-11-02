@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/compare_sortcell_clearance_repair_trials_001.py"
       - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
       - "scripts/verify_sortcell_dynamic_cycle_001.py"
       - "scripts/audit_sortcell_dynamic_contact_safety_001.py"
@@ -42,6 +43,37 @@ jobs:
             --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
             --stage assets/teardown/hs_sort_workcell_main.js \
             --output .cache/sortcell-dynamic-cycle
+      - name: Run original-source candidate fixture and motor-travel repair experiments
+        run: |
+          set -e
+          for variant in margin-only inset-only inset-margin inset-margin-both; do
+            echo "Original-source candidate: $variant"
+            case "$variant" in
+              margin-only) finger="0.002"; pickup="0.46"; deposit="0.46" ;;
+              inset-only) finger="0.0"; pickup="0.05"; deposit="0.46" ;;
+              inset-margin) finger="0.002"; pickup="0.05"; deposit="0.46" ;;
+              inset-margin-both) finger="0.002"; pickup="0.05"; deposit="0.05" ;;
+            esac
+            python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+              --urdf .cache/openarm-source/openarm_v10.urdf \
+              --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+              --stage assets/teardown/hs_sort_workcell_main.js \
+              --finger-margin-m "$finger" \
+              --pickup-support-width-m "$pickup" \
+              --deposit-support-width-m "$deposit" \
+              --output ".cache/sortcell-repair-candidates/$variant"
+          done
+      - name: Compare actual source-mesh fixture and joint-limit outcomes independently
+        run: |
+          python -m scripts.compare_sortcell_clearance_repair_trials_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --baseline .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --variants \
+              .cache/sortcell-repair-candidates/margin-only/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/inset-only/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/inset-margin/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/inset-margin-both/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/sortcell-repair-candidates/REPAIR_COMPARISON.json
       - name: Sweep supported object grasps using original source finger geometry and gravity
         run: |
           python -m scripts.probe_sortcell_supported_grasp_sweep_001 \
@@ -140,5 +172,7 @@ jobs:
             .cache/sortcell-dynamic-cycle/ENGINEERING_RELEASE_GATE.json
             .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
             .cache/sortcell-supported-grasp/SCOPE.md
+            .cache/sortcell-repair-candidates/REPAIR_COMPARISON.json
+            .cache/sortcell-repair-candidates/*/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
           retention-days: 30
           if-no-files-found: warn
