@@ -1,0 +1,105 @@
+name: HS SORTCELL Source Contact, Frame and Gripper Dynamics
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-openarm-contact-gripper.yml"
+      - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
+      - "scripts/probe_sortcell_stage_fixture_collision_001.py"
+      - "scripts/audit_sortcell_openarm_collision_timing_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+      - "assets/teardown/hs_sort_workcell_main.js"
+  workflow_dispatch:
+jobs:
+  source-contact-and-gripper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned official-source physics engine
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Download pinned original URDF
+        run: |
+          mkdir -p .cache/openarm-source
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+      - name: Generate independently reproducible numerical source trajectory
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-kinematics
+      - name: Re-run original-source collision and timed-motion evidence
+        run: |
+          python -m scripts.audit_sortcell_openarm_collision_timing_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --output .cache/sortcell-collision-timing
+      - name: Diagnose native baseline collision, display frame and physical gripper-object contacts
+        run: |
+          python -m scripts.probe_sortcell_source_contact_frame_gripper_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --collision .cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-gripper-contact
+      - name: Replay original OpenArm trajectory against unchanged source-authored fixture boxes
+        run: |
+          python -m scripts.probe_sortcell_stage_fixture_collision_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-stage-fixture
+      - name: Check sourced collisions, workcell frame provenance, genuine motor simulation and closed authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path(".cache/sortcell-gripper-contact/SORTCELL_SOURCE_CONTACT_FRAME_GRIPPER.json").read_text())
+          c=r["source_collision_contact_diagnostic"]
+          f=r["scene_coordinate_contract"]
+          g=r["gripper"]
+          assert r["mesh_count"]>=10
+          assert c["source_limit_safe_park_candidates_tested"]==60
+          assert c["source_limit_safe_wrist_candidates_tested"]==25
+          assert c["collision_pairs_are_not_safety_whitelisted"] is True
+          assert f["display_robot_scale"]==.93
+          assert f["source_cube_size_stage_m"]==[.115,.115,.115]
+          assert len(r["scene_target_reach_candidates"])==4
+          assert g["two_source_prismatic_joints_commanded"] is True
+          assert len(g["contact_trials"])==6
+          assert all(t["no_fake_attachment_constraint"] is True for t in g["contact_trials"])
+          assert g["physical_grasp_verified"] is False
+          assert r["authority"]["world_to_robot_mount_calibrated"] is False
+          assert r["authority"]["real_robot_motion_authorized"] is False
+          fx=json.loads(Path(".cache/sortcell-stage-fixture/SOURCE_STAGE_FIXTURE_COLLISION.json").read_text())
+          assert fx["stage_fixture_collision_shapes"]==18
+          assert fx["robot_collision_meshes"]>=10
+          assert fx["robot_path_frame_count"]==73
+          assert fx["boundaries"]["all_workcell_fixture_geometry_represented"] is False
+          assert fx["boundaries"]["real_robot_motion_authorized"] is False
+          assert len(fx["min_tcp_distance_to_original_scene_targets_m"])==4
+          print("FIXTURE EVIDENCE:",fx["robot_fixtures_contact_frame_count"],
+                "contact frames over 73, using existing source workcell boxes")
+          print("SOURCE GRIPPER CONTACT REPORT VERIFIED:",
+                c["home"]["pair_count"],"initial contact pairs;",
+                c["fingers_open"]["pair_count"],"when fingers opened;",
+                sum(t["converged_within_12mm"] for t in r["scene_target_reach_candidates"]),
+                "workcell frame targets reached;",
+                g["retained_115mm_workpiece_trial_count"],"115mm cubes retained in simulated trials")
+          PY
+      - name: Preserve machine-readable physical-contact evidence without granting hardware authority
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-source-contact-frame-gripper-probe
+          path: |
+            .cache/sortcell-gripper-contact/SORTCELL_SOURCE_CONTACT_FRAME_GRIPPER.json
+            .cache/sortcell-gripper-contact/SCOPE.md
+            .cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json
+            .cache/sortcell-stage-fixture/SOURCE_STAGE_FIXTURE_COLLISION.json
+            .cache/sortcell-stage-fixture/SCOPE.md
+          retention-days: 30
+          if-no-files-found: warn
