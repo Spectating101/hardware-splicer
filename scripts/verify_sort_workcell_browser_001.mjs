@@ -52,6 +52,26 @@ try{
    frames.push({name,t,...rest,sha256:crypto.createHash('sha256').update(png).digest('hex')});
    console.log('TEARDOWN ROBOT WORKCELL VISUAL '+JSON.stringify({name,bright:rest.bright,contrast:rest.contrast,phase:rest.phase,partCount:rest.sourcePartCount}));
  }
+ // The three categories must route to three different physical tray coordinates.
+ const destinations=[];
+ for(const [category,target] of [['0',.45],['1',.97],['2',1.49]]){
+   await page.locator('#sw-category-select').selectOption(category);
+   const lane=await page.evaluate(()=>{
+     window.SIM.render(13.5);
+     return window.HS_SORTCELL.snapshot();
+   });
+   if(Math.abs(lane.workpiece_xyz[0]-target)>.015)
+     throw Error('Sorting category not routed to its own tray: '+JSON.stringify({category,lane}));
+   destinations.push({category:lane.classification,workpiece_xyz:lane.workpiece_xyz});
+ }
+ await page.locator('#sw-category-select').selectOption('1');
+ // Full presentation screenshot in addition to the raw proof of WebGL pixels.
+ // Keep canvas acceptance as the hard requirement if SwiftShader compositor is slow.
+ await page.evaluate(()=>window.SIM.render(0));
+ try{
+   await page.screenshot({path:path.join(output,'sortcell-entire-teardown-ui.png'),fullPage:false,timeout:35000});
+   console.log('FULL TEARDOWN INTERFACE screenshot captured');
+ }catch(e){console.log('Full UI compositor unsupported; actual canvas captures remain valid: '+e.message);}
  const different=frames.some(x=>JSON.stringify(x.workpiece_xyz)!==JSON.stringify(frames[0].workpiece_xyz));
  if(!different||new Set(frames.map(x=>x.phase)).size<5)
   throw Error('No distinct sorting phases or genuine moving 3D workpieces');
@@ -75,7 +95,7 @@ try{
    source_geometry_authored_by_hs:false,
    robot_motion_physically_verified:false,
    camera_classification_real:false,
-   workcell_fabricated:false,frames
+   workcell_fabricated:false,verified_sorting_destinations:destinations,frames
  };
  fs.writeFileSync(path.join(output,'SORTCELL_BROWSER_PROOF.json'),JSON.stringify(proof,null,2));
  console.log('SORTCELL / S1 ACCEPTANCE '+JSON.stringify({passed:true,frames:frames.length,original_source_meshes:542}));
