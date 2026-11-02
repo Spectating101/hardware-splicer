@@ -129,7 +129,22 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
     for link in local_root.findall("link"):
         for visual in link.findall("visual"):link.remove(visual)
     source_meshes(local_root,meshes.resolve())
-    local_urdf=output/"local_original_collision_only.urdf"
+    # Two distinct faithful URDF representations: original upstream package
+    # URI file, plus a copy with *only collision mesh URIs* made relocatable
+    # inside the delivered bundle. Neither changes source link origins/joints.
+    (output/"manufacturer_original_source.urdf").write_bytes(source)
+    portable=ET.fromstring(source)
+    for link in portable.findall("link"):
+        for visual in link.findall("visual"):link.remove(visual)
+    for mesh in portable.findall(".//collision//mesh"):
+        uri=mesh.get("filename")
+        require(uri in asset_map,"portable source requires known hash-pinned mesh")
+        mesh.set("filename",asset_map[uri]["relative"].removeprefix("./"))
+    (output/"manufacturer_collision_portable.urdf").write_bytes(
+        ET.tostring(portable,encoding="utf8",xml_declaration=True))
+    # The physics FK replay still uses original SHA-verified meshes at their
+    # runner-local original-source paths, never a newly converted mesh.
+    local_urdf=output.parent/"source_collision_runner_paths.urdf"
     local_urdf.write_bytes(ET.tostring(local_root,encoding="utf8",xml_declaration=True))
     client=p.connect(p.DIRECT)
     try:
@@ -191,6 +206,9 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
                   "manufacturer_source_visual_DAE_not_included":True,
                   "independent_542_part_v11_GLb_unregistered":True,
                   "source_collision_meshes_not_modified":True,
+                  "original_manufacturer_source_urdf_packaged":True,
+                  "portable_collision_URDF_relative_mesh_references_packaged":True,
+                  "portable_URDF_only_collision_mesh_references_changed":True,
                   "original_joint_and_link_frames_not_modified":True,
                   "viewer_offline_vendor_module_hashes":vendor_hash,
                   "physical_robot_approved":False}
