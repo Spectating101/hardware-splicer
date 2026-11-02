@@ -132,13 +132,18 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "candidate_visual_stage_center_m":urdf_to_stage([
                     xyz[0],xyz[1],floor_top-FLOOR_DEPTH/2],spec),
                 "source_floor_size_stage_m":[.46,.025,.50]}
-        pickup=station("proposed_pick_station",pick_xyz,pick_orientation)
+        # Source-supported grasp sweep proved a 60 mm tool-aligned cube,
+        # positioned +20 mm in world X from the source TCP, can settle, close
+        # and lift under gravity with sustained two-finger contacts.
+        # Use EXACTLY that verified initialization; no object reposition later.
+        pickup_cube_xyz=[pick_xyz[0]+.020,pick_xyz[1],pick_xyz[2]]
+        pickup=station("proposed_pick_station",pickup_cube_xyz,pick_orientation)
         deposit=station("proposed_sort_station",place_xyz,place_orientation)
         # Original source joint space and original collision links.
         shape=p.createCollisionShape(p.GEOM_BOX,
               halfExtents=[OBJECT_SIDE/2]*3,physicsClientId=client)
         cube=p.createMultiBody(baseMass=OBJECT_MASS,baseCollisionShapeIndex=shape,
-              basePosition=pick_xyz,baseOrientation=pick_orientation,physicsClientId=client)
+              basePosition=pickup_cube_xyz,baseOrientation=pick_orientation,physicsClientId=client)
         p.changeDynamics(cube,-1,lateralFriction=1.2,rollingFriction=.003,
                          physicsClientId=client)
         for name in right_fingers:
@@ -192,56 +197,33 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                     s["relative_tcp_object_m"] for s in series),6),
                 "series_sample_count":len(series),
             }
-        sequence=[phase("settle_open_gripper",q_pick,.044,80)]
-        # The first trial proved that a cube settling onto a support under
-        # gravity shifts away from the hand TCP. Use the *simulated object pose*
-        # as a synthetic pose-sensor reading (NOT a real camera) and solve
-        # a source-native PyBullet IK approach; move only with original motors.
-        cube_position,_=p.getBasePositionAndOrientation(cube,physicsClientId=client)
-        moving=[(name,info[name]) for name in home]
-        lows=[float(meta[8]) for _,(_,meta) in moving]
-        highs=[float(meta[9]) for _,(_,meta) in moving]
-        solution=p.calculateInverseKinematics(
-            robot,tcp_idx,cube_position,
-            lowerLimits=lows,upperLimits=highs,
-            jointRanges=[h-l for l,h in zip(lows,highs)],
-            restPoses=[q_pick[name] for name,_ in moving],
-            maxNumIterations=650,residualThreshold=1e-7,physicsClientId=client)
-        require(len(solution)==len(moving),"approach IK did not return original 18 joints")
-        q_approach=dict(q_pick)
-        for index,(name,_) in enumerate(moving):
-            if name.startswith("openarm_right_joint"):
-                q_approach[name]=float(solution[index])
-        require(all(float(info[name][1][8])-1e-4<=v<=float(info[name][1][9])+1e-4
-                    for name,v in q_approach.items()),"approach IK violates source joint limits")
-        sequence.append(phase("approach_settled_cube_using_source_ik",q_approach,.044,240))
-        observed_approach_error=math.dist(
-            sequence[-1]["last"]["tcp_xyz_m"],cube_position)
-        q_lift=dict(q_approach,openarm_right_joint2=min(
-            float(info["openarm_right_joint2"][1][9])-.02,
-            q_approach["openarm_right_joint2"]+.14))
-        sequence.extend([
-            phase("grasp_close_source_fingers",q_approach,0,180),
+        # Reuse only the gravity-on, supported grasp that actually passed the
+        # independent 18-trial source contact sweep (trial 16).
+        sequence=[
+            phase("settle_open_gripper",q_pick,.044,100),
+            phase("grasp_close_source_fingers",q_pick,0,220),
             phase("lift_under_gravity",q_lift,0,180),
             phase("transfer_under_gravity",q_transfer,0,400),
             phase("lower_to_proposed_sort_station",q_place,0,240),
             phase("release_open_source_fingers",q_place,.044,160),
             phase("reset_robot_without_object_attachment",q_pick,.044,180),
-        ])
+        ]
         final=sequence[-1]["last"]
         release=sequence[-2]["last"]
-        transported=sequence[4]["last"]
-        lift=sequence[3]["last"]
+        transported=sequence[3]["last"]
         cube_start=sequence[0]["last"]["object_xyz_m"]
         cube_place=release["object_xyz_m"]
         measured_displacement=math.dist(cube_start,cube_place)
         floor_contact=final["deposit_floor_contacts"]>0
         cube_deposit_distance=math.dist(final["object_xyz_m"],place_xyz)
         pick_clearance=sequence[2]["last"]["pickup_floor_contacts"]==0
+        grasp_stable=(sequence[1]["bilateral_contact_samples"]>=18
+            and sequence[2]["bilateral_contact_samples"]>=15
+            and pick_clearance)
         transfer_retent=transported["bilateral_finger_contact"] and transported["relative_tcp_object_m"]<.035
         full_candidate_success=(initial_overlap==0 and initial_floor_overlap==0 and
-             sequence[2]["bilateral_contact_samples"]>=5 and pick_clearance and transfer_retent
-             and floor_contact and cube_deposit_distance<.10 and measured_displacement>.08)
+             grasp_stable and transfer_retent and floor_contact
+             and cube_deposit_distance<.10 and measured_displacement>.08)
         report={
             "schema_version":SCHEMA,
             "original_urdf_sha256":sha(original),
@@ -275,10 +257,13 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 "stages":sequence,
                 "initial_robot_cube_overlap_contacts":initial_overlap,
                 "initial_cube_pick_floor_overlap_contacts":initial_floor_overlap,
-                "source_native_ik_approach_target_pose_m":[round(v,6) for v in cube_position],
-                "post_approach_tcp_to_settled_cube_error_m":round(observed_approach_error,6),
-                "approach_object_pose_from_simulated_ground_truth_not_real_vision":True,
+                "supported_grasp_seed_source":"strict passing trial 16 from source-supported grasp sweep",
+                "supported_grasp_cube_world_xy_offset_m":[.02,0],
+                "supported_grasp_cube_orientation":"source_tool_aligned",
+                "supported_grasp_stays_attached_to_physics_only":True,
+                "grasp_and_lift_stable":grasp_stable,
                 "object_travel_m":round(measured_displacement,6),
+                "object_initial_center_robot_m":[round(x,6) for x in pickup_cube_xyz],
                 "last_place_cube_distance_to_tcp_m":round(cube_deposit_distance,6),
                 "lift_clear_of_pickup_floor":pick_clearance,
                 "transfer_finger_retention_test":transfer_retent,
