@@ -1,0 +1,71 @@
+name: HS SORTCELL Official OpenArm Source Collision and Timing Audit
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-openarm-collision-timing.yml"
+      - "scripts/audit_sortcell_openarm_collision_timing_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+  workflow_dispatch:
+
+jobs:
+  original-mesh-kinematics-collision:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source-native PyBullet computation engine
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Pin the same official OpenArm source as PR 252
+        run: |
+          mkdir -p .cache/openarm-source
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+      - name: Recompute genuine original-source 18-joint PyBullet numerical trajectory
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-kinematics
+      - name: Download original official collision STLs, audit path and time-parameterize
+        run: |
+          python -m scripts.audit_sortcell_openarm_collision_timing_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --output .cache/sortcell-collision-timing
+      - name: Enforce provenance, numerical validation, and closed hardware authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('.cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json').read_text())
+          c=r['source_collision_geometry']
+          t=r['time_parameterization']
+          a=r['authority']
+          assert c['official_stl_mesh_count']>=10
+          assert c['loaded_link_collision_shape_count']>=14
+          assert c['actual_source_collision_meshes_loaded'] is True
+          assert c['collision_detection_sample_count']>=65
+          assert t['source_urdf_velocity_limits_used'] is True
+          assert t['max_analytic_velocity_fraction_of_policy']<=1
+          assert t['max_analytic_acceleration_fraction_of_policy']<=1
+          assert t['max_replayed_fk_residual_m']<.00005
+          assert t['timed_samples']==c['collision_detection_sample_count']
+          assert a['collision_free_sorting_operation'] is False
+          assert a['physical_motion_or_fabrication_authorized'] is False
+          print('SOURCE COLLISION AUDIT COMPLETE:',c['penetrating_frame_count'],
+                'robot self-penetration frames; collision-free sorting NOT certified')
+          PY
+      - name: Preserve source collision geometry, receipt, and reproducible timed trajectory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-official-openarm-source-collision-timed-motion
+          path: |
+            .cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json
+            .cache/sortcell-collision-timing/SOURCE_COLLISION_SCOPE.md
+            .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json
+          retention-days: 30
+          if-no-files-found: warn
