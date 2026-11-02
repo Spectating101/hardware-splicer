@@ -91,6 +91,40 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
         if shape_list:
             source_links.append({"link":link.get("name"),"shapes":shape_list})
     require(len(source_links)>=18,"missing original source geometry links")
+    wrist_visual_collision_pairs=[]
+    for arm in ("left","right"):
+        for linkno in (5,6,7):
+            name=f"openarm_{arm}_link{linkno}"
+            link=original.find(f"./link[@name='{name}']")
+            require(link is not None,"missing source wrist link "+name)
+            visual=link.find("visual")
+            collision=link.find("collision")
+            require(visual is not None and collision is not None,"missing source wrist geometry")
+            vm=visual.find(".//mesh")
+            cm=collision.find(".//mesh")
+            require(vm is not None and cm is not None,"missing original visual/collision wrist meshes")
+            vo=visual.find("origin")
+            co=collision.find("origin")
+            visual_xyz=numbers(vo.get("xyz") if vo is not None else None,"0 0 0")
+            collision_xyz=numbers(co.get("xyz") if co is not None else None,"0 0 0")
+            visual_rpy=numbers(vo.get("rpy") if vo is not None else None,"0 0 0")
+            collision_rpy=numbers(co.get("rpy") if co is not None else None,"0 0 0")
+            visual_scale=numbers(vm.get("scale"),"1 1 1")
+            collision_scale=numbers(cm.get("scale"),"1 1 1")
+            match=(visual_xyz==collision_xyz and visual_rpy==collision_rpy
+                   and visual_scale==collision_scale)
+            wrist_visual_collision_pairs.append({
+                "source_link":name,"manufacturer_source_visual_DAE":vm.get("filename"),
+                "manufacturer_source_collision_STL":cm.get("filename"),
+                "visual_origin_xyz_m":visual_xyz,"collision_origin_xyz_m":collision_xyz,
+                "visual_origin_rpy_rad":visual_rpy,"collision_origin_rpy_rad":collision_rpy,
+                "visual_mesh_scale":visual_scale,"collision_mesh_scale":collision_scale,
+                "source_URDF_visual_collision_transform_metadata_identical":match,
+                "actual_visual_vs_collision_surface_geometry_compared":False})
+    require(len(wrist_visual_collision_pairs)==6,"incomplete manufacturer wrist links")
+    require(all(x["source_URDF_visual_collision_transform_metadata_identical"]
+                for x in wrist_visual_collision_pairs),
+            "manufacturer wrist DAE/STL URDF transforms unexpectedly diverged")
     local_root=ET.fromstring(source)
     for link in local_root.findall("link"):
         for visual in link.findall("visual"):link.remove(visual)
@@ -150,6 +184,9 @@ def run(urdf,cycle,wrist,meshes,vendor,viewer_html,output):
                   "source_collision_links":source_links,
                   "source_link_count":len(source_links),
                   "original_source_wrist_baseline_penetration_m":w["initial_source_link5_link7_overlap_m"],
+                  "source_wrist_visual_vs_collision_metadata":wrist_visual_collision_pairs,
+                  "all_source_wrist_DAE_STL_URDF_origins_and_scales_identical":True,
+                  "source_visual_DAE_vs_collision_STL_surface_clearance_comparison_done":False,
                   "source_wrist_grid_samples_per_arm":125,
                   "manufacturer_source_visual_DAE_not_included":True,
                   "independent_542_part_v11_GLb_unregistered":True,
