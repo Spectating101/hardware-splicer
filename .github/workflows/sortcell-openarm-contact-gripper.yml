@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/sortcell-openarm-contact-gripper.yml"
       - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
+      - "scripts/probe_sortcell_stage_fixture_collision_001.py"
       - "scripts/audit_sortcell_openarm_collision_timing_001.py"
       - "scripts/solve_sortcell_openarm_pybullet_001.py"
       - "assets/teardown/hs_sort_workcell_main.js"
@@ -44,6 +45,13 @@ jobs:
             --collision .cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json \
             --stage assets/teardown/hs_sort_workcell_main.js \
             --output .cache/sortcell-gripper-contact
+      - name: Replay original OpenArm trajectory against unchanged source-authored fixture boxes
+        run: |
+          python -m scripts.probe_sortcell_stage_fixture_collision_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-stage-fixture
       - name: Check sourced collisions, workcell frame provenance, genuine motor simulation and closed authority
         run: |
           python - <<'PY'
@@ -66,6 +74,15 @@ jobs:
           assert g["physical_grasp_verified"] is False
           assert r["authority"]["world_to_robot_mount_calibrated"] is False
           assert r["authority"]["real_robot_motion_authorized"] is False
+          fx=json.loads(Path(".cache/sortcell-stage-fixture/SOURCE_STAGE_FIXTURE_COLLISION.json").read_text())
+          assert fx["stage_fixture_collision_shapes"]==18
+          assert fx["robot_collision_meshes"]>=10
+          assert fx["robot_path_frame_count"]==73
+          assert fx["boundaries"]["all_workcell_fixture_geometry_represented"] is False
+          assert fx["boundaries"]["real_robot_motion_authorized"] is False
+          assert len(fx["min_tcp_distance_to_original_scene_targets_m"])==4
+          print("FIXTURE EVIDENCE:",fx["robot_fixtures_contact_frame_count"],
+                "contact frames over 73, using existing source workcell boxes")
           print("SOURCE GRIPPER CONTACT REPORT VERIFIED:",
                 c["home"]["pair_count"],"initial contact pairs;",
                 c["fingers_open"]["pair_count"],"when fingers opened;",
@@ -82,5 +99,7 @@ jobs:
             .cache/sortcell-gripper-contact/SORTCELL_SOURCE_CONTACT_FRAME_GRIPPER.json
             .cache/sortcell-gripper-contact/SCOPE.md
             .cache/sortcell-collision-timing/OPENARM_SOURCE_COLLISION_AND_TIMING.json
+            .cache/sortcell-stage-fixture/SOURCE_STAGE_FIXTURE_COLLISION.json
+            .cache/sortcell-stage-fixture/SCOPE.md
           retention-days: 30
           if-no-files-found: warn
