@@ -21,7 +21,7 @@ def classify(path:Path,urdf_hash:str,source_limits:dict)->dict:
     if r["original_urdf_sha256"]!=urdf_hash:
         raise ValueError("Mismatched source URDF for "+str(path))
     events=r["cycle"]["contact_observations"]
-    if len(events)<150 or len(r["cycle"]["stages"])!=8:
+    if len(events)<150 or len(r["cycle"]["stages"]) not in (8,10):
         raise ValueError("Partial trial "+str(path))
     init={tuple(p["link_pair"]):p["depth_m"]
           for p in r["cycle"]["original_source_initial_self_contact_pairs"]}
@@ -84,6 +84,7 @@ def classify(path:Path,urdf_hash:str,source_limits:dict)->dict:
           r["cycle"].get("experimental_source_finger_limit_margin_m",0),
       "source_finger_hard_limits_unchanged":
           r["cycle"].get("original_source_finger_joint_hard_limits_unchanged",True),
+      "return_via_original_source_clearance_corridor":r["candidate_layout"].get("candidate_reset_via_source_clearance",False),
       "physical_fixture_configuration":[
           v.get("simulated_proposed_support_size_m",v["source_floor_size_stage_m"])
           for v in r["candidate_layout"]["proposed_fixture_stations"]],
