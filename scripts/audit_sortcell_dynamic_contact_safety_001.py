@@ -83,8 +83,19 @@ def audit(cycle_path:Path,urdf_path:Path,scene_js:Path)->dict:
         require(set(actual)==set(source_movable),"joint telemetry does not cover all source joints")
         for joint,val in actual.items():
             lim=source_movable[joint]
-            require(math.isfinite(val) and lim["lower"]-.001<=val<=lim["upper"]+.001,
-                    "source joint position out of published limits at frame "+str(n)+" "+joint)
+            require(math.isfinite(val),"nonfinite motor joint position at frame "+str(n)+" "+joint)
+            # A numerical cycle can complete while PyBullet position control
+            # overshoots a manufacturer URDF limit. This is a REAL engineering
+            # hazard, not a file parsing error and not automatically exempted.
+            if val<lim["lower"] or val>lim["upper"]:
+                violations.append({
+                    "sample_index":n,"phase":phase,"source_joint":joint,
+                    "joint_type":lim["type"],"actual":val,
+                    "published_lower":lim["lower"],"published_upper":lim["upper"],
+                    "excess_beyond_limit":round(
+                        max(lim["lower"]-val,val-lim["upper"]),8),
+                    "unit":"m" if lim["type"]=="prismatic" else "rad",
+                })
         pairs=row["source_robot_self_penetrations"]
         already=set()
         for item in pairs:
@@ -152,6 +163,14 @@ def audit(cycle_path:Path,urdf_path:Path,scene_js:Path)->dict:
             {"phase":phase,"robot_link":link,"observations":n}
             for (phase,link),n in sorted(unexpected_object_contacts.items())],
         "source_link_limits_checked_each_sample":True,
+        "source_joint_limit_violation_observations":violations,
+        "source_joint_limit_violation_count":len(violations),
+        "max_joint_limit_overshoot_per_unit":{
+            "prismatic_m":round(max(
+               (v["excess_beyond_limit"] for v in violations if v["unit"]=="m"),default=0),8),
+            "revolute_rad":round(max(
+               (v["excess_beyond_limit"] for v in violations if v["unit"]=="rad"),default=0),8),
+        },
         "motor_contact_samples":len(observed),
         "phase_sample_counts":dict(phase_counts),
         "all_possible_collisions_assessed":False,
@@ -206,10 +225,19 @@ def audit(cycle_path:Path,urdf_path:Path,scene_js:Path)->dict:
         "numeric_source_cycle_passed":c["cycle"]["numerical_full_cycle_test_passed"],
         "robot_self_overlap_initial_pairs":contacts["source_self_initial_count"],
         "robot_self_new_pairs":len(contacts["new_pairs_after_initial_pose"]),
+        "joint_limit_overshoot_observations":len(violations),
+        "max_gripper_joint_limit_overshoot_m":contacts["max_joint_limit_overshoot_per_unit"]["prismatic_m"],
         "robot_self_deepening_pairs":len(contacts["baseline_pairs_deepening_over_0p1mm"]),
         "robot_fixture_unintended_penetration_contact_records":sum(source_fixture_counts.values()),
         "payload_non_gripper_contact_observations":sum(unexpected_object_contacts.values()),
         "cannot_claim_collision_free":True,
+        "full_cycle_collision_and_joint_limit_qualification_passed":(
+            not violations
+            and not contacts["new_pairs_after_initial_pose"]
+            and not contacts["baseline_pairs_deepening_over_0p1mm"]
+            and not source_fixture_counts
+            and not unexpected_object_contacts
+            and not first),
     }
     return {
         "schema_version":SCHEMA,
