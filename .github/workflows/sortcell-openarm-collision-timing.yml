@@ -48,6 +48,9 @@ jobs:
           assert c['loaded_link_collision_shape_count']>=14
           assert c['actual_source_collision_meshes_loaded'] is True
           assert c['collision_detection_sample_count']>=65
+          assert c['initial_pose_penetration_pair_count']>=0
+          assert c['new_pair_count_relative_to_initial_pose']>=0
+          assert c['persistent_baseline_contact_is_not_exempted_as_safe'] is True
           assert t['source_urdf_velocity_limits_used'] is True
           assert t['max_analytic_velocity_fraction_of_policy']<=1
           assert t['max_analytic_acceleration_fraction_of_policy']<=1
@@ -56,7 +59,10 @@ jobs:
           assert a['collision_free_sorting_operation'] is False
           assert a['physical_motion_or_fabrication_authorized'] is False
           print('SOURCE COLLISION AUDIT COMPLETE:',c['penetrating_frame_count'],
-                'robot self-penetration frames; collision-free sorting NOT certified')
+                'penetration frames;',c['initial_pose_penetration_pair_count'],'initial pairs;',
+                c['new_pair_count_relative_to_initial_pose'],'new pairs;',
+                c['increased_penetration_pair_count'],'deepening pairs;',
+                'collision-free sorting NOT certified')
           PY
       - name: Preserve source collision geometry, receipt, and reproducible timed trajectory
         if: always()
