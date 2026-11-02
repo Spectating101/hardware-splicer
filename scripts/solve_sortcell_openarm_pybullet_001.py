@@ -56,7 +56,7 @@ def execute(urdf:Path,output:Path,steps:int=12):
         joints=[(j,p.getJointInfo(body,j,physicsClientId=client))
                 for j in range(p.getNumJoints(body,physicsClientId=client))]
         names={info[1].decode():j for j,info in joints}
-        movable=[(j,info) for j,info in joints if info[2] in (p.JOINT_REVOLUTE,p.JOINT_PRISMATIC,p.JOINT_CONTINUOUS)]
+        movable=[(j,info) for j,info in joints if info[2] in (p.JOINT_REVOLUTE,p.JOINT_PRISMATIC)]
         movableIds=[j for j,_ in movable]
         limits={info[1].decode():{
             "lower":float(info[8]),"upper":float(info[9]),
