@@ -15,6 +15,7 @@ import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import ProductShowcase from "./components/ProductShowcase.jsx";
 import DetailedAssemblyReference from "./components/DetailedAssemblyReference.jsx";
+import SortingWorkcell from "./components/SortingWorkcell.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
@@ -519,6 +520,14 @@ export default function App() {
           </button>
           <button
             type="button"
+            className={`nav-button ${view === VIEWS.sortcell ? "active" : ""}`}
+            data-testid="nav-sortcell"
+            onClick={() => setView(VIEWS.sortcell)}
+          >
+            Sorting workcell
+          </button>
+          <button
+            type="button"
             className={`nav-button ${view === VIEWS.reference ? "active" : ""}`}
             data-testid="nav-complete-assembly"
             onClick={() => setView(VIEWS.reference)}
@@ -663,6 +672,7 @@ export default function App() {
 
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}
+          {view === VIEWS.sortcell && <SortingWorkcell />}
 
           {view === VIEWS.workspace && (
             <ProjectWorkspace
