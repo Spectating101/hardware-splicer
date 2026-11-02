@@ -54,7 +54,7 @@ function buildWorkcell(){
  }
  for(const x of [-1.73,.63]){const roller=cyl(.075,.47,steel,x,.49,.06);roller.rotation.x=Math.PI/2;}
  for(let i=0;i<22;i++){
-  const bar=box(.016,.004,.385,base,-1.65+i*.102,.568,.06);beltBars.push(bar);
+  const bar=box(.016,.004,.385,base,-1.65+i*.102,.568,.06);bar.userData.belt=i*.102;beltBars.push(bar);
  }
  for(const z of [-.24,.36])rod(new THREE.Vector3(-.38,.67,z),new THREE.Vector3(-.38,1.34,z),.027,pale);
  rod(new THREE.Vector3(-.38,1.34,-.24),new THREE.Vector3(-.38,1.34,.36),.027,pale);
@@ -164,7 +164,7 @@ function installUI(){
   e.target.textContent=state.paused?'Play':'Pause';
  });
  root.querySelector('#sw-next').addEventListener('click',()=>{
-  const idx=stages.reduce((a,row,i)=>current>=row.at?a:i,0);
+  const idx=stages.reduce((a,row,i)=>current>=row.at?i:a,0);
   state.seek=stages[(idx+1)%stages.length].at;state.paused=true;
   root.querySelector('#sw-pause').textContent='Play';
  });
