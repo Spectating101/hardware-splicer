@@ -5,6 +5,7 @@ on:
       - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
       - "scripts/probe_sortcell_dynamic_pick_place_001.py"
       - "scripts/compare_sortcell_clearance_repair_trials_001.py"
+      - "scripts/verify_sortcell_optimized_numerical_candidate_001.py"
       - "scripts/probe_sortcell_supported_grasp_sweep_001.py"
       - "scripts/verify_sortcell_dynamic_cycle_001.py"
       - "scripts/audit_sortcell_dynamic_contact_safety_001.py"
@@ -143,6 +144,13 @@ jobs:
               .cache/sortcell-repair-candidates/margin-004-return/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/sortcell-repair-candidates/margin-006-return/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --output .cache/sortcell-repair-candidates/REPAIR_COMPARISON.json
+      - name: Independently verify the selected source-mesh numerical clearance candidate
+        run: |
+          python -m scripts.verify_sortcell_optimized_numerical_candidate_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --baseline .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --candidate .cache/sortcell-repair-candidates/margin-003-return/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/sortcell-repair-candidates/PREFERRED_CANDIDATE_ACCEPTANCE.json
       - name: Sweep supported object grasps using original source finger geometry and gravity
         run: |
           python -m scripts.probe_sortcell_supported_grasp_sweep_001 \
@@ -242,6 +250,7 @@ jobs:
             .cache/sortcell-supported-grasp/ORIGINAL_OPENARM_SUPPORTED_GRASP_SWEEP.json
             .cache/sortcell-supported-grasp/SCOPE.md
             .cache/sortcell-repair-candidates/REPAIR_COMPARISON.json
+            .cache/sortcell-repair-candidates/PREFERRED_CANDIDATE_ACCEPTANCE.json
             .cache/sortcell-repair-candidates/*/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
           retention-days: 30
           if-no-files-found: warn
