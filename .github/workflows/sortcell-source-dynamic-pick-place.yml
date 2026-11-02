@@ -53,7 +53,9 @@ jobs:
           assert r["candidate_layout"]["same_as_existing_sortcell_viewer_layout"] is False
           assert r["candidate_layout"]["visual_cad_v11_registered_to_urdf_v10"] is False
           assert r["candidate_layout"]["tcp_station_separation_m"]>.08
-          assert len(r["cycle"]["stages"])==7
+          assert len(r["cycle"]["stages"])==8
+          assert r["cycle"]["approach_object_pose_from_simulated_ground_truth_not_real_vision"] is True
+          assert r["cycle"]["post_approach_tcp_to_settled_cube_error_m"]>=0
           assert r["cycle"]["no_object_pose_teleports_after_initialization"] is True
           assert r["cycle"]["no_object_attach_constraints"] is True
           assert r["cycle"]["physical_sorter_authorized"] is False
