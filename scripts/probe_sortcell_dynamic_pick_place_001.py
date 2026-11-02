@@ -133,22 +133,22 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path)->dict:
                 low=min(low,source_fk(cfg)[2])
             return low
         high_options=[]
-        for delta in (.25,.4,.55,.7,.85,1.05,1.25,1.45):
-            for elbow in (-.25,0,.2,.45,.7):
+        for delta in (.15,.25,.35,.45,.55,.7,.85,1.05,1.25,1.45,1.7,1.9):
+            for elbow in (-.7,-.5,-.25,0,.2,.45,.7,.95,1.2):
                 cfg=dict(q_place,
                     openarm_right_joint2=q_place["openarm_right_joint2"]+delta,
                     openarm_right_joint4=q_place["openarm_right_joint4"]+elbow)
                 if not source_limit_safe(cfg):continue
                 xyz=source_fk(cfg)
-                if xyz[2]<pick_xyz[2]+.075:continue
-                if math.dist(xyz[:2],place_xyz[:2])>.34:continue
+                if xyz[2]<pick_xyz[2]+.035:continue
+                if math.dist(xyz[:2],place_xyz[:2])>.52:continue
                 min_z=interpolated_z_profile(q_high_lift,cfg)
-                if min_z < pick_xyz[2]+.055:continue
+                if min_z < pick_xyz[2]+.020:continue
                 score=(math.dist(xyz[:2],place_xyz[:2])+
                        .25*delta+.12*abs(elbow))
                 high_options.append((score,cfg,xyz,min_z))
         require(high_options,
-                "no joint-interpolated original-source transfer waypoint preserves pickup clearance")
+                "no joint-interpolated transfer candidate found in broader source-FK search")
         high_options.sort(key=lambda x:x[0])
         _,q_high_transfer,high_transfer_tcp,transfer_path_min_z=high_options[0]
         for cfg in (q_pick,q_lift,q_high_lift,q_high_transfer,q_place):
