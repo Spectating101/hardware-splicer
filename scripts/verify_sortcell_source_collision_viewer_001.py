@@ -107,6 +107,13 @@ def run(urdf,cycle,package):
     if manifest["source_wrist_grid_samples_per_arm"]!=125:
         raise ValueError("original wrist evidence changed")
     if len(trace["supports"])!=2:raise ValueError("missing real candidate support planes")
+    for filename,marker in (("LICENSE-OpenArm.txt","Apache License"),
+                             ("LICENSE-ThreeJS.txt","MIT License")):
+        notice=(package/filename).read_text()
+        if marker not in notice or len(notice)<500:
+            raise ValueError("required pinned source license notice unavailable")
+        if digest(package/filename)!=manifest["pinned_open_source_license_notices_SHA256"][filename]:
+            raise ValueError("original source licensing text changed")
     for name in ("three.module.js","STLLoader.js","OrbitControls.js"):
         if digest(package/"vendor"/name)!=manifest["viewer_offline_vendor_module_hashes"][name]:
             raise ValueError("packaged offline Three.js module hash mismatch")
@@ -129,6 +136,7 @@ def run(urdf,cycle,package):
        "manufacturer_source_wrist_DAE_STL_transform_metadata_matched_for_six_links":True,
        "actual_visual_collision_mesh_surface_comparison_executed":False,
        "all_three_offline_viewer_dependencies_hash_verified":True,
+       "upstream_openarm_apache2_and_threejs_mit_notices_included":True,
        "original_source_collision_geometry_not_visual_DAE":True,
        "visual_v11_GLb_to_source_v10_registered":False,
        "browser_rendering_executed_in_ci":False,
