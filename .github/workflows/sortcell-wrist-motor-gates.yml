@@ -1,0 +1,132 @@
+name: HS SORTCELL Source Wrist Geometry and Finger Dynamics Qualification
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-wrist-motor-gates.yml"
+      - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/probe_sortcell_source_wrist_mesh_diagnosis_001.py"
+      - "scripts/compare_sortcell_clearance_repair_trials_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+      - "scripts/audit_sortcell_openarm_collision_timing_001.py"
+      - "assets/teardown/hs_sort_workcell_main.js"
+  workflow_dispatch:
+jobs:
+  source-wrist-and-motor-diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned original PyBullet solver
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Download pinned original OpenArm v1.0 manufacturer URDF
+        run: |
+          mkdir -p .cache/source-wrist-model
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/source-wrist-model/openarm_v10.urdf
+      - name: Recreate source-manufacturer original joint reference
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --output .cache/source-wrist-reference
+      - name: Replay independently qualified numerical pickup and return with original source hard limits unchanged
+        run: |
+          python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --trajectory .cache/source-wrist-reference/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --finger-margin-m 0.003 \
+            --pickup-support-width-m 0.05 \
+            --deposit-support-width-m 0.46 \
+            --deposit-floor-drop-m 0.010 \
+            --reset-via-clearance \
+            --output .cache/source-motor-experiments/preferred-original-motor
+      - name: Diagnose original manufacturer wrist collision meshes and source-limited native joint configurations
+        run: |
+          python -m scripts.probe_sortcell_source_wrist_mesh_diagnosis_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --candidate .cache/source-motor-experiments/preferred-original-motor/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/source-wrist-diagnosis
+      - name: Test source-finger position-controller gain, velocity and force with actual free-object gravity
+        run: |
+          set -e
+          for variant in gain-005 gain-002 speed-012 speed-006 force-050 gain-speed; do
+            case "$variant" in
+              gain-005) gain="0.05"; speed="0.3"; force="1.0" ;;
+              gain-002) gain="0.02"; speed="0.3"; force="1.0" ;;
+              speed-012) gain="0.1"; speed="0.12"; force="1.0" ;;
+              speed-006) gain="0.1"; speed="0.06"; force="1.0" ;;
+              force-050) gain="0.1"; speed="0.3"; force="0.5" ;;
+              gain-speed) gain="0.05"; speed="0.12"; force="1.0" ;;
+            esac
+            python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+              --urdf .cache/source-wrist-model/openarm_v10.urdf \
+              --trajectory .cache/source-wrist-reference/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+              --stage assets/teardown/hs_sort_workcell_main.js \
+              --finger-margin-m 0.003 \
+              --pickup-support-width-m 0.05 \
+              --deposit-support-width-m 0.46 \
+              --deposit-floor-drop-m 0.010 \
+              --reset-via-clearance \
+              --finger-position-gain "$gain" \
+              --finger-max-velocity-m-s "$speed" \
+              --finger-force-fraction "$force" \
+              --output ".cache/source-motor-experiments/$variant"
+          done
+      - name: Independently score original-source robot joint-limit, contact retention, fixture and wrist evidence
+        run: |
+          python -m scripts.compare_sortcell_clearance_repair_trials_001 \
+            --urdf .cache/source-wrist-model/openarm_v10.urdf \
+            --baseline .cache/source-motor-experiments/preferred-original-motor/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --variants \
+              .cache/source-motor-experiments/gain-005/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/gain-002/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/speed-012/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/speed-006/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/force-050/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/source-motor-experiments/gain-speed/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
+      - name: Assert original geometry provenance and deny physical safety release
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          w=json.loads(Path(".cache/source-wrist-diagnosis/OPENARM_ORIGINAL_WRIST_COLLISION_DIAGNOSIS.json").read_text())
+          m=json.loads(Path(".cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json").read_text())
+          assert w["source_collision_meshes_loaded"]>=11
+          assert len(w["manufacturer_wrist_joint_and_mesh_metadata"])==6
+          assert set(w["gridded_wrist_diagnosis"])=={"left","right"}
+          assert all(v["sampled_source_wrist_poses"]>=50 for v in w["gridded_wrist_diagnosis"].values())
+          assert w["scope"]["source_link5_link7_collision_not_whitelisted"] is True
+          assert w["scope"]["physical_robot_control_authorized"] is False
+          assert m["number_tried"]==6
+          assert m["source_urdf_sha256"]==w["source_urdf_sha256"]
+          assert m["physical_hardware_authorized"] is False
+          assert m["source_self_collision_clearance_qualified"] is False
+          assert m["original_baseline"]["numerical_full_cycle_passed"] is True
+          print("ORIGINAL SOURCE WRIST POSE SWEEP:",
+                {k:{"tested":v["sampled_source_wrist_poses"],
+                    "nonpenetrating":v["poses_without_10um_interpenetration"],
+                    "baseline_overlap_m":v["baseline_source_interpenetration_m"]}
+                 for k,v in w["gridded_wrist_diagnosis"].items()})
+          print("MOTOR EXPERIMENTS:",
+                [(Path(v["trace"]).parent.name,
+                  v["result"]["numerical_full_cycle_passed"],
+                  v["result"].get("metrics",{}).get("maximum_source_prismatic_limit_overshoot_m"))
+                 for v in m["proposals"]])
+          PY
+      - name: Preserve manufacturer geometry, wrist sweep and motorized contact trajectories
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-source-wrist-and-finger-dynamics-evidence
+          path: |
+            .cache/source-wrist-diagnosis/OPENARM_ORIGINAL_WRIST_COLLISION_DIAGNOSIS.json
+            .cache/source-wrist-diagnosis/SCOPE.md
+            .cache/source-motor-experiments/MOTOR_REPAIR_COMPARISON.json
+            .cache/source-motor-experiments/*/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
+          retention-days: 30
+          if-no-files-found: warn
