@@ -61,6 +61,16 @@ export default function SortingWorkcell(){
         <span><b>{Math.round(Math.max(...motion.task.reference_waypoints.map(p=>p.error_m))*1000*100)/100} mm</b> max IK error</span>
         <a href={file("robot_joint_trajectory.json")} download>Download real source joint trajectory</a>
       </div>
+      {motion.workcell_reach_audit && <div className="sw-motion-targets">
+        <b>Candidate workcell reach audit (not a calibrated frame)</b>
+        {motion.workcell_reach_audit.targets.map(goal=>
+          <div key={goal.fixture}>
+            <span>{goal.fixture.replaceAll("_"," ")}</span>
+            <span>{Math.round(goal.numerical_error_m*1000)} mm IK residual</span>
+            <strong>{goal.numerical_reach_demonstrated?"Numerically reached":"Not demonstrated"}</strong>
+          </div>
+        )}
+      </div>}
       <p className="sw-motion-warning">The source joint path is not yet mapped to the physical sorting
       fixtures or validated against matching CAD collision meshes. The illustrated workcell arm
       remains a visual storyboard, not an executed PyBullet trajectory.</p>
