@@ -1,0 +1,75 @@
+name: HS SORTCELL Source-Native Candidate Physics Pick Transfer Release
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-source-dynamic-pick-place.yml"
+      - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/probe_sortcell_source_contact_frame_gripper_001.py"
+      - "scripts/audit_sortcell_openarm_collision_timing_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+      - "assets/teardown/hs_sort_workcell_main.js"
+  workflow_dispatch:
+jobs:
+  openarm-source-native-cycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original PyBullet dynamics engine
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Download exact pinned official OpenArm source URDF
+        run: |
+          mkdir -p .cache/openarm-source
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+      - name: Generate original official 18-joint reference pose
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-kinematics
+      - name: Run physical-contact candidate pickup, transport, placement and release on real original OpenArm meshes
+        run: |
+          python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --output .cache/sortcell-dynamic-cycle
+      - name: Validate source provenance and physical safety boundaries without asserting success
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path(".cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json").read_text())
+          assert r["source_collision_meshes"]>=10
+          assert r["openarm_original_joint_count"]==18
+          assert r["workpiece"]["original_visual_cube_side_m"]==.115
+          assert r["workpiece"]["feasibility_cube_side_m"]==.06
+          assert r["workpiece"]["native_pybullet_free_dynamic_rigid_body"] is True
+          assert r["workpiece"]["fixed_attachment_constraint_added"] is False
+          assert r["candidate_layout"]["same_as_existing_sortcell_viewer_layout"] is False
+          assert r["candidate_layout"]["visual_cad_v11_registered_to_urdf_v10"] is False
+          assert r["candidate_layout"]["tcp_station_separation_m"]>.08
+          assert len(r["cycle"]["stages"])==7
+          assert r["cycle"]["no_object_pose_teleports_after_initialization"] is True
+          assert r["cycle"]["no_object_attach_constraints"] is True
+          assert r["cycle"]["physical_sorter_authorized"] is False
+          print("NUMERICAL CYCLE:", r["cycle"]["numerical_full_cycle_test_passed"])
+          print("PICK, LIFT, TRANSFER, PLACE, RELEASE:",
+                [(s["phase"],s["last"]["relative_tcp_object_m"],
+                  s["last"]["bilateral_finger_contact"],
+                  s["last"]["deposit_floor_contacts"]) for s in r["cycle"]["stages"]])
+          PY
+      - name: Attach replayable original-source dynamics traces and proposal
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-reachable-source-dynamic-pick-place-proposal
+          path: |
+            .cache/sortcell-dynamic-cycle/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
+            .cache/sortcell-dynamic-cycle/README.md
+          retention-days: 30
+          if-no-files-found: warn
