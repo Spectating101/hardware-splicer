@@ -63,6 +63,27 @@ jobs:
               --deposit-support-width-m "$deposit" \
               --output ".cache/sortcell-repair-candidates/$variant"
           done
+      - name: Search destination drop clearance without losing a supported final workpiece
+        run: |
+          set -e
+          for variant in drop-003 drop-006 drop-010 drop-015; do
+            case "$variant" in
+              drop-003) dz="0.003" ;;
+              drop-006) dz="0.006" ;;
+              drop-010) dz="0.010" ;;
+              drop-015) dz="0.015" ;;
+            esac
+            echo "Source fixture release-clearance candidate: $variant"
+            python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+              --urdf .cache/openarm-source/openarm_v10.urdf \
+              --trajectory .cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+              --stage assets/teardown/hs_sort_workcell_main.js \
+              --finger-margin-m 0.002 \
+              --pickup-support-width-m 0.05 \
+              --deposit-support-width-m 0.46 \
+              --deposit-floor-drop-m "$dz" \
+              --output ".cache/sortcell-repair-candidates/$variant"
+          done
       - name: Compare actual source-mesh fixture and joint-limit outcomes independently
         run: |
           python -m scripts.compare_sortcell_clearance_repair_trials_001 \
@@ -73,6 +94,10 @@ jobs:
               .cache/sortcell-repair-candidates/inset-only/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/sortcell-repair-candidates/inset-margin/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
               .cache/sortcell-repair-candidates/inset-margin-both/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/drop-003/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/drop-006/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/drop-010/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+              .cache/sortcell-repair-candidates/drop-015/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
             --output .cache/sortcell-repair-candidates/REPAIR_COMPARISON.json
       - name: Sweep supported object grasps using original source finger geometry and gravity
         run: |
