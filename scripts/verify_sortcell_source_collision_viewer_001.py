@@ -22,6 +22,32 @@ def run(urdf,cycle,package):
     trace=json.loads((package/"source_motion.json").read_text())
     if manifest["schema_version"]!=SCHEMA or manifest["source_urdf_sha256"]!=h or trace["source_urdf_sha256"]!=h:
         raise ValueError("upstream source provenance mismatch")
+    if digest(package/"manufacturer_original_source.urdf")!=h:
+        raise ValueError("unchanged manufacturer source URDF not packaged")
+    portable_root=ET.fromstring((package/"manufacturer_collision_portable.urdf").read_bytes())
+    originals={j.get("name"):ET.tostring(j) for j in xml.findall("joint")}
+    portable_joints={j.get("name"):ET.tostring(j) for j in portable_root.findall("joint")}
+    if originals!=portable_joints:
+        raise ValueError("portable collision URDF changed original source joint definitions")
+    if portable_root.findall(".//visual"):
+        raise ValueError("portable URDF must be explicitly collision-only")
+    original_collision_refs=xml.findall(".//collision//mesh")
+    portable_collision_refs=portable_root.findall(".//collision//mesh")
+    if len(original_collision_refs)!=len(portable_collision_refs):
+        raise ValueError("collision source geometry instances changed")
+    for om,pm in zip(original_collision_refs,portable_collision_refs):
+        original_uri=om.get("filename")
+        if original_uri not in manifest["source_collision_mesh_asset_hashes"]:
+            raise ValueError("missing original source collision URI")
+        dest=manifest["source_collision_mesh_asset_hashes"][original_uri]["relative"].removeprefix("./")
+        if pm.get("filename")!=dest or pm.get("scale")!=om.get("scale"):
+            raise ValueError("portable source collision mesh scale or identity changed")
+        if not (package/dest).is_file():
+            raise ValueError("portable collision mesh not bundled")
+    if not (manifest["original_manufacturer_source_urdf_packaged"] and
+            manifest["portable_collision_URDF_relative_mesh_references_packaged"] and
+            manifest["portable_URDF_only_collision_mesh_references_changed"]):
+        raise ValueError("portable geometry provenance missing")
     if len(expected)!=11 or set(manifest["source_collision_mesh_asset_hashes"])!=expected:
         raise ValueError("incomplete source original STL manifest")
     for _,item in manifest["source_collision_mesh_asset_hashes"].items():
@@ -93,6 +119,9 @@ def run(urdf,cycle,package):
        "schema_version":"hardware_splicer.sortcell_original_source_collision_viewer_acceptance.v1",
        "manufacturer_source_urdf_sha256":h,
        "original_source_STL_assets_hash_verified":len(expected),
+       "untouched_official_manufacturer_source_urdf_packaged":True,
+       "source_joint_definitions_retained_in_relocatable_collision_urdf":True,
+       "original_source_collision_mesh_scale_retained_in_relocatable_urdf":True,
        "original_source_collision_link_count":len(link_names),
        "independent_source_motor_world_pose_frames":len(rows),
        "every_source_joint_and_cube_frame_retained":True,
