@@ -16,7 +16,7 @@ const categories=['PRECISION','ELECTRONICS','REJECT'];
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
-const state={selected:'ALL',explode:0,paused:false,seek:null,yaw:.58,pitch:.32,zoom:1,frames:0};
+const state={selected:'ALL',explode:0,paused:false,seek:null,category:1,yaw:.58,pitch:.32,zoom:1,frames:0};
 const stages=[
  {at:0,name:'01 / FEED',text:'Source-neutral workpiece enters a belt conveyor.'},
  {at:3,name:'02 / INSPECT',text:'Simulated camera classification; not a real vision model.'},
@@ -110,6 +110,7 @@ function installUI(){
  '.sw-side button[data-active=true]{background:#1b7385;border-color:#86e8ee}',
  '.sw-side label{font-size:10px;color:#b4ccd9;display:block;margin-top:14px}',
  '.sw-side input{width:100%;accent-color:#65dce9}',
+ '.sw-side select{width:100%;background:#20465a;border:1px solid #59859b;border-radius:8px;color:#eaf7fe;font-size:11px;padding:8px 2px;margin:6px 0 0}',
  '.sw-bottom{position:absolute;bottom:19px;left:25px;right:25px;display:flex;gap:18px;align-items:center;',
  'background:#102e42f0;border:1px solid #7b9aab88;border-radius:14px;padding:17px 19px;pointer-events:auto}',
  '.sw-stage{width:200px}.sw-stage b{font-size:17px;display:block}',
@@ -138,6 +139,7 @@ function installUI(){
  '<button id="sw-robot" data-active="false">OpenArm source CAD</button>',
  '<button id="sw-belt" data-active="false">Conveyor / sensor</button>',
  '<button id="sw-sort" data-active="false">Sorter / trays</button>',
+ '<label for="sw-category-select">Sort destination (scripted)</label><select id="sw-category-select" aria-label="Sort destination"><option value="0">Precision / cyan tray</option><option value="1" selected>Electronics / amber tray</option><option value="2">Reject / rose tray</option></select>',
  '<label for="sw-explode">Explode original CAD</label><input id="sw-explode" type="range" min="0" max="100" value="0">',
  '<button id="sw-reset" style="margin-top:14px">Reset viewpoint</button></aside>',
  '<footer class="sw-bottom"><div class="sw-stage"><b id="sw-task">01 / FEED</b>',
@@ -154,6 +156,7 @@ function installUI(){
     root.querySelector('#'+key).dataset.active=String(key===id);
   });
  root.querySelector('#sw-explode').addEventListener('input',e=>state.explode=Number(e.target.value)/100);
+ root.querySelector('#sw-category-select').addEventListener('change',e=>{state.category=Number(e.target.value);});
  root.querySelector('#sw-timeline').addEventListener('input',e=>{
   state.seek=Number(e.target.value)/10;state.paused=true;
   root.querySelector('#sw-pause').textContent='Play';
@@ -221,7 +224,7 @@ async function importOriginalRobot(){
 function animate(t){
  current=t;
  const stage=stages.reduce((a,row,i)=>t>=row.at?i:a,0);
- const phase=stages[stage];const categoryIndex=1;
+ const phase=stages[stage];const categoryIndex=state.category;
  const where=[.45,.97,1.49][categoryIndex];
  const pickupX=-.10;
  let x=lerp(-1.45,pickupX,smooth(t/6)),y=.62,z=.06;
@@ -229,6 +232,7 @@ function animate(t){
  if(t>=9){const u=smooth((t-9)/3);x=lerp(.3,where,u);y=.90+.08*Math.sin(u*Math.PI)-.31*u;z=lerp(.29,.74,u);}
  if(t>=12){x=where;y=.56;z=.75;}
  packageCube.position.set(x,y,z);packageCube.rotation.set(0,t>=6&&t<12?.10*Math.sin(t):0,0);
+ packageCube.material.color.setHex(color[categoryIndex]);
  const rise=smooth((t-4.5)/3)-smooth((t-12.7)/3);
  for(const side of ['LEFT','RIGHT']){
   const sign=side==='LEFT'?-1:1;
