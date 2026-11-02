@@ -31,11 +31,17 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
         *,finger_margin_m:float=0.0,pickup_support_width_m:float=.46,
         deposit_support_width_m:float=.46,
         deposit_floor_drop_m:float=0.0,
-        reset_via_source_clearance:bool=False)->dict:
+        reset_via_source_clearance:bool=False,
+        finger_motor_force_fraction:float=1.0,
+        finger_motor_position_gain:float=0.1,
+        finger_motor_max_velocity_m_s:float=0.3)->dict:
     require(0<=finger_margin_m<=.006,"finger limit margin must be 0-6mm")
     require(.035<=pickup_support_width_m<=.46,"candidate pickup support width outside allowed envelope")
     require(.035<=deposit_support_width_m<=.46,"candidate deposit support width outside allowed envelope")
     require(0<=deposit_floor_drop_m<=.05,"candidate destination floor drop outside 0-50mm envelope")
+    require(.1<=finger_motor_force_fraction<=1,"motor force fraction must be within .1-1")
+    require(.01<=finger_motor_position_gain<=.2,"original-source motor gain experiment outside allowed window")
+    require(.03<=finger_motor_max_velocity_m_s<=.3,"original-source finger speed experiment outside allowed window")
     import pybullet as p
     original=urdf.read_bytes()
     motion=json.loads(trajectory.read_text())
@@ -238,10 +244,21 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                     # Original source prismatic limits remain unchanged.
                     # Target margin leaves servo/contact tracking headroom.
                     target=(finger_margin_m if closure==0 else .044-finger_margin_m)
-                p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
-                    targetPosition=target,force=min(40.0,float(meta[10])),
-                    maxVelocity=.65 if "finger" not in name else .3,
-                    physicsClientId=client)
+                # Original joints and URDF hard limits stay untouched. Vary only
+                # the simulated finger motor's tracking dynamics; do not clamp
+                # joint states or fabricate a successful contact outcome.
+                if name in right_fingers:
+                    p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
+                        targetPosition=target,
+                        force=min(40.0,float(meta[10]))*finger_motor_force_fraction,
+                        maxVelocity=finger_motor_max_velocity_m_s,
+                        positionGain=finger_motor_position_gain,
+                        physicsClientId=client)
+                else:
+                    p.setJointMotorControl2(robot,j,p.POSITION_CONTROL,
+                        targetPosition=target,force=min(40.0,float(meta[10])),
+                        maxVelocity=.65 if "finger" not in name else .3,
+                        physicsClientId=client)
         def measure(label,step):
             xyz,_=p.getBasePositionAndOrientation(cube,physicsClientId=client)
             tcp,_=pose()
@@ -390,6 +407,10 @@ def run(urdf:Path,trajectory:Path,stage:Path,output:Path,
                 "supported_grasp_cube_world_xy_offset_m":[.02,0],
                 "supported_grasp_cube_orientation":"source_tool_aligned",
                 "experimental_source_finger_limit_margin_m":finger_margin_m,
+                "experimental_source_finger_motor_force_fraction":finger_motor_force_fraction,
+                "experimental_source_finger_motor_position_gain":finger_motor_position_gain,
+                "experimental_source_finger_motor_max_velocity_m_s":finger_motor_max_velocity_m_s,
+                "finger_motor_modified_source_joint_hard_limits":False,
                 "original_source_finger_joint_hard_limits_unchanged":True,
                 "supported_grasp_stays_attached_to_physics_only":True,
                 "grasp_and_lift_stable":grasp_stable,
@@ -458,13 +479,19 @@ if __name__=="__main__":
     ap.add_argument("--deposit-support-width-m",type=float,default=.46)
     ap.add_argument("--deposit-floor-drop-m",type=float,default=0.0)
     ap.add_argument("--reset-via-clearance",action="store_true")
+    ap.add_argument("--finger-force-fraction",type=float,default=1.)
+    ap.add_argument("--finger-position-gain",type=float,default=.1)
+    ap.add_argument("--finger-max-velocity-m-s",type=float,default=.3)
     args=ap.parse_args()
     r=run(args.urdf,args.trajectory,args.stage,args.output,
           finger_margin_m=args.finger_margin_m,
           pickup_support_width_m=args.pickup_support_width_m,
           deposit_support_width_m=args.deposit_support_width_m,
           deposit_floor_drop_m=args.deposit_floor_drop_m,
-          reset_via_source_clearance=args.reset_via_clearance)
+          reset_via_source_clearance=args.reset_via_clearance,
+          finger_motor_force_fraction=args.finger_force_fraction,
+          finger_motor_position_gain=args.finger_position_gain,
+          finger_motor_max_velocity_m_s=args.finger_max_velocity_m_s)
     print(json.dumps({
       "source_meshes":r["source_collision_meshes"],
       "candidate_station_separation_m":r["candidate_layout"]["tcp_station_separation_m"],
