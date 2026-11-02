@@ -158,6 +158,8 @@ def run(urdf: Path, trajectory: Path, output: Path) -> dict:
         t = 0.0
         measured = []
         contacts_by_pair = Counter()
+        initial_contact_depths = None
+        deepest_contact_depths = {}
         collision_samples = []
         actual_max_vel_ratio = 0.0
         actual_max_accel_ratio = 0.0
@@ -190,9 +192,17 @@ def run(urdf: Path, trajectory: Path, output: Path) -> dict:
                 contacts = p.getContactPoints(bodyA=body, bodyB=body, physicsClientId=client)
                 # Only source-mesh penetrations. Parent-child exclusions come from PyBullet flags.
                 penetrations = [c for c in contacts if float(c[8]) < -1e-5]
-                pairs = sorted({(min(c[3], c[4]), max(c[3], c[4])) for c in penetrations})
+                pair_depths = {}
+                for c in penetrations:
+                    pair = (min(c[3], c[4]), max(c[3], c[4]))
+                    pair_depths[pair] = min(float(c[8]), pair_depths.get(pair, 0.0))
+                pairs = sorted(pair_depths)
+                if initial_contact_depths is None:
+                    initial_contact_depths = dict(pair_depths)
                 for pair in pairs:
                     contacts_by_pair[pair] += 1
+                    deepest_contact_depths[pair] = min(
+                        pair_depths[pair], deepest_contact_depths.get(pair, 0.0))
                 if pairs:
                     collision_samples.append({"sample_index":frame["sample_index"],
                                               "segment":label,"pair_count":len(pairs),
@@ -213,7 +223,12 @@ def run(urdf: Path, trajectory: Path, output: Path) -> dict:
         found = [{"link_a":a, "link_b":b,
                   "joint_a": infos[a][12].decode() if a >= 0 else "base",
                   "joint_b": infos[b][12].decode() if b >= 0 else "base",
-                  "frames":count}
+                  "frames":count,
+                  "present_in_initial_pose":(a,b) in initial_contact_depths,
+                  "initial_penetration_m":round(initial_contact_depths.get((a,b),0),7),
+                  "deepest_path_penetration_m":round(deepest_contact_depths[(a,b)],7),
+                  "additional_penetration_from_initial_m":round(max(
+                      0, initial_contact_depths.get((a,b),0)-deepest_contact_depths[(a,b)]),7)}
                  for (a,b), count in contacts_by_pair.most_common()]
         # Note: getJointInfo()[12] is link name. Names are source-native.
         result = {
@@ -231,6 +246,15 @@ def run(urdf: Path, trajectory: Path, output: Path) -> dict:
                 "collision_detection_sample_count":len(measured),
                 "penetrating_frame_count":len(collision_samples),
                 "penetrating_link_pairs":found,
+                "initial_pose_penetration_pair_count":len(initial_contact_depths),
+                "persistent_all_sample_pair_count":sum(
+                    1 for count in contacts_by_pair.values() if count==len(measured)),
+                "new_pair_count_relative_to_initial_pose":len(
+                    set(contacts_by_pair)-set(initial_contact_depths)),
+                "increased_penetration_pair_count":sum(
+                    1 for pair,depth in deepest_contact_depths.items()
+                    if depth < initial_contact_depths.get(pair,0)-0.0001),
+                "persistent_baseline_contact_is_not_exempted_as_safe":True,
                 "penetrating_frames":collision_samples[:30],
                 "original_robot_self_path_penetration_free":not bool(collision_samples),
                 "workcell_fixture_collisions_audited":False,
@@ -293,6 +317,9 @@ if __name__ == "__main__":
         "links_with_collision_shapes":receipt["source_collision_geometry"]["loaded_link_collision_shape_count"],
         "collision_samples":receipt["source_collision_geometry"]["collision_detection_sample_count"],
         "penetrating_frames":receipt["source_collision_geometry"]["penetrating_frame_count"],
+        "initial_pair_count":receipt["source_collision_geometry"]["initial_pose_penetration_pair_count"],
+        "new_pair_count":receipt["source_collision_geometry"]["new_pair_count_relative_to_initial_pose"],
+        "deepening_pair_count":receipt["source_collision_geometry"]["increased_penetration_pair_count"],
         "duration_s":receipt["time_parameterization"]["total_duration_s"],
         "registered_to_viewer":receipt["authority"]["registered_to_v11_viewer"],
         "physical_authorization":receipt["authority"]["physical_motion_or_fabrication_authorized"],
