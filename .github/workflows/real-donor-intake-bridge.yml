@@ -1,0 +1,122 @@
+name: HS Original Real Donor to Canonical Repair Intake Evidence Bridge
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/real-donor-intake-bridge.yml"
+      - "scripts/bridge_hs_real_donor_canonical_intake_001.py"
+      - "scripts/verify_hs_real_donor_canonical_intake_001.py"
+      - "scripts/compile_hs_real_device_field_workorder_001.py"
+      - "scripts/verify_hs_real_device_workorder_001.py"
+      - "src/hardware_splicer/repair_intake.py"
+  workflow_dispatch:
+jobs:
+  original-source-canonical-real-donor-intake:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate clean blank templates for six existing physical product work orders
+        run: |
+          set -euo pipefail
+          for pilot in usb_fan_contact_driver_repair thinkpad_t480_recover \
+            pixel9_mobile_service framework_reuse_mini_pc \
+            printer_scrap_camera_slider salvaged_quad_bench_only; do
+            python -m scripts.compile_hs_real_device_field_workorder_001 \
+              --root . --pilot "$pilot" \
+              --output ".cache/donor-intake-bridge/six-workorders/$pilot"
+            python -m scripts.bridge_hs_real_donor_canonical_intake_001 \
+              --root . --pilot "$pilot" \
+              --workdir ".cache/donor-intake-bridge/six-workorders/$pilot" \
+              --template \
+              --output ".cache/donor-intake-bridge/six-blank-templates/$pilot"
+          done
+      - name: Exercise intake with EXPLICIT SYNTHETIC fixture files (no actual device)
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/donor-intake-bridge")
+          files=root/"private-synthetic-tests-only"
+          files.mkdir(parents=True,exist_ok=True)
+          source=json.loads((root/"six-blank-templates/usb_fan_contact_driver_repair/DONOR_INPUT_TEMPLATE.json").read_text())
+          source["device_model_redacted"]="SYNTHETIC USB fan test fixture - not actual hardware"
+          source["device_symptoms_observed"]=["SIMULATED fixture symptom: desk fan does not turn"]
+          source["when_fault_occurs"]="SIMULATED symptom at USB connection"
+          source["reported_condition"]="UNKNOWN_UNINSPECTED"
+          source["operator_notes_redacted"]="SYNTHETIC CI: no real technician inspected any device"
+          for key in source["operator_attestation"]:
+            source["operator_attestation"][key]=True
+          for name in ("owner_consent","redacted_device_photo","fault_observation"):
+            path=files/(name+".txt")
+            path.write_text("SYNTHETIC CI TEST FILE — NOT A REAL DEVICE, OWNER CONSENT OR FAULT PHOTO.\\n"+
+                            "Source reference only: "+name+"\\n")
+            source["original_operator_files"][name]={
+              "source_path":path.name,
+              "sha256":hashlib.sha256(path.read_bytes()).hexdigest()
+            }
+          (root/"SYNTHETIC_DONOR_NOT_REAL.json").write_text(json.dumps(source,indent=2))
+          print("SYNTHETIC TEST ONLY — cannot establish original owner or hardware truth")
+          PY
+          python -m scripts.bridge_hs_real_donor_canonical_intake_001 \
+            --root . --pilot usb_fan_contact_driver_repair \
+            --workdir .cache/donor-intake-bridge/six-workorders/usb_fan_contact_driver_repair \
+            --donor .cache/donor-intake-bridge/SYNTHETIC_DONOR_NOT_REAL.json \
+            --files-root .cache/donor-intake-bridge/private-synthetic-tests-only \
+            --output .cache/donor-intake-bridge/SYNTHETIC_CANONICAL_OUTPUT_NOT_REAL
+          python -m scripts.verify_hs_real_donor_canonical_intake_001 \
+            --root . --pilot usb_fan_contact_driver_repair \
+            --workdir .cache/donor-intake-bridge/six-workorders/usb_fan_contact_driver_repair \
+            --donor .cache/donor-intake-bridge/SYNTHETIC_DONOR_NOT_REAL.json \
+            --output .cache/donor-intake-bridge/SYNTHETIC_CANONICAL_OUTPUT_NOT_REAL \
+            --acceptance .cache/donor-intake-bridge/SYNTHETIC_ACCEPTANCE_NOT_PHYSICAL.json
+      - name: Adversarial canonical donor proof and operating-authority checks
+        run: |
+          python - <<'PY'
+          import json,tempfile
+          from pathlib import Path
+          from scripts.bridge_hs_real_donor_canonical_intake_001 import validate_and_bridge
+          root=Path(".cache/donor-intake-bridge")
+          original=json.loads((root/"SYNTHETIC_DONOR_NOT_REAL.json").read_text())
+          changes=[
+            ("fabricated_power",lambda x:x.update({"actual_power_on_authorized":True})),
+            ("fabricated_repair",lambda x:x.update({"actual_product_repaired":True})),
+            ("unrecorded_measurement",lambda x:x.update({"actual_hardware_measurements_submitted":True})),
+            ("unconsented_device",lambda x:x["operator_attestation"].update({"owns_or_has_documented_permission":False})),
+            ("wrong_workorder",lambda x:x.update({"original_work_order_sha256":"0"*64})),
+            ("forged_original_hash",lambda x:x["original_operator_files"]["fault_observation"].update({"sha256":"0"*64})),
+            ("private_path_escape",lambda x:x["original_operator_files"]["redacted_device_photo"].update({"source_path":"../../sensitive.txt"})),
+            ("serial_in_label",lambda x:x.update({"device_model_redacted":"USB fan IMEI: 123456789012345"})),
+            ("no_actual_fault_observation",lambda x:x.update({"device_symptoms_observed":[]})),
+            ("wrong_pilot_identity",lambda x:x.update({"pilot_id":"salvaged_quad_bench_only"})),
+          ]
+          with tempfile.TemporaryDirectory() as tmp:
+            for name,modify in changes:
+              value=json.loads(json.dumps(original))
+              modify(value)
+              sample=Path(tmp)/(name+".json")
+              sample.write_text(json.dumps(value))
+              try:
+                validate_and_bridge(Path("."),
+                  root/"six-workorders/usb_fan_contact_driver_repair",
+                  "usb_fan_contact_driver_repair",sample,
+                  root/"private-synthetic-tests-only",
+                  Path(tmp)/(name+"_output"))
+              except (ValueError,TypeError,FileNotFoundError):
+                pass
+              else:
+                raise AssertionError("UNSAFE CANONICAL DONOR INTAKE ACCEPTED: "+name)
+          print("ALL 10 ADVERSARIAL REAL-DONOR INTAKE SUBMISSIONS REJECTED")
+          PY
+      - name: Preserve only genuinely blank first-device field templates, never synthetic records
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-original-canonical-real-donor-blank-intake-templates
+          path: |
+            .cache/donor-intake-bridge/six-blank-templates/**
+            .cache/donor-intake-bridge/six-workorders/**/HUMAN_BENCH_CARD.md
+            .cache/donor-intake-bridge/six-workorders/**/FIELD_WORK_ORDER.json
+          retention-days: 30
+          if-no-files-found: error
