@@ -9,6 +9,9 @@ from src.intelligence.board_session_store import BoardSessionStore
 from src.intelligence.repair_encyclopedia import RepairEncyclopedia
 from src.intelligence.repair_market_coverage import RepairMarketCoverage
 from src.intelligence.repair_video_playbook import RepairVideoPlaybookBuilder
+from src.intelligence.repair_power_path_evidence import (
+    analyze_laptop_power_evidence, apply_laptop_evidence_to_guide,
+)
 
 
 @dataclass
@@ -22,6 +25,7 @@ class RepairCase:
     observed_actions: List[str] = field(default_factory=list)
     notes: str = ""
     expected_lane: str = ""
+    evidence_events: List[Dict[str, Any]] = field(default_factory=list)
 
 
 class RepairCaseEvaluator:
@@ -81,6 +85,12 @@ class RepairCaseEvaluator:
             symptoms=record.symptoms,
             device_hint=record.device_hint or record.title,
         )
+        evidence_state = None
+        if record.evidence_events:
+            evidence_state = analyze_laptop_power_evidence(
+                record.evidence_events, device_hint=record.device_hint
+            )
+            guide = apply_laptop_evidence_to_guide(guide, evidence_state)
         playbook = self.playbook_builder.build(
             video_reference={
                 "title": record.title,
@@ -103,6 +113,11 @@ class RepairCaseEvaluator:
                 "route": route,
                 "repair_guide": guide,
                 "coverage": coverage,
+                "case_file": {
+                    "source_evidence_events": record.evidence_events,
+                    "evidence_state": evidence_state,
+                    "physical_repair_approval": False,
+                } if record.evidence_events else {},
                 "source": "real_repair_case_eval",
             },
             user_id="case-evaluator",
@@ -118,6 +133,7 @@ class RepairCaseEvaluator:
             "title": record.title,
             "source_url": record.source_url,
             "expected_lane": record.expected_lane,
+            "evidence_state": evidence_state,
             "coverage": {
                 "matched": coverage.get("matched"),
                 "top_item": top_match.get("item_id"),
@@ -271,6 +287,8 @@ class RepairCaseEvaluator:
         safety = guide.get("safety_profile") or {}
         if (guide.get("triage_state") or {}).get("requires_measurement"):
             blockers.append("model-specific knowledge required: differential hypothesis unverified; no repair-ready claim")
+        if guide.get("evidence_state"):
+            blockers.append("model-specific knowledge required: source-reported measurements and causal transition not independently verified")
         if safety.get("risk_level") == "high":
             blockers.append("trained safety workflow required for high-voltage or mains portions")
         if (session.get("metrics") or {}).get("task_count", 0) == 0:
@@ -339,6 +357,7 @@ class RepairCaseEvaluator:
             observed_actions=[str(item) for item in payload.get("observed_actions", []) or []],
             notes=str(payload.get("notes") or ""),
             expected_lane=str(payload.get("expected_lane") or ""),
+            evidence_events=[dict(item) for item in payload.get("evidence_events", []) or []],
         )
 
     @staticmethod
