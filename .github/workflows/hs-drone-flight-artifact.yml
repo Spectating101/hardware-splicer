@@ -1,0 +1,45 @@
+name: HS Drone Lab — Produce a Real PyBullet Flight Recording
+on:
+  pull_request:
+    paths:
+      - "examples/drone_lab/**"
+      - ".github/workflows/hs-drone-flight-artifact.yml"
+  workflow_dispatch:
+jobs:
+  render-a-flying-quadcopter-not-a-test-score:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install the published PyBullet wheel and camera/physics dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            "pybullet==3.2.7" "numpy>=1.26,<2.1" "scipy>=1.12" \
+            "gymnasium>=0.29,<2" "transforms3d>=0.4" "matplotlib>=3.7" "pillow>=10"
+      - name: Fetch original open-source drone simulator at a pinned tested revision
+        run: |
+          git init .cache/hs-drone-upstream
+          git -C .cache/hs-drone-upstream remote add origin https://github.com/learnsyslab/gym-pybullet-drones.git
+          git -C .cache/hs-drone-upstream fetch --depth 1 origin 15c426c85ac8e7a5db66d8b100f48858133357f6
+          git -C .cache/hs-drone-upstream checkout --detach FETCH_HEAD
+          echo "Original Crazyflie dynamics and PID controller from upstream, no custom physics"
+      - name: Actually fly a square and render a 3D camera GIF with full motor and pose telemetry
+        run: |
+          export PYTHONPATH="$GITHUB_WORKSPACE/.cache/hs-drone-upstream"
+          python examples/drone_lab/flight_lab.py --mode demo --out .cache/hs-drone-flight
+      - name: Publish playable image sequence and per-motor real simulation telemetry
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-drone-lab-actual-pybullet-flight-gif-telemetry-and-diy-hardware
+          path: |
+            .cache/hs-drone-flight/*.gif
+            .cache/hs-drone-flight/*.csv
+            .cache/hs-drone-flight/*.json
+            examples/drone_lab/hs_whoop65_build.json
+            examples/drone_lab/README.md
+          if-no-files-found: warn
+          retention-days: 30
