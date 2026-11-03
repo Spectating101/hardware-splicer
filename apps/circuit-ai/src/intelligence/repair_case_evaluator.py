@@ -272,6 +272,15 @@ class RepairCaseEvaluator:
             blockers.append("hard: no board-session evidence tasks generated")
         if float(playbook.get("can_follow_score", 0.0) or 0.0) < 0.5:
             blockers.append("video-to-playbook support is weak without more observed actions")
+        family = (guide.get("device_family") or {}).get("id")
+        if family == "modern_console_usb_c_video":
+            blockers.append("model-specific knowledge required for trained USB-C/HDMI port/filter bench rework")
+        if family == "phone_charging_port_flex":
+            blockers.append("model-specific knowledge required for battery-isolated charging-flex diagnosis")
+        if family == "retro_handheld_aa_power":
+            # The AA contact check is suitable as a workflow, but completion
+            # requires the entire display/audio/control acceptance afterward.
+            pass
         if "laptop" in f"{case.title} {case.device_hint}".lower():
             blockers.append("boardview/schematic and model-specific teardown needed for deeper board repair")
         return list(dict.fromkeys(blockers))
