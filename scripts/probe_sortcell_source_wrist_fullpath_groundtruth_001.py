@@ -3,7 +3,7 @@
 
 Compare original manufacturer v1.0 DAE/STL triangle surfaces with their
 DIAGNOSTIC convex hulls at every one of the 278 actual source joint-state
-observations and all 277 interpolated half-step configurations. Independent
+observations and within-phase interpolated half-step configurations. Independent
 native-source FK, never hand-animated or source mesh modified. Audit
 topological watertightness both raw and on *derived welded copies* to make
 surface-only versus closed-solid limitations inspectable. No physical release.
@@ -45,7 +45,7 @@ def mesh_topology(mesh):
             "winding_consistent":bool(m.is_winding_consistent),
             "boundary_edges_one_triangle":int(np.count_nonzero(edge_incidence==1)),
             "non_manifold_edges_over_two_triangles":int(np.count_nonzero(edge_incidence>2)),
-            "connected_surface_components":int(len(m.split(only_watertight=False)))}
+            "connected_surface_components":int(m.body_count)}
     welded["closed_solid_containment_testing_eligible"]=bool(
         welded["watertight"] and welded["winding_consistent"] and
         welded["boundary_edges_one_triangle"]==0 and
