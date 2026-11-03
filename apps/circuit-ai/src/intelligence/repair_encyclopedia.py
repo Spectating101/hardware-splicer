@@ -66,6 +66,36 @@ class RepairEncyclopedia:
             "symptoms": {"sensor", "display", "reading", "measure", "screen", "oled", "lcd"},
             "capabilities": {"sensor_or_adc", "display_or_ui"},
         },
+        "retro_handheld_aa_power": {
+            "label": "Retro AA-powered handheld power and display",
+            "examples": ["Original Nintendo Game Boy DMG-01"],
+            "subsystems": [
+                "replaceable AA battery contacts and springs", "power switch",
+                "power regulator input", "LCD ribbon/column interconnect",
+            ],
+            "symptoms": {"game boy", "gameboy", "aa battery", "battery spring", "vertical lcd lines"},
+            "capabilities": {"power", "display_or_ui"},
+        },
+        "phone_charging_port_flex": {
+            "label": "Phone charging connector and replacement flex",
+            "examples": ["iPhone Lightning charging assembly", "smartphone USB-C port"],
+            "subsystems": [
+                "charger and cable", "connector receptacle", "charge-port flex",
+                "battery isolation", "input protection and charge controller",
+            ],
+            "symptoms": {"iphone", "smartphone", "lightning connector", "replacement flex"},
+            "capabilities": {"power", "battery"},
+        },
+        "modern_console_usb_c_video": {
+            "label": "Modern console USB-C charging and docked video",
+            "examples": ["Nintendo Switch OLED", "Nintendo Switch"],
+            "subsystems": [
+                "USB-C port pins and anchors", "USB-C power-delivery path",
+                "docked HDMI signal/filter path", "battery isolation",
+            ],
+            "symptoms": {"nintendo switch", "switch oled", "switch dock", "usb type-c breakout"},
+            "capabilities": {"power", "display_or_ui"},
+        },
         "game_controller_input": {
             "label": "Game controller input assembly",
             "examples": ["Xbox controller", "DualSense", "Joy-Con", "retro gamepad"],
@@ -256,6 +286,27 @@ class RepairEncyclopedia:
                 scores[family_id] += min(0.45, 0.16 * len(hits))
                 evidence[family_id].append(f"case phrase: {', '.join(hits[:4])}")
 
+        # Model-identified repair products are not inferred from generic
+        # component words (motor, load, charger) or retrospective outcomes.
+        # When board analysis *already* identified a component role, retain
+        # that measured route; otherwise the exact device family wins.
+        model = hint_text.lower()
+        if not board_type:
+            model_routes = (
+                ("nintendo switch", "modern_console_usb_c_video"),
+                ("switch oled", "modern_console_usb_c_video"),
+                ("game boy", "retro_handheld_aa_power"),
+                ("gameboy", "retro_handheld_aa_power"),
+                ("iphone", "phone_charging_port_flex"),
+                ("smartphone", "phone_charging_port_flex"),
+                ("macbook", "laptop_power_path"),
+            )
+            for model_word, family_id in model_routes:
+                if model_word in model:
+                    scores[family_id] = max(scores[family_id], 0.78)
+                    evidence[family_id].append("explicit source device family: " + model_word)
+                    break
+
         best = max(scores.items(), key=lambda item: item[1])
         family_id = best[0] if best[1] > 0.08 else "generic_electronic_module"
         return family_id, min(best[1], 0.95), evidence[family_id]
@@ -275,6 +326,155 @@ class RepairEncyclopedia:
 
         for fault in common_fault_database.find_faults_by_symptoms(symptoms):
             candidates.append(self._fault_from_database(fault, symptom_text))
+
+        # Restoration replay exposed generic motor/charging heuristics that
+        # misdiagnosed model-identified consoles and phones. These are
+        # hypotheses requiring real measurements, never proven causes.
+        if family_id == "retro_handheld_aa_power":
+            visible_corrosion = self._has_any(symptom_text, {"corrosion", "corroded", "rust", "residue"})
+            candidates.append({
+                "fault_id": "aa_battery_contact_or_power_switch_fault",
+                "name": "Replaceable AA battery terminal or power-switch continuity fault",
+                "category": "battery_contact_power",
+                "severity": "minor_to_major",
+                "likelihood": 0.84 if visible_corrosion else 0.77,
+                "evidence": ["original AA-powered handheld identity"] +
+                            (["owner reports visible contact corrosion"] if visible_corrosion else []),
+                "likely_causes": [
+                    "oxidized battery springs or terminals", "discharged or reversed AA cells",
+                    "dirty/open power switch", "power-board fault if contact checks pass",
+                ],
+                "diagnostic_tests": [{
+                    "name": "Unpowered AA terminal and switch isolation",
+                    "equipment_needed": ["fresh verified AA batteries", "multimeter", "magnification"],
+                    "steps": [
+                        "Remove AA cells and photograph battery terminals and polarity labels.",
+                        "Inspect and measure continuity of battery terminals with cells removed.",
+                        "Inspect corrosion and switch path before any powered test.",
+                        "Check fresh AA cell voltages outside the device; never attempt AA charging.",
+                        "After a qualified controlled boot, test every LCD line, audio and controls.",
+                    ],
+                    "expected_result": "AA input and switch path are continuous and complete display and controls are checked.",
+                    "fault_indicated_if": "Corroded terminal or open switch blocks power, or LCD has separate residual faults.",
+                }],
+                "repair_steps": [
+                    "Clean or replace proven corroded AA terminal using appropriate isolated procedure.",
+                    "Repair open switch/trace only after continuity proves it and user has competent tools.",
+                    "Treat missing LCD columns as another unresolved device fault after boot.",
+                ],
+                "repair_difficulty": "easy_to_medium",
+                "estimated_time_minutes": 35,
+            })
+        if family_id == "phone_charging_port_flex":
+            replaced = self._has_any(symptom_text, {"replacement", "replacing", "replaced", "newly installed"})
+            comparison = self._has_any(symptom_text, {"original port", "old original port", "reconnecting old"})
+            candidates.append({
+                "fault_id": "phone_charge_port_or_replacement_flex_fault",
+                "name": "Phone charging port, connector, or replacement flex fault",
+                "category": "charging_input",
+                "severity": "major",
+                "likelihood": 0.84 if comparison else (0.79 if replaced else 0.69),
+                "evidence": ["model-identified smartphone charging path"] +
+                            (["new replacement was recently installed"] if replaced else []) +
+                            (["original-port comparison reported"] if comparison else []),
+                "likely_causes": [
+                    "mechanically damaged original port", "defective or mismatched replacement flex",
+                    "incomplete flex seating or damaged connector", "cable/charger fault",
+                    "battery or board-level charging fault not yet excluded",
+                ],
+                "diagnostic_tests": [{
+                    "name": "Phone charging port and known-original A/B diagnostic",
+                    "equipment_needed": ["model-specific repair manual", "known-good charger/cable", "multimeter if trained"],
+                    "steps": [
+                        "Verify known-good charger and compatible cable before opening phone.",
+                        "Stop for swollen or damaged lithium battery; use model-specific disconnection steps.",
+                        "Inspect replacement flex identity and connector/pad damage under magnification.",
+                        "If qualified and battery disconnected, compare known-original and replacement connections.",
+                        "Record actual charge current and prove full charging operation before signing off.",
+                    ],
+                    "expected_result": "Charging performance and compatibility of each assembly are independently confirmed.",
+                    "fault_indicated_if": "Replacement alone fails and known-original works partly; suspect replacement/fit, not proven logic board.",
+                }],
+                "repair_steps": [
+                    "Re-seat or replace only the confirmed compatible and actually faulty port assembly.",
+                    "Do not assume charge-controller chip failure before external and flex comparisons.",
+                    "Test charging and all phone functions; original intermittent charging is not a complete fix.",
+                ],
+                "repair_difficulty": "medium_to_expert",
+                "estimated_time_minutes": 70,
+            })
+        if family_id == "modern_console_usb_c_video":
+            candidates.append({
+                "fault_id": "modern_console_usb_c_port_or_video_filter_fault",
+                "name": "Modern console USB-C charging, docked video, or filter path fault",
+                "category": "usb_c_signal",
+                "severity": "major",
+                "likelihood": 0.78 if "hdmi" in symptom_text else 0.7,
+                "evidence": ["identified modern console with USB-C/docked video issue"],
+                "likely_causes": [
+                    "connector pin or solder anchor damage", "USB-C PD/charge negotiation fault",
+                    "docked video lane or noise-filter fault", "damaged port after prior rework",
+                    "other board path not excluded without original electrical measurements",
+                ],
+                "diagnostic_tests": [{
+                    "name": "Model-specific USB-C connector and dock video diagnosis",
+                    "equipment_needed": ["official model-revision schematic", "USB-C breakout", "microscope", "qualified technician"],
+                    "steps": [
+                        "Identify console revision and disconnect/inspect battery safely.",
+                        "Inspect USB-C pins, anchors, solder joints and possible shorts under microscope.",
+                        "Use model-matched USB-C breakout and schematic to record actual continuity.",
+                        "Document individual charging and HDMI/docked display paths separately.",
+                        "Qualified bench only: verify any changed filter/port and both output functions.",
+                    ],
+                    "expected_result": "Charging, dock video and USB-C connector integrity each have measured tests.",
+                    "fault_indicated_if": "Missing pin continuity, damaged port/filter, or failed charger/dock negotiation.",
+                }],
+                "repair_steps": [
+                    "Do not hot-air rework connector or filter without verified soldering competence and model pinout.",
+                    "Repair only proven affected parts and preserve original board evidence.",
+                    "Repeat measured USB-C charging and HDMI/docked video tests before a full-product claim.",
+                ],
+                "repair_difficulty": "expert",
+                "estimated_time_minutes": 100,
+            })
+        if family_id == "laptop_power_path" and self._has_any(
+            symptom_text, {"macbook", "usb-c", "flickering usb-c"}
+        ):
+            stronger = self._has_any(symptom_text, {"two chargers", "charger works on other devices",
+                                                   "indicator flickers", "cable indicator flickers"})
+            candidates.append({
+                "fault_id": "laptop_usb_c_port_or_input_path_fault",
+                "name": "Laptop USB-C jack, charging negotiation, or input path fault",
+                "category": "power",
+                "severity": "major",
+                "likelihood": 0.80 if stronger else 0.75,
+                "evidence": ["laptop charging/no-boot path"] +
+                            (["owner reports known-working external charger or flicker"] if stronger else []),
+                "likely_causes": [
+                    "worn or intermittent USB-C connector",
+                    "charger or cable unsuitable for model despite working elsewhere",
+                    "power-delivery negotiation fault", "battery/charge-controller or rail fault",
+                ],
+                "diagnostic_tests": [{
+                    "name": "USB-C laptop source and connector A/B test",
+                    "equipment_needed": ["model service guide", "known-good rated USB-C PD charger", "USB-C meter if trained"],
+                    "steps": [
+                        "Identify exact MacBook model and required USB-C power profile.",
+                        "Test a verified compatible charger/cable and inspect port mechanically.",
+                        "Record real USB-C PD voltage/current where trained; do not infer from cable LED.",
+                        "Follow model-safe battery isolation and stop before unqualified board probing.",
+                    ],
+                    "expected_result": "Laptop input/port or battery/board path is isolated with real measurements.",
+                    "fault_indicated_if": "Good rated supply fails at device connector or negotiation; further board tests required.",
+                }],
+                "repair_steps": [
+                    "Replace or repair port only after model-specific compatibility and port fault confirmation.",
+                    "Do not replace motherboard based solely on a flickering cable LED.",
+                ],
+                "repair_difficulty": "medium_to_expert",
+                "estimated_time_minutes": 75,
+            })
+
 
         if family_id == "game_controller_input" or self._has_any(symptom_text, {"stick drift", "joystick drift", "drift", "button not working", "button stuck", "trigger"}):
             likelihood = 0.64
@@ -738,6 +938,10 @@ class RepairEncyclopedia:
             },
         )
         battery_terms = self._has_any(text, {"battery", "lithium", "li-ion", "lipo", "18650", "cordless", "toothbrush"})
+        identified_lithium_device = self._has_any(
+            text, {"iphone", "macbook", "nintendo switch", "switch oled", "smartphone"}
+        )
+        battery_terms = battery_terms or identified_lithium_device
         battery_risk = self._has_any(text, {"swollen", "bulging", "punctured"}) or (
             battery_terms and self._has_any(text, {"hot", "overheat", "heating"})
         )
@@ -747,6 +951,10 @@ class RepairEncyclopedia:
             "start every powered test with a current-limited supply when possible",
             "label connector polarity and voltage before reconnecting loads",
         ]
+        if identified_lithium_device:
+            rules.insert(0, "follow model-specific battery isolation; stop for swollen/hot/punctured lithium battery")
+        if self._has_any(text, {"nintendo switch", "switch oled"}):
+            rules.append("USB-C/HDMI port and filter rework requires trained microsoldering and matching schematics")
         if high_voltage:
             rules.insert(0, "do not perform live mains probing; use an isolation transformer and trained procedure")
             rules.append("discharge high-voltage capacitors with a rated discharge tool before handling")
@@ -843,6 +1051,60 @@ class RepairEncyclopedia:
                 "fail_branch": "follow power_input_or_regulator_fault playbook",
             },
         ]
+        if family_id in {
+            "retro_handheld_aa_power", "phone_charging_port_flex",
+            "modern_console_usb_c_video", "laptop_power_path"
+        }:
+            # Generic powered probing is unsafe or meaningless for these
+            # product-specific cases without a model-based battery service
+            # procedure and proper instrument/ratings.
+            steps[2]["title"] = "Model-specific input/power verification before repair"
+            steps[2]["actions"] = [
+                "identify original power source, chemistry, polarity, rating and model revision",
+                "unplug/disconnect or remove batteries under manufacturer-approved procedure",
+                "inspect input connector/contact and measure deenergized continuity first",
+                "record rated source and trained-operator test plan; do not authorize power automatically",
+            ]
+            steps[2]["pass_condition"] = "source limits and deenergized input path are evidenced"
+            steps[2]["fail_branch"] = "STOP unqualified power-on, rework or battery manipulation"
+        if family_id == "retro_handheld_aa_power":
+            steps.append({
+                "order": 4, "title": "AA contacts and full handheld function",
+                "purpose": "Distinguish primary AA contact/switch fault from a second LCD fault.",
+                "actions": [
+                    "verify AA battery type and individual fresh cell voltage",
+                    "inspect corroded battery springs and measure unplugged switch continuity",
+                    "after permitted restoration check full LCD, controls and audio, not boot only",
+                ],
+                "pass_condition": "handheld powers and all display/audio/controls work",
+                "fail_branch": "missing LCD columns remain separate unresolved repair, not full success",
+            })
+        if family_id == "phone_charging_port_flex":
+            steps.append({
+                "order": 4, "title": "Phone original-versus-replacement flex A/B",
+                "purpose": "Do not misroute a bad replacement charging flex to a motor driver.",
+                "actions": [
+                    "identify vendor-approved phone service isolation and source part revision",
+                    "inspect connector seating and known-good charger/cable",
+                    "if qualified and battery safely disconnected, compare old/new charge-flex behavior",
+                    "record actual current and verify all functions after full reassembly",
+                ],
+                "pass_condition": "charging works reliably without flex/plug pressure",
+                "fail_branch": "suspect unverified replacement or connector, not proven charging IC",
+            })
+        if family_id == "modern_console_usb_c_video":
+            steps.append({
+                "order": 4, "title": "Separate USB-C power and HDMI/docked video",
+                "purpose": "Both charging and video are independent acceptance criteria.",
+                "actions": [
+                    "inspect USB-C pins and anchors under magnification",
+                    "record source pinout and breakout continuity for correct console revision",
+                    "qualified operator checks port/filter circuits; no blind rework",
+                    "test USB-C charging and HDMI/dock output independently after any repair",
+                ],
+                "pass_condition": "measured, documented charging and HDMI functions",
+                "fail_branch": "charging-only test does not establish repaired video output",
+            })
         if family_id in {"small_dc_motor_gadget", "relay_power_box"}:
             steps.append(
                 {
@@ -1037,6 +1299,26 @@ class RepairEncyclopedia:
         if not (analysis.get("machine_connection_map") or {}).get("connector_count"):
             needed.append("connector closeups with wire colors and labels")
         family_evidence = {
+            "retro_handheld_aa_power": [
+                "original AA cell voltage and polarity check; no charging-pack or dock test",
+                "battery spring/terminal corrosion photos and disconnected continuity readings",
+                "power switch continuity and input rail if contacts and AA cells check out",
+                "after-boot LCD vertical columns, buttons and audio full-product test",
+            ],
+            "phone_charging_port_flex": [
+                "identify exact phone model and original/replacement port-flex part numbers",
+                "known-good charger and external-cable A/B comparison",
+                "battery disconnection and connector seating evidence before phone opening",
+                "original-vs-new port A/B charge-current and functional test",
+                "after-repair phone display, mic, speaker, data-safe and charge tests",
+            ],
+            "modern_console_usb_c_video": [
+                "exact console revision and original USB-C pin/anchor closeups",
+                "USB-C breakout and model-specific schematic connectivity readings",
+                "charging PD/current and dock HDMI/video separate outcome tests",
+                "noise-filter and connector manufacturer part identity",
+                "trained hot-air rework capability and safe battery isolation",
+            ],
             "game_controller_input": [
                 "before/after controller tester readings for stick center, axis range, triggers, and buttons",
                 "closeups of analog stick modules, button membranes, flex cables, and PCB contacts",
