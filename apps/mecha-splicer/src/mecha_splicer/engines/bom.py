@@ -5,6 +5,7 @@ from typing import Literal
 
 from ..spec import (
     BeltReductionSpec,
+    MountingPlateSpec,
     BracketSpec,
     EnclosureSpec,
     GripperSpec,
@@ -64,6 +65,15 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
             )
         )
         lines.append(BomLine("hardware", "rubber feet", "self-adhesive", 4, "reduces desk rattle", sku="rubber_feet_20"))
+
+    if spec.mounting_plate:
+        mp = spec.mounting_plate
+        lines.append(BomLine(
+            "printed_fixture", "parametric 4-hole mounting plate",
+            f"{mp.w_mm}x{mp.d_mm}x{mp.t_mm}mm, {mp.pitch_x_mm}x{mp.pitch_y_mm} pitch, "
+            f"{mp.hole_d_mm}mm drill",
+            1, "dimension/fit-check bench fixture; not cleared for flight"
+        ))
 
     if spec.bracket:
         lines.extend(_bom_for_bracket(spec.bracket))

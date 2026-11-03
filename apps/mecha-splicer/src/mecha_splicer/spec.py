@@ -87,6 +87,23 @@ class EnclosureSpec(BaseModel):
     include_lid_screw_holes: bool = True
 
 
+class MountingPlateSpec(BaseModel):
+    """Native Mecha-Splicer 4-hole rectangular electronics mount/bench fixture.
+
+    Produces printable source geometry. Hole/part dimensional fit is unverified
+    until measured physically, and this is not an approved flying component.
+    """
+    name: str = "mounting_plate"
+    w_mm: MmPos
+    d_mm: MmPos
+    t_mm: MmPos = 2.4
+    pitch_x_mm: MmPos
+    pitch_y_mm: MmPos
+    hole_d_mm: MmPos = 1.8
+    window_w_mm: Mm = 0.0
+    window_d_mm: Mm = 0.0
+
+
 class BracketSpec(BaseModel):
     name: str = "bracket"
     w_mm: MmPos
@@ -472,6 +489,7 @@ class ProjectSpec(BaseModel):
 
     # v1 scopes
     enclosure: Optional[EnclosureSpec] = None
+    mounting_plate: Optional[MountingPlateSpec] = None
     bracket: Optional[BracketSpec] = None
     servo_mount: Optional[ServoMountSpec] = None
     linear_axis: Optional[LinearAxisSpec] = None

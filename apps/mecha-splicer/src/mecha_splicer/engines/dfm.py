@@ -8,6 +8,7 @@ import math
 from ..spec import (
     AssemblySpec,
     BeltReductionSpec,
+    MountingPlateSpec,
     BracketSpec,
     EnclosureSpec,
     GripperSpec,
@@ -38,6 +39,7 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
 
     if (
         spec.enclosure is None
+        and spec.mounting_plate is None
         and spec.bracket is None
         and spec.servo_mount is None
         and spec.linear_axis is None
@@ -58,6 +60,8 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
 
     if spec.enclosure is not None:
         issues.extend(check_enclosure(spec.enclosure, process=spec.process, mode=spec.mode))
+    if spec.mounting_plate is not None:
+        issues.extend(check_mounting_plate(spec.mounting_plate, process=spec.process))
     if spec.bracket is not None:
         issues.extend(check_bracket(spec.bracket, process=spec.process, mode=spec.mode))
     if spec.servo_mount is not None:
@@ -411,4 +415,24 @@ def check_assembly(a: AssemblySpec, *, mode: str) -> list[DfmIssue]:
             issues.append(DfmIssue("block", "Assembly instance missing module name."))
     if mode == "professional":
         issues.append(DfmIssue("info", "Assembly is a placement aid; verify clearances and fastener access in your real build."))
+    return issues
+
+
+def check_mounting_plate(mp: MountingPlateSpec, *, process: str) -> list[DfmIssue]:
+    """Reject plate geometry that cuts through mounting holes or outer walls."""
+    issues = []
+    if mp.t_mm < _min_wall_mm(process):
+        issues.append(DfmIssue("warn", "Mounting plate is thin for FDM printing."))
+    for dimension, pitch in ((mp.w_mm, mp.pitch_x_mm), (mp.d_mm, mp.pitch_y_mm)):
+        rim = (dimension - pitch - mp.hole_d_mm) / 2
+        if rim < 1.5:
+            issues.append(DfmIssue("block", "Less than 1.5 mm outside rim after drill clearance."))
+    if (mp.window_w_mm == 0) != (mp.window_d_mm == 0):
+        issues.append(DfmIssue("block", "Both aperture dimensions must be positive or both zero."))
+    if mp.window_w_mm and mp.window_d_mm:
+        if mp.window_w_mm > mp.w_mm or mp.window_d_mm > mp.d_mm:
+            issues.append(DfmIssue("block", "Central aperture exceeds mounting plate."))
+        for aperture, pitch in ((mp.window_w_mm, mp.pitch_x_mm), (mp.window_d_mm, mp.pitch_y_mm)):
+            if (pitch - aperture - mp.hole_d_mm) / 2 < 1.5:
+                issues.append(DfmIssue("block", "Central aperture overlaps mounting-hole material."))
     return issues
