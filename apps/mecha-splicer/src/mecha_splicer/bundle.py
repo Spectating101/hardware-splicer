@@ -20,6 +20,7 @@ from .engines.openscad import (
     generate_rotary_joint_parts_scad,
     generate_servo_mount_scad,
 )
+from .engines.aerial import generate_aerial_frame_scad
 from .engines.assembly import generate_assembly_scad
 from .spec import ProjectSpec
 
@@ -34,6 +35,8 @@ def generate_bundle(spec: Dict[str, Any], *, out_dir: Optional[str | Path] = Non
     outputs: Dict[str, str] = {}
     if project.enclosure is not None:
         outputs["enclosure.scad"] = generate_enclosure_scad(project.enclosure)
+    if project.aerial_frame is not None:
+        outputs.update(generate_aerial_frame_scad(project.aerial_frame))
     if project.mounting_plate is not None:
         outputs["mounting_plate.scad"] = generate_mounting_plate_scad(project.mounting_plate)
     if project.bracket is not None:

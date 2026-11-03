@@ -266,10 +266,26 @@ def main():
     parser=argparse.ArgumentParser(description="Run real HS engines to build a DIY microdrone product package.")
     parser.add_argument("--build",type=Path,default=_REPO/"examples/drone_lab/hs_whoop65_build.json")
     parser.add_argument("--out",type=Path,required=True)
-    parser.add_argument("--airframe-source",type=Path,required=True)
+    parser.add_argument("--airframe-source",type=Path)
     parser.add_argument("--flight-source",type=Path,required=True)
     parser.add_argument("--openscad-bin",type=Path,default=Path("openscad"))
+    parser.add_argument("--design-request",type=Path)
+    parser.add_argument("--prompt",type=str)
     args=parser.parse_args()
+    if args.design_request or args.prompt:
+        from .aerial_product_generator import produce as original_product
+        from .aerial_product_generator import request_from_prompt
+        request = args.design_request or request_from_prompt(args.prompt)
+        result = original_product(
+            request.resolve(), args.out.resolve(),
+            args.openscad_bin.expanduser(),
+            args.flight_source.resolve() if args.flight_source else None,
+            simulate=True,
+        )
+        print(json.dumps(result, indent=2))
+        return
+    if args.airframe_source is None or args.flight_source is None:
+        parser.error("Legacy sourced airframe requires --airframe-source and --flight-source")
     result=produce(build=args.build.resolve(),out=args.out.resolve(),
                    airframe=args.airframe_source.resolve(),
                    flight=args.flight_source.resolve(),
