@@ -1,0 +1,82 @@
+name: HS Third-Party 17-Story Measurement-Claim Frozen Holdout
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/hs-third-party-measurement-holdout.yml"
+      - "examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json"
+      - "scripts/bench_hs_third_party_measurement_holdout_001.py"
+      - "scripts/verify_hs_third_party_measurement_holdout_001.py"
+      - "docs/HS_THIRD_PARTY_MEASUREMENT_HOLDOUT_2026_11_03.md"
+  workflow_dispatch:
+jobs:
+  frozen-post-269-engine-outcome-blind:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Assert original engine and new corpus frozen before first execution
+        run: |
+          set -euo pipefail
+          BASELINE="c296b7fb06df581b929f2bfff08664c3ca420aef"
+          test "$(git hash-object examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json)" = "c4473c96309cd95d043e12dcaf4c9f308e66960d"
+          git diff --exit-code "$BASELINE" HEAD -- apps/circuit-ai/src/intelligence
+          echo "FROZEN NEW PUBLIC CORPUS AND UNMODIFIED POST-269 DIAGNOSTIC ENGINE"
+      - name: Install unchanged real Circuit-AI engine
+        run: python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Run all 34 pre-outcome checkpoints on pinned engine
+        run: |
+          python -m scripts.bench_hs_third_party_measurement_holdout_001 \
+            --root . \
+            --corpus examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json \
+            --out .cache/hs-thirdparty-public-repair
+      - name: Independent source chronology and score audit
+        run: |
+          python -m scripts.verify_hs_third_party_measurement_holdout_001 \
+            --corpus examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json \
+            --report .cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_RAW_PREDICTIONS.json \
+            --output .cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_ACCEPTANCE.json
+      - name: Reject altered results and fake physical repairs
+        run: |
+          python - <<'PY'
+          import json,tempfile
+          from pathlib import Path
+          from scripts.verify_hs_third_party_measurement_holdout_001 import validate
+          corpus=Path("examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json")
+          report=Path(".cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_RAW_PREDICTIONS.json")
+          original=json.loads(report.read_text())
+          attacks=[
+            ("invented_hardware_fix",lambda r:r.update({"physical_repair_claims":1})),
+            ("inflated_known_category",lambda r:r.update({"known_item_matches":r["known_item_scored"]})),
+            ("fake_independently_verified_voltage",lambda r:r["after_predictions_source_outcome_adjudication"][0].update({"measurements_independently_verified":True})),
+            ("future_solution_prompt_leak",lambda r:r["raw_blinded_engine_responses"][0]["blinded_input"].update({"notes":"owner final repair was already confirmed"})),
+            ("false_owner_full_fix",lambda r:r["after_predictions_source_outcome_adjudication"][0].update({"source_owner_claimed_full_fix":True})),
+            ("activate_drone_flight",lambda r:r.update({"any_autonomous_power_or_flight_authorized":True})),
+            ("fabricate_root_accuracy",lambda r:r["after_predictions_source_outcome_adjudication"][0]["checkpoints"][0].update({"root_cause_exact_match":True})),
+          ]
+          with tempfile.TemporaryDirectory() as t:
+            for name,attack in attacks:
+              v=json.loads(json.dumps(original));attack(v)
+              p=Path(t)/(name+".json");p.write_text(json.dumps(v))
+              try:validate(corpus,p)
+              except ValueError:pass
+              else:raise AssertionError("adversarial corruption accepted: "+name)
+          print("7 NEGATIVE CONTROL SOURCE/OUTPUT/PHYSICAL AUTHORITY MUTATIONS REJECTED")
+          PY
+      - name: Publish raw output even if diagnostic accuracy is poor
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-third-party-public-17-stories-34-blind-diagnostics
+          path: |
+            examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json
+            docs/HS_THIRD_PARTY_MEASUREMENT_HOLDOUT_2026_11_03.md
+            .cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_RAW_PREDICTIONS.json
+            .cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_SCORING.md
+            .cache/hs-thirdparty-public-repair/THIRD_PARTY_REPAIR_ACCEPTANCE.json
+          retention-days: 30
+          if-no-files-found: warn
