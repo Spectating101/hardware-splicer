@@ -58,7 +58,172 @@ def apply_evidence_first_triage(
     unsafe_operation = False
     reason = ""
 
+    # These routes were motivated by #271's immutable 17-story holdout.
+    # Every fixture added after viewing its output is a DEVELOPMENT regression,
+    # never evidence of independent unseen accuracy.
     if (
+        family == "retro_handheld_aa_power"
+        and (
+            _contains(text, "lcd bias", "dc-dc converter", "-33 v", "negative voltage rail")
+            or (_contains(text, "powers up", "powers on", "boots") and
+                _contains(text, "lcd", "screen") and
+                _contains(text, "abnormal", "white", "garbled", "bias"))
+        )
+    ):
+        reason = "A powered handheld with abnormal LCD/bias behavior should not be routed back to missing AA input."
+        verification = [
+            "Confirm whether normal startup sound/gameplay proves the logic rail is running; do not assume all subsystems are healthy.",
+            "Identify the exact Game Boy DC-DC/LCD bias reference and capture photo of the regulator revision.",
+            "Only a qualified technician may verify regulated negative output with rated probes and appropriate precautions.",
+            "Treat game boot, LCD contrast/bias and missing audio as potentially separate faults; no aftermarket Zener modification authorized.",
+        ]
+        candidate = _hypothesis(
+            "retro_lcd_bias_or_dc_dc_regulation_unverified",
+            "Handheld LCD-bias converter or display/interconnect differential",
+            ["abnormal negative LCD bias supply", "damaged regulator or feedback",
+             "LCD ribbon or display-specific defect", "separate cartridge/audio symptom"],
+            verification,
+            "handheld runs but display/bias measurements or behavior are inconsistent",
+        )
+    elif (
+        family == "retro_handheld_aa_power"
+        and _contains(text, "speaker", "audio", "sound", "volume")
+        and _contains(text, "silent", "no sound", "quiet", "faint", "buzz", "volume", "speaker")
+        and not _contains(text, "won't turn on", "will not turn on", "does not turn on", "fails to power")
+    ):
+        headphone_works = (
+            _contains(text, "headphones work", "headphone audio works", "headphone path works",
+                      "sound works on headphone", "sound works in headphone")
+            or (_contains(text, "headphone") and _contains(text, "display still", "gameplay still"))
+        )
+        reason = "Audio-only symptoms on a functioning handheld require a signal-path differential, not AA contacts."
+        verification = [
+            "Record whether gameplay, display and power indicator work; distinguish no sound versus low sound.",
+            "Compare headphone and built-in speaker function and whether the volume-wheel position changes output.",
+            "Remove cells before passive speaker lead, headphone switch and volume potentiometer inspection.",
+            "Escalate capacitor, audio amplifier and signal-trace measurements to a qualified service procedure; no blind part swap.",
+        ]
+        candidate = _hypothesis(
+            "speaker_jack_switch_or_audio_path_unverified" if headphone_works
+            else "retro_audio_output_or_coupling_unverified",
+            "Speaker/jack output path differential" if headphone_works
+            else "Audio capacitor, amplifier, speaker or volume-control differential",
+            ["failed audio coupling component", "dirty/worn volume control",
+             "speaker/jack disconnect switch", "speaker harness or amplifier"],
+            verification,
+            "device powers sufficiently for an audio symptom; power-contact fault unsupported",
+        )
+    elif (
+        family == "laptop_power_path"
+        and _contains(text, "adapter", "charger", "barrel")
+        and _contains(text, "wattage and type cannot", "adapter not detected",
+                      "charger not detected", "adapter id", "adapter identification",
+                      "not recognizing charger")
+    ):
+        reason = "Correct nominal adapter voltage does not establish adapter identification or charge-authorization signaling."
+        verification = [
+            "Record adapter manufacturer, connector center-ID pin and laptop's specific charger identification protocol.",
+            "Distinguish stable low-voltage power from identification/data-pin continuity; do not bridge pins.",
+            "Use a verified same-model rated charger before any battery or motherboard replacement.",
+            "For qualified service, record manufacturer-safe jack, center-pin and charge-authorization evidence.",
+        ]
+        candidate = _hypothesis(
+            "laptop_adapter_identification_or_sense_unverified",
+            "Laptop barrel adapter identification, connector sense, or charge-path differential",
+            ["adapter center-ID pin contact", "incompatible adapter/identification protocol",
+             "DC jack sense lead", "battery management not ruled out"],
+            verification,
+            "owner reports charger detection failure despite supply input evidence",
+        )
+        unsafe_operation = True
+    elif (
+        family == "laptop_power_path"
+        and _contains(text, "barrel", "charger", "adapter")
+        and _contains(text, "fluctuat", "13-19", "while powered off", "while off",
+                      "usb-c charging still works", "usb-c still")
+    ):
+        reason = "Barrel-input voltage droop or charging-state dependence does not prove a USB-C port failure."
+        verification = [
+            "Identify the actual active charger connector and OEM power rating rather than assume USB-C input.",
+            "Record unloaded versus loaded voltage using a qualified external method and compare with adapter specification.",
+            "Verify compatible known-good rated adapter and barrel jack contact, then board-side input only if trained.",
+            "Separately document USB-C bypass charging, battery behavior and state-dependent charge indicators.",
+        ]
+        candidate = _hypothesis(
+            "laptop_barrel_dc_in_or_loaded_supply_unverified",
+            "Laptop barrel input, adapter load regulation and charge-state differential",
+            ["adapter voltage collapse under load", "barrel-jack intermittency",
+             "power-management/charge-state fault", "battery fault still possible"],
+            verification,
+            "owner reports barrel connector charging anomaly while other input modes differ",
+        )
+        unsafe_operation = True
+    elif (
+        family == "phone_charging_port_flex"
+        and _contains(text, "battery health", "charge cycles", "1200+", "shuts off at", "shuts down at")
+        and _contains(text, "charge", "charging", "battery")
+    ):
+        reason = "Severe pack degradation and state-dependent charging are a battery/management differential, not proof of a port flex failure."
+        verification = [
+            "Capture battery health/cycle history and whether shutdown occurs under battery load versus external supply.",
+            "Review owner charge-current observations with charger/meter model and screen-on/off states; do not equate current change with root cause.",
+            "Inspect physical battery condition with manufacturer-safe procedure; stop for heat, swelling or puncture.",
+            "Qualified service must distinguish known-compatible battery pack/BMS from charging-controller, cable and port faults.",
+        ]
+        candidate = _hypothesis(
+            "phone_battery_bms_or_state_dependent_charge_unverified",
+            "Battery pack/BMS and charge-state regulation differential",
+            ["degraded battery pack or protection state", "incorrect battery communication",
+             "screen-state-dependent charging controller behavior", "port/cable still not excluded"],
+            verification,
+            "owner reports battery degradation and charge instability; no component causality measured by HS",
+        )
+        unsafe_operation = True
+    elif (
+        family == "modern_console_usb_c_video"
+        and _contains(text, "black screen", "no boot", "does not boot", "won't turn on")
+        and _contains(text, "ammeter", "current draw", "charging behavior", "m92 replacement", "0.44 a")
+    ):
+        reason = "A black-screen console with reported charge current can have firmware/boot-state or board causes; charging-IC replacement is premature."
+        verification = [
+            "Record exact console revision, whether ever modified, and separately observed USB-C charge voltage and current.",
+            "Ask whether bootloader/AutoRCM mode is enabled; do not assert it without evidence.",
+            "Identify noninvasive manufacturer-approved power/boot diagnostics before declaring USB-C or battery defective.",
+            "If physical service is needed, qualified technicians isolate USB-C electrical and board boot faults with independent measurements.",
+        ]
+        candidate = _hypothesis(
+            "console_boot_mode_or_power_path_unverified",
+            "Console boot/configuration state versus charging power-path differential",
+            ["firmware boot/RCM state", "battery/input failure",
+             "board logic or display symptom", "USB-C connector/PD issue not yet confirmed"],
+            verification,
+            "reported current alone cannot prove charging-IC failure",
+        )
+        unsafe_operation = True
+    elif (
+        _contains(hint, "printer", "deskjet", "inkjet", "officejet", "epson", "pixma")
+        and _contains(text, "print", "alignment", "nozzle", "lines", "image")
+        and _contains(text, "distort", "misalign", "alignment", "blur", "shift", "wonky", "uneven")
+        and not _contains(text, "carriage stuck", "carriage jam")
+    ):
+        reason = "Print-registration errors can arise from encoder contamination or positioning, not motor-driver electronics."
+        verification = [
+            "Disconnect power before any printer mechanism or encoder inspection; no live carriage intervention.",
+            "Record before/after print alignment pattern and precise model/encoder strip routing.",
+            "Inspect encoder strip and photo-sensor gently under manufacturer-safe procedures; avoid damaging calibration markings.",
+            "Do not replace printhead, board or motor without model-specific test results.",
+        ]
+        candidate = _hypothesis(
+            "printer_encoder_strip_or_registration_unverified",
+            "Encoder positioning, printhead registration or sensor-path differential",
+            ["dirty/displaced encoder strip", "printhead alignment or sensor tracking",
+             "feed/roller transport skew", "printhead defect not yet proven"],
+            verification,
+            "owner reports print alignment failure without a confirmed electronic driver fault",
+        )
+        unsafe_operation = True
+
+    elif (
         family == "retro_handheld_aa_power"
         and _contains(text, "speaker", "sound", "audio")
         and _contains(text, "headphone", "earphone")
@@ -104,9 +269,11 @@ def apply_evidence_first_triage(
         _contains(hint, "drone", "quadcopter", "syma x5")
         and _contains(text, "spin", "rotat", "propeller", "prop", "lift", "tilt", "fly")
         and _contains(text, "no lift", "won't lift", "cannot lift", "won't fly",
-                      "not fly", "tilt", "tip over", "doesn't lift")
+                      "not fly", "tilt", "tip over", "doesn't lift",
+                      "fails to take off", "fails to lift", "no takeoff",
+                      "doesn't take off", "does not take off", "not taking off")
     ):
-        swapped = _contains(text, "replaced", "replacement", "changed", "new prop", "new blade", "swapped")
+        swapped = _contains(text, "replaced", "replacement", "changed", "new prop", "new blade", "swapped", "built", "builder")
         reason = "Spinning rotors do not establish thrust; orientation/geometry and drive train precede driver replacement."
         verification = [
             "Remove battery and propellers before physical inspection; no spin, bench thrust, or flight test is authorized.",
@@ -124,9 +291,10 @@ def apply_evidence_first_triage(
         )
         unsafe_operation = True
     elif (
-        _contains(hint, "printer", "deskjet", "inkjet")
-        and _contains(text, "carriage", "cartridge", "jam", "stuck", "move")
-        and _contains(text, "stuck", "jam", "won't move", "does not move", "not move", "blocked")
+        _contains(hint, "printer", "deskjet", "inkjet", "officejet", "epson", "pixma")
+        and _contains(text, "carriage", "cartridge", "jam", "stuck", "move", "printhead")
+        and _contains(text, "stuck", "jam", "won't move", "does not move", "not move", "blocked",
+                      "catches", "catching", "binds", "rubbing")
     ):
         reason = "Carriage jam is a mechanical path fault until evidence implicates board-level drivers."
         verification = [

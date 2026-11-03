@@ -1,0 +1,52 @@
+name: HS Post-Third-Party Subsystem Triage and Zero Authority Development Regression
+on:
+  pull_request:
+    paths:
+      - "apps/circuit-ai/src/intelligence/repair_differential_triage.py"
+      - "apps/circuit-ai/src/intelligence/repair_encyclopedia.py"
+      - "apps/circuit-ai/src/intelligence/repair_market_coverage.py"
+      - "scripts/verify_hs_postholdout_subsystem_triage_001.py"
+      - "docs/HS_POST_THIRD_PARTY_SUBSYSTEM_TRIAGE_2026_11_03.md"
+      - ".github/workflows/hs-post-third-party-subsystem-triage.yml"
+  workflow_dispatch:
+jobs:
+  synthetic-subsystem-development-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check independent #271 evidence and first-run scripts remain frozen
+        run: |
+          set -euo pipefail
+          test "$(git hash-object examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json)" = "c4473c96309cd95d043e12dcaf4c9f308e66960d"
+          git diff --exit-code "ed382683c73851696389f2ed094b54e978b3b5bf" HEAD -- \
+            examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json \
+            scripts/bench_hs_third_party_measurement_holdout_001.py \
+            scripts/verify_hs_third_party_measurement_holdout_001.py
+          echo "NEW PR IS DEVELOPMENT; ORIGINAL OUT-OF-SAMPLE EXPERIMENT INDEPENDENT"
+      - name: Install real Circuit-AI dependencies
+        run: python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Compile and run original plus new synthetic checks
+        run: |
+          python -m py_compile \
+            apps/circuit-ai/src/intelligence/repair_differential_triage.py \
+            apps/circuit-ai/src/intelligence/repair_encyclopedia.py \
+            apps/circuit-ai/src/intelligence/repair_market_coverage.py \
+            scripts/verify_hs_postholdout_subsystem_triage_001.py
+          python -m scripts.verify_hs_evidence_first_differential_001 > original_synthetic_check.json
+          python -m scripts.verify_hs_postholdout_subsystem_triage_001 | tee post_holdout_synthetic_check.json
+      - name: Publish development-only output including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-subsystem-postholdout-synthetic-only-no-unseen-claim
+          path: |
+            original_synthetic_check.json
+            post_holdout_synthetic_check.json
+            docs/HS_POST_THIRD_PARTY_SUBSYSTEM_TRIAGE_2026_11_03.md
+          if-no-files-found: warn
