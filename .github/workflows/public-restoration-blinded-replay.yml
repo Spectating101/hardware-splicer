@@ -4,6 +4,7 @@ on:
     paths:
       - ".github/workflows/public-restoration-blinded-replay.yml"
       - "examples/public_restoration_replays/**"
+      - "docs/PUBLIC_RESTORATION_REVERSE_ENGINEERING_2026_11_03.md"
       - "scripts/bench_hs_public_restoration_blinded_001.py"
       - "scripts/verify_hs_public_restoration_blinded_001.py"
       - "apps/circuit-ai/src/intelligence/repair_case_evaluator.py"
@@ -79,6 +80,7 @@ jobs:
           name: hs-four-public-restorations-original-engine-blinded-benchmark
           path: |
             examples/public_restoration_replays/cases_2026_11_03.json
+            docs/PUBLIC_RESTORATION_REVERSE_ENGINEERING_2026_11_03.md
             .cache/hs-public-restoration-blinded-replay/PUBLIC_RESTORATION_BLINDED_REPLAY.json
             .cache/hs-public-restoration-blinded-replay/PUBLIC_RESTORATION_BLINDED_SUMMARY.md
             .cache/hs-public-restoration-blinded-replay/INDEPENDENT_PUBLIC_REPAIR_ACCEPTANCE.json
