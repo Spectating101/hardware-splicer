@@ -90,10 +90,16 @@ def verify(cases:Path,report:Path)->dict:
                  output["source_url"]==case["source"]["url"] and
                  output["verdict"] in {"solvable_now","assistive_only","not_ready"} and
                  output["repair_guide"]["family"] and
-                 output["repair_guide"]["top_fault"] and
                  output["coverage"]["top_item"] and
                  0<=output["workflow_score"]<=1,
                  "original Circuit-AI model did not actually return a complete, valid case")
+            # A model may correctly ABSTAIN: the unchanged engine emitted
+            # top_fault=None for an unseen printer. Record this real lack of
+            # diagnosis, never manufacture a candidate or discard the case.
+            if output["repair_guide"]["top_fault"] is None:
+                need(not row["generated_diagnostics"]["fault_candidates"] and
+                     "hard: no fault candidate generated" in output["blockers"],
+                     "missing fault must be transparently classified as engine abstention")
             need(row["current_model_not_modified_to_fit_holdout"] is True and
                  row["physical_product_repaired_by_HS"] is False and
                  row["bench_power_or_flight_authorized"] is False,
@@ -169,6 +175,7 @@ def verify(cases:Path,report:Path)->dict:
         "known_market_item_comparisons":evaluation["scored_known_market_class_checkpoints"],
         "correctly_recomputed_known_guide_family_matches":evaluation["matched_known_diagnostic_family_checkpoints"],
         "known_guide_family_comparisons":evaluation["scored_known_diagnostic_family_checkpoints"],
+        "no_fault_candidates_emitted":sum(x["original_CircuitAI_evaluator_returned"]["repair_guide"]["top_fault"] is None for x in preds),
         "software_lexical_relevance_is_weak_proxy":True,
         "source_unresolved_repair_cases":evaluation["source_owner_did_not_confirm_final_repair_cases"],
         "source_owner_claims_independently_electrically_verified":False,
