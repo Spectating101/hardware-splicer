@@ -166,6 +166,7 @@ def main():
                 "input_source_measurements_known":[x["event_id"] for x in cumulative
                     if x["event_type"]=="measurement"],
                 "typed_event_ids_known":[x["event_id"] for x in cumulative],
+                "input_source_event_records":list(cumulative),
                 "original_engine_fault":row["real_engine_output"]["repair_guide"]["top_fault"],
                 "stateful_engine_fault":result["repair_guide"]["top_fault"],
                 "stateful_engine_verdict":result["verdict"],
