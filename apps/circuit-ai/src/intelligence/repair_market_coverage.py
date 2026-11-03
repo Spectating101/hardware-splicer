@@ -245,7 +245,7 @@ class RepairMarketCoverage:
         },
     }
 
-    def evaluate_text(self, text: str) -> Dict[str, Any]:
+    def evaluate_text(self, text: str, *, device_hint: str = "") -> Dict[str, Any]:
         normalized = str(text or "").lower()
         matches = []
         for item_id, item in self.ITEM_CLASSES.items():
@@ -274,8 +274,20 @@ class RepairMarketCoverage:
             ("game boy", "retro_handheld_console"),
             ("gameboy", "retro_handheld_console"),
         )
-        identity = next(((phrase, item_id) for phrase, item_id in identity_signals
-                         if phrase in normalized), None)
+        explicit_hint = str(device_hint or "").lower()
+        # Product identity supplied separately at intake outranks market-value
+        # scoring and symptom text. Generic mentions never invent OOD classes.
+        hint_identity = (
+            (("laptop", "notebook", "chromebook", "macbook"), "laptop_or_macbook"),
+            (("iphone", "smartphone", "pixel"), "phone_or_tablet"),
+            (("nintendo switch", "switch oled"), "modern_game_console"),
+            (("game boy", "gameboy"), "retro_handheld_console"),
+        )
+        identity = next(((phrase, item_id) for phrases, item_id in hint_identity
+                         for phrase in phrases if phrase in explicit_hint), None)
+        if identity is None:
+            identity = next(((phrase, item_id) for phrase, item_id in identity_signals
+                             if phrase in normalized), None)
         if identity is not None:
             phrase, item_id = identity
             if not any(row["item_id"] == item_id for row in matches):
