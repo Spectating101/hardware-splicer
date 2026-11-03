@@ -1,0 +1,153 @@
+{
+  "schema_version": "hardware_splicer.sortcell_source_wrist_fk_reference.v1",
+  "source_urdf_sha256": "763d8e0280479cd4d9868e977c9c01416b9f83c8899c95b918446c0cfaf32f11",
+  "source_motor_evidence_ci_run": 41513486566,
+  "source_motor_evidence_description": "First actual PyBullet motor-state sample of independently verified 10-phase source-mimic gravity-on SORTCELL numerical sort",
+  "initial_original_source_movable_joint_positions": {
+    "openarm_left_joint1": -2.80004079,
+    "openarm_left_joint2": -2.7000136,
+    "openarm_left_joint3": 0.0000043,
+    "openarm_left_joint4": 0.40000364,
+    "openarm_left_joint5": -0.00010769,
+    "openarm_left_joint6": 0.00004588,
+    "openarm_left_joint7": 0.00011756,
+    "openarm_right_joint1": 0.12635991,
+    "openarm_right_joint2": 0.96432246,
+    "openarm_right_joint3": -0.05826688,
+    "openarm_right_joint4": 1.06803362,
+    "openarm_right_joint5": -0.00333497,
+    "openarm_right_joint6": 0.04511663,
+    "openarm_right_joint7": -0.04181175,
+    "openarm_left_finger_joint2": 0.04100004,
+    "openarm_left_finger_joint1": 0.04099993,
+    "openarm_right_finger_joint2": 0.04099867,
+    "openarm_right_finger_joint1": 0.04100132
+  },
+  "original_pybullet_initial_source_link_world_pose": {
+    "openarm_left_link5": {
+      "p": [
+        -0.128304,
+        0.284115,
+        0.44712
+      ],
+      "q": [
+        -0.006408,
+        0.90942377,
+        0.21891214,
+        -0.35353187
+      ]
+    },
+    "openarm_left_link6": {
+      "p": [
+        -0.234249,
+        0.325307,
+        0.392299
+      ],
+      "q": [
+        -0.00641,
+        0.90942508,
+        0.218907,
+        -0.35353184
+      ]
+    },
+    "openarm_left_link7": {
+      "p": [
+        -0.206126,
+        0.331548,
+        0.368291
+      ],
+      "q": [
+        -0.00641022,
+        0.90942472,
+        0.21890697,
+        -0.35353273
+      ]
+    },
+    "openarm_right_link5": {
+      "p": [
+        0.10249,
+        -0.368298,
+        0.553143
+      ],
+      "q": [
+        0.73954546,
+        0.23450491,
+        0.48616326,
+        0.40215075
+      ]
+    },
+    "openarm_right_link6": {
+      "p": [
+        0.227516,
+        -0.384828,
+        0.548473
+      ],
+      "q": [
+        0.74842793,
+        0.24541077,
+        0.48075029,
+        0.38536787
+      ]
+    },
+    "openarm_right_link7": {
+      "p": [
+        0.211867,
+        -0.412498,
+        0.52858
+      ],
+      "q": [
+        0.75829971,
+        0.23731335,
+        0.46502334,
+        0.39040643
+      ]
+    }
+  },
+  "wrist_pose_cases": {
+    "left": [
+      {
+        "label": "recorded_initial",
+        "wrist_joint5_6_7": [
+          -0.00010769,
+          0.00004588,
+          0.00011756
+        ]
+      },
+      {
+        "label": "lowest_overlap_in_prior_125_pose_sweep",
+        "wrist_joint5_6_7": [
+          -0.7001077,
+          -0.6999541,
+          0.0001176
+        ]
+      }
+    ],
+    "right": [
+      {
+        "label": "recorded_initial",
+        "wrist_joint5_6_7": [
+          -0.00333497,
+          0.04511663,
+          -0.04181175
+        ]
+      },
+      {
+        "label": "lowest_overlap_in_prior_125_pose_sweep",
+        "wrist_joint5_6_7": [
+          -0.703335,
+          0.7451166,
+          -0.0418118
+        ]
+      }
+    ]
+  },
+  "source_wrist_previous_pybullet_initial_contact_depth_m": {
+    "left": -0.004962295495308196,
+    "right": -0.004958549207368906
+  },
+  "source_wrist_previous_pybullet_best_sampled_depth_m": {
+    "left": -0.0041408,
+    "right": -0.0040408
+  },
+  "physical_safety_authorized": false
+}
