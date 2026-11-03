@@ -1,0 +1,604 @@
+{
+  "schema_version": "hardware_splicer.public_restoration_replay_cases.v1",
+  "research_date": "2026-11-03",
+  "source_method": "Public iFixit owner follow-ups and YouTube video description chapter markers; no video frames/transcript inspected.",
+  "protocol": "Two outcome-blinded diagnostic checkpoints per case; keep documented intervention and outcome in oracle, never feed oracle to Circuit-AI.",
+  "public_source_content_reproduced_verbatim": false,
+  "all_actual_operator_measurements_unknown": true,
+  "HS_actual_physical_repairs_performed": 0,
+  "source_reports_not_independent_lab_certification": true,
+  "case_count": 4,
+  "cases": [
+    {
+      "id": "public_gameboy_dmg_2026_power_and_lcd",
+      "title": "Original Game Boy stops powering on after long storage",
+      "device_hint": "Nintendo Game Boy DMG-01 original handheld",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/937739/Why+will+my+Game+Boy+not+turn+on",
+        "title": "Why will my Game Boy not turn on?",
+        "kind": "ifixit_owner_followup",
+        "posted": "2026-01-25",
+        "final_update": "2026-01-28",
+        "independent_physical_verification": false
+      },
+      "full_breakdown": [
+        {
+          "step": 1,
+          "date_or_time": "2026-01-25",
+          "event": "Owner says inherited original Game Boy had been in storage for years and once ran after a basic clean; after subsequent storage it no longer powered on.",
+          "evidence": "owner_initial"
+        },
+        {
+          "step": 2,
+          "date_or_time": "2026-01-26",
+          "event": "Other repairers suggest checking correct, functioning batteries, terminals, corrosion and then power-board condition if initial checks do not help.",
+          "evidence": "expert_advice_not_measurement"
+        },
+        {
+          "step": 3,
+          "date_or_time": "2026-01-27",
+          "event": "Owner reports visible corrosion on the battery terminals, gentle cleaning with a small quantity of vinegar, and installation of checked fresh batteries.",
+          "evidence": "owner_intervention"
+        },
+        {
+          "step": 4,
+          "date_or_time": "2026-01-27",
+          "event": "Owner reports console boots after terminal cleaning and battery replacement; contribution of each individual action was not isolated.",
+          "evidence": "owner_reported_partial_success"
+        },
+        {
+          "step": 5,
+          "date_or_time": "2026-01-27",
+          "event": "Owner then notices missing vertical pixel lines in the LCD. The thread only suggests another repair, without an owner-confirmed display fix.",
+          "evidence": "owner_reported_residual_fault"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "initial_no_power",
+          "title": "Original Nintendo Game Boy no power",
+          "device_hint": "Nintendo original Game Boy retro handheld DMG-01",
+          "symptoms": [
+            "Original Game Boy will not turn on after long storage",
+            "Previously started with batteries but now shows no sign of starting"
+          ],
+          "notes": "Battery age, battery-contact state, board and display are not yet inspected. No physical measurements provided.",
+          "evidence_available_steps": [
+            1
+          ],
+          "expected_subsystems": [
+            {
+              "id": "battery_path",
+              "any_of": [
+                "batter",
+                "contact",
+                "power",
+                "corros",
+                "terminal"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "power_removed_before_opening"
+          ],
+          "gold_visible": false
+        },
+        {
+          "id": "battery_corrosion_observed",
+          "title": "Original Nintendo Game Boy no power after corrosion inspection",
+          "device_hint": "Nintendo original Game Boy retro handheld DMG-01",
+          "symptoms": [
+            "Original handheld does not boot",
+            "Battery terminals have visible corrosion",
+            "Known-good batteries are available for a controlled retest"
+          ],
+          "notes": "Contact corrosion is an observed clue, not proof of sole root cause; device has not yet been cleaned or retested in this checkpoint.",
+          "evidence_available_steps": [
+            1,
+            2
+          ],
+          "expected_subsystems": [
+            {
+              "id": "battery_contact",
+              "any_of": [
+                "batter",
+                "contact",
+                "corros",
+                "terminal",
+                "clean"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "corrosion_handling"
+          ],
+          "gold_visible": false
+        }
+      ],
+      "oracle": {
+        "source_reported_initial_fault": "No power",
+        "source_reported_hardware_intervention": "Cleaned corroded battery terminals and used checked new batteries",
+        "source_reported_result": "Power restored/boots, but vertical LCD lines absent",
+        "known_remaining_defects": [
+          "missing vertical LCD pixel lines"
+        ],
+        "product_state": "PARTIALLY_RESTORED_NOT_FULLY_FIXED",
+        "underlying_cause_certainty": "battery terminal corrosion is plausible and owner-observed, but effect of new batteries versus cleaning not separately isolated",
+        "source_owner_confirmed_repair": true,
+        "source_owner_confirmed_full_repair": false,
+        "physical_repair_by_hs": false,
+        "missing_technical_evidence": [
+          "original terminal resistance",
+          "before-after terminal impedance",
+          "LCD repair outcome",
+          "bench measurements"
+        ]
+      },
+      "expected_family_keywords": [
+        "game boy",
+        "handheld",
+        "retro",
+        "console"
+      ],
+      "engineering_lesson": "Prevent a boot success from being promoted to a complete-functioning-product success when LCD remains faulty."
+    },
+    {
+      "id": "public_macbook_a1534_port_2023",
+      "title": "12-inch 2015 MacBook fails to start or charge",
+      "device_hint": "Apple Retina MacBook 12 inch 2015 A1534",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/769879/MacBook+not+turning+on",
+        "title": "MacBook not turning on?",
+        "kind": "ifixit_owner_followup",
+        "posted": "2023-02-18",
+        "final_update": "2023-02-23",
+        "independent_physical_verification": false
+      },
+      "full_breakdown": [
+        {
+          "step": 1,
+          "date_or_time": "2023-02-18",
+          "event": "Owner reports 2015 12-inch MacBook does not start after overnight charging and stays cold; suspects battery or USB-C charging port.",
+          "evidence": "owner_initial"
+        },
+        {
+          "step": 2,
+          "date_or_time": "2023-02-18",
+          "event": "Owner checks the charger and a second known-working charger; neither starts this MacBook, although they power another compatible device.",
+          "evidence": "owner_diagnostic_observation"
+        },
+        {
+          "step": 3,
+          "date_or_time": "2023-02-18",
+          "event": "Owner reports the indicator on one USB-C cable flickers only with this MacBook, unlike steady illumination on an iPad. This is not a direct electrical current measurement.",
+          "evidence": "owner_diagnostic_observation"
+        },
+        {
+          "step": 4,
+          "date_or_time": "2023-02-18/19",
+          "event": "Repairer notes USB-C charging port is a likely candidate but keeps charger and battery alternatives open; recommends structured checks.",
+          "evidence": "expert_advice_not_direct_measurement"
+        },
+        {
+          "step": 5,
+          "date_or_time": "2023-02-20",
+          "event": "Owner says replacement port and battery have been ordered; the thread does not state unambiguously which parts were ultimately installed.",
+          "evidence": "owner_intended_action"
+        },
+        {
+          "step": 6,
+          "date_or_time": "2023-02-23",
+          "event": "Owner reports root problem was the USB-C port and MacBook is fixed. No instrument readings or extended load test are provided.",
+          "evidence": "owner_reported_fix"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "initial_no_boot",
+          "title": "Retina MacBook 2015 no boot",
+          "device_hint": "Apple 12-inch Retina MacBook 2015 A1534 laptop",
+          "symptoms": [
+            "MacBook does not power on even after charging overnight",
+            "Device is cold to touch and gives no startup response"
+          ],
+          "notes": "No measured charge current. Charging cable, battery, USB-C port and board paths have not yet been isolated.",
+          "evidence_available_steps": [
+            1
+          ],
+          "expected_subsystems": [
+            {
+              "id": "power_path",
+              "any_of": [
+                "power",
+                "battery",
+                "charg",
+                "port",
+                "usb",
+                "input"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "private_storage"
+          ],
+          "gold_visible": false
+        },
+        {
+          "id": "charger_isolation",
+          "title": "Retina MacBook 2015 intermittent charging connection",
+          "device_hint": "Apple 12-inch Retina MacBook 2015 A1534 laptop",
+          "symptoms": [
+            "MacBook still does not power on",
+            "Two chargers work on other devices but not this MacBook",
+            "One USB-C cable's indicator flickers when attached to MacBook"
+          ],
+          "notes": "No actual measured USB-C power delivery values. Battery and charging-port diagnosis still needs physical confirmation.",
+          "evidence_available_steps": [
+            1,
+            2,
+            3
+          ],
+          "expected_subsystems": [
+            {
+              "id": "usb_power_path",
+              "any_of": [
+                "usb",
+                "charge",
+                "port",
+                "power",
+                "battery",
+                "connector"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "private_storage"
+          ],
+          "gold_visible": false
+        }
+      ],
+      "oracle": {
+        "source_reported_initial_fault": "No power or charging",
+        "source_reported_hardware_intervention": "Owner ordered replacement USB-C port and battery; later states charging port was the culprit, but exact installed parts not documented",
+        "source_reported_result": "Owner reports MacBook fixed on 2023-02-23",
+        "known_remaining_defects": [],
+        "product_state": "OWNER_REPORTED_FIXED_NO_INDEPENDENT_BENCH_CERTIFICATE",
+        "underlying_cause_certainty": "charging port identified by owner's follow-up; no board-level meter readings shared",
+        "source_owner_confirmed_repair": true,
+        "source_owner_confirmed_full_repair": true,
+        "physical_repair_by_hs": false,
+        "missing_technical_evidence": [
+          "USB-C PD voltages/current",
+          "exact replacement part installed",
+          "battery health after service",
+          "startup and thermal soak",
+          "data privacy procedure"
+        ]
+      },
+      "expected_family_keywords": [
+        "laptop",
+        "macbook",
+        "battery",
+        "power",
+        "usb",
+        "controller"
+      ],
+      "engineering_lesson": "Known-good charger and intermittent indicator can prioritize port/connector but do not prove root cause or justify board replacement."
+    },
+    {
+      "id": "public_iphone6s_replacement_not_charging_2018",
+      "title": "iPhone 6s still fails to charge after a port replacement",
+      "device_hint": "Apple iPhone 6s Lightning charging system",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/517971/Phone+not+charging+after+charging+port+replacement",
+        "title": "Phone not charging after charging port replacement",
+        "kind": "ifixit_owner_followup",
+        "posted": "2018-09-24",
+        "final_update": "2018-09-25",
+        "independent_physical_verification": false
+      },
+      "full_breakdown": [
+        {
+          "step": 1,
+          "date_or_time": "2018-09-24",
+          "event": "Original Lightning port charged intermittently only when cable was pushed or angled; owner replaced the charging-port assembly.",
+          "evidence": "owner_reported_original_and_intervention"
+        },
+        {
+          "step": 2,
+          "date_or_time": "2018-09-24",
+          "event": "After replacement, phone no longer charges. Screen, microphone, speaker and headphone connection reportedly still function; depleted battery causes a brief boot then shutdown when plugged in.",
+          "evidence": "owner_reported_postrepair_fault"
+        },
+        {
+          "step": 3,
+          "date_or_time": "2018-09-24",
+          "event": "Repair adviser suggests returning to original port as a diagnostic A/B test with battery disconnected first, rather than immediately assuming logic-board chip damage.",
+          "evidence": "expert_advice_not_measurement"
+        },
+        {
+          "step": 4,
+          "date_or_time": "2018-09-24",
+          "event": "Owner reconnects old port and finds charging still possible when the connector is pressed firmly. The original port is still mechanically unreliable.",
+          "evidence": "owner_reported_diagnostic_reversal"
+        },
+        {
+          "step": 5,
+          "date_or_time": "2018-09-25",
+          "event": "Adviser infers replacement flex may be defective and suggests a known-good replacement. No owner follow-up proves the final working fix.",
+          "evidence": "expert_inference_not_verified_final_repair"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "postreplacement_no_charge",
+          "title": "iPhone 6s charging still fails after assembly replacement",
+          "device_hint": "Apple iPhone 6s smartphone with Lightning connector",
+          "symptoms": [
+            "Charging was intermittent with original Lightning port",
+            "After replacing charge-port flex the phone does not charge at all",
+            "Battery depleted; phone momentarily starts on charger then shuts down",
+            "Other phone functions were reported working"
+          ],
+          "notes": "Replacement flex compatibility/function is unverified. Do not assume motherboard IC fault; old port has not yet been reconnected in this checkpoint.",
+          "evidence_available_steps": [
+            1,
+            2
+          ],
+          "expected_subsystems": [
+            {
+              "id": "charging_port_vs_flex",
+              "any_of": [
+                "port",
+                "charg",
+                "flex",
+                "connector",
+                "replacement",
+                "cable"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "private_data",
+            "disconnect_battery_before_open"
+          ],
+          "gold_visible": false
+        },
+        {
+          "id": "old_port_ab_retest",
+          "title": "iPhone 6s original-port A/B comparison after failed replacement",
+          "device_hint": "Apple iPhone 6s smartphone with Lightning connector",
+          "symptoms": [
+            "Newly installed Lightning charging flex does not support charging",
+            "Reconnecting old original port restores partial charging if plug is held at an angle",
+            "Battery ran down after failed replacement"
+          ],
+          "notes": "A/B observation raises suspicion of faulty replacement flex or connection; no measured charge current or final verified new replacement. The phone is not yet fully restored.",
+          "evidence_available_steps": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "expected_subsystems": [
+            {
+              "id": "new_part_flex",
+              "any_of": [
+                "flex",
+                "port",
+                "charg",
+                "replacement",
+                "cable",
+                "connector"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "private_data",
+            "disconnect_battery_before_open"
+          ],
+          "gold_visible": false
+        }
+      ],
+      "oracle": {
+        "source_reported_initial_fault": "Intermittent charging became no charging after replacement flex",
+        "source_reported_hardware_intervention": "Owner reattached original flex; original port charges only while pressed firmly",
+        "source_reported_result": "Original partly works; suggested replacement part failure not independently established; no final owner-confirmed repair",
+        "known_remaining_defects": [
+          "unreliable charging requiring pressure",
+          "replacement flex not working"
+        ],
+        "product_state": "UNRESOLVED_REPAIR_REPLACEMENT_PART_SUSPECTED",
+        "underlying_cause_certainty": "A/B observation supports suspected defective replacement flex or installation, not proven component failure; upstream charging fault remains",
+        "source_owner_confirmed_repair": false,
+        "source_owner_confirmed_full_repair": false,
+        "physical_repair_by_hs": false,
+        "missing_technical_evidence": [
+          "certified known-good compatible flex retest",
+          "charge-current and voltage comparison",
+          "battery condition",
+          "final functional closure"
+        ]
+      },
+      "expected_family_keywords": [
+        "phone",
+        "iphone",
+        "usb",
+        "charge",
+        "battery"
+      ],
+      "engineering_lesson": "Detect a bad replacement part and isolate through A/B evidence, not overclaim a logic board fault or successful phone restoration."
+    },
+    {
+      "id": "public_switch_oled_usb_c_noise_filter_video_2024",
+      "title": "Nintendo Switch OLED with charging and HDMI trouble",
+      "device_hint": "Nintendo Switch OLED game console USB Type-C interface",
+      "source": {
+        "url": "https://www.youtube.com/watch?v=Rqw6-qVKbPs",
+        "title": "REPAIRING THE NINTENDO SWITCH OLED - NO CHARGING - NO HDMI - USING THE MECHANIC T-824",
+        "kind": "youtube_description_timestamp_chapters_only",
+        "posted": "2024-06-05",
+        "final_update": "2024-06-05",
+        "independent_physical_verification": false,
+        "transcript_or_frame_review_available": false
+      },
+      "full_breakdown": [
+        {
+          "step": 1,
+          "date_or_time": "00:29",
+          "event": "Presenter includes a console inspection chapter; title identifies charging and HDMI faults. Individual meter readings are not in the accessible description.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 2,
+          "date_or_time": "03:34",
+          "event": "Uses USB Type-C breakout board to inspect connectivity; accessible description does not report the voltages or individual pin results.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 3,
+          "date_or_time": "05:36",
+          "event": "References XZZ schematics for diagnosis; exact rail/pin conclusions are not text-verified.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 4,
+          "date_or_time": "08:14",
+          "event": "Removes original USB-C port using board repair tools.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 5,
+          "date_or_time": "10:19",
+          "event": "Solders replacement USB-C port.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 6,
+          "date_or_time": "12:32",
+          "event": "Replaces noise filter; component part number and bench reason for failure not in chapter text.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 7,
+          "date_or_time": "13:44",
+          "event": "Re-checks USB port connectivity. Actual before-after continuity readings not in accessible text.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 8,
+          "date_or_time": "14:33",
+          "event": "Solders USB port anchors.",
+          "evidence": "youtube_description_chapter"
+        },
+        {
+          "step": 9,
+          "date_or_time": "15:30",
+          "event": "Chapter tests charging functionality; accessible source does not independently establish a pass or full HDMI restoration.",
+          "evidence": "youtube_description_chapter"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "initial_no_charge_no_hdmi",
+          "title": "Nintendo Switch OLED USB-C charging and HDMI malfunction",
+          "device_hint": "Nintendo Switch OLED handheld gaming console",
+          "symptoms": [
+            "Nintendo Switch OLED reportedly does not charge",
+            "HDMI/docked video output reportedly does not work"
+          ],
+          "notes": "No verified board photos, connectivity readings, voltage data, or completed repair at this initial stage.",
+          "evidence_available_steps": [
+            1
+          ],
+          "expected_subsystems": [
+            {
+              "id": "usb_hdmi_interface",
+              "any_of": [
+                "usb",
+                "port",
+                "charg",
+                "connector",
+                "hdmi",
+                "power"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "hot_air_microsoldering",
+            "usb_c_pinout"
+          ],
+          "gold_visible": false
+        },
+        {
+          "id": "breakout_and_schematic_review",
+          "title": "Nintendo Switch OLED USB-C breakout inspection",
+          "device_hint": "Nintendo Switch OLED handheld gaming console",
+          "symptoms": [
+            "Charging not working",
+            "Docked HDMI output not working",
+            "USB Type-C breakout and schematic review are underway"
+          ],
+          "notes": "Only inspection methods are documented in the source chapter list; no electrical findings or selected failed component are yet known.",
+          "evidence_available_steps": [
+            1,
+            2,
+            3
+          ],
+          "expected_subsystems": [
+            {
+              "id": "connector_and_signal",
+              "any_of": [
+                "usb",
+                "port",
+                "charg",
+                "hdmi",
+                "connector",
+                "power"
+              ]
+            }
+          ],
+          "safety_flags": [
+            "lithium_battery",
+            "hot_air_microsoldering",
+            "usb_c_pinout"
+          ],
+          "gold_visible": false
+        }
+      ],
+      "oracle": {
+        "source_reported_initial_fault": "No charge and no HDMI (video title)",
+        "source_reported_hardware_intervention": "Timestamped chapters cover USB-C port replacement, noise-filter replacement, USB connectivity checks and charging test",
+        "source_reported_result": "Final video description contains charging-test chapter; independent charging success and HDMI restoration not verified from description",
+        "known_remaining_defects": [
+          "HDMI outcome not documented in accessible chapter text"
+        ],
+        "product_state": "PROCEDURE_DOCUMENTED_FINAL_FUNCTIONAL_RESULT_UNVERIFIED",
+        "underlying_cause_certainty": "Video description confirms interventions, not complete electrical root cause or numeric validation; no frame-by-frame review performed",
+        "source_owner_confirmed_repair": false,
+        "source_owner_confirmed_full_repair": false,
+        "physical_repair_by_hs": false,
+        "missing_technical_evidence": [
+          "actual USB-C breakout voltage and continuity readings",
+          "HDMI after-repair test",
+          "model-specific noise-filter part number",
+          "USB-C PD test log",
+          "battery safety and microscope inspection"
+        ]
+      },
+      "expected_family_keywords": [
+        "console",
+        "switch",
+        "usb",
+        "hdmi",
+        "charging"
+      ],
+      "engineering_lesson": "A multi-board microsoldering tutorial with a test chapter is not necessarily proof of fully repaired charging and HDMI."
+    }
+  ]
+}
