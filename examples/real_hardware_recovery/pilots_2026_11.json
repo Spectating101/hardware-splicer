@@ -1,0 +1,476 @@
+{
+  "schema_version": "hardware_splicer.real_hardware_recovery_pilot_catalog.v1",
+  "study_date": "2026-11-03",
+  "project": "Spectating101/hardware-splicer",
+  "purpose": "Reuse existing HS repair/salvage/functional-design paths for real physical devices, not greenfield app duplication",
+  "warning": "Planning evidence only. Every candidate remains blocked until a real owned donor device and operator-produced measurements exist.",
+  "existing_verifiable_engine": {
+    "repair_case_references": 7,
+    "repair_software_only_not_hardware_verified": true,
+    "salvage_examples_present": true,
+    "example_public_demo_drone_power_board_exists": true,
+    "real_hardware_outcomes_verified_in_this_study": 0
+  },
+  "authority_default": {
+    "physical_device_tested": false,
+    "restored_or_rebuilt": false,
+    "operator_power_on_approved": false,
+    "resale_ready": false,
+    "flight_authorized": false,
+    "customer_data_access_authorized": false
+  },
+  "pilot_count": 6,
+  "pilots": [
+    {
+      "id": "usb_fan_contact_driver_repair",
+      "rank": 1,
+      "kind": "repair",
+      "title": "USB desk fan: diagnose power, wiring, and stalled motor",
+      "status": "candidate_no_hardware",
+      "scope": "5V low-voltage bench repair",
+      "final_product": "Working fan with reassembled housing and verified multi-speed operation",
+      "donor": "Owned failed USB fan or comparable small-voltage fan",
+      "existing_hs_paths": [
+        "apps/circuit-ai/eval/real_repair_cases/cases.json",
+        "apps/circuit-ai/src/intelligence/repair_lane_packs.py",
+        "src/hardware_splicer/repair_intake.py"
+      ],
+      "existing_case_id": "usb_fan_no_spin",
+      "reuse_instead_of_new_app": "Use existing small_motor_usb repair lane; preserve original capture/measurement/outcome protocol.",
+      "guides": [
+        "https://www.ifixit.com/Info/Device_Safety"
+      ],
+      "problem": "Fan is unresponsive, stalls, or connector is intermittent.",
+      "component_checks": [
+        "model/voltage/USB power rating",
+        "harness polarity and continuity with disconnected supply",
+        "motor condition and driver compatibility",
+        "current-limited power test"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "serial_free_model_and_fault_photo",
+        "bench_voltage_and_current_measurement",
+        "connector_continuity_measurement",
+        "before_after_functional_test_video",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "battery pack or mains-powered fan: outside this pilot",
+        "unexpected heat, smell, smoke or current draw",
+        "power rating or polarity cannot be established"
+      ],
+      "safety_class": "low_voltage",
+      "potential_value": "practical low-cost bench demonstration",
+      "missing_capability": "physical observations and human test closure",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://www.ifixit.com/Info/Device_Safety",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    },
+    {
+      "id": "thinkpad_t480_recover",
+      "rank": 2,
+      "kind": "repair",
+      "title": "ThinkPad T480: restore boot, storage and cooling",
+      "status": "candidate_no_hardware",
+      "scope": "Model-identified laptop restoration",
+      "final_product": "Data-safe, stable booting refurbished laptop with thermal evidence",
+      "donor": "Owned or consented T480 with replaceable SSD/fan fault",
+      "existing_hs_paths": [
+        "apps/circuit-ai/eval/real_repair_cases/cases.json",
+        "apps/circuit-ai/src/intelligence/repair_encyclopedia.py",
+        "src/hardware_splicer/repair_intake.py"
+      ],
+      "existing_case_id": "laptop_no_power",
+      "reuse_instead_of_new_app": "Reuse general laptop diagnostic case; this specific T480 repair variant is NOT already validated.",
+      "guides": [
+        "https://www.ifixit.com/Device/Lenovo_ThinkPad_T480",
+        "https://www.ifixit.com/Guide/Lenovo+ThinkPad+T480+Fan+Assembly-Heatsink+Replacement/140095",
+        "https://csrc.nist.gov/pubs/sp/800/88/r2/final"
+      ],
+      "problem": "No boot, overheating, storage failure or noisy fan (confirm actual symptom).",
+      "component_checks": [
+        "exact submodel and FRU part identifiers",
+        "known-good charger and battery isolation",
+        "storage health/SMART and backup consent",
+        "fan function and thermal stress behavior",
+        "BIOS/OS boot stability"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "serial_free_model_and_fault_photo",
+        "battery_and_power_isolation",
+        "part_compatibility_evidence",
+        "pre_and_post_storage_health",
+        "pre_and_post_thermal_load_measurements",
+        "data_sanitization_or_return_policy_receipt",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "swollen or compromised lithium battery",
+        "unknown owner of storage and no consent",
+        "replacement part model/FRU mismatch",
+        "mains AC adapter opened"
+      ],
+      "safety_class": "battery_and_private_data",
+      "potential_value": "highly observable computer refurbishment",
+      "missing_capability": "model-specific component sourcing and actual measurements",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://www.ifixit.com/Device/Lenovo_ThinkPad_T480",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://www.ifixit.com/Guide/Lenovo+ThinkPad+T480+Fan+Assembly-Heatsink+Replacement/140095",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://csrc.nist.gov/pubs/sp/800/88/r2/final",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    },
+    {
+      "id": "pixel9_mobile_service",
+      "rank": 3,
+      "kind": "repair",
+      "title": "Google Pixel 9: model-specific screen/USB-C repair intake",
+      "status": "candidate_no_hardware",
+      "scope": "Phone repair feasibility and professional handoff",
+      "final_product": "Restored Pixel with verified charging, display, cameras, biometrics and safe closure",
+      "donor": "Owned Pixel 9 with verified repairable fault",
+      "existing_hs_paths": [
+        "apps/circuit-ai/src/intelligence/repair_case_evaluator.py",
+        "apps/circuit-ai/circuit-ai-frontend/app/repair/page.tsx"
+      ],
+      "existing_case_id": null,
+      "reuse_instead_of_new_app": "Reuse repair case/intake infrastructure; add model-specific procedures and vendor parts only after verifying region and model support.",
+      "guides": [
+        "https://support.google.com/pixelphone/answer/14257407",
+        "https://www.ifixit.com/repairability/smartphone-repairability-scores",
+        "https://www.ifixit.com/Info/Device_Safety"
+      ],
+      "problem": "Broken screen or charging fault; opening often risks adhesive/display and requires verified genuine parts.",
+      "component_checks": [
+        "exact Pixel model/SKU",
+        "OEM repair and parts availability for region",
+        "battery condition and safe opening route",
+        "USB-C/screen replacement compatibility",
+        "post-repair calibration requirements"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "serial_free_model_and_fault_photo",
+        "approved_vendor_repair_manual",
+        "battery_safety_clearance",
+        "part_compatibility_evidence",
+        "function_matrix_after_reassembly",
+        "data_sanitization_or_return_policy_receipt",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "swollen/bent/punctured battery",
+        "unknown account/activation security or third-party data",
+        "unavailable OEM repair procedure",
+        "cannot restore designed ingress resistance: disclose limitation",
+        "No consent to inspect account data or verify that private information remains untouched"
+      ],
+      "safety_class": "battery_and_private_data",
+      "potential_value": "repair-workflow specialization, not assumed low-cost",
+      "missing_capability": "model-specific parts, calibration/adhesive and real device testing",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://support.google.com/pixelphone/answer/14257407",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://www.ifixit.com/repairability/smartphone-repairability-scores",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://www.ifixit.com/Info/Device_Safety",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    },
+    {
+      "id": "framework_reuse_mini_pc",
+      "rank": 4,
+      "kind": "repurpose",
+      "title": "Retired Framework mainboard → standalone mini-PC",
+      "status": "candidate_no_hardware",
+      "scope": "Open documented modular board reuse",
+      "final_product": "Stable standalone Linux desktop/monitoring box in ventilated sourced or printed case",
+      "donor": "Working, legitimately owned Framework Laptop 13 or 16 mainboard",
+      "existing_hs_paths": [
+        "examples/product_corpus/enabot_depth_corpus.json",
+        "apps/circuit-ai/circuit-ai-frontend/app/reuse/page.tsx"
+      ],
+      "existing_case_id": null,
+      "reuse_instead_of_new_app": "Leverage existing HS salvage/device design and published Framework CAD; do not redesign motherboard or claim it is damaged.",
+      "guides": [
+        "https://github.com/FrameworkComputer/Framework-Laptop-16",
+        "https://frame.work/sustainability/",
+        "https://csrc.nist.gov/pubs/sp/800/88/r2/final"
+      ],
+      "problem": "Reuse good computer core from broken enclosure or retired laptop.",
+      "component_checks": [
+        "exact mainboard revision/power input",
+        "genuine board standoffs and grounding",
+        "documented cooling system and thermal limits",
+        "compatible RAM/storage/network/display",
+        "enclosure access and stress relief"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "board_revision_photo",
+        "manufacturer_cad_license_review",
+        "power_supply_compatibility_evidence",
+        "measured_stable_boot_and_thermal_load",
+        "3d_enclosure_clearance_check",
+        "data_sanitization_or_return_policy_receipt",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "unknown power connector rating",
+        "exposed live contacts or poor thermal management",
+        "owner data privacy unresolved"
+      ],
+      "safety_class": "power_and_private_data",
+      "potential_value": "higher-impact genuine hardware remanufacturing",
+      "missing_capability": "part acquisition and enclosure/thermal measurements",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://github.com/FrameworkComputer/Framework-Laptop-16",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://frame.work/sustainability/",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://csrc.nist.gov/pubs/sp/800/88/r2/final",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    },
+    {
+      "id": "printer_scrap_camera_slider",
+      "rank": 5,
+      "kind": "repurpose",
+      "title": "Scrap inkjet printer motion hardware → camera slider",
+      "status": "candidate_no_hardware",
+      "scope": "Ground-based actuator from salvaged stepper system",
+      "final_product": "Supervised low-speed camera rail with endstops and current-limited controller",
+      "donor": "Printer carriage motor/rail and possible driver board",
+      "existing_hs_paths": [
+        "examples/fixtures/splice_donor_inkjet_motion_board.json",
+        "examples/intakes/salvage_wifi_logger_brief.json",
+        "apps/circuit-ai/circuit-ai-frontend/app/reuse/page.tsx"
+      ],
+      "existing_case_id": null,
+      "reuse_instead_of_new_app": "Integrate existing donor motor-driver extraction/connector gates; do not create a new actuator design unnecessarily.",
+      "guides": [
+        "https://www.ifixit.com/Info/Device_Safety"
+      ],
+      "problem": "Reuse salvaged known low-voltage motion mechanics in an actual assembled product.",
+      "component_checks": [
+        "motor winding resistance and type",
+        "driver voltage/current/pinout",
+        "endstop direction and emergency stop",
+        "mechanical load/current draw",
+        "belt/rail limit and stability"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "serial_free_model_and_fault_photo",
+        "driver_pinout_and_current_limit_measurements",
+        "mechanical_travel_and_endstop_test",
+        "bounded_low_speed_motion_video",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "unverified mains power section",
+        "unknown motor/driver ratings",
+        "unguarded moving load or no stop mechanism"
+      ],
+      "safety_class": "low_voltage_mechanism",
+      "potential_value": "tangible enclosure, firmware, mechanics and electronics cross-stack HS showcase",
+      "missing_capability": "measured compatible donor hardware and real mechanics build",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://www.ifixit.com/Info/Device_Safety",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    },
+    {
+      "id": "salvaged_quad_bench_only",
+      "rank": 6,
+      "kind": "rebuild",
+      "title": "Broken quadcopter → propeller-free flight-controller bench rig",
+      "status": "candidate_no_hardware",
+      "scope": "Grounded bench qualification only; no flight proposed",
+      "final_product": "Nonflying propeller-free test rig with verified motors/ESCs, flight-controller mapping, sensor calibration and failsafe logs",
+      "donor": "Crash-damaged small quad with identifiable motors/ESCs plus known-good controller",
+      "existing_hs_paths": [
+        "apps/circuit-ai/circuit-ai-frontend/public/demo/drone_fc_power.kicad_pcb",
+        "apps/circuit-ai/circuit-ai-frontend/public/demo/drone_fc_power.net",
+        "examples/fixtures/splice_donor_rc_motor_board.json"
+      ],
+      "existing_case_id": null,
+      "reuse_instead_of_new_app": "Integrate existing drone power schematic with supported PX4/ArduPilot/Betaflight flight controllers; do not build a new autopilot.",
+      "guides": [
+        "https://docs.ardupilot.org/copter/docs/what-you-need.html",
+        "https://docs.px4.io/main/en/config_mc/",
+        "https://betaflight.com/docs/wiki/getting-started/setup-guide",
+        "https://www.caa.gov.tw/Article.aspx?a=3820&lang=1"
+      ],
+      "problem": "Recover compatible electronics from crashed/unpowered aircraft without treating junk parts as flightworthy.",
+      "component_checks": [
+        "source motor winding/shaft/bearing inspection",
+        "original ESC and motor protocol/current compatibility",
+        "flight controller IMU and orientation",
+        "receiver, arming switch and failsafe",
+        "known-good approved battery pack: no damaged salvage cells",
+        "propeller-free motor direction and telemetry"
+      ],
+      "required_evidence": [
+        "ownership_and_consent",
+        "source_motor_and_esc_identity",
+        "esc_motor_current_and_voltage_compatibility",
+        "new_or_qualified_undamaged_battery_receipt",
+        "supported_autopilot_and_firmware_build",
+        "virtual_SITL_failsafe_logs",
+        "propeller_free_bench_motor_and_failsafe_test",
+        "human_operator_signoff"
+      ],
+      "stop_conditions": [
+        "damaged or unknown lithium pack",
+        "damaged propellers/shafts, unknown ESC current rating",
+        "failsafe unset or bench props attached",
+        "no legal outdoor flight authorization and site check"
+      ],
+      "safety_class": "flight_critical_battery",
+      "potential_value": "strong integrative benchmark after low-voltage and mechanics pilots",
+      "missing_capability": "real parts qualification, verified battery, complete airframe and legal flight approval",
+      "authority": {
+        "physical_device_tested": false,
+        "restored_or_rebuilt": false,
+        "operator_power_on_approved": false,
+        "resale_ready": false,
+        "flight_authorized": false,
+        "customer_data_access_authorized": false
+      },
+      "operator_evidence": [],
+      "economic_actuals": {
+        "purchase_cost": null,
+        "parts_cost": null,
+        "repair_labor_minutes": null,
+        "energy_cost": null,
+        "recovery_or_sale_value": null
+      },
+      "source_references": [
+        {
+          "url": "https://docs.ardupilot.org/copter/docs/what-you-need.html",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://docs.px4.io/main/en/config_mc/",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://betaflight.com/docs/wiki/getting-started/setup-guide",
+          "source_role": "public_technical_documentation_not_physical_test"
+        },
+        {
+          "url": "https://www.caa.gov.tw/Article.aspx?a=3820&lang=1",
+          "source_role": "public_technical_documentation_not_physical_test"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+name: HS Evidence-First Differential and Honest Repair Readiness
+on:
+  pull_request:
+    paths:
+      - "apps/circuit-ai/src/intelligence/repair_differential_triage.py"
+      - "apps/circuit-ai/src/intelligence/repair_encyclopedia.py"
+      - "apps/circuit-ai/src/intelligence/repair_market_coverage.py"
+      - "apps/circuit-ai/src/intelligence/repair_case_evaluator.py"
+      - "scripts/verify_hs_evidence_first_differential_001.py"
+      - "docs/HS_POST_HOLDOUT_EVIDENCE_FIRST_TRIAGE_2026_11_03.md"
+      - ".github/workflows/hs-evidence-first-differential.yml"
+  workflow_dispatch:
+jobs:
+  synthetic-regressions-not-unseen-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prove original unseen repair holdout remains frozen
+        run: |
+          set -euo pipefail
+          test "$(git hash-object examples/public_restoration_replays/unseen_holdout_2026_11_03.json)" = "b2441fb0fbdeb594e33a4f8f01deda25b3b3096a"
+          git diff --exit-code 4154d4f33725f0ef2981fe7ca5c5ecd433a7499d HEAD -- \
+            examples/public_restoration_replays/unseen_holdout_2026_11_03.json \
+            scripts/bench_hs_public_restoration_holdout_001.py \
+            scripts/verify_hs_public_restoration_holdout_001.py
+          echo "FROZEN ORIGINAL HOLDOUT UNTOUCHED; no new blind validation claimed"
+      - name: Install real Circuit-AI integration dependencies
+        run: python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Compile changed Python and run synthetic development regression
+        run: |
+          python -m py_compile \
+            apps/circuit-ai/src/intelligence/repair_differential_triage.py \
+            apps/circuit-ai/src/intelligence/repair_encyclopedia.py \
+            apps/circuit-ai/src/intelligence/repair_market_coverage.py \
+            apps/circuit-ai/src/intelligence/repair_case_evaluator.py \
+            scripts/verify_hs_evidence_first_differential_001.py
+          python -m scripts.verify_hs_evidence_first_differential_001 | tee evidence_first_synthetic_results.json
+      - name: Publish development results, never rebrand as blinded accuracy
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-evidence-first-synthetic-development-not-unseen
+          path: |
+            evidence_first_synthetic_results.json
+            docs/HS_POST_HOLDOUT_EVIDENCE_FIRST_TRIAGE_2026_11_03.md
+          if-no-files-found: warn

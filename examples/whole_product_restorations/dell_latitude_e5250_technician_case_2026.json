@@ -1,0 +1,340 @@
+{
+  "schema_version": "hs.repair_restoration_episode.v1",
+  "case_id": "dell_latitude_e5250_2026_technician_board_repair",
+  "title": "Dell Latitude E5250 — 19V input short, capacitor restoration, second RTC/boot-start state",
+  "source": {
+    "publisher": "Sorin Electronics / Electronics Repair School",
+    "article_url": "https://sorinelectronics.co.uk/dell-laptop-not-charging/",
+    "video_url": "https://www.youtube.com/watch?v=fi-Vt34Al_A",
+    "source_date": "2026-10-05",
+    "source_type": "first_person_professional_repair_case_public_blog_and_linked_video",
+    "independent_second_technician_replication": false,
+    "source_evidence_role": "third_party_technician_report_not_HS_lab_measurement",
+    "source_verification": "web article reviewed; embedded video identified by link, no video frame by frame analysis"
+  },
+  "device": {
+    "manufacturer": "Dell",
+    "model": "Latitude E5250",
+    "category": "business_laptop",
+    "serial_number": null,
+    "motherboard_revision": null,
+    "schematic_or_boardview": null,
+    "preserved_asset": "original encrypted hard drive",
+    "device_in_HS_possession": false
+  },
+  "research_context": {
+    "selection_mode": "illustrative retrospective case study, selected AFTER public repair outcome was already known",
+    "not_a_frozen_unknown_holdout": true,
+    "software_target": "existing RepairCaseEvaluator + RepairEncyclopedia + BoardSessionStore + RepairVideoPlaybookBuilder",
+    "not_a_laboratory_replication": true
+  },
+  "chronology": [
+    {
+      "id": "T0",
+      "phase": "intake",
+      "title": "Dead machine, healthy unloaded adapter, protection trip",
+      "previously_known_observations": [
+        "The Dell Latitude E5250 has no boot and does not charge.",
+        "The Dell adapter indicator goes out as soon as it is attached to this laptop; it comes back after unplugging.",
+        "The disconnected adapter output measures 19.9 V on the repairer's multimeter."
+      ],
+      "source_measurements": [
+        {
+          "id": "M01",
+          "target": "Dell external barrel adapter unloaded",
+          "value": 19.9,
+          "unit": "V",
+          "condition": "DC voltage at accessible adapter plug, not connected to laptop",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        }
+      ],
+      "allowed_in_engine": true,
+      "decision_prompt": "Identify where to localize lost power without assuming the battery or external adapter is bad."
+    },
+    {
+      "id": "T1",
+      "phase": "diagnosis",
+      "title": "Input rail draws heavy current; removing port does not remove short",
+      "previously_known_observations": [
+        "Original repair technician reports the board took 2.3 A from a bench supply nominally set to 19 V while observed voltage collapsed nearly to zero.",
+        "Technician removed the power connector and measured persistent short on the board-side main input rail.",
+        "A diode/short test showed multiple capacitors on the same rail sharing the apparent short; individual capacitor causality not yet isolated."
+      ],
+      "source_measurements": [
+        {
+          "id": "M02",
+          "target": "board supply reported output current under fault",
+          "value": 2.3,
+          "unit": "A",
+          "condition": "technician described bench supply nominally set to 19 V with output collapsed near zero; not an instruction to replicate",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        },
+        {
+          "id": "M03",
+          "target": "bench supply nominal setting (not measured on board)",
+          "value": 19,
+          "unit": "V",
+          "condition": "technician-reported supply setting during failed power injection; actual rail nearly zero",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        }
+      ],
+      "allowed_in_engine": true,
+      "decision_prompt": "Discriminate input-port failure from downstream main-rail short and avoid replacing every capacitor on a shared net."
+    },
+    {
+      "id": "T2",
+      "phase": "diagnosis",
+      "title": "Current-sense resistor was misleading; shorted capacitor localized",
+      "previously_known_observations": [
+        "During the technician's localization, a current-sense resistor first appeared hot because fault current was passing through it; that was a false localization.",
+        "After changing the injection location the repairer observed a particular ceramic capacitor heating; the short disappeared after that capacitor was removed.",
+        "The replacement part electrical value, dielectric, voltage rating, polarity-equivalence/footprint and exact board coordinates were not documented in the article."
+      ],
+      "source_measurements": [
+        {
+          "id": "M04",
+          "target": "localized board current (source-reported lower injection)",
+          "value": 1.3,
+          "unit": "A",
+          "condition": "first injection position as reported; NOT an operating setpoint",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        }
+      ],
+      "allowed_in_engine": true,
+      "decision_prompt": "Stop at an isolated faulty part hypothesis until exact replacement specification and safety are verified."
+    },
+    {
+      "id": "T3",
+      "phase": "post_intervention",
+      "title": "Source technician replaced capacitor, but board still would not boot",
+      "previously_known_observations": [
+        "The source technician fitted a ceramic capacitor harvested from an older MacBook donor board; capacitance, working voltage, dielectric and layout equivalence are not documented.",
+        "The board power rail later sat at 19.9 V and idle current reportedly dropped to around 40 mA.",
+        "The laptop still did not initially boot after partial reassembly despite 3.3 V being present on the power-button circuit and the 19.9 V input rail."
+      ],
+      "source_measurements": [
+        {
+          "id": "M05",
+          "target": "reported post-component-removal current",
+          "value": 40,
+          "unit": "mA",
+          "condition": "after short removal, repair technician report; not a full machine idle current certification",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        },
+        {
+          "id": "M06",
+          "target": "board input rail after capacitor replacement",
+          "value": 19.9,
+          "unit": "V",
+          "condition": "later power-up attempt, source reported",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        },
+        {
+          "id": "M07",
+          "target": "power-button circuit after capacitor replacement",
+          "value": 3.3,
+          "unit": "V",
+          "condition": "board still failed to boot, source reported",
+          "reporter": "original_repair_technician",
+          "independent_HS_measurement": false
+        }
+      ],
+      "allowed_in_engine": true,
+      "decision_prompt": "Re-open diagnosis for a second no-boot condition, rather than claiming complete repair because the input rail recovered."
+    },
+    {
+      "id": "T4",
+      "phase": "post_intervention",
+      "title": "Second boot issue attributed to BIOS/RTC battery startup state",
+      "previously_known_observations": [
+        "The technician found that the laptop would start once the RTC/BIOS battery was disconnected before charger connection.",
+        "The technician described reconnecting the BIOS battery while the computer was powered, after which ordinary on/off cycling reportedly resumed.",
+        "HS does not authorize reconnecting an RTC battery to a powered board, and the article does not establish a permanent model-specific root cause for this state dependence."
+      ],
+      "source_measurements": [],
+      "allowed_in_engine": true,
+      "decision_prompt": "Record the second state-dependent boot blocker and require qualified safe diagnosis rather than hot-connecting the RTC battery."
+    },
+    {
+      "id": "T5",
+      "phase": "functional_outcome",
+      "title": "Source reports OS-level functional boot and reassembly",
+      "previously_known_observations": [
+        "The owner repair technician reports the machine booted to a Windows BitLocker recovery/unlock prompt on its existing encrypted drive.",
+        "The source reports repeated power on/off behavior was restored and mechanical reassembly completed.",
+        "No independently logged complete charge/discharge cycle, battery capacity test, long-duration thermal validation, post-repair data access, or customer signoff is supplied."
+      ],
+      "source_measurements": [],
+      "allowed_in_engine": false,
+      "decision_prompt": "Do not equate seeing BitLocker unlock screen with customer-grade full repair acceptance."
+    }
+  ],
+  "source_reported_interventions": [
+    {
+      "id": "I1",
+      "stage": "T1",
+      "action": "Board voltage/current fault investigation with bench power and disassembly",
+      "actor": "source_technician",
+      "approved_by_HS": false,
+      "risk": "high",
+      "authorization": "source_history_only"
+    },
+    {
+      "id": "I2",
+      "stage": "T2",
+      "action": "Source used a flammable solvent heat/evaporation technique while sourcing a shorted element",
+      "actor": "source_technician",
+      "approved_by_HS": false,
+      "risk": "critical_fire_hazard",
+      "authorization": "explicitly_prohibited_as_HS_instruction"
+    },
+    {
+      "id": "I3",
+      "stage": "T3",
+      "action": "Source removed failed MLCC, then fitted an unspecified old-MacBook donor MLCC",
+      "actor": "source_technician",
+      "approved_by_HS": false,
+      "risk": "high_unverified_part_rating",
+      "authorization": "source_history_only_not_recommended_part"
+    },
+    {
+      "id": "I4",
+      "stage": "T4",
+      "action": "Source disconnected BIOS/RTC battery and later described reconnecting it on an energized board",
+      "actor": "source_technician",
+      "approved_by_HS": false,
+      "risk": "high_hot_connection",
+      "authorization": "explicitly_prohibited_as_HS_instruction"
+    }
+  ],
+  "conditional_bom": [
+    {
+      "id": "B1",
+      "kind": "diagnostic_instrument",
+      "name": "properly rated multimeter and probe accessories",
+      "qty": 1,
+      "source_verified_available": "original technician used a multimeter",
+      "cost_estimate": null,
+      "approved_purchase": false
+    },
+    {
+      "id": "B2",
+      "kind": "diagnostic_instrument",
+      "name": "current-limited bench supply and safe workholding (qualified technician only)",
+      "qty": 1,
+      "source_verified_available": "original technician used a bench supply",
+      "cost_estimate": null,
+      "approved_purchase": false
+    },
+    {
+      "id": "B3",
+      "kind": "diagnostic_instrument",
+      "name": "non-contact thermal camera (preferred over any solvent heating method)",
+      "qty": 1,
+      "source_verified_available": false,
+      "cost_estimate": null,
+      "approved_purchase": false
+    },
+    {
+      "id": "B4",
+      "kind": "component_candidate",
+      "name": "laptop main-input MLCC matching manufacturer board-level capacitor specification",
+      "qty": 1,
+      "source_verified_available": false,
+      "cost_estimate": null,
+      "approved_purchase": false,
+      "missing_spec": [
+        "capacitance",
+        "voltage rating",
+        "dielectric",
+        "package and footprint",
+        "thermal characteristics",
+        "board coordinates",
+        "source part traceability"
+      ],
+      "replacement_approval": "BLOCKED_UNTIL_SPEC_AND_INSPECTION"
+    },
+    {
+      "id": "B5",
+      "kind": "documentation",
+      "name": "Dell Latitude E5250 board revision specific repair manual / boardview",
+      "qty": 1,
+      "source_verified_available": false,
+      "cost_estimate": null,
+      "approved_purchase": false
+    }
+  ],
+  "acceptance_requirements": [
+    {
+      "id": "A1",
+      "name": "main_19v_input_rail_restored",
+      "source_reported": true,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A2",
+      "name": "normal_software_boot_to_original_bitlocker_prompt",
+      "source_reported": true,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A3",
+      "name": "repeated_power_cycle",
+      "source_reported": true,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A4",
+      "name": "battery_charges_safely_through_expected_operating_range",
+      "source_reported": false,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A5",
+      "name": "thermal_stability_under_load_and_extended_runtime",
+      "source_reported": false,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A6",
+      "name": "full_reassembly_interlocks_ports_fan_and_connector_test",
+      "source_reported": false,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A7",
+      "name": "RTC_time_retention_and_correct_safely_deenergized_startup",
+      "source_reported": false,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    },
+    {
+      "id": "A8",
+      "name": "data_access_with_owner_authorization_and_customer_acceptance",
+      "source_reported": false,
+      "HS_observed": false,
+      "qualified_independent_retest": false
+    }
+  ],
+  "scope_control": {
+    "physically_repaired_by_HS": false,
+    "HS_performed_any_measurement": false,
+    "HS_approved_high_energy_injection": false,
+    "HS_approved_live_RTC_connection": false,
+    "HS_proposed_purchased_part": false,
+    "retrospective_not_blind": true,
+    "technician_owner_reports_not_independent_product_certification": true
+  }
+}

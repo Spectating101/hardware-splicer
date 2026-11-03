@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HS SORTCELL / OpenArm v1.0 source collision engineering view</title>
+<style>
+:root{color-scheme:dark;font:14px Inter,system-ui,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#0a1827;color:#eaf6ff;overflow:hidden}
+#viewport{position:absolute;inset:0}
+#header{position:absolute;left:20px;top:18px;pointer-events:none;max-width:min(750px,78vw)}
+#header h1{font-size:24px;margin:5px 0;font-weight:800;letter-spacing:-.045em}
+.kicker{font-size:11px;letter-spacing:.17em;color:#7dd1e8;font-weight:700}
+.desc{color:#b4cedc;line-height:1.45;font-size:12px}
+.flag{display:inline-block;border:1px solid #d89d4e55;padding:5px 8px;color:#ffc77f;border-radius:6px;margin-top:12px;background:#3d261582;font-size:11px}
+#panel{position:absolute;top:18px;right:18px;width:245px;background:#0d2537ed;border:1px solid #54748a;border-radius:12px;padding:15px;max-height:calc(100vh - 175px);overflow:auto}
+#panel strong{display:block;margin:5px 0 2px;color:#fff;font-size:14px}
+#panel small{display:block;color:#a8bfce;font-size:11px;line-height:1.45}
+#phase{font-size:15px;line-height:1.3}
+#notes{margin-top:10px;color:#d4b38f;font-size:11px;line-height:1.45}
+#timeline{position:absolute;bottom:17px;left:17px;right:17px;background:#102b3eec;border:1px solid #52768e;border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:18px}
+#timeline label{font-size:11px;color:#adc7d6;min-width:150px}
+#scrub{flex:1;accent-color:#67d6e9;min-width:100px}
+button{background:#17536e;color:white;border:1px solid #6b9db3;border-radius:7px;padding:8px 12px;cursor:pointer}
+#legend{position:absolute;left:19px;bottom:105px;font-size:11px;color:#aec6d8;background:#142b3dce;padding:10px;border-radius:8px;line-height:1.55;max-width:250px}
+.swatch{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:2px}
+@media(max-width:800px){#header h1{font-size:19px}#panel{top:128px;right:10px;width:160px;padding:10px}#timeline{gap:7px;padding:10px}#timeline label{min-width:0;max-width:90px}#legend{display:none}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+<div id="viewport"></div>
+<div id="header">
+<div class="kicker">HARDWARE SPLICER / SOURCE ENGINEERING VIEW</div>
+<h1>OpenArm v1.0 · Collision Geometry</h1>
+<div class="desc">Original manufacturer URDF collision STLs · source-link transforms from actual PyBullet joint states · free workpiece pose and real simulated fixture supports.</div>
+<div class="flag">NOT SOURCE VISUAL CAD · NOT v1.1 GLB · NOT PHYSICALLY CERTIFIED</div>
+</div>
+<div id="panel">
+<div class="kicker">SAMPLED MOTOR REPLAY</div>
+<strong id="phase">Loading original source geometry…</strong>
+<small id="frame">–</small>
+<div id="notes">Two manufacturer wrist link5/link7 collision pairs remain intersecting. No contacts are whitelisted.</div>
+<hr style="border:0;border-top:1px solid #52748d;margin:12px 0">
+<small>Source v1.0 frame: Z-up, metres</small>
+<small>Manufacturer collision geometry only</small>
+<small>Original v1.1 CAD registration: unavailable</small>
+<small>Motion commands authorized: NO</small>
+</div>
+<div id="legend">
+<div><span class="swatch" style="background:#829caf"></span>Manufacturer collision geometry</div>
+<div><span class="swatch" style="background:#ff865e"></span>Source wrist link5/link7 overlap (both arms)</div>
+<div><span class="swatch" style="background:#55dccc"></span>Free PyBullet workpiece, 60 mm</div>
+<div><span class="swatch" style="background:#74a4db"></span>Proposed fixture (not existing viewer CAD)</div>
+</div>
+<div id="timeline">
+<button id="play">Play</button>
+<label id="step">Source sample 0 / 0</label>
+<input id="scrub" type="range" min="0" max="0" value="0" aria-label="Source physics frame">
+<button id="reset">Reset camera</button>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import {STLLoader} from './vendor/STLLoader.js';
+import {OrbitControls} from './vendor/OrbitControls.js';
+
+const load = async name => {
+ const res = await fetch(name);
+ if(!res.ok)throw Error('Cannot read source engineering evidence: '+name);
+ return await res.json();
+};
+const canvasRoot=document.getElementById('viewport');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.setClearColor(0x0a1827,1);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+canvasRoot.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x0a1827,2.7,7.5);
+scene.add(new THREE.AmbientLight(0xd5eaff,1.6));
+const key=new THREE.DirectionalLight(0xffffff,2.6);key.position.set(1.3,-1.2,2.6);scene.add(key);
+const fill=new THREE.DirectionalLight(0x90c7ff,1.0);fill.position.set(-2,1,1);scene.add(fill);
+const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.01,40);
+camera.up.set(0,0,1);
+const controls=new OrbitControls(camera,renderer.domElement);
+function resetCamera(){
+ camera.position.set(1.7,-2.5,1.65);
+ controls.target.set(0,0,.35);
+ controls.update();
+}
+resetCamera();
+const grid=new THREE.GridHelper(3.2,26,0x456b80,0x24465c);
+grid.rotation.x=Math.PI/2;
+grid.position.z=-.005;scene.add(grid);
+const axes=new THREE.AxesHelper(.22);scene.add(axes);
+const renderMaterial=(n)=>{
+ const wrist=n.includes('link5')||n.includes('link7');
+ const color=wrist?0xff865e:n.includes('right')?0xa6c2d4:0x688ba2;
+ return new THREE.MeshStandardMaterial({
+  color,metalness:.37,roughness:.47,side:THREE.DoubleSide,
+  transparent:true,opacity:wrist?.92:.64,depthWrite:true
+ });
+};
+const stageMaterial=new THREE.MeshStandardMaterial({color:0x537fa8,metalness:.30,roughness:.55,transparent:true,opacity:.46});
+const cubeMaterial=new THREE.MeshStandardMaterial({color:0x55dccc,metalness:.21,roughness:.38});
+const cache=new Map();
+const nativeGroups=new Map();
+function configure(mesh,shape){
+ mesh.position.fromArray(shape.offset_xyz_m);
+ mesh.quaternion.fromArray(shape.offset_quaternion_xyzw);
+ if(shape.kind==='original_stl')mesh.scale.fromArray(shape.scale);
+ mesh.castShadow=true;mesh.receiveShadow=true;
+ return mesh;
+}
+function nativePrimitive(shape){
+ if(shape.kind==='original_box')return new THREE.BoxGeometry(...shape.size);
+ if(shape.kind==='original_sphere')return new THREE.SphereGeometry(shape.radius,16,12);
+ if(shape.kind==='original_cylinder'){
+   const geo=new THREE.CylinderGeometry(shape.radius,shape.radius,shape.length,18);
+   geo.rotateX(Math.PI/2);
+   return geo;
+ }
+ throw Error('Unrecognized manufacturer collision shape');
+}
+let trace;
+let active=0;
+let playing=false;
+let previous=0;
+let cube=null;
+const phaseEl=document.getElementById('phase');
+const frameEl=document.getElementById('frame');
+const noteEl=document.getElementById('notes');
+const slider=document.getElementById('scrub');
+const stepEl=document.getElementById('step');
+const playEl=document.getElementById('play');
+const loader=new STLLoader();
+try{
+ const manifest=await load('./source_manifest.json');
+ trace=await load('./source_motion.json');
+ if(manifest.schema_version!=='hardware_splicer.sortcell_manufacturer_collision_viewer.v1')
+  throw Error('Unexpected manufacturer collision viewer manifest');
+ if(trace.source_urdf_sha256!==manifest.source_urdf_sha256 || !trace.no_v11_registration)
+  throw Error('Unregistered source evidence has inconsistent URDF provenance');
+ if(trace.hardware_authorized)throw Error('Physical robot authority is not permitted');
+ for(const part of manifest.source_collision_links){
+   const group=new THREE.Group();group.name=part.link;scene.add(group);
+   nativeGroups.set(part.link,group);
+   for(const shape of part.shapes){
+     let geom;
+     if(shape.kind==='original_stl'){
+       if(!cache.has(shape.asset))cache.set(shape.asset,loader.loadAsync(shape.asset));
+       geom=await cache.get(shape.asset);
+     } else geom=nativePrimitive(shape);
+     const mesh=configure(new THREE.Mesh(geom,renderMaterial(part.link)),shape);
+     group.add(mesh);
+   }
+ }
+ for(const station of trace.supports){
+   const geom=new THREE.BoxGeometry(...station.size);
+   const obj=new THREE.Mesh(geom,stageMaterial);
+   obj.position.fromArray(station.p);scene.add(obj);
+ }
+ cube=new THREE.Mesh(new THREE.BoxGeometry(trace.cube_side,trace.cube_side,trace.cube_side),cubeMaterial);
+ cube.castShadow=true;scene.add(cube);
+ slider.max=trace.frames.length-1;
+ function update(i){
+    active=Math.max(0,Math.min(trace.frames.length-1,i));
+    const f=trace.frames[active];
+    for(const [name,pose] of Object.entries(f.links)){
+      const group=nativeGroups.get(name);
+      if(!group)throw Error('Source FK link unknown: '+name);
+      group.position.fromArray(pose.p);
+      group.quaternion.fromArray(pose.q);
+    }
+    cube.position.fromArray(f.cube_p);
+    cube.quaternion.fromArray(f.cube_q);
+    phaseEl.textContent=f.phase.replaceAll('_',' ').toUpperCase();
+    frameEl.textContent='Frame '+f.step+' · SOURCE MOTOR SAMPLE '+(active+1)+'/'+trace.frames.length;
+    stepEl.textContent=(active+1)+' / '+trace.frames.length;
+    slider.value=active;
+    const depth=f.source_wrist.filter(x=>(x.link_pair||[]).some(n=>n.includes('link5'))).length;
+    noteEl.textContent='Gripper both fingers contact: '+(f.bilateral?'YES':'NO')+
+        ' · Cube destination support contacts: '+f.deposit_support+
+        ' · Source self-overlap pairs: '+depth+
+        ' · Stage fixture penetration groups: '+Object.keys(f.fixture_hits).length+
+        '. Source wrist overlap is unresolved.';
+ }
+ slider.addEventListener('input',()=>{playing=false;playEl.textContent='Play';update(+slider.value);});
+ playEl.addEventListener('click',()=>{playing=!playing;playEl.textContent=playing?'Pause':'Play';});
+ update(0);
+ function animation(t){
+   requestAnimationFrame(animation);
+   if(playing && t-previous>=55){update((active+1)%trace.frames.length);previous=t;}
+   controls.update();renderer.render(scene,camera);
+ }
+ requestAnimationFrame(animation);
+}catch(err){
+ phaseEl.textContent='SOURCE VIEWER FAILED';
+ noteEl.textContent=String(err);
+ console.error(err);
+}
+document.getElementById('reset').addEventListener('click',resetCamera);
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>

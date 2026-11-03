@@ -9,6 +9,9 @@ from src.intelligence.board_session_store import BoardSessionStore
 from src.intelligence.repair_encyclopedia import RepairEncyclopedia
 from src.intelligence.repair_market_coverage import RepairMarketCoverage
 from src.intelligence.repair_video_playbook import RepairVideoPlaybookBuilder
+from src.intelligence.repair_power_path_evidence import (
+    analyze_laptop_power_evidence, apply_laptop_evidence_to_guide,
+)
 
 
 @dataclass
@@ -22,6 +25,7 @@ class RepairCase:
     observed_actions: List[str] = field(default_factory=list)
     notes: str = ""
     expected_lane: str = ""
+    evidence_events: List[Dict[str, Any]] = field(default_factory=list)
 
 
 class RepairCaseEvaluator:
@@ -75,12 +79,18 @@ class RepairCaseEvaluator:
     ) -> Dict[str, Any]:
         record = self._coerce_case(case)
         query = " ".join([record.title, record.device_hint, *record.symptoms, record.notes])
-        coverage = self.coverage.evaluate_text(query)
+        coverage = self.coverage.evaluate_text(query, device_hint=record.device_hint)
         guide = self.encyclopedia.generate(
             analysis={},
             symptoms=record.symptoms,
             device_hint=record.device_hint or record.title,
         )
+        evidence_state = None
+        if record.evidence_events:
+            evidence_state = analyze_laptop_power_evidence(
+                record.evidence_events, device_hint=record.device_hint
+            )
+            guide = apply_laptop_evidence_to_guide(guide, evidence_state)
         playbook = self.playbook_builder.build(
             video_reference={
                 "title": record.title,
@@ -103,6 +113,11 @@ class RepairCaseEvaluator:
                 "route": route,
                 "repair_guide": guide,
                 "coverage": coverage,
+                "case_file": {
+                    "source_evidence_events": record.evidence_events,
+                    "evidence_state": evidence_state,
+                    "physical_repair_approval": False,
+                } if record.evidence_events else {},
                 "source": "real_repair_case_eval",
             },
             user_id="case-evaluator",
@@ -118,6 +133,7 @@ class RepairCaseEvaluator:
             "title": record.title,
             "source_url": record.source_url,
             "expected_lane": record.expected_lane,
+            "evidence_state": evidence_state,
             "coverage": {
                 "matched": coverage.get("matched"),
                 "top_item": top_match.get("item_id"),
@@ -127,6 +143,7 @@ class RepairCaseEvaluator:
                 "strategic_score": top_match.get("strategic_score"),
             },
             "repair_guide": {
+                "triage_state": guide.get("triage_state"),
                 "family": (guide.get("device_family") or {}).get("id"),
                 "family_label": (guide.get("device_family") or {}).get("label"),
                 "confidence": guide.get("confidence"),
@@ -157,6 +174,8 @@ class RepairCaseEvaluator:
             },
             "workflow_score": score,
             "verdict": verdict,
+            "verdict_scope": "software_workflow_only_not_repaired_product",
+            "physical_repair_ready": False,
             "blockers": blockers,
             "recommended_next_builds": self._case_next_builds(record, coverage, guide, blockers),
         }
@@ -266,12 +285,25 @@ class RepairCaseEvaluator:
         if float(guide.get("confidence", 0.0) or 0.0) < 0.45:
             blockers.append("low guide confidence without board photos or measurements")
         safety = guide.get("safety_profile") or {}
+        if (guide.get("triage_state") or {}).get("requires_measurement"):
+            blockers.append("model-specific knowledge required: differential hypothesis unverified; no repair-ready claim")
+        if guide.get("evidence_state"):
+            blockers.append("model-specific knowledge required: source-reported measurements and causal transition not independently verified")
         if safety.get("risk_level") == "high":
             blockers.append("trained safety workflow required for high-voltage or mains portions")
         if (session.get("metrics") or {}).get("task_count", 0) == 0:
             blockers.append("hard: no board-session evidence tasks generated")
         if float(playbook.get("can_follow_score", 0.0) or 0.0) < 0.5:
             blockers.append("video-to-playbook support is weak without more observed actions")
+        family = (guide.get("device_family") or {}).get("id")
+        if family == "modern_console_usb_c_video":
+            blockers.append("model-specific knowledge required for trained USB-C/HDMI port/filter bench rework")
+        if family == "phone_charging_port_flex":
+            blockers.append("model-specific knowledge required for battery-isolated charging-flex diagnosis")
+        if family == "retro_handheld_aa_power":
+            # The AA contact check is suitable as a workflow, but completion
+            # requires the entire display/audio/control acceptance afterward.
+            pass
         if "laptop" in f"{case.title} {case.device_hint}".lower():
             blockers.append("boardview/schematic and model-specific teardown needed for deeper board repair")
         return list(dict.fromkeys(blockers))
@@ -325,6 +357,7 @@ class RepairCaseEvaluator:
             observed_actions=[str(item) for item in payload.get("observed_actions", []) or []],
             notes=str(payload.get("notes") or ""),
             expected_lane=str(payload.get("expected_lane") or ""),
+            evidence_events=[dict(item) for item in payload.get("evidence_events", []) or []],
         )
 
     @staticmethod

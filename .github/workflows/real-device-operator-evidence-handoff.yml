@@ -1,0 +1,115 @@
+name: HS Real-Device Original Bench Evidence and Measurement Handoff
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/real-device-operator-evidence-handoff.yml"
+      - "scripts/admit_hs_real_device_bench_evidence_001.py"
+      - "scripts/compile_hs_real_device_field_workorder_001.py"
+      - "scripts/verify_hs_real_device_workorder_001.py"
+      - "scripts/evaluate_real_hardware_recovery_pilots_001.py"
+  workflow_dispatch:
+jobs:
+  original-field-evidence-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile first real-product field kit from existing source repair lane
+        run: |
+          python -m scripts.compile_hs_real_device_field_workorder_001 \
+            --root . --pilot usb_fan_contact_driver_repair \
+            --output .cache/hs-operator-bench/field
+          python -m scripts.verify_hs_real_device_workorder_001 \
+            --root . --work-dir .cache/hs-operator-bench/field \
+            --pilot usb_fan_contact_driver_repair \
+            --output .cache/hs-operator-bench/field/INDEPENDENT_WORKORDER_ACCEPTANCE.json
+      - name: Admit a carefully labelled SYNTHETIC TEST file, not a real repair or power authorization
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-operator-bench")
+          evidence=root/"synthetic-ci-only"
+          evidence.mkdir(exist_ok=True)
+          packet=root/"field"/"FIELD_WORK_ORDER.json"
+          image=evidence/"DUMMY_BENCH_RECORD_NOT_A_REAL_DEVICE.txt"
+          image.write_text(
+            "SYNTHETIC CI TEST DATA; NOT ACTUAL DEVICE; NO REPAIR PROVEN\n"
+            "Operator simulation tests hash verification only.\n")
+          h=hashlib.sha256(image.read_bytes()).hexdigest()
+          session={
+            "schema_version":"hardware_splicer.real_device_operator_bench_session.v1",
+            "pilot_id":"usb_fan_contact_driver_repair",
+            "original_work_order_sha256":hashlib.sha256(packet.read_bytes()).hexdigest(),
+            "actual_product_completed":False,
+            "operating_authority_requested":False,
+            "commercial_resale_authorized":False,
+            "original_evidence_receipts":[{"gate":"serial_free_model_and_fault_photo",
+              "source_path":image.name,"sha256":h,
+              "finding":"inconclusive",
+              "observed_at_utc":"2026-11-03T00:00:00Z",
+              "operator_role":"synthetic-ci-tester"}],
+            "original_measurements":[{"measurement_id":"input_voltage_idle",
+              "observed_value":5.0,
+              "unit":"V",
+              "instrument_id":"SIMULATED-NOT-REAL-METER",
+              "observed_at_utc":"2026-11-03T00:00:00Z",
+              "operator_role":"synthetic-ci-tester",
+              "source_path":image.name,"sha256":h}],
+          }
+          (root/"SYNTHETIC_SESSION_NOT_REAL.json").write_text(json.dumps(session,indent=2))
+          PY
+          python -m scripts.admit_hs_real_device_bench_evidence_001 \
+            --root . --pilot usb_fan_contact_driver_repair \
+            --workdir .cache/hs-operator-bench/field \
+            --files-root .cache/hs-operator-bench/synthetic-ci-only \
+            --session .cache/hs-operator-bench/SYNTHETIC_SESSION_NOT_REAL.json \
+            --output .cache/hs-operator-bench/TEST_ONLY_EVIDENCE_ADMISSION.json
+      - name: Adversarial tests — malformed hashes, unknown devices, bad units, fake product completion
+        run: |
+          python - <<'PY'
+          import json,tempfile
+          from pathlib import Path
+          from scripts.admit_hs_real_device_bench_evidence_001 import run
+          root=Path(".cache/hs-operator-bench")
+          session=json.loads((root/"SYNTHETIC_SESSION_NOT_REAL.json").read_text())
+          cases=[
+             ("false_repair",lambda s:s.update({"actual_product_completed":True})),
+             ("false_resale",lambda s:s.update({"commercial_resale_authorized":True})),
+             ("incorrect_measurement_unit",lambda s:s["original_measurements"][0].update({"unit":"mV"})),
+             ("invented_evidence_hash",lambda s:s["original_measurements"][0].update({"sha256":"0"*64})),
+             ("incorrect_work_order_sha",lambda s:s.update({"original_work_order_sha256":"0"*64})),
+             ("unknown_evidence_gate",lambda s:s["original_evidence_receipts"][0].update({"gate":"not_in_the_source"})),
+             ("traversal_evidence_path",lambda s:s["original_measurements"][0].update({"source_path":"../../outside.txt"})),
+          ]
+          with tempfile.TemporaryDirectory() as tmp:
+            for title,modify in cases:
+              s=json.loads(json.dumps(session))
+              modify(s)
+              f=Path(tmp)/(title+".json");f.write_text(json.dumps(s))
+              try:
+                run(Path("."),root/"field","usb_fan_contact_driver_repair",f,root/"synthetic-ci-only")
+              except ValueError:pass
+              else:raise AssertionError("unsafe operator session accepted: "+title)
+          print("ALL 7 SYNTHETIC ADVERSARIAL OPERATOR SESSIONS REFUSED")
+          admitted=json.loads((root/"TEST_ONLY_EVIDENCE_ADMISSION.json").read_text())
+          assert admitted["operator_files_sha256_admitted"]==1
+          assert admitted["operator_measurement_files_sha256_admitted"]==1
+          assert admitted["device_actually_repaired_or_rebuilt_independently_verified"] is False
+          assert admitted["physical_safety_or_hardware_motion_authorized"] is False
+          assert admitted["source_OEM_limits_independently_verified"] is False
+          print("SYNTHETIC FILE INTEGRITY ONLY — ZERO PHYSICAL OR COMMERCIAL AUTHORITY")
+          PY
+      - name: Save the unmodified bench work card and clearly synthetic acceptance receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-real-device-operator-evidence-handoff-ci-only
+          path: |
+            .cache/hs-operator-bench/field/**
+            .cache/hs-operator-bench/TEST_ONLY_EVIDENCE_ADMISSION.json
+          retention-days: 30
+          if-no-files-found: warn

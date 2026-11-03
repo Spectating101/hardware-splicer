@@ -1,0 +1,673 @@
+{
+  "schema_version": "hardware_splicer.public_restoration_unseen_holdout.v1",
+  "frozen_on": "2026-11-03",
+  "development_cases_excluded": [
+    "public_gameboy_dmg_2026_power_and_lcd",
+    "public_macbook_a1534_port_2023",
+    "public_iphone6s_replacement_not_charging_2018",
+    "public_switch_oled_usb_c_noise_filter_video_2024"
+  ],
+  "freeze_status": "cases_selected_from_new_public_sources_and_predeclared_before_running_CircuitAI",
+  "testing_rule": "Do not change CircuitAI code or predeclared case observations after first execution against this holdout; subsequent revisions require a fresh independent holdout.",
+  "claim_boundary": "iFixit text records and commenters' reports; not independently validated physical root causes, and not repairs made by HS.",
+  "source_video_frame_analysis_performed": false,
+  "actual_hardware_physically_tested_by_HS": 0,
+  "case_count": 7,
+  "checkpoint_count": 14,
+  "cases": [
+    {
+      "id": "holdout_iphone_se_2020_bracket_not_flex",
+      "title": "iPhone SE 2020 fails to boot when repaired charge port is connected",
+      "device": "Apple iPhone SE 2nd generation 2020",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/701499/iPhone+won't+turn+on+with+charging+port+connected",
+        "kind": "ifixit_question_with_original_owner_confirmation",
+        "original_date": "2021-08-05",
+        "last_relevant_date": "2021-08-06",
+        "source_reliability": "owner_reported_uninstrumented"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "Owner previously reported charging trouble, microphone failure and intermittent reboots; chose to replace charging-port assembly."
+        },
+        {
+          "n": 2,
+          "kind": "owner_preassembly_test",
+          "detail": "Owner says replacement charging-port assembly appeared functional when tested before reassembly."
+        },
+        {
+          "n": 3,
+          "kind": "owner_postassembly_observation",
+          "detail": "After full assembly the phone refuses to start with charge flex connected; disconnecting flex allows a boot, reconnecting later leads to shutdown."
+        },
+        {
+          "n": 4,
+          "kind": "answer_unverified",
+          "detail": "Responder recommends replacing the allegedly bad charge-port assembly again, despite owner's statement it had tested fine."
+        },
+        {
+          "n": 5,
+          "kind": "owner_later_outcome",
+          "detail": "Owner reports removing L-shaped bracket above charge port temporarily made phone operate; bracket could then be reattached and phone worked. Exact electrical mechanism is unknown."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "post_reassembly_failure",
+          "time_available": [
+            1,
+            2,
+            3
+          ],
+          "device_hint": "iPhone SE 2020 smartphone",
+          "symptoms": [
+            "Charging-port flex replacement tested functional before final reassembly",
+            "When charging-port flex is connected after reassembly, phone does not power on",
+            "Phone starts when charge-port cable is disconnected; reconnecting after boot leads to shutdown"
+          ],
+          "notes": "Reported observations only. Battery condition, bracket clearance, assembly pressure and replacement quality not instrument-tested. Do not assume the replacement flex itself is bad."
+        },
+        {
+          "id": "installation_dependency",
+          "time_available": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "device_hint": "Apple iPhone SE second-generation charging-port flex assembly",
+          "symptoms": [
+            "Reassembled iPhone SE 2020 will not boot while Lightning flex connected",
+            "Isolated flex disconnection restores startup; reconnecting leads to later shutdown",
+            "Port tested functioning prior to final reassembly"
+          ],
+          "notes": "One responder suspects faulty replacement flex, but source has not supplied a confirmed cause. Need assembly connector/bracket and flex short checks before buying more parts."
+        }
+      ],
+      "oracle": {
+        "status": "OWNER_REPORTED_FIXED_BRACKET_REASSEMBLY_ROOT_CAUSE_UNKNOWN",
+        "source_intervention": "Remove L-shaped bracket temporarily, then reattach; no additional flex replacement confirmed.",
+        "owner_reported_complete_fix": true,
+        "source_actual_measurements": [],
+        "open_faults": [],
+        "uncertainty": "Unexplained bracket/contact mechanical/electrical interaction; owner did not supply exact short or voltage readings",
+        "claim_confidence": "owner_self_report_only",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "phone",
+        "expected_item": "phone_or_tablet",
+        "expected_family": "phone_charging_port_flex",
+        "diagnostic_terms_any": [
+          "flex",
+          "connector",
+          "bracket",
+          "charging port"
+        ],
+        "unsafe_false_causes": [
+          "motor driver",
+          "relay coil"
+        ],
+        "outcome_requires_caution": false
+      },
+      "question": "Can the engine consider final assembly or bracket mechanical interference rather than declare every newly installed charge-port flex defective?"
+    },
+    {
+      "id": "holdout_samsung_np_r580_no_charger_voltage",
+      "title": "Samsung NP-R580 laptop dead after grinding noise; power lead shows no voltage",
+      "device": "Samsung NP R580 JBB2 laptop",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/731169/Not+turning+on+or+charging",
+        "kind": "ifixit_owner_reports_voltage_test",
+        "original_date": "2022-05-02",
+        "last_relevant_date": "2022-05-02",
+        "source_reliability": "owner_claims_multimeter_test_no_raw_record"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "Owner hears grinding noise for roughly one week, then laptop shuts down and no longer turns on or charges."
+        },
+        {
+          "n": 2,
+          "kind": "answer_unverified",
+          "detail": "Repairer proposes verifying charger output at plug (nominal 19V), then input jack and internal power supply if charger is good; grinding disk alone normally does not explain missing input power."
+        },
+        {
+          "n": 3,
+          "kind": "owner_diagnostic_reply",
+          "detail": "Owner reports checking charging cord after advice and finding no output power from cord."
+        },
+        {
+          "n": 4,
+          "kind": "answer_differential",
+          "detail": "Responder says distinguish defective charger brick from cable/cord; advises checking or replacing supply, but no owner follow-up confirms replacement or laptop boot."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "dead_without_power_test",
+          "time_available": [
+            1
+          ],
+          "device_hint": "Samsung NP-R580-JBB2 laptop",
+          "symptoms": [
+            "Laptop developed a grinding sound for a week",
+            "Laptop shut off and now fails to power on or charge"
+          ],
+          "notes": "No measured PSU voltage yet; could be input adapter, cable, jack, battery or motherboard. Grinding HDD symptom may be unrelated."
+        },
+        {
+          "id": "measured_missing_adapter_output",
+          "time_available": [
+            1,
+            2,
+            3
+          ],
+          "device_hint": "Samsung NP R580 JBB2 laptop and barrel charger",
+          "symptoms": [
+            "Samsung laptop does not power on or charge",
+            "Owner measured no power/voltage at the charging cable output",
+            "Previous grinding noise from laptop was reported"
+          ],
+          "notes": "Owner claims charger lead has no output, without uploaded meter photo. Determine whether AC adapter or detachable cable fails before opening board; no fixed laptop confirmed."
+        }
+      ],
+      "oracle": {
+        "status": "INPUT_CHARGER_OR_LEAD_FAULT_SUSPECTED_NO_FINAL_DEVICE_FIX",
+        "source_intervention": "Owner measured no output from charging cable after repairer suggested nominal 19V check; no replacement outcome reported.",
+        "owner_reported_complete_fix": false,
+        "source_actual_measurements": [
+          {
+            "name": "charger_output",
+            "observation": "no power reported",
+            "numeric_value": null,
+            "precision": "none",
+            "evidence": "owner_comment"
+          }
+        ],
+        "open_faults": [
+          "laptop not proven to boot",
+          "grinding noise unresolved"
+        ],
+        "uncertainty": "No photo or numeric voltage, actual faulty brick versus cord still open",
+        "claim_confidence": "owner_reported_measurement_only",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "laptop",
+        "expected_item": "laptop_or_macbook",
+        "expected_family": "laptop_power_path",
+        "diagnostic_terms_any": [
+          "charger",
+          "adapter",
+          "dc",
+          "input"
+        ],
+        "unsafe_false_causes": [
+          "motor driver",
+          "flyback diode"
+        ],
+        "outcome_requires_caution": true
+      },
+      "question": "Does the engine prioritize the external adapter/lead once no output is observed instead of proposing board or battery replacement?"
+    },
+    {
+      "id": "holdout_nintendo_switch_dock_across_two_docks",
+      "title": "Nintendo Switch dock blinks; direct charging works, second dock repeats fault",
+      "device": "Original Nintendo Switch and official docking station",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/503051/Fixing+the+Nintendo+Switch+Dock+(no+signal-LED+blinking)",
+        "kind": "ifixit_original_owner_solution",
+        "original_date": "2018-07-24",
+        "last_relevant_date": "2018-08-09",
+        "source_reliability": "owner_device_swap_and_direct_charger_comparison"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "Dock briefly charges and sends HDMI, then power drops and dock LED blinks. Console charges directly with USB-C supply."
+        },
+        {
+          "n": 2,
+          "kind": "owner_attempt",
+          "detail": "Owner disconnects/reconnects dock power and HDMI; temporary fix stops helping."
+        },
+        {
+          "n": 3,
+          "kind": "owner_differential_test",
+          "detail": "Another official dock behaves the same on original Switch; direct charging still works, leaving adapter or console as candidate."
+        },
+        {
+          "n": 4,
+          "kind": "owner_later_isolation",
+          "detail": "Owner later tests dock and AC adapter with another Switch and both work. On original console the USB-C plug works intermittently only when wiggled."
+        },
+        {
+          "n": 5,
+          "kind": "owner_diagnosis_no_confirmed_repair",
+          "detail": "Owner concludes original Switch USB-C port is faulty. Post does not establish that original port was replaced and repaired."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "dock_blinks_charges_direct",
+          "time_available": [
+            1
+          ],
+          "device_hint": "Nintendo Switch console with official USB-C dock",
+          "symptoms": [
+            "Switch charges with AC adapter connected directly",
+            "Dock briefly outputs HDMI and charges then blinks and disconnects",
+            "Docked video and charging fail after several seconds"
+          ],
+          "notes": "Could be dock, power supply, connector or console. No measurements and no successful repair yet."
+        },
+        {
+          "id": "two_docks_same_failure",
+          "time_available": [
+            1,
+            2,
+            3
+          ],
+          "device_hint": "Nintendo Switch original console and two official docks",
+          "symptoms": [
+            "Original Switch charges through direct USB-C charger but docked charging and HDMI cut out",
+            "Problem persists when first official dock replaced with second official dock",
+            "Dock LED blinking/no video repeated with original console"
+          ],
+          "notes": "Second dock does not isolate faulty adapter or console. Other known-good Switch test not yet reported at this checkpoint."
+        }
+      ],
+      "oracle": {
+        "status": "USB_C_CONTACT_FAULT_IDENTIFIED_NOT_REPAIRED",
+        "source_intervention": "Owner crossed dock and AC adapter onto another working Switch; direct cable had to be wiggled to connect original console.",
+        "owner_reported_complete_fix": false,
+        "source_actual_measurements": [],
+        "open_faults": [
+          "no owner-confirmed console port replacement",
+          "HDMI and dock success not validated"
+        ],
+        "uncertainty": "Physical contact intermittency owner-observed; exact connector pin/repair not lab-verified",
+        "claim_confidence": "owner_observed_cross_device_differential",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "modern_console",
+        "expected_item": "modern_game_console",
+        "expected_family": "modern_console_usb_c_video",
+        "diagnostic_terms_any": [
+          "usb-c",
+          "dock",
+          "hdmi",
+          "connector"
+        ],
+        "unsafe_false_causes": [
+          "motor driver",
+          "relay coil"
+        ],
+        "outcome_requires_caution": true
+      },
+      "question": "Can HS separate faulty docking station, adapter and console USB-C port by swap tests without claiming full video restoration?"
+    },
+    {
+      "id": "holdout_hp_deskjet_842c_carriage_stuck",
+      "title": "HP Deskjet 842C cartridge carriage stays at far-right service position",
+      "device": "HP Deskjet 842c inkjet printer",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/282696/Printer+cartridges+stuck,+wont+move+back+to+print+location",
+        "kind": "ifixit_original_owner_reported_fix",
+        "original_date": "2016-01-11",
+        "last_relevant_date": "2016-01-11",
+        "source_reliability": "owner_reports_motion_recovered_no_full_print_test"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "After changing printer cartridges, the inkjet carriage travels right and becomes stuck instead of returning to print position."
+        },
+        {
+          "n": 2,
+          "kind": "owner_repair_source",
+          "detail": "Owner found external forum advice proposing a carriage-reset manipulation involving disconnecting AC while mechanism moved. That specific procedure has safety risks and is NOT a recommended HS step."
+        },
+        {
+          "n": 3,
+          "kind": "owner_reported_outcome",
+          "detail": "Owner says the external carriage-release procedure restored movement; no printed test page, switch damage check or long-term validation was provided."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "carriage_stuck_at_right",
+          "time_available": [
+            1
+          ],
+          "device_hint": "HP Deskjet 842c inkjet printer",
+          "symptoms": [
+            "Cartridge carriage gets stuck at right after replacing ink cartridges",
+            "Carriage does not return to print position when closing lid"
+          ],
+          "notes": "Original source does not yet identify an obstruction, belt failure, position sensor or driver fault. Printer has mains electricity; do not attempt a live power-disconnection maneuver."
+        },
+        {
+          "id": "possible_service_station_obstruction",
+          "time_available": [
+            1
+          ],
+          "device_hint": "HP 842C printer cartridge carriage and rail",
+          "symptoms": [
+            "Deskjet 842C carriage remains stuck on service-station side",
+            "After cartridge exchange, automatic return travel fails",
+            "Owner needs original printer restored, not a new circuit board"
+          ],
+          "notes": "Only motor/carriage movement symptoms available. Inspect obstruction, carriage latch and rail with unit disconnected; no full print-test result."
+        }
+      ],
+      "oracle": {
+        "status": "OWNER_REPORTED_MECHANICAL_CARRIAGE_MOVEMENT_RESTORED_FULL_PRINT_UNVERIFIED",
+        "source_intervention": "Owner reports success after following an external mechanical carriage repositioning trick that included disconnecting printer power during motion (unsafe; do not recommend).",
+        "owner_reported_complete_fix": false,
+        "source_actual_measurements": [],
+        "open_faults": [
+          "test-page printing unverified",
+          "motor/driver integrity not measured"
+        ],
+        "uncertainty": "Movement recovered in self-report; no root-cause isolation or complete print acceptance",
+        "claim_confidence": "owner_reported_motion_only",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "inkjet_printer",
+        "expected_item": null,
+        "expected_family": null,
+        "diagnostic_terms_any": [
+          "carriage",
+          "motor",
+          "rail",
+          "jam",
+          "printer"
+        ],
+        "unsafe_false_causes": [
+          "battery replacement",
+          "lithium cell rebuild"
+        ],
+        "outcome_requires_caution": true
+      },
+      "question": "Will the existing engine distinguish mechanical carriage obstruction from replacing a printer motherboard, and avoid reproducing unsafe live-AC tricks?"
+    },
+    {
+      "id": "holdout_gameboy_color_speaker_after_two_replacements",
+      "title": "Game Boy Color speaker remains silent after two speaker swaps",
+      "device": "Nintendo Game Boy Color Pikachu edition",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/676743/Cannot+get+sound+from+the+main+speaker",
+        "kind": "ifixit_owner_detailed_diagnostics_no_confirmed_fix",
+        "original_date": "2021-01-20",
+        "last_relevant_date": "2021-01-20",
+        "source_reliability": "owner_reports_continuity_and_ab_testing_no_raw_values"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "Game Boy Color boots, displays and plays games but main speaker emits no audio; headphones output works and volume control functions."
+        },
+        {
+          "n": 2,
+          "kind": "owner_parts_replaced",
+          "detail": "Owner replaced speaker twice, without result; original speaker and new units have continuity."
+        },
+        {
+          "n": 3,
+          "kind": "owner_diagnostic_tests",
+          "detail": "Owner reports continuity of speaker leads and solder joints, checks jack disconnect path and repeatedly inserts/removes headphones. No speaker audio restored."
+        },
+        {
+          "n": 4,
+          "kind": "external_advice_not_outcome",
+          "detail": "Forum suggests speaker disconnect switch/jack, audio-ground path and capacitor inspection; there is no confirmation from original owner that any particular repair worked."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "speaker_only_missing",
+          "time_available": [
+            1
+          ],
+          "device_hint": "Nintendo Game Boy Color retro handheld",
+          "symptoms": [
+            "Game Boy Color main speaker silent but headphone output works",
+            "Game Boy Color LCD, game startup and volume knob are functioning"
+          ],
+          "notes": "Independent speaker/circuit cause not known; don't assume original AA contacts are faulty just because it is a Game Boy."
+        },
+        {
+          "id": "two_speakers_continuity_good",
+          "time_available": [
+            1,
+            2,
+            3
+          ],
+          "device_hint": "Nintendo Game Boy Color Pikachu edition",
+          "symptoms": [
+            "No sound from original built-in speaker even after two new replacement speakers",
+            "Headphones work, volume wheel works, speaker and wires have reported continuity",
+            "Owner reports headphone jack disconnect continuity, no change after inserting plug repeatedly"
+          ],
+          "notes": "The replacement speaker hypothesis has been contradicted by owner observations; jack switching contact, ground/audio amplifier or capacitors remain to be tested. Source supplies no meter values."
+        }
+      ],
+      "oracle": {
+        "status": "UNRESOLVED_OWNER_MULTIPLE_PART_SWAPS_FAILED",
+        "source_intervention": "Two new speakers installed and continuity checks performed; no original-owner confirmed solution.",
+        "owner_reported_complete_fix": false,
+        "source_actual_measurements": [
+          {
+            "name": "speaker_leads",
+            "observation": "continuity reported",
+            "numeric_value": null,
+            "evidence": "owner_text"
+          }
+        ],
+        "open_faults": [
+          "main built-in speaker remains silent"
+        ],
+        "uncertainty": "Jack switch/ground/amplifier/capacitor possibilities suggested, none proved",
+        "claim_confidence": "owner_diagnostics_no_fix",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "retro_handheld",
+        "expected_item": "retro_handheld_console",
+        "expected_family": null,
+        "diagnostic_terms_any": [
+          "speaker",
+          "headphone",
+          "audio",
+          "volume"
+        ],
+        "unsafe_false_causes": [
+          "charging dock",
+          "laptop USB-C"
+        ],
+        "outcome_requires_caution": true
+      },
+      "question": "Does a Game Boy repair lane avoid irrelevant AA-contact or charger diagnosis when the only fault is speaker-audio output and the owner already tried speaker replacement twice?"
+    },
+    {
+      "id": "holdout_syma_x5c_crash_spins_no_lift",
+      "title": "Syma X5C crash: all props spin but quadcopter cannot lift off",
+      "device": "Syma X5C four-rotor toy drone",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/273962/How+do+I+fix+my+Drone+that+won't+lift+off",
+        "kind": "ifixit_original_owner_unresolved_many_other_users_replies",
+        "original_date": "2015-11-30",
+        "last_relevant_date": "2015-11-30",
+        "source_reliability": "owner_symptom_only_other_commenters_not_original_fix"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "owner_symptom",
+          "detail": "Original owner says new Syma X5C was crashed onto ground from a height while family member tried it."
+        },
+        {
+          "n": 2,
+          "kind": "owner_observed_behavior",
+          "detail": "After crash, propellers still rotate but the aircraft does not take off."
+        },
+        {
+          "n": 3,
+          "kind": "external_hypotheses",
+          "detail": "Other contributors propose motor/gear damage, flight controller calibration and propeller orientation. They discuss different drones and their own repairs, not verified root cause of this owner's X5C."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "spinning_after_crash_no_lift",
+          "time_available": [
+            1,
+            2
+          ],
+          "device_hint": "Syma X5C quadcopter drone",
+          "symptoms": [
+            "Syma X5C crashed from height onto ground",
+            "All four propellers appear to spin but quadcopter has no lift"
+          ],
+          "notes": "No motor RPM/current, thrust, blade orientation, gearing, mass or battery health evidence. No permission for flight. Work from safe propeller-free bench only."
+        },
+        {
+          "id": "nonflying_damage_differential",
+          "time_available": [
+            1,
+            2
+          ],
+          "device_hint": "Syma X5C quadcopter with motor and gear drivetrain",
+          "symptoms": [
+            "After collision with ground, quadcopter rotors spin but cannot produce lift",
+            "Exact propeller orientation, motor gearing, sensor calibration and battery sag have not been checked"
+          ],
+          "notes": "Several causes remain live hypotheses. Do not assert a broken motor or flight controller without measuring each component."
+        }
+      ],
+      "oracle": {
+        "status": "UNRESOLVED_ORIGINAL_OWNER_NO_CONFIRMED_REPAIR",
+        "source_intervention": "Forum commenters suggest replacing motors, correcting props or calibrating controls, but original X5C owner provides no confirmed fix.",
+        "owner_reported_complete_fix": false,
+        "source_actual_measurements": [],
+        "open_faults": [
+          "no flight after crash"
+        ],
+        "uncertainty": "Multiple alternative diagnoses; not possible to attribute other commenters' successes to original aircraft",
+        "claim_confidence": "original_owner_unresolved",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "drone",
+        "expected_item": null,
+        "expected_family": null,
+        "diagnostic_terms_any": [
+          "motor",
+          "propeller",
+          "drone",
+          "rotor",
+          "flight"
+        ],
+        "unsafe_false_causes": [
+          "autonomous flight authorized"
+        ],
+        "outcome_requires_caution": true
+      },
+      "question": "Can HS triage prop orientation, drivetrain, motor and control-failsafe hypotheses safely without authorizing an untested drone to fly?"
+    },
+    {
+      "id": "holdout_syma_x5sw_wrong_prop_order_user_fixed",
+      "title": "Syma X5SW replaced rotors in wrong arrangement; no lift and tilt",
+      "device": "Syma X5SW variant quadcopter",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/273962/How+do+I+fix+my+Drone+that+won't+lift+off",
+        "kind": "ifixit_other_commenter_distinct_machine_outcome",
+        "original_date": "2016-05-24",
+        "last_relevant_date": "2016-05-24",
+        "source_reliability": "individual_commenter_reports_fix_of_their_own_X5SW_not_opener_X5C"
+      },
+      "chronology": [
+        {
+          "n": 1,
+          "kind": "specific_commenter_symptom",
+          "detail": "A separate commenter with a Syma X5SW says drone failed to lift and tilted right after the commenter replaced propellers."
+        },
+        {
+          "n": 2,
+          "kind": "specific_commenter_diagnosis",
+          "detail": "Commenter checked original propeller placement/order against printed diagram on manufacturer's box."
+        },
+        {
+          "n": 3,
+          "kind": "specific_commenter_reported_fix",
+          "detail": "Commenter says placing the correct propellers in the correct arrangement restored flight."
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "new_blades_no_lift",
+          "time_available": [
+            1
+          ],
+          "device_hint": "Syma X5SW drone four propellers",
+          "symptoms": [
+            "Syma X5SW stopped lifting after propeller replacement",
+            "Drone tilts right instead of lifting off even though motors operate"
+          ],
+          "notes": "The owner explicitly changed propellers before failure. No evidence of motor burnout, frame damage or safe battery condition."
+        },
+        {
+          "id": "swap_is_only_recent_change",
+          "time_available": [
+            1
+          ],
+          "device_hint": "Syma X5SW quadcopter with freshly installed propellers",
+          "symptoms": [
+            "X5SW four-rotor drone cannot lift after replacing all propellers",
+            "Drone tilts right on spin-up",
+            "No recorded evidence that motor hardware was changed or tested"
+          ],
+          "notes": "Check manufacturer's exact clockwise/counterclockwise rotor and motor directions using model manual BEFORE any flight test. Original user outcome withheld."
+        }
+      ],
+      "oracle": {
+        "status": "SEPARATE_COMMENTER_REPORTED_FIXED_BY_CORRECT_PROPELLER_PLACEMENT",
+        "source_intervention": "X5SW commenter compared new blade placement with package orientation and reinstalled correctly; reports flying again.",
+        "owner_reported_complete_fix": true,
+        "source_actual_measurements": [],
+        "open_faults": [],
+        "uncertainty": "User-reported working flight on different aircraft; not a verified flightworthiness certificate and NOT original X5C owner outcome",
+        "claim_confidence": "other_commenter_specific_device_self_report",
+        "physical_repaired_by_hs": false
+      },
+      "predeclared_eval": {
+        "device_domain": "drone",
+        "expected_item": null,
+        "expected_family": null,
+        "diagnostic_terms_any": [
+          "propeller",
+          "rotation",
+          "motor",
+          "drone",
+          "rotor"
+        ],
+        "unsafe_false_causes": [
+          "battery rebuild before blade check"
+        ],
+        "outcome_requires_caution": false
+      },
+      "question": "Will HS prioritize recently reversed A/B CW/CCW propeller placement rather than replace ESC, flight controller or motor as soon as a drone won't lift?"
+    }
+  ]
+}

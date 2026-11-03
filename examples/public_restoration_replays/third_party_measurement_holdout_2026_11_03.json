@@ -1,0 +1,1065 @@
+{
+  "schema_version": "hardware_splicer.measurement_grade_public_repair_holdout.v1",
+  "frozen_on": "2026-11-03",
+  "origin": "newly selected public Reddit/iFixit owner records not included in repair PRs 266-269",
+  "model_target_commit": "c296b7fb06df581b929f2bfff08664c3ca420aef",
+  "initial_corpus_source_status": "source search and hand-transcribed observations; source owner claims not independently instrument verified",
+  "experimental_protocol": "freeze Git blob before first engine evaluation; outcome fields/expected classes kept outside engine inputs; do not tune on this set and call it unseen again",
+  "source_video_frame_analysis_performed": false,
+  "physical_devices_tested_by_HS": 0,
+  "exclusion_case_ids": [
+    "public_gameboy_dmg_2026_power_and_lcd",
+    "public_macbook_a1534_port_2023",
+    "public_iphone6s_replacement_not_charging_2018",
+    "public_switch_oled_usb_c_noise_filter_video_2024",
+    "holdout_iphone_se_2020_bracket_not_flex",
+    "holdout_samsung_np_r580_no_charger_voltage",
+    "holdout_nintendo_switch_dock_across_two_docks",
+    "holdout_hp_deskjet_842c_carriage_stuck",
+    "holdout_gameboy_color_speaker_after_two_replacements",
+    "holdout_syma_x5c_crash_spins_no_lift",
+    "holdout_syma_x5sw_wrong_prop_order_user_fixed"
+  ],
+  "cases": [
+    {
+      "id": "gb_dmg_abnormal_negative_rail",
+      "device": "Original Game Boy DMG-01",
+      "source": {
+        "url": "https://www.reddit.com/r/Gameboy/comments/1ljgr0j",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Game Boy powers up but LCD/boot and game behavior are abnormal; one game shows white screen while another boots without sound"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports LCD bias DC-DC rail measured -33 V versus expected approximately -19 V; no source instrument calibration record"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Original Game Boy DMG-01",
+          "symptoms": [
+            "Game Boy powers up but LCD/boot and game behavior are abnormal; one game shows white screen while another boots without sound"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Original Game Boy DMG-01",
+          "symptoms": [
+            "Game Boy powers up but LCD/boot and game behavior are abnormal; one game shows white screen while another boots without sound",
+            "Owner reports LCD bias DC-DC rail measured -33 V versus expected approximately -19 V; no source instrument calibration record"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "retro_handheld_console",
+        "expected_family": "retro_handheld_aa_power",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "-33 V",
+          "-19 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "SUSPECTED_RAIL_REGULATION; OWNER_DESCRIBED_CUSTOM_ZENER_RESISTOR_INTERVENTION_NO_INDEPENDENT_RETEST",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Unverified source description of circuit alteration does not prove full restoration",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "gb_audio_speaker_voltage",
+      "device": "Original Game Boy audio",
+      "source": {
+        "url": "https://www.reddit.com/r/consolerepair/comments/r8j565",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Game Boy has no built-in speaker sound; owner asks about speaker wiring"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports 1.48 V on one speaker lead and 0.42 V on the other; headphone audio works only at a specific volume-wheel position. No validated reference output waveform"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Original Game Boy audio",
+          "symptoms": [
+            "Game Boy has no built-in speaker sound; owner asks about speaker wiring"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Original Game Boy audio",
+          "symptoms": [
+            "Game Boy has no built-in speaker sound; owner asks about speaker wiring",
+            "Owner reports 1.48 V on one speaker lead and 0.42 V on the other; headphone audio works only at a specific volume-wheel position. No validated reference output waveform"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "retro_handheld_console",
+        "expected_family": null,
+        "measurement_claimed": true,
+        "reported_readings": [
+          "1.48 V",
+          "0.42 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_FULL_AUDIO_FIX",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Speaker wire DC potentials are not proof that speaker itself is bad; commenter hypotheses are not owner repairs",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "gbc_quiet_after_new_speaker",
+      "device": "Game Boy Color",
+      "source": {
+        "url": "https://www.reddit.com/r/Gameboy/comments/198q34o",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Game Boy Color has extremely quiet audio even after owner installs replacement speaker"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Volume potentiometer was cleaned and resoldered without restoring normal loudness; capacitor suspected but not yet replaced"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Game Boy Color",
+          "symptoms": [
+            "Game Boy Color has extremely quiet audio even after owner installs replacement speaker"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Game Boy Color",
+          "symptoms": [
+            "Game Boy Color has extremely quiet audio even after owner installs replacement speaker",
+            "Volume potentiometer was cleaned and resoldered without restoring normal loudness; capacitor suspected but not yet replaced"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "retro_handheld_console",
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_REPORTS_AUDIO_TEN_TIMES_BETTER_AFTER_CAPACITOR_REPLACEMENT",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Owner-reported substantial improvement, not lab-measured acoustic level or complete function certificate",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "asus_m15_charger_load_drop",
+      "device": "ASUS ROG Zephyrus M15 laptop",
+      "source": {
+        "url": "https://www.reddit.com/r/computerhelp/comments/1r6t8eh/asus_rog_zephyrus_m15_charging_issue/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Laptop operates on battery but barrel AC charging cycles intermittently; USB-C charging still works"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports charger unloaded 19.6-19.9 V versus 19.5 V rating, battery 15.3 V, and charger input fluctuating between 13-19 V when plugged; charges while powered off only"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "ASUS ROG Zephyrus M15 laptop",
+          "symptoms": [
+            "Laptop operates on battery but barrel AC charging cycles intermittently; USB-C charging still works"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "ASUS ROG Zephyrus M15 laptop",
+          "symptoms": [
+            "Laptop operates on battery but barrel AC charging cycles intermittently; USB-C charging still works",
+            "Owner reports charger unloaded 19.6-19.9 V versus 19.5 V rating, battery 15.3 V, and charger input fluctuating between 13-19 V when plugged; charges while powered off only"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "laptop_or_macbook",
+        "expected_family": "laptop_power_path",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "19.6-19.9 V",
+          "15.3 V",
+          "13-19 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_COMPLETED_BARREL_CHARGER_REPAIR",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Meter values owner-described, voltage under different states not independently logged",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "msi_gs65_adapter_detect",
+      "device": "MSI GS65 Stealth laptop",
+      "source": {
+        "url": "https://www.reddit.com/r/laptops/comments/1jutr2e",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "MSI GS65 can boot following battery change but charger not detected during normal running"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports 19.5 V measured at adapter jack/board while charge still fails, despite EC reset and battery replacement"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "MSI GS65 Stealth laptop",
+          "symptoms": [
+            "MSI GS65 can boot following battery change but charger not detected during normal running"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "MSI GS65 Stealth laptop",
+          "symptoms": [
+            "MSI GS65 can boot following battery change but charger not detected during normal running",
+            "Owner reports 19.5 V measured at adapter jack/board while charge still fails, despite EC reset and battery replacement"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "laptop_or_macbook",
+        "expected_family": "laptop_power_path",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "19.5 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_CHARGING_FIX",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Owner claims voltage at several board locations without marked reference images",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "dell_adapter_id_unknown",
+      "device": "Dell laptop with barrel adapter identification",
+      "source": {
+        "url": "https://www.reddit.com/r/techsupport/comments/n7nb5x",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Laptop warns AC power adapter wattage/type cannot be determined and battery does not charge"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports 19-20 V measured from original charger and jack, but varying 3.4 V/1.2 V/0 V on battery connector pins after replacement battery failed to resolve issue"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Dell laptop with barrel adapter identification",
+          "symptoms": [
+            "Laptop warns AC power adapter wattage/type cannot be determined and battery does not charge"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Dell laptop with barrel adapter identification",
+          "symptoms": [
+            "Laptop warns AC power adapter wattage/type cannot be determined and battery does not charge",
+            "Owner reports 19-20 V measured from original charger and jack, but varying 3.4 V/1.2 V/0 V on battery connector pins after replacement battery failed to resolve issue"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "laptop_or_macbook",
+        "expected_family": "laptop_power_path",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "19-20 V",
+          "3.4 V",
+          "1.2 V",
+          "0 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_REPAIR; ID_DATA_LINE_NOT_VERIFIED",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Battery connector pin voltages and charger positive supply not conclusive for Dell adapter identification",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "thinkpad_s430_known_charger",
+      "device": "Lenovo ThinkPad S430",
+      "source": {
+        "url": "https://www.ifixit.com/Answers/View/854222/Laptop+isn't+coming+on.",
+        "kind": "ifixit_owner_and_technician_reply",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Laptop died while also charging a phone through USB and no longer indicates input charge or powers on"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner says existing charger was tested on a separate ThinkPad and worked; removal of removable battery did not restore power. Expert suggested checking DC-in cable output but no readings supplied"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Lenovo ThinkPad S430",
+          "symptoms": [
+            "Laptop died while also charging a phone through USB and no longer indicates input charge or powers on"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Lenovo ThinkPad S430",
+          "symptoms": [
+            "Laptop died while also charging a phone through USB and no longer indicates input charge or powers on",
+            "Owner says existing charger was tested on a separate ThinkPad and worked; removal of removable battery did not restore power. Expert suggested checking DC-in cable output but no readings supplied"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "laptop_or_macbook",
+        "expected_family": "laptop_power_path",
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_REPAIR_OR_DC_JACK_MEASUREMENT",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Expert 19.5 V specification is proposed nominal reading, not owner's measurement",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "iphone12pro_screen_state_charge",
+      "device": "Apple iPhone 12 Pro",
+      "source": {
+        "url": "https://www.reddit.com/r/mobilerepair/comments/1t8zo1y/iphone_12_pro_charging_issue_only_charges_with/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "iPhone shuts off at 40% and has 76% battery health/1200+ cycles, with erratic charging and aftermarket battery/screen"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports 0.4 A when off, 0.7-1.2 A screen active and 0 A screen locked; charger station measurement, port cleaning and DFU restore did not solve"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Apple iPhone 12 Pro",
+          "symptoms": [
+            "iPhone shuts off at 40% and has 76% battery health/1200+ cycles, with erratic charging and aftermarket battery/screen"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Apple iPhone 12 Pro",
+          "symptoms": [
+            "iPhone shuts off at 40% and has 76% battery health/1200+ cycles, with erratic charging and aftermarket battery/screen",
+            "Owner reports 0.4 A when off, 0.7-1.2 A screen active and 0 A screen locked; charger station measurement, port cleaning and DFU restore did not solve"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "phone_or_tablet",
+        "expected_family": null,
+        "measurement_claimed": true,
+        "reported_readings": [
+          "0.4 A",
+          "0.7-1.2 A",
+          "0 A"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_REPORTS_RESOLVED_AFTER_BATTERY_REPLACEMENT",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "A reported fix does not establish an independently verified BMS or charging-controller mechanism",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "iphone16pro_magnetic_debris",
+      "device": "Apple iPhone 16 Pro",
+      "source": {
+        "url": "https://www.reddit.com/r/iPhone16Pro/comments/1iauzsw",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "iPhone intermittently connects/disconnects to charging, including with MacBook and after restarts; owner suspects port failure"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner considered service after recurrent charging disconnects; no electrical measurement, broken pins, or successful replacement reported before technician inspection"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Apple iPhone 16 Pro",
+          "symptoms": [
+            "iPhone intermittently connects/disconnects to charging, including with MacBook and after restarts; owner suspects port failure"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Apple iPhone 16 Pro",
+          "symptoms": [
+            "iPhone intermittently connects/disconnects to charging, including with MacBook and after restarts; owner suspects port failure",
+            "Owner considered service after recurrent charging disconnects; no electrical measurement, broken pins, or successful replacement reported before technician inspection"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "phone_or_tablet",
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_REPORTS_SERVICE_CENTER_CLEANED_MAGNETIC_DUST_AND_CHARGING_RECOVERED",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Technician cleaning owner reported; no independent port photo or electronic diagnosis",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "switch_v1_autorcm_misdiagnosed",
+      "device": "Nintendo Switch original HAC-001",
+      "source": {
+        "url": "https://www.reddit.com/r/consolerepair/comments/snxpdy",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Used Switch black screen/no boot while USB ammeter shows charging behavior; prior owner guessed failed M92 charging IC"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports current draw 0.1 A without battery, 0.44 A with battery, pack approximately 3.4 V; prior M92 replacement had not fixed no-boot"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Nintendo Switch original HAC-001",
+          "symptoms": [
+            "Used Switch black screen/no boot while USB ammeter shows charging behavior; prior owner guessed failed M92 charging IC"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Nintendo Switch original HAC-001",
+          "symptoms": [
+            "Used Switch black screen/no boot while USB ammeter shows charging behavior; prior owner guessed failed M92 charging IC",
+            "Owner reports current draw 0.1 A without battery, 0.44 A with battery, pack approximately 3.4 V; prior M92 replacement had not fixed no-boot"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "modern_game_console",
+        "expected_family": "modern_console_usb_c_video",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "0.1 A",
+          "0.44 A",
+          "3.4 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_REPORTS_BOOT_FIXED_AFTER_RECOGNIZING_AUTORCM_MODE",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Misleading charge-current observations; no proof of damaged charge IC",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "switch_lite_battery_3p6_ceiling",
+      "device": "Nintendo Switch Lite",
+      "source": {
+        "url": "https://www.reddit.com/r/consolerepair/comments/1sg0hk5/switch_lite_not_charging_over_36v_how_should_i/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Switch Lite fails to turn on after multiple button-reset attempts"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports battery approximately 3.4 V at first, USB-C VBUS 15 V, and battery at 3.6 V after overnight connection; asks whether charger IC failed"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Nintendo Switch Lite",
+          "symptoms": [
+            "Switch Lite fails to turn on after multiple button-reset attempts"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Nintendo Switch Lite",
+          "symptoms": [
+            "Switch Lite fails to turn on after multiple button-reset attempts",
+            "Owner reports battery approximately 3.4 V at first, USB-C VBUS 15 V, and battery at 3.6 V after overnight connection; asks whether charger IC failed"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "modern_game_console",
+        "expected_family": "modern_console_usb_c_video",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "3.4 V",
+          "15 V",
+          "3.6 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_REPAIR_OR_SINGLE_FAILED_IC",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "VBUS 15 V alone does not prove charging current or healthy lithium battery",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "switch_v1_cc1_diode_partial",
+      "device": "Nintendo Switch V1 HAC-CPU-01",
+      "source": {
+        "url": "https://www.reddit.com/r/Switchrepair/comments/1vk2yy4/v1_switch_boots_on_charged_battery_but_0a/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Switch operates with precharged battery but takes no charge from USB; 5V charger gives 5.06 V with 0.00 A"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports diode test CC1 A5 0.126 V and CC2 approximately 2.3 V; replacing donor M92 briefly changed CC1 to 0.503 V before falling back; USB-C port fault remains owner speculation"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Nintendo Switch V1 HAC-CPU-01",
+          "symptoms": [
+            "Switch operates with precharged battery but takes no charge from USB; 5V charger gives 5.06 V with 0.00 A"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Nintendo Switch V1 HAC-CPU-01",
+          "symptoms": [
+            "Switch operates with precharged battery but takes no charge from USB; 5V charger gives 5.06 V with 0.00 A",
+            "Owner reports diode test CC1 A5 0.126 V and CC2 approximately 2.3 V; replacing donor M92 briefly changed CC1 to 0.503 V before falling back; USB-C port fault remains owner speculation"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": "modern_game_console",
+        "expected_family": "modern_console_usb_c_video",
+        "measurement_claimed": true,
+        "reported_readings": [
+          "5.06 V",
+          "0.00 A",
+          "0.126 V",
+          "2.3 V",
+          "0.503 V"
+        ],
+        "out_of_market_catalog": false,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_FINAL_CHARGING_REPAIR",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Diode-mode readings not supply voltages; no logged validated CC-line short cause",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "hp_smarttank_615_mixed_faults",
+      "device": "HP Smart Tank 615 printer",
+      "source": {
+        "url": "https://www.reddit.com/r/fuckHPprinters/comments/1kdq7tb",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Printer initially shows cartridge communication and print carriage jam errors"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner found displaced encoder strip; after reseating it earlier errors cleared, but printer still fails to pull paper and ADF fails to detect paper"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "HP Smart Tank 615 printer",
+          "symptoms": [
+            "Printer initially shows cartridge communication and print carriage jam errors"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "HP Smart Tank 615 printer",
+          "symptoms": [
+            "Printer initially shows cartridge communication and print carriage jam errors",
+            "Owner found displaced encoder strip; after reseating it earlier errors cleared, but printer still fails to pull paper and ADF fails to detect paper"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": null,
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": true,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "PARTIAL_ENCODER_STRIP_FIX; PAPER_FEED_AND_ADF_FAULTS_REMAIN",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Two subsystems remain faulty and outcome is only partial",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "epson_l3250_carriage_stop",
+      "device": "Epson EcoTank L3250 printer",
+      "source": {
+        "url": "https://www.reddit.com/r/printers/comments/1p2zktz/epson_l3250_printhead_gets_stuck_at_the_same/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Carriage moves along rail but catches at repeatable position and printer LEDs flash with no computer error code"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner cleaned/reseated encoder strip, checked belt and service station, noted earlier sagging flex cable, and reports rubbing at same carriage location"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Epson EcoTank L3250 printer",
+          "symptoms": [
+            "Carriage moves along rail but catches at repeatable position and printer LEDs flash with no computer error code"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Epson EcoTank L3250 printer",
+          "symptoms": [
+            "Carriage moves along rail but catches at repeatable position and printer LEDs flash with no computer error code",
+            "Owner cleaned/reseated encoder strip, checked belt and service station, noted earlier sagging flex cable, and reports rubbing at same carriage location"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": null,
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": true,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "NO_OWNER_CONFIRMED_REPAIR_AFTER_MULTIPLE_INSPECTIONS",
+        "owner_claimed_full_fix": false,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Mechanical rubbing might be belt, flex, rail or sensor; source not conclusive",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "hp_9015e_encoder_cleaned",
+      "device": "HP OfficeJet Pro 9015e printer",
+      "source": {
+        "url": "https://www.reddit.com/r/printers/comments/1jf1vas",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Printed pages and alignment output are severely distorted; printhead cleaning and alignment cycle have not corrected problem"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Owner reports scanner rejects printed alignment page; no measurement or logged encoder position test provided"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "HP OfficeJet Pro 9015e printer",
+          "symptoms": [
+            "Printed pages and alignment output are severely distorted; printhead cleaning and alignment cycle have not corrected problem"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "HP OfficeJet Pro 9015e printer",
+          "symptoms": [
+            "Printed pages and alignment output are severely distorted; printhead cleaning and alignment cycle have not corrected problem",
+            "Owner reports scanner rejects printed alignment page; no measurement or logged encoder position test provided"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": null,
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": true,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_REPORTS_PRINT_QUALITY_RECOVERED_AFTER_ENCODER_CLEANING",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Owner self-report plus illustrative image, no instrumented printhead/calibration certificate",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "fpv_first_build_motor_direction",
+      "device": "Homebuilt FPV quadcopter",
+      "source": {
+        "url": "https://www.reddit.com/r/diydrones/comments/1qa6rtc/no_lift/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Recently built quadcopter spins propellers but fails to take off; builder believes propeller installation/motor direction correct"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Builder changes prop arrangement after replies, then quadcopter flips; motor direction is discussed but no safe guarded test or flight certificate recorded"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Homebuilt FPV quadcopter",
+          "symptoms": [
+            "Recently built quadcopter spins propellers but fails to take off; builder believes propeller installation/motor direction correct"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Homebuilt FPV quadcopter",
+          "symptoms": [
+            "Recently built quadcopter spins propellers but fails to take off; builder believes propeller installation/motor direction correct",
+            "Builder changes prop arrangement after replies, then quadcopter flips; motor direction is discussed but no safe guarded test or flight certificate recorded"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": null,
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": true,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "BUILDER_REPORTS_DIRECTION_CORRECTION_AND_SUBSEQUENT_FLIGHT",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Source owner posts corrected rotor settings and flight report; not proof of airworthiness",
+        "HS_physically_repaired": false
+      }
+    },
+    {
+      "id": "tinywhoop_reversed_motor",
+      "device": "Small FPV TinyWhoop quadcopter",
+      "source": {
+        "url": "https://www.reddit.com/r/TinyWhoop/comments/1xgbiv5/need_some_help/",
+        "kind": "reddit_original_post_owner_update_and_comments",
+        "evidence_grade": "public_owner_statement_not_independent_laboratory_report"
+      },
+      "events": [
+        {
+          "stage": "initial_owner_report",
+          "observations": [
+            "Drone arms but fails to lift off; builder thought propellers were on correct sides"
+          ]
+        },
+        {
+          "stage": "later_owner_observations_before_final_adjudication",
+          "observations": [
+            "Commenter requests actual motor direction comparison against Betaflight config; no tachometer, thrust or measured current supplied"
+          ]
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "first_symptoms",
+          "event_index": 0,
+          "device_hint": "Small FPV TinyWhoop quadcopter",
+          "symptoms": [
+            "Drone arms but fails to lift off; builder thought propellers were on correct sides"
+          ],
+          "notes": "Earlier source observations only; no retrospective source fix."
+        },
+        {
+          "id": "additional_evidence",
+          "event_index": 1,
+          "device_hint": "Small FPV TinyWhoop quadcopter",
+          "symptoms": [
+            "Drone arms but fails to lift off; builder thought propellers were on correct sides",
+            "Commenter requests actual motor direction comparison against Betaflight config; no tachometer, thrust or measured current supplied"
+          ],
+          "notes": "Additional owner-reported evidence; selected final resolution is withheld and unverified."
+        }
+      ],
+      "predeclared_eval": {
+        "expected_item": null,
+        "expected_family": null,
+        "measurement_claimed": false,
+        "reported_readings": [],
+        "out_of_market_catalog": true,
+        "verified_root_cause_available": false
+      },
+      "outcome_oracle": {
+        "reported_status": "OWNER_UPDATE_SAYS_ONE_MOTOR_WRONG_DIRECTION_CORRECTED",
+        "owner_claimed_full_fix": true,
+        "physical_root_cause_independently_verified": false,
+        "limitations": "Reported success does not certify flight, batteries, or guards",
+        "HS_physically_repaired": false
+      }
+    }
+  ],
+  "case_count": 17,
+  "checkpoint_count": 34
+}
