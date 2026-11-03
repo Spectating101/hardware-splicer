@@ -89,7 +89,7 @@ def shape_collision(m5,m7,T5,T7):
     cm.add_object("source_link5",m5,transform=T5)
     cm.add_object("source_link7",m7,transform=T7)
     hit,names=cm.in_collision_internal(return_names=True)
-    return {"FCL_source_mesh_triangle_collision_detected":bool(hit),
+    return {"FCL_contact_detected":bool(hit),
             "FCL_source_link_pairs":[list(item) for item in sorted(names)],
             "solid_containment_and_full_physical_clearance_certified":False}
 
@@ -187,10 +187,10 @@ def run(urdf_path,study_path,poses_path,output_path):
         "FCL_paired_visual_DAE_vs_collision_STL_triangle_queries":result,
         "summary":{
             "native_source_wrist_cases_compared":len(result),
-            "source_visual_DAE_triangle_contact_cases":sum(x["original_visual_DAE_triangle_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
-            "source_collision_STL_triangle_contact_cases":sum(x["original_collision_STL_triangle_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
-            "derived_visual_DAE_convex_hull_collision_cases":sum(x["derived_visual_DAE_convex_hull_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
-            "derived_collision_STL_convex_hull_collision_cases":sum(x["derived_collision_STL_convex_hull_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
+            "source_visual_DAE_triangle_contact_cases":sum(x["original_visual_DAE_triangle_query"]["FCL_contact_detected"] for x in result),
+            "source_collision_STL_triangle_contact_cases":sum(x["original_collision_STL_triangle_query"]["FCL_contact_detected"] for x in result),
+            "derived_visual_DAE_convex_hull_collision_cases":sum(x["derived_visual_DAE_convex_hull_query"]["FCL_contact_detected"] for x in result),
+            "derived_collision_STL_convex_hull_collision_cases":sum(x["derived_collision_STL_convex_hull_query"]["FCL_contact_detected"] for x in result),
             "convex_hull_geometry_is_proxy_for_diagnosis_not_upstream_source":True,
             "FCL_triangle_contacts_not_closed_solid_or_physical_certification":True,
             "source_original_collision_STLs_not_modified":True,
