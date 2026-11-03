@@ -186,6 +186,19 @@ def apply_evidence_first_triage(
         verification + list(guide.get("evidence_to_collect_next") or [])
     ))[:10]
     steps = list(guide.get("diagnostic_flow") or [])
+    # The generic low-voltage flow contains a powered current-limit test.
+    # It is not a safe default for a jammed mains printer or an aircraft.
+    if unsafe_operation:
+        for step in steps:
+            if step.get("title") == "Power path check":
+                step["title"] = "Unpowered intake only"
+                step["actions"] = [
+                    "disconnect all sources and secure moving mechanisms",
+                    "inspect and document the fault under model-specific service guidance",
+                    "do not energize the device or infer the failed electrical component",
+                ]
+                step["pass_condition"] = "power isolated and physical hazards controlled"
+                step["fail_branch"] = "STOP pending qualified safe diagnostic procedure"
     steps.append({
         "order": len(steps) + 1,
         "title": "Contradiction-aware differential before any replacement",
@@ -195,6 +208,23 @@ def apply_evidence_first_triage(
         "fail_branch": "ABSTAIN from component replacement or repair-ready claim",
     })
     guide["diagnostic_flow"] = steps
+    # Remove precomputed generic rework/playbooks: they no longer correspond
+    # to the evidence-first top fault and may imply powered tests/part swaps.
+    guide["repair_playbooks"] = [{
+        "fault_id": candidate["fault_id"],
+        "title": "Diagnostic evidence collection only; no repair approved",
+        "difficulty": "unknown_until_verified",
+        "estimated_time_minutes": None,
+        "repair_steps": verification,
+        "confirmation_after_repair": [
+            "No repair completion can be claimed until new independent measurements and full-product tests exist."
+        ],
+    }]
+    guide["parts_and_tools"] = {
+        "tools": ["model-specific service manual", "photographs", "multimeter only when safe and qualified"],
+        "likely_parts": [],
+        "consumables": [],
+    }
     guide["confidence"] = min(float(guide.get("confidence", 0) or 0), 0.64)
     guide.setdefault("limitations", []).append(
         "Diagnostic ranking is an uncalibrated hypothesis, not measured fault probability or a successful physical repair."
