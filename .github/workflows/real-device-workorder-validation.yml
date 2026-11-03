@@ -1,0 +1,78 @@
+name: HS Physical Product Field Work Orders and Original Repair Evidence
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/real-device-workorder-validation.yml"
+      - "scripts/compile_hs_real_device_field_workorder_001.py"
+      - "scripts/verify_hs_real_device_workorder_001.py"
+      - "examples/real_hardware_recovery/pilots_2026_11.json"
+      - "apps/circuit-ai/src/intelligence/repair_lane_packs.py"
+      - "apps/circuit-ai/eval/real_repair_cases/cases.json"
+  workflow_dispatch:
+jobs:
+  original-source-field-product-handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate real product field work orders from existing Circuit-AI lanes, not new repair app
+        run: |
+          set -euo pipefail
+          for pilot in \
+            usb_fan_contact_driver_repair \
+            thinkpad_t480_recover \
+            pixel9_mobile_service \
+            framework_reuse_mini_pc \
+            printer_scrap_camera_slider \
+            salvaged_quad_bench_only; do
+            python -m scripts.compile_hs_real_device_field_workorder_001 \
+              --root . \
+              --catalog examples/real_hardware_recovery/pilots_2026_11.json \
+              --pilot "$pilot" \
+              --output ".cache/hs-real-device-field-workorders/$pilot"
+            python -m scripts.verify_hs_real_device_workorder_001 \
+              --root . --pilot "$pilot" \
+              --work-dir ".cache/hs-real-device-field-workorders/$pilot" \
+              --output ".cache/hs-real-device-field-workorders/$pilot/INDEPENDENT_FIELD_WORK_ORDER_ACCEPTANCE.json"
+          done
+      - name: Adversarial evidence and authority check — refuse invented product completion
+        run: |
+          python - <<'PY'
+          import json,tempfile
+          from pathlib import Path
+          from scripts.verify_hs_real_device_workorder_001 import verify
+          from scripts.compile_hs_real_device_field_workorder_001 import build
+          pilot="usb_fan_contact_driver_repair"
+          folder=Path(".cache/hs-real-device-field-workorders")/pilot
+          original=json.loads((folder/"FIELD_WORK_ORDER.json").read_text())
+          scenarios=[
+              ("fake_test",lambda c: c["measurable_acceptance_template"][0].update({"observed_value":5.01})),
+              ("fake_power_authority",lambda c: c["evaluation"].update({"human_operator_authorized_bench_power":True})),
+              ("fake_repair",lambda c: c["evaluation"].update({"verdict":"REPAIRED"})),
+              ("removed_original_lane",lambda c:c.update({"reused_repair_lane_id":None})),
+              ("missing_required_evidence",lambda c:c["required_physical_evidence_gates"].pop()),
+          ]
+          with tempfile.TemporaryDirectory() as tmp:
+            for name,change in scenarios:
+              case=json.loads(json.dumps(original))
+              change(case)
+              root=Path(tmp)/name;root.mkdir()
+              (root/"FIELD_WORK_ORDER.json").write_text(json.dumps(case))
+              (root/"HUMAN_BENCH_CARD.md").write_text((folder/"HUMAN_BENCH_CARD.md").read_text())
+              try:
+                verify(Path("."),root,pilot)
+              except ValueError:pass
+              else:raise AssertionError("fake field product state passed: "+name)
+          print("ALL 5 ADVERSARIAL FIELD-REPAIR AUTHORITY TESTS REJECTED")
+          PY
+      - name: Publish printable physical product work cards and verified source handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-six-real-device-workorders-and-measurement-cards
+          path: .cache/hs-real-device-field-workorders/**
+          retention-days: 30
+          if-no-files-found: warn
