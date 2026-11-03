@@ -305,6 +305,10 @@ class RepairEncyclopedia:
                 ("chromebook", "laptop_power_path"),
                 ("notebook", "laptop_power_path"),
                 ("laptop", "laptop_power_path"),
+                ("thinkpad", "laptop_power_path"),
+                ("ideapad", "laptop_power_path"),
+                ("latitude", "laptop_power_path"),
+                ("zephyrus", "laptop_power_path"),
             )
             for model_word, family_id in model_routes:
                 if model_word in model:
