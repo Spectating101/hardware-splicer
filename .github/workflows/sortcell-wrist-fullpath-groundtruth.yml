@@ -1,0 +1,98 @@
+name: HS SORTCELL Full-Path Original Wrist Mesh Ground Truth
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-wrist-fullpath-groundtruth.yml"
+      - "scripts/probe_sortcell_source_wrist_fullpath_groundtruth_001.py"
+      - "scripts/verify_sortcell_wrist_fullpath_groundtruth_001.py"
+      - "scripts/audit_sortcell_wrist_dae_stl_surfaces_001.py"
+      - "scripts/probe_sortcell_original_wrist_triangle_contacts_001.py"
+      - "scripts/probe_sortcell_dynamic_pick_place_001.py"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+  workflow_dispatch:
+jobs:
+  source-wrist-fullpath:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent source simulation and triangle geometry libraries
+        run: |
+          python -m pip install --no-input \
+            'pybullet==3.2.7' 'numpy>=1.26,<3' 'scipy>=1.13,<2' \
+            'trimesh==4.6.8' 'pycollada>=0.8,<1' 'lxml>=5,<7' \
+            'python-fcl==0.7.0.11'
+      - name: Fetch exact original manufacturer OpenArm v1.0 source
+        run: |
+          mkdir -p .cache/hs-wrist-fullpath
+          curl -fLsS --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/hs-wrist-fullpath/openarm_v10.urdf
+      - name: Regenerate original OpenArm joint reference
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/hs-wrist-fullpath/openarm_v10.urdf \
+            --output .cache/hs-wrist-fullpath/reference
+      - name: Reproduce original 10-phase physically coupled free-object source-motor sort
+        run: |
+          python -m scripts.probe_sortcell_dynamic_pick_place_001 \
+            --urdf .cache/hs-wrist-fullpath/openarm_v10.urdf \
+            --trajectory .cache/hs-wrist-fullpath/reference/OPENARM_SOURCE_JOINT_TRAJECTORY.json \
+            --stage assets/teardown/hs_sort_workcell_main.js \
+            --finger-margin-m 0.003 \
+            --pickup-support-width-m 0.05 \
+            --deposit-support-width-m 0.46 \
+            --deposit-floor-drop-m 0.010 \
+            --reset-via-clearance \
+            --enforce-source-right-finger-mimic \
+            --output .cache/hs-wrist-fullpath/source-sort
+      - name: Fetch and measure original unchanged manufacturer visual/collision wrist assets
+        run: |
+          python -m scripts.audit_sortcell_wrist_dae_stl_surfaces_001 \
+            --urdf .cache/hs-wrist-fullpath/openarm_v10.urdf \
+            --output .cache/hs-wrist-fullpath/source-surfaces
+      - name: Compare all real source motor frames and within-phase halfsteps using independent FCL BVH and convex
+        run: |
+          python -m scripts.probe_sortcell_source_wrist_fullpath_groundtruth_001 \
+            --urdf .cache/hs-wrist-fullpath/openarm_v10.urdf \
+            --study .cache/hs-wrist-fullpath/source-surfaces/WRIST_VISUAL_DAE_VS_COLLISION_STL.json \
+            --cycle .cache/hs-wrist-fullpath/source-sort/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --output .cache/hs-wrist-fullpath/WRIST_FULLPATH_GROUNDTRUTH.json
+      - name: Independently verify original-source collision contact and topology claims
+        run: |
+          python -m scripts.verify_sortcell_wrist_fullpath_groundtruth_001 \
+            --urdf .cache/hs-wrist-fullpath/openarm_v10.urdf \
+            --surfaces .cache/hs-wrist-fullpath/source-surfaces/WRIST_VISUAL_DAE_VS_COLLISION_STL.json \
+            --cycle .cache/hs-wrist-fullpath/source-sort/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json \
+            --report .cache/hs-wrist-fullpath/WRIST_FULLPATH_GROUNDTRUTH.json \
+            --output .cache/hs-wrist-fullpath/WRIST_FULLPATH_INDEPENDENT_ACCEPTANCE.json
+      - name: Summarize source mismatch and keep hardware blocked
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path(".cache/hs-wrist-fullpath/WRIST_FULLPATH_GROUNDTRUTH.json")
+          a=Path(".cache/hs-wrist-fullpath/WRIST_FULLPATH_INDEPENDENT_ACCEPTANCE.json")
+          d=json.loads(p.read_text());v=json.loads(a.read_text())
+          print("FULL-PATH ORIGINAL SOURCE GEOMETRY:",json.dumps(d["summary"],indent=2))
+          print("ACCEPTANCE:",json.dumps(v,indent=2))
+          assert v["hardware_robot_motion_authorized"] is False
+          assert d["summary"]["physical_collision_clearance_certified"] is False
+          PY
+      - name: Preserve fully inspectable untouched source geometry and replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-original-wrist-fullpath-solid-evidence
+          path: |
+            .cache/hs-wrist-fullpath/openarm_v10.urdf
+            .cache/hs-wrist-fullpath/source-sort/SORTCELL_CANDIDATE_DYNAMIC_PICK_PLACE.json
+            .cache/hs-wrist-fullpath/source-surfaces/WRIST_VISUAL_DAE_VS_COLLISION_STL.json
+            .cache/hs-wrist-fullpath/source-surfaces/manufacturer-source/**
+            .cache/hs-wrist-fullpath/WRIST_FULLPATH_GROUNDTRUTH.json
+            .cache/hs-wrist-fullpath/WRIST_FULLPATH_INDEPENDENT_ACCEPTANCE.json
+          retention-days: 30
+          if-no-files-found: warn
