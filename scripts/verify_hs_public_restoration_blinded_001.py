@@ -44,6 +44,7 @@ def verify(cases:Path,report:Path)->dict:
              range(1,len(case["full_breakdown"])+1)),"source timeline stage malformed")
         need(all(x["evidence"] in {
              "owner_initial","expert_advice_not_measurement",
+             "expert_advice_not_direct_measurement",
              "owner_intervention","owner_reported_partial_success",
              "owner_reported_residual_fault","owner_diagnostic_observation",
              "owner_intended_action","owner_reported_fix",
