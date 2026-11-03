@@ -19,21 +19,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Assert original engine and new corpus frozen before first execution
+      - name: Verify original untouched corpus and original scorer, isolate pinned historical engine
         run: |
           set -euo pipefail
           BASELINE="c296b7fb06df581b929f2bfff08664c3ca420aef"
-          test "$(git hash-object examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json)" = "c4473c96309cd95d043e12dcaf4c9f308e66960d"
-          git diff --exit-code "$BASELINE" HEAD -- apps/circuit-ai/src/intelligence
-          echo "FROZEN NEW PUBLIC CORPUS AND UNMODIFIED POST-269 DIAGNOSTIC ENGINE"
-      - name: Install unchanged real Circuit-AI engine
-        run: python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
-      - name: Run all 34 pre-outcome checkpoints on pinned engine
+          ORIGINAL_STUDY="ed382683c73851696389f2ed094b54e978b3b5bf"
+          CORPUS="examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json"
+          test "$(git hash-object "$CORPUS")" = "c4473c96309cd95d043e12dcaf4c9f308e66960d"
+          git diff --exit-code "$ORIGINAL_STUDY" HEAD -- \
+            "$CORPUS" \
+            scripts/bench_hs_third_party_measurement_holdout_001.py \
+            scripts/verify_hs_third_party_measurement_holdout_001.py
+          git cat-file -e "$BASELINE^{commit}"
+          PINNED="$RUNNER_TEMP/hs-thirdparty-frozen-engine"
+          git worktree add --detach "$PINNED" "$BASELINE"
+          mkdir -p "$PINNED/scripts" "$PINNED/examples/public_restoration_replays"
+          cp scripts/bench_hs_third_party_measurement_holdout_001.py "$PINNED/scripts/"
+          cp scripts/verify_hs_third_party_measurement_holdout_001.py "$PINNED/scripts/"
+          cp "$CORPUS" "$PINNED/examples/public_restoration_replays/"
+          echo "PINNED_HS_REPLAY=$PINNED" >> "$GITHUB_ENV"
+          echo "Historical 17-story study uses original pinned engine, not modified product code"
+      - name: Install original frozen real Circuit-AI engine
+        run: python -m pip install --no-input -e "$PINNED_HS_REPLAY" "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Reproduce historical 34-checkpoint result on exact original engine (NOT a new blind trial)
         run: |
+          set -euo pipefail
+          cd "$PINNED_HS_REPLAY"
           python -m scripts.bench_hs_third_party_measurement_holdout_001 \
             --root . \
             --corpus examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json \
             --out .cache/hs-thirdparty-public-repair
+          mkdir -p "$GITHUB_WORKSPACE/.cache"
+          cp -a .cache/hs-thirdparty-public-repair "$GITHUB_WORKSPACE/.cache/"
       - name: Independent source chronology and score audit
         run: |
           python -m scripts.verify_hs_third_party_measurement_holdout_001 \
