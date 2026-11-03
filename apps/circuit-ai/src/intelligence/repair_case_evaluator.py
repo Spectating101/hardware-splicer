@@ -158,6 +158,8 @@ class RepairCaseEvaluator:
             },
             "workflow_score": score,
             "verdict": verdict,
+            "verdict_scope": "software_workflow_only_not_repaired_product",
+            "physical_repair_ready": False,
             "blockers": blockers,
             "recommended_next_builds": self._case_next_builds(record, coverage, guide, blockers),
         }
