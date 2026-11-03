@@ -938,6 +938,10 @@ class RepairEncyclopedia:
             },
         )
         battery_terms = self._has_any(text, {"battery", "lithium", "li-ion", "lipo", "18650", "cordless", "toothbrush"})
+        identified_lithium_device = self._has_any(
+            text, {"iphone", "macbook", "nintendo switch", "switch oled", "smartphone"}
+        )
+        battery_terms = battery_terms or identified_lithium_device
         battery_risk = self._has_any(text, {"swollen", "bulging", "punctured"}) or (
             battery_terms and self._has_any(text, {"hot", "overheat", "heating"})
         )
@@ -947,6 +951,10 @@ class RepairEncyclopedia:
             "start every powered test with a current-limited supply when possible",
             "label connector polarity and voltage before reconnecting loads",
         ]
+        if identified_lithium_device:
+            rules.insert(0, "follow model-specific battery isolation; stop for swollen/hot/punctured lithium battery")
+        if self._has_any(text, {"nintendo switch", "switch oled"}):
+            rules.append("USB-C/HDMI port and filter rework requires trained microsoldering and matching schematics")
         if high_voltage:
             rules.insert(0, "do not perform live mains probing; use an isolation transformer and trained procedure")
             rules.append("discharge high-voltage capacitors with a rated discharge tool before handling")
@@ -1043,6 +1051,60 @@ class RepairEncyclopedia:
                 "fail_branch": "follow power_input_or_regulator_fault playbook",
             },
         ]
+        if family_id in {
+            "retro_handheld_aa_power", "phone_charging_port_flex",
+            "modern_console_usb_c_video", "laptop_power_path"
+        }:
+            # Generic powered probing is unsafe or meaningless for these
+            # product-specific cases without a model-based battery service
+            # procedure and proper instrument/ratings.
+            steps[2]["title"] = "Model-specific input/power verification before repair"
+            steps[2]["actions"] = [
+                "identify original power source, chemistry, polarity, rating and model revision",
+                "unplug/disconnect or remove batteries under manufacturer-approved procedure",
+                "inspect input connector/contact and measure deenergized continuity first",
+                "record rated source and trained-operator test plan; do not authorize power automatically",
+            ]
+            steps[2]["pass_condition"] = "source limits and deenergized input path are evidenced"
+            steps[2]["fail_branch"] = "STOP unqualified power-on, rework or battery manipulation"
+        if family_id == "retro_handheld_aa_power":
+            steps.append({
+                "order": 4, "title": "AA contacts and full handheld function",
+                "purpose": "Distinguish primary AA contact/switch fault from a second LCD fault.",
+                "actions": [
+                    "verify AA battery type and individual fresh cell voltage",
+                    "inspect corroded battery springs and measure unplugged switch continuity",
+                    "after permitted restoration check full LCD, controls and audio, not boot only",
+                ],
+                "pass_condition": "handheld powers and all display/audio/controls work",
+                "fail_branch": "missing LCD columns remain separate unresolved repair, not full success",
+            })
+        if family_id == "phone_charging_port_flex":
+            steps.append({
+                "order": 4, "title": "Phone original-versus-replacement flex A/B",
+                "purpose": "Do not misroute a bad replacement charging flex to a motor driver.",
+                "actions": [
+                    "identify vendor-approved phone service isolation and source part revision",
+                    "inspect connector seating and known-good charger/cable",
+                    "if qualified and battery safely disconnected, compare old/new charge-flex behavior",
+                    "record actual current and verify all functions after full reassembly",
+                ],
+                "pass_condition": "charging works reliably without flex/plug pressure",
+                "fail_branch": "suspect unverified replacement or connector, not proven charging IC",
+            })
+        if family_id == "modern_console_usb_c_video":
+            steps.append({
+                "order": 4, "title": "Separate USB-C power and HDMI/docked video",
+                "purpose": "Both charging and video are independent acceptance criteria.",
+                "actions": [
+                    "inspect USB-C pins and anchors under magnification",
+                    "record source pinout and breakout continuity for correct console revision",
+                    "qualified operator checks port/filter circuits; no blind rework",
+                    "test USB-C charging and HDMI/dock output independently after any repair",
+                ],
+                "pass_condition": "measured, documented charging and HDMI functions",
+                "fail_branch": "charging-only test does not establish repaired video output",
+            })
         if family_id in {"small_dc_motor_gadget", "relay_power_box"}:
             steps.append(
                 {
@@ -1237,6 +1299,26 @@ class RepairEncyclopedia:
         if not (analysis.get("machine_connection_map") or {}).get("connector_count"):
             needed.append("connector closeups with wire colors and labels")
         family_evidence = {
+            "retro_handheld_aa_power": [
+                "original AA cell voltage and polarity check; no charging-pack or dock test",
+                "battery spring/terminal corrosion photos and disconnected continuity readings",
+                "power switch continuity and input rail if contacts and AA cells check out",
+                "after-boot LCD vertical columns, buttons and audio full-product test",
+            ],
+            "phone_charging_port_flex": [
+                "identify exact phone model and original/replacement port-flex part numbers",
+                "known-good charger and external-cable A/B comparison",
+                "battery disconnection and connector seating evidence before phone opening",
+                "original-vs-new port A/B charge-current and functional test",
+                "after-repair phone display, mic, speaker, data-safe and charge tests",
+            ],
+            "modern_console_usb_c_video": [
+                "exact console revision and original USB-C pin/anchor closeups",
+                "USB-C breakout and model-specific schematic connectivity readings",
+                "charging PD/current and dock HDMI/video separate outcome tests",
+                "noise-filter and connector manufacturer part identity",
+                "trained hot-air rework capability and safe battery isolation",
+            ],
             "game_controller_input": [
                 "before/after controller tester readings for stick center, axis range, triggers, and buttons",
                 "closeups of analog stick modules, button membranes, flex cables, and PCB contacts",
