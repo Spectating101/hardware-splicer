@@ -6,6 +6,7 @@ from dataclasses import asdict
 from typing import Any, Dict, List, Sequence
 
 from src.intelligence.common_fault_database import CommonFault, common_fault_database
+from src.intelligence.repair_differential_triage import apply_evidence_first_triage
 
 
 class RepairEncyclopedia:
@@ -217,6 +218,7 @@ class RepairEncyclopedia:
                 "Image-only PCB inference cannot see hidden layers, bottom-side components, or exact manufacturer revisions.",
             ],
         }
+        guide = apply_evidence_first_triage(guide, symptoms=symptom_list, device_hint=hint_text)
         guide["quick_summary"] = self._quick_summary(guide)
         return guide
 
