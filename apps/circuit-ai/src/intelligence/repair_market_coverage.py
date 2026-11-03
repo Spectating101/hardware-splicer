@@ -245,8 +245,28 @@ class RepairMarketCoverage:
         },
     }
 
-    def evaluate_text(self, text: str) -> Dict[str, Any]:
+    def evaluate_text(self, text: str, *, device_hint: str = "") -> Dict[str, Any]:
         normalized = str(text or "").lower()
+        hint = str(device_hint or "").lower()
+        # Commercial coverage has no product category for aircraft or printers.
+        # Refuse to force a best-selling but unrelated electronic gadget class.
+        # This is a product-identity abstention, not a repair failure diagnosis.
+        uncovered = (
+            ("drone_or_quadcopter", ("drone", "quadcopter", "syma x5")),
+            ("printer", ("printer", "deskjet", "inkjet", "laserjet")),
+        )
+        unsupported = next(
+            (domain for domain, phrases in uncovered if any(p in hint for p in phrases)), None
+        )
+        if unsupported is not None:
+            return {
+                "mode": "repair_market_coverage",
+                "query": text,
+                "matched": False,
+                "top_matches": [],
+                "uncovered_device_type": unsupported,
+                "recommendation": "Unsupported product class: retain diagnostic notes but do not infer product coverage or repair readiness.",
+            }
         matches = []
         for item_id, item in self.ITEM_CLASSES.items():
             hits = sorted(signal for signal in item["signals"] if signal in normalized)
@@ -274,8 +294,20 @@ class RepairMarketCoverage:
             ("game boy", "retro_handheld_console"),
             ("gameboy", "retro_handheld_console"),
         )
-        identity = next(((phrase, item_id) for phrase, item_id in identity_signals
-                         if phrase in normalized), None)
+        explicit_hint = str(device_hint or "").lower()
+        # Product identity supplied separately at intake outranks market-value
+        # scoring and symptom text. Generic mentions never invent OOD classes.
+        hint_identity = (
+            (("laptop", "notebook", "chromebook", "macbook"), "laptop_or_macbook"),
+            (("iphone", "smartphone", "pixel"), "phone_or_tablet"),
+            (("nintendo switch", "switch oled"), "modern_game_console"),
+            (("game boy", "gameboy"), "retro_handheld_console"),
+        )
+        identity = next(((phrase, item_id) for phrases, item_id in hint_identity
+                         for phrase in phrases if phrase in explicit_hint), None)
+        if identity is None:
+            identity = next(((phrase, item_id) for phrase, item_id in identity_signals
+                             if phrase in normalized), None)
         if identity is not None:
             phrase, item_id = identity
             if not any(row["item_id"] == item_id for row in matches):

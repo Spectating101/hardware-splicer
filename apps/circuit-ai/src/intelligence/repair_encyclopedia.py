@@ -6,6 +6,7 @@ from dataclasses import asdict
 from typing import Any, Dict, List, Sequence
 
 from src.intelligence.common_fault_database import CommonFault, common_fault_database
+from src.intelligence.repair_differential_triage import apply_evidence_first_triage
 
 
 class RepairEncyclopedia:
@@ -217,6 +218,7 @@ class RepairEncyclopedia:
                 "Image-only PCB inference cannot see hidden layers, bottom-side components, or exact manufacturer revisions.",
             ],
         }
+        guide = apply_evidence_first_triage(guide, symptoms=symptom_list, device_hint=hint_text)
         guide["quick_summary"] = self._quick_summary(guide)
         return guide
 
@@ -300,6 +302,9 @@ class RepairEncyclopedia:
                 ("iphone", "phone_charging_port_flex"),
                 ("smartphone", "phone_charging_port_flex"),
                 ("macbook", "laptop_power_path"),
+                ("chromebook", "laptop_power_path"),
+                ("notebook", "laptop_power_path"),
+                ("laptop", "laptop_power_path"),
             )
             for model_word, family_id in model_routes:
                 if model_word in model:

@@ -75,7 +75,7 @@ class RepairCaseEvaluator:
     ) -> Dict[str, Any]:
         record = self._coerce_case(case)
         query = " ".join([record.title, record.device_hint, *record.symptoms, record.notes])
-        coverage = self.coverage.evaluate_text(query)
+        coverage = self.coverage.evaluate_text(query, device_hint=record.device_hint)
         guide = self.encyclopedia.generate(
             analysis={},
             symptoms=record.symptoms,
@@ -127,6 +127,7 @@ class RepairCaseEvaluator:
                 "strategic_score": top_match.get("strategic_score"),
             },
             "repair_guide": {
+                "triage_state": guide.get("triage_state"),
                 "family": (guide.get("device_family") or {}).get("id"),
                 "family_label": (guide.get("device_family") or {}).get("label"),
                 "confidence": guide.get("confidence"),
@@ -157,6 +158,8 @@ class RepairCaseEvaluator:
             },
             "workflow_score": score,
             "verdict": verdict,
+            "verdict_scope": "software_workflow_only_not_repaired_product",
+            "physical_repair_ready": False,
             "blockers": blockers,
             "recommended_next_builds": self._case_next_builds(record, coverage, guide, blockers),
         }
@@ -266,6 +269,8 @@ class RepairCaseEvaluator:
         if float(guide.get("confidence", 0.0) or 0.0) < 0.45:
             blockers.append("low guide confidence without board photos or measurements")
         safety = guide.get("safety_profile") or {}
+        if (guide.get("triage_state") or {}).get("requires_measurement"):
+            blockers.append("model-specific knowledge required: differential hypothesis unverified; no repair-ready claim")
         if safety.get("risk_level") == "high":
             blockers.append("trained safety workflow required for high-voltage or mains portions")
         if (session.get("metrics") or {}).get("task_count", 0) == 0:
