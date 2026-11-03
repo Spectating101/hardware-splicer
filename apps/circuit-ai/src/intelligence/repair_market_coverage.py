@@ -298,7 +298,7 @@ class RepairMarketCoverage:
         # Product identity supplied separately at intake outranks market-value
         # scoring and symptom text. Generic mentions never invent OOD classes.
         hint_identity = (
-            (("laptop", "notebook", "chromebook", "macbook"), "laptop_or_macbook"),
+            (("laptop", "notebook", "chromebook", "macbook", "thinkpad", "ideapad", "latitude", "zephyrus"), "laptop_or_macbook"),
             (("iphone", "smartphone", "pixel"), "phone_or_tablet"),
             (("nintendo switch", "switch oled"), "modern_game_console"),
             (("game boy", "gameboy"), "retro_handheld_console"),
