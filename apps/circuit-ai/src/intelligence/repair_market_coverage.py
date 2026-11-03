@@ -262,7 +262,28 @@ class RepairMarketCoverage:
                 "top_matches": matches[:5],
                 "recommendation": "No direct item match; collect device type, symptoms, photos, and whether it contains electronics.",
             }
-        matches.sort(key=lambda record: record["strategic_score"], reverse=True)
+        # Device identity takes precedence over the strategic *commercial*
+        # value weight. A Switch OLED is not a retro Game Boy, a MacBook is
+        # not a USB fan, and an iPhone is not a battery-charging gadget.
+        identity_signals = (
+            ("nintendo switch", "modern_game_console"),
+            ("switch oled", "modern_game_console"),
+            ("macbook", "laptop_or_macbook"),
+            ("iphone", "phone_or_tablet"),
+            ("google pixel", "phone_or_tablet"),
+            ("game boy", "retro_handheld_console"),
+            ("gameboy", "retro_handheld_console"),
+        )
+        identity = next(((phrase, item_id) for phrase, item_id in identity_signals
+                         if phrase in normalized), None)
+        if identity is not None:
+            phrase, item_id = identity
+            if not any(row["item_id"] == item_id for row in matches):
+                matches.append(self._record(item_id, self.ITEM_CLASSES[item_id], [phrase]))
+            matches.sort(key=lambda record: (
+                record["item_id"] != item_id, -record["strategic_score"]))
+        else:
+            matches.sort(key=lambda record: record["strategic_score"], reverse=True)
         return {
             "mode": "repair_market_coverage",
             "query": text,
