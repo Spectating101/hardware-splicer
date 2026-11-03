@@ -1,0 +1,70 @@
+name: HS Real Hardware Repair and Salvage Pilot Evidence Gates
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/real-hardware-recovery-pilots.yml"
+      - "examples/real_hardware_recovery/pilots_2026_11.json"
+      - "scripts/evaluate_real_hardware_recovery_pilots_001.py"
+      - "docs/REAL_HARDWARE_REPAIR_REUSE_PILOTS_2026-11-03.md"
+  workflow_dispatch:
+jobs:
+  plan-vs-real-hardware-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify all six physical product plans reuse existing repair and salvage paths
+        run: |
+          python -m scripts.evaluate_real_hardware_recovery_pilots_001 \
+            --root . --catalog examples/real_hardware_recovery/pilots_2026_11.json \
+            --output .cache/hs-real-hardware-product-pilots/PHYSICAL_PILOT_ACCEPTANCE.json
+      - name: Assert against fake physical success and fake measurements
+        run: |
+          python - <<'PY'
+          import json,tempfile
+          from pathlib import Path
+          from scripts.evaluate_real_hardware_recovery_pilots_001 import validate
+          original=Path("examples/real_hardware_recovery/pilots_2026_11.json")
+          case=json.loads(original.read_text())
+          with tempfile.TemporaryDirectory() as tmp:
+            output=Path(tmp)
+            for kind in ("fake_completion","fake_receipt"):
+              update=json.loads(original.read_text())
+              receipts=None
+              if kind=="fake_completion":
+                update["pilots"][0]["status"]="hardware_verified"
+              else:
+                receipts=output/"receipt.json"
+                receipts.write_text(json.dumps({update["pilots"][0]["id"]:[{
+                  "gate":"before_after_functional_test_video",
+                  "source_path":"fictional-photo.png",
+                  "sha256":"0"*64,"finding":"observed_pass",
+                  "observed_at_utc":"2026-11-03T00:00:00Z","operator_role":"technician"}]}))
+              spec=output/(kind+".json")
+              spec.write_text(json.dumps(update))
+              try:
+                report=validate(Path("."),spec,receipts,Path("."))
+                if kind=="fake_receipt":
+                  row=report["pilot_evaluations"][0]
+                  assert row["required_real_operator_evidence"]["evidence_passed"]==0
+                  assert row["verdict"]=="PLAN_ONLY_NO_PHYSICAL_EVIDENCE"
+                else:
+                  raise AssertionError("fake physical completion was accepted")
+              except ValueError:
+                if kind!="fake_completion":raise
+            print("FAIL-CLOSED VERIFIED: impossible hardware success and fictional evidence")
+          PY
+      - name: Upload inspectable pilot inventory and physical authority decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-real-hardware-repair-reuse-product-pilots
+          path: |
+            examples/real_hardware_recovery/pilots_2026_11.json
+            docs/REAL_HARDWARE_REPAIR_REUSE_PILOTS_2026-11-03.md
+            .cache/hs-real-hardware-product-pilots/PHYSICAL_PILOT_ACCEPTANCE.json
+          retention-days: 30
+          if-no-files-found: warn
