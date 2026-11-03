@@ -1,7 +1,7 @@
 {
   "schema_version": "hardware_splicer.diy_microdrone_build_v1",
   "product_id": "HS-WHOOP65-1S-V0",
-  "product_name": "HS DIY 65 mm ducted brushless micro quad",
+  "product_name": "HS DIY 65mm 3D-printed micro quad — published Matrix 1S / 0702 build",
   "objective": "assemble a physically piloted, repairable, 1S indoor whoop with off-the-shelf interchangeable components; reuse salvage only when electrically/mechanically compatible",
   "product_type": "manual_rc_quadcopter",
   "state": "real_hardware_not_acquired_or_assembled",
@@ -22,73 +22,76 @@
     "battery_connector": "BT2.0 (must match FC harness and charger)",
     "frame_wheelbase_mm": 65,
     "propeller_diameter_mm": 31,
-    "motor_model_class": "0802 class brushless outrunners; approx 19500KV 1S; exact mount and shaft must match",
+    "motor_model_class": "RCinPower 0702 27000KV brushless as in source's 65mm Matrix1S example",
     "propeller_shaft_mm": 1,
-    "flight_controller_mounting_hole_pattern_mm": "26x26 in vendor reference assembly; confirm board revision and frame",
+    "flight_controller_mounting_hole_pattern_mm": "26x26",
     "esc_requirement": "4-in-1 1S ESC, per-channel continuous current adequate for selected motors; 5A reference, do not infer motor current from KV alone",
     "rf_requirement": "2.4 GHz ExpressLRS receiver and transmitter with compatible major firmware and selected regional band",
     "protocol_requirement": "Betaflight firmware supported by exact board target; motor mapping, DShot, failsafe and gyro orientation verified props-off",
     "payload_kg": 0,
-    "first_flight_environment": "clear indoor area with guards and no bystanders; no outdoor BVLOS/autonomous modes"
+    "first_flight_environment": "clear indoor area with guards and no bystanders; no outdoor BVLOS/autonomous modes",
+    "motor_connector": "JST1.25 (verify selected motor plug harness with Matrix 1S)",
+    "motor_rated_current_and_prop_fit": "use source-matched 0702 and Gemfan1210-2; confirm FC ESC 5A continuous rating and motor spec",
+    "motor_actual_thrust_test": "not yet performed"
   },
   "bom": [
     {
       "id": "frame",
       "quantity": 1,
-      "component": "65mm ducted whoop frame; BETAFPV Meteor65 or verified compatible open printed frame",
+      "component": "3D printed 65mm 26x26 whoop frame from vsergeev/3d-parametric-whoop (CC BY 4.0), or exact-fit donor frame",
       "must_match": [
-        "31mm prop clearance",
-        "FC 26x26 mounts for selected AIO",
-        "0802 motor diameter and bolt pattern",
-        "battery holder compatible with 1S 300mAh"
+        "source 26x26mm Matrix 1S mounting",
+        "31mm Gemfan 1210-2 prop clearance",
+        "0702-class motor diameter, source mount dimensions",
+        "battery pocket verified to real pack dimension"
       ],
       "status": "UNACQUIRED",
-      "source": "https://github.com/vsergeev/3d-parametric-whoop",
+      "source": "https://github.com/vsergeev/3d-parametric-whoop/blob/master/stl/65mm_26x26_whoop.stl",
       "reuse": "Re-use uncracked ducted donor frame after verifying all four motor mounts; no cracked repaired ducts near props"
     },
     {
       "id": "motors",
       "quantity": 4,
-      "component": "BETAFPV 0802SE 19500KV or documented electrically equivalent 1S brushless motor set",
+      "component": "RCinPower 0702 27000KV 1S brushless (4), used by published 65mm frame build",
       "must_match": [
-        "1S voltage",
-        "KV and load/prop fit",
-        "three-phase brushless output, not two-wire brushed toy motors",
-        "1mm prop shaft",
-        "motor mount pattern and connector or solder pads"
+        "1S brushless and source-recommended KV",
+        "motor physical diameter and mounting holes in printed frame",
+        "actual propeller hub/shaft with Gemfan 1210-2 31mm",
+        "JST1.25 terminal or verified adapted harness",
+        "documented current envelope versus 5A ESC"
       ],
       "status": "UNACQUIRED",
-      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "source": "https://github.com/vsergeev/3d-parametric-whoop#65mm-betafpv-matrix-1s-5in1-analog-vtx--betafpv-c03-camera",
       "reuse": "Only 3-wire brushless donor motors with same dimensions and tested no-load condition; 2-wire brushed motors require a DIFFERENT controller"
     },
     {
       "id": "fc_esc",
       "quantity": 1,
-      "component": "1S AIO flight controller with 4 ESCs and serial ELRS 2.4 GHz receiver; BETAFPV F4 1S 5A Serial ELRS reference",
+      "component": "BETAFPV Matrix 1S 5IN1 AIO FC+ESC+Serial ELRS2.4+VTX; exact source-assembled controller",
       "must_match": [
-        "1S supply",
-        "BT2.0 battery connector",
-        "26x26 mounting",
-        "compatible Betaflight board target",
-        "4 motor output stages",
-        "actual receiver protocol ELRS 2.4"
+        "1S only and BT2.0",
+        "26x26mm mounting",
+        "Betaflight target BETAFPVG473 verified on chosen board revision",
+        "JST1.25 motor plugs",
+        "5A continuous four-channel ESC",
+        "ELRS2.4 onboard receiver"
       ],
       "status": "UNACQUIRED",
-      "source": "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
+      "source": "https://betafpv.com/products/matrix-1s-brushless-flight-controller",
       "reuse": "Re-use only if programmable firmware target, gyro and ESC rails verified; proprietary toy FC is not automatically compatible"
     },
     {
       "id": "props",
       "quantity": 1,
-      "component": "set of 4 x 31mm 3-blade props with 1mm shaft hub; correct CW/CCW pair",
+      "component": "Gemfan 1210-2 31mm two-blade matched CW/CCW set from designer's build, not a 35mm or 40mm variant",
       "must_match": [
-        "31mm prop clearance within frame",
-        "1mm motor shaft",
-        "two matched CW and two matched CCW geometry",
-        "manufacturer motor direction diagram"
+        "31mm source prop and verified hub for motor shaft",
+        "CW and CCW handedness verified",
+        "clearance under printed duct",
+        "no cracks"
       ],
       "status": "UNACQUIRED",
-      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "source": "https://github.com/vsergeev/3d-parametric-whoop#65mm-betafpv-matrix-1s-5in1-analog-vtx--betafpv-c03-camera",
       "reuse": "Do not reuse props with cracks, dents, bent blades or hub damage"
     },
     {
@@ -135,11 +138,11 @@
     {
       "id": "mounting",
       "quantity": 1,
-      "component": "manufacturer-compatible motor screws, AIO silicone dampers, canopy and battery retainer",
+      "component": "Printed-frame specific 12x M1.4x3 motor screws + 4x M1.4x8 and nuts for FC/canopy + optional M2x20 camera harness mounts; verify actual vendor screw supply",
       "must_match": [
-        "screw length does not enter motor windings",
-        "no contact between carbon/metal parts and PCB components",
-        "battery secured against shift"
+        "motor thread depth avoids touching windings",
+        "FC/canopy mount source lengths",
+        "battery secured and props unobstructed"
       ],
       "status": "UNACQUIRED",
       "source": "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
@@ -147,17 +150,17 @@
     },
     {
       "id": "camera_video",
-      "quantity": 0,
-      "component": "optional C03 analog camera + compatible 5.8GHz VTX + licensed goggles",
+      "quantity": 1,
+      "component": "BETAFPV C03 analog camera to match the source's printed canopy and integrated Matrix1S VTX; goggles optional if first flight is line-of-sight",
       "must_match": [
         "voltage supply and wiring according to actual AIO",
         "camera mount fit",
         "legal local RF band/power",
         "video goggles compatible analog system"
       ],
-      "status": "DEFERRED_FIRST_LINE_OF_SIGHT_FLIGHT",
-      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
-      "reuse": "Optional only; first hovering can be performed within direct visual line of sight"
+      "status": "UNACQUIRED_OPTIONAL_FOR_VISUAL_LINE_OF_SIGHT",
+      "source": "https://betafpv.com/products/c03-fpv-micro-camera",
+      "reuse": "Camera optional for LOS, but the original printed example's reported 24.4g ASA total used this camera; any omission changes balance and tuning"
     }
   ],
   "assembly_steps": [
@@ -215,10 +218,45 @@
   },
   "safety": "No current hardware or physical flight has been completed by HS. Disconnect battery, remove props during motor tests, observe local airspace/radio rules, use fire-safe LiPo handling and inspect every salvaged item before use.",
   "sources": [
+    "https://betafpv.com/products/matrix-1s-brushless-flight-controller",
     "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
     "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
     "https://betaflight.com/docs/wiki/getting-started/setup-guide",
     "https://github.com/vsergeev/3d-parametric-whoop",
     "https://github.com/learnsyslab/gym-pybullet-drones"
-  ]
+  ],
+  "build_basis": {
+    "design_origin": "vsergeev/3d-parametric-whoop 65mm published example build (not an original HS airframe design)",
+    "verified_public_build_parts": [
+      "65mm_26x26_whoop.stl",
+      "BETAFPV Matrix 1S 5in1 AIO",
+      "RCinPower 0702 27000KV",
+      "Gemfan 1210-2 31mm",
+      "BETAFPV C03 camera + printable canopy"
+    ],
+    "design_repository_commit": "13cf8c2",
+    "design_copyright": "CC-BY-4.0 (credit original author); files fetched from author repo, not redrawn or republished under HS",
+    "local_stl_path_on_optiplex": "~/chatgpt-work/hs-drone-lab-20261104/3d-parametric-whoop/stl/65mm_26x26_whoop.stl",
+    "local_canopy_path_on_optiplex": "~/chatgpt-work/hs-drone-lab-20261104/3d-parametric-whoop/stl/betafpv_c03_26x26_canopy.stl",
+    "status": "source STL downloaded, NOT sliced, printed, weighed or physically installed"
+  },
+  "printing": {
+    "material": "ASA/PETG/hard TPU per designer; verify printer/material capabilities",
+    "layer_height_mm": 0.2,
+    "infill_percent": 100,
+    "supports": "build plate only for frame, none for canopy; maker-specific parameters in source README",
+    "files_to_slice": [
+      "65mm_26x26_whoop.stl",
+      "betafpv_c03_26x26_canopy.stl",
+      "betafpv_c03_camera_harness.stl"
+    ],
+    "printed": false,
+    "physical_fit_tested": false
+  },
+  "secondary_known_build": {
+    "description": "BETAFPV Meteor65 injection-molded reference, do NOT mix its motors or board blindly into printed build",
+    "parts": "Meteor65 frame + F4 1S 5A AIO Serial ELRS + BETAFPV 0802SE 19500KV + 31mm tri-blade + C03",
+    "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+    "status": "alternative architecture only"
+  }
 }
