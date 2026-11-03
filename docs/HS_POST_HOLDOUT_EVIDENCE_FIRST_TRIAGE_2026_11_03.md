@@ -7,15 +7,15 @@ Original evaluation: PR #268, immutable corpus blob b2441fb0fbdeb594e33a4f8f01de
 
 The first untouched 7-case/14-checkpoint evaluation got **6/8** predeclared exact product-class comparisons, **6/6** predeclared broad diagnostic-family comparisons and **14/14** weak keyword occurrences. Those numbers do **not** demonstrate correct component diagnosis or repair success. The report showed a no-power diagnosis on an audio-only Game Boy Color, motor-driver hypotheses on non-lifting drones, two wrong laptop market classifications, and no fault candidates on the jammed printer. Five of seven public story owners did not confirm complete repairs. No hardware was repaired or operated by HS.
 
-The next software change is *not* a claim that HS can now fix those devices*. It adds an evidence-first differential and refuses a repair-ready verdict where a hypothesis remains unverified.
+The next software change is *not* a claim that HS can now fix those devices. It adds an evidence-first differential and refuses a repair-ready verdict where a hypothesis remains unverified.
 
 ## Development implementation
 
 - A centralized, product-intake-only contradiction layer distinguishes **audio-only failure with working headphone audio**, **reported missing external laptop charger voltage**, **motor spin without drone lift**, **printer carriage mechanical jam**, and **charge-port flex failures dependent on final assembly**.
-- Product identity is prioritized from the explicit device hint (e.g. a non-Mac laptop) rather than commercial market score or loose symptom overlap.
+- Product identity is prioritized from the explicit device hint (e.g. a non-Mac laptop) rather than commercial market score or loose symptom overlap. Printer and drone market classes now explicitly abstain (uncovered) instead of forcing an unrelated category.
 - The fault ranking is explicitly an **uncalibrated heuristic**, not a confidence interval or actual root-cause posterior. Each tailored hypothesis requires model-specific observations or physical measurements and sets repair_ready=false, hypothesis_verified=false.
 - Original generic power tests and parts-replacement playbooks are suppressed while an unresolved differential is being investigated. Mains printer and drone routes explicitly reject live-carriage, flight, spin, and unguarded powered tests.
-- RepairCaseEvaluator propagates triage_state and refuses solvable_now for these evidence-missing cases, regardless of commercial coverage or task-count score.
+- RepairCaseEvaluator propagates triage_state and refuses solvable_now for these evidence-missing cases, regardless of commercial coverage or task-count score. Every evaluator output explicitly marks physical_repair_ready=false and the verdict as software-workflow-only.
 - Existing generic and original model-specific routes are retained except where evidence conflicts.
 
 ## Testing and independence
