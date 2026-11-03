@@ -6,6 +6,7 @@ on:
       - "scripts/audit_sortcell_wrist_dae_stl_surfaces_001.py"
       - "scripts/verify_sortcell_wrist_surface_audit_001.py"
       - "scripts/probe_sortcell_original_wrist_triangle_contacts_001.py"
+      - "scripts/verify_sortcell_wrist_convexification_gap_001.py"
       - "tests/fixtures/sortcell_original_source_wrist_fk_reference_001.json"
   workflow_dispatch:
 jobs:
@@ -45,6 +46,14 @@ jobs:
             --study .cache/original-manufacturer-geometry/wrist-surface-audit/WRIST_VISUAL_DAE_VS_COLLISION_STL.json \
             --poses tests/fixtures/sortcell_original_source_wrist_fk_reference_001.json \
             --output .cache/original-manufacturer-geometry/wrist-surface-audit/ASSEMBLED_WRIST_DAE_STL_FCL_TRIANGLE_CONTACTS.json
+      - name: Independently verify original BVH triangle versus derived convex-hull disagreement
+        run: |
+          python -m scripts.verify_sortcell_wrist_convexification_gap_001 \
+            --urdf .cache/original-manufacturer-geometry/openarm_v10.urdf \
+            --study .cache/original-manufacturer-geometry/wrist-surface-audit/WRIST_VISUAL_DAE_VS_COLLISION_STL.json \
+            --poses tests/fixtures/sortcell_original_source_wrist_fk_reference_001.json \
+            --contacts .cache/original-manufacturer-geometry/wrist-surface-audit/ASSEMBLED_WRIST_DAE_STL_FCL_TRIANGLE_CONTACTS.json \
+            --output .cache/original-manufacturer-geometry/wrist-surface-audit/WRIST_CONVEXIFICATION_GAP_ACCEPTANCE.json
       - name: Summarize measured original source wrist DAE vs STL differences
         run: |
           python - <<'PY'
@@ -71,6 +80,7 @@ jobs:
             .cache/original-manufacturer-geometry/wrist-surface-audit/WRIST_VISUAL_DAE_VS_COLLISION_STL.json
             .cache/original-manufacturer-geometry/wrist-surface-audit/SURFACE_AUDIT_ACCEPTANCE.json
             .cache/original-manufacturer-geometry/wrist-surface-audit/ASSEMBLED_WRIST_DAE_STL_FCL_TRIANGLE_CONTACTS.json
+            .cache/original-manufacturer-geometry/wrist-surface-audit/WRIST_CONVEXIFICATION_GAP_ACCEPTANCE.json
             .cache/original-manufacturer-geometry/wrist-surface-audit/manufacturer-source/**
           retention-days: 30
           if-no-files-found: warn
