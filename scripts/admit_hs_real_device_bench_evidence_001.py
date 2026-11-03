@@ -78,8 +78,14 @@ def run(root:Path,workdir:Path,pilot:str,session_file:Path,files_root:Path)->dic
         need(isinstance(row.get("operator_role"),str) and len(row["operator_role"])>=3,
              "operator role absent")
     existing_evidence=check_evidence(files_root,{"required_evidence":list(ids)},receipts)
-    need(not existing_evidence["receipt_issues"],
-         "existing HS evidence admission rejected submitted receipts")
+    # The existing HS gate correctly records an inconclusive/failed physical
+    # observation as NOT ACCEPTED for repair success. Its receipt_issues are
+    # nevertheless valid observation statuses at *ingestion* time. Distinguish
+    # those known nonpassing findings from structural or SHA invalidity.
+    nonpassing={"real operator finding not pass "+row["gate"]
+                for row in receipts if row["finding"]!="observed_pass"}
+    need(set(existing_evidence["receipt_issues"]).issubset(nonpassing),
+         "existing HS evidence admission rejected malformed submitted receipts")
     expected={x["measurement_id"]:x for x in work["measurable_acceptance_template"]}
     measurements=session.get("original_measurements",[])
     need(isinstance(measurements,list),"measurements must be list")
@@ -121,6 +127,8 @@ def run(root:Path,workdir:Path,pilot:str,session_file:Path,files_root:Path)->dic
       "required_original_physical_evidence_gates":len(all_reqs),
       "operator_files_sha256_admitted":len(receipts),
       "operator_pass_findings_recorded":existing_evidence["evidence_passed"],
+      "operator_inconclusive_or_failed_findings_recorded":len(nonpassing),
+      "operator_inconclusive_or_failed_findings_are_not_gate_passes":True,
       "required_original_gates_unmet":existing_evidence["missing_gates"],
       "operator_measurement_files_sha256_admitted":len(summarized),
       "measurement_fields_not_yet_submitted":sorted(set(expected)-seen),
