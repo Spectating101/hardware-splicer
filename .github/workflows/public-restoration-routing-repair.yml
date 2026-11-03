@@ -1,0 +1,57 @@
+name: HS Source-Grounded Repair Family Routing and Seven-Case Regression
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/public-restoration-routing-repair.yml"
+      - "apps/circuit-ai/src/intelligence/repair_market_coverage.py"
+      - "apps/circuit-ai/src/intelligence/repair_encyclopedia.py"
+      - "apps/circuit-ai/src/intelligence/repair_case_evaluator.py"
+      - "scripts/verify_hs_public_restoration_routing_upgrade_001.py"
+      - "examples/public_restoration_replays/**"
+      - "scripts/bench_hs_public_restoration_blinded_001.py"
+  workflow_dispatch:
+jobs:
+  actual-circuitai-routing-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install real original Circuit-AI repair engine with narrowly scoped dependencies
+        run: |
+          python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Re-evaluate same four public restorations at 8 blinded chronological checkpoints
+        run: |
+          python -m scripts.bench_hs_public_restoration_blinded_001 \
+            --root . \
+            --cases examples/public_restoration_replays/cases_2026_11_03.json \
+            --out .cache/hs-source-public-repair-routing
+      - name: Independent original pre-outcome source integrity gate
+        run: |
+          python -m scripts.verify_hs_public_restoration_blinded_001 \
+            --cases examples/public_restoration_replays/cases_2026_11_03.json \
+            --report .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_BLINDED_REPLAY.json \
+            --output .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_SOURCE_INTEGRITY.json
+      - name: Verify specific model identity, fault hypothesis and no regression to seven other repair cases
+        run: |
+          python -m scripts.verify_hs_public_restoration_routing_upgrade_001 \
+            --root . \
+            --cases examples/public_restoration_replays/cases_2026_11_03.json \
+            --replay .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_BLINDED_REPLAY.json \
+            --output .cache/hs-source-public-repair-routing/ROUTING_UPGRADE_INDEPENDENT_ACCEPTANCE.json
+      - name: Preserve original and repaired classifications with source docs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-public-repair-after-fix-blinded-model-vs-original-baseline
+          path: |
+            examples/public_restoration_replays/cases_2026_11_03.json
+            docs/PUBLIC_RESTORATION_REVERSE_ENGINEERING_2026_11_03.md
+            .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_BLINDED_REPLAY.json
+            .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_BLINDED_SUMMARY.md
+            .cache/hs-source-public-repair-routing/PUBLIC_RESTORATION_SOURCE_INTEGRITY.json
+            .cache/hs-source-public-repair-routing/ROUTING_UPGRADE_INDEPENDENT_ACCEPTANCE.json
+          retention-days: 30
+          if-no-files-found: warn
