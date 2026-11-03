@@ -1,0 +1,224 @@
+{
+  "schema_version": "hardware_splicer.diy_microdrone_build_v1",
+  "product_id": "HS-WHOOP65-1S-V0",
+  "product_name": "HS DIY 65 mm ducted brushless micro quad",
+  "objective": "assemble a physically piloted, repairable, 1S indoor whoop with off-the-shelf interchangeable components; reuse salvage only when electrically/mechanically compatible",
+  "product_type": "manual_rc_quadcopter",
+  "state": "real_hardware_not_acquired_or_assembled",
+  "flight_controller_firmware": "Betaflight on supported 1S 4-in-1 AIO; choose exact target/firmware by board revision",
+  "radio": "ExpressLRS 2.4 GHz radio, paired to an ELRS 2.4 GHz receiver; check regional radio rules",
+  "sim_reference": "upstream gym-pybullet-drones Crazyflie 2.x physical quad model, NOT an aerodynamically validated digital twin of this 65mm brushless kit",
+  "physical_state": {
+    "hardware_purchased": false,
+    "frame_printed": false,
+    "firmware_flashed": false,
+    "radio_bound": false,
+    "props_off_motor_check": false,
+    "flight_attempted": false,
+    "HS_physically_tested": false
+  },
+  "mechanical_electrical_contract": {
+    "cell_count": "1S only",
+    "battery_connector": "BT2.0 (must match FC harness and charger)",
+    "frame_wheelbase_mm": 65,
+    "propeller_diameter_mm": 31,
+    "motor_model_class": "0802 class brushless outrunners; approx 19500KV 1S; exact mount and shaft must match",
+    "propeller_shaft_mm": 1,
+    "flight_controller_mounting_hole_pattern_mm": "26x26 in vendor reference assembly; confirm board revision and frame",
+    "esc_requirement": "4-in-1 1S ESC, per-channel continuous current adequate for selected motors; 5A reference, do not infer motor current from KV alone",
+    "rf_requirement": "2.4 GHz ExpressLRS receiver and transmitter with compatible major firmware and selected regional band",
+    "protocol_requirement": "Betaflight firmware supported by exact board target; motor mapping, DShot, failsafe and gyro orientation verified props-off",
+    "payload_kg": 0,
+    "first_flight_environment": "clear indoor area with guards and no bystanders; no outdoor BVLOS/autonomous modes"
+  },
+  "bom": [
+    {
+      "id": "frame",
+      "quantity": 1,
+      "component": "65mm ducted whoop frame; BETAFPV Meteor65 or verified compatible open printed frame",
+      "must_match": [
+        "31mm prop clearance",
+        "FC 26x26 mounts for selected AIO",
+        "0802 motor diameter and bolt pattern",
+        "battery holder compatible with 1S 300mAh"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://github.com/vsergeev/3d-parametric-whoop",
+      "reuse": "Re-use uncracked ducted donor frame after verifying all four motor mounts; no cracked repaired ducts near props"
+    },
+    {
+      "id": "motors",
+      "quantity": 4,
+      "component": "BETAFPV 0802SE 19500KV or documented electrically equivalent 1S brushless motor set",
+      "must_match": [
+        "1S voltage",
+        "KV and load/prop fit",
+        "three-phase brushless output, not two-wire brushed toy motors",
+        "1mm prop shaft",
+        "motor mount pattern and connector or solder pads"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "reuse": "Only 3-wire brushless donor motors with same dimensions and tested no-load condition; 2-wire brushed motors require a DIFFERENT controller"
+    },
+    {
+      "id": "fc_esc",
+      "quantity": 1,
+      "component": "1S AIO flight controller with 4 ESCs and serial ELRS 2.4 GHz receiver; BETAFPV F4 1S 5A Serial ELRS reference",
+      "must_match": [
+        "1S supply",
+        "BT2.0 battery connector",
+        "26x26 mounting",
+        "compatible Betaflight board target",
+        "4 motor output stages",
+        "actual receiver protocol ELRS 2.4"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
+      "reuse": "Re-use only if programmable firmware target, gyro and ESC rails verified; proprietary toy FC is not automatically compatible"
+    },
+    {
+      "id": "props",
+      "quantity": 1,
+      "component": "set of 4 x 31mm 3-blade props with 1mm shaft hub; correct CW/CCW pair",
+      "must_match": [
+        "31mm prop clearance within frame",
+        "1mm motor shaft",
+        "two matched CW and two matched CCW geometry",
+        "manufacturer motor direction diagram"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "reuse": "Do not reuse props with cracks, dents, bent blades or hub damage"
+    },
+    {
+      "id": "battery",
+      "quantity": 2,
+      "component": "1S 300mAh LiHV/LiPo rated for whoop current, BT2.0 connector",
+      "must_match": [
+        "one cell ONLY",
+        "BT2.0 plug polarity",
+        "manufacturer-approved matching 1S charger chemistry",
+        "fit in frame retention slot"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "reuse": "Prefer new verified packs; never charge or fly swollen, punctured, unknown-chemistry or severely aged salvaged cells"
+    },
+    {
+      "id": "charger",
+      "quantity": 1,
+      "component": "purpose-built 1S BT2.0 charger rated for selected LiHV/LiPo pack",
+      "must_match": [
+        "charger connector BT2.0",
+        "1S battery chemistry and max terminal voltage",
+        "correct polarity",
+        "cell storage/handling guidance"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "reuse": "Do not repurpose USB power or unsupported phone chargers as a lithium pack charger"
+    },
+    {
+      "id": "radio",
+      "quantity": 1,
+      "component": "RadioMaster Pocket or existing RC transmitter specifically with built-in ELRS 2.4 GHz",
+      "must_match": [
+        "transmitter RF module must be ELRS not CC2500/4-in-1-only",
+        "firmware major version and region compatible with AIO RX",
+        "arm/disarm switch and failsafe"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://www.radiomasterrc.com/products/pocket-radio-controller-m2",
+      "reuse": "An existing ELRS 2.4 GHz transmitter can be reused; protocol-incompatible radios cannot bind"
+    },
+    {
+      "id": "mounting",
+      "quantity": 1,
+      "component": "manufacturer-compatible motor screws, AIO silicone dampers, canopy and battery retainer",
+      "must_match": [
+        "screw length does not enter motor windings",
+        "no contact between carbon/metal parts and PCB components",
+        "battery secured against shift"
+      ],
+      "status": "UNACQUIRED",
+      "source": "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
+      "reuse": "Can salvage non-damaged screws and grommets only after dimensional match"
+    },
+    {
+      "id": "camera_video",
+      "quantity": 0,
+      "component": "optional C03 analog camera + compatible 5.8GHz VTX + licensed goggles",
+      "must_match": [
+        "voltage supply and wiring according to actual AIO",
+        "camera mount fit",
+        "legal local RF band/power",
+        "video goggles compatible analog system"
+      ],
+      "status": "DEFERRED_FIRST_LINE_OF_SIGHT_FLIGHT",
+      "source": "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+      "reuse": "Optional only; first hovering can be performed within direct visual line of sight"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "stage": 1,
+      "title": "Dry-build mechanical assembly",
+      "physical_act": "Place four motors in frame, check no cracks; match screw threads, prop clearance and rotation freedom; leave propellers OFF.",
+      "evidence": "four close-up pictures of motor/frame/FC mounts",
+      "done": false
+    },
+    {
+      "stage": 2,
+      "title": "Mount controller and route conductors",
+      "physical_act": "Secure 1S AIO on rubber damping hardware, align orientation arrow, mount battery retention; check no harness can contact prop disks.",
+      "evidence": "top and bottom wiring photos, FC target model and connector polarity",
+      "done": false
+    },
+    {
+      "stage": 3,
+      "title": "Connect four brushless motors",
+      "physical_act": "Use exact AIO manufacturer motor pads/connectors, check continuity and insulation; no unverified brushed-to-brushless substitution.",
+      "evidence": "photographed motor map and all four phases",
+      "done": false
+    },
+    {
+      "stage": 4,
+      "title": "Pair radio / configure actual firmware",
+      "physical_act": "Connect USB, identify Betaflight board target, configure serial ELRS/CRSF, verify four channel sticks and assigned arm/disarm; do not flash blind.",
+      "evidence": "receiver signal screenshot, target/version and channel response",
+      "done": false
+    },
+    {
+      "stage": 5,
+      "title": "Props-off motor and failsafe checkout",
+      "physical_act": "REMOVE all props. With a safe charged pack, verify gyro orientation, motor numbering and spin direction with Betaflight guided procedure; unplug/turn off TX to confirm motors stop as specified.",
+      "evidence": "four motor direction outcomes, failsafe record, no props attached",
+      "done": false
+    },
+    {
+      "stage": 6,
+      "title": "First guarded line-of-sight flight",
+      "physical_act": "Only after gates pass, fit correctly oriented undamaged props. In a clear indoor area away from people, arm with low throttle, briefly hover and land; disarm immediately on unexpected motion.",
+      "evidence": "full recorded takeoff, hover, landing, post-flight motor temp and battery inspection",
+      "done": false
+    }
+  ],
+  "release_gate": {
+    "assembled": false,
+    "controlled_flight": false,
+    "prop_guard_intact": false,
+    "rx_failsafe_verified": false,
+    "consistent_motor_directions": false,
+    "battery_passed_inspection": false,
+    "aircraft_released": false
+  },
+  "safety": "No current hardware or physical flight has been completed by HS. Disconnect battery, remove props during motor tests, observe local airspace/radio rules, use fire-safe LiPo handling and inspect every salvaged item before use.",
+  "sources": [
+    "https://betafpv.com/products/meteor65-brushless-whoop-quadcopter-1s?variant=39559181303942",
+    "https://betafpv.com/products/f4-1s-5a-aio-brushless-flight-controller-elrs-2-4g?variant=39968364789894",
+    "https://betaflight.com/docs/wiki/getting-started/setup-guide",
+    "https://github.com/vsergeev/3d-parametric-whoop",
+    "https://github.com/learnsyslab/gym-pybullet-drones"
+  ]
+}
