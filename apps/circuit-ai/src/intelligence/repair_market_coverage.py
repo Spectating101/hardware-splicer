@@ -247,6 +247,26 @@ class RepairMarketCoverage:
 
     def evaluate_text(self, text: str, *, device_hint: str = "") -> Dict[str, Any]:
         normalized = str(text or "").lower()
+        hint = str(device_hint or "").lower()
+        # Commercial coverage has no product category for aircraft or printers.
+        # Refuse to force a best-selling but unrelated electronic gadget class.
+        # This is a product-identity abstention, not a repair failure diagnosis.
+        uncovered = (
+            ("drone_or_quadcopter", ("drone", "quadcopter", "syma x5")),
+            ("printer", ("printer", "deskjet", "inkjet", "laserjet")),
+        )
+        unsupported = next(
+            (domain for domain, phrases in uncovered if any(p in hint for p in phrases)), None
+        )
+        if unsupported is not None:
+            return {
+                "mode": "repair_market_coverage",
+                "query": text,
+                "matched": False,
+                "top_matches": [],
+                "uncovered_device_type": unsupported,
+                "recommendation": "Unsupported product class: retain diagnostic notes but do not infer product coverage or repair readiness.",
+            }
         matches = []
         for item_id, item in self.ITEM_CLASSES.items():
             hits = sorted(signal for signal in item["signals"] if signal in normalized)
