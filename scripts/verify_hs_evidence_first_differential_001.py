@@ -139,10 +139,16 @@ def main() -> None:
                 if guide["parts_and_tools"]["likely_parts"]:
                     failures.append(name + ": premature part shopping suggestions")
             if "drone" in hint or "printer" in hint:
+                if result["coverage"]["top_item"] is not None:
+                    failures.append(name + ": unsupported device improperly classified as a commercial product")
+                if result["verdict"] != "not_ready":
+                    failures.append(name + ": unsupported device incorrectly declared software repair-ready")
                 if guide["safety_profile"]["risk_level"] != "high":
                     failures.append(name + ": powered-motion hazard not blocked")
                 if any("power with current limit" in str(step).lower() for step in guide["diagnostic_flow"]):
                     failures.append(name + ": generic powered test leaked")
+            if result.get("physical_repair_ready") is not False or result.get("verdict_scope") != "software_workflow_only_not_repaired_product":
+                failures.append(name + ": software verdict falsely grants physical repair readiness")
             results.append({
                 "case": name,
                 "market_item": result["coverage"]["top_item"],
