@@ -28,9 +28,41 @@ jobs:
       - name: Fetch exact original manufacturer OpenArm v1.0 source
         run: |
           mkdir -p .cache/hs-wrist-fullpath
-          curl -fLsS --retry 3 \
-            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
-            -o .cache/hs-wrist-fullpath/openarm_v10.urdf
+          python - <<'PY'
+          import base64,hashlib,json,time
+          from urllib.request import Request,urlopen
+          from pathlib import Path
+          rev="2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08"
+          rel="assets/robot/openarm_v1.0/urdf/example/v1.urdf"
+          expected="763d8e0280479cd4d9868e977c9c01416b9f83c8899c95b918446c0cfaf32f11"
+          sources=[
+            ("raw","https://raw.githubusercontent.com/enactic/openarm_description/"+rev+"/"+rel),
+            ("github_api","https://api.github.com/repos/enactic/openarm_description/contents/"+rel+"?ref="+rev),
+          ]
+          errors=[]
+          downloaded=False
+          for kind,url in sources:
+            for attempt in range(3):
+              try:
+                req=Request(url,headers={"User-Agent":"hardware-splicer-original-source-audit"})
+                blob=urlopen(req,timeout=45).read(2_000_000)
+                if kind=="github_api":
+                  payload=json.loads(blob)
+                  if payload.get("encoding")!="base64":raise ValueError("untrusted GitHub blob encoding")
+                  blob=base64.b64decode(payload["content"])
+                found=hashlib.sha256(blob).hexdigest()
+                if found!=expected:raise ValueError("pinned manufacturer URDF SHA256 mismatch")
+                Path(".cache/hs-wrist-fullpath/openarm_v10.urdf").write_bytes(blob)
+                print("PINNED OFFICIAL SOURCE VERIFIED",kind,len(blob),found)
+                downloaded=True
+                break
+              except Exception as exc:
+                errors.append(f"{kind} attempt {attempt+1}: {exc}")
+                time.sleep(1)
+            if downloaded:break
+          if not downloaded:
+            raise RuntimeError("Official source unavailable; no unverified substitution: "+"; ".join(errors))
+          PY
       - name: Regenerate original OpenArm joint reference
         run: |
           python -m scripts.solve_sortcell_openarm_pybullet_001 \
