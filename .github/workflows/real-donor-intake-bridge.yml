@@ -75,6 +75,20 @@ jobs:
             --donor .cache/donor-intake-bridge/SYNTHETIC_DONOR_NOT_REAL.json \
             --output .cache/donor-intake-bridge/SYNTHETIC_CANONICAL_OUTPUT_NOT_REAL \
             --acceptance .cache/donor-intake-bridge/SYNTHETIC_ACCEPTANCE_NOT_PHYSICAL.json
+      - name: Load generated intake through actual canonical PROJECT_INTAKE entry point
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from hardware_splicer.project_intake import load_project_intake
+          source=Path(".cache/donor-intake-bridge/SYNTHETIC_CANONICAL_OUTPUT_NOT_REAL/PROJECT_INTAKE.json")
+          loaded=load_project_intake(source)
+          assert loaded["project_name"]=="hs_real_device_usb_fan_contact_driver_repair"
+          assert loaded["available_parts"]==[], "no known donor parts can be invented"
+          assert loaded["repair_intake_context"]["schema_version"]=="hardware_splicer.repair_intake.v1"
+          assert loaded["repair_intake_context"]["device_hint"].startswith("SYNTHETIC USB fan")
+          assert loaded["field_donor_source"]["physical_product_complete"] is False
+          print("CANONICAL PROJECT_INTAKE LOADER: ACCEPTED STRUCTURED SYNTHETIC SOURCE; ZERO POWER/REPAIR CLAIM")
+          PY
       - name: Adversarial canonical donor proof and operating-authority checks
         run: |
           python - <<'PY'
