@@ -302,6 +302,9 @@ class RepairEncyclopedia:
                 ("iphone", "phone_charging_port_flex"),
                 ("smartphone", "phone_charging_port_flex"),
                 ("macbook", "laptop_power_path"),
+                ("chromebook", "laptop_power_path"),
+                ("notebook", "laptop_power_path"),
+                ("laptop", "laptop_power_path"),
             )
             for model_word, family_id in model_routes:
                 if model_word in model:
