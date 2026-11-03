@@ -337,7 +337,7 @@ class RepairEncyclopedia:
                 "name": "Replaceable AA battery terminal or power-switch continuity fault",
                 "category": "battery_contact_power",
                 "severity": "minor_to_major",
-                "likelihood": 0.84 if visible_corrosion else 0.71,
+                "likelihood": 0.84 if visible_corrosion else 0.77,
                 "evidence": ["original AA-powered handheld identity"] +
                             (["owner reports visible contact corrosion"] if visible_corrosion else []),
                 "likely_causes": [
@@ -447,7 +447,7 @@ class RepairEncyclopedia:
                 "name": "Laptop USB-C jack, charging negotiation, or input path fault",
                 "category": "power",
                 "severity": "major",
-                "likelihood": 0.76 if stronger else 0.69,
+                "likelihood": 0.80 if stronger else 0.75,
                 "evidence": ["laptop charging/no-boot path"] +
                             (["owner reports known-working external charger or flicker"] if stronger else []),
                 "likely_causes": [
