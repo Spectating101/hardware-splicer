@@ -89,7 +89,11 @@ def shape_collision(m5,m7,T5,T7):
     cm.add_object("source_link5",m5,transform=T5)
     cm.add_object("source_link7",m7,transform=T7)
     hit,names=cm.in_collision_internal(return_names=True)
+    geometry_types={
+        link:type(cm._objs[link]["geom"]).__name__
+        for link in ("source_link5","source_link7")}
     return {"FCL_contact_detected":bool(hit),
+            "FCL_geometry_types":geometry_types,
             "FCL_source_link_pairs":[list(item) for item in sorted(names)],
             "solid_containment_and_full_physical_clearance_certified":False}
 
@@ -192,6 +196,14 @@ def run(urdf_path,study_path,poses_path,output_path):
             "derived_visual_DAE_convex_hull_collision_cases":sum(x["derived_visual_DAE_convex_hull_query"]["FCL_contact_detected"] for x in result),
             "derived_collision_STL_convex_hull_collision_cases":sum(x["derived_collision_STL_convex_hull_query"]["FCL_contact_detected"] for x in result),
             "convex_hull_geometry_is_proxy_for_diagnosis_not_upstream_source":True,
+            "original_source_mesh_triangle_queries_returned_no_contact_in_tested_poses":all(
+                not x["original_visual_DAE_triangle_query"]["FCL_contact_detected"] and
+                not x["original_collision_STL_triangle_query"]["FCL_contact_detected"]
+                for x in result),
+            "derived_source_convex_hull_queries_reported_contact_in_tested_poses":all(
+                x["derived_visual_DAE_convex_hull_query"]["FCL_contact_detected"] and
+                x["derived_collision_STL_convex_hull_query"]["FCL_contact_detected"]
+                for x in result),
             "FCL_triangle_contacts_not_closed_solid_or_physical_certification":True,
             "source_original_collision_STLs_not_modified":True,
             "manufacturer_original_URDF_joints_and_origins_not_modified":True,
