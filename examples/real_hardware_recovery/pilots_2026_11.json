@@ -200,13 +200,15 @@
         "battery_safety_clearance",
         "part_compatibility_evidence",
         "function_matrix_after_reassembly",
+        "data_sanitization_or_return_policy_receipt",
         "human_operator_signoff"
       ],
       "stop_conditions": [
         "swollen/bent/punctured battery",
         "unknown account/activation security or third-party data",
         "unavailable OEM repair procedure",
-        "cannot restore designed ingress resistance: disclose limitation"
+        "cannot restore designed ingress resistance: disclose limitation",
+        "No consent to inspect account data or verify that private information remains untouched"
       ],
       "safety_class": "battery_and_private_data",
       "potential_value": "repair-workflow specialization, not assumed low-cost",
