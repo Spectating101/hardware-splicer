@@ -438,7 +438,7 @@ class RepairEncyclopedia:
                 "estimated_time_minutes": 100,
             })
         if family_id == "laptop_power_path" and self._has_any(
-            symptom_text, {"macbook", "usb-c", "charging", "charger"}
+            symptom_text, {"macbook", "usb-c", "flickering usb-c"}
         ):
             stronger = self._has_any(symptom_text, {"two chargers", "charger works on other devices",
                                                    "indicator flickers", "cable indicator flickers"})
