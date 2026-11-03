@@ -1,0 +1,92 @@
+name: HS Untouched Seven Public Repair Stories Real Original Engine Holdout
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/unseen-restoration-public-holdout.yml"
+      - "examples/public_restoration_replays/unseen_holdout_2026_11_03.json"
+      - "scripts/bench_hs_public_restoration_holdout_001.py"
+      - "scripts/verify_hs_public_restoration_holdout_001.py"
+      - "docs/PUBLIC_RESTORATION_UNTOUCHED_HOLDOUT_2026_11_03.md"
+  workflow_dispatch:
+jobs:
+  frozen-unseen-original-circuitai:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Freeze check - no changes to actual Circuit-AI diagnosis engine or preregistered holdout
+        run: |
+          set -euo pipefail
+          BASELINE_SHA="eb60037fb16e4b3696c4ad8197e5202606855caf"
+          CORPUS="examples/public_restoration_replays/unseen_holdout_2026_11_03.json"
+          echo "Original engine (frozen from first holdout) $BASELINE_SHA"
+          git cat-file -e "$BASELINE_SHA^{commit}"
+          git diff --exit-code "$BASELINE_SHA" HEAD -- apps/circuit-ai/src/intelligence
+          ACTUAL_BLOB="$(git hash-object "$CORPUS")"
+          test "$ACTUAL_BLOB" = "b2441fb0fbdeb594e33a4f8f01deda25b3b3096a"
+          echo "UNTOUCHED HOLDOUT LOCKED: $ACTUAL_BLOB"
+      - name: Install only lightweight real Circuit-AI engine dependencies
+        run: |
+          python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: First and ONLY evaluation on the new untouched seven-case holdout
+        run: |
+          python -m scripts.bench_hs_public_restoration_holdout_001 \
+            --root . \
+            --cases examples/public_restoration_replays/unseen_holdout_2026_11_03.json \
+            --out .cache/hs-untouched-public-restoration
+      - name: Independent original source chronology, exact inputs and score recomputation
+        run: |
+          python -m scripts.verify_hs_public_restoration_holdout_001 \
+            --cases examples/public_restoration_replays/unseen_holdout_2026_11_03.json \
+            --report .cache/hs-untouched-public-restoration/UNSEEN_REPAIR_HOLDOUT_ORIGINAL_ENGINE_OUTPUTS.json \
+            --output .cache/hs-untouched-public-restoration/UNSEEN_HOLDOUT_INDEPENDENT_ACCEPTANCE.json
+      - name: Adversarial checks must reject outcome leakage and false repairs
+        run: |
+          python - <<'PY'
+          import json,hashlib,tempfile
+          from pathlib import Path
+          from scripts.verify_hs_public_restoration_holdout_001 import verify
+          base=Path("examples/public_restoration_replays/unseen_holdout_2026_11_03.json")
+          output=Path(".cache/hs-untouched-public-restoration/UNSEEN_REPAIR_HOLDOUT_ORIGINAL_ENGINE_OUTPUTS.json")
+          original=json.loads(output.read_text())
+          cases=[
+            ("invented_real_repair",lambda r:r.update({"physical_repairs_performed_or_independently_certified_by_HS":1})),
+            ("fabricated_model_category_success",lambda r:r.update({"matched_known_market_class_checkpoints":r["scored_known_market_class_checkpoints"]})),
+            ("leak_future_cause_into_input",lambda r:r["raw_blinded_engine_outputs"][0]["blinded_input"].update({"notes":"Bracket removal is confirmed fix"})),
+            ("switch_failed_case_to_fixed",lambda r:r["after_prediction_case_by_case_adjudication"][2].update({"owner_reported_full_fix":True})),
+            ("enable_autonomous_drone_flight",lambda r:r.update({"physical_power_or_flight_authorized":True})),
+          ]
+          with tempfile.TemporaryDirectory() as tmp:
+            for name,change in cases:
+              j=json.loads(json.dumps(original))
+              change(j)
+              path=Path(tmp)/(name+".json");path.write_text(json.dumps(j))
+              try:verify(base,path)
+              except ValueError:pass
+              else:raise AssertionError("unsafe/research-tainted public repair report accepted: "+name)
+            source=json.loads(base.read_text())
+            source["cases"][0]["checkpoints"][0]["symptoms"].append("Future gold: bracket removal already fixed")
+            bad=Path(tmp)/"tampered_original_holdout.json";bad.write_text(json.dumps(source))
+            try:verify(bad,output)
+            except ValueError:pass
+            else:raise AssertionError("frozen source corpus altered after original run")
+          print("6 ADVERSARIAL PUBLIC HOLDOUT/TARGET LEAKAGE MUTATIONS REJECTED")
+          PY
+      - name: Publish results including FAILURES, unanswered owner repairs and original sources
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-seven-unseen-public-repairs-fourteen-blind-checkpoints
+          path: |
+            examples/public_restoration_replays/unseen_holdout_2026_11_03.json
+            docs/PUBLIC_RESTORATION_UNTOUCHED_HOLDOUT_2026_11_03.md
+            .cache/hs-untouched-public-restoration/UNSEEN_REPAIR_HOLDOUT_ORIGINAL_ENGINE_OUTPUTS.json
+            .cache/hs-untouched-public-restoration/UNSEEN_REPAIR_HOLDOUT_SCORING.md
+            .cache/hs-untouched-public-restoration/UNSEEN_HOLDOUT_INDEPENDENT_ACCEPTANCE.json
+          retention-days: 30
+          if-no-files-found: warn
