@@ -153,7 +153,7 @@ class DroneWorld:
     def camera(self):
         pos = self.last_state[:3].tolist()
         v = p.computeViewMatrixFromYawPitchRoll(
-            cameraTargetPosition=pos, distance=0.58, yaw=45, pitch=-32, roll=0,
+            cameraTargetPosition=pos, distance=0.42, yaw=45, pitch=-32, roll=0,
             upAxisIndex=2)
         projection = p.computeProjectionMatrixFOV(fov=58, aspect=640/420, nearVal=.01, farVal=6)
         w,h,rgba,*_ = p.getCameraImage(
@@ -304,7 +304,7 @@ def demo(out_dir:Path):
             "steps":len(rows),
             "max_simulated_altitude_m":round(max(row["z_m"] for row in rows),3),
             "furthest_horizontal_m":round(max(math.hypot(row["x_m"],row["y_m"]) for row in rows),3),
-            "final_position_m":[round(v,3) for v in rows[-1].values() if isinstance(v,float)][:3],
+            "final_position_m":[round(v,3) for v in (rows[-1]["x_m"],rows[-1]["y_m"],rows[-1]["z_m"])][:3],
             "output_gif":str(gif_path),
             "output_telemetry":str(csv_path),
             "physical_hardware_flight":False,
