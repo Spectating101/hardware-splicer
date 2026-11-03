@@ -19,26 +19,38 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Freeze check - no changes to actual Circuit-AI diagnosis engine or preregistered holdout
+      - name: Verify original frozen corpus and benchmark, check out exact historical engine
         run: |
           set -euo pipefail
           BASELINE_SHA="eb60037fb16e4b3696c4ad8197e5202606855caf"
+          ORIGINAL_STUDY="4154d4f33725f0ef2981fe7ca5c5ecd433a7499d"
           CORPUS="examples/public_restoration_replays/unseen_holdout_2026_11_03.json"
-          echo "Original engine (frozen from first holdout) $BASELINE_SHA"
           git cat-file -e "$BASELINE_SHA^{commit}"
-          git diff --exit-code "$BASELINE_SHA" HEAD -- apps/circuit-ai/src/intelligence
-          ACTUAL_BLOB="$(git hash-object "$CORPUS")"
-          test "$ACTUAL_BLOB" = "b2441fb0fbdeb594e33a4f8f01deda25b3b3096a"
-          echo "UNTOUCHED HOLDOUT LOCKED: $ACTUAL_BLOB"
-      - name: Install only lightweight real Circuit-AI engine dependencies
+          test "$(git hash-object "$CORPUS")" = "b2441fb0fbdeb594e33a4f8f01deda25b3b3096a"
+          git diff --exit-code "$ORIGINAL_STUDY" HEAD -- \
+            "$CORPUS" \
+            scripts/bench_hs_public_restoration_holdout_001.py \
+            scripts/verify_hs_public_restoration_holdout_001.py
+          PINNED="$RUNNER_TEMP/hs-seven-frozen-engine"
+          git worktree add --detach "$PINNED" "$BASELINE_SHA"
+          mkdir -p "$PINNED/scripts" "$PINNED/examples/public_restoration_replays"
+          cp scripts/bench_hs_public_restoration_holdout_001.py "$PINNED/scripts/"
+          cp scripts/verify_hs_public_restoration_holdout_001.py "$PINNED/scripts/"
+          cp "$CORPUS" "$PINNED/examples/public_restoration_replays/"
+          echo "PINNED_HS_REPLAY=$PINNED" >> "$GITHUB_ENV"
+          echo "Historical benchmark inputs and original engine are isolated from later Circuit-AI changes"
+      - name: Install only original frozen real Circuit-AI engine dependencies
+        run: python -m pip install --no-input -e "$PINNED_HS_REPLAY" "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Reproduce historical seven-case result on exact frozen original engine (NOT a new unseen trial)
         run: |
-          python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
-      - name: First and ONLY evaluation on the new untouched seven-case holdout
-        run: |
+          set -euo pipefail
+          cd "$PINNED_HS_REPLAY"
           python -m scripts.bench_hs_public_restoration_holdout_001 \
             --root . \
             --cases examples/public_restoration_replays/unseen_holdout_2026_11_03.json \
             --out .cache/hs-untouched-public-restoration
+          mkdir -p "$GITHUB_WORKSPACE/.cache"
+          cp -a .cache/hs-untouched-public-restoration "$GITHUB_WORKSPACE/.cache/"
       - name: Independent original source chronology, exact inputs and score recomputation
         run: |
           python -m scripts.verify_hs_public_restoration_holdout_001 \
