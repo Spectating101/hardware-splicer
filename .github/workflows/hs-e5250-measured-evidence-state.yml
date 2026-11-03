@@ -1,0 +1,109 @@
+name: HS Real E5250 Electrical State Transition Product Demonstration
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/hs-e5250-measured-evidence-state.yml"
+      - "apps/circuit-ai/src/intelligence/repair_power_path_evidence.py"
+      - "apps/circuit-ai/src/intelligence/repair_case_evaluator.py"
+      - "scripts/run_hs_e5250_typed_evidence_progression.py"
+      - "scripts/verify_hs_e5250_typed_evidence_progression.py"
+      - "docs/HS_E5250_ELECTRICAL_STATE_TRANSITIONS_2026_11_04.md"
+  workflow_dispatch:
+jobs:
+  actual-source-based-electrical-state-progression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Freeze original real-product source and original replay harness
+        run: |
+          set -euo pipefail
+          git diff --exit-code 7b42c5caae5a31380bbd2712b082f5f2c0893ca9 HEAD -- \
+            examples/whole_product_restorations/dell_latitude_e5250_technician_case_2026.json \
+            scripts/run_hs_whole_product_restoration_e5250.py \
+            scripts/verify_hs_whole_product_restoration_e5250.py \
+            apps/circuit-ai/src/intelligence/repair_differential_triage.py
+          test "$(git hash-object examples/public_restoration_replays/third_party_measurement_holdout_2026_11_03.json)" = "c4473c96309cd95d043e12dcaf4c9f308e66960d"
+          echo "E5250 HISTORICAL SOURCE AND ORIGINAL FROZEN REPLAY RETAINED"
+      - name: Install existing HS/Circuit-AI
+        run: python -m pip install --no-input -e . "numpy>=1.26,<3" "networkx>=3,<4"
+      - name: Run original unstructured real engine and produce original failure baseline
+        run: |
+          python -m scripts.run_hs_whole_product_restoration_e5250 \
+            --case examples/whole_product_restorations/dell_latitude_e5250_technician_case_2026.json \
+            --out .cache/hs_e5250_original
+          python -m scripts.verify_hs_whole_product_restoration_e5250 \
+            --case examples/whole_product_restorations/dell_latitude_e5250_technician_case_2026.json \
+            --out .cache/hs_e5250_original
+      - name: Replay SAME reported chronology through typed measurement-aware repair engine
+        run: |
+          python -m py_compile \
+            apps/circuit-ai/src/intelligence/repair_power_path_evidence.py \
+            apps/circuit-ai/src/intelligence/repair_case_evaluator.py \
+            scripts/run_hs_e5250_typed_evidence_progression.py \
+            scripts/verify_hs_e5250_typed_evidence_progression.py
+          python -m scripts.run_hs_e5250_typed_evidence_progression \
+            --case examples/whole_product_restorations/dell_latitude_e5250_technician_case_2026.json \
+            --baseline .cache/hs_e5250_original/WHOLE_PRODUCT_ENGINE_TRACE.json \
+            --out .cache/hs_e5250_typed_state
+      - name: Independently check original failures, causal transitions, source facts and physical release
+        run: |
+          python -m scripts.verify_hs_e5250_typed_evidence_progression \
+            --case examples/whole_product_restorations/dell_latitude_e5250_technician_case_2026.json \
+            --baseline .cache/hs_e5250_original/WHOLE_PRODUCT_ENGINE_TRACE.json \
+            --trace .cache/hs_e5250_typed_state/E5250_TYPED_EVIDENCE_STATE_TRACE.json \
+            | tee .cache/hs_e5250_typed_state/E5250_TYPED_STATE_EVIDENCE_AUDIT.json
+      - name: Reject unqualified and tampered evidence, no safe power test invented
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,"apps/circuit-ai")
+          from src.intelligence.repair_power_path_evidence import normalize_events,analyze_laptop_power_evidence
+          e={"event_id":"E1","stage_id":"T0","event_type":"measurement",
+             "signal":"adapter_output_unloaded","actor":"external_technician",
+             "provenance":"third_party_source_report","value":19.9,"unit":"V",
+             "condition":"unloaded external adapter","HS_instrument_verified":False,"repair_authorized":False}
+          from copy import deepcopy
+          attacks=[
+            dict(e,HS_instrument_verified=True),
+            dict(e,repair_authorized=True),
+            dict(e,unit="A"),
+            dict(e,value=float("nan")),
+            dict(e,value=True),
+            dict(e,provenance="independently_HS_verified"),
+            dict(e,signal="invented_laptop_fix"),
+          ]
+          for item in attacks:
+            try: normalize_events([item])
+            except ValueError: pass
+            else: raise AssertionError("source provenance or unit tampering accepted")
+          try:normalize_events([e,e])
+          except ValueError:pass
+          else:raise AssertionError("duplicate source measurement accepted")
+          try:normalize_events([dict(e,stage_id="T2"),dict(e,stage_id="T1",event_id="E2")])
+          except ValueError:pass
+          else:raise AssertionError("future source observation leaked")
+          state=analyze_laptop_power_evidence([e],device_hint="Dell Latitude E5250 laptop")
+          assert state["state"]=="insufficient_structured_evidence"
+          assert state["physical_repair_ready"] is False
+          assert state["independently_verified_HS_measurement_count"]==0
+          print("NEGATIVE SOURCE/UNIT/FUTURE-STATE/FALSE REPAIR ASSERTIONS REJECTED")
+          PY
+      - name: Upload actual product restoration comparison, not synthetic score marketing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-e5250-five-electrical-states-with-real-source-and-original-failure
+          path: |
+            .cache/hs_e5250_original/*.json
+            .cache/hs_e5250_original/*.md
+            .cache/hs_e5250_typed_state/*.json
+            .cache/hs_e5250_typed_state/*.md
+            docs/HS_E5250_ELECTRICAL_STATE_TRANSITIONS_2026_11_04.md
+          if-no-files-found: warn
+          retention-days: 45
