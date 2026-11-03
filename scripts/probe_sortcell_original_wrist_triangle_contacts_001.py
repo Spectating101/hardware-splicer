@@ -153,14 +153,28 @@ def run(urdf_path,study_path,poses_path,output_path):
                     transforms[b["name"]]@b["forms"][kind]["local_offset"])
                 variants[kind]["source_link5_geometry_uri"]=a["forms"][kind]["uri"]
                 variants[kind]["source_link7_geometry_uri"]=b["forms"][kind]["uri"]
+            # Explicitly interrogate *derived* convex hulls, because typical
+            # articulated rigid-body solvers may convexify source mesh STLs.
+            # These are diagnostic proxies only and NEVER manufacturer geometry.
+            for kind in ("visual","collision"):
+                a,b=link_info
+                variants[kind+"_convex_hull"]=shape_collision(
+                    a["forms"][kind]["mesh"].convex_hull,
+                    b["forms"][kind]["mesh"].convex_hull,
+                    transforms[a["name"]]@a["forms"][kind]["local_offset"],
+                    transforms[b["name"]]@b["forms"][kind]["local_offset"])
+                variants[kind+"_convex_hull"]["hull_is_derived_proxy_not_manufacturer_geometry"]=True
             result.append({
                 "arm":side,"source_pose_case":case["label"],
                 "wrist_joint5_6_7_source_rad":params,
                 "source_real_link_fk_from_manufacturer_urdf":True,
-                "geometry_intersection_query_engine":"FCL original triangle BVH",
+                "geometry_intersection_query_engine":"FCL original triangle BVH versus derived convex hulls",
                 "original_visual_DAE_triangle_query":variants["visual"],
                 "original_collision_STL_triangle_query":variants["collision"],
+                "derived_visual_DAE_convex_hull_query":variants["visual_convex_hull"],
+                "derived_collision_STL_convex_hull_query":variants["collision_convex_hull"],
                 "source_meshes_unchanged":True,
+                "derived_hull_is_not_original_manufacturer_collision_geometry":True,
                 "FCL_triangle_contact_query_does_not_prove_solid_clearance":True,
             })
     insist(len(result)==4,"incomplete wrist source pose diagnostics")
@@ -175,6 +189,9 @@ def run(urdf_path,study_path,poses_path,output_path):
             "native_source_wrist_cases_compared":len(result),
             "source_visual_DAE_triangle_contact_cases":sum(x["original_visual_DAE_triangle_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
             "source_collision_STL_triangle_contact_cases":sum(x["original_collision_STL_triangle_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
+            "derived_visual_DAE_convex_hull_collision_cases":sum(x["derived_visual_DAE_convex_hull_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
+            "derived_collision_STL_convex_hull_collision_cases":sum(x["derived_collision_STL_convex_hull_query"]["FCL_source_mesh_triangle_collision_detected"] for x in result),
+            "convex_hull_geometry_is_proxy_for_diagnosis_not_upstream_source":True,
             "FCL_triangle_contacts_not_closed_solid_or_physical_certification":True,
             "source_original_collision_STLs_not_modified":True,
             "manufacturer_original_URDF_joints_and_origins_not_modified":True,
