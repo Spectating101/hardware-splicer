@@ -13,6 +13,7 @@ from typing import Any, Mapping
 
 from .capability_runtime import capability_report
 from .github_signal_pipeline import registry_row
+from .github_signal_task_router import kdif_registry_row
 
 _OPTIONAL_SPECIALISTS = {
     "cadquery-isolated",
@@ -44,7 +45,10 @@ def product_capability_report(
     signal = registry_row(build_dir)
     if signal is not None:
         payload["capabilities"].append(signal)
-        payload["capabilities"].sort(key=lambda r: str(r.get("id")))
+    kdif = kdif_registry_row(build_dir)
+    if kdif is not None:
+        payload["capabilities"].append(kdif)
+    payload["capabilities"].sort(key=lambda r: str(r.get("id")))
 
     required_missing = sorted(
         str(row.get("id"))

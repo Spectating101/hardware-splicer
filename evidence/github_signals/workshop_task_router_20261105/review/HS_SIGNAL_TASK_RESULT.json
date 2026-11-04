@@ -1,0 +1,38 @@
+{
+  "considered": [
+    {
+      "repository": "tipoLi5890/akcli",
+      "status": "executed"
+    },
+    {
+      "repository": "0x12net/kdif",
+      "status": "approved_not_selected"
+    }
+  ],
+  "evidence": {
+    "artifact": "akcli_schematic_findings.json",
+    "artifact_sha256": "42819f4b5302f170bd9dc7cd964279bc694b449fa1b2e5ba57e0ad9e4bed1f2f",
+    "finding_count": 27,
+    "id": "signal-akcli-schematic-review",
+    "license": "MIT",
+    "native_result_kind": "schematic_findings",
+    "source_commit": "2126c328402fa77f8f6bf2114f052595f86f14aa"
+  },
+  "objective": "Inspect the existing SPI schematic for layout and electrical review issues",
+  "ok": true,
+  "physical_authority": false,
+  "schema_version": "hardware_splicer.github_signal_task.v1",
+  "selection": {
+    "matched_terms": [
+      "inspect",
+      "review"
+    ],
+    "reason": "deterministic evidence-bounded keyword-to-capability matching",
+    "selected_repository": "tipoLi5890/akcli",
+    "selected_task": "review_schematic",
+    "selection_model": "rules_v1_not_an_llm"
+  },
+  "source_type": "github_repository_search",
+  "tool_selection_authority": "rules_v1",
+  "verified_physical_device_operation": false
+}

@@ -6,6 +6,9 @@ on:
       - "src/hardware_splicer/capability_policy.py"
       - "tests/test_github_signal_pipeline.py"
       - "scripts/evaluate_github_signal_tool.py"
+      - "scripts/run_github_signal_task.py"
+      - "src/hardware_splicer/github_signal_task_router.py"
+      - "tests/test_github_signal_task_router.py"
       - "examples/github_signals/**"
       - ".github/workflows/hs-github-signal-capability.yml"
   workflow_dispatch:
@@ -23,7 +26,7 @@ jobs:
       - name: Install HS test dependencies
         run: python -m pip install -e '.[dev]'
       - name: Verify signal trust, pin, sandbox and registry gates
-        run: python -m pytest -q tests/test_github_signal_pipeline.py tests/test_capability_policy.py tests/test_capability_runtime.py
+        run: python -m pytest -q tests/test_github_signal_pipeline.py tests/test_github_signal_task_router.py tests/test_capability_policy.py tests/test_capability_runtime.py
 
   native-reviewed-integration:
     runs-on: ubuntu-24.04
@@ -58,5 +61,53 @@ jobs:
         with:
           name: HS-GITHUB-SIGNAL-PINNED-AKCLI-REAL-SCHEMATIC-REVIEW
           path: build_compilation/github_signals_akcli/
+          if-no-files-found: error
+          retention-days: 60
+
+
+  native-reviewed-kdif-task:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS runtime dependencies
+        run: python -m pip install -e .
+      - name: Pre-pull official KiCad 9 CLI image at reviewed digest
+        run: docker pull kicad/kicad@sha256:f36b185970d398b84c095ace896046798ff60d458ce59d49669c4633c304cfbd
+      - name: Create isolated controlled version of real HS SPI PCB
+        run: |
+          python examples/github_signals/make_kdif_fixture.py \
+            --out "$RUNNER_TEMP/hs-kdif-controlled-board" \
+            > "$RUNNER_TEMP/hs-kdif-fixture-log.json"
+          python -c 'import json,os; j=json.load(open(os.environ["RUNNER_TEMP"]+"/hs-kdif-fixture-log.json")); assert j["baseline_is_byte_for_byte_hs_product"] and not j["production_revision"]; f=open(os.environ["GITHUB_ENV"],"a"); f.write("HS_KDIF_REV_A="+j["baseline_sha"]+"\n"); f.write("HS_KDIF_REV_B="+j["controlled_revision_sha"]+"\n")'
+      - name: Execute task-selected source-native kdif against actual HS PCB
+        run: |
+          mkdir -p build_compilation
+          python scripts/run_github_signal_task.py \
+            --feed examples/github_signals/live_reviewed_candidates_20261105.json \
+            --objective "Compare the committed PCB revisions" \
+            --board-repo "$RUNNER_TEMP/hs-kdif-controlled-board" \
+            --board "$RUNNER_TEMP/hs-kdif-controlled-board/spi_flash_adapter_v1.kicad_pcb" \
+            --revision-a "$HS_KDIF_REV_A" --revision-b "$HS_KDIF_REV_B" \
+            --checkout-base "$RUNNER_TEMP/hs-signal-reviewed-tools" \
+            --out build_compilation/github_signals_kdif --fetch --sandbox docker \
+            > build_compilation/github_signals_kdif_task_stdout.json \
+            || { rc=$?; cat build_compilation/github_signals_kdif_task_stdout.json; exit "$rc"; }
+      - name: Verify canonical HS registry and output hash, separately from base capabilities
+        run: |
+          PYTHONPATH=src python -m scripts.report_capabilities \
+            --build-dir build_compilation/github_signals_kdif \
+            > build_compilation/github_signals_kdif/HS_CAPABILITIES.json || test "$?" -eq 2
+          python -c 'import json,hashlib,pathlib; d=pathlib.Path("build_compilation/github_signals_kdif"); c=json.load(open(d/"HS_SIGNAL_KDIF_CAPABILITY.json")); p=json.load(open(d/"HS_CAPABILITIES.json")); rows=[r for r in p["capabilities"] if r["id"]=="signal-kdif-board-revision-diff"]; artifact=d/c["artifact"]; assert rows and rows[0]["readiness"]=="project_used"; assert artifact.is_file() and hashlib.sha256(artifact.read_bytes()).hexdigest()==c["artifact_sha256"]; assert c["physical_authority"] is False; print("SOURCE_NATIVE_KDIF_CI_VALIDATED",artifact.stat().st_size)'
+      - name: Preserve genuine HTML and machine-readable evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-GITHUB-SIGNAL-KDIF-REAL-HS-BOARD-TASK-SELECTED
+          path: |
+            build_compilation/github_signals_kdif/
+            build_compilation/github_signals_kdif_task_stdout.json
           if-no-files-found: error
           retention-days: 60

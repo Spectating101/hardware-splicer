@@ -363,3 +363,41 @@ def test_explicit_docker_backend_real_tool_response_importable(tmp_path, monkeyp
     data["capability"]["pinned_revision"] = "f" * 40
     verdict.write_text(json.dumps(data))
     assert registry_row(tmp_path / "out") is None
+
+
+def test_legacy_akcli_acquisition_does_not_execute_newly_reviewed_kdif(
+    tmp_path, monkeypatch
+):
+    repo, sha = _checkout(tmp_path, monkeypatch)
+    feed = _feed(sha=sha)
+    feed["candidates"].append({
+        "repository": "0x12net/kdif",
+        "commit_sha": ADAPTERS["0x12net/kdif"]["approved_commit_sha"],
+        "license_spdx_id": "MIT",
+    })
+    schematic = tmp_path / "board.kicad_sch"
+    schematic.write_text("(kicad_sch)")
+    monkeypatch.setattr(
+        "hardware_splicer.github_signal_pipeline.shutil.which",
+        lambda x: "/usr/bin/bwrap" if x == "bwrap" else None,
+    )
+    calls = []
+    def upstream_checker(argv, **kw):
+        calls.append(argv)
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps({"findings": []}),
+            stderr="",
+        )
+    result = evaluate_signals(
+        feed, checkout=repo, schematic=schematic,
+        output_dir=tmp_path / "out", run_fn=upstream_checker,
+    )
+    assert result["ok"] is True
+    assert result["capability"]["repository"] == "tipoLi5890/akcli"
+    assert len(calls) == 1
+    assert "-m" in calls[0] and "akcli" in calls[0]
+    kdif = [c for c in result["candidates"] if c["repository"] == "0x12net/kdif"]
+    assert len(kdif) == 1
+    assert kdif[0]["state"] == "approved_other_adapter"
+    assert kdif[0]["executed"] is False
