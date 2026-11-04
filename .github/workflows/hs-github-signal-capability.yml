@@ -88,13 +88,14 @@ jobs:
           mkdir -p build_compilation
           python scripts/run_github_signal_task.py \
             --feed examples/github_signals/live_reviewed_candidates_20261105.json \
-            --objective "Compare the committed PCB revisions to inspect what changed" \
+            --objective "Compare the committed PCB revisions" \
             --board-repo "$RUNNER_TEMP/hs-kdif-controlled-board" \
             --board "$RUNNER_TEMP/hs-kdif-controlled-board/spi_flash_adapter_v1.kicad_pcb" \
             --revision-a "$HS_KDIF_REV_A" --revision-b "$HS_KDIF_REV_B" \
             --checkout-base "$RUNNER_TEMP/hs-signal-reviewed-tools" \
             --out build_compilation/github_signals_kdif --fetch --sandbox docker \
-            > build_compilation/github_signals_kdif_task_stdout.json
+            > build_compilation/github_signals_kdif_task_stdout.json \
+            || { rc=$?; cat build_compilation/github_signals_kdif_task_stdout.json; exit "$rc"; }
       - name: Verify canonical HS registry and output hash, separately from base capabilities
         run: |
           PYTHONPATH=src python -m scripts.report_capabilities \
