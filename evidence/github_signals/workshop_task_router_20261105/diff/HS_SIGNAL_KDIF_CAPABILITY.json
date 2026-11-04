@@ -1,0 +1,31 @@
+{
+  "artifact": "HS_SIGNAL_KDIF_REVISIONS.html",
+  "artifact_bytes": 92459,
+  "artifact_sha256": "16e9fed55618a70c46a3c7f979f04376271a0e9b0c0b49e2d485864adc447202",
+  "electrical_correctness_verified": false,
+  "evidence_label": "Controlled PCB Git revision comparison; not production redesign",
+  "execution_proven": true,
+  "fab_approved": false,
+  "id": "signal-kdif-board-revision-diff",
+  "input": {
+    "file_in_repo": "spi_flash_adapter_v1.kicad_pcb",
+    "file_name": "spi_flash_adapter_v1.kicad_pcb",
+    "revision_a": "460c147f5ccd1736060ca397642877625720e5a2",
+    "revision_a_file_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+    "revision_b": "552f7adfaeadde7b2e41d00fa4344989c3457c64",
+    "revision_b_file_sha256": "c4dd674663116dffed5b42f19db3621941de17ddab86ead60830d4c8b712d2b7",
+    "revisions_have_distinct_bytes": true,
+    "working_tree_sha256": "c4dd674663116dffed5b42f19db3621941de17ddab86ead60830d4c8b712d2b7"
+  },
+  "license": "MIT",
+  "network_isolated": true,
+  "next_action": "Engineer reviews interactive diff against design intent",
+  "physical_authority": false,
+  "pinned_revision": "1de14f9bbfe37ef291b929c52532419d1a14f0e6",
+  "project_used": true,
+  "repository": "0x12net/kdif",
+  "repository_url": "https://github.com/0x12net/kdif",
+  "sandbox_backend": "docker",
+  "source_commit_verified": true,
+  "source_license_verified": true
+}

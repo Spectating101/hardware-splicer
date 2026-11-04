@@ -40,8 +40,19 @@ ADAPTERS = {
         "adapter": "akcli_readonly_schematic_check",
         "license": "MIT",
         "input_suffix": ".kicad_sch",
+        "module_file": "src/akcli/__main__.py",
         "command": ["python3", "-m", "akcli", "check", "/input.kicad_sch", "--format", "json", "--fail-on", "never"],
-    }
+    },
+    "0x12net/kdif": {
+        "approved_commit_sha": "1de14f9bbfe37ef291b929c52532419d1a14f0e6",
+        "capability_id": "signal-kdif-board-revision-diff",
+        "name": "kdif interactive PCB revision comparison",
+        "layer": "electrical",
+        "adapter": "kdif_git_revision_board_comparison",
+        "license": "MIT",
+        "input_suffix": ".kicad_pcb",
+        "module_file": "kdif/__main__.py",
+    },
 }
 
 
@@ -162,8 +173,9 @@ def acquire_pinned_repo(candidate: Mapping[str, Any], checkout: Path, *, fetch: 
         raise SignalEvaluationError("MIT license not independently verified")
     if candidate["license_claim"] != "MIT":
         raise SignalEvaluationError("feed license metadata inconsistent with checkout")
-    if not (checkout / "src" / "akcli" / "__main__.py").is_file():
-        raise SignalEvaluationError("reviewed akcli module entrypoint missing")
+    entrypoint = (checkout / ADAPTERS[repo]["module_file"]).resolve()
+    if not entrypoint.is_relative_to(checkout.resolve()) or not entrypoint.is_file():
+        raise SignalEvaluationError("reviewed module entrypoint absent or escaping checkout")
     return checkout
 
 
@@ -239,13 +251,25 @@ def evaluate_signals(
     """
     candidates = normalize_feed(feed)
     evaluations: list[dict[str, Any]] = []
-    approved = [c for c in candidates if not c["discovered_only"]]
+    # This legacy acquisition endpoint is explicitly akcli-only. The new
+    # task router selects other reviewed specialists from the same feed.
+    # An approved kdif candidate must NOT be mistaken for an akcli request
+    # or silently executed through the wrong adapter.
+    approved = [
+        c for c in candidates
+        if not c["discovered_only"] and c["repository"] == "tipoLi5890/akcli"
+    ]
     output_dir.mkdir(parents=True, exist_ok=True)
     for candidate in candidates:
         if candidate["discovered_only"]:
             evaluations.append({
                 **candidate, "state": "discovered_only",
                 "executed": False, "reason": "No approved repo/adapter/revision pair",
+            })
+        elif candidate["repository"] != "tipoLi5890/akcli":
+            evaluations.append({
+                **candidate, "state": "approved_other_adapter",
+                "executed": False, "reason": "requires task-router selection and compatible input",
             })
     if not approved:
         payload = {
@@ -260,6 +284,9 @@ def evaluate_signals(
     if len(approved) != 1:
         raise SignalEvaluationError("one reviewed candidate per evaluation required")
     candidate = approved[0]
+    if candidate["repository"] != "tipoLi5890/akcli":
+        raise SignalEvaluationError(
+            "this endpoint supports akcli; use the task router for kdif")
     spec = ADAPTERS[candidate["repository"]]
     if schematic.suffix != spec["input_suffix"] or not schematic.is_file():
         raise SignalEvaluationError("only existing KiCad .kicad_sch inputs supported")
