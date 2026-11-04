@@ -1,0 +1,102 @@
+{
+  "schema_version": "hardware_splicer.nonpotable_filter_component_reference.v1",
+  "project_id": "water_filter_nonpotable_bench_001",
+  "technology_candidate_id": "passive_replaceable_depth_media",
+  "reference_use": "non_potable_laboratory_concept_only",
+  "component_pair_status": "manufacturer_documented_product_family_candidate_not_measured_fit",
+  "cartridge": {
+    "manufacturer": "Pentair",
+    "brand": "Pentek",
+    "model": "P5",
+    "part_number": "155014-43",
+    "format": "nominal_10in_DOE_standard_sediment_cartridge",
+    "filter_medium": "spun_bonded_polypropylene",
+    "nominal_micron_rating": 5,
+    "outer_diameter_mm": 60.5,
+    "length_mm": 251,
+    "temperature_min_c": 4.4,
+    "temperature_max_c": 62.8,
+    "published_clean_pressure_point": {
+      "delta_p_psi": 0.2,
+      "flow_us_gpm": 5
+    },
+    "claims_not_supported": [
+      "70_percent_turbidity_reduction",
+      "microbial_removal",
+      "potable_water",
+      "absolute_five_micron_cutoff",
+      "low_flow_pressure_drop"
+    ],
+    "source": {
+      "publisher": "Pentair",
+      "document": "Pentek P Series Spun-Bonded Polypropylene Cartridges",
+      "revision": "310060 REV E SE16",
+      "page": 2,
+      "url": "https://www.pentair.com/content/dam/extranet/web/nam/pentek/spec-sheets/310060-pentek-p-series-spec-sheet.pdf",
+      "document_sha256": null,
+      "claim_location": "SPECIFICATIONS AND PERFORMANCE row P5",
+      "independent_part_authentication": false
+    }
+  },
+  "housing": {
+    "manufacturer": "Pentair",
+    "brand": "Pentek",
+    "model": "Traditional Slim Line Blue/Clear with Pressure Relief",
+    "part_number": "158007",
+    "format": "nominal_10in_DOE_standard_filter_housing",
+    "inlet_outlet_connection": "3/8in_NPT",
+    "overall_max_length_mm": 308,
+    "overall_max_diameter_mm": 118,
+    "maximum_housing_pressure_psi": 125,
+    "temperature_min_c": 4.4,
+    "temperature_max_c": 51.7,
+    "published_clean_pressure_point": {
+      "delta_p_psi": 2,
+      "flow_us_gpm": 5,
+      "note": "housing_only_without_cartridge"
+    },
+    "sump_material": "styrene_acrylonitrile_SAN_clear",
+    "cap_material": "reinforced_polypropylene",
+    "oring_material": "EPDM",
+    "pressure_relief_present": true,
+    "source": {
+      "publisher": "Pentair",
+      "document": "Pentek Traditional Slim Line Series Filter Housings",
+      "revision": "310050 JL25",
+      "page": 2,
+      "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/pentek/residential/spec-sheets/english/310050-pentek-slim-line-spec-sheet.pdf",
+      "document_sha256": null,
+      "claim_location": "SPECIFICATIONS AND PERFORMANCE row 158007; page 1 materials/pressure",
+      "independent_part_authentication": false
+    }
+  },
+  "design_assumptions": {
+    "service_removal_clearance_mm": 150,
+    "service_clearance_basis": "illustrative_external_access_allocation_not_vendor_instruction_or_measured_sump_removal",
+    "inlet_feed_pressure_psi": null,
+    "temperature_operating_c": null,
+    "raw_test_water_particles": null,
+    "turbidity_reduction_observed_percent": null,
+    "effective_pore_distribution_verified": false,
+    "proposed_flow_l_min": 0.5,
+    "actual_pressure_curve_at_proposed_flow_available": false,
+    "mounting_boss_positions_known": false,
+    "fitting_tool_clearance_known": false,
+    "rated_connectors_and_hoses_selected": false,
+    "media_cartridge_housing_fit_physically_checked": false,
+    "wet_dry_separation_validated": false
+  },
+  "provenance": {
+    "claims_transcribed_from_manufacturer_publications": true,
+    "manufacturer_documents_cryptographically_snapshotted": false,
+    "supplier_stock_and_price_checked": false,
+    "product_revision_on_purchased_part_measured": false
+  },
+  "authority": {
+    "procurement": false,
+    "fabrication": false,
+    "fluid_pressure_activation": false,
+    "human_consumption": false,
+    "water_treatment_verified": false
+  }
+}

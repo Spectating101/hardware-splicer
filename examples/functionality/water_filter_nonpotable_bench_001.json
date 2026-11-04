@@ -1,0 +1,383 @@
+{
+  "schema_version": "hardware_splicer.function_intent.v1",
+  "project_id": "water_filter_nonpotable_bench_001",
+  "name": "Non-potable water-filter function-first design demonstrator",
+  "purpose": "Conceptual bench-only device intended to process non-potable demonstration water, with a measurable function-first engineering specification, not for drinking or human consumption.",
+  "intended_use": "non_potable_bench",
+  "claims": [],
+  "inputs": [
+    {
+      "id": "raw_in",
+      "medium": "water",
+      "quality": "non_potable_demo_water",
+      "flow_source": "unverified gravity feed or supervised low pressure"
+    }
+  ],
+  "outputs": [
+    {
+      "id": "treated_out",
+      "medium": "water",
+      "quality": "non_potable_demo_output",
+      "drinking_water_claim": false
+    },
+    {
+      "id": "service_drain",
+      "medium": "water",
+      "quality": "non_potable_wastewater"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ_FLOW",
+      "statement": "Deliver at least 0.5 L/min over the defined bench challenge, at the measured test pressure and clean media condition.",
+      "kind": "performance",
+      "priority": "must",
+      "target": {
+        "minimum_flow_l_min": 0.5,
+        "measured_at_operating_pressure": true
+      },
+      "verification": {
+        "name": "REQ_FLOW bench acceptance",
+        "method_type": "test",
+        "procedure": "Instrument actual inlet and outlet flow, record media state, influent quality, pressure and uncertainty; no physical data available yet.",
+        "acceptance": {
+          "minimum_flow_l_min": 0.5,
+          "measured_at_operating_pressure": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_PARTICLE",
+      "statement": "Reduce specified test-particle turbidity by at least 70% in a controlled non-potable challenge (not a pathogen or health claim).",
+      "kind": "performance",
+      "priority": "must",
+      "target": {
+        "minimum_turbidity_reduction_percent": 70,
+        "paired_influent_effluent_samples": true
+      },
+      "verification": {
+        "name": "REQ_PARTICLE bench acceptance",
+        "method_type": "test",
+        "procedure": "Use calibrated turbidity measurements with sufficient challenge concentration, controls and repeat samples; report variability and any breakthrough.",
+        "acceptance": {
+          "minimum_turbidity_reduction_percent": 70,
+          "paired_influent_effluent_samples": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_LEAK",
+      "statement": "Keep wet path contained with no visible external leakage over the stipulated non-potable bench pressure-hold procedure.",
+      "kind": "safety",
+      "priority": "must",
+      "target": {
+        "external_leaks_allowed": 0,
+        "pressure_test_method_must_be_specified": true
+      },
+      "verification": {
+        "name": "REQ_LEAK bench acceptance",
+        "method_type": "test",
+        "procedure": "Select pressure rating and measured test pressure first; conduct supervised pressure/soak inspection on assembled, reviewed hardware.",
+        "acceptance": {
+          "external_leaks_allowed": 0,
+          "pressure_test_method_must_be_specified": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_BYPASS",
+      "statement": "Ensure feed cannot bypass the selected filter medium unnoticed.",
+      "kind": "safety",
+      "priority": "must",
+      "target": {
+        "unfiltered_bypass_allowed": false,
+        "bypass_inspection_required": true
+      },
+      "verification": {
+        "name": "REQ_BYPASS bench acceptance",
+        "method_type": "test",
+        "procedure": "Inspect seal path, challenge with a visible tracer suitable for non-potable use, and document isolation and bypass results.",
+        "acceptance": {
+          "unfiltered_bypass_allowed": false,
+          "bypass_inspection_required": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_SERVICE",
+      "statement": "Permit filter element replacement without contamination of the dry electrical enclosure.",
+      "kind": "functional",
+      "priority": "must",
+      "target": {
+        "removable_media_required": true,
+        "wet_dry_separation_inspection": true
+      },
+      "verification": {
+        "name": "REQ_SERVICE bench acceptance",
+        "method_type": "test",
+        "procedure": "Inspect maintenance geometry and demonstrate element replacement on a dry/unpowered fixture.",
+        "acceptance": {
+          "removable_media_required": true,
+          "wet_dry_separation_inspection": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_MONITOR",
+      "statement": "Produce a clearly labelled inlet/outlet differential-pressure observation without asserting water quality from pressure alone.",
+      "kind": "functional",
+      "priority": "must",
+      "target": {
+        "inlet_and_outlet_pressure_observations_required": true,
+        "pressure_is_not_treatment_evidence": true
+      },
+      "verification": {
+        "name": "REQ_MONITOR bench acceptance",
+        "method_type": "test",
+        "procedure": "Compare pressure observation to a calibrated reference over intended non-potable bench operating envelope.",
+        "acceptance": {
+          "inlet_and_outlet_pressure_observations_required": true,
+          "pressure_is_not_treatment_evidence": true
+        },
+        "evidence_status": "not_collected"
+      }
+    },
+    {
+      "id": "REQ_NONPOTABLE",
+      "statement": "Prevent release or description of untested output as safe to drink.",
+      "kind": "safety",
+      "priority": "must",
+      "target": {
+        "potable_or_health_claims_allowed": false,
+        "lab_certification_required_for_future_health_claims": true
+      },
+      "verification": {
+        "name": "REQ_NONPOTABLE bench acceptance",
+        "method_type": "test",
+        "procedure": "Review labels, device interface, evidence report and operator procedure; no drinking-water use authorized.",
+        "acceptance": {
+          "potable_or_health_claims_allowed": false,
+          "lab_certification_required_for_future_health_claims": true
+        },
+        "evidence_status": "not_collected"
+      }
+    }
+  ],
+  "functions": [
+    {
+      "id": "FN_FEED",
+      "name": "Accept and convey inlet water",
+      "description": "Capture inlet, contain wet path and provide controlled head/flow.",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK"
+      ],
+      "subsystems": [
+        "SUB_INLET"
+      ],
+      "physical_principle": "hydrostatic or bounded pressure-driven flow",
+      "candidate_technology": "rated tubing and inlet coupling not selected"
+    },
+    {
+      "id": "FN_TREAT",
+      "name": "Separate challenge particulates",
+      "description": "Candidate passive filtration with pressure-dependent separation and potential clogging.",
+      "requirements": [
+        "REQ_PARTICLE",
+        "REQ_BYPASS"
+      ],
+      "subsystems": [
+        "SUB_MEDIA"
+      ],
+      "physical_principle": "size exclusion or verified adsorption selected from the challenge, not presumed",
+      "candidate_technology": "specific media and pore characteristics unselected"
+    },
+    {
+      "id": "FN_DELIVER",
+      "name": "Deliver contained output",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK",
+        "REQ_BYPASS"
+      ],
+      "subsystems": [
+        "SUB_OUTLET"
+      ],
+      "physical_principle": "fluid containment"
+    },
+    {
+      "id": "FN_MONITOR",
+      "name": "Observe flow restriction",
+      "requirements": [
+        "REQ_MONITOR"
+      ],
+      "subsystems": [
+        "SUB_SENSOR"
+      ],
+      "physical_principle": "differential pressure observation",
+      "candidate_technology": "instrument type, range and isolation not selected"
+    },
+    {
+      "id": "FN_SERVICE",
+      "name": "Allow clean media exchange",
+      "requirements": [
+        "REQ_SERVICE"
+      ],
+      "subsystems": [
+        "SUB_SERVICE"
+      ],
+      "physical_principle": "serviceable sealed cartridge"
+    },
+    {
+      "id": "FN_LABEL",
+      "name": "Prevent unsupported water safety claims",
+      "requirements": [
+        "REQ_NONPOTABLE"
+      ],
+      "subsystems": [
+        "SUB_SERVICE"
+      ],
+      "physical_principle": "human-interface safety / labeling"
+    }
+  ],
+  "subsystems": [
+    {
+      "id": "SUB_INLET",
+      "name": "Water inlet & containment",
+      "domain": "mechanical",
+      "engineering_specialty": "fluid mechanics and fittings",
+      "purpose": "Provide source fluid to treatment under controlled conditions",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK"
+      ]
+    },
+    {
+      "id": "SUB_MEDIA",
+      "name": "Treatment element",
+      "domain": "system",
+      "engineering_specialty": "separation process and materials",
+      "purpose": "Process defined non-potable challenge, independently test performance",
+      "requirements": [
+        "REQ_PARTICLE",
+        "REQ_BYPASS"
+      ]
+    },
+    {
+      "id": "SUB_OUTLET",
+      "name": "Outlet and bypass isolation",
+      "domain": "mechanical",
+      "engineering_specialty": "seals and flow containment",
+      "purpose": "Route and contain output and prevent untreated bypass",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK",
+        "REQ_BYPASS"
+      ]
+    },
+    {
+      "id": "SUB_SENSOR",
+      "name": "Differential pressure observation",
+      "domain": "electrical",
+      "engineering_specialty": "instrumentation and optional firmware",
+      "purpose": "Measure pressure drop separately from actual water treatment",
+      "requirements": [
+        "REQ_MONITOR"
+      ]
+    },
+    {
+      "id": "SUB_SERVICE",
+      "name": "Cartridge servicing and safety label",
+      "domain": "assembly",
+      "engineering_specialty": "maintenance and human factors",
+      "purpose": "Enable safe service and prevent drinking-water misrepresentation",
+      "requirements": [
+        "REQ_SERVICE",
+        "REQ_NONPOTABLE"
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IF_INLET_MEDIA",
+      "name": "Wet inlet to treatment element",
+      "from": "SUB_INLET",
+      "to": "SUB_MEDIA",
+      "medium": "fluid",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK"
+      ],
+      "unresolved": [
+        "working_pressure_bar",
+        "flow_l_min",
+        "connection_diameter_mm",
+        "seal_material"
+      ]
+    },
+    {
+      "id": "IF_MEDIA_OUTLET",
+      "name": "Treated-stream outlet",
+      "from": "SUB_MEDIA",
+      "to": "SUB_OUTLET",
+      "medium": "fluid",
+      "requirements": [
+        "REQ_FLOW",
+        "REQ_BYPASS"
+      ],
+      "unresolved": [
+        "media_differential_pressure_bar",
+        "seal_bypass_leak_rate",
+        "wetted_materials"
+      ]
+    },
+    {
+      "id": "IF_SENSOR_TAPS",
+      "name": "Pressure tap and measurement electronics",
+      "from": "SUB_MEDIA",
+      "to": "SUB_SENSOR",
+      "medium": "fluid_to_signal",
+      "requirements": [
+        "REQ_MONITOR"
+      ],
+      "unresolved": [
+        "tap_positions",
+        "isolation",
+        "sensor_range_pa",
+        "sensor_calibration"
+      ]
+    },
+    {
+      "id": "IF_SERVICE",
+      "name": "Media replacement opening",
+      "from": "SUB_SERVICE",
+      "to": "SUB_MEDIA",
+      "medium": "mechanical",
+      "requirements": [
+        "REQ_SERVICE",
+        "REQ_NONPOTABLE"
+      ],
+      "unresolved": [
+        "cartridge_geometry",
+        "gasket_compression",
+        "tool_access",
+        "failure_modes"
+      ]
+    }
+  ],
+  "notes": {
+    "targets_are_design_hypotheses": true,
+    "no_drinking_water_claim": true,
+    "no_human_exposure": true,
+    "regulations_are_not_certifications": true,
+    "sources": [
+      "https://www.nsf.org/consumer-resources/articles/standards-water-treatment-systems",
+      "https://www.cdc.gov/drinking-water/prevention/about-choosing-home-water-filters.html"
+    ]
+  }
+}

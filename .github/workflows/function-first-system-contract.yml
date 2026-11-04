@@ -1,0 +1,701 @@
+name: HS Function-First System Contract
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/function_intent_bridge.py"
+      - "examples/functionality/**"
+      - "scripts/compile_function_intent_001.py"
+      - "tests/test_function_intent_bridge.py"
+      - "src/hardware_splicer/function_technology_selection.py"
+      - "scripts/compare_function_technologies_001.py"
+      - "tests/test_function_technology_selection.py"
+      - "src/hardware_splicer/filter_component_preflight.py"
+      - "scripts/study_filter_components_001.py"
+      - "scripts/verify_filter_clearance_geometry_001.py"
+      - "tests/test_filter_component_preflight.py"
+      - "src/hardware_splicer/filter_assembly_gate.py"
+      - "scripts/audit_filter_assembly_interfaces_001.py"
+      - "tests/test_filter_assembly_gate.py"
+      - "src/hardware_splicer/whole_product_sample.py"
+      - "scripts/build_clearbench_product_001.py"
+      - "scripts/render_clearbench_product_001.py"
+      - "tests/test_whole_product_sample.py"
+      - "src/hardware_splicer/product_ecosystem_bridge.py"
+      - "scripts/export_product_ecosystem_001.py"
+      - "scripts/verify_product_ecosystem_execution_001.py"
+      - "tests/test_product_ecosystem_bridge.py"
+      - "src/hardware_splicer/teardown_cad_mesh.py"
+      - "scripts/build_teardown_cad_mesh_001.py"
+      - "tests/test_teardown_cad_mesh.py"
+      - "apps/splice-ui/src/components/ProductShowcase.jsx"
+      - "apps/splice-ui/src/components/ProductShowcase.css"
+      - "apps/splice-ui/src/components/ProductShowcase.test.jsx"
+      - "apps/splice-ui/src/App.jsx"
+      - "apps/splice-ui/src/nav.js"
+      - "scripts/package_teardown_showcase_001.py"
+      - "scripts/verify_frontend_showcase_browser_001.mjs"
+      - "assets/teardown/hs_product_studio.js"
+      - "assets/teardown/hs_machine_main.js"
+      - "src/hardware_splicer/teardown_product.py"
+      - "scripts/export_teardown_product_001.py"
+      - "scripts/verify_teardown_browser_001.mjs"
+      - "scripts/verify_teardown_acceptance_001.py"
+      - "tests/test_teardown_product.py"
+      - "src/hardware_splicer/multicad_toolchain.py"
+      - "scripts/export_multicad_parts_001.py"
+      - "scripts/verify_multicad_partcad_001.py"
+      - "tests/test_multicad_toolchain.py"
+      - "src/hardware_splicer/cadclaw_dry_product.py"
+      - "scripts/compile_cadclaw_dry_assembly_001.py"
+      - "scripts/verify_cadclaw_dry_assembly_001.py"
+      - ".github/workflows/function-first-system-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  functional-system-traceability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install machine project model and test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Test function allocation, real MachineProject validation and rejection of false claims
+        run: pytest -q tests/test_function_intent_bridge.py
+      - name: Compile non-potable function-first reference
+        run: |
+          python scripts/compile_function_intent_001.py \
+            --brief examples/functionality/water_filter_nonpotable_bench_001.json \
+            --out .cache/hs-function-first-water-001
+      - name: Independently confirm source binding and closed real-world authority
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-function-first-water-001")
+          receipt=json.loads((root/"PACKAGE_RECEIPT.json").read_text())
+          gate=json.loads((root/"FUNCTIONAL_GATE.json").read_text())
+          machine=json.loads((root/"MACHINE_PROJECT.json").read_text())
+          for name,record in receipt["files"].items():
+              data=(root/name).read_bytes()
+              assert len(data)==record["bytes"] and hashlib.sha256(data).hexdigest()==record["sha256"]
+          assert receipt["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert machine["metadata"]["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert len(machine["requirements"])==gate["requirements_count"]
+          assert len(machine["functions"])==gate["functions_count"]
+          assert len(machine["verifications"])==gate["planned_independent_tests"]
+          packages=json.loads((root/"DISCIPLINE_WORK_PACKAGES.json").read_text())
+          assert packages["source_spec_sha256"]==gate["source_spec_sha256"]
+          assert len(packages["packages"])==len(machine["subsystems"])
+          assert not packages["physical_authority_granted"]
+          assert all(not p["native_design_outputs_generated"] for p in packages["packages"])
+          assert all(p["verification_status"]=="not_executed" for p in packages["packages"])
+          assert gate["evidence_collected_count"]==0
+          assert not any(gate["physical_authority"].values())
+          assert machine["requested_release_state"]=="concept"
+          assert all(x["status"]=="planned" for x in machine["verifications"])
+          assert all(x["authority"]=="proposed" for x in machine["interfaces"])
+          assert all(x["contracts"][0]["unresolved_fields"] for x in machine["interfaces"])
+          print("MachineProject function-first traceability: validated concept; no water treatment, drinking, fabrication or activation authority.")
+      - name: Retain exact proposed functional package and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-function-first-water-filter-concept-001
+          path: .cache/hs-function-first-water-001/
+          retention-days: 30
+          if-no-files-found: error
+
+  technology-option-screening:
+    needs: functional-system-traceability
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install existing HS machine project schema dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run adversarial option-screening tests
+        run: pytest -q tests/test_function_technology_selection.py
+      - name: Load function evidence package from preceding independent job
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-function-first-water-filter-concept-001
+          path: .cache/hs-function-first-water-001
+      - name: Compare real functional requirements with four proposed process mechanisms
+        run: |
+          python scripts/compare_function_technologies_001.py \
+            --functional-package .cache/hs-function-first-water-001 \
+            --options examples/functionality/water_filter_technology_options_001.json \
+            --out .cache/hs-filter-technology-study
+      - name: Confirm independently bound provisional architecture and physically closed gates
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-filter-technology-study")
+          receipt=json.loads((root/"TECHNOLOGY_STUDY_RECEIPT.json").read_text())
+          decision=json.loads((root/"TECHNOLOGY_DECISION.json").read_text())
+          handoff=json.loads((root/"PROVISIONAL_ARCHITECTURE_HANDOFF.json").read_text())
+          for name, info in receipt["files"].items():
+              content=(root/name).read_bytes()
+              assert hashlib.sha256(content).hexdigest()==info["sha256"]
+              assert len(content)==info["bytes"]
+          assert receipt["source_spec_sha256"]==decision["source_spec_sha256"]==handoff["source_spec_sha256"]
+          assert receipt["technology_options_sha256"]==decision["technology_options_sha256"]==handoff["technology_options_sha256"]
+          assert decision["selection_state"]=="PROVISIONAL_FOR_DESIGN_STUDY_ONLY"
+          assert decision["provisional_preferred_candidate_id"]=="passive_replaceable_depth_media"
+          assert set(decision["candidate_ids_eligible_for_design_study"])=={
+              "passive_replaceable_depth_media","active_membrane_cartridge"}
+          assert len([c for c in decision["candidate_screening"] if
+                      c["screening_state"]=="REJECT_INCOMPLETE_FUNCTIONAL_COVERAGE"])==2
+          assert len(handoff["discipline_assignments"])==5
+          assert not any([
+              decision["demonstrated_contaminant_reduction"],
+              decision["water_quality_measured"],
+              decision["physical_build_authorized"],
+              decision["human_consumption_authorized"],
+              handoff["physical_authority_granted"],
+              handoff["process_design_verified"],
+              handoff["native_toolchain_executed"],
+          ])
+          print("Technology shortlist is a hypothesis-based design study only; no verified water-quality or build authority.")
+      - name: Retain source-bound alternatives, decision and engineering study handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-water-filter-technology-study-001
+          path: .cache/hs-filter-technology-study/
+          if-no-files-found: error
+          retention-days: 30
+
+  manufacturer-component-clearance:
+    needs: technology-option-screening
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install actual OpenSCAD toolchain, Python geometry inspector and HS model schema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends openscad
+          python -m pip install -e '.[dev]' trimesh==4.8.3
+          openscad --version
+      - name: Execute false-claim, wrong-part, source-tamper and clearance-contract tests
+        run: pytest -q tests/test_filter_component_preflight.py
+      - name: Download exact same-run functional input and accepted technology study
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-function-first-water-filter-concept-001
+          path: .cache/hs-function-first-water-001
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-water-filter-technology-study-001
+          path: .cache/hs-filter-technology-study
+      - name: Match exact published product references against source functional requirements
+        run: |
+          python scripts/study_filter_components_001.py \
+            --functional-package .cache/hs-function-first-water-001 \
+            --technology-study .cache/hs-filter-technology-study \
+            --components examples/functionality/water_filter_component_candidate_001.json \
+            --out .cache/hs-filter-component-study
+      - name: Render only external geometric clearance volumes using real native OpenSCAD
+        run: |
+          python scripts/verify_filter_clearance_geometry_001.py \
+            --project .cache/hs-filter-component-study
+      - name: Cross-check rendered native mesh, authorizations, and component provenance
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          p=Path(".cache/hs-filter-component-study")
+          receipt=json.loads((p/"COMPONENT_PACKAGE_RECEIPT.json").read_text())
+          report=json.loads((p/"COMPONENT_PREFLIGHT.json").read_text())
+          native=json.loads((p/"RENDERED_CLEARANCE_EVIDENCE.json").read_text())
+          bom=json.loads((p/"COMPONENT_BOM.json").read_text())
+          for name,row in receipt["files"].items():
+              raw=(p/name).read_bytes()
+              assert row["sha256"]==hashlib.sha256(raw).hexdigest()
+              assert row["bytes"]==len(raw)
+          assert receipt["source_spec_sha256"]==report["source_spec_sha256"]==native["source_spec_sha256"]==bom["source_spec_sha256"]
+          assert receipt["component_reference_sha256"]==report["component_reference_sha256"]==native["component_reference_sha256"]
+          for key,value in native["solids"].items():
+              raw=(p/value["stl_filename"]).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==value["sha256"]
+              assert len(raw)==value["bytes"]
+              assert value["watertight"] and value["winding_consistent"]
+          assert report["pressure_loss_at_target_flow_psi"] is None
+          assert report["measured_treatment_reduction_percent"] is None
+          assert len(bom["items"])==2 and bom["full_bom"] is False
+          assert not any([
+              report["physical_cartridge_to_housing_fit_validated"],
+              report["hydraulic_feasibility_validated"],
+              report["water_quality_claim_qualified"],
+              native["physical_fit_verified"],
+              native["pressure_containing_design_generated"],
+              native["manufacturing_authorized"],
+              native["human_consumption_authorized"],
+          ])
+          print("Component pair documentary candidate with native clearance mesh only. No treatment or build authorization.")
+      - name: Preserve source bound product, BOM and native CAD clearance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-filter-manufacturer-component-clearance-001
+          path: .cache/hs-filter-component-study/
+          retention-days: 30
+          if-no-files-found: error
+
+  assembly-interface-readiness:
+    needs: manufacturer-component-clearance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install HS function and evidence model
+        run: python -m pip install -e '.[dev]'
+      - name: Run adversarial contract tests without fabricated physical acceptance
+        run: pytest -q tests/test_filter_assembly_gate.py
+      - name: Retrieve actual component and native OpenSCAD/trimesh evidence from upstream same-run job
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-filter-manufacturer-component-clearance-001
+          path: .cache/hs-filter-component-study
+      - name: Independently audit fit, bracket, service, hydraulic and certification interfaces
+        run: |
+          python scripts/audit_filter_assembly_interfaces_001.py \
+            --component-package .cache/hs-filter-component-study \
+            --assembly-interfaces examples/functionality/water_filter_assembly_interfaces_001.json \
+            --out .cache/hs-filter-assembly-interface-gate
+      - name: Verify all unresolved fit and measurement gates remain closed
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          root=Path(".cache/hs-filter-assembly-interface-gate")
+          receipt=json.loads((root/"ASSEMBLY_RECEIPT.json").read_text())
+          report=json.loads((root/"ASSEMBLY_GATE.json").read_text())
+          work=json.loads((root/"EVIDENCE_REQUESTS.json").read_text())
+          for name,details in receipt["files"].items():
+              raw=(root/name).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==details["sha256"]
+              assert len(raw)==details["bytes"]
+          assert report["source_spec_sha256"]==receipt["source_spec_sha256"]==work["source_spec_sha256"]
+          assert report["assembly_source_sha256"]==receipt["assembly_source_sha256"]==work["assembly_source_sha256"]
+          assert len(report["interface_evidence_gates"])==6
+          assert len(report["accessory_candidates"])==3
+          assert all(x["exact_sku_fit_tier"]=="NOT_VERIFIED" for x in report["accessory_candidates"])
+          assert len(work["evidence_requests"])==7
+          assert all(x["status"]=="AWAITING_INDEPENDENT_EVIDENCE" and x["measured_value"] is None for x in work["evidence_requests"])
+          assert report["outcome"]=="ASSEMBLY_DESIGN_BLOCKED_PENDING_EVIDENCE"
+          assert report["hydraulic_pressure_at_target_flow_psi"] is None
+          assert report["service_clearance"]["manufacturer_minimum_verified_mm"] is None
+          assert not report["sku_specific_certification_verified"]
+          assert not report["validated_cartridge_housing_seat_fit"]
+          assert not report["verified_accessory_fit"]
+          assert not any(report["physical_authority"].values())
+          assert not receipt["fabrication_authorized"] and not receipt["treatment_verified"]
+          print("Native source verified; accessory compatibility, hydraulics, certification and physical operations all blocked pending evidence.")
+      - name: Preserve versioned assembly interface graph and measurement requests
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-filter-assembly-interfaces-and-evidence-gates-001
+          path: .cache/hs-filter-assembly-interface-gate/
+          retention-days: 30
+          if-no-files-found: error
+
+  integrated-whole-product-sample:
+    needs: assembly-interface-readiness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install real OpenSCAD, headless product-renderer and mesh inspector
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends openscad xvfb fonts-liberation
+          python -m pip install -e '.[dev]' trimesh==4.8.3
+          openscad --version
+      - name: Independently test whole-device function, no-bypass, geometry, BOM and human-use gates
+        run: pytest -q tests/test_whole_product_sample.py
+      - name: Download the verified same-run assembly gate and source receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-filter-assembly-interfaces-and-evidence-gates-001
+          path: .cache/hs-filter-assembly-interface-gate
+      - name: Synthesize complete ClearBench S1 product-level digital prototype
+        run: |
+          python scripts/build_clearbench_product_001.py \
+            --assembly-package .cache/hs-filter-assembly-interface-gate \
+            --product examples/products/clearbench_s1_product.json \
+            --out .cache/clearbench-s1-product-sample
+      - name: Produce actual integrated product PNG and five independent native STL meshes
+        run: |
+          python scripts/render_clearbench_product_001.py \
+            --project .cache/clearbench-s1-product-sample
+      - name: Verify native product rendering, full functional bill of materials, and no physical release
+        shell: python
+        run: |
+          import hashlib,json
+          from pathlib import Path
+          p=Path(".cache/clearbench-s1-product-sample")
+          r=json.loads((p/"PRODUCT_RECEIPT.json").read_text())
+          report=json.loads((p/"PRODUCT_ARCHITECTURE.json").read_text())
+          render=json.loads((p/"PRODUCT_RENDER_EVIDENCE.json").read_text())
+          bom=json.loads((p/"PRODUCT_BOM.json").read_text())
+          flow=report["functional_flow_graph"]
+          for name,entry in r["files"].items():
+              raw=(p/name).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==entry["sha256"]
+              assert len(raw)==entry["bytes"]
+          assert r["product_spec_sha256"]==report["product_spec_sha256"]==render["product_spec_sha256"]
+          assert report["complete_visual_system_components_count"]==11
+          assert len(bom["items"])==11 and not bom["vendor_fully_qualified_bom"]
+          assert flow["every_symbolic_sample_path_traverses_filter"]
+          assert not flow["actual_hydraulic_connectivity_assembled"]
+          assert not any(report["physical_authority"].values())
+          assert render["complete_product_assembly_image"]["bytes"]>6000
+          assert len(render["independently_checked_native_geometry"])==5
+          for record in render["independently_checked_native_geometry"].values():
+              data=(p/record["file"]).read_bytes()
+              assert len(data)==record["bytes"]
+              assert hashlib.sha256(data).hexdigest()==record["sha256"]
+              assert record["watertight"] and record["winding_consistent"]
+          assert report["release_tier"]=="DIGITAL_PRODUCT_DEMONSTRATOR_ONLY"
+          assert not render["native_pressure_containment_created"]
+          assert not render["product_build_ready"]
+          print("COMPLETE PRODUCT-LEVEL DIGITAL DEMONSTRATOR VERIFIED. Physical filtration, mounting, safety and release remain blocked.")
+      - name: Publish reviewable product image, native CAD, complete BOM and product acceptance reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample/
+          retention-days: 30
+          if-no-files-found: error
+
+  interactive-product-and-disassembly-backends:
+    needs: integrated-whole-product-sample
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BLUEPRINT_COMMIT: 421c659ccbc0cad8e2343c0238e7a78e0422e46a
+      DECAD_COMMIT: 0c748e5b73810c18cee5ac187a9fb63feb16235c
+      PUPPETEER_SKIP_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS Python and execute fail-closed interoperability unit tests
+        run: |
+          python -m pip install -e '.[dev]'
+          pytest -q tests/test_product_ecosystem_bridge.py
+      - name: Download actual assembled product source, native CAD and approval receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - name: Export exact product revision into two external tool native schemas
+        run: |
+          python scripts/export_product_ecosystem_001.py \
+            --product-package .cache/clearbench-s1-product-sample \
+            --out .cache/hs-product-ecosystem
+      - name: Checkout exact third-party source revisions and install offline HTML builder
+        run: |
+          git clone --quiet https://github.com/lubocsu/blueprint-3d-sheet.git .cache/blueprint3d-upstream
+          git -C .cache/blueprint3d-upstream checkout --quiet --detach "$BLUEPRINT_COMMIT"
+          test "$(git -C .cache/blueprint3d-upstream rev-parse HEAD)" = "$BLUEPRINT_COMMIT"
+          npm --prefix .cache/blueprint3d-upstream ci --no-audit --no-fund
+      - name: Actually execute blueprint-3d-sheet validate and offline HTML build
+        run: |
+          node .cache/blueprint3d-upstream/bin/b2d.mjs validate \
+            .cache/hs-product-ecosystem/BLUEPRINT_ASSEMBLY_SPEC.json
+          node .cache/blueprint3d-upstream/bin/b2d.mjs build \
+            .cache/hs-product-ecosystem/BLUEPRINT_ASSEMBLY_SPEC.json \
+            --out .cache/hs-product-ecosystem/interactive
+          test -s .cache/hs-product-ecosystem/interactive/index.html
+      - name: Install pinned DeCAD implementation and run true OD-BOM schema validator
+        run: |
+          python -m pip install "git+https://github.com/daikiito-dk/DeCAD.git@$DECAD_COMMIT"
+          decad validate .cache/hs-product-ecosystem/DECAD_CONCEPT_ODBOM.json | \
+            tee .cache/hs-product-ecosystem/DECAD_VALIDATION.txt
+          decad summary .cache/hs-product-ecosystem/DECAD_CONCEPT_ODBOM.json > \
+            .cache/hs-product-ecosystem/DECAD_SUMMARY.txt
+      - name: Verify both executed outputs, immutable source and no false engineering promotion
+        run: |
+          python scripts/verify_product_ecosystem_execution_001.py \
+            --out .cache/hs-product-ecosystem \
+            --blueprint-sha "$BLUEPRINT_COMMIT" \
+            --decad-sha "$DECAD_COMMIT"
+      - name: Publish real offline interactive product, DeCAD OD-BOM and backend status
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-clearbench-ecosystem-visual-disassembly-001
+          path: .cache/hs-product-ecosystem/
+          retention-days: 30
+          if-no-files-found: error
+
+  cadclaw-native-dry-step-assembly:
+    needs: integrated-whole-product-sample
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CADCLAW_COMMIT: d6d371b154abfa011f843ede9f6d150119ef42c4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install official pinned CADCLAW assembly engine and real CadQuery STEP writer
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m pip install "git+https://github.com/sunnyday-technologies/CADCLAW.git@$CADCLAW_COMMIT"
+          cadclaw --help
+      - name: Retrieve the already rendered full HS product and source receipts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - name: Author real dry stand/component STEP sources from product data
+        run: |
+          python scripts/compile_cadclaw_dry_assembly_001.py \
+            --product-package .cache/clearbench-s1-product-sample \
+            --out .cache/hs-cadclaw-dry-product
+      - name: Validate real CADCLAW schema and solve/build native STEP constraint assembly
+        run: |
+          set +e
+          cadclaw assemble validate-spec .cache/hs-cadclaw-dry-product/assembly.yaml \
+            > .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log 2>&1
+          validation_exit=$?
+          set -e
+          cat .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log
+          # CADCLAW returns 2 for the six *deliberate release blockers*,
+          # despite reporting zero schema/engineering validation failures.
+          # Demand exact evidence of 6 flagged blockers, otherwise fail closed.
+          test "$validation_exit" -eq 2
+          grep -Fq "0 pass, 6 warn, 0 fail. overall: WARN" \
+            .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log
+          test "$(grep -c assemble.not_built_yet .cache/hs-cadclaw-dry-product/CADCLAW_VALIDATION.log)" -eq 6
+          set +e
+          cadclaw assemble build .cache/hs-cadclaw-dry-product/assembly.yaml \
+            > .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log 2>&1
+          build_exit=$?
+          set -e
+          cat .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log
+          # A native STEP may be generated while CADCLAW correctly returns WARN/2.
+          # Accept only the six real release blockers plus two floating concept
+          # components with no joint frames. Any FAIL, other warning or absent
+          # STEP is an engineering failure, not a tolerated warning.
+          test "$build_exit" -eq 2
+          grep -Fq "0 pass, 8 warn, 0 fail. overall: WARN" \
+            .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log
+          test "$(grep -c assemble.not_built_yet .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log)" -eq 6
+          test "$(grep -c assemble.connector_metadata_missing .cache/hs-cadclaw-dry-product/CADCLAW_BUILD.log)" -eq 2
+          test -s .cache/hs-cadclaw-dry-product/clearbench_s1_dry_reference.step
+      - name: Independently check actual CadQuery STEP parts and CADCLAW assembly placement
+        run: |
+          python scripts/verify_cadclaw_dry_assembly_001.py \
+            --assembly .cache/hs-cadclaw-dry-product
+      - name: Retain exact STEP parts, native assembly, constraint metadata and fail-closed receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product/
+          if-no-files-found: error
+          retention-days: 30
+
+  multicad-native-build123d-partcad:
+    needs: cadclaw-native-dry-step-assembly
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      PC_OFFLINE: "true"
+      PC_TELEMETRY_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install native CAD authors and independent STEP importer
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m pip install "build123d==0.10.0" "cadquery==2.6.1" "ocp_gordon==0.1.18" "PyYAML>=6,<7"
+          python -c "import build123d,cadquery; print('native CAD imports OK')"
+      - name: Reject source tampering and forged build / manufacturer claims
+        run: pytest -q tests/test_multicad_toolchain.py
+      - name: Retrieve exact product and CADCLAW original same-run STEP sources
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-clearbench-s1-complete-product-sample-001
+          path: .cache/clearbench-s1-product-sample
+      - uses: actions/download-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product
+      - name: Actually author new STEP solids in build123d and cross-check original CadQuery STEP
+        run: |
+          python scripts/export_multicad_parts_001.py \
+            --product .cache/clearbench-s1-product-sample \
+            --cadclaw .cache/hs-cadclaw-dry-product \
+            --out .cache/hs-multicad-parts
+      - name: Independently verify hashes, native geometry evidence and native PartCAD schema
+        shell: python
+        run: |
+          import json,hashlib,yaml
+          from pathlib import Path
+          from hardware_splicer.multicad_toolchain import check_native_outputs
+          root=Path(".cache/hs-multicad-parts")
+          evidence=check_native_outputs(root)
+          package=yaml.safe_load((root/"partcad/partcad.yaml").read_text())
+          assert len(evidence["parts"])==4
+          assert set(package["parts"])=={p["id"] for p in evidence["parts"]}
+          assert all(p["type"]=="step" and p["path"]=="parts/"+ident+".step"
+                     for ident,p in package["parts"].items())
+          assert not evidence["partcad_cli_executed"]
+          assert not evidence["physical_release_authorized"]
+          print("build123d/CadQuery native cross-check passed; PartCAD runtime NOT YET executed.")
+      - name: Install PartCAD 0.8.273 package manager in isolated environment
+        run: |
+          python -m pip install "partcad==0.8.273"
+          pc version
+      - name: Actually parse published STEP package with native PartCAD CLI
+        run: |
+          pc -p .cache/hs-multicad-parts/partcad list parts > .cache/hs-multicad-parts/PARTCAD_CLI.log 2>&1
+          cat .cache/hs-multicad-parts/PARTCAD_CLI.log
+          python scripts/verify_multicad_partcad_001.py \
+            --project .cache/hs-multicad-parts \
+            --cli-log .cache/hs-multicad-parts/PARTCAD_CLI.log
+      - name: Preserve truly source-bound CadQuery/build123d native STEP files and PartCAD execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-multicad-build123d-partcad-native-001
+          path: .cache/hs-multicad-parts/
+          retention-days: 30
+          if-no-files-found: warn
+
+  teardown-native-machine-visualization:
+    needs: multicad-native-build123d-partcad
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      TEARDOWN_COMMIT: a91262ac1109051e014662d42ecb0b7bc1f113b1
+      TEARDOWN_OUT: .cache/hs-teardown-product
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS manifest verifier and execute adversarial Teardown contract tests
+        run: |
+          python -m pip install -e '.[dev]'
+          pytest -q tests/test_teardown_product.py tests/test_teardown_cad_mesh.py
+      - name: Download actual independently built native STEP and PartCAD execution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-multicad-build123d-partcad-native-001
+          path: .cache/hs-multicad-parts
+      - name: Generate source-bound interactive machine input from validated native tools
+        run: |
+          python scripts/export_teardown_product_001.py \
+            --multicad .cache/hs-multicad-parts \
+            --out .cache/hs-teardown-product
+      - name: Download actual CADCLAW native assembled STEP geometry
+        uses: actions/download-artifact@v4
+        with:
+          name: hs-cadclaw-clearbench-dry-native-step-assembly-001
+          path: .cache/hs-cadclaw-dry-product
+      - name: Independently tessellate assembled native STEP into source-identified GLB solids
+        run: |
+          python -m pip install "cadquery==2.6.1" "trimesh==4.8.3" "numpy<3"
+          python scripts/build_teardown_cad_mesh_001.py \
+            --multicad .cache/hs-multicad-parts \
+            --cadclaw .cache/hs-cadclaw-dry-product \
+            --output .cache/hs-teardown-product/machine
+          test -s .cache/hs-teardown-product/machine/machine.glb
+      - name: Clone exact Teardown upstream and install its locked native bundler/runtime
+        run: |
+          git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream
+          git -C .cache/teardown-upstream checkout --quiet --detach "$TEARDOWN_COMMIT"
+          test "$(git -C .cache/teardown-upstream rev-parse HEAD)" = "$TEARDOWN_COMMIT"
+          npm --prefix .cache/teardown-upstream ci --no-audit --no-fund
+      - name: Actually build Teardown offline HTML using upstream's native bundler
+        run: |
+          node .cache/teardown-upstream/sims/build.mjs \
+            .cache/hs-teardown-product/machine
+          test -s .cache/hs-teardown-product/dist/machine.html
+      - name: Install pinned upstream Playwright browser
+        run: |
+          cd .cache/teardown-upstream
+          npx playwright install --with-deps chromium
+      - name: Execute actual headless Chromium controls, 3D frame and screenshot
+        run: |
+          node scripts/verify_teardown_browser_001.mjs \
+            .cache/teardown-upstream \
+            .cache/hs-teardown-product/dist/machine.html \
+            .cache/hs-teardown-product
+      - name: Recheck native HTML, browser execution, hashes and physical authority
+        run: |
+          python scripts/verify_teardown_acceptance_001.py \
+            --product .cache/hs-teardown-product
+      - name: Package evidence-qualified offline machine into the existing HS React frontend
+        run: |
+          python scripts/package_teardown_showcase_001.py \
+            --source .cache/hs-teardown-product \
+            --public apps/splice-ui/public/showcase
+          npm --prefix apps/splice-ui ci --no-audit --no-fund
+          npm --prefix apps/splice-ui run test -- src/components/ProductShowcase.test.jsx src/App.integration.test.jsx
+          npm --prefix apps/splice-ui run build
+          test -s apps/splice-ui/dist/showcase/machine.html
+          test -s apps/splice-ui/dist/showcase/manifest.json
+      - name: Open actual React frontend and interact with embedded Teardown in Chromium
+        run: |
+          npm --prefix apps/splice-ui run preview -- --host 127.0.0.1 --port 4173 \
+            > .cache/hs-teardown-product/FRONTEND_VITE.log 2>&1 &
+          node scripts/verify_frontend_showcase_browser_001.mjs \
+            .cache/teardown-upstream \
+            http://127.0.0.1:4173/
+      - name: Preserve native HS React showcase including verified offline CAD explorer
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-react-teardown-public-showcase-001
+          path: apps/splice-ui/dist/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve native standalone HTML, browser screenshot and exact source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-teardown-native-interactive-machine-001
+          path: .cache/hs-teardown-product/
+          retention-days: 30
+          if-no-files-found: warn
