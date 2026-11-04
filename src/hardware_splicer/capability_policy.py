@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .capability_runtime import capability_report
+from .github_signal_pipeline import registry_row
 
 _OPTIONAL_SPECIALISTS = {
     "cadquery-isolated",
@@ -36,6 +37,14 @@ def product_capability_report(
                 "Install and configure this specialist only when the current project "
                 "requires generated mechanical output."
             )
+
+    # Externally acquired tools are optional until a real, hash-matching
+    # sandbox execution artifact proves project use. Merely discovering a
+    # repository must never upgrade HS capability status.
+    signal = registry_row(build_dir)
+    if signal is not None:
+        payload["capabilities"].append(signal)
+        payload["capabilities"].sort(key=lambda r: str(r.get("id")))
 
     required_missing = sorted(
         str(row.get("id"))
