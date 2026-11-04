@@ -26,6 +26,9 @@ ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9][A-Za-z0-9._
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 ADAPTERS = {
     "tipoLi5890/akcli": {
+        # Exact approved source revision, not arbitrary future upstream HEAD.
+        # Upgrades need a fresh engineering/security review and new tests.
+        "approved_commit_sha": "2126c328402fa77f8f6bf2114f052595f86f14aa",
         "capability_id": "signal-akcli-schematic-review",
         "name": "akcli external schematic analysis",
         "layer": "electrical",
@@ -71,15 +74,18 @@ def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:
         if repo.lower() in seen:
             raise SignalEvaluationError("duplicate repository entries")
         seen.add(repo.lower())
-        # Feed-provided licenses are metadata, NOT permission to run. The
-        # checked-out LICENSE must also independently match our approved set.
+        # Feed-provided licenses are metadata, NOT permission to run. Both
+        # the reviewed repository and its *exact* approved commit are required.
+        # Any newer upstream revision stays discovery-only until reviewed.
+        adapter = ADAPTERS.get(repo)
+        admitted = bool(adapter and revision == adapter["approved_commit_sha"])
         out.append({
             "repository": repo, "commit_sha": revision,
             "license_claim": str(record.get("license_spdx_id", "UNKNOWN")),
             "url": "https://github.com/" + repo,
             "discovery_source": source,
-            "discovered_only": repo not in ADAPTERS,
-            "adapter_id": ADAPTERS.get(repo, {}).get("capability_id"),
+            "discovered_only": not admitted,
+            "adapter_id": adapter.get("capability_id") if admitted else None,
         })
     return out
 
@@ -89,6 +95,8 @@ def acquire_pinned_repo(candidate: Mapping[str, Any], checkout: Path, *, fetch: 
     revision = str(candidate["commit_sha"])
     if repo not in ADAPTERS:
         raise SignalEvaluationError("no reviewed adapter for this repository")
+    if revision != ADAPTERS[repo]["approved_commit_sha"]:
+        raise SignalEvaluationError("source revision not approved for this adapter")
     if not SHA_PATTERN.fullmatch(revision):
         raise SignalEvaluationError("invalid source revision")
     if fetch:
@@ -195,13 +203,13 @@ def evaluate_signals(
     """
     candidates = normalize_feed(feed)
     evaluations: list[dict[str, Any]] = []
-    approved = [c for c in candidates if c["repository"] in ADAPTERS]
+    approved = [c for c in candidates if not c["discovered_only"]]
     output_dir.mkdir(parents=True, exist_ok=True)
     for candidate in candidates:
-        if candidate["repository"] not in ADAPTERS:
+        if candidate["discovered_only"]:
             evaluations.append({
                 **candidate, "state": "discovered_only",
-                "executed": False, "reason": "No reviewed executable adapter",
+                "executed": False, "reason": "No approved repo/adapter/revision pair",
             })
     if not approved:
         payload = {
@@ -312,13 +320,27 @@ def registry_row(build_dir: Path | str | None) -> dict[str, Any] | None:
             return None
         if cap["id"] != "signal-akcli-schematic-review":
             return None
+        if (
+            cap.get("repository") != "tipoLi5890/akcli"
+            or cap.get("pinned_revision") != ADAPTERS["tipoLi5890/akcli"]["approved_commit_sha"]
+            or cap.get("license") != "MIT"
+            or cap.get("machine_tested") is not True
+            or cap.get("native_upstream_executed") is not True
+            or cap.get("fabrication_authorized") is not False
+            or not re.fullmatch(r"[0-9a-f]{64}", str(cap.get("input_sha256", "")))
+        ):
+            return None
         file = root / cap["diagnostics_file"]
         if file.resolve().parent != root.resolve():
             return None
         if sha256_file(file) != cap["diagnostics_sha256"]:
             return None
         findings = json.loads(file.read_text())["findings"]
-        if len(findings) != cap["finding_count"]:
+        if (
+            len(findings) != cap["finding_count"]
+            or dict(sorted(Counter(x["severity"] for x in findings).items()))
+            != cap.get("findings")
+        ):
             return None
     except (OSError, ValueError, KeyError, TypeError):
         return None

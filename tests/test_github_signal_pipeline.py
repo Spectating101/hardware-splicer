@@ -10,6 +10,7 @@ import pytest
 
 from hardware_splicer.github_signal_pipeline import (
     SCHEMA,
+    ADAPTERS,
     SignalEvaluationError,
     _bwrap_args,
     evaluate_signals,
@@ -30,7 +31,7 @@ def _feed(repo="tipoLi5890/akcli", sha="a" * 40, license="MIT"):
     }
 
 
-def _checkout(tmp_path):
+def _checkout(tmp_path, monkeypatch):
     repo = tmp_path / "akcli"
     (repo / "src" / "akcli").mkdir(parents=True)
     (repo / "src" / "akcli" / "__main__.py").write_text("# fixture\n")
@@ -43,6 +44,7 @@ def _checkout(tmp_path):
         ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
         capture_output=True, text=True,
     ).stdout.strip()
+    monkeypatch.setitem(ADAPTERS["tipoLi5890/akcli"], "approved_commit_sha", sha)
     return repo, sha
 
 
@@ -78,7 +80,19 @@ def test_duplicate_repo_names_rejected():
         normalize_feed(feed)
 
 
-def test_unknown_candidate_discovered_not_run(tmp_path):
+def test_known_repository_at_unapproved_upstream_revision_is_not_executable(tmp_path):
+    feed = _feed(sha="b" * 40)
+    evaluated = evaluate_signals(
+        feed, checkout=tmp_path / "no_checkout",
+        schematic=tmp_path / "not_a_real_design.kicad_sch",
+        output_dir=tmp_path / "output",
+    )
+    assert evaluated["ok"] is False
+    assert evaluated["candidates"][0]["state"] == "discovered_only"
+    assert evaluated["candidates"][0]["adapter_id"] is None
+
+
+def test_unknown_candidate_discovered_not_run(tmp_path, monkeypatch):
     r = evaluate_signals(
         _feed(repo="0x12net/kdif"),
         checkout=tmp_path / "absent",
@@ -91,17 +105,21 @@ def test_unknown_candidate_discovered_not_run(tmp_path):
     assert registry_row(tmp_path / "out") is None
 
 
-def test_existing_checkout_wrong_pin_rejected_before_tool_call(tmp_path):
-    repo, sha = _checkout(tmp_path)
+def test_existing_checkout_wrong_pin_rejected_before_tool_call(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
-    with pytest.raises(SignalEvaluationError, match="SHA differs"):
-        evaluate_signals(_feed(sha="a" * 40), checkout=repo,
-                         schematic=schematic, output_dir=tmp_path / "out")
+    result = evaluate_signals(
+        _feed(sha="a" * 40), checkout=repo,
+        schematic=schematic, output_dir=tmp_path / "out",
+    )
+    assert result["ok"] is False
+    assert result["candidates"][0]["state"] == "discovered_only"
+    assert registry_row(tmp_path / "out") is None
 
 
-def test_pin_is_not_enough_if_checkout_source_has_been_modified(tmp_path):
-    repo, sha = _checkout(tmp_path)
+def test_pin_is_not_enough_if_checkout_source_has_been_modified(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
     (repo / "src" / "akcli" / "__main__.py").write_text("print('malicious')\n")
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
@@ -110,8 +128,8 @@ def test_pin_is_not_enough_if_checkout_source_has_been_modified(tmp_path):
                          schematic=schematic, output_dir=tmp_path / "out")
 
 
-def test_untracked_injection_rejected(tmp_path):
-    repo, sha = _checkout(tmp_path)
+def test_untracked_injection_rejected(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
     (repo / "src" / "akcli" / "injected.py").write_text("# injection")
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
@@ -120,8 +138,8 @@ def test_untracked_injection_rejected(tmp_path):
                          schematic=schematic, output_dir=tmp_path / "out")
 
 
-def test_license_claim_not_sufficient_without_local_approved_license(tmp_path):
-    repo, sha = _checkout(tmp_path)
+def test_license_claim_not_sufficient_without_local_approved_license(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
     (repo / "LICENSE").write_text("Proprietary all rights reserved\n")
     subprocess.run(["git", "-C", str(repo), "add", "LICENSE"], check=True)
     subprocess.run(["git", "-C", str(repo), "-c", "user.name=Test",
@@ -131,6 +149,7 @@ def test_license_claim_not_sufficient_without_local_approved_license(tmp_path):
         ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
         capture_output=True, text=True,
     ).stdout.strip()
+    monkeypatch.setitem(ADAPTERS["tipoLi5890/akcli"], "approved_commit_sha", sha)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
     with pytest.raises(SignalEvaluationError, match="license not independently"):
@@ -138,8 +157,8 @@ def test_license_claim_not_sufficient_without_local_approved_license(tmp_path):
                          schematic=schematic, output_dir=tmp_path / "out")
 
 
-def test_metadata_license_spoof_rejected(tmp_path):
-    repo, sha = _checkout(tmp_path)
+def test_metadata_license_spoof_rejected(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
     with pytest.raises(SignalEvaluationError, match="metadata inconsistent"):
@@ -175,7 +194,7 @@ def test_bwrap_missing_rejects_unsafe_fallback(monkeypatch, tmp_path):
 
 
 def test_native_execution_is_real_evidence_and_registry_requires_hash(tmp_path, monkeypatch):
-    repo, sha = _checkout(tmp_path)
+    repo, sha = _checkout(tmp_path, monkeypatch)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch (version 20231120))")
     monkeypatch.setattr(
@@ -225,7 +244,7 @@ def test_native_execution_is_real_evidence_and_registry_requires_hash(tmp_path, 
 
 
 def test_failed_native_tool_does_not_register_success(tmp_path, monkeypatch):
-    repo, sha = _checkout(tmp_path)
+    repo, sha = _checkout(tmp_path, monkeypatch)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
     monkeypatch.setattr(
@@ -245,7 +264,7 @@ def test_failed_native_tool_does_not_register_success(tmp_path, monkeypatch):
 
 
 def test_malicious_output_not_imported_into_registry(tmp_path, monkeypatch):
-    repo, sha = _checkout(tmp_path)
+    repo, sha = _checkout(tmp_path, monkeypatch)
     schematic = tmp_path / "fixture.kicad_sch"
     schematic.write_text("(kicad_sch)")
     monkeypatch.setattr(
