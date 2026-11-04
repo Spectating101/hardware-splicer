@@ -1,0 +1,20 @@
+{
+  "schema_version": "hardware_splicer.github_signal_feed.v1",
+  "source": "github_repository_search",
+  "discovery_query": "opensource engineering KiCad schematic review and visual diff tool",
+  "description": "Two independently discovered repos. Metadata from GitHub REST; only repo-approved adapter may be executed.",
+  "candidates": [
+    {
+      "repository": "tipoLi5890/akcli",
+      "commit_sha": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "license_spdx_id": "MIT",
+      "intent": "Independent read-only schematic review on existing HS KiCad adapter"
+    },
+    {
+      "repository": "0x12net/kdif",
+      "commit_sha": "1de14f9bbfe37ef291b929c52532419d1a14f0e6",
+      "license_spdx_id": "MIT",
+      "intent": "Independent KiCad visual revision diff; no reviewed adapter yet"
+    }
+  ]
+}

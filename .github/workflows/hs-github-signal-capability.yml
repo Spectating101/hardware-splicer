@@ -1,0 +1,62 @@
+name: HS GitHub Signal → Native Engineering Tool
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/github_signal_pipeline.py"
+      - "src/hardware_splicer/capability_policy.py"
+      - "tests/test_github_signal_pipeline.py"
+      - "scripts/evaluate_github_signal_tool.py"
+      - "examples/github_signals/**"
+      - ".github/workflows/hs-github-signal-capability.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  intake-unit-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Verify signal trust, pin, sandbox and registry gates
+        run: python -m pytest -q tests/test_github_signal_pipeline.py tests/test_capability_policy.py tests/test_capability_runtime.py
+
+  native-reviewed-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS runtime dependencies before importing its capability registry
+        run: python -m pip install -e .
+      - name: Pre-pull approved immutable Python container
+        run: docker pull python@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c
+      - name: Run one genuine approved repo against real HS schematic
+        run: |
+          python scripts/evaluate_github_signal_tool.py \
+            --feed examples/github_signals/live_reviewed_candidates_20261105.json \
+            --schematic hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_sch \
+            --checkout "$RUNNER_TEMP/hs-approved-akcli" \
+            --out build_compilation/github_signals_akcli --fetch --sandbox docker
+      - name: Prove canonical HS capability registry sees project use
+        run: |
+          # The canonical report exits 2 if unrelated base HS tools are
+          # missing on this runner. Preserve that status in the JSON, while
+          # gating this job on the newly acquired external specialist.
+          PYTHONPATH=src python -m scripts.report_capabilities \
+            --build-dir build_compilation/github_signals_akcli \
+            > build_compilation/github_signals_akcli/HS_CAPABILITIES.json || test "$?" -eq 2
+          python -c 'import json; p=json.load(open("build_compilation/github_signals_akcli/HS_CAPABILITIES.json")); rows=[x for x in p["capabilities"] if x["id"]=="signal-akcli-schematic-review"]; assert len(rows)==1 and rows[0]["readiness"]=="project_used"; print("BASE_REQUIRED_MISSING",p["required_missing"]); print("HS_SIGNAL_REVIEWER_SOURCE_NATIVE_PROVEN")'
+      - name: Preserve execution data, not just pass count
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-GITHUB-SIGNAL-PINNED-AKCLI-REAL-SCHEMATIC-REVIEW
+          path: build_compilation/github_signals_akcli/
+          if-no-files-found: error
+          retention-days: 60
