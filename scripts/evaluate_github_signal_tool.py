@@ -31,12 +31,15 @@ def main() -> int:
                    help="Project-scoped capability artifacts")
     p.add_argument("--fetch", action="store_true",
                    help="Clone only pre-approved GitHub repo into empty checkout")
+    p.add_argument("--sandbox", choices=("bwrap", "docker"), default="bwrap",
+                   help="Explicit isolated runner. Docker requires pre-pulled image.")
     args = p.parse_args()
     try:
         verdict = evaluate_signals(
             json.loads(args.feed.read_text(encoding="utf-8")),
             checkout=args.checkout, schematic=args.schematic,
             output_dir=args.out, fetch=args.fetch,
+            sandbox_backend=args.sandbox,
         )
     except (OSError, ValueError, SignalEvaluationError) as error:
         print(json.dumps({"ok": False, "error": str(error)}, indent=2))

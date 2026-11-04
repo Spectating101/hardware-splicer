@@ -22,6 +22,11 @@ from pathlib import Path
 from typing import Any, Mapping
 
 SCHEMA = "hardware_splicer.github_signal_capability.v1"
+# Digest, not a mutable tag. Pull explicitly before execution; do not allow
+# Docker to fetch or switch images during the tool invocation.
+DOCKER_IMAGE = (
+    "python@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c"
+)
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 ADAPTERS = {
@@ -185,6 +190,36 @@ def _bwrap_args(checkout: Path, schematic: Path) -> list[str]:
     ]
 
 
+def _docker_args(checkout: Path, schematic: Path) -> list[str]:
+    """Docker-based isolated execution for hosts that prohibit bwrap netns.
+
+    No automatic bwrap->Docker fallback. An authorized operator must select
+    Docker, arrange for the pinned image to be pre-pulled, and accept the host's
+    local Docker-daemon trust boundary.
+    """
+    executable = shutil.which("docker")
+    if not executable:
+        raise SignalEvaluationError("docker required; refusing unsandboxed run")
+    source = str(checkout.resolve())
+    design = str(schematic.resolve())
+    if ":" in source or ":" in design:
+        raise SignalEvaluationError("colon in source path not supported for Docker mounts")
+    return [
+        executable, "run", "--rm", "--pull=never",
+        "--network=none", "--read-only", "--cap-drop=ALL",
+        "--security-opt=no-new-privileges", "--pids-limit=64",
+        "--memory=512m", "--cpus=1",
+        "--user", f"{os.getuid()}:{os.getgid()}",
+        "--tmpfs", "/tmp:rw,nosuid,noexec,size=64m",
+        "--volume", source + ":/opt/akcli:ro",
+        "--volume", design + ":/input.kicad_sch:ro",
+        "--workdir", "/opt/akcli",
+        "--env", "PYTHONPATH=/opt/akcli/src",
+        DOCKER_IMAGE, "python", "-B", "-m", "akcli",
+        "check", "/input.kicad_sch", "--format", "json", "--fail-on", "never",
+    ]
+
+
 def evaluate_signals(
     feed: Mapping[str, Any],
     *,
@@ -193,6 +228,7 @@ def evaluate_signals(
     output_dir: Path,
     fetch: bool = False,
     run_fn: Any = None,
+    sandbox_backend: str = "bwrap",
 ) -> dict[str, Any]:
     """Evaluate one known compatible candidate, inventory all other signals.
 
@@ -229,8 +265,14 @@ def evaluate_signals(
         raise SignalEvaluationError("only existing KiCad .kicad_sch inputs supported")
     if schematic.stat().st_size > 12 * 1024 * 1024:
         raise SignalEvaluationError("schematic larger than declared 12 MiB bound")
+    if sandbox_backend not in {"bwrap", "docker"}:
+        raise SignalEvaluationError("unsupported sandbox backend; refusing host execution")
     pinned = acquire_pinned_repo(candidate, checkout, fetch=fetch)
-    command = _bwrap_args(pinned, schematic)
+    command = (
+        _bwrap_args(pinned, schematic)
+        if sandbox_backend == "bwrap"
+        else _docker_args(pinned, schematic)
+    )
     runner = run_fn or subprocess.run
     result = runner(
         command, check=False, capture_output=True, text=True,
@@ -281,6 +323,7 @@ def evaluate_signals(
         "source_pin_checked": True, "compatible_input": True,
         "machine_tested": True, "project_used": True,
         "native_upstream_executed": True,
+        "sandbox_backend": sandbox_backend,
         "execution_isolated_from_network": True,
         "read_only_tool_invocation": True,
         "electrical_correctness_verified": False,
@@ -326,6 +369,7 @@ def registry_row(build_dir: Path | str | None) -> dict[str, Any] | None:
             or cap.get("license") != "MIT"
             or cap.get("machine_tested") is not True
             or cap.get("native_upstream_executed") is not True
+            or cap.get("sandbox_backend") not in {"bwrap", "docker"}
             or cap.get("fabrication_authorized") is not False
             or not re.fullmatch(r"[0-9a-f]{64}", str(cap.get("input_sha256", "")))
         ):

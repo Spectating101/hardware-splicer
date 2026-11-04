@@ -35,15 +35,15 @@ jobs:
           python-version: "3.12"
       - name: Install HS runtime dependencies before importing its capability registry
         run: python -m pip install -e .
-      - name: Enable bubblewrap isolated read-only runtime
-        run: sudo apt-get update -qq && sudo apt-get install -y bubblewrap
+      - name: Pre-pull approved immutable Python container
+        run: docker pull python@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c
       - name: Run one genuine approved repo against real HS schematic
         run: |
           python scripts/evaluate_github_signal_tool.py \
             --feed examples/github_signals/live_reviewed_candidates_20261105.json \
             --schematic hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_sch \
             --checkout "$RUNNER_TEMP/hs-approved-akcli" \
-            --out build_compilation/github_signals_akcli --fetch
+            --out build_compilation/github_signals_akcli --fetch --sandbox docker
       - name: Prove canonical HS capability registry sees project use
         run: |
           PYTHONPATH=src python -m scripts.report_capabilities \

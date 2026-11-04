@@ -42,12 +42,26 @@ Linux with git, Python ≥3.12 and bubblewrap (bwrap):
     PYTHONPATH=src python3 -m scripts.report_capabilities \
       --build-dir /tmp/hs-github-signals/out
 
-The importer checks the pinned full git SHA and reads the actual checked-out MIT
-license. It does **not** run a pip postinstall script or arbitrary shell. It
-passes the read-only schematic and the checkout to bubblewrap with
---unshare-net, read-only mounts, sanitized environment, no user home, and a
-75s execution limit. Bubblewrap is a Linux isolation boundary, **not**
-virtual-machine-level malicious-code isolation. Approval remains mandatory.
+The importer checks the exact **approved**, full Git SHA, verifies the
+checkout is clean, and independently inspects the checked-out MIT license.
+It does **not** run pip postinstall scripts or arbitrary user-specified commands.
+
+Two explicit, fail-closed Linux execution backends are supported:
+- Default: bubblewrap with --unshare-net, read-only mounts, sanitized environment
+  and no user home.
+- CI-compatible: Docker with a pinned Python image digest, --pull=never,
+  --network=none, --read-only, --cap-drop=ALL, --security-opt=no-new-privileges,
+  process/memory/CPU ceilings, and **only** read-only source/input volumes.
+  Pre-pull the approved image from the administrator-controlled environment,
+  then add --sandbox docker to the evaluation command. There is no automatic
+  fallback from bubblewrap to Docker or to the host process.
+
+The Docker version has been executed on the Optiplex with identical 27 findings;
+GitHub's hosted runner disallows bubblewrap's requested network namespace in
+its environment, so the CI job explicitly selects Docker instead. Docker daemon
+access and container/kernel escape remain trusted-host considerations; this
+does **not** provide VM-grade isolation for malicious repositories.
+The host **must** approve the exact repository/revision and adapter.
 
 Machine output:
 

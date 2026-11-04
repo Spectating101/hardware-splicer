@@ -13,6 +13,8 @@ from hardware_splicer.github_signal_pipeline import (
     ADAPTERS,
     SignalEvaluationError,
     _bwrap_args,
+    _docker_args,
+    DOCKER_IMAGE,
     evaluate_signals,
     normalize_feed,
     registry_row,
@@ -284,4 +286,80 @@ def test_malicious_output_not_imported_into_registry(tmp_path, monkeypatch):
             _feed(sha=sha), checkout=repo, schematic=schematic,
             output_dir=tmp_path / "out", run_fn=malicious,
         )
+    assert registry_row(tmp_path / "out") is None
+
+def test_docker_native_sandbox_is_explicit_readonly_and_no_network(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "hardware_splicer.github_signal_pipeline.shutil.which",
+        lambda x: "/usr/bin/docker" if x == "docker" else None,
+    )
+    argv = _docker_args(tmp_path / "repo", tmp_path / "board.kicad_sch")
+    assert argv[0] == "/usr/bin/docker"
+    assert argv[1:3] == ["run", "--rm"]
+    assert "--pull=never" in argv
+    assert "--network=none" in argv
+    assert "--read-only" in argv
+    assert "--cap-drop=ALL" in argv
+    assert "--security-opt=no-new-privileges" in argv
+    assert "--pids-limit=64" in argv
+    assert "--memory=512m" in argv
+    assert "--user" in argv
+    assert "--volume" in argv
+    assert DOCKER_IMAGE in argv
+    assert argv[-7:] == ["-m", "akcli", "check", "/input.kicad_sch", "--format", "json", "--fail-on", "never"][-7:]
+    assert "privileged" not in " ".join(argv)
+    assert all(not value.endswith(":rw") for value in argv)
+
+
+def test_docker_missing_never_invokes_unsandboxed_python(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "hardware_splicer.github_signal_pipeline.shutil.which",
+        lambda _: None,
+    )
+    with pytest.raises(SignalEvaluationError, match="refusing unsandboxed"):
+        _docker_args(tmp_path / "repo", tmp_path / "board.kicad_sch")
+
+
+def test_invalid_selected_sandbox_rejected_before_execution(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
+    schematic = tmp_path / "board.kicad_sch"
+    schematic.write_text("(kicad_sch)")
+    with pytest.raises(SignalEvaluationError, match="unsupported sandbox"):
+        evaluate_signals(
+            _feed(sha=sha), checkout=repo, schematic=schematic,
+            output_dir=tmp_path / "out", sandbox_backend="host",
+        )
+    assert registry_row(tmp_path / "out") is None
+
+
+def test_explicit_docker_backend_real_tool_response_importable(tmp_path, monkeypatch):
+    repo, sha = _checkout(tmp_path, monkeypatch)
+    schematic = tmp_path / "board.kicad_sch"
+    schematic.write_text("(kicad_sch)")
+    monkeypatch.setattr(
+        "hardware_splicer.github_signal_pipeline.shutil.which",
+        lambda _: "/usr/bin/docker",
+    )
+    seen = []
+    def docker_success(argv, **kwargs):
+        seen.append(argv)
+        return SimpleNamespace(returncode=0,
+            stdout=json.dumps({
+                "findings": [{"severity": "warning",
+                              "code": "LAYOUT_LABEL_OVERLAP",
+                              "message": "Check proposed label position"}]}),
+            stderr="")
+    result = evaluate_signals(
+        _feed(sha=sha), checkout=repo, schematic=schematic,
+        output_dir=tmp_path / "out", run_fn=docker_success,
+        sandbox_backend="docker",
+    )
+    assert result["ok"] is True
+    assert result["capability"]["sandbox_backend"] == "docker"
+    assert "--network=none" in seen[0]
+    assert registry_row(tmp_path / "out")["readiness"] == "project_used"
+    verdict = tmp_path / "out" / "HS_SIGNAL_CAPABILITY_VERDICT.json"
+    data = json.loads(verdict.read_text())
+    data["capability"]["pinned_revision"] = "f" * 40
+    verdict.write_text(json.dumps(data))
     assert registry_row(tmp_path / "out") is None
