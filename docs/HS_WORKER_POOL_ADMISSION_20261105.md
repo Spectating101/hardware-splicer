@@ -25,6 +25,14 @@ Inspect worker pool without changing state:
 
     python3 scripts/dispatch_hs_workshop_task.py --ledger "$HOME/hs-approved-jobs" workers show
 
+Discover GitHub-registered self-hosted runners (read-only, not enrollment):
+
+    python3 scripts/dispatch_hs_workshop_task.py --ledger "$HOME/hs-approved-jobs" workers discover
+
+The repository had zero registered self-hosted runners when checked from the
+authorized Optiplex on 2026-11-05. Even if runners appear later, discovery
+does not grant HS permission to execute jobs on them.
+
 Explicitly approve the existing pool with one local in-flight slot:
 
     python3 scripts/dispatch_hs_workshop_task.py --ledger "$HOME/hs-approved-jobs" workers configure --approve --max-inflight 1
