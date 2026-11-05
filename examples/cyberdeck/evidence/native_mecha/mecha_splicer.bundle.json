@@ -1,0 +1,100 @@
+{
+  "project_name": "HS-POCKET-SSH-CLAMSHELL-S1",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT ELECTRICALLY VERIFIED: CardKB 5V I2C to ESP32 3.3V; level shift, pull-ups and shared I2C bus"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FUNCTIONALLY VERIFIED: SSH host key, Ctrl/Esc, terminal rendering, reconnect"
+    }
+  ],
+  "bom": [
+    {
+      "category": "electronics",
+      "item": "Waveshare ESP32-S3-Touch-LCD-4.3",
+      "spec": "4.3 inch 800x480, N16R8, 106.1x67.8mm touch version",
+      "qty": 1,
+      "notes": "Built-in CS8501 lithium charger; mounting Z/holes unknown",
+      "sku": "ESP32-S3-Touch-LCD-4.3"
+    },
+    {
+      "category": "electronics",
+      "item": "M5Stack CardKB v1.1",
+      "spec": "88x54x5mm 50-key QWERTY I2C @0x5F; 5V",
+      "qty": 1,
+      "notes": "Verify Ctrl/Esc terminal key semantics and pin voltages",
+      "sku": "U035-B"
+    },
+    {
+      "category": "electrical",
+      "item": "I2C bidirectional voltage level shifter",
+      "spec": "2-channel 3.3V to 5V, SDA/SCL",
+      "qty": 1,
+      "notes": "Selection provisional; no ESP32 pins exposed to 5V until proven",
+      "sku": ""
+    },
+    {
+      "category": "wiring",
+      "item": "4-conductor flexible hinged harness",
+      "spec": "SDA/SCL/5V/GND",
+      "qty": 1,
+      "notes": "Need connector pinout, strain relief, bend radius and 5V availability checks",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "steel hinge pin",
+      "spec": "2.0mm diameter approx. 120.0mm long",
+      "qty": 1,
+      "notes": "Retention and cycling unverified; use metal not printed plastic",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "clamshell keyboard tray",
+      "spec": "PETG base_shell.stl",
+      "qty": 1,
+      "notes": "Keyboard retention/fasteners not finished",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "clamshell LCD lid tray",
+      "spec": "PETG lid_shell.stl",
+      "qty": 1,
+      "notes": "Mounting screw and USB cutouts not designed until measured",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "USB-C 5V external supply",
+      "spec": "5V >=1A, vendor input only",
+      "qty": 1,
+      "notes": "Battery intentionally deferred for first safe bring-up",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "optional protected single-cell Li-ion pack",
+      "spec": "3.7V, PH2.0 polarity to verify",
+      "qty": 0,
+      "notes": "No selected cell or validated battery fit/thermal",
+      "sku": ""
+    }
+  ],
+  "outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad"
+  ],
+  "notes": "Vendor outer planform only. Shell trays and interleaved hinge pin are CAD candidates, not proven printable fit. No keyboard/board mounts or cutouts for USB or battery: exact ports/heights must be measured. No hardware purchased, connected or flashed."
+}

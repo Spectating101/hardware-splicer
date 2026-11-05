@@ -1,0 +1,49 @@
+name: HS Pocket SSH Clamshell - Mechanical and Electrical Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "examples/cyberdeck/**"
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - ".github/workflows/hs-pocket-ssh-clamshell.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  cad-and-electrical-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the real native CAD renderer and validation dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y openscad
+          python -m pip install --disable-pip-version-check 'pydantic>=2,<3' 'pytest>=8,<10'
+      - name: Generate 2 printable mesh candidates and run 6 CGAL hinge collision cases
+        env:
+          PYTHONPATH: apps/mecha-splicer/src
+        run: |
+          python examples/cyberdeck/produce_terminal.py --openscad /usr/bin/openscad
+      - name: Verify CAD, source restrictions, safety and circuit measurement blockers
+        env:
+          PYTHONPATH: apps/mecha-splicer/src:apps/mecha-splicer:src:src
+        run: |
+          pytest -q examples/cyberdeck/tests/test_clamshell.py apps/mecha-splicer/tests/test_bundle.py tests/test_circuit_synthesis_planners.py
+      - name: Publish actual CAD only (not fabricated or powered)
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-Pocket-SSH-Clamshell-CAD-Review-NOT-Physically-Validated
+          path: |
+            examples/cyberdeck/clamshell_ssh_terminal.json
+            examples/cyberdeck/components_20261106.json
+            examples/cyberdeck/evidence/native_mecha/*.scad
+            examples/cyberdeck/evidence/native_mecha/*.stl
+            examples/cyberdeck/evidence/native_mecha/*.json
+            examples/cyberdeck/evidence/native_mecha/bom.csv
+          retention-days: 30

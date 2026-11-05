@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 Mm = Annotated[float, Field(ge=0.0)]
@@ -85,6 +85,59 @@ class EnclosureSpec(BaseModel):
 
     lid_screw_hole_d_mm: MmPos = 3.2
     include_lid_screw_holes: bool = True
+
+
+class ClamshellTerminalSpec(BaseModel):
+    """Two compact trays and pin hinge; not a validated physical product."""
+    name: str = "clamshell_ssh_terminal"
+    case_w_mm: Annotated[float, Field(ge=110, le=170)] = 120.0
+    case_d_mm: Annotated[float, Field(ge=72, le=140)] = 85.0
+    base_h_mm: Annotated[float, Field(ge=10, le=30)] = 14.0
+    lid_h_mm: Annotated[float, Field(ge=10, le=30)] = 14.0
+    closed_gap_mm: Annotated[float, Field(ge=1, le=4)] = 1.6
+    wall_mm: Annotated[float, Field(ge=1.6, le=5)] = 2.2
+    floor_mm: Annotated[float, Field(ge=1.6, le=5)] = 2.0
+    clearance_mm: Annotated[float, Field(ge=0.3, le=2)] = 0.7
+    display_board_w_mm: MmPos = 106.1
+    display_board_d_mm: MmPos = 67.8
+    keyboard_w_mm: MmPos = 88.0
+    keyboard_d_mm: MmPos = 54.0
+    keyboard_module_nominal_t_mm: MmPos = 5.0
+    hinge_outer_d_mm: Annotated[float, Field(ge=5.5, le=12)] = 8.0
+    hinge_pin_d_mm: Annotated[float, Field(ge=1.5, le=4)] = 2.0
+    pin_radial_clearance_mm: Annotated[float, Field(ge=0.2, le=0.8)] = 0.35
+    hinge_y_offset_mm: Annotated[float, Field(ge=0.5, le=4)] = 1.2
+    knuckle_end_margin_mm: Annotated[float, Field(ge=3, le=15)] = 5.0
+    knuckle_outer_length_mm: Annotated[float, Field(ge=15, le=35)] = 23.0
+    knuckle_axial_gap_mm: Annotated[float, Field(ge=5, le=12)] = 7.0
+    cable_slot_w_mm: Annotated[float, Field(ge=3, le=7)] = 5.2
+    cable_slot_h_mm: Annotated[float, Field(ge=2.5, le=6)] = 3.6
+    preview_open_angle_deg: Annotated[float, Field(ge=-170, le=-90)] = -135.0
+
+    @model_validator(mode="after")
+    def _fit_check(self):
+        usable_w = self.case_w_mm - 2*self.wall_mm - 2*self.clearance_mm
+        usable_d = self.case_d_mm - 2*self.wall_mm - 2*self.clearance_mm
+        if max(self.display_board_w_mm, self.keyboard_w_mm) > usable_w:
+            raise ValueError("module width exceeds case usable width with clearance")
+        if max(self.display_board_d_mm, self.keyboard_d_mm) > usable_d:
+            raise ValueError("module depth exceeds case usable depth with clearance")
+        if self.keyboard_module_nominal_t_mm+self.floor_mm > self.base_h_mm:
+            raise ValueError("keyboard too thick for base tray")
+        if 2*(self.knuckle_end_margin_mm+self.knuckle_outer_length_mm+
+              self.knuckle_axial_gap_mm) >= self.case_w_mm-15:
+            raise ValueError("center hinge segment too short")
+        if self.hinge_outer_d_mm < self.hinge_pin_d_mm+2*self.pin_radial_clearance_mm+3:
+            raise ValueError("hinge has under 1.5mm annular material")
+        if self.hinge_outer_d_mm/2 <= self.hinge_y_offset_mm:
+            raise ValueError("hinge barrel does not intersect shell rear wall")
+        if self.hinge_outer_d_mm/2 <= self.closed_gap_mm/2:
+            raise ValueError("hinge barrel cannot connect both shells")
+        if self.cable_slot_w_mm+1 > self.knuckle_axial_gap_mm:
+            raise ValueError("keyboard harness slot must fit entirely in hinge axial gap")
+        if self.base_h_mm-self.floor_mm <= self.cable_slot_h_mm+2:
+            raise ValueError("cable slot too tall for base shell")
+        return self
 
 
 class BracketSpec(BaseModel):
@@ -473,6 +526,7 @@ class ProjectSpec(BaseModel):
     # v1 scopes
     enclosure: Optional[EnclosureSpec] = None
     bracket: Optional[BracketSpec] = None
+    clamshell_terminal: Optional[ClamshellTerminalSpec] = None
     servo_mount: Optional[ServoMountSpec] = None
     linear_axis: Optional[LinearAxisSpec] = None
     leadscrew_axis: Optional[LeadScrewAxisSpec] = None

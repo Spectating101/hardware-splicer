@@ -6,6 +6,7 @@ from typing import Literal
 from ..spec import (
     BeltReductionSpec,
     BracketSpec,
+    ClamshellTerminalSpec,
     EnclosureSpec,
     GripperSpec,
     LeadScrewAxisSpec,
@@ -67,6 +68,8 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
 
     if spec.bracket:
         lines.extend(_bom_for_bracket(spec.bracket))
+    if spec.clamshell_terminal:
+        lines.extend(_bom_for_clamshell_terminal(spec.clamshell_terminal))
 
     if spec.servo_mount:
         lines.extend(_bom_for_servo_mount(spec.servo_mount))
@@ -90,6 +93,33 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
         lines.extend(_bom_for_pan_tilt(spec.pan_tilt))
 
     return lines
+
+
+def _bom_for_clamshell_terminal(p: ClamshellTerminalSpec) -> list[BomLine]:
+    """Prototype budget inventory, not ordered or wired."""
+    return [
+        BomLine("electronics", "Waveshare ESP32-S3-Touch-LCD-4.3",
+                "4.3 inch 800x480, N16R8, 106.1x67.8mm touch version", 1,
+                "Built-in CS8501 lithium charger; mounting Z/holes unknown", sku="ESP32-S3-Touch-LCD-4.3"),
+        BomLine("electronics", "M5Stack CardKB v1.1",
+                "88x54x5mm 50-key QWERTY I2C @0x5F; 5V", 1,
+                "Verify Ctrl/Esc terminal key semantics and pin voltages", sku="U035-B"),
+        BomLine("electrical", "I2C bidirectional voltage level shifter",
+                "2-channel 3.3V to 5V, SDA/SCL", 1,
+                "Selection provisional; no ESP32 pins exposed to 5V until proven", sku=""),
+        BomLine("wiring", "4-conductor flexible hinged harness", "SDA/SCL/5V/GND", 1,
+                "Need connector pinout, strain relief, bend radius and 5V availability checks", sku=""),
+        BomLine("hardware", "steel hinge pin", f"{p.hinge_pin_d_mm}mm diameter approx. {p.case_w_mm}mm long",
+                1, "Retention and cycling unverified; use metal not printed plastic", sku=""),
+        BomLine("printed", "clamshell keyboard tray", "PETG base_shell.stl", 1,
+                "Keyboard retention/fasteners not finished", sku=""),
+        BomLine("printed", "clamshell LCD lid tray", "PETG lid_shell.stl", 1,
+                "Mounting screw and USB cutouts not designed until measured", sku=""),
+        BomLine("power", "USB-C 5V external supply", "5V >=1A, vendor input only", 1,
+                "Battery intentionally deferred for first safe bring-up", sku=""),
+        BomLine("power", "optional protected single-cell Li-ion pack", "3.7V, PH2.0 polarity to verify",
+                0, "No selected cell or validated battery fit/thermal", sku=""),
+    ]
 
 
 def _bom_for_bracket(br: BracketSpec) -> list[BomLine]:

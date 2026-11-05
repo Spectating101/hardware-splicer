@@ -1,0 +1,208 @@
+{
+  "schema": "hs.clamshell_ssh_cad.v1",
+  "generator": "native mecha_splicer.bundle.generate_bundle",
+  "spec": "clamshell_ssh_terminal.json",
+  "native_outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad"
+  ],
+  "native_dfm": [
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT ELECTRICALLY VERIFIED: CardKB 5V I2C to ESP32 3.3V; level shift, pull-ups and shared I2C bus"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FUNCTIONALLY VERIFIED: SSH host key, Ctrl/Esc, terminal rendering, reconnect"
+    }
+  ],
+  "native_bom": [
+    {
+      "category": "electronics",
+      "item": "Waveshare ESP32-S3-Touch-LCD-4.3",
+      "spec": "4.3 inch 800x480, N16R8, 106.1x67.8mm touch version",
+      "qty": 1,
+      "notes": "Built-in CS8501 lithium charger; mounting Z/holes unknown",
+      "sku": "ESP32-S3-Touch-LCD-4.3"
+    },
+    {
+      "category": "electronics",
+      "item": "M5Stack CardKB v1.1",
+      "spec": "88x54x5mm 50-key QWERTY I2C @0x5F; 5V",
+      "qty": 1,
+      "notes": "Verify Ctrl/Esc terminal key semantics and pin voltages",
+      "sku": "U035-B"
+    },
+    {
+      "category": "electrical",
+      "item": "I2C bidirectional voltage level shifter",
+      "spec": "2-channel 3.3V to 5V, SDA/SCL",
+      "qty": 1,
+      "notes": "Selection provisional; no ESP32 pins exposed to 5V until proven",
+      "sku": ""
+    },
+    {
+      "category": "wiring",
+      "item": "4-conductor flexible hinged harness",
+      "spec": "SDA/SCL/5V/GND",
+      "qty": 1,
+      "notes": "Need connector pinout, strain relief, bend radius and 5V availability checks",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "steel hinge pin",
+      "spec": "2.0mm diameter approx. 120.0mm long",
+      "qty": 1,
+      "notes": "Retention and cycling unverified; use metal not printed plastic",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "clamshell keyboard tray",
+      "spec": "PETG base_shell.stl",
+      "qty": 1,
+      "notes": "Keyboard retention/fasteners not finished",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "clamshell LCD lid tray",
+      "spec": "PETG lid_shell.stl",
+      "qty": 1,
+      "notes": "Mounting screw and USB cutouts not designed until measured",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "USB-C 5V external supply",
+      "spec": "5V >=1A, vendor input only",
+      "qty": 1,
+      "notes": "Battery intentionally deferred for first safe bring-up",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "optional protected single-cell Li-ion pack",
+      "spec": "3.7V, PH2.0 polarity to verify",
+      "qty": 0,
+      "notes": "No selected cell or validated battery fit/thermal",
+      "sku": ""
+    }
+  ],
+  "native_hs_level_shift_result": "ready_for_review",
+  "native_hs_level_shift_measurement_gates_open": 2,
+  "native_hs_level_shift_caveat": "Existing generic ESP32-devkit logic surrogate, not exact Waveshare pinout",
+  "mesh": {
+    "base_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "ab8c3a0e2de88ff036b5ae20fe1d56b093807b1cc00032201dcfcd64172ba38f",
+      "triangle_count": 960,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        120.0,
+        90.2,
+        18.8
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bbox_max_mm": [
+        120.0,
+        90.2,
+        18.8
+      ],
+      "signed_volume_cm3": 32.443,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    },
+    "lid_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "8f45de66a06a0b30a098f0cf161aedba23f12332fb85552ed953d17447058900",
+      "triangle_count": 556,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        120.0,
+        90.2,
+        18.8
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        10.8
+      ],
+      "bbox_max_mm": [
+        120.0,
+        90.2,
+        29.6
+      ],
+      "signed_volume_cm3": 32.62,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    }
+  },
+  "cgal_interference_sweep": [
+    {
+      "angle_deg": 0,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -30,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -60,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -90,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -135,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -165,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    }
+  ],
+  "closed_envelope": {
+    "width_mm": 120,
+    "depth_without_hinge_mm": 85,
+    "closed_thickness_mm": 29.6,
+    "hinge_projection_mm": 5.2,
+    "display_board_outer_footprint_mm": [
+      106.1,
+      67.8
+    ],
+    "keyboard_board_outer_footprint_mm": [
+      88,
+      54
+    ],
+    "battery_not_yet_integrated": true,
+    "vendor_board_mounting_holes_unknown": true,
+    "port_access_cutouts_unverified": true
+  },
+  "electrical_wiring_not_ready": true,
+  "firmware_ssh_connected_to_optiplex": false,
+  "physical_hinge_sweep_tested": false,
+  "physical_fit_tested": false,
+  "actual_unit_assembled": false,
+  "usage_notes": "CGAL manifold checks prove geometry only. No vendor pin-length, battery, USB cutout or internal stacking proof."
+}
