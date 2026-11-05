@@ -39,6 +39,7 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
     if (
         spec.enclosure is None
         and spec.bracket is None
+        and spec.indoor_router_mount is None
         and spec.servo_mount is None
         and spec.linear_axis is None
         and spec.leadscrew_axis is None
@@ -60,6 +61,12 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
         issues.extend(check_enclosure(spec.enclosure, process=spec.process, mode=spec.mode))
     if spec.bracket is not None:
         issues.extend(check_bracket(spec.bracket, process=spec.process, mode=spec.mode))
+    if spec.indoor_router_mount is not None:
+        issues.append(DfmIssue(
+            "warn", "INDOOR ROUTER MOUNT IS A FIT/LOAD PROTOTYPE: print two pieces; "
+            "physical router fit, FDM print orientation, 1kg+ static/load testing, "
+            "wall anchor selection and heat/ventilation remain UNVERIFIED."
+        ))
     if spec.servo_mount is not None:
         issues.extend(check_servo_mount(spec.servo_mount, process=spec.process, mode=spec.mode))
     if spec.linear_axis is not None:
