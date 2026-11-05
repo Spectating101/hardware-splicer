@@ -8,6 +8,7 @@ repo artifacts, purchase equipment or imply a physical product exists.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,7 @@ EXPECTED_PATHS = [
 ]
 
 FOCUSED_TESTS = [
+    "examples/arbitrage_lab/pc_refurb/tests",
     "examples/arbitrage_lab/salvage_lot/channel_20261105/tests/test_channel.py",
     "examples/arbitrage_lab/salvage_lot/tests/test_salvage_pilot.py",
     "examples/arbitrage_lab/industrial_printer/tests/test_printer_pilot.py",
@@ -128,6 +130,10 @@ def main() -> int:
     env["PYTHONPATH"] = os.pathsep.join(
         filter(None, ["apps/mecha-splicer", "apps/mecha-splicer/src", env.get("PYTHONPATH")])
     )
+    if importlib.util.find_spec("pytest") is None:
+        print(f"TESTS BLOCKED: pytest is not installed for {sys.executable}. "
+              "Re-run with the repo virtualenv, e.g. .venv/bin/python scripts/hs_salvage_handoff_preflight.py --tests")
+        return 2
     print("FOCUSED REGRESSION:", *FOCUSED_TESTS, sep="\n  ")
     try:
         r = subprocess.run(
