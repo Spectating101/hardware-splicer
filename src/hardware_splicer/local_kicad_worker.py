@@ -496,7 +496,16 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
     raw = paths[2].read_bytes()
     try:
         native = json.loads(raw)
-        found = [row for sheet in native["sheets"] for row in sheet["violations"]]
+        if not isinstance(native, dict) or not isinstance(native.get("sheets"), list):
+            raise ValueError("invalid sheets")
+        found = []
+        for sheet in native["sheets"]:
+            if not isinstance(sheet, dict) or not isinstance(sheet.get("violations"), list):
+                raise ValueError("invalid violations")
+            found.extend(sheet["violations"])
+        if any(not isinstance(row, dict) or row.get("severity") not in
+               ("error", "warning", "exclusion") for row in found):
+            raise ValueError("invalid severity")
         counts = {kind: sum(row["severity"] == kind for row in found)
                   for kind in ("error", "warning", "exclusion")}
     except (TypeError, KeyError, ValueError) as exc:

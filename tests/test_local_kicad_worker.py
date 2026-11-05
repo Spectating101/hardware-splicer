@@ -151,3 +151,25 @@ def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
     (copy / "erc.json").write_text("{}")
     with pytest.raises(worker.WorkerError, match="malformed|inconsistent"):
         verify_bundle(copy, Path(__file__).resolve().parents[1])
+
+
+@pytest.mark.parametrize("violations", [[{"severity": "bogus"}], {}])
+def test_exported_bundle_rejects_invalid_native_erc_findings(prepared, tmp_path, violations):
+    import hashlib
+
+    key, _, identity = prepared
+    root = Path(__file__).resolve().parents[1]
+    original = root / "evidence/github_signals/optiplex_signed_erc_20261105"
+    body = json.loads((original / "receipt.json").read_text())["body"]
+    raw = json.dumps({"$schema": "https://schemas.kicad.org/erc.v1.json",
+                      "sheets": [{"violations": violations}]}).encode()
+    body.update(worker_id=identity["worker_id"], report_sha256=hashlib.sha256(raw).hexdigest(),
+                report_bytes=len(raw), finding_count=len(violations),
+                severity_counts={"error": 0, "warning": 0, "exclusion": 0})
+    bundle = tmp_path / "bundle"
+    bundle.mkdir()
+    (bundle / "public_identity.json").write_text(json.dumps(identity))
+    (bundle / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), body)))
+    (bundle / "erc.json").write_bytes(raw)
+    with pytest.raises(worker.WorkerError, match="malformed"):
+        worker.verify_bundle(bundle, root)
