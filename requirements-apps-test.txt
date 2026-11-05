@@ -6,3 +6,6 @@ pydantic-settings>=2.0
 openai>=1.3
 httpx>=0.27
 PyJWT>=2.8
+# The full test suite collects the signed read-only worker tests. Keep this
+# aligned with the worker/dev extras used by editable installs.
+cryptography>=42,<60
