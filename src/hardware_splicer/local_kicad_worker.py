@@ -476,3 +476,62 @@ def nodes_status(ledger: Path) -> dict[str, Any]:
         })
     return {"schema_version": SCHEMA, "nodes": entries,
             "source": "local_operator_approved_only", "remote_dispatch_enabled": False}
+
+
+def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
+    """Verify an exported public evidence bundle, without a private key/ledger.
+
+    This proves signature ownership of the included public key and integrity
+    of the source/report; it does NOT independently vouch for the signer host.
+    """
+    paths = [bundle / name for name in ("public_identity.json", "receipt.json", "erc.json")]
+    if (bundle.is_symlink() or any(
+        p.is_symlink() or not p.is_file() or p.stat().st_size > max_bytes
+        for p, max_bytes in zip(paths, (4096, 40_000, 2_000_000))
+    )):
+        raise WorkerError("exported evidence bundle missing or unsafe")
+    identity = _validate_public(json.loads(paths[0].read_bytes()))
+    packet = json.loads(paths[1].read_bytes())
+    body = _check_signature(identity, packet)
+    raw = paths[2].read_bytes()
+    try:
+        native = json.loads(raw)
+        found = [row for sheet in native["sheets"] for row in sheet["violations"]]
+        counts = {kind: sum(row["severity"] == kind for row in found)
+                  for kind in ("error", "warning", "exclusion")}
+    except (TypeError, KeyError, ValueError) as exc:
+        raise WorkerError("native ERC evidence malformed") from exc
+    reference = workspace / SOURCE
+    if (reference.is_symlink() or not reference.is_file()
+        or reference.stat().st_size > 12 * 1024 * 1024):
+        raise WorkerError("reference schematic missing or unsafe")
+    input_hash = hashlib.sha256(reference.read_bytes()).hexdigest()
+    if (body.get("schema_version") != SCHEMA or body.get("kind") != "erc_result"
+        or body.get("task") != CAPABILITY or body.get("source_path") != SOURCE
+        or not SHA40.fullmatch(body.get("source_commit", ""))
+        or body.get("input_sha256") != input_hash
+        or body.get("report_sha256") != hashlib.sha256(raw).hexdigest()
+        or body.get("report_bytes") != len(raw)
+        or body.get("erc_schema") != "https://schemas.kicad.org/erc.v1.json"
+        or native.get("$schema") != body.get("erc_schema")
+        or not str(body.get("kicad_version", "")).startswith("9.")
+        or body.get("finding_count") != len(found)
+        or body.get("severity_counts") != counts
+        or body.get("physical_authority") is not False
+        or body.get("hardware_connected") is not False
+        or body.get("fabrication_authorized") is not False
+        or body.get("design_approved") is not False):
+        raise WorkerError("exported signed receipt/source/report inconsistent")
+    return {
+        "ok": True, "worker_id": identity["worker_id"],
+        "request_id": body["request_id"],
+        "signed_receipt_verified": True,
+        "report_sha256": body["report_sha256"],
+        "source_commit_claim": body["source_commit"],
+        "source_bytes_match_checkout": True,
+        "finding_count": len(found), "severity_counts": counts,
+        "operator_enrollment_independently_proven": False,
+        "device_identity_hardware_attested": False,
+        "physical_authority": False,
+        "design_approved": False,
+    }

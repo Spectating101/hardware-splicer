@@ -62,18 +62,26 @@ The hex IDs shown are illustrative and should be replaced by actual values.
 Never paste or upload a private key. Deletion of a private key is not itself
 the registry's revocation mechanism.
 
-## Reality check
+## Real native signed-worker acceptance
 
-The authorized Optiplex has KiCad CLI 9.0.2 and previously produced 40 ERC
-findings on a temporary copy of the reference schematic. Many findings are
-related to the local symbol-library configuration. This exploratory command
-was NOT an end-to-end signed-worker execution and does not prove the design is
-correct or production ready.
+A new temporary-test-key acceptance run **did** execute installed KiCad 9.0.2
+from the signed-worker code on the Optiplex; native JSON and Ed25519 signatures
+were verified. It produced **40 warnings, zero errors**, all of class
+lib_symbol_issues due to isolated runner symbol-library configuration. It is
+not evidence of a fault-free circuit.
 
-New worker tests exercise signing, enrollment, heartbeat replay/freshness,
+The public key, native report and signed receipt (no private key) are committed
+at evidence/github_signals/optiplex_signed_erc_20261105. Recheck them using:
+
+    python3 scripts/hs_optiplex_worker.py verify-bundle --bundle evidence/github_signals/optiplex_signed_erc_20261105 --workspace .
+
+This is temporary test enrollment, not persistent Optiplex onboarding, a
+remote transport, hardware-attested host identity or automatic scheduling.
+
+Worker tests exercise signing, enrollment, heartbeat replay/freshness,
 revocation, fixed-task selection, native JSON schema, provenance and artifact
-hash rejection. Real persistent enrollment and signed ERC job execution still
-require a separately verified authorized on-device activation.
+hash rejection. Persistent enrollment and live operating-service activation still require
+separate operator authorization and on-device verification.
 
 ## Safety and next integration
 

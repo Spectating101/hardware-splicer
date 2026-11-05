@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from hardware_splicer.local_kicad_worker import (
-    WorkerError, create_identity, enroll, heartbeat, nodes_status, revoke, run_erc, verify_erc,
+    WorkerError, create_identity, enroll, heartbeat, nodes_status, revoke, run_erc, verify_erc, verify_bundle,
 )
 
 def main() -> int:
@@ -40,6 +40,9 @@ def main() -> int:
         if name == "verify":
             sub.add_argument("--request-id", required=True)
             sub.add_argument("--workspace", type=Path, default=Path(__file__).resolve().parents[1])
+    bundle = p.add_parser("verify-bundle", help="Verify exported public signature and ERC report")
+    bundle.add_argument("--bundle", type=Path, required=True)
+    bundle.add_argument("--workspace", type=Path, default=Path(__file__).resolve().parents[1])
     a = parser.parse_args()
     try:
         if a.action == "identity":
@@ -48,6 +51,8 @@ def main() -> int:
             result = enroll(a.ledger, a.public_key, approve=a.approve)
         elif a.action == "heartbeat":
             result = heartbeat(a.ledger, a.key_dir)
+        elif a.action == "verify-bundle":
+            result = verify_bundle(a.bundle, a.workspace)
         elif a.action == "status":
             result = nodes_status(a.ledger)
         elif a.action == "run":

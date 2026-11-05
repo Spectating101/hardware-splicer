@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -132,3 +133,21 @@ def test_legacy_remote_dispatch_stays_separate():
     from hardware_splicer.github_signal_remote_dispatch import TASKS
     assert worker.CAPABILITY not in TASKS
     assert worker.KICAD_BIN == "/usr/bin/kicad-cli"
+
+
+def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
+    from hardware_splicer.local_kicad_worker import verify_bundle
+    import shutil
+    bundle = (Path(__file__).resolve().parents[1] /
+              "evidence/github_signals/optiplex_signed_erc_20261105")
+    result = verify_bundle(bundle, Path(__file__).resolve().parents[1])
+    assert result["ok"] is True
+    assert result["signed_receipt_verified"] is True
+    assert result["finding_count"] == 40
+    assert result["severity_counts"]["warning"] == 40
+    assert result["operator_enrollment_independently_proven"] is False
+    copy = tmp_path / "bundle"
+    shutil.copytree(bundle, copy)
+    (copy / "erc.json").write_text("{}")
+    with pytest.raises(worker.WorkerError, match="malformed|inconsistent"):
+        verify_bundle(copy, Path(__file__).resolve().parents[1])
