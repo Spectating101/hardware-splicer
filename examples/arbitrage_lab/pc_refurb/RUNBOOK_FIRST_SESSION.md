@@ -31,7 +31,7 @@ sudo apt update && sudo apt install -y smartmontools memtester stress-ng dmideco
 sudo python3 bench_collect.py --out ./bundle --role target --selftest \
      --memtest-mb -1 --memtest-loops 2 --stress-seconds 1200
 ```
-This is read-only for disks; memory and CPU load stay in RAM. It takes roughly 1.5 hours and needs no operator once
+Use a new, empty `--out` directory for every run: the collector refuses to write into one that already has files, so a new capture can never sit beside an old run's leftovers. This is read-only for disks; memory and CPU load stay in RAM. It takes roughly 1.5 hours and needs no operator once
 started (that is the "unattended" time in the model: it occupies a bench slot, not you). Watch the first minute for a
 crash; a hang or reboot is itself a result: note it and mark the unit REJECT_OR_REPAIR.
 
