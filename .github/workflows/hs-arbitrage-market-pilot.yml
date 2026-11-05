@@ -43,6 +43,12 @@ jobs:
       - name: Check repair evidence gate and scenario profitability
         run: |
           pytest -q examples/arbitrage_lab/refurb_nuc11/tests/test_refurb_pilot.py
+      - name: Screen real Zebra/TSC industrial-printer opportunities
+        run: |
+          python examples/arbitrage_lab/industrial_printer/printer_pilot.py
+      - name: Validate actual public evidence boundaries and printer economics
+        run: |
+          pytest -q examples/arbitrage_lab/industrial_printer/tests/test_printer_pilot.py
       - name: Test the native product/economics contract
         env:
           PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
@@ -58,4 +64,7 @@ jobs:
             examples/arbitrage_lab/outputs/market_screen.json
             examples/arbitrage_lab/refurb_nuc11/evidence/refurb_decision.json
             examples/arbitrage_lab/refurb_nuc11/evidence/sensitivity.csv
+            examples/arbitrage_lab/industrial_printer/evidence/industrial_refurb_screen.json
+            examples/arbitrage_lab/industrial_printer/evidence/zebra_profit_sensitivity.csv
+            examples/arbitrage_lab/industrial_printer/evidence/ZT230_BENCH_QC_OFFLINE.zpl
           retention-days: 30

@@ -1,6 +1,10 @@
 # Hardware Splicer — commercial arbitrage pilot
 
-## Primary applied product: broken mini-PC → genuinely refurbished or upgraded computer
+## Primary next product: industrial barcode printer refurbishment
+
+The new [**Zebra ZT230 industrial-printer rehabilitation case**](industrial_printer/README.md) extends the real functional-product arbitrage program from mini-PCs into **industrial electromechanics, firmware communications, sensors, thermal printing and independently scannable output**. A real for-parts Taiwan listing was screened, with a cheap but **missing-head** TSC printer as an explicit trap. Both remain **NO PURCHASE / NO PRINT / NO SALE**. We generated only an **offline future ZPL acceptance fixture**, not a real printer test.
+
+## Prior product: broken mini-PC → genuinely refurbished or upgraded computer
 
 The [**NUC11PAH no-power real Taiwan listing case**](refurb_nuc11/README.md) supersedes the bracket as the **main HS engineering-profit case**. It uses real seller fault claims, Intel/ASUS technical specifications, live local RAM/SSD/PSU listing benchmarks, the **existing Circuit-AI HardwarePlanOrchestrator's repair-authority gate**, and independently reproducible downside/upside trading economics.
 
