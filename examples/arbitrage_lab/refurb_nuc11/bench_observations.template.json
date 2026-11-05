@@ -1,0 +1,18 @@
+{
+  "schema": "hs.operator_supplied_nuc11_bench.v1",
+  "case": "ruten-nuc11pah-no-power-20261105",
+  "instructions": "No values are prepopulated. The repair status stays blocked without actual acquired hardware, operator measurements and evidence files. Never upload buyer/seller personal data to public GitHub.",
+  "power_led_state": null,
+  "cpu_variant_identified": null,
+  "working_compatible_psu_verified": null,
+  "physical_board_inspection_pass": null,
+  "power_led_response_recorded": null,
+  "boot_post_pass": null,
+  "ram_memtest_pass": null,
+  "ssd_smart_pass": null,
+  "thermal_stress_pass": null,
+  "ports_network_pass": null,
+  "storage_wipe_pass": null,
+  "warranty_and_sale_disclosure": null,
+  "operator_notes": null
+}

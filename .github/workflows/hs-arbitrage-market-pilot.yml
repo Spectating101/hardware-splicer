@@ -37,6 +37,12 @@ jobs:
           PYTHONPATH: apps/mecha-splicer/src
         run: |
           python examples/arbitrage_lab/produce_pilot.py --openscad /usr/bin/openscad
+      - name: Exercise real mini-PC refurbishment risk/authority decision (NO hardware purchase)
+        run: |
+          python examples/arbitrage_lab/refurb_nuc11/refurb_pilot.py
+      - name: Check repair evidence gate and scenario profitability
+        run: |
+          pytest -q examples/arbitrage_lab/refurb_nuc11/tests/test_refurb_pilot.py
       - name: Test the native product/economics contract
         env:
           PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
@@ -50,4 +56,6 @@ jobs:
             examples/arbitrage_lab/outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip
             examples/arbitrage_lab/outputs/market_screen.csv
             examples/arbitrage_lab/outputs/market_screen.json
+            examples/arbitrage_lab/refurb_nuc11/evidence/refurb_decision.json
+            examples/arbitrage_lab/refurb_nuc11/evidence/sensitivity.csv
           retention-days: 30

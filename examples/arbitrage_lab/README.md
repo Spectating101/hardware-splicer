@@ -1,4 +1,14 @@
-# Hardware Splicer — commercial arbitrage pilot (Indonesia, 2026-11-05)
+# Hardware Splicer — commercial arbitrage pilot
+
+## Primary applied product: broken mini-PC → genuinely refurbished or upgraded computer
+
+The [**NUC11PAH no-power real Taiwan listing case**](refurb_nuc11/README.md) supersedes the bracket as the **main HS engineering-profit case**. It uses real seller fault claims, Intel/ASUS technical specifications, live local RAM/SSD/PSU listing benchmarks, the **existing Circuit-AI HardwarePlanOrchestrator's repair-authority gate**, and independently reproducible downside/upside trading economics.
+
+**NO BUY** at the observed NT$1,470 broken-unit asking price until exact CPU/board condition and recovery probabilities are supported. No physical machine was purchased, repaired, booted or sold.
+
+## Archived negative-control: Indonesia 3D-printed bracket
+
+The following old router-bracket study remains to test how the arbitrage model can *reject* low-margin commodity fabrication. It is **NOT** the primary Hardware Splicer product strategy. Actual functional systems, electronics repair/verification and refurbishment are the priority.
 
 This is **one actual HS-native CAD product and an auditable margin screen**, not a storefront, unverified profitability claim, physical test, a proposed purchase, or an outsourced rendering exercise.
 
