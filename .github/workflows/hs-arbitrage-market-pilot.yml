@@ -55,6 +55,12 @@ jobs:
       - name: Test no-resale and physical-inventory evidence gates
         run: |
           pytest -q examples/arbitrage_lab/salvage_lot/tests/test_salvage_pilot.py
+      - name: Screen live Zhongli commercial salvage supply and batch economics
+        run: |
+          python examples/arbitrage_lab/salvage_lot/channel_20261105/channel_pilot.py
+      - name: Test recycler buyback direction, bid caps, and read-only hardware probe evidence
+        run: |
+          pytest -q examples/arbitrage_lab/salvage_lot/channel_20261105/tests/test_channel.py
       - name: Test the native product/economics contract
         env:
           PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
@@ -75,4 +81,7 @@ jobs:
             examples/arbitrage_lab/industrial_printer/evidence/ZT230_BENCH_QC_OFFLINE.zpl
             examples/arbitrage_lab/salvage_lot/evidence/salvage_decision.json
             examples/arbitrage_lab/salvage_lot/evidence/route_sensitivity.csv
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/channel_decision.json
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/batch_sensitivity.csv
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/optiplex_control_readonly.json
           retention-days: 30

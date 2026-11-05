@@ -1,5 +1,11 @@
 # HS Salvage-to-Working-Product — Taiwan Acquisition Pilot, 2026-11-05
 
+## Phase II (2026-11-05): verified supplier channel and live workstation probe
+
+[**Real Zhongli commercial recycler/supplier channel screen**](channel_20261105/README.md) now checks a published NT$140 complete-PC **scrap BUYBACK** (not a supply price) and uses a working-claimed Acer TC-865 as a market control. Five-PC batch risk sensitivity and a qualified Chinese supplier inquiry are preserved. We also ran a **read-only probe of an already-owned Optiplex** as a calibration of real-hardware collection, explicitly not a salvaged product. No supplier has offered or transferred stock. This is the current actionable work.
+
+
+
 **Purpose:** identify a physically obtainable, lawfully transferable **junk electronics lot** and decide which COMPLETE FUNCTIONAL PRODUCT is worth building or recovering, considering profitable resale versus part-out. Do not call a software demonstration a recovered physical product.
 
 **Current result:** **zero legally/commercially obtained lots, zero observed functioning parts, zero verified profitable products.** Executed on authorized Optiplex; native HS Circuit-AI `SalvageSplicePlanner` invoked with the true *empty owned/tested inventory* and produced verdict `collect_more_evidence`, zero build candidates. This is correct; don't use description-only imaginary components or the planner's nominal USD product value estimates to claim a sale.
