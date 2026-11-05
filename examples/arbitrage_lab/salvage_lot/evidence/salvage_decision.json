@@ -1,0 +1,357 @@
+{
+  "schema": "hs.salvage_pilot_20261105.v1",
+  "as_of": "2026-11-05",
+  "source_count": 4,
+  "confirmed_resale_authorized_lots": 0,
+  "verified_usable_assets": 0,
+  "functional_products_produced": 0,
+  "sales_recorded": 0,
+  "physical_validation_status": "NONE",
+  "overall_decision": "NO_COMMERCIAL_SALVAGE_AVAILABLE_YET",
+  "legal_boundary": "PTT Give is non-commercial; third-party recycling stock is NOT public free inventory. Require explicit transfer and disposition authorization.",
+  "sourcing": [
+    {
+      "id": "hsinchu_free_desktop",
+      "source": "https://www.ptt.cc/bbs/give/M.1784598671.A.A64.html",
+      "date": "2026-07-21",
+      "rights": "prohibited_by_board_rule",
+      "identified_actual_items": [
+        "chassis",
+        "motherboard",
+        "power_supply"
+      ],
+      "claimed_working_assets": 0,
+      "unverified": [
+        "CPU",
+        "RAM",
+        "storage",
+        "PSU output functionality",
+        "board identity",
+        "any working boot"
+      ],
+      "physical_acquired": false,
+      "commercial_rights_validated": false,
+      "availability": "historical_unverified",
+      "status": "NONCOMMERCIAL_ONLY_BOARD_RESALE_PROHIBITED",
+      "acquisition_action": "DO_NOT_COLLECT_OR_BUY_WITHOUT_CONFIRMED_OWNER_PERMISSION",
+      "products_examined": []
+    },
+    {
+      "id": "sanchong_scrap_20261030",
+      "source": "https://www.ptt.cc/bbs/give/M.1793295736.A.E7B.html",
+      "date": "2026-10-30",
+      "rights": "explicit_no_resale",
+      "identified_actual_items": [
+        "computer odds and ends (no itemization)"
+      ],
+      "claimed_working_assets": 0,
+      "unverified": [
+        "component types",
+        "actual board identity",
+        "condition"
+      ],
+      "physical_acquired": false,
+      "commercial_rights_validated": false,
+      "availability": "near_expiry_2026_11_05_not_verified",
+      "status": "NONCOMMERCIAL_ONLY_BOARD_RESALE_PROHIBITED",
+      "acquisition_action": "DO_NOT_COLLECT_OR_BUY_WITHOUT_CONFIRMED_OWNER_PERMISSION",
+      "products_examined": []
+    },
+    {
+      "id": "taoyuan_damaged_cpu_board_20261026",
+      "source": "https://www.ptt.cc/bbs/HardwareSale/M.1792988675.A.1FC.html",
+      "date": "2026-10-26",
+      "rights": "normal_paid_sale_possible_not_yet_transferred",
+      "identified_actual_items": [
+        "Intel i5-7400 CPU (condition unknown)",
+        "Z170M motherboard (seller suspects moisture)"
+      ],
+      "claimed_working_assets": 0,
+      "unverified": [
+        "CPU working",
+        "Z170M actual model and fault",
+        "CPU slot condition",
+        "power rails and POST"
+      ],
+      "physical_acquired": false,
+      "commercial_rights_validated": false,
+      "availability": "listing_unverified",
+      "status": "PAID_UNVERIFIED_POOR_MARGIN_REVIEW_ONLY",
+      "acquisition_action": "DO_NOT_COLLECT_OR_BUY_WITHOUT_CONFIRMED_OWNER_PERMISSION",
+      "products_examined": [
+        "tested_i5_7400_cpu_for_resale"
+      ]
+    },
+    {
+      "id": "direct_owner_cleanout_hypothetical",
+      "source": null,
+      "date": "2026-11-05",
+      "rights": "not_obtained",
+      "identified_actual_items": [],
+      "claimed_working_assets": 0,
+      "unverified": [
+        "all parts",
+        "source owner",
+        "resale rights",
+        "data wipe",
+        "stability and thermal test"
+      ],
+      "physical_acquired": false,
+      "commercial_rights_validated": false,
+      "availability": "NOT_IDENTIFIED",
+      "status": "HYPOTHETICAL_NOT_AN_ACQUISITION_LEAD",
+      "acquisition_action": "DO_NOT_COLLECT_OR_BUY_WITHOUT_CONFIRMED_OWNER_PERMISSION",
+      "products_examined": [
+        "refurbished_complete_desktop",
+        "tested_cpu_ram_ssd_partout",
+        "nas_from_scrap_unverified_market"
+      ]
+    }
+  ],
+  "hs_salvage_core": {
+    "backend": "Existing Circuit-AI SalvageSplicePlanner",
+    "vendor": "first_party_original_HS_repo",
+    "real_verified_salvage_asset_count": 0,
+    "backend_verdict": "collect_more_evidence",
+    "backend_candidate_count": 0,
+    "no_inventory_authority": true,
+    "backend_candidate_values_used_for_profitability": false
+  },
+  "market_comparables": [
+    {
+      "product": "Functional i5-7500 desktop 4GB 120GB SSD",
+      "observed_asking_price_twd": 2200,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1788169513.A.0E3.html",
+      "note": "Aug 2026 asking; different machine and specs, no sale evidence"
+    },
+    {
+      "product": "Intel Core i5-7400 bare CPU",
+      "observed_asking_price_range_twd": [
+        450,
+        600
+      ],
+      "url": "https://www.ruten.com.tw/search/intel%2Bi5-7400/",
+      "note": "Public sellers listed used CPUs ~NT$450-600; not verified sales"
+    },
+    {
+      "product": "DDR4 2666 8GB desktop UDIMM",
+      "observed_asking_price_twd": 850,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1792395575.A.D74.html",
+      "note": "Oct 2026 single unit ask, not verified sale"
+    },
+    {
+      "product": "NVMe SSD 256GB",
+      "observed_asking_price_twd": 700,
+      "url": "https://www.ruten.com.tw/item/22640804516783/",
+      "note": "Earlier mini-PC source only; for hypothetical SATA 256GB component this is a rough, not like-for-like pricing assumption"
+    },
+    {
+      "product": "Used i3-8100 NAS case 6-bay 16GB RAM, 450W PSU no HDDs",
+      "observed_asking_price_twd": 2600,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1788427462.A.B3E.html",
+      "note": "Sep 2026 NAS setup asking NT$2600, NOT evidence of value of an older i5 PC converted to NAS"
+    }
+  ],
+  "scenarios": [
+    {
+      "lead_id": "taoyuan_damaged_cpu_board_20261026",
+      "product_id": "tested_i5_7400_cpu_for_resale",
+      "conditional_asp_asking_proxy_twd": 500,
+      "success_probability_hypothesis": 0.25,
+      "profit_if_functionally_verified_and_sold_twd": -720,
+      "loss_if_failed_twd": -1100,
+      "hypothetical_expected_contribution_twd": -1005,
+      "break_even_p": 2.8947,
+      "required_asp_to_break_even_on_success_twd": 1300,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "taoyuan_damaged_cpu_board_20261026",
+      "product_id": "tested_i5_7400_cpu_for_resale",
+      "conditional_asp_asking_proxy_twd": 500,
+      "success_probability_hypothesis": 0.5,
+      "profit_if_functionally_verified_and_sold_twd": -720,
+      "loss_if_failed_twd": -1100,
+      "hypothetical_expected_contribution_twd": -910,
+      "break_even_p": 2.8947,
+      "required_asp_to_break_even_on_success_twd": 1300,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "taoyuan_damaged_cpu_board_20261026",
+      "product_id": "tested_i5_7400_cpu_for_resale",
+      "conditional_asp_asking_proxy_twd": 500,
+      "success_probability_hypothesis": 0.75,
+      "profit_if_functionally_verified_and_sold_twd": -720,
+      "loss_if_failed_twd": -1100,
+      "hypothetical_expected_contribution_twd": -815,
+      "break_even_p": 2.8947,
+      "required_asp_to_break_even_on_success_twd": 1300,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "refurbished_complete_desktop",
+      "conditional_asp_asking_proxy_twd": 2200,
+      "success_probability_hypothesis": 0.25,
+      "profit_if_functionally_verified_and_sold_twd": 630,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -292,
+      "break_even_p": 0.4878,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "refurbished_complete_desktop",
+      "conditional_asp_asking_proxy_twd": 2200,
+      "success_probability_hypothesis": 0.5,
+      "profit_if_functionally_verified_and_sold_twd": 630,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": 15,
+      "break_even_p": 0.4878,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "refurbished_complete_desktop",
+      "conditional_asp_asking_proxy_twd": 2200,
+      "success_probability_hypothesis": 0.75,
+      "profit_if_functionally_verified_and_sold_twd": 630,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": 322,
+      "break_even_p": 0.4878,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "tested_cpu_ram_ssd_partout",
+      "conditional_asp_asking_proxy_twd": 2050,
+      "success_probability_hypothesis": 0.25,
+      "profit_if_functionally_verified_and_sold_twd": 495,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -326,
+      "break_even_p": 0.5479,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "tested_cpu_ram_ssd_partout",
+      "conditional_asp_asking_proxy_twd": 2050,
+      "success_probability_hypothesis": 0.5,
+      "profit_if_functionally_verified_and_sold_twd": 495,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -52,
+      "break_even_p": 0.5479,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "tested_cpu_ram_ssd_partout",
+      "conditional_asp_asking_proxy_twd": 2050,
+      "success_probability_hypothesis": 0.75,
+      "profit_if_functionally_verified_and_sold_twd": 495,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": 221,
+      "break_even_p": 0.5479,
+      "required_asp_to_break_even_on_success_twd": 1500,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "nas_from_scrap_unverified_market",
+      "conditional_asp_asking_proxy_twd": 2600,
+      "success_probability_hypothesis": 0.25,
+      "profit_if_functionally_verified_and_sold_twd": -160,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -490,
+      "break_even_p": 1.3636,
+      "required_asp_to_break_even_on_success_twd": 2778,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "nas_from_scrap_unverified_market",
+      "conditional_asp_asking_proxy_twd": 2600,
+      "success_probability_hypothesis": 0.5,
+      "profit_if_functionally_verified_and_sold_twd": -160,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -380,
+      "break_even_p": 1.3636,
+      "required_asp_to_break_even_on_success_twd": 2778,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    },
+    {
+      "lead_id": "direct_owner_cleanout_hypothetical",
+      "product_id": "nas_from_scrap_unverified_market",
+      "conditional_asp_asking_proxy_twd": 2600,
+      "success_probability_hypothesis": 0.75,
+      "profit_if_functionally_verified_and_sold_twd": -160,
+      "loss_if_failed_twd": -600,
+      "hypothetical_expected_contribution_twd": -270,
+      "break_even_p": 1.3636,
+      "required_asp_to_break_even_on_success_twd": 2778,
+      "max_bid_for_500_expected_profit_twd": 0,
+      "acquisition_or_transfer_authorized": false,
+      "sellable_and_bench_verified": false,
+      "commercial_action": "BLOCKED_NOT_OWNED_OR_RIGHTS",
+      "provenance": "Scenario modeled from public asks and hypothetical probabilities; not generated/realized sale or physical part test"
+    }
+  ],
+  "next_action": "Find one direct owner/commercial shop who explicitly agrees to transfer an item for refurbishment/resale; then acquire only with documented consent and test existing components.",
+  "nonclaims": [
+    "PTT Give donor items are not commercial inventory",
+    "No poster or recycle shop has been contacted",
+    "No printed or physically tested parts from salvage",
+    "No owner authorization to take trash or recycler property",
+    "No resale yield, sales margin or physical proof"
+  ]
+}

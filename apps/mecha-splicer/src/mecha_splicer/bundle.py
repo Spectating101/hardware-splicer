@@ -19,6 +19,7 @@ from .engines.openscad import (
     generate_rotary_joint_parts_scad,
     generate_servo_mount_scad,
 )
+from .engines.indoor_router_mount import generate_indoor_router_mount_scad
 from .engines.assembly import generate_assembly_scad
 from .spec import ProjectSpec
 
@@ -35,6 +36,8 @@ def generate_bundle(spec: Dict[str, Any], *, out_dir: Optional[str | Path] = Non
         outputs["enclosure.scad"] = generate_enclosure_scad(project.enclosure)
     if project.bracket is not None:
         outputs["bracket.scad"] = generate_bracket_scad(project.bracket)
+    if project.indoor_router_mount is not None:
+        outputs["indoor_router_mount.scad"] = generate_indoor_router_mount_scad(project.indoor_router_mount)
     if project.servo_mount is not None:
         outputs["servo_mount.scad"] = generate_servo_mount_scad(project.servo_mount)
     if project.linear_axis is not None:
