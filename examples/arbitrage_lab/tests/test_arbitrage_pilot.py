@@ -88,7 +88,10 @@ def test_negative_price_or_mass_rejected():
 
 
 def test_committed_native_stl_is_a_binary_triangulated_mesh():
-    p=HERE/"outputs/native_router3/indoor_router_mount.stl"
+    # CI regenerates outputs/ (needs OpenSCAD); a fresh clone has only the committed evidence/ copy.
+    candidates=[HERE/"outputs/native_router3/indoor_router_mount.stl",HERE/"evidence/indoor_router_mount.stl"]
+    p=next((c for c in candidates if c.is_file()),None)
+    assert p is not None,"neither generated nor committed native STL exists"
     blob=p.read_bytes()
     n=struct.unpack_from("<I",blob,80)[0]
     assert n>100

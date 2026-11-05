@@ -1,0 +1,4 @@
+{"unit_id": "control-optiplex-20261105", "lot_id": "none", "role": "control_host",
+ "acquired": false,
+ "note": "The authorized running Optiplex that hosts HS. NOT a salvaged unit; SMART/identity read-only via collector. Serials, MACs, IPs and hostname redacted.",
+ "bundles": {"bench": "bundle"}}

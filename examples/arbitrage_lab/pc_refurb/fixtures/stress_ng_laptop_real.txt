@@ -1,0 +1,9 @@
+
+--stderr--
+stress-ng: info:  [81481] setting to a 60 second run per stressor
+stress-ng: info:  [81481] dispatching hogs: 8 cpu, 1 vm
+stress-ng: metrc: [81481] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s
+stress-ng: metrc: [81481]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)
+stress-ng: metrc: [81481] cpu              182490     60.00    417.28      0.34      3041.28         436.98
+stress-ng: metrc: [81481] vm               459523     60.27     39.12     13.74      7624.32        8693.58
+stress-ng: info:  [81481] successful run completed in 60.27s (1 min, 0.27 secs)

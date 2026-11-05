@@ -1,0 +1,32 @@
+{
+  "unit_id": "REPLACE-lot-unit-01",
+  "lot_id": "REPLACE-lot",
+  "role": "target",
+  "acquired": false,
+  "operator": {"name": "REPLACE operator"},
+  "acquisition": {"price_twd": null, "seller": "REPLACE", "date": null},
+  "claimed": {"cpu": "i5-8500", "ram_gb": 8, "storage_gb": 256, "working": true},
+  "rights": {
+    "title_transfer_document": {"evidence": "evidence/transfer_receipt.pdf"},
+    "seller_identity_recorded": {"evidence": "evidence/seller_id_note.txt"},
+    "data_owner_release": {"evidence": "evidence/data_release_statement.txt"}
+  },
+  "bundles": {"bench": "bundle", "wipe": ["wipe_sda"]},
+  "operator_checklist": {
+    "usb_ports_all_tested": {"pass": null, "note": ""},
+    "video_output": {"pass": null, "note": ""},
+    "power_button_and_front_panel": {"pass": null, "note": ""},
+    "fans_and_cleaning_done": {"pass": null, "note": ""},
+    "cosmetic_grade_photos": {"pass": null, "note": ""}
+  },
+  "licence": {"os_to_ship": "linux"},
+  "timing_minutes_actual": {"inspection": null, "power_post": null, "bench_hands_on": null, "bench_unattended": null,
+                            "completion_wipe_install": null, "list_and_ship": null},
+  "review": {},
+  "owner_legal_confirmations": {
+    "second_hand_trade_licence_status_confirmed": false,
+    "tax_registration_status_confirmed": false,
+    "return_and_warranty_terms_written": false,
+    "os_licence_disclosure_written": false
+  }
+}

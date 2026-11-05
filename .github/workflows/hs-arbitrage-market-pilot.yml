@@ -66,6 +66,17 @@ jobs:
           PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
         run: |
           pytest -q examples/arbitrage_lab/tests/test_arbitrage_pilot.py apps/mecha-splicer/tests/test_bundle.py
+      - name: Run staged-triage economics (every input labelled; no measurements)
+        run: |
+          python examples/arbitrage_lab/pc_refurb/staged_economics.py
+      - name: Evaluate control-host casefile (a control host can never release a product)
+        run: |
+          python examples/arbitrage_lab/pc_refurb/casefile.py examples/arbitrage_lab/pc_refurb/control_host_optiplex/unit.json
+      - name: Test PC casefile authority rules, collector safety contract and economics
+        env:
+          PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          pytest -q examples/arbitrage_lab/pc_refurb/tests
       - name: Publish actual source CAD, printable mesh, cost screen and assumptions
         uses: actions/upload-artifact@v4
         with:
@@ -84,4 +95,8 @@ jobs:
             examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/channel_decision.json
             examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/batch_sensitivity.csv
             examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/optiplex_control_readonly.json
+            examples/arbitrage_lab/pc_refurb/evidence/staged_economics.json
+            examples/arbitrage_lab/pc_refurb/evidence/inspection_walkaway.csv
+            examples/arbitrage_lab/pc_refurb/evidence/market_comps_20261105.json
+            examples/arbitrage_lab/pc_refurb/control_host_optiplex/casefile_report.json
           retention-days: 30
