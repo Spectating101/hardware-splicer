@@ -55,6 +55,10 @@ Contribution is **before tax, seller-funded delivery, overhead, unrecovered setu
 
 For the router pair, **25% contribution margin requires ~Rp211,937 selling price** at the CAD-mass print assumption and other costs. That's higher than our observed benchmark, and before the missing taxes/delivery/overhead.
 
+## Competition for CAD engineering services itself
+
+Public providers already advertise [simple-to-complex 3D design at Rp75,000–500,000](https://execute3d.com/), [custom engineering CAD at Rp100,000/part](https://www.projects.co.id/public/browse_services/view/c62711/jasa-menggambar-teknik-mesin-3d-dan-2d) and [Rp150,000+ modeling with revisions](https://layerhaus.id/id/jasa-cetak-3d-jakarta). These are sellers' **asking prices**, not earnings or verified demand. Another service offers [reverse-engineered replacement parts and factory jigs](https://www.hir3dprint.com/). HS cannot monetize *CAD generation alone* on the assumption that nobody offers it.
+
 ## More profitable experiments to validate, NOT yet evidenced
 
 1. **B2B problem-first custom repair/fixture work.** Sell a confirmed diagnosis + design + printed solution for a local shop's device-specific problem, ideally an order commitment first. Must prove willingness to pay **for engineering service**, not rely on cheap generic plastic margins.
