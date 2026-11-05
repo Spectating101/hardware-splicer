@@ -1,0 +1,53 @@
+name: HS Commercial Product Pilot — Native CAD and Real Cost Screen
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "examples/arbitrage_lab/**"
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - ".github/workflows/hs-arbitrage-market-pilot.yml"
+  push:
+    branches:
+      - "feature/hs-arbitrage-marketpilot-20261105"
+    paths:
+      - "examples/arbitrage_lab/**"
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - ".github/workflows/hs-arbitrage-market-pilot.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  product-profit-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native CAD binary and Python requirements
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y openscad
+          python -m pip install --disable-pip-version-check 'pydantic>=2,<3' 'pytest>=8,<10'
+      - name: Generate ORIGINAL HS product geometry and current scenario files
+        env:
+          PYTHONPATH: apps/mecha-splicer/src
+        run: |
+          python examples/arbitrage_lab/produce_pilot.py --openscad /usr/bin/openscad
+      - name: Test the native product/economics contract
+        env:
+          PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          pytest -q examples/arbitrage_lab/tests/test_arbitrage_pilot.py apps/mecha-splicer/tests/test_bundle.py
+      - name: Publish actual source CAD, printable mesh, cost screen and assumptions
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-INDOOR-ROUTER3-CAD-AND-ARBITRAGE-SCREEN-NOT-PHYSICALLY-TESTED
+          path: |
+            examples/arbitrage_lab/outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip
+            examples/arbitrage_lab/outputs/market_screen.csv
+            examples/arbitrage_lab/outputs/market_screen.json
+          retention-days: 30

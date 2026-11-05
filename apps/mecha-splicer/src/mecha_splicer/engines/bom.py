@@ -67,6 +67,13 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
 
     if spec.bracket:
         lines.extend(_bom_for_bracket(spec.bracket))
+    if spec.indoor_router_mount:
+        lines.extend([
+            BomLine("printed", "indoor router support bracket", "PETG FDM; two identical copies", 2,
+                    "physical load and fit not yet verified"),
+            BomLine("hardware", "wall screws/anchors", "M4 nominal, select for wall substrate", 4,
+                    "anchor capacity, wall material and installation require verification"),
+        ])
 
     if spec.servo_mount:
         lines.extend(_bom_for_servo_mount(spec.servo_mount))

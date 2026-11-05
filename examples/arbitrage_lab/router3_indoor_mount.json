@@ -1,0 +1,20 @@
+{
+  "project_name": "HS-MARGIN-PILOT-ROUTER3-INDOOR",
+  "mode": "prototype",
+  "process": "fdm",
+  "indoor_router_mount": {
+    "name": "Two identical indoor wall-support saddles - Starlink Router 3 size class",
+    "device_depth_mm": 43.4,
+    "clearance_mm": 1.5,
+    "bracket_width_mm": 42,
+    "back_height_mm": 65,
+    "back_thickness_mm": 4,
+    "shelf_thickness_mm": 4,
+    "lip_height_mm": 14,
+    "lip_thickness_mm": 3,
+    "gusset_thickness_mm": 3,
+    "anchor_hole_d_mm": 4.5,
+    "anchor_hole_pitch_mm": 27
+  },
+  "notes": "Device reference: official Starlink Router 3 nominal 43.4x298.6x120.4mm, https://starlink.com/gn/specifications. Quantity two. Indoor only, no tested fit or load capacity, no physical release. Design is original generic two-piece support, not OEM/marketplace CAD."
+}
