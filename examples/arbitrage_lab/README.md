@@ -18,7 +18,7 @@ PYTHONPATH=apps/mecha-splicer/src python3 examples/arbitrage_lab/produce_pilot.p
 
 On the authorized Optiplex (2026-11-05), the native `mecha_splicer.bundle.generate_bundle` generated `indoor_router_mount.scad`, the correct quantity-two BOM and a **warning** about physical load, fit, anchors and heat. Upstream official OpenSCAD 2021.01 then rendered its native geometry to a genuine STL. The independent binary STL analyzer checked triangle count/bytes and every undirected edge's incidence.
 
-Output: `outputs/native_router3/` with STLs, editable SCAD, geometry proof and BOM; `outputs/market_screen.csv` and JSON with scenario calculations; `outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip`. The ZIP is *not a fabrication order, vendor quote or certified design*.
+Output: `outputs/native_router3/` with STLs, editable SCAD, geometry proof and BOM; `outputs/market_screen.csv` and JSON with scenario calculations; `outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip`. The ZIP is *not a fabrication order, vendor quote or certified design*. Frozen Optiplex execution evidence is separately checked in at [`evidence/HS_INDOOR_ROUTER3_MARKET_PILOT.zip`](evidence/HS_INDOOR_ROUTER3_MARKET_PILOT.zip), plus mesh audit and ranked CSV; the executable regenerates those from first-party HS code.
 
 Measured **CAD geometry only**: 42 × 53.4 × 65 mm *per bracket*, 564 mesh triangles, zero non-2-manifold edges, 24.13955 cm³ solid volume per bracket; PETG 1.27 g/cm³ density assumption → **30.66 g each / 61.31 g per pair**. Sliced weight including supports/waste and real printed mass are unknown. Machine print orientation, clearances and nominal M4 wall anchors have not been verified.
 

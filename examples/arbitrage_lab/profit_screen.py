@@ -83,7 +83,7 @@ def run()->None:
         "candidates":results
     },indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
     with (args.out/"market_screen.csv").open("w",newline="",encoding="utf-8") as f:
-        w=csv.writer(f)
+        w=csv.writer(f,lineterminator="\n")
         w.writerow(["sku","listed_asp_idr","estimated_billable_mass_g","print_cost_idr",
                     "base_contribution_idr","base_margin_pct","stress_contribution_idr",
                     "base_20pct_margin_gate","stress_positive_gate","status","source"])
