@@ -53,11 +53,13 @@ def safe_argv(argv: list[str]) -> list[str]:
     out, skip = [], False
     for a in argv:
         if skip:
-            out.append("<path>")
+            out.append("<path>" if out[-1] == "--out" else "<addr>")
             skip = False
-        elif a in ("--out", "--verify-wipe"):
+        elif a in ("--out", "--ping-target"):
             out.append(a)
-            skip = a == "--out"  # --verify-wipe takes a device node, which is not sensitive
+            skip = True  # paths and network addresses are not recorded
+        elif a == "--verify-wipe":
+            out.append(a)  # a device node (/dev/sdX) is not sensitive
         else:
             out.append(a)
     return out
@@ -175,16 +177,21 @@ def disks() -> list[str]:
     return [f"/dev/{l.split()[0]}" for l in r["stdout"].splitlines() if len(l.split()) == 2 and l.split()[1] == "disk"]
 
 
-def selftest_running(smart_json: str) -> bool:
+def selftest_running(smart_json: str) -> bool | None:
+    """True = running, False = finished, None = could not tell (empty/garbled read: keep waiting, do not assume done)."""
     try:
         j = json.loads(smart_json)
     except ValueError:
-        return False
+        return None
+    if not isinstance(j, dict):
+        return None
     ata = j.get("ata_smart_data", {}).get("self_test", {}).get("status", {}).get("value")
     if ata is not None:
         return ata >> 4 == 15  # 0xF0..0xFF = self-test in progress
     nvme = j.get("nvme_self_test_log", {}).get("current_self_test_operation", {}).get("value")
-    return bool(nvme)
+    if nvme is not None:
+        return bool(nvme)
+    return None
 
 
 def step_storage(b: Bundle, selftest: bool) -> None:
@@ -200,10 +207,14 @@ def step_storage(b: Bundle, selftest: bool) -> None:
             b.js("selftest_" + dev.replace("/dev/", "") + ".json",
                  {"requested": "short", "rc": t.get("rc"), "status": t["status"],
                   "began": "has begun" in t["stdout"].lower(), "stdout_tail": t["stdout"][-500:]})
-            deadline = time.monotonic() + 900
+            deadline, unreadable = time.monotonic() + 900, 0
             while time.monotonic() < deadline:
                 time.sleep(15)
-                if not selftest_running(run([sm, "-a", "-j", dev], 60)["stdout"]):
+                state = selftest_running(run([sm, "-a", "-j", dev], 60)["stdout"])
+                if state is False:
+                    break
+                unreadable = unreadable + 1 if state is None else 0
+                if unreadable >= 6:  # the drive will not tell us; stop waiting, the gate will see no completed self-test
                     break
         r = run([sm, "-a", "-j", "-n", "standby,0", dev], 90)
         try:
@@ -287,14 +298,27 @@ def step_network(b: Bundle, ping_target: str | None) -> None:
     if ping_target:
         ping = tool("ping")
         pr = run([ping, "-c", "5", "-W", "2", ping_target], 30) if ping else None
-        b.js("ping.json", {"target": ping_target, "rc": pr["rc"] if pr else None, "stdout": pr["stdout"] if pr else ""})
+        out = pr["stdout"] if pr else ""
+        target = ping_target
+        if b.redact:
+            out, target = redact_text(out), _tok(ping_target)
+        b.js("ping.json", {"target": target, "rc": pr["rc"] if pr else None, "stdout": out})
 
 
 def verify_wipe(b: Bundle, dev: str, samples: int = 128) -> None:
     """Read-only check that `dev` carries no filesystem signature and sampled blocks look sanitized."""
     wf = tool("wipefs")
     sig = run([wf, "--no-act", "--json", dev]) if wf else {"status": "tool_missing", "stdout": ""}
-    size = int(run([tool("blockdev") or "blockdev", "--getsize64", dev])["stdout"].strip() or 0)
+    bd = run([tool("blockdev") or "blockdev", "--getsize64", dev])
+    m = re.fullmatch(r"\d+", bd["stdout"].strip()) if bd["status"] == "ok" and bd.get("rc") == 0 else None
+    size = int(m.group(0)) if m else 0
+    if size <= 0:  # cannot size the device: record that, never read an unknown device
+        b.js("wipe_" + dev.replace("/dev/", "") + ".json", {
+            "device": dev, "hs_status": "size_unavailable", "size_bytes": 0, "sampled_blocks": 0, "zero_blocks": 0,
+            "signatures_stdout": sig["stdout"], "signature_rc": sig.get("rc"), "signature_tool": "size_unavailable",
+            "min_entropy_bits_per_byte": None, "operator_declared_method": os.environ.get("HS_WIPE_METHOD", "unspecified"),
+            "note": "blockdev --getsize64 failed; nothing was sampled"})
+        return
     rng = random.SystemRandom()
     offsets = [0, max(0, size - (1 << 20))] + [rng.randrange(0, max(1, size - 4096)) // 4096 * 4096 for _ in range(samples)]
     zero_blocks, entropies = 0, []
@@ -321,6 +345,24 @@ def verify_wipe(b: Bundle, dev: str, samples: int = 128) -> None:
 
 
 # ---------------------------------------------------------------- main
+VERSION_FLAGS = {"smartctl": ["--version"], "stress-ng": ["--version"], "dmidecode": ["--version"],
+                 "lsblk": ["--version"], "ip": ["-V"], "memtester": []}
+
+
+def tool_versions() -> dict:
+    """First line of each tool's own version output (memtester has no flag: its usage text carries the version)."""
+    out = {"python": platform.python_version()}
+    for name, flags in VERSION_FLAGS.items():
+        exe = tool(name)
+        if not exe:
+            out[name] = None
+            continue
+        r = run([exe, *flags], 10)
+        text = (r["stdout"] or r["stderr"] or "").strip().splitlines()
+        out[name] = next((l.strip()[:120] for l in text if re.search(r"\d+\.\d+", l)), "unknown")
+    return out
+
+
 def fingerprint(out: Path) -> str:
     """Stable id from hardware identity files; equal across re-runs on the same machine."""
     h = hashlib.sha256()
@@ -344,6 +386,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--verify-wipe", metavar="DEV", default=None)
     a = ap.parse_args(argv)
 
+    if a.out.exists() and any(a.out.iterdir()):
+        raise SystemExit(f"refusing to reuse a non-empty output directory: stale files from an earlier run would sit "
+                         f"beside this run's manifest. Choose a new --out.")
     b = Bundle(a.out, redact=a.redact_serials)
     started = now()
     if a.verify_wipe:
@@ -358,7 +403,8 @@ def main(argv: list[str] | None = None) -> int:
         meta = {"mode": "bench", "role": a.role, "started_utc": started, "argv": safe_argv(sys.argv[1:]),
                 "redacted_serials": a.redact_serials, "host_fingerprint": fingerprint(a.out),
                 "euid": os.geteuid(),
-                "tools": {t: bool(tool(t)) for t in ("dmidecode", "smartctl", "memtester", "stress-ng", "lsblk", "ip")}}
+                "tools": {t: bool(tool(t)) for t in ("dmidecode", "smartctl", "memtester", "stress-ng", "lsblk", "ip")},
+                "tool_versions": tool_versions()}
     m = b.finish(meta)
     print(f"bundle: {a.out}  role={m['role']}  files={len(m['files_sha256'])}  fingerprint={m.get('host_fingerprint')}")
     return 0
