@@ -163,7 +163,8 @@ def step_identity(b: Bundle) -> None:
                            "python": platform.python_version()})
     lsblk = tool("lsblk")
     r = run([lsblk, "--json", "--bytes", "-o", "NAME,TYPE,SIZE,ROTA,TRAN,MODEL,FSTYPE,PARTTYPE,MOUNTPOINT"]) if lsblk else None
-    b.text("lsblk.json", r["stdout"] if r and r["status"] == "ok" else '{"blockdevices": []}\n')
+    good = r and r["status"] == "ok" and r.get("rc") == 0 and r["stdout"].strip()
+    b.text("lsblk.json", r["stdout"] if good else "# HS_FAILED lsblk did not produce output\n")
 
 
 def disks() -> list[str]:
@@ -194,7 +195,11 @@ def step_storage(b: Bundle, selftest: bool) -> None:
             b.js(name, {"hs_status": "tool_missing"})
             continue
         if selftest:
-            run([sm, "-t", "short", dev], 30)  # non-destructive firmware self-test
+            t = run([sm, "-t", "short", dev], 30)  # non-destructive firmware self-test
+            # Keep the command's own answer: a drive can ignore the request, and its log is not always trustworthy.
+            b.js("selftest_" + dev.replace("/dev/", "") + ".json",
+                 {"requested": "short", "rc": t.get("rc"), "status": t["status"],
+                  "began": "has begun" in t["stdout"].lower(), "stdout_tail": t["stdout"][-500:]})
             deadline = time.monotonic() + 900
             while time.monotonic() < deadline:
                 time.sleep(15)
@@ -307,7 +312,8 @@ def verify_wipe(b: Bundle, dev: str, samples: int = 128) -> None:
             entropies.append(-sum(c / len(blk) * math.log2(c / len(blk)) for c in counts if c))
     n = len(entropies)
     b.js("wipe_" + dev.replace("/dev/", "") + ".json", {
-        "device": dev, "size_bytes": size, "signatures_stdout": sig["stdout"], "signature_tool": sig["status"],
+        "device": dev, "size_bytes": size, "signatures_stdout": sig["stdout"], "signature_rc": sig.get("rc"),
+        "signature_tool": "ok" if sig["status"] == "ok" and sig.get("rc") == 0 else sig["status"] + f"_rc{sig.get('rc')}",
         "sampled_blocks": n, "zero_blocks": zero_blocks,
         "min_entropy_bits_per_byte": round(min(entropies), 3) if entropies else None,
         "operator_declared_method": os.environ.get("HS_WIPE_METHOD", "unspecified"),

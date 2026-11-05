@@ -45,6 +45,8 @@ SMART_CMD_BITS = 1 | 2 | 4  # command line / open failed / SMART command failed 
 DMESG_FATAL = re.compile(r"machine check|hardware error|mce:|i/o error|ata\d+.*(?:failed|error)|"
                          r"nvme.*(?:timeout|reset|abort)|ext4-fs error|critical medium error|"
                          r"thermal.*(?:shutdown|critical)|memory corruption|edac.*(?:uncorrect|ue)", re.I)
+REQUIRED_BUNDLE_FILES = ("dmidecode.txt", "cpuinfo.txt", "meminfo.txt", "lsblk.json", "dmesg_err.txt", "ip_addr.json",
+                         "memtester.meta.json", "thermal.json")
 REQUIRED_RIGHTS = ("title_transfer_document", "seller_identity_recorded", "data_owner_release")
 REQUIRED_CHECKLIST = ("usb_ports_all_tested", "video_output", "power_button_and_front_panel",
                       "fans_and_cleaning_done", "cosmetic_grade_photos")
@@ -77,9 +79,14 @@ def load_bundle(d: Path) -> dict:
     mp = d / "manifest.json"
     if not mp.is_file():
         raise BundleError(f"{d}: no manifest.json")
-    man = json.loads(mp.read_text())
-    if man.get("schema") != "hs.pc_bench_bundle.v1":
-        raise BundleError(f"{d}: unknown bundle schema {man.get('schema')!r}")
+    try:
+        man = json.loads(mp.read_text())
+    except (ValueError, OSError) as e:
+        raise BundleError(f"{d}: manifest.json unreadable ({type(e).__name__})") from e
+    if not isinstance(man, dict) or man.get("schema") != "hs.pc_bench_bundle.v1":
+        raise BundleError(f"{d}: unknown bundle schema {man.get('schema') if isinstance(man, dict) else type(man).__name__!r}")
+    if not isinstance(man.get("files_sha256"), dict) or not all(isinstance(v, str) for v in man["files_sha256"].values()):
+        raise BundleError(f"{d}: manifest.json has no valid files_sha256 map")
     bad = []
     for name, digest in man["files_sha256"].items():
         p = d / name
@@ -205,18 +212,46 @@ def eval_smart(j: dict, size_bytes: int | None = None) -> tuple[str, str, dict]:
     return ("fail", "; ".join(problems), facts) if problems else ("pass", "SMART healthy per policy", facts)
 
 
+MEMTESTER_TESTS_PER_LOOP = 18  # memtester 4.6.0, as observed on real hardware (see fixtures/)
+
+
+def parse_memtester(text: str) -> dict:
+    """Parse real memtester output. It draws progress with character+backspace pairs, so strip those first."""
+    clean = re.sub(r".\x08", "", text).replace("\x08", "")
+    results, bad = [], []
+    for line in clean.splitlines():
+        m = re.match(r"\s{2}([A-Za-z0-9][A-Za-z0-9\- ]*?)\s*:\s*(.*)$", line)
+        if not m:
+            continue
+        if re.fullmatch(r"[-\\|/ ]*", m.group(2)):  # spinner only: a test still running, i.e. incomplete (not failed)
+            continue
+        results.append(m.group(1))
+        if not re.search(r"\bok$", m.group(2).strip()):
+            bad.append(f"{m.group(1)}: {m.group(2).strip()[-40:]}")
+    return {"tests_total": len(results), "tests_ok": len(results) - len(bad), "bad_results": bad,
+            "failure_lines": [l.strip()[:120] for l in clean.splitlines() if "FAILURE" in l],
+            "loops_seen": len(re.findall(r"Loop \d+/\d+:", clean)), "done": "Done." in clean}
+
+
 def eval_memory(meta: dict | None, text: str | None) -> dict:
     if not meta or meta.get("hs_status") != "ran":
         return unknown("memory_test", "memtester was not run on this unit")
-    out, cov = text or "", meta["tested_mb"] / max(1, meta["total_mb"])
+    if text is None:
+        return unknown("memory_test", "memtester.meta.json claims a run but the raw memtester.txt is missing")
     ev = ["memtester.meta.json", "memtester.txt"]
-    if meta.get("rc") != 0 or re.search(r"FAILURE|failed", out, re.I):
-        return gate("memory_test", "fail", "instrument_log", f"memtester rc={meta.get('rc')} / FAILURE in output", ev)
+    p, cov = parse_memtester(text), meta["tested_mb"] / max(1, meta["total_mb"])
+    # Deliberately NOT matching the word "failed": real memtester prints "trying mlock ...failed" in normal runs.
+    if meta.get("rc") != 0 or p["failure_lines"] or p["bad_results"]:
+        why = p["failure_lines"] or p["bad_results"] or [f"rc={meta.get('rc')}"]
+        return gate("memory_test", "fail", "instrument_log", f"memtester rc={meta.get('rc')}; {why[0]}", ev)
+    need = MEMTESTER_TESTS_PER_LOOP * meta.get("loops", 0)
+    if not p["done"] or p["tests_ok"] < need or p["loops_seen"] < meta.get("loops", 0):
+        return unknown("memory_test", f"memtester output incomplete: {p['tests_ok']}/{need} tests ok, Done={p['done']}")
     if meta.get("loops", 0) < POLICY["memtest_min_loops"] or cov < POLICY["memtest_min_coverage"]:
         return unknown("memory_test", f"clean but insufficient: loops={meta.get('loops')} (need "
                        f"{POLICY['memtest_min_loops']}), coverage={cov:.0%} (need {POLICY['memtest_min_coverage']:.0%})")
     return gate("memory_test", "pass", "instrument_log",
-                f"{meta['loops']} loops over {meta['tested_mb']} MiB ({cov:.0%} of RAM), rc=0", ev)
+                f"{meta['loops']} loops, {p['tests_ok']} tests ok, {meta['tested_mb']} MiB ({cov:.0%} of RAM), rc=0", ev)
 
 
 def eval_thermal(t: dict | None) -> dict:
@@ -281,30 +316,39 @@ def wipe_gates(unit_root: Path, unit: dict, disks: list[dict]) -> list[dict]:
     for rel in (unit.get("bundles") or {}).get("wipe", []):
         try:
             wb = load_bundle(unit_root / rel)
-        except BundleError as e:
+            for f in wb["manifest"]["files_sha256"]:
+                if f.startswith("wipe_"):
+                    doc = json.loads((wb["dir"] / f).read_text())
+                    if not isinstance(doc, dict):
+                        raise ValueError("wipe record is not an object")
+                    wipes.append((doc, f"{rel}/{f}"))
+        except (BundleError, ValueError, OSError) as e:
             return [gate("storage_sanitized", "fail", "instrument_log", f"wipe bundle invalid: {e}")]
-        for f in wb["manifest"]["files_sha256"]:
-            if f.startswith("wipe_"):
-                wipes.append((json.loads((wb["dir"] / f).read_text()), f"{rel}/{f}"))
     out = []
     for d in disks:
-        match = [w for w, _ in wipes if w["size_bytes"] == d["size"]]
+        match = [w for w, _ in wipes if w.get("size_bytes") == d["size"]]
         name = f"storage_sanitized:{d['name']}"
         if not match:
             out.append(unknown(name, "no verify-wipe bundle for this disk (sanitization is a separate human-authorised step)"))
             continue
         w, ev = match[-1], [e for x, e in wipes if x is match[-1]]
-        if w.get("signature_tool") != "ok":
-            out.append(unknown(name, "wipefs signature check unavailable"))
-        elif json.loads(w["signatures_stdout"] or '{"signatures": []}').get("signatures"):
+        try:
+            sigs = json.loads(w.get("signatures_stdout") or '{"signatures": []}').get("signatures")
+        except (ValueError, AttributeError):
+            sigs = None
+        if w.get("signature_tool") != "ok" or w.get("signature_rc") != 0 or sigs is None:
+            out.append(unknown(name, "wipefs signature check did not complete cleanly (tool status/exit code); re-run verify-wipe"))
+        elif sigs:
             out.append(gate(name, "fail", "instrument_log", "filesystem/partition signatures still present", ev))
-        elif w["operator_declared_method"] == "unspecified":
+        elif w.get("operator_declared_method") in (None, "", "unspecified"):
             out.append(unknown(name, "no sanitization method declared (HS_WIPE_METHOD)"))
-        elif w["sampled_blocks"] and (w["zero_blocks"] == w["sampled_blocks"]
-                                      or w["min_entropy_bits_per_byte"] >= POLICY["wipe_min_entropy_bits"]):
+        elif w.get("sampled_blocks") and (w.get("zero_blocks") == w["sampled_blocks"]
+                                          or (w.get("min_entropy_bits_per_byte") or 0) >= POLICY["wipe_min_entropy_bits"]):
             out.append(gate(name, "pass", "instrument_log",
                             f"no signatures; {w['sampled_blocks']} sampled blocks zero/random; method={w['operator_declared_method']}. "
                             "Sampling detects an unwiped disk; it cannot prove unread sectors.", ev))
+        elif not w.get("sampled_blocks"):
+            out.append(unknown(name, "no blocks were sampled"))
         else:
             out.append(gate(name, "fail", "instrument_log", "sampled blocks still contain structured data", ev))
     return out
@@ -337,12 +381,20 @@ def evaluate(unit_path: Path) -> dict:
         dmi = parse_dmi(read(bench, "dmidecode.txt") or "")
         cpu = parse_cpuinfo(read(bench, "cpuinfo.txt") or "")
         ram_mb = total_ram_mb(read(bench, "meminfo.txt") or "")
-        lsblk = read_json(bench, "lsblk.json") or {"blockdevices": []}
+        lsblk_doc = read_json(bench, "lsblk.json")
+        lsblk = lsblk_doc if isinstance(lsblk_doc, dict) else {"blockdevices": []}
         all_disks = internal_disks(lsblk)
         disks = [d for d in all_disks if d.get("tran") != "usb"]
         facts.update({"system": dmi.get("system"), "bios": dmi.get("bios"), "cpu": cpu, "ram_total_mb": ram_mb,
                       "dimms": dmi["dimms"], "excluded_usb_disks": len(all_disks) - len(disks),
                       "host_fingerprint": man.get("host_fingerprint"), "bench_manifest_sha256": bench["manifest_sha256"]})
+        missing = [f for f in REQUIRED_BUNDLE_FILES if (read_json(bench, f) if f.endswith(".json") else read(bench, f)) is None]
+        meta = read_json(bench, "memtester.meta.json") or {}
+        if meta.get("hs_status") == "ran" and read(bench, "memtester.txt") is None:
+            missing.append("memtester.txt")
+        gates.append(unknown("bench_completeness", "required raw files missing or failed to collect: " + ", ".join(missing))
+                     if missing else gate("bench_completeness", "pass", "instrument_log",
+                                          "all required raw collector files are present and non-failed"))
         gates.append(identity_gate(unit, dmi, cpu, ram_mb, disks))
         err = read(bench, "dmesg_err.txt")
         hits = [l for l in (err or "").splitlines() if DMESG_FATAL.search(l)]
@@ -352,7 +404,7 @@ def evaluate(unit_path: Path) -> dict:
                           "booted a live OS on this unit; no machine-check/I-O/ATA/NVMe fatal errors logged", ["dmesg_err.txt"]))
         gates.append(eval_memory(read_json(bench, "memtester.meta.json"), read(bench, "memtester.txt")))
         gates.append(eval_thermal(read_json(bench, "thermal.json")))
-        if not disks:
+        if not disks and isinstance(lsblk_doc, dict):
             gates.append(gate("storage_health", "not_applicable", "instrument_log",
                               "no internal disk: completion must add storage (cost goes in the economics)"))
         for d in disks:

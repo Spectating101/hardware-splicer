@@ -23,6 +23,9 @@ bc = _load("hs_pc_bench_collect", "bench_collect.py")
 
 REAL_NVME = json.loads((ROOT / "fixtures/smart_nvme_control_healthy_redacted.json").read_text())
 REAL_NVME_HOT = json.loads((ROOT / "control_host_optiplex/bundle/smart_nvme0n1.json").read_text())
+MEMTESTER_REAL_CLEAN = (ROOT / "fixtures/memtester_laptop_real_clean.txt").read_text()
+MEMTESTER_REAL_RAW_HEAD = (ROOT / "fixtures/memtester_laptop_real_head_raw.txt").read_text()
+THERMAL_REAL = json.loads((ROOT / "fixtures/thermal_laptop_real_60s.json").read_text())
 REAL_ATA = json.loads((ROOT / "fixtures/smart_ata_usb_hdd_control_redacted.json").read_text())
 
 DMI = """# dmidecode 3.6
@@ -69,19 +72,24 @@ def sata_ssd(**over):
 
 
 def make_bundle(d: Path, *, role="target", memory=MEM_OK, thermal=THERMAL_OK, smart=None, dmi=DMI, ip=IP_OK,
-                dmesg="", extra=None) -> Path:
+                dmesg="", extra=None, omit=()) -> Path:
     b = bc.Bundle(d, redact=False)
-    b.text("dmidecode.txt", dmi)
-    b.text("cpuinfo.txt", CPUINFO)
-    b.text("meminfo.txt", "MemTotal:        8064000 kB\nMemAvailable:    7900000 kB\n")
-    b.js("lsblk.json", LSBLK)
-    b.text("dmesg_err.txt", dmesg)
-    b.js("smart_sda.json", smart if smart is not None else sata_ssd())
-    b.js("memtester.meta.json", memory)
+    writes = [
+        ("dmidecode.txt", lambda n: b.text(n, dmi)),
+        ("cpuinfo.txt", lambda n: b.text(n, CPUINFO)),
+        ("meminfo.txt", lambda n: b.text(n, "MemTotal:        8064000 kB\nMemAvailable:    7900000 kB\n")),
+        ("lsblk.json", lambda n: b.js(n, LSBLK)),
+        ("dmesg_err.txt", lambda n: b.text(n, dmesg)),
+        ("smart_sda.json", lambda n: b.js(n, smart if smart is not None else sata_ssd())),
+        ("memtester.meta.json", lambda n: b.js(n, memory)),
+        ("thermal.json", lambda n: b.js(n, thermal)),
+        ("ip_addr.json", lambda n: b.js(n, ip)),
+    ]
     if memory.get("hs_status") == "ran":
-        b.text("memtester.txt", "Loop 1/2:\n  Stuck Address       : ok\nDone.\n")
-    b.js("thermal.json", thermal)
-    b.js("ip_addr.json", ip)
+        writes.append(("memtester.txt", lambda n: b.text(n, MEMTESTER_REAL_CLEAN)))
+    for name, w in writes:
+        if name not in omit:
+            w(name)
     for k, v in (extra or {}).items():
         b.text(k, v)
     b.finish({"role": role, "mode": "bench", "host_fingerprint": "abc123"})
@@ -90,7 +98,7 @@ def make_bundle(d: Path, *, role="target", memory=MEM_OK, thermal=THERMAL_OK, sm
 
 def make_wipe(d: Path, size=256060514304, **over) -> Path:
     b = bc.Bundle(d, redact=False)
-    w = {"device": "/dev/sda", "size_bytes": size, "signatures_stdout": "", "signature_tool": "ok", "sampled_blocks": 130,
+    w = {"device": "/dev/sda", "size_bytes": size, "signatures_stdout": "", "signature_tool": "ok", "signature_rc": 0, "sampled_blocks": 130,
          "zero_blocks": 130, "min_entropy_bits_per_byte": 0.0, "operator_declared_method": "nvme/ATA secure erase"}
     w.update(over)
     b.js("wipe_sda.json", w)
@@ -355,3 +363,106 @@ def test_partout_candidates_only_come_from_components_that_passed_their_own_gate
     assert "ram_module" in names and "storage" in names
     rep = cf.evaluate(make_unit(sub(tmp_path, "f"), bundle_kw={"memory": {**MEM_OK, "rc": 1}}))
     assert "ram_module" not in [c["asset_type"] for c in rep["partout_candidates"]]
+
+
+# ------------------------------------------------------------- Copilot review findings (reproduced here)
+
+
+def _without(tmp_path, name):
+    p = make_unit(tmp_path)
+    # rebuild the bundle with one raw file missing but a valid manifest for what remains
+    kw = {"omit": (name,)}
+    make_bundle(tmp_path / "bundle2", **kw)
+    u = json.loads(p.read_text())
+    u["bundles"]["bench"] = "bundle2"
+    p.write_text(json.dumps(u))
+    return p
+
+
+@pytest.mark.parametrize("missing", ["memtester.txt", "lsblk.json", "dmidecode.txt", "cpuinfo.txt", "meminfo.txt",
+                                     "dmesg_err.txt", "ip_addr.json", "thermal.json", "memtester.meta.json"])
+def test_a_sparse_bundle_missing_any_required_raw_file_cannot_reach_ready(tmp_path, missing):
+    rep = cf.evaluate(_without(tmp_path, missing))
+    assert rep["decision"] != "READY_FOR_INDEPENDENT_REVIEW", missing
+    assert rep["decision"] == "BLOCKED_MISSING_EVIDENCE", missing
+
+
+def test_a_failed_lsblk_is_not_mistaken_for_no_internal_disk(tmp_path):
+    rep = cf.evaluate(_without(tmp_path, "lsblk.json"))
+    assert gates(rep)["bench_completeness"]["status"] == "unknown"
+    assert not any(g["gate"] == "storage_health" and g["status"] == "not_applicable" for g in rep["gates"])
+
+
+@pytest.mark.parametrize("bad", ["{not json", "[]", '{"schema": "hs.pc_bench_bundle.v1"}',
+                                 '{"schema": "hs.pc_bench_bundle.v1", "files_sha256": []}',
+                                 '{"schema": "hs.pc_bench_bundle.v1", "files_sha256": {"x": 5}}'])
+def test_corrupt_manifest_is_a_failed_gate_not_a_crash(tmp_path, bad):
+    p = make_unit(tmp_path)
+    (tmp_path / "bundle" / "manifest.json").write_text(bad)
+    rep = cf.evaluate(p)  # must not raise
+    assert gates(rep)["bench_bundle_integrity"]["status"] == "fail"
+    assert rep["decision"] == "REJECT_OR_REPAIR"
+
+
+def test_a_failed_wipefs_command_is_not_a_clean_signature_check(tmp_path):
+    p = make_unit(tmp_path)
+    make_wipe(tmp_path / "wipe", signature_rc=1)  # wipefs ran but exited nonzero (e.g. device busy / unreadable)
+    assert gates(cf.evaluate(p))["storage_sanitized:sda"]["status"] == "unknown"
+    make_wipe(tmp_path / "wipe", signature_rc=None)  # field missing from an old/forged bundle
+    assert gates(cf.evaluate(p))["storage_sanitized:sda"]["status"] == "unknown"
+
+
+# ------------------------------------------------------------- real memtester / stress-ng / thermal output
+def test_real_memtester_output_parses_as_36_clean_tests_over_two_loops():
+    p = cf.parse_memtester(MEMTESTER_REAL_CLEAN)
+    assert (p["tests_total"], p["tests_ok"], p["loops_seen"], p["done"]) == (36, 36, 2, True)
+    assert p["bad_results"] == [] and p["failure_lines"] == []
+
+
+def test_real_raw_memtester_progress_with_backspaces_is_cleaned_before_parsing():
+    assert "\b" in MEMTESTER_REAL_RAW_HEAD  # genuine progress characters are preserved in the fixture
+    p = cf.parse_memtester(MEMTESTER_REAL_RAW_HEAD)
+    assert p["tests_ok"] >= 1 and p["bad_results"] == [] and p["done"] is False
+
+
+def test_real_memtester_run_is_a_pass_only_with_enough_coverage_and_complete_output():
+    full = {"hs_status": "ran", "tested_mb": 7000, "loops": 2, "rc": 0, "total_mb": 7826}
+    assert cf.eval_memory(full, MEMTESTER_REAL_CLEAN)["status"] == "pass"
+    real_meta = {"hs_status": "ran", "tested_mb": 1024, "loops": 2, "rc": 0, "total_mb": 7826}  # what the laptop really tested
+    g = cf.eval_memory(real_meta, MEMTESTER_REAL_CLEAN)
+    assert g["status"] == "unknown" and "coverage" in g["detail"]  # 13% of RAM is not enough: honest unknown
+    truncated = MEMTESTER_REAL_CLEAN[: MEMTESTER_REAL_CLEAN.index("Loop 2/2")]
+    assert cf.eval_memory(full, truncated)["status"] == "unknown"  # cut-off output cannot pass
+
+
+def test_the_word_failed_in_a_normal_memtester_run_is_not_a_memory_failure():
+    noisy = MEMTESTER_REAL_CLEAN.replace("trying mlock ...locked.", "trying mlock ...failed, retrying with less memory ...locked.")
+    assert "failed" in noisy
+    full = {"hs_status": "ran", "tested_mb": 7000, "loops": 2, "rc": 0, "total_mb": 7826}
+    assert cf.eval_memory(full, noisy)["status"] == "pass"
+
+
+def test_a_non_ok_test_line_or_failure_marker_fails_even_with_rc_zero():
+    full = {"hs_status": "ran", "tested_mb": 7000, "loops": 2, "rc": 0, "total_mb": 7826}
+    bad = MEMTESTER_REAL_CLEAN.replace("Compare XOR         : ok", "Compare XOR         : FAILURE: 0xaaaa != 0xaabb at offset 0x10", 1)
+    assert cf.eval_memory(full, bad)["status"] == "fail"
+
+
+def test_real_thermal_capture_uses_the_throttle_keys_the_evaluator_reads():
+    assert any(k.endswith("core_throttle_count") for k in THERMAL_REAL["throttle_after"])
+    short = cf.eval_thermal(THERMAL_REAL)
+    assert short["status"] == "unknown" and "need 1200" in short["detail"]  # 60 s is not a burn-in
+    old = dict(cf.POLICY)
+    try:
+        cf.POLICY["stress_min_seconds"] = 60
+        ok = cf.eval_thermal(THERMAL_REAL)
+        assert ok["status"] == "pass", ok["detail"]
+        hot = copy.deepcopy(THERMAL_REAL)
+        hot["throttle_after"]["cpu1/core_throttle_count"] += 5
+        assert cf.eval_thermal(hot)["status"] == "fail"
+        hot2 = copy.deepcopy(THERMAL_REAL)
+        hot2["samples"][3]["temps_c"]["coretemp/temp1"] = 99.0
+        assert cf.eval_thermal(hot2)["status"] == "fail"
+    finally:
+        cf.POLICY.clear()
+        cf.POLICY.update(old)
