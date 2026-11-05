@@ -1,0 +1,81 @@
+{
+   "blockdevices": [
+      {
+         "name": "sda",
+         "type": "disk",
+         "size": 2000398934016,
+         "rota": true,
+         "tran": "usb",
+         "model": "ST2000LM007-1R8174",
+         "fstype": null,
+         "parttype": null,
+         "mountpoint": null,
+         "children": [
+            {
+               "name": "sda1",
+               "type": "part",
+               "size": 2000396746752,
+               "rota": true,
+               "tran": null,
+               "model": null,
+               "fstype": "exfat",
+               "parttype": "0x7",
+               "mountpoint": "/mnt/research-data"
+            }
+         ]
+      },{
+         "name": "sr0",
+         "type": "rom",
+         "size": 1073741312,
+         "rota": false,
+         "tran": "sata",
+         "model": "HL-DT-ST DVD-ROM DU90N",
+         "fstype": null,
+         "parttype": null,
+         "mountpoint": null
+      },{
+         "name": "nvme0n1",
+         "type": "disk",
+         "size": 512110190592,
+         "rota": false,
+         "tran": "nvme",
+         "model": "SAMSUNG MZVLQ512HALU-000H1",
+         "fstype": null,
+         "parttype": null,
+         "mountpoint": null,
+         "children": [
+            {
+               "name": "nvme0n1p1",
+               "type": "part",
+               "size": 1023410176,
+               "rota": false,
+               "tran": "nvme",
+               "model": null,
+               "fstype": "vfat",
+               "parttype": "c12a7328-f81f-11d2-ba4b-00a0c93ec93b",
+               "mountpoint": "/boot/efi"
+            },{
+               "name": "nvme0n1p2",
+               "type": "part",
+               "size": 484679090176,
+               "rota": false,
+               "tran": "nvme",
+               "model": null,
+               "fstype": "ext4",
+               "parttype": "0fc63daf-8483-4772-8e79-3d69d8477de4",
+               "mountpoint": "/"
+            },{
+               "name": "nvme0n1p3",
+               "type": "part",
+               "size": 26406289408,
+               "rota": false,
+               "tran": "nvme",
+               "model": null,
+               "fstype": "swap",
+               "parttype": "0657fd6d-a4ab-43c4-84e5-0933c84b4f4f",
+               "mountpoint": "[SWAP]"
+            }
+         ]
+      }
+   ]
+}

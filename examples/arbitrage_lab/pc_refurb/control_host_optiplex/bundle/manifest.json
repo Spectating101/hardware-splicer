@@ -1,0 +1,43 @@
+{
+  "argv": [
+    "--out",
+    "<path>",
+    "--role",
+    "control_host",
+    "--redact-serials"
+  ],
+  "collector_version": "1",
+  "euid": 0,
+  "files_sha256": {
+    "cpuinfo.txt": "a662ba54fd081633eaa6853d23de198c1191104e30c980f4fa63ed1e4b3c369d",
+    "dmesg_err.txt": "3b846e03ec2614f6137be667749219b40593dde74732e753813294e2ea3e8607",
+    "dmidecode.txt": "8f2dfebfa28d198457a5837b301306d3671a28b5846ad40e9c00d36e4022ad9d",
+    "ip_addr.json": "c7cfe78d478fec96f246377d4ebd5fa3ff66d44801dc696692cc75eeb9458a17",
+    "lsblk.json": "47b8c85757c4746072e7abce3de2d766044fea9abe527c170449c84265233fde",
+    "lspci.txt": "4ed49bde43f5448e01bf1a4db94b907e902e51b48e5ce689a894dadb5628383f",
+    "lsusb.txt": "504bc01be43ca03a1661dedb05924a4c853130a02a3364cc3be5643555c50753",
+    "meminfo.txt": "1e02e550f02d1fcf95c5f9ab348680d5741dd534b59f796cd6c270504bf6b8aa",
+    "memtester.meta.json": "3551dd81be063c854b11263655d1d41a78ebeda16c20e35dfe624641e17497e8",
+    "platform.json": "f440559c8767933b9157863ac500ebbe022afb7cebdacebf0f91233d17426aef",
+    "smart_nvme0n1.json": "8a8d1a7855305c1479981e72e2122f10c01cf57f7e7ce3f1f942f829f7c3c55f",
+    "smart_sda.json": "210d34df0039536a31a59e8d51036bf5729f9be39c77cc70fa005e4b7ef5c5e2",
+    "thermal.json": "b9ec493d20a8053ce42bd0104f9ec8cb3c8cb1b31de7ccada17b4e3914ef4dd6",
+    "uptime.txt": "847e9a24e4998819894242c39ebde4249ecbf0bf36f08e14808eb1bc9f80c32e"
+  },
+  "finished_utc": "2026-11-05T14:58:24+00:00",
+  "host_fingerprint": "fa849e46ee3bba5a",
+  "mode": "bench",
+  "notes": [],
+  "redacted_serials": true,
+  "role": "control_host",
+  "schema": "hs.pc_bench_bundle.v1",
+  "started_utc": "2026-11-05T14:58:23+00:00",
+  "tools": {
+    "dmidecode": true,
+    "ip": true,
+    "lsblk": true,
+    "memtester": true,
+    "smartctl": true,
+    "stress-ng": true
+  }
+}

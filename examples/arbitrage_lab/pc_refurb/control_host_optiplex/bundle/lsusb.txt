@@ -1,0 +1,6 @@
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 1a2c:2124 China Resource Semico Co., Ltd Keyboard
+Bus 001 Device 003: ID 2357:0120 TP-Link Archer T2U PLUS [RTL8821AU]
+Bus 001 Device 004: ID 3151:3020 YICHIP Wireless Device
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 002 Device 002: ID 8564:7000 Transcend Information, Inc. StoreJet 25H3
