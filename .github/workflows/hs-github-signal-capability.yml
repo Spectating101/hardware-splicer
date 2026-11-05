@@ -11,8 +11,10 @@ on:
       - "src/hardware_splicer/github_signal_task_router.py"
       - "tests/test_github_signal_task_router.py"
       - "src/hardware_splicer/github_signal_remote_dispatch.py"
+      - "src/hardware_splicer/github_signal_worker_registry.py"
       - "scripts/dispatch_hs_workshop_task.py"
       - "tests/test_github_signal_remote_dispatch.py"
+      - "tests/test_github_signal_worker_registry.py"
       - "examples/github_signals/**"
       - ".github/workflows/hs-github-signal-capability.yml"
   workflow_dispatch:
@@ -51,7 +53,7 @@ jobs:
       - name: Install HS test dependencies
         run: python -m pip install -e '.[dev]'
       - name: Verify signal trust, pin, sandbox and registry gates
-        run: python -m pytest -q tests/test_github_signal_pipeline.py tests/test_github_signal_task_router.py tests/test_github_signal_remote_dispatch.py tests/test_capability_policy.py tests/test_capability_runtime.py
+        run: python -m pytest -q tests/test_github_signal_pipeline.py tests/test_github_signal_task_router.py tests/test_github_signal_remote_dispatch.py tests/test_github_signal_worker_registry.py tests/test_capability_policy.py tests/test_capability_runtime.py
 
   native-reviewed-integration:
     needs: intake-unit-gates

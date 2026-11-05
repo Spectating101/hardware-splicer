@@ -21,6 +21,9 @@ from typing import Any
 
 from .github_signal_pipeline import ADAPTERS, SignalEvaluationError, sha256_file
 from .github_signal_task_router import select_task
+from .github_signal_worker_registry import (
+    WORKER_ID, allocation_lock, choose_worker,
+)
 
 SCHEMA = "hardware_splicer.github_signal_remote_job.v1"
 REPO = "Spectating101/hardware-splicer"
@@ -151,6 +154,16 @@ def read_job(ledger: Path, request_id: str) -> dict[str, Any]:
         raise WorkerStateError("job record task or source pin invalid")
     if data.get("repository") != REPO or data.get("ref") != DEFAULT_REF:
         raise WorkerStateError("job record endpoint not approved")
+    if data.get("worker_id", WORKER_ID) != WORKER_ID:
+        raise WorkerStateError("job record references an unapproved worker transport")
+    assignment = data.get("worker_assignment")
+    if assignment is not None and (
+        not isinstance(assignment, dict)
+        or assignment.get("worker_id") != WORKER_ID
+        or assignment.get("allowed_task") != data.get("task")
+        or assignment.get("physical_authority") is not False
+    ):
+        raise WorkerStateError("job worker assignment is inconsistent")
     return data
 
 
@@ -211,19 +224,24 @@ def submit(
         "mode": "fixed_example_worker_not_arbitrary_user_input",
     }
     if not execute:
+        manifest["worker_assignment"] = choose_worker(ledger, task)
+        manifest["worker_id"] = manifest["worker_assignment"]["worker_id"]
         return manifest
-    if not ledger.exists():
-        ledger.mkdir(parents=True, exist_ok=True)
-    _save(ledger, manifest, overwrite=False)
-    try:
-        client.dispatch(task=task, request_id=rid)
-    except Exception:
-        manifest["status"] = "dispatch_unknown_check_remote_before_retry"
+    # The lock is local-process/host scoped. Hold it across admission,
+    # durable reservation and dispatch to avoid oversubscribing this ledger.
+    with allocation_lock(ledger):
+        manifest["worker_assignment"] = choose_worker(ledger, task)
+        manifest["worker_id"] = manifest["worker_assignment"]["worker_id"]
+        _save(ledger, manifest, overwrite=False)
+        try:
+            client.dispatch(task=task, request_id=rid)
+        except Exception:
+            manifest["status"] = "dispatch_unknown_check_remote_before_retry"
+            _save(ledger, manifest, overwrite=True)
+            raise
+        manifest["status"] = "submitted"
+        manifest["submitted_utc"] = _utc()
         _save(ledger, manifest, overwrite=True)
-        raise
-    manifest["status"] = "submitted"
-    manifest["submitted_utc"] = _utc()
-    _save(ledger, manifest, overwrite=True)
     return manifest
 
 
