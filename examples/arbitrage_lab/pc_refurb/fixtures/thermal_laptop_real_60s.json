@@ -1,0 +1,200 @@
+{
+  "hs_status": "ran",
+  "rc": 0,
+  "requested_seconds": 60,
+  "samples": [
+    {
+      "t": 0.0,
+      "temps_c": {
+        "acpitz/temp1": 65.0,
+        "coretemp/temp1": 65.0,
+        "coretemp/temp2": 60.0,
+        "coretemp/temp3": 62.0,
+        "coretemp/temp4": 65.0,
+        "coretemp/temp5": 59.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 5.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 10.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 60.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 15.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 64.0,
+        "coretemp/temp2": 64.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 20.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 61.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 25.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 64.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 30.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 64.0,
+        "coretemp/temp2": 64.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 35.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 62.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 61.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 40.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 45.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 50.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 61.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 55.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 63.0,
+        "coretemp/temp2": 63.0,
+        "coretemp/temp3": 61.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 60.0,
+        "pch_skylake/temp1": 53.0
+      }
+    },
+    {
+      "t": 60.0,
+      "temps_c": {
+        "acpitz/temp1": 63.0,
+        "coretemp/temp1": 62.0,
+        "coretemp/temp2": 62.0,
+        "coretemp/temp3": 59.0,
+        "coretemp/temp4": 62.0,
+        "coretemp/temp5": 59.0,
+        "pch_skylake/temp1": 53.0
+      }
+    }
+  ],
+  "throttle_after": {
+    "cpu0/core_throttle_count": 0,
+    "cpu0/package_throttle_count": 0,
+    "cpu1/core_throttle_count": 0,
+    "cpu1/package_throttle_count": 0,
+    "cpu2/core_throttle_count": 0,
+    "cpu2/package_throttle_count": 0,
+    "cpu3/core_throttle_count": 0,
+    "cpu3/package_throttle_count": 0,
+    "cpu4/core_throttle_count": 0,
+    "cpu4/package_throttle_count": 0,
+    "cpu5/core_throttle_count": 0,
+    "cpu5/package_throttle_count": 0,
+    "cpu6/core_throttle_count": 0,
+    "cpu6/package_throttle_count": 0,
+    "cpu7/core_throttle_count": 0,
+    "cpu7/package_throttle_count": 0
+  },
+  "throttle_before": {
+    "cpu0/core_throttle_count": 0,
+    "cpu0/package_throttle_count": 0,
+    "cpu1/core_throttle_count": 0,
+    "cpu1/package_throttle_count": 0,
+    "cpu2/core_throttle_count": 0,
+    "cpu2/package_throttle_count": 0,
+    "cpu3/core_throttle_count": 0,
+    "cpu3/package_throttle_count": 0,
+    "cpu4/core_throttle_count": 0,
+    "cpu4/package_throttle_count": 0,
+    "cpu5/core_throttle_count": 0,
+    "cpu5/package_throttle_count": 0,
+    "cpu6/core_throttle_count": 0,
+    "cpu6/package_throttle_count": 0,
+    "cpu7/core_throttle_count": 0,
+    "cpu7/package_throttle_count": 0
+  },
+  "wall_seconds": 60.3
+}
