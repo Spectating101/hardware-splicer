@@ -1,0 +1,216 @@
+{
+  "schema": "hs.pc_refurb_casefile.v1",
+  "unit_id": "control-optiplex-20261105",
+  "lot_id": "none",
+  "role": "control_host",
+  "acquired": false,
+  "decision": "NOT_A_PRODUCT_CONTROL_HOST",
+  "reason": "role 'control_host' can never release a product",
+  "review_note": null,
+  "approved_for_sale": false,
+  "gates": [
+    {
+      "gate": "rights:title_transfer_document",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "no non-empty evidence file",
+      "evidence": []
+    },
+    {
+      "gate": "rights:seller_identity_recorded",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "no non-empty evidence file",
+      "evidence": []
+    },
+    {
+      "gate": "rights:data_owner_release",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "no non-empty evidence file",
+      "evidence": []
+    },
+    {
+      "gate": "identity_matches_claim",
+      "status": "not_applicable",
+      "authority": "none",
+      "detail": "no seller claim recorded",
+      "evidence": []
+    },
+    {
+      "gate": "boot_and_kernel_health",
+      "status": "pass",
+      "authority": "instrument_log",
+      "detail": "booted a live OS on this unit; no machine-check/I-O/ATA/NVMe fatal errors logged",
+      "evidence": [
+        "dmesg_err.txt"
+      ]
+    },
+    {
+      "gate": "memory_test",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "memtester was not run on this unit",
+      "evidence": []
+    },
+    {
+      "gate": "thermal_stress",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "stress-ng was not run on this unit",
+      "evidence": []
+    },
+    {
+      "gate": "storage_health:nvme0n1",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "NVMe temperature flag set at 82 C (cumulative minutes over warning 1662, over critical 9): transient; let the drive cool and re-run. Cumulative over-temperature time is a wear indicator to disclose.",
+      "evidence": [
+        "smart_nvme0n1.json"
+      ]
+    },
+    {
+      "gate": "storage_sanitized:nvme0n1",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "no verify-wipe bundle for this disk (sanitization is a separate human-authorised step)",
+      "evidence": []
+    },
+    {
+      "gate": "network",
+      "status": "pass",
+      "authority": "instrument_log",
+      "detail": "4 interface(s) UP with an IPv4 address (DHCP)",
+      "evidence": [
+        "ip_addr.json"
+      ]
+    },
+    {
+      "gate": "checklist:usb_ports_all_tested",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "not recorded",
+      "evidence": []
+    },
+    {
+      "gate": "checklist:video_output",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "not recorded",
+      "evidence": []
+    },
+    {
+      "gate": "checklist:power_button_and_front_panel",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "not recorded",
+      "evidence": []
+    },
+    {
+      "gate": "checklist:fans_and_cleaning_done",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "not recorded",
+      "evidence": []
+    },
+    {
+      "gate": "checklist:cosmetic_grade_photos",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "not recorded",
+      "evidence": []
+    },
+    {
+      "gate": "os_licence",
+      "status": "unknown",
+      "authority": "none",
+      "detail": "decide: linux / no OS / Windows only with the original COA photographed",
+      "evidence": []
+    }
+  ],
+  "authority_counts": {
+    "none": 14,
+    "instrument_log": 2
+  },
+  "facts": {
+    "system": {
+      "Manufacturer": "Dell Inc.",
+      "Product Name": "OptiPlex 5060",
+      "Version": "Not Specified"
+    },
+    "bios": {
+      "Vendor": "Dell Inc.",
+      "Version": "1.2.22",
+      "Release Date": "11/01/2018"
+    },
+    "cpu": {
+      "model": "Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz",
+      "threads": 6
+    },
+    "ram_total_mb": 31898,
+    "dimms": [
+      {
+        "size_mb": 16384,
+        "type": "DDR4",
+        "speed": "2666 MT/s",
+        "locator": "DIMM1"
+      },
+      {
+        "size_mb": 16384,
+        "type": "DDR4",
+        "speed": "2666 MT/s",
+        "locator": "DIMM2"
+      },
+      {
+        "size_mb": 0,
+        "type": "Unknown",
+        "speed": null,
+        "locator": "DIMM3"
+      },
+      {
+        "size_mb": 0,
+        "type": "Unknown",
+        "speed": null,
+        "locator": "DIMM4"
+      }
+    ],
+    "excluded_usb_disks": 1,
+    "host_fingerprint": "fa849e46ee3bba5a",
+    "bench_manifest_sha256": "24ddbf4f5cf9eb87dff431dc0f6d17b6bbaa850f4dbc42d5019636a76fff7845",
+    "disks": {
+      "nvme0n1": {
+        "size_bytes": 512110190592,
+        "model": "SAMSUNG MZVLQ512HALU-000H1",
+        "smartctl_exit_status": 8,
+        "power_on_hours": 4845,
+        "critical_warning": 2,
+        "percentage_used": 24,
+        "available_spare": 100,
+        "media_errors": 0,
+        "warning_temp_time": 1662,
+        "critical_comp_time": 9,
+        "temperature": 82
+      }
+    }
+  },
+  "policy": {
+    "memtest_min_coverage": 0.75,
+    "memtest_min_loops": 2,
+    "stress_min_seconds": 1200,
+    "max_temp_c": 95.0,
+    "ata_zero_attrs": [
+      5,
+      187,
+      197,
+      198
+    ],
+    "ata_max_crc_errors": 50,
+    "nvme_max_percentage_used": 80,
+    "nvme_min_available_spare": 20,
+    "advisory_power_on_hours": 40000,
+    "wipe_min_entropy_bits": 7.5,
+    "identity_tolerance": 0.1
+  },
+  "physical_proof": "NONE: role/acquisition state forbids physical claims",
+  "partout_candidates": []
+}
