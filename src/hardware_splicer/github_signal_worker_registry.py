@@ -74,6 +74,8 @@ def _verify_worker(row: Any) -> dict[str, Any]:
 
 def read_registry(ledger: Path) -> dict[str, Any]:
     path = _path(ledger)
+    if path.is_symlink():
+        raise RegistryError("worker registry file is unsafe")
     if not path.exists():
         # PR #283's approved backend remains usable without migrating ledgers.
         return {"schema_version": SCHEMA, "workers": [copy.deepcopy(DEFAULT_WORKER)],
@@ -168,7 +170,8 @@ def _occupied(ledger: Path, worker_id: str) -> int:
         except (OSError, ValueError) as exc:
             raise RegistryError("cannot schedule with unreadable job ledger") from exc
         if (not isinstance(job, dict)
-                or job.get("request_id") + ".json" != path.name
+                or not isinstance(job.get("request_id"), str)
+                or job["request_id"] + ".json" != path.name
                 or job.get("schema_version") != "hardware_splicer.github_signal_remote_job.v1"
                 or job.get("task") not in TASK_CAPABILITIES):
             raise RegistryError("cannot schedule with unverified job ledger")
