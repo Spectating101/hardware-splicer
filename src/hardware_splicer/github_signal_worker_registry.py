@@ -208,3 +208,62 @@ def choose_worker(ledger: Path, task: str) -> dict[str, Any]:
                 "physical_authority": False,
             }
     raise RegistryError("approved worker is at local in-flight capacity")
+
+
+def discover_github_self_hosted(client: Any) -> dict[str, Any]:
+    """Read-only discovery of GitHub-registered runners, never enrollment.
+
+    A GitHub registration alone is NOT authority to execute HS tasks.
+    Existing workflow jobs remain on GitHub-hosted ubuntu-24.04.
+    """
+    entries: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    total: int | None = None
+    for page in range(1, 12):
+        data = client.get(
+            "repos/Spectating101/hardware-splicer/actions/runners"
+            f"?per_page=100&page={page}"
+        )
+        count = data.get("total_count")
+        rows = data.get("runners")
+        if type(count) is not int or not 0 <= count <= 1000:
+            raise RegistryError("invalid or excessive self-hosted runner count")
+        if not isinstance(rows, list) or len(rows) > 100 or (total is not None and count != total):
+            raise RegistryError("self-hosted runner discovery response invalid")
+        total = count
+        for row in rows:
+            if (not isinstance(row, dict) or type(row.get("id")) is not int
+                    or not isinstance(row.get("name"), str)
+                    or not isinstance(row.get("labels"), list)):
+                raise RegistryError("self-hosted runner metadata invalid")
+            if row["id"] in seen:
+                raise RegistryError("duplicate self-hosted runner identity")
+            seen.add(row["id"])
+            labels = row["labels"]
+            if any(not isinstance(label, dict) or not isinstance(label.get("name"), str)
+                   for label in labels):
+                raise RegistryError("self-hosted runner labels invalid")
+            entries.append({
+                "github_runner_id": row["id"],
+                "name": row["name"],
+                "status": row.get("status"),
+                "busy": row.get("busy"),
+                "labels": sorted(label["name"] for label in labels),
+                "hs_approved": False,
+                "schedulable_by_hs": False,
+                "reason": "no reviewed self-hosted transport/enrollment policy",
+            })
+        if len(entries) == total:
+            break
+        if len(rows) != 100:
+            raise RegistryError("incomplete self-hosted runner list")
+    if total is None or len(entries) != total:
+        raise RegistryError("self-hosted runner discovery incomplete")
+    return {
+        "schema_version": SCHEMA,
+        "source": "github_actions_self_hosted_runners_read_only",
+        "total_count": total,
+        "runners": entries,
+        "registration_is_execution_authority": False,
+        "physical_authority": False,
+    }
