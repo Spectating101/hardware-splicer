@@ -87,6 +87,52 @@ class EnclosureSpec(BaseModel):
     include_lid_screw_holes: bool = True
 
 
+class AerialFrameSpec(BaseModel):
+    """Parametric whole-airframe prototype for 1S micro brushless quadrotors.
+
+    Explicit wheelbase, prop guard clearance, motor PCD, 45° FC mounts and
+    battery-fit channel. Prototype geometry only, NOT certified flight hardware.
+    """
+    name: str = "hs_microdrone"
+    wheelbase_mm: MmPos
+    prop_diameter_mm: MmPos
+    prop_radial_clearance_mm: MmPos = 0.8
+    duct_wall_mm: MmPos = 1.2
+    duct_height_mm: MmPos = 16.0
+    plate_thickness_mm: MmPos = 2.2
+    strut_width_mm: MmPos = 2.6
+    motor_plate_diameter_mm: MmPos = 11.5
+    motor_bolt_pcd_mm: MmPos = 6.6
+    motor_bolt_hole_d_mm: MmPos = 1.6
+    motor_wire_hole_d_mm: MmPos = 2.9
+    fc_mount_pitch_mm: MmPos = 26
+    fc_mount_hole_d_mm: MmPos = 2.0
+    fc_boss_diameter_mm: MmPos = 6.0
+    battery_w_mm: MmPos
+    battery_h_mm: MmPos
+    battery_l_mm: MmPos
+    battery_clearance_mm: MmPos = 0.4
+    battery_cradle_wall_mm: MmPos = 1.2
+    chamfer_mm: Mm = 0.0
+
+
+class MountingPlateSpec(BaseModel):
+    """Native Mecha-Splicer 4-hole rectangular electronics mount/bench fixture.
+
+    Produces printable source geometry. Hole/part dimensional fit is unverified
+    until measured physically, and this is not an approved flying component.
+    """
+    name: str = "mounting_plate"
+    w_mm: MmPos
+    d_mm: MmPos
+    t_mm: MmPos = 2.4
+    pitch_x_mm: MmPos
+    pitch_y_mm: MmPos
+    hole_d_mm: MmPos = 1.8
+    window_w_mm: Mm = 0.0
+    window_d_mm: Mm = 0.0
+
+
 class BracketSpec(BaseModel):
     name: str = "bracket"
     w_mm: MmPos
@@ -472,6 +518,8 @@ class ProjectSpec(BaseModel):
 
     # v1 scopes
     enclosure: Optional[EnclosureSpec] = None
+    aerial_frame: Optional[AerialFrameSpec] = None
+    mounting_plate: Optional[MountingPlateSpec] = None
     bracket: Optional[BracketSpec] = None
     servo_mount: Optional[ServoMountSpec] = None
     linear_axis: Optional[LinearAxisSpec] = None
