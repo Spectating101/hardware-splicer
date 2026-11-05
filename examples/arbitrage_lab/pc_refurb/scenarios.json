@@ -1,0 +1,76 @@
+{
+  "_readme": "Every number is an input with a basis tag. public_source = cited fact; handoff_assumed = carried from the PR #286 handoff unchanged; assumed = this PR's placeholder to be replaced by a measurement; observed_listing = an asking price seen in market_comps (NOT a realized price). Nothing here is a quote from a supplier.",
+  "defaults": {
+    "labor_rate_twd_per_hr": 196,
+    "lot_size": 5,
+    "transport_total_twd": 600,
+    "inbound_shipping_twd": 0,
+    "disposal_on_fail_twd": 150,
+    "fee_rate": 0.10,
+    "outbound_shipping_twd": 100,
+    "return_rate": 0.10,
+    "return_handling_min": 30,
+    "return_loss_fraction": 0.30,
+    "sell_through": 0.90,
+    "unsold_markdown": 0.15,
+    "target_ev_twd": 150,
+    "prior_strength": 4,
+    "policy": "buy_all",
+    "stages": [
+      {"name": "inspection", "hands_on_min": 10, "p_pass": 0.80, "pre_purchase": true},
+      {"name": "power_post", "hands_on_min": 10, "p_pass": 0.85},
+      {"name": "bench_bundle", "hands_on_min": 15, "unattended_min": 90, "p_pass": 0.75},
+      {"name": "completion_wipe_install", "hands_on_min": 35, "cost_twd": 150, "p_pass": 0.97},
+      {"name": "list_and_ship", "hands_on_min": 45, "p_pass": 1.0}
+    ]
+  },
+  "scenarios": {
+    "scrap_lot_buy_all": {
+      "description": "Handoff scenario: five retired low-spec desktops bought as a lot without per-unit inspection, resale NT$2,200 each.",
+      "assumed_bid_twd": 250,
+      "resale_twd": 2200,
+      "basis": {"resale_twd": "handoff_assumed (market_comps: old i5-6500 8G/256G asks ~2,000 with 0 sold; old gaming PCs ~1,900 with 6 sold)",
+                "assumed_bid_twd": "handoff_assumed (no seller quote)", "stage p_pass": "assumed priors, not measured",
+                "labor_rate_twd_per_hr": "public_source (2026 minimum wage; a floor)", "hands_on_min": "assumed; time the first unit",
+                "fee_rate/return_rate/sell_through": "assumed"}
+    },
+    "scrap_lot_inspect_each": {
+      "description": "Same machines, but the supplier lets you inspect and power each unit before you pay (failures are not bought).",
+      "policy": "inspect_each",
+      "assumed_bid_twd": 250,
+      "resale_twd": 2200,
+      "basis": {"resale_twd": "handoff_assumed", "assumed_bid_twd": "handoff_assumed", "policy": "requires the supplier to agree; unconfirmed",
+                "stage p_pass": "assumed priors"}
+    },
+    "business_8th_gen_inspect_each": {
+      "description": "8th/9th-gen business PCs (OptiPlex/EliteDesk/ThinkCentre) from corporate lease returns, completed with RAM/SSD, inspected before purchase.",
+      "policy": "inspect_each",
+      "assumed_bid_twd": 1500,
+      "resale_twd": 5000,
+      "stage_overrides": {
+        "inspection": {"p_pass": 0.90},
+        "power_post": {"p_pass": 0.93},
+        "bench_bundle": {"p_pass": 0.85},
+        "completion_wipe_install": {"cost_twd": 1200, "p_pass": 0.97}
+      },
+      "basis": {"resale_twd": "assumed haircut of an observed ask: market_comps shows a refurbished i5-8500/16G/512G listing asking NT$7,200 with 68 sold; NT$5,000 assumes a weaker spec/brand. NOT a realized price",
+                "completion_parts_twd": "assumed (RAM + SSD upgrade); replace with a real parts quote",
+                "assumed_bid_twd": "placeholder to show EV; the useful output is max_bid", "stage p_pass": "assumed; lease-return units are better kept than scrap"}
+    },
+    "working_claimed_acer": {
+      "description": "Handoff counterfactual: buy a working-claimed Acer TC-865 (i5-8400) at NT$2,800, verify, resell at NT$5,000. Online purchase: cannot inspect first.",
+      "assumed_bid_twd": 2800,
+      "inbound_shipping_twd": 150,
+      "transport_total_twd": 0,
+      "resale_twd": 5000,
+      "stage_overrides": {
+        "inspection": {"hands_on_min": 5, "p_pass": 0.92, "pre_purchase": false},
+        "power_post": {"p_pass": 0.95},
+        "bench_bundle": {"p_pass": 0.92},
+        "completion_wipe_install": {"cost_twd": 150, "p_pass": 0.98}
+      },
+      "basis": {"assumed_bid_twd": "observed_listing (handoff: Ruten ask NT$2,800)", "resale_twd": "handoff_assumed",
+                "stage p_pass": "assumed: 'arrives as described' 0.92 stands in for the handoff's 0.80 overall"}
+    }
+  }
+}

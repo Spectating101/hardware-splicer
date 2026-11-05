@@ -1,0 +1,537 @@
+{
+  "schema": "hs.pc_staged_economics.v1",
+  "labor_floor_basis": "Taiwan 2026 minimum wage NT$196/h (public)",
+  "scenarios": {
+    "scrap_lot_buy_all": {
+      "scenario": "scrap_lot_buy_all",
+      "description": "Handoff scenario: five retired low-spec desktops bought as a lot without per-unit inspection, resale NT$2,200 each.",
+      "inputs_basis": {
+        "resale_twd": "handoff_assumed (market_comps: old i5-6500 8G/256G asks ~2,000 with 0 sold; old gaming PCs ~1,900 with 6 sold)",
+        "assumed_bid_twd": "handoff_assumed (no seller quote)",
+        "stage p_pass": "assumed priors, not measured",
+        "labor_rate_twd_per_hr": "public_source (2026 minimum wage; a floor)",
+        "hands_on_min": "assumed; time the first unit",
+        "fee_rate/return_rate/sell_through": "assumed"
+      },
+      "bid_assumed_twd": 250,
+      "at_assumed_bid": {
+        "ev_twd": 122.5,
+        "p_success_overall": 0.4947,
+        "p_unit_is_bought": 1.0,
+        "net_per_success_before_acq_twd": 1754.5,
+        "hands_on_hours_expected": 1.14,
+        "unattended_hours_expected": 1.02,
+        "ev_per_hands_on_hour_twd": 107.6
+      },
+      "max_bid_at_prior_twd": 222,
+      "sensitivity_overall_yield": {
+        "0.25": {
+          "max_bid_twd": 0,
+          "ev_twd": -227.4,
+          "p_success_overall": 0.25,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 0.73,
+          "unattended_hours_expected": 0.7,
+          "ev_per_hands_on_hour_twd": -310.1
+        },
+        "0.5": {
+          "max_bid_twd": 230,
+          "ev_twd": 130.2,
+          "p_success_overall": 0.5,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.15,
+          "unattended_hours_expected": 1.03,
+          "ev_per_hands_on_hour_twd": 113.5
+        },
+        "0.65": {
+          "max_bid_twd": 447,
+          "ev_twd": 347.5,
+          "p_success_overall": 0.65,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.38,
+          "unattended_hours_expected": 1.18,
+          "ev_per_hands_on_hour_twd": 251.2
+        },
+        "0.8": {
+          "max_bid_twd": 666,
+          "ev_twd": 566.0,
+          "p_success_overall": 0.8,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.61,
+          "unattended_hours_expected": 1.33,
+          "ev_per_hands_on_hour_twd": 350.6
+        }
+      },
+      "sensitivity_labor_rate": {
+        "196": {
+          "ev_per_unit_at_assumed_bid_twd": 122.5,
+          "max_bid_twd": 222
+        },
+        "300": {
+          "ev_per_unit_at_assumed_bid_twd": 1.5,
+          "max_bid_twd": 101
+        },
+        "500": {
+          "ev_per_unit_at_assumed_bid_twd": -231.1,
+          "max_bid_twd": 0
+        }
+      },
+      "sensitivity_resale_price": {
+        "0.7": {
+          "resale_twd": 1540,
+          "max_bid_twd": 0
+        },
+        "0.85": {
+          "resale_twd": 1870,
+          "max_bid_twd": 82
+        },
+        "1.0": {
+          "resale_twd": 2200,
+          "max_bid_twd": 222
+        },
+        "1.15": {
+          "resale_twd": 2530,
+          "max_bid_twd": 362
+        }
+      },
+      "inspection_walkaway_table": [
+        {
+          "inspected": 0,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 221,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 3,
+          "bid_ceiling_conservative_twd": 25,
+          "bid_ceiling_at_mean_twd": 291,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 2,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 170,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 1,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 49,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 0,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 4,
+          "bid_ceiling_conservative_twd": 36,
+          "bid_ceiling_at_mean_twd": 302,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 3,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 198,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 2,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 90,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 1,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 0,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 0,
+          "bid_ceiling_at_mean_twd": 0,
+          "conservative_percentile": 0.2
+        }
+      ],
+      "claim_boundary": "Conditional on labelled inputs; no seller has quoted, no unit is acquired, yields are priors not measurements."
+    },
+    "scrap_lot_inspect_each": {
+      "scenario": "scrap_lot_inspect_each",
+      "description": "Same machines, but the supplier lets you inspect and power each unit before you pay (failures are not bought).",
+      "inputs_basis": {
+        "resale_twd": "handoff_assumed",
+        "assumed_bid_twd": "handoff_assumed",
+        "policy": "requires the supplier to agree; unconfirmed",
+        "stage p_pass": "assumed priors"
+      },
+      "bid_assumed_twd": 250,
+      "at_assumed_bid": {
+        "ev_twd": 226.5,
+        "p_success_overall": 0.4947,
+        "p_unit_is_bought": 0.8,
+        "net_per_success_before_acq_twd": 1754.5,
+        "hands_on_hours_expected": 1.14,
+        "unattended_hours_expected": 1.02,
+        "ev_per_hands_on_hour_twd": 198.9
+      },
+      "max_bid_at_prior_twd": 345,
+      "sensitivity_overall_yield": {
+        "0.25": {
+          "max_bid_twd": 0,
+          "ev_twd": -42.5,
+          "p_success_overall": 0.25,
+          "p_unit_is_bought": 0.6443,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 0.73,
+          "unattended_hours_expected": 0.7,
+          "ev_per_hands_on_hour_twd": -57.9
+        },
+        "0.5": {
+          "max_bid_twd": 353,
+          "ev_twd": 232.7,
+          "p_success_overall": 0.5,
+          "p_unit_is_bought": 0.8027,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.15,
+          "unattended_hours_expected": 1.03,
+          "ev_per_hands_on_hour_twd": 202.9
+        },
+        "0.65": {
+          "max_bid_twd": 552,
+          "ev_twd": 413.9,
+          "p_success_overall": 0.65,
+          "p_unit_is_bought": 0.8723,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.38,
+          "unattended_hours_expected": 1.18,
+          "ev_per_hands_on_hour_twd": 299.2
+        },
+        "0.8": {
+          "max_bid_twd": 734,
+          "ev_twd": 601.5,
+          "p_success_overall": 0.8,
+          "p_unit_is_bought": 0.9317,
+          "net_per_success_before_acq_twd": 1754.5,
+          "hands_on_hours_expected": 1.61,
+          "unattended_hours_expected": 1.33,
+          "ev_per_hands_on_hour_twd": 372.6
+        }
+      },
+      "sensitivity_labor_rate": {
+        "196": {
+          "ev_per_unit_at_assumed_bid_twd": 226.5,
+          "max_bid_twd": 345
+        },
+        "300": {
+          "ev_per_unit_at_assumed_bid_twd": 105.5,
+          "max_bid_twd": 194
+        },
+        "500": {
+          "ev_per_unit_at_assumed_bid_twd": -127.1,
+          "max_bid_twd": 0
+        }
+      },
+      "sensitivity_resale_price": {
+        "0.7": {
+          "resale_twd": 1540,
+          "max_bid_twd": 0
+        },
+        "0.85": {
+          "resale_twd": 1870,
+          "max_bid_twd": 170
+        },
+        "1.0": {
+          "resale_twd": 2200,
+          "max_bid_twd": 345
+        },
+        "1.15": {
+          "resale_twd": 2530,
+          "max_bid_twd": 520
+        }
+      },
+      "inspection_walkaway_table": [],
+      "claim_boundary": "Conditional on labelled inputs; no seller has quoted, no unit is acquired, yields are priors not measurements."
+    },
+    "business_8th_gen_inspect_each": {
+      "scenario": "business_8th_gen_inspect_each",
+      "description": "8th/9th-gen business PCs (OptiPlex/EliteDesk/ThinkCentre) from corporate lease returns, completed with RAM/SSD, inspected before purchase.",
+      "inputs_basis": {
+        "resale_twd": "assumed haircut of an observed ask: market_comps shows a refurbished i5-8500/16G/512G listing asking NT$7,200 with 68 sold; NT$5,000 assumes a weaker spec/brand. NOT a realized price",
+        "completion_parts_twd": "assumed (RAM + SSD upgrade); replace with a real parts quote",
+        "assumed_bid_twd": "placeholder to show EV; the useful output is max_bid",
+        "stage p_pass": "assumed; lease-return units are better kept than scrap"
+      },
+      "bid_assumed_twd": 1500,
+      "at_assumed_bid": {
+        "ev_twd": 236.7,
+        "p_success_overall": 0.6901,
+        "p_unit_is_bought": 0.9,
+        "net_per_success_before_acq_twd": 4152.7,
+        "hands_on_hours_expected": 1.46,
+        "unattended_hours_expected": 1.26,
+        "ev_per_hands_on_hour_twd": 162.3
+      },
+      "max_bid_at_prior_twd": 1596,
+      "sensitivity_overall_yield": {
+        "0.25": {
+          "max_bid_twd": 383,
+          "ev_twd": -603.0,
+          "p_success_overall": 0.25,
+          "p_unit_is_bought": 0.6745,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 0.76,
+          "unattended_hours_expected": 0.77,
+          "ev_per_hands_on_hour_twd": -795.0
+        },
+        "0.5": {
+          "max_bid_twd": 1115,
+          "ev_twd": -166.1,
+          "p_success_overall": 0.5,
+          "p_unit_is_bought": 0.8213,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.17,
+          "unattended_hours_expected": 1.08,
+          "ev_per_hands_on_hour_twd": -142.4
+        },
+        "0.65": {
+          "max_bid_twd": 1498,
+          "ev_twd": 148.6,
+          "p_success_overall": 0.65,
+          "p_unit_is_bought": 0.8848,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.4,
+          "unattended_hours_expected": 1.22,
+          "ev_per_hands_on_hour_twd": 106.3
+        },
+        "0.8": {
+          "max_bid_twd": 1856,
+          "ev_twd": 485.0,
+          "p_success_overall": 0.8,
+          "p_unit_is_bought": 0.9386,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.62,
+          "unattended_hours_expected": 1.35,
+          "ev_per_hands_on_hour_twd": 298.8
+        }
+      },
+      "sensitivity_labor_rate": {
+        "196": {
+          "ev_per_unit_at_assumed_bid_twd": 236.7,
+          "max_bid_twd": 1596
+        },
+        "300": {
+          "ev_per_unit_at_assumed_bid_twd": 81.4,
+          "max_bid_twd": 1423
+        },
+        "500": {
+          "ev_per_unit_at_assumed_bid_twd": -217.2,
+          "max_bid_twd": 1092
+        }
+      },
+      "sensitivity_resale_price": {
+        "0.7": {
+          "resale_twd": 3500,
+          "max_bid_twd": 611
+        },
+        "0.85": {
+          "resale_twd": 4250,
+          "max_bid_twd": 1103
+        },
+        "1.0": {
+          "resale_twd": 5000,
+          "max_bid_twd": 1596
+        },
+        "1.15": {
+          "resale_twd": 5750,
+          "max_bid_twd": 2088
+        }
+      },
+      "inspection_walkaway_table": [],
+      "claim_boundary": "Conditional on labelled inputs; no seller has quoted, no unit is acquired, yields are priors not measurements."
+    },
+    "working_claimed_acer": {
+      "scenario": "working_claimed_acer",
+      "description": "Handoff counterfactual: buy a working-claimed Acer TC-865 (i5-8400) at NT$2,800, verify, resell at NT$5,000. Online purchase: cannot inspect first.",
+      "inputs_basis": {
+        "assumed_bid_twd": "observed_listing (handoff: Ruten ask NT$2,800)",
+        "resale_twd": "handoff_assumed",
+        "stage p_pass": "assumed: 'arrives as described' 0.92 stands in for the handoff's 0.80 overall"
+      },
+      "bid_assumed_twd": 2800,
+      "at_assumed_bid": {
+        "ev_twd": -127.1,
+        "p_success_overall": 0.788,
+        "p_unit_is_bought": 1.0,
+        "net_per_success_before_acq_twd": 4152.7,
+        "hands_on_hours_expected": 1.52,
+        "unattended_hours_expected": 1.31,
+        "ev_per_hands_on_hour_twd": -83.9
+      },
+      "max_bid_at_prior_twd": 2522,
+      "sensitivity_overall_yield": {
+        "0.25": {
+          "max_bid_twd": 455,
+          "ev_twd": -2194.2,
+          "p_success_overall": 0.25,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 0.65,
+          "unattended_hours_expected": 0.69,
+          "ev_per_hands_on_hour_twd": -3367.2
+        },
+        "0.5": {
+          "max_bid_twd": 1412,
+          "ev_twd": -1237.4,
+          "p_success_overall": 0.5,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.07,
+          "unattended_hours_expected": 1.01,
+          "ev_per_hands_on_hour_twd": -1159.3
+        },
+        "0.65": {
+          "max_bid_twd": 1990,
+          "ev_twd": -659.8,
+          "p_success_overall": 0.65,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.3,
+          "unattended_hours_expected": 1.18,
+          "ev_per_hands_on_hour_twd": -506.2
+        },
+        "0.8": {
+          "max_bid_twd": 2569,
+          "ev_twd": -80.7,
+          "p_success_overall": 0.8,
+          "p_unit_is_bought": 1.0,
+          "net_per_success_before_acq_twd": 4152.7,
+          "hands_on_hours_expected": 1.53,
+          "unattended_hours_expected": 1.32,
+          "ev_per_hands_on_hour_twd": -52.6
+        }
+      },
+      "sensitivity_labor_rate": {
+        "196": {
+          "ev_per_unit_at_assumed_bid_twd": -127.1,
+          "max_bid_twd": 2522
+        },
+        "300": {
+          "ev_per_unit_at_assumed_bid_twd": -288.8,
+          "max_bid_twd": 2361
+        },
+        "500": {
+          "ev_per_unit_at_assumed_bid_twd": -599.7,
+          "max_bid_twd": 2050
+        }
+      },
+      "sensitivity_resale_price": {
+        "0.7": {
+          "resale_twd": 3500,
+          "max_bid_twd": 1510
+        },
+        "0.85": {
+          "resale_twd": 4250,
+          "max_bid_twd": 2016
+        },
+        "1.0": {
+          "resale_twd": 5000,
+          "max_bid_twd": 2522
+        },
+        "1.15": {
+          "resale_twd": 5750,
+          "max_bid_twd": 3029
+        }
+      },
+      "inspection_walkaway_table": [
+        {
+          "inspected": 0,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 3,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 2,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 1,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 3,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 4,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 3,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 2,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 1,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        },
+        {
+          "inspected": 4,
+          "passed_pre_purchase": 0,
+          "bid_ceiling_conservative_twd": 1953,
+          "bid_ceiling_at_mean_twd": 2518,
+          "conservative_percentile": 0.2
+        }
+      ],
+      "claim_boundary": "Conditional on labelled inputs; no seller has quoted, no unit is acquired, yields are priors not measurements."
+    }
+  }
+}
