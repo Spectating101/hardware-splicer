@@ -6,6 +6,17 @@ API/MCP: [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md).
 
 This file holds only what those don't cover.
 
+## Active mission handoff — salvage to functional product (2026-11-05)
+
+If assigned the **Optiplex salvage/refurbishment/arbitrage mission**, open
+[`docs/SALVAGE_TO_PRODUCT_CLAUDE_HANDOFF_2026-11-05.md`](docs/SALVAGE_TO_PRODUCT_CLAUDE_HANDOFF_2026-11-05.md)
+first. The work lives in **draft PR #286**, branch
+`feature/hs-arbitrage-marketpilot-20261105` (not necessarily merged into main).
+Start with `python3 scripts/hs_salvage_handoff_preflight.py --tests`.
+Do **not** assume any electronic scrap was bought, received, repaired or sold.
+Use the existing Circuit-AI / HS engines; avoid new toy CAD, fake hardware proof
+or new high-level planners for functionality that is already implemented.
+
 ## The one rule that matters
 
 **Authority is never implicitly upgraded.**

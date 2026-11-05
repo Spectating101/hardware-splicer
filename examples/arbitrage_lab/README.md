@@ -1,5 +1,9 @@
 # Hardware Splicer — legal salvage and functional-product economics
 
+**Agent handoff:** [Optiplex Claude — exact current mission and evidence/acceptance gates](../../docs/SALVAGE_TO_PRODUCT_CLAUDE_HANDOFF_2026-11-05.md).
+Check out **draft PR #286** before assuming the following modules exist in `main`.
+
+
 ## Current lead: dumpster-diving economics without unauthorized collection
 
 [**Salvage-to-product owner-transfer and commercial-provenance pilot**](salvage_lot/README.md), with a [**real Zhongli recycler and five-PC batch sourcing screen**](salvage_lot/channel_20261105/README.md) is now the controlling next research milestone. Real public PTT free-donation and damaged-lot leads were checked against **PTT's explicit no-resale rules**, actual local used component prices and the existing Circuit-AI salvage planner. **No legally transferred commercial stock or verified working hardware exists yet.** The modeled functional endpoints are a tested desktop, individually validated parts or a NAS; none has been produced or sold. The intake rejects phantom components, unowned rubbish and unconsented donation resale.
