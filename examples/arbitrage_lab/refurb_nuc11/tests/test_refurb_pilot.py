@@ -115,3 +115,15 @@ def test_public_artifact_has_no_fake_bench_metrics():
     for gate in mod.OBSERVED_GATES:
         assert obs[gate] is None
     assert obs["power_led_state"] is None
+
+
+def test_real_independent_nuc11pah_no_video_case_not_misclassified_as_dead():
+    real=json.loads((ROOT/"public_case_replay.json").read_text())
+    assert real["not_target_listing"] is True
+    assert real["expected_repair_proof"] is False
+    observed=real["expected_classification"]
+    steps=mod.technical_route({"power_led_state":observed})
+    assert steps[0]["step"]==real["expected_hs_route_first_step"]
+    assert steps[0]["step"]!="check_verified_adapter"
+    assert all("repair successful" not in row["intent"].lower() for row in steps)
+    assert any(row.get("actual_outcome")=="remote_boot_reported_HDMI_unresolved" for row in real["source_timeline"])

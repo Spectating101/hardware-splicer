@@ -52,6 +52,10 @@ Pre-purchase seller request: photos of exact model/AA board markings, close-up D
 
 The machine must stay in state **NO_PHYSICAL_PROOF** until real hardware and measurements exist. Avoid sharing identifiable old owner data on public GitHub, and obtain qualified assistance for solder/rework and testing as needed.
 
+## Independent same-model diagnostic-replay control
+
+[Actual April 2026 NUC11PAH owner's support thread](https://community.intel.com/t/intel-nuc11pah/138113): **power LED lit, storage activity LED lit, no HDMI picture**; eventually user reported remote login but HDMI remained unresolved. This is a **different** real device and different failure category than our target seller's *no LED at all*. We recorded the source chronology in [`public_case_replay.json`](public_case_replay.json) and assert HS correctly routes **solid LED/no video** to POST/display investigation rather than the no-power-adapter path. Neither repair is proven.
+
 ## Next purchase decision criterion
 
 Before spending money, require seller evidence of CPU identity and actual board/adapter condition, a bounded repair budget, and a confirmed market resale range for *that exact CPU*. If conditional success value cannot cover actual parts, labor, marketplace fees, returns and the realistic probability of scrapping the board, reject the unit. This is opportunity screening, **not permission to order on behalf of the user**.
