@@ -57,4 +57,4 @@ First physical unit: `RUNBOOK_FIRST_SESSION.md`. Supplier inquiry draft (unsent)
 2. **Supplier (owner decides to send):** RFQ v2; need a per-unit price quote with per-unit pre-payment inspection. Exit: a written quote. Compare to the model ceiling; do not reveal the ceiling.
 3. **Legal items (owner):** resolve the `owner_legal_confirmations`. Exit: all four true with notes.
 4. **One to three units, inspected before paying.** Run the runbook, get real minutes and the stage at which units fail. Exit: casefile `READY_FOR_INDEPENDENT_REVIEW`, a filled time sheet.
-5. **Update priors with the first tranche** (`posterior_ev_draws`); buy the next tranche only if the conservative ceiling clears the quoted price. Stop rule: two consecutive tranches below target EV at measured numbers.
+5. **Update priors with the first tranche** (`ceiling_draws`); buy the next tranche only if the conservative ceiling clears the quoted price. Stop rule: two consecutive tranches below target EV at measured numbers.

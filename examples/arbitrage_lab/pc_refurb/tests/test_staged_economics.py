@@ -133,3 +133,49 @@ def test_committed_evidence_matches_a_fresh_run(tmp_path):
     for n in reports:
         assert committed[n]["max_bid_at_prior_twd"] == reports[n]["max_bid_at_prior_twd"]
         assert committed[n]["at_assumed_bid"] == reports[n]["at_assumed_bid"]
+
+
+# ------------------------------------------------------------- Copilot review findings (reproduced here)
+def _independent_ceiling(s, passes, trials, pct_q=0.20):
+    """Per-draw ceilings computed from first principles with the same RNG stream, then summarised."""
+    import random
+    rng = random.Random(20261105)
+    pre = {st["name"] for st in s["stages"] if st.get("pre_purchase")}
+    obs = {n: (passes, trials) for n in pre} if trials else {}
+    vals = []
+    for _ in range(20000):
+        ps = []
+        for st in s["stages"]:
+            a, b = se._beta(st["p_pass"], st.get("prior_strength", s["prior_strength"]), *obs.get(st["name"], (0, 0)))
+            ps.append(rng.betavariate(a, b))
+        r0 = se.ev_unit(s, 0, ps=ps)
+        vals.append((r0["ev_twd"] - s["target_ev_twd"]) / r0["p_unit_is_bought"])
+    vals.sort()
+    return max(0, math.floor(vals[int(pct_q * len(vals))])), max(0, math.floor(sum(vals) / len(vals)))
+
+
+@pytest.mark.parametrize("name", ["scrap_lot_buy_all", "scrap_lot_inspect_each", "business_8th_gen_inspect_each"])
+@pytest.mark.parametrize("passes,trials", [(0, 0), (3, 3), (1, 3)])
+def test_inspection_ceiling_uses_each_draws_own_purchase_probability(name, passes, trials):
+    s = SC[name]
+    cons, mean = _independent_ceiling(s, passes, trials)
+    got = se.bid_ceiling_after_inspection(s, passes, trials)
+    assert got["bid_ceiling_conservative_twd"] == cons
+    assert got["bid_ceiling_at_mean_twd"] == mean
+
+
+def test_ceiling_draws_and_ev_draws_are_separate_well_defined_functions():
+    s = SC["scrap_lot_buy_all"]
+    ev, ceil = se.ev_draws(s, 250, None, n=300), se.ceiling_draws(s, None, n=300)
+    assert len(ev) == len(ceil) == 300 and ev != ceil
+    # for buy_all (p_bought = 1) the two views are linked exactly: EV(250) = EV(0) - 250 and ceiling = EV(0) - target
+    for e, c in zip(ev, ceil):
+        assert c - (e + 250) == pytest.approx(-s["target_ev_twd"], abs=0.2)
+
+
+def test_overall_yield_cannot_be_scaled_when_every_stage_is_certain():
+    s = {**SC["scrap_lot_buy_all"], "stages": [{"name": "a", "hands_on_min": 1, "p_pass": 1.0},
+                                                 {"name": "b", "hands_on_min": 1, "p_pass": 1.0}]}
+    with pytest.raises(ValueError):
+        se.with_overall_yield(s, 0.5)
+    assert math.prod(se.with_overall_yield(s, 1.0)) == pytest.approx(1.0)

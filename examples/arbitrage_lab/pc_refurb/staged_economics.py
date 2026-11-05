@@ -90,8 +90,11 @@ def with_overall_yield(s: dict, q: float) -> list[float]:
     Q = math.prod(base)
     if not 0 < q <= 1 or Q <= 0:
         raise ValueError("overall yield must be in (0,1]")
-    k = math.log(q) / math.log(Q) if Q < 1 else 1.0
-    return [p ** k for p in base]
+    if Q >= 1:
+        if q < 1:
+            raise ValueError("every stage is certain (p=1): an equal-exponent rescale cannot reach a lower overall yield")
+        return base
+    return [p ** (math.log(q) / math.log(Q)) for p in base]
 
 
 # ------------------------------------------------------------ Bayesian inspection
@@ -100,19 +103,31 @@ def _beta(p: float, strength: float, passes: int = 0, trials: int = 0) -> tuple[
     return p * strength + passes, (1 - p) * strength + (trials - passes)
 
 
-def posterior_ev_draws(s: dict, bid: float, inspected: dict | None, n: int = 20000, seed: int = 20261105,
-                       rate: float | None = None) -> list[float]:
-    """Max-bid draws (EV(bid)=target solved per draw) with each stage probability ~ Beta(prior),
-    updated by `inspected`={stage_name: (passes, trials)}. Returned values are per-draw bid ceilings
-    for target EV 0; subtract the target outside."""
-    rng, inspected, out = random.Random(seed), inspected or {}, []
+def _draw_stage_ps(s: dict, inspected: dict | None, n: int, seed: int):
+    """Yield n stage-probability vectors, each stage ~ Beta(prior) updated by `inspected`={stage: (passes, trials)}."""
+    rng, inspected = random.Random(seed), inspected or {}
     for _ in range(n):
         ps = []
         for st in s["stages"]:
             a, b = _beta(st["p_pass"], st.get("prior_strength", s["prior_strength"]), *inspected.get(st["name"], (0, 0)))
             ps.append(rng.betavariate(a, b))
-        r0 = ev_unit(s, bid, rate, ps)
-        out.append(r0["ev_twd"] / r0["p_unit_is_bought"] if bid == 0 else r0["ev_twd"])
+        yield ps
+
+
+def ev_draws(s: dict, bid: float, inspected: dict | None = None, n: int = 20000, seed: int = 20261105,
+             rate: float | None = None) -> list[float]:
+    """Posterior draws of the expected net TWD per candidate unit at a fixed `bid`."""
+    return [ev_unit(s, bid, rate, ps)["ev_twd"] for ps in _draw_stage_ps(s, inspected, n, seed)]
+
+
+def ceiling_draws(s: dict, inspected: dict | None = None, n: int = 20000, seed: int = 20261105,
+                  rate: float | None = None) -> list[float]:
+    """Posterior draws of the bid ceiling for the target EV. Each draw uses its OWN purchase probability
+    (it differs per draw under inspect_each): ceiling = (EV(0) - target) / p_bought."""
+    t, out = s["target_ev_twd"], []
+    for ps in _draw_stage_ps(s, inspected, n, seed):
+        r0 = ev_unit(s, 0, rate, ps)
+        out.append((r0["ev_twd"] - t) / r0["p_unit_is_bought"])
     return out
 
 
@@ -126,14 +141,10 @@ def bid_ceiling_after_inspection(s: dict, passes: int, trials: int, conservative
     """Pre-purchase rule. Only stages flagged ``pre_purchase`` can be observed before buying."""
     pre = [st["name"] for st in s["stages"] if st.get("pre_purchase")]
     obs = {name: (passes, trials) for name in pre} if trials else {}
-    draws0 = posterior_ev_draws(s, 0, obs, rate=rate)
-    ev0_mean, ev0_cons = sum(draws0) / len(draws0), pct(draws0, conservative_pct)
-    t = s["target_ev_twd"]
-    # draws are EV(0)/p_bought; the target EV scales the same way, so subtract t / p_bought at the prior.
-    pb = ev_unit(s, 0, rate)["p_unit_is_bought"]
+    draws = ceiling_draws(s, obs, rate=rate)
     return {"inspected": trials, "passed_pre_purchase": passes,
-            "bid_ceiling_conservative_twd": max(0, math.floor(ev0_cons - t / pb)),
-            "bid_ceiling_at_mean_twd": max(0, math.floor(ev0_mean - t / pb)),
+            "bid_ceiling_conservative_twd": max(0, math.floor(pct(draws, conservative_pct))),
+            "bid_ceiling_at_mean_twd": max(0, math.floor(sum(draws) / len(draws))),
             "conservative_percentile": conservative_pct}
 
 
