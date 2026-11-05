@@ -1,4 +1,4 @@
-name: HS Commercial Product Pilot — Native CAD and Real Cost Screen
+name: HS Salvage / Functional Refurb Product Evidence
 
 on:
   workflow_dispatch:
@@ -49,6 +49,12 @@ jobs:
       - name: Validate actual public evidence boundaries and printer economics
         run: |
           pytest -q examples/arbitrage_lab/industrial_printer/tests/test_printer_pilot.py
+      - name: Screen legally obtainable salvage leads and complete product routes
+        run: |
+          python examples/arbitrage_lab/salvage_lot/salvage_pilot.py
+      - name: Test no-resale and physical-inventory evidence gates
+        run: |
+          pytest -q examples/arbitrage_lab/salvage_lot/tests/test_salvage_pilot.py
       - name: Test the native product/economics contract
         env:
           PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
@@ -57,7 +63,7 @@ jobs:
       - name: Publish actual source CAD, printable mesh, cost screen and assumptions
         uses: actions/upload-artifact@v4
         with:
-          name: HS-INDOOR-ROUTER3-CAD-AND-ARBITRAGE-SCREEN-NOT-PHYSICALLY-TESTED
+          name: HS-SALVAGE-REFURB-AND-ARBITRAGE-RESEARCH-NOT-PHYSICALLY-PROVEN
           path: |
             examples/arbitrage_lab/outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip
             examples/arbitrage_lab/outputs/market_screen.csv
@@ -67,4 +73,6 @@ jobs:
             examples/arbitrage_lab/industrial_printer/evidence/industrial_refurb_screen.json
             examples/arbitrage_lab/industrial_printer/evidence/zebra_profit_sensitivity.csv
             examples/arbitrage_lab/industrial_printer/evidence/ZT230_BENCH_QC_OFFLINE.zpl
+            examples/arbitrage_lab/salvage_lot/evidence/salvage_decision.json
+            examples/arbitrage_lab/salvage_lot/evidence/route_sensitivity.csv
           retention-days: 30

@@ -1,0 +1,13 @@
+lead,product,ASP_ask_proxy_NT,scenario_success_probability,success_profit_NT,failure_loss_NT,scenario_EV_NT,required_ASP_break_even_NT,max_bid_for_target_EV500_NT,resale_rights_verified,commercial_action
+taoyuan_damaged_cpu_board_20261026,tested_i5_7400_cpu_for_resale,500,0.25,-720,-1100,-1005,1300,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+taoyuan_damaged_cpu_board_20261026,tested_i5_7400_cpu_for_resale,500,0.5,-720,-1100,-910,1300,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+taoyuan_damaged_cpu_board_20261026,tested_i5_7400_cpu_for_resale,500,0.75,-720,-1100,-815,1300,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,refurbished_complete_desktop,2200,0.25,630,-600,-292,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,refurbished_complete_desktop,2200,0.5,630,-600,15,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,refurbished_complete_desktop,2200,0.75,630,-600,322,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,tested_cpu_ram_ssd_partout,2050,0.25,495,-600,-326,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,tested_cpu_ram_ssd_partout,2050,0.5,495,-600,-52,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,tested_cpu_ram_ssd_partout,2050,0.75,495,-600,221,1500,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,nas_from_scrap_unverified_market,2600,0.25,-160,-600,-490,2778,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,nas_from_scrap_unverified_market,2600,0.5,-160,-600,-380,2778,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
+direct_owner_cleanout_hypothetical,nas_from_scrap_unverified_market,2600,0.75,-160,-600,-270,2778,0,False,BLOCKED_NOT_OWNED_OR_RIGHTS
