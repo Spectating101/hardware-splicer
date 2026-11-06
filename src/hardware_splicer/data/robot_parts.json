@@ -1,5 +1,322 @@
 {
-  "schema_version": "hardware_splicer.robot_parts.v1",
-  "rule": "Every figure names where it came from. A figure that is typical rather than published says so, and the plan tells you to measure it. Nothing here is guessed silently.",
-  "parts": []
+ "schema_version": "hardware_splicer.robot_parts.v1",
+ "rule": "Every figure names where it came from. A figure that is typical rather than published says so, and the plan tells you to measure it. Nothing here is guessed silently.",
+ "parts": [
+  {
+   "id": "jga25-371-12v-110rpm-hall-encoder",
+   "kind": "drive_motor",
+   "name": "JGA25-371 12 V 110 rpm gearmotor with 11-pulse Hall encoder (sold as a set with a 65 mm wheel, bracket and coupling)",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/21205165759474/",
+    "marketplace": "ruten",
+    "variant": "12V110RPM: the listing has one variant, 下標請告知電壓和轉速, so the buyer states voltage and speed when ordering",
+    "price_twd": 550,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "智能小車三件套 JGA25-371減速馬達（減速編碼器電機+65MM車輪+支架+連軸器+螺絲）",
+     "2 sold, seller lilan-1"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Seller description (speed options, wiring, shaft, mass)",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Ruten item API: the listing's single variant",
+     "url": "https://rapi.ruten.com.tw/api/items/v2/list?gno=21205165759474&level=detail",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Open Impulse JGA25-371 126 rpm page (same motor family, other vendor)",
+     "url": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Open Impulse JGA25-371 gearmotor selector (all ratios)",
+     "url": "https://www.openimpulse.com/blog/jga25-371-gearmotor-selector/",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "rated_voltage": {
+     "value": 12,
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    "output_free_speed_rpm": {
+     "value": 110,
+     "unit": "rpm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "note": "The seller lists 12 V speeds per variant without saying whether they are no-load; treated as free speed. Measure on the bench."
+    },
+    "run_current": {
+     "value": 0.18,
+     "unit": "A",
+     "basis": "typical",
+     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
+     "note": "Derived, not published: linear DC motor model I = I0 + (Istall - I0) x T/Tstall with Open Impulse's I0 46 mA and Istall 1 A, Tstall 0.381 N·m at 11.1 V, and a carpet load (rolling coefficient 0.1, 1.1 kg, 65 mm wheel) of 0.0175 N·m per motor, giving 0.09 A; doubled for margin. Measure on the bench."
+    },
+    "stall_current": {
+     "value": 1,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
+     "note": "Open Impulse publishes 1 A at 12 V for every JGA25-371 ratio (stall current is set by the motor, not the gearbox); the seller does not publish it."
+    },
+    "stall_torque": {
+     "value": 0.412,
+     "unit": "N·m",
+     "basis": "typical",
+     "source": "https://www.openimpulse.com/blog/jga25-371-gearmotor-selector/",
+     "note": "Not published for the seller's 110 rpm ratio. Open Impulse's neighbouring ratios bracket it: 4.2 kg·cm at 126 rpm (1:34) and 5.5 kg·cm at 95 rpm (1:45); the lower bound, 4.2 kg·cm = 0.412 N·m, is used. Measure on the bench."
+    },
+    "encoder_cpr": {
+     "alternatives": [
+      {
+       "value": 11,
+       "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+      },
+      {
+       "value": 12,
+       "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
+      }
+     ],
+     "unit": "count/rev_motor",
+     "basis": "published",
+     "confidence": "conflicting",
+     "note": "Seller: 11 signals per motor revolution on each of two channels. Open Impulse: 12 counts per revolution. Count on the bench before trusting odometry."
+    },
+    "encoder_supply_voltage": {
+     "value": [
+      3.3,
+      5
+     ],
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    "shaft_diameter": {
+     "value": 4,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "note": "D-shaped shaft"
+    },
+    "shaft_length": {
+     "value": 12,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "note": "D flat 8 mm long"
+    },
+    "body_diameter": {
+     "value": 25,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    "mass": {
+     "value": 100,
+     "unit": "g",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "note": "seller says about 100 g and that it varies with ratio"
+    },
+    "connector": {
+     "value": "Six wires: red motor +, white motor -, blue encoder + (3.3-5 V), black encoder -, yellow and green encoder signals. Housing type not stated.",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    }
+   },
+   "quotes": [
+    {
+     "claim": "rated_voltage",
+     "quote": "12V110RPM",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "output_free_speed_rpm",
+     "quote": "12V110RPM",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "stall_current",
+     "quote": "Stall current at 12 V: 1 A",
+     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
+    },
+    {
+     "claim": "encoder_cpr",
+     "quote": "黃→信號反饋(電機轉壹圈 11 個信號)",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "encoder_cpr",
+     "quote": "provides a resolution of 12 counts per revolution",
+     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
+    },
+    {
+     "claim": "encoder_supply_voltage",
+     "quote": "藍→編碼電源 +正 (正負級不可接錯 3.3-5V )",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "shaft_diameter",
+     "quote": "【軸徑】直徑4mm D字型軸",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "shaft_length",
+     "quote": "【軸長】12mm D長8mm",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "body_diameter",
+     "quote": "【外徑尺寸】∮25mm 長度尺寸依據參數不同長度不同",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "mass",
+     "quote": "【重量】100g左右",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "connector",
+     "quote": "紅→電機電源 + (調換可以控制電機正反轉)",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    {
+     "claim": "stall_torque",
+     "quote": "Stall torque at 12 V: 4.2 kg·cm",
+     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "rated_current",
+     "reason": "No source publishes the current at rated load; run_current is derived instead."
+    },
+    {
+     "fact": "gear_ratio",
+     "reason": "The seller lists speeds only. Open Impulse's ratios (1:34 at 126 rpm, 1:45 at 95 rpm) do not include 110 rpm. Counts per wheel revolution must be measured."
+    },
+    {
+     "fact": "body_dimensions",
+     "reason": "Diameter 25 mm is published; gearbox length depends on ratio and is not published for 110 rpm. Measure the part."
+    }
+   ]
+  },
+  {
+   "id": "jga25-371-set-65mm-wheel",
+   "kind": "wheel",
+   "name": "65 mm wheel included in the JGA25-371 set",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/21205165759474/",
+    "marketplace": "ruten",
+    "variant": "included in the 12V110RPM set (one listing variant)",
+    "price_twd": 550,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "減速編碼器電機+65MM車輪+支架+連軸器+螺絲"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Seller description",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "outer_diameter": {
+     "value": 65,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    "mass": {
+     "value": 30,
+     "unit": "g",
+     "basis": "typical",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
+     "note": "Not published; class-typical for a 65 mm rubber robot wheel. Weigh it, i.e. measure on the bench."
+    }
+   },
+   "quotes": [
+    {
+     "claim": "outer_diameter",
+     "quote": "減速編碼器電機+65MM車輪+支架+連軸器+螺絲",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "width",
+     "reason": "Not published by the seller; measure the wheel."
+    },
+    {
+     "fact": "bore",
+     "reason": "Not published; the set includes a coupling (連軸器) for the 4 mm D shaft, so the wheel bore matches the coupling, not the shaft. Measure."
+    }
+   ]
+  },
+  {
+   "id": "ball-caster-25mm-ball",
+   "kind": "caster",
+   "name": "Ball caster, 25 mm ball (牛眼萬向輪)",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/22424722682045/",
+    "marketplace": "ruten",
+    "variant": "萬向輪（球直徑25mm）1個",
+    "price_twd": 25,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "50 sold"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Ruten item API: variants with ball diameter",
+     "url": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "ball_diameter": {
+     "value": 25,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail"
+    }
+   },
+   "quotes": [
+    {
+     "claim": "ball_diameter",
+     "quote": "萬向輪（球直徑25mm）1個",
+     "source": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "height",
+     "reason": "Only the ball diameter is published; the chassis plan sets ride height with a printed spacer after measuring the caster."
+    },
+    {
+     "fact": "mount",
+     "reason": "Not published; the photo shows a flanged housing but hole spacing is not stated. Measure."
+    },
+    {
+     "fact": "mass",
+     "reason": "Not published; small enough to sit inside the chassis allowance. Weigh it."
+    }
+   ]
+  }
+ ]
 }

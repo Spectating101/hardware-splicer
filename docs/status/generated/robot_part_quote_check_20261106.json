@@ -1,0 +1,20 @@
+{
+ "pass": true,
+ "quotes_checked": 14,
+ "failed": [],
+ "sources": {
+  "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058": {
+   "file": "fb6ed0924d348bbc.txt",
+   "sha256": "86efc9f12f1177c760f32bcb2477a01501d1681adda5cba959871510a082b8df"
+  },
+  "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/": {
+   "file": "2ca4b3a8533e2f2f.txt",
+   "sha256": "a73db290b8fd8025089dcc58ecf282fe080e7797acaf087ab19cad8a4cb78c8d"
+  },
+  "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail": {
+   "file": "8ceb4c8dedda74f9.txt",
+   "sha256": "c4486ab2100cb2c584b109d8d0f8a71fc4d028ce31368bb172c7fdc70b15b285"
+  }
+ },
+ "checked_on": "2026-11-06"
+}
