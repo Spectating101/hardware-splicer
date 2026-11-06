@@ -5,8 +5,87 @@
   "github_per_page": 10,
   "ruten_limit": 10,
   "jobs": [
-    {"id": "mobile-development-friction", "problem_to_investigate": "Programming, remote shell and agent workflows from a phone", "github_queries": ["termux keyboard", "mobile ssh"], "ruten_queries": ["T-Deck Plus"]},
-    {"id": "embedded-field-terminal", "problem_to_investigate": "Portable debugging and serial industrial field service", "github_queries": ["android usb serial", "esp32 rs485"], "ruten_queries": ["uConsole"]},
-    {"id": "repair-and-salvage-workflows", "problem_to_investigate": "Affordable computer hardware usable as repair or donor platforms", "github_queries": ["laptop repairability"], "ruten_queries": ["二手 ThinkPad"]}
+    {
+      "id": "mobile-development-friction",
+      "problem_to_investigate": "Programming, remote shell and agent workflows from a phone",
+      "github_queries": [
+        "termux keyboard",
+        "mobile ssh"
+      ],
+      "ruten_queries": [
+        "T-Deck Plus"
+      ],
+      "github_title_terms": [
+        "termux",
+        "ssh",
+        "terminal",
+        "remote shell",
+        "android keyboard",
+        "phone keyboard",
+        "mobile coding"
+      ],
+      "ruten_exclude_terms": [
+        "保護殼",
+        "外殼",
+        "皮套",
+        "配件",
+        "貼膜"
+      ]
+    },
+    {
+      "id": "embedded-field-terminal",
+      "problem_to_investigate": "Portable debugging and serial industrial field service",
+      "github_queries": [
+        "android usb serial",
+        "esp32 rs485"
+      ],
+      "ruten_queries": [
+        "uConsole"
+      ],
+      "github_title_terms": [
+        "rs485",
+        "modbus",
+        "serial",
+        "uart",
+        "esp32",
+        "usb-serial",
+        "android usb"
+      ],
+      "ruten_exclude_terms": [
+        "擴展板",
+        "擴充板",
+        "轉接板",
+        "保護殼",
+        "USB Hub",
+        "配件",
+        "外殼"
+      ]
+    },
+    {
+      "id": "repair-and-salvage-workflows",
+      "problem_to_investigate": "Affordable computer hardware usable as repair or donor platforms",
+      "github_queries": [
+        "laptop repairability"
+      ],
+      "ruten_queries": [
+        "二手 ThinkPad"
+      ],
+      "github_title_terms": [
+        "repairability",
+        "laptop repair",
+        "thinkpad",
+        "replace battery",
+        "battery replacement",
+        "repair parts"
+      ],
+      "ruten_exclude_terms": [
+        "零件",
+        "鍵盤",
+        "電池",
+        "保護殼",
+        "充電器",
+        "轉接器"
+      ]
+    }
   ]
 }
