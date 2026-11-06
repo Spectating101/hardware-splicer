@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y openscad
-          python -m pip install --disable-pip-version-check 'pydantic>=2,<3' 'pytest>=8,<10'
+          python -m pip install --disable-pip-version-check -e . 'pytest>=8,<10'
       - name: Generate 2 printable mesh candidates and run 6 CGAL hinge collision cases
         env:
           PYTHONPATH: apps/mecha-splicer/src
