@@ -1,0 +1,215 @@
+{
+  "product": "FieldDeck v0: used Advantech AIM8I rugged tablet + keyboard dock + Gigabit Ethernet + isolated RS-485/CAN/DI-DO field I/O",
+  "source_design": "PR #111 (PF-003 Taiwan FieldDeck): donor NT$2,000, target MSRP NT$12,900, modeled COGS NT$6,633 of which 'FieldDock + FieldIO + new parts' is an unpriced NT$2,500 assumption",
+  "scope": "A rugged field-service terminal. 'build' lines are what only the splice needs; 'shared' lines are the field I/O every route needs (a laptop or a Toughbook also needs isolated RS-485 and CAN adapters), so they are excluded from both sides of the comparison and added back for COGS. Alternatives are what a field engineer would buy instead.",
+  "lines": [
+    {
+      "id": "donor_aim8i",
+      "qty": 1,
+      "spec": "used Advantech AIM8I tablet (condition unknown; #111 assumes 80% usable yield, unmeasured)",
+      "queries": [
+        "AIM8I",
+        "研華 AIM-8"
+      ],
+      "must": "AIM\\s*-?\\s*8",
+      "exclude": "電池|BAT|充電|底座|座充|保護|皮套",
+      "unit_price_band_twd": [
+        800,
+        8000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "donor_power",
+      "qty": 1,
+      "spec": "power adapter for the donor (write-off listings do not say one is included)",
+      "fixed_price_twd": 350,
+      "fixed_price_basis": "ASSUMED generic adapter allowance; the AIM8I input rating and plug were not checked against a listing"
+    },
+    {
+      "id": "keyboard",
+      "qty": 1,
+      "spec": "compact wired/2.4 GHz keyboard with touchpad for the dock",
+      "queries": [
+        "迷你鍵盤 觸控板 2.4G",
+        "迷你鍵盤 觸控板 有線"
+      ],
+      "must": "鍵盤.*(觸控板|觸摸板|touchpad)|(觸控板|觸摸板|touchpad).*鍵盤",
+      "exclude": "保護膜|鍵帽|皮套|平板殼|iPad|ipad",
+      "unit_price_band_twd": [
+        200,
+        2000
+      ]
+    },
+    {
+      "id": "gbe_usb3",
+      "qty": 1,
+      "spec": "USB 3.0 Gigabit Ethernet adapter (the AIM8I has no RJ45; a laptop or Toughbook does)",
+      "queries": [
+        "USB3.0 Gigabit 網卡",
+        "USB 3.0 轉 RJ45 千兆"
+      ],
+      "must": "(USB\\s*3|USB3).*(Gigabit|千兆|1000|RJ45|網卡|網路)|(Gigabit|千兆|1000M).*(USB\\s*3|USB3)",
+      "exclude": "Type-?C.*擴充|擴充塢|HDMI|讀卡|無線",
+      "unit_price_band_twd": [
+        120,
+        1200
+      ]
+    },
+    {
+      "id": "usb_hub",
+      "qty": 1,
+      "spec": "USB 3.0 4-port hub inside the dock (the donor exposes one USB 3.0 path through its dock connector)",
+      "queries": [
+        "USB3.0 集線器 4埠"
+      ],
+      "must": "(USB\\s*3|USB3).*(集線器|HUB|hub|分線)|(集線器|HUB|hub|分線).*(USB\\s*3|USB3)",
+      "exclude": "HDMI|網卡|RJ45|讀卡|擴充塢|Type-?C.*PD",
+      "unit_price_band_twd": [
+        100,
+        900
+      ]
+    },
+    {
+      "id": "dock_print",
+      "qty": 1,
+      "spec": "printed clamshell dock body with hinge and tablet clamp",
+      "fixed_price_twd": 1200,
+      "fixed_price_basis": "ASSUMED: scaled from the NT$526 3DEX quote for the drone frame+cradle (larger part plus hinge hardware); no dock design or quote exists"
+    },
+    {
+      "id": "dock_connector",
+      "qty": 1,
+      "spec": "mating 16-pin dock / 14-pin extension connection (pogo block or cable) and internal wiring",
+      "fixed_price_twd": 300,
+      "fixed_price_basis": "ASSUMED: the AIM8I dock connector part number and pinout are not in hand; #111 lists real pin behaviour as an open gate"
+    },
+    {
+      "id": "rs485_iso",
+      "qty": 2,
+      "role": "shared",
+      "spec": "isolated USB to RS-485 converter (proxy for FieldIO's two isolated RS-485 channels)",
+      "queries": [
+        "USB 轉 RS485 隔離",
+        "隔離 USB RS485 轉換器"
+      ],
+      "must": "485.*隔離|隔離.*485",
+      "exclude": "非隔離|TTL|模組板|PLC程式|乙太網|網路|以太網|WiFi|4G|RS232.*RS485.*RS422.*TTL",
+      "unit_price_band_twd": [
+        150,
+        3500
+      ]
+    },
+    {
+      "id": "can_usb",
+      "qty": 1,
+      "role": "shared",
+      "spec": "USB to CAN adapter, isolated where listed (proxy for FieldIO's CAN channel)",
+      "queries": [
+        "USB 轉 CAN 分析儀",
+        "USB CAN 隔離"
+      ],
+      "must": "(USB).*CAN|CAN.*(USB)",
+      "exclude": "Canon|CANON|佳能|解碼器|汽車|OBD|行車|WIFI|WiFi|LORA|LoRa",
+      "unit_price_band_twd": [
+        250,
+        5000
+      ]
+    },
+    {
+      "id": "dio_iso",
+      "qty": 1,
+      "role": "shared",
+      "spec": "USB optically isolated digital I/O / relay module (proxy for FieldIO's protected DI/DO)",
+      "queries": [
+        "USB 光耦隔離 IO 模組",
+        "USB 繼電器模組 光耦隔離"
+      ],
+      "must": "USB.*(光耦|隔離)|(光耦|隔離).*USB",
+      "exclude": "485|CAN|232|網路|乙太網|WiFi|充電",
+      "unit_price_band_twd": [
+        80,
+        3000
+      ]
+    }
+  ],
+  "buy_alternatives": [
+    {
+      "id": "used Toughbook laptop",
+      "spec": "used Panasonic Toughbook CF-19/CF-31/CF-54/CF-20 (rugged; CF-19/CF-31/CF-54 have a native RS-232 port)",
+      "queries": [
+        "Toughbook CF-19",
+        "Toughbook CF-31",
+        "Toughbook CF-54",
+        "Toughbook CF-20"
+      ],
+      "must": "CF-?(19|31|54|20)",
+      "exclude": "電池|鍵盤(?!.*主機)|變壓器|充電|螢幕|觸控|硬碟|觸控筆|保護|面板|主機板|底座|車架|VZSU|VZS|硬碟架|全球購",
+      "unit_price_band_twd": [
+        3000,
+        40000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "used Toughpad tablet",
+      "spec": "used Panasonic Toughpad FZ-G1/FZ-M1 rugged tablet (closest like-for-like to the AIM8I)",
+      "queries": [
+        "Toughpad FZ-G1",
+        "Toughpad FZ-M1"
+      ],
+      "must": "FZ-?(G1|M1)",
+      "exclude": "電池|變壓器|充電|螢幕|觸控筆|保護|底座|車架|面板|主機板|BAT|VZSU|VZS|全球購",
+      "unit_price_band_twd": [
+        3000,
+        40000
+      ],
+      "allow_used": true,
+      "allow_words": [
+        "玩具"
+      ]
+    },
+    {
+      "id": "new IP65 industrial tablet",
+      "spec": "new 8-10 inch IP65+ rugged Windows/Android tablet (current-market price anchor)",
+      "queries": [
+        "三防平板 IP65",
+        "工業平板 IP65 8吋"
+      ],
+      "must": "IP6[5-8]",
+      "exclude": "手機|保護殼|殼|支架|鍵盤|皮套|觸控筆|二手|中古",
+      "unit_price_band_twd": [
+        3000,
+        80000
+      ]
+    },
+    {
+      "id": "used business laptop",
+      "spec": "used 14-inch i5 8th-gen laptop (functional baseline; has native Ethernet)",
+      "queries": [
+        "二手 筆電 i5 8代",
+        "中古 筆電 i5-8250U"
+      ],
+      "must": "i5",
+      "exclude": "螢幕|主機板|鍵盤|電池|變壓器|殼|觸控板",
+      "unit_price_band_twd": [
+        2500,
+        15000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "GPD MicroPC",
+      "spec": "x86 handheld with a native RS-232 port and RJ45 (the anchor #111 used)",
+      "queries": [
+        "GPD MicroPC"
+      ],
+      "must": "MicroPC",
+      "unit_price_band_twd": [
+        5000,
+        35000
+      ],
+      "allow_used": true
+    }
+  ]
+}
