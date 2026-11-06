@@ -1,0 +1,698 @@
+ERC report (2026-11-07T02:27:36+0800, Encoding UTF8)
+
+***** Sheet /
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector_Generic'
+    ; warning
+    @(73.66 mm, 99.06 mm): Symbol J1 [Conn_01x02]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_Power'
+    ; warning
+    @(132.08 mm, 99.06 mm): Symbol U1 [MP8759GD]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'power'
+    ; warning
+    @(50.80 mm, 170.18 mm): Symbol #FLG01 [PWR_FLAG]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'power'
+    ; warning
+    @(76.20 mm, 170.18 mm): Symbol #FLG02 [PWR_FLAG]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(66.04 mm, 210.82 mm): Symbol R1 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(86.36 mm, 210.82 mm): Symbol R2 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(106.68 mm, 210.82 mm): Symbol R3 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(127.00 mm, 210.82 mm): Symbol R4 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(147.32 mm, 210.82 mm): Symbol R5 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(66.04 mm, 248.92 mm): Symbol C1 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(86.36 mm, 248.92 mm): Symbol C2 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(106.68 mm, 248.92 mm): Symbol C3 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(172.72 mm, 210.82 mm): Symbol L1 [L]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_Power'
+    ; warning
+    @(259.08 mm, 99.06 mm): Symbol U2 [SGM2590]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(127.00 mm, 248.92 mm): Symbol C4 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(193.04 mm, 210.82 mm): Symbol R6 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(147.32 mm, 248.92 mm): Symbol C5 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(167.64 mm, 248.92 mm): Symbol C6 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(187.96 mm, 248.92 mm): Symbol C7 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(208.28 mm, 248.92 mm): Symbol C8 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(228.60 mm, 248.92 mm): Symbol C9 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector'
+    ; warning
+    @(327.66 mm, 99.06 mm): Symbol J3 [USB_A]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector_Generic'
+    ; warning
+    @(381.00 mm, 99.06 mm): Symbol J2 [Conn_01x06]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 391.16 mm): Symbol U3 Pin 4 [PHY1_MDI1+, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 393.70 mm): Symbol U3 Pin 6 [PHY1_MDI1-, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 398.78 mm): Symbol U3 Pin 10 [PHY1_MDI0-, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 401.32 mm): Symbol U3 Pin 12 [PHY1_MDI0+, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 411.48 mm): Symbol U3 Pin 20 [HP_INT, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 391.16 mm): Symbol U3 Pin 3 [PHY1_MDI3+, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 393.70 mm): Symbol U3 Pin 5 [PHY1_MDI3-, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 416.56 mm): Symbol U3 Pin 24 [PCIE20X1_2_WAKEN_M0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 398.78 mm): Symbol U3 Pin 9 [PHY1_MDI2-, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 421.64 mm): Symbol U3 Pin 28 [SPIO_MOSI_M1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 401.32 mm): Symbol U3 Pin 11 [PHY1_MDI2+, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 424.18 mm): Symbol U3 Pin 30 [SPIO_CLK_M1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 406.40 mm): Symbol U3 Pin 15 [PHY1_LED2_Y, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 408.94 mm): Symbol U3 Pin 17 [PHY1_LED1_G, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 411.48 mm): Symbol U3 Pin 19 [PHY1_LED0_Y1, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 431.80 mm): Symbol U3 Pin 36 [I2C8_SDA_M2_CAM, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 414.02 mm): Symbol U3 Pin 21 [PWM15_M1, Open collector, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 434.34 mm): Symbol U3 Pin 38 [MIPI_CAM2_RST_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 436.88 mm): Symbol U3 Pin 40 [GPIO1_B1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 419.10 mm): Symbol U3 Pin 25 [I2C4_SDA_M3_WIFI, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 421.64 mm): Symbol U3 Pin 27 [WIFI_REG_ON_E, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 441.96 mm): Symbol U3 Pin 44 [GPIO1_B2_CAM1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 424.18 mm): Symbol U3 Pin 29 [GSENSOR_INT, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 444.50 mm): Symbol U3 Pin 46 [I2S0_SCLK_TX, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 426.72 mm): Symbol U3 Pin 31 [SPIO_CS0M1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 447.04 mm): Symbol U3 Pin 48 [I2S0_LRCK_TX, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 449.58 mm): Symbol U3 Pin 50 [I2S0_MCLK, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 431.80 mm): Symbol U3 Pin 35 [I2C8_SCL_M2_CAM, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 434.34 mm): Symbol U3 Pin 37 [TP_INT_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 454.66 mm): Symbol U3 Pin 54 [I2S0_SDI0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 436.88 mm): Symbol U3 Pin 39 [TP_RST_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 457.20 mm): Symbol U3 Pin 56 [GPIO0_C7, Passive, Line]
+[footprint_link_issues]: The current configuration does not include the footprint library 'HS_CM5_OFFICIAL'.
+    ; warning
+    @(139.70 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_CM5_OFFICIAL'
+    ; warning
+    @(139.70 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 439.42 mm): Symbol U3 Pin 41 [LCD_RESET_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 459.74 mm): Symbol U3 Pin 58 [GPIO0_D0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 444.50 mm): Symbol U3 Pin 45 [GPIO1_A6_CAM1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 464.82 mm): Symbol U3 Pin 62 [SDMMC_CMD, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 447.04 mm): Symbol U3 Pin 47 [MIPI_CAM2_PDN_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 449.58 mm): Symbol U3 Pin 49 [I2C4_SCL_M3_WIFI, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 452.12 mm): Symbol U3 Pin 51 [UART2_RX_M0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 457.20 mm): Symbol U3 Pin 55 [UART2_TX_M0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 459.74 mm): Symbol U3 Pin 57 [SDMMC_CLK, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 464.82 mm): Symbol U3 Pin 61 [SDMMC_D3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 485.14 mm): Symbol U3 Pin 78 [GPIO_VREF, Power input, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(109.22 mm, 485.14 mm): Symbol U3 Pin 78 [GPIO_VREF, Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 467.36 mm): Symbol U3 Pin 63 [SDMMC_D0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 487.68 mm): Symbol U3 Pin 80 [I2C7_SCL_M2, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 472.44 mm): Symbol U3 Pin 67 [SDMMC_D1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 490.22 mm): Symbol U3 Pin 82 [I2C7_SDA_M2, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 474.98 mm): Symbol U3 Pin 69 [SDMMC_D2, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 492.76 mm): Symbol U3 Pin 84 [VCC_3V3_S3, Power output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 495.30 mm): Symbol U3 Pin 86 [VCC_3V3_S3, Power output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 480.06 mm): Symbol U3 Pin 73 [VCCIO_FLASH, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(170.18 mm, 480.06 mm): Symbol U3 Pin 73 [VCCIO_FLASH, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 497.84 mm): Symbol U3 Pin 88 [VCC_1V8_S0, Power output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 482.60 mm): Symbol U3 Pin 75 [SD_PWR_ON, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 500.38 mm): Symbol U3 Pin 90 [VCC_1V8_S0, Power output, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(170.18 mm, 485.14 mm): Symbol U3 Pin 77 [VCC_SYSIN, Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 502.92 mm): Symbol U3 Pin 92 [RESET_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 508.00 mm): Symbol U3 Pin 96 [SARADC_VIN4, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 388.62 mm): Symbol U3 Pin 102 [PCIE20X1_2_CLKREQN_M0, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 388.62 mm): Symbol U3 Pin 102 [PCIE20X1_2_CLKREQN_M0, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(109.22 mm, 513.08 mm): Symbol U3 Pin 100 [SPIO_MISO_M1, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 393.70 mm): Symbol U3 Pin 106 [5V_HDMI, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 500.38 mm): Symbol U3 Pin 89 [PWM4_M0, Power input, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(170.18 mm, 500.38 mm): Symbol U3 Pin 89 [PWM4_M0, Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 502.92 mm): Symbol U3 Pin 91 [HOST_WAKE_BT_H, Power input, Line]
+[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
+    ; error
+    @(170.18 mm, 502.92 mm): Symbol U3 Pin 91 [HOST_WAKE_BT_H, Power input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 401.32 mm): Symbol U3 Pin 112 [PCIE20_0_REFCLKN, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 505.46 mm): Symbol U3 Pin 93 [SARADC_VIN0_BOOT, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(170.18 mm, 505.46 mm): Symbol U3 Pin 93 [SARADC_VIN0_BOOT, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 508.00 mm): Symbol U3 Pin 95 [WIFI_LED, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 406.40 mm): Symbol U3 Pin 116 [PCIE20_0_RXP, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 406.40 mm): Symbol U3 Pin 116 [PCIE20_0_RXP, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 408.94 mm): Symbol U3 Pin 118 [PCIE20_0_RXN, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 408.94 mm): Symbol U3 Pin 118 [PCIE20_0_RXN, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(170.18 mm, 513.08 mm): Symbol U3 Pin 99 [PWRON_L, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(170.18 mm, 513.08 mm): Symbol U3 Pin 99 [PWRON_L, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 414.02 mm): Symbol U3 Pin 122 [PCIE20_0_TXP, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 416.56 mm): Symbol U3 Pin 124 [PCIE20_0_TXN, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 421.64 mm): Symbol U3 Pin 128 [MIPI_CSI0_RX_D0N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 421.64 mm): Symbol U3 Pin 128 [MIPI_CSI0_RX_D0N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 424.18 mm): Symbol U3 Pin 130 [MIPI_CSI0_RX_D0P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 424.18 mm): Symbol U3 Pin 130 [MIPI_CSI0_RX_D0P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 429.26 mm): Symbol U3 Pin 134 [MIPI_CSI0_RX_D1N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 429.26 mm): Symbol U3 Pin 134 [MIPI_CSI0_RX_D1N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 431.80 mm): Symbol U3 Pin 136 [MIPI_CSI0_RX_D1P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 431.80 mm): Symbol U3 Pin 136 [MIPI_CSI0_RX_D1P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 436.88 mm): Symbol U3 Pin 140 [MIPI_CSI0_RX_CLK0N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 436.88 mm): Symbol U3 Pin 140 [MIPI_CSI0_RX_CLK0N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 439.42 mm): Symbol U3 Pin 142 [MIPI_CSI0_RX_CLK0P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(350.52 mm, 439.42 mm): Symbol U3 Pin 142 [MIPI_CSI0_RX_CLK0P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 388.62 mm): Symbol U3 Pin 101 [TYPEC0_USB20_OTG_ID, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 388.62 mm): Symbol U3 Pin 101 [TYPEC0_USB20_OTG_ID, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 391.16 mm): Symbol U3 Pin 103 [TYPEC0_OTG_DM, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 393.70 mm): Symbol U3 Pin 105 [TYPEC0_OTG_DP, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 398.78 mm): Symbol U3 Pin 109 [PCIE20X1_2_PERSTN_M0, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 406.40 mm): Symbol U3 Pin 115 [MIPI_DPHY0_RX_D0N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 406.40 mm): Symbol U3 Pin 115 [MIPI_DPHY0_RX_D0N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 408.94 mm): Symbol U3 Pin 117 [MIPI_DPHY0_RX_D0P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 408.94 mm): Symbol U3 Pin 117 [MIPI_DPHY0_RX_D0P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 414.02 mm): Symbol U3 Pin 121 [MIPI_DPHY0_RX_D1N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 414.02 mm): Symbol U3 Pin 121 [MIPI_DPHY0_RX_D1N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 416.56 mm): Symbol U3 Pin 123 [MIPI_DPHY0_RX_D1P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 416.56 mm): Symbol U3 Pin 123 [MIPI_DPHY0_RX_D1P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 421.64 mm): Symbol U3 Pin 127 [MIPI_DPHY0_RX_CLKN, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 421.64 mm): Symbol U3 Pin 127 [MIPI_DPHY0_RX_CLKN, Input, Line]
+[footprint_link_issues]: The current configuration does not include the footprint library 'HS_CM5_OFFICIAL'.
+    ; warning
+    @(381.00 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_CM5_OFFICIAL'
+    ; warning
+    @(381.00 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 474.98 mm): Symbol U3 Pin 170 [HDMI0_TX2P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 424.18 mm): Symbol U3 Pin 129 [MIPI_DPHY0_RX_CLKP, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 424.18 mm): Symbol U3 Pin 129 [MIPI_DPHY0_RX_CLKP, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 477.52 mm): Symbol U3 Pin 172 [HDMI0_TX2N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 429.26 mm): Symbol U3 Pin 133 [MIPI_DPHY0_RX_D2N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 429.26 mm): Symbol U3 Pin 133 [MIPI_DPHY0_RX_D2N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 482.60 mm): Symbol U3 Pin 176 [HDMI0_TX1P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 485.14 mm): Symbol U3 Pin 178 [HDMI0_TX1N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 436.88 mm): Symbol U3 Pin 139 [MIPI_DPHY0_RX_D3N, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 436.88 mm): Symbol U3 Pin 139 [MIPI_DPHY0_RX_D3N, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 439.42 mm): Symbol U3 Pin 141 [MIPI_DPHY0_RX_D3P, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 439.42 mm): Symbol U3 Pin 141 [MIPI_DPHY0_RX_D3P, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 490.22 mm): Symbol U3 Pin 182 [HDMI0_TX0P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 492.76 mm): Symbol U3 Pin 184 [HDMI0_TX0N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 444.50 mm): Symbol U3 Pin 145 [HDMI0_TX_SBDP, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 447.04 mm): Symbol U3 Pin 147 [HDMI0_TX_SBDN, Open collector, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 497.84 mm): Symbol U3 Pin 188 [HDMI0_TX3P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 500.38 mm): Symbol U3 Pin 190 [HDMI0_TX3N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 452.12 mm): Symbol U3 Pin 151 [HDMI_TX0_CEC_PORT, Open collector, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 454.66 mm): Symbol U3 Pin 153 [HDMI_TX0_HPD, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(411.48 mm, 454.66 mm): Symbol U3 Pin 153 [HDMI_TX0_HPD, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 505.46 mm): Symbol U3 Pin 194 [MIPI_DPHY1_TX_D3N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 459.74 mm): Symbol U3 Pin 157 [MIPI_DPHY0_TX_D0N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 508.00 mm): Symbol U3 Pin 196 [MIPI_DPHY1_TX_D3P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 462.28 mm): Symbol U3 Pin 159 [MIPI_DPHY0_TX_D0P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(350.52 mm, 513.08 mm): Symbol U3 Pin 200 [HDMI_TX0_SCL_5V, Open collector, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 467.36 mm): Symbol U3 Pin 163 [MIPI_DPHY0_TX_D1N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 469.90 mm): Symbol U3 Pin 165 [MIPI_DPHY0_TX_D1P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 474.98 mm): Symbol U3 Pin 169 [MIPI_DPHY0_TX_CLKN, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 477.52 mm): Symbol U3 Pin 171 [MIPI_DPHY0_TX_CLKP, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 482.60 mm): Symbol U3 Pin 175 [MIPI_DPHY1_TX_D0N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 485.14 mm): Symbol U3 Pin 177 [MIPI_DPHY1_TX_D0P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 490.22 mm): Symbol U3 Pin 181 [MIPI_DPHY1_TX_D1N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 492.76 mm): Symbol U3 Pin 183 [MIPI_DPHY1_TX_D1P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 497.84 mm): Symbol U3 Pin 187 [MIPI_DPHY1_TX_CLKN, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 500.38 mm): Symbol U3 Pin 189 [MIPI_DPHY1_TX_CLKP, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 505.46 mm): Symbol U3 Pin 193 [MIPI_DPHY1_TX_D2N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 508.00 mm): Symbol U3 Pin 195 [MIPI_DPHY1_TX_D2P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(411.48 mm, 513.08 mm): Symbol U3 Pin 199 [HDMI_TX0_SDA_5V, Bidirectional, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 391.16 mm): Symbol U3 Pin 204 [GPIO3_C0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 393.70 mm): Symbol U3 Pin 206 [GPIO3_B7, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 396.24 mm): Symbol U3 Pin 208 [TYPEC0_SBU1_DC, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 398.78 mm): Symbol U3 Pin 210 [GPIO1_B6_CAM2_CLK, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 401.32 mm): Symbol U3 Pin 212 [GPIO1_B7, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 403.86 mm): Symbol U3 Pin 214 [TYPEC0_SBU2_DC, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 408.94 mm): Symbol U3 Pin 218 [PWM11_M3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 411.48 mm): Symbol U3 Pin 220 [GPIO1_C1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 416.56 mm): Symbol U3 Pin 224 [WIFI_PWR_EN, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 419.10 mm): Symbol U3 Pin 226 [SARADC_VIN1_KEY/RECOVERY, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 421.64 mm): Symbol U3 Pin 228 [SARADC_VIN2_DC, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 424.18 mm): Symbol U3 Pin 230 [SARADC_VIN3_HP_HOOK, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 429.26 mm): Symbol U3 Pin 234 [LCD_PWREN_H, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 431.80 mm): Symbol U3 Pin 236 [HP_DET_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 434.34 mm): Symbol U3 Pin 238 [GPIO4_A4, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 436.88 mm): Symbol U3 Pin 240 [GPIO4_A5, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 441.96 mm): Symbol U3 Pin 244 [GPIO1_D0, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 444.50 mm): Symbol U3 Pin 246 [GPIO1_D1, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 480.06 mm): Symbol U3 Pin 274 [SDMMC_DET_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 391.16 mm): Symbol U3 Pin 203 [TYPEC0_SBU1, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 393.70 mm): Symbol U3 Pin 205 [TYPEC0_SBU2, Output, Line]
+[footprint_link_issues]: The current configuration does not include the footprint library 'HS_CM5_OFFICIAL'.
+    ; warning
+    @(622.30 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_CM5_OFFICIAL'
+    ; warning
+    @(622.30 mm, 449.58 mm): Symbol U3 [Radxa_CM5]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 398.78 mm): Symbol U3 Pin 209 [TYPEC0_SSRX1P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 401.32 mm): Symbol U3 Pin 211 [TYPEC0_SSRX1N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 502.92 mm): Symbol U3 Pin 292 [VCC_3V3_S3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 406.40 mm): Symbol U3 Pin 215 [TYPEC0_SSTX1P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 505.46 mm): Symbol U3 Pin 294 [GPIO0_D3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 408.94 mm): Symbol U3 Pin 217 [TYPEC0_SSTX1N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 508.00 mm): Symbol U3 Pin 296 [CC_INT0_L, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 414.02 mm): Symbol U3 Pin 221 [TYPEC0_SSRX2P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(586.74 mm, 510.54 mm): Symbol U3 Pin 298 [BT_REG_ON_H, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 416.56 mm): Symbol U3 Pin 223 [TYPEC0_SSRX2N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 421.64 mm): Symbol U3 Pin 227 [TYPEC0_SSTX2P, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 424.18 mm): Symbol U3 Pin 229 [TYPEC0_SSTX2N, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 436.88 mm): Symbol U3 Pin 239 [PCIE20_2_REFCLKP, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 439.42 mm): Symbol U3 Pin 241 [PCIE20_2_REFCLKN, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 444.50 mm): Symbol U3 Pin 245 [USB20_HOST1_DP, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 447.04 mm): Symbol U3 Pin 247 [USB20_HOST1_DM, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 452.12 mm): Symbol U3 Pin 251 [USB30_2_SSTXP, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 454.66 mm): Symbol U3 Pin 253 [USB30_2_SSTXN, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 459.74 mm): Symbol U3 Pin 257 [USB30_2_SSRXP, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(657.86 mm, 459.74 mm): Symbol U3 Pin 257 [USB30_2_SSRXP, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 462.28 mm): Symbol U3 Pin 259 [USB30_2_SSRXN, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(657.86 mm, 462.28 mm): Symbol U3 Pin 259 [USB30_2_SSRXN, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 474.98 mm): Symbol U3 Pin 269 [I2C6_SDA_M3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 477.52 mm): Symbol U3 Pin 271 [I2C6_SCL_M3, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 482.60 mm): Symbol U3 Pin 275 [GPIO1_C6_S, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 485.14 mm): Symbol U3 Pin 277 [GPIO1_D5_S, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 487.68 mm): Symbol U3 Pin 279 [GPIO1_C4_S, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 490.22 mm): Symbol U3 Pin 281 [RTC_INT_L, Output, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 492.76 mm): Symbol U3 Pin 283 [GPIO1_D2, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 495.30 mm): Symbol U3 Pin 285 [BT_HOST_WAKE, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 497.84 mm): Symbol U3 Pin 287 [GPIO4_A7, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 500.38 mm): Symbol U3 Pin 289 [GPIO4_A6, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 505.46 mm): Symbol U3 Pin 293 [GPIO0_C2, Passive, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 508.00 mm): Symbol U3 Pin 295 [TYPEC5V_PWREN_H, Input, Line]
+[pin_not_driven]: Input pin not driven by any Output pins
+    ; error
+    @(657.86 mm, 508.00 mm): Symbol U3 Pin 295 [TYPEC5V_PWREN_H, Input, Line]
+[pin_not_connected]: Pin not connected
+    ; error
+    @(657.86 mm, 510.54 mm): Symbol U3 Pin 297 [TYPEC0_OTG_VBUSDET, Passive, Line]
+
+ ** ERC messages: 231  Errors 202  Warnings 29

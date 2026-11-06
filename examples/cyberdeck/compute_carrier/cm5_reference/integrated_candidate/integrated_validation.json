@@ -1,0 +1,38 @@
+{
+  "schema": "hs.cm5_integrated_reference_gate.v1",
+  "cm5_manufacturer_rev": "V2.21",
+  "real_cm5_symbol_pin_count": 300,
+  "physical_vcc_sysin_pins": [
+    77,
+    79,
+    81,
+    83,
+    85,
+    87
+  ],
+  "physical_ground_pins": 76,
+  "physical_usb_power_enable_pins": [
+    97
+  ],
+  "physical_usb_dp_pins": [
+    263
+  ],
+  "physical_usb_dm_pins": [
+    265
+  ],
+  "pin290_held_nc": true,
+  "upstream_power_usb_circuit_unchanged": true,
+  "erc_open_findings": {
+    "lib_symbol_issues": 26,
+    "pin_not_connected": 172,
+    "footprint_link_issues": 3,
+    "power_pin_not_driven": 4,
+    "pin_not_driven": 26
+  },
+  "erc_clean": false,
+  "rated_mating_connector_assessed": false,
+  "physical_power_test": false,
+  "high_speed_routing_test": false,
+  "fabrication_authorized": false,
+  "next_gate": "Review GPIO/boot/reset, USB ESD and current budget, module revision and 300-pin physical footprint. Then design routed PCB and run ERC/DRC/SI and measured boot."
+}

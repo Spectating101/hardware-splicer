@@ -1,0 +1,8 @@
+(sym_lib_table
+ (lib (name "Connector")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Connector.kicad_sym")(options "")(descr "KiCad 9 stock symbols"))
+ (lib (name "Connector_Generic")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Connector_Generic.kicad_sym")(options "")(descr "KiCad 9 stock symbols"))
+ (lib (name "Device")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr "KiCad 9 stock symbols"))
+ (lib (name "power")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/power.kicad_sym")(options "")(descr "KiCad 9 stock symbols"))
+ (lib (name "HS_Power")(type "KiCad")(uri "${KIPRJMOD}/HS_Power.kicad_sym")(options "")(descr "CM5 sourced power stage pin identities"))
+ (lib (name "HS_CM5_OFFICIAL")(type "KiCad")(uri "${KIPRJMOD}/HS_CM5_OFFICIAL.kicad_sym")(options "")(descr "CM5 manufacturer pin map"))
+)
