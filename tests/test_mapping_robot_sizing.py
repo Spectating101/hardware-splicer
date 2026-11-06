@@ -139,3 +139,64 @@ def test_run_current_at_load_preferred_over_rated_current():
     p["drive_motor"]["facts"]["run_current"] = _f(0.12)
     r = sz.run_sizing(p, ASSUMPTIONS)
     assert r["effective"]["motor_run_current_a"] == 0.12
+
+
+# --- Build 1 test 1 report -----------------------------------------------------------------------------------------------
+
+_rspec = importlib.util.spec_from_file_location(
+    "mapping_robot_report", ROOT / "hardware" / "reference_designs" / "mapping_robot_v0" / "report.py")
+rep = importlib.util.module_from_spec(_rspec)
+_rspec.loader.exec_module(rep)
+
+
+def _report_parts():
+    motor = copy.deepcopy(PARTS["drive_motor"])
+    motor.update(name="Test motor", status="SOURCED_NOT_MEASURED",
+                 listing={"url": "https://www.ruten.com.tw/item/1/", "marketplace": "ruten", "variant": "12V110RPM",
+                          "price_twd": 550, "captured": "2026-11-06"},
+                 unconfirmed=[{"fact": "gear_ratio", "reason": "seller lists speeds only"}])
+    motor["facts"]["encoder_cpr"] = {"alternatives": [{"value": 11, "source": "a"}, {"value": 12, "source": "b"}],
+                                     "unit": "count/rev_motor", "basis": "published", "confidence": "conflicting"}
+    motor["facts"]["stall_torque"] = {"value": 0.412, "unit": "N·m", "basis": "typical", "source": "s",
+                                      "note": "bracketed; measure on the bench"}
+    return [motor]
+
+
+QUOTES_OK = {"pass": True, "quotes_checked": 49, "failed": [], "checked_on": "2026-11-06"}
+
+
+def test_report_lists_every_part_with_listing_and_confidence():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK)
+    assert "Test motor" in text and "https://www.ruten.com.tw/item/1/" in text and "NT$550" in text
+    assert "12V110RPM" in text
+
+
+def test_report_lists_unconfirmed_facts_and_assumptions():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK)
+    assert "gear_ratio" in text and "seller lists speeds only" in text
+    assert "converter_efficiency" in text and "chassis_mass_kg" in text
+    assert "stall_torque" in text and "bracketed" in text  # typical figures are listed with their notes
+
+
+def test_report_lists_conflicting_facts():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK)
+    assert "encoder_cpr" in text and "11" in text and "12" in text and "conflicting" in text
+
+
+def test_report_says_designed_not_built():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK).lower()
+    assert "sourced, not measured" in text
+    assert "verified" not in text and "approved" not in text
+
+
+def test_report_shows_sizing_fail_reasons():
+    failing = sz.run_sizing(parts(battery_pack__capacity=_f(1000)), ASSUMPTIONS)
+    text = rep.render_report(_report_parts(), failing, QUOTES_OK)
+    assert "does not meet" in text.lower() and any(reason in text for reason in failing["reasons"])
+
+
+def test_report_shows_failed_quote_check():
+    bad = {"pass": False, "quotes_checked": 3, "failed": [{"part": "m", "claim": "mass", "source": "x",
+                                                           "reason": "quote not found in the captured source"}]}
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), bad)
+    assert "quote not found" in text and "mass" in text
