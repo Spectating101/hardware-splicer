@@ -110,3 +110,26 @@ def test_wrong_chip_variant_or_connector_count_fails():
         x["modules"][1]["vendor_connector_count"]=2
     with pytest.raises(CarrierGateError,match="connector"):
         assess(change(bad))
+
+
+def test_manufacturer_conflicting_cm5_outline_cannot_be_hidden():
+    result=assess(SOURCE.read_bytes())
+    assert any(x["code"]=="vendor_dimension_reference_conflict" for x in result["blockers"])
+    def mutate(x):
+        x["modules"][1]["mechanical_conflicting_vendor_references"].pop()
+    with pytest.raises(CarrierGateError,match="dimension"):
+        assess(change(mutate))
+
+def test_smarc_vendor_standard_and_osm_are_distinct():
+    result=assess(SOURCE.read_bytes())
+    assert not result["safe_to_fabricate"]
+    def mutate(x):
+        next(y for y in x["alternative_standards"] if y["id"]=="sget_osm_sdt05")["interchange"]="HOT_SWAPPABLE"
+    with pytest.raises(CarrierGateError,match="soldered"):
+        assess(change(mutate))
+
+def test_used_phone_price_does_not_imply_qualified_bulk_inventory():
+    def mutate(x):
+        next(y for y in x["current_taiwan_market_reference"] if y["id"]=="used_s21_prior_research")["availability"]="BULK_STOCK_VERIFIED"
+    with pytest.raises(CarrierGateError,match="cost comparison"):
+        assess(change(mutate))
