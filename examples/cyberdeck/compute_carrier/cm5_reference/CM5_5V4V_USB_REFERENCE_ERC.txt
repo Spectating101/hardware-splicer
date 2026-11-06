@@ -1,0 +1,74 @@
+ERC report (2026-11-07T02:09:17+0800, Encoding UTF8)
+
+***** Sheet /
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector_Generic'
+    ; warning
+    @(73.66 mm, 99.06 mm): Symbol J1 [Conn_01x02]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_Power'
+    ; warning
+    @(132.08 mm, 99.06 mm): Symbol U1 [MP8759GD]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'power'
+    ; warning
+    @(50.80 mm, 170.18 mm): Symbol #FLG01 [PWR_FLAG]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'power'
+    ; warning
+    @(76.20 mm, 170.18 mm): Symbol #FLG02 [PWR_FLAG]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(66.04 mm, 210.82 mm): Symbol R1 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(86.36 mm, 210.82 mm): Symbol R2 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(106.68 mm, 210.82 mm): Symbol R3 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(127.00 mm, 210.82 mm): Symbol R4 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(147.32 mm, 210.82 mm): Symbol R5 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(66.04 mm, 248.92 mm): Symbol C1 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(86.36 mm, 248.92 mm): Symbol C2 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(106.68 mm, 248.92 mm): Symbol C3 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(172.72 mm, 210.82 mm): Symbol L1 [L]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'HS_Power'
+    ; warning
+    @(259.08 mm, 99.06 mm): Symbol U2 [SGM2576]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(127.00 mm, 248.92 mm): Symbol C4 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(193.04 mm, 210.82 mm): Symbol R6 [R]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(147.32 mm, 248.92 mm): Symbol C5 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(167.64 mm, 248.92 mm): Symbol C6 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(187.96 mm, 248.92 mm): Symbol C7 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(208.28 mm, 248.92 mm): Symbol C8 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Device'
+    ; warning
+    @(228.60 mm, 248.92 mm): Symbol C9 [C]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector'
+    ; warning
+    @(327.66 mm, 99.06 mm): Symbol J3 [USB_A]
+[lib_symbol_issues]: The current configuration does not include the symbol library 'Connector_Generic'
+    ; warning
+    @(381.00 mm, 99.06 mm): Symbol J2 [Conn_01x06]
+
+ ** ERC messages: 23  Errors 0  Warnings 23
