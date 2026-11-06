@@ -11,8 +11,11 @@ here can mark a part verified, approved or fit for a build.
 """
 from __future__ import annotations
 
+import hashlib
+import html as htmllib
 import json
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -150,6 +153,49 @@ def validate_part(entry: dict) -> list[str]:
         if name not in facts and name not in unconfirmed:
             out.append(f"required fact {name} is missing; source it or list it as unconfirmed with a reason")
     return out
+
+
+def normalise(text: str) -> str:
+    """Compare text the way a reader would: same rules as ``scripts/verify_device_module_quotes.py``."""
+    text = unicodedata.normalize("NFKC", text)
+    for a, b in (("−", "-"), ("–", "-"), ("—", "-"), ("’", "'"), ("‘", "'"), ("“", '"'), ("”", '"')):
+        text = text.replace(a, b)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def html_to_text(html: str) -> str:
+    """Visible text of an HTML page: scripts, styles and tags dropped, entities decoded."""
+    html = re.sub(r"(?is)<(script|style|noscript)\b.*?</\1\s*>", " ", html)
+    html = re.sub(r"(?s)<[^>]+>", " ", html)
+    return normalise(htmllib.unescape(html))
+
+
+def verify_quotes(parts: list[dict], capture_dir: Path) -> dict:
+    """Check every quote against the captured copy of its own source (``capture_dir/index.json`` maps url to file)."""
+    capture_dir = Path(capture_dir)
+    index_path = capture_dir / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.is_file() else {}
+    sources: dict[str, dict] = {}
+    texts: dict[str, str] = {}
+    failed = []
+    checked = 0
+    for part in parts:
+        for q in part.get("quotes", []):
+            checked += 1
+            url = q["source"]
+            row = {"part": part["id"], "claim": q["claim"], "source": url}
+            name = index.get(url)
+            path = capture_dir / name if name else None
+            if path is None or not path.is_file():
+                failed.append({**row, "reason": "no capture of this source"})
+                continue
+            if url not in texts:
+                raw = path.read_bytes()
+                sources[url] = {"file": name, "sha256": hashlib.sha256(raw).hexdigest()}
+                texts[url] = normalise(raw.decode("utf-8", errors="replace"))
+            if normalise(q["quote"]) not in texts[url]:
+                failed.append({**row, "reason": "quote not found in the captured source"})
+    return {"pass": checked > 0 and not failed, "quotes_checked": checked, "failed": failed, "sources": sources}
 
 
 def load_parts(path: Path = LIBRARY_PATH) -> list[dict]:

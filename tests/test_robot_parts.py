@@ -180,3 +180,65 @@ def test_load_parts_returns_valid_parts(tmp_path):
 
 def test_shipped_library_loads():
     assert isinstance(rp.load_parts(), list)
+
+
+# --- quote verification against captured sources ----------------------------------------------------------------------
+
+def _captures(tmp_path, files: dict[str, str]):
+    d = tmp_path / "captures"
+    d.mkdir()
+    index = {}
+    for n, (url, text) in enumerate(files.items()):
+        name = f"source_{n}.txt"
+        (d / name).write_text(text, encoding="utf-8")
+        index[url] = name
+    (d / "index.json").write_text(json.dumps(index), encoding="utf-8")
+    return d
+
+
+def _one_quote_part(quote: str, source: str = DS) -> dict:
+    e = copy.deepcopy(GOOD)
+    e["quotes"] = [{"claim": "rated_voltage", "quote": quote, "source": source}]
+    return e
+
+
+def test_quote_found_after_normalisation(tmp_path):
+    caps = _captures(tmp_path, {DS: "The motor’s rated\n   voltage is 12 V – nominal."})
+    result = rp.verify_quotes([_one_quote_part("The motor's rated voltage is 12 V - nominal.")], caps)
+    assert result["pass"] is True and result["quotes_checked"] == 1 and result["failed"] == []
+
+
+def test_quote_missing_fails(tmp_path):
+    caps = _captures(tmp_path, {DS: "Rated voltage 6 V."})
+    result = rp.verify_quotes([_one_quote_part("Rated voltage 12 V.")], caps)
+    assert result["pass"] is False
+    assert result["failed"][0]["claim"] == "rated_voltage" and "not found" in result["failed"][0]["reason"]
+
+
+def test_quote_without_capture_fails(tmp_path):
+    caps = _captures(tmp_path, {"https://other.example/": "Rated voltage 12 V."})
+    result = rp.verify_quotes([_one_quote_part("Rated voltage 12 V.")], caps)
+    assert result["pass"] is False and "no capture" in result["failed"][0]["reason"]
+
+
+def test_sha256_recorded(tmp_path):
+    import hashlib
+    text = "Rated voltage 12 V."
+    caps = _captures(tmp_path, {DS: text})
+    result = rp.verify_quotes([_one_quote_part("Rated voltage 12 V.")], caps)
+    assert result["sources"][DS]["sha256"] == hashlib.sha256(text.encode()).hexdigest()
+
+
+def test_no_quotes_is_not_a_pass(tmp_path):
+    caps = _captures(tmp_path, {DS: "x"})
+    e = copy.deepcopy(GOOD)
+    e["quotes"] = []
+    result = rp.verify_quotes([e], caps)
+    assert result["quotes_checked"] == 0 and result["pass"] is False
+
+
+def test_html_to_text_drops_markup_scripts_and_entities():
+    html = "<html><head><style>p{}</style><script>var x=1</script></head><body><p>Rated&nbsp;voltage:<b>12&#8239;V</b></p></body></html>"
+    text = rp.html_to_text(html)
+    assert "var x" not in text and "p{}" not in text and "<" not in text
+    assert rp.normalise("Rated voltage: 12 V") in rp.normalise(text)
