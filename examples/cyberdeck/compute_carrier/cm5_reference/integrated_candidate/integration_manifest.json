@@ -1,0 +1,21 @@
+{
+  "schema": "hs.cm5_integrated_power_usb_schematic.v1",
+  "manufacturer_revision": "V2.21",
+  "cm5_component": "U3",
+  "cm5_symbol_units": 3,
+  "cm5_contacts": 300,
+  "cm5_gnd_contacts": 76,
+  "cm5_vcc_sysin_contacts": 6,
+  "host_usb_power_enable_pin": 97,
+  "host_usb_dp_pin": 263,
+  "host_usb_dm_pin": 265,
+  "manufacturer_nc_count": 40,
+  "cm5_pin290_nc": true,
+  "regulator": "MP8759GD-Z",
+  "usb_switch": "SGM2590XN5G/TR",
+  "power_up_tested": false,
+  "all_pins_reviewed": false,
+  "erc_clean": false,
+  "routed_board": false,
+  "fabrication_authorized": false
+}
