@@ -3,14 +3,17 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import sys
 import pytest
 
 from hardware_splicer.cyberdeck_packaging_workflow import (
     run, PackagingInputError, _native_spec,
 )
-from mecha_splicer.spec import ClamshellTerminalSpec
-
 ROOT=Path(__file__).resolve().parents[1]
+# This test must also run under HS core-fast CI (PYTHONPATH=src only).
+# Discover the repo-owned Mecha-Splicer app instead of requiring external pip installs.
+sys.path.insert(0,str(ROOT/"apps/mecha-splicer/src"))
+from mecha_splicer.spec import ClamshellTerminalSpec
 BASE=ROOT/"examples/cyberdeck/dual_touch/cm5_native_replay"
 REQ=json.loads((BASE/"requirements.json").read_text())
 
