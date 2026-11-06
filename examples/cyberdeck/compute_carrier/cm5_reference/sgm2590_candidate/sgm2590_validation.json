@@ -1,0 +1,20 @@
+{
+  "schema": "hs.cm5_sgm2590_successor_gate.v1",
+  "successor_model": "SGM2590XN5G/TR",
+  "predecessor_model": "SGM2576YN5G/TR",
+  "manufacturer_recommended_replacement": true,
+  "five_pin_functions_equivalent": true,
+  "source_io_net_topology_unchanged": true,
+  "validated_power_usb_nets": 14,
+  "other_component_values_unchanged": true,
+  "current_limit_r_kohm": 4.53,
+  "new_current_limit_typical_a": 1.4998381996269508,
+  "old_current_limit_reference_a": 1.446808510638298,
+  "erc_electrical_net_findings": 0,
+  "erc_library_config_warnings": 23,
+  "input_power_and_sgm_switch_tested": false,
+  "esd_and_emi_qualified": false,
+  "exact_pcb_landpattern_tested": false,
+  "assembly_authorized": false,
+  "next_gate": "Qualify SGM2590 package land pattern and thermal/current limits, add USB DP/DM ESD protection and regulator input protection, then integrate with physical CM5 connector."
+}

@@ -1,0 +1,1530 @@
+(kicad_sch (version 20250114) (generator "eeschema") (uuid "7e7cfc20-f633-56d2-a955-4405a0d4c12e") (paper "A2") (title_block (title "CM5 5V to 4V / USB 2.0 power reference NOT FOR FAB") (rev "BENCH DESIGN REVIEW"))(lib_symbols
+(symbol "HS_Power:MP8759GD"
+(exclude_from_sim no) (in_bom yes) (on_board yes)
+(property "Reference" "U" (at 0 23 0) (effects (font (size 1.27 1.27))))
+(property "Value" "MP8759GD" (at 0 21 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(symbol "MP8759GD_1_1"
+(rectangle (start -10.16 17.78) (end 10.16 -17.78) (stroke (width 0.254) (type default)) (fill (type background)))
+(pin power_in line (at -15.2400 10.1600 0) (length 5.08) (name "VIN" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 1.0 1.0)))))
+(pin power_in line (at 15.2400 -10.1600 180) (length 5.08) (name "PGND" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 1.0 1.0)))))
+(pin open_collector line (at -15.2400 -10.1600 0) (length 5.08) (name "PG" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 1.0 1.0)))))
+(pin no_connect line (at -15.2400 -15.2400 0) (length 5.08) (name "NC" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 1.0 1.0)))))
+(pin input line (at 15.2400 5.0800 180) (length 5.08) (name "VOUT" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 1.0 1.0)))))
+(pin input line (at -15.2400 0.0000 0) (length 5.08) (name "MODE" (effects (font (size 1.0 1.0)))) (number "6" (effects (font (size 1.0 1.0)))))
+(pin power_out line (at 15.2400 10.1600 180) (length 5.08) (name "SW" (effects (font (size 1.0 1.0)))) (number "7" (effects (font (size 1.0 1.0)))))
+(pin input line (at 15.2400 0.0000 180) (length 5.08) (name "BST" (effects (font (size 1.0 1.0)))) (number "8" (effects (font (size 1.0 1.0)))))
+(pin power_out line (at 15.2400 -5.0800 180) (length 5.08) (name "VCC" (effects (font (size 1.0 1.0)))) (number "9" (effects (font (size 1.0 1.0)))))
+(pin power_in line (at 15.2400 -15.2400 180) (length 5.08) (name "AGND" (effects (font (size 1.0 1.0)))) (number "10" (effects (font (size 1.0 1.0)))))
+(pin input line (at -15.2400 -5.0800 0) (length 5.08) (name "FB" (effects (font (size 1.0 1.0)))) (number "11" (effects (font (size 1.0 1.0)))))
+(pin input line (at -15.2400 5.0800 0) (length 5.08) (name "EN" (effects (font (size 1.0 1.0)))) (number "12" (effects (font (size 1.0 1.0)))))
+)
+ )
+(symbol "HS_Power:SGM2590"
+(exclude_from_sim no) (in_bom yes) (on_board yes)
+(property "Reference" "U" (at 0 23 0) (effects (font (size 1.27 1.27))))
+(property "Value" "SGM2590" (at 0 21 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(symbol "SGM2590_1_1"
+(rectangle (start -10.16 17.78) (end 10.16 -17.78) (stroke (width 0.254) (type default)) (fill (type background)))
+(pin power_out line (at 12.7000 5.0800 180) (length 5.08) (name "VOUT" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 1.0 1.0)))))
+(pin power_in line (at 12.7000 -5.0800 180) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 1.0 1.0)))))
+(pin input line (at -12.7000 -5.0800 0) (length 5.08) (name "ILIM" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 1.0 1.0)))))
+(pin input line (at -12.7000 0.0000 0) (length 5.08) (name "EN" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 1.0 1.0)))))
+(pin power_in line (at -12.7000 5.0800 0) (length 5.08) (name "VIN" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 1.0 1.0)))))
+)
+ )
+(symbol "power:PWR_FLAG"
+		(power)
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "#FLG"
+			(at 0 1.905 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 0 3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "flag power"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "PWR_FLAG_0_0"
+			(pin power_out line
+				(at 0 0 90)
+				(length 0)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "PWR_FLAG_0_1"
+			(polyline
+				(pts
+					(xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector_Generic:Conn_01x02"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02"
+			(at 0 -5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x02_1_1"
+			(rectangle
+				(start -1.27 1.27)
+				(end 1.27 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector_Generic:Conn_01x06"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 7.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x06"
+			(at 0 -10.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x06_1_1"
+			(rectangle
+				(start -1.27 6.35)
+				(end 1.27 -8.89)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 5.207)
+				(end 0 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 2.667)
+				(end 0 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -4.953)
+				(end 0 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -7.493)
+				(end 0 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 5.08 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -5.08 0)
+				(length 3.81)
+				(name "Pin_5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -7.62 0)
+				(length 3.81)
+				(name "Pin_6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector:USB_A"
+		(pin_names
+			(offset 1.016)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at -5.08 11.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "USB_A"
+			(at -5.08 8.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 3.81 -1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 3.81 -1.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "USB Type A connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector USB"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "USB*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "USB_A_0_1"
+			(rectangle
+				(start -5.08 -7.62)
+				(end 5.08 7.62)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(circle
+				(center -3.81 2.159)
+				(radius 0.635)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.175 2.159) (xy -2.54 2.159) (xy -1.27 3.429) (xy -0.635 3.429)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.54 2.159) (xy -1.905 2.159) (xy -1.27 0.889) (xy 0 0.889)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.524 4.826)
+				(end -4.318 5.334)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start -1.27 4.572)
+				(end -4.572 5.842)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center -0.635 3.429)
+				(radius 0.381)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start -0.127 -7.62)
+				(end 0.127 -6.858)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 0.254 1.27)
+				(end -0.508 0.508)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 2.794) (xy 0.635 1.524) (xy 1.905 2.159) (xy 0.635 2.794)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start 5.08 4.953)
+				(end 4.318 5.207)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 5.08 -0.127)
+				(end 4.318 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 5.08 -2.667)
+				(end 4.318 -2.413)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "USB_A_1_1"
+			(polyline
+				(pts
+					(xy -1.905 2.159) (xy 0.635 2.159)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -2.54 -10.16 90)
+				(length 2.54)
+				(name "Shield"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -10.16 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 7.62 5.08 180)
+				(length 2.54)
+				(name "VBUS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 7.62 0 180)
+				(length 2.54)
+				(name "D+"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 7.62 -2.54 180)
+				(length 2.54)
+				(name "D-"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:L"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "L"
+			(at -1.27 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "L"
+			(at 1.905 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Inductor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "inductor choke coil reactor magnetic"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "L_0_1"
+			(arc
+				(start 0 2.54)
+				(mid 0.6323 1.905)
+				(end 0 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 1.27)
+				(mid 0.6323 0.635)
+				(end 0 0)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 0)
+				(mid 0.6323 -0.635)
+				(end 0 -1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 -1.27)
+				(mid 0.6323 -1.905)
+				(end 0 -2.54)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "L_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:C"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.254)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "C"
+			(at 0.635 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "C"
+			(at 0.635 -2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 0.9652 -3.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "cap capacitor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "C_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "C_0_1"
+			(polyline
+				(pts
+					(xy -2.032 0.762) (xy 2.032 0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -2.032 -0.762) (xy 2.032 -0.762)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "C_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 2.794)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	))
+(symbol (lib_id "Connector_Generic:Conn_01x02") (at 73.6600 99.0600 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "f49514e9-66e6-51e8-ba27-b19af8d21830")
+(property "Reference" "J1" (at 73.6600 103.0600 0) (effects (font (size 1.27 1.27))))
+(property "Value" "EXTERNAL_5V_BENCH_ONLY" (at 73.6600 106.0600 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 73.66 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "J1") (unit 1)))) )
+(wire (pts (xy 68.5800 99.0600) (xy 63.5000 99.0600)) (stroke (width 0) (type default)) (uuid "71bea362-fa41-58c9-a331-ffccaed3c2dd"))
+(label "VCC5V0_SYS" (at 63.5000 99.0600 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2551459f-23aa-5a20-95e5-573a64a9b8a6"))
+(wire (pts (xy 68.5800 101.6000) (xy 63.5000 101.6000)) (stroke (width 0) (type default)) (uuid "6ec063a3-7029-5c3c-85c8-05f097a4e70c"))
+(label "GND" (at 63.5000 101.6000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "1c272c02-97ff-542e-926b-9ecc9c28cec9"))
+(symbol (lib_id "Connector_Generic:Conn_01x06") (at 381.0000 99.0600 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "e6191d73-8e08-5d5d-b041-80b137c2d3d2")
+(property "Reference" "J2" (at 381.0000 103.0600 0) (effects (font (size 1.27 1.27))))
+(property "Value" "CM5_HARNESS_LOGICAL_NOT_PINOUT" (at 381.0000 106.0600 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 381.0 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "J2") (unit 1)))) )
+(wire (pts (xy 375.9200 93.9800) (xy 370.8400 93.9800)) (stroke (width 0) (type default)) (uuid "0dab83ff-460f-5da5-990e-945b20592415"))
+(label "VCC_SYSIN" (at 370.8400 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "a0ac7221-95f2-5f4e-aec0-71e0054cab27"))
+(wire (pts (xy 375.9200 96.5200) (xy 370.8400 96.5200)) (stroke (width 0) (type default)) (uuid "31fd0e4f-b5d6-5573-9dcb-5ba30c71fb83"))
+(label "GND" (at 370.8400 96.5200 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "4d301880-9c4f-5f52-9e27-b235a125a642"))
+(wire (pts (xy 375.9200 99.0600) (xy 370.8400 99.0600)) (stroke (width 0) (type default)) (uuid "8e4d8fd9-8595-5e7a-b301-8815cd6a5c52"))
+(label "USB20_HOST0_DP" (at 370.8400 99.0600 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "a4429b04-082f-58fe-b2ab-3106d258c878"))
+(wire (pts (xy 375.9200 101.6000) (xy 370.8400 101.6000)) (stroke (width 0) (type default)) (uuid "46444938-59b8-5c55-897e-e06f1f6d00d2"))
+(label "USB20_HOST0_DM" (at 370.8400 101.6000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "6f7c8729-a9b6-5dc3-af9a-cb425a2d6563"))
+(wire (pts (xy 375.9200 104.1400) (xy 370.8400 104.1400)) (stroke (width 0) (type default)) (uuid "c89e7edc-9599-51f8-b217-d47b36498410"))
+(label "USB_HOST_PWREN_H" (at 370.8400 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "f242eed5-057d-5fe0-a87a-12ba9891cc84"))
+(wire (pts (xy 375.9200 106.6800) (xy 370.8400 106.6800)) (stroke (width 0) (type default)) (uuid "9cab2097-0603-51a3-8864-fcb3e191bad7"))
+(label "GND" (at 370.8400 106.6800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "913f9b7f-9905-5ed3-bc6a-36cdedf1f083"))
+(symbol (lib_id "Connector:USB_A") (at 327.6600 99.0600 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "7a65aefc-b92f-5039-a2dc-69a889afb051")
+(property "Reference" "J3" (at 327.6600 103.0600 0) (effects (font (size 1.27 1.27))))
+(property "Value" "USB2_A_HOST_ESD_NOT_DESIGNED" (at 327.6600 106.0600 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 327.66 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "J3") (unit 1)))) )
+(wire (pts (xy 335.2800 93.9800) (xy 340.3600 93.9800)) (stroke (width 0) (type default)) (uuid "8a9afb7c-3ac8-5dc7-955d-718b9f6c81ee"))
+(label "USB_VBUS_SW" (at 340.3600 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "ae9dc908-325c-5474-82a6-4b331b35446e"))
+(wire (pts (xy 335.2800 101.6000) (xy 340.3600 101.6000)) (stroke (width 0) (type default)) (uuid "43a52b56-3fd0-55be-8eb5-ed04bcecd7a8"))
+(label "USB20_HOST0_DM" (at 340.3600 101.6000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2019eca3-02bc-5c0f-a2a5-742ece08fde1"))
+(wire (pts (xy 335.2800 99.0600) (xy 340.3600 99.0600)) (stroke (width 0) (type default)) (uuid "3baabc13-b8f0-5b59-bfaa-0d1cb6cb9855"))
+(label "USB20_HOST0_DP" (at 340.3600 99.0600 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "a37d09b5-395a-5ccc-a2b9-f969db7057dc"))
+(wire (pts (xy 327.6600 109.2200) (xy 327.6600 104.1400)) (stroke (width 0) (type default)) (uuid "ff964e86-08ed-5396-b743-eb201c82486b"))
+(label "GND" (at 327.6600 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7f29b1dd-58d4-53cb-a01b-32a0a74f607d"))
+(no_connect (at 325.1200 109.2200) (uuid "ed3af68c-7e03-5616-b465-7fbb78d74af6") )
+(symbol (lib_id "HS_Power:MP8759GD") (at 132.0800 99.0600 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "fe9504e8-6ae5-5028-8d55-bb2652a6eb51")
+(property "Reference" "U1" (at 132.0800 103.0600 0) (effects (font (size 1.27 1.27))))
+(property "Value" "MP8759GD-Z_REQUIRES_SI_REVIEW" (at 132.0800 106.0600 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 132.08 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "U1") (unit 1)))) )
+(wire (pts (xy 116.8400 88.9000) (xy 111.7600 88.9000)) (stroke (width 0) (type default)) (uuid "e461b096-a658-577e-9e8e-8411a52843a1"))
+(label "VCC5V0_SYS" (at 111.7600 88.9000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7988bd93-b09a-5709-bf29-36ace9d9a9e7"))
+(wire (pts (xy 147.3200 109.2200) (xy 152.4000 109.2200)) (stroke (width 0) (type default)) (uuid "667cc487-cd00-5a81-8b40-344a5aa145c8"))
+(label "GND" (at 152.4000 109.2200 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "faf90321-22a2-5ffb-aa20-056a58478dee"))
+(wire (pts (xy 147.3200 93.9800) (xy 152.4000 93.9800)) (stroke (width 0) (type default)) (uuid "588c0a11-b5b8-57cb-ab35-562d638e8325"))
+(label "VCC_SYSIN" (at 152.4000 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "e8a97a5d-f512-564b-8cd0-5ad7a36e3323"))
+(wire (pts (xy 147.3200 88.9000) (xy 152.4000 88.9000)) (stroke (width 0) (type default)) (uuid "94d1bc17-7142-506a-b13c-b9d38f569fe4"))
+(label "SW_MPS" (at 152.4000 88.9000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "382b87bc-70be-52cd-9bd8-22c319d99c67"))
+(wire (pts (xy 147.3200 99.0600) (xy 152.4000 99.0600)) (stroke (width 0) (type default)) (uuid "98e05abf-ae97-5864-91f9-32a77b467912"))
+(label "BST_MPS" (at 152.4000 99.0600 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "ba266c6f-6557-5174-bf2e-b2649c535e9a"))
+(wire (pts (xy 147.3200 104.1400) (xy 152.4000 104.1400)) (stroke (width 0) (type default)) (uuid "cc28ba30-27d1-500e-b296-2465946607d1"))
+(label "VCC_MPS" (at 152.4000 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "d54a802b-d27b-5961-b6ae-fc76cb31305c"))
+(wire (pts (xy 147.3200 114.3000) (xy 152.4000 114.3000)) (stroke (width 0) (type default)) (uuid "58779b6e-ae9a-57b8-8447-ebeb45c50685"))
+(label "GND" (at 152.4000 114.3000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7a898253-fe43-5bc7-963f-89eed934f6e8"))
+(wire (pts (xy 116.8400 104.1400) (xy 111.7600 104.1400)) (stroke (width 0) (type default)) (uuid "d75806a7-1c45-587f-9051-a1707c7c9b06"))
+(label "FB_MPS" (at 111.7600 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "47f21652-5d52-53c7-b9e6-9c99ff7cd468"))
+(wire (pts (xy 116.8400 93.9800) (xy 111.7600 93.9800)) (stroke (width 0) (type default)) (uuid "7a319671-7020-5be3-ad4a-da463a4dbae5"))
+(label "EN_MPS" (at 111.7600 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "5633ae87-fbad-5805-9b16-bd709bdbcb41"))
+(no_connect (at 116.8400 109.2200) (uuid "c961e597-e147-5290-9b47-64b3eec0130a") )
+(no_connect (at 116.8400 114.3000) (uuid "9a77132b-1c29-564f-98bc-e88c0b6e6851") )
+(no_connect (at 116.8400 99.0600) (uuid "76ae747d-ad6b-5497-955a-a66da5badd2f") )
+(symbol (lib_id "HS_Power:SGM2590") (at 259.0800 99.0600 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "aa3bbdde-e092-5d24-a04e-5f09473dd94d")
+(property "Reference" "U2" (at 259.0800 103.0600 0) (effects (font (size 1.27 1.27))))
+(property "Value" "SGM2590XN5G_TR_ACTIVE_PIN_EQUIVALENT_NOT_LAYOUT_APPROVED" (at 259.0800 106.0600 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 259.08 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "U2") (unit 1)))) )
+(wire (pts (xy 271.7800 93.9800) (xy 276.8600 93.9800)) (stroke (width 0) (type default)) (uuid "85d864c1-262a-58db-a19e-099976bc1542"))
+(label "USB_VBUS_SW" (at 276.8600 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7c0850c8-9af8-578f-bcc7-13bd3af3ba33"))
+(wire (pts (xy 271.7800 104.1400) (xy 276.8600 104.1400)) (stroke (width 0) (type default)) (uuid "b5e461e5-9343-5e5a-860c-ffaf33f8f651"))
+(label "GND" (at 276.8600 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "32b9bb01-fb85-55d0-85d1-47eb560a3ee5"))
+(wire (pts (xy 246.3800 104.1400) (xy 241.3000 104.1400)) (stroke (width 0) (type default)) (uuid "71943028-c73a-5baa-9212-bc3001dace9d"))
+(label "ILIM_USB" (at 241.3000 104.1400 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "bdc76b7a-2bcc-5e18-bf67-828ccacab99f"))
+(wire (pts (xy 246.3800 99.0600) (xy 241.3000 99.0600)) (stroke (width 0) (type default)) (uuid "2e38879c-9ec6-5599-8c68-3ff235725a0f"))
+(label "USB_HOST_PWREN_H" (at 241.3000 99.0600 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "fc3bc054-2b8b-5c71-a414-926d57c34080"))
+(wire (pts (xy 246.3800 93.9800) (xy 241.3000 93.9800)) (stroke (width 0) (type default)) (uuid "9dc1ddb3-1693-5d97-ae64-9a109676d069"))
+(label "VCC5V0_SYS" (at 241.3000 93.9800 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "5fd3a9fe-8be0-5eb4-93dd-ac4e61263b6b"))
+(symbol (lib_id "Device:L") (at 172.7200 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "b815b78d-031c-5807-adc7-c5a2ffb7881a")
+(property "Reference" "L1" (at 172.7200 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "1.5uH_ISAT_UNVERIFIED" (at 172.7200 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 172.72 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "L1") (unit 1)))) )
+(wire (pts (xy 172.7200 207.0100) (xy 172.7200 201.9300)) (stroke (width 0) (type default)) (uuid "9caa9577-5272-5a4e-acd5-6ccfe4b20bf3"))
+(label "SW_MPS" (at 172.7200 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "adcb4bd2-d5ac-5db6-8459-78e99a672dd9"))
+(wire (pts (xy 172.7200 214.6300) (xy 172.7200 219.7100)) (stroke (width 0) (type default)) (uuid "636110cb-5102-5443-a1c5-5f2269a6a98e"))
+(label "VCC_SYSIN" (at 172.7200 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "5f78f6cd-039e-5d33-b798-0a11947c5dcf"))
+(symbol (lib_id "Device:R") (at 66.0400 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "4021e1ce-0b12-5ffe-86f3-77de34b8960f")
+(property "Reference" "R1" (at 66.0400 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "47k_1pct_RFB_TOP" (at 66.0400 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 66.04 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R1") (unit 1)))) )
+(wire (pts (xy 66.0400 207.0100) (xy 66.0400 201.9300)) (stroke (width 0) (type default)) (uuid "2779eeb1-4df1-544b-8f19-a6a367a698cd"))
+(label "VCC_SYSIN" (at 66.0400 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "fb1afb90-676f-590a-9ef5-d4ae53c1d4cf"))
+(wire (pts (xy 66.0400 214.6300) (xy 66.0400 219.7100)) (stroke (width 0) (type default)) (uuid "2587ba22-ce8d-5412-9d32-8fe64e19ad58"))
+(label "FB_MPS" (at 66.0400 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "8f9b9997-926d-508e-b82e-a55e9e1c243a"))
+(symbol (lib_id "Device:R") (at 86.3600 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "0276de16-318e-519d-b13d-1784df76d495")
+(property "Reference" "R2" (at 86.3600 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "8.2k_1pct_RFB_BOTTOM" (at 86.3600 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 86.36 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R2") (unit 1)))) )
+(wire (pts (xy 86.3600 207.0100) (xy 86.3600 201.9300)) (stroke (width 0) (type default)) (uuid "870eec3b-6eaf-5cf9-8301-8a34e0071a5f"))
+(label "FB_MPS" (at 86.3600 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "81c3cacc-fba1-57db-95fc-1f154a10a2d4"))
+(wire (pts (xy 86.3600 214.6300) (xy 86.3600 219.7100)) (stroke (width 0) (type default)) (uuid "acfcde80-5a66-5f08-866c-5dd32fffe694"))
+(label "GND" (at 86.3600 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "1d494822-ec7a-5ed2-a075-b0c74783788c"))
+(symbol (lib_id "Device:R") (at 106.6800 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "e19a4a32-83bf-5e22-8edf-c58f85ca0afd")
+(property "Reference" "R3" (at 106.6800 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "510k_REN_TOP" (at 106.6800 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 106.68 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R3") (unit 1)))) )
+(wire (pts (xy 106.6800 207.0100) (xy 106.6800 201.9300)) (stroke (width 0) (type default)) (uuid "b0aaae0e-9f63-514e-8bd0-e9074ee8840e"))
+(label "VCC5V0_SYS" (at 106.6800 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7b1a69d4-fd76-5540-95c5-af65e6956154"))
+(wire (pts (xy 106.6800 214.6300) (xy 106.6800 219.7100)) (stroke (width 0) (type default)) (uuid "6814acdc-041d-5ecc-bce5-2e997aea3b9b"))
+(label "EN_MPS" (at 106.6800 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "f25b23c8-2290-56fb-a7ae-5f4793f67d26"))
+(symbol (lib_id "Device:R") (at 127.0000 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "12ad28b5-5535-5ca6-a8f6-128378f73d0d")
+(property "Reference" "R4" (at 127.0000 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "510k_REN_BOTTOM" (at 127.0000 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 127.0 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R4") (unit 1)))) )
+(wire (pts (xy 127.0000 207.0100) (xy 127.0000 201.9300)) (stroke (width 0) (type default)) (uuid "c8c66c8b-d31e-5063-8f2d-f74958aad4e0"))
+(label "EN_MPS" (at 127.0000 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "115ffa80-58c8-5c0a-a0b7-3d2f1eff2122"))
+(wire (pts (xy 127.0000 214.6300) (xy 127.0000 219.7100)) (stroke (width 0) (type default)) (uuid "7bdd56a4-55d4-5c62-96aa-b7b71b2805f4"))
+(label "GND" (at 127.0000 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "0977fb6b-478b-5fc0-96af-234842ee4d78"))
+(symbol (lib_id "Device:R") (at 147.3200 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "be962e2c-8153-5efd-8751-81d81224d78e")
+(property "Reference" "R5" (at 147.3200 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "3.3R_BOOT_SERIES" (at 147.3200 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 147.32 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R5") (unit 1)))) )
+(wire (pts (xy 147.3200 207.0100) (xy 147.3200 201.9300)) (stroke (width 0) (type default)) (uuid "49b72de6-dbf1-5d59-b243-bb8bc698188f"))
+(label "BST_MPS" (at 147.3200 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "c363f56f-c204-5892-bf1e-1dd6933f441c"))
+(wire (pts (xy 147.3200 214.6300) (xy 147.3200 219.7100)) (stroke (width 0) (type default)) (uuid "b64ea2d3-14e8-5c3b-b248-118a42321dd0"))
+(label "BST_SERIES" (at 147.3200 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2d6e5229-0d72-591d-a5c1-b343b71df392"))
+(symbol (lib_id "Device:R") (at 193.0400 210.8200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "ce627ae9-4e20-56d2-8725-e8ced2177e21")
+(property "Reference" "R6" (at 193.0400 214.8200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "4.53k_1pct_USB_ILIM" (at 193.0400 217.8200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 193.04 210.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "R6") (unit 1)))) )
+(wire (pts (xy 193.0400 207.0100) (xy 193.0400 201.9300)) (stroke (width 0) (type default)) (uuid "2f59a72e-5e48-5e96-9ec7-c0c0ebbf2bfe"))
+(label "ILIM_USB" (at 193.0400 201.9300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "0526c1d4-744d-5149-a623-ab0025b8c928"))
+(wire (pts (xy 193.0400 214.6300) (xy 193.0400 219.7100)) (stroke (width 0) (type default)) (uuid "2c7bd14b-ce5b-5da2-a88c-e2ee702bc3ab"))
+(label "GND" (at 193.0400 219.7100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "5ed2baf9-5b1c-536e-9a7d-85a22f5d35a0"))
+(symbol (lib_id "Device:C") (at 66.0400 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "16e6bb3f-d38e-57f0-82ae-82ac3128e4cf")
+(property "Reference" "C1" (at 66.0400 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "10uF_10V_VIN" (at 66.0400 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 66.04 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C1") (unit 1)))) )
+(wire (pts (xy 66.0400 245.1100) (xy 66.0400 240.0300)) (stroke (width 0) (type default)) (uuid "4206b52c-d849-5f2f-a11b-f303d5f4fefb"))
+(label "VCC5V0_SYS" (at 66.0400 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "3d89464a-cdc2-5a5f-b561-d2cba19e75b2"))
+(wire (pts (xy 66.0400 252.7300) (xy 66.0400 257.8100)) (stroke (width 0) (type default)) (uuid "ea196e5c-c5c8-576a-942a-270fd395908a"))
+(label "GND" (at 66.0400 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "37bbd1cd-6e6c-5b4e-b694-2335321d8768"))
+(symbol (lib_id "Device:C") (at 86.3600 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "5f289c3a-2b7b-5e80-a747-82d8ecdd8d90")
+(property "Reference" "C2" (at 86.3600 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "100nF_10V_VIN" (at 86.3600 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 86.36 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C2") (unit 1)))) )
+(wire (pts (xy 86.3600 245.1100) (xy 86.3600 240.0300)) (stroke (width 0) (type default)) (uuid "31616cee-0866-5c3e-98e6-b220be4e5113"))
+(label "VCC5V0_SYS" (at 86.3600 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "3aa90d61-22ed-5e41-9acf-3d16735d4cca"))
+(wire (pts (xy 86.3600 252.7300) (xy 86.3600 257.8100)) (stroke (width 0) (type default)) (uuid "09caecad-bda6-525e-981a-2fd92637ae06"))
+(label "GND" (at 86.3600 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "4ff13474-dd8c-50a3-97cf-7874e87aba9a"))
+(symbol (lib_id "Device:C") (at 106.6800 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "c99a1f77-2778-501b-8f8e-2ab9a127f0b1")
+(property "Reference" "C3" (at 106.6800 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "22uF_10V_VOUT" (at 106.6800 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 106.68 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C3") (unit 1)))) )
+(wire (pts (xy 106.6800 245.1100) (xy 106.6800 240.0300)) (stroke (width 0) (type default)) (uuid "36bb5c66-10c8-5e99-9181-dda51e59d720"))
+(label "VCC_SYSIN" (at 106.6800 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "4918faee-cfe6-51ad-9f00-f82c4e80e0e3"))
+(wire (pts (xy 106.6800 252.7300) (xy 106.6800 257.8100)) (stroke (width 0) (type default)) (uuid "1f22b928-bcba-5cc1-8b42-ce700e95c102"))
+(label "GND" (at 106.6800 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "42de4ba5-87bc-5714-a481-f42f38408c4f"))
+(symbol (lib_id "Device:C") (at 127.0000 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "6912a585-8d5c-5422-9d6f-7b588c510719")
+(property "Reference" "C4" (at 127.0000 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "22uF_10V_VOUT" (at 127.0000 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 127.0 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C4") (unit 1)))) )
+(wire (pts (xy 127.0000 245.1100) (xy 127.0000 240.0300)) (stroke (width 0) (type default)) (uuid "af1ab1e0-d7b5-564a-a401-8c113e411d0c"))
+(label "VCC_SYSIN" (at 127.0000 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "1f1ab0c8-fcca-5eac-9898-1a0a86bc6f74"))
+(wire (pts (xy 127.0000 252.7300) (xy 127.0000 257.8100)) (stroke (width 0) (type default)) (uuid "e8724b76-c1b8-5465-9f05-fcd64702f35b"))
+(label "GND" (at 127.0000 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "500837bd-49a4-56cc-8cee-0d12ab107649"))
+(symbol (lib_id "Device:C") (at 147.3200 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "e172767b-d5f6-5858-bb47-f53d5425dd49")
+(property "Reference" "C5" (at 147.3200 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "100nF_10V_VOUT" (at 147.3200 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 147.32 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C5") (unit 1)))) )
+(wire (pts (xy 147.3200 245.1100) (xy 147.3200 240.0300)) (stroke (width 0) (type default)) (uuid "d8030e2e-a238-52f2-a5f1-d6c73b52039b"))
+(label "VCC_SYSIN" (at 147.3200 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2bf0bac0-caa2-597f-a305-e43cb279a803"))
+(wire (pts (xy 147.3200 252.7300) (xy 147.3200 257.8100)) (stroke (width 0) (type default)) (uuid "753874c1-e54c-5326-a4d0-a71082216d8f"))
+(label "GND" (at 147.3200 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "77c0f777-b507-5a59-b24a-b87241bacdcf"))
+(symbol (lib_id "Device:C") (at 167.6400 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "e18ed31f-8727-5eca-83e8-7dbec2921dd0")
+(property "Reference" "C6" (at 167.6400 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "220nF_10V_BOOT" (at 167.6400 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 167.64 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C6") (unit 1)))) )
+(wire (pts (xy 167.6400 245.1100) (xy 167.6400 240.0300)) (stroke (width 0) (type default)) (uuid "62447083-544c-5dbc-9992-01c8454b2139"))
+(label "BST_SERIES" (at 167.6400 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "32580a2e-8d66-5dc1-863d-bd8090519428"))
+(wire (pts (xy 167.6400 252.7300) (xy 167.6400 257.8100)) (stroke (width 0) (type default)) (uuid "49c05115-bbbc-53b7-b392-6b321eab563f"))
+(label "SW_MPS" (at 167.6400 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "13d03223-1dcb-5b1f-9993-670b56f2a9dd"))
+(symbol (lib_id "Device:C") (at 187.9600 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "4b917703-9adb-5ff3-aeab-e4f0b10ed058")
+(property "Reference" "C7" (at 187.9600 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "1uF_10V_REG_VCC" (at 187.9600 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 187.96 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C7") (unit 1)))) )
+(wire (pts (xy 187.9600 245.1100) (xy 187.9600 240.0300)) (stroke (width 0) (type default)) (uuid "38af8daf-565f-54d3-bd35-41dca2d7c97f"))
+(label "VCC_MPS" (at 187.9600 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "60d4aba7-82e7-5ddc-bd9f-af2ec7a73661"))
+(wire (pts (xy 187.9600 252.7300) (xy 187.9600 257.8100)) (stroke (width 0) (type default)) (uuid "26cbdee0-a865-5d4d-bf07-817f4cad5e97"))
+(label "GND" (at 187.9600 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "8cd724d7-5ae2-5183-a12b-d41d9322060e"))
+(symbol (lib_id "Device:C") (at 208.2800 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "90d6c8a4-8f6f-5e44-a1b2-598591a65504")
+(property "Reference" "C8" (at 208.2800 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "1uF_10V_USB_IN" (at 208.2800 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 208.28 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C8") (unit 1)))) )
+(wire (pts (xy 208.2800 245.1100) (xy 208.2800 240.0300)) (stroke (width 0) (type default)) (uuid "152f532d-7625-5143-8094-9d6b10ef63d6"))
+(label "VCC5V0_SYS" (at 208.2800 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "be4c9d2a-b3a7-5721-9c27-8dfb45653674"))
+(wire (pts (xy 208.2800 252.7300) (xy 208.2800 257.8100)) (stroke (width 0) (type default)) (uuid "2eb5c8df-c6c6-5c00-b281-1fd35e1ca1e9"))
+(label "GND" (at 208.2800 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "3510cb42-5095-5965-b9b8-d547cd6c19e6"))
+(symbol (lib_id "Device:C") (at 228.6000 248.9200 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "cacf0e80-0a46-5400-8f93-289e99a92126")
+(property "Reference" "C9" (at 228.6000 252.9200 0) (effects (font (size 1.27 1.27))))
+(property "Value" "22uF_10V_USB_OUT" (at 228.6000 255.9200 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 228.6 248.92 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "C9") (unit 1)))) )
+(wire (pts (xy 228.6000 245.1100) (xy 228.6000 240.0300)) (stroke (width 0) (type default)) (uuid "c58c9db6-f9cb-54b5-9ad6-f41742316411"))
+(label "USB_VBUS_SW" (at 228.6000 240.0300 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "7c6bd6ba-d46c-525c-80e0-59a06a691910"))
+(wire (pts (xy 228.6000 252.7300) (xy 228.6000 257.8100)) (stroke (width 0) (type default)) (uuid "8ea9d80a-057e-5439-952d-bd0106b1643c"))
+(label "GND" (at 228.6000 257.8100 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "a74b9b37-4d60-52e2-a22e-63bb77d16554"))
+(symbol (lib_id "power:PWR_FLAG") (at 50.8000 170.1800 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "62354941-7751-5815-9576-42ff970e3b0b")
+(property "Reference" "#FLG01" (at 50.8000 174.1800 0) (effects (font (size 1.27 1.27))))
+(property "Value" "PWR_FLAG" (at 50.8000 177.1800 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 50.8 170.18 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "#FLG01") (unit 1)))) )
+(wire (pts (xy 50.8000 170.1800) (xy 50.8000 165.1000)) (stroke (width 0) (type default)) (uuid "02de3705-0f53-568e-bba1-30f561823125"))
+(label "VCC5V0_SYS" (at 50.8000 165.1000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "4a4fd950-adb7-5396-bda6-4364ff4a9b24"))
+(symbol (lib_id "power:PWR_FLAG") (at 76.2000 170.1800 0) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "2960db2f-8535-5feb-9065-8a290c6b7059")
+(property "Reference" "#FLG02" (at 76.2000 174.1800 0) (effects (font (size 1.27 1.27))))
+(property "Value" "PWR_FLAG" (at 76.2000 177.1800 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 76.2 170.18 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(instances (project "CM5_POWER_USB_SGM2590_NO_FAB" (path "/7e7cfc20-f633-56d2-a955-4405a0d4c12e" (reference "#FLG02") (unit 1)))) )
+(wire (pts (xy 76.2000 170.1800) (xy 76.2000 165.1000)) (stroke (width 0) (type default)) (uuid "426ab94e-086d-50de-b651-7c9cfcfb26cc"))
+(label "GND" (at 76.2000 165.1000 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "d923e2b7-77cb-5778-ac8f-ced0eb5f985f"))
+(text "EXTERNAL REGULATED 5V SUPPLY ONLY - NO USB-C PD" (at 45.7200 295.9100 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "b29de3a4-6c8b-51e1-aa02-848bcc7b168e"))
+(text "VCC_SYSIN NOMINAL 4.04V - POWER STABILITY NOT MEASURED" (at 45.7200 306.0700 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "43f14c3b-0664-5124-b55f-4dc87c0e7937"))
+(text "SGM2576 IS OBSOLETE; ITS PIN3 IS ILIM, NOT OCB" (at 45.7200 316.2300 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "2f81d2ca-a580-5d76-9f5b-1abda04918ab"))
+(text "USB DATA ESD/EMC, PORT SHIELD, AND VBUS SAFETY NOT VALIDATED" (at 45.7200 326.3900 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "d8983a6a-6387-56b0-8143-1ef664b94a1c"))
+(text "CONCEPT REFERENCE ONLY - NO MANUFACTURING OR POWER AUTHORIZATION" (at 45.7200 336.5500 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "d157607c-b460-5711-b0e0-f7b65c792554")) (embedded_fonts no))
