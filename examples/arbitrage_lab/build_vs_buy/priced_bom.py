@@ -152,6 +152,8 @@ def compare(product: dict, priced: list[dict], alts: list[dict]) -> dict:
     for which in ("min", "p25", "median"):
         costs = [line_cost(r, which) for r in build]
         out[f"build_{which}_twd"] = None if any(c is None for c in costs) else round(sum(costs))
+        both = costs + [line_cost(r, which) for r in shared]  # total cost of goods when the shared lines are bought too
+        out[f"build_plus_shared_{which}_twd"] = None if any(c is None for c in both) else round(sum(both))
     out["unpriced_build_lines"] = [r["id"] for r in build if line_cost(r, "median") is None]
     out["shared_lines_excluded_from_both_sides"] = {r["id"]: line_cost(r, "median") for r in shared}
     rows = []

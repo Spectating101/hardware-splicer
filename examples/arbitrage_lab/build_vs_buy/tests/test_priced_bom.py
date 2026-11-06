@@ -119,9 +119,13 @@ def test_compare_sums_build_lines_excludes_shared_and_flags_unpriced():
     c = pb.compare({}, lines, alts)
     assert (c["build_min_twd"], c["build_p25_twd"], c["build_median_twd"]) == (1326, 2526, 3326)
     assert c["shared_lines_excluded_from_both_sides"] == {"radio": 3000}
+    assert c["build_plus_shared_p25_twd"] == 2526 + 3000  # cost of goods when the shared line is bought too
     assert c["alternatives"][0]["build_minus_buy_p25_twd"] == 2526 - 2950
     c2 = pb.compare({}, lines + [priced("fc", 1, None, None, None)], alts)
     assert c2["build_p25_twd"] is None and c2["unpriced_build_lines"] == ["fc"]
+    assert c2["build_plus_shared_p25_twd"] is None
+    c3 = pb.compare({}, lines + [priced("io", 1, None, None, None, role="shared")], alts)
+    assert c3["build_p25_twd"] == 2526 and c3["build_plus_shared_p25_twd"] is None  # unpriced shared line blocks COGS
 
 
 @pytest.mark.parametrize("name", ["drone_whoop65.json", "cyberdeck_pi5.json"])
