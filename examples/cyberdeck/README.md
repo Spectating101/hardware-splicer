@@ -1,5 +1,7 @@
 # HS Pocket SSH Clamshell S1 — 4.3-inch folding ESP32 terminal
 
+**Next HS experiment:** [S2 two 4.3-inch touchscreens + onboard RS485 ordinary-hinge bridge](dual_touch/README.md). This is an additional, independent design alternative, **not** a claim of assembled or working dual-screen hardware. The original CardKB keyboard design remains intact.
+
 **Actual status:** 2026-11-06. This is a **real, reproducible Hardware Splicer CAD + electrical-interface casefile**, **not** a fabricated or SSH-connected physical device. Parts have not been ordered, connected, flashed or physically tested. The target is a low-cost, calculator-sized **clamshell** whose purpose is to SSH into an existing Optiplex, rather than a foldable phone or full laptop.
 
 ![Actual OpenSCAD-generated hinged shell preview — PCB, display and keyboard not installed](evidence/native_mecha/clamshell_open_preview.png)

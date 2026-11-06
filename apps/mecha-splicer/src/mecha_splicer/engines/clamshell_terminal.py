@@ -111,8 +111,35 @@ def generate_clamshell_terminal_scad(p: ClamshellTerminalSpec) -> dict[str, str]
         "  translate([0,-hy,-hz]) lid_shell();",
         "",
     ]
-    return {
+    outputs = {
         "base_shell.scad":"\n".join(base),
         "lid_shell.scad":"\n".join(lid),
         "clamshell_open_preview.scad":"\n".join(preview),
     }
+    if p.input_surface_mode == "dual_touch":
+        # SCAD-only visual labels are not part of the printable shells or any
+        # physical LVGL firmware; display glass/mechanics remain unmeasured.
+        bw,bd=p.lower_touch_board_w_mm,p.lower_touch_board_d_mm
+        ux,uy=(w-p.display_board_w_mm)/2,(d-p.display_board_d_mm)/2
+        lx,ly=(w-bw)/2,(d-bd)/2
+        lower_display_h=hb-0.5
+        upper_display_h=zbottom+0.7
+        scad=[
+            "// HS source-backed dual-touch *visual mock-up*, not operating electronics",
+            "use <base_shell.scad>", "use <lid_shell.scad>",
+            f"angle={p.preview_open_angle_deg}; hy={hinge_y}; hz={hinge_z};",
+            "color([0.14,0.19,0.26]) base_shell();",
+            "color([0.23,0.30,0.39]) translate([0,hy,hz]) rotate([angle,0,0]) translate([0,-hy,-hz]) lid_shell();",
+            f"color([0.03,0.09,0.13]) translate([{lx},{ly},{lower_display_h}]) cube([{bw},{bd},0.3]);",
+            "// Draw the SOFTWARE keyboard on the lower virtual screen, NOT on the case",
+            f"for(row=[0:3]) for(col=[0:9]) translate([{lx+4}+col*{(bw-8)/10},{ly+9}+row*11,{lower_display_h+0.35}])",
+            f"  color([0.25,0.38,0.48]) cube([{(bw-8)/10-0.9},9,0.15]);",
+            "// Model placeholder for upper LCD and terminal. It rotates with the lid.",
+            "translate([0,hy,hz]) rotate([angle,0,0]) translate([0,-hy,-hz]) {",
+            f"  color([0.025,0.065,0.085]) translate([{ux},{uy},{upper_display_h}]) cube([{p.display_board_w_mm},{p.display_board_d_mm},0.3]);",
+            f"  color([0.21,0.92,0.61]) translate([{ux+4},{uy+15},{upper_display_h-0.1}]) linear_extrude(height=0.02) text(\"ssh optiplex\",size=4);",
+            f"  color([0.14,0.65,0.45]) translate([{ux+4},{uy+25},{upper_display_h-0.1}]) linear_extrude(height=0.02) text(\"tmux attach\",size=4);",
+            "}",
+        ]
+        outputs["dual_touch_visual_preview.scad"]="\n".join(scad)+"\n"
+    return outputs

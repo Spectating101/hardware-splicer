@@ -1,0 +1,604 @@
+{
+  "schema_version": "hardware_splicer.machine_project.v1",
+  "project_id": "HS-DUAL-TOUCH-S1",
+  "name": "Thin, folding two-ESP32 touchscreen SSH terminal",
+  "purpose": "Use upper touchscreen as Optiplex SSH terminal and lower as virtual command keyboard.",
+  "lifecycle_state": "design",
+  "requested_release_state": "operationally_authorized",
+  "requirements": [
+    {
+      "requirement_id": "r-hinge",
+      "statement": "Two rigid 4.3-inch panels shall fold on an ordinary metal pin hinge",
+      "kind": "functional",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-geometry",
+        "v-hinge-physical"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-dual-touch",
+      "statement": "Each 800x480 panel must receive and respond to its own touch events",
+      "kind": "functional",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-panel-touch"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-keyboard",
+      "statement": "Lower virtual keyboard shall deliver Ctrl/Esc/Tab/Enter/arrows to upper SSH PTY exactly once",
+      "kind": "functional",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-keys"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-link",
+      "statement": "Two 2-pin HY2.0 RS485 ports shall exchange key events over hinge without LCD FPC",
+      "kind": "interface",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-link"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-power",
+      "statement": "Dual 5V boards shall have documented safe current, common reference and protected USB feed",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-power"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-security",
+      "statement": "Upper SSH shall validate out-of-band pinned host key before any credentials",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-host-key"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-portability",
+      "statement": "Enclosure dimensions, cable bend and mass shall be demonstrated physically",
+      "kind": "performance",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-physical-fit"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    }
+  ],
+  "functions": [],
+  "subsystems": [
+    {
+      "subsystem_id": "upper",
+      "name": "Upper touch SSH controller",
+      "domain": "electrical",
+      "purpose": "",
+      "parent_subsystem_id": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "component_ids": [
+        "upper-lcd",
+        "optiplex"
+      ],
+      "interface_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "subsystem_id": "lower",
+      "name": "Lower touch virtual keyboard",
+      "domain": "electrical",
+      "purpose": "",
+      "parent_subsystem_id": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "component_ids": [
+        "lower-lcd"
+      ],
+      "interface_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "subsystem_id": "shell",
+      "name": "Mechanical dual-tray hinge",
+      "domain": "mechanical",
+      "purpose": "",
+      "parent_subsystem_id": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "component_ids": [
+        "base-shell",
+        "lid-shell",
+        "hinge-pin"
+      ],
+      "interface_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "subsystem_id": "link",
+      "name": "Inter-half RS485 and power",
+      "domain": "electrical",
+      "purpose": "",
+      "parent_subsystem_id": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "component_ids": [
+        "hinge-wire",
+        "bench-usb"
+      ],
+      "interface_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    }
+  ],
+  "components": [
+    {
+      "component_id": "upper-lcd",
+      "name": "Upper ESP32-S3 4.3-inch touch display",
+      "domain": "electrical",
+      "subsystem_id": "upper",
+      "role": "",
+      "source": "new",
+      "part": {
+        "manufacturer": "Waveshare",
+        "manufacturer_part_number": "ESP32-S3-Touch-LCD-4.3",
+        "supplier": null,
+        "supplier_part_number": null,
+        "package": null,
+        "symbol_ref": null,
+        "footprint_ref": null,
+        "datasheet_ref": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3",
+        "provenance": "public manufacturer documentation; no unit acquired"
+      },
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "lower-lcd",
+      "name": "Lower ESP32-S3 4.3-inch touch display",
+      "domain": "electrical",
+      "subsystem_id": "lower",
+      "role": "",
+      "source": "new",
+      "part": {
+        "manufacturer": "Waveshare",
+        "manufacturer_part_number": "ESP32-S3-Touch-LCD-4.3",
+        "supplier": null,
+        "supplier_part_number": null,
+        "package": null,
+        "symbol_ref": null,
+        "footprint_ref": null,
+        "datasheet_ref": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3",
+        "provenance": "public manufacturer documentation; no unit acquired"
+      },
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "optiplex",
+      "name": "Remote Optiplex Linux SSH host",
+      "domain": "software",
+      "subsystem_id": "upper",
+      "role": "",
+      "source": "external",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {
+        "identity": "owner-authorized remote system, no SSH tested by cyberdeck"
+      }
+    },
+    {
+      "component_id": "base-shell",
+      "name": "PETG case base",
+      "domain": "mechanical",
+      "subsystem_id": "shell",
+      "role": "",
+      "source": "generated",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "lid-shell",
+      "name": "PETG display lid",
+      "domain": "mechanical",
+      "subsystem_id": "shell",
+      "role": "",
+      "source": "generated",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "hinge-pin",
+      "name": "Unpurchased steel 2mm hinge pin",
+      "domain": "mechanical",
+      "subsystem_id": "shell",
+      "role": "",
+      "source": "new",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "hinge-wire",
+      "name": "2-pin RS485 A/B harness with ground reference",
+      "domain": "electrical",
+      "subsystem_id": "link",
+      "role": "",
+      "source": "new",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "component_id": "bench-usb",
+      "name": "Unselected protected USB supply 5V 2A minimum",
+      "domain": "electrical",
+      "subsystem_id": "link",
+      "role": "",
+      "source": "new",
+      "part": null,
+      "requirement_ids": [],
+      "function_ids": [],
+      "artifact_refs": [],
+      "authority": "proposed",
+      "metadata": {}
+    }
+  ],
+  "interfaces": [
+    {
+      "interface_id": "link-rs485",
+      "name": "Differential-keyboard packet bridge",
+      "kind": "serial_rs485_half_duplex",
+      "endpoints": [
+        {
+          "object_id": "upper-lcd",
+          "port": "HY2.0_RS485_2P",
+          "role": ""
+        },
+        {
+          "object_id": "lower-lcd",
+          "port": "HY2.0_RS485_2P",
+          "role": ""
+        }
+      ],
+      "contracts": [
+        {
+          "contract_type": "RS485",
+          "values": {
+            "onboard_transceiver": "SP3485 on both boards",
+            "tx_gpio": 15,
+            "rx_gpio": 16,
+            "uart_baud_scenario": 115200,
+            "physical_screen_ribbon_over_hinge": false,
+            "line_protocol": "sequence, CRC, ACK and timeout to be implemented"
+          },
+          "unresolved_fields": [
+            "A/B terminal polarity",
+            "common_ground",
+            "termination_and_bias",
+            "packet_firmware",
+            "measured_cable_flex_life"
+          ],
+          "authority": "proposed"
+        }
+      ],
+      "requirement_ids": [],
+      "verification_method_ids": [],
+      "authority": "unknown",
+      "metadata": {}
+    },
+    {
+      "interface_id": "usb-power",
+      "name": "Both designated USB-C power ports",
+      "kind": "power_5v",
+      "endpoints": [
+        {
+          "object_id": "bench-usb",
+          "port": "5V",
+          "role": ""
+        },
+        {
+          "object_id": "upper-lcd",
+          "port": "designated_USB_C",
+          "role": ""
+        },
+        {
+          "object_id": "lower-lcd",
+          "port": "designated_USB_C",
+          "role": ""
+        }
+      ],
+      "contracts": [
+        {
+          "contract_type": "power_budget",
+          "values": {
+            "nominal_board_draw_mA_each": 450,
+            "nominal_total_5V_W": 4.5,
+            "prototype_supply_minimum": "5V 2A, dual USB outputs"
+          },
+          "unresolved_fields": [
+            "peak_current_measured",
+            "external_5V_USB_supply",
+            "real_power_connector",
+            "safe_common_ground"
+          ],
+          "authority": "proposed"
+        }
+      ],
+      "requirement_ids": [],
+      "verification_method_ids": [],
+      "authority": "unknown",
+      "metadata": {}
+    },
+    {
+      "interface_id": "ssh-link",
+      "name": "Host identity and SSH session",
+      "kind": "ssh",
+      "endpoints": [
+        {
+          "object_id": "upper-lcd",
+          "port": "WiFi_2.4GHz",
+          "role": ""
+        },
+        {
+          "object_id": "optiplex",
+          "port": "SSH",
+          "role": ""
+        }
+      ],
+      "contracts": [
+        {
+          "contract_type": "ssh_host_identity",
+          "values": {
+            "known_host_pinning_mandatory": true,
+            "private_key_material_in_repo": false
+          },
+          "unresolved_fields": [
+            "out_of_band_host_key_pin",
+            "library_port",
+            "actual_ssh_handshake",
+            "network_security_route"
+          ],
+          "authority": "proposed"
+        }
+      ],
+      "requirement_ids": [],
+      "verification_method_ids": [],
+      "authority": "unknown",
+      "metadata": {}
+    }
+  ],
+  "constraints": [],
+  "verifications": [
+    {
+      "verification_id": "v-geometry",
+      "name": "CAD mesh watertightness",
+      "method_type": "analysis",
+      "status": "passed",
+      "requirement_ids": [
+        "r-hinge"
+      ],
+      "target_ids": [
+        "base-shell",
+        "lid-shell"
+      ],
+      "evidence_ids": [
+        "cad-mesh"
+      ],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-hinge-physical",
+      "name": "Actual printed hinge open-close cycles",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-hinge"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-panel-touch",
+      "name": "Two independently functioning capacitive displays",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-dual-touch"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-keys",
+      "name": "All terminal control keys on target board",
+      "method_type": "demonstration",
+      "status": "planned",
+      "requirement_ids": [
+        "r-keyboard"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-link",
+      "name": "RS485 polarity, power reference, CRC/ACK test",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-link"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-power",
+      "name": "USB current/ground/peak and battery isolation",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-power"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-host-key",
+      "name": "Pinned SSH host key success and mismatch rejection",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-security"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-physical-fit",
+      "name": "PCB Z, mounts, ports, antenna, cable fit and closed thickness",
+      "method_type": "inspection",
+      "status": "planned",
+      "requirement_ids": [
+        "r-portability"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "cad-mesh",
+      "kind": "OpenSCAD CGAL mesh audit",
+      "basis": "native shell STL audited with zero non-manifold edges",
+      "ref": "evidence/native_mecha/design_evidence.json",
+      "supports": [
+        "base-shell",
+        "lid-shell",
+        "r-hinge"
+      ],
+      "authority": "proposed",
+      "simulated": true,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "cad-sweep",
+      "kind": "6-angle digital interference check",
+      "basis": "CGAL shell intersection empty at each sampled angle",
+      "ref": "evidence/native_mecha/design_evidence.json",
+      "supports": [
+        "r-hinge"
+      ],
+      "authority": "proposed",
+      "simulated": true,
+      "metadata": {}
+    }
+  ],
+  "artifacts": [],
+  "discipline_payloads": {},
+  "metadata": {
+    "physical_items_count": 0,
+    "existing_mecha_splicer_used": true,
+    "manufacturer_model_exact": true,
+    "cad_not_physical_release": true
+  }
+}

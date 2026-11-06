@@ -1,0 +1,43 @@
+{
+  "requested_state": "operationally_authorized",
+  "achieved_state": "design_ready",
+  "blockers": [
+    {
+      "code": "unresolved_interface",
+      "message": "interface 'link-rs485' has unresolved fields: A/B terminal polarity, common_ground, measured_cable_flex_life, packet_firmware, termination_and_bias",
+      "object_id": "link-rs485",
+      "severity": "error"
+    },
+    {
+      "code": "unresolved_interface",
+      "message": "interface 'usb-power' has unresolved fields: external_5V_USB_supply, peak_current_measured, real_power_connector, safe_common_ground",
+      "object_id": "usb-power",
+      "severity": "error"
+    },
+    {
+      "code": "unresolved_interface",
+      "message": "interface 'ssh-link' has unresolved fields: actual_ssh_handshake, library_port, network_security_route, out_of_band_host_key_pin",
+      "object_id": "ssh-link",
+      "severity": "error"
+    },
+    {
+      "code": "safety_not_closed",
+      "message": "safety requirement 'r-power' is not closed by passing verification",
+      "object_id": "r-power",
+      "severity": "error"
+    },
+    {
+      "code": "safety_not_closed",
+      "message": "safety requirement 'r-security' is not closed by passing verification",
+      "object_id": "r-security",
+      "severity": "error"
+    },
+    {
+      "code": "release_state_not_reached",
+      "message": "requested operationally_authorized, but evidence supports only design_ready",
+      "object_id": "HS-DUAL-TOUCH-S1",
+      "severity": "error"
+    }
+  ],
+  "warnings": []
+}

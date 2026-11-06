@@ -1,0 +1,126 @@
+{
+  "snapshot_date": "2026-11-06",
+  "currency": "TWD",
+  "authority": "manufacturer specs and asking prices only, NOT physically acquired or measured",
+  "board": {
+    "exact_model": "Waveshare ESP32-S3-Touch-LCD-4.3 SKU25948 capacitive touch variant",
+    "source": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3",
+    "price_tw_source": "https://www.icshop.com.tw/en/products/368031700131",
+    "taiwan_asking_price_twd": 1250,
+    "stock_status": "unconfirmed",
+    "outer_footprint_mm": [
+      106.1,
+      67.8
+    ],
+    "pixels": [
+      800,
+      480
+    ],
+    "controller": "ESP32-S3 N16R8 with onboard RGB LCD and touch",
+    "touch_bus": "GPIO8 SDA/GPIO9 SCL shared with CH422G",
+    "rs485": {
+      "transceiver": "SP3485 onboard",
+      "tx_gpio": 15,
+      "rx_gpio": 16,
+      "connector": "HY2.0 2P",
+      "auto_direction": true
+    },
+    "nominal_5V_draw_mA": 450,
+    "battery_port": "PH2.0 3.7V single-cell CS8501 onboard per board",
+    "not_confirmed": [
+      "unit in stock or shipped",
+      "PCB thickness and underside height",
+      "usable 5V rail through hinge",
+      "RS485 polarity/ground/termination",
+      "real mounting holes and USB access"
+    ]
+  },
+  "gui": {
+    "name": "LVGL lv_keyboard",
+    "source": "https://lvgl.io/docs/open/widgets/keyboard",
+    "default_focus": "text areas, not PTY key bytes",
+    "required_custom_terminal_keys": [
+      "Ctrl",
+      "Esc",
+      "Tab",
+      "Alt",
+      "Enter",
+      "Backspace",
+      "arrows",
+      "slash",
+      "colon",
+      "pipe",
+      "tilde"
+    ]
+  },
+  "ssh": {
+    "candidate": "0015/PocketSSH 1.2.0",
+    "source": "https://github.com/0015/PocketSSH",
+    "original_hardware": "LILYGO T-Deck Plus ST7789 320x240, not Waveshare RGB 800x480",
+    "existing_host_key_verification": false,
+    "reuse_status": "SOURCE_PORT_ONLY_NOT_A_WAVESHARE_FIRMWARE",
+    "verified_host_key_primitive": "https://libssh2.org/libssh2_hostkey_hash.html",
+    "secure_host_key_requirement": "Pinned SHA256 host-key digest must match before authentication; any NULL/mismatch fails closed; credentials not stored in public repository"
+  },
+  "workbench_power": {
+    "prototype_5V_board_count": 2,
+    "manufacturer_5V_draw_mA_each": 450,
+    "nominal_total_W": 4.5,
+    "test_supply": "two USB-C leads fed from a protected >=5V2A supply, each through designated USB-C input; do not splice USB power to undocumented pins",
+    "battery_option": "separate verified protected single-cell 3.7V for each board OR designed common regulated 5V source; NEVER parallel charger outputs"
+  },
+  "parts_price_scenario": [
+    {
+      "item": "2 exact Waveshare touch boards",
+      "qty": 2,
+      "unit_twd": 1250,
+      "subtotal_twd": 2500,
+      "classification": "observed asking prices, not stock confirmed"
+    },
+    {
+      "item": "RS485 HY2.0 interconnect, safe ground reference",
+      "qty": 1,
+      "subtotal_twd": 85,
+      "classification": "unquoted assumption; verify included vendor cables"
+    },
+    {
+      "item": "flex cabling and strain relief",
+      "qty": 1,
+      "subtotal_twd": 70,
+      "classification": "unquoted assumption"
+    },
+    {
+      "item": "2mm metal hinge pin and retention",
+      "qty": 1,
+      "subtotal_twd": 45,
+      "classification": "unquoted assumption"
+    },
+    {
+      "item": "PETG two trays",
+      "qty": 2,
+      "subtotal_twd": 140,
+      "classification": "unquoted printing estimate"
+    },
+    {
+      "item": "bench dual USB-C power cables/adapter",
+      "qty": 1,
+      "subtotal_twd": 125,
+      "classification": "unquoted assumption"
+    }
+  ],
+  "prior_hs_history": {
+    "2026_08_fit": "https://github.com/Spectating101/hardware-splicer/blob/design/cyberdeck-hs-fit-20260829/docs/design/CYBERDECK_HS_FIT_EXPERIMENT.md",
+    "2026_10_real_trial": "https://github.com/Spectating101/hardware-splicer/blob/experiment/hs-cyberdeck-physics-20261021/projects/cyberdeck-real-trial-20261020/README.md",
+    "2026_10_structural": "https://github.com/Spectating101/hardware-splicer/blob/experiment/hs-cyberdeck-physics-20261021/projects/cyberdeck_structural_validation_20261021/README.md",
+    "current_geometry_PR290": "https://github.com/Spectating101/hardware-splicer/pull/290"
+  },
+  "physical_authority": {
+    "units_purchased": 0,
+    "boards_wired": 0,
+    "ssh_connections_made": 0,
+    "lcds_driven": 0,
+    "touchpoints_tested": 0,
+    "shells_printed": 0,
+    "battery_tests": 0
+  }
+}

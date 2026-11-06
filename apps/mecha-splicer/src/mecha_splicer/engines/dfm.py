@@ -136,8 +136,13 @@ def check_clamshell_terminal(p: ClamshellTerminalSpec, *, process: str) -> list[
     if (p.case_w_mm-p.display_board_w_mm)/2 < 5:
         issues.append(DfmIssue("warn", "Display planform leaves narrow side rails"))
     issues.append(DfmIssue("warn", "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"))
-    issues.append(DfmIssue("warn", "NOT ELECTRICALLY VERIFIED: CardKB 5V I2C to ESP32 3.3V; level shift, pull-ups and shared I2C bus"))
-    issues.append(DfmIssue("warn", "NOT FUNCTIONALLY VERIFIED: SSH host key, Ctrl/Esc, terminal rendering, reconnect"))
+    if p.input_surface_mode == "dual_touch":
+        issues.append(DfmIssue("warn", "NOT ELECTRICALLY VERIFIED: two SP3485 RS485 A/B ports, termination, half-duplex communication and common-ground/power reference"))
+        issues.append(DfmIssue("warn", "NOT PHYSICALLY VERIFIED: second Waveshare LCD module mounting Z/USB and touchscreen closure clearance"))
+        issues.append(DfmIssue("warn", "NOT FUNCTIONALLY VERIFIED: LVGL virtual keyboard, Ctrl/Esc/Alt/Tab, framed RS485 key events, SSH pinned host key and reconnect"))
+    else:
+        issues.append(DfmIssue("warn", "NOT ELECTRICALLY VERIFIED: CardKB 5V I2C to ESP32 3.3V; level shift, pull-ups and shared I2C bus"))
+        issues.append(DfmIssue("warn", "NOT FUNCTIONALLY VERIFIED: SSH host key, Ctrl/Esc, terminal rendering, reconnect"))
     return issues
 
 
