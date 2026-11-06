@@ -90,9 +90,10 @@ def keep(row: dict, line: dict) -> str | None:
     if not re.search(line["must"], t, re.I):
         return "title does not name the part"
     exclude = line.get("exclude", "")
-    base = DEFAULT_EXCLUDE
+    allowed = set(line.get("allow_words", ()))  # e.g. a seller named 大人的玩具 must not trip the 玩具 (toy) exclusion
     if line.get("allow_used"):  # e.g. a used-laptop baseline or a used donor: keep 二手/中古, still drop broken units
-        base = "|".join(w for w in DEFAULT_EXCLUDE.split("|") if w not in USED_WORDS)
+        allowed |= set(USED_WORDS)
+    base = "|".join(w for w in DEFAULT_EXCLUDE.split("|") if w not in allowed)
     if re.search(base + (("|" + exclude) if exclude else ""), t, re.I):
         return "excluded keyword"
     lo, hi = line["unit_price_band_twd"]

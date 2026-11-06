@@ -51,6 +51,14 @@ def test_used_listings_are_dropped_unless_the_line_allows_them():
     assert pb.keep(row("二手 ThinkPad 故障", 3200), {**line, "allow_used": True}) == "excluded keyword"  # broken still out
 
 
+def test_allow_words_lifts_only_the_named_default_exclusion():
+    line = {"must": "FZ-M1", "unit_price_band_twd": [3000, 40000], "allow_used": True}
+    seller = row("大人的玩具 Panasonic Toughpad FZ-M1 三防平板", 7500)  # 玩具 (toy) is the seller's name here
+    assert pb.keep(seller, line) == "excluded keyword"
+    assert pb.keep(seller, {**line, "allow_words": ["玩具"]}) is None
+    assert pb.keep(row("大人的玩具 FZ-M1 故障", 7500), {**line, "allow_words": ["玩具"]}) == "excluded keyword"
+
+
 class _Resp:
     def __enter__(self):
         return self
