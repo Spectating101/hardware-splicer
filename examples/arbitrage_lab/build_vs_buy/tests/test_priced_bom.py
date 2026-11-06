@@ -128,7 +128,7 @@ def test_compare_sums_build_lines_excludes_shared_and_flags_unpriced():
     assert c3["build_p25_twd"] == 2526 and c3["build_plus_shared_p25_twd"] is None  # unpriced shared line blocks COGS
 
 
-@pytest.mark.parametrize("name", ["drone_whoop65.json", "cyberdeck_pi5.json"])
+@pytest.mark.parametrize("name", ["drone_whoop65.json", "cyberdeck_pi5.json", "fielddeck_aim8i.json"])
 def test_product_files_are_well_formed(name):
     d = json.loads((ROOT / name).read_text())
     for line in d["lines"]:
