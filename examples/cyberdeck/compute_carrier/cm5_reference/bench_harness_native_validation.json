@@ -1,0 +1,46 @@
+{
+  "schema": "hs.cm5_native_connected_bench_gate.v1",
+  "source": "native_kicad_cli_schematic_export_and_erc",
+  "required_net_labels": [
+    "/GND",
+    "/UART2_RX_M0",
+    "/UART2_TX_M0",
+    "/USB20_HOST0_DM",
+    "/USB20_HOST0_DP",
+    "/VCC_SYSIN"
+  ],
+  "verified_4v_input_contacts": [
+    77,
+    79,
+    81,
+    83,
+    85,
+    87
+  ],
+  "verified_ground_contacts": 76,
+  "usb2_host0_data_pins": [
+    263,
+    265
+  ],
+  "uart2_pins": [
+    51,
+    55
+  ],
+  "no_4v_to_ground_short": true,
+  "pin290_unconnected": true,
+  "power_external_regulated_4v_3a_only": true,
+  "usb_vbus_not_present": true,
+  "erc_open_findings": {
+    "pin_not_connected": 172,
+    "power_pin_not_driven": 5,
+    "footprint_link_issues": 3,
+    "lib_symbol_issues": 8,
+    "pin_not_driven": 27
+  },
+  "erc_clean": false,
+  "standalone_linux_boot_tested": false,
+  "physical_assembly_tested": false,
+  "release_authorized": false,
+  "safe_to_fabricate": false,
+  "next_gate": "Resolve power and USB VBUS/ESD, qualify UART levels, review all unused pins/electrical types and revision, then rerun full schematic ERC and electrical review."
+}
