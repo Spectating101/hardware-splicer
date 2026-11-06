@@ -15,6 +15,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 import hs_cm5_connected_bench_schematic as b
 
 PROJECT="CM5_POWER_USB_REFERENCE_NO_FAB"
+USB_SWITCH_MODEL="SGM2576"
 b.PROJECT=PROJECT
 b.ROOTNS="hs.cm5.power.usb.20261107"
 MP_PINS={
@@ -131,7 +132,7 @@ def unit_symbol(local: str,ref_prefix: str,pins:dict[int,tuple]) -> str:
 def generate(conn_lib:str,connector_lib:str,dev_lib:str,power_lib:str, out:Path,manifest:Path) -> dict:
     specs={
       "HS_Power:MP8759GD":(unit_symbol("MP8759GD","U",MP_PINS),MP_PINS),
-      "HS_Power:SGM2576":(unit_symbol("SGM2576","U",SGM_PINS),SGM_PINS),
+      f"HS_Power:{USB_SWITCH_MODEL}":(unit_symbol(USB_SWITCH_MODEL,"U",SGM_PINS),SGM_PINS),
     }
     builtin={
       "Connector_Generic:Conn_01x02":(conn_lib,"Conn_01x02"),
@@ -213,8 +214,8 @@ def generate(conn_lib:str,connector_lib:str,dev_lib:str,power_lib:str, out:Path,
     # Local, editable KiCad symbols from published pin functions.
     local_lib=[unit_symbol("MP8759GD","U",MP_PINS).replace(
                    '(symbol "HS_Power:MP8759GD"','(symbol "MP8759GD"',1),
-               unit_symbol("SGM2576","U",SGM_PINS).replace(
-                   '(symbol "HS_Power:SGM2576"','(symbol "SGM2576"',1)]
+               unit_symbol(USB_SWITCH_MODEL,"U",SGM_PINS).replace(
+                   f'(symbol "HS_Power:{USB_SWITCH_MODEL}"',f'(symbol "{USB_SWITCH_MODEL}"',1)]
     (out.parent/"HS_Power.kicad_sym").write_text(
         '(kicad_symbol_lib (version 20231120) (generator "kicad_symbol_editor")\n'+
         "\n".join(local_lib)+'(embedded_fonts no))\n',encoding="utf-8")
