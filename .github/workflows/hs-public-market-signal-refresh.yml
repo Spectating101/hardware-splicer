@@ -1,8 +1,6 @@
 name: HS Public Commercial Signals - Read Only
 
 on:
-  push:
-    branches: ['agent/hs-market-discovery-acquisition-20261106'] # one-branch live source smoke
   workflow_dispatch:
   schedule:
     # Runs only after merged to default branch; live public-source signals remain artifacts.
@@ -40,7 +38,7 @@ jobs:
           python scripts/hs_market_evidence_handoff.py --check-only
 
   acquire-public-sources:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     needs: validate-acquisition-contract
     runs-on: ubuntu-latest
     timeout-minutes: 15
