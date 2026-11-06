@@ -1,0 +1,66 @@
+name: HS CM5 - Connected Bench Schematic Electrical-Net Truth
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/hs_cm5_connected_bench_schematic.py'
+      - 'src/hardware_splicer/cm5_bench_netlist_gate.py'
+      - 'tests/test_cm5_connected_bench_schematic.py'
+      - 'examples/cyberdeck/compute_carrier/cm5_reference/**'
+      - '.github/workflows/hs-cm5-bench-netlist-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assert-native-netlist-source-and-fail-closed-erc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS pytest and minimal project dependencies
+        run: python -m pip install --disable-pip-version-check -e . 'pytest>=8,<10'
+      - name: Validate pinned vendor pinout, routed reference and native KiCad netlist
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_compute_carrier_reference_gate.py \
+            tests/test_cm5_pinout_audit.py \
+            tests/test_cm5_reference_board_netmap.py \
+            tests/test_cm5_connected_bench_schematic.py
+      - name: Recompute fail-closed native electrical-net validation
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cm5_bench_netlist_gate \
+            --netlist examples/cyberdeck/compute_carrier/cm5_reference/CM5_BENCH_HARNESS_NETLIST_EVIDENCE.xml \
+            --erc examples/cyberdeck/compute_carrier/cm5_reference/CM5_BENCH_HARNESS_ERC_OPEN.txt \
+            --output /tmp/hs_cm5_bench_gate.json
+          cmp /tmp/hs_cm5_bench_gate.json \
+            examples/cyberdeck/compute_carrier/cm5_reference/bench_harness_native_validation.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/hs_cm5_bench_gate.json'))
+          assert x['no_4v_to_ground_short']
+          assert len(x['verified_4v_input_contacts'])==6
+          assert x['verified_ground_contacts']==76
+          assert x['pin290_unconnected']
+          assert not x['erc_clean']
+          assert not x['safe_to_fabricate']
+          assert x['erc_open_findings']['pin_not_connected']>=100
+          PY
+      - name: Archive inspectable KiCad netlist, ERC findings and gate
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-CM5-CONNECTED-BENCH-NOT-FOR-FAB
+          retention-days: 30
+          path: |
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_BENCH_HARNESS_NOT_FOR_FAB.kicad_sch
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_BENCH_HARNESS_NETLIST_EVIDENCE.xml
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_BENCH_HARNESS_ERC_OPEN.txt
+            /tmp/hs_cm5_bench_gate.json
