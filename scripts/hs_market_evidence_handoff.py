@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Cross-agent commercial evidence handoff: PR291 prices + PR293 demand + PR292 HS gates.
 
-Read-only. This script NEVER queries buyer accounts, orders components, authorizes
-physical actions, or claims an independently verified commercial market.
+Read-only. Can optionally consume a separately-acquired hs.market_signals.v1
+snapshot and its collection date. Never authorizes purchase or production.
 """
 from __future__ import annotations
 
 import argparse
 from datetime import date
+from hashlib import sha256
 import json
 from pathlib import Path
 import sys
@@ -19,16 +20,12 @@ from hardware_splicer.commercial_evidence_bridge import (
     CommercialEvidenceError, from_files,
 )
 
-DEFAULT_MANIFEST = (
-    "examples/cyberdeck/dual_touch/market/inputs/handoff_manifest_20261106.json"
-)
-DEFAULT_OUT = (
-    "examples/cyberdeck/dual_touch/market/evidence/commercial_handoff.json"
-)
+DEFAULT_MANIFEST = "examples/cyberdeck/dual_touch/market/inputs/handoff_manifest_20261106.json"
+DEFAULT_OUT = "examples/cyberdeck/dual_touch/market/evidence/commercial_handoff.json"
 
 
 def _repo_path(relative: str) -> Path:
-    """No absolute/traversal references from a source manifest."""
+    """No absolute/traversal references from a source manifest or CLI."""
     if not isinstance(relative, str) or not relative:
         raise CommercialEvidenceError("missing input path")
     p = Path(relative)
@@ -40,7 +37,8 @@ def _repo_path(relative: str) -> Path:
     return resolved
 
 
-def run(manifest_path: str = DEFAULT_MANIFEST) -> dict:
+def run(manifest_path: str = DEFAULT_MANIFEST, *,
+        signals_override: str | None = None, as_of_override: date | None = None) -> dict:
     manifest = json.loads(_repo_path(manifest_path).read_text(encoding="utf-8"))
     if manifest.get("schema") != "hs.market_evidence_manifest.v1":
         raise CommercialEvidenceError("unsupported source-manifest schema")
@@ -49,27 +47,60 @@ def run(manifest_path: str = DEFAULT_MANIFEST) -> dict:
         raise CommercialEvidenceError("missing pinned source")
     if not source.get("source_agent_commit") or not source.get("source_file"):
         raise CommercialEvidenceError("missing original producing-agent provenance")
-    return from_files(
+    signals_path = _repo_path(signals_override or manifest["signals_path"])
+    if signals_override:
+        # A live pack must carry a collection date so it cannot be quietly
+        # backdated, stale, or promoted via the frozen 2026-11-06 manifest.
+        signal_pack = json.loads(signals_path.read_text(encoding="utf-8"))
+        if signal_pack.get("schema") != "hs.market_signals.v1":
+            raise CommercialEvidenceError("unsupported acquired signal schema")
+        if signal_pack.get("discovery") is None:
+            raise CommercialEvidenceError("live acquired source provenance is missing")
+        captured = signal_pack.get("captured_at_utc", "")
+        from hardware_splicer.commercial_evidence_bridge import _iso_date
+        acquired_date = _iso_date(captured, "live discovery capture")
+        if as_of_override is None:
+            as_of_override = acquired_date
+        if as_of_override < acquired_date:
+            raise CommercialEvidenceError("evaluation predates live source capture")
+    result = from_files(
         market_path=_repo_path(source["local_path"]),
         pinned_market_sha256=source["sha256"],
         source_ref=f"{source['source_repo']}@{source['source_agent_commit']}:{source['source_file']}",
-        signals_path=_repo_path(manifest["signals_path"]),
+        signals_path=signals_path,
         hs_release_path=_repo_path(manifest["engineering_release_path"]),
         hs_machine_project_path=_repo_path(manifest["engineering_machine_project_path"]),
         hs_budget_path=_repo_path(manifest["engineering_budget_path"]),
-        as_of=date.fromisoformat(manifest["as_of_utc"]),
+        as_of=as_of_override or date.fromisoformat(manifest["as_of_utc"]),
         reference_architecture=manifest["reference_architecture"],
         target_architecture=manifest["target_architecture"],
     )
+    if signals_override:
+        discovery = signal_pack["discovery"]
+        result["live_acquisition"] = {
+            "signal_pack_sha256": sha256(signals_path.read_bytes()).hexdigest(),
+            "plan_sha256": signal_pack.get("plan_sha256"),
+            "captured_at_utc": captured,
+            "acquisition_status": discovery.get("acquisition_status"),
+            "coverage": discovery.get("coverage"),
+            "failures": discovery.get("failures"),
+            "observation_count": len(signal_pack.get("signals", [])),
+            "marketplace_counters_are_not_verified_sales": True,
+            "buyer_or_inventory_authority": False,
+        }
+    return result
 
 
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--manifest", default=DEFAULT_MANIFEST)
+    p.add_argument("--signals", help="live hs.market_signals.v1 pack; do not edit pinned curated pack")
+    p.add_argument("--as-of", help="UTC evaluation date; defaults to live capture date for --signals")
     p.add_argument("--out", default=DEFAULT_OUT)
     p.add_argument("--check-only", action="store_true")
     opts = p.parse_args()
-    result = run(opts.manifest)
+    result = run(opts.manifest, signals_override=opts.signals,
+                 as_of_override=date.fromisoformat(opts.as_of) if opts.as_of else None)
     if not opts.check_only:
         path = _repo_path(opts.out)
         path.parent.mkdir(parents=True, exist_ok=True)
