@@ -1,0 +1,38 @@
+{
+  "schema": "hs.cm5_power_boot_gate.v1",
+  "manufacturer_revision": "V2.21",
+  "five_volt_auxiliary_contact": 106,
+  "five_volt_link_ref": "R7",
+  "five_volt_upstream_preserved": true,
+  "four_keys_checked": {
+    "PWRON_L": 99,
+    "RESET_L": 92,
+    "SARADC_VIN0_BOOT": 93,
+    "SARADC_VIN1_KEY/RECOVERY": 226
+  },
+  "unchanged_original_connections": 143,
+  "newly_connected_contacts": 23,
+  "erc_open_findings": {
+    "lib_symbol_issues": 35,
+    "pin_not_connected": 167,
+    "footprint_link_issues": 3,
+    "power_pin_not_driven": 3,
+    "pin_not_driven": 24
+  },
+  "previous_erc_open_findings": {
+    "lib_symbol_issues": 26,
+    "pin_not_connected": 172,
+    "footprint_link_issues": 3,
+    "power_pin_not_driven": 4,
+    "pin_not_driven": 26
+  },
+  "erc_clean": false,
+  "rated_footprints": false,
+  "input_protection": false,
+  "usb_data_esd": false,
+  "gpio_flash_power_domains_qualified": false,
+  "regulator_load_test": false,
+  "real_hardware_boot_test": false,
+  "board_routed": false,
+  "fabrication_authorized": false
+}

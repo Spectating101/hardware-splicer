@@ -1,0 +1,43 @@
+{
+  "schema": "hs.cm5_power_boot_bringup.v1",
+  "manufacturer_revision": "V2.21",
+  "auxiliary_5v_pin": 106,
+  "auxiliary_5v_name": "5V_HDMI",
+  "auxiliary_5v_link": "R7 0R from VCC5V0_SYS",
+  "keys": [
+    {
+      "function": "PWRON_L",
+      "cm5_pin": 99,
+      "series": "R8",
+      "button": "SW1"
+    },
+    {
+      "function": "RESET_L",
+      "cm5_pin": 92,
+      "series": "R9",
+      "button": "SW2"
+    },
+    {
+      "function": "SARADC_VIN0_BOOT",
+      "cm5_pin": 93,
+      "series": "R10",
+      "button": "SW3"
+    },
+    {
+      "function": "SARADC_VIN1_KEY/RECOVERY",
+      "cm5_pin": 226,
+      "series": "R11",
+      "button": "SW4"
+    }
+  ],
+  "gpio_vref_qualified": false,
+  "flash_voltage_qualified": false,
+  "input_protection_present": false,
+  "usb_data_esd_present": false,
+  "current_limit_measured": false,
+  "buck_droop_test_passed": false,
+  "power_on_tested": false,
+  "full_erc_clean": false,
+  "pcb_routed": false,
+  "fabrication_authorized": false
+}
