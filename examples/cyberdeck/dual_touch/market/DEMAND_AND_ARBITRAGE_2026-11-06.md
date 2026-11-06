@@ -1,6 +1,8 @@
 # Pocket cyberdeck market: demand, sourcing and buy/build arbitrage
 **Evidence date:** November 6, 2026 | **Markets:** global enthusiast hardware; Taiwan; Indonesia | **Project:** HS dual-touch clamshell draft [PR #292](https://github.com/Spectating101/hardware-splicer/pull/292)
 
+**Follow-on:** [Coding-first mobile development: smartphone and cyberdeck variants, market and HS feasibility](PHONE_CYBERDECK_MARKET_VALIDATION_2026-11-06.md).
+
 **Question:** Is there *paying demand* for a cheap, calculator-size, fold-shut SSH pocket terminal (possibly two 4.3-inch touchscreens), and if so should HS build it, resell existing hardware, sell kits, or stop?
 
 **Verdict:** There's **strong evidence that a global niche purchases specialized pocket/open-hardware computers**, but **no identified transaction data or preorder cohort proving demand for our exact two-glass-screen SSH device**, and **no verified Taiwan/Indonesia volume** for that device. Do **not** stock finished custom products yet. The best business next action is **qualified demand validation at stated price points** and a **real one-screen SSH usability prototype**, while separately studying import/reseller/firmware-service margins.
