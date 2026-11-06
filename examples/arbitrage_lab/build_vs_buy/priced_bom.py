@@ -93,8 +93,8 @@ def keep(row: dict, line: dict) -> str | None:
     allowed = set(line.get("allow_words", ()))  # e.g. a seller named 大人的玩具 must not trip the 玩具 (toy) exclusion
     if line.get("allow_used"):  # e.g. a used-laptop baseline or a used donor: keep 二手/中古, still drop broken units
         allowed |= set(USED_WORDS)
-    base = "|".join(w for w in DEFAULT_EXCLUDE.split("|") if w not in allowed)
-    if re.search(base + (("|" + exclude) if exclude else ""), t, re.I):
+    parts = [w for w in DEFAULT_EXCLUDE.split("|") if w not in allowed] + ([exclude] if exclude else [])
+    if parts and re.search("|".join(parts), t, re.I):  # an empty pattern would match, and so reject, every title
         return "excluded keyword"
     lo, hi = line["unit_price_band_twd"]
     unit = row["price_twd"] / pack_size(row["title"], line)

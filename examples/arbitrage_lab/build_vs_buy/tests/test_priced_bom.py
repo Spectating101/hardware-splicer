@@ -59,6 +59,14 @@ def test_allow_words_lifts_only_the_named_default_exclusion():
     assert pb.keep(row("大人的玩具 FZ-M1 故障", 7500), {**line, "allow_words": ["玩具"]}) == "excluded keyword"
 
 
+def test_lifting_every_default_exclusion_does_not_reject_everything():
+    everything = pb.DEFAULT_EXCLUDE.split("|")
+    line = {"must": "FZ-M1", "unit_price_band_twd": [3000, 40000], "allow_words": everything}
+    assert pb.keep(row("Toughpad FZ-M1", 7500), line) is None
+    assert pb.keep(row("Toughpad FZ-M1 電池", 7500), {**line, "exclude": "電池"}) == "excluded keyword"
+    assert pb.keep(row("Toughpad FZ-M1", 7500), {**line, "exclude": "電池"}) is None
+
+
 class _Resp:
     def __enter__(self):
         return self
