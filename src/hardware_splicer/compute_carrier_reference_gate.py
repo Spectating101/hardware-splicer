@@ -52,6 +52,13 @@ def assess(source: bytes) -> dict[str, Any]:
             raise CarrierGateError(f"{mid}: wrong module silicon or vendor connector family")
         if m.get("vendor_pitch_mm") != .4 or m.get("physical_nominal_mm") != [55, 40]:
             raise CarrierGateError(f"{mid}: nominal module/connector geometry mismatch")
+        if mid == "radxa_cm5_rk3588s2":
+            references = m.get("mechanical_conflicting_vendor_references", [])
+            unique = {tuple(x.get("dimensions_mm", [])) for x in references if isinstance(x, dict)}
+            if len(unique) < 2 or (55,40) not in unique or (56,41) not in unique:
+                raise CarrierGateError("known CM5 55x40 vs 56x41 vendor drawing conflict omitted")
+            block("vendor_dimension_reference_conflict", mid,
+                  "CM5 product page says 56x41mm; docs say 55x40mm; actual vendor DXF+STEP must govern fitting")
         if not m.get("official_carrier_design") or not m.get("kicad_community"):
             block("missing_reference_cad", mid, "vendor carrier and open KiCad library must be traced")
         db = m.get("agent_hardware_db")
@@ -79,6 +86,21 @@ def assess(source: bytes) -> dict[str, Any]:
     if da["power_blob_sha"] == db["power_blob_sha"]:
         block("identical_upstream_power_blobs", "cm4_cm5",
               "identical unknown power blob is NOT shared rail compatibility")
+    standards = {x.get("id"): x for x in obj.get("alternative_standards", [])}
+    if set(standards) != {"sget_smarc_sdt01", "sget_osm_sdt05"}:
+        raise CarrierGateError("missing actual industry-standard alternatives")
+    if standards["sget_osm_sdt05"].get("interchange") != "SOLDERED_NOT_FIELD_SWAPPABLE":
+        raise CarrierGateError("OSM is soldered; cannot claim field replaceability")
+    if standards["sget_smarc_sdt01"].get("edge_contact_count") != 314:
+        raise CarrierGateError("SMARC connector contract invalid")
+    market = {x.get("id"): x for x in obj.get("current_taiwan_market_reference", [])}
+    cm4_price = market.get("radxa_cm4_4gb_32gb_icshop", {})
+    donor = market.get("used_s21_prior_research", {})
+    if (cm4_price.get("listed_twd") != 4200 or cm4_price.get("availability") != "SOLD_OUT"
+            or donor.get("listed_twd") != 1600 or donor.get("availability") != "UNVERIFIED_USED_LISTING"):
+        raise CarrierGateError("cost comparison sources altered or incorrectly classified")
+    block("no_reproducible_supply_quote", "commercial",
+          "local 4GB CM4 offer sold out; used donor ask not a stable supplier quotation")
     known = obj.get("source_known_hazards")
     if not isinstance(known, list) or {x.get("id") for x in known} != {
         "radxa_cm3_to_cm5_5v_gpio", "radxa_cm3j_to_cm5_not_dropin", "radxa_cm4_to_cm5_pinout_unverified"
