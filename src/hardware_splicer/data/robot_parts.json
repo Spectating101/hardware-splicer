@@ -1,0 +1,5 @@
+{
+  "schema_version": "hardware_splicer.robot_parts.v1",
+  "rule": "Every figure names where it came from. A figure that is typical rather than published says so, and the plan tells you to measure it. Nothing here is guessed silently.",
+  "parts": []
+}
