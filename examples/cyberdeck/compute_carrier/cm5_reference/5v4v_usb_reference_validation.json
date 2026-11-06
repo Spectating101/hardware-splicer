@@ -1,0 +1,23 @@
+{
+  "schema": "hs.cm5_5v4v_usb_power_netlist_gate.v1",
+  "native_electrical_nets_checked": 14,
+  "component_count": 21,
+  "power_rail_5v_and_4v_separate": true,
+  "regulated_4v_referenced_rail_connected": true,
+  "usb_vbus_after_switch": true,
+  "usb_enable_on_cm5_host_pwren": true,
+  "sgm_pin3_vendor_datasheet_name": "ILIM",
+  "sgm_pin3_reference_label_conflicts": true,
+  "feedback_vout_nominal_v": 4.0390243902439025,
+  "usb_ilim_nominal_a": 1.446808510638298,
+  "erc_only_symbol_registration_warnings": true,
+  "erc_findings": {
+    "lib_symbol_issues": 23
+  },
+  "usb_esd_tested": false,
+  "regulator_power_up_tested": false,
+  "input_supply_droop_characterized": false,
+  "switch_alternative_sourced": false,
+  "board_fabrication_authorized": false,
+  "next_gate": "Qualify available USB switch replacement; resolve ESD/shield, 5V 5A supply margin, 1.5uH saturation, PMIC loop/signal integrity and assembly design before PCB."
+}

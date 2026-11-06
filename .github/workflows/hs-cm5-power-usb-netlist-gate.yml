@@ -1,0 +1,70 @@
+name: HS CM5 - 5V to 4V Regulator and USB Host Power Netlist Gate
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/hs_cm5_5v4v_usb_power_reference.py'
+      - 'src/hardware_splicer/cm5_power_usb_reference_gate.py'
+      - 'tests/test_cm5_power_usb_reference_gate.py'
+      - 'examples/cyberdeck/compute_carrier/cm5_reference/**'
+      - '.github/workflows/hs-cm5-power-usb-netlist-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independently-audit-source-connected-power:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS test harness
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Test all current CM5 source and electrical continuity gates
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_compute_carrier_reference_gate.py \
+            tests/test_cm5_pinout_audit.py \
+            tests/test_cm5_reference_board_netmap.py \
+            tests/test_cm5_connected_bench_schematic.py \
+            tests/test_cm5_power_usb_reference_gate.py
+      - name: Validate native KiCad netlist receipt and unresolved non-fab markers
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cm5_power_usb_reference_gate \
+            --netlist examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NETLIST.xml \
+            --erc examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_ERC.txt \
+            --contract examples/cyberdeck/compute_carrier/cm5_reference/5v4v_usb_reference_contract.json \
+            --output /tmp/hs_cm5_power_usb_gate.json
+          cmp /tmp/hs_cm5_power_usb_gate.json \
+            examples/cyberdeck/compute_carrier/cm5_reference/5v4v_usb_reference_validation.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/hs_cm5_power_usb_gate.json').read_text())
+          assert x['native_electrical_nets_checked']==14
+          assert x['component_count']==21
+          assert x['power_rail_5v_and_4v_separate']
+          assert x['usb_vbus_after_switch']
+          assert x['sgm_pin3_reference_label_conflicts']
+          assert not x['board_fabrication_authorized']
+          assert not x['usb_esd_tested']
+          assert not x['regulator_power_up_tested']
+          PY
+      - name: Archive non-production schematic and native export provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-CM5-5V4V-USB-NETLIST-RESEARCH-ONLY
+          retention-days: 30
+          path: |
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NETLIST.xml
+            examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_ERC.txt
+            /tmp/hs_cm5_power_usb_gate.json

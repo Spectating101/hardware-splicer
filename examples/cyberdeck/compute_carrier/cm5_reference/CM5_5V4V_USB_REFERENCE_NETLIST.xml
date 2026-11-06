@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>/tmp/hs_cm5_import_probe/hs/examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch</source>
+    <date>2026-11-07T02:10:10+0800</date>
+    <tool>Eeschema 9.0.2+dfsg-1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>CM5 5V to 4V / USB 2.0 power reference NOT FOR FAB</title>
+        <company/>
+        <rev>BENCH DESIGN REVIEW</rev>
+        <date/>
+        <source>CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>10uF_10V_VIN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>079b8842-6b81-5c99-b537-0c98576b818e</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>100nF_10V_VIN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>812da707-9184-588a-8b05-1d1cf81316a0</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>22uF_10V_VOUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e5649da1-4f5b-59a4-929a-fa39b1d7a92e</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>22uF_10V_VOUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e2d4c105-6395-5837-9903-7f3f239c4115</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>100nF_10V_VOUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9dc7ca95-2ecb-59d5-9da9-54c7cc96507b</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>220nF_10V_BOOT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d7bbdd2f-9b20-52a2-8702-28ad744e3347</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>1uF_10V_REG_VCC</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>40bd1338-6821-558b-9dd8-ce382160e1a4</tstamps>
+    </comp>
+    <comp ref="C8">
+      <value>1uF_10V_USB_IN</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1a48cbff-5eb3-5652-be38-291508c88dc7</tstamps>
+    </comp>
+    <comp ref="C9">
+      <value>22uF_10V_USB_OUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c1fc9586-4f3f-5419-8e64-90a06722746a</tstamps>
+    </comp>
+    <comp ref="J1">
+      <value>EXTERNAL_5V_BENCH_ONLY</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>6b78b2ea-9d14-512a-b842-f3b97220bbae</tstamps>
+    </comp>
+    <comp ref="J2">
+      <value>CM5_HARNESS_LOGICAL_NOT_PINOUT</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x06" description="Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a2906ecc-fc6d-5d07-b51c-7405c276e0fa</tstamps>
+    </comp>
+    <comp ref="J3">
+      <value>USB2_A_HOST_ESD_NOT_DESIGNED</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="USB_A" description="USB Type A connector"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="connector USB"/>
+      <property name="ki_fp_filters" value="USB*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>02a9e0c6-3f2d-56e0-9a99-78376abcaa10</tstamps>
+    </comp>
+    <comp ref="L1">
+      <value>1.5uH_ISAT_UNVERIFIED</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="L" description="Inductor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="inductor choke coil reactor magnetic"/>
+      <property name="ki_fp_filters" value="Choke_* *Coil* Inductor_* L_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>98fce40a-93e9-5082-bb04-d487339e095c</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>47k_1pct_RFB_TOP</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>bbb6dcff-ad72-50b6-aa53-45e73b0cfac3</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>8.2k_1pct_RFB_BOTTOM</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>da81e82e-a5f2-5518-b309-36e795892416</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>510k_REN_TOP</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>311fd5d4-b19c-5cd4-9c3c-9db079908ab4</tstamps>
+    </comp>
+    <comp ref="R4">
+      <value>510k_REN_BOTTOM</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b758435d-d5b9-5063-a44d-658390962ffb</tstamps>
+    </comp>
+    <comp ref="R5">
+      <value>3.3R_BOOT_SERIES</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b3a83391-245f-5d03-80e2-ca8050036d6c</tstamps>
+    </comp>
+    <comp ref="R6">
+      <value>4.7k_1pct_USB_ILIM</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e88c80f1-f0c8-5c79-8def-55daa6f04b6e</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>MP8759GD-Z_REQUIRES_SI_REVIEW</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="HS_Power" part="MP8759GD" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f061bfbf-95ae-5cad-ba61-ce6b88966ad3</tstamps>
+    </comp>
+    <comp ref="U2">
+      <value>SGM2576_OBSOLETE_SUBSTITUTE_NEEDED</value>
+      <fields>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="HS_Power" part="SGM2576" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="examples/cyberdeck/compute_carrier/cm5_reference/CM5_5V4V_USB_REFERENCE_NOT_FOR_FAB.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d1f0fdb8-e349-5495-9b30-0781e5c18857</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="USB_A">
+      <description>USB Type A connector</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>USB*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">USB_A</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">USB Type A connector</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VBUS" type="power_in"/>
+        <pin num="2" name="D-" type="bidirectional"/>
+        <pin num="3" name="D+" type="bidirectional"/>
+        <pin num="4" name="GND" type="power_in"/>
+        <pin num="5" name="Shield" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x02">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x06">
+      <description>Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x06</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="L">
+      <description>Inductor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">L</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">Inductor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">~</field>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="HS_Power" part="MP8759GD">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MP8759GD</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="VIN" type="power_in"/>
+        <pin num="2" name="PGND" type="power_in"/>
+        <pin num="3" name="PG" type="open_collector"/>
+        <pin num="4" name="NC" type="no_connect"/>
+        <pin num="5" name="VOUT" type="input"/>
+        <pin num="6" name="MODE" type="input"/>
+        <pin num="7" name="SW" type="power_out"/>
+        <pin num="8" name="BST" type="input"/>
+        <pin num="9" name="VCC" type="power_out"/>
+        <pin num="10" name="AGND" type="power_in"/>
+        <pin num="11" name="FB" type="input"/>
+        <pin num="12" name="EN" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="HS_Power" part="SGM2576">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SGM2576</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="VOUT" type="power_out"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="ILIM" type="input"/>
+        <pin num="4" name="EN" type="input"/>
+        <pin num="5" name="VIN" type="power_in"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries/>
+  <nets>
+    <net code="1" name="/BST_MPS" class="Default">
+      <node ref="R5" pin="1" pintype="passive"/>
+      <node ref="U1" pin="8" pinfunction="BST" pintype="input"/>
+    </net>
+    <net code="2" name="/BST_SERIES" class="Default">
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="R5" pin="2" pintype="passive"/>
+    </net>
+    <net code="3" name="/EN_MPS" class="Default">
+      <node ref="R3" pin="2" pintype="passive"/>
+      <node ref="R4" pin="1" pintype="passive"/>
+      <node ref="U1" pin="12" pinfunction="EN" pintype="input"/>
+    </net>
+    <net code="4" name="/FB_MPS" class="Default">
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+      <node ref="U1" pin="11" pinfunction="FB" pintype="input"/>
+    </net>
+    <net code="5" name="/GND" class="Default">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="C9" pin="2" pintype="passive"/>
+      <node ref="J1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="J2" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="J3" pin="4" pinfunction="GND" pintype="power_in"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+      <node ref="R6" pin="2" pintype="passive"/>
+      <node ref="U1" pin="10" pinfunction="AGND" pintype="power_in"/>
+      <node ref="U1" pin="2" pinfunction="PGND" pintype="power_in"/>
+      <node ref="U2" pin="2" pinfunction="GND" pintype="power_in"/>
+    </net>
+    <net code="6" name="/ILIM_USB" class="Default">
+      <node ref="R6" pin="1" pintype="passive"/>
+      <node ref="U2" pin="3" pinfunction="ILIM" pintype="input"/>
+    </net>
+    <net code="7" name="/SW_MPS" class="Default">
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="L1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="U1" pin="7" pinfunction="SW" pintype="power_out"/>
+    </net>
+    <net code="8" name="/USB20_HOST0_DM" class="Default">
+      <node ref="J2" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="J3" pin="2" pinfunction="D-" pintype="bidirectional"/>
+    </net>
+    <net code="9" name="/USB20_HOST0_DP" class="Default">
+      <node ref="J2" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="J3" pin="3" pinfunction="D+" pintype="bidirectional"/>
+    </net>
+    <net code="10" name="/USB_HOST_PWREN_H" class="Default">
+      <node ref="J2" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="U2" pin="4" pinfunction="EN" pintype="input"/>
+    </net>
+    <net code="11" name="/USB_VBUS_SW" class="Default">
+      <node ref="C9" pin="1" pintype="passive"/>
+      <node ref="J3" pin="1" pinfunction="VBUS" pintype="power_in"/>
+      <node ref="U2" pin="1" pinfunction="VOUT" pintype="power_out"/>
+    </net>
+    <net code="12" name="/VCC5V0_SYS" class="Default">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C8" pin="1" pintype="passive"/>
+      <node ref="J1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="VIN" pintype="power_in"/>
+      <node ref="U2" pin="5" pinfunction="VIN" pintype="power_in"/>
+    </net>
+    <net code="13" name="/VCC_MPS" class="Default">
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="U1" pin="9" pinfunction="VCC" pintype="power_out"/>
+    </net>
+    <net code="14" name="/VCC_SYSIN" class="Default">
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="L1" pin="2" pinfunction="2" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="VOUT" pintype="input"/>
+    </net>
+    <net code="15" name="unconnected-(J3-Shield-Pad5)" class="Default">
+      <node ref="J3" pin="5" pinfunction="Shield" pintype="passive+no_connect"/>
+    </net>
+    <net code="16" name="unconnected-(U1-MODE-Pad6)" class="Default">
+      <node ref="U1" pin="6" pinfunction="MODE" pintype="input+no_connect"/>
+    </net>
+    <net code="17" name="unconnected-(U1-NC-Pad4)" class="Default">
+      <node ref="U1" pin="4" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="18" name="unconnected-(U1-PG-Pad3)" class="Default">
+      <node ref="U1" pin="3" pinfunction="PG" pintype="open_collector+no_connect"/>
+    </net>
+  </nets>
+</export>
