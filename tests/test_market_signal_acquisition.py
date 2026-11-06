@@ -11,8 +11,8 @@ PLAN = {
     "schema": "hs.discovery_plan.v1", "target_architecture": "dual_esp32_touch_4p3_rs485",
     "max_pages": 2, "github_per_page": 2, "ruten_limit": 2,
     "jobs": [
-        {"id": "mobile-development-friction", "problem_to_investigate": "work", "github_queries": ["mobile ssh"], "ruten_queries": ["T-Deck"]},
-        {"id": "another-mobile-job", "problem_to_investigate": "other", "github_queries": ["termux"], "ruten_queries": ["T-Deck"]},
+        {"id": "mobile-development-friction", "problem_to_investigate": "work", "github_queries": ["mobile ssh"], "github_title_terms": ["keyboard", "ssh"], "ruten_queries": ["T-Deck"]},
+        {"id": "another-mobile-job", "problem_to_investigate": "other", "github_queries": ["termux"], "github_title_terms": ["keyboard", "ssh"], "ruten_queries": ["T-Deck"]},
     ],
 }
 T = datetime(2026, 11, 6, 14, 0, tzinfo=timezone.utc)
@@ -107,3 +107,33 @@ def test_github_source_never_becomes_transaction_claim():
     gh = [x for x in a["signals"] if x["id"].startswith("github-")]
     assert gh and all(x["source_metadata"]["not_a_customer_interview"] for x in gh)
     assert all("verified_paid_order" != x["kind"] for x in a["signals"])
+
+
+def test_irrelevant_public_issue_is_archived_but_not_promoted_to_market_signal():
+    def noise(url, headers):
+        if "/search/issues" in url:
+            return {"total_count": 1, "items": [{**ISSUE, "title": "Auto-generated CI digest report"}]}
+        return fake_get(url, headers)
+    result = acquire(PLAN, observed=T, getter=noise)
+    assert len([x for x in result["signals"] if x["kind"] == "anecdotal_problem"]) == 0
+    raw = result["discovery"]["raw_candidates"]
+    assert any(x["qualification_events"][0]["reason"] == "rejected_irrelevant_issue_title" for x in raw)
+
+
+def test_marketplace_accessory_is_retained_in_raw_but_rejected_as_competitor_candidate():
+    plan = {**PLAN, "jobs": [{**PLAN["jobs"][0], "ruten_exclude_terms": ["擴展板"]}]}
+    def accessory(url, headers):
+        if "/prod/" in url:
+            return [{**DETAIL, "ProdName": "uConsole 擴展板"}]
+        return fake_get(url, headers)
+    result = acquire(plan, observed=T, getter=accessory)
+    assert all(x["kind"] != "marketplace_asking_price" for x in result["signals"])
+    assert any(x["kind"] == "marketplace_asking_price" for x in result["discovery"]["raw_candidates"])
+
+
+def test_auditable_source_payload_matches_source_record_hash():
+    from hardware_splicer.market_signal_acquisition import _digest
+    a = acquire(PLAN, observed=T, getter=fake_get)
+    for signal in a["signals"]:
+        meta = signal["source_metadata"]
+        assert _digest(meta["source_record"]) == meta["source_record_sha256"]
