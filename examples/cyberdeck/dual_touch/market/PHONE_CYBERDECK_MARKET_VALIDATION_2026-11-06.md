@@ -1,3 +1,5 @@
+**Execution update:** [HS cross-agent evidence bridge](AGENT_PIPELINE_HANDOFF_2026-11-06.md) now consumes pinned pricing, engineering and demand signals.
+
 # Phone + Cyberdeck: Research-backed product family decision
 
 **Dated:** 2026-11-06 (Taiwan) | **Owner:** Hardware Splicer (HS) research pipeline

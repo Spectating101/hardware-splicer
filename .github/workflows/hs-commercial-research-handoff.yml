@@ -1,0 +1,48 @@
+name: HS Cross-Agent Commercial Evidence - Honest Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hs-commercial-research-handoff.yml"
+      - "src/hardware_splicer/commercial_evidence_bridge.py"
+      - "scripts/hs_market_evidence_handoff.py"
+      - "tests/test_commercial_evidence_bridge.py"
+      - "examples/cyberdeck/dual_touch/market/**"
+      - "examples/cyberdeck/dual_touch/evidence/native_mecha/**"
+
+permissions:
+  contents: read
+
+jobs:
+  replay-source-and-machine-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install declared HS backend models and test tooling
+        run: |
+          python -m pip install --disable-pip-version-check -e . 'pytest>=8,<10'
+      - name: Validate source classification, tampering, money and engineer fail-closed rules
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q tests/test_commercial_evidence_bridge.py
+      - name: Recompute independent source snapshot and canonical HS release
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/hs_market_evidence_handoff.py
+          git diff --exit-code -- examples/cyberdeck/dual_touch/market/evidence/commercial_handoff.json
+      - name: Upload research-only receipt, NOT a build or sales authorization
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-Cross-Agent-Market-Evidence-Research-Only
+          path: |
+            examples/cyberdeck/dual_touch/market/evidence/commercial_handoff.json
+            examples/cyberdeck/dual_touch/market/inputs/handoff_manifest_20261106.json
+            examples/cyberdeck/dual_touch/market/inputs/adjacent_market_signals_20261106.json
+          retention-days: 30
