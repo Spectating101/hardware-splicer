@@ -146,10 +146,26 @@ def _check_source_pack(pack: Mapping[str, Any], handoff: Mapping[str, Any], sour
             raise OpportunityEvidenceError("source record provenance mismatch")
         if _timestamp(row.get("observed_at_utc")) != capture:
             raise OpportunityEvidenceError("observation time differs from acquisition timestamp")
+        record = meta["source_record"]
+        if row.get("summary") != record.get("title") or not isinstance(row.get("summary"), str):
+            raise OpportunityEvidenceError("displayed title not backed by source record")
         if row["kind"] == "anecdotal_problem":
+            if meta.get("source") != "github_public_issue" or record.get("url") != row.get("source_url"):
+                raise OpportunityEvidenceError("GitHub source identity mismatch")
             _repo(row.get("source_url", ""))
-        elif not _listing_url(row.get("source_url", "")):
-            raise OpportunityEvidenceError("untrusted listing URL")
+        else:
+            if meta.get("source") != "ruten_public_listing" or not _listing_url(row.get("source_url", "")):
+                raise OpportunityEvidenceError("untrusted listing identity")
+            if record.get("id") != row["source_url"].rstrip("/").split("/")[-1]:
+                raise OpportunityEvidenceError("listing ID mismatch")
+            prices = record.get("prices")
+            asking = meta.get("asking_price_twd")
+            if (not isinstance(prices, list) or not prices or type(asking) not in (int, float)
+                    or type(prices[0]) not in (int, float) or not math.isfinite(asking)
+                    or asking != prices[0]):
+                raise OpportunityEvidenceError("asking price does not match source record")
+            if meta.get("seller_reported_cumulative_sold") != record.get("sold_qty"):
+                raise OpportunityEvidenceError("seller counter does not match source record")
     if ids != bridge_ids:
         raise OpportunityEvidenceError("handoff market signals mismatch acquired pack")
     return signals
@@ -239,6 +255,7 @@ def qualify(*, source_bytes: bytes, handoff: Mapping[str, Any], plan: Mapping[st
                           else "SINGLE_REPOSITORY_ISSUE_REPORT_UNVERIFIED" if by_repos
                           else "NO_QUALIFIED_PROBLEM_REPORTS")
         market_status = ("BOUNDED_REQUESTS_WITH_FAILURES" if pack["discovery"]["failures"]
+                         else "BOUNDED_SEARCH_TRUNCATED" if any(c.get("truncated") for c in pack["discovery"]["coverage"])
                          else "BOUNDED_REQUESTS_NO_REPORTED_FAILURES")
         hsid = lane["candidate_product_id"] == pack["target_architecture"]
         opportunities.append({
