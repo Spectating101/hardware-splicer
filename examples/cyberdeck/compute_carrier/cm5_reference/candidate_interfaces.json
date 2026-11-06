@@ -1,0 +1,492 @@
+{
+  "schema": "hs.cm5_io_candidate_net_map.v1",
+  "authority": "MANUFACTURER_PIN_LABEL_MATCH_ONLY",
+  "target": "Radxa CM5 V2.21",
+  "canonical_source_sha256": "191052d98a057384b6659bab2626aae81cfc6b565f3216f20433c26046029b9c",
+  "logical_subsystems": {
+    "power": [
+      {
+        "pin": 1,
+        "name": "GND"
+      },
+      {
+        "pin": 2,
+        "name": "GND"
+      },
+      {
+        "pin": 7,
+        "name": "GND"
+      },
+      {
+        "pin": 8,
+        "name": "GND"
+      },
+      {
+        "pin": 13,
+        "name": "GND"
+      },
+      {
+        "pin": 14,
+        "name": "GND"
+      },
+      {
+        "pin": 22,
+        "name": "GND"
+      },
+      {
+        "pin": 23,
+        "name": "GND"
+      },
+      {
+        "pin": 32,
+        "name": "GND"
+      },
+      {
+        "pin": 33,
+        "name": "GND"
+      },
+      {
+        "pin": 42,
+        "name": "GND"
+      },
+      {
+        "pin": 43,
+        "name": "GND"
+      },
+      {
+        "pin": 52,
+        "name": "GND"
+      },
+      {
+        "pin": 53,
+        "name": "GND"
+      },
+      {
+        "pin": 59,
+        "name": "GND"
+      },
+      {
+        "pin": 60,
+        "name": "GND"
+      },
+      {
+        "pin": 65,
+        "name": "GND"
+      },
+      {
+        "pin": 66,
+        "name": "GND"
+      },
+      {
+        "pin": 71,
+        "name": "GND"
+      },
+      {
+        "pin": 74,
+        "name": "GND"
+      },
+      {
+        "pin": 77,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 79,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 81,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 83,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 84,
+        "name": "VCC_3V3_S3"
+      },
+      {
+        "pin": 85,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 86,
+        "name": "VCC_3V3_S3"
+      },
+      {
+        "pin": 87,
+        "name": "VCC_SYSIN"
+      },
+      {
+        "pin": 98,
+        "name": "GND"
+      },
+      {
+        "pin": 106,
+        "name": "5V_HDMI"
+      },
+      {
+        "pin": 107,
+        "name": "GND"
+      },
+      {
+        "pin": 108,
+        "name": "GND"
+      },
+      {
+        "pin": 113,
+        "name": "GND"
+      },
+      {
+        "pin": 114,
+        "name": "GND"
+      },
+      {
+        "pin": 119,
+        "name": "GND"
+      },
+      {
+        "pin": 120,
+        "name": "GND"
+      },
+      {
+        "pin": 125,
+        "name": "GND"
+      },
+      {
+        "pin": 126,
+        "name": "GND"
+      },
+      {
+        "pin": 131,
+        "name": "GND"
+      },
+      {
+        "pin": 132,
+        "name": "GND"
+      },
+      {
+        "pin": 137,
+        "name": "GND"
+      },
+      {
+        "pin": 138,
+        "name": "GND"
+      },
+      {
+        "pin": 144,
+        "name": "GND"
+      },
+      {
+        "pin": 150,
+        "name": "GND"
+      },
+      {
+        "pin": 155,
+        "name": "GND"
+      },
+      {
+        "pin": 156,
+        "name": "GND"
+      },
+      {
+        "pin": 161,
+        "name": "GND"
+      },
+      {
+        "pin": 162,
+        "name": "GND"
+      },
+      {
+        "pin": 167,
+        "name": "GND"
+      },
+      {
+        "pin": 168,
+        "name": "GND"
+      },
+      {
+        "pin": 173,
+        "name": "GND"
+      },
+      {
+        "pin": 174,
+        "name": "GND"
+      },
+      {
+        "pin": 179,
+        "name": "GND"
+      },
+      {
+        "pin": 180,
+        "name": "GND"
+      },
+      {
+        "pin": 185,
+        "name": "GND"
+      },
+      {
+        "pin": 186,
+        "name": "GND"
+      },
+      {
+        "pin": 191,
+        "name": "GND"
+      },
+      {
+        "pin": 192,
+        "name": "GND"
+      },
+      {
+        "pin": 197,
+        "name": "GND"
+      },
+      {
+        "pin": 198,
+        "name": "GND"
+      },
+      {
+        "pin": 201,
+        "name": "GND"
+      },
+      {
+        "pin": 202,
+        "name": "GND"
+      },
+      {
+        "pin": 207,
+        "name": "GND"
+      },
+      {
+        "pin": 213,
+        "name": "GND"
+      },
+      {
+        "pin": 219,
+        "name": "GND"
+      },
+      {
+        "pin": 222,
+        "name": "GND"
+      },
+      {
+        "pin": 225,
+        "name": "GND"
+      },
+      {
+        "pin": 231,
+        "name": "GND"
+      },
+      {
+        "pin": 232,
+        "name": "GND"
+      },
+      {
+        "pin": 237,
+        "name": "GND"
+      },
+      {
+        "pin": 242,
+        "name": "GND"
+      },
+      {
+        "pin": 243,
+        "name": "GND"
+      },
+      {
+        "pin": 248,
+        "name": "GND"
+      },
+      {
+        "pin": 249,
+        "name": "GND"
+      },
+      {
+        "pin": 255,
+        "name": "GND"
+      },
+      {
+        "pin": 256,
+        "name": "GND"
+      },
+      {
+        "pin": 261,
+        "name": "GND"
+      },
+      {
+        "pin": 262,
+        "name": "GND"
+      },
+      {
+        "pin": 267,
+        "name": "GND"
+      },
+      {
+        "pin": 268,
+        "name": "GND"
+      },
+      {
+        "pin": 272,
+        "name": "GND"
+      },
+      {
+        "pin": 273,
+        "name": "GND"
+      },
+      {
+        "pin": 276,
+        "name": "GND"
+      },
+      {
+        "pin": 292,
+        "name": "VCC_3V3_S3"
+      },
+      {
+        "pin": 299,
+        "name": "GND"
+      },
+      {
+        "pin": 300,
+        "name": "GND"
+      }
+    ],
+    "usb2_keyboard": [
+      {
+        "pin": 245,
+        "name": "USB20_HOST1_DP"
+      },
+      {
+        "pin": 247,
+        "name": "USB20_HOST1_DM"
+      },
+      {
+        "pin": 263,
+        "name": "USB20_HOST0_DP"
+      },
+      {
+        "pin": 265,
+        "name": "USB20_HOST0_DM"
+      }
+    ],
+    "uart_debug": [
+      {
+        "pin": 51,
+        "name": "UART2_RX_M0"
+      },
+      {
+        "pin": 55,
+        "name": "UART2_TX_M0"
+      }
+    ],
+    "hdmi": [
+      {
+        "pin": 106,
+        "name": "5V_HDMI"
+      },
+      {
+        "pin": 145,
+        "name": "HDMI0_TX_SBDP"
+      },
+      {
+        "pin": 147,
+        "name": "HDMI0_TX_SBDN"
+      },
+      {
+        "pin": 151,
+        "name": "HDMI_TX0_CEC_PORT"
+      },
+      {
+        "pin": 153,
+        "name": "HDMI_TX0_HPD"
+      },
+      {
+        "pin": 170,
+        "name": "HDMI0_TX2P"
+      },
+      {
+        "pin": 172,
+        "name": "HDMI0_TX2N"
+      },
+      {
+        "pin": 176,
+        "name": "HDMI0_TX1P"
+      },
+      {
+        "pin": 178,
+        "name": "HDMI0_TX1N"
+      },
+      {
+        "pin": 182,
+        "name": "HDMI0_TX0P"
+      },
+      {
+        "pin": 184,
+        "name": "HDMI0_TX0N"
+      },
+      {
+        "pin": 188,
+        "name": "HDMI0_TX3P"
+      },
+      {
+        "pin": 190,
+        "name": "HDMI0_TX3N"
+      },
+      {
+        "pin": 199,
+        "name": "HDMI_TX0_SDA_5V"
+      },
+      {
+        "pin": 200,
+        "name": "HDMI_TX0_SCL_5V"
+      }
+    ]
+  },
+  "requires_vendor_power_design": true,
+  "requires_actual_high_speed_layout_review": true,
+  "no_connect_pins": [
+    16,
+    18,
+    26,
+    64,
+    68,
+    70,
+    72,
+    76,
+    94,
+    104,
+    111,
+    143,
+    146,
+    148,
+    149,
+    152,
+    154,
+    158,
+    160,
+    164,
+    166,
+    216,
+    233,
+    235,
+    250,
+    252,
+    254,
+    258,
+    260,
+    264,
+    266,
+    270,
+    278,
+    280,
+    282,
+    284,
+    286,
+    288,
+    290,
+    291
+  ],
+  "boot_power_tested": false,
+  "usb_keyboard_tested": false,
+  "hdmi_display_tested": false,
+  "fabrication_authorized": false
+}
