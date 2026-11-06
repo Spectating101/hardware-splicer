@@ -14,7 +14,7 @@ This follow-on adds an independently executable **read-only** data-acquisition s
 
 ```bash
 PYTHONPATH=src python3 scripts/hs_market_signal_refresh.py --plan-only
-PYTHONPATH=src python3 -m pytest -q tests/test_market_signal_acquisition.py tests/test_commercial_evidence_bridge.py
+PYTHONPATH=src python3 -m pytest -q tests/test_market_signal_acquisition.py tests/test_live_market_handoff.py tests/test_commercial_evidence_bridge.py
 # Explicitly opt in to external, read-only public API access:
 PYTHONPATH=src python3 scripts/hs_market_signal_refresh.py --strict
 PYTHONPATH=src python3 scripts/hs_market_evidence_handoff.py \
@@ -22,7 +22,7 @@ PYTHONPATH=src python3 scripts/hs_market_evidence_handoff.py \
   --out examples/cyberdeck/dual_touch/market/evidence/live_commercial_handoff.json
 ```
 
-Workflow `hs-public-market-signal-refresh.yml`: PRs run **offline tests only**. Manual dispatch can acquire fresh data from this branch. Weekly schedule becomes active only if merged into the default branch. Live snapshots are CI artifacts, **not silently committed** into the evidence record. GitHub API may rate limit; Ruten may refuse requests or change its API; every failure is visible, not hidden by static fallback research.
+Workflow `hs-public-market-signal-refresh.yml`: PRs run **offline tests only**. GitHub manual dispatch is available only after the workflow is present on the default branch; before then, live acquisition can be run explicitly with the CLI. Weekly scheduling also becomes active only after merging into the default branch. Live snapshots are CI artifacts, **not silently committed** into the evidence record. GitHub API may rate limit; Ruten may refuse requests or change its API; every failure is visible, not hidden by static fallback research.
 
 ## Next genuine capability gates
 
