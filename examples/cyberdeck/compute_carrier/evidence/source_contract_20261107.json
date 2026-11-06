@@ -67,7 +67,23 @@
       "pinout_verified_against_vendor_schematic": false,
       "revision_and_mechanical_fit_validated_by_hs": false,
       "board_power_characterized": false,
-      "source_reuse_cleared": false
+      "source_reuse_cleared": false,
+      "mechanical_conflicting_vendor_references": [
+        {
+          "source": "https://docs.radxa.com/en/som/cm/cm5",
+          "dimensions_mm": [
+            55,
+            40
+          ]
+        },
+        {
+          "source": "https://radxa.com/products/cm/cm5/",
+          "dimensions_mm": [
+            56,
+            41
+          ]
+        }
+      ]
     },
     {
       "id": "samsung_s21_donor",
@@ -166,5 +182,48 @@
   "high_speed_signal_integrity_pass": false,
   "physical_test_pass": false,
   "authorization_requested": "fabrication",
-  "release_authorized": false
+  "release_authorized": false,
+  "alternative_standards": [
+    {
+      "id": "sget_smarc_sdt01",
+      "reference": "https://sget.org/standards/smarc/",
+      "module_sizes_mm": [
+        [
+          82,
+          50
+        ],
+        [
+          82,
+          80
+        ]
+      ],
+      "edge_contact_count": 314,
+      "interchange": "cross_vendor_physical_standard_but_feature_and_power_limits_still_need_module_validation",
+      "use_case": "commercial_long_lifecycle",
+      "tradeoff": "larger footprint and industrial module prices"
+    },
+    {
+      "id": "sget_osm_sdt05",
+      "reference": "https://sget.org/standards/osm/",
+      "interchange": "SOLDERED_NOT_FIELD_SWAPPABLE",
+      "use_case": "volume_embedded_pcba",
+      "tradeoff": "requires BGA assembly and no plug-in recovery"
+    }
+  ],
+  "current_taiwan_market_reference": [
+    {
+      "id": "radxa_cm4_4gb_32gb_icshop",
+      "source": "https://www.icshop.com.tw/products/368030502344",
+      "listed_twd": 4200,
+      "availability": "SOLD_OUT",
+      "notes": "Source description inconsistently says 8GB/64GB in an introductory paragraph, product title says 4GB/32GB; confirm SKU before buying."
+    },
+    {
+      "id": "used_s21_prior_research",
+      "source": "https://tw.carousell.com/p/samsung-s21-1471969849/",
+      "listed_twd": 1600,
+      "availability": "UNVERIFIED_USED_LISTING",
+      "notes": "Used donor price from prior HS scan, not reproducible bulk quote."
+    }
+  ]
 }
