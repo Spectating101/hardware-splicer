@@ -30,6 +30,10 @@ The original HS `evidence/native_mecha/budget.json` is preserved at **NT$2,965**
 | **Folding two-board test article** | **NT$4,277** | Above plus 150g PETG estimate (NT$210), 2 mm pin (NT$45), extra cable/ground (NT$50), fasteners (NT$25), heatshrink (NT$20), and a larger NT$180 combined freight allowance. Not measured assembled Z, battery or fit. |
 | **iCShop reference ONLY** | **NT$3,477** | Same two-screen folding scenario but uses **sold-out NT$1,250** board reference, **not a currently purchasable cost**. |
 
+**Printing cross-check from HS's own CAD:** `design_evidence.json` records a 32.443 cm³ base and 32.620 cm³ lid, **65.063 cm³ total closed-mesh volume**. Using the [Polymaker PolyLite PETG technical reference](https://wiki.polymaker.com/polymaker-products/more-about-our-products/documents/technical-data-sheets/petg-pet/polylite-tm-petg) at 1.25 g/cm³, an ideal **fully solid equivalent** would be about **81.3 g**, before slicer-specific support/raft/purge and fabrication conditions. The **150 g** budget input is therefore a conservative *scenario allowance*, **not** actual sliced grams or an offer from a printer. Have the supplier slice the two exact STLs before treating NT$210 as a real quote.
+
+[Traditional Chinese supplier RFQ, **not sent**](SUPPLIER_RFQ_ZH.md) asks for exact touch SKU25948, 2-unit stock, included HY2.0 cables, shipping to Zhongli and a printer quote after shell fit corrections.
+
 Each value can be recomputed via `PYTHONPATH=src python3 scripts/hs_taiwan_sourcing_budget.py`. The machine-readable observations are in `taiwan_snapshot_20261106.json`. **All estimates exclude rechargeable batteries, BMS/charging integration, engineering labor, physical-test failures, shell reprints, shipping uncertainty above reserves, and compliance.** No supplier has issued an exact delivered quote.
 
 ## Practical procurement gate / next step
