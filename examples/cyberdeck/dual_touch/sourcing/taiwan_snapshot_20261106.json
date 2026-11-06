@@ -1,0 +1,289 @@
+{
+  "schema": "hs.taiwan_component_sourcing.v1",
+  "captured_utc": "2026-11-06T15:32:00Z",
+  "currency": "TWD",
+  "project": "HS-POCKET-SSH-DUAL-TOUCH-S2",
+  "architecture": "dual_esp32_touch_4p3_rs485",
+  "comparison_ref_architecture": "pi5_7in_touch_keyboard_ups",
+  "purpose": "prototype_sourcing_only",
+  "orders_placed": 0,
+  "quotes_obtained": 0,
+  "exact_retail_stock_confirmed": false,
+  "parts_received": 0,
+  "sources": [
+    {
+      "id": "waveshare_25948",
+      "type": "manufacturer_spec_and_pack_contents",
+      "url": "https://www.waveshare.com/esp32-s3-touch-lcd-4.3.htm?sku=25948",
+      "model": "ESP32-S3-Touch-LCD-4.3",
+      "sku": "25948",
+      "touch": true,
+      "unit_price_usd": 32.99,
+      "terms": "Foreign currency reference only; Taiwan delivered cost, tax and carriage not verified",
+      "included": [
+        "2x HY2.0 2P male-tail cables 10cm",
+        "1x HY2.0 3P cable 10cm",
+        "1x HY2.0 4P cable 10cm",
+        "standoff pack"
+      ],
+      "observed": "manufacturer page, no delivered quote"
+    },
+    {
+      "id": "icshop_25948",
+      "type": "taiwan_listed_asking_price",
+      "url": "https://www.icshop.com.tw/products/368031700131",
+      "seller": "iCShop",
+      "sku": "25948",
+      "touch": true,
+      "unit_twd": 1250,
+      "availability": "SOLD_OUT",
+      "note": "Original HS source; not currently purchasable at stated price. iCShop page contains inconsistent short-form flash size; manufacturer says N16R8"
+    },
+    {
+      "id": "ruten_mixed_25948_30493",
+      "type": "marketplace_variant_price_range",
+      "url": "https://www.ruten.com.tw/item/22629113316589/",
+      "seller": "Ruten marketplace independent seller",
+      "variants": [
+        "25948 touchscreen",
+        "30493 no touch"
+      ],
+      "range_twd": [
+        1371,
+        1650
+      ],
+      "availability": "VARIANT_STOCK_UNCONFIRMED",
+      "note": "Do NOT assign NT$1371 to touchscreen SKU. NT$1650 used as conservative price envelope only, pending selected variant/cart confirmation"
+    },
+    {
+      "id": "wancai_petg",
+      "type": "fabrication_rate",
+      "url": "https://www.wancai-3d.com/fabrication-services-1",
+      "material": "PETG",
+      "rate_twd_per_g": 1.4,
+      "order_minimum_twd": 150,
+      "weight_known": false,
+      "note": "150g is a modeling assumption, not an STL slicer result; print cost and support/time fees subject to RFQ"
+    },
+    {
+      "id": "cable_yahoo_ugreen",
+      "type": "taiwan_listed_asking_price",
+      "url": "https://tw.buy.yahoo.com/gdsale/%E7%B6%A0%E8%81%AF-USB-C-Type-C%E5%BF%AB%E5%85%85%E5%82%B3%E8%BC%B8%E7%B7%9A-%E9%BB%91%E8%89%B2-%E5%8D%87%E7%B4%9A%E7%89%88-0-5%E5%85%AC%E5%B0%BA-9191445.html",
+      "part": "USB-A to USB-C 0.5m",
+      "unit_twd": 99,
+      "availability": "CHECK_CHECKOUT",
+      "note": "USB-C power/firmware path must be tested on exact board revision"
+    },
+    {
+      "id": "adapter_linktech_20w",
+      "type": "taiwan_listed_asking_price",
+      "url": "https://www.linktech.tw/product/ac-d11-%E9%9B%99%E5%AD%94-20w-%E5%85%85%E9%9B%BB%E5%99%A8-4711075641475",
+      "part": "AC-D11 dual USB-A/USB-C supply",
+      "unit_twd": 249,
+      "combined_output": "5V 3A max across both outputs",
+      "availability": "CHECK_CHECKOUT",
+      "note": "Capacity only against 2x manufacturer nominal draw; measure startup and display peaks before relying on one adapter"
+    },
+    {
+      "id": "screw_icshop",
+      "type": "category_asking_price",
+      "url": "https://www.icshop.com.tw/categories/screws-nuts",
+      "part": "M2 fasteners/nuts",
+      "approx_twd": 25,
+      "availability": "SIZE_HOLE_FIT_UNCONFIRMED"
+    },
+    {
+      "id": "heatshrink_doublesun",
+      "type": "taiwan_listed_asking_price",
+      "url": "https://double-sun.com.tw/product-detail/1114",
+      "part": "2mm heatshrink 10cm 10 pack",
+      "unit_twd": 20,
+      "availability": "CHECK_CHECKOUT"
+    },
+    {
+      "id": "hinge_rod_candidate",
+      "type": "marketplace_search_reference",
+      "url": "https://shopee.tw/search?keyword=%E5%AF%A6%E5%BF%83%E5%9C%93%E6%A3%92&page=0",
+      "part": "304 2mm diameter stainless rod >120mm, cut to size",
+      "search_starting_twd": 30,
+      "availability": "EXACT_VARIANT_NOT_QUOTED",
+      "note": "NT$45 budget allowance is assumption, not offered/verified single-rod price"
+    },
+    {
+      "id": "rs485_cables_manufacturer",
+      "type": "manufacturer_spec_and_connector_validation",
+      "url": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3/FAQ",
+      "part": "HY2.0 2P RS485 A/B; PH2.0 2P battery",
+      "unit_twd": 0,
+      "availability": "PACK_CONTENTS_CONDITIONAL",
+      "note": "Included HY2.0 wires may eliminate need to purchase extra plugs; verify common reference and conductor fatigue"
+    }
+  ],
+  "components": [
+    {
+      "id": "display_boards",
+      "description": "Exact manufacturer capacitive touch SKU25948",
+      "qty": 2,
+      "source_id": "ruten_mixed_25948_30493",
+      "unit_twd": 1650,
+      "valuation": "variant-range upper-end modeling assumption",
+      "reusable": false,
+      "required": "bench"
+    },
+    {
+      "id": "usb_cables",
+      "description": "USB-A -> USB-C 0.5m 3A power/data cable",
+      "qty": 2,
+      "source_id": "cable_yahoo_ugreen",
+      "unit_twd": 99,
+      "valuation": "seller asking price",
+      "required": "bench"
+    },
+    {
+      "id": "adapter",
+      "description": "5V 3A combined dual-output protected charger",
+      "qty": 1,
+      "source_id": "adapter_linktech_20w",
+      "unit_twd": 249,
+      "valuation": "seller asking price; peak headroom unverified",
+      "required": "bench"
+    },
+    {
+      "id": "rs485_vendor_cables",
+      "description": "HY2.0 2P RS485 pair wires and standoffs (included)",
+      "qty": 1,
+      "source_id": "rs485_cables_manufacturer",
+      "unit_twd": 0,
+      "valuation": "manufacturer package contents assumed; retailer packing must be checked",
+      "required": "bench"
+    },
+    {
+      "id": "flex_cable_and_ground",
+      "description": "Extra ground/reference conductor, splice/flex protection",
+      "qty": 1,
+      "source_id": null,
+      "unit_twd": 50,
+      "valuation": "UNQUOTED allowance",
+      "required": "folding"
+    },
+    {
+      "id": "hinge_rod",
+      "description": "2mm x 120mm cut stainless rod",
+      "qty": 1,
+      "source_id": "hinge_rod_candidate",
+      "unit_twd": 45,
+      "valuation": "UNQUOTED allowance; exact cut and retention untested",
+      "required": "folding"
+    },
+    {
+      "id": "printed_shells_petg",
+      "description": "Two PETG printed shell halves, scenario 150g total",
+      "qty": 1,
+      "source_id": "wancai_petg",
+      "unit_twd": 210,
+      "valuation": "MODELED 150g × NT$1.40/g; subject to sliced grams, support, time and minimum",
+      "required": "folding"
+    },
+    {
+      "id": "mounting_fasteners",
+      "description": "M2 nuts/screws, exact fit TBD",
+      "qty": 1,
+      "source_id": "screw_icshop",
+      "unit_twd": 25,
+      "valuation": "category reference; hole size not qualified",
+      "required": "folding"
+    },
+    {
+      "id": "heatshrink",
+      "description": "2mm heat shrink 10cm x10",
+      "qty": 1,
+      "source_id": "heatshrink_doublesun",
+      "unit_twd": 20,
+      "valuation": "seller asking price",
+      "required": "folding"
+    },
+    {
+      "id": "domestic_freight_reserve",
+      "description": "Multi-seller delivery allowance",
+      "qty": 1,
+      "source_id": null,
+      "unit_twd": 180,
+      "valuation": "UNQUOTED allowance, NOT an actual cart/delivered quotation",
+      "required": "folding"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "one_board_bench",
+      "description": "ONE board, cable, USB adapter and rough freight; no hinge, no printed shell",
+      "included_ids": [
+        "display_boards",
+        "usb_cables",
+        "adapter"
+      ],
+      "overrides": {
+        "display_boards": 1,
+        "usb_cables": 1
+      },
+      "add_shipping_reserve_twd": 60
+    },
+    {
+      "id": "two_board_bench",
+      "description": "Two powered screens and a minimal supplied RS485 cable bench; no print or battery",
+      "included_ids": [
+        "display_boards",
+        "usb_cables",
+        "adapter",
+        "rs485_vendor_cables"
+      ],
+      "add_shipping_reserve_twd": 80
+    },
+    {
+      "id": "full_exterior_concept",
+      "description": "Two-screen wired folding test article, print estimated at 150g, excludes batteries labor/rework",
+      "included_ids": [
+        "display_boards",
+        "usb_cables",
+        "adapter",
+        "rs485_vendor_cables",
+        "flex_cable_and_ground",
+        "hinge_rod",
+        "printed_shells_petg",
+        "mounting_fasteners",
+        "heatshrink",
+        "domestic_freight_reserve"
+      ],
+      "add_shipping_reserve_twd": 0
+    },
+    {
+      "id": "unavailable_icshop_price_counterfactual",
+      "description": "Historical exact board price reference but seller SOLD OUT; not orderable",
+      "included_ids": [
+        "display_boards",
+        "usb_cables",
+        "adapter",
+        "rs485_vendor_cables",
+        "flex_cable_and_ground",
+        "hinge_rod",
+        "printed_shells_petg",
+        "mounting_fasteners",
+        "heatshrink",
+        "domestic_freight_reserve"
+      ],
+      "overrides": {
+        "display_boards": 2
+      },
+      "unit_overrides_twd": {
+        "display_boards": 1250
+      },
+      "add_shipping_reserve_twd": 0
+    }
+  ],
+  "exclusions": [
+    "rechargeable batteries, charger/BMS integration, battery compartment, physical power safety test",
+    "actual accepted supplier quotation and VAT reconciliation where applicable",
+    "assembly labor, firmware development, PCB revision rework, warranty, import duty",
+    "3D printed mechanical fit retries, assembly/tool procurement, certification, stock reserve"
+  ],
+  "purchase_authorized": false
+}
