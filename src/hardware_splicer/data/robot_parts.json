@@ -317,6 +317,191 @@
      "reason": "Not published; small enough to sit inside the chassis allowance. Weigh it."
     }
    ]
+  },
+  {
+   "id": "slamtec-rplidar-c1",
+   "kind": "lidar",
+   "name": "Slamtec RPLIDAR C1 (C1M1) 360° DTOF 2D LiDAR",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/22403646891274/",
+    "marketplace": "ruten",
+    "variant": "only variant (the listing has no options)",
+    "price_twd": 2700,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "原裝思嵐激光雷達RPLIDAR C1傳感器 HD毫米級 360°掃描測距 ±12mm測距半徑 UART、TTL ROS2",
+     "5 sold"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Slamtec RPLIDAR C1 datasheet v1.1 (2024-03-12), copy hosted by a distributor",
+     "url": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Slamtec RPLIDAR C1 product page",
+     "url": "https://www.slamtec.com/en/C1",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Slamtec sllidar_ros2 README (official ROS 2 driver)",
+     "url": "https://raw.githubusercontent.com/Slamtec/sllidar_ros2/main/README.md",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "supply_voltage": {
+     "value": 5,
+     "unit": "V",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "note": "4.8 V min, 5.2 V max; one supply powers the scanner core and the motor"
+    },
+    "supply_current": {
+     "value": 0.26,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "note": "230 mA typical, 260 mA maximum; the maximum is used"
+    },
+    "interface": {
+     "value": "3.3 V TTL UART, 8 data bits, 1 stop bit, no parity",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "baud_rate": {
+     "value": 460800,
+     "unit": "baud",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "protocol": {
+     "value": "RPLIDAR communication protocols (S-series and A-series standard sampling); decoded by Slamtec's open SDK",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "ros2_driver": {
+     "value": "sllidar_ros2, launch file view_sllidar_c1_launch.py",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://raw.githubusercontent.com/Slamtec/sllidar_ros2/main/README.md"
+    },
+    "scan_rate": {
+     "value": 10,
+     "unit": "Hz",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "note": "8-12 Hz range, 10 Hz typical; 5 kHz sample rate"
+    },
+    "range_max": {
+     "value": 12,
+     "unit": "m",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "note": "white object at 70% reflectivity; 6 m for a black object at 10%"
+    },
+    "range_min": {
+     "value": 0.05,
+     "unit": "m",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "motor_control": {
+     "value": "none: the motor runs from VCC and the core adapts to its speed; no PWM or enable line",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "pinout": {
+     "value": "4 wires: red VCC 5 V, yellow TX (scanner output, 3.3 V), green RX (scanner input, 3.3 V), black GND",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "mass": {
+     "value": 110,
+     "unit": "g",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    }
+   },
+   "quotes": [
+    {
+     "claim": "supply_voltage",
+     "quote": "Power Voltage V 4.8 5 5.2",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "supply_current",
+     "quote": "Power Current mA - 230 260",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "interface",
+     "quote": "The RPLIDAR C1 takes the 3.3V-TTL serial port (UART) as the communication",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "baud_rate",
+     "quote": "Baud Rate bps - 460800 -",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "protocol",
+     "quote": "RPLIDAR C1 is compatible with all communication protocols used by previous",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "ros2_driver",
+     "quote": "The command for RPLIDAR C1 is",
+     "source": "https://raw.githubusercontent.com/Slamtec/sllidar_ros2/main/README.md"
+    },
+    {
+     "claim": "scan_rate",
+     "quote": "8~12Hz, 10Hz@typical",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "range_max",
+     "quote": "White object: 0.05-12 meters (under 70% reflection)",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "range_min",
+     "quote": "White object: 0.05-12 meters (under 70% reflection)",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "motor_control",
+     "quote": "And there is no need to provide a complicated power system for the RPLIDAR.",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "pinout",
+     "quote": "Red VCC Power Total Power 4.8V 5V 5.2V",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "pinout",
+     "quote": "Green RX Input Serial port input of 0V / 3.5V",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "mass",
+     "quote": "Weight Gram (g) - 110 -",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "body_dimensions",
+     "reason": "The datasheet gives dimensions only as a drawing (Figure 4-1). Retailers state 55.6 x 55.6 x 41.3 mm, but no page stating it could be captured for checking. Read the drawing or measure the part."
+    }
+   ]
   }
  ]
 }

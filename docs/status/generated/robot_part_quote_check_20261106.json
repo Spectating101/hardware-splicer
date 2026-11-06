@@ -1,6 +1,6 @@
 {
  "pass": true,
- "quotes_checked": 14,
+ "quotes_checked": 27,
  "failed": [],
  "sources": {
   "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058": {
@@ -14,6 +14,14 @@
   "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail": {
    "file": "8ceb4c8dedda74f9.txt",
    "sha256": "c4486ab2100cb2c584b109d8d0f8a71fc4d028ce31368bb172c7fdc70b15b285"
+  },
+  "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf": {
+   "file": "fa4adc164fd25871.txt",
+   "sha256": "125e0e2f9cf15f486e997d645b35860e7729889483f04a10abcef12469179d6b"
+  },
+  "https://raw.githubusercontent.com/Slamtec/sllidar_ros2/main/README.md": {
+   "file": "025d19abb005418e.txt",
+   "sha256": "3afb6584e1d0771484752179926c78d79084bd409fc09fa56722529f6d40cecf"
   }
  },
  "checked_on": "2026-11-06"
