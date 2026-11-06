@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import date
+from hashlib import sha256
 import json
 from pathlib import Path
 import sys
@@ -62,7 +63,7 @@ def run(manifest_path: str = DEFAULT_MANIFEST, *,
             as_of_override = acquired_date
         if as_of_override < acquired_date:
             raise CommercialEvidenceError("evaluation predates live source capture")
-    return from_files(
+    result = from_files(
         market_path=_repo_path(source["local_path"]),
         pinned_market_sha256=source["sha256"],
         source_ref=f"{source['source_repo']}@{source['source_agent_commit']}:{source['source_file']}",
@@ -74,6 +75,20 @@ def run(manifest_path: str = DEFAULT_MANIFEST, *,
         reference_architecture=manifest["reference_architecture"],
         target_architecture=manifest["target_architecture"],
     )
+    if signals_override:
+        discovery = signal_pack["discovery"]
+        result["live_acquisition"] = {
+            "signal_pack_sha256": sha256(signals_path.read_bytes()).hexdigest(),
+            "plan_sha256": signal_pack.get("plan_sha256"),
+            "captured_at_utc": captured,
+            "acquisition_status": discovery.get("acquisition_status"),
+            "coverage": discovery.get("coverage"),
+            "failures": discovery.get("failures"),
+            "observation_count": len(signal_pack.get("signals", [])),
+            "marketplace_counters_are_not_verified_sales": True,
+            "buyer_or_inventory_authority": False,
+        }
+    return result
 
 
 def main() -> int:
