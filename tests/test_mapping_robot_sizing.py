@@ -130,3 +130,12 @@ def test_minimum_requirements_follow_from_hs_result():
     assert req["min_motor_free_speed_rpm_at_pack_voltage"] == pytest.approx(58.76 * 1.5, abs=0.02)
     assert req["min_stall_torque_nm_per_motor"] == pytest.approx(r["required_force_n"] * 0.0325 / 2)
     assert req["min_pack_energy_wh"] == pytest.approx(r["average_power_w"] / 0.8)
+
+
+def test_run_current_at_load_preferred_over_rated_current():
+    p = parts()
+    del p["drive_motor"]["facts"]["rated_current"]
+    p["drive_motor"]["unconfirmed"] = [{"fact": "rated_current", "reason": "not published"}]
+    p["drive_motor"]["facts"]["run_current"] = _f(0.12)
+    r = sz.run_sizing(p, ASSUMPTIONS)
+    assert r["effective"]["motor_run_current_a"] == 0.12

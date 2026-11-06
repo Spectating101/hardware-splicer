@@ -31,7 +31,7 @@ TARGETS = {"speed_mps": 0.2, "runtime_min": 60, "duty_cycle": 1.0, "min_speed_ma
 ROLES = ("drive_motor", "wheel", "lidar", "battery_pack", "dc_dc_converter", "compute_board")
 MASS_ROLES = {"drive_motor": 2, "wheel": 2, "lidar": 1, "battery_pack": 1, "compute_board": 1}
 LOWEST = {"output_free_speed_rpm", "stall_torque", "capacity", "nominal_voltage", "outer_diameter"}
-HIGHEST = {"rated_current", "stall_current", "supply_current", "typical_current", "mass"}
+HIGHEST = {"rated_current", "run_current", "stall_current", "supply_current", "typical_current", "mass"}
 
 
 class SizingError(ValueError):
@@ -76,7 +76,9 @@ def build_payload(parts: dict[str, dict], assumptions: dict) -> tuple[dict, dict
         "pack_nominal_voltage_v": pack_v, "motor_rated_voltage_v": motor_v, "motor_voltage_scale": scale,
         "motor_free_speed_rpm": _value(parts, "drive_motor", "output_free_speed_rpm") * scale,
         "motor_stall_torque_nm": _value(parts, "drive_motor", "stall_torque") * scale,
-        "motor_run_current_a": _value(parts, "drive_motor", "rated_current"),
+        # current at the mapping load when a source or derivation gives it; otherwise the rated-load current
+        "motor_run_current_a": _value(parts, "drive_motor",
+                                      "run_current" if "run_current" in parts["drive_motor"].get("facts", {}) else "rated_current"),
         "motor_stall_current_a": _value(parts, "drive_motor", "stall_current"),
         "wheel_diameter_mm": _value(parts, "wheel", "outer_diameter"),
         "pack_capacity_mah": _value(parts, "battery_pack", "capacity"),
