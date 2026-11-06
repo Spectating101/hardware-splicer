@@ -31,6 +31,46 @@ so donor yield and battery health are unknown: that is exactly what the `pc_refu
 function the market does not sell** (PR #111's isolated RS-485/CAN field I/O, a payload-carrying or sensor whoop). A plain
 whoop or a plain Pi deck is a commodity you should buy.
 
+## FieldDeck (PR #111) priced end to end
+
+`fielddeck_aim8i.json` prices the #111 splice: used AIM8I + keyboard dock + USB 3.0 Gigabit Ethernet + hub, plus the field
+I/O (2x isolated RS-485, CAN, isolated DI/DO). The field I/O is a **shared** line: a laptop or a Toughbook bought instead
+also needs those adapters, so it is left out of the build-vs-buy difference and added back for cost of goods. Retail USB
+adapters stand in for the unbuilt FieldIO board. Ruten asking prices on 2026-11-06, 61 requests.
+
+| p25 unless noted | NT$ |
+|---|---|
+| AIM8I donor (3 listings, one seller, "write-off parts") | 2,000 |
+| Dock-only parts: keyboard 615, GbE 343, hub 348, adapter 350\*, printed dock 1,200\*, dock connector 300\* | 3,156 |
+| Field I/O: RS-485 985 x2, CAN 531, DI/DO 751 | 3,252 |
+| **Parts per unit** | **8,408** |
+| #111's own overheads, unchanged (shipping, 80% donor yield, rework, warranty, labour; its 6,633 minus donor and the 2,500) | 2,133 |
+| **Cost of goods** (#111 modelled 6,633 by assuming the dock and I/O cost 2,500) | **10,541** |
+
+\* assumed, labelled in the product file; no dock design, connector part or print quote exists.
+
+At the NT$12,900 target that is an **18% gross margin, against #111's 45% floor** (40% if every line hit its cheapest
+listing; 10% at median). The 2,500 assumption was low by about 2.6x.
+
+**What a field engineer can buy instead** (adding the same field I/O, NT$3,252, to each):
+
+| Route | Unit | With field I/O |
+|---|---|---|
+| Used Panasonic Toughpad FZ-M1, 7" rugged Windows tablet, i5 (3 sold at this price) | 7,500 | **10,752** |
+| Used Toughbook CF-31, rugged, i5, native RS-232 and Ethernet (2 domestic listings) | 6,500 | **9,752** |
+| Used business laptop, not rugged | 5,668 | **8,920** |
+| FieldDeck at #111's target price (Atom x5-Z8350, 2 GB) | 12,900 | already included |
+
+So FieldDeck would sell above what a buyer pays to assemble the same function from used rugged hardware that has a faster
+CPU. The donor saving that beats a Pi deck (above) does not beat the used rugged market, which is FieldDeck's real
+competitor. New IP65 tablets (p25 NT$13,040, cheapest 8" Android units about NT$7,000) bound it from above.
+
+What would have to be true for FieldDeck to clear 45%: dock plus field I/O at about NT$2,500 per unit (a custom FieldIO
+PCB, not retail adapters, which needs its own NRE quote), *and* buyers paying NT$12,900 for one integrated unit over a
+used Toughpad plus adapters at about NT$10,750. Neither is evidenced. Thin spots: the Toughbook and Toughpad prices rest on
+two to three domestic listings (most CF-19/CF-54/CF-20 listings are cross-border at NT$12,000-19,000); the CAN line
+includes non-isolated boards; asking prices only.
+
 ## Compatibility checked against published specs (not against parts in hand)
 
 Drone (PR #276 build):
@@ -56,12 +96,14 @@ Cyberdeck:
 ```bash
 python3 examples/arbitrage_lab/build_vs_buy/priced_bom.py examples/arbitrage_lab/build_vs_buy/drone_whoop65.json
 python3 examples/arbitrage_lab/build_vs_buy/priced_bom.py examples/arbitrage_lab/build_vs_buy/cyberdeck_pi5.json
+python3 examples/arbitrage_lab/build_vs_buy/priced_bom.py examples/arbitrage_lab/build_vs_buy/fielddeck_aim8i.json
 python3 -m pytest -q examples/arbitrage_lab/build_vs_buy/tests        # offline: pack parsing, filters, comparison maths
 ```
 Each line's `dropped` field records why listings were rejected, with examples; read it before trusting a thin line.
 
 ## Next
-1. Price the **FieldDeck donor build** properly: AIM8I + dock + isolated RS-485/CAN I/O, against what field-service terminals sell for.
-   That is the route where the numbers favour splicing.
+1. FieldDeck is priced (above) and does not clear its margin floor at retail-adapter prices. Before any FieldDeck work, get a
+   real quote for a 10-unit FieldIO board (2x isolated RS-485, CAN, DI/DO, USB hub, GbE) and check whether it lands near
+   NT$2,500 with the dock. If it does not, drop the route; the used rugged market already sells the function.
 2. For the drone, stop treating the whoop as the product: pick a function a commodity BNF does not have and price that.
 3. Physical checks that no listing can answer: Matrix II hole positions, motor connector, AIM8I dock pinout and battery health.
