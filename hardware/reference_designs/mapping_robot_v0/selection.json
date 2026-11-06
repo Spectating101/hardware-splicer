@@ -1,5 +1,7 @@
 {
  "drive_motor": "jga25-371-12v-110rpm-hall-encoder",
  "wheel": "jga25-371-set-65mm-wheel",
- "lidar": "slamtec-rplidar-c1"
+ "lidar": "slamtec-rplidar-c1",
+ "compute_board": "raspberry-pi-4b-4gb",
+ "imu": "gy-521-mpu6050"
 }

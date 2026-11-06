@@ -1,6 +1,6 @@
 {
  "pass": true,
- "quotes_checked": 27,
+ "quotes_checked": 38,
  "failed": [],
  "sources": {
   "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058": {
@@ -22,6 +22,30 @@
   "https://raw.githubusercontent.com/Slamtec/sllidar_ros2/main/README.md": {
    "file": "025d19abb005418e.txt",
    "sha256": "3afb6584e1d0771484752179926c78d79084bd409fc09fa56722529f6d40cecf"
+  },
+  "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf": {
+   "file": "feac5cd59bda2873.txt",
+   "sha256": "7400250beb213854c4aa94138fa69db3dede94cd6586eb45b7a9b98b6b636ee8"
+  },
+  "https://rapi.ruten.com.tw/api/items/v2/list?gno=22640800216898&level=detail": {
+   "file": "941c416aee50c6f7.txt",
+   "sha256": "bf04abd3ff17c947708a943c40ecd8509e653d157acf48dd4cd0d5722b1ead7e"
+  },
+  "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc": {
+   "file": "c7041c424ddde7f8.txt",
+   "sha256": "7c1ec2f0430a1121ef592ca57cb3b2fdb40c7327d165edd91a39db188406513e"
+  },
+  "https://raw.githubusercontent.com/ros-infrastructure/rep/master/rep-2000.rst": {
+   "file": "7552a1bcc5e9a0bd.txt",
+   "sha256": "8304924c8615d01ee5640b973090089f829f0cf5f70b51fc64db789c395dc24d"
+  },
+  "https://ubuntu.com/download/raspberry-pi": {
+   "file": "d9be560f4c206d03.txt",
+   "sha256": "ab23b74d1b8aeb74854b1f4c153c191e73d4c2442f729e6d32f271463d9d7ff0"
+  },
+  "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749": {
+   "file": "e292d1cdd12ba2f1.txt",
+   "sha256": "6c748d199fec2b45e3c5412b9bd55f550f8b850512cd78f1cb2a6f645cb91f16"
   }
  },
  "checked_on": "2026-11-06"

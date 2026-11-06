@@ -502,6 +502,235 @@
      "reason": "The datasheet gives dimensions only as a drawing (Figure 4-1). Retailers state 55.6 x 55.6 x 41.3 mm, but no page stating it could be captured for checking. Read the drawing or measure the part."
     }
    ]
+  },
+  {
+   "id": "raspberry-pi-4b-4gb",
+   "kind": "compute_board",
+   "name": "Raspberry Pi 4 Model B, 4 GB",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/22640800216898/",
+    "marketplace": "ruten",
+    "variant": "only variant (4GB, no options)",
+    "price_twd": 3171,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "現貨Raspberry Pi 4 Model B(4GB) 樹莓派4代 Python linux開發板",
+     "【下單七天左右送到噢】: delivery about seven days after ordering, so probably shipped from abroad",
+     "0 sold"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Ruten item API (title and variants)",
+     "url": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22640800216898&level=detail",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Seller description",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=22640800216898&k=0c673d75&o=1790924025",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Raspberry Pi 4 product brief",
+     "url": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Raspberry Pi documentation source: power supplies table",
+     "url": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "REP 2000, ROS 2 releases and target platforms (source)",
+     "url": "https://raw.githubusercontent.com/ros-infrastructure/rep/master/rep-2000.rst",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Ubuntu for Raspberry Pi downloads",
+     "url": "https://ubuntu.com/download/raspberry-pi",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "soc": {
+     "value": "Broadcom BCM2711, quad-core Cortex-A72, 64-bit",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf"
+    },
+    "ram": {
+     "value": 4,
+     "unit": "GB",
+     "basis": "published",
+     "source": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22640800216898&level=detail"
+    },
+    "supply_voltage": {
+     "value": 5,
+     "unit": "V",
+     "basis": "published",
+     "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf",
+     "note": "via USB-C or the GPIO header, minimum 3 A"
+    },
+    "peak_current": {
+     "value": 3.0,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc",
+     "note": "recommended supply capacity, including up to 1.2 A for USB peripherals"
+    },
+    "typical_current": {
+     "value": 1.4,
+     "unit": "A",
+     "basis": "typical",
+     "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc",
+     "note": "Raspberry Pi publishes 600 mA typical for a bare board. SLAM Toolbox and Nav2 keep all four cores busy, so 1.4 A (7 W) is assumed, between that figure and the 3.0 A supply rating. Measure on the bench."
+    },
+    "ros2_support": {
+     "value": "ROS 2 Jazzy Jalisco (May 2024 to May 2029): Tier 1 on Ubuntu 24.04 arm64",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://raw.githubusercontent.com/ros-infrastructure/rep/master/rep-2000.rst"
+    },
+    "os_support": {
+     "value": "Ubuntu publishes Raspberry Pi 4 images (minimum EEPROM date applies)",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://ubuntu.com/download/raspberry-pi"
+    },
+    "mass": {
+     "value": 46,
+     "unit": "g",
+     "basis": "typical",
+     "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf",
+     "note": "Raspberry Pi does not publish the board's mass; 46 g is class-typical. Weigh it, i.e. measure on the bench."
+    }
+   },
+   "quotes": [
+    {
+     "claim": "soc",
+     "quote": "Broadcom BCM2711, quad-core Cortex-A72 (Arm v8) 64-bit SoC @",
+     "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf"
+    },
+    {
+     "claim": "ram",
+     "quote": "現貨Raspberry Pi 4 Model B(4GB) 樹莓派4代",
+     "source": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22640800216898&level=detail"
+    },
+    {
+     "claim": "supply_voltage",
+     "quote": "5V DC via GPIO header (minimum 3A",
+     "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf"
+    },
+    {
+     "claim": "peak_current",
+     "quote": "| Raspberry Pi 4 Model B | 3.0A | 1.2A | 600mA",
+     "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc"
+    },
+    {
+     "claim": "ros2_support",
+     "quote": "Jazzy Jalisco (May 2024 - May 2029)",
+     "source": "https://raw.githubusercontent.com/ros-infrastructure/rep/master/rep-2000.rst"
+    },
+    {
+     "claim": "ros2_support",
+     "quote": "| arm64 | Tier 1 [d][a][s] |",
+     "source": "https://raw.githubusercontent.com/ros-infrastructure/rep/master/rep-2000.rst"
+    },
+    {
+     "claim": "os_support",
+     "quote": "require a minimum EEPROM date for compatibility for the Raspberry Pi 4 and 5",
+     "source": "https://ubuntu.com/download/raspberry-pi"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "body_dimensions",
+     "reason": "The product brief gives dimensions only as a drawing. Read the drawing or measure the board."
+    }
+   ]
+  },
+  {
+   "id": "gy-521-mpu6050",
+   "kind": "imu",
+   "name": "GY-521 breakout with InvenSense MPU-6050 6-axis IMU",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/21438233309457/",
+    "marketplace": "ruten",
+    "variant": "only variant (no options)",
+    "price_twd": 85,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "634 sold, seller diy_lab",
+     "seller may ship another factory's equivalent board when stock is short; layout may differ slightly"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Seller description (chip, supply, interface, pitch)",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "sensor": {
+     "value": "InvenSense MPU-6050 (3-axis gyroscope, 3-axis accelerometer)",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    },
+    "interface": {
+     "value": "I2C",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    },
+    "supply_voltage": {
+     "value": [
+      3,
+      5
+     ],
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749",
+     "note": "on-board low-dropout regulator"
+    },
+    "pin_pitch": {
+     "value": 2.54,
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    }
+   },
+   "quotes": [
+    {
+     "claim": "sensor",
+     "quote": "使用晶片: MPU-6050",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    },
+    {
+     "claim": "interface",
+     "quote": "通信方式:標準 IIC 通信協定",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    },
+    {
+     "claim": "supply_voltage",
+     "quote": "供電電源: 3-5v (內部低壓差穩壓)",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    },
+    {
+     "claim": "pin_pitch",
+     "quote": "引腳間距 2.54mm",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "body_dimensions",
+     "reason": "Not published, and the seller may ship a different factory's layout. Measure the board received."
+    }
+   ]
   }
  ]
 }
