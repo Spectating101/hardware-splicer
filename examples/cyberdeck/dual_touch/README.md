@@ -1,5 +1,8 @@
 # HS Pocket Dual Touch S2 — real two-screen clamshell design investigation
 
+**Market validation study (2026-11-06):** [Dated demand, local Taiwan/Indonesia resale comparisons, buyer segmentation, and honest NT$ unit economics](market/DEMAND_AND_ARBITRAGE_2026-11-06.md). Adjacent pocket-computer crowdfunding has real backers; no exact dual-touch sale or regional sell-through has yet been established. This research does **not** authorize procurement or product release.
+
+
 **2026-11-06.** Product target: inexpensive, pocketable, calculator-size, ordinary **visible mechanical hinge**, **4.3-inch touch LCD in BOTH halves**, upper showing a remotely connected Optiplex terminal and lower a reconfigurable touchscreen keyboard. **Not a foldable OLED**, not an x86 mini-PC, and not two panels stitched into one impossible seamless screen.
 
 **Current result: SOURCE-SUPPORTED SOFTWARE/CAD DESIGN ONLY. No board bought, connected, powered, flashed or used for SSH.**
