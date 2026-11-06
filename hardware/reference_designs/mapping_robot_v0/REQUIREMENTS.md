@@ -28,3 +28,6 @@ speed margin 2.36, force margin 9.1 (acceleration and rolling only).
 door threshold on a 65 mm wheel needs a horizontal push of about 1.04 × the load on the driven wheels
 (√(h(2r−h)) / (r−h) with h = 10 mm, r = 32.5 mm). With about 70% of 1.1 kg on the drive wheels that is 7.5 N, or
 0.12 N·m per motor at the wheel radius; doubled for margin, 0.25 N·m stall torque per motor.
+
+**Update after choosing parts (2026-11-06).** Battery maximum discharge: recomputed with the chosen motor's 1 A stall,
+the requirement is ≥ 3.8 A rather than 4.5 A; see `selection/power.md`. The chosen pack's 4 A meets it with about 5% margin.

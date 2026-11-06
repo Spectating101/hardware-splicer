@@ -3,5 +3,7 @@
  "wheel": "jga25-371-set-65mm-wheel",
  "lidar": "slamtec-rplidar-c1",
  "compute_board": "raspberry-pi-4b-4gb",
- "imu": "gy-521-mpu6050"
+ "imu": "gy-521-mpu6050",
+ "battery_pack": "3s2p-18650-6000mah-pack-bms",
+ "dc_dc_converter": "xl4015-5a-buck-module"
 }

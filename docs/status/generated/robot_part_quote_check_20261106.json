@@ -1,6 +1,6 @@
 {
  "pass": true,
- "quotes_checked": 38,
+ "quotes_checked": 49,
  "failed": [],
  "sources": {
   "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058": {
@@ -46,6 +46,14 @@
   "https://www.ruten.com.tw/item/goods_comments.php?id=21438233309457&k=2bfb9811&o=1765697749": {
    "file": "e292d1cdd12ba2f1.txt",
    "sha256": "6c748d199fec2b45e3c5412b9bd55f550f8b850512cd78f1cb2a6f645cb91f16"
+  },
+  "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064": {
+   "file": "397a01265715c0f2.txt",
+   "sha256": "015749248a91602e1df2d63ed289d10957119a4747d3a59924a373d5de22d162"
+  },
+  "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527": {
+   "file": "9a4204b69a4f8122.txt",
+   "sha256": "8c33aaca0dff8b304e7228e17bd8090037633851e6040c8baf017c72280cbfd3"
   }
  },
  "checked_on": "2026-11-06"

@@ -731,6 +731,220 @@
      "reason": "Not published, and the seller may ship a different factory's layout. Measure the board received."
     }
    ]
+  },
+  {
+   "id": "3s2p-18650-6000mah-pack-bms",
+   "kind": "battery_pack",
+   "name": "12 V (3S2P) 18650 Li-ion pack, 6000 mAh, with protection board and charger",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/22627027679167/",
+    "marketplace": "ruten",
+    "variant": "3S2P 6000Ah (the seller's label; the description gives 6000 mAh)",
+    "price_twd": 900,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "【快速出貨 免運】12V 6.0Ah（6000mAh）3S2P 18650 鋰電池組 帶保護板 含充電器",
+     "0 sold, seller ohjfoknp1967",
+     "ships within 48 hours, 3-5 working days to a pickup store"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Seller description (pack parameters)",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
+     "as_of": "2026-11-06"
+    },
+    {
+     "label": "Ruten item API: variants and prices",
+     "url": "https://rapi.ruten.com.tw/api/items/v2/list?gno=22627027679167&level=detail",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "nominal_voltage": {
+     "value": 11.1,
+     "unit": "V",
+     "basis": "typical",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
+     "note": "The seller labels the pack 12V(12.6V). A 3S Li-ion pack's nominal voltage is 3 x 3.6-3.7 V = 10.8-11.1 V, so 11.1 V is used. Measure on the bench."
+    },
+    "full_voltage": {
+     "value": 12.6,
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    "capacity": {
+     "value": 6000,
+     "unit": "mAh",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    "max_discharge_current": {
+     "value": 4,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
+     "note": "Robot worst case with the chosen parts is about 3.8 A (two 1 A motor stalls plus electronics at peak), so the margin is about 5%."
+    },
+    "bms": {
+     "value": "built-in protection against over-charge, over-discharge, over-current and external short circuit; 8 V discharge cut-off",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    "mass": {
+     "value": 300,
+     "unit": "g",
+     "basis": "typical",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
+     "note": "Not published; six 18650 cells at about 45 g plus board and wrap. Weigh it, i.e. measure on the bench."
+    }
+   },
+   "quotes": [
+    {
+     "claim": "full_voltage",
+     "quote": "充电截止电压:12.6 伏",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    {
+     "claim": "capacity",
+     "quote": "额定容量:6000 毫安时(6.0 安时)",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    {
+     "claim": "max_discharge_current",
+     "quote": "最大放电电流:4 安",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    {
+     "claim": "bms",
+     "quote": "内置自动保护系统,可对电池过充、过放、过流及外部短路提供有效保护",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    },
+    {
+     "claim": "bms",
+     "quote": "放电截止电压:8 伏",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+    }
+   ],
+   "unconfirmed": [
+    {
+     "fact": "connector",
+     "reason": "Not published. Check the plug on the pack and the included charger."
+    },
+    {
+     "fact": "body_dimensions",
+     "reason": "The seller states 18 x 58 x 65 mm, which cannot hold six 18650 cells (two cells side by side need about 36 mm). Treat as wrong; measure the pack."
+    }
+   ]
+  },
+  {
+   "id": "xl4015-5a-buck-module",
+   "kind": "dc_dc_converter",
+   "name": "XL4015 5 A adjustable buck module (with heatsink)",
+   "status": "SOURCED_NOT_MEASURED",
+   "listing": {
+    "url": "https://www.ruten.com.tw/item/21519300644500/",
+    "marketplace": "ruten",
+    "variant": "only variant (no options)",
+    "price_twd": 40,
+    "captured": "2026-11-06",
+    "seller_claims": [
+     "235 sold, seller diy_lab"
+    ]
+   },
+   "sources": [
+    {
+     "label": "Seller description (electrical parameters, size)",
+     "url": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527",
+     "as_of": "2026-11-06"
+    }
+   ],
+   "facts": {
+    "input_voltage_range": {
+     "value": [
+      4,
+      38
+     ],
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    "output_voltage": {
+     "value": [
+      1.25,
+      36
+     ],
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527",
+     "note": "Adjustable; set to 5.1 V for the Pi. It ships set to about 20 V, which would destroy a Pi: adjust before connecting."
+    },
+    "max_output_current": {
+     "value": 4.5,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527",
+     "note": "Rated 0-5 A; the seller recommends staying within 4.5 A. The robot's 5 V load is about 3.8 A worst case (Pi 3.0 A, LiDAR 0.26 A, 0.5 A margin)."
+    },
+    "body_dimensions": {
+     "value": [
+      54,
+      23,
+      18
+     ],
+     "unit": "mm",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    "factory_output_voltage": {
+     "value": 20,
+     "unit": "V",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    "reverse_input_protection": {
+     "value": "none",
+     "unit": "text",
+     "basis": "published",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    }
+   },
+   "quotes": [
+    {
+     "claim": "input_voltage_range",
+     "quote": "輸入電壓 : 4-38V",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    {
+     "claim": "output_voltage",
+     "quote": "輸出電壓: 1.25-36V 連續可調",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    {
+     "claim": "max_output_current",
+     "quote": "輸出電流: 0-5A ,建議在 4.5A 內使用。",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    {
+     "claim": "body_dimensions",
+     "quote": "模組尺寸:長 54mm 寬 23mm 高 18mm",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    {
+     "claim": "factory_output_voltage",
+     "quote": "默認輸出電壓在 20V 左右",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    },
+    {
+     "claim": "reverse_input_protection",
+     "quote": "輸入反接保護:無",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21519300644500&k=18b63f90&o=1784817527"
+    }
+   ],
+   "unconfirmed": []
   }
  ]
 }
