@@ -1,0 +1,229 @@
+{
+  "schema": "hs.compute_carrier_evidence.v1",
+  "observed_date": "2026-11-07",
+  "reference_repo": "radxa/radxa-som-projects",
+  "reference_commit": "cf5a4b1984fb4321233d2439320bcaea05af4817",
+  "reference_repo_url": "https://github.com/radxa/radxa-som-projects",
+  "scope": "CONCEPT_AND_REFERENCE_ONLY_NO_PCB_GENERATED",
+  "target": "HS_COMMON_DEVICE_INTERFACE_REV0_UNFABRICATED",
+  "modules": [
+    {
+      "id": "radxa_cm4_rk3576",
+      "soc": "RK3576(J)",
+      "authoritative_specs": "https://docs.radxa.com/en/som/cm/cm4",
+      "physical_nominal_mm": [
+        55,
+        40
+      ],
+      "vendor_connector_count": 3,
+      "vendor_pins_per_connector": 100,
+      "vendor_pitch_mm": 0.4,
+      "official_carrier_design": "https://github.com/radxa/radxa-som-projects/tree/main/cm4/radxa-cm4-io-board",
+      "cad": "Altium schematics/PCB, PADS, OrCAD source",
+      "kicad_community": "https://github.com/swdee/radxa-cm4-kicad",
+      "kicad_license": "MIT",
+      "agent_hardware_db": {
+        "board_path": "hardware-db/boards/cm4/board.json",
+        "board_sha": "fb98c9f849c96eb7e5ddfcf96df2885c3af3c2f4",
+        "board_soc": "RK3676(J)",
+        "pinout_path": "hardware-db/boards/cm4/pinout.json",
+        "pinout_blob_sha": "2409a522324d6e816fb30338d198d125ec7615fe",
+        "power_path": "hardware-db/boards/cm4/power.json",
+        "power_blob_sha": "34ec212483a5dc1cea07f04819d3821ea8ca80d9",
+        "placeholder_pin_names_present": true,
+        "power_fields_unknown": true
+      },
+      "pinout_verified_against_vendor_schematic": false,
+      "revision_and_mechanical_fit_validated_by_hs": false,
+      "board_power_characterized": false,
+      "source_reuse_cleared": false
+    },
+    {
+      "id": "radxa_cm5_rk3588s2",
+      "soc": "RK3588S2",
+      "authoritative_specs": "https://docs.radxa.com/en/som/cm/cm5",
+      "physical_nominal_mm": [
+        55,
+        40
+      ],
+      "vendor_connector_count": 3,
+      "vendor_pins_per_connector": 100,
+      "vendor_pitch_mm": 0.4,
+      "official_carrier_design": "https://github.com/radxa/radxa-som-projects/tree/main/cm5/radxa-cm5-io-board",
+      "cad": "Altium schematics/PCB, PADS, OrCAD source",
+      "kicad_community": "https://github.com/swdee/radxa-cm5-kicad",
+      "kicad_license": "MIT",
+      "agent_hardware_db": {
+        "board_path": "hardware-db/boards/cm5/board.json",
+        "board_sha": "6b67ee25dcfaeb0e11703cbaaad74c6f57b31d88",
+        "board_soc": "RK3588S",
+        "pinout_path": "hardware-db/boards/cm5/pinout.json",
+        "pinout_blob_sha": "2409a522324d6e816fb30338d198d125ec7615fe",
+        "power_path": "hardware-db/boards/cm5/power.json",
+        "power_blob_sha": "34ec212483a5dc1cea07f04819d3821ea8ca80d9",
+        "placeholder_pin_names_present": true,
+        "power_fields_unknown": true
+      },
+      "pinout_verified_against_vendor_schematic": false,
+      "revision_and_mechanical_fit_validated_by_hs": false,
+      "board_power_characterized": false,
+      "source_reuse_cleared": false,
+      "mechanical_conflicting_vendor_references": [
+        {
+          "source": "https://docs.radxa.com/en/som/cm/cm5",
+          "dimensions_mm": [
+            55,
+            40
+          ]
+        },
+        {
+          "source": "https://radxa.com/products/cm/cm5/",
+          "dimensions_mm": [
+            56,
+            41
+          ]
+        }
+      ]
+    },
+    {
+      "id": "samsung_s21_donor",
+      "soc": "Exynos2100_or_Snapdragon888_DEPENDS_ON_MARKET_SKU",
+      "authoritative_specs": "https://www.samsung.com/tw/smartphones/galaxy-s21-5g/",
+      "official_carrier_design": null,
+      "cad": null,
+      "kicad_community": null,
+      "kicad_license": null,
+      "connector_pinout_verified": false,
+      "boot_without_oem_screen_battery_verified": false,
+      "usb_display_output_on_sample_verified": false,
+      "board_power_characterized": false,
+      "source_reuse_cleared": false,
+      "revision_and_mechanical_fit_validated_by_hs": false
+    }
+  ],
+  "source_known_hazards": [
+    {
+      "id": "radxa_cm3_to_cm5_5v_gpio",
+      "pair": [
+        "radxa_cm3",
+        "radxa_cm5_rk3588s2"
+      ],
+      "connector": "third_100pin",
+      "pins": [
+        94,
+        96,
+        98
+      ],
+      "source": "https://docs.radxa.com/en/som/cm/cm5/faq",
+      "detail": "CM3 carrier may tie 5V USB_5V_IN to pins that CM5 uses as GPIO; unsafe to swap without rewiring",
+      "severity": "DO_NOT_POWER_ON"
+    },
+    {
+      "id": "radxa_cm3j_to_cm5_not_dropin",
+      "pair": [
+        "radxa_cm3j",
+        "radxa_cm5_rk3588s2"
+      ],
+      "source": "https://docs.radxa.com/en/som/cm/cm5/faq",
+      "detail": "Vendor explicitly says pin-to-pin substitution invalid even if connector mechanically fits",
+      "severity": "DO_NOT_POWER_ON"
+    },
+    {
+      "id": "radxa_cm4_to_cm5_pinout_unverified",
+      "pair": [
+        "radxa_cm4_rk3576",
+        "radxa_cm5_rk3588s2"
+      ],
+      "source": "https://docs.radxa.com/en/som/cm/cm5/download",
+      "detail": "Three 100-pin connectors and approximate size do not establish CM4→CM5 net compatibility; individual signal and power comparisons necessary",
+      "severity": "BLOCK_DIRECT_SWAP"
+    }
+  ],
+  "device_contract": {
+    "revision": "HS_DEVICE_INTERFACE_V0",
+    "interface_scope": "LOGICAL_SUBSYSTEM_CONTRACT_ONLY_NO_PHYSICAL_PIN_ALLOCATION",
+    "independent_module_adapters_required": true,
+    "functions": [
+      {
+        "name": "system_power",
+        "requirement": "current_limit_reverse_protection_sequence_and_shutdown",
+        "state": "UNMAPPED"
+      },
+      {
+        "name": "touch_and_keyboard",
+        "requirement": "USB_HID_or_verified_I2C_UART_bridge",
+        "state": "UNMAPPED"
+      },
+      {
+        "name": "video",
+        "requirement": "verified_HDMI_or_DSI_adapter_specific_routing",
+        "state": "UNMAPPED"
+      },
+      {
+        "name": "recovery",
+        "requirement": "dedicated_recovery_boot_UART_or_vendor_sequence",
+        "state": "UNMAPPED"
+      },
+      {
+        "name": "comms",
+        "requirement": "USB2_console_optional_RS485_CAN_after_level_check",
+        "state": "UNMAPPED"
+      },
+      {
+        "name": "thermal",
+        "requirement": "model_specific_mechanical_spreader_and_measurements",
+        "state": "UNMAPPED"
+      }
+    ]
+  },
+  "active_cad_outputs": 0,
+  "independent_erc_pass": false,
+  "independent_drc_pass": false,
+  "high_speed_signal_integrity_pass": false,
+  "physical_test_pass": false,
+  "authorization_requested": "fabrication",
+  "release_authorized": false,
+  "alternative_standards": [
+    {
+      "id": "sget_smarc_sdt01",
+      "reference": "https://sget.org/standards/smarc/",
+      "module_sizes_mm": [
+        [
+          82,
+          50
+        ],
+        [
+          82,
+          80
+        ]
+      ],
+      "edge_contact_count": 314,
+      "interchange": "cross_vendor_physical_standard_but_feature_and_power_limits_still_need_module_validation",
+      "use_case": "commercial_long_lifecycle",
+      "tradeoff": "larger footprint and industrial module prices"
+    },
+    {
+      "id": "sget_osm_sdt05",
+      "reference": "https://sget.org/standards/osm/",
+      "interchange": "SOLDERED_NOT_FIELD_SWAPPABLE",
+      "use_case": "volume_embedded_pcba",
+      "tradeoff": "requires BGA assembly and no plug-in recovery"
+    }
+  ],
+  "current_taiwan_market_reference": [
+    {
+      "id": "radxa_cm4_4gb_32gb_icshop",
+      "source": "https://www.icshop.com.tw/products/368030502344",
+      "listed_twd": 4200,
+      "availability": "SOLD_OUT",
+      "notes": "Source description inconsistently says 8GB/64GB in an introductory paragraph, product title says 4GB/32GB; confirm SKU before buying."
+    },
+    {
+      "id": "used_s21_prior_research",
+      "source": "https://tw.carousell.com/p/samsung-s21-1471969849/",
+      "listed_twd": 1600,
+      "availability": "UNVERIFIED_USED_LISTING",
+      "notes": "Used donor price from prior HS scan, not reproducible bulk quote."
+    }
+  ]
+}
