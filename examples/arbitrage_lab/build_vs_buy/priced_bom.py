@@ -204,6 +204,8 @@ def main() -> int:
     out.write_text(json.dumps(res, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     c = res["comparison"]
     print(f"BUILD p25={c['build_p25_twd']} median={c['build_median_twd']} unpriced={c['unpriced_build_lines']} requests={res['requests']}")
+    if c["shared_lines_excluded_from_both_sides"]:
+        print(f"BUILD + shared lines (cost of goods) p25={c['build_plus_shared_p25_twd']} median={c['build_plus_shared_median_twd']}")
     for r in c["alternatives"]:
         print(f"  vs {r['alternative']:<22} buy p25={r['buy_p25_twd']}  build-buy={r['build_minus_buy_p25_twd']}")
     return 0
