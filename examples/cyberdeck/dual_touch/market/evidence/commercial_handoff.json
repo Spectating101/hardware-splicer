@@ -1,0 +1,224 @@
+{
+  "schema": "hardware_splicer.commercial_evidence_handoff.v1",
+  "as_of_utc": "2026-11-06",
+  "target_product": "dual_esp32_touch_4p3_rs485",
+  "reference_product": "pi5_7in_touch_keyboard_ups",
+  "not_same_product": true,
+  "market_snapshot": {
+    "source_ref": "Spectating101/hardware-splicer@afa56cafacc1d72c1459c58392738b86081589c0:examples/arbitrage_lab/build_vs_buy/evidence/cyberdeck_pi5_20261106.json",
+    "sha256": "b65a6f1ac8c10e4ef220d03da733e4e67c5d0bcce05b8ca271c79c1b8e9c40e4",
+    "captured_utc": "2026-11-05T22:36:02+00:00",
+    "age_days": 1,
+    "product": "Pi 5 cyberdeck: 7-inch touch, mini keyboard, 2x18650 UPS, printed shell",
+    "notes": "Ruten asking prices on one day; verify each cheapest listing by hand before buying. Nothing ordered.",
+    "validation": {
+      "matched": true,
+      "listed_input_assumptions": [
+        "cables_misc",
+        "shell_print"
+      ],
+      "min": {
+        "recomputed_twd": 6505,
+        "claimed_twd": 6505,
+        "unpriced": []
+      },
+      "p25": {
+        "recomputed_twd": 8057,
+        "claimed_twd": 8057,
+        "unpriced": []
+      },
+      "median": {
+        "recomputed_twd": 9374,
+        "claimed_twd": 9374,
+        "unpriced": []
+      }
+    },
+    "reference_build_p25_twd": 8057,
+    "reference_only_not_target_cost": true
+  },
+  "target_hs_estimated_parts_twd": 2965.0,
+  "hs_engineering": {
+    "achieved_state": "design_ready",
+    "requested_state": "operationally_authorized",
+    "blocker_count": 6,
+    "blocker_codes": [
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "safety_not_closed",
+      "safety_not_closed",
+      "release_state_not_reached"
+    ],
+    "operational_authorization_proved": false
+  },
+  "alternatives": [
+    {
+      "id": "ClockworkPi uConsole",
+      "source_architecture": "pi5_7in_touch_keyboard_ups",
+      "listed_p25_twd": 7700,
+      "sample_listings_kept": 9,
+      "listings_reporting_cumulative_sales": 1,
+      "sold_units_verified": false,
+      "evidence_type": "seller_asking_prices",
+      "not_equivalent_to_target_architecture": true,
+      "example_listing_urls": [
+        "https://www.ruten.com.tw/item/22645090847434/",
+        "https://www.ruten.com.tw/item/22522703372858/"
+      ]
+    },
+    {
+      "id": "GPD MicroPC",
+      "source_architecture": "pi5_7in_touch_keyboard_ups",
+      "listed_p25_twd": 12048,
+      "sample_listings_kept": 26,
+      "listings_reporting_cumulative_sales": 0,
+      "sold_units_verified": false,
+      "evidence_type": "seller_asking_prices",
+      "not_equivalent_to_target_architecture": true,
+      "example_listing_urls": [
+        "https://www.ruten.com.tw/item/22540086805156/",
+        "https://www.ruten.com.tw/item/22638674097846/"
+      ]
+    },
+    {
+      "id": "used business laptop",
+      "source_architecture": "pi5_7in_touch_keyboard_ups",
+      "listed_p25_twd": 5668,
+      "sample_listings_kept": 14,
+      "listings_reporting_cumulative_sales": 3,
+      "sold_units_verified": false,
+      "evidence_type": "seller_asking_prices",
+      "not_equivalent_to_target_architecture": true,
+      "example_listing_urls": [
+        "https://www.ruten.com.tw/item/22628068758071/",
+        "https://www.ruten.com.tw/item/22410935432892/"
+      ]
+    },
+    {
+      "id": "AIM8I rugged tablet (donor)",
+      "source_architecture": "pi5_7in_touch_keyboard_ups",
+      "listed_p25_twd": 2000,
+      "sample_listings_kept": 3,
+      "listings_reporting_cumulative_sales": 0,
+      "sold_units_verified": false,
+      "evidence_type": "seller_asking_prices",
+      "not_equivalent_to_target_architecture": true,
+      "example_listing_urls": [
+        "https://www.ruten.com.tw/item/22516220086521/",
+        "https://www.ruten.com.tw/item/22516220077352/"
+      ]
+    }
+  ],
+  "market_signals": [
+    {
+      "id": "pocketmage-paid-adjacent",
+      "kind": "crowdfunding_pledge",
+      "relation": "adjacent",
+      "source_url": "https://www.crowdsupply.com/talisman-design/pocketmage",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count_if_reported": 1205,
+      "interpretation": "adjacent_paid_interest",
+      "independently_verified": false
+    },
+    {
+      "id": "comet-paid-adjacent",
+      "kind": "crowdfunding_pledge",
+      "relation": "adjacent",
+      "source_url": "https://www.kickstarter.com/projects/mecha-systems/mecha-comet-modular-linux-handheld-computer",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count_if_reported": 3346,
+      "interpretation": "adjacent_paid_interest",
+      "independently_verified": false
+    },
+    {
+      "id": "github-ai-dev-activity",
+      "kind": "developer_activity",
+      "relation": "general",
+      "source_url": "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count_if_reported": null,
+      "interpretation": "workflow_adoption_not_hardware_demand",
+      "independently_verified": false
+    },
+    {
+      "id": "local-tdeck-asking",
+      "kind": "marketplace_asking_price",
+      "relation": "adjacent",
+      "source_url": "https://www.ruten.com.tw/search/t-deck/",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count_if_reported": null,
+      "interpretation": "marketplace_proxy_not_sales_velocity",
+      "independently_verified": false
+    },
+    {
+      "id": "software-mobile-research",
+      "kind": "anecdotal_problem",
+      "relation": "general",
+      "source_url": "https://github.com/anthropics/claude-code/issues",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count_if_reported": null,
+      "interpretation": "qualitative_interest_not_purchase",
+      "independently_verified": false
+    }
+  ],
+  "verified_exact_customer_orders": 0,
+  "commercial_readiness": "RESEARCH_AND_PROTOTYPE_ONLY",
+  "safe_to_order_inventory": false,
+  "safe_to_claim_market_demand_for_exact_product": false,
+  "gates": [
+    {
+      "gate": "qualified_buyer_demand",
+      "status": "unverified",
+      "why": "No independently verified price-specific purchase commitments for the exact target product."
+    },
+    {
+      "gate": "sourcing",
+      "status": "unverified",
+      "why": "HS target BOM contains estimates, no supplier quotes or actual deliveries."
+    },
+    {
+      "gate": "physical_product",
+      "status": "blocked",
+      "why": "HS engineering release is design_ready with 6 blockers."
+    },
+    {
+      "gate": "market_snapshot",
+      "status": "usable_for_price_research",
+      "why": "Competitor/parts data is 1 days old; asking prices are not completed transactions."
+    },
+    {
+      "gate": "legal_fulfillment",
+      "status": "unverified",
+      "why": "No commercial certification, import/export eligibility, warranty or fulfillment approval supplied."
+    }
+  ],
+  "next_agent_tasks": [
+    {
+      "id": "market-live-acquisition",
+      "owner": "market_research_agent",
+      "evidence_needed": "Independent fresh marketplace sources, exact product/variant identity, durable URL/UTC stamp, sold volume over time; no invented throughput."
+    },
+    {
+      "id": "customer-price-interviews",
+      "owner": "customer_discovery_agent",
+      "evidence_needed": "Qualified target-buyer interviews and independently checked price-specific purchase commitments; keep Taiwan and Indonesia distinct."
+    },
+    {
+      "id": "supplier-bom-quote",
+      "owner": "sourcing_agent",
+      "evidence_needed": "Delivered exact-SKU quote, availability, shipping, tax, warranty and compliant sale route."
+    },
+    {
+      "id": "ssh-cyberdeck-bench",
+      "owner": "hs_engineering_agent",
+      "evidence_needed": "Real authenticated SSH, accessible terminal/agent UI, physical fit, power/hinge, and manufacturer pin evidence."
+    }
+  ],
+  "limitations": [
+    "Market data ingestion is from other agents' snapshots, not live autonomous web discovery.",
+    "A marketplace listing's SoldQty is not independently verified or time-bounded sales velocity.",
+    "Adjacent crowdfunding backers cannot be converted to this product's demand.",
+    "The Pi5 pricing snapshot and the dual-ESP32 concept are NOT interchangeable BOMs.",
+    "No customer interviews, verified orders, product assembly, shipping or certification were performed."
+  ]
+}

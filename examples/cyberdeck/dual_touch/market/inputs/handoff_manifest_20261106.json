@@ -1,0 +1,19 @@
+{
+  "schema": "hs.market_evidence_manifest.v1",
+  "as_of_utc": "2026-11-06",
+  "reference_architecture": "pi5_7in_touch_keyboard_ups",
+  "target_architecture": "dual_esp32_touch_4p3_rs485",
+  "reference_evidence": {
+    "source_repo": "Spectating101/hardware-splicer",
+    "source_agent_commit": "afa56cafacc1d72c1459c58392738b86081589c0",
+    "source_file": "examples/arbitrage_lab/build_vs_buy/evidence/cyberdeck_pi5_20261106.json",
+    "retrieval": "git show from independent PR #291 branch",
+    "local_path": "examples/cyberdeck/dual_touch/market/inputs/pr291_pi5_market_snapshot_20261106.json",
+    "sha256": "b65a6f1ac8c10e4ef220d03da733e4e67c5d0bcce05b8ca271c79c1b8e9c40e4"
+  },
+  "signals_path": "examples/cyberdeck/dual_touch/market/inputs/adjacent_market_signals_20261106.json",
+  "engineering_release_path": "examples/cyberdeck/dual_touch/evidence/native_mecha/hs_release_assessment.json",
+  "engineering_budget_path": "examples/cyberdeck/dual_touch/evidence/native_mecha/budget.json",
+  "source_caveat": "The reference is a Pi5 7-inch custom cyberdeck, NOT a dual-ESP32 4.3-inch machine; no direct BOM equivalence.",
+  "engineering_machine_project_path": "examples/cyberdeck/dual_touch/evidence/native_mecha/machine_project.json"
+}

@@ -1,0 +1,49 @@
+{
+  "schema": "hs.market_signals.v1",
+  "target_architecture": "dual_esp32_touch_4p3_rs485",
+  "scope": "Global adjacent category and general developer behavior; Taiwan/Indonesia exact product orders absent",
+  "signals": [
+    {
+      "id": "pocketmage-paid-adjacent",
+      "kind": "crowdfunding_pledge",
+      "relation": "adjacent",
+      "source_url": "https://www.crowdsupply.com/talisman-design/pocketmage",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count": 1205,
+      "summary": "Backers for different e-paper/OLED keyboard handheld; pledges not shipments"
+    },
+    {
+      "id": "comet-paid-adjacent",
+      "kind": "crowdfunding_pledge",
+      "relation": "adjacent",
+      "source_url": "https://www.kickstarter.com/projects/mecha-systems/mecha-comet-modular-linux-handheld-computer",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "count": 3346,
+      "summary": "Backers for modular Linux handheld, not our dual-touch terminal"
+    },
+    {
+      "id": "github-ai-dev-activity",
+      "kind": "developer_activity",
+      "relation": "general",
+      "source_url": "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "summary": "GitHub 2026 Octoverse reports more agent-initiated PRs; not hardware buying"
+    },
+    {
+      "id": "local-tdeck-asking",
+      "kind": "marketplace_asking_price",
+      "relation": "adjacent",
+      "source_url": "https://www.ruten.com.tw/search/t-deck/",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "summary": "Taiwan marketplace asking prices; source may change, no deal closed"
+    },
+    {
+      "id": "software-mobile-research",
+      "kind": "anecdotal_problem",
+      "relation": "general",
+      "source_url": "https://github.com/anthropics/claude-code/issues",
+      "observed_at_utc": "2026-11-06T00:00:00Z",
+      "summary": "General source for user-reported remote session/mobile coding friction; qualitative only"
+    }
+  ]
+}

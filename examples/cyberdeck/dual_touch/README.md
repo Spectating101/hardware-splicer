@@ -1,5 +1,7 @@
 # HS Pocket Dual Touch S2 — real two-screen clamshell design investigation
 
+**Executable cross-agent research bridge:** [Source/engineering evidence handoff, automatic PR #291 BOM integrity check, and fail-closed commercial review](market/AGENT_PIPELINE_HANDOFF_2026-11-06.md). Source acquisition and customer validation are NOT autonomously completed.
+
 **Two-version product-family validation (2026-11-06):** [Phone vs dual-touch cyberdeck demand, current competitors and HS engineering go/no-go](market/PHONE_CYBERDECK_MARKET_VALIDATION_2026-11-06.md).
 
 **Market validation study (2026-11-06):** [Dated demand, local Taiwan/Indonesia resale comparisons, buyer segmentation, and honest NT$ unit economics](market/DEMAND_AND_ARBITRAGE_2026-11-06.md). Adjacent pocket-computer crowdfunding has real backers; no exact dual-touch sale or regional sell-through has yet been established. This research does **not** authorize procurement or product release.
