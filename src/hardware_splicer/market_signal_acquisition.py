@@ -9,8 +9,10 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import math
 import os
 import re
+import time
 from typing import Any, Callable, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
@@ -22,6 +24,7 @@ DETAIL = "https://rtapi.ruten.com.tw/api/prod/v2/index.php/prod"
 GITHUB = "https://api.github.com/search/issues"
 HOSTS = {"api.github.com", "rtapi.ruten.com.tw"}
 Fetch = Callable[[str, Mapping[str, str]], Any]
+_RUTEN_LAST_CALL = 0.0
 
 
 class AcquisitionError(ValueError):
@@ -33,6 +36,12 @@ def fetch_json(url: str, headers: Mapping[str, str]) -> Any:
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname not in HOSTS or parsed.username or parsed.password:
         raise AcquisitionError("disallowed acquisition origin")
+    global _RUTEN_LAST_CALL
+    if parsed.hostname == "rtapi.ruten.com.tw":
+        delay = 1.0 - (time.monotonic() - _RUTEN_LAST_CALL)
+        if _RUTEN_LAST_CALL > 0 and delay > 0:
+            time.sleep(delay)
+        _RUTEN_LAST_CALL = time.monotonic()
     request = Request(url, headers={"User-Agent": "HS-public-market-research/1", "Accept": "application/json", **dict(headers)})
     try:
         with urlopen(request, timeout=15) as response:
@@ -66,6 +75,12 @@ def _check_plan(plan: Mapping[str, Any]) -> None:
             for q in queries:
                 if not isinstance(q, str) or not 2 <= len(q.strip()) <= 100 or any(c in q for c in ("\n", "\r")):
                     raise AcquisitionError("invalid search query")
+        terms = job.get("github_title_terms", [])
+        if job.get("github_queries") and (not isinstance(terms, list) or not terms or len(terms) > 30 or any(not isinstance(t, str) or not 2 <= len(t) <= 60 for t in terms)):
+            raise AcquisitionError("GitHub discovery requires explicit title-relevance terms")
+        excludes = job.get("ruten_exclude_terms", [])
+        if not isinstance(excludes, list) or len(excludes) > 30 or any(not isinstance(t, str) or not 2 <= len(t) <= 60 for t in excludes):
+            raise AcquisitionError("invalid marketplace exclusions")
         if not job.get("github_queries") and not job.get("ruten_queries"):
             raise AcquisitionError("job must search at least one source")
     for key, limit in (("max_pages", 3), ("github_per_page", 30), ("ruten_limit", 40)):
@@ -101,7 +116,7 @@ def _github(row: Any, stamp: str) -> dict[str, Any] | None:
     raw = {"url": url, "title": str(row.get("title", ""))[:180], "updated_at": row.get("updated_at")}
     return {"id": "github-" + _digest(url)[:18], "kind": "anecdotal_problem", "relation": "general",
             "source_url": url, "observed_at_utc": stamp, "summary": raw["title"],
-            "source_metadata": {"source": "github_public_issue", "source_record_sha256": _digest(raw),
+            "source_metadata": {"source": "github_public_issue", "source_record_sha256": _digest(raw), "source_record": raw,
                                 "source_updated_at": row.get("updated_at"), "not_a_customer_interview": True}}
 
 
@@ -115,7 +130,7 @@ def _ruten(row: Any, stamp: str) -> dict[str, Any] | None:
     if not isinstance(prices, list) or not prices or type(prices[0]) not in (int, float):
         return None
     price = prices[0]
-    if price <= 0 or price >= 100000 or any(type(v) not in (int, float) or v < price for v in prices):
+    if not math.isfinite(price) or price <= 0 or price >= 100000 or any(type(v) not in (int, float) or not math.isfinite(v) or v < price for v in prices):
         return None  # reject masked, teaser, or corrupt variant prices
     url = f"https://www.ruten.com.tw/item/{pid}/"
     raw = {"id": pid, "title": str(row.get("ProdName", ""))[:180], "prices": prices,
@@ -124,7 +139,7 @@ def _ruten(row: Any, stamp: str) -> dict[str, Any] | None:
     qty = qty if type(qty) is int and qty >= 0 else None
     return {"id": "ruten-" + pid, "kind": "marketplace_asking_price", "relation": "adjacent",
             "source_url": url, "observed_at_utc": stamp, "summary": raw["title"],
-            "source_metadata": {"source": "ruten_public_listing", "source_record_sha256": _digest(raw),
+            "source_metadata": {"source": "ruten_public_listing", "source_record_sha256": _digest(raw), "source_record": raw,
                                 "asking_price_twd": price, "seller_reported_cumulative_sold": qty,
                                 "unverified_variant_and_stock": True}}
 
@@ -143,6 +158,7 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
     if token:
         headers["Authorization"] = f"Bearer {token}"
     observed_signals: dict[str, dict[str, Any]] = {}
+    raw_candidates: dict[str, dict[str, Any]] = {}
     failures: list[dict[str, str]] = []
     coverage: list[dict[str, Any]] = []
     job_counts: dict[str, dict[str, int]] = {job["id"]: {"github": 0, "ruten": 0} for job in plan["jobs"]}
@@ -156,6 +172,16 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
         if job not in linked:
             linked.append(job)
             job_counts[job][source] += 1
+
+    def consider(signal: dict[str, Any] | None, job: str, source: str, qualified: bool, reason: str) -> None:
+        if signal is None:
+            return
+        if signal["id"] not in raw_candidates:
+            raw_candidates[signal["id"]] = {**signal, "qualification_events": []}
+        raw_candidates[signal["id"]]["qualification_events"].append(
+            {"job": job, "selected": qualified, "reason": reason})
+        if qualified:
+            add(signal, job, source)
 
     for job in plan["jobs"]:
         for query in job.get("github_queries", []):
@@ -175,7 +201,11 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
                     rows = data["items"]
                     pages_done += 1
                     for row in rows:
-                        add(_github(row, stamp), job["id"], "github")
+                        signal = _github(row, stamp)
+                        title = str(row.get("title", "")).casefold() if isinstance(row, dict) else ""
+                        qualified = any(t.casefold() in title for t in job["github_title_terms"])
+                        consider(signal, job["id"], "github", qualified,
+                                 "explicit_title_term_match" if qualified else "rejected_irrelevant_issue_title")
                     seen += len(rows)
                     if len(rows) < plan.get("github_per_page", 10):
                         break
@@ -206,7 +236,12 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
                         raise AcquisitionError("unexpected Ruten detail response")
                     details_seen += len(details)
                     for detail in details:
-                        add(_ruten(detail, stamp), job["id"], "ruten")
+                        signal = _ruten(detail, stamp)
+                        title = str(detail.get("ProdName", "")).casefold() if isinstance(detail, dict) else ""
+                        accessory = any(t.casefold() in title for t in job.get("ruten_exclude_terms", []))
+                        consider(signal, job["id"], "ruten", not accessory,
+                                 "unverified_listing_without_excluded_accessory_term" if not accessory
+                                 else "excluded_probable_accessory")
             except (AcquisitionError, KeyError, TypeError, ValueError) as exc:
                 failures.append({"job": job["id"], "source": "ruten", "query": query,
                                  "error": str(exc)[:150]})
@@ -215,6 +250,7 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
                              "truncated": rows_seen >= plan.get("ruten_limit", 10)})
 
     signals = sorted(observed_signals.values(), key=lambda s: s["id"])
+    raw = sorted(raw_candidates.values(), key=lambda s: s["id"])
     for signal in signals:
         signal["discovery_job_ids"].sort()
     candidates = [{"id": job["id"], "problem_to_investigate": job.get("problem_to_investigate", ""),
@@ -226,8 +262,11 @@ def acquire(plan: Mapping[str, Any], *, observed: datetime,
             "scope": "Automated bounded public-source discovery; source interest is NOT exact-product demand",
             "captured_at_utc": stamp, "plan_sha256": _digest(plan),
             "signals": signals, "discovery": {"jobs": candidates, "coverage": coverage, "failures": failures,
+                                         "raw_candidate_count": len(raw), "qualified_signal_count": len(signals),
+                                         "raw_candidates": raw,
                                          "acquisition_status": "partial" if failures else "complete_with_bounded_queries",
                                          "exact_product_customers_verified": 0,
                                          "source_type_limits": ["GitHub issues are public self-reports, not buyer interviews",
                                                                 "Ruten asking prices and seller counters are not verified sales",
+                                                                "Title-term relevance is not customer or product-identity verification",
                                                                 "Open-world market discovery and SKU verification remain unimplemented"]}}
