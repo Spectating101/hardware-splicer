@@ -14,28 +14,38 @@ sz = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(sz)
 
 
-def _f(value):
-    return {"value": value, "unit": "x", "basis": "published", "source": "https://example.com/"}
+def _f(value, unit="x"):
+    return {"value": value, "unit": unit, "basis": "published", "source": "https://example.com/"}
 
 
 PARTS = {
     "drive_motor": {"id": "m", "kind": "drive_motor", "facts": {
-        "rated_voltage": _f(12), "output_free_speed_rpm": _f(200), "rated_current": _f(0.3), "stall_current": _f(1.5),
-        "stall_torque": _f(0.4), "mass": _f(95)}, "unconfirmed": []},
-    "wheel": {"id": "w", "kind": "wheel", "facts": {"outer_diameter": _f(65), "mass": _f(30)}, "unconfirmed": []},
-    "lidar": {"id": "l", "kind": "lidar", "facts": {"supply_voltage": _f(5), "supply_current": _f(0.3), "mass": _f(50)},
-              "unconfirmed": []},
-    "battery_pack": {"id": "b", "kind": "battery_pack", "facts": {"nominal_voltage": _f(11.1), "capacity": _f(3000),
-                                                                  "mass": _f(150)}, "unconfirmed": []},
-    "dc_dc_converter": {"id": "d", "kind": "dc_dc_converter", "facts": {"output_voltage": _f(5)}, "unconfirmed": []},
-    "compute_board": {"id": "c", "kind": "compute_board", "facts": {"supply_voltage": _f(5), "typical_current": _f(0.8),
-                                                                    "mass": _f(50)}, "unconfirmed": []},
+        "rated_voltage": _f(12, "V"), "output_free_speed_rpm": _f(200, "rpm"), "rated_current": _f(0.3, "A"),
+        "stall_current": _f(1.5, "A"), "stall_torque": _f(0.4, "N·m"), "no_load_current": _f(0.1, "A"),
+        "mass": _f(95, "g")}, "unconfirmed": []},
+    "wheel": {"id": "w", "kind": "wheel", "facts": {"outer_diameter": _f(65, "mm"), "mass": _f(30, "g")}, "unconfirmed": []},
+    "lidar": {"id": "l", "kind": "lidar", "facts": {"supply_voltage": _f(5, "V"), "supply_current": _f(0.3, "A"),
+                                                    "mass": _f(50, "g")}, "unconfirmed": []},
+    "battery_pack": {"id": "b", "kind": "battery_pack", "facts": {
+        "nominal_voltage": _f(11.1, "V"), "full_voltage": _f(12.6, "V"), "capacity": _f(3000, "mAh"),
+        "max_discharge_current": _f(10, "A"), "mass": _f(150, "g")}, "unconfirmed": []},
+    "dc_dc_converter": {"id": "d", "kind": "dc_dc_converter", "facts": {"output_voltage": _f(5, "V"),
+                                                                        "max_output_current": _f(4.5, "A")},
+                        "unconfirmed": []},
+    "compute_board": {"id": "c", "kind": "compute_board", "facts": {
+        "supply_voltage": _f(5, "V"), "typical_current": _f(0.8, "A"), "peak_current": _f(3.0, "A"),
+        "mass": _f(50, "g")}, "unconfirmed": []},
 }
 ASSUMPTIONS = {
     "usable_fraction": {"value": 0.8, "basis": "typical", "note": "Li-ion usable share; measure on the bench"},
     "converter_efficiency": {"value": 0.85, "basis": "typical", "note": "buck efficiency; measure on the bench"},
     "mcu_power_w": {"value": 0.5, "basis": "typical", "note": "ESP32-class average; measure on the bench"},
     "chassis_mass_kg": {"value": 0.6, "basis": "typical", "note": "printed chassis and fasteners; weigh it"},
+    "min_operating_voltage": {"value": 9.9, "basis": "typical", "note": "3S at 3.3 V per cell; measure the cut-off"},
+    "motor_current_limit_a": {"value": 1.2, "basis": "design", "note": "set by the board's motor driver"},
+    "step_height_mm": {"value": 10, "basis": "design", "note": "door threshold to climb"},
+    "drive_wheel_load_fraction": {"value": 0.7, "basis": "typical", "note": "weight on the drive wheels; measure"},
+    "step_torque_margin": {"value": 2.0, "basis": "design", "note": "margin on threshold torque"},
 }
 
 
@@ -75,7 +85,7 @@ def test_mass_and_baseline_are_explicit_not_hs_defaults():
 
 
 def test_runtime_below_60_fails():
-    r = sz.run_sizing(parts(battery_pack__capacity=_f(1000)), ASSUMPTIONS)
+    r = sz.run_sizing(parts(battery_pack__capacity=_f(1000, "mAh")), ASSUMPTIONS)
     assert r["passed"] is False
     assert any("runtime" in reason for reason in r["reasons"])
 
@@ -86,7 +96,7 @@ def test_runtime_passes_with_enough_pack():
 
 
 def test_speed_margin_below_1_5_fails():
-    r = sz.run_sizing(parts(drive_motor__output_free_speed_rpm=_f(80)), ASSUMPTIONS)
+    r = sz.run_sizing(parts(drive_motor__output_free_speed_rpm=_f(80, "rpm")), ASSUMPTIONS)
     assert r["passed"] is False
     assert any("speed" in reason for reason in r["reasons"])
 
@@ -103,13 +113,13 @@ def test_conflicting_fact_uses_worst_case():
 
 
 def test_motor_speed_and_torque_scaled_to_pack_voltage():
-    r = sz.run_sizing(parts(battery_pack__nominal_voltage=_f(7.4)), ASSUMPTIONS)
+    r = sz.run_sizing(parts(battery_pack__nominal_voltage=_f(7.4, "V")), ASSUMPTIONS)
     assert r["effective"]["motor_free_speed_rpm"] == pytest.approx(200 * 7.4 / 12)
     assert r["effective"]["motor_stall_torque_nm"] == pytest.approx(0.4 * 7.4 / 12)
 
 
 def test_pack_above_motor_rating_fails():
-    r = sz.run_sizing(parts(battery_pack__nominal_voltage=_f(14.8)), ASSUMPTIONS)
+    r = sz.run_sizing(parts(battery_pack__nominal_voltage=_f(14.8, "V")), ASSUMPTIONS)
     assert r["passed"] is False and any("exceeds" in reason for reason in r["reasons"])
 
 
@@ -136,7 +146,7 @@ def test_run_current_at_load_preferred_over_rated_current():
     p = parts()
     del p["drive_motor"]["facts"]["rated_current"]
     p["drive_motor"]["unconfirmed"] = [{"fact": "rated_current", "reason": "not published"}]
-    p["drive_motor"]["facts"]["run_current"] = _f(0.12)
+    p["drive_motor"]["facts"]["run_current"] = _f(0.12, "A")
     r = sz.run_sizing(p, ASSUMPTIONS)
     assert r["effective"]["motor_run_current_a"] == 0.12
 
@@ -190,7 +200,7 @@ def test_report_says_designed_not_built():
 
 
 def test_report_shows_sizing_fail_reasons():
-    failing = sz.run_sizing(parts(battery_pack__capacity=_f(1000)), ASSUMPTIONS)
+    failing = sz.run_sizing(parts(battery_pack__capacity=_f(1000, "mAh")), ASSUMPTIONS)
     text = rep.render_report(_report_parts(), failing, QUOTES_OK)
     assert "does not meet" in text.lower() and any(reason in text for reason in failing["reasons"])
 
@@ -200,3 +210,67 @@ def test_report_shows_failed_quote_check():
                                                            "reason": "quote not found in the captured source"}]}
     text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), bad)
     assert "quote not found" in text and "mass" in text
+
+
+# --- review fixes: worst-case voltage, peak currents, current limit, step torque, units -----------------------------------
+
+def test_speed_margin_evaluated_at_min_operating_voltage():
+    r = sz.run_sizing(parts(), ASSUMPTIONS)
+    assert r["effective"]["motor_free_speed_rpm_at_min_voltage"] == pytest.approx(200 * 9.9 / 12)
+    assert r["speed_margin"] == pytest.approx(200 * 9.9 / 12 / 58.76, abs=0.01)
+
+
+def test_pack_peak_current_over_rating_fails():
+    r = sz.run_sizing(parts(battery_pack__max_discharge_current=_f(4, "A")), ASSUMPTIONS)
+    # motors 2 x min(1.5, 1.2) + (3.0*5 + 0.3*5 + 0.5) W / 9.9 V / 0.85
+    assert r["pack_peak_current_a"] == pytest.approx(2.4 + 17.0 / 9.9 / 0.85, abs=1e-3)
+    assert r["passed"] is False and any("pack" in reason and "discharge" in reason for reason in r["reasons"])
+
+
+def test_motor_current_limit_caps_pack_peak():
+    loose = dict(ASSUMPTIONS, motor_current_limit_a={"value": 5.0, "basis": "design", "note": "no limit"})
+    r = sz.run_sizing(parts(), loose)
+    assert r["effective"]["motor_peak_current_a"] == 1.5  # the stall current is lower than a 5 A limit
+
+
+def test_lidar_startup_and_compute_max_load_used_in_peaks():
+    p = parts(lidar__startup_current=_f(0.8, "A"), compute_board__max_load_current=_f(1.25, "A"))
+    r = sz.run_sizing(p, ASSUMPTIONS)
+    assert r["effective"]["electronics_peak_power_w"] == pytest.approx(1.25 * 5 + 0.8 * 5 + 0.5)
+    assert r["converter_peak_current_a"] == pytest.approx(1.25 + 0.8 + 0.5)
+
+
+def test_converter_overload_fails():
+    r = sz.run_sizing(parts(dc_dc_converter__max_output_current=_f(3.0, "A")), ASSUMPTIONS)
+    assert r["passed"] is False and any("converter" in reason for reason in r["reasons"])
+
+
+def test_step_torque_check():
+    r = sz.run_sizing(parts(), ASSUMPTIONS)
+    k = (10 * (65 - 10)) ** 0.5 / (32.5 - 10)
+    need = 1.1 * 9.81 * 0.7 * k * 0.0325 / 2 * 2.0
+    assert r["step_torque_required_nm"] == pytest.approx(need, rel=1e-3)
+    kt = 0.4 / (1.5 - 0.1)
+    assert r["step_torque_available_nm"] == pytest.approx(min(0.4 * 9.9 / 12, kt * (1.2 - 0.1)), rel=1e-3)
+    weak = dict(ASSUMPTIONS, motor_current_limit_a={"value": 0.5, "basis": "design", "note": "low"})
+    r = sz.run_sizing(parts(), weak)
+    assert r["passed"] is False and any("threshold" in reason for reason in r["reasons"])
+
+
+def test_step_torque_needs_no_load_current():
+    p = parts()
+    del p["drive_motor"]["facts"]["no_load_current"]
+    with pytest.raises(sz.SizingError, match="no_load_current"):
+        sz.run_sizing(p, ASSUMPTIONS)
+
+
+def test_wrong_unit_for_a_fact_sizing_reads_raises():
+    p = parts()
+    p["drive_motor"]["facts"]["run_current"] = _f(180, "mA")
+    with pytest.raises(sz.SizingError, match="run_current"):
+        sz.run_sizing(p, ASSUMPTIONS)
+
+
+def test_full_charge_above_motor_rating_warns():
+    r = sz.run_sizing(parts(), ASSUMPTIONS)  # 12.6 V full charge on a 12 V motor
+    assert any("12.6" in w for w in r["warnings"])
