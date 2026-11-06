@@ -5,7 +5,7 @@
   {
    "id": "jga25-371-12v-110rpm-hall-encoder",
    "kind": "drive_motor",
-   "name": "JGA25-371 12 V 110 rpm gearmotor with 11-pulse Hall encoder (sold as a set with a 65 mm wheel, bracket and coupling)",
+   "name": "JGA25-371 12 V 110 rpm gearmotor (8,500 rpm motor, 1:78 gearbox) with Hall encoder, sold as a set with a 65 mm wheel, bracket and coupling",
    "status": "SOURCED_NOT_MEASURED",
    "listing": {
     "url": "https://www.ruten.com.tw/item/21205165759474/",
@@ -30,13 +30,13 @@
      "as_of": "2026-11-06"
     },
     {
-     "label": "Open Impulse JGA25-371 126 rpm page (same motor family, other vendor)",
+     "label": "Open Impulse JGA25-371 126 rpm page (a different, 4,300 rpm winding; cited only for its encoder count)",
      "url": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
      "as_of": "2026-11-06"
     },
     {
-     "label": "Open Impulse JGA25-371 gearmotor selector (all ratios)",
-     "url": "https://www.openimpulse.com/blog/jga25-371-gearmotor-selector/",
+     "label": "Precision Microdrives NFP-JGA25-370 tables (NFP-JGA25-370-1285: 12 V, 8,500 rpm)",
+     "url": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
      "as_of": "2026-11-06"
     }
    ],
@@ -48,32 +48,34 @@
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
     },
     "output_free_speed_rpm": {
-     "value": 110,
+     "alternatives": [
+      {
+       "value": 110,
+       "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+      },
+      {
+       "value": 108,
+       "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+      }
+     ],
      "unit": "rpm",
      "basis": "published",
-     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058",
-     "note": "The seller lists 12 V speeds per variant without saying whether they are no-load; treated as free speed. Measure on the bench."
-    },
-    "run_current": {
-     "value": 0.18,
-     "unit": "A",
-     "basis": "typical",
-     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
-     "note": "Derived, not published: linear DC motor model I = I0 + (Istall - I0) x T/Tstall with Open Impulse's I0 46 mA and Istall 1 A, Tstall 0.381 N·m at 11.1 V, and a carpet load (rolling coefficient 0.1, 1.1 kg, 65 mm wheel) of 0.0175 N·m per motor, giving 0.09 A; doubled for margin. Measure on the bench."
+     "confidence": "conflicting",
+     "note": "Seller lists 110 rpm; NFP's 78:1 row gives 108 rpm with ±15% tolerance on reduced speeds. Measure on the bench."
     },
     "stall_current": {
-     "value": 1,
+     "value": 2.6,
      "unit": "A",
      "basis": "published",
-     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/",
-     "note": "Open Impulse publishes 1 A at 12 V for every JGA25-371 ratio (stall current is set by the motor, not the gearbox); the seller does not publish it."
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
+     "note": "NFP's 12 V, 8,500 rpm JGA25-370 motor: the seller's speed list (1930, 915, 400, 250, 190, 110, 85, 50, 39, 17 rpm) matches NFP's ratios for this motor (1931, 915, 399, 242, 188, 108, 82, 50, 37, 17 rpm), so the seller's 110 rpm part is taken as NFP's 78:1 row. The seller publishes no electrical figures."
     },
     "stall_torque": {
-     "value": 0.412,
+     "value": 0.843,
      "unit": "N·m",
-     "basis": "typical",
-     "source": "https://www.openimpulse.com/blog/jga25-371-gearmotor-selector/",
-     "note": "Not published for the seller's 110 rpm ratio. Open Impulse's neighbouring ratios bracket it: 4.2 kg·cm at 126 rpm (1:34) and 5.5 kg·cm at 95 rpm (1:45); the lower bound, 4.2 kg·cm = 0.412 N·m, is used. Measure on the bench."
+     "basis": "published",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
+     "note": "8.6 kg·cm x 0.0980665 = 0.843 N·m. NFP's 12 V, 8,500 rpm JGA25-370 motor: the seller's speed list (1930, 915, 400, 250, 190, 110, 85, 50, 39, 17 rpm) matches NFP's ratios for this motor (1931, 915, 399, 242, 188, 108, 82, 50, 37, 17 rpm), so the seller's 110 rpm part is taken as NFP's 78:1 row. The seller publishes no electrical figures."
     },
     "encoder_cpr": {
      "alternatives": [
@@ -89,7 +91,7 @@
      "unit": "count/rev_motor",
      "basis": "published",
      "confidence": "conflicting",
-     "note": "Seller: 11 signals per motor revolution on each of two channels. Open Impulse: 12 counts per revolution. Count on the bench before trusting odometry."
+     "note": "Seller: 11 signals per motor revolution on each of two channels. Open Impulse's JGA25-371 (a different winding, same encoder family) says 12 counts per revolution. Count on the bench before trusting odometry."
     },
     "encoder_supply_voltage": {
      "value": [
@@ -132,6 +134,27 @@
      "unit": "text",
      "basis": "published",
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
+    },
+    "rated_current": {
+     "value": 0.4,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
+     "note": "At NFP's rated load, 2 kg·cm and 76 rpm. NFP's 12 V, 8,500 rpm JGA25-370 motor: the seller's speed list (1930, 915, 400, 250, 190, 110, 85, 50, 39, 17 rpm) matches NFP's ratios for this motor (1931, 915, 399, 242, 188, 108, 82, 50, 37, 17 rpm), so the seller's 110 rpm part is taken as NFP's 78:1 row. The seller publishes no electrical figures."
+    },
+    "no_load_current": {
+     "value": 0.1,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
+     "note": "NFP's 12 V, 8,500 rpm JGA25-370 motor: the seller's speed list (1930, 915, 400, 250, 190, 110, 85, 50, 39, 17 rpm) matches NFP's ratios for this motor (1931, 915, 399, 242, 188, 108, 82, 50, 37, 17 rpm), so the seller's 110 rpm part is taken as NFP's 78:1 row. The seller publishes no electrical figures."
+    },
+    "gear_ratio": {
+     "value": 78,
+     "unit": "ratio",
+     "basis": "typical",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370",
+     "note": "Inferred, not published for the seller's part: NFP's 108 rpm row is 78:1. Count encoder pulses per wheel turn to measure it on the bench."
     }
    },
    "quotes": [
@@ -144,11 +167,6 @@
      "claim": "output_free_speed_rpm",
      "quote": "12V110RPM",
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
-    },
-    {
-     "claim": "stall_current",
-     "quote": "Stall current at 12 V: 1 A",
-     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
     },
     {
      "claim": "encoder_cpr",
@@ -191,20 +209,37 @@
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058"
     },
     {
+     "claim": "output_free_speed_rpm",
+     "quote": "78: 1 108 rpm 0.1A 76 rpm 0.4A 2kg.cm 2.6A 8.6kg.cm",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+    },
+    {
+     "claim": "rated_current",
+     "quote": "78: 1 108 rpm 0.1A 76 rpm 0.4A 2kg.cm 2.6A 8.6kg.cm",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+    },
+    {
+     "claim": "no_load_current",
+     "quote": "78: 1 108 rpm 0.1A 76 rpm 0.4A 2kg.cm 2.6A 8.6kg.cm",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+    },
+    {
+     "claim": "stall_current",
+     "quote": "78: 1 108 rpm 0.1A 76 rpm 0.4A 2kg.cm 2.6A 8.6kg.cm",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+    },
+    {
      "claim": "stall_torque",
-     "quote": "Stall torque at 12 V: 4.2 kg·cm",
-     "source": "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/"
+     "quote": "78: 1 108 rpm 0.1A 76 rpm 0.4A 2kg.cm 2.6A 8.6kg.cm",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
+    },
+    {
+     "claim": "stall_current",
+     "quote": "NFP-JGA25-370-1285, 12V DC, 8,500RPM, 4.8W",
+     "source": "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370"
     }
    ],
    "unconfirmed": [
-    {
-     "fact": "rated_current",
-     "reason": "No source publishes the current at rated load; run_current is derived instead."
-    },
-    {
-     "fact": "gear_ratio",
-     "reason": "The seller lists speeds only. Open Impulse's ratios (1:34 at 126 rpm, 1:45 at 95 rpm) do not include 110 rpm. Counts per wheel revolution must be measured."
-    },
     {
      "fact": "body_dimensions",
      "reason": "Diameter 25 mm is published; gearbox length depends on ratio and is not published for 110 rpm. Measure the part."
@@ -411,7 +446,7 @@
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
     },
     "motor_control": {
-     "value": "none: the motor runs from VCC and the core adapts to its speed; no PWM or enable line",
+     "value": "closed-loop motor inside the unit; speed is set by a serial command; it starts and stops with the scan command; no PWM or enable line",
      "unit": "text",
      "basis": "published",
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
@@ -427,6 +462,13 @@
      "unit": "g",
      "basis": "published",
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    "startup_current": {
+     "value": 0.8,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf",
+     "note": "typical, during system start-up"
     }
    },
    "quotes": [
@@ -476,11 +518,6 @@
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
     },
     {
-     "claim": "motor_control",
-     "quote": "And there is no need to provide a complicated power system for the RPLIDAR.",
-     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
-    },
-    {
      "claim": "pinout",
      "quote": "Red VCC Power Total Power 4.8V 5V 5.2V",
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
@@ -493,6 +530,21 @@
     {
      "claim": "mass",
      "quote": "Weight Gram (g) - 110 -",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "startup_current",
+     "quote": "System Start mA - 800 -",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "motor_control",
+     "quote": "Users can change the rotation speed of the motor by",
+     "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
+    },
+    {
+     "claim": "motor_control",
+     "quote": "the motor can't start or stop alone, and its working state depends on",
      "source": "https://cdn.shopify.com/s/files/1/0058/3145/8904/files/SLAMTEC_rplidar_datasheet_C1_v1.1_en.pdf"
     }
    ],
@@ -584,7 +636,7 @@
      "unit": "A",
      "basis": "typical",
      "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc",
-     "note": "Raspberry Pi publishes 600 mA typical for a bare board. SLAM Toolbox and Nav2 keep all four cores busy, so 1.4 A (7 W) is assumed, between that figure and the 3.0 A supply rating. Measure on the bench."
+     "note": "Raspberry Pi publishes 600 mA idle and 1.2 A average under stress for the 4B. SLAM Toolbox and Nav2 load all four cores, so 1.4 A (7 W) is assumed, above the stress average. Measure on the bench."
     },
     "ros2_support": {
      "value": "ROS 2 Jazzy Jalisco (May 2024 to May 2029): Tier 1 on Ubuntu 24.04 arm64",
@@ -604,6 +656,13 @@
      "basis": "typical",
      "source": "https://datasheets.raspberrypi.com/rpi4/raspberry-pi-4-product-brief.pdf",
      "note": "Raspberry Pi does not publish the board's mass; 46 g is class-typical. Weigh it, i.e. measure on the bench."
+    },
+    "max_load_current": {
+     "value": 1.25,
+     "unit": "A",
+     "basis": "published",
+     "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc",
+     "note": "Raspberry Pi 4B stress-test maximum (average 1.2 A), measured with an HDMI monitor, USB keyboard and mouse attached. This robot has no USB peripherals (LiDAR on UART), so the 3.0 A supply rating's 1.2 A USB allowance is not used."
     }
    },
    "quotes": [
@@ -641,6 +700,11 @@
      "claim": "os_support",
      "quote": "require a minimum EEPROM date for compatibility for the Raspberry Pi 4 and 5",
      "source": "https://ubuntu.com/download/raspberry-pi"
+    },
+    {
+     "claim": "max_load_current",
+     "quote": "| Stress | Max | 0.35 | 0.82 | 1.34 | 0.35 | 1.25 |",
+     "source": "https://raw.githubusercontent.com/raspberrypi/documentation/master/documentation/asciidoc/computers/raspberry-pi/power-supplies.adoc"
     }
    ],
    "unconfirmed": [
@@ -776,10 +840,11 @@
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
     },
     "capacity": {
-     "value": 6000,
+     "value": 2400,
      "unit": "mAh",
-     "basis": "published",
-     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
+     "basis": "typical",
+     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
+     "note": "The seller says 6000 mAh, but its stated size (18 x 58 x 65 mm) is one row of three 18650 cells, a 3S1P layout, and the listing's variants run from '2400' to '6000' with one shared description. The smallest variant's 2400 mAh is used as the worst case. Measure capacity on the bench."
     },
     "max_discharge_current": {
      "value": 4,
@@ -799,18 +864,13 @@
      "unit": "g",
      "basis": "typical",
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064",
-     "note": "Not published; six 18650 cells at about 45 g plus board and wrap. Weigh it, i.e. measure on the bench."
+     "note": "Not published; 300 g assumes six cells (worst case for traction); three cells would be about 150 g. Weigh it, i.e. measure on the bench."
     }
    },
    "quotes": [
     {
      "claim": "full_voltage",
      "quote": "充电截止电压:12.6 伏",
-     "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
-    },
-    {
-     "claim": "capacity",
-     "quote": "额定容量:6000 毫安时(6.0 安时)",
      "source": "https://www.ruten.com.tw/item/goods_comments.php?id=22627027679167&k=e689fbb3&o=1782922064"
     },
     {
@@ -836,7 +896,7 @@
     },
     {
      "fact": "body_dimensions",
-     "reason": "The seller states 18 x 58 x 65 mm, which cannot hold six 18650 cells (two cells side by side need about 36 mm). Treat as wrong; measure the pack."
+     "reason": "The seller states 18 x 58 x 65 mm, which fits three 18650 cells (3S1P), not the six a 3S2P pack needs. Measure the pack."
     }
    ]
   },

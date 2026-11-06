@@ -18,5 +18,30 @@
   "value": 0.6,
   "basis": "typical",
   "note": "printed chassis, board, fasteners, caster and wiring; weigh it"
+ },
+ "min_operating_voltage": {
+  "value": 9.9,
+  "basis": "typical",
+  "note": "3S Li-ion at 3.3 V per cell, near the end of useful charge; the pack's BMS cuts off at 8 V. Measure the voltage under load at end of run."
+ },
+ "motor_current_limit_a": {
+  "value": 1.2,
+  "basis": "design",
+  "note": "Requirement for the board plan: the motor driver regulates each motor to 1.2 A. Without it two stalled motors (2 x 2.6 A) exceed the pack's 4 A."
+ },
+ "step_height_mm": {
+  "value": 10,
+  "basis": "design",
+  "note": "door threshold the robot must climb"
+ },
+ "drive_wheel_load_fraction": {
+  "value": 0.7,
+  "basis": "typical",
+  "note": "share of weight on the two drive wheels with a rear caster; measure on the bench with a scale under each wheel"
+ },
+ "step_torque_margin": {
+  "value": 2.0,
+  "basis": "design",
+  "note": "margin on the threshold torque"
  }
 }

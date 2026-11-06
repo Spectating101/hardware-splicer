@@ -1,6 +1,6 @@
 {
  "pass": true,
- "quotes_checked": 49,
+ "quotes_checked": 55,
  "failed": [],
  "sources": {
   "https://www.ruten.com.tw/item/goods_comments.php?id=21205165759474&k=dd59a18f&o=1535787058": {
@@ -10,6 +10,10 @@
   "https://www.openimpulse.com/blog/products-page/25d-gearmotors/jga25-371-dc-gearmotor-encoder-126-rpm-12-v-2/": {
    "file": "2ca4b3a8533e2f2f.txt",
    "sha256": "a73db290b8fd8025089dcc58ecf282fe080e7797acaf087ab19cad8a4cb78c8d"
+  },
+  "https://precisionminidrives.com/product/6v-12v-24v-dc-gearmotor-model-nfp-25-370": {
+   "file": "6bb0e5c72c1e8a0d.txt",
+   "sha256": "32695ac4a80124d2f85f7b299d4ad37c92d510c7cdca8d26af1206985d4c256e"
   },
   "https://rapi.ruten.com.tw/api/items/v2/list?gno=22424722682045&level=detail": {
    "file": "8ceb4c8dedda74f9.txt",
