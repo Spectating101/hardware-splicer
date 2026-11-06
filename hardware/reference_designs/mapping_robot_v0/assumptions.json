@@ -1,0 +1,22 @@
+{
+ "usable_fraction": {
+  "value": 0.8,
+  "basis": "typical",
+  "note": "share of a Li-ion pack's rated energy used before the BMS cut-off; measure on the bench"
+ },
+ "converter_efficiency": {
+  "value": 0.85,
+  "basis": "typical",
+  "note": "buck converter efficiency at about 1-2 A; measure on the bench"
+ },
+ "mcu_power_w": {
+  "value": 0.5,
+  "basis": "typical",
+  "note": "ESP32-class microcontroller average with Wi-Fi idle; measure on the bench"
+ },
+ "chassis_mass_kg": {
+  "value": 0.6,
+  "basis": "typical",
+  "note": "printed chassis, board, fasteners, caster and wiring; weigh it"
+ }
+}

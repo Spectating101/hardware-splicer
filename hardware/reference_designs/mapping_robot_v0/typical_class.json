@@ -1,0 +1,152 @@
+{
+ "drive_motor": {
+  "id": "typical-25mm-12v-gearmotor",
+  "kind": "drive_motor",
+  "facts": {
+   "rated_voltage": {
+    "value": 12,
+    "unit": "V",
+    "basis": "typical",
+    "note": "25 mm 12 V encoder gearmotor; class-typical, not a chosen part; measure on the bench"
+   },
+   "output_free_speed_rpm": {
+    "value": 150,
+    "unit": "rpm",
+    "basis": "typical",
+    "note": "mid-range gearing; class-typical, not a chosen part; measure on the bench"
+   },
+   "rated_current": {
+    "value": 0.3,
+    "unit": "A",
+    "basis": "typical",
+    "note": "rated load; class-typical, not a chosen part; measure on the bench"
+   },
+   "stall_current": {
+    "value": 1.5,
+    "unit": "A",
+    "basis": "typical",
+    "note": "stall; class-typical, not a chosen part; measure on the bench"
+   },
+   "stall_torque": {
+    "value": 0.4,
+    "unit": "N·m",
+    "basis": "typical",
+    "note": "stall; class-typical, not a chosen part; measure on the bench"
+   },
+   "mass": {
+    "value": 95,
+    "unit": "g",
+    "basis": "typical",
+    "note": "with encoder; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ },
+ "wheel": {
+  "id": "typical-65mm-wheel",
+  "kind": "wheel",
+  "facts": {
+   "outer_diameter": {
+    "value": 65,
+    "unit": "mm",
+    "basis": "typical",
+    "note": "common robot wheel; class-typical, not a chosen part; measure on the bench"
+   },
+   "mass": {
+    "value": 30,
+    "unit": "g",
+    "basis": "typical",
+    "note": "rubber tyre; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ },
+ "lidar": {
+  "id": "typical-2d-lidar",
+  "kind": "lidar",
+  "facts": {
+   "supply_voltage": {
+    "value": 5,
+    "unit": "V",
+    "basis": "typical",
+    "note": "hobby 2D LiDAR; class-typical, not a chosen part; measure on the bench"
+   },
+   "supply_current": {
+    "value": 0.3,
+    "unit": "A",
+    "basis": "typical",
+    "note": "running; class-typical, not a chosen part; measure on the bench"
+   },
+   "mass": {
+    "value": 50,
+    "unit": "g",
+    "basis": "typical",
+    "note": "module; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ },
+ "battery_pack": {
+  "id": "typical-3s-pack",
+  "kind": "battery_pack",
+  "facts": {
+   "nominal_voltage": {
+    "value": 11.1,
+    "unit": "V",
+    "basis": "typical",
+    "note": "3S Li-ion; class-typical, not a chosen part; measure on the bench"
+   },
+   "capacity": {
+    "value": 2600,
+    "unit": "mAh",
+    "basis": "typical",
+    "note": "3S1P 18650; class-typical, not a chosen part; measure on the bench"
+   },
+   "mass": {
+    "value": 150,
+    "unit": "g",
+    "basis": "typical",
+    "note": "3S1P with BMS; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ },
+ "dc_dc_converter": {
+  "id": "typical-5v-buck",
+  "kind": "dc_dc_converter",
+  "facts": {
+   "output_voltage": {
+    "value": 5,
+    "unit": "V",
+    "basis": "typical",
+    "note": "5 V rail; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ },
+ "compute_board": {
+  "id": "typical-sbc",
+  "kind": "compute_board",
+  "facts": {
+   "supply_voltage": {
+    "value": 5,
+    "unit": "V",
+    "basis": "typical",
+    "note": "single-board computer; class-typical, not a chosen part; measure on the bench"
+   },
+   "typical_current": {
+    "value": 1.2,
+    "unit": "A",
+    "basis": "typical",
+    "note": "running SLAM and navigation; class-typical, not a chosen part; measure on the bench"
+   },
+   "mass": {
+    "value": 50,
+    "unit": "g",
+    "basis": "typical",
+    "note": "board with heatsink; class-typical, not a chosen part; measure on the bench"
+   }
+  },
+  "unconfirmed": []
+ }
+}
