@@ -1,0 +1,43 @@
+# HS pocket cyberdeck — phone-donor vs Linux SBC value scan
+
+**Observed:** 2026-11-06 (Taiwan public asking prices). **Research only; no devices purchased, contacted, inspected, benchmarked or disassembled.** This is a companion to PR #297's exact-component sourcing for the 2× Waveshare ESP32-S3 touch proof.
+
+## The product decision
+
+Do **not** remove a donor smartphone SoC board until its intact-device functionality and an actual independent display/boot/power alternative have been validated. The strongest price advantage is **a functioning whole phone with its original screen, battery, charging, touch input, Wi-Fi, cooling/spreader and Android drivers**. A stripped phone board loses those integrations. Its OEM display does not become generic HDMI/MIPI and the two Waveshare ESP32-S3 RGB modules are **not plug-and-play phone GPU displays**.
+
+A thin donor phone enclosed in a **mechanical clamshell keyboard dock** is a different product architecture than PR #292's two ESP32-native touch modules.
+
+## Publicly listed Taiwan examples
+
+| Architecture / lead | Device-level evidence and price (TWD) | Relevant qualification |
+|---|---|---|
+| **S21 whole-phone reuse**, prioritized cost/performance pilot | [Galaxy S21 5G, Taoyuan listing **NT$1,600**](https://tw.carousell.com/p/samsung-s21-1471969849/); **screen has lines**, seller says other functions normal; 128GB. Samsung original S21 ships with **8GB RAM**, 6.2-inch 2400×1080 OLED, 7.9mm thick. [Samsung TW specs](https://news.samsung.com/tw/samsung-galaxy-s21%EF%B8%B1s21) | **High-ratio compute**, but check exact variant, unlock, working touch, USB-C video and battery in person. Screen lines could worsen. **Samsung S21 standard security updates ended Feb 2026**. |
+| **S20 FE 5G whole phone** | [NT$2,000 128GB](https://tw.carousell.com/p/samsung-galaxy-s20fe-5g-1455105387/); screen cracked/burn-in, touch claimed normal. [Samsung TW](https://news.samsung.com/tw/galaxy-s20-fe-5g-taiwan) confirms Snapdragon 865 6GB RAM / 128GB, 6.5-inch AMOLED, 8.4mm, wireless DeX | Strong value and lower-risk than a naked board only if phone remains functional; dated firmware/security support, damaged screen and uncertain charge health. |
+| **S9+ backup ultra-cheap experiment** | [NT$1,349 complete phone](https://tw.carousell.com/p/samsung-galaxy-s9-%E8%9E%A2%E5%B9%95%E6%BC%82%E4%BA%AE-%E8%B4%88%E6%89%8B%E6%A9%9F%E6%AE%BC-1455663354/) described as working, but **previously flashed, Knox disabled, battery ~70% health** | Reject as secure SSH/control terminal; consider only for offline/disposable mechanics demo. Do not store sensitive credentials. |
+| **S10e smaller form factor** | [NT$2,500 used 6GB/128GB](https://tw.carousell.com/p/%E4%B8%89%E6%98%9Fs10e-6g-128g-1462574446/), claimed functional | Compact display/SoC donor, worse compute-per-NT$ than S21, battery/security risks. |
+| **Radxa Zero 3W Linux module** | [Ruten **2GB/no eMMC, NT$1,372**](https://www.ruten.com.tw/item/22634442431375/). [Radxa manufacturer](https://docs.radxa.com/zero/zero3) confirms RK3566, quad Cortex-A55 up to 1.6GHz, 1/2/4/8GB LPDDR4, micro-HDMI, USB 3 host, Wi-Fi 6, 40-pin and USB-C power | **Best found clean-sheet hackable board at specific listed price**; 2GB is 1/4 of S21's RAM; needs microSD, screen, keyboard, housing, power; check seller and model. Can use maintained Linux stack and documented device interfaces. |
+| **Orange Pi Zero 3 Linux board** | [Ruten **NT$988–2,080 across 1/1.5/2/4GB variants**](https://www.ruten.com.tw/item/22450399871167/); specific 2GB price not resolved. H618 quad-core Cortex-A53 1.5GHz, micro-HDMI, USB-C power, Linux. [Manufacturer manual](https://orangepi.net/wp-content/uploads/2023/10/OrangePi_Zero3_H618_user-manual_v1.1.pdf) | Potentially cheapest bare Linux compute but requires exact memory/price at checkout, OS/driver review, external display and power. |
+| **Pi Zero 2 W Linux module** | [Taiwan Pi vendor NT$580 pre-tax](https://piepie.com.tw/product/raspberry-pi-zero-2-w) **SOLD OUT**; quad Cortex-A53 1GHz, 512MB RAM, mini-HDMI | Lowest *historical* board ask, but 512MB restricts modern development. **No DSI display connector**, so cheap Raspberry Pi DSI touch panels cannot be assumed directly compatible. |
+
+Samsung confirms the S8–S26 series includes various **DeX USB-C to HDMI output** options: https://www.samsung.com/tw/apps/samsung-dex/ . That does *not* mean an arbitrary OEM AMOLED panel can be rewired to a Galaxy board, or that the broken-screen phone will enter DeX without first unlocking and approving the prompt.
+
+## Inputs and no-invention unit economics
+
+*Phone as its own display plus tactile Bluetooth keyboard:* example [new Harmonica tri-fold Bluetooth keyboard **NT$685**](https://tw.carousell.com/p/%E5%85%A8%E6%96%B0-harmonica-%E4%B8%89%E6%8A%98%E5%BC%8F%E8%97%8D%E7%89%99%E9%8D%B5%E7%9B%A4-%E6%8A%98%E7%96%8A%E4%BE%BF%E6%94%9C-%E8%87%AA%E5%B8%B6%E6%89%8B%E6%A9%9F%E6%94%AF%E6%9E%B6-%E6%89%8B%E6%A9%9F%E5%B9%B3%E6%9D%BF%E9%81%A9%E7%94%A8-1472163598/). This complete, detachable accessory includes a phone stand. **S21 plus keyboard starts at NT$2,285 in separate seller asks**; S20 FE 5G plus keyboard NT$2,685. **Not delivered totals**; shipping, battery defects, test failure and warranty excluded. Both reuse the original screen; a new 3D shell is unnecessary for the initial usability evaluation.
+
+*Bare Linux module in a custom cyberdeck:* 2GB Radxa Zero 3W **NT$1,372** + separately sourced [Waveshare 5-inch HDMI 800×480 USB touch **NT$1,580**](https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE5%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-hdmi/) (vendor page showed stock 8) + NT$685 keyboard = **NT$3,637 before microSD, USB-C power, cooling, wiring, custom shell, shipment or battery**. The documented Radxa micro-HDMI has **one standard output**, so **two independent externally driven panels are not demonstrated**.
+
+*Do not double-spend:* PR #297's dual-ESP32 touch **folding test article is NT$4,277** without a Linux/Android compute module. Simply adding a NT$1,600 S21 donor **raises** modeled parts to **NT$5,877**, before new USB/RS485/display interface bridges, physical rework and batteries; two ESP32 screens cannot directly display a standard smartphone GPU framebuffer. This is *not* a viable cost-reduction tactic.
+
+A separate [Waveshare 4.3-inch HDMI 800×480 USB touch is NT$1,569 but listed sold out](https://www.icshop.com.tw/zh-hant/products/388370100010); do not use it as in-stock or treat cheap **Pi DSI**/USART HMI displays as interchangeable with HDMI.
+
+## Engineering feasibility / gating
+
+1. **Winner for immediate capability-per-dollar:** keep an S21 (or a 5G S20 FE) intact, match with BT keyboard, run Termux or another legitimate Android SSH client, test actual remote code/agent tasks, hotplug + DeX only if confirmed on the exact unit. [Termux F-Droid](https://f-droid.org/packages/com.termux/) supports SSH, Python, GCC/Clang and Git, but Android does not become an unrestricted native Linux desktop.
+2. **Winner for manufacturable/custom hardware control:** Radxa Zero 3W 2GB; unlike a stripped smartphone SoC, it has published Linux SBC I/O, normal power input and documented display. Still needs real 5V consumption, boot and USB/display support tests.
+3. **Reject motherboard-only phone as phase one:** OEM display, battery connector thermistor, USB-C port board flex, antenna/ground, proprietary boot/recovery and cooling make board extraction an *engineering experiment*, not a cost saving. Never remove/defeat battery protection or attempt unsafe power injection to force boot.
+4. **Security:** Samsung's official monthly/quarterly [security update list](https://security.samsungmobile.com/workScope.smsb) no longer includes the standard S21. The phone may be fine for isolated proof-of-concept, but don't put long-lived SSH private keys, unrestricted machine administration or production secrets on an unsupported/damaged donor.
+5. **Buyer inspection before any money:** seller demonstrates factory reset ownership clearance/FRP, touch/display/USB-C power/DeX, Wi-Fi, Bluetooth keyboard pairing, charge health and safe thermals; confirm exact model/IMEI/condition and final delivered price. If seller will not demonstrate, pass.
+
+**Next HS move:** prototype **whole-phone-on-hinge** with a separate tactile keyboard, and a **Radxa Linux-native panel** in parallel. Benchmark the exact workflow (remote shell, tmux controls, SSH host-key trust, editing code, reconnect, power and latency) before spending on stripped boards or another custom two-screen PCB. Track product identities separately; don't transplant PR #292's six release blockers as proof these alternatives are tested.
