@@ -1,0 +1,52 @@
+{
+  "budget_scenario_twd": 2965,
+  "screen_subtotal_twd": 2500,
+  "screen_ratio": 0.843,
+  "quote_obtained": false,
+  "parts_obtained": false,
+  "shipping_included": false,
+  "battery_included": false,
+  "labor_included": false,
+  "electricity_5V_nominal_W": 4.5,
+  "candidate_status": "CAD_ONLY_PENDING_SOURCE_FIT_ELECTRICAL_FIRMWARE_TESTS",
+  "screen_price_origin": "https://www.icshop.com.tw/en/products/368031700131",
+  "lines": [
+    {
+      "item": "2 exact Waveshare touch boards",
+      "qty": 2,
+      "unit_twd": 1250,
+      "subtotal_twd": 2500,
+      "classification": "observed asking prices, not stock confirmed"
+    },
+    {
+      "item": "RS485 HY2.0 interconnect, safe ground reference",
+      "qty": 1,
+      "subtotal_twd": 85,
+      "classification": "unquoted assumption; verify included vendor cables"
+    },
+    {
+      "item": "flex cabling and strain relief",
+      "qty": 1,
+      "subtotal_twd": 70,
+      "classification": "unquoted assumption"
+    },
+    {
+      "item": "2mm metal hinge pin and retention",
+      "qty": 1,
+      "subtotal_twd": 45,
+      "classification": "unquoted assumption"
+    },
+    {
+      "item": "PETG two trays",
+      "qty": 2,
+      "subtotal_twd": 140,
+      "classification": "unquoted printing estimate"
+    },
+    {
+      "item": "bench dual USB-C power cables/adapter",
+      "qty": 1,
+      "subtotal_twd": 125,
+      "classification": "unquoted assumption"
+    }
+  ]
+}

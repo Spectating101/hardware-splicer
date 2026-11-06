@@ -64,7 +64,10 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
     # Normalize the native BOM CSV CRLF to LF for reproducible evidence diffs.
     csv_path=output/"bom.csv"
     csv_path.write_bytes(csv_path.read_bytes().replace(b"\r\n",b"\n"))
+    is_dual = spec["clamshell_terminal"].get("input_surface_mode") == "dual_touch"
     expect={"base_shell.scad","lid_shell.scad","clamshell_open_preview.scad"}
+    if is_dual:
+        expect.add("dual_touch_visual_preview.scad")
     if bundle["blockers"] or set(bundle["outputs"])!=expect:
         raise ValueError(f"Native HS bundle did not provide exact clamshell parts: {bundle}")
     mesh={}
@@ -118,12 +121,15 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
                      f"stl_exists={coll.exists()} stderr={result.stderr[-250:]}")
             sweep.append({"angle_deg":angle,"interference_mesh":"EMPTY",
                           "cad_clearance_pass":True})
-    # Existing HS engineering planner (not a custom shifter design):
-    # the generic ESP32-devkit registry entry stands in for ESP32-S3
-    # controller logic ONLY, NOT the exact Waveshare PCB or its connector.
-    sys.path.insert(0,str(HERE.parents[1]/"src"))
-    from hardware_splicer.sdk import plan_level_shift_circuit
-    voltage_plan=plan_level_shift_circuit({
+    # A second Waveshare board has its own touch controller. Do NOT treat the
+    # dual-board RS485 link as a CardKB 5V I2C level-shifter problem.
+    voltage_plan=None
+    if not is_dual:
+        # Existing HS engineering planner (not a custom shifter design):
+        # the generic ESP32-devkit registry entry stands in for ESP32-S3.
+        sys.path.insert(0,str(HERE.parents[1]/"src"))
+        from hardware_splicer.sdk import plan_level_shift_circuit
+        voltage_plan=plan_level_shift_circuit({
         "goal":"ESP32-S3 3.3V I2C to external 5V CardKB keyboard; SCL/SDA",
         "signal_requirements":[{
             "type":"i2c","controller_voltage_v":3.3,
@@ -132,19 +138,21 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
         "allowed_modules":["usb-power-5v","esp32-devkit","level-shifter-4ch"],
         "notes":"Catalog ESP32 devkit proxy, CardKB exact module not in registry; vendor wires NOT pinned",
     })
-    if voltage_plan["result"] not in ("ready_for_review","blocked"):
-        raise ValueError("HS electrical synthesis unexpectedly authorized without bench proof")
-    if any(g["status"]!="open" for g in voltage_plan["verification_gates"]):
-        raise ValueError("Pre-hardware electrical measurement gates must remain OPEN")
-    (output/"hs_level_shift_review.json").write_text(
-        json.dumps(voltage_plan,indent=2)+"\n",encoding="utf-8")
+        if voltage_plan["result"] not in ("ready_for_review","blocked"):
+            raise ValueError("HS electrical synthesis unexpectedly authorized without bench proof")
+        if any(g["status"]!="open" for g in voltage_plan["verification_gates"]):
+            raise ValueError("Pre-hardware electrical measurement gates must remain OPEN")
+        (output/"hs_level_shift_review.json").write_text(
+            json.dumps(voltage_plan,indent=2)+"\n",encoding="utf-8")
     envelope={
        "width_mm":p["case_w_mm"],
        "depth_without_hinge_mm":p["case_d_mm"],
        "closed_thickness_mm":round(p["base_h_mm"]+p["lid_h_mm"]+p["closed_gap_mm"],2),
        "hinge_projection_mm":round(p["hinge_y_offset_mm"]+p["hinge_outer_d_mm"]/2,2),
        "display_board_outer_footprint_mm":[p["display_board_w_mm"],p["display_board_d_mm"]],
-       "keyboard_board_outer_footprint_mm":[p["keyboard_w_mm"],p["keyboard_d_mm"]],
+       "lower_board_footprint_mm": ([p["lower_touch_board_w_mm"],p["lower_touch_board_d_mm"]]
+           if is_dual else [p["keyboard_w_mm"],p["keyboard_d_mm"]]),
+       "lower_input_type":"dual_touch" if is_dual else "physical_keyboard",
        "battery_not_yet_integrated":True,
        "vendor_board_mounting_holes_unknown":True,
        "port_access_cutouts_unverified":True
@@ -155,9 +163,10 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
       "native_outputs":bundle["outputs"],
       "native_dfm":bundle["dfm"],
       "native_bom":bundle["bom"],
-      "native_hs_level_shift_result":voltage_plan["result"],
-      "native_hs_level_shift_measurement_gates_open":len(voltage_plan["verification_gates"]),
-      "native_hs_level_shift_caveat":"Existing generic ESP32-devkit logic surrogate, not exact Waveshare pinout",
+      "native_hs_level_shift_result":(voltage_plan["result"] if voltage_plan else "NOT_APPLICABLE_RS485_LINK"),
+      "native_hs_level_shift_measurement_gates_open":(len(voltage_plan["verification_gates"]) if voltage_plan else 0),
+      "native_hs_level_shift_caveat":("Existing generic ESP32-devkit logic surrogate, not exact Waveshare pinout" if voltage_plan
+             else "Dual Waveshare boards use onboard SP3485 RS485; A/B, reference, power and firmware still unverified"),
       "mesh":mesh,
       "cgal_interference_sweep":sweep,
       "closed_envelope":envelope,

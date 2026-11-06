@@ -97,6 +97,25 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
 
 def _bom_for_clamshell_terminal(p: ClamshellTerminalSpec) -> list[BomLine]:
     """Prototype budget inventory, not ordered or wired."""
+    if p.input_surface_mode == "dual_touch":
+        return [
+            BomLine("electronics", "Waveshare ESP32-S3-Touch-LCD-4.3", "ESP32-S3 N16R8, 800x480 touch 106.1x67.8mm", 2,
+                "One per clamshell half. SP3485 RS485 transceiver onboard; full PCB Z/ports not yet measured", sku="ESP32-S3-Touch-LCD-4.3"),
+            BomLine("wiring", "RS485 differential pair + verified common reference", "2-wire A/B HY2.0 2P plus safe shared power ground", 1,
+                "Two on-board SP3485; verify A/B polarity, half-duplex timing, 120-ohm termination and ground. No loose 5V GPIO wiring", sku=""),
+            BomLine("wiring", "Hinge flexible wire and protection", "RS485 + potential 5V/GND power cable; test flex radius", 1,
+                "Mechanical cable passage is a concept, NOT fatigue/lid-cycle proven", sku=""),
+            BomLine("hardware", "steel hinge pin", f"{p.hinge_pin_d_mm}mm diameter, ~{p.case_w_mm}mm long", 1,
+                "Test retention and tolerance after printing; no plastic hinge pin", sku=""),
+            BomLine("printed", "dual-touch keyboard-half base tray", "PETG base_shell.stl", 1,
+                "Second LCD rather than CardKB; module mount/USB access absent", sku=""),
+            BomLine("printed", "dual-touch upper display lid tray", "PETG lid_shell.stl", 1,
+                "Upper LCD module mount/USB access absent", sku=""),
+            BomLine("power", "USB-powered dual-prototype supply", "5V 2A or higher verified, two USB-C power leads", 1,
+                "Power both boards through their designated USB inputs for first bench only; no shared battery wiring approved", sku=""),
+            BomLine("power", "optional protected Li-ion cells", "3.7V single cell PER board, PH2.0 polarity to verify", 0,
+                "Not included; do not parallel two on-board charger outputs", sku=""),
+        ]
     return [
         BomLine("electronics", "Waveshare ESP32-S3-Touch-LCD-4.3",
                 "4.3 inch 800x480, N16R8, 106.1x67.8mm touch version", 1,

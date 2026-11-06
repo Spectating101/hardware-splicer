@@ -1,0 +1,97 @@
+{
+  "project_name": "HS-POCKET-SSH-DUAL-TOUCH-S2",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT ELECTRICALLY VERIFIED: two SP3485 RS485 A/B ports, termination, half-duplex communication and common-ground/power reference"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT PHYSICALLY VERIFIED: second Waveshare LCD module mounting Z/USB and touchscreen closure clearance"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FUNCTIONALLY VERIFIED: LVGL virtual keyboard, Ctrl/Esc/Alt/Tab, framed RS485 key events, SSH pinned host key and reconnect"
+    }
+  ],
+  "bom": [
+    {
+      "category": "electronics",
+      "item": "Waveshare ESP32-S3-Touch-LCD-4.3",
+      "spec": "ESP32-S3 N16R8, 800x480 touch 106.1x67.8mm",
+      "qty": 2,
+      "notes": "One per clamshell half. SP3485 RS485 transceiver onboard; full PCB Z/ports not yet measured",
+      "sku": "ESP32-S3-Touch-LCD-4.3"
+    },
+    {
+      "category": "wiring",
+      "item": "RS485 differential pair + verified common reference",
+      "spec": "2-wire A/B HY2.0 2P plus safe shared power ground",
+      "qty": 1,
+      "notes": "Two on-board SP3485; verify A/B polarity, half-duplex timing, 120-ohm termination and ground. No loose 5V GPIO wiring",
+      "sku": ""
+    },
+    {
+      "category": "wiring",
+      "item": "Hinge flexible wire and protection",
+      "spec": "RS485 + potential 5V/GND power cable; test flex radius",
+      "qty": 1,
+      "notes": "Mechanical cable passage is a concept, NOT fatigue/lid-cycle proven",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "steel hinge pin",
+      "spec": "2.0mm diameter, ~120.0mm long",
+      "qty": 1,
+      "notes": "Test retention and tolerance after printing; no plastic hinge pin",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "dual-touch keyboard-half base tray",
+      "spec": "PETG base_shell.stl",
+      "qty": 1,
+      "notes": "Second LCD rather than CardKB; module mount/USB access absent",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "dual-touch upper display lid tray",
+      "spec": "PETG lid_shell.stl",
+      "qty": 1,
+      "notes": "Upper LCD module mount/USB access absent",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "USB-powered dual-prototype supply",
+      "spec": "5V 2A or higher verified, two USB-C power leads",
+      "qty": 1,
+      "notes": "Power both boards through their designated USB inputs for first bench only; no shared battery wiring approved",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "optional protected Li-ion cells",
+      "spec": "3.7V single cell PER board, PH2.0 polarity to verify",
+      "qty": 0,
+      "notes": "Not included; do not parallel two on-board charger outputs",
+      "sku": ""
+    }
+  ],
+  "outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad",
+    "dual_touch_visual_preview.scad"
+  ],
+  "notes": "Two separate vendor RGB display/ESP32/touch assemblies with onboard SP3485 RS485 keyboard event link. Ordinary 2mm pin hinge, NO flexible OLED, NO LCD FPC across hinge; separate 5V USB-C supplies first. Shell/dimensions illustrative without physical Z/ports. No device built, no host key/SSH tested."
+}

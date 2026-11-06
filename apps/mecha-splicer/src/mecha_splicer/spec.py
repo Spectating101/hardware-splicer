@@ -90,6 +90,7 @@ class EnclosureSpec(BaseModel):
 class ClamshellTerminalSpec(BaseModel):
     """Two compact trays and pin hinge; not a validated physical product."""
     name: str = "clamshell_ssh_terminal"
+    input_surface_mode: Literal["physical_keyboard", "dual_touch"] = "physical_keyboard"
     case_w_mm: Annotated[float, Field(ge=110, le=170)] = 120.0
     case_d_mm: Annotated[float, Field(ge=72, le=140)] = 85.0
     base_h_mm: Annotated[float, Field(ge=10, le=30)] = 14.0
@@ -103,6 +104,8 @@ class ClamshellTerminalSpec(BaseModel):
     keyboard_w_mm: MmPos = 88.0
     keyboard_d_mm: MmPos = 54.0
     keyboard_module_nominal_t_mm: MmPos = 5.0
+    lower_touch_board_w_mm: MmPos = 106.1
+    lower_touch_board_d_mm: MmPos = 67.8
     hinge_outer_d_mm: Annotated[float, Field(ge=5.5, le=12)] = 8.0
     hinge_pin_d_mm: Annotated[float, Field(ge=1.5, le=4)] = 2.0
     pin_radial_clearance_mm: Annotated[float, Field(ge=0.2, le=0.8)] = 0.35
@@ -118,11 +121,14 @@ class ClamshellTerminalSpec(BaseModel):
     def _fit_check(self):
         usable_w = self.case_w_mm - 2*self.wall_mm - 2*self.clearance_mm
         usable_d = self.case_d_mm - 2*self.wall_mm - 2*self.clearance_mm
-        if max(self.display_board_w_mm, self.keyboard_w_mm) > usable_w:
+        lower_w = self.lower_touch_board_w_mm if self.input_surface_mode == "dual_touch" else self.keyboard_w_mm
+        lower_d = self.lower_touch_board_d_mm if self.input_surface_mode == "dual_touch" else self.keyboard_d_mm
+        if max(self.display_board_w_mm, lower_w) > usable_w:
             raise ValueError("module width exceeds case usable width with clearance")
-        if max(self.display_board_d_mm, self.keyboard_d_mm) > usable_d:
+        if max(self.display_board_d_mm, lower_d) > usable_d:
             raise ValueError("module depth exceeds case usable depth with clearance")
-        if self.keyboard_module_nominal_t_mm+self.floor_mm > self.base_h_mm:
+        if (self.input_surface_mode == "physical_keyboard" and
+                self.keyboard_module_nominal_t_mm+self.floor_mm > self.base_h_mm):
             raise ValueError("keyboard too thick for base tray")
         if 2*(self.knuckle_end_margin_mm+self.knuckle_outer_length_mm+
               self.knuckle_axial_gap_mm) >= self.case_w_mm-15:
