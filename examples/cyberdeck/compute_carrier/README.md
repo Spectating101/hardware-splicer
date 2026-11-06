@@ -125,3 +125,35 @@ derive complete contact-level reports against the separate source
 schematics, import one official carrier into an HS-supported ECAD workflow
 without lost nets, then run independent ERC/DRC. Until then, this is not
 a fab-ready KiCad project.
+
+
+## Standard form factors and the cost test (additional verified sources)
+
+- **SGET SMARC:** genuinely industry-specified **314-contact edge connector**,
+  82×50mm or 82×80mm modules; multi-vendor swap opportunities, but each
+  generation's supported features, power rails and thermal envelopes still
+  require checks. Source: https://sget.org/standards/smarc/ . This is a
+  credible alternative to a **Radxa-only high-density socket** where long
+  lifecycle/replacement suppliers matter more than enclosure size.
+- **SGET OSM:** standardized much smaller **solder-on BGA compute modules**.
+  Attractive for production but **not field hot-swappable**. Source:
+  https://sget.org/standards/osm/ .
+- **Official CM5 dimension discrepancy:** CM5 product marketing states
+  56×41mm (https://radxa.com/products/cm/cm5/), while CM5 docs indicate
+  55×40mm (https://docs.radxa.com/en/som/cm/cm5). Actual vendor 2D/3D CAD
+  and revision are mandatory, and HS records a blocking `vendor_dimension_reference_conflict`.
+- **Real Taiwan price floor:** iCShop offered Radxa CM4 RK3576
+  **4GB/32GB at NT$4,200**, but the listing is currently **sold out**:
+  https://www.icshop.com.tw/products/368030502344 .
+  The product page has an inconsistent introductory paragraph saying
+  8GB/64GB; title/spec section says 4GB/32GB. Supplier qualification is
+  necessary. This **module alone is more expensive** than the NT$1,600
+  damaged S21 whole-phone example in PR #298, and the custom carrier,
+  display, power and enclosure are additional costs.
+
+**Engineering conclusion:** build a first *reference-carrier-based prototype*
+for deterministic I/O, not claim a cheap new SoC. HS's best advantage is
+integrating open carrier designs with donor-first sourcing and evidence gates.
+For volume, benchmark actual delivered parts and recoverable yield before
+selecting between a vendor SoM, SMARC, solderable OSM, or recovered complete
+phone subsystem.
