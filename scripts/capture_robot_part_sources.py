@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from hardware_splicer.robot_parts import html_to_text, load_parts  # noqa: E402
+from hardware_splicer.robot_parts import load_parts, source_text  # noqa: E402
 
 DEFAULT_DIR = ROOT / ".cache" / "hardware-splicer" / "robot_part_sources"
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) HS-robot-parts-capture/1"
@@ -58,7 +58,7 @@ def main() -> int:
             continue
         try:
             raw, ctype = _fetch(url)
-            text = _pdf_text(raw) if raw[:5] == b"%PDF-" or "pdf" in ctype else html_to_text(raw.decode("utf-8", errors="replace"))
+            text = _pdf_text(raw) if raw[:5] == b"%PDF-" or "pdf" in ctype else source_text(raw, ctype)
         except Exception as e:  # noqa: BLE001 - every failure is reported below
             failed.append({"url": url, "error": f"{type(e).__name__}: {e}"})
             continue

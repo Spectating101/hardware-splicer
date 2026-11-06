@@ -242,3 +242,14 @@ def test_html_to_text_drops_markup_scripts_and_entities():
     text = rp.html_to_text(html)
     assert "var x" not in text and "p{}" not in text and "<" not in text
     assert rp.normalise("Rated voltage: 12 V") in rp.normalise(text)
+
+
+def test_source_text_decodes_json_escapes_so_quotes_can_match():
+    raw = json.dumps({"spec_name": "萬向輪（球直徑25mm）1個"}).encode()  # ensure_ascii escapes the Chinese
+    assert b"\\u" in raw
+    text = rp.source_text(raw, "application/json; charset=utf-8")
+    assert rp.normalise("萬向輪(球直徑25mm)1個") in rp.normalise(text)
+
+
+def test_source_text_strips_html():
+    assert rp.source_text(b"<p>Gear ratio: <b>1:34</b></p>", "text/html") == "Gear ratio: 1:34"

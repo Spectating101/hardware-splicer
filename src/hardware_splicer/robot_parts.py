@@ -170,6 +170,14 @@ def html_to_text(html: str) -> str:
     return normalise(htmllib.unescape(html))
 
 
+def source_text(raw: bytes, content_type: str) -> str:
+    """Readable text of a fetched HTML page or JSON reply (PDFs are converted by the capture script)."""
+    decoded = raw.decode("utf-8", errors="replace")
+    if "json" in content_type.lower():
+        return json.dumps(json.loads(decoded), ensure_ascii=False, indent=1)
+    return html_to_text(decoded)
+
+
 def verify_quotes(parts: list[dict], capture_dir: Path) -> dict:
     """Check every quote against the captured copy of its own source (``capture_dir/index.json`` maps url to file)."""
     capture_dir = Path(capture_dir)
