@@ -204,3 +204,21 @@ def test_wrong_product_rulebook_and_duplicate_model_rejected():
     rules["lanes"][0]["competitor_models"].append(deepcopy(rules["lanes"][0]["competitor_models"][0]))
     with pytest.raises(OpportunityEvidenceError, match="duplicated model"):
         qualify(source_bytes=source, handoff=bridge, plan=PLAN, rules=rules)
+
+
+def test_forged_asking_price_cannot_be_injected_after_source_hash():
+    pack = source_pack()
+    row = next(x for x in pack["signals"] if x["kind"] == "marketplace_asking_price")
+    row["source_metadata"]["asking_price_twd"] = 1
+    source, bridge = make_bridge(pack)
+    with pytest.raises(OpportunityEvidenceError, match="asking price"):
+        qualify(source_bytes=source, handoff=bridge, plan=PLAN, rules=RULES)
+
+
+def test_seller_counter_cannot_be_inflated_without_changing_source_record():
+    pack = source_pack()
+    row = next(x for x in pack["signals"] if x["kind"] == "marketplace_asking_price")
+    row["source_metadata"]["seller_reported_cumulative_sold"] = 1000000
+    source, bridge = make_bridge(pack)
+    with pytest.raises(OpportunityEvidenceError, match="seller counter"):
+        qualify(source_bytes=source, handoff=bridge, plan=PLAN, rules=RULES)
