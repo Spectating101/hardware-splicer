@@ -56,7 +56,7 @@ def assess(source: bytes) -> dict[str, Any]:
             references = m.get("mechanical_conflicting_vendor_references", [])
             unique = {tuple(x.get("dimensions_mm", [])) for x in references if isinstance(x, dict)}
             if len(unique) < 2 or (55,40) not in unique or (56,41) not in unique:
-                raise CarrierGateError("known CM5 55x40 vs 56x41 vendor drawing conflict omitted")
+                raise CarrierGateError("known CM5 dimension conflict: 55x40 vs 56x41 vendor drawing reference omitted")
             block("vendor_dimension_reference_conflict", mid,
                   "CM5 product page says 56x41mm; docs say 55x40mm; actual vendor DXF+STEP must govern fitting")
         if not m.get("official_carrier_design") or not m.get("kicad_community"):

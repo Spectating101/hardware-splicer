@@ -1,0 +1,1182 @@
+{
+  "schema": "hs.cm5_pinout_audit.v1",
+  "module": "Radxa CM5 V2.21",
+  "manufacturer_xlsx_url": "https://dl.radxa.com/cm5/v2210/radxa_cm5_v2210_pinout.xlsx",
+  "manufacturer_xlsx_sha256": "191052d98a057384b6659bab2626aae81cfc6b565f3216f20433c26046029b9c",
+  "community_repo": "swdee/radxa-cm5-kicad",
+  "community_repo_commit": "33add7f768b313ddef58c81eca8f2d1c8004ac66",
+  "community_symbol_sha256": "389141960fdc4f4023b631edec4e0002edf962d79d4be56dca786b81c606954c",
+  "community_footprint_sha256": "92d2f4aca9df8f6723458639537c99e17396198f986d7e7258f4a7b567bb2439",
+  "symbol_pin_count": 300,
+  "footprint_pad_count": 300,
+  "vendor_contact_count": 300,
+  "pin_name_differences": 192,
+  "manufacturer_NC_conflicts": 22,
+  "changed_contacts": [
+    {
+      "pin": 3,
+      "upstream": "Ethernet_Pair3_P",
+      "vendor": "PHY1_MDI3+",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 4,
+      "upstream": "Ethernet_Pair1_P",
+      "vendor": "PHY1_MDI1+",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 5,
+      "upstream": "Ethernet_Pair3_N",
+      "vendor": "PHY1_MDI3-",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 6,
+      "upstream": "Ethernet_Pair1_N",
+      "vendor": "PHY1_MDI1-",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 9,
+      "upstream": "Ethernet_Pair2_N",
+      "vendor": "PHY1_MDI2-",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 10,
+      "upstream": "Ethernet_Pair0_N",
+      "vendor": "PHY1_MDI0-",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 11,
+      "upstream": "Ethernet_Pair2_P",
+      "vendor": "PHY1_MDI2+",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 12,
+      "upstream": "Ethernet_Pair0_P",
+      "vendor": "PHY1_MDI0+",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 15,
+      "upstream": "Ethernet_nLED3(3.3v)",
+      "vendor": "PHY1_LED2_Y",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 16,
+      "upstream": "Ethernet_SYNC_IN(1.8v)",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 17,
+      "upstream": "Ethernet_nLED2(3.3v)",
+      "vendor": "PHY1_LED1_G",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 18,
+      "upstream": "Ethernet_SYNC_OUT(1.8v)",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 19,
+      "upstream": "Ethernet_nLED1(3.3v)",
+      "vendor": "PHY1_LED0_Y1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 20,
+      "upstream": "EEPROM_nWP",
+      "vendor": "HP_INT",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 21,
+      "upstream": "PI_nLED_Activity",
+      "vendor": "PWM15_M1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 24,
+      "upstream": "GPIO26",
+      "vendor": "PCIE20X1_2_WAKEN_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 25,
+      "upstream": "GPIO21",
+      "vendor": "I2C4_SDA_M3_WIFI",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 26,
+      "upstream": "GPIO19",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 27,
+      "upstream": "GPIO20",
+      "vendor": "WIFI_REG_ON_E",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 28,
+      "upstream": "GPIO13",
+      "vendor": "SPIO_MOSI_M1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 29,
+      "upstream": "GPIO16",
+      "vendor": "GSENSOR_INT",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 30,
+      "upstream": "GPIO6",
+      "vendor": "SPIO_CLK_M1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 31,
+      "upstream": "GPIO12",
+      "vendor": "SPIO_CS0M1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 34,
+      "upstream": "GPIO5",
+      "vendor": "I2S0_SDO0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 35,
+      "upstream": "ID_SC",
+      "vendor": "I2C8_SCL_M2_CAM",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 36,
+      "upstream": "ID_SD",
+      "vendor": "I2C8_SDA_M2_CAM",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 37,
+      "upstream": "GPIO7",
+      "vendor": "TP_INT_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 38,
+      "upstream": "GPIO11",
+      "vendor": "MIPI_CAM2_RST_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 39,
+      "upstream": "GPIO8",
+      "vendor": "TP_RST_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 40,
+      "upstream": "GPIO9",
+      "vendor": "GPIO1_B1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 41,
+      "upstream": "GPIO25",
+      "vendor": "LCD_RESET_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 44,
+      "upstream": "GPIO10",
+      "vendor": "GPIO1_B2_CAM1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 45,
+      "upstream": "GPIO24",
+      "vendor": "GPIO1_A6_CAM1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 46,
+      "upstream": "GPIO22",
+      "vendor": "I2S0_SCLK_TX",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 47,
+      "upstream": "GPIO23",
+      "vendor": "MIPI_CAM2_PDN_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 48,
+      "upstream": "GPIO27",
+      "vendor": "I2S0_LRCK_TX",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 49,
+      "upstream": "GPIO18",
+      "vendor": "I2C4_SCL_M3_WIFI",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 50,
+      "upstream": "GPIO17",
+      "vendor": "I2S0_MCLK",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 51,
+      "upstream": "GPIO15",
+      "vendor": "UART2_RX_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 54,
+      "upstream": "GPIO4",
+      "vendor": "I2S0_SDI0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 55,
+      "upstream": "GPIO14",
+      "vendor": "UART2_TX_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 56,
+      "upstream": "GPIO3",
+      "vendor": "GPIO0_C7",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 57,
+      "upstream": "SD_CLK",
+      "vendor": "SDMMC_CLK",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 58,
+      "upstream": "GPIO2",
+      "vendor": "GPIO0_D0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 61,
+      "upstream": "SD_DAT3",
+      "vendor": "SDMMC_D3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 62,
+      "upstream": "SD_CMD",
+      "vendor": "SDMMC_CMD",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 63,
+      "upstream": "SD_DAT0",
+      "vendor": "SDMMC_D0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 64,
+      "upstream": "SD_DAT5",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 67,
+      "upstream": "SD_DAT1",
+      "vendor": "SDMMC_D1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 68,
+      "upstream": "SD_DAT4",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 69,
+      "upstream": "SD_DAT2",
+      "vendor": "SDMMC_D2",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 70,
+      "upstream": "SD_DAT7",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 72,
+      "upstream": "SD_DAT6",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 73,
+      "upstream": "SD_VDD_Override",
+      "vendor": "VCCIO_FLASH",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 76,
+      "upstream": "Reserved",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 77,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 78,
+      "upstream": "GPIO_VREF(1.8v/3.3v_Input)",
+      "vendor": "GPIO_VREF",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 79,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 80,
+      "upstream": "SCL0",
+      "vendor": "I2C7_SCL_M2",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 81,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 82,
+      "upstream": "SDA0",
+      "vendor": "I2C7_SDA_M2",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 83,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 84,
+      "upstream": "+3.3v_(Output)",
+      "vendor": "VCC_3V3_S3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 85,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 86,
+      "upstream": "+3.3v_(Output)",
+      "vendor": "VCC_3V3_S3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 87,
+      "upstream": "+5v_(Input)",
+      "vendor": "VCC_SYSIN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 88,
+      "upstream": "+1.8v_(Output)",
+      "vendor": "VCC_1V8_S0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 89,
+      "upstream": "WiFi_nDisable",
+      "vendor": "PWM4_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 90,
+      "upstream": "+1.8v_(Output)",
+      "vendor": "VCC_1V8_S0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 91,
+      "upstream": "BT_nDisable",
+      "vendor": "HOST_WAKE_BT_H",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 92,
+      "upstream": "RUN_PG",
+      "vendor": "RESET_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 93,
+      "upstream": "nRPIBOOT",
+      "vendor": "SARADC_VIN0_BOOT",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 94,
+      "upstream": "AnalogIP1",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 95,
+      "upstream": "nPI_LED_PWR",
+      "vendor": "WIFI_LED",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 96,
+      "upstream": "AnalogIP0",
+      "vendor": "SARADC_VIN4",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 97,
+      "upstream": "Camera_GPIO",
+      "vendor": "USB_HOST_PWREN_H",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 99,
+      "upstream": "Global_EN",
+      "vendor": "PWRON_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 100,
+      "upstream": "nEXTRST",
+      "vendor": "SPIO_MISO_M1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 101,
+      "upstream": "USB_OTG_ID",
+      "vendor": "TYPEC0_USB20_OTG_ID",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 102,
+      "upstream": "PCIe_CLK_nREQ",
+      "vendor": "PCIE20X1_2_CLKREQN_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 103,
+      "upstream": "USB2_N",
+      "vendor": "TYPEC0_OTG_DM",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 104,
+      "upstream": "Reserved",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 105,
+      "upstream": "USB2_P",
+      "vendor": "TYPEC0_OTG_DP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 106,
+      "upstream": "Reserved",
+      "vendor": "5V_HDMI",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 109,
+      "upstream": "PCIe_nRST",
+      "vendor": "PCIE20X1_2_PERSTN_M0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 110,
+      "upstream": "PCIe_CLK_P",
+      "vendor": "PCIE20_0_REFCLKP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 111,
+      "upstream": "VDAC_COMP",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 112,
+      "upstream": "PCIe_CLK_N",
+      "vendor": "PCIE20_0_REFCLKN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 115,
+      "upstream": "CAM1_D0_N",
+      "vendor": "MIPI_DPHY0_RX_D0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 116,
+      "upstream": "PCIe_RX_P",
+      "vendor": "PCIE20_0_RXP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 117,
+      "upstream": "CAM1_D0_P",
+      "vendor": "MIPI_DPHY0_RX_D0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 118,
+      "upstream": "PCIe_RX_N",
+      "vendor": "PCIE20_0_RXN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 121,
+      "upstream": "CAM1_D1_N",
+      "vendor": "MIPI_DPHY0_RX_D1N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 122,
+      "upstream": "PCIe_TX_P",
+      "vendor": "PCIE20_0_TXP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 123,
+      "upstream": "CAM1_D1_P",
+      "vendor": "MIPI_DPHY0_RX_D1P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 124,
+      "upstream": "PCIe_TX_N",
+      "vendor": "PCIE20_0_TXN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 127,
+      "upstream": "CAM1_C_N",
+      "vendor": "MIPI_DPHY0_RX_CLKN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 128,
+      "upstream": "CAM0_D0_N",
+      "vendor": "MIPI_CSI0_RX_D0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 129,
+      "upstream": "CAM1_C_P",
+      "vendor": "MIPI_DPHY0_RX_CLKP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 130,
+      "upstream": "CAM0_D0_P",
+      "vendor": "MIPI_CSI0_RX_D0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 133,
+      "upstream": "CAM1_D2_N",
+      "vendor": "MIPI_DPHY0_RX_D2N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 134,
+      "upstream": "CAM0_D1_N",
+      "vendor": "MIPI_CSI0_RX_D1N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 135,
+      "upstream": "CAM1_D2_P",
+      "vendor": "MIPI_DPHY0_RX_D2P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 136,
+      "upstream": "CAM0_D1_P",
+      "vendor": "MIPI_CSI0_RX_D1P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 139,
+      "upstream": "CAM1_D3_N",
+      "vendor": "MIPI_DPHY0_RX_D3N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 140,
+      "upstream": "CAM0_C_N",
+      "vendor": "MIPI_CSI0_RX_CLK0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 141,
+      "upstream": "CAM1_D3_P",
+      "vendor": "MIPI_DPHY0_RX_D3P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 142,
+      "upstream": "CAM0_C_P",
+      "vendor": "MIPI_CSI0_RX_CLK0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 143,
+      "upstream": "HDMI1_HOTPLUG",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 145,
+      "upstream": "HDMI1_SDA",
+      "vendor": "HDMI0_TX_SBDP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 146,
+      "upstream": "HDMI1_TX2_P",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 147,
+      "upstream": "HDMI1_SCL",
+      "vendor": "HDMI0_TX_SBDN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 148,
+      "upstream": "HDMI1_TX2_N",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 149,
+      "upstream": "HDMI1_CEC",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 151,
+      "upstream": "HDMI0_CEC",
+      "vendor": "HDMI_TX0_CEC_PORT",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 152,
+      "upstream": "HDMI1_TX1_P",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 153,
+      "upstream": "HDMI0_HOTPLUG",
+      "vendor": "HDMI_TX0_HPD",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 154,
+      "upstream": "HDMI1_TX1_N",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 157,
+      "upstream": "DSI0_D0_N",
+      "vendor": "MIPI_DPHY0_TX_D0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 158,
+      "upstream": "HDMI1_TX0_P",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 159,
+      "upstream": "DSI0_D0_P",
+      "vendor": "MIPI_DPHY0_TX_D0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 160,
+      "upstream": "HDMI1_TX0_N",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 163,
+      "upstream": "DSI0_D1_N",
+      "vendor": "MIPI_DPHY0_TX_D1N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 164,
+      "upstream": "HDMI1_CLK_P",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 165,
+      "upstream": "DSI0_D1_P",
+      "vendor": "MIPI_DPHY0_TX_D1P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 166,
+      "upstream": "HDMI1_CLK_N",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 169,
+      "upstream": "DSI0_C_N",
+      "vendor": "MIPI_DPHY0_TX_CLKN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 170,
+      "upstream": "HDMI0_TX2_P",
+      "vendor": "HDMI0_TX2P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 171,
+      "upstream": "DSI0_C_P",
+      "vendor": "MIPI_DPHY0_TX_CLKP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 172,
+      "upstream": "HDMI0_TX2_N",
+      "vendor": "HDMI0_TX2N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 175,
+      "upstream": "DSI1_D0_N",
+      "vendor": "MIPI_DPHY1_TX_D0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 176,
+      "upstream": "HDMI0_TX1_P",
+      "vendor": "HDMI0_TX1P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 177,
+      "upstream": "DSI1_D0_P",
+      "vendor": "MIPI_DPHY1_TX_D0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 178,
+      "upstream": "HDMI0_TX1_N",
+      "vendor": "HDMI0_TX1N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 181,
+      "upstream": "DSI1_D1_N",
+      "vendor": "MIPI_DPHY1_TX_D1N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 182,
+      "upstream": "HDMI0_TX0_P",
+      "vendor": "HDMI0_TX0P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 183,
+      "upstream": "DSI1_D1_P",
+      "vendor": "MIPI_DPHY1_TX_D1P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 184,
+      "upstream": "HDMI0_TX0_N",
+      "vendor": "HDMI0_TX0N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 187,
+      "upstream": "DSI1_C_N",
+      "vendor": "MIPI_DPHY1_TX_CLKN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 188,
+      "upstream": "HDMI0_CLK_P",
+      "vendor": "HDMI0_TX3P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 189,
+      "upstream": "DSI1_C_P",
+      "vendor": "MIPI_DPHY1_TX_CLKP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 190,
+      "upstream": "HDMI0_CLK_N",
+      "vendor": "HDMI0_TX3N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 193,
+      "upstream": "DSI1_D2_N",
+      "vendor": "MIPI_DPHY1_TX_D2N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 194,
+      "upstream": "DSI1_D3_N",
+      "vendor": "MIPI_DPHY1_TX_D3N",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 195,
+      "upstream": "DSI1_D2_P",
+      "vendor": "MIPI_DPHY1_TX_D2P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 196,
+      "upstream": "DSI1_D3_P",
+      "vendor": "MIPI_DPHY1_TX_D3P",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 199,
+      "upstream": "HDMI0_SDA",
+      "vendor": "HDMI_TX0_SDA_5V",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 200,
+      "upstream": "HDMI0_SCL",
+      "vendor": "HDMI_TX0_SCL_5V",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 204,
+      "upstream": "GPIO_3V3_1",
+      "vendor": "GPIO3_C0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 206,
+      "upstream": "GPIO_3V3_2",
+      "vendor": "GPIO3_B7",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 208,
+      "upstream": "GPIO_3V3_3",
+      "vendor": "TYPEC0_SBU1_DC",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 210,
+      "upstream": "GPIO_1V8_CAM_CLK",
+      "vendor": "GPIO1_B6_CAM2_CLK",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 212,
+      "upstream": "GPIO_1V8_2",
+      "vendor": "GPIO1_B7",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 214,
+      "upstream": "GPIO_3V3_4",
+      "vendor": "TYPEC0_SBU2_DC",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 218,
+      "upstream": "GPIO_3V3_PWM",
+      "vendor": "PWM11_M3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 220,
+      "upstream": "GPIO_1V8_3",
+      "vendor": "GPIO1_C1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 224,
+      "upstream": "GPIO_1V8_4",
+      "vendor": "WIFI_PWR_EN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 226,
+      "upstream": "SARADC_VIN0_KEY/RECOVERY",
+      "vendor": "SARADC_VIN1_KEY/RECOVERY",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 228,
+      "upstream": "SARADC_VIN1_HW_ID",
+      "vendor": "SARADC_VIN2_DC",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 230,
+      "upstream": "SARADC_VIN2_HP_HOOK",
+      "vendor": "SARADC_VIN3_HP_HOOK",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 234,
+      "upstream": "GPIO_3V3_6",
+      "vendor": "LCD_PWREN_H",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 236,
+      "upstream": "GPIO_1V8_HP_DET_L",
+      "vendor": "HP_DET_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 238,
+      "upstream": "GPIO_3V3_7",
+      "vendor": "GPIO4_A4",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 239,
+      "upstream": "RSVD",
+      "vendor": "PCIE20_2_REFCLKP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 240,
+      "upstream": "GPIO_3V3_8",
+      "vendor": "GPIO4_A5",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 241,
+      "upstream": "RSVD",
+      "vendor": "PCIE20_2_REFCLKN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 244,
+      "upstream": "GPIO_1V8_6",
+      "vendor": "GPIO1_D0",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 245,
+      "upstream": "USB3_HOST1_DP",
+      "vendor": "USB20_HOST1_DP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 246,
+      "upstream": "GPIO_1V8_7",
+      "vendor": "GPIO1_D1",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 247,
+      "upstream": "USB3_HOST1_DM",
+      "vendor": "USB20_HOST1_DM",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 251,
+      "upstream": "USB3_HOST1_SSTXP",
+      "vendor": "USB30_2_SSTXP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 253,
+      "upstream": "USB3_HOST1_SSTXN",
+      "vendor": "USB30_2_SSTXN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 257,
+      "upstream": "USB3_HOST1_SSRXP",
+      "vendor": "USB30_2_SSRXP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 259,
+      "upstream": "USB3_HOST1_SSRXN",
+      "vendor": "USB30_2_SSRXN",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 263,
+      "upstream": "USB2_HOST2_DP",
+      "vendor": "USB20_HOST0_DP",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 265,
+      "upstream": "USB2_HOST2_DM",
+      "vendor": "USB20_HOST0_DM",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 269,
+      "upstream": "I2C_SDA_3V3",
+      "vendor": "I2C6_SDA_M3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 271,
+      "upstream": "I2C_SCL_3V3",
+      "vendor": "I2C6_SCL_M3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 275,
+      "upstream": "GPIO_1V8_9",
+      "vendor": "GPIO1_C6_S",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 277,
+      "upstream": "GPIO_1V8_10",
+      "vendor": "GPIO1_D5_S",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 279,
+      "upstream": "GPIO_1V8_11",
+      "vendor": "GPIO1_C4_S",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 283,
+      "upstream": "GPIO_1V8_12",
+      "vendor": "GPIO1_D2",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 285,
+      "upstream": "GPIO_3V3_12",
+      "vendor": "BT_HOST_WAKE",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 287,
+      "upstream": "GPIO_3V3_13",
+      "vendor": "GPIO4_A7",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 289,
+      "upstream": "GPIO_3V3_14",
+      "vendor": "GPIO4_A6",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 290,
+      "upstream": "GPIO_1V8_32K",
+      "vendor": "NC",
+      "manufacturer_no_connect": true
+    },
+    {
+      "pin": 292,
+      "upstream": "VCC_SD_3V3_S3",
+      "vendor": "VCC_3V3_S3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 293,
+      "upstream": "GPIO_3V3_15",
+      "vendor": "GPIO0_C2",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 294,
+      "upstream": "GPIO_3V3_9",
+      "vendor": "GPIO0_D3",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 296,
+      "upstream": "GPIO_3V3_CC_INT0_L",
+      "vendor": "CC_INT0_L",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 297,
+      "upstream": "USB_OTG0_VBUSDET",
+      "vendor": "TYPEC0_OTG_VBUSDET",
+      "manufacturer_no_connect": false
+    },
+    {
+      "pin": 298,
+      "upstream": "GPIO_3V3_BT_REG_ON",
+      "vendor": "BT_REG_ON_H",
+      "manufacturer_no_connect": false
+    }
+  ],
+  "pin_names_after_patch_match_vendor": true,
+  "kicad_symbol_sha256": "6e5e4f0cce7a17558c6af3d1241ffb14d360a8bcc466972203653752c8584b98",
+  "source_footprint_identifier_corrected": true,
+  "unverified_symbol_current_annotations_removed": true,
+  "physical_pad_geometry_independently_validated": false,
+  "pin_electrical_types_independently_validated": false,
+  "released_for_fabrication": false,
+  "blockers": [
+    "Connector pad geometry and placement not independently dimension-checked against CM5 module DXF/STEP.",
+    "Pin electrical types in the community symbol have NOT been checked against manufacturer datasheet.",
+    "No carrier schematic nets, power regulation, USB/HDMI/DSI routing, ESD or controlled impedance design.",
+    "No ERC/DRC of a complete connected board, no prototype boot or physical electrical tests."
+  ]
+}
