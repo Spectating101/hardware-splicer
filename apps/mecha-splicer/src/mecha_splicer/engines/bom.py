@@ -97,6 +97,25 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
 
 def _bom_for_clamshell_terminal(p: ClamshellTerminalSpec) -> list[BomLine]:
     """Prototype budget inventory, not ordered or wired."""
+    if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm5_dual_dsi":
+        return [
+            BomLine("compute", "Radxa CM5 V2.21", "56x41mm SoM; board-to-board mating stack not qualified", 1,
+                "Candidate only; processor carrier / power sequencing and PCB not validated", sku="Radxa_CM5_V2.21"),
+            BomLine("display", "Winstar WF50DTYA3MNG10-000", "127.6x73.3x3.45mm 2-lane MIPI DSI capacitive touch", 2,
+                "Unverified Linux panel drivers, touch I2C topology and FPC bend; not ordered", sku="WF50DTYA3MNG10-000"),
+            BomLine("electronics", "custom CM5 carrier", "nominal 0.8mm PCB; NO routed copper or footprint approval", 1,
+                "Must qualify 200+100-pad mating connectors and 5V-to-4V supply", sku=""),
+            BomLine("power", "protected pouch cell and charging path", "80x50x6mm nominal naked placeholder", 1,
+                "Cell protection/BMS, swelling, thermal and charger not designed", sku=""),
+            BomLine("thermal", "CM5 heat spreader", "0.5mm unverified thermal pad/plate", 1,
+                "No measured thermal resistance or usable 18mm proof", sku=""),
+            BomLine("hardware", "hinge + rated display FPC", f"{p.hinge_pin_d_mm}mm hinge pin, bend radius unqualified", 1,
+                "Actual flex tail extends beyond shell if straight; cycles and strain relief not proven", sku=""),
+            BomLine("printed", "CM5 dual-touch lower enclosure", "Native Mecha-Splicer shell, not fit qualified", 1,
+                "Requires real mounts, PCB, battery clearance", sku=""),
+            BomLine("printed", "CM5 dual-touch upper enclosure", "Native Mecha-Splicer shell, not fit qualified", 1,
+                "Requires actual panel retention, display connector route", sku=""),
+        ]
     if p.input_surface_mode == "dual_touch":
         return [
             BomLine("electronics", "Waveshare ESP32-S3-Touch-LCD-4.3", "ESP32-S3 N16R8, 800x480 touch 106.1x67.8mm", 2,

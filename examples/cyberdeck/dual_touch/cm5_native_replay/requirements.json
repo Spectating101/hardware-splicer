@@ -1,0 +1,52 @@
+{
+  "schema": "hs.cyberdeck_dual_touch_input.v1",
+  "product": "Pocket cyberdeck, two independent touchscreens, no mechanical keyboard",
+  "input_mode": "dual_touch",
+  "physical_keyboard": false,
+  "compute_architecture": "cm5_dual_dsi",
+  "panel_count": 2,
+  "body": {
+    "length_mm": 155,
+    "width_mm": 80,
+    "hard_max_thickness_mm": 18,
+    "lid_height_mm": 5.8,
+    "closed_gap_mm": 0.8
+  },
+  "panel": {
+    "manufacturer": "Winstar",
+    "mpn": "WF50DTYA3MNG10-000",
+    "manufacturer_source_url": "https://www.winstar.com.tw/d/676/WF50DTYA3MNG10-000.pdf",
+    "length_mm": 127.6,
+    "width_mm": 73.3,
+    "thickness_mm": 3.45,
+    "tft_tail_extension_mm": 42.7,
+    "touch": "GT928 I2C",
+    "dsi_lanes": 2
+  },
+  "lower_stack": {
+    "cm5_geometry_source_url": "https://dl.radxa.com/cm5/radxa_cm5_pcba_3d.stp.zip",
+    "back_wall_mm": 1.6,
+    "pcb_mm": 0.8,
+    "mating_mm": 1.5,
+    "cm5_pcba_mm": 4.285,
+    "thermal_mm": 0.5,
+    "battery_mm": 6,
+    "research_min_clearance_mm": 1,
+    "all_stacks_vendor_qualified": false
+  },
+  "thickness_scenarios_mm": [
+    18,
+    19,
+    20,
+    21
+  ],
+  "evidence_notes": {
+    "origin": "Native HS Mecha-Splicer FDM floor 1.6 mm applied; earlier 0.85mm CadQuery shell was not equivalent to its printable geometry",
+    "power_stage": "MP8759 5V-to-nominal4V and SGM2590 USB stage remain incomplete, PRs #305-306",
+    "thermal": "0.5mm spreader is an assumed layer, not measured",
+    "mating": "1.5mm is not a verified Radxa board-to-board contact-height selection",
+    "fpc": "Unfolded TFT flex ~42.7mm must fold; no radius or connector clearance",
+    "battery": "6mm is naked cell thickness only; protection, capacity and swelling unverified"
+  },
+  "fabrication_authorized": false
+}
