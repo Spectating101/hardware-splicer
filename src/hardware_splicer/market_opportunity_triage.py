@@ -164,7 +164,9 @@ def _check_source_pack(pack: Mapping[str, Any], handoff: Mapping[str, Any], sour
                     or type(prices[0]) not in (int, float) or not math.isfinite(asking)
                     or asking != prices[0]):
                 raise OpportunityEvidenceError("asking price does not match source record")
-            if meta.get("seller_reported_cumulative_sold") != record.get("sold_qty"):
+            reported = record.get("sold_qty")
+            expected = reported if type(reported) is int and reported >= 0 else None
+            if meta.get("seller_reported_cumulative_sold") != expected:
                 raise OpportunityEvidenceError("seller counter does not match source record")
     if ids != bridge_ids:
         raise OpportunityEvidenceError("handoff market signals mismatch acquired pack")
