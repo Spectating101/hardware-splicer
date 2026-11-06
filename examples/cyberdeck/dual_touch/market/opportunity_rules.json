@@ -1,0 +1,145 @@
+{
+  "schema": "hs.market_opportunity_rules.v1",
+  "target_architecture": "dual_esp32_touch_4p3_rs485",
+  "global_issue_pain_terms": [
+    "feature request",
+    "request",
+    "missing",
+    "cannot",
+    "can't",
+    "unable",
+    "fails",
+    "failure",
+    "broken",
+    "doesn't",
+    "does not",
+    "need",
+    "improve",
+    "difficult",
+    "difficulties",
+    "unresponsive",
+    "support",
+    "not working",
+    "bug",
+    "error",
+    "limitation",
+    "problem"
+  ],
+  "global_listing_exclusions": [
+    "配件",
+    "擴展板",
+    "擴充板",
+    "轉接板",
+    "保護殼",
+    "外殼",
+    "皮套",
+    "貼膜",
+    "主板",
+    "主機板",
+    "零件",
+    "鍵盤",
+    "電池",
+    "充電器",
+    "變壓器",
+    "usb hub",
+    "parts only",
+    "for parts",
+    "repair only"
+  ],
+  "lanes": [
+    {
+      "id": "mobile-development-friction",
+      "candidate_product_id": "dual_esp32_touch_4p3_rs485",
+      "candidate_label": "Pocket remote-development terminal",
+      "hypothesis": "Users need portable authenticated terminal and agent-control workflows beyond phone ergonomics.",
+      "required_validation": "Recruit phone-only remote developers; run timed task comparison and price-labeled interviews.",
+      "problem_terms": [
+        "remote coding",
+        "remote development",
+        "ssh",
+        "termux",
+        "terminal",
+        "keyboard",
+        "mobile app",
+        "pty"
+      ],
+      "competitor_models": [
+        {
+          "id": "lilygo-t-deck-plus",
+          "all_terms": [
+            "t-deck",
+            "plus"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "embedded-field-terminal",
+      "candidate_product_id": "field_terminal_unspecified",
+      "candidate_label": "Portable field-service terminal",
+      "hypothesis": "Field technicians need integrated portable debugging and industrial interfaces.",
+      "required_validation": "Interview field technicians; identify exact field-bus connector/isolation needs and quote a complete device.",
+      "problem_terms": [
+        "rs485",
+        "modbus",
+        "serial",
+        "uart",
+        "usb serial",
+        "android usb"
+      ],
+      "competitor_models": [
+        {
+          "id": "clockworkpi-uconsole",
+          "all_terms": [
+            "uconsole"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "repair-and-salvage-workflows",
+      "candidate_product_id": "repair_donor_unspecified",
+      "candidate_label": "Repair or donor-computer workflow",
+      "hypothesis": "Repeatable diagnostics and verified donor hardware could improve repair economics.",
+      "required_validation": "Measure actual defect/yield, labor, lawful ownership transfer and realized resale prices on a pilot lot.",
+      "problem_terms": [
+        "laptop repair",
+        "thinkpad repair",
+        "repairability",
+        "replace battery",
+        "battery replacement",
+        "laptop hinge"
+      ],
+      "competitor_models": [
+        {
+          "id": "thinkpad-x240",
+          "all_terms": [
+            "thinkpad",
+            "x240"
+          ]
+        },
+        {
+          "id": "thinkpad-x250",
+          "all_terms": [
+            "thinkpad",
+            "x250"
+          ]
+        },
+        {
+          "id": "thinkpad-x260",
+          "all_terms": [
+            "thinkpad",
+            "x260"
+          ]
+        },
+        {
+          "id": "thinkpad-x61",
+          "all_terms": [
+            "thinkpad",
+            "x61"
+          ]
+        }
+      ]
+    }
+  ]
+}
