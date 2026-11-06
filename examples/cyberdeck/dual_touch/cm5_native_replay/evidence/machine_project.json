@@ -1,0 +1,243 @@
+{
+  "schema_version": "hardware_splicer.machine_project.v1",
+  "project_id": "HS-CM5-DUAL-TOUCH",
+  "name": "Pocket dual-touch CM5",
+  "purpose": "Compare hard pocket thickness to nominal CAD constraints",
+  "lifecycle_state": "intake",
+  "requested_release_state": "build_ready",
+  "requirements": [
+    {
+      "requirement_id": "r-thickness",
+      "statement": "Closed body shall not exceed specified hard thickness",
+      "kind": "constraint",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-thickness"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-cm5-clearance",
+      "statement": "CM5-to-lower-touch-display nominal AABB clearance >=1mm research margin",
+      "kind": "performance",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-cm5-fit"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-dual-touch",
+      "statement": "Both real touchscreen panels shall operate on distinct DSI and GT928 I2C paths",
+      "kind": "functional",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-dsi"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-hinge",
+      "statement": "Hinge FPC flex routing and fatigue shall be physically qualified",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-fpc"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-protected-power",
+      "statement": "Battery, charging, 5V, 4V and panel backlight boost shall be physically qualified",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-power"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-thermal",
+      "statement": "CM5 thermal path shall be verified under load",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-thermal"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-mating",
+      "statement": "Module-to-carrier mating and actual stack height shall be vendor-qualified",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-mating"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    }
+  ],
+  "functions": [],
+  "subsystems": [],
+  "components": [],
+  "interfaces": [],
+  "constraints": [],
+  "verifications": [
+    {
+      "verification_id": "v-thickness",
+      "name": "Closed body shall not exceed specified hard thickness",
+      "method_type": "analysis",
+      "status": "failed",
+      "requirement_ids": [
+        "r-thickness"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-cm5-fit",
+      "name": "CM5-to-lower-touch-display nominal AABB clearance >=1mm research margin",
+      "method_type": "analysis",
+      "status": "passed",
+      "requirement_ids": [
+        "r-cm5-clearance"
+      ],
+      "target_ids": [],
+      "evidence_ids": [
+        "e-nominal-fit"
+      ],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-dsi",
+      "name": "Both real touchscreen panels shall operate on distinct DSI and GT928 I2C paths",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-dual-touch"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-fpc",
+      "name": "Hinge FPC flex routing and fatigue shall be physically qualified",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-hinge"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-power",
+      "name": "Battery, charging, 5V, 4V and panel backlight boost shall be physically qualified",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-protected-power"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-thermal",
+      "name": "CM5 thermal path shall be verified under load",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-thermal"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-mating",
+      "name": "Module-to-carrier mating and actual stack height shall be vendor-qualified",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-mating"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "e-nominal-fit",
+      "kind": "native HS mechanical AABB",
+      "basis": "manufacturer nominal geometry and unverified mating/battery assumptions",
+      "ref": "hs_packaging_report.json",
+      "supports": [
+        "r-thickness",
+        "r-cm5-clearance"
+      ],
+      "authority": "proposed",
+      "simulated": true,
+      "metadata": {}
+    }
+  ],
+  "artifacts": [],
+  "discipline_payloads": {},
+  "metadata": {
+    "hard_max_mm": 18,
+    "no_physical_keyboard": true
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "schema": "hs.clamshell_ssh_cad.v1",
+  "generator": "native mecha_splicer.bundle.generate_bundle",
+  "spec": "dual_touch/cm5_native_replay/evidence/native_project_spec.json",
+  "native_outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad",
+    "dual_touch_visual_preview.scad"
+  ],
+  "native_dfm": [
+    {
+      "severity": "warn",
+      "message": "Closed gap may pinch keys and cable"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "CM5 two independent DSI hosts: panel drivers, touch controller bus, backlight boost and FPC routing not verified"
+    },
+    {
+      "severity": "warn",
+      "message": "3.45mm real panel plus CM5 mating, heat and protection need independent Z-constraint check; native shell alone is NOT fit proof"
+    },
+    {
+      "severity": "warn",
+      "message": "Ultra-thin FDM shell, hinge clearance and battery protection are NOT qualified for physical fabrication"
+    }
+  ],
+  "native_bom": [
+    {
+      "category": "compute",
+      "item": "Radxa CM5 V2.21",
+      "spec": "56x41mm SoM; board-to-board mating stack not qualified",
+      "qty": 1,
+      "notes": "Candidate only; processor carrier / power sequencing and PCB not validated",
+      "sku": "Radxa_CM5_V2.21"
+    },
+    {
+      "category": "display",
+      "item": "Winstar WF50DTYA3MNG10-000",
+      "spec": "127.6x73.3x3.45mm 2-lane MIPI DSI capacitive touch",
+      "qty": 2,
+      "notes": "Unverified Linux panel drivers, touch I2C topology and FPC bend; not ordered",
+      "sku": "WF50DTYA3MNG10-000"
+    },
+    {
+      "category": "electronics",
+      "item": "custom CM5 carrier",
+      "spec": "nominal 0.8mm PCB; NO routed copper or footprint approval",
+      "qty": 1,
+      "notes": "Must qualify 200+100-pad mating connectors and 5V-to-4V supply",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "protected pouch cell and charging path",
+      "spec": "80x50x6mm nominal naked placeholder",
+      "qty": 1,
+      "notes": "Cell protection/BMS, swelling, thermal and charger not designed",
+      "sku": ""
+    },
+    {
+      "category": "thermal",
+      "item": "CM5 heat spreader",
+      "spec": "0.5mm unverified thermal pad/plate",
+      "qty": 1,
+      "notes": "No measured thermal resistance or usable 18mm proof",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "hinge + rated display FPC",
+      "spec": "2.0mm hinge pin, bend radius unqualified",
+      "qty": 1,
+      "notes": "Actual flex tail extends beyond shell if straight; cycles and strain relief not proven",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM5 dual-touch lower enclosure",
+      "spec": "Native Mecha-Splicer shell, not fit qualified",
+      "qty": 1,
+      "notes": "Requires real mounts, PCB, battery clearance",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM5 dual-touch upper enclosure",
+      "spec": "Native Mecha-Splicer shell, not fit qualified",
+      "qty": 1,
+      "notes": "Requires actual panel retention, display connector route",
+      "sku": ""
+    }
+  ],
+  "native_hs_level_shift_result": "NOT_APPLICABLE_RS485_LINK",
+  "native_hs_level_shift_measurement_gates_open": 0,
+  "native_hs_level_shift_caveat": "Dual Waveshare boards use onboard SP3485 RS485; A/B, reference, power and firmware still unverified",
+  "mesh": {
+    "base_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "8d7cebdf15343738d6867637127d11fdaf878dfb3cb3253bd0f3bf462ad1c8bc",
+      "triangle_count": 1008,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        155.0,
+        84.6,
+        17.2
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bbox_max_mm": [
+        155.0,
+        84.6,
+        17.2
+      ],
+      "signed_volume_cm3": 29.427,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    },
+    "lid_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "adb55d7ff677076ee1609835903221c05d4783a4e5289f6611ec50beca270020",
+      "triangle_count": 580,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        155.0,
+        84.6,
+        9.6
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        10.4
+      ],
+      "bbox_max_mm": [
+        155.0,
+        84.6,
+        20.0
+      ],
+      "signed_volume_cm3": 25.004,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    }
+  },
+  "cgal_interference_sweep": [
+    {
+      "angle_deg": 0,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -30,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -60,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -90,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -135,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -165,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    }
+  ],
+  "closed_envelope": {
+    "width_mm": 155,
+    "depth_without_hinge_mm": 80,
+    "closed_thickness_mm": 20.0,
+    "hinge_projection_mm": 4.6,
+    "display_board_outer_footprint_mm": [
+      127.6,
+      73.3
+    ],
+    "lower_board_footprint_mm": [
+      127.6,
+      73.3
+    ],
+    "lower_input_type": "dual_touch",
+    "battery_not_yet_integrated": true,
+    "vendor_board_mounting_holes_unknown": true,
+    "port_access_cutouts_unverified": true
+  },
+  "electrical_wiring_not_ready": true,
+  "firmware_ssh_connected_to_optiplex": false,
+  "physical_hinge_sweep_tested": false,
+  "physical_fit_tested": false,
+  "actual_unit_assembled": false,
+  "usage_notes": "CGAL manifold checks prove geometry only. No vendor pin-length, battery, USB cutout or internal stacking proof."
+}

@@ -98,7 +98,7 @@ def _render_readme(bundle: Dict[str, Any]) -> str:
 
 def _write_bom_csv(path: Path, bom) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["category", "item", "spec", "qty", "sku", "notes"])
         for b in bom:
             w.writerow([b.category, b.item, b.spec, b.qty, getattr(b, "sku", ""), b.notes])

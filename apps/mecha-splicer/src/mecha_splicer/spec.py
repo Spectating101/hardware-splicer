@@ -91,11 +91,12 @@ class ClamshellTerminalSpec(BaseModel):
     """Two compact trays and pin hinge; not a validated physical product."""
     name: str = "clamshell_ssh_terminal"
     input_surface_mode: Literal["physical_keyboard", "dual_touch"] = "physical_keyboard"
+    compute_architecture: Literal["dual_esp32", "cm5_dual_dsi"] = "dual_esp32"
     case_w_mm: Annotated[float, Field(ge=110, le=170)] = 120.0
     case_d_mm: Annotated[float, Field(ge=72, le=140)] = 85.0
     base_h_mm: Annotated[float, Field(ge=10, le=30)] = 14.0
-    lid_h_mm: Annotated[float, Field(ge=10, le=30)] = 14.0
-    closed_gap_mm: Annotated[float, Field(ge=1, le=4)] = 1.6
+    lid_h_mm: Annotated[float, Field(ge=4, le=30)] = 14.0
+    closed_gap_mm: Annotated[float, Field(ge=0.6, le=4)] = 1.6
     wall_mm: Annotated[float, Field(ge=1.6, le=5)] = 2.2
     floor_mm: Annotated[float, Field(ge=1.6, le=5)] = 2.0
     clearance_mm: Annotated[float, Field(ge=0.3, le=2)] = 0.7
@@ -119,6 +120,12 @@ class ClamshellTerminalSpec(BaseModel):
 
     @model_validator(mode="after")
     def _fit_check(self):
+        if self.input_surface_mode == "physical_keyboard" and (self.lid_h_mm < 10 or self.closed_gap_mm < 1):
+            raise ValueError("legacy keyboard shell requires lid >=10 mm and gap >=1 mm")
+        if self.compute_architecture == "cm5_dual_dsi" and self.input_surface_mode != "dual_touch":
+            raise ValueError("CM5 dual-DSI architecture requires two touchscreens")
+        if self.lid_h_mm <= self.floor_mm:
+            raise ValueError("lid thickness must exceed floor thickness")
         usable_w = self.case_w_mm - 2*self.wall_mm - 2*self.clearance_mm
         usable_d = self.case_d_mm - 2*self.wall_mm - 2*self.clearance_mm
         lower_w = self.lower_touch_board_w_mm if self.input_surface_mode == "dual_touch" else self.keyboard_w_mm

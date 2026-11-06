@@ -1,0 +1,9 @@
+category,item,spec,qty,sku,notes
+compute,Radxa CM5 V2.21,56x41mm SoM; board-to-board mating stack not qualified,1,Radxa_CM5_V2.21,Candidate only; processor carrier / power sequencing and PCB not validated
+display,Winstar WF50DTYA3MNG10-000,127.6x73.3x3.45mm 2-lane MIPI DSI capacitive touch,2,WF50DTYA3MNG10-000,"Unverified Linux panel drivers, touch I2C topology and FPC bend; not ordered"
+electronics,custom CM5 carrier,nominal 0.8mm PCB; NO routed copper or footprint approval,1,,Must qualify 200+100-pad mating connectors and 5V-to-4V supply
+power,protected pouch cell and charging path,80x50x6mm nominal naked placeholder,1,,"Cell protection/BMS, swelling, thermal and charger not designed"
+thermal,CM5 heat spreader,0.5mm unverified thermal pad/plate,1,,No measured thermal resistance or usable 18mm proof
+hardware,hinge + rated display FPC,"2.0mm hinge pin, bend radius unqualified",1,,Actual flex tail extends beyond shell if straight; cycles and strain relief not proven
+printed,CM5 dual-touch lower enclosure,"Native Mecha-Splicer shell, not fit qualified",1,,"Requires real mounts, PCB, battery clearance"
+printed,CM5 dual-touch upper enclosure,"Native Mecha-Splicer shell, not fit qualified",1,,"Requires actual panel retention, display connector route"

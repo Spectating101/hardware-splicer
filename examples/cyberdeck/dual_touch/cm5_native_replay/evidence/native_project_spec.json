@@ -1,0 +1,33 @@
+{
+  "project_name": "HS-CM5-POCKET-DUAL-DSI-S2",
+  "mode": "prototype",
+  "process": "fdm",
+  "clamshell_terminal": {
+    "name": "CM5 2x 5in DSI touch - CAD shell candidate only",
+    "compute_architecture": "cm5_dual_dsi",
+    "input_surface_mode": "dual_touch",
+    "case_w_mm": 155,
+    "case_d_mm": 80,
+    "base_h_mm": 13.4,
+    "lid_h_mm": 5.8,
+    "closed_gap_mm": 0.8,
+    "wall_mm": 1.6,
+    "floor_mm": 1.6,
+    "clearance_mm": 0.3,
+    "display_board_w_mm": 127.6,
+    "display_board_d_mm": 73.3,
+    "lower_touch_board_w_mm": 127.6,
+    "lower_touch_board_d_mm": 73.3,
+    "hinge_outer_d_mm": 6.8,
+    "hinge_pin_d_mm": 2.0,
+    "pin_radial_clearance_mm": 0.35,
+    "hinge_y_offset_mm": 1.2,
+    "knuckle_end_margin_mm": 5.0,
+    "knuckle_outer_length_mm": 23.0,
+    "knuckle_axial_gap_mm": 7.0,
+    "cable_slot_w_mm": 5.2,
+    "cable_slot_h_mm": 3.6,
+    "preview_open_angle_deg": -135
+  },
+  "notes": "User insists on two touchscreens and hard max 18mm. Nominal shell only; FPC, thermals and mating still unknown."
+}

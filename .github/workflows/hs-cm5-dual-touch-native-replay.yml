@@ -1,0 +1,86 @@
+name: HS CM5 Native Dual-Touch Packaging Replay
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-cm5-dual-touch-native-replay.yml'
+      - 'src/hardware_splicer/cyberdeck_packaging_workflow.py'
+      - 'tests/test_cyberdeck_packaging_workflow.py'
+      - 'examples/cyberdeck/dual_touch/cm5_native_replay/**'
+      - 'apps/mecha-splicer/src/mecha_splicer/spec.py'
+      - 'apps/mecha-splicer/src/mecha_splicer/engines/bom.py'
+      - 'apps/mecha-splicer/src/mecha_splicer/engines/dfm.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python tooling
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Replay native Mecha-Splicer, MechanicalFit, and MachineProject
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m hardware_splicer.cyberdeck_packaging_workflow \
+            --requirements examples/cyberdeck/dual_touch/cm5_native_replay/requirements.json \
+            --out examples/cyberdeck/dual_touch/cm5_native_replay/evidence
+          git diff --exit-code -- examples/cyberdeck/dual_touch/cm5_native_replay/evidence
+      - name: Check adversarial fit and legacy dual-touch regressions
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q \
+            tests/test_cyberdeck_packaging_workflow.py \
+            examples/cyberdeck/dual_touch/tests/test_dual_touch.py \
+            examples/cyberdeck/tests/test_clamshell.py \
+            apps/mecha-splicer/tests/test_bundle.py \
+            tests/test_machine_project.py \
+            tests/test_mechanical_fit.py
+      - name: Install OpenSCAD for native CGAL shells and hinge sweep
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openscad
+      - name: Physically compute native shell meshes / sampled hinge poses (CAD only)
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src:examples/cyberdeck
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from produce_terminal import run
+          root=Path("examples/cyberdeck/dual_touch/cm5_native_replay/evidence").resolve()
+          result=run(root/"native_project_spec.json",root/"native_mecha","/usr/bin/openscad")
+          assert all(row["nonmanifold_edges"]==0 for row in result["mesh"].values())
+          assert len(result["cgal_interference_sweep"])==6
+          assert all(row["interference_mesh"]=="EMPTY" for row in result["cgal_interference_sweep"])
+          assert not result["physical_fit_tested"]
+          assert not result["actual_unit_assembled"]
+          PY
+      - name: Prevent physical-authorization via CAD artifacts
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python - <<'PY'
+          import json
+          p="examples/cyberdeck/dual_touch/cm5_native_replay/evidence/hs_packaging_report.json"
+          r=json.load(open(p))
+          assert r["requirements"]["hard_max_thickness_mm"]==18
+          assert not r["hard_constraint_met"]
+          assert r["minimum_nominal_fit_mm"]==20
+          assert r["profiles"][0]["compute_to_panel_clearance_mm"]==-0.735
+          assert not r["fabrication_authorized"]
+          assert not r["safe_to_power"]
+          assert r["release_assessment"]["blockers"]
+          PY
+      - name: Retain native engineering outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-cm5-dual-touch-native-replay-no-fab
+          retention-days: 30
+          path: |
+            examples/cyberdeck/dual_touch/cm5_native_replay/evidence

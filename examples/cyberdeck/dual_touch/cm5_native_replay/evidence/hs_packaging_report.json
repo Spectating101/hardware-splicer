@@ -1,0 +1,277 @@
+{
+  "schema": "hs.cyberdeck_dual_touch_packaging.v1",
+  "project": "HS-CM5-DUAL-TOUCH",
+  "generator": "hardware_splicer.cyberdeck_packaging_workflow with native MechanicalFit + Mecha-Splicer + MachineProject",
+  "requirements": {
+    "closed_body_mm": [
+      155,
+      80
+    ],
+    "hard_max_thickness_mm": 18,
+    "screens": 2,
+    "physical_keyboard": false
+  },
+  "profiles": [
+    {
+      "closed_thickness_mm": 18.0,
+      "base_height_mm": 11.4,
+      "lid_height_mm": 5.8,
+      "screen_gap_mm": 0.8,
+      "compute_stack_top_mm": 8.685,
+      "panel_back_mm": 7.95,
+      "compute_to_panel_clearance_mm": -0.735,
+      "battery_to_panel_clearance_mm": 0.35,
+      "footprint_nominal_fit": true,
+      "native_mechanical_fit": "blocked",
+      "native_mechanical_fit_checks": {
+        "clearance-cm5-to-panel": {
+          "status": "fail",
+          "clearance_mm": -0.735,
+          "required_mm": 1.0
+        },
+        "clearance-battery-to-panel": {
+          "status": "fail",
+          "clearance_mm": 0.35,
+          "required_mm": 1.0
+        }
+      },
+      "hard_thickness_requirement_pass": true,
+      "nominal_research_fit": false,
+      "status": "fails_nominal_fit"
+    },
+    {
+      "closed_thickness_mm": 19.0,
+      "base_height_mm": 12.4,
+      "lid_height_mm": 5.8,
+      "screen_gap_mm": 0.8,
+      "compute_stack_top_mm": 8.685,
+      "panel_back_mm": 8.95,
+      "compute_to_panel_clearance_mm": 0.265,
+      "battery_to_panel_clearance_mm": 1.35,
+      "footprint_nominal_fit": true,
+      "native_mechanical_fit": "blocked",
+      "native_mechanical_fit_checks": {
+        "clearance-cm5-to-panel": {
+          "status": "fail",
+          "clearance_mm": 0.265,
+          "required_mm": 1.0
+        },
+        "clearance-battery-to-panel": {
+          "status": "pass",
+          "clearance_mm": 1.35,
+          "required_mm": 1.0
+        }
+      },
+      "hard_thickness_requirement_pass": false,
+      "nominal_research_fit": false,
+      "status": "fails_nominal_fit"
+    },
+    {
+      "closed_thickness_mm": 20.0,
+      "base_height_mm": 13.4,
+      "lid_height_mm": 5.8,
+      "screen_gap_mm": 0.8,
+      "compute_stack_top_mm": 8.685,
+      "panel_back_mm": 9.95,
+      "compute_to_panel_clearance_mm": 1.265,
+      "battery_to_panel_clearance_mm": 2.35,
+      "footprint_nominal_fit": true,
+      "native_mechanical_fit": "candidate",
+      "native_mechanical_fit_checks": {
+        "clearance-cm5-to-panel": {
+          "status": "pass",
+          "clearance_mm": 1.265,
+          "required_mm": 1.0
+        },
+        "clearance-battery-to-panel": {
+          "status": "pass",
+          "clearance_mm": 2.35,
+          "required_mm": 1.0
+        }
+      },
+      "hard_thickness_requirement_pass": false,
+      "nominal_research_fit": true,
+      "status": "counterfactual_exceeds_hard_limit"
+    },
+    {
+      "closed_thickness_mm": 21.0,
+      "base_height_mm": 14.4,
+      "lid_height_mm": 5.8,
+      "screen_gap_mm": 0.8,
+      "compute_stack_top_mm": 8.685,
+      "panel_back_mm": 10.95,
+      "compute_to_panel_clearance_mm": 2.265,
+      "battery_to_panel_clearance_mm": 3.35,
+      "footprint_nominal_fit": true,
+      "native_mechanical_fit": "candidate",
+      "native_mechanical_fit_checks": {
+        "clearance-cm5-to-panel": {
+          "status": "pass",
+          "clearance_mm": 2.265,
+          "required_mm": 1.0
+        },
+        "clearance-battery-to-panel": {
+          "status": "pass",
+          "clearance_mm": 3.35,
+          "required_mm": 1.0
+        }
+      },
+      "hard_thickness_requirement_pass": false,
+      "nominal_research_fit": true,
+      "status": "counterfactual_exceeds_hard_limit"
+    }
+  ],
+  "minimum_nominal_fit_mm": 20.0,
+  "calculated_minimum_nominal_thickness_mm": 19.735,
+  "selected_for_native_cad_mm": 20.0,
+  "hard_constraint_met": false,
+  "decision": "reject_hard_envelope_research_alternative_requires_user_approval",
+  "fpc_overflow_mm": 29.0,
+  "fpc_gate": "straight_FPC_exceeds_body",
+  "native_cad_outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad",
+    "dual_touch_visual_preview.scad"
+  ],
+  "native_bom": [
+    {
+      "category": "compute",
+      "item": "Radxa CM5 V2.21",
+      "spec": "56x41mm SoM; board-to-board mating stack not qualified",
+      "qty": 1,
+      "notes": "Candidate only; processor carrier / power sequencing and PCB not validated",
+      "sku": "Radxa_CM5_V2.21"
+    },
+    {
+      "category": "display",
+      "item": "Winstar WF50DTYA3MNG10-000",
+      "spec": "127.6x73.3x3.45mm 2-lane MIPI DSI capacitive touch",
+      "qty": 2,
+      "notes": "Unverified Linux panel drivers, touch I2C topology and FPC bend; not ordered",
+      "sku": "WF50DTYA3MNG10-000"
+    },
+    {
+      "category": "electronics",
+      "item": "custom CM5 carrier",
+      "spec": "nominal 0.8mm PCB; NO routed copper or footprint approval",
+      "qty": 1,
+      "notes": "Must qualify 200+100-pad mating connectors and 5V-to-4V supply",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "protected pouch cell and charging path",
+      "spec": "80x50x6mm nominal naked placeholder",
+      "qty": 1,
+      "notes": "Cell protection/BMS, swelling, thermal and charger not designed",
+      "sku": ""
+    },
+    {
+      "category": "thermal",
+      "item": "CM5 heat spreader",
+      "spec": "0.5mm unverified thermal pad/plate",
+      "qty": 1,
+      "notes": "No measured thermal resistance or usable 18mm proof",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "hinge + rated display FPC",
+      "spec": "2.0mm hinge pin, bend radius unqualified",
+      "qty": 1,
+      "notes": "Actual flex tail extends beyond shell if straight; cycles and strain relief not proven",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM5 dual-touch lower enclosure",
+      "spec": "Native Mecha-Splicer shell, not fit qualified",
+      "qty": 1,
+      "notes": "Requires real mounts, PCB, battery clearance",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM5 dual-touch upper enclosure",
+      "spec": "Native Mecha-Splicer shell, not fit qualified",
+      "qty": 1,
+      "notes": "Requires actual panel retention, display connector route",
+      "sku": ""
+    }
+  ],
+  "native_dfm": [
+    {
+      "severity": "warn",
+      "message": "Closed gap may pinch keys and cable"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "CM5 two independent DSI hosts: panel drivers, touch controller bus, backlight boost and FPC routing not verified"
+    },
+    {
+      "severity": "warn",
+      "message": "3.45mm real panel plus CM5 mating, heat and protection need independent Z-constraint check; native shell alone is NOT fit proof"
+    },
+    {
+      "severity": "warn",
+      "message": "Ultra-thin FDM shell, hinge clearance and battery protection are NOT qualified for physical fabrication"
+    }
+  ],
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "build_ready",
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-hinge' is not closed by passing verification",
+        "object_id": "r-hinge",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-protected-power' is not closed by passing verification",
+        "object_id": "r-protected-power",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-thermal' is not closed by passing verification",
+        "object_id": "r-thermal",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-mating' is not closed by passing verification",
+        "object_id": "r-mating",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-thickness' is failed",
+        "object_id": "v-thickness",
+        "severity": "error"
+      }
+    ],
+    "warnings": []
+  },
+  "unresolved": [
+    "mating_connector_stack_height",
+    "both_DSI_linux_driver_integration",
+    "dual_GT928_I2C_path",
+    "FPC_hinge_routing_bend_fatigue",
+    "backlight_boost_converter",
+    "battery_BMS_swelling",
+    "thermal_path_and_load",
+    "mechanical_tolerances",
+    "USB_ESD_and_power_integrity",
+    "PCB_routing_and_DRC"
+  ],
+  "physical_validation": false,
+  "safe_to_power": false,
+  "fabrication_authorized": false
+}
