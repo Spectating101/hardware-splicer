@@ -15,7 +15,7 @@ from hardware_splicer.market_signal_acquisition import acquire
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = {"schema": "hs.discovery_plan.v1",
         "target_architecture": "dual_esp32_touch_4p3_rs485",
-        "jobs": [{"id": "mobile-dev", "github_queries": ["ssh phone"]}],
+        "jobs": [{"id": "mobile-dev", "github_queries": ["ssh phone"], "github_title_terms": ["ssh","terminal","keyboard"]}],
         "github_per_page": 10, "max_pages": 1}
 
 
