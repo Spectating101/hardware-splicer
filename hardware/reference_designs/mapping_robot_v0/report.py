@@ -68,10 +68,22 @@ def render_report(parts: list[dict], sizing_result: dict, quote_check: dict) -> 
             f"| Speed margin at {s['targets']['speed_mps']} m/s | {s['speed_margin']} | ≥ {s['targets']['min_speed_margin']} |",
             f"| Wheel speed needed | {s['required_wheel_rpm']} rpm | motor gives {round(s['effective']['motor_free_speed_rpm'], 1)} rpm at pack voltage |",
             f"| Force margin (acceleration and rolling only) | {s['force_margin']} | ≥ 1 |",
+            f"| Pack peak current (motors at their limit, electronics at peak, minimum voltage) | "
+            f"{round(s['pack_peak_current_a'], 2)} A | ≤ {s['pack_max_discharge_a']} A |",
+            f"| 5 V converter peak | {round(s['converter_peak_current_a'], 2)} A | ≤ {s['converter_rating_a']} A |",
+            f"| Door threshold torque per motor | {round(s['step_torque_available_nm'], 3)} N·m available | "
+            f"≥ {round(s['step_torque_required_nm'], 3)} N·m |",
             f"| Robot mass | {round(s['mass_kg'], 3)} kg | |",
-            f"| Average power | {s['average_power_w']} W | |", "",
-            "Assumptions (not part facts):", ""]
+            f"| Average power | {s['average_power_w']} W | |", ""]
+    if s.get("warnings"):
+        out += ["Warnings:", "", *[f"- {w}" for w in s["warnings"]], ""]
+    out += ["Assumptions (not part facts):", ""]
     out += [f"- `{name}` = {a['value']} ({a['basis']}): {a['note']}" for name, a in s["assumptions"].items()]
+    out += ["", "## Handed to later stages", "",
+            "- The microcontroller is not a bought module here: it is soldered on the HS board as a module from the "
+            "LCSC/JLCPCB catalogue, chosen in the board plan; its power is the `mcu_power_w` assumption above.",
+            *[f"- `{name}` = {a['value']}: {a['note']}" for name, a in s["assumptions"].items() if a.get("basis") == "design"],
+            "- Dimensions given only as drawings (LiDAR, Raspberry Pi) are read from those drawings by the chassis plan."]
 
     q = quote_check
     out += ["", "## Quote check", "",

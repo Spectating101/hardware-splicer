@@ -13,10 +13,14 @@ Searched Ruten 2026-11-06 (read-only, about 20 requests): `3S 18650 電池組 �
 | **XL4015 5 A buck module** | [21519300644500](https://www.ruten.com.tw/item/21519300644500/) NT$40 | 235 | **Chosen.** Seller publishes input, output, current (4.5 A recommended), protections and size. |
 | Holybro 5 A UBEC | [22640764586550](https://www.ruten.com.tw/item/22640764586550/) NT$1,069 | 0 | **Alternative.** Fixed 5.2 V output, so no risk of the 20 V factory setting, at 25 times the price. |
 
-**Discharge requirement, recomputed with the chosen parts.** `REQUIREMENTS.md` asked for ≥ 4.5 A using a typical 1.5 A
-stall per motor. The chosen motor stalls at 1 A, so the worst case is 2 x 1.0 A + (3.0 A x 5 V + 0.26 A x 5 V + 0.5 W) /
-11.1 V / 0.85 = 2.0 + 1.78 = 3.8 A. The pack's 4 A passes with about 5% margin: thin, and a bench item. Both motors stalling
-while the Pi draws its full rated supply is unlikely, but the firmware plan should limit motor current.
+**Discharge requirement, with the chosen parts.** The motor stalls at 2.6 A (NFP's figure; an earlier version wrongly used
+1 A from a different winding). Two stalled motors alone would exceed the pack's 4 A, so the board plan must regulate each
+motor to 1.2 A (`motor_current_limit_a` in `assumptions.json`). With that limit, the worst case at the 9.9 V minimum is
+2 x 1.2 A + (1.25 A x 5 V Pi stress maximum + 0.8 A x 5 V LiDAR start-up + 0.5 W) / 9.9 V / 0.85 = 3.68 A: under 4 A by about 8%.
+`sizing.py` now checks this, and the 5 V converter's 2.55 A peak against its 4.5 A rating, on every run.
+
+**Capacity.** The seller says 6000 mAh, but its stated size fits three cells (3S1P), not six; sizing uses the smallest
+variant's 2400 mAh as the worst case and still gets 66 minutes.
 
 Safety notes for the bench checklist: the XL4015 ships set to about 20 V and must be set to 5.1 V before the Pi is
 connected; it has no reverse-input protection; the pack's stated size is impossible for six cells and must be measured.

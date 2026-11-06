@@ -274,3 +274,15 @@ def test_wrong_unit_for_a_fact_sizing_reads_raises():
 def test_full_charge_above_motor_rating_warns():
     r = sz.run_sizing(parts(), ASSUMPTIONS)  # 12.6 V full charge on a 12 V motor
     assert any("12.6" in w for w in r["warnings"])
+
+
+def test_report_shows_peak_current_and_threshold_checks_and_warnings():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK)
+    assert "Pack peak current" in text and "5 V converter peak" in text and "Door threshold torque" in text
+    assert "12.6" in text  # the full-charge warning
+
+
+def test_report_lists_requirements_handed_to_later_stages():
+    text = rep.render_report(_report_parts(), sz.run_sizing(parts(), ASSUMPTIONS), QUOTES_OK)
+    assert "microcontroller" in text.lower() and "board plan" in text.lower()
+    assert "motor_current_limit_a" in text

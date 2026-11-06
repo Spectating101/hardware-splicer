@@ -31,3 +31,8 @@ door threshold on a 65 mm wheel needs a horizontal push of about 1.04 × the loa
 
 **Update after choosing parts (2026-11-06).** Battery maximum discharge: recomputed with the chosen motor's 1 A stall,
 the requirement is ≥ 3.8 A rather than 4.5 A; see `selection/power.md`. The chosen pack's 4 A meets it with about 5% margin.
+
+**Correction after the final review (2026-11-06).** The 1 A stall above came from a different motor winding; the chosen motor
+stalls at 2.6 A. Pack peak current, converter peak and door-threshold torque (re-derived at the sized 1.316 kg: 0.31 N·m per
+motor) are now checked by `sizing.py` at the pack's 9.9 V minimum, with each motor regulated to 1.2 A by the board's driver.
+See `selection/power.md` and `BUILD1_TEST1.md`.
