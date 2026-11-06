@@ -51,6 +51,54 @@ def test_used_listings_are_dropped_unless_the_line_allows_them():
     assert pb.keep(row("二手 ThinkPad 故障", 3200), {**line, "allow_used": True}) == "excluded keyword"  # broken still out
 
 
+class _Resp:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def read(self, *a):
+        return b'{"ok": 1}'
+
+
+def test_get_retries_network_errors_but_not_http_errors(monkeypatch):
+    import urllib.error
+    calls = []
+
+    def flaky(req, timeout):
+        calls.append(1)
+        if len(calls) < 3:
+            raise urllib.error.URLError("Temporary failure in name resolution")
+        return _Resp()
+
+    monkeypatch.setattr(pb.urllib.request, "urlopen", flaky)
+    monkeypatch.setattr(pb.time, "sleep", lambda s: None)
+    assert pb.get("https://example.invalid", {}) == {"ok": 1} and len(calls) == 3
+
+    calls.clear()
+
+    def always_down(req, timeout):
+        calls.append(1)
+        raise urllib.error.URLError("down")
+
+    monkeypatch.setattr(pb.urllib.request, "urlopen", always_down)
+    with pytest.raises(urllib.error.URLError):
+        pb.get("https://example.invalid", {})
+    assert len(calls) == 3  # gives up after the last try
+
+    calls.clear()
+
+    def http_500(req, timeout):
+        calls.append(1)
+        raise urllib.error.HTTPError("u", 500, "err", {}, None)
+
+    monkeypatch.setattr(pb.urllib.request, "urlopen", http_500)
+    with pytest.raises(urllib.error.HTTPError):
+        pb.get("https://example.invalid", {})
+    assert len(calls) == 1  # a server answer is not retried
+
+
 def priced(id_, qty, mn, p25, med, role="build", fixed=None):
     return {"id": id_, "qty": qty, "role": role, "spec": "", "listings_kept": 5, "fixed_price_twd": fixed,
             "unit_price_twd": {"min": mn, "p25": p25, "median": med}}

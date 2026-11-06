@@ -18,6 +18,7 @@ import json
 import re
 import statistics
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -35,10 +36,21 @@ PACK_WORD = re.compile(r"(?<![\d.])(\d{1,2})\s*(?:顆|個|入|支|片|只|pcs|PC
 PACK_X = re.compile(r"(?<![\d.A-Za-z])[xX×]\s*(\d{1,2})(?!\d)(?!\s*(?:mm|cm|吋|V|mAh|G|K))")  # "x4" but not "M1.4x3"
 
 
-def get(url: str, params: dict) -> object:
+def get(url: str, params: dict, tries: int = 3, backoff: float = 5.0) -> object:
+    """One read-only request; a transient network error (DNS, reset, timeout) is retried with growing pauses."""
     req = urllib.request.Request(url + "?" + urllib.parse.urlencode(params), headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        return json.load(r)
+    for attempt in range(1, tries + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=25) as r:
+                return json.load(r)
+        except urllib.error.HTTPError:
+            raise  # the server answered: a 4xx/5xx is not a network blip, so do not hammer it
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            if attempt == tries:
+                raise
+            print(f"  network error ({e}); retry {attempt}/{tries - 1} in {backoff * attempt:.0f}s", flush=True)
+            time.sleep(backoff * attempt)
+    raise AssertionError("unreachable")
 
 
 def pack_size(title: str, line: dict) -> int:
