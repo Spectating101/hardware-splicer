@@ -22,7 +22,9 @@
         "remote shell",
         "android keyboard",
         "phone keyboard",
-        "mobile coding"
+        "mobile coding",
+        "remote coding",
+        "remote development"
       ],
       "ruten_exclude_terms": [
         "保護殼",
@@ -47,7 +49,6 @@
         "modbus",
         "serial",
         "uart",
-        "esp32",
         "usb-serial",
         "android usb"
       ],
@@ -71,12 +72,13 @@
         "二手 ThinkPad"
       ],
       "github_title_terms": [
-        "repairability",
         "laptop repair",
-        "thinkpad",
-        "replace battery",
-        "battery replacement",
-        "repair parts"
+        "thinkpad repair",
+        "replace laptop battery",
+        "laptop battery replacement",
+        "laptop disassembly",
+        "repair laptop",
+        "laptop hinge repair"
       ],
       "ruten_exclude_terms": [
         "零件",
