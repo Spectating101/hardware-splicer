@@ -1,0 +1,100 @@
+name: HS Pocket real-SSH touchscreen software evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-pocket-real-ssh-workflow.yml'
+      - 'examples/cyberdeck/workflow_lab/**'
+      - 'src/hardware_splicer/cyberdeck_workflow_acceptance.py'
+      - 'tests/test_cyberdeck_workflow_lab.py'
+  workflow_dispatch:
+    inputs:
+      run_real_ssh:
+        description: 'Attempt real local OpenSSH + bwrap + Chrome E2E on hosted runner (fails closed if user namespaces unavailable)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  source-and-measured-evidence-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS and pinned existing upstream terminal
+        run: |
+          python -m pip install -e . 'pytest>=8,<10'
+          npm ci --prefix examples/cyberdeck/workflow_lab/web --ignore-scripts --no-audit
+      - name: Validate locked UI code without rebuilding terminal emulator
+        run: |
+          node --check examples/cyberdeck/workflow_lab/web/app.js
+          python -m compileall -q examples/cyberdeck/workflow_lab             src/hardware_splicer/cyberdeck_workflow_acceptance.py
+      - name: Replay canonical HS MachineProject from REAL captured local evidence
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cyberdeck_workflow_acceptance \
+            --benchmark examples/cyberdeck/workflow_lab/evidence/bench_results.json \
+            --prior examples/cyberdeck/electrical_feasibility/report.json \
+            --screenshot examples/cyberdeck/workflow_lab/evidence/touch_ssh_bench.png \
+            --out examples/cyberdeck/workflow_lab/evidence/hs_workflow_acceptance.json
+          git diff --exit-code -- examples/cyberdeck/workflow_lab/evidence/hs_workflow_acceptance.json
+      - name: Adversarial source, screenshot and safety regression
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q \
+            tests/test_cyberdeck_workflow_lab.py \
+            tests/test_cyberdeck_electrical_feasibility.py \
+            tests/test_cyberdeck_inset_hinge.py \
+            tests/test_cyberdeck_cm4_stack.py \
+            tests/test_cyberdeck_architecture_value.py \
+            tests/test_machine_project.py
+      - name: No claims of physical CM4 or manufacture from a browser benchmark
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('examples/cyberdeck/workflow_lab/evidence/hs_workflow_acceptance.json'))
+          assert len(r['real_software_requirements_passed'])==5
+          assert r['physical_panel_and_power_requirements_passed']==[]
+          assert r['release_assessment']['blockers']
+          assert r['status']=='SOFTWARE_INTERACTION_BENCH_ACCEPTED_PHYSICAL_BUILD_BLOCKED'
+          assert not r['fabrication_authorized'] and not r['procurement_authorized']
+          PY
+  opt-in-real-local-ssh:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_real_ssh
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dependencies — no weakening host-wide AppArmor/user namespaces
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openssh-server bubblewrap tmux nano
+          python -m pip install aiohttp playwright
+          npm ci --prefix examples/cyberdeck/workflow_lab/web --ignore-scripts --no-audit
+          test "$(cat /proc/sys/dev/tty/legacy_tiocsti)" = 0
+          command -v google-chrome
+          bwrap --unshare-net --unshare-pid --ro-bind /usr /usr \
+            --ro-bind /bin /bin --ro-bind /lib /lib \
+            --ro-bind /lib64 /lib64 --dev /dev --proc /proc \
+            -- /bin/true
+      - name: Real Chrome touch, OpenSSH host-key security, Nano/tmux and input RTT
+        run: python examples/cyberdeck/workflow_lab/run_e2e.py
+      - name: Archive new runtime evidence, never automatically promote release
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-real-loopback-touch-ssh-metrics
+          retention-days: 30
+          path: examples/cyberdeck/workflow_lab/evidence

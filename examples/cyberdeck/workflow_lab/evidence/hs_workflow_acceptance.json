@@ -1,0 +1,485 @@
+{
+  "schema": "hardware_splicer.pocket_terminal_workflow_acceptance.v1",
+  "status": "SOFTWARE_INTERACTION_BENCH_ACCEPTED_PHYSICAL_BUILD_BLOCKED",
+  "real_software_requirements_passed": [
+    "r-real-ssh",
+    "r-touch",
+    "r-editor",
+    "r-multiplexer",
+    "r-reconnect"
+  ],
+  "physical_panel_and_power_requirements_passed": [],
+  "loopback_echo_median_ms": 15.8,
+  "pocket_hardware_verified": false,
+  "fabrication_authorized": false,
+  "procurement_authorized": false,
+  "machine_project": {
+    "schema_version": "hardware_splicer.machine_project.v1",
+    "project_id": "HS-POCKET-TERMINAL-REAL-SSH-TOUCH-MVP",
+    "name": "HS realistic touch-SSH workflow proof",
+    "purpose": "Value engineer a useful two-screen cyberdeck without commercialization requirements",
+    "lifecycle_state": "intake",
+    "requested_release_state": "build_ready",
+    "requirements": [
+      {
+        "requirement_id": "r-real-ssh",
+        "statement": "OpenSSH host-key pinning and isolated authorized terminal commands",
+        "kind": "safety",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-real-ssh"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-touch",
+        "statement": "Browser on-screen lower-panel key events actually reach upper xterm.js",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-touch"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-editor",
+        "statement": "Real Nano saves file using Ctrl+O, Ctrl+X and arrow edits",
+        "kind": "functional",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-editor"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-multiplexer",
+        "statement": "Real tmux Ctrl+B and D detaches live session",
+        "kind": "functional",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-multiplexer"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-reconnect",
+        "statement": "SSH reconnection preserves sandboxed files",
+        "kind": "functional",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-reconnect"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-two-physical-panels",
+        "statement": "Independent real touchscreens run upper terminal and lower keyboard",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-two-physical-panels"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-native-dual-dsi",
+        "statement": "CM4 DSI0 and DSI1 initialize exact Winstar panels and GT928 inputs",
+        "kind": "interface",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-native-dual-dsi"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-fitting",
+        "statement": "Full qualified mechanical and bonded screen stack <=155x80x18mm",
+        "kind": "constraint",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-fitting"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-cell",
+        "statement": "Verified protected pack, charging, boost drive and thermal under load",
+        "kind": "safety",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-cell"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-ergonomics",
+        "statement": "Human editing on 5-inch physical glass during extended use",
+        "kind": "performance",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-ergonomics"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-field-network",
+        "statement": "Authenticated VPN/wireless SSH to a persistent remote Optiplex tmux",
+        "kind": "safety",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-field-network"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-delivered-cost",
+        "statement": "Real entire Taiwan build bill of materials, assembly and rework estimate",
+        "kind": "constraint",
+        "priority": "should",
+        "source": "HS verification",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-delivered-cost"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      }
+    ],
+    "functions": [],
+    "subsystems": [],
+    "components": [],
+    "interfaces": [],
+    "constraints": [],
+    "verifications": [
+      {
+        "verification_id": "v-real-ssh",
+        "name": "Validate real-ssh",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-real-ssh"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-loopback"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-touch",
+        "name": "Validate touch",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-touch"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-loopback"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-editor",
+        "name": "Validate editor",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-editor"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-loopback"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-multiplexer",
+        "name": "Validate multiplexer",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-multiplexer"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-loopback"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-reconnect",
+        "name": "Validate reconnect",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-reconnect"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-loopback"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-two-physical-panels",
+        "name": "Validate two-physical-panels",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-two-physical-panels"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-native-dual-dsi",
+        "name": "Validate native-dual-dsi",
+        "method_type": "test",
+        "status": "blocked",
+        "requirement_ids": [
+          "r-native-dual-dsi"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-fitting",
+        "name": "Validate fitting",
+        "method_type": "test",
+        "status": "failed",
+        "requirement_ids": [
+          "r-fitting"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-cell",
+        "name": "Validate cell",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-cell"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-ergonomics",
+        "name": "Validate ergonomics",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-ergonomics"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-field-network",
+        "name": "Validate field-network",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-field-network"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-delivered-cost",
+        "name": "Validate delivered-cost",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-delivered-cost"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "real-loopback",
+        "kind": "Chrome/Playwright and OpenSSH measured runtime",
+        "basis": "Browser key taps + actual OpenSSH via localhost with pinned host key and bwrap, saved Nano files, tmux control",
+        "ref": "evidence/bench_results.json",
+        "supports": [
+          "r-real-ssh",
+          "r-touch",
+          "r-editor",
+          "r-multiplexer",
+          "r-reconnect"
+        ],
+        "authority": "measured",
+        "simulated": false,
+        "metadata": {
+          "loopback_only": true,
+          "not_hardware_tested": true
+        }
+      },
+      {
+        "evidence_id": "browser-screenshot",
+        "kind": "Chrome screenshot",
+        "basis": "Actual xterm.js upper viewport and lower on-screen keyboard screenshot from local test",
+        "ref": "evidence/touch_ssh_bench.png",
+        "supports": [
+          "r-touch"
+        ],
+        "authority": "observed",
+        "simulated": false,
+        "metadata": {
+          "screens_are_browser_areas_not_physical_panels": true
+        }
+      },
+      {
+        "evidence_id": "prior-packaging",
+        "kind": "HS prior native CGAL and electrical qualification",
+        "basis": "Previous 18mm failure and exact DSI vendor missing driver proof",
+        "ref": "../electrical_feasibility/report.json",
+        "supports": [
+          "r-fitting",
+          "r-native-dual-dsi"
+        ],
+        "authority": "proposed",
+        "simulated": true,
+        "metadata": {}
+      }
+    ],
+    "artifacts": [],
+    "discipline_payloads": {},
+    "metadata": {
+      "real_ssh_not_stub": true,
+      "local_loopback_only": true,
+      "actual_hardware_fabricated": false,
+      "commercialization_required": false,
+      "measured_median_ms": 15.8
+    }
+  },
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "build_ready",
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-cell' is not closed by passing verification",
+        "object_id": "r-cell",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-field-network' is not closed by passing verification",
+        "object_id": "r-field-network",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-native-dual-dsi' is blocked",
+        "object_id": "v-native-dual-dsi",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-fitting' is failed",
+        "object_id": "v-fitting",
+        "severity": "error"
+      }
+    ],
+    "warnings": []
+  },
+  "unresolved_next": "Exact CM4 dual-DSI bring-up and real physical touch on supported panel; then ergonomic test and measured full BOM",
+  "provenance": {
+    "benchmark_sha256": "dc41dd0540d50b26e63b90d760e9661565e4456c87d6083649d71e266c8ec10c",
+    "prior_HS_electrical_sha256": "1fc57e4c483e90899ebb4816f80a5f07b90374eba2bb2c96817beecd9913798b",
+    "browser_screenshot_sha256": "8ec43c0b53cc7622434cb91f8d68e1adf585f1025adf82ba2c3b5ff03bbe1aa5"
+  }
+}

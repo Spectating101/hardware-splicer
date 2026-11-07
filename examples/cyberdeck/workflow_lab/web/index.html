@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:,">
+<title>Hardware Splicer · Pocket SSH workflow test</title>
+<link rel="stylesheet" href="/vendor/xterm.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<main class="dual">
+  <section class="screen terminal-screen" aria-label="Upper display — actual SSH terminal">
+    <header class="bar">
+      <div class="brand"><span class="spark">⌁</span> <strong>HS</strong><span class="brand-sub">POCKET TERMINAL LAB</span></div>
+      <div class="status" id="status" role="status"><span class="pulse"></span> CONNECTING</div>
+    </header>
+    <div class="terminal-frame" id="terminal" aria-label="Real SSH terminal session"></div>
+    <footer class="terminal-footer">
+      <span>ISOLATED LOCAL SSH · NO HARDWARE CLAIMS</span>
+      <span id="dimensions">— × —</span>
+    </footer>
+  </section>
+  <section class="screen keyboard-screen" aria-label="Lower display — touch keyboard">
+    <header class="bar keyboard-bar">
+      <div class="brand"><span class="spark">⌘</span> <strong>INPUT</strong> <span class="brand-sub">TOUCH KEYBOARD</span></div>
+      <div class="latency" id="latency" aria-live="polite">RTT —</div>
+      <button type="button" id="probe" class="probe">MEASURE SSH</button>
+      <button type="button" id="reconnect" class="probe secondary">RECONNECT</button>
+    </header>
+    <div class="keypad" id="keypad" aria-label="Touch keyboard keys">
+      <div class="keys" id="keys"></div>
+    </div>
+    <footer class="keyboard-footer">
+      <div>CONTROL KEYS <span class="dot">•</span> <span>tmux: Ctrl+B, then a command</span></div>
+      <div>LOCAL DEMO</div>
+    </footer>
+  </section>
+</main>
+<script src="/vendor/xterm.js"></script>
+<script src="/vendor/fit.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

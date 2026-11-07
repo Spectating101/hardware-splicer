@@ -1,0 +1,57 @@
+{
+  "schema": "hs.pocket_terminal_real_ssh_touch_benchmark.v1",
+  "date_utc": "2026-11-07",
+  "actual_physical_cyberdeck_built": false,
+  "actual_CM4_or_DSI_tested": false,
+  "marketing_or_company_required": false,
+  "result": "SOFTWARE_WORKFLOW_ON_REAL_SANDBOXED_LOCAL_SSH_PASSED",
+  "security": {
+    "no_token_http_rejected": true,
+    "invalid_token_http_rejected": true,
+    "cross_origin_websocket_rejected": true,
+    "no_token_websocket_rejected": true,
+    "wrong_pinned_host_key_rejected_before_commands": true,
+    "openssh_only_listens_on_loopback": true,
+    "reused_user_ssh_keys": false,
+    "filesystem_home_and_network_namespace_isolated": true
+  },
+  "workflow": {
+    "browser_engine": "Chrome headless actual Chromium renderer",
+    "viewport_px": [
+      1280,
+      1440
+    ],
+    "two_surface_layout": "one top terminal, one lower touch-keyboard",
+    "terminal_cells": {
+      "columns": 115,
+      "rows": 25
+    },
+    "screen_mocked_hardware": true,
+    "network": "127.0.0.1 local OpenSSH only",
+    "connection_and_command_on_real_sshd": true,
+    "virtual_key_touches": 27,
+    "tmux_started_and_ctrl_b_d_detached": true,
+    "nano_file_saved_using_touch_ctrl_o_ctrl_x": true,
+    "nano_arrow_insertion_file": "axbc",
+    "ctrl_c_interrupts_running_command": true,
+    "same_sandbox_workspace_file_survives_new_ssh_connection": true,
+    "same_tmux_server_survives_reconnect": false,
+    "input_output_loopback_ms": {
+      "samples": [
+        15.3,
+        15.2,
+        15.9,
+        20.6,
+        19.6,
+        17.3,
+        15.7,
+        15.7
+      ],
+      "median": 15.8,
+      "p95_nearest_rank": 20.6,
+      "interpretation": "same-host short SSH command echo + browser, NOT WiFi/CM4/touch-panel latency"
+    },
+    "screenshot": "evidence/touch_ssh_bench.png",
+    "console_js_errors": []
+  }
+}
