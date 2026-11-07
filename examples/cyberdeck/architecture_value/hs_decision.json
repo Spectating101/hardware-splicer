@@ -1,0 +1,638 @@
+{
+  "schema": "hardware_splicer.cyberdeck_architecture_value_review.v1",
+  "input_sha256": "sha256:0615b4c2ba406c5f65244631a1f0951d8ed4c5d805c47f7b12289d83be4073a3",
+  "comparison_date": "2026-11-08",
+  "product_requirement": {
+    "scenario": "Portable code editing and SSH into Optiplex; dual independent capacitive touchscreens; no physical keyboard",
+    "max_closed_size_mm": [
+      155,
+      80,
+      18
+    ],
+    "two_touchscreens_mandatory": true,
+    "physical_keyboard_forbidden": true,
+    "target_budget_ntd": 8000,
+    "target_budget_is_user_approved": false,
+    "native_linux_is_preference_not_requirement": true,
+    "security_and_safe_power_mandatory": true,
+    "commercialization_required": false
+  },
+  "results": [
+    {
+      "candidate_id": "cm4_dual_dsi",
+      "name": "Raspberry Pi CM4 Linux with two 5in DSI touchscreens",
+      "category": "build",
+      "engineering_role": "native_Linux_challenger",
+      "declared_native_linux": true,
+      "asking_price_subtotal_ntd": 6324,
+      "number_of_listed_price_items": 2,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 5in DSI LCD (B) 800x480 touch",
+          "qty": 2,
+          "ask_ntd": 1298,
+          "url": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE-5-%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_screen_port_design_documented_no_simultaneous_validation",
+      "pocketability": "manufacturer_panel_xy_exceeds_155x80_case",
+      "module_footprint_gate": {
+        "module_oriented_length_mm": 127.7,
+        "module_oriented_width_mm": 87.45,
+        "native_FDM_usable_length_mm": 151.8,
+        "native_FDM_usable_width_mm": 76.8,
+        "source_url": "https://www.robotshop.com/products/5inch-capacitive-ips-touch-display-raspberry-pi-800x480-dsi-low-power",
+        "fits_nominal_xy": false
+      },
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "FAIL: 5in DSI (B) panel 127.70x87.45 mm exceeds 80 mm width before enclosure wall",
+        "CM4 2 simultaneous DSI panel drivers and independent touch",
+        "actual DSI adapters/connectors and FPC bend",
+        "carrier PCB connector stack and routed panel power",
+        "closed thickness and battery protection",
+        "manufacturing all-in total"
+      ],
+      "unpriced_subsystems": [
+        "carrier",
+        "dual DSI adapters",
+        "battery/BMS/charging",
+        "hinge/FPC",
+        "enclosure",
+        "thermal",
+        "shipping",
+        "assembly/rework"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "cm4_narrow_50_dsi",
+      "name": "Raspberry Pi CM4 + two narrow 5in Waveshare DSI LCD (D) 720x1280",
+      "category": "build",
+      "engineering_role": "narrow_dsi_linux_study_but_budget_baseline_overrun",
+      "declared_native_linux": true,
+      "asking_price_subtotal_ntd": 8366,
+      "number_of_listed_price_items": 2,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 5inch DSI LCD (D) SKU28970 720x1280 touch",
+          "qty": 2,
+          "ask_ntd": 2319,
+          "url": "https://www.icshop.com.tw/products/388370100062",
+          "price_kind": "listed_seller_ask",
+          "availability": "made_to_order_eta_unknown"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "asking_price_subtotal_already_above_budget",
+      "display_topology": "two_screen_port_design_documented_no_simultaneous_validation",
+      "pocketability": "not_measured_for_155x80x18",
+      "module_footprint_gate": {
+        "module_oriented_length_mm": 126.9,
+        "module_oriented_width_mm": 70.7,
+        "native_FDM_usable_length_mm": 151.8,
+        "native_FDM_usable_width_mm": 76.8,
+        "source_url": "https://files.waveshare.com/wiki/5inch%20DSI%20LCD%20%28D%29/5inch_DSI_LCD_D.pdf",
+        "fits_nominal_xy": true
+      },
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "1.6mm shell + actual screen controller PCB Z depth and two real hinge FPC",
+        "two same panels simultaneously DSI0/DSI1 and separate touch mapping",
+        "DSI FPC and panel 5V power, connector BOM",
+        "factory quoted delivered amount, board rework, battery and case"
+      ],
+      "unpriced_subsystems": [
+        "carrier",
+        "MIPI cable and adapters",
+        "battery/BMS",
+        "hinge/flex",
+        "enclosure",
+        "thermal",
+        "shipping",
+        "assembly/rework"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "cm4_43_dsi",
+      "name": "Raspberry Pi CM4 + two low-cost Waveshare 4.3in 800x480 DSI touch",
+      "category": "build",
+      "engineering_role": "cheap_Linux_panel_subtotal_but_Z_excluded",
+      "declared_native_linux": true,
+      "asking_price_subtotal_ntd": 5724,
+      "number_of_listed_price_items": 2,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 4.3inch DSI LCD SKU16239 integrated module",
+          "qty": 2,
+          "ask_ntd": 998,
+          "url": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE4-3%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_9_in_stock"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_screen_port_design_documented_no_simultaneous_validation",
+      "pocketability": "two_unmodified_display_modules_exceed_18mm_alone",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": 28.1,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "14.05mm seller-listed full module thickness each => 28.1mm minimum two rigid surfaces before frame",
+        "dual panel mapping and backlights",
+        "carrier and battery/hinge integration"
+      ],
+      "unpriced_subsystems": [
+        "carrier",
+        "DSI adapters",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/shipping"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "cm4_narrow_custom",
+      "name": "CM4 with two bare narrow Winstar 5in capacitive MIPI panels",
+      "category": "build",
+      "engineering_role": "narrow_thin_raw_panel_design_study_unquoted",
+      "declared_native_linux": true,
+      "asking_price_subtotal_ntd": 3728,
+      "number_of_listed_price_items": 1,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_screen_port_design_documented_no_simultaneous_validation",
+      "pocketability": "not_measured_for_155x80x18",
+      "module_footprint_gate": {
+        "module_oriented_length_mm": 127.6,
+        "module_oriented_width_mm": 73.3,
+        "native_FDM_usable_length_mm": 151.8,
+        "native_FDM_usable_width_mm": 76.8,
+        "source_url": "https://www.winstar.com.tw/products/tft-lcd/ips-tft/capacitive-touch-panel.html",
+        "fits_nominal_xy": true
+      },
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "Taiwan landed exact 2-lane panel price and stock unquoted; DigiKey USD alone not included in NTD subtotal",
+        "Winstar panel Linux DSI driver and two GT928 addresses",
+        "backlight power and FPC custom carrier",
+        "18mm complete CM4 stack and battery thermal"
+      ],
+      "unpriced_subsystems": [
+        "TWO DISPLAY MODULES",
+        "panel backlight controller and driver integration",
+        "carrier",
+        "DSI flex",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/shipping"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "esp32_dual_43",
+      "name": "Two Waveshare ESP32-S3 4.3in touchscreen boards",
+      "category": "build",
+      "engineering_role": "low_price_remote_only_trial",
+      "declared_native_linux": false,
+      "asking_price_subtotal_ntd": 3300,
+      "number_of_listed_price_items": 1,
+      "price_confidence": "contingent_mixed_variant",
+      "sourced_price_items": [
+        {
+          "name": "Waveshare ESP32-S3-Touch-LCD-4.3 SKU25948",
+          "qty": 2,
+          "ask_ntd": 1650,
+          "url": "https://www.ruten.com.tw/item/22629113316589/",
+          "price_kind": "mixed_variant_upper_ask_unconfirmed_exact_SKU",
+          "availability": "stock_SKU_unconfirmed"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_rigid_touch_modules_declared_no_live_terminal",
+      "pocketability": "existing_HS_shell_29_6mm_not_18mm",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "secure SSH host-key validation actual firmware",
+        "terminal latency/readability and virtual keys",
+        "RS485 pair common ground and split-charge topology",
+        "battery/charger/full Z height and hinge life",
+        "exact touch variant availability and checkout total"
+      ],
+      "unpriced_subsystems": [
+        "battery/BMS",
+        "protected power",
+        "enclosure",
+        "hinge/wiring",
+        "shipping",
+        "labor/rework"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "radxa_cm5_dual_50",
+      "name": "Radxa CM5 Linux with two Winstar 5in 720x1280 DSI touchscreens",
+      "category": "build",
+      "engineering_role": "high_capability_overengineered_current_baseline",
+      "declared_native_linux": true,
+      "asking_price_subtotal_ntd": null,
+      "number_of_listed_price_items": 0,
+      "price_confidence": "no_comparable_NTD_seller_asks",
+      "sourced_price_items": [],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_screen_port_design_documented_no_simultaneous_validation",
+      "pocketability": "failed_18mm_declared_HS_stack",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": {
+        "source_path": "examples/cyberdeck/dual_touch/cm5_native_replay/evidence/hs_packaging_report.json",
+        "source_sha256": "sha256:aeba3d61993864d8abb78b0d2e619a1c1be927c956e17ae2f22449ea37e457ae",
+        "18mm_nominal_gap_mm": -0.735,
+        "hard_constraint_met": false,
+        "note": "native HS AABB stack, assumed components, not full part or tolerance validation"
+      },
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "2026 exact Radxa SKU seller quote",
+        "two Winstar landed prices in NTD",
+        "Linux 2-panel simultaneous DSI init",
+        "hinge FPC and battery/thermal",
+        "18mm failure under native FDM shell"
+      ],
+      "unpriced_subsystems": [
+        "ALL exact-NDT sourced BOM not available",
+        "carrier",
+        "panel pricing currency mismatch",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/rework"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "intact_phone_dual_display",
+      "name": "Keep used S23 intact + independent HDMI touchscreen",
+      "category": "hybrid",
+      "engineering_role": "buy_vs_build_workflow_control",
+      "declared_native_linux": false,
+      "asking_price_subtotal_ntd": 7200,
+      "number_of_listed_price_items": 1,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Used Galaxy S23 8GB/256GB Taiwan store ask",
+          "qty": 1,
+          "ask_ntd": 7200,
+          "url": "https://tw.bid.yahoo.com/tw/Galaxy%E5%85%B6%E4%BB%96-2092073584-category.html?acu=3&pg=1&refine=con_used%2Cis_super_hot_seller&sort=ontime",
+          "price_kind": "listing_ask_condition_unknown",
+          "availability": "single_used_unit_not_reserved"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "two_displays_possible_but_no_verified_pocket_hinge",
+      "pocketability": "external_assembly_not_self_contained_pocket",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "USB-C DeX video + external touch HID simultaneous and lower-screen software",
+        "external touchscreen price",
+        "single battery/power/hinge",
+        "used condition and secure updates"
+      ],
+      "unpriced_subsystems": [
+        "external_HDMI_touchscreen",
+        "hub/cables",
+        "mounting hinge",
+        "shipping",
+        "battery replacement"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "used_fold4",
+      "name": "Used Galaxy Z Fold4, functioning intact device",
+      "category": "buy",
+      "engineering_role": "external_purchase_price_benchmark",
+      "declared_native_linux": false,
+      "asking_price_subtotal_ntd": 10000,
+      "number_of_listed_price_items": 1,
+      "price_confidence": "seller_asking_price_only",
+      "sourced_price_items": [
+        {
+          "name": "Used Samsung Z Fold4 Taiwan seller ask",
+          "qty": 1,
+          "ask_ntd": 10000,
+          "url": "https://tw.bid.yahoo.com/tw/Galaxy%E5%85%B6%E4%BB%96-2092073584-category.html?acu=3&pg=1&refine=con_used%2Cis_super_hot_seller&sort=ontime",
+          "price_kind": "listing_ask_used_unit",
+          "availability": "seller_condition_and_stock_unverified"
+        }
+      ],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "asking_price_subtotal_already_above_budget",
+      "display_topology": "not_this_two_rigid_touchscreen_product",
+      "pocketability": "pocketable_but_flexible_OLED_and_used_hinge_risk",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "fold history and hinge remaining life",
+        "screen repair economics",
+        "battery health and security support",
+        "condition return/warranty"
+      ],
+      "unpriced_subsystems": [
+        "future repairs",
+        "battery wear"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    },
+    {
+      "candidate_id": "stripped_phone_mainboard",
+      "name": "Salvaged smartphone board as generic dual-MIPI/Linux computer",
+      "category": "salvage",
+      "engineering_role": "tempting_but_no_plug_and_play_development_path",
+      "declared_native_linux": false,
+      "asking_price_subtotal_ntd": null,
+      "number_of_listed_price_items": 0,
+      "price_confidence": "no_comparable_NTD_seller_asks",
+      "sourced_price_items": [],
+      "all_in_prototype_price_ntd": null,
+      "budget_status": "all_in_budget_unknown_components_and_delivery_unquoted",
+      "display_topology": "not_this_two_rigid_touchscreen_product",
+      "pocketability": "not_measured_for_155x80x18",
+      "module_footprint_gate": null,
+      "two_module_minimum_thickness_mm": null,
+      "native_hs_mechanical_fit_evidence": null,
+      "unresolved_requirements": [
+        "two_touch_panels_operating_together",
+        "pocket_closed_155x80x18_fit",
+        "safe_protected_portable_power",
+        "functional_secure_ssh_and_editing",
+        "actual_delivered_BOM_and_assembly_cost",
+        "hinge_cable_bend_and_serviceability"
+      ],
+      "critical_unknowns": [
+        "OEM panel timing proprietary and connectors",
+        "boot/power/thermistor/antenna path",
+        "Linux device-tree",
+        "two unrelated screens drive",
+        "reused board quality and sourcing"
+      ],
+      "unpriced_subsystems": [
+        "donor",
+        "new panels",
+        "interface bridge",
+        "PCB",
+        "battery",
+        "hinge",
+        "full engineering"
+      ],
+      "machine_release": {
+        "requested_state": "operationally_authorized",
+        "achieved_state": "build_ready",
+        "allowed": false,
+        "blocking_issue_codes": [
+          "release_state_not_reached",
+          "safety_not_closed"
+        ],
+        "all_six_product_verifications": "planned_not_executed"
+      },
+      "product_qualified": false,
+      "purchasing_authorized": false,
+      "manufacturing_authorized": false
+    }
+  ],
+  "preferred_linux_research_candidate_id": null,
+  "preferred_lowest_integrated_cost_experiment_id": "esp32_dual_43",
+  "highest_information_gain_thin_linux_study": "cm4_narrow_custom",
+  "no_priced_Linux_architecture_meets_both_footprint_and_budget": true,
+  "reject_current_cm5_18mm_package": true,
+  "decision": "RESEARCH_CONTINUE_NO_FULL_BUILD_OR_PURCHASE_AUTHORITY",
+  "rationale": {
+    "linux_choice": "CM4 has dual DSI ports, but the cheap 5in B display exceeds 80mm width, the cheap 4.3in module is 14.05mm each, and the narrower 5in D display plus CM4 already exceeds NT$8000 before the carrier. Bare narrow panel remains an unquoted research lead, not a chosen product",
+    "mcu_choice": "Dual integrated displays are useful for low-cost remote terminal proof, but no native Linux or full GUI benchmark",
+    "phone_choice": "Keep intact phone as buy-vs-build functional benchmark; salvaged OEM mainboard not a generic second-display controller",
+    "constraint": "No candidate has verified both panels, 18 mm fit, protected power, delivered cost and actual programming workflow"
+  },
+  "commercialization_required": false,
+  "marketing_and_distribution_out_of_scope": true,
+  "buyer_demand_measured": false,
+  "any_candidate_manufacturing_authorized": false,
+  "any_candidate_purchasing_authorized": false,
+  "supplier_checkout_quote_confirmed": false
+}
