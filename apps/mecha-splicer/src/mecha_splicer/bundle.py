@@ -20,6 +20,7 @@ from .engines.openscad import (
     generate_servo_mount_scad,
 )
 from .engines.clamshell_terminal import generate_clamshell_terminal_scad
+from .engines.inset_side_hinge import generate_inset_side_hinge
 from .engines.assembly import generate_assembly_scad
 from .spec import ProjectSpec
 
@@ -37,7 +38,10 @@ def generate_bundle(spec: Dict[str, Any], *, out_dir: Optional[str | Path] = Non
     if project.bracket is not None:
         outputs["bracket.scad"] = generate_bracket_scad(project.bracket)
     if project.clamshell_terminal is not None:
-        outputs.update(generate_clamshell_terminal_scad(project.clamshell_terminal))
+        if project.clamshell_terminal.hinge_style == "inset_side_pins":
+            outputs.update(generate_inset_side_hinge(project.clamshell_terminal))
+        else:
+            outputs.update(generate_clamshell_terminal_scad(project.clamshell_terminal))
     if project.servo_mount is not None:
         outputs["servo_mount.scad"] = generate_servo_mount_scad(project.servo_mount)
     if project.linear_axis is not None:

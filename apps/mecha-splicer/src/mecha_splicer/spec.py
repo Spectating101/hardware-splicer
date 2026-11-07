@@ -107,6 +107,12 @@ class ClamshellTerminalSpec(BaseModel):
     keyboard_module_nominal_t_mm: MmPos = 5.0
     lower_touch_board_w_mm: MmPos = 106.1
     lower_touch_board_d_mm: MmPos = 67.8
+    hinge_style: Literal["external_three_knuckle", "inset_side_pins"] = "external_three_knuckle"
+    hinge_inset_from_rear_mm: Annotated[float, Field(ge=2, le=12)] = 4.0
+    hinge_side_knuckle_axial_length_mm: Annotated[float, Field(ge=2.4, le=5)] = 3.2
+    hinge_side_axial_gap_mm: Annotated[float, Field(ge=0.4, le=1.5)] = 0.7
+    hinge_rear_relief_length_mm: Annotated[float, Field(ge=2.0, le=8.0)] = 6.0
+    hinge_base_rear_relief_height_mm: Annotated[float, Field(ge=2.0, le=12.0)] = 6.7
     hinge_outer_d_mm: Annotated[float, Field(ge=5.5, le=12)] = 8.0
     hinge_pin_d_mm: Annotated[float, Field(ge=1.5, le=4)] = 2.0
     pin_radial_clearance_mm: Annotated[float, Field(ge=0.2, le=0.8)] = 0.35
@@ -142,7 +148,24 @@ class ClamshellTerminalSpec(BaseModel):
             raise ValueError("center hinge segment too short")
         if self.hinge_outer_d_mm < self.hinge_pin_d_mm+2*self.pin_radial_clearance_mm+3:
             raise ValueError("hinge has under 1.5mm annular material")
-        if self.hinge_outer_d_mm/2 <= self.hinge_y_offset_mm:
+        if self.hinge_style == "inset_side_pins":
+            radius=self.hinge_outer_d_mm/2
+            if self.hinge_inset_from_rear_mm < radius:
+                raise ValueError("inset hinge barrel extends outside closed 80mm body")
+            if self.hinge_inset_from_rear_mm > radius + self.wall_mm + 1:
+                raise ValueError("inset hinge barrel cannot connect rear wall")
+            pair_end = (self.wall_mm + 2*self.hinge_side_knuckle_axial_length_mm
+                        + self.hinge_side_axial_gap_mm)
+            side_limit=(self.case_w_mm - max(self.display_board_w_mm,
+                         self.lower_touch_board_w_mm if self.input_surface_mode=="dual_touch"
+                         else self.keyboard_w_mm))/2
+            if pair_end + 0.6 > side_limit:
+                raise ValueError("inset side hinges overlap display module width; no clearance")
+            if self.hinge_base_rear_relief_height_mm >= self.base_h_mm-self.floor_mm:
+                raise ValueError("inset rear cut destroys full base rear attachment")
+            if self.hinge_rear_relief_length_mm >= self.case_d_mm/5:
+                raise ValueError("inset rear cut cannot consume a whole rear fifth of shell")
+        elif self.hinge_outer_d_mm/2 <= self.hinge_y_offset_mm:
             raise ValueError("hinge barrel does not intersect shell rear wall")
         if self.hinge_outer_d_mm/2 <= self.closed_gap_mm/2:
             raise ValueError("hinge barrel cannot connect both shells")

@@ -91,6 +91,9 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
            check=True,capture_output=True,text=True,timeout=120)
 
     p=spec["clamshell_terminal"]
+    is_inset = p.get("hinge_style") == "inset_side_pins"
+    hinge_y=(p["case_d_mm"]-p["hinge_inset_from_rear_mm"] if is_inset
+             else p["case_d_mm"]+p["hinge_y_offset_mm"])
     # Real CGAL boolean geometry test at 6 actual hinge poses. OpenSCAD
     # produces no STL when the intersection object is empty.
     angles=[0,-30,-60,-90,-135,-165]
@@ -104,9 +107,9 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
                 "use <"+str((output/"lid_shell.scad").resolve())+">\n"
                 "intersection() {\n"
                 "base_shell();\n"
-                f"translate([0,{p['case_d_mm']+p['hinge_y_offset_mm']},{p['base_h_mm']+p['closed_gap_mm']/2}])"
+                f"translate([0,{hinge_y},{p['base_h_mm']+p['closed_gap_mm']/2}])"
                 f" rotate([{angle},0,0])"
-                f" translate([0,-{p['case_d_mm']+p['hinge_y_offset_mm']},"
+                f" translate([0,-{hinge_y},"
                 f"-{p['base_h_mm']+p['closed_gap_mm']/2}]) lid_shell();\n"
                 "}\n", encoding="utf-8")
             cmd=[openscad]
@@ -148,7 +151,10 @@ def run(spec_path:Path,output:Path,openscad:str)->dict:
        "width_mm":p["case_w_mm"],
        "depth_without_hinge_mm":p["case_d_mm"],
        "closed_thickness_mm":round(p["base_h_mm"]+p["lid_h_mm"]+p["closed_gap_mm"],2),
-       "hinge_projection_mm":round(p["hinge_y_offset_mm"]+p["hinge_outer_d_mm"]/2,2),
+       "hinge_projection_mm":round((p["hinge_outer_d_mm"]/2-p["hinge_inset_from_rear_mm"])
+           if is_inset else p["hinge_y_offset_mm"]+p["hinge_outer_d_mm"]/2,2),
+       "hinge_style":p.get("hinge_style","external_three_knuckle"),
+       "hinge_axis_y_mm":round(hinge_y,3),
        "display_board_outer_footprint_mm":[p["display_board_w_mm"],p["display_board_d_mm"]],
        "lower_board_footprint_mm": ([p["lower_touch_board_w_mm"],p["lower_touch_board_d_mm"]]
            if is_dual else [p["keyboard_w_mm"],p["keyboard_d_mm"]]),
