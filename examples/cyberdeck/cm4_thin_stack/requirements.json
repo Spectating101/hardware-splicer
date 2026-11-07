@@ -1,0 +1,109 @@
+{
+  "schema": "hs.cyberdeck_cm4_thin_stack_input.v1",
+  "configuration": "CM4 Lite (wireless 2GB) + 2 Winstar 2-lane capacitive touch, nominal packaging experiment",
+  "user_constraints": {
+    "screens": 2,
+    "physical_keyboard": false,
+    "closed_max_xyz_mm": [
+      155.0,
+      80.0,
+      18.0
+    ],
+    "target_budget_ntd": 8000,
+    "budget_status": "assistant_proposed_not_user_authorized"
+  },
+  "candidate_parts": {
+    "compute": {
+      "mpn": "CM4102000",
+      "quantity": 1,
+      "price_ntd": 2238.43,
+      "price_notes": "element14 seller listing, price before VAT, 26 week lead, not delivered",
+      "source": "https://tw.element14.com/en-TW/raspberry-pi/cm4102000/rpi-compute-module-4-lite-2gb/dp/3563483",
+      "ram_gb": 2,
+      "emmc_gb": 0,
+      "wifi": true,
+      "mated_package_height_mm": 5.078,
+      "mated_geometry_source": "https://datasheets.raspberrypi.com/cm4/cm4-datasheet.pdf",
+      "mated_package_height_basis": "1.5mm stacking option including CM4 above carrier PCB, datasheet package dimension, not a local measured assembly"
+    },
+    "panels": {
+      "mpn": "WF50DTYA3MNG10-000",
+      "quantity": 2,
+      "source": "https://www.digikey.com/en/products/detail/winstar-display/WF50DTYA3MNG10-000/20533236",
+      "datasheet_parent": "https://www.winstar.com.tw/products/tft-lcd/ips-tft/capacitive-touch-panel.html",
+      "panel_price_usd_each": 29.88,
+      "delivery_shipping_tax_unknown": true,
+      "dsi_lanes": 2,
+      "resolution": [
+        720,
+        1280
+      ],
+      "touch": "GT928 projected capacitive",
+      "dimensions_xyz_mm": [
+        127.6,
+        73.3,
+        3.45
+      ],
+      "fpc_tail_unfolded_overflow_mm": 29.0,
+      "driver_exact_panel_unverified": true
+    },
+    "carrier": {
+      "nominal_xy_mm": [
+        60.0,
+        55.0
+      ],
+      "pcb_thickness_mm": 0.8,
+      "vendor_qualified": false,
+      "pcb_routed": false
+    },
+    "battery": {
+      "nominal_xy_mm": [
+        80.0,
+        50.0
+      ],
+      "cell_thickness_mm": 6.0,
+      "protected_pack_qualified": false,
+      "bms_thickness_unknown": true
+    }
+  },
+  "enclosure": {
+    "shell_floor_mm": 1.6,
+    "shell_wall_mm": 1.6,
+    "closed_screen_gap_mm": 0.8,
+    "upper_lid_height_sweep_mm": [
+      5.05,
+      5.1,
+      5.15,
+      5.2,
+      5.3,
+      5.8
+    ],
+    "minimum_research_clearance_mm": 1.0,
+    "hinge_outer_d_mm": 6.8,
+    "hinge_y_offset_mm": 1.2
+  },
+  "scenario_perturbations": [
+    {
+      "id": "cell_plus_0p30mm",
+      "battery_delta_mm": 0.3
+    },
+    {
+      "id": "cm4_plus_0p25mm",
+      "cm4_mated_delta_mm": 0.25
+    },
+    {
+      "id": "lid_plus_0p20mm",
+      "upper_lid_delta_mm": 0.2
+    },
+    {
+      "id": "screen_plus_0p15mm",
+      "panel_thickness_delta_mm": 0.15
+    }
+  ],
+  "release_authority": {
+    "hardware_powered": false,
+    "simultaneous_dsi_verified": false,
+    "battery_repaired_verified": false,
+    "fab_authorized": false
+  }
+}

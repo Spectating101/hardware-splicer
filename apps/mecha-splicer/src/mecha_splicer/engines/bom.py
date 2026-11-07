@@ -97,6 +97,23 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
 
 def _bom_for_clamshell_terminal(p: ClamshellTerminalSpec) -> list[BomLine]:
     """Prototype budget inventory, not ordered or wired."""
+    if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm4_dual_dsi":
+        return [
+            BomLine("compute", "Raspberry Pi CM4102000 wireless Lite 2GB", "55x40mm CM4 with 1.5mm option mated stack 5.078mm", 1,
+                "No eMMC; budget for SD interface, radio antenna clearance, and real 5V power", sku="CM4102000"),
+            BomLine("display", "Winstar WF50DTYA3MNG10-000", "127.6x73.3x3.45mm 2-lane DSI projected capacitive touch", 2,
+                "GT928 + ILI9881C: dual Linux device-tree, exact panel timing and power drivers unverified", sku="WF50DTYA3MNG10-000"),
+            BomLine("electronics", "custom CM4 dual-DSI carrier", "nominal 0.8mm PCB with 2x100-pin 0.4mm-pitch mating", 1,
+                "Real DSI0/DSI1 differential routing, touch I2C, SD, Wi-Fi keepout and both backlights required", sku=""),
+            BomLine("power", "protected battery and charger", "80x50x6mm naked cell placeholder, NOT approved pack", 1,
+                "Swelling, protection, BMS, 5V boost, backlight rail and actual capacity unqualified", sku=""),
+            BomLine("hardware", "mechanical hinge and two display ribbon cables", "hinge FPC bend radius, EMI, connector and fatigue unqualified", 1,
+                "No hinge flex validated. DO NOT route MIPI DSI as ordinary GPIO jumpers", sku=""),
+            BomLine("printed", "CM4 dual-touch lower enclosure", "HS native Mecha-Splicer shell, FDM 1.6mm floor", 1,
+                "1mm nominal clearance is a research assumption, not manufacturing tolerance", sku=""),
+            BomLine("printed", "CM4 dual-touch upper enclosure", "HS native Mecha-Splicer shell, FDM 1.6mm floor", 1,
+                "No internal LCD PCB mounting, FPC relief or real lid closing test", sku=""),
+        ]
     if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm5_dual_dsi":
         return [
             BomLine("compute", "Radxa CM5 V2.21", "56x41mm SoM; board-to-board mating stack not qualified", 1,
