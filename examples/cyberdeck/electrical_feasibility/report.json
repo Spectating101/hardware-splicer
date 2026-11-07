@@ -1,0 +1,96 @@
+{
+  "schema": "hs.cm4_two_panel_feasibility_result.v1",
+  "product": "CM4 Lite + 2x exact 2-lane Winstar thin touchscreens",
+  "engineering_goal": "commercially credible physical product, no commercial launch",
+  "technical_decision": "NO_GO_COMPONENT_ORDER_WITHOUT_PANEL_DRIVER_AND_BENCH_PLAN",
+  "display": {
+    "dsi0_hardware_lanes": 2,
+    "dsi1_hardware_lanes": 4,
+    "exact_panel_lanes": 2,
+    "active_pixel_only_gbps_per_lane": 0.663552,
+    "hardware_lane_rate_limit_gbps": 1,
+    "active_data_rate_below_raw_limit": true,
+    "actual_Phy_clock_or_blanking_timing_verified": false,
+    "same_chip_as_official_panel_does_not_mean_same_init": true,
+    "reviewed_kernel_driver_names_exact_vendor_panel": false,
+    "panel_specific_initialization_and_display_mode_available": false,
+    "two_independent_Linux_DSI_outputs_tested": false,
+    "two_GT928_touch_devices_tested": false,
+    "vendor_panel_software_gate": "BLOCKED",
+    "required_pin_interfaces_per_panel": {
+      "DSI_FPC": 40,
+      "touch_FPC": 6
+    }
+  },
+  "official_reference": {
+    "name": "Raspberry Pi Touch Display 2 5 inch",
+    "known_supported_software_reference": true,
+    "outer_xy_mm": [
+      143.5,
+      91.5
+    ],
+    "depth_mm": 16,
+    "fits_80mm_body": false,
+    "drop_in_winstar_driver_equivalent": false
+  },
+  "protected_pack_comparison": {
+    "previous_assumed_unprotected_cell_depth_mm": 6,
+    "candidate_part": "LP525178",
+    "manufacturer_claimed_protected_pack_depth_mm": 5.2,
+    "nominal_pack_Wh": 9.25,
+    "NTC_present": false,
+    "seller_minimum_order": 5,
+    "price_and_shipping_validated": false,
+    "pack_thermal_and_protection_system_qualified": false,
+    "CM4_mated_plus_carrier_height_mm": 5.878,
+    "primary_lower_stack_dominant_component": "CM4",
+    "old_6mm_cell_nominal_lower_bound_mm": 19.05,
+    "new_protected_5p2mm_pack_nominal_lower_bound_mm": 18.928,
+    "nominal_thickness_saved_mm": 0.122,
+    "remaining_shortfall_to_18mm_mm": 0.928,
+    "min_calculation_excludes_connector_placement_and_swelling": true
+  },
+  "backlight": {
+    "two_panel_range_W": [
+      1.568,
+      1.904
+    ],
+    "driver_needed": "two channels or independently switched constant-current LED drive + boost voltage",
+    "5V_direct_connection_acceptable": false,
+    "driver_schematic_or_SPICE_test_completed": false
+  },
+  "root_blockers": [
+    "Exact WF50DTYA3MNG10-000 DSI init/timing mode not in reviewed Raspberry Pi driver/overlay",
+    "Dual DSI0/DSI1, separate GT928 touch/IRQ/reset and compositor mapping not on-bench",
+    "Protected pack narrows height but CM4/connector stack dominates minimum closed thickness",
+    "Physical 18mm, screen bonding, rear hinge support, thermal and flex fatigue not qualified",
+    "LED backlight current-controlled 20-24V boost and safe cell charger not designed/tested",
+    "No exact Taiwan all-in component+fabrication quote or physical product build"
+  ],
+  "next_cheapest_experiment": {
+    "name": "Firmware feasibility and supplier capability gate BEFORE buying two screens",
+    "vendor_request": [
+      "Exact -000 2-lane ILI9881C panel DSI command-init table and pixel timing",
+      "Known Raspberry Pi 4/CM4 Linux device-tree or tested reference driver",
+      "Power sequencing for VCI/IOVCC/GT928 and LED backlight reference circuit",
+      "Pin/FPC bending data, minimum radius, permissible repeated cycles, connector+retainer drawings",
+      "Sample purchase price delivered Taiwan for ONE panel; availability and warranty"
+    ],
+    "software_work": [
+      "Review Raspberry Pi 6.12 ILI9881C descriptor for exact compatible panel rather than copying Touch Display 2",
+      "Plan two 2-lane DSI channels and two independent I2C/IRQ/reset paths",
+      "Use official supported Touch Display 2 only as bench software control, not a pocket geometry substitute"
+    ],
+    "first_physical_purchase_authorized": false,
+    "two_panel_purchase_authorized": false
+  },
+  "release": {
+    "safe_to_power": false,
+    "manufacturing_authorized": false,
+    "component_purchase_authorized": false
+  },
+  "evidence_receipt": {
+    "input_sha256": "06aadadf1896653aaad44710758366321782a1c07cb56b23d0a6a3c3285777d3",
+    "prior_inset_gate_sha256": "0772915290a700e66b96584976eaad9d879a225aa8b0eb86d7af2f95339a4843"
+  }
+}

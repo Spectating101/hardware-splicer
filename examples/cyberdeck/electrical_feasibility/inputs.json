@@ -1,0 +1,108 @@
+{
+  "schema": "hs.cm4_two_panel_feasibility.v1",
+  "date": "2026-11-08",
+  "user_constraints": {
+    "two_touchscreens": true,
+    "no_physical_keyboard": true,
+    "max_closed_mm": [
+      155,
+      80,
+      18
+    ],
+    "budget_target_ntd": 8000,
+    "budget_user_approved": false,
+    "marketing_business_out_of_scope": true
+  },
+  "cm4": {
+    "exact_mpn": "CM4102000",
+    "dsi0_lanes": 2,
+    "dsi1_lanes": 4,
+    "max_gbps_per_lane": 1,
+    "mated_height_mm": 5.078,
+    "carrier_pcb_mm": 0.8,
+    "source": "https://datasheets.raspberrypi.com/cm4/cm4-datasheet.pdf",
+    "official_firmware_supported_panels_only": true
+  },
+  "panel": {
+    "exact_mpn": "WF50DTYA3MNG10-000",
+    "count": 2,
+    "dsi_lanes": 2,
+    "controller": "ILI9881C",
+    "resolution_px": [
+      720,
+      1280
+    ],
+    "fps_assumption": 60,
+    "bpp_assumption": 24,
+    "datasheet": "https://www.winstar.com.tw/d/676/WF50DTYA3MNG10-000.pdf",
+    "fpc_lcd_pins": 40,
+    "fpc_touch_pins": 6,
+    "gt928_touch": true,
+    "thickness_nominal_mm": 3.45,
+    "thickness_tolerance_mm": 0.5,
+    "backlight_voltage_min_v": 19.6,
+    "backlight_voltage_max_v": 23.8,
+    "backlight_current_a": 0.04,
+    "vendor_init_table_confirmed": false,
+    "timing_and_DSI_mode_validated": false,
+    "linux_exact_panel_driver_confirmed": false
+  },
+  "kernel": {
+    "repository": "raspberrypi/linux",
+    "ref": "rpi-6.12.y",
+    "driver_path": "drivers/gpu/drm/panel/panel-ilitek-ili9881c.c",
+    "driver_blob_sha": "416ff6fe6d8995fc42a37ea3565a9faabdbde427",
+    "reviewed_file_does_not_name_exact_winstar": true,
+    "official_5inch_compatibility": "raspberrypi,dsi-5inch",
+    "overlay_path": "arch/arm/boot/dts/overlays/vc4-kms-dsi-ili9881-5inch-overlay.dts",
+    "overlay_blob_sha": "830e28703e57ca43c831f2c82ad9bc2e5b0a8e11",
+    "driver_source": "https://github.com/raspberrypi/linux/blob/rpi-6.12.y/drivers/gpu/drm/panel/panel-ilitek-ili9881c.c"
+  },
+  "official_control": {
+    "name": "Raspberry Pi Touch Display 2 5 inch",
+    "display_module_xy_mm": [
+      143.5,
+      91.5
+    ],
+    "display_module_depth_mm": 16,
+    "source": "https://www.raspberrypi.com/documentation/accessories/touch-display-2.html",
+    "not_interchangeable_with_winstar": true
+  },
+  "protected_pack": {
+    "mpn": "LP525178",
+    "supplier": "LiPol Battery",
+    "source": "https://www.lipobattery.us/lp525178-3-7v-2500mah-9-25wh-li-poly-battery/",
+    "overall_length_mm": 78.6,
+    "overall_width_mm": 50.3,
+    "overall_depth_mm": 5.2,
+    "nominal_wh": 9.25,
+    "PCM_included": true,
+    "NTC_included": false,
+    "seller_min_order": 5,
+    "shipping_and_local_price_unknown": true,
+    "connector_and_swelling_fit_not_qualified": true
+  },
+  "previous_battery_placeholder_depth_mm": 6,
+  "stack": {
+    "base_shell_floor_mm": 1.6,
+    "lid_shell_floor_mm": 1.6,
+    "closed_gap_mm": 0.8,
+    "screen_bondline_assumption_mm": 0.15,
+    "min_component_research_clearance_mm": 1
+  },
+  "existing_HS_mechanical_report": "../inset_hinge_test/hinge_qualification.json",
+  "gate_truth": {
+    "dual_exact_panels_bench_verified": false,
+    "independent_touch_axes_verified": false,
+    "protected_battery_and_charger_measured": false,
+    "backlight_current_controller_verified": false,
+    "hinge_FPC_cycle_qualified": false,
+    "full_NTD_BOM_confirmed": false,
+    "source_panel_init_table_obtained": false
+  },
+  "release": {
+    "hardware_purchased": false,
+    "hardware_powered": false,
+    "fabrication_authorized": false
+  }
+}

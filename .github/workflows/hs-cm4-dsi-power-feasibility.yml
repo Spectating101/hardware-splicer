@@ -1,0 +1,61 @@
+name: HS CM4 dual-DSI driver and protected-pack feasibility
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-cm4-dsi-power-feasibility.yml'
+      - 'src/hardware_splicer/cyberdeck_electrical_feasibility.py'
+      - 'tests/test_cyberdeck_electrical_feasibility.py'
+      - 'examples/cyberdeck/electrical_feasibility/**'
+      - 'examples/cyberdeck/inset_hinge_test/hinge_qualification.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-backed-electrical-no-go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and regression tests
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Recompute from exact Winstar, Pi driver SHA and prior HS native CGAL
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cyberdeck_electrical_feasibility \
+            --input examples/cyberdeck/electrical_feasibility/inputs.json \
+            --out examples/cyberdeck/electrical_feasibility/report.json
+          git diff --exit-code -- examples/cyberdeck/electrical_feasibility/report.json
+      - name: Run source falsification and previous CAD release regressions
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q tests/test_cyberdeck_electrical_feasibility.py \
+            tests/test_cyberdeck_inset_hinge.py tests/test_cyberdeck_cm4_stack.py \
+            tests/test_cyberdeck_architecture_value.py \
+            tests/test_cyberdeck_packaging_workflow.py \
+            tests/test_machine_project.py
+      - name: Require no procurement or fabrication authority
+        run: |
+          python - <<'PY'
+          import json
+          p="examples/cyberdeck/electrical_feasibility/report.json"
+          r=json.load(open(p))
+          assert r["technical_decision"]=="NO_GO_COMPONENT_ORDER_WITHOUT_PANEL_DRIVER_AND_BENCH_PLAN"
+          assert r["display"]["vendor_panel_software_gate"]=="BLOCKED"
+          assert r["display"]["active_pixel_only_gbps_per_lane"]==0.663552
+          assert r["protected_pack_comparison"]["new_protected_5p2mm_pack_nominal_lower_bound_mm"]==18.928
+          assert r["protected_pack_comparison"]["remaining_shortfall_to_18mm_mm"]==0.928
+          assert not r["release"]["safe_to_power"]
+          assert not r["release"]["manufacturing_authorized"]
+          assert not r["release"]["component_purchase_authorized"]
+          PY
+      - name: Retain exact-component research decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-cm4-dsi-power-not-approved
+          retention-days: 30
+          path: examples/cyberdeck/electrical_feasibility
