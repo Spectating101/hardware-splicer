@@ -1,0 +1,212 @@
+{
+  "schema_version": "hardware_splicer.machine_project.v1",
+  "project_id": "HS-CM4-LITE-THIN-DUAL-TOUCH",
+  "name": "CM4 dual-touch thin case research",
+  "purpose": "Evaluate constrained packaging and construction economics, not sales",
+  "lifecycle_state": "intake",
+  "requested_release_state": "build_ready",
+  "requirements": [
+    {
+      "requirement_id": "r-nominal-fit",
+      "statement": "HS declared 155x80x18 dual-touch 1mm clearance screen/battery/compute analysis",
+      "kind": "performance",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-nominal-fit"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-physical-fit",
+      "statement": "Real purchased screen, battery, FPC, CM4 mating and case fit within tolerances",
+      "kind": "performance",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-physical-fit"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-firmware",
+      "statement": "Two correct DSI devices + GT928 touch inputs independently functional under Linux",
+      "kind": "functional",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-firmware"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-safe-battery",
+      "statement": "Protected cell, 5V boost and backlights under measured power and thermal conditions",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-safe-battery"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-secure-ssh",
+      "statement": "Correct host-key trust and on-screen editing controls demonstrated",
+      "kind": "safety",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-secure-ssh"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    },
+    {
+      "requirement_id": "r-economic",
+      "statement": "Fully qualified build cost including PCB, battery, shipping, failed prototypes",
+      "kind": "constraint",
+      "priority": "should",
+      "source": "user",
+      "parent_requirement_id": null,
+      "allocated_to": [],
+      "verification_method_ids": [
+        "v-economic"
+      ],
+      "authority": "declared",
+      "metadata": {}
+    }
+  ],
+  "functions": [],
+  "subsystems": [],
+  "components": [],
+  "interfaces": [],
+  "constraints": [],
+  "verifications": [
+    {
+      "verification_id": "v-nominal-fit",
+      "name": "Verify nominal-fit",
+      "method_type": "analysis",
+      "status": "passed",
+      "requirement_ids": [
+        "r-nominal-fit"
+      ],
+      "target_ids": [],
+      "evidence_ids": [
+        "native-nominal"
+      ],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-physical-fit",
+      "name": "Verify physical-fit",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-physical-fit"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-firmware",
+      "name": "Verify firmware",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-firmware"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-safe-battery",
+      "name": "Verify safe-battery",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-safe-battery"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-secure-ssh",
+      "name": "Verify secure-ssh",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-secure-ssh"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    },
+    {
+      "verification_id": "v-economic",
+      "name": "Verify economic",
+      "method_type": "test",
+      "status": "planned",
+      "requirement_ids": [
+        "r-economic"
+      ],
+      "target_ids": [],
+      "evidence_ids": [],
+      "procedure": "",
+      "acceptance_criteria": {},
+      "authority": "proposed",
+      "metadata": {}
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "native-nominal",
+      "kind": "HS MechanicalFit bounding boxes",
+      "basis": "Source-labelled manufacturer nominal dimensions and unverified component assumptions",
+      "ref": "cm4_stack_result.json",
+      "supports": [
+        "r-nominal-fit"
+      ],
+      "authority": "proposed",
+      "simulated": true,
+      "metadata": {}
+    }
+  ],
+  "artifacts": [],
+  "discipline_payloads": {},
+  "metadata": {
+    "commercialization": false
+  }
+}

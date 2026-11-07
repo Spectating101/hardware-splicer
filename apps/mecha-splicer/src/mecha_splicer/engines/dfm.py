@@ -136,7 +136,11 @@ def check_clamshell_terminal(p: ClamshellTerminalSpec, *, process: str) -> list[
     if (p.case_w_mm-p.display_board_w_mm)/2 < 5:
         issues.append(DfmIssue("warn", "Display planform leaves narrow side rails"))
     issues.append(DfmIssue("warn", "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"))
-    if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm5_dual_dsi":
+    if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm4_dual_dsi":
+        issues.append(DfmIssue("warn", "CM4 DSI0/DSI1 and dual GT928 touch software, panel timing and I2C configuration NOT verified"))
+        issues.append(DfmIssue("warn", "CM4 mated stack and dual raw panel clearances are nominal only; 18mm FDM envelope is NOT tolerance or assembly validated"))
+        issues.append(DfmIssue("warn", "No actual backlight boost, cell BMS/swelling, hinge FPC/strain relief or full part BREP collision proof"))
+    elif p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm5_dual_dsi":
         issues.append(DfmIssue("warn", "CM5 two independent DSI hosts: panel drivers, touch controller bus, backlight boost and FPC routing not verified"))
         issues.append(DfmIssue("warn", "3.45mm real panel plus CM5 mating, heat and protection need independent Z-constraint check; native shell alone is NOT fit proof"))
         issues.append(DfmIssue("warn", "Ultra-thin FDM shell, hinge clearance and battery protection are NOT qualified for physical fabrication"))

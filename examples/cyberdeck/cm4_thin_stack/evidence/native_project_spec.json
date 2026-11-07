@@ -1,0 +1,33 @@
+{
+  "project_name": "HS-CM4-LITE-2-THIN-TOUCH",
+  "mode": "prototype",
+  "process": "fdm",
+  "clamshell_terminal": {
+    "name": "CM4 Lite with 2x Winstar two-lane DSI touch: nominal only",
+    "compute_architecture": "cm4_dual_dsi",
+    "input_surface_mode": "dual_touch",
+    "case_w_mm": 155.0,
+    "case_d_mm": 80.0,
+    "base_h_mm": 12.1,
+    "lid_h_mm": 5.1,
+    "closed_gap_mm": 0.8,
+    "wall_mm": 1.6,
+    "floor_mm": 1.6,
+    "clearance_mm": 0.3,
+    "display_board_w_mm": 127.6,
+    "display_board_d_mm": 73.3,
+    "lower_touch_board_w_mm": 127.6,
+    "lower_touch_board_d_mm": 73.3,
+    "hinge_outer_d_mm": 6.8,
+    "hinge_pin_d_mm": 2.0,
+    "pin_radial_clearance_mm": 0.35,
+    "hinge_y_offset_mm": 1.2,
+    "knuckle_end_margin_mm": 5.0,
+    "knuckle_outer_length_mm": 23.0,
+    "knuckle_axial_gap_mm": 7.0,
+    "cable_slot_w_mm": 5.2,
+    "cable_slot_h_mm": 3.6,
+    "preview_open_angle_deg": -135
+  },
+  "notes": "Unverified 18mm nominal placement only; FPC, battery protection, dual Linux drivers, 5V/backlight and assembly not qualified."
+}

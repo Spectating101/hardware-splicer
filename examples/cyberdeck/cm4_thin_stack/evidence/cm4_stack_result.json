@@ -1,0 +1,551 @@
+{
+  "schema": "hs.cyberdeck_cm4_stack_replay.v1",
+  "source_sha256": "sha256:9528f6d7b3e88a2fcd07db55c2037bd5622f64a0ace0728d182251b62af2f74d",
+  "engine": "HS native MechanicalFit + Mecha-Splicer clamshell + canonical MachineProject",
+  "required_closed_xyz_mm": [
+    155.0,
+    80.0,
+    18.0
+  ],
+  "native_clamshell_hinge_included_xyz_mm": [
+    155.0,
+    84.6,
+    18.0
+  ],
+  "whole_device_pocket_envelope_met": false,
+  "external_hinge_projection_mm": 4.6,
+  "hinge_geometry_still_requires_redesign": true,
+  "budget_proposal_ntd": 8000,
+  "budget_not_user_approved": true,
+  "quoted_nonstrict_module_price_ntd": 2238.43,
+  "panel_price_separate_currency": {
+    "usd_each": 29.88,
+    "qty": 2,
+    "no_NTD_landed_quote": true
+  },
+  "unpriced": [
+    "two_panels_delivered_NTD_price",
+    "carrier_PCB_and_assembly",
+    "dual_DSI_route_and_connector",
+    "dual_panel_driver_and_backlights",
+    "hinge_FPC_qualified",
+    "protected_battery_and_boost",
+    "SD_card",
+    "thermal_spreader_and_antenna",
+    "enclosure_material_and_rework"
+  ],
+  "sweep": [
+    {
+      "lid_height_mm": 5.05,
+      "base_height_mm": 12.15,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "candidate",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.222,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.1,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.222,
+      "naked_battery_display_gap_mm": 1.1,
+      "panel_in_lid_rigidity_slack_mm": -0.0,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": true,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "lid_height_mm": 5.1,
+      "base_height_mm": 12.1,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "candidate",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.172,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.05,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.172,
+      "naked_battery_display_gap_mm": 1.05,
+      "panel_in_lid_rigidity_slack_mm": 0.05,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": true,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "lid_height_mm": 5.15,
+      "base_height_mm": 12.05,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "candidate",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.122,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.0,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.122,
+      "naked_battery_display_gap_mm": 1.0,
+      "panel_in_lid_rigidity_slack_mm": 0.1,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": true,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "lid_height_mm": 5.2,
+      "base_height_mm": 12.0,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.072,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.95,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.072,
+      "naked_battery_display_gap_mm": 0.95,
+      "panel_in_lid_rigidity_slack_mm": 0.15,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "lid_height_mm": 5.3,
+      "base_height_mm": 11.9,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.972,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.85,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 0.972,
+      "naked_battery_display_gap_mm": 0.85,
+      "panel_in_lid_rigidity_slack_mm": 0.25,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "lid_height_mm": 5.8,
+      "base_height_mm": 11.4,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.472,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.35,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 0.472,
+      "naked_battery_display_gap_mm": 0.35,
+      "panel_in_lid_rigidity_slack_mm": 0.75,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    }
+  ],
+  "nominal_candidate_lid_height_mm": 5.1,
+  "nominal_pass_count": 3,
+  "sensitivity_at_chosen": [
+    {
+      "id": "cell_plus_0p30mm",
+      "lid_height_mm": 5.1,
+      "base_height_mm": 12.1,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.172,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.75,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.172,
+      "naked_battery_display_gap_mm": 0.75,
+      "panel_in_lid_rigidity_slack_mm": 0.05,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "id": "cm4_plus_0p25mm",
+      "lid_height_mm": 5.1,
+      "base_height_mm": 12.1,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.922,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.05,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 0.922,
+      "naked_battery_display_gap_mm": 1.05,
+      "panel_in_lid_rigidity_slack_mm": 0.05,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "id": "lid_plus_0p20mm",
+      "lid_height_mm": 5.3,
+      "base_height_mm": 11.9,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.972,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.85,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 0.972,
+      "naked_battery_display_gap_mm": 0.85,
+      "panel_in_lid_rigidity_slack_mm": 0.25,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    },
+    {
+      "id": "screen_plus_0p15mm",
+      "lid_height_mm": 5.1,
+      "base_height_mm": 12.1,
+      "closed_envelope_mm": [
+        155.0,
+        80.0,
+        18.0
+      ],
+      "native_fit_status": "blocked",
+      "native_checks": {
+        "clearance-cm4-to-lower-screen": {
+          "status": "pass",
+          "measured_nominal_mm": 1.022,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-lower-screen": {
+          "status": "fail",
+          "measured_nominal_mm": 0.9,
+          "research_required_mm": 1.0
+        },
+        "clearance-battery-to-carrier": {
+          "status": "pass",
+          "measured_nominal_mm": 8.0,
+          "research_required_mm": 2.0
+        },
+        "clearance-screen-glass-to-glass": {
+          "status": "pass",
+          "measured_nominal_mm": 0.8,
+          "research_required_mm": 0.6
+        }
+      },
+      "cm4_display_gap_mm": 1.022,
+      "naked_battery_display_gap_mm": 0.9,
+      "panel_in_lid_rigidity_slack_mm": -0.1,
+      "XY_declared_fit": true,
+      "minimum_nominal_research_fit": false,
+      "physical_fit_or_tolerance_qualified": false,
+      "manufacturer_driver_pair_qualified": false
+    }
+  ],
+  "sensitivity_any_failed": true,
+  "nominal_only_fit": true,
+  "selected_candidate_requires_lid_module_slack_review": true,
+  "native_bom": [
+    {
+      "category": "compute",
+      "item": "Raspberry Pi CM4102000 wireless Lite 2GB",
+      "spec": "55x40mm CM4 with 1.5mm option mated stack 5.078mm",
+      "qty": 1,
+      "notes": "No eMMC; budget for SD interface, radio antenna clearance, and real 5V power",
+      "sku": "CM4102000"
+    },
+    {
+      "category": "display",
+      "item": "Winstar WF50DTYA3MNG10-000",
+      "spec": "127.6x73.3x3.45mm 2-lane DSI projected capacitive touch",
+      "qty": 2,
+      "notes": "GT928 + ILI9881C: dual Linux device-tree, exact panel timing and power drivers unverified",
+      "sku": "WF50DTYA3MNG10-000"
+    },
+    {
+      "category": "electronics",
+      "item": "custom CM4 dual-DSI carrier",
+      "spec": "nominal 0.8mm PCB with 2x100-pin 0.4mm-pitch mating",
+      "qty": 1,
+      "notes": "Real DSI0/DSI1 differential routing, touch I2C, SD, Wi-Fi keepout and both backlights required",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "protected battery and charger",
+      "spec": "80x50x6mm naked cell placeholder, NOT approved pack",
+      "qty": 1,
+      "notes": "Swelling, protection, BMS, 5V boost, backlight rail and actual capacity unqualified",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "mechanical hinge and two display ribbon cables",
+      "spec": "hinge FPC bend radius, EMI, connector and fatigue unqualified",
+      "qty": 1,
+      "notes": "No hinge flex validated. DO NOT route MIPI DSI as ordinary GPIO jumpers",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM4 dual-touch lower enclosure",
+      "spec": "HS native Mecha-Splicer shell, FDM 1.6mm floor",
+      "qty": 1,
+      "notes": "1mm nominal clearance is a research assumption, not manufacturing tolerance",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM4 dual-touch upper enclosure",
+      "spec": "HS native Mecha-Splicer shell, FDM 1.6mm floor",
+      "qty": 1,
+      "notes": "No internal LCD PCB mounting, FPC relief or real lid closing test",
+      "sku": ""
+    }
+  ],
+  "native_dfm": [
+    {
+      "severity": "warn",
+      "message": "Closed gap may pinch keys and cable"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "CM4 DSI0/DSI1 and dual GT928 touch software, panel timing and I2C configuration NOT verified"
+    },
+    {
+      "severity": "warn",
+      "message": "CM4 mated stack and dual raw panel clearances are nominal only; 18mm FDM envelope is NOT tolerance or assembly validated"
+    },
+    {
+      "severity": "warn",
+      "message": "No actual backlight boost, cell BMS/swelling, hinge FPC/strain relief or full part BREP collision proof"
+    }
+  ],
+  "native_cad_outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad",
+    "dual_touch_visual_preview.scad"
+  ],
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "build_ready",
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-safe-battery' is not closed by passing verification",
+        "object_id": "r-safe-battery",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-secure-ssh' is not closed by passing verification",
+        "object_id": "r-secure-ssh",
+        "severity": "error"
+      }
+    ],
+    "warnings": []
+  },
+  "decision": "NOMINAL_INTERNAL_STACK_BUT_HINGE_EXCEEDS_POCKET_LIMIT",
+  "manufacturing_authorized": false,
+  "hardware_bought": false,
+  "safe_to_power": false,
+  "two_DSI_panels_tested": false,
+  "ready_for_landed_cost_quote": true
+}

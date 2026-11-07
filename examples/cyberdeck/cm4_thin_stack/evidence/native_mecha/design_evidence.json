@@ -1,0 +1,202 @@
+{
+  "schema": "hs.clamshell_ssh_cad.v1",
+  "generator": "native mecha_splicer.bundle.generate_bundle",
+  "spec": "cm4_thin_stack/evidence/native_project_spec.json",
+  "native_outputs": [
+    "base_shell.scad",
+    "lid_shell.scad",
+    "clamshell_open_preview.scad",
+    "dual_touch_visual_preview.scad"
+  ],
+  "native_dfm": [
+    {
+      "severity": "warn",
+      "message": "Closed gap may pinch keys and cable"
+    },
+    {
+      "severity": "warn",
+      "message": "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"
+    },
+    {
+      "severity": "warn",
+      "message": "CM4 DSI0/DSI1 and dual GT928 touch software, panel timing and I2C configuration NOT verified"
+    },
+    {
+      "severity": "warn",
+      "message": "CM4 mated stack and dual raw panel clearances are nominal only; 18mm FDM envelope is NOT tolerance or assembly validated"
+    },
+    {
+      "severity": "warn",
+      "message": "No actual backlight boost, cell BMS/swelling, hinge FPC/strain relief or full part BREP collision proof"
+    }
+  ],
+  "native_bom": [
+    {
+      "category": "compute",
+      "item": "Raspberry Pi CM4102000 wireless Lite 2GB",
+      "spec": "55x40mm CM4 with 1.5mm option mated stack 5.078mm",
+      "qty": 1,
+      "notes": "No eMMC; budget for SD interface, radio antenna clearance, and real 5V power",
+      "sku": "CM4102000"
+    },
+    {
+      "category": "display",
+      "item": "Winstar WF50DTYA3MNG10-000",
+      "spec": "127.6x73.3x3.45mm 2-lane DSI projected capacitive touch",
+      "qty": 2,
+      "notes": "GT928 + ILI9881C: dual Linux device-tree, exact panel timing and power drivers unverified",
+      "sku": "WF50DTYA3MNG10-000"
+    },
+    {
+      "category": "electronics",
+      "item": "custom CM4 dual-DSI carrier",
+      "spec": "nominal 0.8mm PCB with 2x100-pin 0.4mm-pitch mating",
+      "qty": 1,
+      "notes": "Real DSI0/DSI1 differential routing, touch I2C, SD, Wi-Fi keepout and both backlights required",
+      "sku": ""
+    },
+    {
+      "category": "power",
+      "item": "protected battery and charger",
+      "spec": "80x50x6mm naked cell placeholder, NOT approved pack",
+      "qty": 1,
+      "notes": "Swelling, protection, BMS, 5V boost, backlight rail and actual capacity unqualified",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "mechanical hinge and two display ribbon cables",
+      "spec": "hinge FPC bend radius, EMI, connector and fatigue unqualified",
+      "qty": 1,
+      "notes": "No hinge flex validated. DO NOT route MIPI DSI as ordinary GPIO jumpers",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM4 dual-touch lower enclosure",
+      "spec": "HS native Mecha-Splicer shell, FDM 1.6mm floor",
+      "qty": 1,
+      "notes": "1mm nominal clearance is a research assumption, not manufacturing tolerance",
+      "sku": ""
+    },
+    {
+      "category": "printed",
+      "item": "CM4 dual-touch upper enclosure",
+      "spec": "HS native Mecha-Splicer shell, FDM 1.6mm floor",
+      "qty": 1,
+      "notes": "No internal LCD PCB mounting, FPC relief or real lid closing test",
+      "sku": ""
+    }
+  ],
+  "native_hs_level_shift_result": "NOT_APPLICABLE_RS485_LINK",
+  "native_hs_level_shift_measurement_gates_open": 0,
+  "native_hs_level_shift_caveat": "Dual Waveshare boards use onboard SP3485 RS485; A/B, reference, power and firmware still unverified",
+  "mesh": {
+    "base_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "ea13d4250e43cd15177e087ae98f14ce95819affa42c885a91cd9069aa8feb0e",
+      "triangle_count": 1008,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        155.0,
+        84.6,
+        15.9
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bbox_max_mm": [
+        155.0,
+        84.6,
+        15.9
+      ],
+      "signed_volume_cm3": 28.462,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    },
+    "lid_shell": {
+      "status": "CGAL_OPENSCAD_MESH_GEOMETRY_ONLY",
+      "sha256": "d98c829c4100901fb6fa432b125a6888b7fb31b17f7f96b42de2c908488b2648",
+      "triangle_count": 588,
+      "nonmanifold_edges": 0,
+      "bbox_mm": [
+        155.0,
+        84.6,
+        8.9
+      ],
+      "bbox_min_mm": [
+        0.0,
+        0.0,
+        9.1
+      ],
+      "bbox_max_mm": [
+        155.0,
+        84.6,
+        18.0
+      ],
+      "signed_volume_cm3": 24.484,
+      "CAD_validated": true,
+      "physically_printed": false,
+      "physical_fit_verified": false
+    }
+  },
+  "cgal_interference_sweep": [
+    {
+      "angle_deg": 0,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -30,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -60,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -90,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -135,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    },
+    {
+      "angle_deg": -165,
+      "interference_mesh": "EMPTY",
+      "cad_clearance_pass": true
+    }
+  ],
+  "closed_envelope": {
+    "width_mm": 155.0,
+    "depth_without_hinge_mm": 80.0,
+    "closed_thickness_mm": 18.0,
+    "hinge_projection_mm": 4.6,
+    "display_board_outer_footprint_mm": [
+      127.6,
+      73.3
+    ],
+    "lower_board_footprint_mm": [
+      127.6,
+      73.3
+    ],
+    "lower_input_type": "dual_touch",
+    "battery_not_yet_integrated": true,
+    "vendor_board_mounting_holes_unknown": true,
+    "port_access_cutouts_unverified": true
+  },
+  "electrical_wiring_not_ready": true,
+  "firmware_ssh_connected_to_optiplex": false,
+  "physical_hinge_sweep_tested": false,
+  "physical_fit_tested": false,
+  "actual_unit_assembled": false,
+  "usage_notes": "CGAL manifold checks prove geometry only. No vendor pin-length, battery, USB cutout or internal stacking proof."
+}
