@@ -1,0 +1,98 @@
+name: HS CM4 Inset Side-Hinge and Dual-Display CGAL Acceptance
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-cm4-inset-hinge-qualification.yml'
+      - 'apps/mecha-splicer/src/mecha_splicer/spec.py'
+      - 'apps/mecha-splicer/src/mecha_splicer/bundle.py'
+      - 'apps/mecha-splicer/src/mecha_splicer/engines/inset_side_hinge.py'
+      - 'apps/mecha-splicer/src/mecha_splicer/engines/dfm.py'
+      - 'src/hardware_splicer/cyberdeck_panel_collision.py'
+      - 'src/hardware_splicer/cyberdeck_inset_hinge_gate.py'
+      - 'examples/cyberdeck/produce_terminal.py'
+      - 'examples/cyberdeck/inset_hinge_test/**'
+      - 'tests/test_cyberdeck_inset_hinge.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-open-cgal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS, tests and OpenSCAD
+        run: |
+          python -m pip install -e . 'pytest>=8,<10'
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openscad
+      - name: Real native Mecha-Splicer manifold meshes + six shell collision poses
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src:examples/cyberdeck
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from produce_terminal import run
+          root=Path("examples/cyberdeck/inset_hinge_test").resolve()
+          output=run(root/"spec.json",root/"evidence","/usr/bin/openscad")
+          assert all(row["nonmanifold_edges"]==0 for row in output["mesh"].values())
+          assert len(output["cgal_interference_sweep"])==6
+          assert all(row["interference_mesh"]=="EMPTY" for row in output["cgal_interference_sweep"])
+          assert output["closed_envelope"]["hinge_projection_mm"]==0.0
+          assert output["mesh"]["base_shell"]["bbox_mm"][:2]==[155.0,80.0]
+          assert output["mesh"]["lid_shell"]["bbox_mm"][:2]==[155.0,80.0]
+          assert output["actual_unit_assembled"] is False
+          PY
+      - name: Real CGAL dual-LCD cross-half collision and worst-case tolerance negative control
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m hardware_splicer.cyberdeck_panel_collision \
+            --spec examples/cyberdeck/inset_hinge_test/spec.json \
+            --native-mecha examples/cyberdeck/inset_hinge_test/evidence \
+            --openscad /usr/bin/openscad \
+            --out examples/cyberdeck/inset_hinge_test/panel_CGAL_report.json
+      - name: Native HS source-backed acceptance must fail closed on mounting and 18mm
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m hardware_splicer.cyberdeck_inset_hinge_gate \
+            --qualification examples/cyberdeck/inset_hinge_test/qualification_input.json \
+            --out examples/cyberdeck/inset_hinge_test/hinge_qualification.json
+          python - <<'PY'
+          import json
+          p="examples/cyberdeck/inset_hinge_test/hinge_qualification.json"
+          r=json.load(open(p))
+          assert r["decision"]=="CGAL_KINEMATIC_PASS_COMPONENT_RETENTION_AND_TOLERANCE_FAIL"
+          assert r["tested_geometry"]["barrel_max_external_projection_mm"]==0
+          assert r["tested_geometry"]["CGAL_six_shell_angles_pass"]
+          assert r["retention"]["vendor_max_panel_collides_inside_nominal_lid_CGAL"]
+          assert r["retention"]["unsupported_screen_rear_edge_mm"]==2.65
+          assert r["worst_case_packaging"]["minimum_closed_thickness_mm"]==19.05
+          assert r["electrical"]["two_backlights_w"]==[1.568,1.904]
+          assert r["machine_release"]["blockers"]
+          assert r["manufacturing_authorized"] is False
+          assert r["safe_to_power"] is False
+          PY
+      - name: Regression tests for current and predecessor native HS cyberdecks
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q \
+            tests/test_cyberdeck_inset_hinge.py \
+            tests/test_cyberdeck_cm4_stack.py \
+            tests/test_cyberdeck_architecture_value.py \
+            tests/test_cyberdeck_packaging_workflow.py \
+            tests/test_machine_project.py \
+            tests/test_mechanical_fit.py \
+            apps/mecha-splicer/tests/test_bundle.py \
+            examples/cyberdeck/dual_touch/tests/test_dual_touch.py
+      - name: Retain HS mechanical and electrical acceptance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-inset-side-hinge-CGAL-pass-retention-fail
+          retention-days: 30
+          path: examples/cyberdeck/inset_hinge_test

@@ -1,0 +1,64 @@
+{
+  "schema": "hardware_splicer.inset_hinge_panel_collision_cgal.v1",
+  "generator": "real OpenSCAD/CGAL multi-body intersection not hand-drawn animation",
+  "panels": "Winstar WF50DTYA3MNG10-000: 2 separate rigid screens, no physical keyboard",
+  "nominal_screen_mm": [
+    127.6,
+    73.3,
+    3.45
+  ],
+  "manufacturer_max_screen_mm": [
+    127.6,
+    73.3,
+    3.95
+  ],
+  "angles": [
+    {
+      "angle_deg": 0,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    },
+    {
+      "angle_deg": -30,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    },
+    {
+      "angle_deg": -60,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    },
+    {
+      "angle_deg": -90,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    },
+    {
+      "angle_deg": -135,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    },
+    {
+      "angle_deg": -165,
+      "intersection": "EMPTY",
+      "file_sha256": null,
+      "mesh_bytes": 0
+    }
+  ],
+  "nominal_two_half_CGAL_collision_free": true,
+  "vendor_max_panel_inside_nominal_lid": {
+    "intersection": "NONEMPTY",
+    "file_sha256": "c683a61214656bd893003a8bef9b2d3fdab85d962b77cc19b9d2f4268fb29587",
+    "mesh_bytes": 684
+  },
+  "vendor_max_panel_collides_with_lid_floor": true,
+  "internal_battery_vs_LCD_collision_verified": false,
+  "FPC_dynamic_collision_verified": false,
+  "real_components_installed": false,
+  "physical_build_authorized": false
+}

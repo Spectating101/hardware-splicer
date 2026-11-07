@@ -136,6 +136,9 @@ def check_clamshell_terminal(p: ClamshellTerminalSpec, *, process: str) -> list[
     if (p.case_w_mm-p.display_board_w_mm)/2 < 5:
         issues.append(DfmIssue("warn", "Display planform leaves narrow side rails"))
     issues.append(DfmIssue("warn", "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"))
+    if p.hinge_style == "inset_side_pins":
+        issues.append(DfmIssue("warn", "Inset side-pin hinge is a CAD hypothesis; no metal pin engagement, shell adhesion, fatigue, angle stops or FPC flex routing validated"))
+        issues.append(DfmIssue("warn", "Rear 28mm relief is a modelled passage, NOT a compliant 40-pin MIPI/touch flex connection"))
     if p.input_surface_mode == "dual_touch" and p.compute_architecture == "cm4_dual_dsi":
         issues.append(DfmIssue("warn", "CM4 DSI0/DSI1 and dual GT928 touch software, panel timing and I2C configuration NOT verified"))
         issues.append(DfmIssue("warn", "CM4 mated stack and dual raw panel clearances are nominal only; 18mm FDM envelope is NOT tolerance or assembly validated"))

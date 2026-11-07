@@ -1,0 +1,397 @@
+{
+  "schema": "hardware_splicer.inset_hinge_qualification.v1",
+  "source": "native_Mecha-Splicer+real_CGAL+prior_HS_MechanicalFit+exact_Winstar_datasheet",
+  "tested_geometry": {
+    "closed_body_xyz_mm": [
+      155,
+      80,
+      18
+    ],
+    "hinge_style": "inset_side_pins",
+    "barrel_max_external_projection_mm": 0,
+    "CGAL_six_shell_angles_pass": true,
+    "nominal_full_thickness_screen_boxes_cross_half_tested": true,
+    "full_screen_and_FPC_sweep_tested": false,
+    "actual_vendor_STEP_model_used": false,
+    "physical_pin_insertion_tested": false
+  },
+  "retention": {
+    "manufacturer_nominal_panel_thickness_mm": 3.45,
+    "manufacturer_tolerance_plus_minus_mm": 0.5,
+    "research_bondline_allowance_mm": 0.15,
+    "selected_upper_lid_height_mm": 5.1,
+    "minimum_upper_lid_for_panel_max_mm": 5.7,
+    "selected_lid_missing_mm": 0.6,
+    "vendor_max_panel_collides_inside_nominal_lid_CGAL": true,
+    "rear_swing_relief_starts_y_mm": 74.0,
+    "display_ends_y_mm": 76.65,
+    "unsupported_screen_rear_edge_mm": 2.65,
+    "mounting_holes_on_panel": false,
+    "physically_serviceable_screen_retainer": false,
+    "screen_retention_gate": "BLOCKED"
+  },
+  "worst_case_packaging": {
+    "minimum_closed_thickness_mm": 19.05,
+    "minimum_closed_if_no_bondline_mm": 18.9,
+    "shortfall_to_18mm_mm": 1.05,
+    "calculation_is_a_lower_bound_without_BMS_or_mating_uncertainty": true,
+    "nominal_18mm_pass_does_not_survive_vendor_Z_tolerance": true
+  },
+  "electrical": {
+    "LCD_backlight_voltage_domain_v": [
+      19.6,
+      23.8
+    ],
+    "LCD_backlight_current_a_each": 0.04,
+    "LCD_backlight_power_w_each": [
+      0.784,
+      0.952
+    ],
+    "two_backlights_w": [
+      1.568,
+      1.904
+    ],
+    "voltage_input_NOT_directly_5V_or_cell": true,
+    "requires_current_controlled_boost": true,
+    "backlight_driver_qualified": false,
+    "two_linux_DSI_panels_verified": false,
+    "two_GT928_touch_inputs_verified": false
+  },
+  "mechanical_and_service": {
+    "rear_shell_open_across_width_mm": 6.0,
+    "base_rear_upper_clearance_cut_mm": 6.7,
+    "hinge_pin_supported_with_real_physical_load_test": false,
+    "FPC_dynamic_bend_tested": false,
+    "rear_dust_and_water_ingress_risk": true,
+    "safe_to_build_as_proposed": false
+  },
+  "machine_release": {
+    "requested_state": "build_ready",
+    "achieved_state": "build_ready",
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-electrical' is not closed by passing verification",
+        "object_id": "r-electrical",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-safe-cell' is not closed by passing verification",
+        "object_id": "r-safe-cell",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-flex' is not closed by passing verification",
+        "object_id": "r-flex",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-rear-strength' is not closed by passing verification",
+        "object_id": "r-rear-strength",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-screen-mount' is failed",
+        "object_id": "v-screen-mount",
+        "severity": "error"
+      }
+    ],
+    "warnings": []
+  },
+  "machine_project": {
+    "schema_version": "hardware_splicer.machine_project.v1",
+    "project_id": "HS-CM4-INSET-PIN-QUALIFICATION",
+    "name": "Inset side pin + dual Winstar panel mounting test",
+    "purpose": "Commercial-grade engineering quality and cost, without go-to-market",
+    "lifecycle_state": "intake",
+    "requested_release_state": "build_ready",
+    "requirements": [
+      {
+        "requirement_id": "r-closed-profile",
+        "statement": "CGAL native model fits 155x80x18 in closed pose",
+        "kind": "performance",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-closed-profile"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-kinematic-sweep",
+        "statement": "Six native shell-only CGAL hinge poses non-colliding",
+        "kind": "performance",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-kinematic-sweep"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-screen-mount",
+        "statement": "Both panels retained with +0.5mm manufacturer Z and a serviceable backing",
+        "kind": "performance",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-screen-mount"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-electrical",
+        "statement": "Correct 19.6-23.8V LED current regulators and backlight switching",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-electrical"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-safe-cell",
+        "statement": "Protected cell, swelling space, safe charging and thermal route",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-safe-cell"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-flex",
+        "statement": "Actual display FPC connector geometry and repeated hinge-bend life",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-flex"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-linux-dsi",
+        "statement": "Independent DSI0/DSI1, touch I2C, SSH and virtual keyboard",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-linux-dsi"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-rear-strength",
+        "statement": "Rear wall cut-out, hinge pin strength/retention and exposed screen edge are acceptable",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-rear-strength"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      }
+    ],
+    "functions": [],
+    "subsystems": [],
+    "components": [],
+    "interfaces": [],
+    "constraints": [],
+    "verifications": [
+      {
+        "verification_id": "v-closed-profile",
+        "name": "Verify closed-profile",
+        "method_type": "analysis",
+        "status": "passed",
+        "requirement_ids": [
+          "r-closed-profile"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "cad-native"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-kinematic-sweep",
+        "name": "Verify kinematic-sweep",
+        "method_type": "analysis",
+        "status": "passed",
+        "requirement_ids": [
+          "r-kinematic-sweep"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "cad-native"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-screen-mount",
+        "name": "Verify screen-mount",
+        "method_type": "analysis",
+        "status": "failed",
+        "requirement_ids": [
+          "r-screen-mount"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-electrical",
+        "name": "Verify electrical",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-electrical"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-safe-cell",
+        "name": "Verify safe-cell",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-safe-cell"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-flex",
+        "name": "Verify flex",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-flex"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-linux-dsi",
+        "name": "Verify linux-dsi",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-linux-dsi"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-rear-strength",
+        "name": "Verify rear-strength",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-rear-strength"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "cad-native",
+        "kind": "HS native Mecha-Splicer and OpenSCAD CGAL",
+        "basis": "Computational shell-only meshes and intersection checks",
+        "ref": "evidence/design_evidence.json",
+        "supports": [
+          "r-closed-profile",
+          "r-kinematic-sweep"
+        ],
+        "authority": "proposed",
+        "simulated": true,
+        "metadata": {}
+      }
+    ],
+    "artifacts": [],
+    "discipline_payloads": {},
+    "metadata": {
+      "no_manufacturing_or_use_authority": true,
+      "screen_mounting_fail_closed": true
+    }
+  },
+  "decision": "CGAL_KINEMATIC_PASS_COMPONENT_RETENTION_AND_TOLERANCE_FAIL",
+  "component_procuring_authorized": false,
+  "manufacturing_authorized": false,
+  "safe_to_power": false,
+  "next_engineering_experiments": [
+    "Select actual 2-lane panel driver and bench test two separate DSI/touch paths",
+    "Find screen fastening/support solution that preserves \u00b10.5mm vendor Z tolerance",
+    "Design inset side hinge with full rear screen support and flex bend loop",
+    "Select protected slim cell, charger and regulated 20-24V current-driven backlights",
+    "Re-run native CAD with complete connectors, battery, retention and tolerances"
+  ],
+  "provenance": {
+    "qualification_input_sha256": "sha256:294a331ad33edb928589aab5da04a66622eb6ef736cd24caf8d26d581b3875bd",
+    "native_spec_sha256": "sha256:b9ca0aa3dbb00c2c47554e554423fa2f3c7734f349f17f5955ab39af642ae249",
+    "native_CGAL_report_sha256": "sha256:9a2cf8798ca8652dbc208c711839ce65611038dcccc79c3a568ce6b5cf6b6a86",
+    "prior_HS_CM4_fit_sha256": "sha256:affbffbc276896ecc8892c79aeac9e16e9c4376722a93b5547bfd70351c21bf0",
+    "nominal_plus_worst_case_panel_CGAL_sha256": "sha256:73206e4ba9f4cb6a2fd6edac972e28ebf2b0ff1ab76c0e48c66c78a4854a18ef"
+  }
+}
