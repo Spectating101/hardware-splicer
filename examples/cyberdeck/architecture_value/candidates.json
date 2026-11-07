@@ -1,0 +1,403 @@
+{
+  "schema": "hardware_splicer.cyberdeck_architecture_options.v1",
+  "as_of": "2026-11-08",
+  "product_requirement": {
+    "scenario": "Portable code editing and SSH into Optiplex; dual independent capacitive touchscreens; no physical keyboard",
+    "max_closed_size_mm": [
+      155,
+      80,
+      18
+    ],
+    "two_touchscreens_mandatory": true,
+    "physical_keyboard_forbidden": true,
+    "target_budget_ntd": 8000,
+    "target_budget_is_user_approved": false,
+    "native_linux_is_preference_not_requirement": true,
+    "security_and_safe_power_mandatory": true,
+    "commercialization_required": false
+  },
+  "candidates": [
+    {
+      "id": "cm4_dual_dsi",
+      "name": "Raspberry Pi CM4 Linux with two 5in DSI touchscreens",
+      "category": "build",
+      "architecture": "single Linux SoM + dual DSI with 2-lane and 4-lane host",
+      "native_linux": true,
+      "sourced_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 5in DSI LCD (B) 800x480 touch",
+          "qty": 2,
+          "ask_ntd": 1298,
+          "url": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE-5-%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        }
+      ],
+      "native_display_host_source": "https://www.raspberrypi.com/documentation/computers/compute-module.html",
+      "supplier_interface_source": "https://www.waveshare.com/product/raspberry-pi/5inch-dsi-lcd-b.htm",
+      "screen_controllers_independent": "unverified_simultaneous",
+      "touch_controllers_independent": "unverified_dual_i2c",
+      "fit_155x80x18": "manufacturer_panel_87_45mm_exceeds_80mm_pocket_width",
+      "safety_power": "unverified",
+      "shell_3d": "not_generated_for_this_SKU",
+      "critical_unknowns": [
+        "FAIL: 5in DSI (B) panel 127.70x87.45 mm exceeds 80 mm width before enclosure wall",
+        "CM4 2 simultaneous DSI panel drivers and independent touch",
+        "actual DSI adapters/connectors and FPC bend",
+        "carrier PCB connector stack and routed panel power",
+        "closed thickness and battery protection",
+        "manufacturing all-in total"
+      ],
+      "cost_exclusions": [
+        "carrier",
+        "dual DSI adapters",
+        "battery/BMS/charging",
+        "hinge/FPC",
+        "enclosure",
+        "thermal",
+        "shipping",
+        "assembly/rework"
+      ],
+      "role": "native_Linux_challenger",
+      "module_footprint_mm": [
+        127.7,
+        87.45
+      ],
+      "module_size_source": "https://www.robotshop.com/products/5inch-capacitive-ips-touch-display-raspberry-pi-800x480-dsi-low-power"
+    },
+    {
+      "id": "cm4_narrow_50_dsi",
+      "name": "Raspberry Pi CM4 + two narrow 5in Waveshare DSI LCD (D) 720x1280",
+      "category": "build",
+      "architecture": "CM4 native Linux 2 DSI host ports with compact portrait panels",
+      "native_linux": true,
+      "sourced_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 5inch DSI LCD (D) SKU28970 720x1280 touch",
+          "qty": 2,
+          "ask_ntd": 2319,
+          "url": "https://www.icshop.com.tw/products/388370100062",
+          "price_kind": "listed_seller_ask",
+          "availability": "made_to_order_eta_unknown"
+        }
+      ],
+      "native_display_host_source": "https://www.raspberrypi.com/documentation/computers/compute-module.html",
+      "supplier_interface_source": "https://www.waveshare.com/wiki/5inch_DSI_LCD_%28D%29",
+      "module_footprint_mm": [
+        126.9,
+        70.7
+      ],
+      "module_size_source": "https://files.waveshare.com/wiki/5inch%20DSI%20LCD%20%28D%29/5inch_DSI_LCD_D.pdf",
+      "screen_controllers_independent": "two_DSI_host_ports_but_simultaneous_unverified",
+      "touch_controllers_independent": "two_own_i2c_panels_but_simultaneous_unverified",
+      "fit_155x80x18": "XY_fits_without_stack_and_hinge_validation",
+      "safety_power": "unverified",
+      "shell_3d": "no_native_HS_fitted_shell_yet",
+      "critical_unknowns": [
+        "1.6mm shell + actual screen controller PCB Z depth and two real hinge FPC",
+        "two same panels simultaneously DSI0/DSI1 and separate touch mapping",
+        "DSI FPC and panel 5V power, connector BOM",
+        "factory quoted delivered amount, board rework, battery and case"
+      ],
+      "cost_exclusions": [
+        "carrier",
+        "MIPI cable and adapters",
+        "battery/BMS",
+        "hinge/flex",
+        "enclosure",
+        "thermal",
+        "shipping",
+        "assembly/rework"
+      ],
+      "role": "narrow_dsi_linux_study_but_budget_baseline_overrun"
+    },
+    {
+      "id": "cm4_43_dsi",
+      "name": "Raspberry Pi CM4 + two low-cost Waveshare 4.3in 800x480 DSI touch",
+      "category": "build",
+      "architecture": "CM4 native Linux 2 DSI and two full development LCD units",
+      "native_linux": true,
+      "sourced_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        },
+        {
+          "name": "Waveshare 4.3inch DSI LCD SKU16239 integrated module",
+          "qty": 2,
+          "ask_ntd": 998,
+          "url": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE4-3%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_9_in_stock"
+        }
+      ],
+      "native_display_host_source": "https://www.raspberrypi.com/documentation/computers/compute-module.html",
+      "supplier_interface_source": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE4-3%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+      "full_module_depth_mm": 14.05,
+      "module_size_source": "https://www.meiyagroup.com.tw/product/%E6%A8%B9%E8%8E%93%E6%B4%BE4-3%E5%90%8B%E9%9B%BB%E5%AE%B9%E5%BC%8F%E8%A7%B8%E6%8E%A7%E8%9E%A2%E5%B9%95800x480-dsi-%E4%BD%8E%E5%8A%9F%E8%80%97/",
+      "screen_controllers_independent": "two_DSI_host_ports_but_simultaneous_unverified",
+      "touch_controllers_independent": "two_own_i2c_panels_but_simultaneous_unverified",
+      "fit_155x80x18": "FAIL_two_14_05mm_integrated_modules_exceed_total_closed_18mm",
+      "safety_power": "unverified",
+      "shell_3d": "no_native_HS_fitted_shell_yet",
+      "critical_unknowns": [
+        "14.05mm seller-listed full module thickness each => 28.1mm minimum two rigid surfaces before frame",
+        "dual panel mapping and backlights",
+        "carrier and battery/hinge integration"
+      ],
+      "cost_exclusions": [
+        "carrier",
+        "DSI adapters",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/shipping"
+      ],
+      "role": "cheap_Linux_panel_subtotal_but_Z_excluded"
+    },
+    {
+      "id": "cm4_narrow_custom",
+      "name": "CM4 with two bare narrow Winstar 5in capacitive MIPI panels",
+      "category": "build",
+      "architecture": "single CM4 Linux dual DSI; custom LCD backlight/power/touch carriers",
+      "native_linux": true,
+      "sourced_items": [
+        {
+          "name": "Raspberry Pi CM4 CM4102032 2GB/32GB wireless",
+          "qty": 1,
+          "ask_ntd": 3728,
+          "url": "https://www.meiyagroup.com.tw/product-category/%E6%A8%B9%E8%8E%93%E6%B4%BE-cm4-%E5%B0%88%E5%8D%80/",
+          "price_kind": "listed_seller_ask",
+          "availability": "listed_8_in_stock"
+        }
+      ],
+      "native_display_host_source": "https://www.raspberrypi.com/documentation/computers/compute-module.html",
+      "supplier_interface_source": "https://www.digikey.com/en/products/detail/winstar-display/WF50DTYA3MNG10-000/20533236",
+      "module_footprint_mm": [
+        127.6,
+        73.3
+      ],
+      "module_size_source": "https://www.winstar.com.tw/products/tft-lcd/ips-tft/capacitive-touch-panel.html",
+      "screen_controllers_independent": "2_DSI_ports_documented_but_no_2panel_test",
+      "touch_controllers_independent": "2_GT928_panels_custom_buses_not_verified",
+      "fit_155x80x18": "XY_fits_very_tight_but_actual_module_stack_unknown",
+      "safety_power": "unverified",
+      "shell_3d": "no_native_HS_CM4_panel_fit_yet",
+      "critical_unknowns": [
+        "Taiwan landed exact 2-lane panel price and stock unquoted; DigiKey USD alone not included in NTD subtotal",
+        "Winstar panel Linux DSI driver and two GT928 addresses",
+        "backlight power and FPC custom carrier",
+        "18mm complete CM4 stack and battery thermal"
+      ],
+      "cost_exclusions": [
+        "TWO DISPLAY MODULES",
+        "panel backlight controller and driver integration",
+        "carrier",
+        "DSI flex",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/shipping"
+      ],
+      "role": "narrow_thin_raw_panel_design_study_unquoted"
+    },
+    {
+      "id": "esp32_dual_43",
+      "name": "Two Waveshare ESP32-S3 4.3in touchscreen boards",
+      "category": "build",
+      "architecture": "one MCU per RGB panel with RS485 hinge event transport; remote SSH only",
+      "native_linux": false,
+      "sourced_items": [
+        {
+          "name": "Waveshare ESP32-S3-Touch-LCD-4.3 SKU25948",
+          "qty": 2,
+          "ask_ntd": 1650,
+          "url": "https://www.ruten.com.tw/item/22629113316589/",
+          "price_kind": "mixed_variant_upper_ask_unconfirmed_exact_SKU",
+          "availability": "stock_SKU_unconfirmed"
+        }
+      ],
+      "native_display_host_source": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3",
+      "supplier_interface_source": "https://github.com/Spectating101/hardware-splicer/tree/engineering/hs-dual-touch-native-replay-20261107/examples/cyberdeck/dual_touch",
+      "screen_controllers_independent": "two_hardware_RBG_controllers_documented",
+      "touch_controllers_independent": "two_integrated_i2c_touch_modules_documented",
+      "fit_155x80x18": "unknown",
+      "safety_power": "unverified",
+      "shell_3d": "existing_HS_29.6mm_shell_not_meeting_thin_target",
+      "critical_unknowns": [
+        "secure SSH host-key validation actual firmware",
+        "terminal latency/readability and virtual keys",
+        "RS485 pair common ground and split-charge topology",
+        "battery/charger/full Z height and hinge life",
+        "exact touch variant availability and checkout total"
+      ],
+      "cost_exclusions": [
+        "battery/BMS",
+        "protected power",
+        "enclosure",
+        "hinge/wiring",
+        "shipping",
+        "labor/rework"
+      ],
+      "role": "low_price_remote_only_trial"
+    },
+    {
+      "id": "radxa_cm5_dual_50",
+      "name": "Radxa CM5 Linux with two Winstar 5in 720x1280 DSI touchscreens",
+      "category": "build",
+      "architecture": "single RK3588S2 SoM dual DSI via custom carrier",
+      "native_linux": true,
+      "sourced_items": [],
+      "native_display_host_source": "https://docs.radxa.com/en/som/cm/cm5/getting-started/accessory-usage",
+      "supplier_interface_source": "https://www.digikey.com/en/products/detail/winstar-display/WF50DTYA3MNG10-000/20533236",
+      "screen_controllers_independent": "two_DSI_outputs_documented_but_pair_untested",
+      "touch_controllers_independent": "two_GT928_modules_unverified_simultaneous",
+      "fit_155x80x18": "failed_in_native_HS_model",
+      "native_fit_report": "examples/cyberdeck/dual_touch/cm5_native_replay/evidence/hs_packaging_report.json",
+      "safety_power": "unverified",
+      "shell_3d": "HS_native_20mm_counterfactual_fails_18mm",
+      "critical_unknowns": [
+        "2026 exact Radxa SKU seller quote",
+        "two Winstar landed prices in NTD",
+        "Linux 2-panel simultaneous DSI init",
+        "hinge FPC and battery/thermal",
+        "18mm failure under native FDM shell"
+      ],
+      "cost_exclusions": [
+        "ALL exact-NDT sourced BOM not available",
+        "carrier",
+        "panel pricing currency mismatch",
+        "battery",
+        "hinge",
+        "enclosure",
+        "assembly/rework"
+      ],
+      "role": "high_capability_overengineered_current_baseline"
+    },
+    {
+      "id": "intact_phone_dual_display",
+      "name": "Keep used S23 intact + independent HDMI touchscreen",
+      "category": "hybrid",
+      "architecture": "Android/DeX phone plus wired 2nd USB/HDMI touch panel (not a proven pocketable clamshell)",
+      "native_linux": false,
+      "sourced_items": [
+        {
+          "name": "Used Galaxy S23 8GB/256GB Taiwan store ask",
+          "qty": 1,
+          "ask_ntd": 7200,
+          "url": "https://tw.bid.yahoo.com/tw/Galaxy%E5%85%B6%E4%BB%96-2092073584-category.html?acu=3&pg=1&refine=con_used%2Cis_super_hot_seller&sort=ontime",
+          "price_kind": "listing_ask_condition_unknown",
+          "availability": "single_used_unit_not_reserved"
+        }
+      ],
+      "native_display_host_source": "https://www.samsung.com/tw/apps/samsung-dex/",
+      "supplier_interface_source": "",
+      "screen_controllers_independent": "external_video_capable_but_exact_2_touch_modes_unverified",
+      "touch_controllers_independent": "usb_touch_event_routing_unverified",
+      "fit_155x80x18": "not_a_self_contained_pocketable_clamshell",
+      "safety_power": "OEM_device_integrated_but_used_unknown",
+      "shell_3d": "none",
+      "critical_unknowns": [
+        "USB-C DeX video + external touch HID simultaneous and lower-screen software",
+        "external touchscreen price",
+        "single battery/power/hinge",
+        "used condition and secure updates"
+      ],
+      "cost_exclusions": [
+        "external_HDMI_touchscreen",
+        "hub/cables",
+        "mounting hinge",
+        "shipping",
+        "battery replacement"
+      ],
+      "role": "buy_vs_build_workflow_control"
+    },
+    {
+      "id": "used_fold4",
+      "name": "Used Galaxy Z Fold4, functioning intact device",
+      "category": "buy",
+      "architecture": "integrated Fold OLED on Android; no custom rigid display",
+      "native_linux": false,
+      "sourced_items": [
+        {
+          "name": "Used Samsung Z Fold4 Taiwan seller ask",
+          "qty": 1,
+          "ask_ntd": 10000,
+          "url": "https://tw.bid.yahoo.com/tw/Galaxy%E5%85%B6%E4%BB%96-2092073584-category.html?acu=3&pg=1&refine=con_used%2Cis_super_hot_seller&sort=ontime",
+          "price_kind": "listing_ask_used_unit",
+          "availability": "seller_condition_and_stock_unverified"
+        }
+      ],
+      "native_display_host_source": "https://www.samsung.com/tw/apps/samsung-dex/",
+      "supplier_interface_source": "",
+      "screen_controllers_independent": "fold_main_and_cover_not_two_rigid_touches",
+      "touch_controllers_independent": "not_two_parallel_rigid_screens",
+      "fit_155x80x18": "yes_device_spec_but_not_same_architecture",
+      "safety_power": "OEM_integrated_used_wear_unknown",
+      "shell_3d": "not_applicable",
+      "critical_unknowns": [
+        "fold history and hinge remaining life",
+        "screen repair economics",
+        "battery health and security support",
+        "condition return/warranty"
+      ],
+      "cost_exclusions": [
+        "future repairs",
+        "battery wear"
+      ],
+      "role": "external_purchase_price_benchmark"
+    },
+    {
+      "id": "stripped_phone_mainboard",
+      "name": "Salvaged smartphone board as generic dual-MIPI/Linux computer",
+      "category": "salvage",
+      "architecture": "OEM proprietary SoC board detached from its original display",
+      "native_linux": false,
+      "sourced_items": [],
+      "native_display_host_source": "https://github.com/Spectating101/hardware-splicer/blob/engineering/hs-dual-touch-native-replay-20261107/examples/cyberdeck/dual_touch/sourcing/PHONE_DONOR_VS_SBC_VALUE_20261106.md",
+      "supplier_interface_source": "",
+      "screen_controllers_independent": "unsupported_oem_panel_interface",
+      "touch_controllers_independent": "unsupported",
+      "fit_155x80x18": "unknown",
+      "safety_power": "unverified",
+      "shell_3d": "none",
+      "critical_unknowns": [
+        "OEM panel timing proprietary and connectors",
+        "boot/power/thermistor/antenna path",
+        "Linux device-tree",
+        "two unrelated screens drive",
+        "reused board quality and sourcing"
+      ],
+      "cost_exclusions": [
+        "donor",
+        "new panels",
+        "interface bridge",
+        "PCB",
+        "battery",
+        "hinge",
+        "full engineering"
+      ],
+      "role": "tempting_but_no_plug_and_play_development_path"
+    }
+  ]
+}

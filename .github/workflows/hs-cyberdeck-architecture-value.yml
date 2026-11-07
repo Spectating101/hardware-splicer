@@ -1,0 +1,54 @@
+name: HS Cyberdeck Buy-vs-Build Engineering Value
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-cyberdeck-architecture-value.yml'
+      - 'src/hardware_splicer/cyberdeck_architecture_value.py'
+      - 'tests/test_cyberdeck_architecture_value.py'
+      - 'examples/cyberdeck/architecture_value/**'
+      - 'examples/cyberdeck/dual_touch/cm5_native_replay/evidence/hs_packaging_report.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  value-screening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Run HS source-backed decision and verify it is reproducible
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cyberdeck_architecture_value \
+            --candidates examples/cyberdeck/architecture_value/candidates.json \
+            --out examples/cyberdeck/architecture_value/hs_decision.json
+          git diff --exit-code -- examples/cyberdeck/architecture_value/hs_decision.json
+      - name: Run adversarial cost, display fit and release gates
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q tests/test_cyberdeck_architecture_value.py \
+            tests/test_machine_project.py
+      - name: Check fail-closed value decision
+        run: |
+          python - <<'PY'
+          import json
+          path='examples/cyberdeck/architecture_value/hs_decision.json'
+          r=json.load(open(path))
+          assert r['preferred_linux_research_candidate_id'] is None
+          assert r['no_priced_Linux_architecture_meets_both_footprint_and_budget']
+          assert r['highest_information_gain_thin_linux_study']=='cm4_narrow_custom'
+          by_id={c['candidate_id']:c for c in r['results']}
+          assert by_id['cm4_dual_dsi']['module_footprint_gate']['fits_nominal_xy'] is False
+          assert by_id['cm4_43_dsi']['two_module_minimum_thickness_mm']==28.1
+          assert by_id['cm4_narrow_50_dsi']['asking_price_subtotal_ntd']==8366
+          assert not r['any_candidate_manufacturing_authorized']
+          assert not r['any_candidate_purchasing_authorized']
+          assert not r['commercialization_required']
+          PY
