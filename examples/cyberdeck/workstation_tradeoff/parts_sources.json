@@ -1,0 +1,165 @@
+{
+  "schema": "hs.dual_portrait_workstation_sources.v1",
+  "as_of": "2026-11-09",
+  "mission": "Two independent 5-inch portrait touchscreens and meaningful local Linux programming; SSH/remote Optiplex optional, not hardware replacement; DS handhelds are references only",
+  "requirements": {
+    "dual_screen_count": 2,
+    "screen_resolution_each_px": [
+      720,
+      1280
+    ],
+    "both_panels_capacitive_touch": true,
+    "screen_orientation": "portrait",
+    "physical_keyboard": false,
+    "local_development_required": true,
+    "research_ram_floor_gb": 4,
+    "research_ram_preferred_gb": 8,
+    "closed_xyz_stretch_goal_mm": [
+      155,
+      80,
+      18
+    ],
+    "stretch_goal_is_not_a_user_approved_hard_constraint": true,
+    "assistant_proposed_cost_goal_ntd": 8000,
+    "assistant_cost_goal_user_approved": false,
+    "safe_power_thermal_and_hinge_cable_required": true,
+    "commercial_launch_required": false
+  },
+  "displays": {
+    "sku": "Waveshare 5inch DSI LCD (D) SKU 28970",
+    "qty": 2,
+    "native_orientation": "720x1280 portrait",
+    "active_view_area_mm": [
+      62.28,
+      110.32
+    ],
+    "outer_front_mm": [
+      70.7,
+      126.9
+    ],
+    "mechanism": "one DSI and I2C touch path per module; Waveshare lists Pi CM4 and Pi CM5 as compatible individually",
+    "twd_ask_each": 2319,
+    "price_status": "Taiwan seller made-to-order asking price; lead, tax and shipped total not confirmed",
+    "local_url": "https://www.icshop.com.tw/en/products/388370100062",
+    "official_url": "https://www.waveshare.com/wiki/5inch_DSI_LCD_%28D%29",
+    "drawing_url": "https://files.waveshare.com/wiki/5inch%20DSI%20LCD%20%28D%29/5inch_DSI_LCD_D.pdf",
+    "CAD_zip_url": "https://files.waveshare.com/wiki/5inch%20DSI%20LCD%20%28D%29/5inch-dsi-lcd-d_3D.zip",
+    "both_simultaneous_validated": false,
+    "after_electronics_relocation_drivers_validated": false
+  },
+  "computes": [
+    {
+      "id": "pi_cm4_lite_2gb",
+      "platform": "Raspberry Pi CM4 Lite WiFi",
+      "mpn": "CM4102000",
+      "ram_gb": 2,
+      "emmc_gb": 0,
+      "wifi": true,
+      "performance_category": "quad_Cortex_A72_baseline",
+      "price_ntd": 2238.43,
+      "price_scope": "Taiwan before VAT asking price, long lead time; SD card, carrier omitted",
+      "source_url": "https://tw.element14.com/en-TW/raspberry-pi/cm4102000/rpi-compute-module-4-lite-2gb/dp/3563483",
+      "availability": "long_lead_unconfirmed_checkout",
+      "source_claim": "as previously recorded HS #309"
+    },
+    {
+      "id": "pi_cm5_wifi4_lite",
+      "platform": "Raspberry Pi CM5 Wireless Lite",
+      "mpn": "CM5104000",
+      "ram_gb": 4,
+      "emmc_gb": 0,
+      "wifi": true,
+      "performance_category": "quad_Cortex_A76_2p4GHz",
+      "price_ntd": 3801,
+      "price_scope": "Taiwan DigiKey unit seller ask, shipping/tax and stock must be rechecked",
+      "source_url": "https://www.digikey.tw/en/products/detail/raspberry-pi/SC1592/25805568",
+      "availability": "listed_in_stock_at_research"
+    },
+    {
+      "id": "pi_cm5_wifi8_lite",
+      "platform": "Raspberry Pi CM5 Wireless Lite",
+      "mpn": "CM5108000",
+      "ram_gb": 8,
+      "emmc_gb": 0,
+      "wifi": true,
+      "performance_category": "quad_Cortex_A76_2p4GHz",
+      "price_ntd": 6155,
+      "price_scope": "Taiwan DigiKey unit seller ask, shipping/tax and stock must be rechecked",
+      "source_url": "https://www.digikey.tw/zh/products/detail/raspberry-pi/SC1598/25805587",
+      "availability": "listed_in_stock_at_research"
+    },
+    {
+      "id": "pi_cm5_wifi4_emmc32",
+      "platform": "Raspberry Pi CM5 WiFi 4GB 32GB eMMC",
+      "mpn": "CM5104032",
+      "ram_gb": 4,
+      "emmc_gb": 32,
+      "wifi": true,
+      "performance_category": "quad_Cortex_A76_2p4GHz",
+      "price_ntd": 6300,
+      "price_scope": "Taiwan iCShop asking price, listing sold out",
+      "source_url": "https://www.icshop.com.tw/en/products/368030502268",
+      "availability": "listed_sold_out"
+    },
+    {
+      "id": "radxa_cm5_4_emmc32",
+      "platform": "Radxa CM5 RK3588S2",
+      "mpn": "RM120-D4E32R26",
+      "ram_gb": 4,
+      "emmc_gb": 32,
+      "wifi": false,
+      "performance_category": "quad_Cortex_A76_plus_quad_Cortex_A55",
+      "price_ntd": null,
+      "price_usd": 89,
+      "price_scope": "Radxa distributor USD seller ask, SKU sold out, no currency conversion or Taiwan quote",
+      "source_url": "https://shop.allnetchina.cn/products/radxa-cm5-1",
+      "availability": "listed_sold_out",
+      "operating_voltage_recommendation": "4V 3A carrier supply; typical current 2A per Radxa docs",
+      "hardware_source": "https://docs.radxa.com/en/som/cm/cm5"
+    },
+    {
+      "id": "radxa_cm5_8_emmc64",
+      "platform": "Radxa CM5 RK3588S2",
+      "mpn": "RM120-D8E64R26",
+      "ram_gb": 8,
+      "emmc_gb": 64,
+      "wifi": false,
+      "performance_category": "quad_Cortex_A76_plus_quad_Cortex_A55",
+      "price_ntd": null,
+      "price_usd": 119,
+      "price_scope": "Radxa distributor USD seller ask, SKU sold out, no currency conversion or Taiwan quote",
+      "source_url": "https://shop.allnetchina.cn/products/radxa-cm5-1",
+      "availability": "listed_sold_out",
+      "operating_voltage_recommendation": "4V 3A carrier supply; typical current 2A per Radxa docs",
+      "hardware_source": "https://docs.radxa.com/en/som/cm/cm5"
+    }
+  ],
+  "reference_only": [
+    {
+      "id": "anbernic_rgds",
+      "display": "2x4in 640x480 landscape",
+      "ram_gb": 3,
+      "compute": "RK3568 quad A55",
+      "source_url": "https://anbernic.com/en-gb/products/rgds?variant=46854314721537",
+      "engineering_role": "integrated hinge cable lid sensing battery references only; not our portrait screen or local compute requirements"
+    },
+    {
+      "id": "anbernic_rgds_plus",
+      "display": "2x4.3in 1024x768 landscape",
+      "ram_gb": 1,
+      "compute": "gaming Linux",
+      "source_url": "https://github.com/JorreFog/BananaLinux",
+      "engineering_role": "dual screen linux display/input architecture reference; not local workstation spec"
+    }
+  ],
+  "truth": {
+    "real_two_panels_on_compute_tested": false,
+    "real_flex_under_hinge_tested": false,
+    "real_battery_protection_and_cooling_tested": false,
+    "full_landed_twd_bom": false,
+    "real_ergonomics_and_30min_code_tested": false,
+    "owner_approved_budget": false,
+    "hardware_purchased": false,
+    "no_full_product_fab_authority": true
+  }
+}

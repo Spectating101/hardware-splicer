@@ -12,7 +12,7 @@
 .probe{border:1px solid #34495a;background:#1c313d;color:#b1e7da;border-radius:10px;font-size:10px;font-weight:750;letter-spacing:.08em;padding:10px 13px}.probe:active{background:#337564}.probe.secondary{background:#17212b;border-color:#34404b;color:#8fa8b7}
 .latency{color:#94b0c6;font-size:12px;font-family:ui-monospace,monospace;white-space:nowrap}
 .keypad{display:flex;flex:1;min-height:0;align-items:center;justify-content:center;padding:10px 13px}
-.keys{display:grid;gap:7px;width:100%;max-width:1220px;height:100%;grid-template-rows:repeat(5,minmax(0,1fr))}
+.keys{display:grid;gap:7px;width:100%;max-width:1220px;height:100%;grid-auto-rows:minmax(0,1fr)}
 .keyrow{display:flex;gap:7px;justify-content:center;min-height:0;flex:1}
 .key{flex:1;min-width:0;border-radius:10px;background:linear-gradient(180deg,#2a3748,#1c2837);border:1px solid #405063;box-shadow:0 3px 0 #0b1119;color:#edf1f5;font-size:clamp(12px,1.6vw,21px);font-weight:600;user-select:none;-webkit-user-select:none;min-height:0;white-space:nowrap}
 .key:active{background:#2c675f;transform:translateY(2px);box-shadow:0 1px 0 #0b1119}
@@ -27,3 +27,9 @@
   .keypad{padding:5px}.keys,.keyrow{gap:3px}.key{border-radius:5px;font-size:clamp(10px,3vw,15px)}.key.special{font-size:clamp(8px,2.4vw,12px)}
 }
 @media(max-height:560px){.bar{min-height:36px}.terminal-footer,.keyboard-footer{display:none}.keypad{padding:4px}.keyrow,.keys{gap:3px}.key{border-radius:4px}}
+/* A 5in 720x1280 portrait screen has only ~62.28mm active width.
+ * Do not waste scarce physical touch area on decorative gaps. */
+body[data-keyboard-layout="wide"] .keypad{padding:6px}
+body[data-keyboard-layout="wide"] .keys{gap:4px}
+body[data-keyboard-layout="wide"] .keyrow{gap:3px}
+body[data-keyboard-layout="wide"] .key{border-radius:7px}

@@ -1,0 +1,80 @@
+name: HS Dual Portrait Workstation — Vendor CAD / Linux Value / Real UI Evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-dual-portrait-workstation.yml'
+      - 'examples/cyberdeck/workstation_tradeoff/**'
+      - 'examples/cyberdeck/workflow_lab/web/app.js'
+      - 'examples/cyberdeck/workflow_lab/web/app.css'
+      - 'examples/cyberdeck/workflow_lab/web/index.html'
+      - 'src/hardware_splicer/cyberdeck_workstation_tradeoff.py'
+      - 'tests/test_cyberdeck_workstation_tradeoff.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reality-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS and upstream xterm dependencies
+        run: |
+          python -m pip install -e . 'pytest>=8,<10'
+          npm ci --prefix examples/cyberdeck/workflow_lab/web --ignore-scripts --no-audit
+      - name: Validate actual UI source and vendor STEP measurement algorithm
+        run: |
+          node --check examples/cyberdeck/workflow_lab/web/app.js
+          python -m compileall -q src/hardware_splicer/cyberdeck_workstation_tradeoff.py \
+            examples/cyberdeck/workstation_tradeoff
+      - name: Recompute architecture value from immutable sourced measurements
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cyberdeck_workstation_tradeoff \
+            --sources examples/cyberdeck/workstation_tradeoff/parts_sources.json \
+            --cad examples/cyberdeck/workstation_tradeoff/evidence/waveshare_d_step.json \
+            --browser examples/cyberdeck/workstation_tradeoff/evidence/portrait_vs_DS_browser.json \
+            --out examples/cyberdeck/workstation_tradeoff/evidence/hs_workstation_decision.json
+          git diff --exit-code -- examples/cyberdeck/workstation_tradeoff/evidence/hs_workstation_decision.json
+      - name: Adversarial local Linux, pricing, physical geometry and UI tests
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q \
+            tests/test_cyberdeck_workstation_tradeoff.py \
+            tests/test_cyberdeck_workflow_lab.py \
+            tests/test_cyberdeck_electrical_feasibility.py \
+            tests/test_cyberdeck_inset_hinge.py \
+            tests/test_cyberdeck_cm4_stack.py \
+            tests/test_cyberdeck_architecture_value.py \
+            tests/test_machine_project.py
+      - name: Explicitly reject previous CM4-only / gaming console substitution
+        run: |
+          python - <<'PY'
+          import json
+          path='examples/cyberdeck/workstation_tradeoff/evidence/hs_workstation_decision.json'
+          r=json.load(open(path))
+          x={v['candidate_id']:v for v in r['sourced_compute_and_screen_subtotals']}
+          assert x['pi_cm5_wifi4_lite']['compute_and_two_panels_subtotal_NTD']==8439
+          assert x['pi_cm5_wifi8_lite']['compute_and_two_panels_subtotal_NTD']==10793
+          assert x['radxa_cm5_8_emmc64']['compute_and_two_panels_subtotal_NTD'] is None
+          assert r['vendor_CAD_geometry']['full_module_pair_only_depth_mm']==27.216
+          assert r['vendor_CAD_geometry']['pair_without_deep_mount_hardware_mm']==21.6
+          assert r['browser_portrait']['wide_key_nominal_mm']>=7
+          assert r['browser_portrait']['real_symbol_page_to_sandboxed_ssh_tested']
+          assert not r['browser_portrait']['actual_touch_controller_or_DSI_tested']
+          assert set(r['physical_release'].values())=={False}
+          PY
+      - name: Retain independent design-trade evidence, never infer physical build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-dual-portrait-workstation-research-only
+          retention-days: 30
+          path: examples/cyberdeck/workstation_tradeoff/evidence

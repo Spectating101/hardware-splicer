@@ -33,6 +33,11 @@
   let probeBuffer='';
   let touchInputCount=0;
   let completedProbes=0;
+  // The user asked for two physically narrow portrait touch surfaces.
+  // Browser scaling is a research proxy, not an actual two-panel driver.
+  let wideKeys=(innerHeight/innerWidth>=3 && innerWidth<=800);
+  let symbolLayer=false;
+  const keyboardMode=document.getElementById('keyboard-mode');
   const qp=new URLSearchParams(window.location.search);
   const token=qp.get('token')||'';
   const wsScheme=window.location.protocol==='https:'?'wss:':'ws:';
@@ -61,6 +66,11 @@
     });
   }
   function press(key){
+    if(key==='SYM'||key==='ABC'){
+      symbolLayer=key==='SYM';
+      renderKeys();
+      return;
+    }
     if(key==='SHIFT'||key==='CTRL'){setMode(key.toLowerCase());return;}
     const special={
       'ESC':'\x1b','TAB':'\t','ENTER':'\r','BACKSPACE':'\x7f','SPACE':' ',
@@ -89,29 +99,63 @@
     [['TMUX','Ctrl+B'],['CTRL-C','Ctrl+C'],['CTRL-D','Ctrl+D'],['LEFT','←'],
       ['DOWN','↓'],['RIGHT','→'],['SPACE','Space'],['-','-'],['=','='],['ENTER','↵']],
   ];
+  const WIDE_ALPHA_ROWS=[
+    Array.from('qwertyui').map(k=>[k,k]),
+    Array.from('opasdfgh').map(k=>[k,k]),
+    Array.from('jklzxcvb').map(k=>[k,k]),
+    [['n','n'],['m','m'],[',',','],['.','.'],['/','/'],[';',';'],[':',':'],["'","'"]],
+    [['ESC','Esc'],['TAB','Tab'],['CTRL','Ctrl'],['SHIFT','Shift'],
+      ['LEFT','←'],['DOWN','↓'],['UP','↑'],['RIGHT','→']],
+    [['TMUX','Ctrl+B'],['CTRL-C','Ctrl+C'],['CTRL-D','Ctrl+D'],
+      ['BACKSPACE','⌫'],['SPACE','Space'],['ENTER','↵'],['SYM','123 {}']],
+  ];
+  const WIDE_SYMBOL_ROWS=[
+    Array.from('12345678').map(k=>[k,k]),
+    Array.from('90!@#$%^').map(k=>[k,k]),
+    Array.from('&*()[]{}').map(k=>[k,k]),
+    [['`','`'],['~','~'],['+','+'],['-','-'],['_','_'],['=','='],['\\','\\'],['|','|']],
+    [['<','<'],['>','>'],['?','?'],[':',':'],[';',';'],['"','"'],['ESC','Esc'],['TAB','Tab']],
+    [['CTRL','Ctrl'],['SHIFT','Shift'],['LEFT','←'],['DOWN','↓'],['UP','↑'],
+      ['RIGHT','→'],['BACKSPACE','⌫'],['ENTER','↵']],
+    [['TMUX','Ctrl+B'],['CTRL-C','Ctrl+C'],['CTRL-D','Ctrl+D'],
+      ['SPACE','Space'],['ABC','ABC']],
+  ];
   const specialKeys=new Set(['ESC','TAB','CTRL','SHIFT','ENTER','BACKSPACE',
-    'UP','DOWN','LEFT','RIGHT','TMUX','CTRL-C','CTRL-D','SPACE']);
-  for(const list of KEY_ROWS){
-    const row=document.createElement('div');row.className='keyrow';
-    for(const [key,label] of list){
-      const button=document.createElement('button');
-      button.type='button';button.className='key';
-      if(specialKeys.has(key))button.classList.add('special');
-      if(['SPACE'].includes(key))button.classList.add('space');
-      if(['ENTER','CTRL','SHIFT','TMUX','TAB'].includes(key))button.classList.add('wide');
-      button.textContent=label;
-      button.dataset.key=key;
-      if(key.length===1&&/[a-z]/.test(key)){button.dataset.letter=key;}
-      if(key==='CTRL'||key==='SHIFT'){
-        button.dataset.mode=key.toLowerCase();
-        button.setAttribute('aria-pressed','false');
+    'UP','DOWN','LEFT','RIGHT','TMUX','CTRL-C','CTRL-D','SPACE','SYM','ABC']);
+  function renderKeys(){
+    keysRoot.textContent='';
+    const rows=wideKeys?(symbolLayer?WIDE_SYMBOL_ROWS:WIDE_ALPHA_ROWS):KEY_ROWS;
+    document.body.dataset.keyboardLayout=wideKeys?'wide':'full';
+    document.body.dataset.keyboardLayer=symbolLayer?'symbols':'letters';
+    keyboardMode.textContent=wideKeys?'FULL KEYS':'WIDE KEYS';
+    for(const list of rows){
+      const row=document.createElement('div');row.className='keyrow';
+      for(const [key,label] of list){
+        const button=document.createElement('button');
+        button.type='button';button.className='key';
+        if(specialKeys.has(key))button.classList.add('special');
+        if(key==='SPACE')button.classList.add('space');
+        if(['ENTER','CTRL','SHIFT','TMUX','TAB'].includes(key))button.classList.add('wide');
+        button.textContent=label;
+        button.dataset.key=key;
+        if(key.length===1&&/[a-z]/.test(key)){button.dataset.letter=key;}
+        if(key==='CTRL'||key==='SHIFT'){
+          button.dataset.mode=key.toLowerCase();
+          button.setAttribute('aria-pressed','false');
+        }
+        button.addEventListener('pointerdown',e=>e.preventDefault());
+        button.addEventListener('click',()=>press(key));
+        row.appendChild(button);
       }
-      button.addEventListener('pointerdown',e=>e.preventDefault());
-      button.addEventListener('click',()=>press(key));
-      row.appendChild(button);
+      keysRoot.appendChild(row);
     }
-    keysRoot.appendChild(row);
   }
+  keyboardMode.addEventListener('click',()=>{
+    wideKeys=!wideKeys;
+    symbolLayer=false;
+    renderKeys();
+  });
+  renderKeys();
   term.onData(send);
   ws=new WebSocket(wsScheme+'//'+location.host+'/ws?token='+encodeURIComponent(token));
   ws.binaryType='arraybuffer';
@@ -172,6 +216,8 @@
     getTouches:()=>touchInputCount,
     getLastRtt:()=>latency.dataset.lastRttMs||null,
     getProbeCount:()=>completedProbes,
+    getKeyboardLayout:()=>document.body.dataset.keyboardLayout,
+    getKeyboardLayer:()=>document.body.dataset.keyboardLayer,
     getScreenText:()=>Array.from({length:term.rows},(_,i)=>{
       return term.buffer.active.getLine(i)?.translateToString(true)||'';
     }).join('\n'),

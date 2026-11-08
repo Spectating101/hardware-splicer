@@ -1,0 +1,39 @@
+{
+  "schema": "hs.vendor_step_waveshare_5inch_D_open_cascade.v1",
+  "vendor_model": "Waveshare 5inch DSI LCD (D), 2024-10-25 STEP",
+  "source_zip_url": "https://files.waveshare.com/wiki/5inch%20DSI%20LCD%20%28D%29/5inch-dsi-lcd-d_3D.zip",
+  "step_file": "5inch-dsi-lcd-d_20241025.stp",
+  "step_sha256": "e46e226f2fbb315edcc8b83b2fc394ce27b34745a84b904a1e599907bee2935c",
+  "analysis_engine": "OpenCascade OCP STEPControl_Reader + BRepBndLib",
+  "outer_bbox_xyz_mm": [
+    70.708,
+    126.908,
+    13.608
+  ],
+  "outer_bbox_min_xyz_mm": [
+    -35.354,
+    -63.454,
+    -10.604
+  ],
+  "outer_bbox_max_xyz_mm": [
+    35.354,
+    63.454,
+    3.004
+  ],
+  "number_solid_components": 365,
+  "one_full_face_solid_bbox_mm": [
+    70.7,
+    126.9,
+    5.8
+  ],
+  "face_solid_identification": "largest continuous 70x126mm solid heuristic, not validated separable panel SKU",
+  "deep_z_below_minus_8mm_solid_count": 5,
+  "remaining_after_omitting_deep_solid_envelope_mm": 10.8,
+  "claim_safe_to_remove_standoffs": false,
+  "module_2x_full_assembly_Z_mm": 27.216,
+  "module_2x_without_deep_solid_Z_mm": 21.6,
+  "panel_2x_face_solid_Z_mm": 11.6,
+  "manufacturer_backlight_and_circuitry_present_in_face_only": null,
+  "software_driver_after_disassembly_qualified": false,
+  "fabrication_qualified": false
+}
