@@ -1,0 +1,217 @@
+{
+  "schema": "hs.dual_portrait_vs_DS_real_browser_benchmark.v1",
+  "run_kind": "actual Chromium xterm.js upper and clickable keyboard lower, loopback OpenSSH",
+  "physical_touchscreen_or_CM5_tested": false,
+  "device_pixel_ratio_assumed_1_no_OS_scaling_proof": true,
+  "human_typing_tested": false,
+  "screens": [
+    {
+      "id": "hs_dual_5in_portrait",
+      "device": "HS portrait 720x1280 per display",
+      "pixels_per_screen": [
+        720,
+        1280
+      ],
+      "viewport_css": [
+        720,
+        2560
+      ],
+      "visible_width_mm": 62.28,
+      "visible_height_mm": 110.32,
+      "physical_dimension_basis": "Waveshare 5inch DSI LCD (D) manufacturer active CG VA"
+    },
+    {
+      "id": "anbernic_rgds_4in_landscape",
+      "device": "RG DS gaming reference: 640x480 per display",
+      "pixels_per_screen": [
+        640,
+        480
+      ],
+      "viewport_css": [
+        640,
+        960
+      ],
+      "visible_width_mm": 81.28,
+      "visible_height_mm": 60.96,
+      "physical_dimension_basis": "approx 4.0 inch diagonal 4:3 marketing size, not measured panel CAD"
+    },
+    {
+      "id": "anbernic_rgds_plus_43in_landscape",
+      "device": "RG DS Plus gaming reference: 1024x768 per display",
+      "pixels_per_screen": [
+        1024,
+        768
+      ],
+      "viewport_css": [
+        1024,
+        1536
+      ],
+      "visible_width_mm": 87.376,
+      "visible_height_mm": 65.532,
+      "physical_dimension_basis": "approx 4.3 inch diagonal 4:3 marketing size, not measured panel CAD"
+    }
+  ],
+  "results": [
+    {
+      "device": "hs_dual_5in_portrait",
+      "cols": 63,
+      "rows": 49,
+      "smallest_letter_css_px": 84.125,
+      "smallest_key_css_px": 60.984375,
+      "letter_key_count": 26,
+      "top_height_css_px": 1271,
+      "lower_height_css_px": 1271,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 18,
+      "smallest_letter_nominal_mm": 7.28,
+      "font_nominal_mm": 1.56,
+      "physical_input_target_requirement_met_7mm": true,
+      "wide_vs_legacy_key_width_gain": 2.061,
+      "keyboard_layout": "wide",
+      "real_ssh_touch_pwd_passed": true,
+      "symbol_layer_to_real_SSH_verified": true
+    },
+    {
+      "device": "hs_dual_5in_portrait",
+      "cols": 47,
+      "rows": 35,
+      "smallest_letter_css_px": 84.125,
+      "smallest_key_css_px": 60.984375,
+      "letter_key_count": 26,
+      "top_height_css_px": 1271,
+      "lower_height_css_px": 1271,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 24,
+      "smallest_letter_nominal_mm": 7.28,
+      "font_nominal_mm": 2.08,
+      "physical_input_target_requirement_met_7mm": true,
+      "wide_vs_legacy_key_width_gain": 2.061,
+      "keyboard_layout": "wide"
+    },
+    {
+      "device": "hs_dual_5in_portrait",
+      "cols": 41,
+      "rows": 31,
+      "smallest_letter_css_px": 84.125,
+      "smallest_key_css_px": 60.984375,
+      "letter_key_count": 26,
+      "top_height_css_px": 1271,
+      "lower_height_css_px": 1271,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 28,
+      "smallest_letter_nominal_mm": 7.28,
+      "font_nominal_mm": 2.42,
+      "physical_input_target_requirement_met_7mm": true,
+      "wide_vs_legacy_key_width_gain": 2.061,
+      "keyboard_layout": "wide",
+      "real_ssh_touch_pwd_passed": null
+    },
+    {
+      "device": "anbernic_rgds_4in_landscape",
+      "cols": 57,
+      "rows": 17,
+      "smallest_letter_css_px": 40.40625,
+      "smallest_key_css_px": 40.40625,
+      "letter_key_count": 26,
+      "top_height_css_px": 475,
+      "lower_height_css_px": 475,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 18,
+      "smallest_letter_nominal_mm": 5.13,
+      "font_nominal_mm": 2.29,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full",
+      "real_ssh_touch_pwd_passed": true
+    },
+    {
+      "device": "anbernic_rgds_4in_landscape",
+      "cols": 42,
+      "rows": 12,
+      "smallest_letter_css_px": 40.40625,
+      "smallest_key_css_px": 40.40625,
+      "letter_key_count": 26,
+      "top_height_css_px": 475,
+      "lower_height_css_px": 475,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 24,
+      "smallest_letter_nominal_mm": 5.13,
+      "font_nominal_mm": 3.05,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full"
+    },
+    {
+      "device": "anbernic_rgds_4in_landscape",
+      "cols": 36,
+      "rows": 10,
+      "smallest_letter_css_px": 40.40625,
+      "smallest_key_css_px": 40.40625,
+      "letter_key_count": 26,
+      "top_height_css_px": 475,
+      "lower_height_css_px": 475,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 28,
+      "smallest_letter_nominal_mm": 5.13,
+      "font_nominal_mm": 3.56,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full",
+      "real_ssh_touch_pwd_passed": null
+    },
+    {
+      "device": "anbernic_rgds_plus_43in_landscape",
+      "cols": 91,
+      "rows": 27,
+      "smallest_letter_css_px": 61.578125,
+      "smallest_key_css_px": 61.578125,
+      "letter_key_count": 26,
+      "top_height_css_px": 759,
+      "lower_height_css_px": 759,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 18,
+      "smallest_letter_nominal_mm": 5.25,
+      "font_nominal_mm": 1.54,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full",
+      "real_ssh_touch_pwd_passed": true
+    },
+    {
+      "device": "anbernic_rgds_plus_43in_landscape",
+      "cols": 68,
+      "rows": 20,
+      "smallest_letter_css_px": 61.578125,
+      "smallest_key_css_px": 61.578125,
+      "letter_key_count": 26,
+      "top_height_css_px": 759,
+      "lower_height_css_px": 759,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 24,
+      "smallest_letter_nominal_mm": 5.25,
+      "font_nominal_mm": 2.05,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full"
+    },
+    {
+      "device": "anbernic_rgds_plus_43in_landscape",
+      "cols": 59,
+      "rows": 17,
+      "smallest_letter_css_px": 61.578125,
+      "smallest_key_css_px": 61.578125,
+      "letter_key_count": 26,
+      "top_height_css_px": 759,
+      "lower_height_css_px": 759,
+      "horizontal_overflow": false,
+      "fontsize_css_px": 28,
+      "smallest_letter_nominal_mm": 5.25,
+      "font_nominal_mm": 2.39,
+      "physical_input_target_requirement_met_7mm": false,
+      "wide_vs_legacy_key_width_gain": null,
+      "keyboard_layout": "full",
+      "real_ssh_touch_pwd_passed": null
+    }
+  ],
+  "screenshots_are_browser_not_devices": true
+}
