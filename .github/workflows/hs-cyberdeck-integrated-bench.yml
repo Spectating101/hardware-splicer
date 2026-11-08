@@ -1,0 +1,67 @@
+name: HS two real browser surfaces / physical CM5 gate
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-cyberdeck-integrated-bench.yml'
+      - 'examples/cyberdeck/integrated_bench/**'
+      - 'examples/cyberdeck/workflow_lab/server.py'
+      - 'src/hardware_splicer/cyberdeck_integrated_prototype_gate.py'
+      - 'tests/test_cyberdeck_integrated_bench.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-screens-and-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install HS and local server analysis dependencies
+        run: |
+          python -m pip install -e . 'pytest>=8,<10' aiohttp
+          npm ci --prefix examples/cyberdeck/workflow_lab/web --ignore-scripts --no-audit
+      - name: Validate distinct display client code
+        run: |
+          node --check examples/cyberdeck/integrated_bench/web/terminal.js
+          node --check examples/cyberdeck/integrated_bench/web/keyboard.js
+          python -m compileall -q examples/cyberdeck/integrated_bench             src/hardware_splicer/cyberdeck_integrated_prototype_gate.py
+      - name: Recompute native HS MachineProject from recorded real Optiplex test
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m hardware_splicer.cyberdeck_integrated_prototype_gate             --root examples/cyberdeck/integrated_bench             --out examples/cyberdeck/integrated_bench/evidence/hs_integrated_gate.json
+          git diff --exit-code -- examples/cyberdeck/integrated_bench/evidence/hs_integrated_gate.json
+      - name: Verify physical gates and downstream previous HS regression
+        env:
+          PYTHONPATH: src:apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          python -m pytest -q             tests/test_cyberdeck_integrated_bench.py             tests/test_cyberdeck_workstation_tradeoff.py             tests/test_cyberdeck_workflow_lab.py             tests/test_cyberdeck_electrical_feasibility.py             tests/test_cyberdeck_inset_hinge.py             tests/test_cyberdeck_cm4_stack.py             tests/test_cyberdeck_architecture_value.py             tests/test_machine_project.py
+      - name: Fail closed on physical manufacturing or misleading dual display claims
+        run: |
+          python - <<'PY'
+          import json
+          base='examples/cyberdeck/integrated_bench/evidence/'
+          a=json.load(open(base+'dual_surface_integration.json'))
+          h=json.load(open(base+'optiplex_first_boot_probe.json'))
+          r=json.load(open(base+'hs_integrated_gate.json'))
+          assert a['result']=='TWO_SEPARATE_BROWSER_SURFACES_TO_REAL_OPENSSH_PASSED'
+          assert a['browser']['two_distinct_websockets']
+          assert r['verified_real_software_requirements'] and len(r['verified_real_software_requirements'])==5
+          assert not h['cm5_identified_from_device_tree']
+          assert not h['drm_two_DSI_ports_with_720x1280']
+          assert not r['hardware_fabrication_authorized']
+          assert not r['battery_wiring_authorized']
+          assert r['release_assessment']['blockers']
+          PY
+      - name: Archive measured browser output without certifying a hardware prototype
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-two-viewport-real-loopback-ssh-v1
+          retention-days: 30
+          path: examples/cyberdeck/integrated_bench/evidence

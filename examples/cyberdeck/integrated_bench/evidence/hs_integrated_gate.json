@@ -1,0 +1,476 @@
+{
+  "schema": "hs.integrated_dual_portrait_prototype_gate.v1",
+  "status": "DUAL_INDEPENDENT_SOFTWARE_SURFACES_PASS_CM5_HARDWARE_GATE_BLOCKED",
+  "verified_real_software_requirements": [
+    "r-separate-surfaces",
+    "r-real-terminal",
+    "r-actual-editing",
+    "r-tmux-controls",
+    "r-local-security"
+  ],
+  "physical_component_verified": false,
+  "connected_cm5_detected": false,
+  "two_720x1280_physical_DSI_displays": false,
+  "hardware_fabrication_authorized": false,
+  "battery_wiring_authorized": false,
+  "first_physical_bench_requires": [
+    "CM5 + manufacturer CM5IO board + known regulated USB-C 5V5A",
+    "one supported DSI LCD (D) + correct cable and single panel check",
+    "second LCD (D) + DSI0/DSI1 simultaneous output and independent touch mapping",
+    "local Linux compiler/SSH session, fan, power and sustained thermal evidence"
+  ],
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "build_ready",
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'r-power' is not closed by passing verification",
+        "object_id": "r-power",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-physical-cm5' is blocked",
+        "object_id": "v-physical-cm5",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-dual-720x1280-DSI' is blocked",
+        "object_id": "v-dual-720x1280-DSI",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'v-hinge-screen' is failed",
+        "object_id": "v-hinge-screen",
+        "severity": "error"
+      }
+    ],
+    "warnings": []
+  },
+  "machine_project": {
+    "schema_version": "hardware_splicer.machine_project.v1",
+    "project_id": "HS-CYBERDECK-INTEGRATED-BENCH-V1",
+    "name": "HS CM5 two-portrait first powered development bench",
+    "purpose": "Build practical personal two-screen Linux workstation, no product company",
+    "lifecycle_state": "intake",
+    "requested_release_state": "build_ready",
+    "requirements": [
+      {
+        "requirement_id": "r-separate-surfaces",
+        "statement": "Two independent browser windows, 720x1280 each, connected to independent WS roles",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-separate-surfaces"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-real-terminal",
+        "statement": "Touch on lower window runs shell actions in upper xterm via OpenSSH",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-real-terminal"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-actual-editing",
+        "statement": "Two browser surfaces edit a real file in Nano",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-actual-editing"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-tmux-controls",
+        "statement": "Lower touch controls real tmux detach",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-tmux-controls"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-local-security",
+        "statement": "Wrong token/cross origin and blind input connection rejected",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-local-security"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-physical-cm5",
+        "statement": "Boot real Raspberry Pi CM5 on its official carrier",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-physical-cm5"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-dual-720x1280-DSI",
+        "statement": "Both physical portrait panels have independent DRM outputs",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-dual-720x1280-DSI"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-touch-mapping",
+        "statement": "Two physical touch digitizers independently map to each display",
+        "kind": "interface",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-touch-mapping"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-local-workstation",
+        "statement": "Run native on-device Git/Python/compiler workload and measure memory, power and thermal",
+        "kind": "performance",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-local-workstation"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-hinge-screen",
+        "statement": "Complete protected screen, cable and enclosure product, not virtual glass",
+        "kind": "constraint",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-hinge-screen"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-power",
+        "statement": "Protected and qualified battery, correct power delivery and thermal safety",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-power"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      },
+      {
+        "requirement_id": "r-cost",
+        "statement": "Complete verified delivered BOM with carrier, screens, enclosure, power and rework",
+        "kind": "constraint",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [],
+        "verification_method_ids": [
+          "v-cost"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      }
+    ],
+    "functions": [],
+    "subsystems": [],
+    "components": [],
+    "interfaces": [],
+    "constraints": [],
+    "verifications": [
+      {
+        "verification_id": "v-separate-surfaces",
+        "name": "Check separate-surfaces",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-separate-surfaces"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-two-pages"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-real-terminal",
+        "name": "Check real-terminal",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-real-terminal"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-two-pages"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-actual-editing",
+        "name": "Check actual-editing",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-actual-editing"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-two-pages"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-tmux-controls",
+        "name": "Check tmux-controls",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-tmux-controls"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-two-pages"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-local-security",
+        "name": "Check local-security",
+        "method_type": "demonstration",
+        "status": "passed",
+        "requirement_ids": [
+          "r-local-security"
+        ],
+        "target_ids": [],
+        "evidence_ids": [
+          "real-two-pages"
+        ],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-physical-cm5",
+        "name": "Check physical-cm5",
+        "method_type": "test",
+        "status": "blocked",
+        "requirement_ids": [
+          "r-physical-cm5"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-dual-720x1280-DSI",
+        "name": "Check dual-720x1280-DSI",
+        "method_type": "test",
+        "status": "blocked",
+        "requirement_ids": [
+          "r-dual-720x1280-DSI"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-touch-mapping",
+        "name": "Check touch-mapping",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-touch-mapping"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-local-workstation",
+        "name": "Check local-workstation",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-local-workstation"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-hinge-screen",
+        "name": "Check hinge-screen",
+        "method_type": "test",
+        "status": "failed",
+        "requirement_ids": [
+          "r-hinge-screen"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-power",
+        "name": "Check power",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-power"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "v-cost",
+        "name": "Check cost",
+        "method_type": "test",
+        "status": "planned",
+        "requirement_ids": [
+          "r-cost"
+        ],
+        "target_ids": [],
+        "evidence_ids": [],
+        "procedure": "",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "real-two-pages",
+        "kind": "Real Chrome/Playwright + SSH interaction",
+        "basis": "Two independent Chrome windows, WS role separation, sandboxed OpenSSH, Nano and tmux",
+        "ref": "evidence/dual_surface_integration.json",
+        "supports": [
+          "r-separate-surfaces",
+          "r-real-terminal",
+          "r-actual-editing",
+          "r-tmux-controls",
+          "r-local-security"
+        ],
+        "authority": "measured",
+        "simulated": false,
+        "metadata": {
+          "simulated_touch": true,
+          "actual_CM5": false
+        }
+      },
+      {
+        "evidence_id": "two-browser-pngs",
+        "kind": "Chrome screenshots",
+        "basis": "Separate upper and lower 720x1280 screenshots, not photographed hardware",
+        "ref": "evidence/",
+        "supports": [
+          "r-separate-surfaces"
+        ],
+        "authority": "observed",
+        "simulated": false,
+        "metadata": {}
+      }
+    ],
+    "artifacts": [],
+    "discipline_payloads": {},
+    "metadata": {
+      "actual_CM5_connected": false,
+      "battery_power_applied": false,
+      "commercialization_required": false,
+      "software_BENCH_not_physical_product": true
+    }
+  },
+  "provenance_sha256": {
+    "bench": "92e0870897124b38e9db2e58a3e1f4a785975c1dd2a9f1082dc86db69561f7c6",
+    "hardware": "aaf53128f57e08fbf63f7c8864239129385686d3a02dd1e545ba0ff7cd7a3845",
+    "manifest": "ca309f74ecc0af6fcb2b3548e9bf552c6b829af47d6143f0e82ea58cb1e0198e",
+    "upper": "c032dc9453b119e3cbcf8484349e5f1e804d8a5333c8b443df4ae1693fe97b61",
+    "lower": "fdcae86be4ca2427887231d1bd6f044d95ae386dbeea0ec245bef783febdb32e"
+  }
+}
