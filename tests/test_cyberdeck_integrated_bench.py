@@ -10,7 +10,6 @@ ROOT=Path(__file__).resolve().parents[1]
 LAB=ROOT/"examples/cyberdeck/integrated_bench"
 sys.path.insert(0,str(LAB))
 from first_boot_probe import collect
-from dual_panel_server import DualPanelServer
 from hardware_splicer.cyberdeck_integrated_prototype_gate import evaluate,run
 
 RESULT=json.loads((LAB/"evidence/dual_surface_integration.json").read_text())
