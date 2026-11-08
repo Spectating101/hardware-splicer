@@ -1,0 +1,70 @@
+{
+  "schema": "hs.cm5_two_DSI_first_boot_probe.v1",
+  "date": "2026-11-08",
+  "source": "read_only_actual_Linux_sysfs_and_procfs",
+  "processor_architecture": "x86_64",
+  "board_model": "not_available_x86_non_device_tree",
+  "cm5_identified_from_device_tree": false,
+  "drm_connectors": [
+    {
+      "port": "card0-DP-1",
+      "state": "disconnected",
+      "advertised_720x1280": false,
+      "mode_count": 0,
+      "dsi_port": false
+    },
+    {
+      "port": "card0-DP-2",
+      "state": "disconnected",
+      "advertised_720x1280": false,
+      "mode_count": 0,
+      "dsi_port": false
+    },
+    {
+      "port": "card0-DP-3",
+      "state": "connected",
+      "advertised_720x1280": false,
+      "mode_count": 11,
+      "dsi_port": false
+    },
+    {
+      "port": "card0-HDMI-A-1",
+      "state": "disconnected",
+      "advertised_720x1280": false,
+      "mode_count": 0,
+      "dsi_port": false
+    },
+    {
+      "port": "card0-HDMI-A-2",
+      "state": "disconnected",
+      "advertised_720x1280": false,
+      "mode_count": 0,
+      "dsi_port": false
+    },
+    {
+      "port": "card0-HDMI-A-3",
+      "state": "disconnected",
+      "advertised_720x1280": false,
+      "mode_count": 0,
+      "dsi_port": false
+    }
+  ],
+  "drm_two_DSI_ports_with_720x1280": false,
+  "touch_like_kernel_inputs": [],
+  "has_two_distinct_touch_like_handlers": false,
+  "ready_for_manual_powered_display_validation": false,
+  "tested_display_color_patterns": false,
+  "tested_each_touch_coordinate_input": false,
+  "tested_CM5_compile_thermal_and_power": false,
+  "mobile_battery_pack_safe": false,
+  "ready_for_handheld_fabrication": false,
+  "no_dsi_or_touch_emulation_substituted": true,
+  "blockers": [
+    "host_is_not_Raspberry_Pi_Compute_Module_5",
+    "two_720x1280_physical_DSI_modes_not_detected",
+    "two_independent_touch_event_devices_not_detected",
+    "physical_touch_coordinate_mapping_requires_manual_per_panel_test",
+    "measured_power_and_thermal_load_not_recorded",
+    "mechanical_and_battery_qualification_not_performed"
+  ]
+}

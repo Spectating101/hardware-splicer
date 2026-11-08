@@ -1,0 +1,22 @@
+:root{font-family:ui-sans-serif,system-ui,sans-serif;color:#edf4f1;background:#05090e;overscroll-behavior:none}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}
+.panel{display:flex;flex-direction:column;height:100dvh;width:100vw;padding:7px;gap:5px}
+header,footer{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border:1px solid #253748;background:#131f2b;border-radius:10px}
+header{height:56px;flex:none;font-size:13px;letter-spacing:.075em}header .brand{color:#7cf1c7;font-size:19px;margin-right:9px}
+#status{font:11px ui-monospace,monospace;color:#d8b37c}body.online #status{color:#85ecb8}
+footer{height:32px;flex:none;font:10px ui-monospace,monospace;letter-spacing:.03em;color:#8fa9b6}
+#terminal{flex:1;min-height:0;padding:11px 8px;border-radius:11px;background:#0a1118;border:1px solid #263849}
+#terminal .xterm{height:100%}
+button{touch-action:manipulation;color:inherit;font-family:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #a6d6f0}
+#tools{display:flex;align-items:center;gap:8px;flex:none;height:43px}
+.tool{border:1px solid #465b6c;border-radius:8px;padding:8px 11px;background:#1d2f3c;font-weight:700}
+.tool.active{background:#245447;border-color:#5ca78e;color:#c9f9e9}
+#touch-count{margin-left:auto;font:11px ui-monospace,monospace;color:#a5b4bf}
+.keypad{display:flex;flex-direction:column;flex:1;gap:6px;min-height:0}
+.keyrow{display:flex;flex:1;gap:5px;min-height:0}
+.key{flex:1;min-width:0;min-height:0;background:linear-gradient(#314152,#20303f);border:1px solid #44596c;border-radius:8px;box-shadow:0 3px #090f15;font-size:clamp(17px,3.8vw,30px);font-weight:650;user-select:none;-webkit-user-select:none}
+.key.special{background:#284c49;color:#e0f5ee;font-size:clamp(12px,2.6vw,19px)}
+.key:active{background:#417e69;transform:translateY(2px);box-shadow:none}
+.key.active{background:#427b65}
+@media(max-width:720px){.panel{padding:3px;gap:3px}header{height:43px;font-size:11px;padding:6px}header .brand{font-size:15px}footer{height:25px;font-size:8px;padding:5px}#terminal{padding:6px 4px}.keypad{gap:3px}.keyrow{gap:3px}.key{border-radius:5px}#tools{height:33px}.tool{padding:5px 7px}}

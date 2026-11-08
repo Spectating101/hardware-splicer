@@ -1,0 +1,88 @@
+{
+  "schema": "hs.cm5_dual_portrait_bench_contract.v1",
+  "project": "HS dual-portrait local Linux workstation",
+  "objective": "First powered desktop bench using known reference CM5 IO board; NOT the thin folded product",
+  "user_intent": {
+    "screens": 2,
+    "orientation": "portrait",
+    "resolution_each": [
+      720,
+      1280
+    ],
+    "touchscreen_each": true,
+    "physical_keyboard": false,
+    "local_linux_programming": true,
+    "can_ssh_optiplex": true,
+    "commercial_launch": false
+  },
+  "bench": {
+    "compute": "Raspberry Pi Compute Module 5 Wireless Lite 4GB, with microSD boot",
+    "compute_source": "https://www.raspberrypi.com/documentation/computers/compute-module.html",
+    "official_carrier": "Raspberry Pi Compute Module 5 IO Board",
+    "board_dimensions_mm": [
+      160,
+      90
+    ],
+    "board_mechanical_status": "OUTSIDE handheld target; separate desk bench fixture",
+    "power": "regulated vendor-qualified USB-C 5V 5A PSU for CM5 IO, NOT direct LiPo",
+    "power_source": "https://datasheets.raspberrypi.com/cm5/cm5io-datasheet.pdf",
+    "mipi_connectors": [
+      {
+        "name": "CAM/DISP 0",
+        "pins": 22,
+        "pitch_mm": 0.5
+      },
+      {
+        "name": "CAM/DISP 1",
+        "pins": 22,
+        "pitch_mm": 0.5
+      }
+    ],
+    "i2c_jumper_notice": "J6 pair may be required for CAM/DISP 1 I2C; check official CM5IO schematic and revision",
+    "display": {
+      "sku": "Waveshare 5inch DSI LCD (D)",
+      "quantity": 2,
+      "px": [
+        720,
+        1280
+      ],
+      "manufacturer_source": "https://www.waveshare.com/wiki/5inch_DSI_LCD_%28D%29",
+      "supported_single_pi_cm5": true,
+      "simultaneous_pair_not_proven": true,
+      "overlay_name": "vc4-kms-dsi-waveshare-panel",
+      "overlay_parameter": "5_0_inch",
+      "dsi1_single_test_overlay": "dtoverlay=vc4-kms-dsi-waveshare-panel,5_0_inch",
+      "dsi0_single_test_overlay": "dtoverlay=vc4-kms-dsi-waveshare-panel,5_0_inch,dsi0",
+      "two_overlay_experiment": "Do not auto-enable dual overlays until vendor confirms simultaneous initialization and distinct touch input routing",
+      "dsi_cable": "appropriate 22-pin CM5IO to Waveshare panel DSI flat-flex; pin orientation and revision must be physically checked",
+      "max_front_face_mm": [
+        70.7,
+        126.9
+      ],
+      "full_vendor_step_depth_mm": 13.608
+    },
+    "bench_price_status": "not ordered; manufacturer/seller asking-price subtotal only; no battery or custom PCB"
+  },
+  "accepted_now": {
+    "two_720x1280_chrome_surfaces": true,
+    "real_local_loopback_ssh": true,
+    "dual_role_websockets": true,
+    "nano_and_tmux": true
+  },
+  "unverified_and_blocking": {
+    "physical_CM5_present": false,
+    "two_connected_DSI_panels": false,
+    "two_independent_touch_input_devices": false,
+    "CM5_Linux_thermal_and_power_log": false,
+    "physical_30min_typing": false,
+    "folding_FPC_fatigue": false,
+    "screen_retention": false,
+    "protected_battery_and_charging": false,
+    "complete_landed_cost": false
+  },
+  "release": {
+    "can_order_full_fabrication": false,
+    "can_attach_battery": false,
+    "physical_bench_power_on_without_correct_PSU": false
+  }
+}

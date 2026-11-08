@@ -1,0 +1,32 @@
+{
+  "schema": "hs.two_independent_surface_local_ssh_integration.v1",
+  "date": "2026-11-08",
+  "result": "TWO_SEPARATE_BROWSER_SURFACES_TO_REAL_OPENSSH_PASSED",
+  "actual_CM5_tested": false,
+  "actual_DSI_pair_tested": false,
+  "battery_power_applied": false,
+  "fabrication_authorized": false,
+  "security": {
+    "pages_require_bearer_token": true,
+    "websockets_require_bearer_token": true,
+    "keyboard_must_wait_for_terminal": true,
+    "foreign_origin_blocked": true
+  },
+  "browser": {
+    "two_separate_720x1280_browser_pages": true,
+    "two_distinct_websockets": true,
+    "physical_dual_DSI_tested": false,
+    "upper_cells": {
+      "cols": 50,
+      "rows": 38
+    },
+    "lower_touch_events": 22,
+    "symbol_layer_to_real_shell": true,
+    "real_nano_file": "hs dual",
+    "tmux_detach": true,
+    "upper_output_bytes": 2504,
+    "terminal_has_no_input_API": true,
+    "keyboard_has_no_output_API": true,
+    "javascript_errors": []
+  }
+}

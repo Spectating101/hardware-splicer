@@ -49,9 +49,11 @@ MAX_INPUT=2048
 
 
 class TerminalSession:
-    def __init__(self, command:list[str],ws:web.WebSocketResponse):
+    def __init__(self, command:list[str],ws:web.WebSocketResponse,
+                 output_callback=None):
         self.command=command
         self.ws=ws
+        self.output_callback=output_callback
         self.proc: subprocess.Popen | None=None
         self.master: int | None=None
         self.send_task: asyncio.Task | None=None
@@ -103,7 +105,10 @@ class TerminalSession:
                     await self.ws.close(code=1000,message=b"ssh_session_ended")
                 break
             if self.ws.closed:break
-            await self.ws.send_bytes(item)
+            if self.output_callback is not None:
+                await self.output_callback(item)
+            else:
+                await self.ws.send_bytes(item)
 
     def write(self,value:str)->None:
         if not isinstance(value,str) or len(value.encode("utf8"))>MAX_INPUT:
