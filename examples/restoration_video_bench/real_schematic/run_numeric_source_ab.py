@@ -67,8 +67,9 @@ def run(*,video_vtt:Path,article_html:Path,out:Path,timeout_s:int)->dict:
     }
     out.parent.mkdir(parents=True,exist_ok=True)
     for cid,order in CASE_ARMS:
-        base=build_numeric_case_context(ledger,case_id=cid,assisted=False)
-        hs=build_numeric_case_context(ledger,case_id=cid,assisted=True)
+        # This runner is the frozen 2026-11-10 v1 model experiment.
+        base=build_numeric_case_context(ledger,case_id=cid,assisted=False,render_version="legacy_v1")
+        hs=build_numeric_case_context(ledger,case_id=cid,assisted=True,render_version="legacy_v1")
         if base["evidence_sha256"]!=hs["evidence_sha256"]:
             raise ValueError("A/B source evidence is not equal")
         item={

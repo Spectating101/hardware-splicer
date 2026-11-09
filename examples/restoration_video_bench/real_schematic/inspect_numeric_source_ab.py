@@ -38,8 +38,9 @@ def inspect(frozen:dict)->dict:
     for row,(case_id,order) in zip(frozen["cases"],CASE_ARMS):
         if row["case_id"]!=case_id or row["model_arm_order"]!=list(order):
             raise ValueError("registered case or execution order was changed")
-        base=build_numeric_case_context(ledger,case_id=case_id,assisted=False)
-        hs=build_numeric_case_context(ledger,case_id=case_id,assisted=True)
+        # Preserve exact original prompt hashes; no rewriting history.
+        base=build_numeric_case_context(ledger,case_id=case_id,assisted=False,render_version="legacy_v1")
+        hs=build_numeric_case_context(ledger,case_id=case_id,assisted=True,render_version="legacy_v1")
         if (base["evidence_sha256"]!=hs["evidence_sha256"]
                 or base["evidence_sha256"]!=row["evidence_sha256"]):
             raise ValueError("same original numerical source evidence was not used")
