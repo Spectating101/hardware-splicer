@@ -1,0 +1,87 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "reebok_treadmill_dead",
+      "source_url": "https://www.youtube.com/watch?v=1Nvt8ARL5Xc",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "13cbcb53d740356f4e1b113ab68c8c6998edcb5af0db6a31bf67ae8f97d2c34f",
+      "caption_provenance": {
+        "raw_vtt_sha256": "f60534306b3de667fbe5554aa5be717ca4e4e4468888ca22bf42583a5d9a2c39",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 52,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "a9ea06211f1d972e4ea5027c9d79573625417a52ac8b579ea6c47b6fa9f22ce1",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "9c01be7062c12112b40365e79b5f669519bf7360c12f43fc81abf925556aa7bf",
+      "usage": {
+        "prompt_tokens": 1039,
+        "completion_tokens": 346
+      },
+      "plan": {
+        "summary": "The treadmill is reported to be completely unpowered and unresponsive to user controls. All diagnostic statements and observations are unverified claims from video transcript evidence. No internal or mains testing has yet confirmed whether the fault lies in incoming AC power delivery, console interlocks, or internal power circuitry.",
+        "hypotheses": [
+          {
+            "mechanism": "Failure in the external AC power supply chain (e.g., faulty outlet, defective power lead, or open mains plug fuse).",
+            "why": "The unit is reported completely non-responsive, and unverified creator comments suggest moving the equipment to an unfamiliar extension cord/outlet setup without formal verification.",
+            "evidence_ids": [
+              "E1",
+              "E3",
+              "E4",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "With the treadmill power cord unplugged from the mains, perform an unpowered continuity test on the detachable power cord and check the plug fuse with a multimeter, or test the mains wall outlet safely using a known-working, double-insulated lamp or standard socket tester."
+          },
+          {
+            "mechanism": "Safety key missing, misaligned, or safety switch circuit open.",
+            "why": "Treadmills typically require a magnetic or physical safety key on the console to power up the display and controls; E4 mentions pulling something off and putting it back on without effect.",
+            "evidence_ids": [
+              "E4"
+            ],
+            "safe_test": "With the treadmill unplugged, visually inspect the console safety key socket and the key itself for physical damage, corrosion, or foreign debris, ensuring correct seating."
+          },
+          {
+            "mechanism": "Tripped thermal circuit breaker, blown internal fuse, or open power switch at the treadmill base.",
+            "why": "The unit suddenly became completely dead and fails to activate despite power button presses.",
+            "evidence_ids": [
+              "E1",
+              "E3",
+              "E4",
+              "E5",
+              "E6"
+            ],
+            "safe_test": "With the treadmill completely disconnected from mains power, perform a visual check for an external reset button/breaker near the power inlet and conduct an unpowered continuity test across the power switch contacts in both positions."
+          }
+        ],
+        "next_safe_check": "Ensure the treadmill remains completely unplugged from the mains wall outlet, then inspect the power lead and plug fuse for physical damage and verify electrical continuity while de-energized.",
+        "uncertainty": "Information originates from an unverified video commentary without instrument measurements; whether the wall outlet actually provides power or whether the unit has internal electrical damage remains unconfirmed.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 10.64,
+      "receipt_sha256": "935e681b420184ad6d6e754c7966e09e9c6515ea7d03868959c8a1e0c9544db5"
+    }
+  ]
+}

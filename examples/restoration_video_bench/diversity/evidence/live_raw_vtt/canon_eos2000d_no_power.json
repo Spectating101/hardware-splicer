@@ -1,0 +1,85 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "canon_eos2000d_no_power",
+      "source_url": "https://www.youtube.com/watch?v=XXKlAIcint8",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "2e654e0f4d2ba203f9a2a30284997adb22b0b5caaceb0252050b6f410279ca39",
+      "caption_provenance": {
+        "raw_vtt_sha256": "0dde52e91c11c684792d6b713bebcbef0f133fe6f693f71f8f0c99b673a881e9",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 54,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "f75e856d33959f663bbf5741bb0c5e86996368e5d6ed26d029ba9de5ce848e50",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "9e7441000788e76ce67be0a40a633a60dc092f4dd34380bbac23237378d47eb4",
+      "usage": {
+        "prompt_tokens": 987,
+        "completion_tokens": 329
+      },
+      "plan": {
+        "summary": "The camera exhibits a no-power condition following extensive shutter cycles (~400,000 actuations). Reported battery terminal voltage does not eliminate power delivery faults under load or safety interlock disengagement.",
+        "hypotheses": [
+          {
+            "mechanism": "Door or compartment microswitch failure or improper engagement preventing power-on circuit completion",
+            "why": "DSLR bodies typically incorporate physical interlock microswitches on the battery door and card slot door that cut logic power when open or unseated.",
+            "evidence_ids": [
+              "E1",
+              "E5",
+              "E7"
+            ],
+            "safe_test": "Visually inspect the mechanical levers and tabs of the battery and memory card doors to confirm they fully depress their corresponding internal interlock switches when closed."
+          },
+          {
+            "mechanism": "Power delivery failure under load (e.g., degraded battery cells or high-resistance battery terminal contacts)",
+            "why": "Open-circuit resting voltage measurement on a lithium-ion battery does not confirm capacity or the ability to deliver operating current under load.",
+            "evidence_ids": [
+              "E1",
+              "E4",
+              "E7"
+            ],
+            "safe_test": "Test the camera using a known-working, OEM-compatible battery or official DC coupler power adapter without opening the internal chassis."
+          },
+          {
+            "mechanism": "Internal mainboard DC-DC power converter or blown surface-mount fuse failure",
+            "why": "High total usage or an electrical fault during prolonged operation can open an internal surface-mount fuse or damage power management circuitry, resulting in complete failure to power on.",
+            "evidence_ids": [
+              "E1",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "Non-intrusively verify if any status LEDs flash or if the device draws quiescent current when connected via an approved external power adapter."
+          }
+        ],
+        "next_safe_check": "Perform a clean external inspection of the battery door and card slot door latches to ensure physical microswitch actuator tabs are intact and fully closing.",
+        "uncertainty": "Claims regarding prior internal inspection and battery health are unverified anecdotal reports; internal circuitry condition remains unconfirmed without non-destructive diagnostic power testing.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 8.85,
+      "receipt_sha256": "5ee6792e73645eeb08bbf88f6b90eaa434f6f0456659f99d319bdc9e68e9e0ad"
+    }
+  ]
+}

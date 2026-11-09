@@ -1,0 +1,84 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "a53_touch_failure",
+      "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "6571f5449c62811189f3de0946eaf547f1b9147879e2f827870a4574c34b8bfd",
+      "caption_provenance": {
+        "raw_vtt_sha256": "d80824c0a58405ed8bd534077e571ce75eed7a6ac640c48b02128781933678ec",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 50,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "5c68cb702399c6af080200612536ec73c1d0787d41cd0d02ef0a70aa8d0d42a0",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "54db4032e3db057ed5a9fca1936c40719c33c22d5845f7af68f5d90d3b3e4b04",
+      "usage": {
+        "prompt_tokens": 981,
+        "completion_tokens": 327
+      },
+      "plan": {
+        "summary": "Report indicates a Samsung Galaxy A53 5G powers on and displays an image, but touch input is unresponsive, with unverified claims of prior liquid exposure.",
+        "hypotheses": [
+          {
+            "mechanism": "Digitizer assembly failure or damage to display flexible printed circuit (FPC)",
+            "why": "The screen powers on and renders graphics normally, but swipe gestures and touch input fail entirely across the panel.",
+            "evidence_ids": [
+              "E1",
+              "E2",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "Inspect the display surface externally under magnification for hairline cracks or physical deformation without opening the enclosure."
+          },
+          {
+            "mechanism": "Corrosion or pin bridging at the display/digitizer connector or motherboard touch circuitry due to liquid ingress",
+            "why": "Unverified testimony mentions past water damage, which frequently corrodes connector contacts or causes intermittent shorts in touch power/data lines.",
+            "evidence_ids": [
+              "E1",
+              "E3"
+            ],
+            "safe_test": "Inspect exterior seams, USB-C port, and the SIM card tray opening with an external light source for moisture indicator discoloration or corrosion residue without disassembling or powering with external mains."
+          },
+          {
+            "mechanism": "Temporary OS-level touch input processing freeze or unresponsive touch driver",
+            "why": "Device powered on after being unused since a past date and may be stalled at lockscreen driver initialization.",
+            "evidence_ids": [
+              "E1",
+              "E7"
+            ],
+            "safe_test": "Perform a non-invasive hardware key forced restart (holding Power/Side + Volume Down buttons) while disconnected from chargers to observe if touch recovers without wiping user data."
+          }
+        ],
+        "next_safe_check": "Perform a visual external inspection of the frame, glass, and ports, followed by a non-invasive forced restart using external physical buttons while observing lithium-ion battery safety precautions.",
+        "uncertainty": "All liquid damage assertions originate from unverified conversational speech rather than objective inspection, and internal board/connector states remain unobserved.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 9.05,
+      "receipt_sha256": "c05b4f09d8251d1cbeed9bc18ae059cfe05475324f1c961c0886e434b13cd1cc"
+    }
+  ]
+}

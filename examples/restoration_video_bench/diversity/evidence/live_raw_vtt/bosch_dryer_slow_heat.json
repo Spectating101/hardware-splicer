@@ -1,0 +1,84 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "bosch_dryer_slow_heat",
+      "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "9e92a82fe4a7dcdf1b49943f5bde66c6cdb3abdca9ad7dbe2e1cc4c82b09b623",
+      "caption_provenance": {
+        "raw_vtt_sha256": "ebf258cdf24dd5104a57d85ea3417cbf0779d3a0443d4b6badb8172eae378ba3",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 38,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "f7524a4881768d11d5cf42e3661f02954e731517f075b8df28bcef4b91e05e7e",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "f97ea945d61104c901d1a9f692ae528cfa5a4d54299a05d4915afa8d27779307",
+      "usage": {
+        "prompt_tokens": 912,
+        "completion_tokens": 304
+      },
+      "plan": {
+        "summary": "The Bosch tumble dryer reportedly heats up but takes an unusually long time to dry clothes. Video creator commentary speculates that the low heat selection switch might be stuck closed internally, though this is unverified conjecture. Common real-world causes for slow drying also include restricted airflow or partial heating element/thermostat malfunction.",
+        "hypotheses": [
+          {
+            "mechanism": "The low-heat selector switch has failed internally in a continuously closed/active circuit state, limiting heating power regardless of button position.",
+            "why": "Unverified creator commentary notes the dryer heats but dries very slowly and suspects the low heat switch is stuck closed even when outwardly off.",
+            "evidence_ids": [
+              "E1",
+              "E2",
+              "E3",
+              "E4"
+            ],
+            "safe_test": "With the dryer disconnected from ac mains, measure electrical continuity across the low-heat switch terminals while toggling the switch between on and off states."
+          },
+          {
+            "mechanism": "Restricted airflow due to lint accumulation in the filter, condenser, or exhaust ducting reduces drying efficiency while still allowing heat generation.",
+            "why": "Slow drying with some heat present is frequently caused by poor air circulation across the drum and moisture sensor/heating assembly.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "Inspect and clean the lint trap, heat exchanger/condenser box, and external venting duct without opening the machine chassis."
+          },
+          {
+            "mechanism": "A dual-stage heating element or cycling thermostat circuit is partially open or faulty, delivering only low/reduced heat.",
+            "why": "If one bank of a multi-stage heating element is burned out or a high-stage thermostat fails open, the dryer will produce heat but dry slowly.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "With the unit unplugged from ac mains, perform a passive resistance check on each heating element coil and associated thermal switches."
+          }
+        ],
+        "next_safe_check": "Ensure the appliance remains unplugged from AC mains electricity, then perform a non-invasive check and cleaning of the lint filter and condenser ducting before any disassembly.",
+        "uncertainty": "Creator claims are speculative and unverified; actual drum temperature, drying cycle duration, airflow status, and switch continuity measurements have not yet been established.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 8.78,
+      "receipt_sha256": "64f5eaefdaf78ce82e83e571153ae9cf02623e3af6c3f07e456b332162070af7"
+    }
+  ]
+}

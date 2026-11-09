@@ -1,0 +1,49 @@
+name: HS source-grounded restoration reasoning agent
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/restoration_reasoning_agent.py'
+      - 'src/hardware_splicer/restoration_caption_ingest.py'
+      - 'src/hardware_splicer/integrations/agy_text_client.py'
+      - 'examples/restoration_video_bench/diversity/run_live_agent.py'
+      - 'examples/restoration_video_bench/diversity/LIVE_AGENT.md'
+      - 'examples/restoration_video_bench/diversity/evidence/agy_gemini38_flash_low_nine_live.json'
+      - 'examples/restoration_video_bench/diversity/evidence/bosch_raw_vtt_first120_live.json'
+      - 'examples/restoration_video_bench/diversity/evidence/live_raw_vtt/**'
+      - 'tests/test_restoration_reasoning_agent.py'
+      - 'tests/test_restoration_caption_agent.py'
+      - 'tests/test_restoration_live_receipts.py'
+      - '.github/workflows/hs-restoration-reasoning-agent.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deterministic-guardrails-without-live-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and pytest
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Native intake, caption cutoff, AGY CLI, safety, receipts
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_restoration_reasoning_agent.py \
+            tests/test_restoration_caption_agent.py \
+            tests/test_llm_text_client.py \
+            tests/test_restoration_live_receipts.py
+      - name: No live inference or paid API calls in CI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('src/hardware_splicer/restoration_reasoning_agent.py').read_text()
+          assert 'only local loopback Ollama is permitted' in text
+          assert 'repair_authorized' in text
+          assert 'actual_video_frames_analyzed' in text
+          print("CI validates sealed receipts without live inference")
+          PY

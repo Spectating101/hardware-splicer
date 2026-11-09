@@ -1,0 +1,87 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "ps5_pro_no_power_hdmi",
+      "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "7a28b808d4998b092c3bb356d1f739aa2ad9d4b58573eb2189b2d149431ad01b",
+      "caption_provenance": {
+        "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 45,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "211d7f3e60dd505f5139326458029172ce5bf8155c78ff33f69ef4a71a2ff7ac",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "e251421c940bab8803bc0a8e5229afe2ef2a831feb1c3762519ac6f3a18b3cf3",
+      "usage": {
+        "prompt_tokens": 968,
+        "completion_tokens": 322
+      },
+      "plan": {
+        "summary": "Initial unverified report indicates a PlayStation 5 Pro with no power and visible HDMI port damage; console remains uninspected internally and warranty seal status is contradictory between seller claims and physical inspection.",
+        "hypotheses": [
+          {
+            "mechanism": "Mechanical HDMI damage caused electrical short on 5V HDMI line or crushed pins bridging power/ground rail, triggering PSU protection or preventing standby rail generation.",
+            "why": "Reports confirm physical HDMI port damage alongside immediate failure to power on.",
+            "evidence_ids": [
+              "E1",
+              "E2",
+              "E4",
+              "E5"
+            ],
+            "safe_test": "Perform an unpowered visual inspection with magnification and an unpowered resistance/continuity check with a multimeter across HDMI connector pins to chassis ground while AC mains is completely disconnected."
+          },
+          {
+            "mechanism": "Internal power supply unit (PSU) failure or tripped primary/secondary fuse preventing standby power delivery.",
+            "why": "Device exhibits complete lack of power response with zero signs of life upon plug-in.",
+            "evidence_ids": [
+              "E1",
+              "E2",
+              "E5"
+            ],
+            "safe_test": "With the console completely unplugged from AC mains, remove the PSU modular assembly safely and perform unpowered continuity checks on accessible low-voltage fuses/rails without opening the high-voltage PSU casing."
+          },
+          {
+            "mechanism": "Standby power management circuitry fault or physical motherboard component damage from a prior drop or partial disassembly.",
+            "why": "Seller reported prior opening (though sticker was present), and physical trauma sufficient to break the HDMI port may have cracked solder joints or damaged standby regulators.",
+            "evidence_ids": [
+              "E1",
+              "E4",
+              "E5",
+              "E6"
+            ],
+            "safe_test": "With AC mains disconnected, perform an unpowered visual inspection of the motherboard for cracked passive components, torn traces, or liquid/debris ingress around the power management IC and standby rails."
+          }
+        ],
+        "next_safe_check": "Disconnect all power sources completely, discharge ESD, and perform a non-invasive visual inspection of the external HDMI port pins using a flashlight and magnification to check for bridged pins.",
+        "uncertainty": "Evidence is derived entirely from preliminary unverified speech transcripts and secondhand eBay descriptions before board-level diagnosis; internal rail conditions, tamper history, and PSU integrity remain unconfirmed.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 9.02,
+      "receipt_sha256": "3d6df64c63f2546711b7ac2778ecdfe8e358e2364ef9b33e3bb852347d2bc9b4"
+    }
+  ]
+}

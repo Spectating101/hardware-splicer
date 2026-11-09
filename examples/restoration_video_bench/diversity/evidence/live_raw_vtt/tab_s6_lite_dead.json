@@ -1,0 +1,86 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "tab_s6_lite_dead",
+      "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "ac6905515566ecd1c985188a600065a0fd625a307422b0d8b26f54412c92786f",
+      "caption_provenance": {
+        "raw_vtt_sha256": "05a9741a3aa8e6133f53b50ce69e8ce27000759c6318f7aec9c7ecfb8b007c3e",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 57,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "652f63bdce207467f3b6c228edeed43224bc9c27e55ff843728035a89bcabf8e",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "78a44a838bd36d3245c215e7948a9c694512e44866979b3cb098dcfd209dc663",
+      "usage": {
+        "prompt_tokens": 1054,
+        "completion_tokens": 351
+      },
+      "plan": {
+        "summary": "The tablet is reported unresponsive with no display or sound, though creator observations suggest possible current draw or power cycling when buttons are pressed. Prior screen replacement and damaged ribbon connectors complicate assessment without proving any specific internal failure.",
+        "hypotheses": [
+          {
+            "mechanism": "Display/touch panel connection failure or defective screen assembly",
+            "why": "Prior screen replacement occurred, a connector retaining clip broke, and display cable integrity is unverified, which could cause a blank display while the board still draws power or cycles.",
+            "evidence_ids": [
+              "E3",
+              "E4",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "Safely inspect the ribbon cables and board connectors under magnification for physical pin damage or improper seating without applying mechanical force or puncturing components."
+          },
+          {
+            "mechanism": "Operating system crash / bootloop or unresponsive firmware state",
+            "why": "Power button combinations allegedly cause drop-and-resume behavior suggestive of cycling, yet the host PC fails to enumerate the device and no sound is emitted.",
+            "evidence_ids": [
+              "E4",
+              "E5"
+            ],
+            "safe_test": "Connect the tablet via a known-good standard USB cable to a dedicated external USB inline power meter (5V source) to monitor stable vs fluctuating voltage and current draw without opening or modifying hardware."
+          },
+          {
+            "mechanism": "Primary power rail / charging circuit abnormality or deeply depleted battery",
+            "why": "Conflicting notes mention no power at all versus an impression that it seems to charge, while a repair shop previously deemed it unrepairable.",
+            "evidence_ids": [
+              "E1",
+              "E3",
+              "E5",
+              "E6"
+            ],
+            "safe_test": "Measure exterior USB input current and voltage using a calibrated USB power meter over an extended non-mains low-voltage charging period, monitoring the device exterior for any abnormal heat generation."
+          }
+        ],
+        "next_safe_check": "Connect the intact assembly to an external USB power meter connected to a certified 5V USB power supply to measure exact current draw and check for reboot cycles, without opening or mains probing.",
+        "uncertainty": "All evidence consists of unverified spoken statements and subjective observations; no objective power measurements, board diagnostics, or verified schematics are present.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 9.08,
+      "receipt_sha256": "cedbeccaed763f44c559e0492afd1f8521b8849f174d7dfaa2c44833b32ba178"
+    }
+  ]
+}
