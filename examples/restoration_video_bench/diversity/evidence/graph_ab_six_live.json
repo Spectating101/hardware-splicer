@@ -1,0 +1,1048 @@
+{
+  "protocol": {
+    "schema": "hs.restoration.real_caption_graph_paired_ab.v1",
+    "precommitted_case_arm_order": [
+      [
+        "bosch_dryer_slow_heat",
+        "hs_graph",
+        "plain"
+      ],
+      [
+        "dewalt_blower_intermittent",
+        "plain",
+        "hs_graph"
+      ],
+      [
+        "tab_s6_lite_dead",
+        "hs_graph",
+        "plain"
+      ],
+      [
+        "ps5_pro_no_power_hdmi",
+        "plain",
+        "hs_graph"
+      ],
+      [
+        "delonghi_eletta_faults",
+        "hs_graph",
+        "plain"
+      ],
+      [
+        "a53_touch_failure",
+        "plain",
+        "hs_graph"
+      ]
+    ],
+    "exact_model": "gemini-3.8-flash-low",
+    "input_stage": "first_120_seconds_actual_video_webvtt",
+    "arm_control": "plain_native_hs_intake_and_base_gemini_prompt",
+    "arm_treatment": "same_native_intake_plus_HS_engineering_source_graph_and_falsifiable_test_prompt",
+    "equal_model_calls_per_arm": true,
+    "equal_raw_evidence_per_arm": true,
+    "outcomes_not_loaded": true,
+    "graph_does_not_retrieve_schematics": true,
+    "measured_criteria": [
+      "model_valid_output",
+      "source_citation_integrity",
+      "reported_next_safe_check",
+      "model_ranked_fault_mechanisms",
+      "manual_blinded_repair_fault_family_score_only_after_prediction_freeze"
+    ],
+    "no_physical_actions": true
+  },
+  "protocol_sha256": "c6f0c700cb66f4a593ccaa55cbd1b23d74dcefdcb2795d861abb34ab90d59f78",
+  "model": "gemini-3.8-flash-low",
+  "cases": [
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "arm_order": [
+        "hs_graph",
+        "plain"
+      ],
+      "identical_evidence_sha256": "9e92a82fe4a7dcdf1b49943f5bde66c6cdb3abdca9ad7dbe2e1cc4c82b09b623",
+      "source_raw_vtt_sha256": "ebf258cdf24dd5104a57d85ea3417cbf0779d3a0443d4b6badb8172eae378ba3",
+      "arms": {
+        "hs_graph": {
+          "hs_source_graph_sha256": "00127687dd115be774a2ddd213214d5611e027c8fd6957647aa91535c62c34b1",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "bosch_dryer_slow_heat",
+            "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "9e92a82fe4a7dcdf1b49943f5bde66c6cdb3abdca9ad7dbe2e1cc4c82b09b623",
+            "caption_provenance": {
+              "raw_vtt_sha256": "ebf258cdf24dd5104a57d85ea3417cbf0779d3a0443d4b6badb8172eae378ba3",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 38,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "631c47318d6eae33ce7af406271f0529d0705e63a542479ab0a32916dba25919",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "74ff2a353e34a78571febb8ad866c2df778936ada79cc1be423e9f6b440546a5",
+            "hs_source_graph_sha256": "00127687dd115be774a2ddd213214d5611e027c8fd6957647aa91535c62c34b1",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "de1d6c88afaf160b490f87c7efe346a83b095ef48d954c3d475acaafdbd23762",
+            "usage": {
+              "prompt_tokens": 1419,
+              "completion_tokens": 473
+            },
+            "plan": {
+              "summary": "Evaluation of slow drying complaint in Bosch tumble dryer based strictly on unverified video claims and declared authority. Heating occurs but drying cycle is excessively long; creator suspects low heat switch stuck closed. No bench measurements or schematics are present.",
+              "hypotheses": [
+                {
+                  "mechanism": "Airflow restriction or lint filter / condenser blockage reducing moisture evacuation rate despite active heating elements.",
+                  "why": "Tumble dryers require adequate airflow to carry away evaporated moisture. Restricted exhaust or lint build-up directly causes prolonged cycle times while still generating heat.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2"
+                  ],
+                  "safe_test": "Inspect the externally accessible lint filter, condenser unit, and exhaust path while the appliance is unpowered and cool."
+                },
+                {
+                  "mechanism": "Low heat / half-power setting circuit permanently engaged (e.g., stuck switch mechanism or contact weld) limiting power dissipation.",
+                  "why": "Creator speech hypothesizes that a stuck low heat button forces the dryer into reduced power mode, prolonging drying cycles.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2",
+                    "E3"
+                  ],
+                  "safe_test": "With the dryer fully unplugged from mains power, perform a mechanical inspection and de-energized continuity test across switch terminals if accessible without disturbing mains safety barriers."
+                },
+                {
+                  "mechanism": "Partial heating element failure or high-limit thermostat cycling prematurely due to poor thermal dissipation or sensor drift.",
+                  "why": "A dryer with dual-stage or split elements running on only one coil, or cycling rapidly on thermal cutout, will produce warmth but insufficient heat transfer for normal cycle times.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2"
+                  ],
+                  "safe_test": "Perform an external check of exhaust temperature profile using an external non-contact infrared thermometer during operation, observing whether temperature reaches nominal drying threshold or cuts out prematurely."
+                }
+              ],
+              "next_safe_check": "While the dryer is completely unplugged and cool, perform an external, non-destructive inspection and thorough cleaning of the lint filter, door seals, and condenser box. If filter and condenser passages are clean and unrestricted, this disfavors an external airflow blockage and favors electrical or control causes such as a restricted heating profile or stuck low-heat switch.",
+              "uncertainty": "All statements are declared creator hypotheses without verified bench measurements, circuit diagrams, or service manuals. Fault isolation cannot be confirmed without controlled de-energized component measurements.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 11.14,
+            "receipt_sha256": "9a7aa0f60c7619cf0161b4a4c535e110a9529e22d733b0a0ec2a27c05b613f1a"
+          }
+        },
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "bosch_dryer_slow_heat",
+            "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "9e92a82fe4a7dcdf1b49943f5bde66c6cdb3abdca9ad7dbe2e1cc4c82b09b623",
+            "caption_provenance": {
+              "raw_vtt_sha256": "ebf258cdf24dd5104a57d85ea3417cbf0779d3a0443d4b6badb8172eae378ba3",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 38,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "f7524a4881768d11d5cf42e3661f02954e731517f075b8df28bcef4b91e05e7e",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "49268d2a2b3fec2155b84655acd2f7804c74ff344b2ba00d2c2facd5b5a7e316",
+            "usage": {
+              "prompt_tokens": 848,
+              "completion_tokens": 282
+            },
+            "plan": {
+              "summary": "The Bosch tumble dryer reportedly heats up but takes an unusually long time to dry. Creator conjecture suggests a stuck low-heat switch, but common dryer issues such as restricted airflow, heating circuit partial failure, or sensor fouling also match these symptoms without disassembly.",
+              "hypotheses": [
+                {
+                  "mechanism": "Restricted airflow due to lint buildup or blocked condenser/vent pathway",
+                  "why": "The dryer heats but takes excessively long to dry laundry, which is characteristically caused by impeded airflow preventing moisture evacuation.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2"
+                  ],
+                  "safe_test": "Safely inspect and clean the user-accessible lint filter and condenser unit with the appliance powered off."
+                },
+                {
+                  "mechanism": "Low-heat switch stuck or electrically closed in the on position",
+                  "why": "The creator conjectures that if the low-heat setting is continuously engaged, reduced heater power would cause slow drying while still generating some heat.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2",
+                    "E3",
+                    "E4"
+                  ],
+                  "safe_test": "With the appliance completely unplugged from mains electricity, measure continuity across the low-heat switch terminals while toggling the button to verify state change."
+                },
+                {
+                  "mechanism": "Faulty moisture sensor strips or partial heating element failure",
+                  "why": "A failing element bank or scale-coated moisture sensors can lead to reduced heating power or premature cycle termination/extended cycles.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2"
+                  ],
+                  "safe_test": "Inspect visible drum moisture sensor strips for limescale or film and clean gently with white vinegar while the dryer is disconnected from power."
+                }
+              ],
+              "next_safe_check": "Disconnect the dryer from AC mains power and perform an external inspection and cleaning of the primary lint screen and condenser cassette.",
+              "uncertainty": "Creator statements represent unverified assumptions rather than confirmed faults; no internal component measurements or diagnostic codes have been confirmed.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 8.82,
+            "receipt_sha256": "67abdf30f5d823e821d380be4e258f526f601a19b4db76b37f7a7a02861ec9bc"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "arm_order": [
+        "plain",
+        "hs_graph"
+      ],
+      "identical_evidence_sha256": "e07da013b07d06bca59eb90537320536c894b5655fad4c98d7318c0b994b9843",
+      "source_raw_vtt_sha256": "5be93d3a6af7a1bbf2759305db8cf0677828a82bac531628a2c0b2a64f6358af",
+      "arms": {
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "dewalt_blower_intermittent",
+            "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "e07da013b07d06bca59eb90537320536c894b5655fad4c98d7318c0b994b9843",
+            "caption_provenance": {
+              "raw_vtt_sha256": "5be93d3a6af7a1bbf2759305db8cf0677828a82bac531628a2c0b2a64f6358af",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 38,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "6c7a82c126da22785da7d8423a41b68f21aa6921f6a2f4b92b5748444993e7ed",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "f93daa48f244e2b13c614d13986c2663ee0f207671a11a40d4814aa262c44c5a",
+            "usage": {
+              "prompt_tokens": 852,
+              "completion_tokens": 284
+            },
+            "plan": {
+              "summary": "The cordless blower displays intermittent operation and failure to run, with reported hit-and-miss behavior during use.",
+              "hypotheses": [
+                {
+                  "mechanism": "Degraded or loose battery terminal contacts causing intermittent power delivery under vibration or handling.",
+                  "why": "Intermittent operation that cuts in and out unpredictably can stem from high resistance or momentary open circuits at the battery interface.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With the battery removed, visually inspect the tool-side battery receptacle pins for corrosion, spread terminals, debris, or mechanical play."
+                },
+                {
+                  "mechanism": "Intermittent trigger switch contact or internal variable speed switch wiper degradation.",
+                  "why": "Creator speech specifically notes irregular cutting in and out while engaged, consistent with switch contact bounce, internal contamination, or worn contacts.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With the battery disconnected, perform an unpowered continuity or resistance check across the switch contacts while actuating the trigger mechanism."
+                },
+                {
+                  "mechanism": "Worn motor brushes or intermittent internal wiring/solder joint failure within the motor circuit.",
+                  "why": "DC motors can exhibit intermittent starting failure and spontaneous stalling if carbon brushes are worn, hung up in holders, or wiring connections are loose.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With the battery removed, manually rotate the blower impeller by hand to check for mechanical binding, and visually inspect motor brush engagement if externally accessible without live testing."
+                }
+              ],
+              "next_safe_check": "Disconnect the battery completely and visually inspect the battery terminal blades and connector housing for signs of looseness, fretting, corrosion, or contamination.",
+              "uncertainty": "Evidence is purely anecdotal speech and observational symptoms without unpowered electrical measurements, component inspection, or verification of battery pack health.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 13.0,
+            "receipt_sha256": "3e0bc810d51d9e28f6eca4a95e8ec349d5626dedf7dea8a2f1a8ed4e51f1fe10"
+          }
+        },
+        "hs_graph": {
+          "hs_source_graph_sha256": "cdf5715d5fa291a9c33878e1dfef58f117b8f14e224936d9d61e209047043ea9",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "dewalt_blower_intermittent",
+            "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "e07da013b07d06bca59eb90537320536c894b5655fad4c98d7318c0b994b9843",
+            "caption_provenance": {
+              "raw_vtt_sha256": "5be93d3a6af7a1bbf2759305db8cf0677828a82bac531628a2c0b2a64f6358af",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 38,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "d649ede1aff707c5ad909ea55017fa3728edb5ec97a566f55310af9f5b5a8267",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "037ee4969a7b27c3c14865f4d12c3d175cc383a53ba0e15c96f24424118df8bb",
+            "hs_source_graph_sha256": "cdf5715d5fa291a9c33878e1dfef58f117b8f14e224936d9d61e209047043ea9",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "e80f5c20f3a5c359cdd2d50dc743ed87aaf5907af6ca3bb762897f8116309364",
+            "usage": {
+              "prompt_tokens": 1604,
+              "completion_tokens": 534
+            },
+            "plan": {
+              "summary": "Untrusted creator statements report an intermittent fault on a DeWalt DCV100 cordless blower where operation cuts in and out or fails completely. No physical measurements, schematics, or bench tests have been conducted. Several potential mechanisms exist, primarily involving the trigger/speed switch contacts, battery interface terminal engagement, or internal motor/brush wear.",
+              "hypotheses": [
+                {
+                  "mechanism": "Degraded or oxidized trigger switch contacts causing intermittent circuit continuity under mechanical vibration.",
+                  "why": "Creator reports intermittent 'hit and miss' operation while the tool is held or switched on (E1, E5, E6, E7). Trigger switches frequently suffer contact pitting or particulate buildup.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With battery removed, inspect switch feel for mechanical binding; reattach battery safely pointing nozzle away from people, set trigger in lock-on or continuous position, and gently wiggle the trigger without shaking the tool body. If continuity cuts in/out specifically with trigger manipulation, switch failure is favored."
+                },
+                {
+                  "mechanism": "Loose, worn, or oxidized battery pack terminal interface contacts leading to intermittent power delivery under vibration.",
+                  "why": "The tool is battery-powered and handheld; intermittent loss of contact at the receptacle spades can cause random power cutouts described as 'all over the place' (E1, E5, E6, E7).",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With battery removed, perform an external visual inspection of the battery connector blades for spread, corrosion, or contamination; reinstall a known-good battery firmly and gently wiggle only the battery pack in its slide mount while holding the trigger steady. If cutting out correlates with battery displacement rather than trigger motion, terminal interface failure is favored over a switch fault."
+                },
+                {
+                  "mechanism": "Internal motor brush/commutator wear or intermittent motor lead connection.",
+                  "why": "The symptom shows sporadic starting failure ('sometimes it won't work at all') followed by restarting ('now it's going again') (E5, E6, E7), which can occur if motor brushes fail to seat reliably at certain rotor resting angles.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "With battery removed, visually inspect the externally visible motor impeller/vents and manually rotate the fan by hand through external vents using a non-conductive plastic probe to check for smooth mechanical rotation and resistance. If no binding is detected and intermittent starting depends on resting rotor angle when battery is tested, motor brush wear is favored over terminal interface issues."
+                }
+              ],
+              "next_safe_check": "With the tool completely powered down and battery removed, perform an external visual and physical inspection of the battery interface terminals (checking for loose fit, contamination, or bent contacts), followed by safely mounting a known-good battery in a clear space: hold the trigger switch steady and gently manipulate only the battery pack to observe if power cuts out. A cutout during battery movement favors terminal connection failure, whereas a cutout occurring only when manipulating the trigger paddle favors internal switch contact degradation.",
+              "uncertainty": "All statements originate from unverified third-party video claims (authority ceiling: declared). No schematics, component datasheets, or electrical bench measurements exist. Internal circuit continuity cannot be confirmed without internal probing, which cannot be recommended at this stage.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 12.89,
+            "receipt_sha256": "e00200ffc1e1bdcfdf74de315d98d7966604699bbf25c7f511b3ddbcdd4f8375"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "arm_order": [
+        "hs_graph",
+        "plain"
+      ],
+      "identical_evidence_sha256": "ac6905515566ecd1c985188a600065a0fd625a307422b0d8b26f54412c92786f",
+      "source_raw_vtt_sha256": "05a9741a3aa8e6133f53b50ce69e8ce27000759c6318f7aec9c7ecfb8b007c3e",
+      "arms": {
+        "hs_graph": {
+          "hs_source_graph_sha256": "9bda29faef1ea9a38521b8971ed7c837af8a121de1e6cd004132201a93e7b6fa",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "tab_s6_lite_dead",
+            "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "ac6905515566ecd1c985188a600065a0fd625a307422b0d8b26f54412c92786f",
+            "caption_provenance": {
+              "raw_vtt_sha256": "05a9741a3aa8e6133f53b50ce69e8ce27000759c6318f7aec9c7ecfb8b007c3e",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 57,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "d49aa85632b4007024c3f0ca3a94e0737e483885a624d7efc094ba5706dc0275",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "9758e7031d42f4de74f4951b194a423547f9a669da527819b4d7b6aa026b19fa",
+            "hs_source_graph_sha256": "9bda29faef1ea9a38521b8971ed7c837af8a121de1e6cd004132201a93e7b6fa",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "2cf89ab8fee73bbf3ca644b6a44cc9efc7b32bf35421e76fe4a2a1a882178cc5",
+            "usage": {
+              "prompt_tokens": 1676,
+              "completion_tokens": 558
+            },
+            "plan": {
+              "summary": "Unverified creator reports Samsung Galaxy Tab S6 Lite shows no display, sound, or PC USB enumeration, yet creator perceives indications of charging or current draw when power cycling, alongside a previously replaced screen with a damaged connector clip during subsequent teardown.",
+              "hypotheses": [
+                {
+                  "mechanism": "Display subsystem / FPC connector discontinuity or faulty panel preventing display output while board boots or cycles",
+                  "why": "The creator notes signs of charging/booting current response upon button combos, previous screen replacement history, and damaged ribbon clip, which could present as an apparently dead unit if backlight/OLED fails to initialize or signal lines are interrupted.",
+                  "evidence_ids": [
+                    "E3",
+                    "E4",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Connect the tablet to an external USB multimeter/power monitor while connected to a 5V USB power supply; observe whether current draw behaves like standard system boot sequence (~0.5A-1.5A fluctuating) versus static low-power charge mode (~0.1A-0.4A)."
+                },
+                {
+                  "mechanism": "Firmware crash, corrupted bootloader, or PMIC boot-loop / crash without establishing USB data communication",
+                  "why": "The device fails to enumerate on a PC, produces no audio chimes, and drops current/resets during hard key combinations, which can occur during unhandled AP/PMIC boot failure before USB descriptor handover or OS initialization.",
+                  "evidence_ids": [
+                    "E4",
+                    "E5"
+                  ],
+                  "safe_test": "Connect the tablet via a verified USB data cable to an external PC running OS device manager / dmesg / lsusb while performing hardware button resets to observe if any transient low-level USB VID/PID (e.g. Exynos boot ROM or emergency download device) enumerates, distinguishing pre-OS bootloader states from complete USB interface silence."
+                },
+                {
+                  "mechanism": "Physical USB-C daughterboard/interconnect damage or charge circuit failure preventing battery charge and USB data line continuity",
+                  "why": "Lack of PC recognition and dead device symptoms could stem from broken USB data lines (D+/D-) or marginal VBUS contact, potentially keeping battery depleted if actual sustained charging is not occurring.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3",
+                    "E5"
+                  ],
+                  "safe_test": "Inspect the external USB-C receptacle under magnification and measure total DC current draw using an external inline USB tester; stable 0.00A draw under known-good charger would favor charging/receptacle failure over an internal display fault."
+                }
+              ],
+              "next_safe_check": "Connect the tablet to a known-working external USB-C power monitor and standard 5V wall adapter without disassembly, observing resting current draw, then hold Power + Volume Down: a dynamic cycling current draw (>0.4A with resets) favors an intact mainboard/PMIC with a display/bootloop issue, whereas a flat 0.00A or static low draw (<0.05A) favors a charging circuit, battery, or port connection fault.",
+              "uncertainty": "All statements are declared creator speech without physical bench instrument verification, schematics, boardviews, or component datasheets. Internal physical status of the battery state of charge, mainboard rails, and connector integrity remains unconfirmed.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 12.19,
+            "receipt_sha256": "f3cb5b344bb3634786a75c26a138a26f94078cc3f225737febae27ec5250eca9"
+          }
+        },
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "tab_s6_lite_dead",
+            "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "ac6905515566ecd1c985188a600065a0fd625a307422b0d8b26f54412c92786f",
+            "caption_provenance": {
+              "raw_vtt_sha256": "05a9741a3aa8e6133f53b50ce69e8ce27000759c6318f7aec9c7ecfb8b007c3e",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 57,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "652f63bdce207467f3b6c228edeed43224bc9c27e55ff843728035a89bcabf8e",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "8b6b250070ad8edbade83f0908a1a6635ecf3a9877b254fef337b13133a543d1",
+            "usage": {
+              "prompt_tokens": 1068,
+              "completion_tokens": 356
+            },
+            "plan": {
+              "summary": "The tablet exhibits unresponsiveness with no display, audio, or computer USB recognition, though unverified observations suggest current draw or reboot cycling during button combinations following a prior screen replacement and connector latch damage.",
+              "hypotheses": [
+                {
+                  "mechanism": "Damaged, disconnected, or defective display assembly/connector preventing image output while the board powers on.",
+                  "why": "Unverified reports indicate the device draws power and current cycles during hard-reset attempts, but the screen was previously replaced and a ribbon cable connector latch broke during subsequent removal.",
+                  "evidence_ids": [
+                    "E3",
+                    "E4",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Inspect the display ribbon cable and FPC connector non-invasively under magnification for bent pins or fractured traces without powering on."
+                },
+                {
+                  "mechanism": "Operating system crash, bootloop, or corrupted firmware failing to initialize peripheral drivers and USB enumeration.",
+                  "why": "Button combinations alter power draw behavior or reboot state, yet no audio chimes or USB file system enumeration occur when attached to a host computer.",
+                  "evidence_ids": [
+                    "E4",
+                    "E5"
+                  ],
+                  "safe_test": "Connect the tablet to an external USB digital multimeter/ammeter at 5V to observe whether current draw matches a static bootloop cycle versus normal charging current."
+                },
+                {
+                  "mechanism": "Battery deep discharge or PMIC charging rail fault preventing sufficient rail voltage for full boot.",
+                  "why": "The previous owner and repair shop reported the tablet as having no power, and prolonged charging allegedly produced no discernible change in behavior.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3",
+                    "E5",
+                    "E6"
+                  ],
+                  "safe_test": "Monitor voltage and current on an external inline USB power meter during cold plug-in to confirm if power delivery negotiates correctly without disassembling the battery."
+                }
+              ],
+              "next_safe_check": "Connect the intact tablet via its external charging port to a certified USB power meter (ammeter/voltmeter) to monitor baseline voltage and current draw without opening the unit or probing internal components.",
+              "uncertainty": "All statements stem from unverified creator and user commentary; no direct electrical measurements, schematics, or thermal logs exist to verify board health, rail integrity, or whether the broken latch affects display or digitizer functionality.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 9.27,
+            "receipt_sha256": "38a0cf696dd8a355b70f55667227cd95e397f80506d1e0a7f621b311bdec5e0d"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "arm_order": [
+        "plain",
+        "hs_graph"
+      ],
+      "identical_evidence_sha256": "7a28b808d4998b092c3bb356d1f739aa2ad9d4b58573eb2189b2d149431ad01b",
+      "source_raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+      "arms": {
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "ps5_pro_no_power_hdmi",
+            "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "7a28b808d4998b092c3bb356d1f739aa2ad9d4b58573eb2189b2d149431ad01b",
+            "caption_provenance": {
+              "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 45,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "211d7f3e60dd505f5139326458029172ce5bf8155c78ff33f69ef4a71a2ff7ac",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "1d3c9f5741d0ecffa767c22c66a15b0c97c9795a3aef1b3fe333aa92c5fffad6",
+            "usage": {
+              "prompt_tokens": 986,
+              "completion_tokens": 328
+            },
+            "plan": {
+              "summary": "A Sony PlayStation 5 Pro console reportedly exhibits a no-power state alongside visible physical damage to the HDMI port, based on preliminary external observations and seller statements.",
+              "hypotheses": [
+                {
+                  "mechanism": "Physical bridging or bent pins within the damaged HDMI port may be shorting the 5V line or communication rails to ground, potentially tripping internal power management protection and preventing boot.",
+                  "why": "Reports indicate visible damage to the HDMI connector coincident with a total failure to power on.",
+                  "evidence_ids": [
+                    "E1",
+                    "E4"
+                  ],
+                  "safe_test": "Perform an unpowered visual and optical inspection under magnification of the HDMI connector pins to check for bridged, bent, or grounded contacts without connecting AC mains."
+                },
+                {
+                  "mechanism": "Internal power supply unit (PSU) fault, blown input fuse, or mainboard standby rail failure preventing the initial power delivery sequence.",
+                  "why": "The console shows no signs of life, lights, or power response when plugged in.",
+                  "evidence_ids": [
+                    "E1",
+                    "E2",
+                    "E5"
+                  ],
+                  "safe_test": "With the console completely disconnected from AC mains power, perform unpowered passive resistance-to-ground measurements across standard motherboard standby rails using a digital multimeter."
+                },
+                {
+                  "mechanism": "Discrepancies in previous handling, opening, or tamper status (such as conflicting reports on warranty seal removal) could indicate prior internal tampering, physical damage to components, or liquid/debris ingress.",
+                  "why": "Initial reports claimed prior opening and seal removal, though later observation indicated an intact warranty seal; creator also initially suspected insect or liquid debris.",
+                  "evidence_ids": [
+                    "E2",
+                    "E3",
+                    "E4",
+                    "E6"
+                  ],
+                  "safe_test": "Perform an external and, if non-destructively disassembled under ESD protection, unpowered visual inspection of the chassis, vents, and board surfaces for liquid residue, corrosion, or component displacement."
+                }
+              ],
+              "next_safe_check": "Disconnect all AC power and cables, discharge ESD, and perform a detailed visual inspection of the internal pins of the damaged HDMI port with an inspection light or microscope to verify whether any pins are bridged to ground.",
+              "uncertainty": "Evidence relies on subjective speech and unverified seller claims; contradictory statements exist regarding whether the console was previously opened or if warranty stickers were intact; no electronic measurements have been taken.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 9.2,
+            "receipt_sha256": "b88023e262d2a7fdddc78c9f18f6440dcaf019b25a42c978a4b0b8b198af06ef"
+          }
+        },
+        "hs_graph": {
+          "hs_source_graph_sha256": "3756f19595c48cf7beac37f6a009c3e7f5ef0d4028b337e4f8f2572d14bc5bfd",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "ps5_pro_no_power_hdmi",
+            "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "7a28b808d4998b092c3bb356d1f739aa2ad9d4b58573eb2189b2d149431ad01b",
+            "caption_provenance": {
+              "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 45,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "878b19b6df4d224ce6811590141f0dae3f71283b0a60d069c90ed454959fbc73",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "7c2d1b9e615e96d282fdc5061df07a875b85f2729101b7c7dcf5c524cb693fb9",
+            "hs_source_graph_sha256": "3756f19595c48cf7beac37f6a009c3e7f5ef0d4028b337e4f8f2572d14bc5bfd",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "d7a60d9b2d11a3daf307e634b3ace3113c2682745a62815b235721e3fab1a112",
+            "usage": {
+              "prompt_tokens": 1571,
+              "completion_tokens": 523
+            },
+            "plan": {
+              "summary": "Declared unverified claims state the console exhibits no power and visible HDMI port damage, with conflicting statements regarding prior disassembly or warranty seal integrity. No schematics, boardview, or electrical measurements exist, precluding verified fault isolation.",
+              "hypotheses": [
+                {
+                  "mechanism": "Physical short circuit on HDMI port pins (e.g., 5V rail pin shorted to ground or data lines) triggering power rail protection/shutoff",
+                  "why": "The listing and inspection note visible damage to the HDMI connector; crushed or bridged internal pins on an HDMI port can short standby or secondary power lines directly to ground, preventing console power sequencing.",
+                  "evidence_ids": [
+                    "E1",
+                    "E4"
+                  ],
+                  "safe_test": "Perform an external optical inspection of the HDMI connector with high-magnification illumination and an insulated non-conductive inspection probe without opening the chassis or plugging into mains. If bridged or grounded pins are visible inside the port, it favors external connector shorting over an isolated internal PSU fault."
+                },
+                {
+                  "mechanism": "Internal power supply unit (PSU) failure or tripped primary/secondary protection independent of port damage",
+                  "why": "The console shows zero power response when connected, which is consistent with an internal PSU fault, blown input fuse, or damaged standby power delivery.",
+                  "evidence_ids": [
+                    "E1",
+                    "E5"
+                  ],
+                  "safe_test": "Inspect external AC inlet socket for physical damage or foreign debris, and monitor the unit using an external inline AC wattmeter during a single momentary button press. If current draw is strictly zero (0.0W), it favors an open primary circuit/inlet disconnect; if a brief current spike occurs followed immediately by shutdown, it favors downstream overcurrent shutdown."
+                },
+                {
+                  "mechanism": "Mechanical or ribbon cable disconnect/damage at the front power switch assembly from prior handling or drop impact",
+                  "why": "Accounts conflict regarding previous opening and the physical trauma that damaged the HDMI port may have displaced or damaged the front panel power button or associated board interconnects.",
+                  "evidence_ids": [
+                    "E2",
+                    "E4",
+                    "E5",
+                    "E6"
+                  ],
+                  "safe_test": "Attempt to initiate power-on sequence using an externally connected, known-good USB controller via front USB port or by inserting a disc/checking disc eject button (if applicable), while monitoring the external inline wattmeter. If the console responds to secondary external wake inputs but not the primary power button, it favors a localized power switch fault over total PSU failure."
+                }
+              ],
+              "next_safe_check": "Perform an external optical inspection of the HDMI port using a flashlight/magnifier for bridged pins, combined with an external inline AC wattmeter reading during a single power button push; visible pin contact without mains draw confirms port deformation before any internal chassis intervention.",
+              "uncertainty": "All provided claims are declared without physical electrical measurements, component datasheets, or schematics; internal faults cannot be verified without disassembly and diagnostic probing, which carry mains and ESD hazards.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 10.62,
+            "receipt_sha256": "8d4ef6e1fd34259a139d5d2256d3ad9f3681fc663422ba195dc624cef2c88204"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "arm_order": [
+        "hs_graph",
+        "plain"
+      ],
+      "identical_evidence_sha256": "f03802e0b5d178a16f509ffa122921c3fac2808d5698f9b1d7ae599e25a1eb56",
+      "source_raw_vtt_sha256": "40f26a4dcc7a37cd6b24ba65fdd6b1889201022b8dec69835be0ec1f43fc9275",
+      "arms": {
+        "hs_graph": {
+          "hs_source_graph_sha256": "0fbd19c00bc490f432a92c556a9e42e26a6d610353a7a95cdd988b6c6fb6369d",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "delonghi_eletta_faults",
+            "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "f03802e0b5d178a16f509ffa122921c3fac2808d5698f9b1d7ae599e25a1eb56",
+            "caption_provenance": {
+              "raw_vtt_sha256": "40f26a4dcc7a37cd6b24ba65fdd6b1889201022b8dec69835be0ec1f43fc9275",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 43,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "2e7579748cf57081a73f27160452d2f872bcce942eacd4c188427fa16d4ab1d1",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "d45ea2120bfb9f4ba30a73f730a72148a1b87bf4068e4fec51dd5d8eaaa591ad",
+            "hs_source_graph_sha256": "0fbd19c00bc490f432a92c556a9e42e26a6d610353a7a95cdd988b6c6fb6369d",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "831b3d182fb056d175e2abc53223b5bc4e5aefa4bf23d077895d3a295162ba7f",
+            "usage": {
+              "prompt_tokens": 1575,
+              "completion_tokens": 525
+            },
+            "plan": {
+              "summary": "Unverified reports for a DeLonghi Eletta ECAM 44.660.B2 describe hanging on the milk preparation cycle and significant internal water/coffee leakage into the drip tray and grounds container. Due to lack of schematics and bench measurements, no fault is confirmed.",
+              "hypotheses": [
+                {
+                  "mechanism": "Hydraulic blockage or solenoid valve failure in the steam/milk circuit preventing completion of the milk preparation cycle",
+                  "why": "Creator reports the unit hangs indefinitely ('preparation underway' for 15 minutes) when attempting milk dispensing, consistent with failure to reach pressure/temperature or open fluid delivery paths.",
+                  "evidence_ids": [
+                    "E3"
+                  ],
+                  "safe_test": "Power down and unplug machine. Inspect the external milk jug connection coupling and spout for visible scale build-up, milk residue, or damaged O-rings without opening internal enclosures. A clear, unblocked coupling with intact O-rings favors an internal valve/sensor fault, whereas visible blockage favors an external clogs/seal degradation."
+                },
+                {
+                  "mechanism": "Brew group / generator seal failure or infuser misalignment causing severe leakage into the grounds tray and watery coffee",
+                  "why": "Creator notes grounds tray fills with water, coffee leaks behind the area, and coffee is watery, indicating brew circuit bypass or seal breach during infusion.",
+                  "evidence_ids": [
+                    "E4",
+                    "E5"
+                  ],
+                  "safe_test": "With the machine disconnected from mains power and completely cold, remove the external grounds container and drip tray, then visually inspect the brew group cavity and seals through the access door. Severe coffee residue and displaced O-rings on the infuser piston favor brew group seal failure over upstream hydraulic pipe rupture."
+                },
+                {
+                  "mechanism": "Steam boiler / thermoblock heating or thermal sensing fault halting cycle transition",
+                  "why": "The microcontroller hangs during milk preparation ('preparation underway') without completing dispensing, which can occur if the dedicated steam circuit does not reach operating temperature or signal readiness.",
+                  "evidence_ids": [
+                    "E3"
+                  ],
+                  "safe_test": "Perform an external observation during a cold start: observe whether standard coffee heating completes normally versus whether initiating hot water or steam cycle indefinitely hangs or displays an error code. Normal hot coffee dispensing with a hang strictly on steam favors a dedicated steam-circuit thermal/pressure failure over a general hydraulic block."
+                }
+              ],
+              "next_safe_check": "Perform a cold, unpowered visual inspection of the external milk frother/carafe coupling nozzle and brew door compartment for external milk/coffee encrustation or missing O-rings. If the external milk connector and seals are pristine, this favors internal solenoid/boiler control failure; if heavily obstructed with dried residue or damaged seals, this favors external interface blockage.",
+              "uncertainty": "All statements stem from unverified creator speech with no electrical schematics, component datasheets, or physical multimeter/bench measurements available. Internal electrical or hydraulic causes cannot be proven without verified diagnostics.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 10.81,
+            "receipt_sha256": "552c0ae57d68e5b033d0a561967d1692e03b45cc6430aed381f19f6121e0f42a"
+          }
+        },
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "delonghi_eletta_faults",
+            "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "f03802e0b5d178a16f509ffa122921c3fac2808d5698f9b1d7ae599e25a1eb56",
+            "caption_provenance": {
+              "raw_vtt_sha256": "40f26a4dcc7a37cd6b24ba65fdd6b1889201022b8dec69835be0ec1f43fc9275",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 43,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "5b993e95380c75bc39679d907453c03535291f8ca62aa55feb84383e4f8aba89",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "17138304a19a50d97d07ec8b442dc58227b36d54a54e89cd6821a49f07af7ab3",
+            "usage": {
+              "prompt_tokens": 1011,
+              "completion_tokens": 337
+            },
+            "plan": {
+              "summary": "Unverified reports indicate the coffee machine hangs on 'preparation underway' during milk dispensing and suffers severe internal leaking into the grounds tray and behind components, along with watery coffee.",
+              "hypotheses": [
+                {
+                  "mechanism": "Failure in the secondary thermoblock, steam NTC sensor, or thermal fuse preventing the machine from reaching the target steam temperature required for milk dispensing, causing the software to hang awaiting ready state.",
+                  "why": "The creator notes the machine hangs indefinitely ('15 minutes') on 'preparation underway' specifically when requesting milk/froth, while basic coffee extraction still operates.",
+                  "evidence_ids": [
+                    "E3",
+                    "E4"
+                  ],
+                  "safe_test": "With the appliance completely unplugged and cooled down, visually inspect wiring and connections around the steam thermoblock for burns, disconnections, or obvious corrosion without opening energized components."
+                },
+                {
+                  "mechanism": "Faulty, blocked, or unseated solenoid valves (e.g., 2-way/3-way electrovalves) controlling steam and hot water routing to the milk carafe coupling.",
+                  "why": "If a solenoid valve fails to actuate or route fluid, the cycle may hang awaiting flow or temperature confirmation, or divert fluid internally causing massive leaks into the drip/grounds tray.",
+                  "evidence_ids": [
+                    "E3",
+                    "E4",
+                    "E5"
+                  ],
+                  "safe_test": "With the appliance fully unpowered and disconnected from mains, inspect the solenoid valve bodies and adjacent tubing connectors for mineral buildup, moisture traces, or physical fractures."
+                },
+                {
+                  "mechanism": "Degraded internal O-rings, damaged infusion group seals, or cracked fluid couplings leading to pressure loss, watery extraction, and water bypassing into the grounds tray.",
+                  "why": "The grounds tray fills with water, coffee is reported as watery, and leakage is visible behind internal panels during brewing.",
+                  "evidence_ids": [
+                    "E4",
+                    "E5"
+                  ],
+                  "safe_test": "While fully disconnected from power, remove the brew group and inspect the infuser gaskets, piston seals, and mechanical track for visible tears, hardening, or misalignment."
+                }
+              ],
+              "next_safe_check": "Disconnect the machine from AC mains and allow it to cool completely, then remove the drip tray and grounds container to visually inspect for standing fluid and check the brew group seals for obvious physical deterioration.",
+              "uncertainty": "All claims rely entirely on unverified creator statements from a secondhand unit with missing/third-party parts; electrical and hydraulic systems have not been tested under controlled, safe diagnostic conditions.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 8.93,
+            "receipt_sha256": "b5e02192e177d8509fbb04a2c343b3c851a759139619f59eed110461956ae49b"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "a53_touch_failure",
+      "arm_order": [
+        "plain",
+        "hs_graph"
+      ],
+      "identical_evidence_sha256": "6571f5449c62811189f3de0946eaf547f1b9147879e2f827870a4574c34b8bfd",
+      "source_raw_vtt_sha256": "d80824c0a58405ed8bd534077e571ce75eed7a6ac640c48b02128781933678ec",
+      "arms": {
+        "plain": {
+          "hs_source_graph_sha256": null,
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "a53_touch_failure",
+            "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "6571f5449c62811189f3de0946eaf547f1b9147879e2f827870a4574c34b8bfd",
+            "caption_provenance": {
+              "raw_vtt_sha256": "d80824c0a58405ed8bd534077e571ce75eed7a6ac640c48b02128781933678ec",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 50,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "5c68cb702399c6af080200612536ec73c1d0787d41cd0d02ef0a70aa8d0d42a0",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "12bd41745faa90d965d5d44020d101c4ae27b4b7116a01d55952224006edf41c",
+            "usage": {
+              "prompt_tokens": 992,
+              "completion_tokens": 330
+            },
+            "plan": {
+              "summary": "A Samsung Galaxy A53 5G powers on and displays the lock screen, but touch input is unresponsive; reported prior water contact and external USB peripheral functionality suggest core system operation with localized digitizer or interconnect impairment.",
+              "hypotheses": [
+                {
+                  "mechanism": "Digitizer hardware failure or localized corrosion at the display assembly",
+                  "why": "The OLED panel produces an image and external USB input reportedly functioned, but touch input fails completely across the screen, consistent with localized digitizer sensor or controller damage from suspected liquid exposure.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3",
+                    "E4",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Safely connect an external USB mouse via OTG adapter to confirm system-level responsiveness and back up any remaining unverified user data without opening the chassis."
+                },
+                {
+                  "mechanism": "FPC flex cable or connector corrosion/interconnect fault between display/sub-board and mainboard",
+                  "why": "Suspected water damage frequently causes localized pin oxidation or intermittent connection on high-density ribbon connectors carrying touch signals (I2C/SPI lines) while power and display data lines may remain partially operational.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Inspect USB-C port externally with an illuminated magnifier for corrosion/liquid debris and test external peripheral input stability under battery power."
+                },
+                {
+                  "mechanism": "Operating system or touch controller IC firmware crash/lockup",
+                  "why": "Software or firmware lockup can cause touch driver non-responsiveness while the lock screen clock/display remains rendered.",
+                  "evidence_ids": [
+                    "E1",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Perform a non-destructive forced hardware reboot using the external physical buttons (Volume Down + Power key hold) while disconnected from any charger."
+                }
+              ],
+              "next_safe_check": "Perform a safe non-destructive external check by connecting an OTG USB mouse to verify device interaction and verify data backup status before any intrusive evaluation.",
+              "uncertainty": "Reported liquid ingress and internal hardware status rely strictly on unverified creator statements; internal inspection has not occurred, and specific circuit condition is unknown.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 9.35,
+            "receipt_sha256": "c7512e40306a34a7f99f0d3d3a97af9c97b61396cd54f7aebcaf92b94d29d975"
+          }
+        },
+        "hs_graph": {
+          "hs_source_graph_sha256": "9d7734fede68e3b4e6dac646b4e97876eec83444a6fa8d07897a47d44242cfdb",
+          "receipt": {
+            "schema": "hs.restoration.free_text_diagnostic_v1",
+            "case_id": "a53_touch_failure",
+            "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+            "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+            "evidence_sha256": "6571f5449c62811189f3de0946eaf547f1b9147879e2f827870a4574c34b8bfd",
+            "caption_provenance": {
+              "raw_vtt_sha256": "d80824c0a58405ed8bd534077e571ce75eed7a6ac640c48b02128781933678ec",
+              "cutoff_seconds": 120,
+              "total_early_final_cues": 50,
+              "no_video_frames": true,
+              "caption_reliability": "unverified_auto_generated"
+            },
+            "preceding_receipt_sha256": null,
+            "prompt_version": "hs.restoration.reasoning_prompt.v1",
+            "prompt_sha256": "f8f70eddb7def0c4a2a590c377b6e09fb76b03109ad4c816bebfc06aacd85658",
+            "model_requested": "gemini-3.8-flash-low",
+            "model_called": true,
+            "physical_measurements_by_HS": false,
+            "actual_video_frames_analyzed": false,
+            "repair_authorized": false,
+            "device_repaired_by_HS": false,
+            "fabrication_authorized": false,
+            "parts_purchase_authorized": false,
+            "hs_engineering_ledger_sha256": "77a7e67d27f3d9646a2a9d3f8cb5b63b5c2195cbf7c953e8b88d7551249fff6e",
+            "hs_source_graph_sha256": "9d7734fede68e3b4e6dac646b4e97876eec83444a6fa8d07897a47d44242cfdb",
+            "model_reported": "gemini-3.8-flash-low",
+            "provider_reported": "agy_antigravity_subscription_cli",
+            "raw_model_output_sha256": "702a9a5f8a3efc989bbb5b31a6cfdfa1d69964c36a6752a490cb53f16cf9b852",
+            "usage": {
+              "prompt_tokens": 1544,
+              "completion_tokens": 514
+            },
+            "plan": {
+              "summary": "Unverified creator statements report that a Samsung Galaxy A53 5G powers on and displays an unlock screen, but does not respond to touch input following suspected liquid exposure, while basic OS functioning and external USB HID input previously allowed data recovery.",
+              "hypotheses": [
+                {
+                  "mechanism": "Digitizer hardware failure or liquid damage localized to the screen assembly or flex interconnect",
+                  "why": "The creator notes prior liquid exposure, and the screen shows image output but no capacitive touch response.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Connect a verified USB-C mouse via an OTG adapter while powered on; if the pointer appears and navigates the UI normally, this indicates the core SoC, OS touch subsystem, and display rendering are operational, favoring an isolated digitizer/interconnect fault over a broader system board crash."
+                },
+                {
+                  "mechanism": "Liquid damage or corrosion at the main-to-sub interconnect board / FPC connector routing digitizer lines",
+                  "why": "Liquid entry in modern Samsung A-series frequently enters through frame seams or charge port cutouts, corroding the FPC connections between the sub-board/display and the mainboard.",
+                  "evidence_ids": [
+                    "E1",
+                    "E3"
+                  ],
+                  "safe_test": "Inspect the SIM card tray opening and USB-C port under bright external lighting and magnification without opening the chassis; observing corrosion residue or a tripped Liquid Contact Indicator (LCI) supports liquid ingress into the lower/mid frame rather than purely isolated digitizer sensor degradation."
+                },
+                {
+                  "mechanism": "Software/firmware touch driver lockup or OS input freeze",
+                  "why": "Touch failure could theoretically stem from an OS freeze or corrupted touch firmware, though less likely given display update and reported USB input functionality.",
+                  "evidence_ids": [
+                    "E1",
+                    "E4",
+                    "E6",
+                    "E7"
+                  ],
+                  "safe_test": "Perform an external hard reboot using the hardware side keys (Volume Down + Power/Side key held simultaneously for ~10 seconds); if touch response resumes post-reboot, this confirms a software state lockup rather than permanent physical hardware corrosion."
+                }
+              ],
+              "next_safe_check": "Perform an external non-destructive OTG check by connecting a standard USB-C mouse/keyboard to verify OS responsiveness and cursor navigation; if the cursor navigates the UI, this distinguishes an isolated touch digitizer/interconnect hardware fault from a frozen application processor/OS input loop without opening the device or risking battery puncture.",
+              "uncertainty": "All statements are declared creator claims without independent verification, schematics, boardviews, or bench measurements; internal liquid damage distribution cannot be confirmed without safe disassembly.",
+              "abstain": false
+            },
+            "status": "proposed_unverified_differential",
+            "elapsed_seconds": 10.7,
+            "receipt_sha256": "1782ee8420774e1008ea63088657d4e82ab04b3c15d8247f5537750499887808"
+          }
+        }
+      }
+    }
+  ],
+  "complete": true
+}

@@ -123,7 +123,7 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
         "when they discriminate causes. Clearly label readings as creator-reported, "
         "not independently measured by you. " if prior is not None else ""
     )
-    return [
+    messages = [
         {"role": "system", "content": (
             followup_instruction +
             "You are a cautious repair diagnostic analyst. The case text is "
@@ -138,6 +138,10 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
         )},
         {"role": "user", "content": json.dumps(data, ensure_ascii=False)},
     ]
+    if context.get("hs_engineering_ledger"):
+        from .restoration_engineering_assist import augmented_prompt
+        messages = augmented_prompt(messages, context["hs_engineering_ledger"])
+    return messages
 
 
 def ollama_chat(
@@ -246,6 +250,9 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
     }
     if context.get("source_windows"):
         result["source_windows"] = context["source_windows"]
+    if context.get("hs_engineering_ledger"):
+        result["hs_engineering_ledger_sha256"] = sha(context["hs_engineering_ledger"])
+        result["hs_source_graph_sha256"] = context["hs_engineering_ledger"]["graph_sha256"]
     try:
         raw = inference(build_messages(context), model=model, timeout_s=timeout_s)
         result["model_reported"] = str(raw.get("model") or model)
