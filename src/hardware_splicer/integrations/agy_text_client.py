@@ -68,14 +68,18 @@ def call_agy_chat(
     parts.append(user_prompt)
     full_prompt = "\n\n".join(part for part in parts if part)
 
+    # agy treats the token after a bare --print as its prompt. Passing
+    # --print --model ... silently consumes "--model" as the prompt.
+    # Attach prompt to the long flag, keeping all CLI options separate.
     cmd = [
         agy_binary(),
-        "--print",
         "--model",
         selected_model,
+        "--mode",
+        "plan",
         "--print-timeout",
         f"{wait_s}s",
-        full_prompt,
+        f"--print={full_prompt}",
     ]
     if temperature <= 0:
         pass  # agy defaults; no stable temperature flag documented

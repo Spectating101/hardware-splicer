@@ -1,0 +1,81 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "delonghi_eletta_faults",
+      "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "f03802e0b5d178a16f509ffa122921c3fac2808d5698f9b1d7ae599e25a1eb56",
+      "caption_provenance": {
+        "raw_vtt_sha256": "40f26a4dcc7a37cd6b24ba65fdd6b1889201022b8dec69835be0ec1f43fc9275",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 43,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "5b993e95380c75bc39679d907453c03535291f8ca62aa55feb84383e4f8aba89",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "7a09c4a1cd4e6ffdd31216fb042b6123467c6b4aad18aebe2733b9b13f5246cd",
+      "usage": {
+        "prompt_tokens": 1017,
+        "completion_tokens": 339
+      },
+      "plan": {
+        "summary": "Used bean-to-cup coffee machine purchased faulty on eBay. Unverified creator report describes milk preparation hanging indefinitely at 'preparation underway' with no progress, watery coffee output, and substantial water/coffee leakage into the drip/grounds tray and behind panels. Case reports are unverified and faults remain unproven.",
+        "hypotheses": [
+          {
+            "mechanism": "Failure in the steam heating, thermoblock/temperature sensing, or steam circuit delivery pathway preventing the readiness condition for milk frothing.",
+            "why": "Creator reports the machine hangs at 'preparation underway' for 15 minutes when attempting milk preparation, which typically requires reaching steam operating temperature and pressure.",
+            "evidence_ids": [
+              "E3"
+            ],
+            "safe_test": "With the unit cool, completely unplugged from AC mains, and safely depressurized, perform a visual inspection of external connectors and check cold heater circuit continuity with a multimeter if permissible, or safely observe exterior indicators without bypassing panels."
+          },
+          {
+            "mechanism": "Failed solenoid valve or mechanical blockage in the milk coupling/spout fluid path.",
+            "why": "Creator mentions hanging on the milk menu and plans to trace back from the milk spout, which can occur if the machine cannot cycle fluid or sense microswitch activation at the milk carafe coupling.",
+            "evidence_ids": [
+              "E3",
+              "E7"
+            ],
+            "safe_test": "With the appliance disconnected from AC mains, inspect the milk jug connector coupling and mechanical latching microswitch for scale buildup, physical damage, or debris without opening live electrical enclosures."
+          },
+          {
+            "mechanism": "Degraded brew group seals, cracked mechanical connector, or damaged internal hose causing internal leaks and watery extraction.",
+            "why": "Creator reports the grounds tray is full of water, coffee is leaking internally behind panels, and brewed coffee is excessively watery.",
+            "evidence_ids": [
+              "E4",
+              "E5"
+            ],
+            "safe_test": "Perform an unplugged, unpowered visual examination of the removable brew group, accessible door gaskets, and waste container for torn O-rings, cracked plastic, or dried residue."
+          }
+        ],
+        "next_safe_check": "Disconnect appliance from AC mains, allow full cooling/depressurization, remove the water tank and brew unit, and perform an unpowered visual inspection of accessible mechanical seals and carafe coupling contacts.",
+        "uncertainty": "All observations stem from unverified creator video commentary on an uninspected, secondhand unit. No independent diagnostic logs, electrical measurements, or controlled bench tests have been conducted.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 9.33,
+      "receipt_sha256": "57ebb8ec455e2a382fcf9de1f8c3221c561fb681da2c0233953e2166776166aa"
+    }
+  ]
+}

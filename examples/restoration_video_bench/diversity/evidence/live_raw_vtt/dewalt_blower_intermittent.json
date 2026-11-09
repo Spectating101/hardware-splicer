@@ -1,0 +1,88 @@
+{
+  "schema": "hs.restoration.live_local_inference_batch.v1",
+  "mode": "actual_optiplex_ollama_local_llm_not_gpt6_control",
+  "preoutcome_inputs_only": true,
+  "no_gold_files_loaded": true,
+  "selected_count": 1,
+  "valid_plans": 1,
+  "provider": "agy_antigravity_subscription_cli",
+  "model_requested": "gemini-3.8-flash-low",
+  "results": [
+    {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "dewalt_blower_intermittent",
+      "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "e07da013b07d06bca59eb90537320536c894b5655fad4c98d7318c0b994b9843",
+      "caption_provenance": {
+        "raw_vtt_sha256": "5be93d3a6af7a1bbf2759305db8cf0677828a82bac531628a2c0b2a64f6358af",
+        "cutoff_seconds": 120,
+        "total_early_final_cues": 38,
+        "no_video_frames": true,
+        "caption_reliability": "unverified_auto_generated"
+      },
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "6c7a82c126da22785da7d8423a41b68f21aa6921f6a2f4b92b5748444993e7ed",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "bab4e6170ac5bc86939efe9b08c4c37176d6795c9f150a8aad3ff7f3ac886ff8",
+      "usage": {
+        "prompt_tokens": 909,
+        "completion_tokens": 303
+      },
+      "plan": {
+        "summary": "A cordless compact blower exhibits intermittent operation, cutting in and out unpredictably without a fixed period. The symptoms are consistent with an intermittent electrical connection, a degraded power switch/trigger contact, or motor brush wear, but the available evidence does not prove a specific point of failure.",
+        "hypotheses": [
+          {
+            "mechanism": "Degraded or oxidized trigger switch contacts",
+            "why": "The tool cuts in and out and sometimes fails to start when engaged, which is commonly caused by high-resistance or intermittent mechanical contact inside the trigger switch assembly.",
+            "evidence_ids": [
+              "E1",
+              "E5",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "With the battery pack removed, connect a digital multimeter in continuity or low-resistance mode across the switch terminals and cycle or gently wiggle the trigger to check for intermittent contact resistance without power."
+          },
+          {
+            "mechanism": "Intermittent battery interface or terminal contact",
+            "why": "Movement or vibration during handling can cause loose terminal tabs or tarnished contacts between the tool housing and battery pack to briefly break the circuit.",
+            "evidence_ids": [
+              "E1",
+              "E5",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "With the battery removed, visually inspect the tool-side receptacle terminals for spread pins, corrosion, debris, or thermal deformation without bending or shorting contacts."
+          },
+          {
+            "mechanism": "Worn motor brushes or intermittent commutator contact",
+            "why": "In brushed DC motor tools, worn carbon brushes or weak brush spring tension can cause intermittent power delivery and sporadic stalling when the rotor stops on an uneven contact point.",
+            "evidence_ids": [
+              "E1",
+              "E5",
+              "E6",
+              "E7"
+            ],
+            "safe_test": "With the battery removed, manually rotate the motor fan/shaft by hand while checking resistance across the unpowered motor leads to identify dead spots or erratic contact."
+          }
+        ],
+        "next_safe_check": "Disconnect and remove the battery pack, then perform a visual inspection of the tool battery receptacle contacts and mechanical trigger action for loose fittings, contamination, or abnormal physical play.",
+        "uncertainty": "The source evidence relies on subjective creator speech and observations without electrical measurements, terminal inspections, or teardown data; motor type (brushed vs. brushless) and internal control circuitry are unverified.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 8.36,
+      "receipt_sha256": "666eabf0c550bd0b97054bd5e57a6268d9a64df39b8e075c75098eb35054474c"
+    }
+  ]
+}
