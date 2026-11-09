@@ -1,0 +1,271 @@
+{
+  "schema": "hs.restoration.text_control_preoutcome.v1",
+  "date": "2026-11-10",
+  "candidate_count": 9,
+  "provenance": "Single-pass predictions authored by GPT-6 in chat, based on title and bounded opening auto-caption observations; never executed inside HS. Not a prospective proof of model performance.",
+  "no_creator_outcomes_opened_for_scoring": true,
+  "created_for_external_comparator_only": true,
+  "predictions": [
+    {
+      "case_id": "a53_touch_failure",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "digitizer_or_display_touch_subsystem",
+          "rationale": "Touch sensing may fail even when LCD image works; water exposure may have damaged digitizer electronics",
+          "discriminating_check": "Check whether hardware buttons, display and external authorized input still work; compare touch failure across lock screen and safe OS modes"
+        },
+        {
+          "rank": 2,
+          "mechanism": "corroded_or_displaced_touch_flex",
+          "rationale": "Water-exposed FPC/board connectors may interrupt touch signaling while display remains powered",
+          "discriminating_check": "Qualified technician: power down before visual connector and moisture inspection; do not reseat under power"
+        },
+        {
+          "rank": 3,
+          "mechanism": "software_touch_stack_failure",
+          "rationale": "Firmware or OS fault could disable touch despite intact glass",
+          "discriminating_check": "Try reversible non-destructive restart or safe mode only after preserving user data, with owner permission"
+        }
+      ],
+      "first_safe_step": "Prioritize owner-data preservation and non-destructive input/access checks; do NOT reset or replace the screen on symptoms alone.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "display_or_backlight_signal_path",
+          "rationale": "A black panel may disguise a running device, especially if external host behavior exists",
+          "discriminating_check": "Confirm actual USB device enumeration on a known-good host and look for noninvasive sound/haptic/backlight responses"
+        },
+        {
+          "rank": 2,
+          "mechanism": "charging_power_path_fault",
+          "rationale": "Battery input, charging connection or regulator failure can prevent startup",
+          "discriminating_check": "Use an approved USB power meter/cable to observe external charge negotiation only; no direct pack injection"
+        },
+        {
+          "rank": 3,
+          "mechanism": "ribbon_latch_or_interconnect_damage",
+          "rationale": "A prior repair reportedly damaged a flex-cable retainer, a possible independent fault",
+          "discriminating_check": "Qualified visual inspection with all external power removed; identify affected flex before assigning it causality"
+        }
+      ],
+      "first_safe_step": "Determine whether electronics run despite a dark display before touching batteries or ordering an entire board.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "multiple_faults_possible",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "brew_unit_home_sensor_or_mechanical_jam",
+          "rationale": "Stuck preparation message can reflect failed initial actuator/home-position sequence",
+          "discriminating_check": "After unplugging and cooling, inspect accessible brew-unit travel and safe service diagnostics, without defeating interlocks"
+        },
+        {
+          "rank": 2,
+          "mechanism": "leaking_seal_or_hose",
+          "rationale": "Reported external coffee and water leakage may be a separate hydraulic defect",
+          "discriminating_check": "With machine unplugged/cooled, visually trace dry residue and detached hoses; do not perform open-chassis powered leak testing"
+        },
+        {
+          "rank": 3,
+          "mechanism": "milk_frothing_flow_or_valve_fault",
+          "rationale": "Milk side may have blocked path, valve issue or damaged milk delivery fittings",
+          "discriminating_check": "Check removable milk parts for safe cleaning/obvious blockage before testing electrically"
+        }
+      ],
+      "first_safe_step": "Treat stuck startup, leaks and milk operation as potentially independent failures; stop and consult appliance service if hot water/mains exposure is required.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "battery_terminal_or_pack_protection_intermit",
+          "rationale": "Contact resistance or pack safety cutoff can cause starts/stops across speeds",
+          "discriminating_check": "Inspect terminals with battery removed; compare with a known-good manufacturer-compatible protected pack if safe"
+        },
+        {
+          "rank": 2,
+          "mechanism": "trigger_switch_or_speed_controller_fault",
+          "rationale": "Intermittent trigger contact/control signal could stop tool despite held trigger",
+          "discriminating_check": "With power removed inspect trigger motion and damage; qualified service may evaluate control signal off-load"
+        },
+        {
+          "rank": 3,
+          "mechanism": "motor_drive_or_protection_fault",
+          "rationale": "Motor driver, stalled rotor, thermal or overcurrent protection may interrupt operation",
+          "discriminating_check": "Record whether cutouts correlate with load, heat, sound or operating time, without bypassing protective shutdown"
+        }
+      ],
+      "first_safe_step": "First distinguish pack/connection faults from tool electronics; never bridge or bypass lithium battery protection.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "restricted_airflow_or_blocked_heat_exchanger",
+          "rationale": "Lint and restricted circulation can lengthen drying regardless of heat-selector state",
+          "discriminating_check": "With appliance unplugged, inspect/clean user-accessible lint filter and airflow path per manual"
+        },
+        {
+          "rank": 2,
+          "mechanism": "heater_or_heat_pump_performance_fault",
+          "rationale": "Thermal generation/heat transfer failure can make cycle dry slowly",
+          "discriminating_check": "Document full-program drying time, condensate/air exhaust behavior and fault codes; qualified technician to measure internal systems"
+        },
+        {
+          "rank": 3,
+          "mechanism": "low_heat_selector_or_control_fault",
+          "rationale": "A low-heat button/control board could be misread, but this is only the creator's suspicion",
+          "discriminating_check": "Use noninvasive control/display checks and manufacturer diagnostics before testing switch terminals"
+        }
+      ],
+      "first_safe_step": "Do not assume the suspected low-heat switch is the failure; verify airflow and cycle performance first.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "canon_eos2000d_no_power",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "battery_compartment_or_sd_door_interlock",
+          "rationale": "Door interlock or microswitch issue can suppress camera startup",
+          "discriminating_check": "Verify both covers and latches engage normally with a manufacturer-correct healthy battery"
+        },
+        {
+          "rank": 2,
+          "mechanism": "battery_or_supply_contact_fault",
+          "rationale": "A charged pack can still fail under load, or supply contacts may be corroded",
+          "discriminating_check": "Compare to a known-good compatible battery; inspect contacts unpowered and without bridging terminals"
+        },
+        {
+          "rank": 3,
+          "mechanism": "board_level_power_or_shutter_mechanism_fault",
+          "rationale": "High shutter count indicates wear exposure, not proof of shutter or power-board failure",
+          "discriminating_check": "Check whether any LED/display response appears before proposing internal board or shutter work"
+        }
+      ],
+      "first_safe_step": "Use a reversible battery-and-interlock triage; do not infer a shutter replacement from high actuation count alone.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "reebok_treadmill_dead",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "external_ac_input_or_main_switch_fault",
+          "rationale": "Dead machine may be due to external cord, protective breaker or inlet problem",
+          "discriminating_check": "Unplug, inspect cord and wall outlet using safe noninvasive external methods"
+        },
+        {
+          "rank": 2,
+          "mechanism": "safety_key_or_console_enable_fault",
+          "rationale": "Safety interlock or console electronics might keep treadmill idle",
+          "discriminating_check": "Check manufacturer safety key engagement and visible console response without opening powered cabinet"
+        },
+        {
+          "rank": 3,
+          "mechanism": "internal_power_or_motor_control_board_fault",
+          "rationale": "Internal low-voltage PSU/controller failure could prevent boot",
+          "discriminating_check": "Refer internal mains/motor measurements to qualified service; obtain model-specific schematic first"
+        }
+      ],
+      "first_safe_step": "Mains-fed motor assembly: no powered internal probing or operation with protective covers removed.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "multiple_faults_possible",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "internal_psu_or_power_distribution_fault",
+          "rationale": "No power may originate in the supply or low-voltage distribution, independently of HDMI damage",
+          "discriminating_check": "Check external cord/socket and noninvasive beep/fan/LED response before any internal test"
+        },
+        {
+          "rank": 2,
+          "mechanism": "board_short_or_regulator_fault",
+          "rationale": "Shorted motherboard rail can hold an otherwise healthy PSU in protection",
+          "discriminating_check": "Qualified console repair service: unpowered fault-isolation using schematics; no PSU live testing by owner"
+        },
+        {
+          "rank": 3,
+          "mechanism": "power_button_or_control_cable_fault",
+          "rationale": "A damaged button/harness can mimic full no-power conditions",
+          "discriminating_check": "Document response to approved wake controls before assigning mainboard failure"
+        }
+      ],
+      "first_safe_step": "Treat the HDMI damage as a second fault that does not by itself explain loss of all power; don't purchase parts without differentiated evidence.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    },
+    {
+      "case_id": "xbox_series_s_dead",
+      "model_source": "GPT-6 ChatGPT-authored in this conversation (manual artifact), NOT an executed HS or Optiplex LLM",
+      "status": "provisional_plan",
+      "confidence": "low",
+      "hypotheses": [
+        {
+          "rank": 1,
+          "mechanism": "external_ac_or_internal_psu_path",
+          "rationale": "AC-mains console may fail to power due to cord, power-supply or protected output issues",
+          "discriminating_check": "Check external power source and cord with power disconnected; escalate internal PSU to qualified service"
+        },
+        {
+          "rank": 2,
+          "mechanism": "front_button_board_or_harness",
+          "rationale": "A nonfunctioning button/cable may prevent normal start despite a functioning supply",
+          "discriminating_check": "Document noninvasive alternate supported activation and visible response; no internal mains access"
+        },
+        {
+          "rank": 3,
+          "mechanism": "mainboard_short_or_power_regulation",
+          "rationale": "A logic board short may suppress power sequencing",
+          "discriminating_check": "Service technician: use model-matched low-voltage diagnostic procedure after safe isolation"
+        }
+      ],
+      "first_safe_step": "Refuse user-service battery contacts or slide-switch diagnoses: Xbox Series S uses an internal AC PSU.",
+      "repair_authorized": false,
+      "outcome_known_at_prediction": false
+    }
+  ]
+}

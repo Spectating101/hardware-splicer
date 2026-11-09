@@ -1,0 +1,190 @@
+{
+  "schema": "hs.restoration.raw_video_diversity.v1",
+  "date": "2026-11-10",
+  "dataset_note": "Source videos exist; title and bounded opening-only observations paraphrased; NOT video outcomes. Human-authored intake from original auto-captions, not automated ASR or model vision.",
+  "protocol": "No repair result or creator outcome supplied to any candidate or evaluator until prediction commit sealed.",
+  "cases": [
+    {
+      "id": "a53_touch_failure",
+      "video_id": "NcYvWA-kGtM",
+      "device": "Samsung Galaxy A53 5G smartphone",
+      "channel": "My Mate VINCE",
+      "category": "touchscreen_and_data",
+      "title_symptom": "Display appears functional but touchscreen does not respond.",
+      "opening_observations": [
+        "Phone is visibly running but touch input does not respond.",
+        "Water exposure was reported as a possibility, not independently confirmed.",
+        "Important photos were reportedly extracted before this repair attempt."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "data_loss"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "tab_s6_lite_dead",
+      "video_id": "CrOf4SmyGvE",
+      "device": "Samsung Galaxy Tab S6 Lite tablet",
+      "channel": "My Mate VINCE",
+      "category": "tablet_power_or_display",
+      "title_symptom": "Tablet apparently completely dead and unresponsive.",
+      "opening_observations": [
+        "Charging does not restore normal display or startup.",
+        "Owner reports no clear screen impact damage.",
+        "Some host/USB behavior may occur when buttons are held, but this has not been electrically verified.",
+        "A previous attempt reportedly damaged an internal ribbon retaining clip."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "data_loss"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "delonghi_eletta_faults",
+      "video_id": "qmR75MbSmXY",
+      "device": "DeLonghi Eletta ECAM 44.660.B2 coffee machine",
+      "channel": "My Mate VINCE",
+      "category": "mixed_thermal_fluid_mechanical",
+      "title_symptom": "Used bean-to-cup coffee machine sold as faulty; exact faults unspecified in title.",
+      "opening_observations": [
+        "Display appears stuck at a preparation message.",
+        "Leaks involving water and coffee are reported.",
+        "Milk preparation/frothing subsystem appears problematic."
+      ],
+      "hazards": [
+        "ac_mains",
+        "hot_water",
+        "steam"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "dewalt_blower_intermittent",
+      "video_id": "utgBfSJsod0",
+      "device": "DeWalt compact cordless blower",
+      "channel": "My Mate VINCE",
+      "category": "power_tool_intermit",
+      "title_symptom": "Blower operates intermittently, cutting in and out.",
+      "opening_observations": [
+        "Motor may run and then stop while trigger remains held fully down.",
+        "Intermittency is reported across different speed settings.",
+        "No validated battery current or temperature measurements available."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "rotating_parts"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "bosch_dryer_slow_heat",
+      "video_id": "RxgjyTRtKZs",
+      "device": "Bosch tumble dryer",
+      "channel": "My Mate VINCE",
+      "category": "thermal_appliance",
+      "title_symptom": "Dryer appears unusually slow to heat or dry.",
+      "opening_observations": [
+        "Creator suspects low-heat switch could be engaged despite off position.",
+        "Low-heat switch status is a hypothesis, not a verified defect.",
+        "No independently measured temperature/airflow provided at intake."
+      ],
+      "hazards": [
+        "ac_mains",
+        "heat",
+        "moving_parts"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "canon_eos2000d_no_power",
+      "video_id": "XXKlAIcint8",
+      "device": "Canon EOS 2000D DSLR camera",
+      "channel": "My Mate VINCE",
+      "category": "optical_camera_power",
+      "title_symptom": "DSLR camera will not power on after very high shutter use.",
+      "opening_observations": [
+        "Camera reportedly shot around 400,000 photographs.",
+        "Presenter mentions checking charged battery voltage and considering compartment microswitches.",
+        "Battery-door and SD-door interlock are possibilities, not measured failures."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "delicate_optical_components"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=XXKlAIcint8",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "reebok_treadmill_dead",
+      "video_id": "1Nvt8ARL5Xc",
+      "device": "Reebok GT40S treadmill",
+      "channel": "My Mate VINCE",
+      "category": "electromechanical_fitness",
+      "title_symptom": "Treadmill reportedly completely dead.",
+      "opening_observations": [
+        "Owner reports treadmill previously worked, then stopped.",
+        "External control/input yields no obvious response.",
+        "No qualified power-supply measurements at intake."
+      ],
+      "hazards": [
+        "ac_mains",
+        "large_motor",
+        "mechanical_motion"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=1Nvt8ARL5Xc",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "ps5_pro_no_power_hdmi",
+      "video_id": "xbp8lIggbxY",
+      "device": "Sony PlayStation 5 Pro",
+      "channel": "TronicsFix",
+      "category": "console_multi_fault",
+      "title_symptom": "Console does not power on; seller also reports HDMI port damage.",
+      "opening_observations": [
+        "Seller reports a power-on failure and damaged HDMI port as separate symptoms.",
+        "Warranty sticker was reportedly already removed before purchase.",
+        "No verified electrical tests before disassembly."
+      ],
+      "hazards": [
+        "ac_mains_internal_psu",
+        "esd"
+      ],
+      "caption_cutoff_s": 120,
+      "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION"
+    },
+    {
+      "id": "xbox_series_s_dead",
+      "video_id": "yXFmSrgb0xI",
+      "device": "Microsoft Xbox Series S",
+      "channel": "Rosales Super Tech",
+      "category": "console_ac_power",
+      "title_symptom": "Console described as having no power.",
+      "opening_observations": [
+        "No device-specific electrical observations disclosed in the title.",
+        "Factory internal AC power architecture independently documented."
+      ],
+      "hazards": [
+        "ac_mains_internal_psu"
+      ],
+      "caption_cutoff_s": 0,
+      "source_url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+      "evidence_stage": "TITLE_ONLY_NO_SUBTITLES"
+    }
+  ]
+}

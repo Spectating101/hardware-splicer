@@ -1,0 +1,249 @@
+{
+  "schema": "hs.restoration.raw_diversity_baseline.v1",
+  "case_count": 9,
+  "unique_fault_domains": 9,
+  "native_repair_intake_accepted": 9,
+  "legacy_triage_accepted_raw_text": 0,
+  "title_only_raw_supported": 0,
+  "assessment": "Measures free-text compatibility of the PR318 rule-based triage entrypoint ONLY. Not a test of every HS agent, not video vision, not a diagnostic accuracy score.",
+  "creator_outcomes_read": false,
+  "post_repair_evidence_used": false,
+  "physical_hardware_touched": false,
+  "candidate_set_sha256": "304b04c479dccea5791edc57baf539d0fad400f0b795b9e39546edb277c51083",
+  "cases": [
+    {
+      "case_id": "a53_touch_failure",
+      "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+      "category": "touchscreen_and_data",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "d75c81e0075bcdc66023e85e134a39f2ed9c73b02a95e3420569e34a32f7eb99",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "ac21fe6cd8748602b4f8a9d650ac70acf344c64de0e29f202a1019a1fd8be472",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+      "category": "tablet_power_or_display",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "ec57ab31dfee885620557991dbd44e8389d5c1ce72e1318852378369575a6299",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "9e8fa08bc63f6e4ea07614c1d5d254aefcaef95cf7a86c30c04d18fcf223ea30",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+      "category": "mixed_thermal_fluid_mechanical",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "c90e4b81cacbda190560a6fb99093fe75a8a75e29fe58f38380956568cf5a0a3",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "25d28dc73fa9d9f070437f7650c967ae5860cfd4e57b31de27f9098c19f0eb30",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+      "category": "power_tool_intermit",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "1f98b1bf2954313decaca2c7201accd6339142234ce52adffdffd7c45918c766",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "7ed1fbf3c5af106dba8f1cdd7da1aab68e995af4ce27e59130d2470d71a91737",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+      "category": "thermal_appliance",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "664986a4e3f827b7db2cf52951ce500bcf257cc4b1514cdaf2b0bfe7c54c17a9",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "cdb80ae55097673da6a28d7755c2b82e38295a03799f2123159a48c68407ce3e",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "canon_eos2000d_no_power",
+      "source_url": "https://www.youtube.com/watch?v=XXKlAIcint8",
+      "category": "optical_camera_power",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "9abb64e7094ffbc8602cdee6c2b6c6b6637e1da30c854bbe4daa031993177973",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "345ff874346183b3d93cc945c503748b234fee5d0de7eae51e7e1dae3d3ddfb5",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "reebok_treadmill_dead",
+      "source_url": "https://www.youtube.com/watch?v=1Nvt8ARL5Xc",
+      "category": "electromechanical_fitness",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "5e29d79ca554f1db318a650af644e5599673bd67fb874d8c13b57b02c9b01c4b",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "d7a6741f553cabcd630000ed92fb028e4e684e35e40e84ea2256e01814e709dc",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "category": "console_multi_fault",
+      "evidence_stage": "TITLE_PLUS_OPENING_AUTOCAPTION",
+      "phases": {
+        "title": {
+          "input_sha256": "7fe71046592046f70407d4178dddaeaf22511a27dd2da33b3332f3c1550cb7dc",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "f4a577e8f2a26c5b65c31bb0139a8e0ab14c3c934a3693c27a420edb33b38239",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "xbox_series_s_dead",
+      "source_url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+      "category": "console_ac_power",
+      "evidence_stage": "TITLE_ONLY_NO_SUBTITLES",
+      "phases": {
+        "title": {
+          "input_sha256": "e471ed98636ed3897575a3d01f72f784caad7afb030e21093ed63c14de93236a",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        },
+        "opening": {
+          "input_sha256": "f359fea750b48902b63f65921b8a4d287614286886ef2292ff449df48fddd660",
+          "native_repair_intake_normalized": true,
+          "raw_legacy_triage": {
+            "accepted_raw_text": false,
+            "failure_type": "ValueError",
+            "error": "repair case lacks actual visible observations"
+          }
+        }
+      }
+    }
+  ]
+}
