@@ -51,7 +51,7 @@ def generate():
         "connection":"left central BLE HID to Android/Linux; right peripheral BLE to left",
         "no_battery_required_for_first_usb_powered_bench":True,
         "proof":{"KiCad_netlist_rows":True,"generated_ZMK_keymap":True,
-                 "ZMK_compiled":False,"two_physical_mcu_booted":False,
+                 "ZMK_compiled_by_config_generator":False,"two_physical_mcu_booted":False,
                  "all_50_real_switches_scanned":False,"Bluetooth_host_paired":False,
                  "battery_charger_approved":False},
         "wiring_requires_external_testpad_harness_and_ESD_protection":True,

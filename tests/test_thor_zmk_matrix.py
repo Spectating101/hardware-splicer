@@ -103,3 +103,21 @@ def test_ZMK_manifest_and_build_inputs_are_upstream_but_no_unearned_image():
     assert 'DSHIELD=' in workflow
     assert 'test -s' in workflow
     assert 'zmk.uf2' in workflow
+
+
+def test_real_upstream_compiler_receipt_has_two_nordic_uf2_images_and_no_physical_claim():
+    receipt=json.loads((Z/'firmware_build_receipt.json').read_text())
+    assert receipt['schema']=='hs.thor.zmk_verified_upstream_build.v1'
+    assert receipt['repository']=='Spectating101/hardware-splicer'
+    assert receipt['workflow_run']==42654086871
+    assert receipt['git_commit']=='8948bbc'
+    assert receipt['target_board']=='seeeduino_xiao_ble'
+    assert receipt['actual_independent_zephyr_compilations']==2
+    assert [v['shield'] for v in receipt['files']]==['thor_split_left','thor_split_right']
+    assert [v['role'] for v in receipt['files']]==['central','peripheral']
+    assert [v['size_bytes'] for v in receipt['files']]==[423936,348160]
+    assert all(len(v['sha256'])==64 and 'Nordic NRF52840' in v['file_signature'] for v in receipt['files'])
+    for forbidden in ('physical_mcu_attached','firmware_flashed','physical_50_switch_matrix_tested',
+                      'host_BLE_HID_paired','battery_or_charger_validated','Thor_original_parts_modified',
+                      'PCB_fabrication_approved'):
+        assert receipt[forbidden] is False, forbidden

@@ -31,7 +31,7 @@
   "proof": {
     "KiCad_netlist_rows": true,
     "generated_ZMK_keymap": true,
-    "ZMK_compiled": false,
+    "ZMK_compiled_by_config_generator": false,
     "two_physical_mcu_booted": false,
     "all_50_real_switches_scanned": false,
     "Bluetooth_host_paired": false,
