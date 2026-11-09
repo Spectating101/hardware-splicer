@@ -1,0 +1,27 @@
+{
+  "schema": "hs.restoration.video_blind_intake.v1",
+  "case_id": "xbox_series_s_2021_no_power",
+  "device": "Microsoft Xbox Series S console",
+  "repair_intake": {
+    "symptoms": ["Creator describes a purchased Xbox Series S as having no power"],
+    "when_it_fails": "At power-on; no electrical readings or further symptoms available",
+    "device_hint": "Microsoft Xbox Series S"
+  },
+  "initial_codes": ["no_power"],
+  "device_power": {
+    "architecture": "ac_mains_internal_psu",
+    "independent_device_reference": "https://learn.microsoft.com/en-us/xbox/service-guides/series-s-console/series-s-device-id-and-disassembly",
+    "scope": "Factory device architecture; no information about the particular fault"
+  },
+  "source_context": {
+    "url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+    "creator": "Rosales Super Tech",
+    "date": "2021-10-28",
+    "retrieval_limit": "Public YouTube title/description only; no outcome, repair procedures, video frames, or measurement logs read"
+  },
+  "challenge": {
+    "stage": "initial_only",
+    "status": "outcome_not_inspected",
+    "outcome_label_present": false
+  }
+}

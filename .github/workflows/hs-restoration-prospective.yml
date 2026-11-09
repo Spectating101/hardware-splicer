@@ -1,0 +1,49 @@
+name: HS pre-outcome restoration suitability
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-restoration-prospective.yml'
+      - 'examples/restoration_video_bench/prospective/**'
+      - 'tests/test_restoration_prospective.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  seal-pre-outcome-diagnosis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and pytest
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Produce prediction with NO creator outcome
+        env:
+          PYTHONPATH: src
+        run: |
+          python examples/restoration_video_bench/prospective/predict.py \
+            --case examples/restoration_video_bench/prospective/cases/xbox_series_s_2021_no_power.json \
+            --out examples/restoration_video_bench/prospective/evidence/xbox_series_s_sealed_prediction.json
+          python - <<'PY'
+          import json
+          p=json.load(open('examples/restoration_video_bench/prospective/evidence/xbox_series_s_sealed_prediction.json'))
+          assert p['decision']=='ABSTAIN_DEVICE_INCOMPATIBLE'
+          assert not p['qualified_hypothesis_ids']
+          assert p['outcome_opened_by_predictor'] is False
+          assert p['HS_repair_executed'] is False
+          assert p['score_available'] is False
+          print('PRE_OUTCOME_RECEIPT_SHA256='+p['receipt_sha256'])
+          PY
+          git diff --exit-code -- examples/restoration_video_bench/prospective/evidence/xbox_series_s_sealed_prediction.json
+      - name: Run leak, abstention and integrity tests
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_restoration_prospective.py
+      - name: Upload sealed prediction ONLY; no hidden labels
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-xbox-series-s-pre-outcome-diagnosis
+          retention-days: 90
+          path: examples/restoration_video_bench/prospective/evidence/xbox_series_s_sealed_prediction.json
