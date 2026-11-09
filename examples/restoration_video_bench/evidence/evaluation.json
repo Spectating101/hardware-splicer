@@ -1,0 +1,155 @@
+{
+  "schema": "hs.restoration.video_replay_evaluation.v1",
+  "status": "RETROSPECTIVE_HUMAN_AUTHORED_TRIAGE_REPLAY_NO_PHYSICAL_REPAIR",
+  "case_count": 4,
+  "metrics_counts": {
+    "initial_hit_at_1": 3,
+    "initial_hit_at_3": 4,
+    "after_observations_hit_at_1": 4,
+    "after_observations_hit_at_3": 4
+  },
+  "metrics_denominator": 4,
+  "case_results": [
+    {
+      "case_id": "dmg_2016_battery_contact_corrosion",
+      "video_url": "https://www.youtube.com/watch?v=mMjNzPR7nVE",
+      "creator_reported_root_cause": "corroded_battery_contact",
+      "source_outcome_quality": "low-detail creator-description outcome (weak ground truth)",
+      "initial_top1": "corroded_battery_contact",
+      "initial_top3": [
+        "corroded_battery_contact",
+        "open_power_trace",
+        "power_switch_fault"
+      ],
+      "initial_hit_at_1": true,
+      "initial_hit_at_3": true,
+      "after_observations_top1": "corroded_battery_contact",
+      "after_observations_top3": [
+        "corroded_battery_contact",
+        "open_power_trace",
+        "power_switch_fault"
+      ],
+      "after_observations_hit_at_1": true,
+      "after_observations_hit_at_3": true,
+      "creator_reported_repair_actions": [
+        "Video is described as a no-power battery-contact corrosion fix; detailed electrical procedure not documented in retrieved description"
+      ],
+      "creator_reported_outcome": "Repair claimed by title/description; specific measurements and causal proof not accessible",
+      "HS_did_not_execute_repair": true,
+      "human_electrical_confirmation_required": true,
+      "creator_outcome_SHA256": "6c8f554ecfe5ced4a78707d1b84ca9fd466c80f1e05b8f104c3fbf5ad2fdf0e5"
+    },
+    {
+      "case_id": "gbc_2020_broken_power_path",
+      "video_url": "https://www.youtube.com/watch?v=2BmGMi0IEx4",
+      "creator_reported_root_cause": "open_power_trace",
+      "source_outcome_quality": "creator-reported outcome, not independent lab verification",
+      "initial_top1": "corroded_battery_contact",
+      "initial_top3": [
+        "corroded_battery_contact",
+        "open_power_trace",
+        "display_polarizer_damage"
+      ],
+      "initial_hit_at_1": false,
+      "initial_hit_at_3": true,
+      "after_observations_top1": "open_power_trace",
+      "after_observations_top3": [
+        "open_power_trace",
+        "display_polarizer_damage",
+        "battery_management_fault"
+      ],
+      "after_observations_hit_at_1": true,
+      "after_observations_hit_at_3": true,
+      "creator_reported_repair_actions": [
+        "Creator bridged a broken battery-terminal connection with wire",
+        "Creator later replaced a damaged LCD polarizer and refurbished exterior"
+      ],
+      "creator_reported_outcome": "Power returned after connection bridge; visual display subsequently restored",
+      "HS_did_not_execute_repair": true,
+      "human_electrical_confirmation_required": true,
+      "creator_outcome_SHA256": "b1ae19a656481a45419d46eade028e0dad657c7248f82dca01efda03119be0f2"
+    },
+    {
+      "case_id": "ps2_2021_disc_no_read",
+      "video_url": "https://www.youtube.com/watch?v=8hGGVW_mGEI",
+      "creator_reported_root_cause": "optical_pickup_failure",
+      "source_outcome_quality": "creator-reported outcome; exact failing electronic component not instrumented",
+      "initial_top1": "optical_pickup_failure",
+      "initial_top3": [
+        "optical_pickup_failure",
+        "dirty_disc_or_lens",
+        "spindle_mechanism_fault"
+      ],
+      "initial_hit_at_1": true,
+      "initial_hit_at_3": true,
+      "after_observations_top1": "optical_pickup_failure",
+      "after_observations_top3": [
+        "optical_pickup_failure",
+        "dirty_disc_or_lens",
+        "spindle_mechanism_fault"
+      ],
+      "after_observations_hit_at_1": true,
+      "after_observations_hit_at_3": true,
+      "creator_reported_repair_actions": [
+        "Creator replaced the disc drive/laser assembly",
+        "Creator adjusted optical mechanism screws afterward"
+      ],
+      "creator_reported_outcome": "Creator reports restoring disc reading after drive/laser replacement and adjustment",
+      "HS_did_not_execute_repair": true,
+      "human_electrical_confirmation_required": true,
+      "creator_outcome_SHA256": "3062aabe0bfa79310ceca4398e2e5b6d66e288503de54824668c0f488e50da5e"
+    },
+    {
+      "case_id": "switch_2024_dead_usb_c",
+      "video_url": "https://www.youtube.com/watch?v=0HZSA8nZd_k",
+      "creator_reported_root_cause": "damaged_usb_c_port",
+      "source_outcome_quality": "creator-reported outcome; no independent solder-joint verification",
+      "initial_top1": "damaged_usb_c_port",
+      "initial_top3": [
+        "damaged_usb_c_port",
+        "charging_ic_fault",
+        "battery_management_fault"
+      ],
+      "initial_hit_at_1": true,
+      "initial_hit_at_3": true,
+      "after_observations_top1": "damaged_usb_c_port",
+      "after_observations_top3": [
+        "damaged_usb_c_port",
+        "battery_management_fault",
+        "corroded_battery_contact"
+      ],
+      "after_observations_hit_at_1": true,
+      "after_observations_hit_at_3": true,
+      "creator_reported_repair_actions": [
+        "Creator replaced visibly damaged USB-C port",
+        "Creator separately replaced scratched digitizer"
+      ],
+      "creator_reported_outcome": "Creator reports restoration of charging/power after USB-C replacement",
+      "HS_did_not_execute_repair": true,
+      "human_electrical_confirmation_required": true,
+      "creator_outcome_SHA256": "6b86378cfc4c282d82c2bbb6ae96661ec3953949fde6ac170a0b6403aeba2f4e"
+    }
+  ],
+  "methodology": {
+    "prediction_was_written_before_gold_opened_in_this_runner": true,
+    "gold_labels_separated_from_diagnostic_function": true,
+    "human_authored_rule_taxonomy_postdated_public_case_outcomes": true,
+    "NOT_scientifically_independent_blind_test": true,
+    "NOT_a_proof_of_generalization": true,
+    "NOT_actual_video_frame_or_transcript_processing": true,
+    "NOT_an_LLM_autonomous_diagnosis": true,
+    "native_HS_repair_intake_was_used": true,
+    "diagnostic_checks_are_proposed_not_measured": true,
+    "root_cause_is_creator_report_not_independent_test": true,
+    "actual_restoration_repaired_by_HS": false,
+    "any_tools_or_parts_purchased": false
+  },
+  "open_improvements": [
+    "Real YouTube video timestamp/visual evidence extraction with provenance and consent",
+    "Prospective unseen-device cases with no posthoc rule tuning",
+    "Real images, boardview/netlist and independent multimeter observations",
+    "Native tool dispatcher must select meter/CAD/KiCad/parts only when inputs support them",
+    "Repair-to-verification feedback from an actual independent technician"
+  ],
+  "predictions_file_sha256": "dd1c24faaa42fef39588ef74fc495e1bd73edeee5696cc24b0fe4d93cb486965"
+}
