@@ -1,0 +1,117 @@
+{
+  "schema": "hs.restoration.graph_ab_human_postreview.v1",
+  "reviewer": "ChatGPT human-style qualitative assessment after frozen predictions; same experimenter previously saw creator outcomes; NOT an independent blinded reviewer",
+  "reviewed_prediction_commit": "2502fa02d20d67e6bfec376834ca7933c5e90944",
+  "frozen_prediction_sha256": "68124e6a091855d24ad363ac465ac4cc3976ca3c84e0f596ca0398a03c2d12d9",
+  "creator_outcomes_source_commit": "160befae4c476dfde8b93b72c10bd0b0f6b62172",
+  "creator_outcomes_sha256": "9bcb6910b251718afe0e5fb38c9043da426d934440134103d356ee3e1420db38",
+  "creator_outcome_caveat": "Creator-narrated repairs from English auto-captions are not independent lab truth. Fault-family grades are interpretive, not exact-string matching.",
+  "grading_contract": {
+    "exact_family": "Explicitly identified distinctive failure mechanism family, not necessarily individual part.",
+    "partial_domain": "Related subsystem or disjunctive possible connector/board mechanism, not a distinct actionable fault family.",
+    "miss": "No model hypothesis identifies or meaningfully localizes this failure mechanism.",
+    "separate_faults": "One disjunctive hypothesis mentioning either screen or ribbon does not count as identifying two independent faults."
+  },
+  "cases": [
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "faults": [
+        {
+          "fault": "Restricted exhaust airflow from kinked external dryer vent hose",
+          "plain": {"grade":"exact_family","hypothesis_rank":1,"rationale":"Ranks obstructed condenser/vent path first; did not identify exact kink."},
+          "hs_graph": {"grade":"exact_family","hypothesis_rank":1,"rationale":"Ranks airflow restriction first; did not identify exact external hose kink."}
+        }
+      ],
+      "test_notes": {
+        "plain":"Unplugged lint/condenser inspection; reasonable low-risk first check, but overlooks explicitly inspecting the external vent hose.",
+        "hs_graph":"Same low-risk inspection with stronger interpretation of clean filters; still does not prioritize external vent hose."
+      },
+      "hs_added_unverified_threshold":false
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "faults": [
+        {
+          "fault": "Dust contamination of brushed motor/commutation contact",
+          "plain":{"grade":"partial_domain","hypothesis_rank":3,"rationale":"Mentions worn motor brushes, not dust or contamination causing intermittent contact."},
+          "hs_graph":{"grade":"partial_domain","hypothesis_rank":3,"rationale":"Mentions brushes/commutator wear but not heavy contamination and cleaning."}
+        }
+      ],
+      "test_notes":{
+        "plain":"Battery-terminal visual inspection does not discriminate motor-dust cause.",
+        "hs_graph":"More elaborate battery movement vs trigger behavior under power, but still does not discriminate a contaminated brushed motor; rotating-part safety deserves explicit care."
+      },
+      "hs_added_unverified_threshold":false
+    },
+    {
+      "case_id":"tab_s6_lite_dead",
+      "faults":[
+        {
+          "fault":"Failed display/screen assembly causing apparent dead tablet",
+          "plain":{"grade":"exact_family","hypothesis_rank":1,"rationale":"Explicitly says defective display assembly as the leading explanation."},
+          "hs_graph":{"grade":"exact_family","hypothesis_rank":1,"rationale":"Explicitly says faulty display panel in leading explanation."}
+        },
+        {
+          "fault":"Kinked intermittent display ribbon during reassembly",
+          "plain":{"grade":"partial_domain","hypothesis_rank":1,"rationale":"Combines faulty panel and connector as one alternative; does not propose a second independent intermittently kinked cable."},
+          "hs_graph":{"grade":"partial_domain","hypothesis_rank":1,"rationale":"Combines panel and FPC discontinuity as one alternative; not independent kinked second fault."}
+        }
+      ],
+      "test_notes":{
+        "plain":"External USB meter safe as a broad check, but output does not specify the observation-to-fault mapping.",
+        "hs_graph":"Adds a falsifiable dynamic vs flat power-draw comparison; however >0.4A and <0.05A are ungrounded device-specific cutoffs absent from source data and documentation."
+      },
+      "hs_added_unverified_threshold":true
+    },
+    {
+      "case_id":"ps5_pro_no_power_hdmi",
+      "faults":[
+        {
+          "fault":"Shorted motherboard power-stage MOSFET",
+          "plain":{"grade":"partial_domain","hypothesis_rank":2,"rationale":"Second mechanism mentions a generic mainboard standby rail failure, not the specific power-stage short."},
+          "hs_graph":{"grade":"miss","hypothesis_rank":null,"rationale":"HDMI short, internal PSU, and front switch are the three hypotheses; none localizes a motherboard power-stage fault."}
+        }
+      ],
+      "test_notes":{
+        "plain":"External visual inspection of HDMI damage is safe but poorly discriminative for the console's actual no-power fault.",
+        "hs_graph":"Adds external AC wattmeter but continues to assume HDMI damage can explain no power; its language implies a power reading confirms HDMI deformation, which is not established by available evidence."
+      },
+      "hs_added_unverified_threshold":false
+    },
+    {
+      "case_id":"delonghi_eletta_faults",
+      "faults":[
+        {
+          "fault":"Failed heating thermal cutout / one-shot thermal fuse",
+          "plain":{"grade":"exact_family","hypothesis_rank":1,"rationale":"Explicitly names thermal fuse among the first-ranked alternatives."},
+          "hs_graph":{"grade":"partial_domain","hypothesis_rank":3,"rationale":"Third-ranked thermoblock/thermal sensing fault is a broad heating domain, not an identified thermal cutout or fuse."}
+        },
+        {
+          "fault":"Pressure-water leakage through worn O-rings/upper piston",
+          "plain":{"grade":"exact_family","hypothesis_rank":3,"rationale":"Explicitly names deteriorating O-rings and infusion group seals."},
+          "hs_graph":{"grade":"exact_family","hypothesis_rank":2,"rationale":"Explicitly names brew group seals and leakage."}
+        }
+      ],
+      "test_notes":{
+        "plain":"Cold, unplugged visual inspection of leaked fluid and seals is relevant to one of two independent failures, but not the thermal cutout.",
+        "hs_graph":"Cold, unplugged inspection of coupling and O-rings is relevant to leaks, but does not test the failed cutout."
+      },
+      "hs_added_unverified_threshold":false
+    },
+    {
+      "case_id":"a53_touch_failure",
+      "faults":[
+        {
+          "fault":"Damaged/open microscopic touchscreen connector or flex contact continuity",
+          "plain":{"grade":"partial_domain","hypothesis_rank":2,"rationale":"A connector corrosion/interconnect fault is related but does not identify the microscopic open-conductor repair."},
+          "hs_graph":{"grade":"partial_domain","hypothesis_rank":2,"rationale":"A connector/flex fault is related but does not localize the exact damaged contact path."}
+        }
+      ],
+      "test_notes":{
+        "plain":"Safe OTG mouse check discriminates general OS function from touch-path malfunction.",
+        "hs_graph":"Same safe OTG mouse strategy, with more explicit interpretation, but not more precise root cause."
+      },
+      "hs_added_unverified_threshold":false
+    }
+  ]
+}
