@@ -1,0 +1,45 @@
+{
+  "schema": "hs.restoration.prospective_prediction.v1",
+  "case_id": "xbox_series_s_2021_no_power",
+  "source_url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+  "case_sha256": "7caa632dfce99734c6edb9ed72f4f1d24a693e3df66decad9368c28f64553221",
+  "triage_source_sha256": "7b4d5638671d799f29696f6affabb248763c2873311fd030b0b72a90c48663a8",
+  "power_architecture": "ac_mains_internal_psu",
+  "power_architecture_source": "https://learn.microsoft.com/en-us/xbox/service-guides/series-s-console/series-s-device-id-and-disassembly",
+  "stage": "INITIAL_SYMPTOMS_NO_OUTCOME",
+  "baseline_hypothesis_ids": [
+    "corroded_battery_contact",
+    "open_power_trace",
+    "power_switch_fault"
+  ],
+  "baseline_first_choice": "corroded_battery_contact",
+  "rejected_as_device_incompatible": [
+    {
+      "hypothesis_id": "corroded_battery_contact",
+      "exclusion_reason": "No user-replaceable cell contacts on AC-mains console"
+    },
+    {
+      "hypothesis_id": "open_power_trace",
+      "exclusion_reason": "Baseline hypothesis describes a battery-to-board path"
+    },
+    {
+      "hypothesis_id": "power_switch_fault",
+      "exclusion_reason": "Baseline test assumes a slide switch, not a button board"
+    }
+  ],
+  "qualified_hypothesis_ids": [],
+  "decision": "ABSTAIN_DEVICE_INCOMPATIBLE",
+  "next_safe_checks": [
+    "Disconnect AC and visually inspect external power cord/plug only",
+    "Document exact externally visible power-on response and history",
+    "Use the manufacturer's service guide and qualified technicians for internal faults",
+    "Do not probe or rework internal mains PSU without specialist safety procedures"
+  ],
+  "repair_authorized": false,
+  "HS_repair_executed": false,
+  "outcome_opened_by_predictor": false,
+  "independent_measurements_available": false,
+  "score_available": false,
+  "limitations": "Source-visible procedural split only; not an LLM video diagnosis",
+  "receipt_sha256": "cee06d9e9cdd45370fe1a2ff64e19d749fd0856b57de93ea694026c01ec85b8b"
+}
