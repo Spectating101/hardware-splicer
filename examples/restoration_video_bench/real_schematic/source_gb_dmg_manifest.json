@@ -1,0 +1,15 @@
+{
+  "commit": "032eb9c2578125b157ab88048113b2d52663b819",
+  "derived_snapshot_sha256": "06bba923b03443c60bc37a22d0eacac1e4286d1f1caf2690944ae52e0a33bdf0",
+  "files": {
+    "DC-CONV-DMG-AB/DC-CONV-DMG-AB.kicad_sch": "5a24cea5f41b9fa9261e53b2df5290cc10ae679c7da08594de0db6f5af121b92",
+    "DMG-CPU-06/DMG-CPU-06.kicad_sch": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+    "DMG-CPU-06/audio.kicad_sch": "e5abb608be830aa541c6fdcaf772814a8510e724a9992363fad275e1d69d7246",
+    "DMG-CPU-06/link_port.kicad_sch": "e23ba5152e0e859b3b6a64355ebdefbbe0d7c8e5168b8cd1d86023d0fd710271",
+    "DMG-CPU-06/power.kicad_sch": "830c06ae166b81c1ae2a01f2c97a321ffd06471b2730bb76c46a1e69e6bb94b3"
+  },
+  "kicad_cli_version": "9.0.2",
+  "license": "CC-BY-4.0, credit Gekkio; original source must remain attributed",
+  "model_scope": "DMG-CPU-06 mainboard only; DC-CONV-DMG-A/B board is a separate alternative reference and target subtype is unknown",
+  "repository": "https://github.com/Gekkio/gb-schematics"
+}
