@@ -176,6 +176,40 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
                 "unresolved":reference["unresolved_source_ids"],
             },sort_keys=True)
         )
+    if context.get("numeric_source_tool"):
+        tool = context["numeric_source_tool"]
+        if tool.get("case_id")!=context["case_id"] or tool.get("source_authority_ceiling")!="declared":
+            raise ValueError("numeric source tool must match this case with declared-only authority")
+        if tool.get("target_board_physically_verified") is not False:
+            raise ValueError("textual measurements cannot certify the physical PCB revision")
+        messages[0]["content"] += (
+            "\n\nHS SOURCE-CONDITION EVIDENCE MODE. The following numeric records "
+            "were checked against actual source bytes and registered in the "
+            "native HS engineering source graph, with authority DECLARED only. "
+            "A creator saying a meter read 12 V is NOT a verified instrument log. "
+            "A repair article specifying a healthy value is NOT a measurement "
+            "of this particular device and is NOT automatically a manufacturer "
+            "specification. Distinguish different connection/load conditions "
+            "before inferring contradictory readings. Do not invent test "
+            "results, and do not use numeric thresholds as medical/electrical "
+            "certainties without authenticated device reference data. "
+            "Do not recommend internal mains power-supply inspection, live "
+            "electrical probing, connector repair or battery operations. "
+            "Use original E numbers when supporting hypotheses. "
+            "SOURCE_NUMERIC_CLAIMS_JSON=" + json.dumps({
+                "case_id":tool["case_id"],
+                "source_manifest_sha256":tool["source_manifest_sha256"],
+                "source_graph_sha256":tool["HS_real_source_graph_sha256"],
+                "claims":[{
+                    "id":c["claim_id"],"kind":c["claim_type"],"value":c["value"],
+                    "upper_value":c["upper_value"],"unit":c["unit"],
+                    "quantity":c["quantity"],"condition_id":c["condition_id"],
+                    "condition_description":c["condition_description"],
+                    "source_sha256":c["source_sha256"],
+                    "source_locator":c["source_locator"],"authority":"declared",
+                } for c in tool["claims"]]
+            },sort_keys=True)
+        )
     if context.get("board_action_feedback"):
         feedback=context["board_action_feedback"]
         if not feedback.get("parent_receipt_sha256"):
@@ -289,7 +323,9 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
     if any(UNSAFE.search(s) for s in combined):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
-    ledger = context.get("hs_engineering_ledger") or context.get("engineering_reference")
+    ledger = (context.get("hs_engineering_ledger")
+              or context.get("engineering_reference")
+              or context.get("numeric_source_tool"))
     if ledger:
         from .restoration_numeric_truth_gate import reject_unsourced_thresholds
         reject_unsourced_thresholds(value,ledger)
@@ -330,6 +366,11 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
         result["real_schematic_tool_result_sha256"] = sha(context["engineering_reference"])
         result["real_schematic_source_graph_sha256"] = context["engineering_reference"]["native_HS_engineering_source_graph_sha256"]
         result["target_board_physically_verified"] = False
+    if context.get("numeric_source_tool"):
+        result["numeric_source_tool_sha256"] = sha(context["numeric_source_tool"])
+        result["numeric_source_graph_sha256"] = context["numeric_source_tool"]["HS_real_source_graph_sha256"]
+        result["reported_numbers_not_HS_measurements"] = True
+        result["physical_board_verified"] = False
     if context.get("board_action_feedback"):
         result["board_action_parent_receipt_sha256"] = context["board_action_feedback"]["parent_receipt_sha256"]
         result["board_action_correction"] = True

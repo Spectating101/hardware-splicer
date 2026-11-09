@@ -1,0 +1,98 @@
+{
+  "schema": "hs.restoration.source_numeric_claims.v1",
+  "sources": [
+    {
+      "id": "ps5pro_early_captions",
+      "case_id": "ps5_pro_no_power_hdmi",
+      "source_type": "video_caption",
+      "url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "artifact_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+      "raw_artifact_provenance": "YouTube auto-generated captions; speaker narrates meter readings, no instrument log independently available",
+      "claims": [
+        {
+          "id": "M1",
+          "claim_type": "creator_reported_reading",
+          "quantity": "voltage",
+          "value": 0,
+          "unit": "V",
+          "anchor": "exactly zero volts",
+          "window_start_s": 120,
+          "window_end_s": 151,
+          "condition_id": "psu_connected_before_board_extraction",
+          "condition_description": "Console assembled before power-supply removal; physical probe nodes and fixture not independently verified",
+          "device_board_verified": false
+        },
+        {
+          "id": "M2",
+          "claim_type": "creator_reported_reading",
+          "quantity": "voltage",
+          "value": 12,
+          "unit": "V",
+          "anchor": "we have 12 volts",
+          "window_start_s": 300,
+          "window_end_s": 311,
+          "condition_id": "psu_tested_without_motherboard",
+          "condition_description": "Creator reports 12 V with motherboard disconnected; no signed instrument log",
+          "device_board_verified": false
+        },
+        {
+          "id": "M3",
+          "claim_type": "creator_reported_reading",
+          "quantity": "resistance",
+          "value": 2,
+          "unit": "ohm",
+          "anchor": "That is 2 ohms",
+          "window_start_s": 330,
+          "window_end_s": 340,
+          "condition_id": "motherboard_dc_input_contacts",
+          "condition_description": "Creator reports resistance at mainboard DC input pins; meter and target probe locations not independently verified",
+          "device_board_verified": false
+        }
+      ]
+    },
+    {
+      "id": "dmg_published_expectations",
+      "case_id": "dmg_reported_battery_only_failure",
+      "source_type": "repair_article",
+      "url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+      "artifact_sha256": "0f5c36614ddd008486193b215de7412532936671a11878f1aa0d09307ea27a83",
+      "raw_artifact_provenance": "Public repair guide as published; expected values, NOT raw measurements from its particular console",
+      "claims": [
+        {
+          "id": "R1",
+          "claim_type": "published_reference_expectation",
+          "quantity": "voltage",
+          "value": 6,
+          "upper_value": 6.4,
+          "unit": "V",
+          "anchor": "Expect 6.0 to 6.4 V open circuit",
+          "condition_id": "four_fresh_aa_open_circuit",
+          "condition_description": "Author-recommended expected open-circuit pack range, not measured evidence from target hardware",
+          "device_board_verified": false
+        },
+        {
+          "id": "R2",
+          "claim_type": "published_reference_expectation",
+          "quantity": "voltage",
+          "value": 5.4,
+          "unit": "V",
+          "anchor": "at least 5.4 V",
+          "condition_id": "power_board_input_under_load",
+          "condition_description": "Author-recommended minimum load voltage, not a verified manufacturer spec or target measurement",
+          "device_board_verified": false
+        },
+        {
+          "id": "R3",
+          "claim_type": "published_reference_expectation",
+          "quantity": "voltage",
+          "value": 4.5,
+          "unit": "V",
+          "anchor": "Below 4.5 V",
+          "condition_id": "power_board_input_under_load",
+          "condition_description": "Author's failure threshold claim, not an observed unit result or manufacturer-verified specification",
+          "device_board_verified": false
+        }
+      ]
+    }
+  ]
+}

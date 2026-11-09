@@ -1,0 +1,65 @@
+{
+  "schema": "hs.restoration.numeric_source_no_gold_receipt_review.v1",
+  "real_hs_graph_provenance_validated": true,
+  "original_source_claim_count": 6,
+  "published_expectations": 3,
+  "creator_reported_readings": 3,
+  "independent_instrument_measurements": 0,
+  "model_calls": 4,
+  "valid_by_arm": {
+    "plain": 1,
+    "hs_numeric_source": 2
+  },
+  "elapsed_by_arm_seconds": {
+    "plain": 21.4,
+    "hs_numeric_source": 16.54
+  },
+  "cannot_score_repair_accuracy_or_true_safety_from_these_receipts": true,
+  "creator_outcomes_not_accessed": true,
+  "cases": [
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "arms": {
+        "plain": {
+          "status": "rejected_model_output_or_unavailable",
+          "seconds": 11.65,
+          "error_type": "ValueError",
+          "error": "unsafe or irreversible proposed action; fail closed",
+          "first_hypothesis": null,
+          "next_safe_check": null
+        },
+        "hs_numeric_source": {
+          "status": "proposed_unverified_differential",
+          "seconds": 7.57,
+          "error_type": null,
+          "error": null,
+          "first_hypothesis": "Unverified low-impedance or short circuit condition on the 12 V mainboard power rail or downstream power stage",
+          "next_safe_check": "Perform a completely unpowered visual inspection of the external HDMI port and exterior connectors under magnification for physical bridging, foreign debris, or bent pins while disconnected from mains power."
+        }
+      },
+      "source_sha256": "648fd275bed7e7d0cbad506cd06cde1195efadbebbee61343a1d6777cdd4f778"
+    },
+    {
+      "case_id": "dmg_reported_battery_only_failure",
+      "arms": {
+        "plain": {
+          "status": "proposed_unverified_differential",
+          "seconds": 9.75,
+          "error_type": null,
+          "error": null,
+          "first_hypothesis": "DC jack internal mechanical switch contact oxidation or mechanical failure",
+          "next_safe_check": "Perform an unpowered visual inspection of the battery terminals and DC jack, followed by an unpowered continuity test across the DC jack internal switch with no external plug inserted."
+        },
+        "hs_numeric_source": {
+          "status": "proposed_unverified_differential",
+          "seconds": 8.97,
+          "error_type": null,
+          "error": null,
+          "first_hypothesis": "Open circuit or high contact resistance at the battery terminal contacts (e.g. surface contamination, corrosion, or mechanical deformation) preventing battery DC voltage from reaching the internal power distribution circuit.",
+          "next_safe_check": "Perform an unpowered visual inspection of the external battery compartment contacts for signs of alkaline corrosion residue, deformation, or surface contamination."
+        }
+      },
+      "source_sha256": "bf075d0dd60c8592cd64f59e42e0a5f4c84d41e46544d05af23141a20b4b0325"
+    }
+  ]
+}
