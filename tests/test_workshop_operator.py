@@ -260,11 +260,29 @@ def test_real_pilot_receipts_stay_bound_to_exact_source_revision():
     assert rc["trace"][-1]["state"]=="skipped"
     src=ROOT/op.SPI_ROOT
     item_hashes={p.relative_to(src).as_posix():op._hash(p)
-                 for p in sorted(src.rglob("*")) if p.is_file() and not p.is_symlink()
-                 and "out" not in p.relative_to(src).parts and "__pycache__" not in p.parts}
+                 for p in op._registered_source_files(ROOT,src)}
     assert hashlib.sha256(json.dumps(item_hashes,sort_keys=True).encode()).hexdigest()==spi["source_sha256"]
     assert op._hash(ROOT/op.REGISTERED[op.RC_ID]["source"])==rc["source_sha256"]
     for row in (spi,rc):
         assert not row["fabrication_authorized"]
         assert not row["power_on_authorized"]
         assert not row["real_repair_confirmed"]
+
+
+def test_untracked_generated_output_cannot_pollute_source_hash_or_stage(tmp_path):
+    source=ROOT/op.SPI_ROOT
+    baseline={p.relative_to(source).as_posix():op._hash(p)
+              for p in op._registered_source_files(ROOT,source)}
+    # KiCad and broad pytest runs may leave ephemeral files in the source dir.
+    extra=source/"untracked_ci_test_probe.txt"
+    try:
+        extra.write_text("generated result that is not a source input")
+        selected=op._registered_source_files(ROOT,source)
+        after={p.relative_to(source).as_posix():op._hash(p) for p in selected}
+        assert after==baseline
+        assert extra not in selected
+        dry=op.run_workshop_operator(op.SPI_ID,out_dir=tmp_path/"preview")
+        assert dry["source_sha256"]==__import__("hashlib").sha256(
+            json.dumps(baseline,sort_keys=True).encode()).hexdigest()
+    finally:
+        extra.unlink(missing_ok=True)

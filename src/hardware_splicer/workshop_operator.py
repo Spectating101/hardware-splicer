@@ -67,6 +67,42 @@ def _source_path(root: Path, name: str) -> Path:
     return p
 
 
+def _registered_source_files(root: Path, source: Path) -> list[Path]:
+    """Hash/stage the Git-pinned inputs, never incidental KiCad/test byproducts.
+
+    A full pytest or KiCad run may deposit untracked outputs inside the design
+    directory. Hashing every filesystem entry made a committed pilot receipt
+    fail in CI after unrelated tests, despite zero *source* changes. The repo
+    index is our immutable input inventory for this bounded operator.
+    """
+    relative = source.relative_to(root).as_posix()
+    if not (root / ".git").exists():
+        raise ValueError("controlled checkout lacks Git source inventory")
+    # Popen is used rather than the verifier's subprocess.run adapter so
+    # adversarial tests can intercept KiCad without corrupting source identity.
+    with subprocess.Popen(
+        ["git", "ls-files", "-z", "--", relative],
+        cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ) as git:
+        raw_paths, errors = git.communicate(timeout=15)
+        if git.returncode != 0:
+            raise ValueError("Git tracked source listing failed: "+
+                             errors.decode(errors="replace")[-120:])
+    paths = []
+    for raw in raw_paths.split(b"\0"):
+        if not raw:
+            continue
+        # File names in Git may include uppercase and spaces. They are not
+        # user-provided paths; containment and symlinks are verified directly.
+        item = (root / os.fsdecode(raw)).resolve()
+        if source not in item.parents or not item.is_file() or (root / os.fsdecode(raw)).is_symlink():
+            raise ValueError("registered source contains invalid Git object")
+        paths.append(item)
+    if not paths:
+        raise ValueError("no tracked source inputs for registered design")
+    return sorted(paths)
+
+
 def _record_artifacts(paths: list[Path], root: Path) -> dict[str, str]:
     """Hash files only after checking they are *in* the operator's run."""
     result: dict[str, str] = {}
@@ -110,11 +146,16 @@ def _trace(report: dict[str, Any], stage: str, tool: str, state: str,
 
 def _native_spi(run_dir: Path, source: Path, report: dict[str, Any]) -> None:
     stage = run_dir / "source_copy"
+    stage.mkdir()
     if any(p.is_symlink() for p in source.rglob("*")):
         raise ValueError("source references symlink outside approved design")
-    shutil.copytree(source, stage, ignore=shutil.ignore_patterns(
-        "out", "__pycache__", "*.rpt", ".hardware-splicer-execution-home"
-    ))
+    # Stage exactly the source files measured by the Git-bound source hash.
+    # Do not copy untracked local test output or hostile injected Python files.
+    for original in _registered_source_files(REPO_ROOT, source):
+        relative = original.relative_to(source)
+        target = stage / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(original, target)
     # The source may contain an older green receipt. Remove it so a crashed
     # or mocked verifier can NEVER be mistaken for this run's new evidence.
     (stage / "verification.json").unlink(missing_ok=True)
@@ -411,9 +452,7 @@ def run_workshop_operator(case_id:str,*,out_dir:str|Path,execute:bool=False,
     source=_source_path(root,REGISTERED[case_id]["source"])
     # Source identity is defined by source state, not a self-reported model answer.
     if source.is_dir():
-        items=[p for p in sorted(source.rglob("*")) if p.is_file()
-               and not p.is_symlink() and "out" not in p.relative_to(source).parts
-               and "__pycache__" not in p.parts]
+        items=_registered_source_files(root, source)
         source_hash=hashlib.sha256(json.dumps(
              {p.relative_to(source).as_posix():_hash(p) for p in items},
              sort_keys=True).encode()).hexdigest()

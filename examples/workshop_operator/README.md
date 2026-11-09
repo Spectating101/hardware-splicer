@@ -96,6 +96,14 @@ python3 scripts/splice_demo.py --case robot_repair_cafe_s3 \
   --out /tmp/hs-existing-repair-replay
 ```
 
+The SPI case source identity is computed from **Git-tracked files** in the
+registered reference directory. Native KiCad and unrelated tests may generate
+ignored/untracked artifacts there; those files neither pollute the recorded
+source SHA nor get staged into the verifier. Every tracked input is still
+hashed and checked for modifications, and paths are restricted to the
+registered source tree. This repairs a full-suite CI hash mismatch without
+loosening the actual KiCad/verifier acceptance criteria.
+
 Tests reject stale green receipts, modified source hashes, a missing source
 file, wrong path/case, unregistered execution, unverified donor identity,
 manufacturing/BOM inconsistency, and forged power authorization.
