@@ -1,0 +1,27 @@
+{
+  "schema": "hs.restoration.real_kicad_pilot_no_gold_audit.v1",
+  "source_reference_board": "DMG-CPU-06",
+  "reported_target_board_only": true,
+  "same_initial_evidence": true,
+  "real_source_pinned": "032eb9c2578125b157ab88048113b2d52663b819",
+  "source_netlist_sha256": "06bba923b03443c60bc37a22d0eacac1e4286d1f1caf2690944ae52e0a33bdf0",
+  "board_variant_match_not_physically_verified": true,
+  "creator_repair_accuracy_not_scored": true,
+  "genuine_new_information": "Gekkio KiCad pin-to-net connectivity from actual exported reverse-engineered source",
+  "results": {
+    "plain": {
+      "status": "proposed_unverified_differential",
+      "first_hypothesis": "Dirty, oxidized, or chemically corroded battery contact terminals preventing electrical conduction from the AA cells.",
+      "next_safe_check": "Remove all batteries and unplug the DC adapter, then visually inspect the battery compartment terminals for signs of corrosion, oxidation, or debris.",
+      "elapsed_seconds": 10.62,
+      "actual_pinout_verified_against_target": false
+    },
+    "hs_real_kicad": {
+      "status": "proposed_unverified_differential",
+      "first_hypothesis": "Open circuit or high resistance in the battery contact assembly or path from BT1 to DC1 on reference net /Power/BT+ (e.g., corrosion, physical deformation, or broken solder joint).",
+      "next_safe_check": "With no batteries installed and the external DC jack disconnected, visually inspect the battery compartment terminals for corrosion, leakage residue, or physical deformation, followed by an unpowered continuity check of the battery contacts to the board.",
+      "elapsed_seconds": 11.85,
+      "actual_pinout_verified_against_target": false
+    }
+  }
+}

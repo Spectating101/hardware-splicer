@@ -1,0 +1,693 @@
+{
+  "protocol": {
+    "schema": "hs.restoration.real_schematic_pilot_ab.v1",
+    "source_case_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+    "source_case_intake_only": "works with external adapter; does not start with AA batteries; board revision DMG-CPU-06 reported",
+    "source_case_board_physically_verified": false,
+    "schematic_repo": "https://github.com/Gekkio/gb-schematics",
+    "schematic_commit": "032eb9c2578125b157ab88048113b2d52663b819",
+    "model": "gemini-3.8-flash-low",
+    "arm_order": [
+      "plain",
+      "hs_real_kicad"
+    ],
+    "control": "native HS repair intake and existing Gemini reasoning prompt",
+    "treatment": "same native intake with validated real KiCad net connections and source graph",
+    "same_input_symptoms_and_model": true,
+    "one_model_call_per_arm": true,
+    "creator_repair_outcomes_never_loaded": true,
+    "source_variant_guard": "reference DMG-CPU-06; converter board subtype unverified and exact converter mapping withheld",
+    "infer_component_current_or_actual_working_path": false,
+    "physical_repair_or_test_by_HS": false,
+    "accuracy_not_inferable_without_outcome_review": true
+  },
+  "protocol_sha256": "5f6c7567110bca7b981ad56c334c5689c719921402539818920f3af0ee964f5e",
+  "native_repair_intake_evidence_sha256": "b0c01623e56930647631ea3a0ee172a68ec4716cbece236ebd2ae0a0bc236a26",
+  "real_reference_netlist_sha256": "06bba923b03443c60bc37a22d0eacac1e4286d1f1caf2690944ae52e0a33bdf0",
+  "real_source_graph_sha256": "5a037b7e5c5eec2e483de3392c16f60231d9b8bc2cc809b05d87b6c80b7f9cf6",
+  "tool_result": {
+    "schema": "hs.restoration.real_schematic_reference_tool.v1",
+    "status": "reference_netlist_available_reported_revision_match_only",
+    "reported_target_board": "DMG-CPU-06",
+    "reference_board": "DMG-CPU-06",
+    "target_board_physically_verified": false,
+    "power_board_type_physically_verified": false,
+    "source_repo": "https://github.com/Gekkio/gb-schematics",
+    "source_commit": "032eb9c2578125b157ab88048113b2d52663b819",
+    "source_license": "CC-BY-4.0; attribution to Gekkio",
+    "schematic_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+    "reference_snapshot_sha256": "06bba923b03443c60bc37a22d0eacac1e4286d1f1caf2690944ae52e0a33bdf0",
+    "native_HS_engineering_source_graph_sha256": "5a037b7e5c5eec2e483de3392c16f60231d9b8bc2cc809b05d87b6c80b7f9cf6",
+    "native_HS_source_graph_schema": "hardware_splicer.engineering_source_graph.v1",
+    "source_graph_claim_authority": "declared",
+    "unresolved_source_ids": [
+      "actual_continuity_and_supply_measurements_not_performed",
+      "actual_power_converter_board_variant_not_confirmed",
+      "board_revision_reported_by_website_not_verified_from_photo",
+      "no_component_datasheet_provided",
+      "no_verified_meter_observations",
+      "reference_netlist_does_not_prove_live_conduction"
+    ],
+    "mainboard_components_extracted": 50,
+    "mainboard_nets_extracted": 108,
+    "converter_reference_components_extracted": 19,
+    "converter_reference_nets_extracted": 15,
+    "converter_netlist_withheld_from_target_pin_inference": true,
+    "pin_specific_evidence_available": true,
+    "candidate_battery_nets": [
+      {
+        "net": "/Power/BT+",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "BT1"
+          },
+          {
+            "pin": "4",
+            "ref": "DC1"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "1",
+            "ref": "BT1"
+          },
+          {
+            "pin": "4",
+            "ref": "DC1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "/Power/DC-VCC",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "C20"
+          },
+          {
+            "pin": "2",
+            "ref": "D1"
+          },
+          {
+            "pin": "2",
+            "ref": "DC1"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "2",
+            "ref": "D1"
+          },
+          {
+            "pin": "2",
+            "ref": "DC1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "/Power/SW1-VCC",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "D1"
+          },
+          {
+            "pin": "3",
+            "ref": "DC1"
+          },
+          {
+            "pin": "1",
+            "ref": "SW1"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "1",
+            "ref": "D1"
+          },
+          {
+            "pin": "3",
+            "ref": "DC1"
+          },
+          {
+            "pin": "1",
+            "ref": "SW1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "/~{RES}",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "C10"
+          },
+          {
+            "pin": "30",
+            "ref": "P1"
+          },
+          {
+            "pin": "2",
+            "ref": "R7"
+          },
+          {
+            "pin": "3",
+            "ref": "SW1"
+          },
+          {
+            "pin": "71",
+            "ref": "U1"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "3",
+            "ref": "SW1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "GND",
+        "terminals": [
+          {
+            "pin": "2",
+            "ref": "BT1"
+          },
+          {
+            "pin": "2",
+            "ref": "C1"
+          },
+          {
+            "pin": "2",
+            "ref": "C10"
+          },
+          {
+            "pin": "2",
+            "ref": "C11"
+          },
+          {
+            "pin": "2",
+            "ref": "C12"
+          },
+          {
+            "pin": "2",
+            "ref": "C13"
+          },
+          {
+            "pin": "2",
+            "ref": "C14"
+          },
+          {
+            "pin": "2",
+            "ref": "C15"
+          },
+          {
+            "pin": "2",
+            "ref": "C16"
+          },
+          {
+            "pin": "2",
+            "ref": "C17"
+          },
+          {
+            "pin": "2",
+            "ref": "C18"
+          },
+          {
+            "pin": "2",
+            "ref": "C19"
+          },
+          {
+            "pin": "2",
+            "ref": "C2"
+          },
+          {
+            "pin": "2",
+            "ref": "C20"
+          },
+          {
+            "pin": "2",
+            "ref": "C21"
+          },
+          {
+            "pin": "2",
+            "ref": "C22"
+          },
+          {
+            "pin": "2",
+            "ref": "C5"
+          },
+          {
+            "pin": "2",
+            "ref": "C6"
+          },
+          {
+            "pin": "2",
+            "ref": "C7"
+          },
+          {
+            "pin": "2",
+            "ref": "C8"
+          },
+          {
+            "pin": "2",
+            "ref": "C9"
+          },
+          {
+            "pin": "3",
+            "ref": "DA1"
+          },
+          {
+            "pin": "3",
+            "ref": "DA2"
+          },
+          {
+            "pin": "3",
+            "ref": "DA3"
+          },
+          {
+            "pin": "3",
+            "ref": "DA4"
+          },
+          {
+            "pin": "1",
+            "ref": "DC1"
+          },
+          {
+            "pin": "3",
+            "ref": "J1"
+          },
+          {
+            "pin": "1",
+            "ref": "J2"
+          },
+          {
+            "pin": "10",
+            "ref": "J2"
+          },
+          {
+            "pin": "21",
+            "ref": "J2"
+          },
+          {
+            "pin": "2",
+            "ref": "J3"
+          },
+          {
+            "pin": "32",
+            "ref": "P1"
+          },
+          {
+            "pin": "6",
+            "ref": "P2"
+          },
+          {
+            "pin": "SH",
+            "ref": "P2"
+          },
+          {
+            "pin": "1",
+            "ref": "RV1"
+          },
+          {
+            "pin": "MP",
+            "ref": "RV1"
+          },
+          {
+            "pin": "4",
+            "ref": "SW1"
+          },
+          {
+            "pin": "MP",
+            "ref": "SW1"
+          },
+          {
+            "pin": "32",
+            "ref": "U1"
+          },
+          {
+            "pin": "72",
+            "ref": "U1"
+          },
+          {
+            "pin": "76",
+            "ref": "U1"
+          },
+          {
+            "pin": "77",
+            "ref": "U1"
+          },
+          {
+            "pin": "14",
+            "ref": "U2"
+          },
+          {
+            "pin": "14",
+            "ref": "U3"
+          },
+          {
+            "pin": "1",
+            "ref": "U4"
+          },
+          {
+            "pin": "2",
+            "ref": "U4"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "2",
+            "ref": "BT1"
+          },
+          {
+            "pin": "1",
+            "ref": "DC1"
+          },
+          {
+            "pin": "3",
+            "ref": "J1"
+          },
+          {
+            "pin": "4",
+            "ref": "SW1"
+          },
+          {
+            "pin": "MP",
+            "ref": "SW1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "VCC",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "C2"
+          },
+          {
+            "pin": "4",
+            "ref": "J1"
+          },
+          {
+            "pin": "2",
+            "ref": "J2"
+          },
+          {
+            "pin": "2",
+            "ref": "SW1"
+          },
+          {
+            "pin": "4",
+            "ref": "U4"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "4",
+            "ref": "J1"
+          },
+          {
+            "pin": "2",
+            "ref": "SW1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "VDD",
+        "terminals": [
+          {
+            "pin": "1",
+            "ref": "C1"
+          },
+          {
+            "pin": "1",
+            "ref": "C11"
+          },
+          {
+            "pin": "1",
+            "ref": "C12"
+          },
+          {
+            "pin": "1",
+            "ref": "C13"
+          },
+          {
+            "pin": "1",
+            "ref": "C14"
+          },
+          {
+            "pin": "1",
+            "ref": "C15"
+          },
+          {
+            "pin": "2",
+            "ref": "D2"
+          },
+          {
+            "pin": "1",
+            "ref": "DA1"
+          },
+          {
+            "pin": "1",
+            "ref": "DA2"
+          },
+          {
+            "pin": "1",
+            "ref": "DA3"
+          },
+          {
+            "pin": "1",
+            "ref": "DA4"
+          },
+          {
+            "pin": "1",
+            "ref": "J1"
+          },
+          {
+            "pin": "11",
+            "ref": "J2"
+          },
+          {
+            "pin": "1",
+            "ref": "P1"
+          },
+          {
+            "pin": "1",
+            "ref": "R7"
+          },
+          {
+            "pin": "58",
+            "ref": "U1"
+          },
+          {
+            "pin": "26",
+            "ref": "U2"
+          },
+          {
+            "pin": "28",
+            "ref": "U2"
+          },
+          {
+            "pin": "28",
+            "ref": "U3"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "1",
+            "ref": "J1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      },
+      {
+        "net": "VEE",
+        "terminals": [
+          {
+            "pin": "2",
+            "ref": "J1"
+          },
+          {
+            "pin": "3",
+            "ref": "J2"
+          }
+        ],
+        "selected_terminals": [
+          {
+            "pin": "2",
+            "ref": "J1"
+          }
+        ],
+        "source_file": "DMG-CPU-06/DMG-CPU-06.kicad_sch",
+        "source_file_sha256": "bed6fb81b0e3106c13501b47d28d659e708bbb0d014dc46e0e01aed11a0aedf8",
+        "physical_measurement": false,
+        "reference_circuit_only": true
+      }
+    ],
+    "no_inferred_conduction_through_components": true,
+    "instrument_measurements_by_HS": false,
+    "repair_authorized": false
+  },
+  "arms": {
+    "plain": {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "dmg_reported_battery_only_failure",
+      "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "b0c01623e56930647631ea3a0ee172a68ec4716cbece236ebd2ae0a0bc236a26",
+      "caption_provenance": null,
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "2b8ac1325c8000bc83c3fd4af2dd7b416b38f75d0a361c1374fcf15dde3188ec",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "3d1bd852009df521bcf39b6aff709c52dcefab0a424ffe2f9fef59c3f47f998c",
+      "usage": {
+        "prompt_tokens": 649,
+        "completion_tokens": 216
+      },
+      "plan": {
+        "summary": "Reported failure to power on via AA batteries while external DC power reportedly functions suggests an issue isolated to the battery compartment, series contacts, DC jack switching mechanism, or battery power rail traces.",
+        "hypotheses": [
+          {
+            "mechanism": "Dirty, oxidized, or chemically corroded battery contact terminals preventing electrical conduction from the AA cells.",
+            "why": "The device reportedly works on DC power (E2) but fails on battery power (E1), and battery corrosion hazard is noted.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "Visually inspect the battery terminal springs and flat contacts with a flashlight for greenish/white corrosion, rust, or physical deformation with batteries removed."
+          },
+          {
+            "mechanism": "Stuck or oxidized internal switch contacts inside the external DC jack that fail to reconnect the battery circuit when the external plug is removed.",
+            "why": "The DMG-01 DC power jack incorporates a mechanical disconnect switch that breaks the battery positive circuit when a DC plug is inserted; oxidation or mechanical failure can leave it permanently open.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "Perform an unpowered continuity check with a digital multimeter between the negative/positive battery spring trace and the corresponding DC jack switched pin with no power sources connected."
+          },
+          {
+            "mechanism": "Corroded or fractured PCB trace connecting the battery terminal solder pads to the power switch / DC jack input circuit.",
+            "why": "Alkaline leakage can leach into vias and sever copper traces along the battery supply line without damaging the DC input rail.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "Inspect the rear PCB around the battery terminal solder points for darkened solder mask, copper bubbling, or broken traces with the housing safely opened and unpowered."
+          }
+        ],
+        "next_safe_check": "Remove all batteries and unplug the DC adapter, then visually inspect the battery compartment terminals for signs of corrosion, oxidation, or debris.",
+        "uncertainty": "The evidence relies entirely on an unverified user account without direct electrical measurements, physical board photos, or confirmation of battery charge state.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 10.62,
+      "receipt_sha256": "97737bf7cb678066b3633709e95b7fcbf2f3b332755ca00aa2fe69faa1ab9867"
+    },
+    "hs_real_kicad": {
+      "schema": "hs.restoration.free_text_diagnostic_v1",
+      "case_id": "dmg_reported_battery_only_failure",
+      "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+      "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+      "evidence_sha256": "b0c01623e56930647631ea3a0ee172a68ec4716cbece236ebd2ae0a0bc236a26",
+      "caption_provenance": null,
+      "preceding_receipt_sha256": null,
+      "prompt_version": "hs.restoration.reasoning_prompt.v1",
+      "prompt_sha256": "db19a895db7d7127766af63460531d13dd90fb0c79607d501f5f38edcad05395",
+      "model_requested": "gemini-3.8-flash-low",
+      "model_called": true,
+      "physical_measurements_by_HS": false,
+      "actual_video_frames_analyzed": false,
+      "repair_authorized": false,
+      "device_repaired_by_HS": false,
+      "fabrication_authorized": false,
+      "parts_purchase_authorized": false,
+      "real_schematic_tool_result_sha256": "78f06adafa6b225d3e5cd9eb918b94a0dac2d6f1c9f3add07dd904567398c668",
+      "real_schematic_source_graph_sha256": "5a037b7e5c5eec2e483de3392c16f60231d9b8bc2cc809b05d87b6c80b7f9cf6",
+      "target_board_physically_verified": false,
+      "model_reported": "gemini-3.8-flash-low",
+      "provider_reported": "agy_antigravity_subscription_cli",
+      "raw_model_output_sha256": "b565154fcf727a13d66c2a773573f3d0b841fdb53f971461a1a1ca70aa424fa7",
+      "usage": {
+        "prompt_tokens": 1342,
+        "completion_tokens": 447
+      },
+      "plan": {
+        "summary": "Unverified account reports a DMG-01 unit boots on external DC adapter power but fails on AA battery power. Using DMG-CPU-06 schematics as an unverified reference, the DC input path (/Power/DC-VCC through D1 to /Power/SW1-VCC) and downstream power conversion appear functional if the account is accurate, pointing suspicion toward the battery-specific path including battery contacts, leaf switch in DC jack DC1, or continuity to SW1. Board revision and converter board subtype remain unverified.",
+        "hypotheses": [
+          {
+            "mechanism": "Open circuit or high resistance in the battery contact assembly or path from BT1 to DC1 on reference net /Power/BT+ (e.g., corrosion, physical deformation, or broken solder joint).",
+            "why": "Reported failure to boot on AA cells (E1) contrasted with operation on DC adapter (E2) implicates the battery supply path prior to the common switch circuit. Reference net /Power/BT+ connects BT1 pin 1 to DC1 pin 4.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "With batteries removed and no power connected, perform a visual inspection for alkaline corrosion, residue, or contact fatigue at BT1 terminals, followed by an unpowered multimeter continuity check across the battery terminal clips to DC1 pin 4 if disassembled."
+          },
+          {
+            "mechanism": "Failed normally-closed bypass contact switch inside DC power jack DC1 (pins 3 and 4) failing to bridge /Power/BT+ to /Power/SW1-VCC when external plug is detached.",
+            "why": "In DMG power jack circuits, inserting an external plug mechanically opens a shunt contact to isolate the battery path (/Power/BT+). If the internal contact in DC1 remains open or oxidized after plug removal, power from BT1 will not reach /Power/SW1-VCC (pin 3 of DC1 to pin 1 of SW1).",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "With device unpowered and no external plug inserted, perform an unpowered resistance or continuity test between DC1 pin 4 (/Power/BT+) and DC1 pin 3 (/Power/SW1-VCC) to check if the internal jack switch closes properly."
+          },
+          {
+            "mechanism": "Discontinuity or contact degradation specific to the battery negative terminal connection to GND at BT1 pin 2.",
+            "why": "If BT1 pin 2 has lost physical or electrical continuity to the reference GND net, AA cells cannot complete the circuit to supply power, while an external adapter connects directly to GND via DC1 pin 1.",
+            "evidence_ids": [
+              "E1",
+              "E2"
+            ],
+            "safe_test": "With batteries removed and unit completely unpowered, inspect the negative battery spring contact for corrosion and conduct an unpowered continuity test between BT1 pin 2 and a verified chassis/reference GND point."
+          }
+        ],
+        "next_safe_check": "With no batteries installed and the external DC jack disconnected, visually inspect the battery compartment terminals for corrosion, leakage residue, or physical deformation, followed by an unpowered continuity check of the battery contacts to the board.",
+        "uncertainty": "The DMG-CPU-06 board revision claim (E3) is unverified without inspecting physical PCB markings. The DC-DC converter subtype is unconfirmed. Conduction across multi-pin electromechanical components (DC1 jack switch, SW1) cannot be assumed from static netlists alone without verified physical meter observations.",
+        "abstain": false
+      },
+      "status": "proposed_unverified_differential",
+      "elapsed_seconds": 11.85,
+      "receipt_sha256": "fefed7deb979420cbb062395caebf8219abbbf591031b0555e6018477ef44f14"
+    }
+  },
+  "complete": true
+}
