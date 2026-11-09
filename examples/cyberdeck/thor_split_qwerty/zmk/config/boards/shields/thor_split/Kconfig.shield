@@ -1,0 +1,5 @@
+config SHIELD_THOR_SPLIT_LEFT
+    def_bool $(shields_list_contains,thor_split_left)
+
+config SHIELD_THOR_SPLIT_RIGHT
+    def_bool $(shields_list_contains,thor_split_right)

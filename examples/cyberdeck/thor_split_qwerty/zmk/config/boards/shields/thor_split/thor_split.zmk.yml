@@ -1,0 +1,7 @@
+file_format: "1"
+id: thor_split
+name: HS Thor Split QWERTY
+type: shield
+requires: [xiao]
+features: [keys]
+siblings: [thor_split_left, thor_split_right]

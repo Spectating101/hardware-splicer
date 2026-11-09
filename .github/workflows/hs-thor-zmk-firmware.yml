@@ -1,0 +1,48 @@
+name: HS Thor ZMK split QWERTY compile (no hardware)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-thor-zmk-firmware.yml'
+      - 'examples/cyberdeck/thor_split_qwerty/zmk/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compile-zmk-on-exact-config-root:
+    runs-on: ubuntu-24.04
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    strategy:
+      fail-fast: false
+      matrix:
+        shield: [thor_split_left, thor_split_right]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real upstream ZMK toolchain and Zephyr build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd examples/cyberdeck/thor_split_qwerty/zmk
+          # The west manifest lives in this SUBDIRECTORY, not the Git repo root.
+          # Running west update from the Git repo root is a real, observed failure.
+          west init -l config
+          west update --fetch-opt=--filter=tree:0
+          west zephyr-export
+          west build -s zmk/app -d "build_${{ matrix.shield }}" \
+            -b seeeduino_xiao_ble -- \
+            -DZMK_CONFIG="${PWD}/config" \
+            -DSHIELD="${{ matrix.shield }}"
+          if test -s "build_${{ matrix.shield }}/zephyr/zmk.uf2"; then
+            mkdir -p firmware
+            cp "build_${{ matrix.shield }}/zephyr/zmk.uf2" \
+              "firmware/${{ matrix.shield }}.uf2"
+          else
+            echo "::error::No actual compiled UF2 file; do not claim firmware ready"
+            exit 1
+          fi
+      - name: Archive actual unflashed ZMK UF2 by half
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-thor-${{ matrix.shield }}-unflashed
+          retention-days: 30
+          path: examples/cyberdeck/thor_split_qwerty/zmk/firmware/${{ matrix.shield }}.uf2

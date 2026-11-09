@@ -1,0 +1,47 @@
+{
+  "schema": "hs.thor.zmk_verified_upstream_build.v1",
+  "repository": "Spectating101/hardware-splicer",
+  "pull_request": 317,
+  "workflow_run": 42654086871,
+  "workflow_run_url": "https://github.com/Spectating101/hardware-splicer/actions/runs/42654086871",
+  "git_commit": "8948bbc",
+  "toolchain": "zmkfirmware/zmk-build-arm:stable with upstream west manifest pinned to ZMK v0.3",
+  "target_board": "seeeduino_xiao_ble",
+  "actual_independent_zephyr_compilations": 2,
+  "firmware_artifacts_retrieved_and_examined": true,
+  "files": [
+    {
+      "shield": "thor_split_left",
+      "role": "central",
+      "artifact": "hs-thor-thor_split_left-unflashed",
+      "filename": "thor_split_left.uf2",
+      "size_bytes": 423936,
+      "sha256": "2314ab69b9db4f86c8f8226368bbdabb1c34afbc8782d6e60f06c440f4780603",
+      "file_signature": "UF2 firmware image, family Nordic NRF52840, base address 0x027000, 828 total blocks"
+    },
+    {
+      "shield": "thor_split_right",
+      "role": "peripheral",
+      "artifact": "hs-thor-thor_split_right-unflashed",
+      "filename": "thor_split_right.uf2",
+      "size_bytes": 348160,
+      "sha256": "be7696010e2e74b9dee34a2db2facd202166f58ff55f54ea0801da9cebc0fcfc",
+      "file_signature": "UF2 firmware image, family Nordic NRF52840, base address 0x027000, 680 total blocks"
+    }
+  ],
+  "physical_mcu_attached": false,
+  "firmware_flashed": false,
+  "physical_50_switch_matrix_tested": false,
+  "host_BLE_HID_paired": false,
+  "battery_or_charger_validated": false,
+  "Thor_original_parts_modified": false,
+  "PCB_fabrication_approved": false,
+  "does_not_prove": [
+    "physical XIAO pinout/harness connectivity",
+    "valid Bluetooth pairing and inter-half BLE",
+    "actual keyboard ghosting or switch actuation",
+    "sleep/wake, latency and current draw",
+    "safe battery and charging design",
+    "Thor mechanical assembly clearance"
+  ]
+}
