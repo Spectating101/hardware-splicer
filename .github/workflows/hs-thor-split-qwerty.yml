@@ -1,0 +1,66 @@
+name: HS Thor Split QWERTY — Exact Scan / KiCad / Fit Gates
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-thor-split-qwerty.yml'
+      - 'examples/cyberdeck/thor_split_qwerty/**'
+      - 'tests/test_thor_split_qwerty.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-artifact-sources-and-no-hardware-overclaim:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install only the test runner — do not silently install/generate boards
+        run: python -m pip install 'pytest>=8,<10'
+      - name: Verify source-linked exact PCB hashes, true QWERTY and 2D keepouts
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_thor_split_qwerty.py
+      - name: Explicitly bound report to external geometry and local KiCad receipts
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('examples/cyberdeck/thor_split_qwerty')
+          d=json.loads((root/'generated/fit_report.json').read_text())
+          r=json.loads((root/'evidence/verification.json').read_text())
+          assert r['status']=='FOUR_NATIVE_ROUTED_PCBS_DRC_PASS_PHYSICAL_RETROFIT_BLOCKED'
+          assert r['community_STL_sha256']==d['source']['sha256']
+          assert r['native_drc_all_four'] and len(r['board_results'])==4
+          for row in r['board_results']:
+              pcb=root/row['source']
+              assert hashlib.sha256(pcb.read_bytes()).hexdigest()==row['sha256']
+              assert row['unconnected_count']==row['violation_count']==0
+              assert row['switches']==row['diodes']==25
+              assert row['breakout_solderpads']==10
+          assert not d['tested_closed_lid']
+          assert not r['fabrication_or_order_authorized']
+          assert not r['ZMK_firmware_compiled']
+          assert not r['physical_Thor_assembly_tested']
+          assert not r['schematic_nets_parity_tested']
+          PY
+      - name: Native KiCad recheck if this runner has actual tools
+        run: |
+          if command -v kicad-cli >/dev/null 2>&1 && python -c 'import pcbnew' >/dev/null 2>&1; then
+            python examples/cyberdeck/thor_split_qwerty/verify.py               --out /tmp/hs_thor_current_runner_drc.json
+          else
+            echo 'Runner native KiCad/pcbnew absent: recorded Optiplex DRC receipt hash-verified, NOT independently replayed on this runner.'
+          fi
+      - name: Store real electrical research outputs (not release authority)
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-thor-50key-research-2d-no-physical-approval
+          retention-days: 30
+          path: |
+            examples/cyberdeck/thor_split_qwerty/generated
+            examples/cyberdeck/thor_split_qwerty/evidence

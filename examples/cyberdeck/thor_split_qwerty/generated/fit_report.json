@@ -1,0 +1,1705 @@
+{
+  "schema": "hs.thor_split_qwerty_external_scan_retrofit.v1",
+  "source": {
+    "file": "hs-thor-open-reference-20261109.stl",
+    "sha256": "42800c73d5e0523961f243e482732fcd2ba119c6e3aeae55659d7adee32e8402",
+    "source_url": "https://handheldmodz.com/content/files/2025/11/Thor-Open.stl",
+    "triangle_count": 1012267,
+    "xyz_min_mm": [
+      -74.661,
+      -74.405,
+      5.553
+    ],
+    "xyz_max_mm": [
+      77.746,
+      103.333,
+      37.83
+    ],
+    "xyz_extent_mm": [
+      152.407,
+      177.738,
+      32.276
+    ],
+    "mesh_exterior_not_internal_cavity": true,
+    "maker_scan_no_mount_or_depth_certification": true
+  },
+  "research_date": "2026-11-09",
+  "assembly": "AYN Thor original 6in upper screen and 3.92in lower screen retained",
+  "scope": "keyboard PCB geometry, exploratory switch matrices, external-geometry-only fit",
+  "nominal_Thor_body_width_mm": 150,
+  "manual_scan_keepouts": {
+    "lower_half_x_mm": [
+      -74.66,
+      77.75
+    ],
+    "lower_half_y_mm": [
+      -74.4,
+      -1.0
+    ],
+    "lower_screen_x_keepout_mm": [
+      -35.25,
+      39.0
+    ],
+    "hinge_keepout_y_above_mm": -8.0,
+    "bottom_recess_keepout_y_below_mm": -70.0,
+    "measured_by": "segmentation of exterior open scan; provisional +-2mm",
+    "internal_keepouts_known": false
+  },
+  "switch_native_kicad_footprint": "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2",
+  "diode_native_kicad_footprint": "Diode_SMD:D_SOD-123",
+  "diode_candidate": "1N4148W in SOD-123 (tentative, BOM validation required)",
+  "firmware_candidate": "ZMK split BLE central/peripheral; custom shields unimplemented",
+  "electrical_validation": "separately run kicad-cli pcb drc on generated boards",
+  "keyboard_board_count": 4,
+  "full_keyboard_key_count": 50,
+  "original_controller_removal_tested": false,
+  "actual_Thor_available_for_test": false,
+  "tested_closed_lid": false,
+  "tested_internal_cavities": false,
+  "tested_touchscreen_shielding": false,
+  "tested_Bluetooth_HID": false,
+  "fabrication_approved": false,
+  "variants": {
+    "flush_7mm": {
+      "variant": "flush_7mm",
+      "min_screen_edge_gap_mm": 1.0,
+      "min_hinge_keepout_gap_mm": 2.0,
+      "min_bottom_keepout_gap_mm": 3.0,
+      "provisional_2mm_clearance_gate": false,
+      "provisional_fit_status": "NO_SCREEN_OVERLAP_BUT_NOT_CLEARANCE_QUALIFIED",
+      "layout": "5 columns x 5 rows on each side of existing lower screen",
+      "total_keys": 50,
+      "layout_is_true_split_QWERTY": true,
+      "original_two_screens_unchanged": true,
+      "used_exterior_scan": true,
+      "internal_mounting_clearance_verified": false,
+      "closed_lid_clearance_verified": false,
+      "controller_board_removal_verified": false,
+      "battery_and_heat_shield_unmodified": true,
+      "switch_footprint": "C&K KMR2 series; 4.6x2.8 mm body, 1.9mm height",
+      "keycap_mounting_to_switch_verified": false,
+      "keyboard_power_and_antenna_verified": false,
+      "computed_2D_screen_overlap_pass": true,
+      "2D_critical": [],
+      "sides": [
+        {
+          "side": "left",
+          "pcb_rect_case_xy_mm": [
+            -72.7,
+            -67.0,
+            -36.7,
+            -10.0
+          ],
+          "pcb_width_mm": 36.0,
+          "pcb_height_mm": 57.0,
+          "keycap_count": 25,
+          "keycap_pitch_mm": [
+            7.0,
+            10.5
+          ],
+          "lateral_extension_outside_case_mm": 0.0,
+          "screen_edge_gap_mm": 1.45,
+          "outer_case_edge_gap_mm": 1.96,
+          "proposed_board_near_hinge_gap_mm": 2.0,
+          "proposed_board_near_bottom_gap_mm": 3.0,
+          "keys": [
+            {
+              "id": "L01",
+              "label": "Q",
+              "row": 0,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -68.7,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L02",
+              "label": "W",
+              "row": 0,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -61.7,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L03",
+              "label": "E",
+              "row": 0,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -54.7,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L04",
+              "label": "R",
+              "row": 0,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -47.7,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L05",
+              "label": "T",
+              "row": 0,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -40.7,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L06",
+              "label": "A",
+              "row": 1,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                -68.7,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "L07",
+              "label": "S",
+              "row": 1,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                -61.7,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "L08",
+              "label": "D",
+              "row": 1,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                -54.7,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "L09",
+              "label": "F",
+              "row": 1,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                -47.7,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "L10",
+              "label": "G",
+              "row": 1,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                -40.7,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "L11",
+              "label": "Z",
+              "row": 2,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                -68.7,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "L12",
+              "label": "X",
+              "row": 2,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                -61.7,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "L13",
+              "label": "C",
+              "row": 2,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                -54.7,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "L14",
+              "label": "V",
+              "row": 2,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                -47.7,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "L15",
+              "label": "B",
+              "row": 2,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                -40.7,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "L16",
+              "label": "1",
+              "row": 3,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                -68.7,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "L17",
+              "label": "2",
+              "row": 3,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                -61.7,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "L18",
+              "label": "3",
+              "row": 3,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                -54.7,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "L19",
+              "label": "4",
+              "row": 3,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                -47.7,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "L20",
+              "label": "5",
+              "row": 3,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                -40.7,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "L21",
+              "label": "SHIFT",
+              "row": 4,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                -68.7,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "L22",
+              "label": "CTRL",
+              "row": 4,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                -61.7,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "L23",
+              "label": "ALT",
+              "row": 4,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                -54.7,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "L24",
+              "label": "TAB",
+              "row": 4,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                -47.7,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "L25",
+              "label": "FN",
+              "row": 4,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                -40.7,
+                -58.0,
+                null
+              ]
+            }
+          ]
+        },
+        {
+          "side": "right",
+          "pcb_rect_case_xy_mm": [
+            40.0,
+            -67.0,
+            76.0,
+            -10.0
+          ],
+          "pcb_width_mm": 36.0,
+          "pcb_height_mm": 57.0,
+          "keycap_count": 25,
+          "keycap_pitch_mm": [
+            7.0,
+            10.5
+          ],
+          "lateral_extension_outside_case_mm": 0.0,
+          "screen_edge_gap_mm": 1.0,
+          "outer_case_edge_gap_mm": 1.75,
+          "proposed_board_near_hinge_gap_mm": 2.0,
+          "proposed_board_near_bottom_gap_mm": 3.0,
+          "keys": [
+            {
+              "id": "R01",
+              "label": "Y",
+              "row": 0,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                44.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R02",
+              "label": "U",
+              "row": 0,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                51.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R03",
+              "label": "I",
+              "row": 0,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                58.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R04",
+              "label": "O",
+              "row": 0,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                65.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R05",
+              "label": "P",
+              "row": 0,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                72.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R06",
+              "label": "H",
+              "row": 1,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                44.0,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "R07",
+              "label": "J",
+              "row": 1,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                51.0,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "R08",
+              "label": "K",
+              "row": 1,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                58.0,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "R09",
+              "label": "L",
+              "row": 1,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                65.0,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "R10",
+              "label": ";",
+              "row": 1,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                16.5
+              ],
+              "case_center_xyz_mm": [
+                72.0,
+                -26.5,
+                null
+              ]
+            },
+            {
+              "id": "R11",
+              "label": "N",
+              "row": 2,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                44.0,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "R12",
+              "label": "M",
+              "row": 2,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                51.0,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "R13",
+              "label": ",",
+              "row": 2,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                58.0,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "R14",
+              "label": ".",
+              "row": 2,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                65.0,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "R15",
+              "label": "/",
+              "row": 2,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                27.0
+              ],
+              "case_center_xyz_mm": [
+                72.0,
+                -37.0,
+                null
+              ]
+            },
+            {
+              "id": "R16",
+              "label": "6",
+              "row": 3,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                44.0,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "R17",
+              "label": "7",
+              "row": 3,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                51.0,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "R18",
+              "label": "8",
+              "row": 3,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                58.0,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "R19",
+              "label": "9",
+              "row": 3,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                65.0,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "R20",
+              "label": "0",
+              "row": 3,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                37.5
+              ],
+              "case_center_xyz_mm": [
+                72.0,
+                -47.5,
+                null
+              ]
+            },
+            {
+              "id": "R21",
+              "label": "SYM",
+              "row": 4,
+              "col": 0,
+              "pcb_xy_mm": [
+                4.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                44.0,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "R22",
+              "label": "SPACE",
+              "row": 4,
+              "col": 1,
+              "pcb_xy_mm": [
+                11.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                51.0,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "R23",
+              "label": "ENTER",
+              "row": 4,
+              "col": 2,
+              "pcb_xy_mm": [
+                18.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                58.0,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "R24",
+              "label": "BSPC",
+              "row": 4,
+              "col": 3,
+              "pcb_xy_mm": [
+                25.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                65.0,
+                -58.0,
+                null
+              ]
+            },
+            {
+              "id": "R25",
+              "label": "ESC",
+              "row": 4,
+              "col": 4,
+              "pcb_xy_mm": [
+                32.0,
+                48.0
+              ],
+              "case_center_xyz_mm": [
+                72.0,
+                -58.0,
+                null
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "detachable_9mm": {
+      "variant": "detachable_9mm",
+      "min_screen_edge_gap_mm": 2.0,
+      "min_hinge_keepout_gap_mm": 2.0,
+      "min_bottom_keepout_gap_mm": 2.0,
+      "provisional_2mm_clearance_gate": true,
+      "provisional_fit_status": "NO_SCREEN_OVERLAP_BUT_NOT_CLEARANCE_QUALIFIED",
+      "layout": "5 columns x 5 rows on each side of existing lower screen",
+      "total_keys": 50,
+      "layout_is_true_split_QWERTY": true,
+      "original_two_screens_unchanged": true,
+      "used_exterior_scan": true,
+      "internal_mounting_clearance_verified": false,
+      "closed_lid_clearance_verified": false,
+      "controller_board_removal_verified": false,
+      "battery_and_heat_shield_unmodified": true,
+      "switch_footprint": "C&K KMR2 series; 4.6x2.8 mm body, 1.9mm height",
+      "keycap_mounting_to_switch_verified": false,
+      "keyboard_power_and_antenna_verified": false,
+      "computed_2D_screen_overlap_pass": true,
+      "2D_critical": [],
+      "sides": [
+        {
+          "side": "left",
+          "pcb_rect_case_xy_mm": [
+            -84.5,
+            -68.0,
+            -37.5,
+            -10.0
+          ],
+          "pcb_width_mm": 47.0,
+          "pcb_height_mm": 58.0,
+          "keycap_count": 25,
+          "keycap_pitch_mm": [
+            9.0,
+            11.0
+          ],
+          "lateral_extension_outside_case_mm": 9.84,
+          "screen_edge_gap_mm": 2.25,
+          "outer_case_edge_gap_mm": -9.84,
+          "proposed_board_near_hinge_gap_mm": 2.0,
+          "proposed_board_near_bottom_gap_mm": 2.0,
+          "keys": [
+            {
+              "id": "L01",
+              "label": "Q",
+              "row": 0,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -79.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L02",
+              "label": "W",
+              "row": 0,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -70.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L03",
+              "label": "E",
+              "row": 0,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -61.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L04",
+              "label": "R",
+              "row": 0,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -52.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L05",
+              "label": "T",
+              "row": 0,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                -43.0,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "L06",
+              "label": "A",
+              "row": 1,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                -79.0,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "L07",
+              "label": "S",
+              "row": 1,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                -70.0,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "L08",
+              "label": "D",
+              "row": 1,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                -61.0,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "L09",
+              "label": "F",
+              "row": 1,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                -52.0,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "L10",
+              "label": "G",
+              "row": 1,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                -43.0,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "L11",
+              "label": "Z",
+              "row": 2,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                -79.0,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "L12",
+              "label": "X",
+              "row": 2,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                -70.0,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "L13",
+              "label": "C",
+              "row": 2,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                -61.0,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "L14",
+              "label": "V",
+              "row": 2,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                -52.0,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "L15",
+              "label": "B",
+              "row": 2,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                -43.0,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "L16",
+              "label": "1",
+              "row": 3,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                -79.0,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "L17",
+              "label": "2",
+              "row": 3,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                -70.0,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "L18",
+              "label": "3",
+              "row": 3,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                -61.0,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "L19",
+              "label": "4",
+              "row": 3,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                -52.0,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "L20",
+              "label": "5",
+              "row": 3,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                -43.0,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "L21",
+              "label": "SHIFT",
+              "row": 4,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                -79.0,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "L22",
+              "label": "CTRL",
+              "row": 4,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                -70.0,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "L23",
+              "label": "ALT",
+              "row": 4,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                -61.0,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "L24",
+              "label": "TAB",
+              "row": 4,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                -52.0,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "L25",
+              "label": "FN",
+              "row": 4,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                -43.0,
+                -60.0,
+                null
+              ]
+            }
+          ]
+        },
+        {
+          "side": "right",
+          "pcb_rect_case_xy_mm": [
+            41.0,
+            -68.0,
+            88.0,
+            -10.0
+          ],
+          "pcb_width_mm": 47.0,
+          "pcb_height_mm": 58.0,
+          "keycap_count": 25,
+          "keycap_pitch_mm": [
+            9.0,
+            11.0
+          ],
+          "lateral_extension_outside_case_mm": 10.25,
+          "screen_edge_gap_mm": 2.0,
+          "outer_case_edge_gap_mm": -10.25,
+          "proposed_board_near_hinge_gap_mm": 2.0,
+          "proposed_board_near_bottom_gap_mm": 2.0,
+          "keys": [
+            {
+              "id": "R01",
+              "label": "Y",
+              "row": 0,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                46.5,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R02",
+              "label": "U",
+              "row": 0,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                55.5,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R03",
+              "label": "I",
+              "row": 0,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                64.5,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R04",
+              "label": "O",
+              "row": 0,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                73.5,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R05",
+              "label": "P",
+              "row": 0,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                6.0
+              ],
+              "case_center_xyz_mm": [
+                82.5,
+                -16.0,
+                null
+              ]
+            },
+            {
+              "id": "R06",
+              "label": "H",
+              "row": 1,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                46.5,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "R07",
+              "label": "J",
+              "row": 1,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                55.5,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "R08",
+              "label": "K",
+              "row": 1,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                64.5,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "R09",
+              "label": "L",
+              "row": 1,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                73.5,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "R10",
+              "label": ";",
+              "row": 1,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                17.0
+              ],
+              "case_center_xyz_mm": [
+                82.5,
+                -27.0,
+                null
+              ]
+            },
+            {
+              "id": "R11",
+              "label": "N",
+              "row": 2,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                46.5,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "R12",
+              "label": "M",
+              "row": 2,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                55.5,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "R13",
+              "label": ",",
+              "row": 2,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                64.5,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "R14",
+              "label": ".",
+              "row": 2,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                73.5,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "R15",
+              "label": "/",
+              "row": 2,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                28.0
+              ],
+              "case_center_xyz_mm": [
+                82.5,
+                -38.0,
+                null
+              ]
+            },
+            {
+              "id": "R16",
+              "label": "6",
+              "row": 3,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                46.5,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "R17",
+              "label": "7",
+              "row": 3,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                55.5,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "R18",
+              "label": "8",
+              "row": 3,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                64.5,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "R19",
+              "label": "9",
+              "row": 3,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                73.5,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "R20",
+              "label": "0",
+              "row": 3,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                39.0
+              ],
+              "case_center_xyz_mm": [
+                82.5,
+                -49.0,
+                null
+              ]
+            },
+            {
+              "id": "R21",
+              "label": "SYM",
+              "row": 4,
+              "col": 0,
+              "pcb_xy_mm": [
+                5.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                46.5,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "R22",
+              "label": "SPACE",
+              "row": 4,
+              "col": 1,
+              "pcb_xy_mm": [
+                14.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                55.5,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "R23",
+              "label": "ENTER",
+              "row": 4,
+              "col": 2,
+              "pcb_xy_mm": [
+                23.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                64.5,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "R24",
+              "label": "BSPC",
+              "row": 4,
+              "col": 3,
+              "pcb_xy_mm": [
+                32.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                73.5,
+                -60.0,
+                null
+              ]
+            },
+            {
+              "id": "R25",
+              "label": "ESC",
+              "row": 4,
+              "col": 4,
+              "pcb_xy_mm": [
+                41.5,
+                50.0
+              ],
+              "case_center_xyz_mm": [
+                82.5,
+                -60.0,
+                null
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "diagram": "generated/thor_two_keyboard_options.png"
+}
