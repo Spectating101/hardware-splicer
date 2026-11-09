@@ -60,3 +60,24 @@ A single new correction can be run with:
       --out /tmp/dmg_verified_board_gate.json
 
 The original prediction and source hashes are read-only.
+
+
+## Live correction result (post-preregistration)
+
+After the model-output authority gate was committed, the stored
+source-backed Game Boy answer was checked and four prohibited physical
+component-pin test references were found (some repeat the same pin).
+
+One new source-preserving Gemini 3.8 Flash Low correction completed in
+10.47 seconds and proposed:
+
+"Visually inspect the battery compartment terminals and the external
+aperture of the DC power jack under good lighting with no batteries or
+cables inserted, and verify the physical board revision silkscreen
+marking before attempting any internal probing."
+
+No pin-specific actions remain in the corrective plan. The outcome
+was added as a SEPARATE immutable receipt in
+dmg_board_gate_correction_live.json; original PR #327 results were
+not modified. Neither output authorizes touching physical hardware.
+The gate does not prove correct diagnosis or verify the board revision.
