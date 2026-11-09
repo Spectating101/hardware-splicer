@@ -94,6 +94,12 @@ def test_ZMK_manifest_and_build_inputs_are_upstream_but_no_unearned_image():
     assert "https://github.com/zmkfirmware" in west
     assert "revision: v0.3" in west
     workflow=(ROOT/".github/workflows/hs-thor-zmk-firmware.yml").read_text()
-    assert "zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3" in workflow
-    assert "build_matrix_path: examples/cyberdeck/thor_split_qwerty/zmk/build.yaml" in workflow
-    assert "config_path: examples/cyberdeck/thor_split_qwerty/zmk/config" in workflow
+    assert "zmkfirmware/zmk-build-arm:stable" in workflow
+    assert "west init -l config" in workflow
+    assert "west update" in workflow
+    assert "west build -s zmk/app" in workflow
+    assert 'cd examples/cyberdeck/thor_split_qwerty/zmk' in workflow
+    assert 'DZMK_CONFIG=' in workflow
+    assert 'DSHIELD=' in workflow
+    assert 'test -s' in workflow
+    assert 'zmk.uf2' in workflow
