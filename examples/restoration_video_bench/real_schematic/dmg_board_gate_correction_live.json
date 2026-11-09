@@ -1,0 +1,92 @@
+{
+  "schema": "hs.restoration.board_pin_action_quality_correction.v1",
+  "original_receipt_sha256": "fefed7deb979420cbb062395caebf8219abbbf591031b0555e6018477ef44f14",
+  "source_evidence_sha256": "b0c01623e56930647631ea3a0ee172a68ec4716cbece236ebd2ae0a0bc236a26",
+  "real_kicad_reference_sha256": "78f06adafa6b225d3e5cd9eb918b94a0dac2d6f1c9f3add07dd904567398c668",
+  "original_unverified_pin_tests": [
+    {
+      "field": "hypotheses[1].safe_test",
+      "pin_reference": "DC1 pin 4",
+      "reason": "The cited schematic is revision-specific; target board identity is only publisher-reported, not physically verified."
+    },
+    {
+      "field": "hypotheses[2].safe_test",
+      "pin_reference": "DC1 pin 4",
+      "reason": "The cited schematic is revision-specific; target board identity is only publisher-reported, not physically verified."
+    },
+    {
+      "field": "hypotheses[2].safe_test",
+      "pin_reference": "DC1 pin 3",
+      "reason": "The cited schematic is revision-specific; target board identity is only publisher-reported, not physically verified."
+    },
+    {
+      "field": "hypotheses[3].safe_test",
+      "pin_reference": "BT1 pin 2",
+      "reason": "The cited schematic is revision-specific; target board identity is only publisher-reported, not physically verified."
+    }
+  ],
+  "one_correction_attempt_only": true,
+  "source_evidence_unchanged": true,
+  "target_board_physically_verified": false,
+  "physical_test_or_repair_authorized": false,
+  "correction": {
+    "schema": "hs.restoration.free_text_diagnostic_v1",
+    "case_id": "dmg_reported_battery_only_failure",
+    "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+    "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+    "evidence_sha256": "b0c01623e56930647631ea3a0ee172a68ec4716cbece236ebd2ae0a0bc236a26",
+    "caption_provenance": null,
+    "preceding_receipt_sha256": null,
+    "prompt_version": "hs.restoration.reasoning_prompt.v1",
+    "prompt_sha256": "08903c9c943f9879b8bfcad915cdd5178d87ca6c994f70ffb079b8706cf602b1",
+    "model_requested": "gemini-3.8-flash-low",
+    "model_called": true,
+    "physical_measurements_by_HS": false,
+    "actual_video_frames_analyzed": false,
+    "repair_authorized": false,
+    "device_repaired_by_HS": false,
+    "fabrication_authorized": false,
+    "parts_purchase_authorized": false,
+    "real_schematic_tool_result_sha256": "78f06adafa6b225d3e5cd9eb918b94a0dac2d6f1c9f3add07dd904567398c668",
+    "real_schematic_source_graph_sha256": "5a037b7e5c5eec2e483de3392c16f60231d9b8bc2cc809b05d87b6c80b7f9cf6",
+    "target_board_physically_verified": false,
+    "board_action_parent_receipt_sha256": "fefed7deb979420cbb062395caebf8219abbbf591031b0555e6018477ef44f14",
+    "board_action_correction": true,
+    "model_reported": "gemini-3.8-flash-low",
+    "provider_reported": "agy_antigravity_subscription_cli",
+    "raw_model_output_sha256": "93d42ec6962dbb9c39de57ee29548529f9d067d78dee9c90c1f3de562dccdbb0",
+    "usage": {
+      "prompt_tokens": 1404,
+      "completion_tokens": 468
+    },
+    "plan": {
+      "summary": "The reported device powers on via an external DC jack but fails to power on from AA batteries. Based on DMG-CPU-06 reference schematics (net /Power/BT+ at BT1 pin 1 to DC1 pin 4, and net /Power/SW1-VCC at DC1 pin 3, D1 pin 1, and SW1 pin 1), battery power normally routes through a normally-closed mechanical shunt switch inside the DC jack (DC1) to feed the main power switch when no external DC plug is inserted. A fault isolated to the battery compartment contacts or the DC jack internal shunt contact can interrupt the battery rail while leaving external DC operation intact. However, the physical board revision and internal layout remain unverified.",
+      "hypotheses": [
+        {
+          "mechanism": "Mechanical disconnection or oxidation at the internal DC jack shunt contact",
+          "why": "In the DMG-CPU-06 reference design, net /Power/BT+ connects the battery positive terminal (BT1) to DC jack pin 4, while net /Power/SW1-VCC connects DC jack pin 3 to power switch SW1. When no DC barrel plug is inserted, internal contacts between pins 3 and 4 of DC1 must mechanically bridge /Power/BT+ to /Power/SW1-VCC. If this shunt contact is oxidized, deformed, or stuck open, external DC power (via net /Power/DC-VCC through diode D1 to /Power/SW1-VCC) works (E2), but battery power is blocked (E1).",
+          "evidence_ids": [
+            "E1",
+            "E2"
+          ],
+          "safe_test": "Inspect the external DC jack opening with a flashlight while unpowered to check for foreign debris or a physically stuck internal contact lever, without inserting conductive tools."
+        },
+        {
+          "mechanism": "Battery contact corrosion or mechanical contact open circuit",
+          "why": "Net /Power/BT+ originates at battery terminal BT1 pin 1, and net GND connects to BT1 pin 2. If the external spring or plate contacts in the battery compartment suffer from alkaline leakage residue, corrosion, or loss of spring tension, the four AA series circuit cannot deliver voltage to /Power/BT+ or return to GND, preventing operation on batteries (E1) while external DC power via DC1 remains fully operational (E2).",
+          "evidence_ids": [
+            "E1",
+            "E2"
+          ],
+          "safe_test": "Perform a non-powered visual inspection of the battery compartment terminals for corrosion, green/white residue, or bent contact tabs, and verify battery orientation."
+        }
+      ],
+      "next_safe_check": "Visually inspect the battery compartment terminals and the external aperture of the DC power jack under good lighting with no batteries or cables inserted, and verify the physical board revision silkscreen marking before attempting any internal probing.",
+      "uncertainty": "Target board revision DMG-CPU-06 is unconfirmed (E3), power converter subtype is unverified, and no physical continuity measurements have been conducted. The reference netlist establishes connectivity within individual nets but does not establish physical conduction across components or jacks on the actual unit.",
+      "abstain": false
+    },
+    "status": "proposed_unverified_differential",
+    "elapsed_seconds": 10.47,
+    "receipt_sha256": "93c2c554515a69a2204d537fd5783bdbf92dd912774da114087ba2199123aa3d"
+  }
+}
