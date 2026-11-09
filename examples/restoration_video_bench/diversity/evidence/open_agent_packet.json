@@ -1,0 +1,162 @@
+{
+  "schema": "hs.restoration.open_agent_packet.v1",
+  "task_count": 9,
+  "model_access_not_implied": true,
+  "tasks": [
+    {
+      "case_id": "a53_touch_failure",
+      "device": "Samsung Galaxy A53 5G smartphone",
+      "source_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+      "symptoms_and_opening_only": [
+        "Display appears functional but touchscreen does not respond.",
+        "Phone is visibly running but touch input does not respond.",
+        "Water exposure was reported as a possibility, not independently confirmed.",
+        "Important photos were reportedly extracted before this repair attempt."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "data_loss"
+      ],
+      "intake_sha256": "ac21fe6cd8748602b4f8a9d650ac70acf344c64de0e29f202a1019a1fd8be472",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "device": "Samsung Galaxy Tab S6 Lite tablet",
+      "source_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+      "symptoms_and_opening_only": [
+        "Tablet apparently completely dead and unresponsive.",
+        "Charging does not restore normal display or startup.",
+        "Owner reports no clear screen impact damage.",
+        "Some host/USB behavior may occur when buttons are held, but this has not been electrically verified.",
+        "A previous attempt reportedly damaged an internal ribbon retaining clip."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "data_loss"
+      ],
+      "intake_sha256": "9e8fa08bc63f6e4ea07614c1d5d254aefcaef95cf7a86c30c04d18fcf223ea30",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "device": "DeLonghi Eletta ECAM 44.660.B2 coffee machine",
+      "source_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+      "symptoms_and_opening_only": [
+        "Used bean-to-cup coffee machine sold as faulty; exact faults unspecified in title.",
+        "Display appears stuck at a preparation message.",
+        "Leaks involving water and coffee are reported.",
+        "Milk preparation/frothing subsystem appears problematic."
+      ],
+      "hazards": [
+        "ac_mains",
+        "hot_water",
+        "steam"
+      ],
+      "intake_sha256": "25d28dc73fa9d9f070437f7650c967ae5860cfd4e57b31de27f9098c19f0eb30",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "device": "DeWalt compact cordless blower",
+      "source_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+      "symptoms_and_opening_only": [
+        "Blower operates intermittently, cutting in and out.",
+        "Motor may run and then stop while trigger remains held fully down.",
+        "Intermittency is reported across different speed settings.",
+        "No validated battery current or temperature measurements available."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "rotating_parts"
+      ],
+      "intake_sha256": "7ed1fbf3c5af106dba8f1cdd7da1aab68e995af4ce27e59130d2470d71a91737",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "device": "Bosch tumble dryer",
+      "source_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+      "symptoms_and_opening_only": [
+        "Dryer appears unusually slow to heat or dry.",
+        "Creator suspects low-heat switch could be engaged despite off position.",
+        "Low-heat switch status is a hypothesis, not a verified defect.",
+        "No independently measured temperature/airflow provided at intake."
+      ],
+      "hazards": [
+        "ac_mains",
+        "heat",
+        "moving_parts"
+      ],
+      "intake_sha256": "cdb80ae55097673da6a28d7755c2b82e38295a03799f2123159a48c68407ce3e",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "canon_eos2000d_no_power",
+      "device": "Canon EOS 2000D DSLR camera",
+      "source_url": "https://www.youtube.com/watch?v=XXKlAIcint8",
+      "symptoms_and_opening_only": [
+        "DSLR camera will not power on after very high shutter use.",
+        "Camera reportedly shot around 400,000 photographs.",
+        "Presenter mentions checking charged battery voltage and considering compartment microswitches.",
+        "Battery-door and SD-door interlock are possibilities, not measured failures."
+      ],
+      "hazards": [
+        "lithium_ion",
+        "delicate_optical_components"
+      ],
+      "intake_sha256": "345ff874346183b3d93cc945c503748b234fee5d0de7eae51e7e1dae3d3ddfb5",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "reebok_treadmill_dead",
+      "device": "Reebok GT40S treadmill",
+      "source_url": "https://www.youtube.com/watch?v=1Nvt8ARL5Xc",
+      "symptoms_and_opening_only": [
+        "Treadmill reportedly completely dead.",
+        "Owner reports treadmill previously worked, then stopped.",
+        "External control/input yields no obvious response.",
+        "No qualified power-supply measurements at intake."
+      ],
+      "hazards": [
+        "ac_mains",
+        "large_motor",
+        "mechanical_motion"
+      ],
+      "intake_sha256": "d7a6741f553cabcd630000ed92fb028e4e684e35e40e84ea2256e01814e709dc",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "device": "Sony PlayStation 5 Pro",
+      "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "symptoms_and_opening_only": [
+        "Console does not power on; seller also reports HDMI port damage.",
+        "Seller reports a power-on failure and damaged HDMI port as separate symptoms.",
+        "Warranty sticker was reportedly already removed before purchase.",
+        "No verified electrical tests before disassembly."
+      ],
+      "hazards": [
+        "ac_mains_internal_psu",
+        "esd"
+      ],
+      "intake_sha256": "f4a577e8f2a26c5b65c31bb0139a8e0ab14c3c934a3693c27a420edb33b38239",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    },
+    {
+      "case_id": "xbox_series_s_dead",
+      "device": "Microsoft Xbox Series S",
+      "source_url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+      "symptoms_and_opening_only": [
+        "Console described as having no power.",
+        "No device-specific electrical observations disclosed in the title.",
+        "Factory internal AC power architecture independently documented."
+      ],
+      "hazards": [
+        "ac_mains_internal_psu"
+      ],
+      "intake_sha256": "f359fea750b48902b63f65921b8a4d287614286886ef2292ff449df48fddd660",
+      "instructions": "Do not browse the video outcome or infer a repair was completed. Generate <=3 distinct mechanisms with falsifiable observations; give the single best safe next discriminating check; distinguish confirmed vs suggested facts; abstain when evidence insufficient. No physical mains probing, lithium pack work, powered laser, irreversible parts replacement or data wiping."
+    }
+  ]
+}
