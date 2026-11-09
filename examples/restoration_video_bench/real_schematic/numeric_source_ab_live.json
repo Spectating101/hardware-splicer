@@ -1,0 +1,463 @@
+{
+  "protocol": {
+    "schema": "hs.restoration.numeric_source_authority_matched_ab.v1",
+    "exact_model": "gemini-3.8-flash-low",
+    "case_order": [
+      {
+        "id": "ps5_pro_no_power_hdmi",
+        "arm_order": [
+          "plain",
+          "hs_numeric_source"
+        ]
+      },
+      {
+        "id": "dmg_reported_battery_only_failure",
+        "arm_order": [
+          "hs_numeric_source",
+          "plain"
+        ]
+      }
+    ],
+    "model_calls_per_arm_per_case": 1,
+    "source_claims_identical_between_arms": true,
+    "creator_outcome_or_repair_method_never_loaded": true,
+    "control": "same source-backed claim text and source URL without machine provenance ledger",
+    "intervention": "same source-backed claim text with actual native engineering source graph, condition IDs and declared-only authority guidance",
+    "no_fabricated_measurement_or_manufacturer_specification": true,
+    "real_board_revision_never_verified_by_this_test": true,
+    "hardware_physical_actions": false,
+    "not_an_isolated_graph_effect": "treatment has longer prompt and explicit source-authority instructions",
+    "no_gold_accuracy_scoring_in_runner": true
+  },
+  "protocol_sha256": "8fb0f02f369860b1d62b6631b2ae457b02aa6e3091da53079b8f3a94eeb78175",
+  "original_numeric_source_manifest_sha256": "9584cc8e25b93694391fc8d343393c08c15d33a0f9f9a36e209e75ce67b015ed",
+  "real_HS_graph_sha256": "bc97cf06c5589c3096abd7e12cc050e524ec0bb0f14ab6289f07fca053f26ca7",
+  "numeric_source_validation": {
+    "schema": "hs.restoration.source_numeric_evidence_ledger.v1",
+    "source_manifest_sha256": "9584cc8e25b93694391fc8d343393c08c15d33a0f9f9a36e209e75ce67b015ed",
+    "native_HS_source_graph_sha256": "bc97cf06c5589c3096abd7e12cc050e524ec0bb0f14ab6289f07fca053f26ca7",
+    "native_HS_source_graph_schema": "hardware_splicer.engineering_source_graph.v1",
+    "source_count": 2,
+    "claim_count": 6,
+    "claims": [
+      {
+        "claim_id": "M1",
+        "case_id": "ps5_pro_no_power_hdmi",
+        "source_type": "video_caption",
+        "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+        "source_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+        "claim_type": "creator_reported_reading",
+        "quantity": "voltage",
+        "value": 0,
+        "upper_value": null,
+        "unit": "V",
+        "source_anchor": "exactly zero volts",
+        "source_locator": {
+          "start_second": 120,
+          "end_second": 151,
+          "caption_auto_generated": true
+        },
+        "condition_id": "psu_connected_before_board_extraction",
+        "condition_description": "Console assembled before power-supply removal; physical probe nodes and fixture not independently verified",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      },
+      {
+        "claim_id": "M2",
+        "case_id": "ps5_pro_no_power_hdmi",
+        "source_type": "video_caption",
+        "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+        "source_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+        "claim_type": "creator_reported_reading",
+        "quantity": "voltage",
+        "value": 12,
+        "upper_value": null,
+        "unit": "V",
+        "source_anchor": "we have 12 volts",
+        "source_locator": {
+          "start_second": 300,
+          "end_second": 311,
+          "caption_auto_generated": true
+        },
+        "condition_id": "psu_tested_without_motherboard",
+        "condition_description": "Creator reports 12 V with motherboard disconnected; no signed instrument log",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      },
+      {
+        "claim_id": "M3",
+        "case_id": "ps5_pro_no_power_hdmi",
+        "source_type": "video_caption",
+        "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+        "source_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+        "claim_type": "creator_reported_reading",
+        "quantity": "resistance",
+        "value": 2,
+        "upper_value": null,
+        "unit": "ohm",
+        "source_anchor": "That is 2 ohms",
+        "source_locator": {
+          "start_second": 330,
+          "end_second": 340,
+          "caption_auto_generated": true
+        },
+        "condition_id": "motherboard_dc_input_contacts",
+        "condition_description": "Creator reports resistance at mainboard DC input pins; meter and target probe locations not independently verified",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      },
+      {
+        "claim_id": "R1",
+        "case_id": "dmg_reported_battery_only_failure",
+        "source_type": "repair_article",
+        "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+        "source_sha256": "0f5c36614ddd008486193b215de7412532936671a11878f1aa0d09307ea27a83",
+        "claim_type": "published_reference_expectation",
+        "quantity": "voltage",
+        "value": 6,
+        "upper_value": 6.4,
+        "unit": "V",
+        "source_anchor": "Expect 6.0 to 6.4 V open circuit",
+        "source_locator": {
+          "url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+          "section": "published repair instructions"
+        },
+        "condition_id": "four_fresh_aa_open_circuit",
+        "condition_description": "Author-recommended expected open-circuit pack range, not measured evidence from target hardware",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      },
+      {
+        "claim_id": "R2",
+        "case_id": "dmg_reported_battery_only_failure",
+        "source_type": "repair_article",
+        "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+        "source_sha256": "0f5c36614ddd008486193b215de7412532936671a11878f1aa0d09307ea27a83",
+        "claim_type": "published_reference_expectation",
+        "quantity": "voltage",
+        "value": 5.4,
+        "upper_value": null,
+        "unit": "V",
+        "source_anchor": "at least 5.4 V",
+        "source_locator": {
+          "url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+          "section": "published repair instructions"
+        },
+        "condition_id": "power_board_input_under_load",
+        "condition_description": "Author-recommended minimum load voltage, not a verified manufacturer spec or target measurement",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      },
+      {
+        "claim_id": "R3",
+        "case_id": "dmg_reported_battery_only_failure",
+        "source_type": "repair_article",
+        "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+        "source_sha256": "0f5c36614ddd008486193b215de7412532936671a11878f1aa0d09307ea27a83",
+        "claim_type": "published_reference_expectation",
+        "quantity": "voltage",
+        "value": 4.5,
+        "upper_value": null,
+        "unit": "V",
+        "source_anchor": "Below 4.5 V",
+        "source_locator": {
+          "url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+          "section": "published repair instructions"
+        },
+        "condition_id": "power_board_input_under_load",
+        "condition_description": "Author's failure threshold claim, not an observed unit result or manufacturer-verified specification",
+        "authority": "declared",
+        "measured_by_HS": false,
+        "target_board_physically_verified": false,
+        "calibrated_instrument_data_present": false,
+        "manufacturer_specification_verified": false,
+        "independent_bench_truth": false
+      }
+    ],
+    "conflicts": [],
+    "conditions_are_distinct": true,
+    "source_authority_ceiling": "declared",
+    "measurements_physically_taken_by_HS": false,
+    "board_identity_independently_verified": false,
+    "independent_verified_numeric_thresholds": false,
+    "repair_authorized": false
+  },
+  "cases": [
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "model_arm_order": [
+        "plain",
+        "hs_numeric_source"
+      ],
+      "evidence_sha256": "648fd275bed7e7d0cbad506cd06cde1195efadbebbee61343a1d6777cdd4f778",
+      "source_numeric_claim_ids": [
+        "M1",
+        "M2",
+        "M3"
+      ],
+      "arms": {
+        "plain": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "ps5_pro_no_power_hdmi",
+          "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "648fd275bed7e7d0cbad506cd06cde1195efadbebbee61343a1d6777cdd4f778",
+          "caption_provenance": null,
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "b9e257e45ac4b47154612ca0b98ec41d895fad19a28f61b963d7cdd7c51aae7f",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "e1bc23f168381d8afe5547712aabfee15ceb7252241bd4d929b58cbca82c2db4",
+          "usage": {
+            "prompt_tokens": 874,
+            "completion_tokens": 291
+          },
+          "status": "rejected_model_output_or_unavailable",
+          "error_type": "ValueError",
+          "error": "unsafe or irreversible proposed action; fail closed",
+          "plan": null,
+          "elapsed_seconds": 11.65,
+          "receipt_sha256": "5c8375a2f7944360b33e4165869f5f0c957bf25e7a6a66f5897251be8ce0efd9"
+        },
+        "hs_numeric_source": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "ps5_pro_no_power_hdmi",
+          "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "648fd275bed7e7d0cbad506cd06cde1195efadbebbee61343a1d6777cdd4f778",
+          "caption_provenance": null,
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "1649705c84451aa1a0a5f9a6907a7b3b2a4f4cd8aede77d4c802991fa2b346bd",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "numeric_source_tool_sha256": "ade728f3c59c38a65072e9ae453c95d8892d6a0b19d2dae61e99e7969cb2eb07",
+          "numeric_source_graph_sha256": "bc97cf06c5589c3096abd7e12cc050e524ec0bb0f14ab6289f07fca053f26ca7",
+          "reported_numbers_not_HS_measurements": true,
+          "physical_board_verified": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "3dc80198fd393b00eaf6ebed5c2fc69f5efc8974078fae9e7ff741ccfdab4287",
+          "usage": {
+            "prompt_tokens": 1157,
+            "completion_tokens": 385
+          },
+          "plan": {
+            "summary": "Untrusted creator reports describe a PS5 Pro with no startup power, damaged HDMI port, unverified 0 V assembled vs 12 V disconnected readings, and an unverified 2 ohm DC input resistance. No fault is proven; live probing and mains power supply teardown are prohibited.",
+            "hypotheses": [
+              {
+                "mechanism": "Unverified low-impedance or short circuit condition on the 12 V mainboard power rail or downstream power stage",
+                "why": "Aligns with reported no-power symptom and creator-claimed 0 V under load versus 12 V unloaded, alongside claimed 2 ohm DC input resistance, though meter calibration and probe contact nodes remain unverified.",
+                "evidence_ids": [
+                  "E1",
+                  "E3",
+                  "E4",
+                  "E5"
+                ],
+                "safe_test": "Inspect disconnected mainboard externally under unpowered magnification for visible capacitor or component degradation without mains power or board-level energized testing."
+              },
+              {
+                "mechanism": "Power delivery interruption or protection trip originating from physical damage at connector interfaces or external port traces",
+                "why": "Reported visible HDMI port physical damage may indicate mechanical drop or external trauma, potentially causing bent pins, bridged pads, or collateral trace shorts that prevent system startup.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "Perform passive optical inspection of the external HDMI port and surrounding chassis connectors under magnification with the console fully unpowered and disconnected from mains."
+              }
+            ],
+            "next_safe_check": "Perform a completely unpowered visual inspection of the external HDMI port and exterior connectors under magnification for physical bridging, foreign debris, or bent pins while disconnected from mains power.",
+            "uncertainty": "All quantitative values (0 V, 12 V, 2 ohm) are declared creator claims without signed instrument calibration, reference specifications, or independent verification; probing points and true baseline impedances are unknown.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 7.57,
+          "receipt_sha256": "20cd8ab08fb210f062b5539665bae1c944a59e16e6e745199ce0a06177dcded7"
+        }
+      }
+    },
+    {
+      "case_id": "dmg_reported_battery_only_failure",
+      "model_arm_order": [
+        "hs_numeric_source",
+        "plain"
+      ],
+      "evidence_sha256": "bf075d0dd60c8592cd64f59e42e0a5f4c84d41e46544d05af23141a20b4b0325",
+      "source_numeric_claim_ids": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "arms": {
+        "hs_numeric_source": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "dmg_reported_battery_only_failure",
+          "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "bf075d0dd60c8592cd64f59e42e0a5f4c84d41e46544d05af23141a20b4b0325",
+          "caption_provenance": null,
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "e2a060447ac3a59352475eb997739bd1cf85332caf09bdc7e2f7d13037b2c442",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "numeric_source_tool_sha256": "b5e9b86a7242729ce0b5a52ec1a3d32b7e0b9276141b7b97bdbc81d3a6ce5e75",
+          "numeric_source_graph_sha256": "bc97cf06c5589c3096abd7e12cc050e524ec0bb0f14ab6289f07fca053f26ca7",
+          "reported_numbers_not_HS_measurements": true,
+          "physical_board_verified": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "237266fa1c251d9f8bd38bf0379585405002e9a22c936fb3abf421b2171ef5d6",
+          "usage": {
+            "prompt_tokens": 1388,
+            "completion_tokens": 462
+          },
+          "plan": {
+            "summary": "Unverified account reports a Nintendo Game Boy DMG-01 fails to power on from AA batteries but functions via an external DC adapter. No empirical electrical measurements or physical board observations have been verified on the target device.",
+            "hypotheses": [
+              {
+                "mechanism": "Open circuit or high contact resistance at the battery terminal contacts (e.g. surface contamination, corrosion, or mechanical deformation) preventing battery DC voltage from reaching the internal power distribution circuit.",
+                "why": "Reported symptom states external DC adapter operation succeeds while AA battery operation fails, suggesting the DC jack internal disconnect switch or the battery terminals upstream of the power switch may be open-circuit or high-resistance under battery load.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "Perform an unpowered visual inspection of the battery compartment terminals for visible corrosion, oxidation, or bent springs without inserting batteries or applying power."
+              },
+              {
+                "mechanism": "Mechanical or electrical failure of the external DC jack's internal leaf switch contact, causing it to remain open and isolate the battery circuit even when no external DC plug is inserted.",
+                "why": "The DMG-01 DC barrel jack contains a mechanical switch designed to disconnect battery power when an external adapter plug is inserted; if jammed or oxidized, battery path remains disconnected while external power works.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "Conduct an unpowered visual check inside the DC input jack opening using an external light source to check for physical debris or an obviously bent leaf contact."
+              },
+              {
+                "mechanism": "Battery rail trace break, degraded solder joint, or corroded PCB trace between the battery contact pads and the main power rail/power switch.",
+                "why": "External power enters through the DC jack circuit while battery power enters through the shell contacts; a localized break or dry solder joint exclusively on the battery path could cause battery-only failure.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "Perform an unpowered, external visual inspection through available seams or openings for severe battery leakage residues or casing cracks without disassembling the device."
+              }
+            ],
+            "next_safe_check": "Perform an unpowered visual inspection of the external battery compartment contacts for signs of alkaline corrosion residue, deformation, or surface contamination.",
+            "uncertainty": "All reported failure symptoms and hardware revisions are unverified testimonial accounts; values E4-E6 are external reference expectations, not measurements of this console; no hardware measurements or verified internal inspections have been conducted.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 8.97,
+          "receipt_sha256": "f1b9d420810abbe094e15b8b3a50122238321bad7c577f100c30e78db7f325be"
+        },
+        "plain": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "dmg_reported_battery_only_failure",
+          "source_url": "https://revamp.top/gameboy/gameboy-dmg-no-power-battery-contact/",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "bf075d0dd60c8592cd64f59e42e0a5f4c84d41e46544d05af23141a20b4b0325",
+          "caption_provenance": null,
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "3a93ae98c83fcfe3d89046eafee95760b38c8ffce05e21ef4314c022abf9ff0e",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "a2e2eaa53fd2a3c2a2ce87b1c0ecdfb31ed5acd714a7465bcf923e849d052bdd",
+          "usage": {
+            "prompt_tokens": 853,
+            "completion_tokens": 284
+          },
+          "plan": {
+            "summary": "The unit reportedly boots via an external DC adapter but fails to power on from AA cells. Potential issues center on the battery power path, specifically the internal switch contact in the DC jack, battery terminal contact or corrosion, or traces between the battery compartment and the power switch/DC jack.",
+            "hypotheses": [
+              {
+                "mechanism": "DC jack internal mechanical switch contact oxidation or mechanical failure",
+                "why": "In the DMG-01, the external DC jack contains a mechanical switch contact that disconnects the battery positive line when an external plug is inserted. If the contact is stuck, oxidized, or broken, battery power cannot reach the power switch even when no external plug is inserted, while an external adapter bypasses this switch and powers the unit.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "With all power sources removed, perform an unpowered continuity check between the battery positive terminal connection and the DC jack switched output pin using a digital multimeter."
+              },
+              {
+                "mechanism": "Battery terminal corrosion or high contact resistance",
+                "why": "Corrosion, oxidation, or lack of spring tension on the battery contacts can prevent adequate current or voltage delivery from the AA pack into the board, leaving the external DC path unaffected.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "Perform an unpowered visual inspection of the battery contacts for corrosion, residue, or deformation, followed by an unpowered resistance check across the spring/plate contacts."
+              },
+              {
+                "mechanism": "Broken trace or solder joint in the battery supply rail prior to the DC jack or power switch",
+                "why": "Physical stress, dropped unit damage, or acid leaching from past battery leakage may have severed the conductive trace or fractured a solder joint between the battery terminals and the DC input circuitry.",
+                "evidence_ids": [
+                  "E1",
+                  "E2"
+                ],
+                "safe_test": "With batteries removed and adapter disconnected, perform unpowered point-to-point continuity checks along the PCB traces from the battery terminal solder pads to the DC jack input pad."
+              }
+            ],
+            "next_safe_check": "Perform an unpowered visual inspection of the battery terminals and DC jack, followed by an unpowered continuity test across the DC jack internal switch with no external plug inserted.",
+            "uncertainty": "Mainboard revision DMG-CPU-06 is unconfirmed (E3), and items E4-E6 represent unverified third-party reference claims rather than measured hardware values from this unit. Fault cannot be proven without physical, unpowered continuity testing of the switch contacts and battery rail.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 9.75,
+          "receipt_sha256": "77b3dd0583e7e7ced8095986b899f00df74a531541c2872e0f324af381e73784"
+        }
+      }
+    }
+  ],
+  "complete": true
+}

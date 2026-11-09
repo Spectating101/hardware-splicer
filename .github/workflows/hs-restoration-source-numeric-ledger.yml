@@ -7,8 +7,11 @@ on:
       - 'src/hardware_splicer/restoration_reasoning_agent.py'
       - 'examples/restoration_video_bench/real_schematic/source_numeric_claims*'
       - 'examples/restoration_video_bench/real_schematic/run_numeric_source_ab.py'
+      - 'examples/restoration_video_bench/real_schematic/inspect_numeric_source_ab.py'
+      - 'examples/restoration_video_bench/real_schematic/numeric_source_ab_*.json'
       - 'examples/restoration_video_bench/real_schematic/NUMERIC_SOURCE_PROVENANCE.md'
       - 'tests/test_restoration_numeric_source_ledger.py'
+      - 'tests/test_restoration_numeric_source_ab_live.py'
       - '.github/workflows/hs-restoration-source-numeric-ledger.yml'
   workflow_dispatch:
 permissions:
@@ -29,6 +32,7 @@ jobs:
         run: |
           python -m pytest -q \
             tests/test_restoration_numeric_source_ledger.py \
+            tests/test_restoration_numeric_source_ab_live.py \
             tests/test_restoration_numeric_truth_gate.py \
             tests/test_restoration_board_action_gate.py \
             tests/test_restoration_real_schematic.py

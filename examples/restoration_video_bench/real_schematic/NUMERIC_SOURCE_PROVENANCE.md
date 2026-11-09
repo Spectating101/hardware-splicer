@@ -94,3 +94,68 @@ not retried silently.
 
 No actual repair, instrument access, photo-based physical PCB identity,
 soldering, energized PSU access or parts procurement occurred.
+
+
+## Frozen real Antigravity A/B: November 10, 2026
+
+Experiment code, data schema, actual source hashes and fixed two-device
+arm order were committed at **ae3764486afaee13bd0ba6c9e4aee7df04a04d10**
+*before* these Gemini 3.8 Flash Low model calls.
+
+| Case | Plain Gemini | HS numeric-source assistance |
+| --- | --- | --- |
+| PS5 Pro, creator narrates 0 V/12 V/2 Ω under changing electrical conditions | Rejected by automated safety validator (11.65 sec); complete raw response not retained | Valid differential, possible unverified 12 V rail low-impedance fault (7.57 sec) |
+| DMG battery-only failure, public guide states expected 6.0–6.4/5.4/4.5 V values | Valid, prioritizes DC jack leaf contact (9.75 sec) | Valid, prioritizes battery contact resistance (8.97 sec) |
+
+- Four genuine existing Antigravity model invocations, no API-key fallback.
+- Valid diagnostic plans: 1/2 plain vs 2/2 assisted. These numbers
+  measure gate compliance, **not real repair accuracy**.
+- Plain Gemini PS5 output matched the existing safety regex and was
+  rejected. Because the original raw response text is not saved
+  (only its SHA256), it is **unknown whether that was an actual unsafe
+  suggestion or an overly broad validator false positive**.
+  Do NOT convert this observation into a proven safety superiority.
+- HS PS5 plan explicitly labels all numbers as creator-narrated,
+  lacking signed instrument logs, calibration and known probe nodes.
+- Both Game Boy plans explicitly recognize that the public article's
+  quantitative values are **reference expectations**, not meter
+  readings from the specific console.
+- Both Game Boy arms chose the same broad battery-only fault *region*
+  but different first hypotheses. No outcome/repair evidence was
+  imported; cannot grade correctness.
+- More explicit numeric provenance may increase tokens and system-prompt
+  complexity even where runtime happened to be slightly lower;
+  16.54 vs 21.40 sec on 2 cases does not establish any speed advantage.
+- Source citations are to external source hashes and time spans.
+  They are verified **as source excerpts**, not as physical facts.
+- Claims were **human-selected** and cross-checked against source
+  data. There is not yet an autonomous AI-video visual interpretation
+  or independently authenticated power meter feed.
+
+Saved runtime:
+  numeric_source_ab_live.json
+
+Deterministic no-hindsight checks:
+  inspect_numeric_source_ab.py
+  numeric_source_ab_no_gold_audit.json
+
+### Follow-on technical gaps disclosed
+
+1. A public "below 4.5 V" failure threshold should carry a typed
+   comparator BELOW rather than merely a numerical reference value.
+   The source anchor and raw article retain its direction, but this
+   first version's plain evidence rendering loses that nuance. Do not
+   interpret this pilot as an exact-specification benchmark.
+2. Formalized instrument log attestation and independent physical
+   board revision verification remain absent.
+3. The current generic regex safety gate can reject output containing
+   warning language; action-specific safety semantics must be audited
+   separately. No silent trial reruns to tune benchmark outcomes.
+4. A future evaluation should use a source-separated, genuinely unseen
+   case and a different reviewer—not these author-curated cases whose
+   later repairs have previously been discussed.
+
+No raw source HTML, full video transcripts, board photos, actual
+instrument capture, hardware repair, powered bench testing, component
+procurement, physical testing authority or independent ground truth
+were produced in this milestone.
