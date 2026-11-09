@@ -1,0 +1,2728 @@
+{
+  "reference_boards": {
+    "DC-CONV-DMG-AB": {
+      "component_count": 19,
+      "components": [
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C1",
+          "value": "680n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C2",
+          "value": "1n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C3",
+          "value": "8.2n"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C4",
+          "value": "33u"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C5",
+          "value": "10u"
+        },
+        {
+          "lib": {
+            "description": "Diode",
+            "lib": "Device",
+            "part": "D"
+          },
+          "ref": "D1",
+          "value": "D"
+        },
+        {
+          "lib": {
+            "description": "40V 0.1A Small signal Schottky diode, SOT-23",
+            "lib": "Gekkio_Diode",
+            "part": "1SS294"
+          },
+          "ref": "D2",
+          "value": "1SS294"
+        },
+        {
+          "lib": {
+            "description": "Diode",
+            "lib": "Device",
+            "part": "D"
+          },
+          "ref": "D3",
+          "value": "D"
+        },
+        {
+          "lib": {
+            "description": "Zener diode",
+            "lib": "Device",
+            "part": "D_Zener"
+          },
+          "ref": "D4",
+          "value": "4.7V"
+        },
+        {
+          "lib": {
+            "description": "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)",
+            "lib": "Connector_Generic",
+            "part": "Conn_01x04"
+          },
+          "ref": "J1",
+          "value": "Conn_01x04"
+        },
+        {
+          "lib": {
+            "description": "Inductor",
+            "lib": "Device",
+            "part": "L"
+          },
+          "ref": "L1",
+          "value": "1u"
+        },
+        {
+          "lib": {
+            "description": "NPN transistor, base/collector/emitter",
+            "lib": "Device",
+            "part": "Q_NPN_BCE"
+          },
+          "ref": "Q1",
+          "value": "2SD1664R"
+        },
+        {
+          "lib": {
+            "description": "NPN transistor, base/emitter/collector",
+            "lib": "Device",
+            "part": "Q_NPN_BEC"
+          },
+          "ref": "Q2",
+          "value": "2SD1328"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R1",
+          "value": "20k"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R2",
+          "value": "330"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R3",
+          "value": "2.7k"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R4",
+          "value": "180"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R5",
+          "value": "510"
+        },
+        {
+          "lib": {
+            "description": "Power Transformer, original Game Boy (DMG)",
+            "lib": "Gekkio_Transformer",
+            "part": "GameBoy_Transformer_DMG"
+          },
+          "ref": "T1",
+          "value": "223 or 231"
+        }
+      ],
+      "net_count": 15,
+      "nets": [
+        {
+          "name": "/VOUT+",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C5"
+            },
+            {
+              "pin": "3",
+              "ref": "D2"
+            },
+            {
+              "pin": "2",
+              "ref": "D3"
+            },
+            {
+              "pin": "1",
+              "ref": "D4"
+            },
+            {
+              "pin": "1",
+              "ref": "J1"
+            }
+          ]
+        },
+        {
+          "name": "/VOUT-",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "C4"
+            },
+            {
+              "pin": "2",
+              "ref": "J1"
+            },
+            {
+              "pin": "1",
+              "ref": "R5"
+            }
+          ]
+        },
+        {
+          "name": "GND",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "C1"
+            },
+            {
+              "pin": "2",
+              "ref": "C3"
+            },
+            {
+              "pin": "1",
+              "ref": "C4"
+            },
+            {
+              "pin": "2",
+              "ref": "C5"
+            },
+            {
+              "pin": "3",
+              "ref": "J1"
+            },
+            {
+              "pin": "3",
+              "ref": "Q1"
+            },
+            {
+              "pin": "2",
+              "ref": "Q2"
+            },
+            {
+              "pin": "2",
+              "ref": "R4"
+            },
+            {
+              "pin": "5",
+              "ref": "T1"
+            },
+            {
+              "pin": "9",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(C1-Pad1)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C1"
+            },
+            {
+              "pin": "2",
+              "ref": "L1"
+            },
+            {
+              "pin": "1",
+              "ref": "R1"
+            },
+            {
+              "pin": "3",
+              "ref": "T1"
+            },
+            {
+              "pin": "4",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(C2-Pad1)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C2"
+            },
+            {
+              "pin": "8",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(C2-Pad2)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "C2"
+            },
+            {
+              "pin": "1",
+              "ref": "R2"
+            }
+          ]
+        },
+        {
+          "name": "Net-(D1-A)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "D1"
+            },
+            {
+              "pin": "2",
+              "ref": "R5"
+            }
+          ]
+        },
+        {
+          "name": "Net-(D1-K)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "D1"
+            },
+            {
+              "pin": "7",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(D2-A)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "D2"
+            },
+            {
+              "pin": "6",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(D3-K)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "D3"
+            },
+            {
+              "pin": "1",
+              "ref": "R3"
+            }
+          ]
+        },
+        {
+          "name": "Net-(D4-A)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C3"
+            },
+            {
+              "pin": "2",
+              "ref": "D4"
+            },
+            {
+              "pin": "1",
+              "ref": "Q2"
+            },
+            {
+              "pin": "1",
+              "ref": "R4"
+            }
+          ]
+        },
+        {
+          "name": "Net-(Q1-B)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "Q1"
+            },
+            {
+              "pin": "3",
+              "ref": "Q2"
+            },
+            {
+              "pin": "2",
+              "ref": "R1"
+            },
+            {
+              "pin": "2",
+              "ref": "R2"
+            },
+            {
+              "pin": "2",
+              "ref": "R3"
+            }
+          ]
+        },
+        {
+          "name": "Net-(Q1-C)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "Q1"
+            },
+            {
+              "pin": "1",
+              "ref": "T1"
+            },
+            {
+              "pin": "2",
+              "ref": "T1"
+            }
+          ]
+        },
+        {
+          "name": "VCC",
+          "nodes": [
+            {
+              "pin": "4",
+              "ref": "J1"
+            },
+            {
+              "pin": "1",
+              "ref": "L1"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(D2-NC-Pad2)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "D2"
+            }
+          ]
+        }
+      ],
+      "provenance_kind": "KiCad 9 kicadxml export from Gekkio pinned reverse-engineered schematic; not independently verified against device"
+    },
+    "DMG-CPU-06": {
+      "component_count": 50,
+      "components": [
+        {
+          "lib": {
+            "description": "Multiple-cell battery",
+            "lib": "Device",
+            "part": "Battery"
+          },
+          "ref": "BT1",
+          "value": "AAx4"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C1",
+          "value": "100u"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C10",
+          "value": "100n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C11",
+          "value": "10n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C12",
+          "value": "10n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C13",
+          "value": "10n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C14",
+          "value": "10n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C15",
+          "value": "10n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C16",
+          "value": "100p"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C17",
+          "value": "100p"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C18",
+          "value": "100p"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C19",
+          "value": "100p"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C2",
+          "value": "100u"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C20",
+          "value": "100p"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C21",
+          "value": "27p"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C22",
+          "value": "27p"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C3",
+          "value": "1u"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C4",
+          "value": "1u"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C5",
+          "value": "10u"
+        },
+        {
+          "lib": {
+            "description": "Polarized capacitor",
+            "lib": "Device",
+            "part": "C_Polarized"
+          },
+          "ref": "C6",
+          "value": "10u"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C7",
+          "value": "47n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C8",
+          "value": "47n"
+        },
+        {
+          "lib": {
+            "description": "Unpolarized capacitor",
+            "lib": "Device",
+            "part": "C"
+          },
+          "ref": "C9",
+          "value": "47n"
+        },
+        {
+          "lib": {
+            "description": "Schottky diode",
+            "lib": "Device",
+            "part": "D_Schottky"
+          },
+          "ref": "D1",
+          "value": "RB100A"
+        },
+        {
+          "lib": {
+            "description": "Diode",
+            "lib": "Device",
+            "part": "D"
+          },
+          "ref": "D2",
+          "value": "1SS254"
+        },
+        {
+          "lib": {
+            "description": "Dual diode, cathode/center/anode",
+            "lib": "Device",
+            "part": "D_Dual_Series_KCA_Split"
+          },
+          "ref": "DA1",
+          "value": "DA216"
+        },
+        {
+          "lib": {
+            "description": "Dual diode, cathode/center/anode",
+            "lib": "Device",
+            "part": "D_Dual_Series_KCA_Split"
+          },
+          "ref": "DA2",
+          "value": "DA216"
+        },
+        {
+          "lib": {
+            "description": "Dual diode, cathode/center/anode",
+            "lib": "Device",
+            "part": "D_Dual_Series_KCA_Split"
+          },
+          "ref": "DA3",
+          "value": "DA216"
+        },
+        {
+          "lib": {
+            "description": "Dual diode, cathode/center/anode",
+            "lib": "Device",
+            "part": "D_Dual_Series_KCA_Split"
+          },
+          "ref": "DA4",
+          "value": "DA216"
+        },
+        {
+          "lib": {
+            "description": "DC Barrel Jack, original Game Boy (DMG)",
+            "lib": "Gekkio_Connector_Specialized",
+            "part": "GameBoy_Barrel_Jack_DMG"
+          },
+          "ref": "DC1",
+          "value": "GameBoy_Barrel_Jack_DMG"
+        },
+        {
+          "lib": {
+            "description": "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)",
+            "lib": "Connector_Generic",
+            "part": "Conn_01x04"
+          },
+          "ref": "J1",
+          "value": "Conn_01x04"
+        },
+        {
+          "lib": {
+            "description": "Generic connector, single row, 01x21, script generated (kicad-library-utils/schlib/autogen/connector/)",
+            "lib": "Connector_Generic",
+            "part": "Conn_01x21"
+          },
+          "ref": "J2",
+          "value": "Conn_01x21"
+        },
+        {
+          "lib": {
+            "description": "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)",
+            "lib": "Connector_Generic",
+            "part": "Conn_01x04"
+          },
+          "ref": "J3",
+          "value": "Conn_01x04"
+        },
+        {
+          "lib": {
+            "description": "Game Boy cartridge edge connector",
+            "lib": "Gekkio_Connector_Specialized",
+            "part": "GameBoy_Cartridge"
+          },
+          "ref": "P1",
+          "value": "GameBoy_Cartridge"
+        },
+        {
+          "lib": {
+            "description": "Game Boy link port",
+            "lib": "Gekkio_Connector_Specialized",
+            "part": "GameBoy_LinkPort"
+          },
+          "ref": "P2",
+          "value": "GameBoy_LinkPort"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R1",
+          "value": "220"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R2",
+          "value": "220"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R3",
+          "value": "220"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R4",
+          "value": "220"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R5",
+          "value": "510"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R6",
+          "value": "510"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R7",
+          "value": "180k"
+        },
+        {
+          "lib": {
+            "description": "Resistor",
+            "lib": "Device",
+            "part": "R"
+          },
+          "ref": "R8",
+          "value": "1M"
+        },
+        {
+          "lib": {
+            "description": "Audio volume potentiometer, original Game Boy (DMG)",
+            "lib": "Gekkio_Device_Specialized",
+            "part": "R_Potentiometer_GameBoy_Volume_DMG"
+          },
+          "ref": "RV1",
+          "value": "10kx2"
+        },
+        {
+          "lib": {
+            "description": "Double Pole Double Throw (DPDT) Switch, original Game Boy (DMG)",
+            "lib": "Gekkio_Switch",
+            "part": "GameBoy_SW_DPDT_DMG"
+          },
+          "ref": "SW1",
+          "value": "DPDT"
+        },
+        {
+          "lib": {
+            "description": "CPU, original Game Boy (DMG), QFP-80",
+            "lib": "Gekkio_CPU_Nintendo",
+            "part": "GameBoy_CPU_DMG"
+          },
+          "ref": "U1",
+          "value": "DMG CPU"
+        },
+        {
+          "lib": {
+            "description": "64kb (8K x 8) Game Boy SRAM chip, SOIC-28W",
+            "lib": "Gekkio_Memory_RAM",
+            "part": "GameBoy_SRAM_64K"
+          },
+          "ref": "U2",
+          "value": "LH5164LN"
+        },
+        {
+          "lib": {
+            "description": "64kb (8K x 8) Game Boy SRAM chip, SOIC-28W",
+            "lib": "Gekkio_Memory_RAM",
+            "part": "GameBoy_SRAM_64K"
+          },
+          "ref": "U3",
+          "value": "LH5164LN"
+        },
+        {
+          "lib": {
+            "description": "Audio amplifier, original Game Boy (DMG), SSOP-18",
+            "lib": "Gekkio_Amplifier_Audio",
+            "part": "IR3R40N"
+          },
+          "ref": "U4",
+          "value": "IR3R40N"
+        },
+        {
+          "lib": {
+            "description": "Two pin crystal",
+            "lib": "Device",
+            "part": "Crystal"
+          },
+          "ref": "X1",
+          "value": "4.194304 MHz"
+        }
+      ],
+      "net_count": 108,
+      "nets": [
+        {
+          "name": "/A0",
+          "nodes": [
+            {
+              "pin": "6",
+              "ref": "P1"
+            },
+            {
+              "pin": "1",
+              "ref": "U1"
+            },
+            {
+              "pin": "10",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A1",
+          "nodes": [
+            {
+              "pin": "7",
+              "ref": "P1"
+            },
+            {
+              "pin": "2",
+              "ref": "U1"
+            },
+            {
+              "pin": "9",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A10",
+          "nodes": [
+            {
+              "pin": "16",
+              "ref": "P1"
+            },
+            {
+              "pin": "11",
+              "ref": "U1"
+            },
+            {
+              "pin": "21",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A11",
+          "nodes": [
+            {
+              "pin": "17",
+              "ref": "P1"
+            },
+            {
+              "pin": "12",
+              "ref": "U1"
+            },
+            {
+              "pin": "23",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A12",
+          "nodes": [
+            {
+              "pin": "18",
+              "ref": "P1"
+            },
+            {
+              "pin": "13",
+              "ref": "U1"
+            },
+            {
+              "pin": "2",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A13",
+          "nodes": [
+            {
+              "pin": "19",
+              "ref": "P1"
+            },
+            {
+              "pin": "14",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/A14",
+          "nodes": [
+            {
+              "pin": "20",
+              "ref": "P1"
+            },
+            {
+              "pin": "15",
+              "ref": "U1"
+            },
+            {
+              "pin": "26",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A15",
+          "nodes": [
+            {
+              "pin": "21",
+              "ref": "P1"
+            },
+            {
+              "pin": "16",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/A2",
+          "nodes": [
+            {
+              "pin": "8",
+              "ref": "P1"
+            },
+            {
+              "pin": "3",
+              "ref": "U1"
+            },
+            {
+              "pin": "8",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A3",
+          "nodes": [
+            {
+              "pin": "9",
+              "ref": "P1"
+            },
+            {
+              "pin": "4",
+              "ref": "U1"
+            },
+            {
+              "pin": "7",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A4",
+          "nodes": [
+            {
+              "pin": "10",
+              "ref": "P1"
+            },
+            {
+              "pin": "5",
+              "ref": "U1"
+            },
+            {
+              "pin": "6",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A5",
+          "nodes": [
+            {
+              "pin": "11",
+              "ref": "P1"
+            },
+            {
+              "pin": "6",
+              "ref": "U1"
+            },
+            {
+              "pin": "5",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A6",
+          "nodes": [
+            {
+              "pin": "12",
+              "ref": "P1"
+            },
+            {
+              "pin": "7",
+              "ref": "U1"
+            },
+            {
+              "pin": "4",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A7",
+          "nodes": [
+            {
+              "pin": "13",
+              "ref": "P1"
+            },
+            {
+              "pin": "8",
+              "ref": "U1"
+            },
+            {
+              "pin": "3",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A8",
+          "nodes": [
+            {
+              "pin": "14",
+              "ref": "P1"
+            },
+            {
+              "pin": "9",
+              "ref": "U1"
+            },
+            {
+              "pin": "25",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/A9",
+          "nodes": [
+            {
+              "pin": "15",
+              "ref": "P1"
+            },
+            {
+              "pin": "10",
+              "ref": "U1"
+            },
+            {
+              "pin": "24",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/HPLBC",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C6"
+            },
+            {
+              "pin": "16",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/HPRBC",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C5"
+            },
+            {
+              "pin": "13",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/LIN",
+          "nodes": [
+            {
+              "pin": "3",
+              "ref": "RV1"
+            },
+            {
+              "pin": "7",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/LOUT",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C7"
+            },
+            {
+              "pin": "4",
+              "ref": "J3"
+            },
+            {
+              "pin": "15",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/RIN",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "RV1"
+            },
+            {
+              "pin": "8",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/ROUT",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C9"
+            },
+            {
+              "pin": "3",
+              "ref": "J3"
+            },
+            {
+              "pin": "12",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/SW",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "J3"
+            },
+            {
+              "pin": "6",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/VR1-SO1",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "R5"
+            },
+            {
+              "pin": "5",
+              "ref": "RV1"
+            }
+          ]
+        },
+        {
+          "name": "/Analog audio/VR1-SO2",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "R6"
+            },
+            {
+              "pin": "4",
+              "ref": "RV1"
+            }
+          ]
+        },
+        {
+          "name": "/CP",
+          "nodes": [
+            {
+              "pin": "14",
+              "ref": "J2"
+            },
+            {
+              "pin": "53",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/CPG",
+          "nodes": [
+            {
+              "pin": "19",
+              "ref": "J2"
+            },
+            {
+              "pin": "52",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/CPL",
+          "nodes": [
+            {
+              "pin": "18",
+              "ref": "J2"
+            },
+            {
+              "pin": "55",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/D0",
+          "nodes": [
+            {
+              "pin": "22",
+              "ref": "P1"
+            },
+            {
+              "pin": "17",
+              "ref": "U1"
+            },
+            {
+              "pin": "11",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D1",
+          "nodes": [
+            {
+              "pin": "23",
+              "ref": "P1"
+            },
+            {
+              "pin": "18",
+              "ref": "U1"
+            },
+            {
+              "pin": "12",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D2",
+          "nodes": [
+            {
+              "pin": "24",
+              "ref": "P1"
+            },
+            {
+              "pin": "19",
+              "ref": "U1"
+            },
+            {
+              "pin": "13",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D3",
+          "nodes": [
+            {
+              "pin": "25",
+              "ref": "P1"
+            },
+            {
+              "pin": "20",
+              "ref": "U1"
+            },
+            {
+              "pin": "15",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D4",
+          "nodes": [
+            {
+              "pin": "26",
+              "ref": "P1"
+            },
+            {
+              "pin": "21",
+              "ref": "U1"
+            },
+            {
+              "pin": "16",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D5",
+          "nodes": [
+            {
+              "pin": "27",
+              "ref": "P1"
+            },
+            {
+              "pin": "22",
+              "ref": "U1"
+            },
+            {
+              "pin": "17",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D6",
+          "nodes": [
+            {
+              "pin": "28",
+              "ref": "P1"
+            },
+            {
+              "pin": "23",
+              "ref": "U1"
+            },
+            {
+              "pin": "18",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/D7",
+          "nodes": [
+            {
+              "pin": "29",
+              "ref": "P1"
+            },
+            {
+              "pin": "24",
+              "ref": "U1"
+            },
+            {
+              "pin": "19",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/FR",
+          "nodes": [
+            {
+              "pin": "13",
+              "ref": "J2"
+            },
+            {
+              "pin": "56",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/LD0",
+          "nodes": [
+            {
+              "pin": "16",
+              "ref": "J2"
+            },
+            {
+              "pin": "51",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/LD1",
+          "nodes": [
+            {
+              "pin": "15",
+              "ref": "J2"
+            },
+            {
+              "pin": "50",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/Link port/P2-P14",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C19"
+            },
+            {
+              "pin": "2",
+              "ref": "DA4"
+            },
+            {
+              "pin": "4",
+              "ref": "P2"
+            },
+            {
+              "pin": "2",
+              "ref": "R4"
+            }
+          ]
+        },
+        {
+          "name": "/Link port/P2-SCK",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C16"
+            },
+            {
+              "pin": "2",
+              "ref": "DA1"
+            },
+            {
+              "pin": "5",
+              "ref": "P2"
+            },
+            {
+              "pin": "2",
+              "ref": "R1"
+            }
+          ]
+        },
+        {
+          "name": "/Link port/P2-SIN",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C17"
+            },
+            {
+              "pin": "2",
+              "ref": "DA2"
+            },
+            {
+              "pin": "3",
+              "ref": "P2"
+            },
+            {
+              "pin": "2",
+              "ref": "R2"
+            }
+          ]
+        },
+        {
+          "name": "/Link port/P2-SOUT",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C18"
+            },
+            {
+              "pin": "2",
+              "ref": "DA3"
+            },
+            {
+              "pin": "2",
+              "ref": "P2"
+            },
+            {
+              "pin": "2",
+              "ref": "R3"
+            }
+          ]
+        },
+        {
+          "name": "/Link port/P2-VDD",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "D2"
+            },
+            {
+              "pin": "1",
+              "ref": "P2"
+            }
+          ]
+        },
+        {
+          "name": "/MA0",
+          "nodes": [
+            {
+              "pin": "34",
+              "ref": "U1"
+            },
+            {
+              "pin": "10",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA1",
+          "nodes": [
+            {
+              "pin": "35",
+              "ref": "U1"
+            },
+            {
+              "pin": "9",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA10",
+          "nodes": [
+            {
+              "pin": "44",
+              "ref": "U1"
+            },
+            {
+              "pin": "21",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA11",
+          "nodes": [
+            {
+              "pin": "46",
+              "ref": "U1"
+            },
+            {
+              "pin": "23",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA12",
+          "nodes": [
+            {
+              "pin": "42",
+              "ref": "U1"
+            },
+            {
+              "pin": "2",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA2",
+          "nodes": [
+            {
+              "pin": "36",
+              "ref": "U1"
+            },
+            {
+              "pin": "8",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA3",
+          "nodes": [
+            {
+              "pin": "37",
+              "ref": "U1"
+            },
+            {
+              "pin": "7",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA4",
+          "nodes": [
+            {
+              "pin": "38",
+              "ref": "U1"
+            },
+            {
+              "pin": "6",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA5",
+          "nodes": [
+            {
+              "pin": "39",
+              "ref": "U1"
+            },
+            {
+              "pin": "5",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA6",
+          "nodes": [
+            {
+              "pin": "40",
+              "ref": "U1"
+            },
+            {
+              "pin": "4",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA7",
+          "nodes": [
+            {
+              "pin": "41",
+              "ref": "U1"
+            },
+            {
+              "pin": "3",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA8",
+          "nodes": [
+            {
+              "pin": "48",
+              "ref": "U1"
+            },
+            {
+              "pin": "25",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MA9",
+          "nodes": [
+            {
+              "pin": "47",
+              "ref": "U1"
+            },
+            {
+              "pin": "24",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD0",
+          "nodes": [
+            {
+              "pin": "33",
+              "ref": "U1"
+            },
+            {
+              "pin": "11",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD1",
+          "nodes": [
+            {
+              "pin": "31",
+              "ref": "U1"
+            },
+            {
+              "pin": "12",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD2",
+          "nodes": [
+            {
+              "pin": "30",
+              "ref": "U1"
+            },
+            {
+              "pin": "13",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD3",
+          "nodes": [
+            {
+              "pin": "29",
+              "ref": "U1"
+            },
+            {
+              "pin": "15",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD4",
+          "nodes": [
+            {
+              "pin": "28",
+              "ref": "U1"
+            },
+            {
+              "pin": "16",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD5",
+          "nodes": [
+            {
+              "pin": "27",
+              "ref": "U1"
+            },
+            {
+              "pin": "17",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD6",
+          "nodes": [
+            {
+              "pin": "26",
+              "ref": "U1"
+            },
+            {
+              "pin": "18",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/MD7",
+          "nodes": [
+            {
+              "pin": "25",
+              "ref": "U1"
+            },
+            {
+              "pin": "19",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/P10",
+          "nodes": [
+            {
+              "pin": "8",
+              "ref": "J2"
+            },
+            {
+              "pin": "67",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/P11",
+          "nodes": [
+            {
+              "pin": "4",
+              "ref": "J2"
+            },
+            {
+              "pin": "66",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/P12",
+          "nodes": [
+            {
+              "pin": "7",
+              "ref": "J2"
+            },
+            {
+              "pin": "65",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/P13",
+          "nodes": [
+            {
+              "pin": "6",
+              "ref": "J2"
+            },
+            {
+              "pin": "64",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/P14",
+          "nodes": [
+            {
+              "pin": "5",
+              "ref": "J2"
+            },
+            {
+              "pin": "1",
+              "ref": "R4"
+            },
+            {
+              "pin": "63",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/P15",
+          "nodes": [
+            {
+              "pin": "9",
+              "ref": "J2"
+            },
+            {
+              "pin": "62",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/PHI",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "P1"
+            },
+            {
+              "pin": "75",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/Power/BT+",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "BT1"
+            },
+            {
+              "pin": "4",
+              "ref": "DC1"
+            }
+          ]
+        },
+        {
+          "name": "/Power/DC-VCC",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C20"
+            },
+            {
+              "pin": "2",
+              "ref": "D1"
+            },
+            {
+              "pin": "2",
+              "ref": "DC1"
+            }
+          ]
+        },
+        {
+          "name": "/Power/SW1-VCC",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "D1"
+            },
+            {
+              "pin": "3",
+              "ref": "DC1"
+            },
+            {
+              "pin": "1",
+              "ref": "SW1"
+            }
+          ]
+        },
+        {
+          "name": "/S",
+          "nodes": [
+            {
+              "pin": "12",
+              "ref": "J2"
+            },
+            {
+              "pin": "57",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SCK",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "R1"
+            },
+            {
+              "pin": "68",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SIN",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "R2"
+            },
+            {
+              "pin": "69",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SO1",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C3"
+            },
+            {
+              "pin": "60",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SO2",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C4"
+            },
+            {
+              "pin": "59",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SOUT",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "R3"
+            },
+            {
+              "pin": "70",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/SP",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C8"
+            },
+            {
+              "pin": "20",
+              "ref": "J2"
+            },
+            {
+              "pin": "3",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "/ST",
+          "nodes": [
+            {
+              "pin": "17",
+              "ref": "J2"
+            },
+            {
+              "pin": "54",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/VIN",
+          "nodes": [
+            {
+              "pin": "31",
+              "ref": "P1"
+            },
+            {
+              "pin": "61",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/~{CS}",
+          "nodes": [
+            {
+              "pin": "5",
+              "ref": "P1"
+            },
+            {
+              "pin": "80",
+              "ref": "U1"
+            },
+            {
+              "pin": "20",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/~{MCS}",
+          "nodes": [
+            {
+              "pin": "43",
+              "ref": "U1"
+            },
+            {
+              "pin": "20",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/~{MRD}",
+          "nodes": [
+            {
+              "pin": "45",
+              "ref": "U1"
+            },
+            {
+              "pin": "22",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/~{MWR}",
+          "nodes": [
+            {
+              "pin": "49",
+              "ref": "U1"
+            },
+            {
+              "pin": "27",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "/~{RD}",
+          "nodes": [
+            {
+              "pin": "4",
+              "ref": "P1"
+            },
+            {
+              "pin": "79",
+              "ref": "U1"
+            },
+            {
+              "pin": "22",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "/~{RES}",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C10"
+            },
+            {
+              "pin": "30",
+              "ref": "P1"
+            },
+            {
+              "pin": "2",
+              "ref": "R7"
+            },
+            {
+              "pin": "3",
+              "ref": "SW1"
+            },
+            {
+              "pin": "71",
+              "ref": "U1"
+            }
+          ]
+        },
+        {
+          "name": "/~{WR}",
+          "nodes": [
+            {
+              "pin": "3",
+              "ref": "P1"
+            },
+            {
+              "pin": "78",
+              "ref": "U1"
+            },
+            {
+              "pin": "27",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "GND",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "BT1"
+            },
+            {
+              "pin": "2",
+              "ref": "C1"
+            },
+            {
+              "pin": "2",
+              "ref": "C10"
+            },
+            {
+              "pin": "2",
+              "ref": "C11"
+            },
+            {
+              "pin": "2",
+              "ref": "C12"
+            },
+            {
+              "pin": "2",
+              "ref": "C13"
+            },
+            {
+              "pin": "2",
+              "ref": "C14"
+            },
+            {
+              "pin": "2",
+              "ref": "C15"
+            },
+            {
+              "pin": "2",
+              "ref": "C16"
+            },
+            {
+              "pin": "2",
+              "ref": "C17"
+            },
+            {
+              "pin": "2",
+              "ref": "C18"
+            },
+            {
+              "pin": "2",
+              "ref": "C19"
+            },
+            {
+              "pin": "2",
+              "ref": "C2"
+            },
+            {
+              "pin": "2",
+              "ref": "C20"
+            },
+            {
+              "pin": "2",
+              "ref": "C21"
+            },
+            {
+              "pin": "2",
+              "ref": "C22"
+            },
+            {
+              "pin": "2",
+              "ref": "C5"
+            },
+            {
+              "pin": "2",
+              "ref": "C6"
+            },
+            {
+              "pin": "2",
+              "ref": "C7"
+            },
+            {
+              "pin": "2",
+              "ref": "C8"
+            },
+            {
+              "pin": "2",
+              "ref": "C9"
+            },
+            {
+              "pin": "3",
+              "ref": "DA1"
+            },
+            {
+              "pin": "3",
+              "ref": "DA2"
+            },
+            {
+              "pin": "3",
+              "ref": "DA3"
+            },
+            {
+              "pin": "3",
+              "ref": "DA4"
+            },
+            {
+              "pin": "1",
+              "ref": "DC1"
+            },
+            {
+              "pin": "3",
+              "ref": "J1"
+            },
+            {
+              "pin": "1",
+              "ref": "J2"
+            },
+            {
+              "pin": "10",
+              "ref": "J2"
+            },
+            {
+              "pin": "21",
+              "ref": "J2"
+            },
+            {
+              "pin": "2",
+              "ref": "J3"
+            },
+            {
+              "pin": "32",
+              "ref": "P1"
+            },
+            {
+              "pin": "6",
+              "ref": "P2"
+            },
+            {
+              "pin": "SH",
+              "ref": "P2"
+            },
+            {
+              "pin": "1",
+              "ref": "RV1"
+            },
+            {
+              "pin": "MP",
+              "ref": "RV1"
+            },
+            {
+              "pin": "4",
+              "ref": "SW1"
+            },
+            {
+              "pin": "MP",
+              "ref": "SW1"
+            },
+            {
+              "pin": "32",
+              "ref": "U1"
+            },
+            {
+              "pin": "72",
+              "ref": "U1"
+            },
+            {
+              "pin": "76",
+              "ref": "U1"
+            },
+            {
+              "pin": "77",
+              "ref": "U1"
+            },
+            {
+              "pin": "14",
+              "ref": "U2"
+            },
+            {
+              "pin": "14",
+              "ref": "U3"
+            },
+            {
+              "pin": "1",
+              "ref": "U4"
+            },
+            {
+              "pin": "2",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "Net-(C3-Pad2)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "C3"
+            },
+            {
+              "pin": "1",
+              "ref": "R5"
+            }
+          ]
+        },
+        {
+          "name": "Net-(C4-Pad2)",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "C4"
+            },
+            {
+              "pin": "1",
+              "ref": "R6"
+            }
+          ]
+        },
+        {
+          "name": "Net-(U1-CK1)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C21"
+            },
+            {
+              "pin": "1",
+              "ref": "R8"
+            },
+            {
+              "pin": "74",
+              "ref": "U1"
+            },
+            {
+              "pin": "1",
+              "ref": "X1"
+            }
+          ]
+        },
+        {
+          "name": "Net-(U1-CK2)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C22"
+            },
+            {
+              "pin": "2",
+              "ref": "R8"
+            },
+            {
+              "pin": "73",
+              "ref": "U1"
+            },
+            {
+              "pin": "2",
+              "ref": "X1"
+            }
+          ]
+        },
+        {
+          "name": "VCC",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C2"
+            },
+            {
+              "pin": "4",
+              "ref": "J1"
+            },
+            {
+              "pin": "2",
+              "ref": "J2"
+            },
+            {
+              "pin": "2",
+              "ref": "SW1"
+            },
+            {
+              "pin": "4",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "VDD",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "C1"
+            },
+            {
+              "pin": "1",
+              "ref": "C11"
+            },
+            {
+              "pin": "1",
+              "ref": "C12"
+            },
+            {
+              "pin": "1",
+              "ref": "C13"
+            },
+            {
+              "pin": "1",
+              "ref": "C14"
+            },
+            {
+              "pin": "1",
+              "ref": "C15"
+            },
+            {
+              "pin": "2",
+              "ref": "D2"
+            },
+            {
+              "pin": "1",
+              "ref": "DA1"
+            },
+            {
+              "pin": "1",
+              "ref": "DA2"
+            },
+            {
+              "pin": "1",
+              "ref": "DA3"
+            },
+            {
+              "pin": "1",
+              "ref": "DA4"
+            },
+            {
+              "pin": "1",
+              "ref": "J1"
+            },
+            {
+              "pin": "11",
+              "ref": "J2"
+            },
+            {
+              "pin": "1",
+              "ref": "P1"
+            },
+            {
+              "pin": "1",
+              "ref": "R7"
+            },
+            {
+              "pin": "58",
+              "ref": "U1"
+            },
+            {
+              "pin": "26",
+              "ref": "U2"
+            },
+            {
+              "pin": "28",
+              "ref": "U2"
+            },
+            {
+              "pin": "28",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "VEE",
+          "nodes": [
+            {
+              "pin": "2",
+              "ref": "J1"
+            },
+            {
+              "pin": "3",
+              "ref": "J2"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U2-NC-Pad1)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "U2"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U3-NC-Pad1)",
+          "nodes": [
+            {
+              "pin": "1",
+              "ref": "U3"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad10)",
+          "nodes": [
+            {
+              "pin": "10",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad11)",
+          "nodes": [
+            {
+              "pin": "11",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad14)",
+          "nodes": [
+            {
+              "pin": "14",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad18)",
+          "nodes": [
+            {
+              "pin": "18",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad5)",
+          "nodes": [
+            {
+              "pin": "5",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-NC-Pad9)",
+          "nodes": [
+            {
+              "pin": "9",
+              "ref": "U4"
+            }
+          ]
+        },
+        {
+          "name": "unconnected-(U4-SPKBC-Pad17)",
+          "nodes": [
+            {
+              "pin": "17",
+              "ref": "U4"
+            }
+          ]
+        }
+      ],
+      "provenance_kind": "KiCad 9 kicadxml export from Gekkio pinned reverse-engineered schematic; not independently verified against device"
+    }
+  },
+  "schema": "hs.restoration.real_kicad_netlist_snapshot.v1",
+  "source_commit": "032eb9c2578125b157ab88048113b2d52663b819"
+}

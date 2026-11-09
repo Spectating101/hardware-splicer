@@ -141,6 +141,41 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
     if context.get("hs_engineering_ledger"):
         from .restoration_engineering_assist import augmented_prompt
         messages = augmented_prompt(messages, context["hs_engineering_ledger"])
+    if context.get("engineering_reference"):
+        reference = context["engineering_reference"]
+        if reference.get("status")!="reference_netlist_available_reported_revision_match_only":
+            raise ValueError("unmatched schematics cannot be injected as device pinout")
+        if reference.get("target_board_physically_verified") is not False:
+            raise ValueError("target board was not independently verified from a physical device")
+        selected = [{
+            "net":net["net"], "contact_pins":net["selected_terminals"],
+            "source_sha256":net["source_file_sha256"],
+        } for net in reference["candidate_battery_nets"]]
+        messages[0]["content"] += (
+            "\n\nGENUINE SOURCE-REFERENCED ENGINEERING MODE: The following "
+            "netlist connections were extracted by KiCad from reverse-engineered "
+            "DMG-CPU-06 source schematics, NOT guessed by you. The article's "
+            "board revision claim is unverified; source nets are REFERENCE "
+            "only until an actual board marking is observed. "
+            "Each net's pins share one schematic electrical net; do not assume "
+            "a diode, power jack or switch conducts between its different pins. "
+            "No converter-board subtype has been verified, so do not give "
+            "converter-board pin-specific advice. "
+            "Prioritize safe non-powered, external battery/contact/jack checks "
+            "that distinguish battery-path faults from a failed converter. "
+            "Use the original E IDs for symptom citations, refer to the "
+            "actual reference net names in your rationale, disclose revision "
+            "uncertainty and do not invent numeric diagnostic thresholds. "
+            "No destructive repair or live powered probing. "
+            "REAL_KICAD_SOURCE_JSON=" + json.dumps({
+                "source_repo":reference["source_repo"],
+                "source_commit":reference["source_commit"],
+                "reference_board":reference["reference_board"],
+                "target_board_physically_verified":False,
+                "reference_nets":selected,
+                "unresolved":reference["unresolved_source_ids"],
+            },sort_keys=True)
+        )
     if context.get("quality_feedback"):
         feedback = context["quality_feedback"]
         if not feedback.get("parent_receipt_sha256"):
@@ -237,9 +272,10 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
     if any(UNSAFE.search(s) for s in combined):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
-    if context.get("hs_engineering_ledger"):
+    ledger = context.get("hs_engineering_ledger") or context.get("engineering_reference")
+    if ledger:
         from .restoration_numeric_truth_gate import reject_unsourced_thresholds
-        reject_unsourced_thresholds(value,context["hs_engineering_ledger"])
+        reject_unsourced_thresholds(value,ledger)
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],
         "next_safe_check": value["next_safe_check"][:1000],
@@ -270,6 +306,10 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
     if context.get("hs_engineering_ledger"):
         result["hs_engineering_ledger_sha256"] = sha(context["hs_engineering_ledger"])
         result["hs_source_graph_sha256"] = context["hs_engineering_ledger"]["graph_sha256"]
+    if context.get("engineering_reference"):
+        result["real_schematic_tool_result_sha256"] = sha(context["engineering_reference"])
+        result["real_schematic_source_graph_sha256"] = context["engineering_reference"]["native_HS_engineering_source_graph_sha256"]
+        result["target_board_physically_verified"] = False
     if context.get("quality_feedback"):
         result["quality_parent_receipt_sha256"] = context["quality_feedback"]["parent_receipt_sha256"]
         result["quality_feedback_kind"] = "unsourced_numeric_diagnostic_cutoff"
