@@ -176,6 +176,23 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
                 "unresolved":reference["unresolved_source_ids"],
             },sort_keys=True)
         )
+    if context.get("board_action_feedback"):
+        feedback=context["board_action_feedback"]
+        if not feedback.get("parent_receipt_sha256"):
+            raise ValueError("board applicability correction must name a sealed prior receipt")
+        messages[0]["content"] += (
+            "\n\nPHYSICAL BOARD AUTHORITY CORRECTION. The reported target board "
+            "revision is NOT independently verified. Prior output prescribed "
+            "component-specific pin measurements; these were unsupported as "
+            "PHYSICAL DEVICE instructions, even though the pins exist in the "
+            "reference schematic. Retain reference-level electrical reasoning, "
+            "but DO NOT recommend any specific component-pin measurements, "
+            "disassembly, repair action or internal probing on the unknown "
+            "target revision. Make the next practical check an external, "
+            "non-powered observation or a request to first verify the actual "
+            "board silkscreen marking. This is one source-preserving correction, "
+            "not evidence of repair or verified hardware."
+        )
     if context.get("quality_feedback"):
         feedback = context["quality_feedback"]
         if not feedback.get("parent_receipt_sha256"):
@@ -276,6 +293,9 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
     if ledger:
         from .restoration_numeric_truth_gate import reject_unsourced_thresholds
         reject_unsourced_thresholds(value,ledger)
+    if context.get("engineering_reference"):
+        from .restoration_board_action_gate import reject_unverified_board_pin_actions
+        reject_unverified_board_pin_actions(value,context["engineering_reference"])
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],
         "next_safe_check": value["next_safe_check"][:1000],
@@ -310,6 +330,9 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
         result["real_schematic_tool_result_sha256"] = sha(context["engineering_reference"])
         result["real_schematic_source_graph_sha256"] = context["engineering_reference"]["native_HS_engineering_source_graph_sha256"]
         result["target_board_physically_verified"] = False
+    if context.get("board_action_feedback"):
+        result["board_action_parent_receipt_sha256"] = context["board_action_feedback"]["parent_receipt_sha256"]
+        result["board_action_correction"] = True
     if context.get("quality_feedback"):
         result["quality_parent_receipt_sha256"] = context["quality_feedback"]["parent_receipt_sha256"]
         result["quality_feedback_kind"] = "unsourced_numeric_diagnostic_cutoff"
