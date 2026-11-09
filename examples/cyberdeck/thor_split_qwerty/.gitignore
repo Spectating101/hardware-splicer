@@ -1,0 +1,3 @@
+# KiCad UI session state, not engineering design input.
+*.kicad_prl
+__pycache__/
