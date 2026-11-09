@@ -1,0 +1,78 @@
+{
+  "artifacts_sha256": {},
+  "canonical_machine_release": {
+    "achieved": "build_ready",
+    "allowed": false,
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'req-physical' is not closed by passing verification"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'verify-software' is blocked"
+      },
+      {
+        "code": "release_state_not_reached",
+        "message": "requested operationally_authorized, but evidence supports only build_ready"
+      }
+    ],
+    "physical_measurements_count": 0,
+    "requested": "operationally_authorized",
+    "software_evidence_count": 0,
+    "verification_states": {
+      "verify-physical": "planned",
+      "verify-software": "blocked"
+    }
+  },
+  "case_id": "robot_repair_cafe_s3",
+  "chosen_route": "existing_splice_intake",
+  "engineering_acceptance": false,
+  "execute_requested": true,
+  "fabrication_authorized": false,
+  "objective": "RC toy donor diagnosis and repair/splice build",
+  "open_actions": [
+    "No evidenced non-generic build identity was resolved.",
+    "No donor functional block was resolved for a physical splice.",
+    "Obtain pin-level donor identification and measured electrical evidence before compilation.",
+    "Do not energize the salvaged board; power topology and protection remain unverified."
+  ],
+  "physical_validation": false,
+  "power_on_authorized": false,
+  "real_repair_confirmed": false,
+  "registered_source": "examples/intakes/splice_robot_drive_vision_repair_brief.json",
+  "schema_version": "hardware_splicer.workshop_operator.v1",
+  "source_sha256": "66b4f084bf064b7cde6294212791f1389ac5100fbcd629f3a699a73b2c2e9ccb",
+  "status": "blocked_unresolved_donor_architecture",
+  "trace": [
+    {
+      "details": "Normalized real user-provided case symptoms and registered donor source.",
+      "existing_engine": "project_intake.load_project_intake",
+      "source_attestation": "registered offline fixture, not a measured real broken unit",
+      "stage": "intake",
+      "state": "passed",
+      "symptom_count": 2
+    },
+    {
+      "blockers": [
+        "No evidenced non-generic build identity was resolved.",
+        "No donor functional block was resolved for a physical splice."
+      ],
+      "details": "No generic placeholder board is accepted as a successful RC repair.",
+      "donor_vision_applied": 1,
+      "existing_engine": "project_intake.plan_project_from_intake + salvage bridge",
+      "expected_build_id": "robot_drive_base",
+      "extracted_evidence_accepted": 0,
+      "proposed_build_id": null,
+      "reusable_blocks": 0,
+      "stage": "planning",
+      "state": "blocked"
+    },
+    {
+      "details": "Unsafe or unsupported to compile a wrong generic donor replacement.",
+      "existing_engine": "splice_manifest.run_splice_case",
+      "stage": "execution",
+      "state": "skipped"
+    }
+  ]
+}

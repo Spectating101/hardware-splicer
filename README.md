@@ -22,6 +22,13 @@ bash scripts/install_splice_v1.sh && source .venv/bin/activate
 hs-doctor && make splice-ui-serve
 ```
 
+**Engineering operator pilot:** `python3 scripts/hs_workshop_operator.py --list` exposes
+reviewed, bounded workflows that reuse the existing native verification and
+repair/salvage engines. The [two real work-order runs](examples/workshop_operator/README.md)
+show a successful SPI design check and a correctly blocked donor repair. This is
+software-level engineering evidence, **not** an autonomous physical repair or
+fabrication approval.
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers
