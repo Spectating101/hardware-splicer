@@ -1,0 +1,41 @@
+{
+  "schema": "hs.restoration.video_blind_intake.v1",
+  "case_id": "gbc_2020_broken_power_path",
+  "device": "Nintendo Game Boy Color",
+  "repair_intake": {
+    "symptoms": [
+      "No power with installed batteries",
+      "Battery compartment and terminals visibly corroded",
+      "Display has discoloration/dark damaged area"
+    ],
+    "when_it_fails": "Never starts after power switch used",
+    "device_hint": "Nintendo Game Boy Color",
+    "repro_steps": [
+      "Insert correct batteries and try to turn on"
+    ]
+  },
+  "initial_codes": [
+    "no_power",
+    "corrosion_visible",
+    "screen_damage"
+  ],
+  "followup_repair_intake": {
+    "symptoms": [
+      "After cleaning accessible battery contacts, still no power",
+      "Power switch checked functional",
+      "Continuity along battery positive supply path is broken"
+    ],
+    "device_hint": "Nintendo Game Boy Color"
+  },
+  "followup_codes": [
+    "contacts_cleaned_still_dead",
+    "switch_checked_good",
+    "battery_path_continuity_open"
+  ],
+  "source_context": {
+    "url": "https://www.youtube.com/watch?v=2BmGMi0IEx4",
+    "creator": "Odd Tinkering",
+    "date": "2020-02-08",
+    "retrieval_limit": "video description supplied by creator (not full video frames/transcript)"
+  }
+}

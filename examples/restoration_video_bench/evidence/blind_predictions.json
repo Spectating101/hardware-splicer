@@ -1,0 +1,829 @@
+{
+  "schema": "hs.restoration.video_replay_predictions.v1",
+  "dataset": "4 creator-described restoration cases (low variety, deliberately non-independent)",
+  "source_kind": "YouTube public descriptions, not full video analysis",
+  "source_notes": "human-authored generic taxonomy informed by public examples",
+  "gold_labels_loaded_in_prediction_stage": false,
+  "predictions": [
+    {
+      "case_id": "dmg_2016_battery_contact_corrosion",
+      "source_url": "https://www.youtube.com/watch?v=mMjNzPR7nVE",
+      "case_input_sha256": "fbf356459f6e655386929520762f6a8b4319d59d642ed8c5a599968520ee95e7",
+      "initial": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "dmg_2016_battery_contact_corrosion",
+        "device": "Nintendo Game Boy DMG-01",
+        "stage": "initial_symptoms_only",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Does not turn on with batteries",
+          "Battery terminals heavily corroded"
+        ],
+        "new_observations": [],
+        "evidence_codes_used": [
+          "no_power",
+          "corrosion_visible"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "corroded_battery_contact",
+            "hypothesis": "High-resistance or corroded battery terminal",
+            "support_score_not_probability": 8,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 6
+              }
+            ],
+            "tests_before_repair": [
+              "Power removed: inspect battery contacts for corrosion or weak spring force",
+              "Measure continuity and voltage drop across contacts using an appropriate safe meter setup",
+              "Do not assume cleaning repairs a trace or via beyond the contact"
+            ],
+            "conditional_repair_only_after_measurements": "Restore/replace confirmed defective battery terminal, then verify supply path"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "open_power_trace",
+            "hypothesis": "Open copper path between battery input and board power rail",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 4
+              }
+            ],
+            "tests_before_repair": [
+              "With cells removed, compare continuity between terminal solder joint and next mapped power node",
+              "Inspect both sides, solder joints and vias for oxidation or lifted copper",
+              "Only bridge after confirming net identity, load and absence of a short"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified low-voltage conductor restoration plus isolation and continuity checks"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "power_switch_fault",
+            "hypothesis": "Defective power switch",
+            "support_score_not_probability": 2,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              }
+            ],
+            "tests_before_repair": [
+              "Remove cells and meter switch contacts in ON/OFF states",
+              "Inspect slide-switch solder joints for cracks"
+            ],
+            "conditional_repair_only_after_measurements": "Repair or replace verified faulty switch, not the entire logic board"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      },
+      "followup": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "dmg_2016_battery_contact_corrosion",
+        "device": "Nintendo Game Boy DMG-01",
+        "stage": "followup_after_observation",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Does not turn on with batteries",
+          "Battery terminals heavily corroded"
+        ],
+        "new_observations": [
+          "Battery contacts visibly show substantial corrosion"
+        ],
+        "evidence_codes_used": [
+          "no_power",
+          "corrosion_visible"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "corroded_battery_contact",
+            "hypothesis": "High-resistance or corroded battery terminal",
+            "support_score_not_probability": 8,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 6
+              }
+            ],
+            "tests_before_repair": [
+              "Power removed: inspect battery contacts for corrosion or weak spring force",
+              "Measure continuity and voltage drop across contacts using an appropriate safe meter setup",
+              "Do not assume cleaning repairs a trace or via beyond the contact"
+            ],
+            "conditional_repair_only_after_measurements": "Restore/replace confirmed defective battery terminal, then verify supply path"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "open_power_trace",
+            "hypothesis": "Open copper path between battery input and board power rail",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 4
+              }
+            ],
+            "tests_before_repair": [
+              "With cells removed, compare continuity between terminal solder joint and next mapped power node",
+              "Inspect both sides, solder joints and vias for oxidation or lifted copper",
+              "Only bridge after confirming net identity, load and absence of a short"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified low-voltage conductor restoration plus isolation and continuity checks"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "power_switch_fault",
+            "hypothesis": "Defective power switch",
+            "support_score_not_probability": 2,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              }
+            ],
+            "tests_before_repair": [
+              "Remove cells and meter switch contacts in ON/OFF states",
+              "Inspect slide-switch solder joints for cracks"
+            ],
+            "conditional_repair_only_after_measurements": "Repair or replace verified faulty switch, not the entire logic board"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      }
+    },
+    {
+      "case_id": "gbc_2020_broken_power_path",
+      "source_url": "https://www.youtube.com/watch?v=2BmGMi0IEx4",
+      "case_input_sha256": "6f3482284eb923f36d019ab93588df99e530e4d2b323efe63ddf58a69e23c57e",
+      "initial": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "gbc_2020_broken_power_path",
+        "device": "Nintendo Game Boy Color",
+        "stage": "initial_symptoms_only",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "No power with installed batteries",
+          "Battery compartment and terminals visibly corroded",
+          "Display has discoloration/dark damaged area"
+        ],
+        "new_observations": [],
+        "evidence_codes_used": [
+          "no_power",
+          "corrosion_visible",
+          "screen_damage"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "corroded_battery_contact",
+            "hypothesis": "High-resistance or corroded battery terminal",
+            "support_score_not_probability": 8,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 6
+              }
+            ],
+            "tests_before_repair": [
+              "Power removed: inspect battery contacts for corrosion or weak spring force",
+              "Measure continuity and voltage drop across contacts using an appropriate safe meter setup",
+              "Do not assume cleaning repairs a trace or via beyond the contact"
+            ],
+            "conditional_repair_only_after_measurements": "Restore/replace confirmed defective battery terminal, then verify supply path"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "open_power_trace",
+            "hypothesis": "Open copper path between battery input and board power rail",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 4
+              }
+            ],
+            "tests_before_repair": [
+              "With cells removed, compare continuity between terminal solder joint and next mapped power node",
+              "Inspect both sides, solder joints and vias for oxidation or lifted copper",
+              "Only bridge after confirming net identity, load and absence of a short"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified low-voltage conductor restoration plus isolation and continuity checks"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "display_polarizer_damage",
+            "hypothesis": "LCD polarizer degradation independent of power failure",
+            "support_score_not_probability": 3,
+            "observation_contributions": [
+              {
+                "observation": "screen_damage",
+                "delta": 3
+              }
+            ],
+            "tests_before_repair": [
+              "First establish whether LCD glass and signal path work",
+              "Compare polarizer condition under light; avoid unnecessary panel replacement"
+            ],
+            "conditional_repair_only_after_measurements": "Optical film restoration is separate from electrical power recovery"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      },
+      "followup": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "gbc_2020_broken_power_path",
+        "device": "Nintendo Game Boy Color",
+        "stage": "followup_after_observation",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "No power with installed batteries",
+          "Battery compartment and terminals visibly corroded",
+          "Display has discoloration/dark damaged area"
+        ],
+        "new_observations": [
+          "After cleaning accessible battery contacts, still no power",
+          "Power switch checked functional",
+          "Continuity along battery positive supply path is broken"
+        ],
+        "evidence_codes_used": [
+          "no_power",
+          "corrosion_visible",
+          "screen_damage",
+          "contacts_cleaned_still_dead",
+          "switch_checked_good",
+          "battery_path_continuity_open"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "open_power_trace",
+            "hypothesis": "Open copper path between battery input and board power rail",
+            "support_score_not_probability": 22,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              },
+              {
+                "observation": "corrosion_visible",
+                "delta": 4
+              },
+              {
+                "observation": "contacts_cleaned_still_dead",
+                "delta": 4
+              },
+              {
+                "observation": "battery_path_continuity_open",
+                "delta": 12
+              }
+            ],
+            "tests_before_repair": [
+              "With cells removed, compare continuity between terminal solder joint and next mapped power node",
+              "Inspect both sides, solder joints and vias for oxidation or lifted copper",
+              "Only bridge after confirming net identity, load and absence of a short"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified low-voltage conductor restoration plus isolation and continuity checks"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "display_polarizer_damage",
+            "hypothesis": "LCD polarizer degradation independent of power failure",
+            "support_score_not_probability": 3,
+            "observation_contributions": [
+              {
+                "observation": "screen_damage",
+                "delta": 3
+              }
+            ],
+            "tests_before_repair": [
+              "First establish whether LCD glass and signal path work",
+              "Compare polarizer condition under light; avoid unnecessary panel replacement"
+            ],
+            "conditional_repair_only_after_measurements": "Optical film restoration is separate from electrical power recovery"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "battery_management_fault",
+            "hypothesis": "Battery pack or battery protection issue",
+            "support_score_not_probability": 1,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              }
+            ],
+            "tests_before_repair": [
+              "Inspect pack condition without puncturing or applying uncontrolled direct voltage",
+              "Use approved manufacturer diagnostics or a qualified service technician"
+            ],
+            "conditional_repair_only_after_measurements": "Use correct certified replacement pack or seek professional battery service"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      }
+    },
+    {
+      "case_id": "ps2_2021_disc_no_read",
+      "source_url": "https://www.youtube.com/watch?v=8hGGVW_mGEI",
+      "case_input_sha256": "bd681ef4e1e26b3d74e30b8f339499dfe66a37bf1faf9ce07645c6855c3613c9",
+      "initial": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "ps2_2021_disc_no_read",
+        "device": "Sony PlayStation 2 Slim",
+        "stage": "initial_symptoms_only",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Console powers on",
+          "Game discs do not load or read",
+          "Device obtained as junk or for spares"
+        ],
+        "new_observations": [],
+        "evidence_codes_used": [
+          "boots_normally",
+          "disc_read_failure"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "optical_pickup_failure",
+            "hypothesis": "Disc optical pickup / laser module not reading",
+            "support_score_not_probability": 8,
+            "observation_contributions": [
+              {
+                "observation": "boots_normally",
+                "delta": 1
+              },
+              {
+                "observation": "disc_read_failure",
+                "delta": 7
+              }
+            ],
+            "tests_before_repair": [
+              "Compare with a known-good undamaged disc and verify normal spindle/focus behavior",
+              "Check mechanism and optical pickup service information; do not look into powered laser",
+              "Verify failure before replacing matched optical assembly"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified pickup/drive replacement followed by official alignment and read tests"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "dirty_disc_or_lens",
+            "hypothesis": "Unreadable disc, dirty lens, or optical contamination",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "disc_read_failure",
+                "delta": 6
+              }
+            ],
+            "tests_before_repair": [
+              "Use known-good disc and inspect readable surfaces for damage",
+              "Clean optics using approved nonabrasive procedure only if appropriate"
+            ],
+            "conditional_repair_only_after_measurements": "Service dirty media/optics and rerun read test before ordering laser"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "spindle_mechanism_fault",
+            "hypothesis": "Disc spindle / lid switch / mechanical alignment fault",
+            "support_score_not_probability": 5,
+            "observation_contributions": [
+              {
+                "observation": "disc_read_failure",
+                "delta": 5
+              }
+            ],
+            "tests_before_repair": [
+              "Observe spindle behavior only with standard guard operation",
+              "Check switch or alignment according to service procedure; never bypass laser interlock"
+            ],
+            "conditional_repair_only_after_measurements": "Repair or replace documented mechanical fault, then repeat media-read tests"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      },
+      "followup": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "ps2_2021_disc_no_read",
+        "device": "Sony PlayStation 2 Slim",
+        "stage": "followup_after_observation",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Console powers on",
+          "Game discs do not load or read",
+          "Device obtained as junk or for spares"
+        ],
+        "new_observations": [
+          "Optical disc mechanism was inspected",
+          "Replacing optical pickup or drive considered reasonable"
+        ],
+        "evidence_codes_used": [
+          "boots_normally",
+          "disc_read_failure",
+          "optical_pickup_suspected"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "optical_pickup_failure",
+            "hypothesis": "Disc optical pickup / laser module not reading",
+            "support_score_not_probability": 12,
+            "observation_contributions": [
+              {
+                "observation": "boots_normally",
+                "delta": 1
+              },
+              {
+                "observation": "disc_read_failure",
+                "delta": 7
+              },
+              {
+                "observation": "optical_pickup_suspected",
+                "delta": 4
+              }
+            ],
+            "tests_before_repair": [
+              "Compare with a known-good undamaged disc and verify normal spindle/focus behavior",
+              "Check mechanism and optical pickup service information; do not look into powered laser",
+              "Verify failure before replacing matched optical assembly"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified pickup/drive replacement followed by official alignment and read tests"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "dirty_disc_or_lens",
+            "hypothesis": "Unreadable disc, dirty lens, or optical contamination",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "disc_read_failure",
+                "delta": 6
+              }
+            ],
+            "tests_before_repair": [
+              "Use known-good disc and inspect readable surfaces for damage",
+              "Clean optics using approved nonabrasive procedure only if appropriate"
+            ],
+            "conditional_repair_only_after_measurements": "Service dirty media/optics and rerun read test before ordering laser"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "spindle_mechanism_fault",
+            "hypothesis": "Disc spindle / lid switch / mechanical alignment fault",
+            "support_score_not_probability": 5,
+            "observation_contributions": [
+              {
+                "observation": "disc_read_failure",
+                "delta": 5
+              }
+            ],
+            "tests_before_repair": [
+              "Observe spindle behavior only with standard guard operation",
+              "Check switch or alignment according to service procedure; never bypass laser interlock"
+            ],
+            "conditional_repair_only_after_measurements": "Repair or replace documented mechanical fault, then repeat media-read tests"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      }
+    },
+    {
+      "case_id": "switch_2024_dead_usb_c",
+      "source_url": "https://www.youtube.com/watch?v=0HZSA8nZd_k",
+      "case_input_sha256": "ee6007c6d91860137c4d435490c930d20db7fd1ff4aa1e8b3fb17e1304db487d",
+      "initial": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "switch_2024_dead_usb_c",
+        "device": "Nintendo Switch (original)",
+        "stage": "initial_symptoms_only",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Console will not turn on",
+          "Charging produces no visible response",
+          "USB-C cable is used for charging"
+        ],
+        "new_observations": [],
+        "evidence_codes_used": [
+          "no_power",
+          "no_charge_response",
+          "usb_c_power_input"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "damaged_usb_c_port",
+            "hypothesis": "Damaged USB-C receptacle or solder connections",
+            "support_score_not_probability": 10,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              },
+              {
+                "observation": "no_charge_response",
+                "delta": 6
+              },
+              {
+                "observation": "usb_c_power_input",
+                "delta": 3
+              }
+            ],
+            "tests_before_repair": [
+              "Remove external power and inspect tongue, pins, anchors and underside joints under magnification",
+              "Inspect VBUS/GND continuity and CC lines using known-good pinout and dedicated USB-C tester",
+              "Check for shorts and lifted pads before any reflow or replacement"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified microsoldering repair with magnification and post-repair USB-C tester verification"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "charging_ic_fault",
+            "hypothesis": "Charging or power-management controller fault",
+            "support_score_not_probability": 6,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              },
+              {
+                "observation": "no_charge_response",
+                "delta": 4
+              },
+              {
+                "observation": "usb_c_power_input",
+                "delta": 1
+              }
+            ],
+            "tests_before_repair": [
+              "Confirm charger/port input path and rail voltages before implicating controller",
+              "Compare controller enable/rail signals with verified schematic or boardview"
+            ],
+            "conditional_repair_only_after_measurements": "Only replace a verified failed charging IC using proper board-level process"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "battery_management_fault",
+            "hypothesis": "Battery pack or battery protection issue",
+            "support_score_not_probability": 3,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              },
+              {
+                "observation": "no_charge_response",
+                "delta": 2
+              }
+            ],
+            "tests_before_repair": [
+              "Inspect pack condition without puncturing or applying uncontrolled direct voltage",
+              "Use approved manufacturer diagnostics or a qualified service technician"
+            ],
+            "conditional_repair_only_after_measurements": "Use correct certified replacement pack or seek professional battery service"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      },
+      "followup": {
+        "schema": "hs.restoration.triage_report.v1",
+        "case_id": "switch_2024_dead_usb_c",
+        "device": "Nintendo Switch (original)",
+        "stage": "followup_after_observation",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "native_HS_symptoms": [
+          "Console will not turn on",
+          "Charging produces no visible response",
+          "USB-C cable is used for charging"
+        ],
+        "new_observations": [
+          "Charging controller checked with multimeter and appeared functional",
+          "Physical USB-C charging connector appears damaged"
+        ],
+        "evidence_codes_used": [
+          "no_power",
+          "no_charge_response",
+          "usb_c_power_input",
+          "charge_ic_checked_good",
+          "charging_port_physically_damaged"
+        ],
+        "ranked_differential": [
+          {
+            "rank": 1,
+            "hypothesis_id": "damaged_usb_c_port",
+            "hypothesis": "Damaged USB-C receptacle or solder connections",
+            "support_score_not_probability": 24,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              },
+              {
+                "observation": "no_charge_response",
+                "delta": 6
+              },
+              {
+                "observation": "usb_c_power_input",
+                "delta": 3
+              },
+              {
+                "observation": "charge_ic_checked_good",
+                "delta": 2
+              },
+              {
+                "observation": "charging_port_physically_damaged",
+                "delta": 12
+              }
+            ],
+            "tests_before_repair": [
+              "Remove external power and inspect tongue, pins, anchors and underside joints under magnification",
+              "Inspect VBUS/GND continuity and CC lines using known-good pinout and dedicated USB-C tester",
+              "Check for shorts and lifted pads before any reflow or replacement"
+            ],
+            "conditional_repair_only_after_measurements": "Qualified microsoldering repair with magnification and post-repair USB-C tester verification"
+          },
+          {
+            "rank": 2,
+            "hypothesis_id": "battery_management_fault",
+            "hypothesis": "Battery pack or battery protection issue",
+            "support_score_not_probability": 3,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 1
+              },
+              {
+                "observation": "no_charge_response",
+                "delta": 2
+              }
+            ],
+            "tests_before_repair": [
+              "Inspect pack condition without puncturing or applying uncontrolled direct voltage",
+              "Use approved manufacturer diagnostics or a qualified service technician"
+            ],
+            "conditional_repair_only_after_measurements": "Use correct certified replacement pack or seek professional battery service"
+          },
+          {
+            "rank": 3,
+            "hypothesis_id": "corroded_battery_contact",
+            "hypothesis": "High-resistance or corroded battery terminal",
+            "support_score_not_probability": 2,
+            "observation_contributions": [
+              {
+                "observation": "no_power",
+                "delta": 2
+              }
+            ],
+            "tests_before_repair": [
+              "Power removed: inspect battery contacts for corrosion or weak spring force",
+              "Measure continuity and voltage drop across contacts using an appropriate safe meter setup",
+              "Do not assume cleaning repairs a trace or via beyond the contact"
+            ],
+            "conditional_repair_only_after_measurements": "Restore/replace confirmed defective battery terminal, then verify supply path"
+          }
+        ],
+        "scoring": "explicit human-authored rules, uncalibrated ranking, not an AI/video diagnosis",
+        "safety": {
+          "unpowered_visual_and_continuity_checks_first": true,
+          "charge_or_power_injection_authorized": false,
+          "hot_air_or_microsolder_repair_authorized": false,
+          "battery_pack_handling_authorized": false,
+          "optical_laser_interlock_bypass_authorized": false,
+          "no_unsupported_board_or_parts_substitution": true
+        },
+        "release": {
+          "fault_confirmed_by_HS_physical_meter": false,
+          "repair_executed_by_HS": false,
+          "restoration_completed_by_HS": false,
+          "fabrication_or_procurement_authorized": false
+        }
+      }
+    }
+  ]
+}

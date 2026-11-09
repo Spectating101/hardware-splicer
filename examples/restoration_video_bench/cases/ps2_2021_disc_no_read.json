@@ -1,0 +1,37 @@
+{
+  "schema": "hs.restoration.video_blind_intake.v1",
+  "case_id": "ps2_2021_disc_no_read",
+  "device": "Sony PlayStation 2 Slim",
+  "repair_intake": {
+    "symptoms": [
+      "Console powers on",
+      "Game discs do not load or read",
+      "Device obtained as junk or for spares"
+    ],
+    "when_it_fails": "When attempting to read disc media",
+    "device_hint": "Sony PlayStation 2 Slim",
+    "repro_steps": [
+      "Power on console and try a known working game disc"
+    ]
+  },
+  "initial_codes": [
+    "boots_normally",
+    "disc_read_failure"
+  ],
+  "followup_repair_intake": {
+    "symptoms": [
+      "Optical disc mechanism was inspected",
+      "Replacing optical pickup or drive considered reasonable"
+    ],
+    "device_hint": "Sony PlayStation 2 Slim"
+  },
+  "followup_codes": [
+    "optical_pickup_suspected"
+  ],
+  "source_context": {
+    "url": "https://www.youtube.com/watch?v=8hGGVW_mGEI",
+    "creator": "Odd Tinkering",
+    "date": "2021-01-06",
+    "retrieval_limit": "creator video description; no frame-by-frame viewing"
+  }
+}
