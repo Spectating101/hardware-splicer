@@ -141,6 +141,20 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
     if context.get("hs_engineering_ledger"):
         from .restoration_engineering_assist import augmented_prompt
         messages = augmented_prompt(messages, context["hs_engineering_ledger"])
+    if context.get("quality_feedback"):
+        feedback = context["quality_feedback"]
+        if not feedback.get("parent_receipt_sha256"):
+            raise ValueError("quality correction must name the sealed prior receipt")
+        messages[0]["content"] += (
+            "\n\nSOURCE-CONSTRAINT CORRECTION TURN. Prior model advice contained "
+            "UNSOURCED numeric measurement thresholds. You have no device-specific "
+            "healthy current, resistance or voltage reference curve. Avoid numeric "
+            "diagnostic cutoffs that lack validated technical documentation. "
+            "Revise the proposed safe diagnostic check to use qualitative, "
+            "externally observable and falsifiable distinctions; cite the same "
+            "unchanged source evidence. The previous thresholds were guesses, "
+            "NOT new evidence. Exactly one correction attempt is authorized."
+        )
     return messages
 
 
@@ -223,6 +237,9 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
     if any(UNSAFE.search(s) for s in combined):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
+    if context.get("hs_engineering_ledger"):
+        from .restoration_numeric_truth_gate import reject_unsourced_thresholds
+        reject_unsourced_thresholds(value,context["hs_engineering_ledger"])
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],
         "next_safe_check": value["next_safe_check"][:1000],
@@ -253,6 +270,9 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
     if context.get("hs_engineering_ledger"):
         result["hs_engineering_ledger_sha256"] = sha(context["hs_engineering_ledger"])
         result["hs_source_graph_sha256"] = context["hs_engineering_ledger"]["graph_sha256"]
+    if context.get("quality_feedback"):
+        result["quality_parent_receipt_sha256"] = context["quality_feedback"]["parent_receipt_sha256"]
+        result["quality_feedback_kind"] = "unsourced_numeric_diagnostic_cutoff"
     try:
         raw = inference(build_messages(context), model=model, timeout_s=timeout_s)
         result["model_reported"] = str(raw.get("model") or model)

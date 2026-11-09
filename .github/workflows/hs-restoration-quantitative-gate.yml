@@ -1,0 +1,48 @@
+name: HS quantitative truth gate for restoration plans
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/restoration_numeric_truth_gate.py'
+      - 'src/hardware_splicer/restoration_quality_correction.py'
+      - 'src/hardware_splicer/restoration_reasoning_agent.py'
+      - 'examples/restoration_video_bench/diversity/run_tablet_quality_repair.py'
+      - 'examples/restoration_video_bench/diversity/QUANTITATIVE_GATE.md'
+      - 'examples/restoration_video_bench/diversity/evidence/tab_s6_numeric_correction_live.json'
+      - 'tests/test_restoration_numeric_truth_gate.py'
+      - '.github/workflows/hs-restoration-quantitative-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-matched-quantitative-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Check source-calibration and one-turn quality repair, no live model
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_restoration_numeric_truth_gate.py \
+            tests/test_restoration_graph_ab.py \
+            tests/test_restoration_reasoning_agent.py \
+            tests/test_restoration_live_receipts.py
+      - name: Ensure correction receipt does not elevate repair authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('examples/restoration_video_bench/diversity/evidence/tab_s6_numeric_correction_live.json').read_text())
+          r=d['correction']
+          assert d['correction_attempt_count']==1
+          assert d['source_evidence_unchanged'] is True
+          assert d['physical_action_authorized'] is False
+          assert r['repair_authorized'] is False
+          assert r['physical_measurements_by_HS'] is False
+          assert r['quality_parent_receipt_sha256']==d['original_receipt_sha256']
+          PY
