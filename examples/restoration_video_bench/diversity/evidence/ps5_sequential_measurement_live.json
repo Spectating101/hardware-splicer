@@ -1,0 +1,234 @@
+{
+  "schema": "hs.restoration.sequential_measurement_trial.v1",
+  "case_id": "ps5_pro_no_power_hdmi",
+  "video_id": "xbp8lIggbxY",
+  "previous_sealed_prediction_sha256": "3d6df64c63f2546711b7ac2778ecdfe8e358e2364ef9b33e3bb852347d2bc9b4",
+  "provider": "agy_antigravity_subscription_cli",
+  "model": "gemini-3.8-flash-low",
+  "max_video_second_admitted": 360,
+  "source_kind": "unverified_creator_narration_from_timestamped_auto_captions",
+  "no_post_repair_outcomes_opened": true,
+  "independent_bench_measurements": false,
+  "automatic_video_frame_analysis": false,
+  "physical_repair_authorized": false,
+  "turns": [
+    {
+      "window_start_s": 120,
+      "window_end_s": 300,
+      "new_evidence_ids": [
+        "E8",
+        "E9",
+        "E10",
+        "E11",
+        "E12",
+        "E13"
+      ],
+      "receipt": {
+        "schema": "hs.restoration.free_text_diagnostic_v1",
+        "case_id": "ps5_pro_no_power_hdmi",
+        "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "evidence_sha256": "ff9c656baa36bb70a3b4662125c4d8b9a42784c2b8461f0d0e0659e748aed29b",
+        "caption_provenance": {
+          "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+          "cutoff_seconds": 120,
+          "total_early_final_cues": 45,
+          "no_video_frames": true,
+          "caption_reliability": "unverified_auto_generated"
+        },
+        "preceding_receipt_sha256": "3d6df64c63f2546711b7ac2778ecdfe8e358e2364ef9b33e3bb852347d2bc9b4",
+        "prompt_version": "hs.restoration.reasoning_prompt.v1",
+        "prompt_sha256": "0be6428a8866645b10ee9e978120d9974a5dbe516431c5fa58dea59e837944a4",
+        "model_requested": "gemini-3.8-flash-low",
+        "model_called": true,
+        "physical_measurements_by_HS": false,
+        "actual_video_frames_analyzed": false,
+        "repair_authorized": false,
+        "device_repaired_by_HS": false,
+        "fabrication_authorized": false,
+        "parts_purchase_authorized": false,
+        "source_windows": [
+          {
+            "start_second": 0,
+            "cutoff_second": 120,
+            "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093"
+          },
+          {
+            "start_second": 120,
+            "cutoff_second": 300,
+            "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+            "caption_chunks": 6
+          }
+        ],
+        "model_reported": "gemini-3.8-flash-low",
+        "provider_reported": "agy_antigravity_subscription_cli",
+        "raw_model_output_sha256": "5ec8db3174799c9b0ca502afd7fb13bd43983235f3318fffe50edeb1289df1c1",
+        "usage": {
+          "prompt_tokens": 1757,
+          "completion_tokens": 585
+        },
+        "plan": {
+          "summary": "The console does not power on according to seller reports and creator narration. The creator reported observing exactly 0 V input into the console and later reported the internal PSU fuse was intact, suspecting a faulty PSU assembly, while physical HDMI damage is also reported.",
+          "hypotheses": [
+            {
+              "mechanism": "Internal power supply unit (PSU) assembly failure or tripped internal shutdown mechanism preventing output voltage",
+              "why": "The creator reported measuring exactly 0 V coming into the console from the PSU (E8), though the creator later claimed the internal PSU fuse tested good upon visual/basic check (E12). This reading is creator-reported and unverified.",
+              "evidence_ids": [
+                "E1",
+                "E5",
+                "E8",
+                "E12",
+                "E13"
+              ],
+              "safe_test": "With the device disconnected from AC mains power and residual PSU bulk capacitance fully discharged, perform an unpowered bench resistance/continuity check at the DC output connector and mainboard power input pins to check for short circuits."
+            },
+            {
+              "mechanism": "Mainboard standby power rail short circuit or management IC fault holding power rail down or triggering PSU overcurrent protection",
+              "why": "A short circuit on the motherboard standby or main voltage rails could cause the PSU to shut down or read 0 V. The creator noted 0 V (E8) and observed no obvious visual burns on PSU control chips (E13), but motherboard-level shorts remain unverified.",
+              "evidence_ids": [
+                "E1",
+                "E4",
+                "E5",
+                "E8",
+                "E13"
+              ],
+              "safe_test": "With the board removed and completely unpowered, inspect the mainboard under magnification for cracked passives or liquid intrusion, and measure resistance to ground on main DC power entry rails using a multimeter in resistance mode."
+            },
+            {
+              "mechanism": "HDMI port mechanical damage bridging pins or causing collateral rail damage",
+              "why": "Multiple reports state the HDMI port is damaged or loose (E1, E2, E4, E8, E10). Damaged pins can bridge the 5V rail or data lines to ground, potentially dragging down standby rails or triggering protection circuits, though 0 V at input could also precede this.",
+              "evidence_ids": [
+                "E1",
+                "E2",
+                "E4",
+                "E8",
+                "E10"
+              ],
+              "safe_test": "Inspect the HDMI port pins under magnification for bridged contacts or bent ground shields while completely unpowered, and test resistance between HDMI pin 18 (5V) and chassis ground."
+            }
+          ],
+          "next_safe_check": "Perform an unpowered visual inspection of the damaged HDMI connector and take passive resistance-to-ground measurements at the disconnected mainboard 12V/standby DC power interface using a digital multimeter to check for dead shorts before connecting any external power.",
+          "uncertainty": "All voltage and fuse readings are creator-reported without independent verification, test instrumentation display, or documented measurement methodology; the exact point where 0 V was measured is unverified, and internal PSU components pose high-voltage capacitor shock hazards if handled while charged.",
+          "abstain": false
+        },
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 10.82,
+        "receipt_sha256": "108decf9eb8b5f8a38168e8978c6deee198bd37ba987d7ba3747e58365bdba21"
+      }
+    },
+    {
+      "window_start_s": 300,
+      "window_end_s": 360,
+      "new_evidence_ids": [
+        "E14",
+        "E15",
+        "E16",
+        "E17",
+        "E18",
+        "E19"
+      ],
+      "receipt": {
+        "schema": "hs.restoration.free_text_diagnostic_v1",
+        "case_id": "ps5_pro_no_power_hdmi",
+        "source_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+        "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+        "evidence_sha256": "34fb2fa7147cf27c2634f5763eb966c3ad08ed1546d385e9bbfe97bbe55c8e26",
+        "caption_provenance": {
+          "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+          "cutoff_seconds": 120,
+          "total_early_final_cues": 45,
+          "no_video_frames": true,
+          "caption_reliability": "unverified_auto_generated"
+        },
+        "preceding_receipt_sha256": "108decf9eb8b5f8a38168e8978c6deee198bd37ba987d7ba3747e58365bdba21",
+        "prompt_version": "hs.restoration.reasoning_prompt.v1",
+        "prompt_sha256": "1219ef5070fa77e1a7cdc13a8d8b98d4d51ca200d146bfd842c00f92a6de0440",
+        "model_requested": "gemini-3.8-flash-low",
+        "model_called": true,
+        "physical_measurements_by_HS": false,
+        "actual_video_frames_analyzed": false,
+        "repair_authorized": false,
+        "device_repaired_by_HS": false,
+        "fabrication_authorized": false,
+        "parts_purchase_authorized": false,
+        "source_windows": [
+          {
+            "start_second": 0,
+            "cutoff_second": 120,
+            "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093"
+          },
+          {
+            "start_second": 120,
+            "cutoff_second": 300,
+            "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+            "caption_chunks": 6
+          },
+          {
+            "start_second": 300,
+            "cutoff_second": 360,
+            "raw_vtt_sha256": "b010cddce1a2378c601e0e3ee1219ff04e9bf30469480cc8afd1d196bdb7b093",
+            "caption_chunks": 6
+          }
+        ],
+        "model_reported": "gemini-3.8-flash-low",
+        "provider_reported": "agy_antigravity_subscription_cli",
+        "raw_model_output_sha256": "22e815f58bf312b6a1669c0374d595a255f8889abc08c38ea63bc9eea608d8c3",
+        "usage": {
+          "prompt_tokens": 2226,
+          "completion_tokens": 742
+        },
+        "plan": {
+          "summary": "The PlayStation 5 Pro console reportedly exhibits a no-power symptom alongside a damaged HDMI port. Initial testing by the video creator suggested zero volts at the console input, but subsequent unverified testing of the disconnected power supply unit (PSU) yielded a creator-reported reading of 12 V, indicating the PSU may generate voltage without load. Further unverified unpowered resistance measurements on the detached mainboard's main power input revealed a creator-reported reading of 2 ohms across power and ground pins, alongside reported shorts across several decoupling/filtering capacitors. This evidence indicates a primary low-impedance short on the mainboard 12 V power plane, likely triggering PSU overcurrent shutdown, while leaving the PSU's capability under load unconfirmed and the damaged HDMI port as a potential secondary or contributing fault.",
+          "hypotheses": [
+            {
+              "mechanism": "Mainboard main 12V rail short circuit or downstream component breakdown triggering PSU overcurrent/fault protection",
+              "why": "Creator-reported measurements indicate 12 V present on the isolated PSU output (E14) but a creator-reported 2-ohm low-resistance reading between mainboard power input pins and ground (E17), as well as creator-reported shorts across multiple board capacitors (E18, E19). A low-impedance fault on the mainboard's primary supply plane would cause the PSU protection circuitry to shut down or prevent rail startup under load (E8).",
+              "evidence_ids": [
+                "E1",
+                "E5",
+                "E8",
+                "E14",
+                "E16",
+                "E17",
+                "E18",
+                "E19"
+              ],
+              "safe_test": "With the console entirely disconnected from AC mains power and discharged, perform unpowered resistance and continuity measurements across the main 12V input terminals and suspected surface-mount decoupling capacitors using an ESD-safe digital multimeter in resistance mode to independently confirm whether a low-impedance short to ground exists."
+            },
+            {
+              "mechanism": "PSU failure under load or internal regulation collapse",
+              "why": "Although the creator reported reading 12 V on the detached PSU without the motherboard connected (E14), the console initially showed no response (E1, E5) and a creator-reported zero volts entering the board when assembled (E8). Unverified creator narration acknowledges that the internal PSU could still be failing to maintain voltage regulation or latching off under a normal startup load (E15).",
+              "evidence_ids": [
+                "E1",
+                "E5",
+                "E8",
+                "E12",
+                "E13",
+                "E14",
+                "E15"
+              ],
+              "safe_test": "With the PSU removed from the console and completely disconnected from AC mains, inspect the PSU exterior and connectors for signs of thermal stress, burn marks, or cracked solder joints using passive visual inspection, avoiding any contact with internal high-voltage capacitors."
+            },
+            {
+              "mechanism": "HDMI port mechanical pin bridge or collateral power/ESD rail damage",
+              "why": "The console is confirmed to have visible mechanical damage to the HDMI connector (E1, E2, E4, E10). Bent or mangled connector pins could short the 5V HDMI power pin to chassis ground, damage ESD protection diode arrays, or compromise HDMI transmitter circuitry connected to system rails, though it may be an independent concurrent fault.",
+              "evidence_ids": [
+                "E1",
+                "E2",
+                "E4",
+                "E10"
+              ],
+              "safe_test": "Perform an unpowered visual examination under magnification or passive unpowered diode/continuity testing between HDMI connector pins and ground to check for bent pins or short circuits to ground, without mains power applied."
+            }
+          ],
+          "next_safe_check": "Perform an unpowered, ESD-safe multimeter resistance measurement across the mainboard's primary power input terminals and nearby decoupling capacitors to independently verify the creator-reported 2-ohm short to ground without connecting the device to AC mains.",
+          "uncertainty": "All voltage and resistance readings are creator-reported via unverified video narration and have not been independently measured; whether the PSU can sustain output under an actual or simulated load is unverified; whether the HDMI port damage is purely mechanical/display-related or contributed to an electrical short remains undetermined.",
+          "abstain": false
+        },
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 12.87,
+        "receipt_sha256": "f6eb43b2c7d9b82c354988505bb78a63d16f270b2db13793edeeef519c98a08b"
+      }
+    }
+  ]
+}

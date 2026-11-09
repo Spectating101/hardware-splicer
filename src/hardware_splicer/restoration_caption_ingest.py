@@ -24,9 +24,10 @@ TAG = re.compile(r"<[^>]*>")
 
 
 def parse_early_vtt(path: Path, *, cutoff_s: int = 120,
-                    max_chunks: int = 6, chars_per_chunk: int = 480) -> dict[str, Any]:
-    if not 10 <= cutoff_s <= 600:
-        raise ValueError("first-stage caption cutoff must be 10..600 seconds")
+                    start_s: int = 0, max_chunks: int = 6,
+                    chars_per_chunk: int = 480) -> dict[str, Any]:
+    if not 10 <= cutoff_s <= 600 or not 0 <= start_s < cutoff_s:
+        raise ValueError("source window must fit within 0..600 seconds")
     if not 1 <= max_chunks <= 12 or not 100 <= chars_per_chunk <= 1500:
         raise ValueError("caption evidence limits exceeded")
     raw = path.read_bytes()
@@ -47,7 +48,7 @@ def parse_early_vtt(path: Path, *, cutoff_s: int = 120,
         start, end = sec(""), sec("end")
         if start > cutoff_s:
             break
-        if end > cutoff_s + 3:
+        if start < start_s or end > cutoff_s:
             continue
         # Auto-caption finalized single-line short cues avoid rolling text repetition.
         if not (0 <= end-start <= .2):
@@ -66,10 +67,10 @@ def parse_early_vtt(path: Path, *, cutoff_s: int = 120,
     if not snippets:
         raise ValueError("no safe early finalized caption cues found")
     # Split earliest allowed span into timestamped intervals, not full transcript.
-    width = cutoff_s / max_chunks
+    width = (cutoff_s - start_s) / max_chunks
     batches: list[list[tuple[float,str]]] = [[] for _ in range(max_chunks)]
     for stamp, words in snippets:
-        batches[min(max_chunks-1,int(stamp/width))].append((stamp,words))
+        batches[min(max_chunks-1,int((stamp-start_s)/width))].append((stamp,words))
     chunks=[]
     for batch in batches:
         if not batch:
@@ -86,6 +87,7 @@ def parse_early_vtt(path: Path, *, cutoff_s: int = 120,
     return {
         "schema":"hs.restoration.early_vtt.v1",
         "raw_vtt_sha256":hashlib.sha256(raw).hexdigest(),
+        "window_start_seconds":start_s,
         "cutoff_seconds":cutoff_s,
         "source_kind":"YouTube auto-caption WebVTT (not video frame understanding)",
         "total_early_final_cues":len(snippets),

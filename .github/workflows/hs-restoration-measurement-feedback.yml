@@ -1,0 +1,48 @@
+name: HS evidence-fed restoration diagnosis
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/restoration_measurement_feedback.py'
+      - 'src/hardware_splicer/restoration_caption_ingest.py'
+      - 'src/hardware_splicer/restoration_reasoning_agent.py'
+      - 'tests/test_restoration_measurement_feedback.py'
+      - 'examples/restoration_video_bench/diversity/run_ps5_sequential.py'
+      - 'examples/restoration_video_bench/diversity/SEQUENTIAL_AGENT.md'
+      - 'examples/restoration_video_bench/diversity/evidence/ps5_sequential_measurement_live.json'
+      - '.github/workflows/hs-restoration-measurement-feedback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-receipt-and-window-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Verify model receipt chains and synthetic video windows, without AI calls
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_restoration_measurement_feedback.py \
+            tests/test_restoration_caption_agent.py \
+            tests/test_restoration_reasoning_agent.py \
+            tests/test_restoration_live_receipts.py
+      - name: Ensure live outputs are passive and pre-outcome bounded
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("examples/restoration_video_bench/diversity/evidence/ps5_sequential_measurement_live.json")
+          result=json.loads(p.read_text())
+          assert result["max_video_second_admitted"] == 360
+          assert result["no_post_repair_outcomes_opened"]
+          assert not result["physical_repair_authorized"]
+          assert [s["window_end_s"] for s in result["turns"]] == [300,360]
+          assert all(not t["receipt"]["repair_authorized"] for t in result["turns"])
+          print("Saved inferences verified; no live model invoked in CI")
+          PY
