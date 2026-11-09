@@ -210,6 +210,15 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
                 } for c in tool["claims"]]
             },sort_keys=True)
         )
+        if tool.get("semantic_comparators"):
+            messages[0]["content"] += (
+                "\nEXACT_SOURCE_NUMERIC_RELATIONS_V2=" +
+                json.dumps(tool["semantic_comparators"],sort_keys=True) +
+                "\nThese are source-published comparator relations, NOT "
+                "independently validated device operating specifications or "
+                "physical instrument readings. Do not drop below/at-least/range "
+                "semantics when comparing the claims."
+            )
     if context.get("board_action_feedback"):
         feedback=context["board_action_feedback"]
         if not feedback.get("parent_receipt_sha256"):
@@ -321,7 +330,8 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
     combined = [value[k] for k in ("summary", "next_safe_check", "uncertainty")]
     for h in value["hypotheses"]:
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
-    if any(UNSAFE.search(s) for s in combined):
+    from .restoration_safety_semantics import unsafe_action_findings
+    if unsafe_action_findings(value,UNSAFE):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
     ledger = (context.get("hs_engineering_ledger")
               or context.get("engineering_reference")
@@ -351,7 +361,11 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
         "evidence_sha256": context["evidence_sha256"],
         "caption_provenance": context.get("caption_provenance"),
         "preceding_receipt_sha256": context["preceding_receipt_sha256"],
-        "prompt_version": PROMPT_VERSION, "prompt_sha256": sha(build_messages(context)),
+        "prompt_version": (
+            "hs.restoration.reasoning_prompt.semantic_numeric_v2"
+            if context.get("numeric_source_tool",{}).get("semantic_comparators")
+            else PROMPT_VERSION
+        ), "prompt_sha256": sha(build_messages(context)),
         "model_requested": model, "model_called": True,
         "physical_measurements_by_HS": False, "actual_video_frames_analyzed": False,
         "repair_authorized": False, "device_repaired_by_HS": False,

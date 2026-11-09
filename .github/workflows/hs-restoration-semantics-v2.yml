@@ -1,0 +1,42 @@
+name: HS restoration numerical semantics and caution parsing
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/restoration_numeric_case.py'
+      - 'src/hardware_splicer/restoration_reasoning_agent.py'
+      - 'src/hardware_splicer/restoration_safety_semantics.py'
+      - 'tests/test_restoration_semantic_safety_v2.py'
+      - 'examples/restoration_video_bench/real_schematic/run_numeric_source_ab.py'
+      - 'examples/restoration_video_bench/real_schematic/inspect_numeric_source_ab.py'
+      - 'examples/restoration_video_bench/real_schematic/NUMERIC_SEMANTICS_V2.md'
+      - '.github/workflows/hs-restoration-semantics-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fail-closed-source-and-safety-meaning:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Numerical comparator and negation regression without model calls
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_restoration_semantic_safety_v2.py \
+            tests/test_restoration_numeric_source_ab_live.py \
+            tests/test_restoration_numeric_source_ledger.py \
+            tests/test_restoration_numeric_truth_gate.py \
+            tests/test_restoration_reasoning_agent.py
+      - name: Revalidate exactly frozen historical source-conditioned receipts
+        env:
+          PYTHONPATH: src
+        run: |
+          python examples/restoration_video_bench/real_schematic/inspect_numeric_source_ab.py \
+            --infile examples/restoration_video_bench/real_schematic/numeric_source_ab_live.json \
+            --out /tmp/hs_numeric_legacy_review_reproduced.json
