@@ -1,0 +1,154 @@
+{
+  "schema": "hs.restoration.postfreeze_multifault_score.v1",
+  "frozen_prediction_commit": "79d6620c9b8fc7f18ac5151e59683b7538024218",
+  "frozen_prediction_sha256": "b966c3866051cd9c606b6fcacccb6d1b2be2bd474efc8e65af3f9a9ba0c9f4d8",
+  "n_cases": 9,
+  "n_resolved_cases": 7,
+  "n_unscored_cases": 2,
+  "n_creator_reported_faults_scored": 9,
+  "exact_fault_family": 5,
+  "broad_domain_only": 3,
+  "missed_faults": 1,
+  "exact_fault_family_top1": 2,
+  "cases_all_reported_faults_exact": 3,
+  "quality_note": "Not independent: same assistant that authored initial predictions read later auto-captions after Git freeze. Creator-narrated repair actions and functional claims are not independent laboratory ground truth; match specificity reviewed strictly (exact family vs broad domain).",
+  "NOT_native_HS_diagnostic_result": true,
+  "NOT_independent_ground_truth": true,
+  "NOT_video_frame_evaluation": true,
+  "NOT_a_proof_of_generalization": true,
+  "case_results": [
+    {
+      "case_id": "a53_touch_failure",
+      "status": "resolved",
+      "creator_reported_result": "Touch works after restoration of the damaged tiny flex/connector contact path.",
+      "review_provenance": "Auto-caption narrative around 18:20\u201330:45 (connector contact/trace continuity work and touchscreen restored)",
+      "faults": [
+        {
+          "reported_fault": "Damaged/open microscopic touchscreen connector or flex contact continuity",
+          "source_window": "18:20-30:45",
+          "match_quality": "partial_domain",
+          "matched_prediction_rank": 2,
+          "judgement": "The plan located a touch interconnect path but did not predict a broken conductor/eroded pin and specific bridge."
+        }
+      ]
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "status": "resolved",
+      "creator_reported_result": "Creator reports prior water damage, defective screen, and separate intermittent kinked screen ribbon; tablet subsequently boots repeatedly.",
+      "review_provenance": "Auto-caption retrospective explanation at 57:31\u201362:15; tablet responds repeatedly after replacement display and ribbon cable",
+      "faults": [
+        {
+          "reported_fault": "Failed display/screen assembly causing apparent dead tablet",
+          "source_window": "57:31-61:45",
+          "match_quality": "exact_family",
+          "matched_prediction_rank": 1,
+          "judgement": "Black screen despite electronics alive was first-ranked and distinguishable with host enumeration."
+        },
+        {
+          "reported_fault": "Kinked intermittent display ribbon during reassembly",
+          "source_window": "58:13-60:45",
+          "match_quality": "exact_family",
+          "matched_prediction_rank": 3,
+          "judgement": "Interconnect mechanism independently anticipated; precise kink location unknown before teardown."
+        }
+      ]
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "status": "resolved",
+      "creator_reported_result": "Creator replaced a failed thermal cutout and leaking upper-piston seals/assembly; machine subsequently made coffee.",
+      "review_provenance": "Auto-caption sections at 10:51\u201315:15 (failed thermal cutout) and 26:17\u201333:42 (O-rings and renewed coffee output)",
+      "faults": [
+        {
+          "reported_fault": "Failed heating thermal cutout / one-shot thermal fuse",
+          "source_window": "10:51-15:15",
+          "match_quality": "miss",
+          "matched_prediction_rank": null,
+          "judgement": "No thermal fuse or heat cutout hypothesis in three initial proposals."
+        },
+        {
+          "reported_fault": "Pressure-water leakage through worn O-rings/upper piston",
+          "source_window": "26:17-33:42",
+          "match_quality": "exact_family",
+          "matched_prediction_rank": 2,
+          "judgement": "Failure of hydraulic sealing was anticipated, but specific seal location was not."
+        }
+      ]
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "status": "resolved",
+      "creator_reported_result": "Presenter attributes intermittency to motor heavily packed with dust; cleaning restores sustained operation and braking.",
+      "review_provenance": "Auto-caption sections at 32:53\u201335:33: heavy dust contamination on brushed motor; runs after service",
+      "faults": [
+        {
+          "reported_fault": "Dust contamination of brushed motor/commutation contact",
+          "source_window": "32:53-35:33",
+          "match_quality": "partial_domain",
+          "matched_prediction_rank": 3,
+          "judgement": "Plan considered motor/drive but failed to target contamination/commutator fouling as an actionable cause."
+        }
+      ]
+    },
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "status": "resolved",
+      "creator_reported_result": "Dryer had restricted exhaust airflow from a sharply kinked external vent; machine itself was reportedly functional.",
+      "review_provenance": "Auto-caption explanation at 30:19\u201333:58: low-heat switch theory rejected, vent-hose kink removed and drying restored",
+      "faults": [
+        {
+          "reported_fault": "Restricted exhaust airflow from kinked external dryer vent hose",
+          "source_window": "32:36-33:58",
+          "match_quality": "exact_family",
+          "matched_prediction_rank": 1,
+          "judgement": "First-ranked airflow restriction mechanism, although the particular vent kink was not specified."
+        }
+      ]
+    },
+    {
+      "case_id": "canon_eos2000d_no_power",
+      "status": "partially_resolved",
+      "creator_reported_result": "Camera partly revived, display ribbon was repaired after additional damage, but creator could not establish original no-power cause and shutter remained unreliable.",
+      "review_provenance": "Auto-caption admission at 52:24\u201353:45: partial function returned but original no-power cause not established; shutter errors and damage introduced during repair",
+      "faults": []
+    },
+    {
+      "case_id": "reebok_treadmill_dead",
+      "status": "resolved",
+      "creator_reported_result": "Treadmill restored after a small failed diode was replaced; repair also included correction of workshop-introduced wiring issues.",
+      "review_provenance": "Auto-caption at 70:42\u201371:46 identifies small diode; normal speed/incline shown around 66:24\u201370:25",
+      "faults": [
+        {
+          "reported_fault": "Failed diode in treadmill power/control circuit",
+          "source_window": "70:42-71:46",
+          "match_quality": "partial_domain",
+          "matched_prediction_rank": 3,
+          "judgement": "Generic internal control-board category is not an actionable prediction of a particular diode; no exact credit."
+        }
+      ]
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "status": "resolved",
+      "creator_reported_result": "Shorted power-stage MOSFET removed/replaced; PSU showed output; console powered and displayed. HDMI port separately straightened.",
+      "review_provenance": "Auto-caption at 05:28\u201309:43: shorted board MOSFET isolated and replaced; 11:23\u201311:48 power/display returned",
+      "faults": [
+        {
+          "reported_fault": "Shorted motherboard power-stage MOSFET",
+          "source_window": "05:28-11:48",
+          "match_quality": "exact_family",
+          "matched_prediction_rank": 2,
+          "judgement": "Board short/regulator fault was explicitly second-ranked, but no individual MOSFET named before measurement."
+        }
+      ]
+    },
+    {
+      "case_id": "xbox_series_s_dead",
+      "status": "inconclusive",
+      "creator_reported_result": "Unknown; withheld from review.",
+      "review_provenance": "No caption-based or independent post-repair adjudication performed for this already sealed title-only case.",
+      "faults": []
+    }
+  ]
+}

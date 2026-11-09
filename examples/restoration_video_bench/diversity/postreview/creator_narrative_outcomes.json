@@ -1,0 +1,171 @@
+{
+  "schema": "hs.restoration.creator_narrative_postreview.v1",
+  "review_date": "2026-11-10",
+  "frozen_prediction_commit": "79d6620c9b8fc7f18ac5151e59683b7538024218",
+  "frozen_prediction_sha256": "b966c3866051cd9c606b6fcacccb6d1b2be2bd474efc8e65af3f9a9ba0c9f4d8",
+  "quality_note": "Not independent: same assistant that authored initial predictions read later auto-captions after Git freeze. Creator-narrated repair actions and functional claims are not independent laboratory ground truth; match specificity reviewed strictly (exact family vs broad domain).",
+  "outcomes": [
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "a53_touch_failure",
+      "video_url": "https://www.youtube.com/watch?v=NcYvWA-kGtM",
+      "status": "resolved",
+      "review_provenance": "Auto-caption narrative around 18:20–30:45 (connector contact/trace continuity work and touchscreen restored)",
+      "creator_reported_result": "Touch works after restoration of the damaged tiny flex/connector contact path.",
+      "faults": [
+        {
+          "fault": "Damaged/open microscopic touchscreen connector or flex contact continuity",
+          "timestamp": "18:20-30:45",
+          "matched_hypothesis": "corroded_or_displaced_touch_flex",
+          "match_quality": "partial_domain",
+          "rationale": "The plan located a touch interconnect path but did not predict a broken conductor/eroded pin and specific bridge."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "tab_s6_lite_dead",
+      "video_url": "https://www.youtube.com/watch?v=CrOf4SmyGvE",
+      "status": "resolved",
+      "review_provenance": "Auto-caption retrospective explanation at 57:31–62:15; tablet responds repeatedly after replacement display and ribbon cable",
+      "creator_reported_result": "Creator reports prior water damage, defective screen, and separate intermittent kinked screen ribbon; tablet subsequently boots repeatedly.",
+      "faults": [
+        {
+          "fault": "Failed display/screen assembly causing apparent dead tablet",
+          "timestamp": "57:31-61:45",
+          "matched_hypothesis": "display_or_backlight_signal_path",
+          "match_quality": "exact_family",
+          "rationale": "Black screen despite electronics alive was first-ranked and distinguishable with host enumeration."
+        },
+        {
+          "fault": "Kinked intermittent display ribbon during reassembly",
+          "timestamp": "58:13-60:45",
+          "matched_hypothesis": "ribbon_latch_or_interconnect_damage",
+          "match_quality": "exact_family",
+          "rationale": "Interconnect mechanism independently anticipated; precise kink location unknown before teardown."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "delonghi_eletta_faults",
+      "video_url": "https://www.youtube.com/watch?v=qmR75MbSmXY",
+      "status": "resolved",
+      "review_provenance": "Auto-caption sections at 10:51–15:15 (failed thermal cutout) and 26:17–33:42 (O-rings and renewed coffee output)",
+      "creator_reported_result": "Creator replaced a failed thermal cutout and leaking upper-piston seals/assembly; machine subsequently made coffee.",
+      "faults": [
+        {
+          "fault": "Failed heating thermal cutout / one-shot thermal fuse",
+          "timestamp": "10:51-15:15",
+          "matched_hypothesis": null,
+          "match_quality": "miss",
+          "rationale": "No thermal fuse or heat cutout hypothesis in three initial proposals."
+        },
+        {
+          "fault": "Pressure-water leakage through worn O-rings/upper piston",
+          "timestamp": "26:17-33:42",
+          "matched_hypothesis": "leaking_seal_or_hose",
+          "match_quality": "exact_family",
+          "rationale": "Failure of hydraulic sealing was anticipated, but specific seal location was not."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "dewalt_blower_intermittent",
+      "video_url": "https://www.youtube.com/watch?v=utgBfSJsod0",
+      "status": "resolved",
+      "review_provenance": "Auto-caption sections at 32:53–35:33: heavy dust contamination on brushed motor; runs after service",
+      "creator_reported_result": "Presenter attributes intermittency to motor heavily packed with dust; cleaning restores sustained operation and braking.",
+      "faults": [
+        {
+          "fault": "Dust contamination of brushed motor/commutation contact",
+          "timestamp": "32:53-35:33",
+          "matched_hypothesis": "motor_drive_or_protection_fault",
+          "match_quality": "partial_domain",
+          "rationale": "Plan considered motor/drive but failed to target contamination/commutator fouling as an actionable cause."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "bosch_dryer_slow_heat",
+      "video_url": "https://www.youtube.com/watch?v=RxgjyTRtKZs",
+      "status": "resolved",
+      "review_provenance": "Auto-caption explanation at 30:19–33:58: low-heat switch theory rejected, vent-hose kink removed and drying restored",
+      "creator_reported_result": "Dryer had restricted exhaust airflow from a sharply kinked external vent; machine itself was reportedly functional.",
+      "faults": [
+        {
+          "fault": "Restricted exhaust airflow from kinked external dryer vent hose",
+          "timestamp": "32:36-33:58",
+          "matched_hypothesis": "restricted_airflow_or_blocked_heat_exchanger",
+          "match_quality": "exact_family",
+          "rationale": "First-ranked airflow restriction mechanism, although the particular vent kink was not specified."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "canon_eos2000d_no_power",
+      "video_url": "https://www.youtube.com/watch?v=XXKlAIcint8",
+      "status": "partially_resolved",
+      "review_provenance": "Auto-caption admission at 52:24–53:45: partial function returned but original no-power cause not established; shutter errors and damage introduced during repair",
+      "creator_reported_result": "Camera partly revived, display ribbon was repaired after additional damage, but creator could not establish original no-power cause and shutter remained unreliable.",
+      "faults": [],
+      "uncertainty": "Original fault not instrumentally isolated; do NOT score guessing an interlock or shutter as a correct repair."
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "reebok_treadmill_dead",
+      "video_url": "https://www.youtube.com/watch?v=1Nvt8ARL5Xc",
+      "status": "resolved",
+      "review_provenance": "Auto-caption at 70:42–71:46 identifies small diode; normal speed/incline shown around 66:24–70:25",
+      "creator_reported_result": "Treadmill restored after a small failed diode was replaced; repair also included correction of workshop-introduced wiring issues.",
+      "faults": [
+        {
+          "fault": "Failed diode in treadmill power/control circuit",
+          "timestamp": "70:42-71:46",
+          "matched_hypothesis": "internal_power_or_motor_control_board_fault",
+          "match_quality": "partial_domain",
+          "rationale": "Generic internal control-board category is not an actionable prediction of a particular diode; no exact credit."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "ps5_pro_no_power_hdmi",
+      "video_url": "https://www.youtube.com/watch?v=xbp8lIggbxY",
+      "status": "resolved",
+      "review_provenance": "Auto-caption at 05:28–09:43: shorted board MOSFET isolated and replaced; 11:23–11:48 power/display returned",
+      "creator_reported_result": "Shorted power-stage MOSFET removed/replaced; PSU showed output; console powered and displayed. HDMI port separately straightened.",
+      "faults": [
+        {
+          "fault": "Shorted motherboard power-stage MOSFET",
+          "timestamp": "05:28-11:48",
+          "matched_hypothesis": "board_short_or_regulator_fault",
+          "match_quality": "exact_family",
+          "rationale": "Board short/regulator fault was explicitly second-ranked, but no individual MOSFET named before measurement."
+        }
+      ]
+    },
+    {
+      "reviewer": "ChatGPT post-freeze auto-caption analysis; SAME assistant as prediction author, NOT independent adjudicator",
+      "evidence_kind": "creator spoken report reconstructed from YouTube English auto-caption, no source video frame inspection",
+      "case_id": "xbox_series_s_dead",
+      "video_url": "https://www.youtube.com/watch?v=yXFmSrgb0xI",
+      "status": "inconclusive",
+      "review_provenance": "No caption-based or independent post-repair adjudication performed for this already sealed title-only case.",
+      "creator_reported_result": "Unknown; withheld from review.",
+      "faults": [],
+      "uncertainty": "No accessible transcript or independently reviewed outcome in this pass."
+    }
+  ]
+}
