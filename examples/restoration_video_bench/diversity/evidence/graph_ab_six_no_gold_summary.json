@@ -1,0 +1,185 @@
+{
+  "schema": "hs.restoration.graph_ab_no_gold_summary.v1",
+  "model": "gemini-3.8-flash-low",
+  "cases": 6,
+  "valid_output_count_by_arm": {
+    "plain": 6,
+    "hs_graph": 6
+  },
+  "inference_seconds_by_arm": {
+    "plain": 58.57,
+    "hs_graph": 68.35
+  },
+  "accuracy_not_scored_without_external_adjudication": true,
+  "no_claim_of_tools_improving_fault_identification": true,
+  "results": [
+    {
+      "case_id": "bosch_dryer_slow_heat",
+      "same_source_sha256": "9e92a82fe4a7dcdf1b49943f5bde66c6cdb3abdca9ad7dbe2e1cc4c82b09b623",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 8.82,
+        "prompt_sha256": "f7524a4881768d11d5cf42e3661f02954e731517f075b8df28bcef4b91e05e7e",
+        "first_ranked_mechanism": "Restricted airflow due to lint buildup or blocked condenser/vent pathway",
+        "next_safe_check": "Disconnect the dryer from AC mains power and perform an external inspection and cleaning of the primary lint screen and condenser cassette.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 848,
+          "completion_tokens": 282
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 11.14,
+        "prompt_sha256": "631c47318d6eae33ce7af406271f0529d0705e63a542479ab0a32916dba25919",
+        "first_ranked_mechanism": "Airflow restriction or lint filter / condenser blockage reducing moisture evacuation rate despite active heating elements.",
+        "next_safe_check": "While the dryer is completely unplugged and cool, perform an external, non-destructive inspection and thorough cleaning of the lint filter, door seals, and condenser box. If filter and condenser passages are clean and unrestricted, this disfavors an external airflow blockage and favors electrical or control causes such as a restricted heating profile or stuck low-heat switch.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1419,
+          "completion_tokens": 473
+        }
+      }
+    },
+    {
+      "case_id": "dewalt_blower_intermittent",
+      "same_source_sha256": "e07da013b07d06bca59eb90537320536c894b5655fad4c98d7318c0b994b9843",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 13.0,
+        "prompt_sha256": "6c7a82c126da22785da7d8423a41b68f21aa6921f6a2f4b92b5748444993e7ed",
+        "first_ranked_mechanism": "Degraded or loose battery terminal contacts causing intermittent power delivery under vibration or handling.",
+        "next_safe_check": "Disconnect the battery completely and visually inspect the battery terminal blades and connector housing for signs of looseness, fretting, corrosion, or contamination.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 852,
+          "completion_tokens": 284
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 12.89,
+        "prompt_sha256": "d649ede1aff707c5ad909ea55017fa3728edb5ec97a566f55310af9f5b5a8267",
+        "first_ranked_mechanism": "Degraded or oxidized trigger switch contacts causing intermittent circuit continuity under mechanical vibration.",
+        "next_safe_check": "With the tool completely powered down and battery removed, perform an external visual and physical inspection of the battery interface terminals (checking for loose fit, contamination, or bent contacts), followed by safely mounting a known-good battery in a clear space: hold the trigger switch steady and gently manipulate only the battery pack to observe if power cuts out. A cutout during battery movement favors terminal connection failure, whereas a cutout occurring only when manipulating the trigger paddle favors internal switch contact degradation.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1604,
+          "completion_tokens": 534
+        }
+      }
+    },
+    {
+      "case_id": "tab_s6_lite_dead",
+      "same_source_sha256": "ac6905515566ecd1c985188a600065a0fd625a307422b0d8b26f54412c92786f",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 9.27,
+        "prompt_sha256": "652f63bdce207467f3b6c228edeed43224bc9c27e55ff843728035a89bcabf8e",
+        "first_ranked_mechanism": "Damaged, disconnected, or defective display assembly/connector preventing image output while the board powers on.",
+        "next_safe_check": "Connect the intact tablet via its external charging port to a certified USB power meter (ammeter/voltmeter) to monitor baseline voltage and current draw without opening the unit or probing internal components.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1068,
+          "completion_tokens": 356
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 12.19,
+        "prompt_sha256": "d49aa85632b4007024c3f0ca3a94e0737e483885a624d7efc094ba5706dc0275",
+        "first_ranked_mechanism": "Display subsystem / FPC connector discontinuity or faulty panel preventing display output while board boots or cycles",
+        "next_safe_check": "Connect the tablet to a known-working external USB-C power monitor and standard 5V wall adapter without disassembly, observing resting current draw, then hold Power + Volume Down: a dynamic cycling current draw (>0.4A with resets) favors an intact mainboard/PMIC with a display/bootloop issue, whereas a flat 0.00A or static low draw (<0.05A) favors a charging circuit, battery, or port connection fault.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1676,
+          "completion_tokens": 558
+        }
+      }
+    },
+    {
+      "case_id": "ps5_pro_no_power_hdmi",
+      "same_source_sha256": "7a28b808d4998b092c3bb356d1f739aa2ad9d4b58573eb2189b2d149431ad01b",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 9.2,
+        "prompt_sha256": "211d7f3e60dd505f5139326458029172ce5bf8155c78ff33f69ef4a71a2ff7ac",
+        "first_ranked_mechanism": "Physical bridging or bent pins within the damaged HDMI port may be shorting the 5V line or communication rails to ground, potentially tripping internal power management protection and preventing boot.",
+        "next_safe_check": "Disconnect all AC power and cables, discharge ESD, and perform a detailed visual inspection of the internal pins of the damaged HDMI port with an inspection light or microscope to verify whether any pins are bridged to ground.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 986,
+          "completion_tokens": 328
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 10.62,
+        "prompt_sha256": "878b19b6df4d224ce6811590141f0dae3f71283b0a60d069c90ed454959fbc73",
+        "first_ranked_mechanism": "Physical short circuit on HDMI port pins (e.g., 5V rail pin shorted to ground or data lines) triggering power rail protection/shutoff",
+        "next_safe_check": "Perform an external optical inspection of the HDMI port using a flashlight/magnifier for bridged pins, combined with an external inline AC wattmeter reading during a single power button push; visible pin contact without mains draw confirms port deformation before any internal chassis intervention.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1571,
+          "completion_tokens": 523
+        }
+      }
+    },
+    {
+      "case_id": "delonghi_eletta_faults",
+      "same_source_sha256": "f03802e0b5d178a16f509ffa122921c3fac2808d5698f9b1d7ae599e25a1eb56",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 8.93,
+        "prompt_sha256": "5b993e95380c75bc39679d907453c03535291f8ca62aa55feb84383e4f8aba89",
+        "first_ranked_mechanism": "Failure in the secondary thermoblock, steam NTC sensor, or thermal fuse preventing the machine from reaching the target steam temperature required for milk dispensing, causing the software to hang awaiting ready state.",
+        "next_safe_check": "Disconnect the machine from AC mains and allow it to cool completely, then remove the drip tray and grounds container to visually inspect for standing fluid and check the brew group seals for obvious physical deterioration.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1011,
+          "completion_tokens": 337
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 10.81,
+        "prompt_sha256": "2e7579748cf57081a73f27160452d2f872bcce942eacd4c188427fa16d4ab1d1",
+        "first_ranked_mechanism": "Hydraulic blockage or solenoid valve failure in the steam/milk circuit preventing completion of the milk preparation cycle",
+        "next_safe_check": "Perform a cold, unpowered visual inspection of the external milk frother/carafe coupling nozzle and brew door compartment for external milk/coffee encrustation or missing O-rings. If the external milk connector and seals are pristine, this favors internal solenoid/boiler control failure; if heavily obstructed with dried residue or damaged seals, this favors external interface blockage.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1575,
+          "completion_tokens": 525
+        }
+      }
+    },
+    {
+      "case_id": "a53_touch_failure",
+      "same_source_sha256": "6571f5449c62811189f3de0946eaf547f1b9147879e2f827870a4574c34b8bfd",
+      "plain": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 9.35,
+        "prompt_sha256": "5c68cb702399c6af080200612536ec73c1d0787d41cd0d02ef0a70aa8d0d42a0",
+        "first_ranked_mechanism": "Digitizer hardware failure or localized corrosion at the display assembly",
+        "next_safe_check": "Perform a safe non-destructive external check by connecting an OTG USB mouse to verify device interaction and verify data backup status before any intrusive evaluation.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 992,
+          "completion_tokens": 330
+        }
+      },
+      "hs_graph": {
+        "status": "proposed_unverified_differential",
+        "elapsed_seconds": 10.7,
+        "prompt_sha256": "f8f70eddb7def0c4a2a590c377b6e09fb76b03109ad4c816bebfc06aacd85658",
+        "first_ranked_mechanism": "Digitizer hardware failure or liquid damage localized to the screen assembly or flex interconnect",
+        "next_safe_check": "Perform an external non-destructive OTG check by connecting a standard USB-C mouse/keyboard to verify OS responsiveness and cursor navigation; if the cursor navigates the UI, this distinguishes an isolated touch digitizer/interconnect hardware fault from a frozen application processor/OS input loop without opening the device or risking battery puncture.",
+        "hypotheses_count": 3,
+        "tokens_estimated": {
+          "prompt_tokens": 1544,
+          "completion_tokens": 514
+        }
+      }
+    }
+  ]
+}
