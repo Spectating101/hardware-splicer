@@ -20,8 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install only the test runner — do not silently install/generate boards
-        run: python -m pip install 'pytest>=8,<10'
+      - name: Install canonical HS dependencies without regenerating boards
+        run: python -m pip install -e . 'pytest>=8,<10'
       - name: Verify source-linked exact PCB hashes, true QWERTY and 2D keepouts
         env:
           PYTHONPATH: src
