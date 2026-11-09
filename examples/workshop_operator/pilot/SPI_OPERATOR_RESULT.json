@@ -1,0 +1,89 @@
+{
+  "artifacts_sha256": {
+    "source_copy/design_manifest.json": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
+    "source_copy/spi_flash_adapter_v1.kicad_pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+    "source_copy/spi_flash_adapter_v1.kicad_sch": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "source_copy/verification.json": "f9a7f82d09ea61f73d757cf513bbf0e31e93ed753dfcd64d96cbfedc4eb6519b"
+  },
+  "canonical_machine_release": {
+    "achieved": "build_ready",
+    "allowed": false,
+    "blockers": [
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'req-physical' is not closed by passing verification"
+      },
+      {
+        "code": "release_state_not_reached",
+        "message": "requested operationally_authorized, but evidence supports only build_ready"
+      }
+    ],
+    "physical_measurements_count": 0,
+    "requested": "operationally_authorized",
+    "software_evidence_count": 1,
+    "verification_states": {
+      "verify-physical": "planned",
+      "verify-software": "passed"
+    }
+  },
+  "case_id": "spi_flash_adapter_reference",
+  "chosen_route": "reference_native_verifier",
+  "engineering_acceptance": true,
+  "execute_requested": true,
+  "fabrication_authorized": false,
+  "objective": "Independent rebuild/check of the existing SPI adapter",
+  "open_actions": [
+    "Independent human EE review of the exact sourced design and parts.",
+    "Fabricate/assemble only after a separate owner approval.",
+    "Measure supply, waveforms and host compatibility before claiming physical function."
+  ],
+  "physical_validation": false,
+  "power_on_authorized": false,
+  "real_repair_confirmed": false,
+  "registered_source": "hardware/reference_designs/spi_flash_adapter_v1",
+  "schema_version": "hardware_splicer.workshop_operator.v1",
+  "source_sha256": "e88aca7d48d29a0b95e9dfbcf6feabed7fb503407647ad4834eb7b44aa827eaf",
+  "status": "verified_design_only_physical_blocked",
+  "tool_versions": {
+    "kicad_cli": "9.0.2",
+    "pcbnew": "9.0.2",
+    "router": "Freerouting v2.4.1; routing output accepted only after KiCad checks"
+  },
+  "trace": [
+    {
+      "details": "Staged the complete editable reference source; no synthesized replacement.",
+      "existing_engine": "published SPI reference + SHA-256",
+      "source_artifacts_sha256": {
+        "spi_flash_adapter_v1.kicad_pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+        "spi_flash_adapter_v1.kicad_sch": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+        "verify_design.py": "9f89c37333f36549bda7c4fcf3713359001cc3dee7b37e0a81b4c3415c716ae5"
+      },
+      "stage": "source",
+      "state": "passed"
+    },
+    {
+      "checks": {
+        "assembly_variant_issues": 0,
+        "board_identity_issues": 0,
+        "bom_parity_issues": 0,
+        "drc_actionable_violations": 0,
+        "erc_errors": 0,
+        "erc_warnings": 0,
+        "footprint_errors": 0,
+        "ground_reference_issues": 0,
+        "required_topology_issues": 0,
+        "schematic_parity_issues": 0,
+        "unconnected_pads": 0
+      },
+      "details": "Ran the project's own full native verifier, not a fabricated CAD PASS.",
+      "existing_engine": "existing verify_design.py -> KiCad 9 ERC/DRC/parity/BOM",
+      "exit_code": 0,
+      "last_error": "",
+      "nonphysical_authority": true,
+      "receipt_matches_all_sources": true,
+      "source_unchanged": true,
+      "stage": "verification",
+      "state": "passed"
+    }
+  ]
+}

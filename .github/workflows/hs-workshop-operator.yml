@@ -1,0 +1,73 @@
+name: HS Core Workshop Operator — Real Source, Correct Verdict
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-workshop-operator.yml'
+      - 'src/hardware_splicer/workshop_operator.py'
+      - 'scripts/hs_workshop_operator.py'
+      - 'tests/test_workshop_operator.py'
+      - 'examples/workshop_operator/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-engineering-operator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the actual HS backend, not a second dummy SDK
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Module and CLI syntax
+        run: |
+          python -m compileall -q src/hardware_splicer/workshop_operator.py scripts/hs_workshop_operator.py
+          python scripts/hs_workshop_operator.py --list
+      - name: Reproduce non-executing default using a real registered case
+        run: |
+          python scripts/hs_workshop_operator.py --case robot_repair_cafe_s3 --out /tmp/hs-operator-ci-preview
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/hs-operator-ci-preview/HS_OPERATOR_RESULT.json').read_text())
+          assert d['status']=='planned_not_executed'
+          assert not d['execute_requested']
+          assert not d['engineering_acceptance']
+          assert not d['canonical_machine_release']['allowed']
+          assert not d['power_on_authorized']
+          PY
+      - name: Native routing, evidence provenance and adversarial release tests
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_workshop_operator.py
+      - name: Explicitly keep the published real pilots non-physical
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('examples/workshop_operator/pilot')
+          spi=json.loads((root/'SPI_OPERATOR_RESULT.json').read_text())
+          rc=json.loads((root/'RC_OPERATOR_RESULT.json').read_text())
+          assert spi['status']=='verified_design_only_physical_blocked'
+          assert spi['engineering_acceptance']
+          assert all(v==0 for v in spi['trace'][-1]['checks'].values())
+          assert spi['trace'][-1]['receipt_matches_all_sources']
+          assert rc['status']=='blocked_unresolved_donor_architecture'
+          assert rc['trace'][-1]['state']=='skipped'
+          for row in (spi,rc):
+              assert not row['physical_validation']
+              assert not row['power_on_authorized']
+              assert not row['fabrication_authorized']
+              assert not row['real_repair_confirmed']
+              assert not row['canonical_machine_release']['allowed']
+          PY
+      - name: Runner capability transparency
+        run: |
+          if command -v kicad-cli >/dev/null 2>&1 && python -c 'import pcbnew' >/dev/null 2>&1; then
+            echo 'Native KiCad rerun was exercised by the regression suite.'
+          else
+            echo 'Runner lacks KiCad/pcbnew: native KiCad regression was SKIPPED, not proven here.'
+            echo 'The separate Optiplex native run receipt is captured in examples/workshop_operator/pilot.'
+          fi
