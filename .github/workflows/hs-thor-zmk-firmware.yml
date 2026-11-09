@@ -1,0 +1,16 @@
+name: HS Thor 50-key ZMK firmware compile (no hardware)
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-thor-zmk-firmware.yml'
+      - 'examples/cyberdeck/thor_split_qwerty/zmk/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compile:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+    with:
+      build_matrix_path: examples/cyberdeck/thor_split_qwerty/zmk/build.yaml
+      config_path: examples/cyberdeck/thor_split_qwerty/zmk/config
+      archive_name: hs-thor-zmk-unflashed

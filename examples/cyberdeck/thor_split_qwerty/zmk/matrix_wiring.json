@@ -1,0 +1,347 @@
+{
+  "schema": "hs.thor.zmk_split_matrix.v1",
+  "board": "seeeduino_xiao_ble",
+  "board_revision_to_confirm": "Seeed Studio XIAO nRF52840, NOT ESP32 XIAO or RP2040",
+  "original_design": "detachable_9mm/left & right 25-key native KiCad 9 boards",
+  "matrix_each_half": [
+    5,
+    5
+  ],
+  "gpio_columns": [
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "D4"
+  ],
+  "gpio_rows": [
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9"
+  ],
+  "row_gpio_pull": "down",
+  "active_columns": "high",
+  "diode_direction": "col2row",
+  "diode_physical_path": "SW pad1 COL -> SW pad2 KEY -> diode pad2 anode -> diode pad1 cathode ROW",
+  "mcus": 2,
+  "connection": "left central BLE HID to Android/Linux; right peripheral BLE to left",
+  "no_battery_required_for_first_usb_powered_bench": true,
+  "proof": {
+    "KiCad_netlist_rows": true,
+    "generated_ZMK_keymap": true,
+    "ZMK_compiled": false,
+    "two_physical_mcu_booted": false,
+    "all_50_real_switches_scanned": false,
+    "Bluetooth_host_paired": false,
+    "battery_charger_approved": false
+  },
+  "wiring_requires_external_testpad_harness_and_ESD_protection": true,
+  "positions": {
+    "left": [
+      {
+        "row": 0,
+        "col": 0,
+        "label": "Q",
+        "id": "L01"
+      },
+      {
+        "row": 0,
+        "col": 1,
+        "label": "W",
+        "id": "L02"
+      },
+      {
+        "row": 0,
+        "col": 2,
+        "label": "E",
+        "id": "L03"
+      },
+      {
+        "row": 0,
+        "col": 3,
+        "label": "R",
+        "id": "L04"
+      },
+      {
+        "row": 0,
+        "col": 4,
+        "label": "T",
+        "id": "L05"
+      },
+      {
+        "row": 1,
+        "col": 0,
+        "label": "A",
+        "id": "L06"
+      },
+      {
+        "row": 1,
+        "col": 1,
+        "label": "S",
+        "id": "L07"
+      },
+      {
+        "row": 1,
+        "col": 2,
+        "label": "D",
+        "id": "L08"
+      },
+      {
+        "row": 1,
+        "col": 3,
+        "label": "F",
+        "id": "L09"
+      },
+      {
+        "row": 1,
+        "col": 4,
+        "label": "G",
+        "id": "L10"
+      },
+      {
+        "row": 2,
+        "col": 0,
+        "label": "Z",
+        "id": "L11"
+      },
+      {
+        "row": 2,
+        "col": 1,
+        "label": "X",
+        "id": "L12"
+      },
+      {
+        "row": 2,
+        "col": 2,
+        "label": "C",
+        "id": "L13"
+      },
+      {
+        "row": 2,
+        "col": 3,
+        "label": "V",
+        "id": "L14"
+      },
+      {
+        "row": 2,
+        "col": 4,
+        "label": "B",
+        "id": "L15"
+      },
+      {
+        "row": 3,
+        "col": 0,
+        "label": "1",
+        "id": "L16"
+      },
+      {
+        "row": 3,
+        "col": 1,
+        "label": "2",
+        "id": "L17"
+      },
+      {
+        "row": 3,
+        "col": 2,
+        "label": "3",
+        "id": "L18"
+      },
+      {
+        "row": 3,
+        "col": 3,
+        "label": "4",
+        "id": "L19"
+      },
+      {
+        "row": 3,
+        "col": 4,
+        "label": "5",
+        "id": "L20"
+      },
+      {
+        "row": 4,
+        "col": 0,
+        "label": "SHIFT",
+        "id": "L21"
+      },
+      {
+        "row": 4,
+        "col": 1,
+        "label": "CTRL",
+        "id": "L22"
+      },
+      {
+        "row": 4,
+        "col": 2,
+        "label": "ALT",
+        "id": "L23"
+      },
+      {
+        "row": 4,
+        "col": 3,
+        "label": "TAB",
+        "id": "L24"
+      },
+      {
+        "row": 4,
+        "col": 4,
+        "label": "FN",
+        "id": "L25"
+      }
+    ],
+    "right": [
+      {
+        "row": 0,
+        "col": 0,
+        "label": "Y",
+        "id": "R01"
+      },
+      {
+        "row": 0,
+        "col": 1,
+        "label": "U",
+        "id": "R02"
+      },
+      {
+        "row": 0,
+        "col": 2,
+        "label": "I",
+        "id": "R03"
+      },
+      {
+        "row": 0,
+        "col": 3,
+        "label": "O",
+        "id": "R04"
+      },
+      {
+        "row": 0,
+        "col": 4,
+        "label": "P",
+        "id": "R05"
+      },
+      {
+        "row": 1,
+        "col": 0,
+        "label": "H",
+        "id": "R06"
+      },
+      {
+        "row": 1,
+        "col": 1,
+        "label": "J",
+        "id": "R07"
+      },
+      {
+        "row": 1,
+        "col": 2,
+        "label": "K",
+        "id": "R08"
+      },
+      {
+        "row": 1,
+        "col": 3,
+        "label": "L",
+        "id": "R09"
+      },
+      {
+        "row": 1,
+        "col": 4,
+        "label": ";",
+        "id": "R10"
+      },
+      {
+        "row": 2,
+        "col": 0,
+        "label": "N",
+        "id": "R11"
+      },
+      {
+        "row": 2,
+        "col": 1,
+        "label": "M",
+        "id": "R12"
+      },
+      {
+        "row": 2,
+        "col": 2,
+        "label": ",",
+        "id": "R13"
+      },
+      {
+        "row": 2,
+        "col": 3,
+        "label": ".",
+        "id": "R14"
+      },
+      {
+        "row": 2,
+        "col": 4,
+        "label": "/",
+        "id": "R15"
+      },
+      {
+        "row": 3,
+        "col": 0,
+        "label": "6",
+        "id": "R16"
+      },
+      {
+        "row": 3,
+        "col": 1,
+        "label": "7",
+        "id": "R17"
+      },
+      {
+        "row": 3,
+        "col": 2,
+        "label": "8",
+        "id": "R18"
+      },
+      {
+        "row": 3,
+        "col": 3,
+        "label": "9",
+        "id": "R19"
+      },
+      {
+        "row": 3,
+        "col": 4,
+        "label": "0",
+        "id": "R20"
+      },
+      {
+        "row": 4,
+        "col": 0,
+        "label": "SYM",
+        "id": "R21"
+      },
+      {
+        "row": 4,
+        "col": 1,
+        "label": "SPACE",
+        "id": "R22"
+      },
+      {
+        "row": 4,
+        "col": 2,
+        "label": "ENTER",
+        "id": "R23"
+      },
+      {
+        "row": 4,
+        "col": 3,
+        "label": "BSPC",
+        "id": "R24"
+      },
+      {
+        "row": 4,
+        "col": 4,
+        "label": "ESC",
+        "id": "R25"
+      }
+    ]
+  }
+}
