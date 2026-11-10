@@ -1,0 +1,4 @@
+# KiCad/CadQuery CAD files are vendor-generated geometry, not hand-edited source.
+# Native STEP exports contain legal whitespace and must retain their exact SHA.
+*.step -diff -text
+*.stl -diff -text

@@ -1,0 +1,172 @@
+{
+  "claims": [],
+  "functions": [
+    {
+      "id": "F_CAPTURE",
+      "name": "Capture nominal board edge",
+      "requirements": [
+        "R_SLOT",
+        "R_ACCESS"
+      ],
+      "subsystems": [
+        "S_STAND",
+        "S_BOARD"
+      ]
+    },
+    {
+      "id": "F_STABLE",
+      "name": "Resist lateral tip",
+      "requirements": [
+        "R_TIP"
+      ],
+      "subsystems": [
+        "S_STAND"
+      ]
+    },
+    {
+      "id": "F_MAKE",
+      "name": "Fabricate material-efficient stand",
+      "requirements": [
+        "R_PRINT",
+        "R_MATERIAL"
+      ],
+      "subsystems": [
+        "S_STAND"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "unpowered_pcb",
+      "medium": "solid board"
+    }
+  ],
+  "intended_use": "general_device",
+  "interfaces": [
+    {
+      "from": "S_BOARD",
+      "id": "I_SLOT",
+      "medium": "mechanical",
+      "name": "Edge capture",
+      "requirements": [
+        "R_SLOT"
+      ],
+      "to": "S_STAND",
+      "unresolved": [
+        "board actual thickness and corner geometry",
+        "FDM shrinkage and repeatability",
+        "ESD-safety qualification",
+        "printed fixture physical fit and durability"
+      ]
+    }
+  ],
+  "name": "PCB Service Stand \u2014 function first",
+  "outputs": [
+    {
+      "id": "supported_pcb",
+      "medium": "mechanical support"
+    }
+  ],
+  "project_id": "pcb_repair_stand_function_geometry_v1",
+  "purpose": "Create a parametric unpowered inspection stand, not a physically qualified repair fixture",
+  "requirements": [
+    {
+      "id": "R_SLOT",
+      "kind": "interface",
+      "priority": "must",
+      "statement": "Nominal PCB edge captured by top-open slot with specified clearance.",
+      "verification": {
+        "acceptance": {
+          "per_side_clearance_mm": 0.3
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Measure actual PCB and printed slot, insert/withdraw, inspect edge contact and wobble."
+      }
+    },
+    {
+      "id": "R_ACCESS",
+      "kind": "functional",
+      "priority": "must",
+      "statement": "Two separated supports allow viewing both board faces.",
+      "verification": {
+        "acceptance": {
+          "support_count": 2
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Photograph board access from each face with a nonpowered dummy PCB."
+      }
+    },
+    {
+      "id": "R_TIP",
+      "kind": "performance",
+      "priority": "must",
+      "statement": "Static tip-proxy margin under declared lateral push.",
+      "verification": {
+        "acceptance": {
+          "minimum_factor": 1.5
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Measure real printed part and PCB mass, then record controlled lateral dummy-board loading."
+      }
+    },
+    {
+      "id": "R_PRINT",
+      "kind": "constraint",
+      "priority": "must",
+      "statement": "Geometry within FDM bed and minimum thin-wall limit.",
+      "verification": {
+        "acceptance": {
+          "bed_mm": [
+            220,
+            220,
+            250
+          ],
+          "minimum_wall_mm": 3
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Independently slice, print and measure slot, outer dimensions, and wall quality."
+      }
+    },
+    {
+      "id": "R_MATERIAL",
+      "kind": "performance",
+      "priority": "must",
+      "statement": "Choose lowest CAD-solid volume among feasible modelled alternatives.",
+      "verification": {
+        "acceptance": {
+          "objective": "minimum solid volume with all declared numeric gates"
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Cross-import STEP/STL to compare geometry mass proxies; validate real sliced material later."
+      }
+    }
+  ],
+  "schema_version": "hardware_splicer.function_intent.v1",
+  "subsystems": [
+    {
+      "domain": "mechanical",
+      "id": "S_STAND",
+      "name": "Print stand",
+      "purpose": "Support unpowered board at two edge slots",
+      "requirements": [
+        "R_SLOT",
+        "R_ACCESS",
+        "R_TIP",
+        "R_PRINT",
+        "R_MATERIAL"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_BOARD",
+      "name": "Unmeasured target board",
+      "purpose": "Provide declared nominal envelope without physical measurement",
+      "requirements": []
+    }
+  ]
+}

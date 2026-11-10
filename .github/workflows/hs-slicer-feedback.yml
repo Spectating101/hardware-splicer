@@ -1,0 +1,54 @@
+name: HS real slicer feedback and G-code provenance
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/function_print_slicer.py'
+      - 'src/hardware_splicer/function_print_feedback.py'
+      - 'examples/print_function_pilot/pcb_service_stand/**'
+      - 'tests/test_function_print_slicer.py'
+      - '.github/workflows/hs-slicer-feedback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  numeric-source-and-native-CAD-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install native CAD and HS dependencies
+        run: |
+          python -m pip install -e .
+          python -m pip install 'cadquery==2.6.1' 'trimesh==4.12.2' 'pytest>=8,<10'
+      - name: Source-locked CAD, real slicer receipts, sensitivity analysis
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_function_print_slicer.py \
+            tests/test_function_print_geometry.py \
+            tests/test_function_intent_bridge.py \
+            tests/test_step_geometry.py \
+            tests/test_mechanical_fit.py
+          python examples/print_function_pilot/pcb_service_stand/verify_independent_reslice.py --source-only
+  independent-real-prusaslicer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently re-slice all 12 source STLs in Debian PrusaSlicer
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo:ro" -w /repo \
+            debian:trixie \
+            bash -lc '
+              set -e
+              apt-get update -qq
+              DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+                --no-install-recommends prusa-slicer python3 ca-certificates >/tmp/slicer-apt.log
+              python3 examples/print_function_pilot/pcb_service_stand/verify_independent_reslice.py \
+                --slicer /usr/bin/prusa-slicer
+            '

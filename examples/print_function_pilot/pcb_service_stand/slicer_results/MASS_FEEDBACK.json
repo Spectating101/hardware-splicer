@@ -1,0 +1,250 @@
+{
+  "analysis_mode": "post-hoc sensitivity screen, not prespecified blind calibration",
+  "cases": [
+    {
+      "candidate_results": [
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 2.262,
+          "id": "solid_plate",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.573,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 29.0,
+          "slicer_estimated_print_time_s": 10468,
+          "source_gcode_sha256": "ac303c974cec1c59e09d6289cbc4522a036987f5284e92e1655074b83aaeb3d8"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": false,
+          "guarded_tip_factor_using_slicer_mass": 1.207,
+          "id": "minimal_46",
+          "nominal_slicer_proxy_pass": false,
+          "nominal_tip_factor_using_slicer_mass": 1.363,
+          "original_CAD_feasible": false,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 17.3,
+          "slicer_estimated_print_time_s": 6112,
+          "source_gcode_sha256": "8306a06f90f193840a1453de9513e22a4d2898715cd21607e87fd46d7b2a0d77"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": false,
+          "guarded_tip_factor_using_slicer_mass": 1.385,
+          "id": "minimal_52",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 1.565,
+          "original_CAD_feasible": false,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 17.95,
+          "slicer_estimated_print_time_s": 6339,
+          "source_gcode_sha256": "588e3c3afa82df7a601f2627dc353b5b17054b8ac5e22c1aea1ba746411b0bf9"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 1.623,
+          "id": "ladder_58",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 1.837,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 20.21,
+          "slicer_estimated_print_time_s": 7132,
+          "source_gcode_sha256": "63b1a2960f6a5003d8c720bf1c734fecc158296d044353b82dc880177975ba36"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 1.817,
+          "id": "ladder_64",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.058,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 20.89,
+          "slicer_estimated_print_time_s": 7387,
+          "source_gcode_sha256": "84c4457f15c97db5ccfec6adebab6ef3d502986dca18b5d4073feaba2360cd11"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 2.09,
+          "id": "reinforced_68",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.372,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 24.79,
+          "slicer_estimated_print_time_s": 8705,
+          "source_gcode_sha256": "fc49811b80e3be41b7a00c73e6fe63e9c5bfc9807da8b50bc1d33e690d82632e"
+        }
+      ],
+      "guarded_chose_different_than_previous_CAD": false,
+      "nominal_chose_different_than_previous_CAD": true,
+      "profile": "standard_020",
+      "selection": {
+        "guarded": {
+          "chosen": "ladder_58",
+          "chosen_estimated_filament_g": 20.21,
+          "chosen_estimated_time_s": 7132,
+          "feasible_order": [
+            "ladder_58",
+            "ladder_64",
+            "reinforced_68",
+            "solid_plate"
+          ],
+          "filament_saving_vs_plate_percent": 30.3
+        },
+        "nominal": {
+          "chosen": "minimal_52",
+          "chosen_estimated_filament_g": 17.95,
+          "chosen_estimated_time_s": 6339,
+          "feasible_order": [
+            "minimal_52",
+            "ladder_58",
+            "ladder_64",
+            "reinforced_68",
+            "solid_plate"
+          ],
+          "filament_saving_vs_plate_percent": 38.1
+        }
+      }
+    },
+    {
+      "candidate_results": [
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 2.349,
+          "id": "solid_plate",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.675,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 31.13,
+          "slicer_estimated_print_time_s": 8873,
+          "source_gcode_sha256": "f372b12f29053782b81c2472d426fc88d11a34fa655fd8b37c023428fba5ace3"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": false,
+          "guarded_tip_factor_using_slicer_mass": 1.215,
+          "id": "minimal_46",
+          "nominal_slicer_proxy_pass": false,
+          "nominal_tip_factor_using_slicer_mass": 1.373,
+          "original_CAD_feasible": false,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 17.59,
+          "slicer_estimated_print_time_s": 4847,
+          "source_gcode_sha256": "d621cd7c09b88c351f738b3dc277149e1cf66851572356741e23811744e4fe49"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": false,
+          "guarded_tip_factor_using_slicer_mass": 1.395,
+          "id": "minimal_52",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 1.577,
+          "original_CAD_feasible": false,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 18.27,
+          "slicer_estimated_print_time_s": 5047,
+          "source_gcode_sha256": "28290b8778412b7b71c5030360828bd5e6719d68240534f221015768b9095513"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 1.647,
+          "id": "ladder_58",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 1.865,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 20.89,
+          "slicer_estimated_print_time_s": 5765,
+          "source_gcode_sha256": "3dcf2a09f4057096c37add26e2e9a4559d22ca741f6a893eee5d7a0314532134"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 1.847,
+          "id": "ladder_64",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.093,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 21.67,
+          "slicer_estimated_print_time_s": 5987,
+          "source_gcode_sha256": "05f117dbcfe0309551ba675867a54798ac4fd3a45913102c6e9d33902e863770"
+        },
+        {
+          "actual_mass_measured": false,
+          "geometry_nonstability_gates_pass": true,
+          "guarded_slicer_proxy_pass": true,
+          "guarded_tip_factor_using_slicer_mass": 2.123,
+          "id": "reinforced_68",
+          "nominal_slicer_proxy_pass": true,
+          "nominal_tip_factor_using_slicer_mass": 2.411,
+          "original_CAD_feasible": true,
+          "physical_tip_test_completed": false,
+          "slicer_estimated_filament_g": 25.59,
+          "slicer_estimated_print_time_s": 7062,
+          "source_gcode_sha256": "389660b54339c633d4e7621037706f5ac07045f41f7a9271839c42d2edfaed63"
+        }
+      ],
+      "guarded_chose_different_than_previous_CAD": false,
+      "nominal_chose_different_than_previous_CAD": true,
+      "profile": "draft_028",
+      "selection": {
+        "guarded": {
+          "chosen": "ladder_58",
+          "chosen_estimated_filament_g": 20.89,
+          "chosen_estimated_time_s": 5765,
+          "feasible_order": [
+            "ladder_58",
+            "ladder_64",
+            "reinforced_68",
+            "solid_plate"
+          ],
+          "filament_saving_vs_plate_percent": 32.9
+        },
+        "nominal": {
+          "chosen": "minimal_52",
+          "chosen_estimated_filament_g": 18.27,
+          "chosen_estimated_time_s": 5047,
+          "feasible_order": [
+            "minimal_52",
+            "ladder_58",
+            "ladder_64",
+            "reinforced_68",
+            "solid_plate"
+          ],
+          "filament_saving_vs_plate_percent": 41.3
+        }
+      }
+    }
+  ],
+  "feedback_policy_sha256": "2a53c181d67163bee37d2715e5c474ad9328d007aa19f2a49255776aba719897",
+  "mass_provenance": "native PrusaSlicer G-code material estimate, NOT weighed print",
+  "printer_execution_authorized": false,
+  "project_id": "pcb_repair_stand_function_geometry_v1",
+  "schema": "hs.function_print_slicer_feedback.v1",
+  "slicer_report_sha256": "d5b67167114adcdb272a6f005d236ac23ae76e846340ebb26b391f46750b636f",
+  "source_design_sha256": "b728736cb2e9b8375b2b4be5904d5d8d86965b742c1ed4fdacf3d24429e21499",
+  "source_slicer_profile_sha256": "dd160de78f3fde84eb7d09a99ad1fb3c8fbbdbaa6f0cd50347b6fbb06a76807e",
+  "static_model_has_no_slide_fatigue_creep_adhesion_or_FEA_verification": true
+}

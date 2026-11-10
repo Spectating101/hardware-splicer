@@ -1,0 +1,40 @@
+{
+  "actual_native_slice_count": 12,
+  "gcode_hashes_verified": true,
+  "physical_print_authorized": false,
+  "rankings": [
+    {
+      "baseline_plate_filament_g": 29.0,
+      "cad_volume_selection": "ladder_58",
+      "profile": "standard_020",
+      "relative_slicer_filament_reduction_pct": 30.3,
+      "selected_estimated_print_time_s": 7132,
+      "selected_filament_g": 20.21,
+      "slicer_feasible_rank": [
+        "ladder_58",
+        "ladder_64",
+        "reinforced_68",
+        "solid_plate"
+      ],
+      "slicer_filament_selection": "ladder_58",
+      "slicer_selection_differs_from_CAD": false
+    },
+    {
+      "baseline_plate_filament_g": 31.13,
+      "cad_volume_selection": "ladder_58",
+      "profile": "draft_028",
+      "relative_slicer_filament_reduction_pct": 32.9,
+      "selected_estimated_print_time_s": 5765,
+      "selected_filament_g": 20.89,
+      "slicer_feasible_rank": [
+        "ladder_58",
+        "ladder_64",
+        "reinforced_68",
+        "solid_plate"
+      ],
+      "slicer_filament_selection": "ladder_58",
+      "slicer_selection_differs_from_CAD": false
+    }
+  ],
+  "schema": "hs.slicer_trial_offline_audit.v1"
+}

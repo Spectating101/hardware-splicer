@@ -1,0 +1,24 @@
+{
+  "schema": "hs.slicer_mass_feedback_policy.v1",
+  "objective": "minimize actual-slicer-estimated filament mass among candidates satisfying all geometry constraints and chosen tip-proxy screen",
+  "provenance": "Exploratory post-slice sensitivity analysis; guard band chosen for stress testing, not empirically calibrated reliability",
+  "assumed_filament_mass_lower_fraction": 0.9,
+  "assumed_board_mass_lower_fraction": 0.95,
+  "assumed_lateral_force_upper_fraction": 1.05,
+  "minimum_nominal_tip_factor": 1.5,
+  "minimum_guarded_tip_factor": 1.5,
+  "design_authority": {
+    "physical_mass_observed": false,
+    "physical_tip_load_observed": false,
+    "slicer_infill_qualified": false,
+    "physical_print_passed": false,
+    "fabrication_authorized": false
+  },
+  "unresolved": [
+    "Slicer mass is estimated extrusion at fixed 1.24g/cm³ density, not scale-measured print mass",
+    "Nominal board 25 g is invented illustration, not a measured sample",
+    "Tip model is quasistatic lever estimate: not FEA, impulse, slide or fatigue qualification",
+    "Guard bands are illustrative sensitivity parameters; reliability confidence is NOT statistically calibrated",
+    "PCB fit, ESD, layer adhesion, printer tuning and filament properties are unverified"
+  ]
+}
