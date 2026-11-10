@@ -219,6 +219,38 @@ def build_messages(context: Mapping[str, Any]) -> list[dict[str, str]]:
                 "physical instrument readings. Do not drop below/at-least/range "
                 "semantics when comparing the claims."
             )
+    if context.get("investigator_reference"):
+        ref=context["investigator_reference"]
+        if ref.get("schema")!="hs.repair_investigator.reference_tool.v1" or ref.get("case_id")!=context["case_id"]:
+            raise ValueError("engineering reference does not match this source case")
+        if ref.get("physical_target_revision_verified") is not False or ref.get("repair_authorized") is not False:
+            raise ValueError("source-only schematic may not authorize physical test operations")
+        messages[0]["content"] += (
+            "\n\nHS REAL-KICAD INVESTIGATOR: This is actual attributed"
+            " KiCad-derived REFERENCE topology, not a model-generated"
+            " pinout, but the physical C64 board revision is NOT independently"
+            " inspected and the replica may differ from historic revisions."
+            " The original KiCad export also warned about annotation errors."
+            " The video narration is UNVERIFIED auto-caption speech, not"
+            " visual frame analysis or meter readings verified by HS."
+            " Do not advise actual component-pin testing, live electrical"
+            " measurements, internal powered probing, replacement or soldering."
+            " Instead propose a safe, nonpowered inspection or request for"
+            " photos confirming the actual board model and damaged areas."
+            " You may explain specific reference nets as engineering context,"
+            " but never infer conductive passage through switch or IC pins,"
+            " and do not claim any instrument observation occurred."
+            " Cite symptom evidence by its existing E IDs."
+            " REAL_ENGINEERING_TOOL=" + json.dumps({
+                "reference_board":ref["reference_board"],
+                "source_commit":ref["source_commit"],
+                "reference_license":ref["source_license"],
+                "source_graph_sha256":ref["source_graph_sha256"],
+                "selected_reference_nets":ref["reference_nets"],
+                "unresolved":ref["unresolved_source_ids"],
+                "physical_target_revision_verified":False,
+            },sort_keys=True)
+        )
     if context.get("board_action_feedback"):
         feedback=context["board_action_feedback"]
         if not feedback.get("parent_receipt_sha256"):
@@ -335,13 +367,19 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         raise ValueError("unsafe or irreversible proposed action; fail closed")
     ledger = (context.get("hs_engineering_ledger")
               or context.get("engineering_reference")
-              or context.get("numeric_source_tool"))
+              or context.get("numeric_source_tool")
+              or context.get("investigator_reference"))
     if ledger:
         from .restoration_numeric_truth_gate import reject_unsourced_thresholds
         reject_unsourced_thresholds(value,ledger)
     if context.get("engineering_reference"):
         from .restoration_board_action_gate import reject_unverified_board_pin_actions
         reject_unverified_board_pin_actions(value,context["engineering_reference"])
+    if context.get("investigator_reference"):
+        from .restoration_board_action_gate import reject_unverified_board_pin_actions
+        reject_unverified_board_pin_actions(
+            value,{"target_board_physically_verified":False}
+        )
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],
         "next_safe_check": value["next_safe_check"][:1000],
@@ -385,6 +423,10 @@ def diagnose(context: dict[str, Any], *, model: str = "qwen2.5:1.5b-instruct",
         result["numeric_source_graph_sha256"] = context["numeric_source_tool"]["HS_real_source_graph_sha256"]
         result["reported_numbers_not_HS_measurements"] = True
         result["physical_board_verified"] = False
+    if context.get("investigator_reference"):
+        result["investigator_reference_sha256"] = sha(context["investigator_reference"])
+        result["investigator_source_graph_sha256"] = context["investigator_reference"]["source_graph_sha256"]
+        result["target_board_physically_verified"] = False
     if context.get("board_action_feedback"):
         result["board_action_parent_receipt_sha256"] = context["board_action_feedback"]["parent_receipt_sha256"]
         result["board_action_correction"] = True

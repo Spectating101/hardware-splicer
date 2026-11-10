@@ -1,0 +1,1437 @@
+{
+  "board_design_id": "250407_",
+  "board_family": "Commodore C64",
+  "board_replica_not_identical_to_all_original_revisions": true,
+  "claimed_reference_revision": "bwack 250407 replica v1.3 (based on KU and 250407 Rev.B)",
+  "full_netlist_component_count": 230,
+  "full_netlist_net_count": 250,
+  "kicad_export_warning": "KiCad reported schematic annotation errors; source-derived netlist is not a certified physical replica",
+  "kicad_export_xml_sha256": "f85b6f751eb45dc290bbec58fbea98ec95a1b8c370985b8f8d5cdd48ca6d5046",
+  "kicad_version": "9.0.2",
+  "physical_target_revision_verified": false,
+  "referenced_components": [
+    {
+      "ref": "C100",
+      "value": ".22"
+    },
+    {
+      "ref": "C102",
+      "value": "10uF"
+    },
+    {
+      "ref": "C103",
+      "value": ".1"
+    },
+    {
+      "ref": "C14",
+      "value": "10uF"
+    },
+    {
+      "ref": "C17",
+      "value": "10uF"
+    },
+    {
+      "ref": "C2",
+      "value": ".1"
+    },
+    {
+      "ref": "C20",
+      "value": ".22"
+    },
+    {
+      "ref": "C203",
+      "value": "82pF"
+    },
+    {
+      "ref": "C204",
+      "value": "NC"
+    },
+    {
+      "ref": "C21",
+      "value": ".22"
+    },
+    {
+      "ref": "C22",
+      "value": ".1"
+    },
+    {
+      "ref": "C25",
+      "value": ".1"
+    },
+    {
+      "ref": "C26",
+      "value": ".1"
+    },
+    {
+      "ref": "C27",
+      "value": ".1"
+    },
+    {
+      "ref": "C28",
+      "value": ".1"
+    },
+    {
+      "ref": "C29",
+      "value": ".1"
+    },
+    {
+      "ref": "C3",
+      "value": ".1"
+    },
+    {
+      "ref": "C30",
+      "value": ".1"
+    },
+    {
+      "ref": "C31",
+      "value": ".1"
+    },
+    {
+      "ref": "C32",
+      "value": ".1"
+    },
+    {
+      "ref": "C33",
+      "value": ".1"
+    },
+    {
+      "ref": "C34",
+      "value": "10uF"
+    },
+    {
+      "ref": "C36",
+      "value": "20pF"
+    },
+    {
+      "ref": "C39",
+      "value": ".1"
+    },
+    {
+      "ref": "C4",
+      "value": ".1"
+    },
+    {
+      "ref": "C40",
+      "value": ".1"
+    },
+    {
+      "ref": "C41",
+      "value": ".1"
+    },
+    {
+      "ref": "C42",
+      "value": ".1"
+    },
+    {
+      "ref": "C43",
+      "value": ".1"
+    },
+    {
+      "ref": "C44",
+      "value": ".1"
+    },
+    {
+      "ref": "C45",
+      "value": ".1"
+    },
+    {
+      "ref": "C46",
+      "value": ".1"
+    },
+    {
+      "ref": "C47",
+      "value": ".1"
+    },
+    {
+      "ref": "C49",
+      "value": ".1"
+    },
+    {
+      "ref": "C5",
+      "value": ".1"
+    },
+    {
+      "ref": "C52",
+      "value": ".1"
+    },
+    {
+      "ref": "C53",
+      "value": ".1"
+    },
+    {
+      "ref": "C57",
+      "value": "10uF"
+    },
+    {
+      "ref": "C59",
+      "value": ".1"
+    },
+    {
+      "ref": "C6",
+      "value": ".1"
+    },
+    {
+      "ref": "C62",
+      "value": "10uF"
+    },
+    {
+      "ref": "C65",
+      "value": "10uF"
+    },
+    {
+      "ref": "C66",
+      "value": ".1"
+    },
+    {
+      "ref": "C7",
+      "value": ".1"
+    },
+    {
+      "ref": "C8",
+      "value": "10uF"
+    },
+    {
+      "ref": "C9",
+      "value": ".1"
+    },
+    {
+      "ref": "C90",
+      "value": "470uF"
+    },
+    {
+      "ref": "C91",
+      "value": "100uF"
+    },
+    {
+      "ref": "C92",
+      "value": ".1"
+    },
+    {
+      "ref": "C94",
+      "value": "10uF"
+    },
+    {
+      "ref": "C96",
+      "value": ".1"
+    },
+    {
+      "ref": "C99",
+      "value": ".1"
+    },
+    {
+      "ref": "CN1",
+      "value": "KEYBOARD_20PIN_MALE"
+    },
+    {
+      "ref": "CN2",
+      "value": "USER_PORT_CON"
+    },
+    {
+      "ref": "CN4",
+      "value": "SERIAL_BUS_CON"
+    },
+    {
+      "ref": "CN6",
+      "value": "EXPANSION_PORT"
+    },
+    {
+      "ref": "CR100",
+      "value": "D_Small_ALT"
+    },
+    {
+      "ref": "CR102",
+      "value": "D_Small_ALT"
+    },
+    {
+      "ref": "CR4",
+      "value": "BRIDGE_RECTIFIER"
+    },
+    {
+      "ref": "F1",
+      "value": "1A"
+    },
+    {
+      "ref": "FB10",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB11",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB12",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB17",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB18",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB22",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB23",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB3",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB4",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "FB5",
+      "value": "FERRITE_BEAD"
+    },
+    {
+      "ref": "L2",
+      "value": "2.2uH"
+    },
+    {
+      "ref": "L4",
+      "value": "CHOKE"
+    },
+    {
+      "ref": "L5",
+      "value": "1.2uH"
+    },
+    {
+      "ref": "Q8",
+      "value": "2SC1815"
+    },
+    {
+      "ref": "R1",
+      "value": "3K3"
+    },
+    {
+      "ref": "R28",
+      "value": "1K"
+    },
+    {
+      "ref": "R29",
+      "value": "1K"
+    },
+    {
+      "ref": "R30",
+      "value": "1K"
+    },
+    {
+      "ref": "R31",
+      "value": "1K"
+    },
+    {
+      "ref": "R33",
+      "value": "47K"
+    },
+    {
+      "ref": "R34",
+      "value": "47K"
+    },
+    {
+      "ref": "R35",
+      "value": "470K"
+    },
+    {
+      "ref": "R36",
+      "value": "1K"
+    },
+    {
+      "ref": "R39",
+      "value": "390"
+    },
+    {
+      "ref": "R41",
+      "value": "1M"
+    },
+    {
+      "ref": "R42",
+      "value": "82"
+    },
+    {
+      "ref": "R43",
+      "value": "3K3"
+    },
+    {
+      "ref": "R44",
+      "value": "3K3"
+    },
+    {
+      "ref": "R45",
+      "value": "3K3"
+    },
+    {
+      "ref": "R5",
+      "value": "560"
+    },
+    {
+      "ref": "R50",
+      "value": "1M"
+    },
+    {
+      "ref": "R51",
+      "value": "1.5K"
+    },
+    {
+      "ref": "RP3",
+      "value": "3K3 Bussed"
+    },
+    {
+      "ref": "RP4",
+      "value": "3K3 Bussed"
+    },
+    {
+      "ref": "SW1",
+      "value": "POWER_SWITCH"
+    },
+    {
+      "ref": "U1",
+      "value": "CIA_U1"
+    },
+    {
+      "ref": "U10",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U11",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U12",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U13",
+      "value": "74LS257"
+    },
+    {
+      "ref": "U14",
+      "value": "74LS258"
+    },
+    {
+      "ref": "U15A",
+      "value": "74LS139"
+    },
+    {
+      "ref": "U16",
+      "value": "4066_U28"
+    },
+    {
+      "ref": "U17",
+      "value": "PLA_U17"
+    },
+    {
+      "ref": "U18",
+      "value": "6581"
+    },
+    {
+      "ref": "U19",
+      "value": "VIC"
+    },
+    {
+      "ref": "U2",
+      "value": "CIA_U2"
+    },
+    {
+      "ref": "U20",
+      "value": "556"
+    },
+    {
+      "ref": "U21",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U22",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U23",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U24",
+      "value": "4164-2"
+    },
+    {
+      "ref": "U25",
+      "value": "74LS257"
+    },
+    {
+      "ref": "U26",
+      "value": "74LS373"
+    },
+    {
+      "ref": "U27",
+      "value": "7408_U27"
+    },
+    {
+      "ref": "U27B",
+      "value": "7408_U27"
+    },
+    {
+      "ref": "U27D",
+      "value": "7408_U27"
+    },
+    {
+      "ref": "U28",
+      "value": "4066_U28"
+    },
+    {
+      "ref": "U3",
+      "value": "2364A"
+    },
+    {
+      "ref": "U32",
+      "value": "MC4044"
+    },
+    {
+      "ref": "U4",
+      "value": "2364A"
+    },
+    {
+      "ref": "U5",
+      "value": "2332A"
+    },
+    {
+      "ref": "U6",
+      "value": "2114"
+    },
+    {
+      "ref": "U7",
+      "value": "6510_MPU"
+    },
+    {
+      "ref": "U8",
+      "value": "7406N"
+    },
+    {
+      "ref": "U9",
+      "value": "4164-2"
+    },
+    {
+      "ref": "VR1",
+      "value": "7812"
+    },
+    {
+      "ref": "VR2",
+      "value": "7805"
+    }
+  ],
+  "schema": "hs.circuit_kicad_reference_snapshot.v1",
+  "selected_nets": [
+    {
+      "name": "+5V",
+      "pin_count": 93,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "C100"
+        },
+        {
+          "pin": "1",
+          "ref": "C14"
+        },
+        {
+          "pin": "1",
+          "ref": "C17"
+        },
+        {
+          "pin": "1",
+          "ref": "C2"
+        },
+        {
+          "pin": "1",
+          "ref": "C22"
+        },
+        {
+          "pin": "1",
+          "ref": "C25"
+        },
+        {
+          "pin": "1",
+          "ref": "C26"
+        },
+        {
+          "pin": "1",
+          "ref": "C27"
+        },
+        {
+          "pin": "1",
+          "ref": "C28"
+        },
+        {
+          "pin": "2",
+          "ref": "C29"
+        },
+        {
+          "pin": "2",
+          "ref": "C3"
+        },
+        {
+          "pin": "1",
+          "ref": "C30"
+        },
+        {
+          "pin": "2",
+          "ref": "C31"
+        },
+        {
+          "pin": "2",
+          "ref": "C32"
+        },
+        {
+          "pin": "1",
+          "ref": "C33"
+        },
+        {
+          "pin": "1",
+          "ref": "C34"
+        },
+        {
+          "pin": "2",
+          "ref": "C39"
+        },
+        {
+          "pin": "2",
+          "ref": "C4"
+        },
+        {
+          "pin": "1",
+          "ref": "C40"
+        },
+        {
+          "pin": "1",
+          "ref": "C41"
+        },
+        {
+          "pin": "1",
+          "ref": "C42"
+        },
+        {
+          "pin": "1",
+          "ref": "C43"
+        },
+        {
+          "pin": "2",
+          "ref": "C44"
+        },
+        {
+          "pin": "1",
+          "ref": "C45"
+        },
+        {
+          "pin": "1",
+          "ref": "C46"
+        },
+        {
+          "pin": "1",
+          "ref": "C47"
+        },
+        {
+          "pin": "1",
+          "ref": "C49"
+        },
+        {
+          "pin": "2",
+          "ref": "C5"
+        },
+        {
+          "pin": "2",
+          "ref": "C6"
+        },
+        {
+          "pin": "1",
+          "ref": "C7"
+        },
+        {
+          "pin": "1",
+          "ref": "C8"
+        },
+        {
+          "pin": "1",
+          "ref": "C9"
+        },
+        {
+          "pin": "1",
+          "ref": "C91"
+        },
+        {
+          "pin": "1",
+          "ref": "C92"
+        },
+        {
+          "pin": "2",
+          "ref": "C96"
+        },
+        {
+          "pin": "4",
+          "ref": "CN1"
+        },
+        {
+          "pin": "2",
+          "ref": "CN2"
+        },
+        {
+          "pin": "2",
+          "ref": "CN6"
+        },
+        {
+          "pin": "3",
+          "ref": "CN6"
+        },
+        {
+          "pin": "1",
+          "ref": "CR100"
+        },
+        {
+          "pin": "1",
+          "ref": "CR102"
+        },
+        {
+          "pin": "2",
+          "ref": "FB10"
+        },
+        {
+          "pin": "1",
+          "ref": "FB18"
+        },
+        {
+          "pin": "2",
+          "ref": "FB3"
+        },
+        {
+          "pin": "1",
+          "ref": "L5"
+        },
+        {
+          "pin": "1",
+          "ref": "R1"
+        },
+        {
+          "pin": "2",
+          "ref": "R28"
+        },
+        {
+          "pin": "2",
+          "ref": "R29"
+        },
+        {
+          "pin": "2",
+          "ref": "R30"
+        },
+        {
+          "pin": "2",
+          "ref": "R31"
+        },
+        {
+          "pin": "1",
+          "ref": "R33"
+        },
+        {
+          "pin": "1",
+          "ref": "R34"
+        },
+        {
+          "pin": "1",
+          "ref": "R35"
+        },
+        {
+          "pin": "1",
+          "ref": "R36"
+        },
+        {
+          "pin": "1",
+          "ref": "R39"
+        },
+        {
+          "pin": "1",
+          "ref": "R41"
+        },
+        {
+          "pin": "1",
+          "ref": "R43"
+        },
+        {
+          "pin": "1",
+          "ref": "R44"
+        },
+        {
+          "pin": "1",
+          "ref": "R45"
+        },
+        {
+          "pin": "1",
+          "ref": "R50"
+        },
+        {
+          "pin": "2",
+          "ref": "R51"
+        },
+        {
+          "pin": "1",
+          "ref": "RP3"
+        },
+        {
+          "pin": "1",
+          "ref": "RP4"
+        },
+        {
+          "pin": "20",
+          "ref": "U1"
+        },
+        {
+          "pin": "8",
+          "ref": "U10"
+        },
+        {
+          "pin": "8",
+          "ref": "U11"
+        },
+        {
+          "pin": "8",
+          "ref": "U12"
+        },
+        {
+          "pin": "16",
+          "ref": "U13"
+        },
+        {
+          "pin": "16",
+          "ref": "U14"
+        },
+        {
+          "pin": "16",
+          "ref": "U15A"
+        },
+        {
+          "pin": "14",
+          "ref": "U16"
+        },
+        {
+          "pin": "28",
+          "ref": "U17"
+        },
+        {
+          "pin": "20",
+          "ref": "U2"
+        },
+        {
+          "pin": "10",
+          "ref": "U20"
+        },
+        {
+          "pin": "14",
+          "ref": "U20"
+        },
+        {
+          "pin": "4",
+          "ref": "U20"
+        },
+        {
+          "pin": "8",
+          "ref": "U21"
+        },
+        {
+          "pin": "8",
+          "ref": "U22"
+        },
+        {
+          "pin": "8",
+          "ref": "U23"
+        },
+        {
+          "pin": "8",
+          "ref": "U24"
+        },
+        {
+          "pin": "16",
+          "ref": "U25"
+        },
+        {
+          "pin": "20",
+          "ref": "U26"
+        },
+        {
+          "pin": "1",
+          "ref": "U27"
+        },
+        {
+          "pin": "14",
+          "ref": "U27"
+        },
+        {
+          "pin": "14",
+          "ref": "U28"
+        },
+        {
+          "pin": "24",
+          "ref": "U3"
+        },
+        {
+          "pin": "24",
+          "ref": "U4"
+        },
+        {
+          "pin": "21",
+          "ref": "U5"
+        },
+        {
+          "pin": "24",
+          "ref": "U5"
+        },
+        {
+          "pin": "18",
+          "ref": "U6"
+        },
+        {
+          "pin": "6",
+          "ref": "U7"
+        },
+        {
+          "pin": "14",
+          "ref": "U8"
+        },
+        {
+          "pin": "8",
+          "ref": "U9"
+        }
+      ]
+    },
+    {
+      "name": "+12V",
+      "pin_count": 10,
+      "pins": [
+        {
+          "pin": "1",
+          "ref": "C52"
+        },
+        {
+          "pin": "1",
+          "ref": "C53"
+        },
+        {
+          "pin": "1",
+          "ref": "C57"
+        },
+        {
+          "pin": "1",
+          "ref": "C59"
+        },
+        {
+          "pin": "1",
+          "ref": "C62"
+        },
+        {
+          "pin": "1",
+          "ref": "C94"
+        },
+        {
+          "pin": "2",
+          "ref": "FB11"
+        },
+        {
+          "pin": "2",
+          "ref": "FB12"
+        },
+        {
+          "pin": "2",
+          "ref": "Q8"
+        },
+        {
+          "pin": "2",
+          "ref": "VR1"
+        }
+      ]
+    },
+    {
+      "name": "~{RESET}",
+      "pin_count": 9,
+      "pins": [
+        {
+          "pin": "3",
+          "ref": "CN2"
+        },
+        {
+          "pin": "6",
+          "ref": "CN4"
+        },
+        {
+          "pin": "2",
+          "ref": "FB4"
+        },
+        {
+          "pin": "2",
+          "ref": "R36"
+        },
+        {
+          "pin": "34",
+          "ref": "U1"
+        },
+        {
+          "pin": "5",
+          "ref": "U18"
+        },
+        {
+          "pin": "34",
+          "ref": "U2"
+        },
+        {
+          "pin": "40",
+          "ref": "U7"
+        },
+        {
+          "pin": "8",
+          "ref": "U8"
+        }
+      ]
+    },
+    {
+      "name": "CAN+5V",
+      "pin_count": 7,
+      "pins": [
+        {
+          "pin": "1",
+          "ref": "C102"
+        },
+        {
+          "pin": "1",
+          "ref": "C103"
+        },
+        {
+          "pin": "1",
+          "ref": "C65"
+        },
+        {
+          "pin": "1",
+          "ref": "C66"
+        },
+        {
+          "pin": "2",
+          "ref": "FB22"
+        },
+        {
+          "pin": "1",
+          "ref": "L2"
+        },
+        {
+          "pin": "2",
+          "ref": "VR2"
+        }
+      ]
+    },
+    {
+      "name": "/9VAC",
+      "pin_count": 3,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "C20"
+        },
+        {
+          "pin": "3",
+          "ref": "L4"
+        },
+        {
+          "pin": "1",
+          "ref": "SW1"
+        }
+      ]
+    },
+    {
+      "name": "/9VAC~",
+      "pin_count": 7,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "C21"
+        },
+        {
+          "pin": "2",
+          "ref": "C90"
+        },
+        {
+          "pin": "2",
+          "ref": "C99"
+        },
+        {
+          "pin": "10",
+          "ref": "CN2"
+        },
+        {
+          "pin": "4",
+          "ref": "CR4"
+        },
+        {
+          "pin": "4",
+          "ref": "L4"
+        },
+        {
+          "pin": "1",
+          "ref": "R5"
+        }
+      ]
+    },
+    {
+      "name": "/'9VAC~",
+      "pin_count": 3,
+      "pins": [
+        {
+          "pin": "11",
+          "ref": "CN2"
+        },
+        {
+          "pin": "2",
+          "ref": "CR4"
+        },
+        {
+          "pin": "1",
+          "ref": "F1"
+        }
+      ]
+    },
+    {
+      "name": "/250407_sheet2/~{RAS}",
+      "pin_count": 10,
+      "pins": [
+        {
+          "pin": "4",
+          "ref": "U10"
+        },
+        {
+          "pin": "4",
+          "ref": "U11"
+        },
+        {
+          "pin": "4",
+          "ref": "U12"
+        },
+        {
+          "pin": "18",
+          "ref": "U19"
+        },
+        {
+          "pin": "4",
+          "ref": "U21"
+        },
+        {
+          "pin": "4",
+          "ref": "U22"
+        },
+        {
+          "pin": "4",
+          "ref": "U23"
+        },
+        {
+          "pin": "4",
+          "ref": "U24"
+        },
+        {
+          "pin": "11",
+          "ref": "U26"
+        },
+        {
+          "pin": "4",
+          "ref": "U9"
+        }
+      ]
+    },
+    {
+      "name": "/250407_sheet2/~{CAS}",
+      "pin_count": 6,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "C203"
+        },
+        {
+          "pin": "1",
+          "ref": "U13"
+        },
+        {
+          "pin": "1",
+          "ref": "U14"
+        },
+        {
+          "pin": "9",
+          "ref": "U17"
+        },
+        {
+          "pin": "19",
+          "ref": "U19"
+        },
+        {
+          "pin": "1",
+          "ref": "U25"
+        }
+      ]
+    },
+    {
+      "name": "/250407_sheet2/~{CASRAM}'",
+      "pin_count": 10,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "C204"
+        },
+        {
+          "pin": "1",
+          "ref": "R42"
+        },
+        {
+          "pin": "15",
+          "ref": "U10"
+        },
+        {
+          "pin": "15",
+          "ref": "U11"
+        },
+        {
+          "pin": "15",
+          "ref": "U12"
+        },
+        {
+          "pin": "15",
+          "ref": "U21"
+        },
+        {
+          "pin": "15",
+          "ref": "U22"
+        },
+        {
+          "pin": "15",
+          "ref": "U23"
+        },
+        {
+          "pin": "15",
+          "ref": "U24"
+        },
+        {
+          "pin": "15",
+          "ref": "U9"
+        }
+      ]
+    },
+    {
+      "name": "PHI0",
+      "pin_count": 3,
+      "pins": [
+        {
+          "pin": "2",
+          "ref": "FB23"
+        },
+        {
+          "pin": "3",
+          "ref": "U32"
+        },
+        {
+          "pin": "1",
+          "ref": "U7"
+        }
+      ]
+    },
+    {
+      "name": "PHI2",
+      "pin_count": 5,
+      "pins": [
+        {
+          "pin": "E",
+          "ref": "CN6"
+        },
+        {
+          "pin": "1",
+          "ref": "FB5"
+        },
+        {
+          "pin": "25",
+          "ref": "U1"
+        },
+        {
+          "pin": "6",
+          "ref": "U18"
+        },
+        {
+          "pin": "25",
+          "ref": "U2"
+        }
+      ]
+    },
+    {
+      "name": "DOT_CLOCK",
+      "pin_count": 4,
+      "pins": [
+        {
+          "pin": "1",
+          "ref": "C36"
+        },
+        {
+          "pin": "6",
+          "ref": "CN6"
+        },
+        {
+          "pin": "2",
+          "ref": "FB17"
+        },
+        {
+          "pin": "22",
+          "ref": "U19"
+        }
+      ]
+    },
+    {
+      "name": "CAEC",
+      "pin_count": 2,
+      "pins": [
+        {
+          "pin": "6",
+          "ref": "U27B"
+        },
+        {
+          "pin": "5",
+          "ref": "U7"
+        }
+      ]
+    },
+    {
+      "name": "D0",
+      "pin_count": 12,
+      "pins": [
+        {
+          "pin": "21",
+          "ref": "CN6"
+        },
+        {
+          "pin": "33",
+          "ref": "U1"
+        },
+        {
+          "pin": "11",
+          "ref": "U16"
+        },
+        {
+          "pin": "15",
+          "ref": "U18"
+        },
+        {
+          "pin": "7",
+          "ref": "U19"
+        },
+        {
+          "pin": "33",
+          "ref": "U2"
+        },
+        {
+          "pin": "14",
+          "ref": "U21"
+        },
+        {
+          "pin": "2",
+          "ref": "U21"
+        },
+        {
+          "pin": "9",
+          "ref": "U3"
+        },
+        {
+          "pin": "9",
+          "ref": "U4"
+        },
+        {
+          "pin": "9",
+          "ref": "U5"
+        },
+        {
+          "pin": "37",
+          "ref": "U7"
+        }
+      ]
+    },
+    {
+      "name": "A0",
+      "pin_count": 11,
+      "pins": [
+        {
+          "pin": "Y",
+          "ref": "CN6"
+        },
+        {
+          "pin": "38",
+          "ref": "U1"
+        },
+        {
+          "pin": "9",
+          "ref": "U18"
+        },
+        {
+          "pin": "38",
+          "ref": "U2"
+        },
+        {
+          "pin": "13",
+          "ref": "U25"
+        },
+        {
+          "pin": "6",
+          "ref": "U26"
+        },
+        {
+          "pin": "8",
+          "ref": "U3"
+        },
+        {
+          "pin": "8",
+          "ref": "U4"
+        },
+        {
+          "pin": "8",
+          "ref": "U5"
+        },
+        {
+          "pin": "5",
+          "ref": "U6"
+        },
+        {
+          "pin": "7",
+          "ref": "U7"
+        }
+      ]
+    },
+    {
+      "name": "/250407_sheet2/BA",
+      "pin_count": 4,
+      "pins": [
+        {
+          "pin": "12",
+          "ref": "CN6"
+        },
+        {
+          "pin": "26",
+          "ref": "U17"
+        },
+        {
+          "pin": "12",
+          "ref": "U19"
+        },
+        {
+          "pin": "9",
+          "ref": "U27D"
+        }
+      ]
+    }
+  ],
+  "source_commit": "9bf17bb868248b12fb12210d66be3a37ec4ab832",
+  "source_files": {
+    "250407_.kicad_pcb": "77a929c5f9506e355429bd419ba7c7db1057dd6a577b0631bda4fe4b49c10ed7",
+    "250407_.kicad_sch": "0fbcada473031b45c38869e018e85f3e8af8bd518b71e561b0145edb00bb1bbe",
+    "250407_sheet2.kicad_sch": "7ad7228d15d23a2cc3906845326c45516c055a42257d5944fd87ccddcb58be7e",
+    "LICENSE": "05485510ce48c3186726aa11b27c8649013c8b88b1fc49de4fdc76966674a67a"
+  },
+  "source_license": "CERN-OHL-1.2",
+  "source_repository": "https://github.com/bwack/C64-250407-Replica-KiCad",
+  "voltage_measurements_by_HS": false
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "hs.repair_investigator.public_source_summaries.v1",
+  "case_id": "c64_250407_blank_board_pilot",
+  "source_video_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+  "source_publication": "Brief, independently authored paraphrases of early creator narration; original auto-caption text not redistributed.",
+  "evidence": {
+    "E1": "Nonfunctioning Commodore 64 board; critical ICs missing and earlier rework visible.",
+    "E2": "Creator introduces the 250407 repair challenge and identifies the donated board.",
+    "E3": "The device came from another retro-computing creator for assessment.",
+    "E4": "Several major chips are absent, with signs of attempted previous repairs.",
+    "E5": "Creator plans an assessment of the board and its other apparent problems.",
+    "E6": "The opening discussion shifts toward a possibly substituted power switch.",
+    "E7": "A replacement-style rocker switch is discussed; electrical equivalence has not been verified.",
+    "E8": "Inspection identifies missing CPU, PLA, firmware ROM and an additional logic chip.",
+    "E9": "Creator proposes examining connections and supply condition after preliminary visual work.",
+    "E10": "The board has a component with superficial damage that the creator intends to inspect.",
+    "E11": "Previous firmware-ROM removal appears rough, with residue around solder pads.",
+    "E12": "A ceramic capacitor has a disconnected lead that may require further investigation.",
+    "E13": "Previous modifications near the RF section prompt questions about trace continuity."
+  }
+}

@@ -1,0 +1,54 @@
+name: HS Repair Investigator end-to-end
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/repair_investigator*.py'
+      - 'src/hardware_splicer/repair_investigator_publication.py'
+      - 'src/hardware_splicer/restoration_reasoning_agent.py'
+      - 'examples/restoration_video_bench/investigator/**'
+      - 'tests/test_repair_investigator*.py'
+      - '.github/workflows/hs-repair-investigator-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deterministic-offline-integrated-workflow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and deterministic tests
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Validate source snapshot, source graph, model receipts and standalone HTML
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_repair_investigator.py \
+            tests/test_repair_investigator_report.py \
+            tests/test_repair_investigator_publication.py \
+            tests/test_restoration_reasoning_agent.py \
+            tests/test_restoration_measurement_feedback.py \
+            tests/test_restoration_board_action_gate.py
+      - name: Audit fixed real schematic source, no remote downloads or AI calls
+        run: |
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('examples/restoration_video_bench/investigator/c64_250407')
+          m=json.loads((p/'case.json').read_text())
+          raw=(p/m['source_reference_file']).read_bytes()
+          assert hashlib.sha256(raw).hexdigest()==m['reference_snapshot_sha256']
+          snap=json.loads(raw)
+          assert snap['source_commit']=='9bf17bb868248b12fb12210d66be3a37ec4ab832'
+          assert snap['source_license']=='CERN-OHL-1.2'
+          assert snap['full_netlist_component_count']==230
+          assert snap['full_netlist_net_count']==250
+          assert len(snap['selected_nets'])==17
+          assert not snap['physical_target_revision_verified']
+          assert snap['kicad_export_warning']
+          print('Frozen upstream source validated; no video, model, or hardware operations in CI')
+          PY

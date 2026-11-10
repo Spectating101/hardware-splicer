@@ -1,0 +1,25 @@
+{
+  "schema": "hs.restoration.investigator_case.v1",
+  "id": "c64_250407_blank_board_pilot",
+  "device": "Commodore 64 ASSY 250407 reported board",
+  "video_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+  "video_title_symptom": "Commodore 64 ASSY 250407 nonworking board with missing ICs and previous repair work",
+  "video_id": "mkGEXlQ84wk",
+  "video_creator": "Jan Beta",
+  "captions_filename": "mkGEXlQ84wk.en-orig.vtt",
+  "video_auto_captions_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+  "opening_cutoff_seconds": 120,
+  "inspection_cutoff_seconds": 210,
+  "source_reference_file": "c64_250407_reference.json",
+  "reference_snapshot_sha256": "8541fd66f107001ce870f1a0a1d496cb481a683bbc5a1b15843a06f9b42bb2c0",
+  "reference_board_photographed_and_independently_verified": false,
+  "video_frames_analyzed": false,
+  "hazards": [
+    "old_external_mains_power_adapter",
+    "vintage_electrolytic_capacitors",
+    "possible_unreliable_power_supply",
+    "unknown_prior_board_rework"
+  ],
+  "no_creator_outcome_in_inputs": true,
+  "physical_repairs_authorized": false
+}

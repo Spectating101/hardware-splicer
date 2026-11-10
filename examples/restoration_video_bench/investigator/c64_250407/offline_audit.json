@@ -1,0 +1,50 @@
+{
+  "schema": "hs.repair_investigator.offline_integrity_audit.v1",
+  "case_id": "c64_250407_blank_board_pilot",
+  "board_source_commit": "9bf17bb868248b12fb12210d66be3a37ec4ab832",
+  "video_raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+  "source_graph_sha256": "0314f8fa6b7db5d38cd0a343a1b4c225586443f1f633a375109176d585ad0b6a",
+  "model_attempts": 4,
+  "valid_by_arm": {
+    "plain": 2,
+    "hs_circuit": 2
+  },
+  "no_independent_physical_measurements": true,
+  "no_video_frame_vision": true,
+  "board_revision_not_verified": true,
+  "no_repair_success_or_accuracy_scored": true,
+  "results": [
+    {
+      "arm": "plain",
+      "stage": 0,
+      "status": "proposed_unverified_differential",
+      "sha256": "8c7b337381893de4c84f074233a52c4439cec5ba3961736d40ec66af2fd463cd",
+      "first_hypothesis": "Incomplete circuit operation due to missing critical ICs",
+      "seconds": 10.22
+    },
+    {
+      "arm": "plain",
+      "stage": 1,
+      "status": "proposed_unverified_differential",
+      "sha256": "3205e625e4ddbc1014b4e43941b62b550dcfa5685c3c43ffafeaf6d591b66997",
+      "first_hypothesis": "Missing core processing and support silicon prevents fundamental system boot and operation",
+      "seconds": 10.18
+    },
+    {
+      "arm": "hs_circuit",
+      "stage": 0,
+      "status": "proposed_unverified_differential",
+      "sha256": "02883d5e00fb2fa42ed331a207824763a5a36adae07c301a26bc869af1601e6e",
+      "first_hypothesis": "Missing primary functional ICs (such as VIC-II and SID) prevent system startup and baseline video or clock operation",
+      "seconds": 8.88
+    },
+    {
+      "arm": "hs_circuit",
+      "stage": 1,
+      "status": "proposed_unverified_differential",
+      "sha256": "14284a6670627c1bcfb9ad5f13cb4782eef5fd1898de75beb2f6b6970b23eefa",
+      "first_hypothesis": "Missing core processing, clock, logic, and bus ICs prevent system clock generation, address decoding, and bus operation",
+      "seconds": 10.92
+    }
+  ]
+}
