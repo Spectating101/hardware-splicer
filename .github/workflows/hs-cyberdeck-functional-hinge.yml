@@ -1,0 +1,50 @@
+name: HS cyberdeck moving hinge CAD and real slicing
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/functional_hinge*.py'
+      - 'examples/functional_hinge_cyberdeck/**'
+      - 'tests/test_functional_hinge*.py'
+      - '.github/workflows/hs-cyberdeck-functional-hinge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-geometry-motion-and-source-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install actual native CAD and HS
+        run: |
+          python -m pip install -e .
+          python -m pip install 'cadquery==2.6.1' 'trimesh==4.12.2' 'pytest>=8,<10'
+      - name: Inspect original source, actual STEP/STL, BRep kinematics and native slicer receipts
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_functional_hinge_assembly.py \
+            tests/test_functional_hinge_slicer.py
+          python examples/functional_hinge_cyberdeck/verify_independent_slicing.py --source-only
+  independently-reslice-eight-real-hinge-components:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce actual PrusaSlicer toolpaths against saved hashes and weights
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo:ro" -w /repo \
+            debian:trixie \
+            bash -lc '
+              set -e
+              apt-get update -qq
+              DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+                --no-install-recommends prusa-slicer python3 ca-certificates >/tmp/apt-slicer.log
+              python3 examples/functional_hinge_cyberdeck/verify_independent_slicing.py \
+                --slicer /usr/bin/prusa-slicer
+            '

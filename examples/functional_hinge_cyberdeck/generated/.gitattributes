@@ -1,0 +1,3 @@
+# Vendor-generated CAD is exact-byte binary evidence, not manually edited text.
+*.step -diff -text
+*.stl -diff -text

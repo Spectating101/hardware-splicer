@@ -1,0 +1,226 @@
+{
+  "all_model_slices_succeeded": true,
+  "fabrication_released": false,
+  "gcode_file_bytes_not_committed": true,
+  "native_slicer_executable_sha256": "7beaf8cc8861dcb97803da73222bdee358992e02c13a8e2b6212ae4809c121d2",
+  "no_physical_printer_or_hardware_calibration": true,
+  "no_routed_cable_or_shaft_retention_test": true,
+  "original_source_CAD_audit": {
+    "all_original_BRep_and_mesh_exports_verified": true,
+    "kinematic_source_angles_per_candidate": 37,
+    "original_real_printed_parts": 14,
+    "physical_dimensions_fabrication_verified": false,
+    "schema": "hs.cyberdeck_hinge_native_source_audit.v1",
+    "source_ranked_winner": "balanced_60",
+    "source_spec_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587"
+  },
+  "real_native_slicer_job_count": 8,
+  "schema": "hs.cyberdeck_hinge_actual_slicer_trial.v1",
+  "slicer_version": "PrusaSlicer-2.9.2+UNKNOWN based on Slic3r (with GUI support)",
+  "source_jobs": [
+    {
+      "design": "balanced_60",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1595598,
+      "gcode_sha256": "e5c32e283c0f5231d9441cc9a64e3a34fbd56738e241520134445b945dfa3410",
+      "layer_profile": "std_020",
+      "native_slicer_report": {
+        "estimated_time": "2h 47m 53s",
+        "estimated_time_s": 10073,
+        "filament_length_mm": 8288.86,
+        "filament_mass_g": 24.72,
+        "filament_volume_cm3": 19.94,
+        "gcode_lines": 54776,
+        "layer_markers": 51
+      },
+      "printed_part": "lower_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": " Generating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/std_020__balanced_60__lower_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/std_020__balanced_60__lower_leaf.gcode\n\n",
+      "source_STL_sha256": "c0dc5b8d225e0ff9adb1bb3b037c5de805b2aa043b91ca68e101f53531b8e0b2",
+      "status": "sliced"
+    },
+    {
+      "design": "balanced_60",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1712753,
+      "gcode_sha256": "5d0ebe485d16d07a90ae67fe8ce624756f9fec9e7ff9e0002ffb8d9c729f0736",
+      "layer_profile": "std_020",
+      "native_slicer_report": {
+        "estimated_time": "2h 56m 44s",
+        "estimated_time_s": 10604,
+        "filament_length_mm": 8599.27,
+        "filament_mass_g": 25.65,
+        "filament_volume_cm3": 20.68,
+        "gcode_lines": 59370,
+        "layer_markers": 51
+      },
+      "printed_part": "upper_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": " Generating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/std_020__balanced_60__upper_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/std_020__balanced_60__upper_leaf.gcode\n\n",
+      "source_STL_sha256": "4398ad4a6e13f6a5999e80db79435efe3a54bedc8aa2f4f968a3599e99581922",
+      "status": "sliced"
+    },
+    {
+      "design": "reinforced_64",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1623914,
+      "gcode_sha256": "f70c67e93ee8f1017a93c01d3bc0db4f27d4beaa64956f49c1440dac22320862",
+      "layer_profile": "std_020",
+      "native_slicer_report": {
+        "estimated_time": "2h 50m 37s",
+        "estimated_time_s": 10237,
+        "filament_length_mm": 8412.6,
+        "filament_mass_g": 25.09,
+        "filament_volume_cm3": 20.23,
+        "gcode_lines": 55880,
+        "layer_markers": 55
+      },
+      "printed_part": "lower_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "erating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/std_020__reinforced_64__lower_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/std_020__reinforced_64__lower_leaf.gcode\n\n",
+      "source_STL_sha256": "75886a0a75d4fdfb45e10cc4fa9a19cf8b21b3891cabc090cbb9f31eccc5e4e1",
+      "status": "sliced"
+    },
+    {
+      "design": "reinforced_64",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1756637,
+      "gcode_sha256": "986402bf1f620b2701a9e44ae69d73d8f5ab6c8c4aca34464bff64c39d23e01d",
+      "layer_profile": "std_020",
+      "native_slicer_report": {
+        "estimated_time": "3h 0m 45s",
+        "estimated_time_s": 10845,
+        "filament_length_mm": 8780.7,
+        "filament_mass_g": 26.19,
+        "filament_volume_cm3": 21.12,
+        "gcode_lines": 61100,
+        "layer_markers": 55
+      },
+      "printed_part": "upper_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "erating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/std_020__reinforced_64__upper_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/std_020__reinforced_64__upper_leaf.gcode\n\n",
+      "source_STL_sha256": "6f334600a1b733cbe5b210b6c73cb6d661009a980fddd7f7dab181bea9f228a5",
+      "status": "sliced"
+    },
+    {
+      "design": "balanced_60",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1040502,
+      "gcode_sha256": "0f43b8fe55c7189858498871df74d19fb7916117785e93e9d661dab72eadee43",
+      "layer_profile": "draft_028",
+      "native_slicer_report": {
+        "estimated_time": "2h 35m 21s",
+        "estimated_time_s": 9321,
+        "filament_length_mm": 9869.95,
+        "filament_mass_g": 29.44,
+        "filament_volume_cm3": 23.74,
+        "gcode_lines": 35709,
+        "layer_markers": 36
+      },
+      "printed_part": "lower_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "erating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/draft_028__balanced_60__lower_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/draft_028__balanced_60__lower_leaf.gcode\n\n",
+      "source_STL_sha256": "c0dc5b8d225e0ff9adb1bb3b037c5de805b2aa043b91ca68e101f53531b8e0b2",
+      "status": "sliced"
+    },
+    {
+      "design": "balanced_60",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1122262,
+      "gcode_sha256": "51b4711a46c70a0a45c3b70c0a0b0dc176f209b3cbfebfe5d7a77382f20d2000",
+      "layer_profile": "draft_028",
+      "native_slicer_report": {
+        "estimated_time": "2h 41m 52s",
+        "estimated_time_s": 9712,
+        "filament_length_mm": 10177.67,
+        "filament_mass_g": 30.36,
+        "filament_volume_cm3": 24.48,
+        "gcode_lines": 38961,
+        "layer_markers": 36
+      },
+      "printed_part": "upper_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "erating perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/draft_028__balanced_60__upper_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/draft_028__balanced_60__upper_leaf.gcode\n\n",
+      "source_STL_sha256": "4398ad4a6e13f6a5999e80db79435efe3a54bedc8aa2f4f968a3599e99581922",
+      "status": "sliced"
+    },
+    {
+      "design": "reinforced_64",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1058329,
+      "gcode_sha256": "75e14632020eba182db1dc5c088c76c187718a19af86604dce6c582fb53824f6",
+      "layer_profile": "draft_028",
+      "native_slicer_report": {
+        "estimated_time": "2h 37m 20s",
+        "estimated_time_s": 9440,
+        "filament_length_mm": 9985.24,
+        "filament_mass_g": 29.78,
+        "filament_volume_cm3": 24.02,
+        "gcode_lines": 36433,
+        "layer_markers": 39
+      },
+      "printed_part": "lower_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "ing perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/draft_028__reinforced_64__lower_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/draft_028__reinforced_64__lower_leaf.gcode\n\n",
+      "source_STL_sha256": "75886a0a75d4fdfb45e10cc4fa9a19cf8b21b3891cabc090cbb9f31eccc5e4e1",
+      "status": "sliced"
+    },
+    {
+      "design": "reinforced_64",
+      "gcode_authorized_for_hardware": false,
+      "gcode_bytes": 1157133,
+      "gcode_sha256": "ac4e7c4ccce27377ef36270b29e6eeffdd6ff34ba2c6fd77e3357a231747c037",
+      "layer_profile": "draft_028",
+      "native_slicer_report": {
+        "estimated_time": "2h 44m 49s",
+        "estimated_time_s": 9889,
+        "filament_length_mm": 10358.41,
+        "filament_mass_g": 30.89,
+        "filament_volume_cm3": 24.91,
+        "gcode_lines": 40308,
+        "layer_markers": 39
+      },
+      "printed_part": "upper_leaf",
+      "slicer_exit_code": 0,
+      "slicer_log_tail": "ing perimeters\n30 => Preparing infill\n45 => Making infill\n65 => Searching support spots\n69 => Alert if supports needed\n89 => Calculating overhanging perimeters\n88 => Generating skirt and brim\n90 => Exporting G-code to /tmp/hs-hinge-real-gcode-20261110/draft_028__reinforced_64__upper_leaf.gcode\nSlicing result exported to /tmp/hs-hinge-real-gcode-20261110/draft_028__reinforced_64__upper_leaf.gcode\n\n",
+      "source_STL_sha256": "6f334600a1b733cbe5b210b6c73cb6d661009a980fddd7f7dab181bea9f228a5",
+      "status": "sliced"
+    }
+  ],
+  "source_profile_sha256": "13a38002249318774ed1bbe0812d6374fdd27059feed883425fe1c4c1bb81a05",
+  "source_spec_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
+  "summaries": [
+    {
+      "design": "balanced_60",
+      "horizontal_hinge_bore_overhang_physically_qualified": false,
+      "metal_pin_not_in_slicer_mass": true,
+      "profile": "std_020",
+      "slicer_estimated_two_part_filament_g": 50.37,
+      "slicer_estimated_two_print_jobs_seconds": 20677
+    },
+    {
+      "design": "reinforced_64",
+      "horizontal_hinge_bore_overhang_physically_qualified": false,
+      "metal_pin_not_in_slicer_mass": true,
+      "profile": "std_020",
+      "slicer_estimated_two_part_filament_g": 51.28,
+      "slicer_estimated_two_print_jobs_seconds": 21082
+    },
+    {
+      "design": "balanced_60",
+      "horizontal_hinge_bore_overhang_physically_qualified": false,
+      "metal_pin_not_in_slicer_mass": true,
+      "profile": "draft_028",
+      "slicer_estimated_two_part_filament_g": 59.8,
+      "slicer_estimated_two_print_jobs_seconds": 19033
+    },
+    {
+      "design": "reinforced_64",
+      "horizontal_hinge_bore_overhang_physically_qualified": false,
+      "metal_pin_not_in_slicer_mass": true,
+      "profile": "draft_028",
+      "slicer_estimated_two_part_filament_g": 60.67,
+      "slicer_estimated_two_print_jobs_seconds": 19329
+    }
+  ]
+}
