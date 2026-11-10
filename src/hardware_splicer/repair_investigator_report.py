@@ -83,7 +83,7 @@ footer{border-top:1px solid var(--border);padding:22px clamp(20px,4vw,64px);colo
 <div class="kicker">Repair field investigation · archival experiment</div>
 <h1 id="case-title">Not booting. Multiple possible failure paths.</h1>
 <p class="deck" id="intro"></p>
-<div class="note warning"><p><b>Authority boundary:</b> This report proposes diagnostic hypotheses only. No physical repair, powered test, internal probing, component replacement or safety certification was conducted. The video was analyzed as auto-caption text, not inspected frame by frame.</p></div>
+<div class="note warning"><p><b>Authority boundary:</b> This report proposes diagnostic hypotheses only. No physical repair, powered test, internal probing, component replacement or safety certification was conducted. The video was analyzed as auto-caption text, not inspected frame by frame. Public source observations are brief editorial paraphrases rather than the original copyrighted transcript.</p></div>
 <section class="block" id="diagnosis">
 <div class="sectionhead"><div><div class="kicker">01 / Diagnostic investigation</div><h2>How the hypothesis changes</h2></div><span class="sectionsub">Change the model arm and evidence window. Each state comes from a saved inference receipt.</span></div>
 <div class="kicker">Evidence window</div>
@@ -200,7 +200,8 @@ draw();
 """
 
 def make_html(*,record:Mapping[str,Any],manifest:Mapping[str,Any],
-              reference:Mapping[str,Any],snapshot_sha256:str)->str:
+              reference:Mapping[str,Any],snapshot_sha256:str,
+              publication_summaries:Mapping[str,Any]|None=None)->str:
     if record.get("schema")!= "hs.repair_investigator.v1" or not record.get("complete"):
         raise ValueError("cannot publish an incomplete or unknown investigator record")
     if record["source_manifest_sha256"]!=sha(manifest):
@@ -221,10 +222,14 @@ def make_html(*,record:Mapping[str,Any],manifest:Mapping[str,Any],
                 raise ValueError("model receipt was edited after original inference")
             if receipt["repair_authorized"] is not False or receipt["actual_video_frames_analyzed"] is not False:
                 raise ValueError("report would misrepresent hardware or visual authority")
+    public_record=record
+    if publication_summaries is not None:
+        from .repair_investigator_publication import redact_for_public
+        public_record=redact_for_public(record,manifest,publication_summaries)
     payload={
         "schema":"hs.repair_investigator.standalone_html_payload.v1",
         "manifest":manifest,"reference":reference,"reference_file_sha256":snapshot_sha256,
-        "investigation":record,"repair_completed":False,"physical_board_verified":False,
+        "investigation":public_record,"repair_completed":False,"physical_board_verified":False,
         "independently_captured_instrument_data":False,
     }
     literal=json.dumps(payload,ensure_ascii=False,sort_keys=True).replace("<","\\u003c").replace(">","\\u003e").replace("&","\\u0026")

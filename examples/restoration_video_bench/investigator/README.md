@@ -62,7 +62,16 @@ After inference is frozen, generate the offline forensic report:
     PYTHONPATH=src python3 examples/restoration_video_bench/investigator/render_investigator.py \
       --record /tmp/hs_c64_investigator_live.json \
       --html /tmp/hs_c64_investigator.html \
-      --audit /tmp/hs_c64_audit.json
+      --audit /tmp/hs_c64_audit.json \
+      --public-record /tmp/hs_c64_investigator_public.json
+
+The exact, potentially copyrighted model-input caption excerpts remain in
+the original private local inference file and are not redistributed.
+The public standalone HTML and machine JSON replace those excerpts
+with brief human-authored paraphrases, preserving each original evidence
+text hash, timestamp and frozen model-receipt digest. Independent replay
+requires obtaining the actual public VTT again; a redacted copy alone
+cannot fully reconstruct the original model prompt.
 
 Open the single HTML file in a browser. It includes working phase and
 model toggles, original E-coded source observations, real KiCad net/pin

@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'src/hardware_splicer/repair_investigator*.py'
+      - 'src/hardware_splicer/repair_investigator_publication.py'
       - 'src/hardware_splicer/restoration_reasoning_agent.py'
       - 'examples/restoration_video_bench/investigator/**'
       - 'tests/test_repair_investigator*.py'
@@ -28,6 +29,7 @@ jobs:
           python -m pytest -q \
             tests/test_repair_investigator.py \
             tests/test_repair_investigator_report.py \
+            tests/test_repair_investigator_publication.py \
             tests/test_restoration_reasoning_agent.py \
             tests/test_restoration_measurement_feedback.py \
             tests/test_restoration_board_action_gate.py

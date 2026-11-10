@@ -1,0 +1,955 @@
+{
+  "schema": "hs.repair_investigator.v1",
+  "protocol": {
+    "case_id": "c64_250407_blank_board_pilot",
+    "source_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+    "source_cutoffs": [
+      120,
+      210
+    ],
+    "model": "gemini-3.8-flash-low",
+    "arm_order_by_stage": [
+      [
+        "plain",
+        "hs_circuit"
+      ],
+      [
+        "hs_circuit",
+        "plain"
+      ]
+    ],
+    "source_outcome_not_passed": true,
+    "same_raw_video_evidence": true,
+    "physical_board_verified": false,
+    "no_external_tools_or_power_authorized": true,
+    "data_modes": "opening auto-caption, later pre-repair visual-inspection narration; no video frames"
+  },
+  "source_manifest_sha256": "2684c885f9151aafc4941c6338bc1567c67013cb1d7280770fc49ac1f52d28a7",
+  "source_snapshot_sha256": "9be809a10b74b43e758922c64aa56b2c85b4ebdce9541ea5368e261406657d8c",
+  "video_source_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+  "native_graph": {
+    "schema": "hs.repair_investigator.reference_graph.v1",
+    "native_source_graph_sha256": "0314f8fa6b7db5d38cd0a343a1b4c225586443f1f633a375109176d585ad0b6a",
+    "native_source_graph_schema": "hardware_splicer.engineering_source_graph.v1",
+    "video_claim_ids": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5",
+      "E6",
+      "E7"
+    ],
+    "schematic_claim_ids": [
+      "N1",
+      "N2",
+      "N3",
+      "N4",
+      "N5",
+      "N6",
+      "N7",
+      "N8",
+      "N9",
+      "N10",
+      "N11",
+      "N12",
+      "N13",
+      "N14",
+      "N15",
+      "N16",
+      "N17"
+    ],
+    "source_claim_authority": "declared",
+    "source_code_commit": "9bf17bb868248b12fb12210d66be3a37ec4ab832",
+    "source_license": "CERN-OHL-1.2",
+    "video_source_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+    "schematic_source_sha256": "0fbcada473031b45c38869e018e85f3e8af8bd518b71e561b0145edb00bb1bbe",
+    "unresolved_source_ids": [
+      "kicad_source_has_annotation_warnings",
+      "no_component_datasheet_provided",
+      "no_independent_voltage_or_logic_analyzer_measurements",
+      "no_verified_meter_observations",
+      "physical_board_revision_unverified",
+      "replica_schematic_pin_mapping_not_independently_authenticated"
+    ],
+    "target_board_physically_verified": false,
+    "source_graph_does_not_validate_hardware": true
+  },
+  "results": {
+    "plain": [
+      {
+        "stage": 0,
+        "evidence_sha256": "9f828808aad92fffb66e00d24ae6ea479e26c65fdc63ef9749be144243862546",
+        "evidence": [
+          {
+            "id": "E1",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Nonfunctioning Commodore 64 board; critical ICs missing and earlier rework visible.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "a3ef0feb0641df1c9a6c6c433292028ac7b575c89d1904fcf99f0d8830debd58",
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E2",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator introduces the 250407 repair challenge and identifies the donated board.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "cfbb1e19aec7d00b713b1686a64befa5d434387438d5dc4d4723ce743d8c7a08",
+            "source_window_seconds": [
+              2.55,
+              17.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E3",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The device came from another retro-computing creator for assessment.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "59d7265c099f58c36739f32b79f98aca4c69cca806ddf709a48dd882962d93d8",
+            "source_window_seconds": [
+              20.55,
+              39.31
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E4",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Several major chips are absent, with signs of attempted previous repairs.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "bc42a7c346292d1b23388871b76320f26221d3c4a6bb52b36a12514a0646c604",
+            "source_window_seconds": [
+              42.07,
+              56.51
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E5",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator plans an assessment of the board and its other apparent problems.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "31ae6c7506959ea005d49f510875b9e2f9e5a848bdbe384bab6dd8c93557bd08",
+            "source_window_seconds": [
+              60.03,
+              79.11
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E6",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The opening discussion shifts toward a possibly substituted power switch.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "7d96d37b7d11007dfdac1b6abf0cd45baf84a8e1bdd8236521a798ec578d46c9",
+            "source_window_seconds": [
+              80.87,
+              98.91
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E7",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): A replacement-style rocker switch is discussed; electrical equivalence has not been verified.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "e336fc3964de56e9e51957eb52c593c7422c247c11b7f0bc7f95c64e6ca021b2",
+            "source_window_seconds": [
+              101.07,
+              118.07
+            ],
+            "public_source_text_redacted": true
+          }
+        ],
+        "new_video_observations": 0,
+        "model_receipt": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "c64_250407_blank_board_pilot",
+          "source_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "9f828808aad92fffb66e00d24ae6ea479e26c65fdc63ef9749be144243862546",
+          "caption_provenance": {
+            "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+            "cutoff_seconds": 120,
+            "total_early_final_cues": 45,
+            "no_video_frames": true,
+            "caption_reliability": "unverified_auto_generated"
+          },
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "1beddb4f9a83fc2df65e680a14fdf2a281199b6a73fa2ecc1edd1f107dfd3eb1",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "a366c253620eaec7035c0eb74abc26755278b5674541be3b6ecb5673cb51501d",
+          "usage": {
+            "prompt_tokens": 890,
+            "completion_tokens": 296
+          },
+          "plan": {
+            "summary": "Reported Commodore 64 ASSY 250407 board is non-operational with multiple missing ICs (including VIC-II and SID), unverified prior rework attempts, and a replacement non-original power switch.",
+            "hypotheses": [
+              {
+                "mechanism": "Incomplete circuit operation due to missing critical ICs",
+                "why": "Transcript evidence notes that several primary integrated circuits including the VIC-II and SID are absent, preventing basic system initialization.",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E5",
+                  "E7"
+                ],
+                "safe_test": "Perform an unpowered visual inventory against the ASSY 250407 bill of materials to document all missing ICs and socket conditions."
+              },
+              {
+                "mechanism": "Power delivery failure or mismatch at the replacement switch",
+                "why": "A non-original slide or pole power switch was installed to replace the original rocker switch, creating uncertainty regarding pin compatibility and proper contact closure.",
+                "evidence_ids": [
+                  "E6",
+                  "E7"
+                ],
+                "safe_test": "Perform unpowered continuity and pinout resistance checks across switch terminals using a digital multimeter in both switch positions."
+              },
+              {
+                "mechanism": "Short circuit or trace damage from prior rework",
+                "why": "Visual rework and repair attempts are noted on the board, presenting risk of solder bridges, damaged traces, or improper component installations.",
+                "evidence_ids": [
+                  "E1",
+                  "E4"
+                ],
+                "safe_test": "Perform an unpowered visual inspection under magnification and check resistance between major supply rails (5V, 12V, GND) before considering any bench supply connection."
+              }
+            ],
+            "next_safe_check": "Perform a comprehensive unpowered visual inspection under magnification to map all missing components, examine prior solder joints/rework, and measure supply-rail-to-ground resistance.",
+            "uncertainty": "Evidence relies entirely on unverified verbal commentary and initial visual impressions; internal component functionality, trace continuity, and power rail integrity remain unmeasured.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 10.22,
+          "receipt_sha256": "8c7b337381893de4c84f074233a52c4439cec5ba3961736d40ec66af2fd463cd"
+        }
+      },
+      {
+        "stage": 1,
+        "evidence_sha256": "9fce362a9a06e9f4d47bde553523135c126f80410a8df39d92c9004ed5138b1f",
+        "evidence": [
+          {
+            "id": "E1",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Nonfunctioning Commodore 64 board; critical ICs missing and earlier rework visible.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "a3ef0feb0641df1c9a6c6c433292028ac7b575c89d1904fcf99f0d8830debd58",
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E2",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator introduces the 250407 repair challenge and identifies the donated board.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "cfbb1e19aec7d00b713b1686a64befa5d434387438d5dc4d4723ce743d8c7a08",
+            "source_window_seconds": [
+              2.55,
+              17.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E3",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The device came from another retro-computing creator for assessment.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "59d7265c099f58c36739f32b79f98aca4c69cca806ddf709a48dd882962d93d8",
+            "source_window_seconds": [
+              20.55,
+              39.31
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E4",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Several major chips are absent, with signs of attempted previous repairs.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "bc42a7c346292d1b23388871b76320f26221d3c4a6bb52b36a12514a0646c604",
+            "source_window_seconds": [
+              42.07,
+              56.51
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E5",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator plans an assessment of the board and its other apparent problems.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "31ae6c7506959ea005d49f510875b9e2f9e5a848bdbe384bab6dd8c93557bd08",
+            "source_window_seconds": [
+              60.03,
+              79.11
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E6",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The opening discussion shifts toward a possibly substituted power switch.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "7d96d37b7d11007dfdac1b6abf0cd45baf84a8e1bdd8236521a798ec578d46c9",
+            "source_window_seconds": [
+              80.87,
+              98.91
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E7",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): A replacement-style rocker switch is discussed; electrical equivalence has not been verified.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "e336fc3964de56e9e51957eb52c593c7422c247c11b7f0bc7f95c64e6ca021b2",
+            "source_window_seconds": [
+              101.07,
+              118.07
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E8",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Inspection identifies missing CPU, PLA, firmware ROM and an additional logic chip.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "11aba6edb58729569e9d9261808cf2d498a85209d2c4dc34c4805f32f850a50f",
+            "source_window_seconds": [
+              120.79,
+              134.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E9",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Creator proposes examining connections and supply condition after preliminary visual work.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "fdef542b3ef7d5f839ac11052ac367218aedc6a7ae17b28e74b69390438e57de",
+            "source_window_seconds": [
+              136.71,
+              148.949
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E10",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): The board has a component with superficial damage that the creator intends to inspect.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "c5b53bc5a24d795ef862710b058f9ab9658b3f83ea1d2a8145a2b5075cef935b",
+            "source_window_seconds": [
+              150.67,
+              164.75
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E11",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Previous firmware-ROM removal appears rough, with residue around solder pads.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "fe33b80e22676c42455b2816388bc7c55c8e82d50308e6e9ba968dd6ae946b77",
+            "source_window_seconds": [
+              166.949,
+              176.07
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E12",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): A ceramic capacitor has a disconnected lead that may require further investigation.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "535aa2c6d1fe60d7c248c3f8a9f5027ee546534d35b6fc4d24785ec397da5a45",
+            "source_window_seconds": [
+              180.07,
+              194.55
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E13",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Previous modifications near the RF section prompt questions about trace continuity.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "999a8217ebe93bf002c97abf79453bc6d09f26c45b82c720a8f283ab85cb12d7",
+            "source_window_seconds": [
+              198.55,
+              207.47
+            ],
+            "public_source_text_redacted": true
+          }
+        ],
+        "new_video_observations": 6,
+        "model_receipt": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "c64_250407_blank_board_pilot",
+          "source_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "9fce362a9a06e9f4d47bde553523135c126f80410a8df39d92c9004ed5138b1f",
+          "caption_provenance": {
+            "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+            "cutoff_seconds": 120,
+            "total_early_final_cues": 45,
+            "no_video_frames": true,
+            "caption_reliability": "unverified_auto_generated"
+          },
+          "preceding_receipt_sha256": "8c7b337381893de4c84f074233a52c4439cec5ba3961736d40ec66af2fd463cd",
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "e1f66db21a7db9db02151c3ea23a66128ffe47e7ad1b31b60b658343280d0f9c",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "source_windows": [
+            {
+              "start_second": 0,
+              "cutoff_second": 120,
+              "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb"
+            },
+            {
+              "start_second": 120,
+              "cutoff_second": 210,
+              "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+              "caption_chunks": 6
+            }
+          ],
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "50e254330748d000ce2970ff3051474921b2a40759207e828e576d7780e67adf",
+          "usage": {
+            "prompt_tokens": 1381,
+            "completion_tokens": 460
+          },
+          "plan": {
+            "summary": "Visual assessment based on creator-reported observations indicates an incomplete Commodore 64 ASSY 250407 board exhibiting unpopulated key IC sockets, non-original power switch rework, and mechanical/solder damage from previous servicing attempts. No electrical measurements have been independently verified.",
+            "hypotheses": [
+              {
+                "mechanism": "Missing core processing and support silicon prevents fundamental system boot and operation",
+                "why": "The creator reports missing vital integrated circuits including the CPU, VIC-II, SID, PLA, KERNAL ROM, and 7406 logic chip, rendering system bus initialization impossible.",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E7",
+                  "E8"
+                ],
+                "safe_test": "Perform an unpowered inventory check of all open IC sockets against the ASSY 250407 schematic layout to catalogue all absent integrated circuits."
+              },
+              {
+                "mechanism": "Physical damage, lifted pins, and residual solder from prior rework causing open circuits or potential bridged connections",
+                "why": "The creator reports a disconnected ceramic capacitor leg, crude desoldering with residual solder at the KERNAL ROM footprint, and rework around the RF modulator area.",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E10",
+                  "E11",
+                  "E12",
+                  "E13"
+                ],
+                "safe_test": "Conduct an unpowered visual and continuity/short check using a digital multimeter on low-voltage diode/resistance mode around the KERNAL ROM pads, severed capacitor, and adjacent traces."
+              },
+              {
+                "mechanism": "Non-original power switch pinout mismatch or open circuit preventing rail distribution",
+                "why": "The original toggle/rocker power switch was replaced with an alternative pole switch whose pin compatibility and contact operation are creator-reported as unverified.",
+                "evidence_ids": [
+                  "E6",
+                  "E7"
+                ],
+                "safe_test": "Perform an unpowered switch contact resistance and continuity test across all switch poles in both on and off positions using a multimeter."
+              }
+            ],
+            "next_safe_check": "Perform an unpowered continuity and short-circuit inspection between the primary DC power/ground rails and across the reworked KERNAL ROM pads prior to any power application.",
+            "uncertainty": "All condition details rely strictly on unverified creator speech and auto-generated transcripts; no independent electrical, voltage, or continuity measurements have been conducted.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 10.18,
+          "receipt_sha256": "3205e625e4ddbc1014b4e43941b62b550dcfa5685c3c43ffafeaf6d591b66997"
+        }
+      }
+    ],
+    "hs_circuit": [
+      {
+        "stage": 0,
+        "evidence_sha256": "9f828808aad92fffb66e00d24ae6ea479e26c65fdc63ef9749be144243862546",
+        "evidence": [
+          {
+            "id": "E1",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Nonfunctioning Commodore 64 board; critical ICs missing and earlier rework visible.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "a3ef0feb0641df1c9a6c6c433292028ac7b575c89d1904fcf99f0d8830debd58",
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E2",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator introduces the 250407 repair challenge and identifies the donated board.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "cfbb1e19aec7d00b713b1686a64befa5d434387438d5dc4d4723ce743d8c7a08",
+            "source_window_seconds": [
+              2.55,
+              17.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E3",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The device came from another retro-computing creator for assessment.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "59d7265c099f58c36739f32b79f98aca4c69cca806ddf709a48dd882962d93d8",
+            "source_window_seconds": [
+              20.55,
+              39.31
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E4",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Several major chips are absent, with signs of attempted previous repairs.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "bc42a7c346292d1b23388871b76320f26221d3c4a6bb52b36a12514a0646c604",
+            "source_window_seconds": [
+              42.07,
+              56.51
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E5",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator plans an assessment of the board and its other apparent problems.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "31ae6c7506959ea005d49f510875b9e2f9e5a848bdbe384bab6dd8c93557bd08",
+            "source_window_seconds": [
+              60.03,
+              79.11
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E6",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The opening discussion shifts toward a possibly substituted power switch.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "7d96d37b7d11007dfdac1b6abf0cd45baf84a8e1bdd8236521a798ec578d46c9",
+            "source_window_seconds": [
+              80.87,
+              98.91
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E7",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): A replacement-style rocker switch is discussed; electrical equivalence has not been verified.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "e336fc3964de56e9e51957eb52c593c7422c247c11b7f0bc7f95c64e6ca021b2",
+            "source_window_seconds": [
+              101.07,
+              118.07
+            ],
+            "public_source_text_redacted": true
+          }
+        ],
+        "new_video_observations": 0,
+        "model_receipt": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "c64_250407_blank_board_pilot",
+          "source_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "9f828808aad92fffb66e00d24ae6ea479e26c65fdc63ef9749be144243862546",
+          "caption_provenance": {
+            "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+            "cutoff_seconds": 120,
+            "total_early_final_cues": 45,
+            "no_video_frames": true,
+            "caption_reliability": "unverified_auto_generated"
+          },
+          "preceding_receipt_sha256": null,
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "07ebaf758afc6a967a181b93fde7a5f62605bb5a4b83c2ecbf0f49a85d84fb4c",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "investigator_reference_sha256": "4c5606c851e5231634dfacc04f48862a3bb5e2425c2ab20016068e4b4479c9c4",
+          "investigator_source_graph_sha256": "0314f8fa6b7db5d38cd0a343a1b4c225586443f1f633a375109176d585ad0b6a",
+          "target_board_physically_verified": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "d782aa5dc8660fdec305a2ac5fbc0237632ae2891694af42f2748089bbc45d00",
+          "usage": {
+            "prompt_tokens": 1526,
+            "completion_tokens": 508
+          },
+          "plan": {
+            "summary": "Reported ASSY 250407 board is missing major ICs and exhibits unverified prior rework including a non-original power switch. Physical board revision, trace integrity, and component status remain unconfirmed without direct visual inspection or verified test data.",
+            "hypotheses": [
+              {
+                "mechanism": "Missing primary functional ICs (such as VIC-II and SID) prevent system startup and baseline video or clock operation",
+                "why": "Unverified video narration and case descriptions indicate major ICs were removed or cannibalized, precluding normal system initialization",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E7"
+                ],
+                "safe_test": "Perform an unpowered visual audit of all IC sockets against reference documentation to identify which specific chips are absent without applying power"
+              },
+              {
+                "mechanism": "Non-original power switch replacement may have incompatible footprint, pinout, or wiring preventing proper line routing or causing bridge faults",
+                "why": "Narration reports an aftermarket switch was substituted, which may not match ASSY 250407 reference pin assignments (e.g., SW1 nets like /9VAC)",
+                "evidence_ids": [
+                  "E1",
+                  "E6",
+                  "E7"
+                ],
+                "safe_test": "Inspect the power switch solder joints and footprint visually under magnification while completely unpowered, and request high-resolution photographs to verify orientation and trace integrity"
+              },
+              {
+                "mechanism": "Unverified prior rework or repair attempts may have introduced solder bridges, lifted pads, or damaged traces",
+                "why": "Initial reports note prior repair rework on what appears to be a parts/donor board, creating risks of short circuits on reference power or reset rails",
+                "evidence_ids": [
+                  "E1",
+                  "E4"
+                ],
+                "safe_test": "Conduct a thorough, unpowered visual inspection of both sides of the PCB with magnification to catalog prior rework areas, bridge candidates, or damaged traces without powered probing"
+              }
+            ],
+            "next_safe_check": "Request high-resolution, unpowered macro photographs of the entire board (front and back) to confirm actual PCB assembly revision markings, identify all vacant IC sockets, and inspect prior rework areas and switch solder joints.",
+            "uncertainty": "Physical PCB revision ASSY 250407 is unverified, schematic reference pin mappings contain known annotation warnings, narration claims are unauthenticated auto-captions, and no verified electrical or visual measurements exist.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 8.88,
+          "receipt_sha256": "02883d5e00fb2fa42ed331a207824763a5a36adae07c301a26bc869af1601e6e"
+        }
+      },
+      {
+        "stage": 1,
+        "evidence_sha256": "9fce362a9a06e9f4d47bde553523135c126f80410a8df39d92c9004ed5138b1f",
+        "evidence": [
+          {
+            "id": "E1",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Nonfunctioning Commodore 64 board; critical ICs missing and earlier rework visible.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "a3ef0feb0641df1c9a6c6c433292028ac7b575c89d1904fcf99f0d8830debd58",
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E2",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator introduces the 250407 repair challenge and identifies the donated board.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "cfbb1e19aec7d00b713b1686a64befa5d434387438d5dc4d4723ce743d8c7a08",
+            "source_window_seconds": [
+              2.55,
+              17.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E3",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The device came from another retro-computing creator for assessment.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "59d7265c099f58c36739f32b79f98aca4c69cca806ddf709a48dd882962d93d8",
+            "source_window_seconds": [
+              20.55,
+              39.31
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E4",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Several major chips are absent, with signs of attempted previous repairs.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "bc42a7c346292d1b23388871b76320f26221d3c4a6bb52b36a12514a0646c604",
+            "source_window_seconds": [
+              42.07,
+              56.51
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E5",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): Creator plans an assessment of the board and its other apparent problems.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "31ae6c7506959ea005d49f510875b9e2f9e5a848bdbe384bab6dd8c93557bd08",
+            "source_window_seconds": [
+              60.03,
+              79.11
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E6",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): The opening discussion shifts toward a possibly substituted power switch.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "7d96d37b7d11007dfdac1b6abf0cd45baf84a8e1bdd8236521a798ec578d46c9",
+            "source_window_seconds": [
+              80.87,
+              98.91
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E7",
+            "kind": "reported_symptom",
+            "text": "Editorial paraphrase (NOT original transcript): A replacement-style rocker switch is discussed; electrical equivalence has not been verified.",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "stage": "auto_vtt_first_120s",
+            "original_source_excerpt_sha256": "e336fc3964de56e9e51957eb52c593c7422c247c11b7f0bc7f95c64e6ca021b2",
+            "source_window_seconds": [
+              101.07,
+              118.07
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E8",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Inspection identifies missing CPU, PLA, firmware ROM and an additional logic chip.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "11aba6edb58729569e9d9261808cf2d498a85209d2c4dc34c4805f32f850a50f",
+            "source_window_seconds": [
+              120.79,
+              134.43
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E9",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Creator proposes examining connections and supply condition after preliminary visual work.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "fdef542b3ef7d5f839ac11052ac367218aedc6a7ae17b28e74b69390438e57de",
+            "source_window_seconds": [
+              136.71,
+              148.949
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E10",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): The board has a component with superficial damage that the creator intends to inspect.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "c5b53bc5a24d795ef862710b058f9ab9658b3f83ea1d2a8145a2b5075cef935b",
+            "source_window_seconds": [
+              150.67,
+              164.75
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E11",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Previous firmware-ROM removal appears rough, with residue around solder pads.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "fe33b80e22676c42455b2816388bc7c55c8e82d50308e6e9ba968dd6ae946b77",
+            "source_window_seconds": [
+              166.949,
+              176.07
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E12",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): A ceramic capacitor has a disconnected lead that may require further investigation.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "535aa2c6d1fe60d7c248c3f8a9f5027ee546534d35b6fc4d24785ec397da5a45",
+            "source_window_seconds": [
+              180.07,
+              194.55
+            ],
+            "public_source_text_redacted": true
+          },
+          {
+            "id": "E13",
+            "kind": "video_segment",
+            "source": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+            "text": "Editorial paraphrase (NOT original transcript): Previous modifications near the RF section prompt questions about trace continuity.",
+            "stage": "followup_caption_120_210",
+            "original_source_excerpt_sha256": "999a8217ebe93bf002c97abf79453bc6d09f26c45b82c720a8f283ab85cb12d7",
+            "source_window_seconds": [
+              198.55,
+              207.47
+            ],
+            "public_source_text_redacted": true
+          }
+        ],
+        "new_video_observations": 6,
+        "model_receipt": {
+          "schema": "hs.restoration.free_text_diagnostic_v1",
+          "case_id": "c64_250407_blank_board_pilot",
+          "source_url": "https://www.youtube.com/watch?v=mkGEXlQ84wk",
+          "native_HS_repair_intake_schema": "hardware_splicer.repair_intake.v1",
+          "evidence_sha256": "9fce362a9a06e9f4d47bde553523135c126f80410a8df39d92c9004ed5138b1f",
+          "caption_provenance": {
+            "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+            "cutoff_seconds": 120,
+            "total_early_final_cues": 45,
+            "no_video_frames": true,
+            "caption_reliability": "unverified_auto_generated"
+          },
+          "preceding_receipt_sha256": "02883d5e00fb2fa42ed331a207824763a5a36adae07c301a26bc869af1601e6e",
+          "prompt_version": "hs.restoration.reasoning_prompt.v1",
+          "prompt_sha256": "47eeca7105b3e0e581f2d8cfb3a042cbffa3d9ef694b320a299ac5ba73b61fd7",
+          "model_requested": "gemini-3.8-flash-low",
+          "model_called": true,
+          "physical_measurements_by_HS": false,
+          "actual_video_frames_analyzed": false,
+          "repair_authorized": false,
+          "device_repaired_by_HS": false,
+          "fabrication_authorized": false,
+          "parts_purchase_authorized": false,
+          "source_windows": [
+            {
+              "start_second": 0,
+              "cutoff_second": 120,
+              "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb"
+            },
+            {
+              "start_second": 120,
+              "cutoff_second": 210,
+              "raw_vtt_sha256": "59f29eaf1c236b2f621facd9e810619be657cc4cde9ac3e5977e73d42cfe0dcb",
+              "caption_chunks": 6
+            }
+          ],
+          "investigator_reference_sha256": "4c5606c851e5231634dfacc04f48862a3bb5e2425c2ab20016068e4b4479c9c4",
+          "investigator_source_graph_sha256": "0314f8fa6b7db5d38cd0a343a1b4c225586443f1f633a375109176d585ad0b6a",
+          "target_board_physically_verified": false,
+          "model_reported": "gemini-3.8-flash-low",
+          "provider_reported": "agy_antigravity_subscription_cli",
+          "raw_model_output_sha256": "40f8f864fccac27d32ec303e6530d814fced8bed4300b32825e4106f1513b590",
+          "usage": {
+            "prompt_tokens": 2070,
+            "completion_tokens": 690
+          },
+          "plan": {
+            "summary": "Unverified creator narration and initial visual cues report an unauthenticated Commodore 64 ASSY 250407 board exhibiting missing critical ICs, replacement of the original power switch with an unverified type, crude desoldering residue at the Kernal ROM location, torn capacitor leads, and rework around the RF modulator. No independent voltage or instrument measurements exist.",
+            "hypotheses": [
+              {
+                "mechanism": "Missing core processing, clock, logic, and bus ICs prevent system clock generation, address decoding, and bus operation",
+                "why": "Creator-reported missing components include VIC-II, SID, PLA, CPU, Kernal ROM, and 7406 logic chip, which are structurally required for functional operation",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E7",
+                  "E8"
+                ],
+                "safe_test": "Perform an unpowered visual inventory against a verified ASSY 250407 reference component placement diagram to record all empty IC sockets and unpopulated footprints"
+              },
+              {
+                "mechanism": "Physical damage from prior rework, including crude Kernal ROM desoldering, torn passive component leads, and RF area rework, risks severed traces or solder shorts",
+                "why": "Creator narration specifically notes crude Kernal desoldering with remaining solder residue, a torn capacitor lead, and rework around the RF modulator",
+                "evidence_ids": [
+                  "E1",
+                  "E4",
+                  "E10",
+                  "E11",
+                  "E12",
+                  "E13"
+                ],
+                "safe_test": "Conduct a safe unpowered optical inspection under magnification and request high-resolution photographs of the Kernal ROM footprint, torn capacitor, and RF modulator area to check for bridged solder or lifted copper traces"
+              },
+              {
+                "mechanism": "Non-original replacement power switch may differ in internal terminal routing or footprint compared to the reference switch",
+                "why": "Creator narration indicates the original rocking switch was replaced with a different pole-type switch whose electrical pin compatibility has not been verified",
+                "evidence_ids": [
+                  "E6",
+                  "E7"
+                ],
+                "safe_test": "Perform an unpowered visual inspection and request clear macro photographs of SW1 markings, terminal arrangement, and PCB solder pads to identify the switch part number and verify its pinout against reference documentation"
+              }
+            ],
+            "next_safe_check": "Request clear, high-resolution photographs of the overall board assembly, the SW1 switch footprint, and the Kernal ROM desoldering area to independently verify the physical PCB revision and visually inspect for trace damage while the unit remains unpowered.",
+            "uncertainty": "Physical board revision is unverified, schematic topology is based on an unauthenticated reference with known annotation warnings, narration claims are unverified creator speech rather than direct instrument measurements, and electrical continuity across switch contacts and traces has not been independently measured.",
+            "abstain": false
+          },
+          "status": "proposed_unverified_differential",
+          "elapsed_seconds": 10.92,
+          "receipt_sha256": "14284a6670627c1bcfb9ad5f13cb4782eef5fd1898de75beb2f6b6970b23eefa"
+        }
+      }
+    ]
+  },
+  "complete": true,
+  "public_projection": {
+    "schema": "hs.repair_investigator.copyright_safe_projection.v1",
+    "original_source_evidence_is_redacted": true,
+    "original_full_model_prompts_are_not_redistributed": true,
+    "original_model_receipt_sha256_preserved": true,
+    "independent_audit_requires_reobtaining_original_source": true,
+    "source_summary_content_sha256": "c8aadd2bf6460aed3327c55de5629ca45271ec1c6dc6f08c1a0dc07b7ff9e0f4",
+    "source_license_note": "KiCad source attributed CERN-OHL-1.2; caption evidence only summarized",
+    "creator_outcomes_never_loaded": true
+  }
+}
