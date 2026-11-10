@@ -44,6 +44,12 @@ def test_twelve_real_slicer_receipts_and_output_grammar_are_sealed():
                for x in report["case_results"])
     assert len({x["slicer_output_sha256"] for x in report["case_results"]})==12
     assert [x["profile"] for x in report["profile_rankings"]]==["standard_020","draft_028"]
+    # The repository's fast-core job intentionally has no optional OCP/
+    # CadQuery installation. The dedicated native-CAD CI job runs this
+    # same test with those dependencies present; fast core skips only
+    # the actual STEP/STL roundtrip assertion.
+    pytest.importorskip("cadquery")
+    pytest.importorskip("trimesh")
     native=audit_slicer_report(req,profile,cad_dir=CAD,out=OUT,require_gcode=False)
     assert native["actual_native_slice_count"]==12
     assert native["physical_print_authorized"] is False
@@ -122,6 +128,8 @@ def test_native_gcode_roundtrip_and_mutation_when_local_private_files_exist(tmp_
     req,profile,policy,cad,report,feedback=sources()
     if not LOCAL.is_dir():
         pytest.skip("original 12 G-code binaries are intentionally not redistributed")
+    pytest.importorskip("cadquery")
+    pytest.importorskip("trimesh")
     assert audit_slicer_report(req,profile,cad_dir=CAD,out=LOCAL,require_gcode=True)["actual_native_slice_count"]==12
     original=(LOCAL/"standard_020__minimal_52.gcode").read_text()
     stats=read_statistics(original,layer=profile["profiles"][0])
