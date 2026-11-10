@@ -1,0 +1,14 @@
+{
+  "actual_imported_reference_metal_solids": 3,
+  "actual_reimported_cable_tubes": 3,
+  "actual_reimported_six_part_pose_STEPS": 3,
+  "cable_anchored_to_verified_hardware": false,
+  "new_nominal_route_meets_declared_cable_constraints": true,
+  "original_reserved_space_fails_to_contain_route": true,
+  "physical_assembly_certified": false,
+  "retention_grooved_shaft_source_consistent": true,
+  "sampled_cable_routes_source_consistent": true,
+  "schema": "hs.cyberdeck_retention_cable_offline_audit.v1",
+  "source_hinge_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
+  "source_spec_sha256": "8bf1ac22d34b6d38e74be6a6ac6794f02eb2193593f587c0ee7677101865aeae"
+}

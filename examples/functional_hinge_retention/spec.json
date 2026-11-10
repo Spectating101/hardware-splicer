@@ -1,0 +1,87 @@
+{
+  "schema": "hs.cyberdeck_hinge_retention_cable_path.v1",
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "parent_reference": "examples/functional_hinge_cyberdeck/reference_spec.json",
+  "parent_generated": "examples/functional_hinge_cyberdeck/generated",
+  "source_variant": "balanced_60",
+  "pin_retention": {
+    "shaft_length_mm": 96,
+    "shaft_nominal_diameter_mm": 3,
+    "grooves_x_centres_mm": [
+      -45.2,
+      45.2
+    ],
+    "groove_minor_diameter_mm": 2.2,
+    "groove_axial_width_mm": 0.95,
+    "retaining_ring_outside_diameter_mm": 6.2,
+    "retaining_ring_inside_diameter_mm": 2.34,
+    "retaining_ring_axial_thickness_mm": 0.7,
+    "retaining_ring_opening_width_mm": 1.7,
+    "retaining_ring_opening_side": "positive Y",
+    "min_clearance_ring_to_printed_leaf_mm": 0.65,
+    "max_nominal_pin_float_total_mm": 4.5,
+    "ring_elastic_assembly_verified": false,
+    "metal_ring_material_verified": false,
+    "actual_hardware_sourced": false
+  },
+  "cable_route": {
+    "nominal_cable_diameter_mm": 1.1,
+    "minimum_hypothetical_bend_radius_mm": 2,
+    "nominal_free_segment_length_mm": 44,
+    "nominal_lower_exit_xyz_mm": [
+      81.6,
+      16,
+      5
+    ],
+    "nominal_upper_exit_local_xyz_mm": [
+      81.6,
+      -16,
+      5
+    ],
+    "route_x_outward_bulge_mm": 6.4,
+    "rightmost_total_width_limit_mm": 165,
+    "max_folded_route_height_mm": 20,
+    "original_printed_closed_height_limit_mm": 13.5,
+    "minimum_cable_to_printed_solid_clearance_mm": 2,
+    "minimum_cable_to_retainer_clearance_mm": 2,
+    "max_free_segment_length_variation_pct": 0.2,
+    "max_allowable_cable_to_original_keepout_intrusion_mm3": 0,
+    "route_designs": [
+      {
+        "id": "compact_low_bend",
+        "z_loop_bulge_mm": 8,
+        "free_length_mm": 40
+      },
+      {
+        "id": "medium_low_bend",
+        "z_loop_bulge_mm": 10,
+        "free_length_mm": 40
+      },
+      {
+        "id": "roomy_bend_relief",
+        "z_loop_bulge_mm": 12,
+        "free_length_mm": 44
+      },
+      {
+        "id": "tall_bend_relief",
+        "z_loop_bulge_mm": 14,
+        "free_length_mm": 48
+      }
+    ],
+    "cable_material_verified": false,
+    "real_connector_dimensions_verified": false,
+    "anchor_guides_modelled": false,
+    "actual_electrical_connectivity_verified": false,
+    "repeated_fold_test_completed": false
+  },
+  "authority": {
+    "board_or_display_dimensions_measured": false,
+    "real_pin_groove_fabricated": false,
+    "retainer_installation_tested": false,
+    "cable_spec_measured": false,
+    "cable_strain_relief_validated": false,
+    "continuous_motion_collision_certified": false,
+    "physical_assembly_tested": false,
+    "fabrication_release_authorized": false
+  }
+}
