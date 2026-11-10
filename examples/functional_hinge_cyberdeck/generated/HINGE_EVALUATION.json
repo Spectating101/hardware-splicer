@@ -1,0 +1,3151 @@
+{
+  "authority": {
+    "actual_cable_routed": false,
+    "live_hardware_rotated": false,
+    "mechanical_production_release": false,
+    "motion_fatigue_measured": false,
+    "physical_components_verified": false,
+    "print_completed": false
+  },
+  "candidates": [
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": false,
+        "screen_mockups_no_sweep_intersection": false,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.948,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.8618,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.7416,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.5876,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.4002,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.1796,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.9263,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.6409,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.3237,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.9754,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.5968,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.1885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.7512,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.2859,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.7934,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.2746,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.7305,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.1622,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.5708,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.9573,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.323,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.6691,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.9967,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.3072,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.6019,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.8821,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.1492,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.4046,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.6497,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.886,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.4,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.1149,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.1514,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 2.3378,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.4422,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 1.5563,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.7291,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 0.7718,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.0167,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 0.0,
+          "screen_interference_mm3": 0.15944,
+          "screen_to_other_leaf_distance_mm": 2.2859,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 0.0,
+          "screen_interference_mm3": 7616.0,
+          "screen_to_other_leaf_distance_mm": 1.5,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.8283,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 8.6,
+        "hinge_wall_mm": 1.85,
+        "lower_volume_mm3": 29468.27,
+        "min_modelled_screen_gap_mm": 0.0,
+        "min_modelled_shell_gap_mm": 0.8283,
+        "min_reserved_cable_corridor_separation_mm": 2.5,
+        "min_screen_to_other_leaf_gap_mm": 1.5,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 59443.476,
+        "upper_volume_mm3": 29975.206
+      },
+      "id": "slim_43",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": false,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 29468.27,
+          "STEP_volume_mm3": 29468.27,
+          "STL_volume_mm3": 29467.242,
+          "fabrication_authorized": false,
+          "mesh_faces": 1148,
+          "mesh_watertight": true,
+          "step_sha256": "db7c2fe305f278d397fa3912c5ce6d2f3fcdfa8aba6d62931790af3294a63370",
+          "stl_sha256": "5228c58a98baa814f12f9359b224996471af8fec05c497875054eea93bd29eca"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 29975.206,
+          "STEP_volume_mm3": 29975.206,
+          "STL_volume_mm3": 29973.662,
+          "fabrication_authorized": false,
+          "mesh_faces": 1716,
+          "mesh_watertight": true,
+          "step_sha256": "a6eec72d44903fbb7d229126b22831f80e36444763c10daeea97ffec2bc1ab3c",
+          "stl_sha256": "40fdd06954979d555cfbd0ce16bb5ed637ddbe4419195db51ad1ecd498af2c13"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": false,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0178,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0012,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.9504,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.8655,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.7465,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.5937,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.4075,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.1881,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.936,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.6516,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.3356,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.9885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.6109,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.2036,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.7674,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.303,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.8115,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.2936,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.7504,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.183,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.5924,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.9797,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.3461,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.6928,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.0211,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.3322,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.6274,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.9081,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.1757,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.4315,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.6769,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.9135,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.0089,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.1426,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.455,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 2.3658,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.7419,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 1.5844,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.0294,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 0.8,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 2.3259,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 0.826,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 10.2,
+        "hinge_wall_mm": 2.25,
+        "lower_volume_mm3": 29846.566,
+        "min_modelled_screen_gap_mm": 0.8,
+        "min_modelled_shell_gap_mm": 0.826,
+        "min_reserved_cable_corridor_separation_mm": 2.5,
+        "min_screen_to_other_leaf_gap_mm": 2.3259,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 60389.216,
+        "upper_volume_mm3": 30542.65
+      },
+      "id": "compact_51",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": false,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 29846.566,
+          "STEP_volume_mm3": 29846.566,
+          "STL_volume_mm3": 29845.264,
+          "fabrication_authorized": false,
+          "mesh_faces": 1140,
+          "mesh_watertight": true,
+          "step_sha256": "c27c402c6605573c580e80c1f3a9e799298252bc5a6cac0573676a29820d539b",
+          "stl_sha256": "285a4e5d77e87d97397e9cd3979381164424bdd137cae333fc2c5d45b5c7be93"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 30542.65,
+          "STEP_volume_mm3": 30542.65,
+          "STL_volume_mm3": 30540.695,
+          "fabrication_authorized": false,
+          "mesh_faces": 1704,
+          "mesh_watertight": true,
+          "step_sha256": "e0fdd6de2dc2f20c0adae99302037d348bb2f605f1e40708b11358a24c66ed4f",
+          "stl_sha256": "fbd7d75471ea96f1817b793ef8172a8dd899e57534356fc3f1b6790da66685d0"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": true,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0963,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1581,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1854,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.178,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1361,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0596,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.9487,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.8037,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.6248,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.4123,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.1667,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.8885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.578,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.236,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.8631,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.46,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.0275,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.5664,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.0775,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.5619,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.0204,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.4542,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.8642,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.2517,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.6177,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.9635,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.2904,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.5996,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.8924,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.1701,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.4343,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.6862,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.9272,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.1589,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5876,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.3827,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.8744,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 2.6,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.1623,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 12.0,
+        "hinge_wall_mm": 2.45,
+        "lower_volume_mm3": 30127.48,
+        "min_modelled_screen_gap_mm": 2.6,
+        "min_modelled_shell_gap_mm": 1.1814,
+        "min_reserved_cable_corridor_separation_mm": 2.5,
+        "min_screen_to_other_leaf_gap_mm": 3.1623,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 61091.499,
+        "upper_volume_mm3": 30964.019
+      },
+      "id": "balanced_60",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": true,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 30127.48,
+          "STEP_volume_mm3": 30127.48,
+          "STL_volume_mm3": 30125.997,
+          "fabrication_authorized": false,
+          "mesh_faces": 1132,
+          "mesh_watertight": true,
+          "step_sha256": "ba299471674ae266e24f6137d5b3156fe8619c31835c25d030ce45fe0230bfd2",
+          "stl_sha256": "c0dc5b8d225e0ff9adb1bb3b037c5de805b2aa043b91ca68e101f53531b8e0b2"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 30964.019,
+          "STEP_volume_mm3": 30964.019,
+          "STL_volume_mm3": 30961.795,
+          "fabrication_authorized": false,
+          "mesh_faces": 1692,
+          "mesh_watertight": true,
+          "step_sha256": "dc27b4719c4d592c2ecdf2f09bfa1b63837080a183dc12c08aa38a90eab1943b",
+          "stl_sha256": "4398ad4a6e13f6a5999e80db79435efe3a54bedc8aa2f4f968a3599e99581922"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": false,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": true,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.0963,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.1581,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.1854,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.178,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.1361,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 18.0596,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 17.9487,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 17.8037,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 17.6248,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 17.4123,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 17.1667,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 16.8885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 16.578,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 16.236,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 15.8631,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 15.46,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 15.0275,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 14.5664,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 14.0775,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 13.5619,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 13.0204,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 12.4542,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 11.8642,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 11.2517,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 10.6177,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 9.9635,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 9.2904,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 8.5996,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 7.8924,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 7.1701,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 6.4343,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 5.6862,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 4.9272,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.8934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 4.1589,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5876,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 3.3827,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.8744,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 1.0,
+          "screen_distance_mm": 2.6,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.1623,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.1814,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 12.0,
+        "hinge_wall_mm": 2.45,
+        "lower_volume_mm3": 30127.48,
+        "min_modelled_screen_gap_mm": 2.6,
+        "min_modelled_shell_gap_mm": 1.1814,
+        "min_reserved_cable_corridor_separation_mm": 1.0,
+        "min_screen_to_other_leaf_gap_mm": 3.1623,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 61091.499,
+        "upper_volume_mm3": 30964.019
+      },
+      "id": "crowded_cable_60",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": false,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 30127.48,
+          "STEP_volume_mm3": 30127.48,
+          "STL_volume_mm3": 30125.997,
+          "fabrication_authorized": false,
+          "mesh_faces": 1132,
+          "mesh_watertight": true,
+          "step_sha256": "58d2762d9d2259b95df569090803159c7d228391d7a9c47b8b93e8e8bc8ec8da",
+          "stl_sha256": "c0dc5b8d225e0ff9adb1bb3b037c5de805b2aa043b91ca68e101f53531b8e0b2"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 30964.019,
+          "STEP_volume_mm3": 30964.019,
+          "STL_volume_mm3": 30961.795,
+          "fabrication_authorized": false,
+          "mesh_faces": 1692,
+          "mesh_watertight": true,
+          "step_sha256": "181357be1ff6a1ffc40f3ea0604659d0dc88583d34f8b7cf90a0079a07d6fac7",
+          "stl_sha256": "4398ad4a6e13f6a5999e80db79435efe3a54bedc8aa2f4f968a3599e99581922"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": false,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": true,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0963,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1581,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1854,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.178,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1361,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0596,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.9487,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.8037,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.6248,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.4123,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.1667,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.8885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.578,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.236,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.8631,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.46,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.0275,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.5664,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.0775,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.5619,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.0204,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.4542,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.8642,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.2517,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.6177,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.9635,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.2904,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.5996,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.8924,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.1701,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.4343,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.6862,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.6934,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.9272,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 5.2971,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 4.1589,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5876,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 3.3827,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.8744,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 2.6,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.1623,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.9814,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 12.0,
+        "hinge_wall_mm": 1.65,
+        "lower_volume_mm3": 29639.644,
+        "min_modelled_screen_gap_mm": 2.6,
+        "min_modelled_shell_gap_mm": 1.9814,
+        "min_reserved_cable_corridor_separation_mm": 2.5,
+        "min_screen_to_other_leaf_gap_mm": 3.1623,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 59871.91,
+        "upper_volume_mm3": 30232.266
+      },
+      "id": "thin_wall_60",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": false,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 29639.644,
+          "STEP_volume_mm3": 29639.644,
+          "STL_volume_mm3": 29638.758,
+          "fabrication_authorized": false,
+          "mesh_faces": 1156,
+          "mesh_watertight": true,
+          "step_sha256": "993f80db71923961d949c568713899ddd465db820724dd3fa8a2f18d4e0d78c1",
+          "stl_sha256": "4b463bfc356dde7bc0ee6c57508c0a351da92d4956480f7795d2ac7565299155"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 30232.266,
+          "STEP_volume_mm3": 30232.266,
+          "STL_volume_mm3": 30230.936,
+          "fabrication_authorized": false,
+          "mesh_faces": 1728,
+          "mesh_watertight": true,
+          "step_sha256": "9e6ed2e6728a318d97bef603edbfcf37286b43aaf16f4ffd14ed1ca328427df8",
+          "stl_sha256": "4f361d8a6fac1910f0a9ede8203fa0abdaeac4a3e68e6f12c6f862b1aeb37473"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": true,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": true,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.1312,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.2278,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.2898,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.3169,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.3092,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.2666,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.1893,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 18.0773,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 17.931,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 17.7504,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 17.5361,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 17.2885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 17.0079,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 16.6949,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 16.3501,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 15.9743,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 15.568,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 15.1321,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 14.6674,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 14.1747,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 13.6551,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 13.1095,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 12.5389,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 11.9445,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 11.3273,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 10.6886,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 10.0295,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 9.3513,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 8.6553,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 7.9429,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 7.2153,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 6.474,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 5.7204,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 4.9559,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.5591,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 4.1819,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.2572,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 3.0,
+          "screen_distance_mm": 3.4,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 3.544,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.0569,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 12.8,
+        "hinge_wall_mm": 2.85,
+        "lower_volume_mm3": 30469.712,
+        "min_modelled_screen_gap_mm": 3.4,
+        "min_modelled_shell_gap_mm": 1.0569,
+        "min_reserved_cable_corridor_separation_mm": 3.0,
+        "min_screen_to_other_leaf_gap_mm": 3.544,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 61947.079,
+        "upper_volume_mm3": 31477.368
+      },
+      "id": "reinforced_64",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": true,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 30469.712,
+          "STEP_volume_mm3": 30469.712,
+          "STL_volume_mm3": 30467.89,
+          "fabrication_authorized": false,
+          "mesh_faces": 1124,
+          "mesh_watertight": true,
+          "step_sha256": "f0190fa416fcbdedd4c450a7e2d75db390fcea000a09fb7a9e2ef27c98585cf5",
+          "stl_sha256": "75886a0a75d4fdfb45e10cc4fa9a19cf8b21b3891cabc090cbb9f31eccc5e4e1"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 31477.368,
+          "STEP_volume_mm3": 31477.368,
+          "STL_volume_mm3": 31474.635,
+          "fabrication_authorized": false,
+          "mesh_faces": 1680,
+          "mesh_watertight": true,
+          "step_sha256": "fb3b968603df41979848ac3c9c89a8ad52baa9efa3c0952c497448b14110a63c",
+          "stl_sha256": "6f334600a1b733cbe5b210b6c73cb6d661009a980fddd7f7dab181bea9f228a5"
+        }
+      },
+      "shaft_retention_verified": false
+    },
+    {
+      "actual_cable_routed": false,
+      "checks": {
+        "cable_corridor_within_nominal_max_width": true,
+        "external_cable_corridor_avoids_printed_solids": true,
+        "folded_printed_shell_thickness_within_limit": false,
+        "minimum_hinge_radial_wall_mm": true,
+        "moving_shells_keep_min_nominal_gap": true,
+        "moving_shells_no_BRep_intersections": true,
+        "nominal_metal_pin_not_printed": true,
+        "nominal_pin_clearance_both_leaves": true,
+        "screen_mockups_keep_min_nominal_gap": true,
+        "screen_mockups_no_sweep_intersection": true,
+        "screens_clear_opposite_printed_leaf": true,
+        "valid_two_separate_source_leaf_solids": true
+      },
+      "continuous_angle_collision_certified": false,
+      "discrete_sweep": [
+        {
+          "angle_deg": 0,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.0,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 5,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.2097,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 10,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.3847,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 15,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.5247,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 20,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.6295,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 25,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.6988,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 30,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.7325,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 35,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.7306,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 40,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.693,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 45,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.6198,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 50,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.5112,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 55,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.3673,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 60,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 18.1885,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 65,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.975,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 70,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.7273,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 75,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.4459,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 80,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 17.1313,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 85,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.7841,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 90,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 16.4049,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 95,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.9945,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 100,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.5536,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 105,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 15.0831,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 110,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.584,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 115,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 14.057,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 120,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 13.5033,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 125,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.9239,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 130,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 12.3199,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 135,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.6925,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 140,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 11.0428,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 145,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 10.372,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 150,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 9.6816,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 155,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.9727,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 160,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 8.2467,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 165,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 7.505,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 170,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 6.749,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 175,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.9802,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        },
+        {
+          "angle_deg": 180,
+          "external_cable_reservation_distance_mm": 2.5,
+          "screen_distance_mm": 5.2,
+          "screen_interference_mm3": 0.0,
+          "screen_to_other_leaf_distance_mm": 4.368,
+          "screen_to_other_leaf_interference_mm3": 0.0,
+          "shell_distance_mm": 1.3253,
+          "shell_interference_mm3": 0.0
+        }
+      ],
+      "geometry": {
+        "folded_solid_height_mm": 14.6,
+        "hinge_wall_mm": 3.25,
+        "lower_volume_mm3": 30916.819,
+        "min_modelled_screen_gap_mm": 5.2,
+        "min_modelled_shell_gap_mm": 1.3253,
+        "min_reserved_cable_corridor_separation_mm": 2.5,
+        "min_screen_to_other_leaf_gap_mm": 4.368,
+        "open_solid_y_extent_mm": 164.0,
+        "pin_bore_diametral_clearance_mm": 0.5,
+        "solid_volume_mm3": 63064.848,
+        "upper_volume_mm3": 32148.029
+      },
+      "id": "tall_73",
+      "mechanism": {
+        "axis": "X",
+        "interval_samples": 37,
+        "moving_part": "upper_leaf",
+        "rotation_deg": [
+          0,
+          180
+        ],
+        "rotation_direction": "negative",
+        "static_part": "lower_leaf"
+      },
+      "nominal_mechanism_feasible": false,
+      "physical_screen_or_cable_test_completed": false,
+      "printed_files": {
+        "lower_leaf": {
+          "BRep_volume_mm3": 30916.819,
+          "STEP_volume_mm3": 30916.819,
+          "STL_volume_mm3": 30914.616,
+          "fabrication_authorized": false,
+          "mesh_faces": 1116,
+          "mesh_watertight": true,
+          "step_sha256": "c6033b6007f12601333e1f59fea026515f7d94e5e6dea9b280fadffa3c287b41",
+          "stl_sha256": "e511e4a7239080bfa2dddbb12adf44cd953da96dd23d03363aace1ee6727d0ea"
+        },
+        "upper_leaf": {
+          "BRep_volume_mm3": 32148.029,
+          "STEP_volume_mm3": 32148.029,
+          "STL_volume_mm3": 32144.723,
+          "fabrication_authorized": false,
+          "mesh_faces": 1668,
+          "mesh_watertight": true,
+          "step_sha256": "ea6bcc423db222d24e06382a13f72b345d28632ea551717425a6186a34f891fa",
+          "stl_sha256": "32c006e4316b1cde46b613d164427158b9302f6889c6bb836c24daa730c152f8"
+        }
+      },
+      "shaft_retention_verified": false
+    }
+  ],
+  "feasible_order": [
+    "balanced_60",
+    "reinforced_64"
+  ],
+  "native_function_gate": {
+    "evidence_collected_count": 0,
+    "functional_traceability_pass": true,
+    "functions_count": 3,
+    "interface_count": 2,
+    "machine_project_release_request": "concept",
+    "machine_project_unresolved_interfaces": [
+      "interface 'I_REVOLUTE_PIN' has unresolved fields: axial shaft retention, bearing wear and repeated fold endurance, hinge torque and full fatigue tests, printed bore accuracy, real pin dimensional tolerance",
+      "interface 'I_UPPER_PIN' has unresolved fields: shaft fit and real part print"
+    ],
+    "open_engineering_gates": [
+      "Select evidence-backed process/technology alternatives",
+      "Determine inlet quality and exact intended output",
+      "Verify hydraulic/process model with measured properties and media",
+      "Choose qualified wetted materials, seals and rated connectors",
+      "Generate and independently validate domain-native engineering artifacts",
+      "Collect physical function, leakage, durability and treatment evidence",
+      "Require independent health/safety qualification before any human exposure"
+    ],
+    "physical_authority": {
+      "build_ready": false,
+      "design_ready": false,
+      "fabrication": false,
+      "firmware_flash": false,
+      "operation": false,
+      "power_on": false,
+      "treatment_performance_verified": false,
+      "water_safe_to_drink": false
+    },
+    "planned_independent_tests": 6,
+    "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+    "requirements_count": 6,
+    "schema_version": "hardware_splicer.function_intent_gate.v1",
+    "source_spec_sha256": "a2b477cdfcd0a279ab6fabc9d14fe0d9115d51d1d1d708247f974013a0366c70",
+    "status": "FUNCTIONAL_CONCEPT_ONLY",
+    "subsystem_disciplines": {
+      "S_LOWER": "mechanical",
+      "S_SHAFT": "mechanical",
+      "S_UPPER": "mechanical"
+    }
+  },
+  "native_function_intent_SHA256": "a2b477cdfcd0a279ab6fabc9d14fe0d9115d51d1d1d708247f974013a0366c70",
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "reference_spec_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
+  "schema": "hs.cyberdeck_mating_hinge_cad.v1",
+  "selected": "balanced_60",
+  "selection_reason": "lowest genuine printable-leaf BRep volume among candidates meeting discrete motion, screen/cable keepout and folded thickness proxy gates",
+  "source_uncertainties": [
+    "The screen package is an assumed BRep box, not a sourced display module.",
+    "A cable keepout is NOT a routed/connected cable, connector bend test, flexible circuit or life-test.",
+    "The pin is an unmeasured 3 mm metal-shaft reference, not a ready-to-fit printable fastener.",
+    "A five-degree sampled sweep is NOT a continuous mathematical clearance proof.",
+    "No load case, torque requirement, wall fatigue/FEM, bearing wear or shaft retention test.",
+    "No real FDM printer profile, actual print, component measurements or closed-stack tolerancing."
+  ]
+}

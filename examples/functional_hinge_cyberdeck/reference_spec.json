@@ -1,0 +1,113 @@
+{
+  "schema": "hs.functional_moving_hinge.v1",
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "purpose": "Print two genuine mating hinge leaves for dual-panel fold geometry, with steel pin as nominal nonprinted reference and an external cable loop clearance reservation only.",
+  "source_authority": {
+    "screen_dimensions_measured": false,
+    "cable_spec_verified": false,
+    "existing_device_teardown_measured": false,
+    "printer_calibrated": false,
+    "mechanical_load_verified": false,
+    "physical_fit_verified": false,
+    "production_release_authorized": false
+  },
+  "design_reference": {
+    "panel_width_mm": 152,
+    "panel_depth_mm": 78,
+    "panel_gap_each_side_mm": 4,
+    "panel_backing_thickness_mm": 2.4,
+    "screen_package_thickness_mm": 2.3,
+    "screen_keepout_width_mm": 140,
+    "screen_keepout_depth_mm": 68,
+    "screen_keepout_center_y_mm": 43
+  },
+  "mechanical": {
+    "barrel_knuckle_length_mm": 14,
+    "base_barrel_x_centres_mm": [
+      -18,
+      18
+    ],
+    "lid_barrel_x_centres_mm": [
+      -36,
+      0,
+      36
+    ],
+    "pin_nominal_diameter_mm": 3,
+    "hinge_bore_nominal_diameter_mm": 3.5,
+    "minimum_radial_wall_mm": 1.8,
+    "minimum_leaf_separation_mm": 0.4,
+    "minimum_screen_gap_mm": 1,
+    "folded_envelope_max_height_mm": 13.5,
+    "angle_start_deg": 0,
+    "angle_end_deg": 180,
+    "angle_sampling_step_deg": 5,
+    "rotation_direction": "-X",
+    "shaft_retention_design_verified": false
+  },
+  "cable": {
+    "strategy": "external_service_loop_outside_right_panel_footprint",
+    "reserved_cable_bend_envelope_radius_mm": 9,
+    "keepout_axial_extent_mm": 8,
+    "minimum_keepout_to_solid_clearance_mm": 2,
+    "maximum_overall_width_with_keepout_mm": 165,
+    "actual_cable_geometry_routed": false,
+    "cable_end_connectors_measured": false,
+    "flex_life_tested": false
+  },
+  "printer": {
+    "bed_mm": [
+      220,
+      220,
+      250
+    ],
+    "nominal_nozzle_mm": 0.4,
+    "nominal_layer_mm": 0.2,
+    "nominal_density_g_cm3": 1.24,
+    "nominal_infill_percent": 20,
+    "printer_profile_verified": false
+  },
+  "alternatives": [
+    {
+      "id": "slim_43",
+      "axis_height_mm": 4.3,
+      "barrel_radius_mm": 3.6,
+      "cable_keepout_start_x_mm": 78.5
+    },
+    {
+      "id": "compact_51",
+      "axis_height_mm": 5.1,
+      "barrel_radius_mm": 4,
+      "cable_keepout_start_x_mm": 78.5
+    },
+    {
+      "id": "balanced_60",
+      "axis_height_mm": 6,
+      "barrel_radius_mm": 4.2,
+      "cable_keepout_start_x_mm": 78.5
+    },
+    {
+      "id": "crowded_cable_60",
+      "axis_height_mm": 6,
+      "barrel_radius_mm": 4.2,
+      "cable_keepout_start_x_mm": 77
+    },
+    {
+      "id": "thin_wall_60",
+      "axis_height_mm": 6,
+      "barrel_radius_mm": 3.4,
+      "cable_keepout_start_x_mm": 78.5
+    },
+    {
+      "id": "reinforced_64",
+      "axis_height_mm": 6.4,
+      "barrel_radius_mm": 4.6,
+      "cable_keepout_start_x_mm": 79
+    },
+    {
+      "id": "tall_73",
+      "axis_height_mm": 7.3,
+      "barrel_radius_mm": 5,
+      "cable_keepout_start_x_mm": 78.5
+    }
+  ]
+}

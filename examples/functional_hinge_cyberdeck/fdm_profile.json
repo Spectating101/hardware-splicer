@@ -1,0 +1,45 @@
+{
+  "schema": "hs.unverified_hinge_fdm_v1",
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "source_profile_reference": "examples/print_function_pilot/pcb_service_stand/slicer_profile.json",
+  "prusa_version": "PrusaSlicer-2.9.2",
+  "materials": {
+    "filament": "illustrative generic PLA",
+    "density_g_cm3": 1.24,
+    "nozzle_mm": 0.4,
+    "filament_mm": 1.75,
+    "infill_percent": 20,
+    "infill_pattern": "gyroid",
+    "perimeters": 3,
+    "supports": false
+  },
+  "machine": {
+    "bed_mm": [
+      220,
+      220,
+      250
+    ],
+    "calibrated": false,
+    "bed_temperature_c": 60,
+    "nozzle_temperature_c": 205,
+    "first_layer_temperature_c": 210,
+    "firmware": "reprap_generic_unverified"
+  },
+  "profiles": [
+    {
+      "id": "std_020",
+      "layer_mm": 0.2
+    },
+    {
+      "id": "draft_028",
+      "layer_mm": 0.28
+    }
+  ],
+  "authority": {
+    "manufactured": false,
+    "printed_part_tested": false,
+    "machine_gcode_execution_authorized": false,
+    "support_free_horizontal_holes_verified": false
+  },
+  "notes": "Reference hinge has horizontal-axis 3.5 mm bore; generating no supports does not prove unsupported overhang/bridging quality."
+}
