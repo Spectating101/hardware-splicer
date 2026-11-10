@@ -1,0 +1,71 @@
+{
+  "schema": "hs.fff_slicer_trial_profile.v1",
+  "project_id": "pcb_repair_stand_function_geometry_v1",
+  "description": "PrusaSlicer CLI tests on actual STLs with nominal uncalibrated RepRap printer configuration; not machine-ready G-code",
+  "slicer": {
+    "name": "PrusaSlicer",
+    "requested_version": "2.9.2+dfsg-1",
+    "distro_package": "Debian trixie prusa-slicer",
+    "distro_package_sha256": "4ff3972a868621f48adee0e1d6848ce27ada765a2fdc1d0cb87e81026f6c5392",
+    "binary_sha256": null
+  },
+  "filament": {
+    "diameter_mm": 1.75,
+    "nominal_density_g_cm3": 1.24,
+    "name": "Generic PLA illustrative",
+    "qualified_for_ESD": false
+  },
+  "machine": {
+    "nominal_bed_polygon_mm": [
+      [
+        0,
+        0
+      ],
+      [
+        220,
+        0
+      ],
+      [
+        220,
+        220
+      ],
+      [
+        0,
+        220
+      ]
+    ],
+    "nozzle_diameter_mm": 0.4,
+    "machine_profile_physically_verified": false
+  },
+  "fixed_options": {
+    "perimeters": 3,
+    "fill_density_percent": 20,
+    "fill_pattern": "gyroid",
+    "support_material": false,
+    "skirts": 0,
+    "brim_width_mm": 0,
+    "temperature_c": 205,
+    "first_layer_temperature_c": 210,
+    "bed_temperature_c": 60,
+    "first_layer_bed_temperature_c": 60,
+    "gcode_flavor": "reprap"
+  },
+  "profiles": [
+    {
+      "id": "standard_020",
+      "layer_height_mm": 0.2,
+      "first_layer_height_mm": 0.2
+    },
+    {
+      "id": "draft_028",
+      "layer_height_mm": 0.28,
+      "first_layer_height_mm": 0.28
+    }
+  ],
+  "release_authority": {
+    "printer_profile_calibrated": false,
+    "physical_measurements_taken": false,
+    "printer_control_authorized": false,
+    "gcode_safe_to_execute_on_unverified_machine": false
+  }
+}

@@ -126,3 +126,13 @@ and conditionally select a functionally motivated geometry within a
 limited parametric design family. It cannot yet prove the print will
 fit, retain, or protect a real board; and it has not autonomously
 created new topologies from open-ended natural-language prompts.
+
+## Follow-up: native PrusaSlicer manufacturing feedback
+
+The independent native FDM slicing experiment and source-limited
+re-selection are documented in SLICER_RESULTS.md. These are actual
+PrusaSlicer toolpath estimates, not the 55%-density CAD surrogate.
+Nominal print-mass evidence promotes Minimal 52 to the lightest
+proxy-feasible shape, while a declared post-hoc conservative
+sensitivity screen still selects Ladder 58. No physical approval
+or printer G-code release is implied.
