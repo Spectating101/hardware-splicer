@@ -1,0 +1,85 @@
+{
+  "schema": "hs.functional_print_design.v1",
+  "project_id": "pcb_repair_stand_function_geometry_v1",
+  "model": "unpowered_pcb_vertical_service_stand",
+  "board": {
+    "nominal_width_mm": 80,
+    "nominal_height_mm": 56,
+    "nominal_thickness_mm": 1.6,
+    "nominal_mass_g": 25,
+    "dimensions_physically_measured": false
+  },
+  "fit": {
+    "per_side_clearance_mm": 0.3,
+    "minimum_wall_mm": 3,
+    "minimum_support_spacing_fraction": 0.5
+  },
+  "printer": {
+    "bed_mm": [
+      220,
+      220,
+      250
+    ],
+    "nozzle_mm": 0.4,
+    "filament": "Generic PLA, concept only",
+    "material_nominal_density_g_cm3": 1.24,
+    "effective_density_fraction_assumption": 0.55,
+    "profile_verified": false
+  },
+  "stability": {
+    "hypothetical_lateral_force_n": 0.1,
+    "min_modelled_factor": 1.5,
+    "board_mass_measured": false
+  },
+  "safety": {
+    "nonpowered_fixture_only": true,
+    "ESD_certified": false,
+    "FEA_completed": false,
+    "physical_fit_verified": false,
+    "print_approved": false
+  },
+  "alternatives": [
+    {
+      "id": "solid_plate",
+      "style": "plate",
+      "depth_mm": 68,
+      "foot_width_mm": 22,
+      "beam_width_mm": 68
+    },
+    {
+      "id": "minimal_46",
+      "style": "open_rail",
+      "depth_mm": 46,
+      "foot_width_mm": 20,
+      "beam_width_mm": 6
+    },
+    {
+      "id": "minimal_52",
+      "style": "open_rail",
+      "depth_mm": 52,
+      "foot_width_mm": 20,
+      "beam_width_mm": 6
+    },
+    {
+      "id": "ladder_58",
+      "style": "open_rail",
+      "depth_mm": 58,
+      "foot_width_mm": 22,
+      "beam_width_mm": 8
+    },
+    {
+      "id": "ladder_64",
+      "style": "open_rail",
+      "depth_mm": 64,
+      "foot_width_mm": 22,
+      "beam_width_mm": 8
+    },
+    {
+      "id": "reinforced_68",
+      "style": "open_rail",
+      "depth_mm": 68,
+      "foot_width_mm": 26,
+      "beam_width_mm": 10
+    }
+  ]
+}

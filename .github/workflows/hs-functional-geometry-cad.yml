@@ -1,0 +1,48 @@
+name: HS functional geometry printable CAD
+on:
+  pull_request:
+    paths:
+      - 'src/hardware_splicer/function_print_geometry.py'
+      - 'examples/print_function_pilot/**'
+      - 'tests/test_function_print_geometry.py'
+      - '.github/workflows/hs-functional-geometry-cad.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-cad-and-functional-authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HS and actual native CAD and mesh dependencies
+        run: |
+          python -m pip install -e .
+          python -m pip install 'cadquery==2.6.1' 'trimesh==4.12.2' 'pytest>=8,<10'
+      - name: Native BRep export/import, STL mesh, functional traceability and tamper suite
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_function_print_geometry.py \
+            tests/test_function_intent_bridge.py \
+            tests/test_step_geometry.py \
+            tests/test_mechanical_fit.py
+      - name: Reaudit committed real CAD artifacts
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from hardware_splicer.function_print_geometry import audit_bundle
+          root=Path("examples/print_function_pilot/pcb_service_stand")
+          report=audit_bundle(json.loads((root/"design_request.json").read_text()),root/"generated")
+          assert report["native_shape_count"]==6
+          assert report["selected"]=="ladder_58"
+          assert report["nonfabrication_authority_preserved"]
+          print("Reaudited native CAD solids and all source-linked evidence.")
+          PY

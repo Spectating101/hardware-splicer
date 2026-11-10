@@ -1,0 +1,17 @@
+{
+  "schema": "hs.function_to_printable_cad_native_audit.v1",
+  "source_design_sha256": "b728736cb2e9b8375b2b4be5904d5d8d86965b742c1ed4fdacf3d24429e21499",
+  "native_shape_count": 6,
+  "verified_candidates": [
+    "solid_plate",
+    "minimal_46",
+    "minimal_52",
+    "ladder_58",
+    "ladder_64",
+    "reinforced_68"
+  ],
+  "selected": "ladder_58",
+  "nonfabrication_authority_preserved": true,
+  "source_concept_traceability_verified": true,
+  "real_CAD_and_STL_roundtrip_verified": true
+}

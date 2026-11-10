@@ -1,0 +1,419 @@
+{
+  "actual_native_geometry_written": true,
+  "alternatives": [
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": true,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          68.0,
+          30.0
+        ],
+        "mesh_triangles": 76,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 40467.2,
+        "stl_volume_mm3": 40467.2,
+        "stl_watertight": true,
+        "volume_mm3": 40467.2
+      },
+      "geometry_spec": {
+        "beam_width_mm": 68,
+        "depth_mm": 68,
+        "foot_width_mm": 22,
+        "id": "solid_plate",
+        "style": "plate"
+      },
+      "id": "solid_plate",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 27.599,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 2.506,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": true,
+      "source_sha256": {
+        "step": "3e2d44cbfed80b8ca5369179f12454b296544c7b62286012ac6e4253a6c66350",
+        "stl": "a89e352871bfaa16d98ecf697defb92d2f0bc7b86a62f51509421e23770f88e9"
+      },
+      "style": "plate"
+    },
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": false,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          46.0,
+          30.0
+        ],
+        "mesh_triangles": 140,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 19968.0,
+        "stl_volume_mm3": 19968.0,
+        "stl_watertight": true,
+        "volume_mm3": 19968.0
+      },
+      "geometry_spec": {
+        "beam_width_mm": 6,
+        "depth_mm": 46,
+        "foot_width_mm": 20,
+        "id": "minimal_46",
+        "style": "open_rail"
+      },
+      "id": "minimal_46",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 13.618,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 1.245,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": false,
+      "source_sha256": {
+        "step": "6dfb3a03d933ea8de4d5b0b94ddec707e91befc331f5da3009671cf2776cee39",
+        "stl": "cc6da707bb24a5db9f8d28246694c8d30429e69fe6cfb0dbda3d8779c8383650"
+      },
+      "style": "open_rail"
+    },
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": false,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          52.0,
+          30.0
+        ],
+        "mesh_triangles": 140,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 20928.0,
+        "stl_volume_mm3": 20928.0,
+        "stl_watertight": true,
+        "volume_mm3": 20928.0
+      },
+      "geometry_spec": {
+        "beam_width_mm": 6,
+        "depth_mm": 52,
+        "foot_width_mm": 20,
+        "id": "minimal_52",
+        "style": "open_rail"
+      },
+      "id": "minimal_52",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 14.273,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 1.431,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": false,
+      "source_sha256": {
+        "step": "52f1d3cfb1feec9ccf8d7c53de3b2fd7f7e6aa50b89c3730e32122b868cc174a",
+        "stl": "9eed13430a1f245f113cacf867b8ef8f210d2a4754a37f14f01458f801b5c7e2"
+      },
+      "style": "open_rail"
+    },
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": true,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          58.0,
+          30.0
+        ],
+        "mesh_triangles": 140,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 24307.2,
+        "stl_volume_mm3": 24307.2,
+        "stl_watertight": true,
+        "volume_mm3": 24307.2
+      },
+      "geometry_spec": {
+        "beam_width_mm": 8,
+        "depth_mm": 58,
+        "foot_width_mm": 22,
+        "id": "ladder_58",
+        "style": "open_rail"
+      },
+      "id": "ladder_58",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 16.578,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 1.69,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": true,
+      "source_sha256": {
+        "step": "c411144832d8fc817dcc791bd8acac221ef2700b65ccfb2fa2a8494a2551a810",
+        "stl": "d66968a2c012eddb01f0f1278c73eeba22fec1e13f477bcc2c316e6ca39b032d"
+      },
+      "style": "open_rail"
+    },
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": true,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          64.0,
+          30.0
+        ],
+        "mesh_triangles": 140,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 25363.2,
+        "stl_volume_mm3": 25363.2,
+        "stl_watertight": true,
+        "volume_mm3": 25363.2
+      },
+      "geometry_spec": {
+        "beam_width_mm": 8,
+        "depth_mm": 64,
+        "foot_width_mm": 22,
+        "id": "ladder_64",
+        "style": "open_rail"
+      },
+      "id": "ladder_64",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 17.298,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 1.897,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": true,
+      "source_sha256": {
+        "step": "5ddfd5cf25ed60a6d14f9e8a75eb6e677ea80e953d2b491d7ce5bf1503f9d641",
+        "stl": "92fa974cfa5e7fbba847ee78f6635a43e4f67b2dbe526e34f3e6a16026168312"
+      },
+      "style": "open_rail"
+    },
+    {
+      "CAD_authority": "native_CadQuery_BREP_only",
+      "ESD_material_qualified": false,
+      "actual_print_completed": false,
+      "actual_slicer_used": false,
+      "checks": {
+        "brep_single_valid_solid": true,
+        "fits_declared_build_volume": true,
+        "min_support_spacing": true,
+        "nominal_board_noninterference": true,
+        "open_top_unroofed_slot": true,
+        "slot_has_positive_declared_clearance": true,
+        "static_tip_proxy_under_assumptions": true,
+        "step_volume_roundtrip_0_5pct": true,
+        "stl_volume_0_5pct": true,
+        "stl_watertight": true,
+        "upright_wall_minimum": true
+      },
+      "geometry": {
+        "board_nominal_interference_mm3": 0.0,
+        "bounds_mm": [
+          104.0,
+          68.0,
+          30.0
+        ],
+        "mesh_triangles": 140,
+        "minimum_upright_wall_mm": 4.9,
+        "slot_bottom_z_mm": 14,
+        "slot_opening_mm": 2.2,
+        "step_volume_mm3": 30617.6,
+        "stl_volume_mm3": 30617.6,
+        "stl_watertight": true,
+        "volume_mm3": 30617.6
+      },
+      "geometry_spec": {
+        "beam_width_mm": 10,
+        "depth_mm": 68,
+        "foot_width_mm": 26,
+        "id": "reinforced_68",
+        "style": "open_rail"
+      },
+      "id": "reinforced_68",
+      "modelled_stability": {
+        "assumed_board_mass_g": 25,
+        "assumed_effective_print_density_g_cm3": 0.682,
+        "estimated_part_mass_g": 20.881,
+        "hypothetical_force_n": 0.1,
+        "modelled_tip_factor": 2.186,
+        "physical_test_completed": false
+      },
+      "numeric_feasible": true,
+      "source_sha256": {
+        "step": "455844adadad3ba6f120199a4db67b54b1db358acb6f7ed00f8b291c16098614",
+        "stl": "cce2acdecb6701cdef7bf48114645b8511d3c562fb8b455907411c3e7df56c6a"
+      },
+      "style": "open_rail"
+    }
+  ],
+  "authoring_tool": "CadQuery 2.6.1",
+  "authority": {
+    "ESD_safety_verified": false,
+    "actual_print_completed": false,
+    "fabrication_release_authorized": false,
+    "physical_board_measured": false,
+    "physical_fit_test_completed": false,
+    "slicer_profile_verified": false,
+    "static_or_fatigue_FEA_completed": false
+  },
+  "baseline_plate_volume_mm3": 40467.2,
+  "existing_HS_machine_project_traceability": {
+    "evidence_collected_count": 0,
+    "functional_traceability_pass": true,
+    "functions_count": 3,
+    "interface_count": 1,
+    "machine_project_release_request": "concept",
+    "machine_project_unresolved_interfaces": [
+      "interface 'I_SLOT' has unresolved fields: ESD-safety qualification, FDM shrinkage and repeatability, board actual thickness and corner geometry, printed fixture physical fit and durability"
+    ],
+    "open_engineering_gates": [
+      "Select evidence-backed process/technology alternatives",
+      "Determine inlet quality and exact intended output",
+      "Verify hydraulic/process model with measured properties and media",
+      "Choose qualified wetted materials, seals and rated connectors",
+      "Generate and independently validate domain-native engineering artifacts",
+      "Collect physical function, leakage, durability and treatment evidence",
+      "Require independent health/safety qualification before any human exposure"
+    ],
+    "physical_authority": {
+      "build_ready": false,
+      "design_ready": false,
+      "fabrication": false,
+      "firmware_flash": false,
+      "operation": false,
+      "power_on": false,
+      "treatment_performance_verified": false,
+      "water_safe_to_drink": false
+    },
+    "planned_independent_tests": 5,
+    "project_id": "pcb_repair_stand_function_geometry_v1",
+    "requirements_count": 5,
+    "schema_version": "hardware_splicer.function_intent_gate.v1",
+    "source_spec_sha256": "50a251e79b95a23147621980c5aae381d611430164813724515f7bcd72676042",
+    "status": "FUNCTIONAL_CONCEPT_ONLY",
+    "subsystem_disciplines": {
+      "S_BOARD": "mechanical",
+      "S_STAND": "mechanical"
+    }
+  },
+  "function_intent_sha256": "50a251e79b95a23147621980c5aae381d611430164813724515f7bcd72676042",
+  "known_uncertainties": [
+    "Nominal PCB mass/width/height/thickness are defined test assumptions, not source measurements.",
+    "Static tipping calculation is a simple quasistatic model, not a real push/load or stability test.",
+    "CAD solid volume is not slicer-estimated filament usage; effective density is explicitly assumed.",
+    "No slicer G-code, layer preview or FDM profile validation performed.",
+    "Ordinary PLA is NOT verified ESD-safe for sensitive electronics.",
+    "No tolerance print coupon, deformation/impact/retention test or actual fabricated part.",
+    "Slots are gravity-supported: no positive fastener or locking retention."
+  ],
+  "project_id": "pcb_repair_stand_function_geometry_v1",
+  "ranked_feasible": [
+    "ladder_58",
+    "ladder_64",
+    "reinforced_68",
+    "solid_plate"
+  ],
+  "schema": "hs.function_to_printable_cad_trial.v1",
+  "selected": "ladder_58",
+  "selection_reason": "lowest BRep solid volume among geometries satisfying declared fit/volume/stability proxy assumptions",
+  "source_design_sha256": "b728736cb2e9b8375b2b4be5904d5d8d86965b742c1ed4fdacf3d24429e21499",
+  "vs_plate_solid_volume_reduction_pct": 39.9
+}
