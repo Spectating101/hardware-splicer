@@ -4,13 +4,51 @@ Retained G-code is not a released printer program; the generic profile
 doesn't qualify mechanically useful cable strain relief or print adhesion.
 """
 from __future__ import annotations
-import argparse,hashlib,json,subprocess
+import argparse,hashlib,json,re,subprocess
 from pathlib import Path
 
 HERE=Path(__file__).resolve().parent
 INPUT=HERE/"generated"
 CASES=["lower_leaf_integral_saddle","lower_removable_saddle_cap",
        "upper_leaf_integral_saddle","upper_removable_saddle_cap"]
+
+def file_sha(path:Path)->str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def read_statistics(raw:str,*,layer:dict)->dict:
+    """Strict standalone PrusaSlicer metadata parser; no HS/CadQuery imports.
+
+    Independent Debian CI has only Python stdlib and real slicer, so
+    it must not accidentally rely on the full software author's venv.
+    """
+    def one(label:str):
+        pattern=r"(?m)^;\s*"+re.escape(label)+r"\s*=\s*(.+?)\s*$"
+        values=re.findall(pattern,raw)
+        if len(values)!=1:
+            raise ValueError("G-code missing unique PrusaSlicer field: "+label)
+        return values[0]
+    grams=float(one("filament used [g]"))
+    volume=float(one("filament used [cm3]"))
+    if not 0<grams<500 or not abs(grams-volume*1.24)<.06:
+        raise ValueError("slicer filament density or volume mismatch")
+    for name,expected in (
+        ("layer_height","0.2"),("first_layer_height","0.2"),
+        ("perimeters","3"),("fill_density","20%"),
+        ("fill_pattern","gyroid"),("support_material","0"),
+        ("nozzle_diameter","0.4"),("filament_diameter","1.75")
+    ):
+        if one(name)!=expected:
+            raise ValueError("native source slicer profile drift: "+name)
+    time=one("estimated printing time (normal mode)")
+    components=re.findall(r"(\d+)\s*([dhms])",time)
+    if not components:
+        raise ValueError("unparseable native PrusaSlicer estimated duration")
+    seconds=sum(int(n)*{"d":86400,"h":3600,"m":60,"s":1}[u] for n,u in components)
+    if seconds<=0 or ";LAYER_CHANGE" not in raw or "\nG1 " not in raw:
+        raise ValueError("invalid source toolpath evidence")
+    return {"filament_mass_g":grams,"estimated_time_s":seconds,
+            "layer_markers":raw.count(";LAYER_CHANGE"),
+            "gcode_lines":raw.count("\n")+1}
 
 def run_native_slicing(executable:Path,out:Path)->dict:
     if out.exists():raise ValueError("never overwrite prior toolpath experiment")
@@ -19,8 +57,6 @@ def run_native_slicing(executable:Path,out:Path)->dict:
     cmd_version=subprocess.run([str(executable),"--help"],capture_output=True,text=True,check=True,timeout=35).stdout.splitlines()[0]
     if "2.9.2" not in cmd_version:
         raise ValueError("native source requires PrusaSlicer 2.9.2")
-    from hardware_splicer.function_print_slicer import read_statistics
-    from hardware_splicer.function_print_geometry import file_sha
     outputs=[]
     for name in CASES:
         source=INPUT/(name+".stl")
@@ -67,7 +103,6 @@ def run_native_slicing(executable:Path,out:Path)->dict:
 
 def audit_source_only(data:dict)->dict:
     original=json.loads((INPUT/"ANCHORED_CABLE_TRIAL.json").read_text())
-    from hardware_splicer.function_print_geometry import file_sha
     if data["schema"]!="hs.cyberdeck_mount_4_prusaslicer_estimates.v1" or data["actual_native_gcode_runs"]!=4:
         raise ValueError("original native PrusaSlicer source receipts absent")
     if data["source_geometry_spec_sha256"]!=original["source_spec_sha256"]:
@@ -84,6 +119,15 @@ def audit_source_only(data:dict)->dict:
             raise ValueError("G-code receipt hash or fabrication authority altered")
     if data["gcode_released_for_printer"] is not False:
         raise ValueError("unqualified machine toolpaths cannot be released")
+    # An entirely new PrusaSlicer run must recover the original
+    # printed-mass and runtime forecasts, allowing 1–2 seconds for
+    # platform-specific G-code estimate rounding.
+    pinned=json.loads((INPUT/"NATIVE_FDM_SLICER.json").read_text())
+    for actual,source in zip(data["run_results"],pinned["run_results"]):
+        if (actual["printed_part"]!=source["printed_part"]
+            or abs(actual["slicer_filament_g"]-source["slicer_filament_g"])>.2
+            or abs(actual["slicer_estimated_print_seconds"]-source["slicer_estimated_print_seconds"])>120):
+            raise ValueError("independent slicer run did not reproduce source estimates")
     return {"source_linked_slicer_runs":4,"unverified_printer_release":False}
 
 def main():
