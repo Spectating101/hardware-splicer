@@ -1,0 +1,121 @@
+{
+  "schema": "hs.cyberdeck_anchored_wire_pilot.v1",
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "parents": {
+    "hinge": "examples/functional_hinge_cyberdeck/reference_spec.json",
+    "retainer": "examples/functional_hinge_retention/spec.json"
+  },
+  "reference_selected_hinge": "balanced_60",
+  "prototype_intent": "2-piece screw-together cable guide/saddle mounts on both printed hinge leaves; illustrative 1.1mm round low-speed wire only",
+  "wire": {
+    "profile": "round_wire_nominal",
+    "diameter_mm": 1.1,
+    "display_data_cable_compatible": false,
+    "datasheet_dynamic_bend_verified": false,
+    "nominal_lower_exit_xyz": [
+      81.6,
+      10,
+      5
+    ],
+    "nominal_upper_exit_local_xyz": [
+      81.6,
+      -20,
+      5
+    ],
+    "nominal_min_bend_radius_mm": 2,
+    "cross_check_flexible_cable_dynamic_radius_multiple_diameter": 5,
+    "selected_manufacturer_part": null
+  },
+  "mount": {
+    "lower_y_mm": 10,
+    "upper_y_mm": -20,
+    "local_x_mm": 81.6,
+    "wire_center_z_mm": 5,
+    "base_outer_x_mm": [
+      72,
+      88
+    ],
+    "base_width_y_mm": 8,
+    "base_top_z_mm": 5,
+    "cap_outer_x_mm": [
+      74.6,
+      88.6
+    ],
+    "cap_width_y_mm": 8,
+    "cap_bottom_z_mm": 5,
+    "cap_top_z_mm": 7.8,
+    "channel_nominal_radius_mm": 0.8,
+    "screw_x_mm": [
+      77.2,
+      86
+    ],
+    "screw_nominal_clearance_diameter_mm": 2.2,
+    "nominal_fasteners_sourced": false,
+    "actual_cable_clamping_force_verified": false,
+    "physical_strain_relief_verified": false
+  },
+  "routes": [
+    {
+      "id": "short_40",
+      "free_length_mm": 40,
+      "z_bulge_mm": 10,
+      "x_bulge_mm": 6.4
+    },
+    {
+      "id": "medium_44",
+      "free_length_mm": 44,
+      "z_bulge_mm": 12,
+      "x_bulge_mm": 6.4
+    },
+    {
+      "id": "long_48",
+      "free_length_mm": 48,
+      "z_bulge_mm": 14,
+      "x_bulge_mm": 6.4
+    },
+    {
+      "id": "relaxed_52",
+      "free_length_mm": 52,
+      "z_bulge_mm": 16,
+      "x_bulge_mm": 6.4
+    }
+  ],
+  "clearance": {
+    "min_nominal_cable_to_solid_mm": 0.1,
+    "max_total_width_mm": 165,
+    "max_folded_cable_envelope_mm": 20,
+    "min_hypothetical_bend_radius_mm": 2,
+    "full_motion_step_deg": 5,
+    "fine_selected_step_deg": 1
+  },
+  "source_links": [
+    {
+      "issuer": "igus",
+      "url": "https://www.igus.com/cables/unharnessed-cables-bending-radius",
+      "claim": "Dynamic cable bend radius varies by actual cable and is generally specified relative to OD; not a specification for this unsourced wire",
+      "status": "context_only"
+    },
+    {
+      "issuer": "Molex",
+      "url": "https://www.molex.com/content/dam/molex/molex-dot-com/en_us/pdf/datasheets/987650-6631.pdf?inline=",
+      "claim": "Premo-Flex FFC is a flat multiconductor cable family with thickness and flex-cycle differences; 1.1mm round wire surrogate is NOT a display FFC",
+      "status": "generic_FFC_family_reference"
+    },
+    {
+      "issuer": "Molex",
+      "url": "https://www.molex.com/content/dam/molex/molex-dot-com/en_us/pdf/datasheets/987652-5681.pdf",
+      "claim": "15026/200485 series is an actual LVDS FPC and mating connector family, not interchangeable with generic round wire fixture",
+      "status": "manufacturer_connector_family_reference"
+    }
+  ],
+  "authority": {
+    "physical_wire_available": false,
+    "hinge_sourced": false,
+    "fastener_sourced": false,
+    "actual_display_connector_pins_verified": false,
+    "electrical_continuity_verified": false,
+    "printed_coupon_tested": false,
+    "strain_relief_force_tested": false,
+    "manufacturing_approved": false
+  }
+}

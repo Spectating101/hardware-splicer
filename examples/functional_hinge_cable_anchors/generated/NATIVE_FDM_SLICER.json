@@ -1,0 +1,56 @@
+{
+  "actual_native_gcode_runs": 4,
+  "all_source_geometry_files_verified": true,
+  "gcode_released_for_printer": false,
+  "no_real_m2_hardware_or_display_electrical_assembly": true,
+  "round_wire_physical_strain_relief_qualified": false,
+  "run_results": [
+    {
+      "generated_unreleased_Gcode_sha256": "bed96231ec0d7fc252410c698835eea0ad93feff4c8f6697f0e9f6e7fa2141ae",
+      "printed_part": "lower_leaf_integral_saddle",
+      "profile": "generic PLA, 0.4mm nozzle, 0.2mm layer, 20% gyroid, 3 walls, zero supports; uncalibrated",
+      "safe_to_print_without_calibration": false,
+      "slicer_estimated_print_seconds": 10424,
+      "slicer_filament_g": 25.34,
+      "slicer_layer_markers": 51,
+      "slicer_toolpath_lines": 63533,
+      "source_STL_sha256": "4b36a4e95f231116623d4591c6c6b260bbb7fa5b0a541b7e99901a7a9d589ecb"
+    },
+    {
+      "generated_unreleased_Gcode_sha256": "767d15d7f67b4b7cc7e0c7424d3f18eb47865f2b8818d73934561c646e4022b1",
+      "printed_part": "lower_removable_saddle_cap",
+      "profile": "generic PLA, 0.4mm nozzle, 0.2mm layer, 20% gyroid, 3 walls, zero supports; uncalibrated",
+      "safe_to_print_without_calibration": false,
+      "slicer_estimated_print_seconds": 220,
+      "slicer_filament_g": 0.37,
+      "slicer_layer_markers": 14,
+      "slicer_toolpath_lines": 6218,
+      "source_STL_sha256": "80a86069313a356699892de6e49e1aec479fa4e1b43e027567264fe31abd0ac4"
+    },
+    {
+      "generated_unreleased_Gcode_sha256": "7309b0b38b2dceac214b3a2de6a25b100392f1a738736213413f87f170bc1084",
+      "printed_part": "upper_leaf_integral_saddle",
+      "profile": "generic PLA, 0.4mm nozzle, 0.2mm layer, 20% gyroid, 3 walls, zero supports; uncalibrated",
+      "safe_to_print_without_calibration": false,
+      "slicer_estimated_print_seconds": 10952,
+      "slicer_filament_g": 26.28,
+      "slicer_layer_markers": 51,
+      "slicer_toolpath_lines": 68348,
+      "source_STL_sha256": "55fa8bec582d92c38a438dd457763fdf3df6886aee29c90737d2a42c53c68ac7"
+    },
+    {
+      "generated_unreleased_Gcode_sha256": "855f94efa1823406bd2ddefb8ae29176d8879524e194cfb983ff5ddde35f8381",
+      "printed_part": "upper_removable_saddle_cap",
+      "profile": "generic PLA, 0.4mm nozzle, 0.2mm layer, 20% gyroid, 3 walls, zero supports; uncalibrated",
+      "safe_to_print_without_calibration": false,
+      "slicer_estimated_print_seconds": 221,
+      "slicer_filament_g": 0.37,
+      "slicer_layer_markers": 14,
+      "slicer_toolpath_lines": 6177,
+      "source_STL_sha256": "80abe1df52eb73790e0647d5e540c3dd4491aed69495c80b88dc4f6b112bcfb5"
+    }
+  ],
+  "schema": "hs.cyberdeck_mount_4_prusaslicer_estimates.v1",
+  "slicer_version": "PrusaSlicer-2.9.2+UNKNOWN based on Slic3r (with GUI support)",
+  "source_geometry_spec_sha256": "67fcd929fe2decdf97fd58bf1a26451e05b5d9b7193ece1428af69c57fca59ca"
+}
