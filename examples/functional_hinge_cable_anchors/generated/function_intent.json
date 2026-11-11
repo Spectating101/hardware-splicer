@@ -1,0 +1,440 @@
+{
+  "claims": [],
+  "functions": [
+    {
+      "id": "F_FOLD",
+      "name": "Articulate two physical leaves",
+      "requirements": [
+        "R_MATE",
+        "R_SWEEP"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER",
+        "S_SHAFT"
+      ]
+    },
+    {
+      "id": "F_PROTECT",
+      "name": "Protect hypothetical displays and reserve cable envelope",
+      "requirements": [
+        "R_SCREEN",
+        "R_CABLE"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER"
+      ]
+    },
+    {
+      "id": "F_FABRICATE",
+      "name": "Minimize printable envelope and material",
+      "requirements": [
+        "R_THIN",
+        "R_PRINT"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER"
+      ]
+    },
+    {
+      "id": "F_RETAIN_PIN",
+      "name": "Retain pivot axially",
+      "requirements": [
+        "R_RETAINER"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER",
+        "S_SHAFT",
+        "S_RETENTION"
+      ]
+    },
+    {
+      "id": "F_ROUTE_WIRE",
+      "name": "Route flexible wire through entire folded travel",
+      "requirements": [
+        "R_WIRE_PATH",
+        "R_PACKED_HEIGHT"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER",
+        "S_CABLE"
+      ]
+    },
+    {
+      "id": "F_MOUNT_WIRE",
+      "name": "Provide removable two-piece printed saddles",
+      "requirements": [
+        "R_GUIDE_MATE",
+        "R_WIRE_ANCHOR_SWEEP"
+      ],
+      "subsystems": [
+        "S_LOWER",
+        "S_UPPER",
+        "S_WIRE_CAPS"
+      ]
+    },
+    {
+      "id": "F_REQUIRE_DISPLAY_CABLE",
+      "name": "Reject unsourced electrical display cable",
+      "requirements": [
+        "R_DISPLAY_CABLE"
+      ],
+      "subsystems": [
+        "S_CABLE",
+        "S_WIRE_CAPS"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "two_nominal_screen_packages",
+      "medium": "mechanical envelope"
+    },
+    {
+      "id": "nominal_pin",
+      "medium": "unverified external fastener"
+    }
+  ],
+  "intended_use": "general_device",
+  "interfaces": [
+    {
+      "from": "S_SHAFT",
+      "id": "I_REVOLUTE_PIN",
+      "medium": "mechanical",
+      "name": "Running clearance in interleaved pivot knuckles",
+      "requirements": [
+        "R_MATE",
+        "R_SWEEP"
+      ],
+      "to": "S_LOWER",
+      "unresolved": [
+        "real pin dimensional tolerance",
+        "printed bore accuracy",
+        "bearing wear and repeated fold endurance",
+        "axial shaft retention",
+        "hinge torque and full fatigue tests"
+      ]
+    },
+    {
+      "from": "S_SHAFT",
+      "id": "I_UPPER_PIN",
+      "medium": "mechanical",
+      "name": "Upper pivot knuckle interface",
+      "requirements": [
+        "R_MATE",
+        "R_SWEEP"
+      ],
+      "to": "S_UPPER",
+      "unresolved": [
+        "shaft fit and real part print"
+      ]
+    },
+    {
+      "from": "S_RETENTION",
+      "id": "I_RETENTION_GROOVE",
+      "medium": "mechanical",
+      "name": "Split spring ring in machined metal shaft groove",
+      "requirements": [
+        "R_RETAINER"
+      ],
+      "to": "S_SHAFT",
+      "unresolved": [
+        "ring elastic radial installation feasibility",
+        "actual shaft diameter and groove machining",
+        "axial pullout force and fatigue",
+        "commercial ring sourcing"
+      ]
+    },
+    {
+      "from": "S_CABLE",
+      "id": "I_WIRE_TERMINATIONS",
+      "medium": "mechanical",
+      "name": "Two explicitly unanchored virtual wire exits",
+      "requirements": [
+        "R_WIRE_PATH",
+        "R_PACKED_HEIGHT"
+      ],
+      "to": "S_UPPER",
+      "unresolved": [
+        "actual upper/lower connectors not present",
+        "full cable electrical continuity not verified",
+        "no cable clips or strain relief designed",
+        "datasheet bend radius and cycles unverified"
+      ]
+    },
+    {
+      "from": "S_WIRE_CAPS",
+      "id": "I_WIRE_CLAMP",
+      "medium": "mechanical",
+      "name": "Serviceable cable clamp/guide beside printed hinge",
+      "requirements": [
+        "R_GUIDE_MATE",
+        "R_WIRE_ANCHOR_SWEEP"
+      ],
+      "to": "S_LOWER",
+      "unresolved": [
+        "no actual clamping screws or nuts sourced",
+        "no real round-wire section or elastic compression known",
+        "no actual display ribbon retention design",
+        "no physical stress/thermal/print fit data"
+      ]
+    }
+  ],
+  "name": "Two-part foldable hinge: motion + screen and cable keepouts",
+  "outputs": [
+    {
+      "id": "rotational_joint_envelope",
+      "medium": "mechanical"
+    }
+  ],
+  "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
+  "purpose": "Two printable reference mating leaves rotate around an unverified 3mm hinge shaft without crushing hypothetical screens",
+  "requirements": [
+    {
+      "id": "R_MATE",
+      "kind": "interface",
+      "priority": "must",
+      "statement": "Two leaf bodies have interleaved coaxial knuckles and declared pin/bore running clearance.",
+      "verification": {
+        "acceptance": {
+          "bore_diameter_mm": 3.5,
+          "pin_diameter_mm": 3
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Reimport STEP and mechanically trial a real rod/print coupon"
+      }
+    },
+    {
+      "id": "R_SWEEP",
+      "kind": "functional",
+      "priority": "must",
+      "statement": "Mating solids remain clear across all 0\u2013180 degree positions.",
+      "verification": {
+        "acceptance": {
+          "minimum_gap_mm": 0.4,
+          "sample_angle_step_deg": 5
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Independently evaluate BRep distances/intersections at discrete angles then test an actual assembled hinge"
+      }
+    },
+    {
+      "id": "R_SCREEN",
+      "kind": "functional",
+      "priority": "must",
+      "statement": "Reference screen packages have noninterfering swept/closed space.",
+      "verification": {
+        "acceptance": {
+          "nominal_minimum_screen_gap_mm": 1
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Physically measure real display modules and test closed display-to-display clearance"
+      }
+    },
+    {
+      "id": "R_CABLE",
+      "kind": "constraint",
+      "priority": "must",
+      "statement": "Reserve a service-loop envelope external to the hinge, without falsely claiming routed cable.",
+      "verification": {
+        "acceptance": {
+          "proof_status": "UNVERIFIED_CABLE_ROUTING",
+          "reserved_radius_mm": 9
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Identify real cable/FPC and connector dimensions, route and fatigue-test external bend radius"
+      }
+    },
+    {
+      "id": "R_THIN",
+      "kind": "performance",
+      "priority": "must",
+      "statement": "Folded CAD envelope meets declared thickness limit.",
+      "verification": {
+        "acceptance": {
+          "maximum_nominal_closed_height_mm": 13.5
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Measure final assembled device and displays with calipers"
+      }
+    },
+    {
+      "id": "R_PRINT",
+      "kind": "constraint",
+      "priority": "must",
+      "statement": "Two printed leaves export as valid mesh and STEP; metal shaft is reference-only.",
+      "verification": {
+        "acceptance": {
+          "solid_printed_parts": 2
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Use named FDM printer, measured shaft and print calibration coupons before physical assembly"
+      }
+    },
+    {
+      "id": "R_RETAINER",
+      "kind": "interface",
+      "priority": "must",
+      "statement": "Two real ring references in grooved pin should geometrically block axial escape.",
+      "verification": {
+        "acceptance": {
+          "requires_real_hardware_observation": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Install sourced calibrated circlips and measure pin axial travel, groove seating, force and wear."
+      }
+    },
+    {
+      "id": "R_WIRE_PATH",
+      "kind": "functional",
+      "priority": "must",
+      "statement": "A named hypothetical round wire spans both fold endpoints with bounded path length and curvature.",
+      "verification": {
+        "acceptance": {
+          "requires_real_hardware_observation": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Choose actual FFC/cable datasheet, anchor mechanical connectors, then fold repeatedly under camera."
+      }
+    },
+    {
+      "id": "R_PACKED_HEIGHT",
+      "kind": "constraint",
+      "priority": "must",
+      "statement": "The total cable free loop must not be confused with printed-only closed shell thickness.",
+      "verification": {
+        "acceptance": {
+          "requires_real_hardware_observation": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Measure folded assembly with physical cable, retainer and display packages including routing bulges."
+      }
+    },
+    {
+      "id": "R_GUIDE_MATE",
+      "kind": "interface",
+      "priority": "must",
+      "statement": "Each integral printed hinge saddle carries a separate cap and nominal M2 clearance bores.",
+      "verification": {
+        "acceptance": {
+          "cap_and_base_geometry": true,
+          "physical_clamping_must_be_measured": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Print interface coupons, measure actual cable diameter, bolt depth, clamp compression, friction and retention."
+      }
+    },
+    {
+      "id": "R_WIRE_ANCHOR_SWEEP",
+      "kind": "functional",
+      "priority": "must",
+      "statement": "A real tube BRep must clear every printed mount and cap through the fold, without presuming the unattached spline is clamped.",
+      "verification": {
+        "acceptance": {
+          "no_interference": true,
+          "physical_flex_life_verified": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "test",
+        "procedure": "Source real cable and connectors, bolt mounts, verify all angles and repeated actual folding."
+      }
+    },
+    {
+      "id": "R_DISPLAY_CABLE",
+      "kind": "constraint",
+      "priority": "must",
+      "statement": "Flat display ribbons and round wire service-loop prototypes have distinct mechanical/electrical interfaces.",
+      "verification": {
+        "acceptance": {
+          "real_display_connector_pinout_matched": true,
+          "round_wire_substitution_prohibited": true
+        },
+        "evidence_status": "not_collected",
+        "method_type": "inspection",
+        "procedure": "Pick actual display module data connector, circuit count and cable part number and demonstrate source manufacturer compatibility."
+      }
+    }
+  ],
+  "schema_version": "hardware_splicer.function_intent.v1",
+  "subsystems": [
+    {
+      "domain": "mechanical",
+      "id": "S_LOWER",
+      "name": "Lower printable hinge leaf",
+      "purpose": "Bottom folded shell and two alternating knuckles",
+      "requirements": [
+        "R_MATE",
+        "R_SWEEP",
+        "R_THIN",
+        "R_PRINT"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_UPPER",
+      "name": "Upper printable hinge leaf",
+      "purpose": "Top folded shell and three alternating knuckles",
+      "requirements": [
+        "R_MATE",
+        "R_SWEEP",
+        "R_SCREEN",
+        "R_CABLE",
+        "R_THIN",
+        "R_PRINT"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_SHAFT",
+      "name": "Unverified 3mm separate steel pin",
+      "purpose": "Reference mating axial cylinder only; no capture mechanism validated",
+      "requirements": [
+        "R_MATE"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_RETENTION",
+      "name": "Nominal metal C clips, not printed",
+      "purpose": "Opposed annular shaft grooves and split rings resist axial escape",
+      "requirements": [
+        "R_RETAINER"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_CABLE",
+      "name": "Unmeasured external flex-cable reference path",
+      "purpose": "Reserve constant-length free loop with screened curvature",
+      "requirements": [
+        "R_WIRE_PATH",
+        "R_PACKED_HEIGHT"
+      ]
+    },
+    {
+      "domain": "mechanical",
+      "id": "S_WIRE_CAPS",
+      "name": "Printed wire saddle caps",
+      "purpose": "Nominal cable passage interface with M2 clearance holes; clamping force unproven",
+      "requirements": [
+        "R_GUIDE_MATE",
+        "R_WIRE_ANCHOR_SWEEP",
+        "R_DISPLAY_CABLE"
+      ]
+    }
+  ]
+}
