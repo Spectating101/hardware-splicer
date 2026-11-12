@@ -49,6 +49,19 @@ const payload = {
   recipes: CATALOG_RECIPES,
 };
 
-fs.mkdirSync(path.dirname(OUT), { recursive: true });
-fs.writeFileSync(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-console.log(`Wrote ${OUT} (${SUPPORTED_BUILD_IDS.length} recipes)`);
+// The tracked file is formatted differently from JSON.stringify. Rewriting it on
+// every install left a 2,000-line formatting diff in a fresh checkout, so leave
+// it alone when the data is unchanged.
+let unchanged = false;
+try {
+  unchanged = JSON.stringify(JSON.parse(fs.readFileSync(OUT, "utf8"))) === JSON.stringify(payload);
+} catch (_) {
+  unchanged = false;
+}
+if (unchanged) {
+  console.log(`Up to date: ${OUT} (${SUPPORTED_BUILD_IDS.length} recipes)`);
+} else {
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+  fs.writeFileSync(OUT, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  console.log(`Wrote ${OUT} (${SUPPORTED_BUILD_IDS.length} recipes)`);
+}
