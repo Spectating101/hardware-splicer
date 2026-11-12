@@ -1,0 +1,324 @@
+{
+  "schema_version": "hs.engineering_landscape_freeze.v1",
+  "freeze_date": "2026-10-27",
+  "freeze_time_zone": "Asia/Taipei",
+  "kind": "research_snapshot_not_release_authority",
+  "external_candidates": [
+    {
+      "discipline": "electrical",
+      "id": "atopile",
+      "url": "https://github.com/atopile/atopile",
+      "capability": "native-electrical-generation",
+      "priority": "P0",
+      "hs_next_action": "compare",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "electrical",
+      "id": "tscircuit",
+      "url": "https://github.com/tscircuit/tscircuit",
+      "capability": "code-first-ecad",
+      "priority": "P0",
+      "hs_next_action": "already-partial-hs",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "electrical",
+      "id": "KiCad",
+      "url": "https://www.kicad.org/",
+      "capability": "native-erc-drc-fabrication",
+      "priority": "P0",
+      "hs_next_action": "already-core-hs",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "electrical",
+      "id": "FreeRouting",
+      "url": "https://github.com/freerouting/freerouting",
+      "capability": "pcb-routing",
+      "priority": "P1",
+      "hs_next_action": "already-optional-hs",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "text-to-cad",
+      "url": "https://github.com/earthtojake/text-to-cad",
+      "capability": "parametric-cad-dfam",
+      "priority": "P0",
+      "hs_next_action": "compare",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "agentcad",
+      "url": "https://agentcad.dev/",
+      "capability": "parametric-cad-mcp",
+      "priority": "P1",
+      "hs_next_action": "compare",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "Procedura",
+      "url": "https://github.com/SpatiaOS/Procedura",
+      "capability": "mechanism-assembly",
+      "priority": "P1",
+      "hs_next_action": "evaluate-interface",
+      "source_confidence": "carried-from-prior-survey",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "SOMA",
+      "url": "https://github.com/Kai-Jungsthoefel/SOMA",
+      "capability": "desktop-cad-agent",
+      "priority": "P2",
+      "hs_next_action": "evaluate-maturity",
+      "source_confidence": "carried-from-prior-survey",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "SolidCraft",
+      "url": "https://solidcraft.io/",
+      "capability": "agent-cad-engine",
+      "priority": "P2",
+      "hs_next_action": "evaluate-maturity",
+      "source_confidence": "carried-from-prior-survey",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cad",
+      "id": "Meshy",
+      "url": "https://www.meshy.ai/",
+      "capability": "visual-3d-mesh",
+      "priority": "P2",
+      "hs_next_action": "optional",
+      "source_confidence": "carried-from-prior-survey",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "mechanical",
+      "id": "FreeCAD-CalculiX",
+      "url": "https://github.com/FreeCAD/FreeCAD-documentation/blob/main/wiki/FEM_Install.md",
+      "capability": "structural-fea",
+      "priority": "P1",
+      "hs_next_action": "benchmark-independent-solver",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "physics",
+      "id": "Elmer-FEM",
+      "url": "https://github.com/ElmerCSC/elmerfem",
+      "capability": "thermal-mechanical-fluid-em",
+      "priority": "P1",
+      "hs_next_action": "benchmark-independent-solver",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "physics",
+      "id": "MOOSE",
+      "url": "https://github.com/idaholab/moose",
+      "capability": "multi-physics",
+      "priority": "P2",
+      "hs_next_action": "advanced",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "materials",
+      "id": "thermo",
+      "url": "https://github.com/CalebBell/thermo",
+      "capability": "thermophysical-properties",
+      "priority": "P1",
+      "hs_next_action": "source-parameter-contract",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "materials",
+      "id": "pymatgen",
+      "url": "https://github.com/materialsproject/pymatgen",
+      "capability": "materials-data-analysis",
+      "priority": "P1",
+      "hs_next_action": "source-parameter-contract",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "materials",
+      "id": "PyBaMM",
+      "url": "https://github.com/pybamm-team/PyBaMM",
+      "capability": "battery-electrochemical-simulation",
+      "priority": "P2",
+      "hs_next_action": "domain-option",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "firmware",
+      "id": "PlatformIO",
+      "url": "https://platformio.org/",
+      "capability": "firmware-compile-toolchain",
+      "priority": "P0",
+      "hs_next_action": "already-compile-hs",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "firmware",
+      "id": "agentic-hil",
+      "url": "https://github.com/agentic-hil/agentic-hil",
+      "capability": "bounded-agent-flash-uart-can",
+      "priority": "P0",
+      "hs_next_action": "policy-gated-benchmark",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "firmware",
+      "id": "Firment",
+      "url": "https://github.com/MoRiv447/Firment",
+      "capability": "embedded-agent-probe-debug",
+      "priority": "P1",
+      "hs_next_action": "early-hil-competitor",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "firmware",
+      "id": "Boardex",
+      "url": "https://github.com/ankayca/boardex",
+      "capability": "logic-capture-firmware-agent",
+      "priority": "P1",
+      "hs_next_action": "early-hil-competitor",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "firmware",
+      "id": "TuyaOpen",
+      "url": "https://tuyaopen.ai/",
+      "capability": "multi-chip-firmware-cloud-app",
+      "priority": "P2",
+      "hs_next_action": "assess-dependencies",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "robotics",
+      "id": "MuJoCo",
+      "url": "https://github.com/google-deepmind/mujoco",
+      "capability": "contact-dynamics",
+      "priority": "P1",
+      "hs_next_action": "physics-backend",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "robotics",
+      "id": "ros2_control",
+      "url": "https://github.com/ros-controls/ros2_control",
+      "capability": "robot-hardware-control",
+      "priority": "P2",
+      "hs_next_action": "motion-boundary",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "robotics",
+      "id": "LeRobot",
+      "url": "https://github.com/huggingface/lerobot",
+      "capability": "robot-learning",
+      "priority": "P2",
+      "hs_next_action": "optional",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "manufacturing",
+      "id": "Kiln",
+      "url": "https://github.com/codeofaxel/Kiln",
+      "capability": "agent-multi-printer-orchestration",
+      "priority": "P1",
+      "hs_next_action": "license-and-device-test",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "manufacturing",
+      "id": "OctoPrint",
+      "url": "https://docs.octoprint.org/en/main/api/",
+      "capability": "printer-rest",
+      "priority": "P1",
+      "hs_next_action": "hs-draft-225",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "manufacturing",
+      "id": "Moonraker",
+      "url": "https://moonraker.readthedocs.io/en/latest/external_api/",
+      "capability": "klipper-device-api",
+      "priority": "P1",
+      "hs_next_action": "hs-draft-226",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cross-domain",
+      "id": "vibe-hardware",
+      "url": "https://github.com/luckiday/vibe-hardware",
+      "capability": "firmware-pcb-enclosure-plm-contracts",
+      "priority": "P0",
+      "hs_next_action": "evaluate-actual-maturity",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cross-domain",
+      "id": "Form-OSS",
+      "url": "https://github.com/caid-technologies/Form-OSS",
+      "capability": "idea-to-cad-wiring-assembly",
+      "priority": "P1",
+      "hs_next_action": "experimental-audit",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "cross-domain",
+      "id": "Kerf",
+      "url": "https://github.com/vul-os/kerf",
+      "capability": "multidisciplinary-cad-agent",
+      "priority": "P2",
+      "hs_next_action": "claims-only-audit",
+      "source_confidence": "source-backed-upstream",
+      "integrated_and_verified": false
+    },
+    {
+      "discipline": "model",
+      "id": "Kimi-K3.1-Pro",
+      "url": "https://www.kimi.ai/blog/kimi-k3-1-pro",
+      "capability": "agent-coding-cad",
+      "priority": "P0",
+      "hs_next_action": "controlled-harness-benchmark",
+      "source_confidence": "vendor-reported",
+      "integrated_and_verified": false
+    }
+  ],
+  "release_authority": {
+    "electrical": false,
+    "firmware_on_real_hardware": false,
+    "mechanical_physical": false,
+    "machine_manufacturing": false
+  }
+}
