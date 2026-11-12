@@ -8,7 +8,7 @@ setup:
 
 setup-cadquery:
 	bash scripts/setup_demo.sh
-	$(PYTHON) -m pip install cadquery || apps/3d-splicer/.venv/bin/pip install cadquery
+	$(PYTHON) -m pip install -e ".[cad]" || apps/3d-splicer/.venv/bin/pip install cadquery trimesh
 
 cleanup:
 	bash scripts/cleanup_test_artifacts.sh
