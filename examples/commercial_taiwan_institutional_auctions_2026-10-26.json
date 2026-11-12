@@ -1,0 +1,58 @@
+{
+  "schema_version": "hardware_splicer.institutional_disposal_sources.v1",
+  "research_checked_date": "2026-10-26",
+  "scope": "Historical individual auction cases and national listing/feed; not current available purchasable equipment, not verified winning bids.",
+  "records": [
+    {
+      "source_id": "TW-AUCTION-001",
+      "market": "Taiwan",
+      "agency": "National Taitung University",
+      "asset_class": "unserviceable university computer/information equipment, one lot",
+      "source_url": "https://dga.nttu.edu.tw/p/406-1008-180365%2Cr677.php?Lang=zh-tw",
+      "event_date": "2026-10-22",
+      "event_status": "PAST",
+      "reserve_price_twd": null,
+      "bid_deposit_twd": 10000,
+      "eligibility": {
+        "company_registration_required": true,
+        "recycling_license_required": true
+      },
+      "condition": "approved scrap; inspect Oct 22 only, removal within three days after winning",
+      "financial_note": "Winning bid undisclosed; bundle item breakdown in linked attachments, cannot infer individual component cost"
+    },
+    {
+      "source_id": "TW-AUCTION-002",
+      "market": "Taiwan",
+      "agency": "Bureau of Labor Insurance, Ministry of Labor",
+      "asset_class": "mixed retired electrical equipment and shelves, one bulk lot",
+      "source_url": "https://www.bli.gov.tw/0109912.html",
+      "event_date": "2026-05-28",
+      "event_status": "PAST_NOTICE",
+      "reserve_price_twd": 388620,
+      "bid_deposit_twd": null,
+      "eligibility": {
+        "company_registration_required": false,
+        "recycling_license_required": false
+      },
+      "condition": "historical notice; listed natural persons as eligible applicants, but each actual sale's final tender and removal conditions require review",
+      "financial_note": "NT$388,620 is aggregate minimum bid for mixed lot, NOT e-waste unit price or completed hammer price"
+    },
+    {
+      "source_id": "TW-AUCTION-FEED-001",
+      "market": "Taiwan",
+      "agency": "TaiwanBuying public surplus and liquidation notices index",
+      "asset_class": "cross-agency disposal notices; mixed goods",
+      "source_url": "https://www.taiwanbuying.com.tw/Query_PTYCompany.ASP",
+      "event_date": null,
+      "event_status": "DISCOVERY_FEED",
+      "reserve_price_twd": null,
+      "bid_deposit_twd": null,
+      "eligibility": {
+        "company_registration_required": null,
+        "recycling_license_required": null
+      },
+      "condition": "Feed lists recent public surplus notices; each actual procurement requires tender qualification, item detail, transport and environmental checks",
+      "financial_note": "Discovery feed only; not one purchasable lot or an observed unit price"
+    }
+  ]
+}

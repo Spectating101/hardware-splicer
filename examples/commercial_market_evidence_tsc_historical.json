@@ -1,0 +1,23 @@
+{
+  "schema_version": "hardware_splicer.market_evidence.v1",
+  "candidate_id": "tsc-ttp244plus-budget-fault",
+  "market": "Taiwan",
+  "currency": "TWD",
+  "exact_model": "TSC TTP-244 Plus",
+  "provenance_note": "Historical search-level seller-advertised ask carried from PR #147; the exact donor and option were NOT verified. It is not a completed sale, physical specimen, or stock confirmation.",
+  "records": [
+    {
+      "evidence_id": "tw-tsc-historical-ask-2026-10-19",
+      "event_kind": "advertised_ask",
+      "unit_price": 500,
+      "currency": "TWD",
+      "market": "Taiwan",
+      "exact_model": "TSC TTP-244 Plus",
+      "variant_verified": false,
+      "condition_class": "broken",
+      "observed_date": "2026-10-19",
+      "source_ref": "https://github.com/Spectating101/hardware-splicer/pull/147",
+      "settlement_verified": false
+    }
+  ]
+}

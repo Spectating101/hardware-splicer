@@ -1,0 +1,69 @@
+{
+  "schema_version": "hs-commercial-convergence-snapshots-v0",
+  "as_of": "2026-10-24",
+  "authority": "DISCOVERY_ONLY",
+  "notes": [
+    "These are source-branch hypotheses, NOT finished products, measured margins or authorizations.",
+    "PF-001/002/003 currently live in separate open PRs; do not silently move their implementation into main.",
+    "Estimated listed prices never become sold comps, buyer commitments or procurement authorization."
+  ],
+  "product_factory": [
+    {
+      "run_id": "PF-001",
+      "source_pr": 109,
+      "source_branch": "experiment/proofpod-commercial-arbitrage-v0",
+      "source_file": "experiments/product_factory/run-001-proofpod.json",
+      "product_id": "proofpod-v0",
+      "native_currency": "USD",
+      "target_sale_price": 79,
+      "target_price_kind": "board_msrp_hypothesis",
+      "physical_validated": false,
+      "customer_order_verified": false,
+      "purchase_authorized": false
+    },
+    {
+      "run_id": "PF-002",
+      "source_pr": 110,
+      "source_branch": "experiment/pf002-taiwan-benchhmi-v0",
+      "source_file": "experiments/product_factory/run-002-benchhmi.json",
+      "product_id": "benchhmi-v0",
+      "native_currency": "TWD",
+      "target_sale_price": 8990,
+      "modeled_cogs": 3841.67,
+      "target_price_kind": "msrp_hypothesis",
+      "physical_validated": false,
+      "customer_order_verified": false,
+      "purchase_authorized": false
+    },
+    {
+      "run_id": "PF-003",
+      "source_pr": 111,
+      "source_branch": "experiment/pf003-taiwan-fielddeck-v0",
+      "source_file": "experiments/product_factory/run-003-fielddeck.json",
+      "product_id": "fielddeck-v0",
+      "native_currency": "TWD",
+      "target_sale_price": 12900,
+      "modeled_cogs": 6633,
+      "target_price_kind": "msrp_hypothesis",
+      "physical_validated": false,
+      "customer_order_verified": false,
+      "purchase_authorized": false
+    }
+  ],
+  "salvage_sources": [
+    {
+      "source_pr": 147,
+      "source_branch": "agent/gpt6-tw-salvage-opportunity-screen-v0",
+      "role": "purchase-specific risk and bid-ceiling screening",
+      "merged": false,
+      "must_preserve": ["yield sensitivity", "bid ceiling", "purchase_authorized=false", "same-model comp caveat"]
+    },
+    {
+      "source_pr": 148,
+      "source_branch": "agent/gpt6-tw-commerce-donor-inventory-v0",
+      "role": "Taiwan e-commerce donor discovery with 17 listing URLs",
+      "merged": false,
+      "must_preserve": ["ask vs sold distinction", "donor model identity", "discovery-only provenance"]
+    }
+  ]
+}

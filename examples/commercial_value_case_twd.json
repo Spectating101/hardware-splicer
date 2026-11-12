@@ -1,0 +1,67 @@
+{
+  "schema_version": "hardware_splicer.commercial_value_case.v1",
+  "candidate_id": "TW-DONOR-REFERENCE-0001",
+  "market": "Taiwan",
+  "currency": "TWD",
+  "target_contribution_margin": 0.3,
+  "notes": "ALL numbers are illustrative. This is not an acquisition listing, quotation, sold comp, actual donor or purchasing authority.",
+  "routes": [
+    {
+      "route_id": "refurbish-and-resell",
+      "action": "refurbish",
+      "currency": "TWD",
+      "success_probability": 0.7,
+      "probability_evidence": "HYPOTHESIS",
+      "sale_proceeds": {"amount": 8990, "evidence_class": "HYPOTHESIS"},
+      "failure_proceeds": {"amount": 300, "evidence_class": "HYPOTHESIS"},
+      "expenses": {
+        "acquisition": {"amount": 1000, "evidence_class": "HYPOTHESIS"},
+        "material_and_fab": {"amount": 1500, "evidence_class": "HYPOTHESIS"},
+        "engineering": {"amount": 1000, "evidence_class": "HYPOTHESIS"},
+        "labor": {"amount": 800, "evidence_class": "HYPOTHESIS"},
+        "quality": {"amount": 400, "evidence_class": "HYPOTHESIS"},
+        "freight_and_tax": {"amount": 200, "evidence_class": "HYPOTHESIS"},
+        "sales_and_payment": {"amount": 300, "evidence_class": "HYPOTHESIS"},
+        "warranty_and_returns": {"amount": 500, "evidence_class": "HYPOTHESIS"}
+      },
+      "gates": {
+        "physical_test_passed": false,
+        "rights_cleared": false,
+        "compliance_cleared": false,
+        "buyer_committed": false,
+        "procurement_verified": false
+      }
+    },
+    {
+      "route_id": "operate-internally",
+      "action": "operate",
+      "currency": "TWD",
+      "success_probability": 1.0,
+      "probability_evidence": "HYPOTHESIS",
+      "monthly_discount_rate": 0.01,
+      "monthly_net_cashflows": [
+        {"amount": 300, "evidence_class": "HYPOTHESIS"},
+        {"amount": 300, "evidence_class": "HYPOTHESIS"},
+        {"amount": 300, "evidence_class": "HYPOTHESIS"}
+      ],
+      "terminal_value": {"amount": 600, "evidence_class": "HYPOTHESIS"},
+      "expenses": {
+        "acquisition": {"amount": 1000, "evidence_class": "HYPOTHESIS"},
+        "material_and_fab": {"amount": 1500, "evidence_class": "HYPOTHESIS"},
+        "engineering": {"amount": 1000, "evidence_class": "HYPOTHESIS"},
+        "labor": {"amount": 800, "evidence_class": "HYPOTHESIS"},
+        "quality": {"amount": 400, "evidence_class": "HYPOTHESIS"},
+        "freight_and_tax": {"amount": 200, "evidence_class": "HYPOTHESIS"},
+        "sales_and_payment": {"amount": 300, "evidence_class": "HYPOTHESIS"},
+        "warranty_and_returns": {"amount": 500, "evidence_class": "HYPOTHESIS"}
+      },
+      "gates": {
+        "physical_test_passed": false,
+        "rights_cleared": false,
+        "compliance_cleared": false,
+        "buyer_committed": false,
+        "procurement_verified": false
+      }
+    }
+  ]
+}

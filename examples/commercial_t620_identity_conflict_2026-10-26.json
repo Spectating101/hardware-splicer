@@ -1,0 +1,37 @@
+{
+  "schema_version": "hardware_splicer.commercial_identity_claims.v1",
+  "candidate_id": "TW-PF-EDGE-001",
+  "date_observed": "2026-10-26",
+  "note": "Comparison of independently sourced published claims; source roles are not authenticated evidence. An 'HP t620 J1900' seller option could reflect seller error, model mix-up, or unrelated hardware, not evidence of fraud. No asset or exact SKU inspected.",
+  "source_groups": [
+    {
+      "source_role": "manufacturer_spec",
+      "source_url": "https://manualzz.com/doc/2470816/hp-t620-specification",
+      "claims": [
+        {
+          "attribute": "cpu_family",
+          "value": "AMD GX series"
+        }
+      ]
+    },
+    {
+      "source_role": "seller_listing",
+      "source_url": "https://www.ruten.com.tw/item/22641820631780/",
+      "claims": [
+        {
+          "attribute": "cpu_family",
+          "value": "Intel J1900"
+        }
+      ]
+    }
+  ],
+  "seller_price_signal": {
+    "currency": "TWD",
+    "min": 446,
+    "max": 2178,
+    "kind": "MULTI_OPTION_ADVERTISED_PRICE_NOT_EXACT_CPU_QUOTE",
+    "observed_date": "2026-10-26",
+    "note": "Listings mix accessories and alternative hardware; range is NOT an equivalent per-unit equipment price"
+  },
+  "purchase_authorized": false
+}
