@@ -1,0 +1,369 @@
+{
+  "schema": "hs.drone_proving_ground.inputs.v1",
+  "accessed": "2026-11-14",
+  "source_classes": {
+    "maker_page": "Manufacturer or maker-store page fetched directly on the access date.",
+    "maker_search": "Manufacturer page content seen only through a search-engine extract (the site refused or rate-limited direct fetches).",
+    "retailer_search": "Retailer listing seen only through a search-engine extract. Prices move; re-check before buying.",
+    "repo": "A file committed in this repository or a public upstream repository at a pinned commit.",
+    "regulator_search": "Regulator page seen through a search-engine extract.",
+    "assumption": "Engineering assumption with no single source. Listed so that it can be replaced by a measurement."
+  },
+  "parts": [
+    {
+      "id": "stack",
+      "role": "Flight controller + 4-in-1 ESC (20x20 stack)",
+      "identity": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 16 MB flash; BLS 35A Mini V2 ESC)",
+      "qty": 1,
+      "unit_mass_g": 13.5,
+      "mass_note": "Listings disagree (FC 9.6 g, ESC 7.2 g, stack 13.5 g with 32x35x14.2 mm, or about 15 g). 13.5 g is used; replace it with a scale reading.",
+      "unit_price_usd": 59.99,
+      "esc_continuous_a": 35,
+      "esc_burst_a": 45,
+      "esc_burst_s": 5,
+      "footprint_mm": [
+        35,
+        35
+      ],
+      "height_mm": 14.2,
+      "mount_pitch_mm": 20,
+      "mount_hole_d_mm": 3.5,
+      "sources": [
+        {
+          "url": "https://www.racedayquads.com/products/speedybee-f405-mini-bls-35a-20x20-stack",
+          "class": "retailer_search",
+          "supports": "US price 59.99 USD"
+        },
+        {
+          "url": "https://www.fpvfaster.com.au/products/speedybee-f405-mini-stack-flight-controller-bls-35a-mini-v2-4in1-esc-20x20mm",
+          "class": "retailer_search",
+          "supports": "35 A x 4 continuous, 45 A burst (5 s), DShot300/600"
+        },
+        {
+          "url": "https://racer.lt/datasheet/speedybee-f405-mini-bls-35a-20x20-stack-1795",
+          "class": "retailer_search",
+          "supports": "13.5 g, 32 x 35 x 14.2 mm"
+        },
+        {
+          "url": "https://github.com/iNavFlight/inav/blob/940b9281bbefb06b85d442ac5b456c81ae8672c9/src/main/target/SPEEDYBEEF405MINI/target.h",
+          "class": "repo",
+          "supports": "INAV target exists: UART1-6 (UART4 routed to BLE), DPS310 baro, M25P16 flash, blackbox on by default"
+        },
+        {
+          "url": "https://github.com/ArduPilot/ardupilot/blob/20ed31186c01a551b06d8d29e866aaca8c5387a3/libraries/AP_HAL_ChibiOS/hwdef/SpeedyBeeF405Mini/hwdef.dat",
+          "class": "repo",
+          "supports": "ArduPilot hwdef exists: SERIAL_ORDER OTG1 USART1 USART2 USART3 UART4 UART5 USART6"
+        }
+      ],
+      "uarts_hw": 6,
+      "uarts_reserved": {
+        "UART4": "routed to the on-board Bluetooth module (INAV target.h)"
+      },
+      "uart_needs": [
+        "receiver (CRSF)",
+        "GNSS",
+        "VTX SmartAudio/Tramp"
+      ]
+    },
+    {
+      "id": "motor",
+      "role": "Motor",
+      "identity": "T-Motor (T-Hobby) F1404 3800KV, 9N12P, 3-4S",
+      "qty": 4,
+      "unit_mass_g": 9.34,
+      "unit_price_usd": 16.89,
+      "peak_current_60s_a": 19,
+      "body_diameter_mm": 17.9,
+      "body_height_mm": 16.6,
+      "mount_bolt": "M2",
+      "mount_pcd_candidates_mm": [
+        9.0,
+        12.0
+      ],
+      "mount_note": "The maker page shows the bolt pattern only as a drawing image. BETAFPV's 1404 listing says the 1404 pattern moved from 12 mm to 9 mm PCD. The frame carries both patterns; caliper the motor before cutting.",
+      "sources": [
+        {
+          "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html",
+          "class": "maker_page",
+          "supports": "9.34 g incl. cable, 9N12P, 3-4S, peak 19 A (60 s), 195 mOhm, body 17.9 x 16.6 mm, thrust table"
+        },
+        {
+          "url": "https://www.racedayquads.com/collections/all/products/t-motor-f1404-3800kv-micro-motor",
+          "class": "retailer_search",
+          "supports": "16.89 USD"
+        },
+        {
+          "url": "https://betafpv.com/products/1404-3800kv-brushless-motors",
+          "class": "maker_search",
+          "supports": "1404 mount moved from 12 mm to 9 mm PCD; M2 holes"
+        }
+      ]
+    },
+    {
+      "id": "prop",
+      "role": "Propeller (set of 4, 2CW + 2CCW)",
+      "identity": "HQProp T3x3x3 PC (3 in, 3 in pitch, 3 blades), 1.5 mm shaft",
+      "qty": 2,
+      "qty_note": "Two 4-packs: one flying set and one spare set.",
+      "unit_mass_g": 6.0,
+      "mass_note": "1.5 g per prop x 4 props per pack; only one pack is on the aircraft.",
+      "on_aircraft_packs": 1,
+      "unit_price_usd": 2.29,
+      "diameter_mm": 76.2,
+      "hub_height_mm": 6.0,
+      "hub_height_note": "assumption: not published; measure the hub.",
+      "sources": [
+        {
+          "url": "https://www.getfpv.com/hqprop-dp-3x3x3-pc-propeller-3-blade-black-set-of-4.html",
+          "class": "retailer_search",
+          "supports": "1.5 g per prop, 1.5 mm shaft"
+        },
+        {
+          "url": "https://www.racedayquads.com/products/hq-t3x3x3-pc-dp-durable-prop-for-3-three-hole-mount",
+          "class": "retailer_search",
+          "supports": "2.29 USD per 4-pack"
+        }
+      ]
+    },
+    {
+      "id": "battery",
+      "role": "Battery",
+      "identity": "CNHL MiniStar 650 mAh 4S 70C LiPo, XT30",
+      "qty": 2,
+      "on_aircraft": 1,
+      "unit_mass_g": 87,
+      "unit_price_usd": 18.99,
+      "capacity_mah": 650,
+      "cells": 4,
+      "c_continuous": 70,
+      "c_burst": 140,
+      "size_mm": [
+        58,
+        30,
+        27
+      ],
+      "sources": [
+        {
+          "url": "https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug",
+          "class": "maker_search",
+          "supports": "650 mAh, 4S, 70C continuous / 140C burst, 87 g incl. cable and plug, 27 x 30 x 58 mm, XT30"
+        },
+        {
+          "url": "https://www.racedayquads.com/products/cnhl-650mah-4s-70c-ministar-fpv-lipo-for-2-3-quads-xt30",
+          "class": "retailer_search",
+          "supports": "18.99 USD"
+        }
+      ]
+    },
+    {
+      "id": "gps",
+      "role": "GNSS + compass",
+      "identity": "Matek M10Q-5883 (u-blox M10, QMC5883L)",
+      "qty": 1,
+      "unit_mass_g": 8,
+      "unit_price_usd": 39.99,
+      "size_mm": [
+        20,
+        20,
+        12.4
+      ],
+      "availability_note": "One retailer says Matek marks this module end-of-life; a same-footprint M10 + compass module may be needed.",
+      "sources": [
+        {
+          "url": "https://www.racedayquads.com/products/matek-m10q-5883-gnss-compass",
+          "class": "retailer_search",
+          "supports": "39.99 USD, 8 g, 20 x 20 x 12.4 mm"
+        },
+        {
+          "url": "https://openelab.io/products/matek-m10q-5883-gps-compass",
+          "class": "retailer_search",
+          "supports": "EOL note"
+        }
+      ]
+    },
+    {
+      "id": "receiver",
+      "role": "Radio receiver",
+      "identity": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+      "qty": 1,
+      "unit_mass_g": 2.2,
+      "unit_price_usd": 18.99,
+      "sources": [
+        {
+          "url": "https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver",
+          "class": "maker_search",
+          "supports": "18.99 USD, 2.2 g with antenna, 5 V"
+        }
+      ]
+    },
+    {
+      "id": "camera",
+      "role": "Analog FPV camera",
+      "identity": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+      "qty": 1,
+      "unit_mass_g": 2.0,
+      "unit_price_usd": 17.9,
+      "size_mm": [
+        14,
+        14,
+        14
+      ],
+      "sources": [
+        {
+          "url": "https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14",
+          "class": "retailer_search",
+          "supports": "about 2 g, 17.90 USD"
+        }
+      ]
+    },
+    {
+      "id": "vtx",
+      "role": "Analog video transmitter",
+      "identity": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+      "qty": 1,
+      "unit_mass_g": 2.4,
+      "unit_price_usd": 24.99,
+      "sources": [
+        {
+          "url": "https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html",
+          "class": "retailer_search",
+          "supports": "unit net weight 2.4 g (maker figure quoted), 24.99 USD (shown out of stock)"
+        }
+      ]
+    },
+    {
+      "id": "standoff",
+      "role": "Top-plate standoff",
+      "identity": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+      "qty": 4,
+      "computed_mass": true,
+      "unit_price_usd": 0.5,
+      "price_class": "assumption",
+      "sources": []
+    },
+    {
+      "id": "hardware",
+      "role": "Screws, nuts, grommets, battery strap",
+      "identity": "16x M2x6 motor screws, 8x M3 screws, 4x M3 nylon nuts, 20 mm battery strap",
+      "qty": 1,
+      "unit_mass_g": 6.0,
+      "unit_price_usd": 8.0,
+      "price_class": "assumption",
+      "sources": []
+    },
+    {
+      "id": "wiring",
+      "role": "Wiring, XT30 pigtail, low-ESR capacitor, VTX antenna, camera and GPS mounts",
+      "identity": "allowance",
+      "qty": 1,
+      "unit_mass_g": 10.0,
+      "unit_price_usd": 6.0,
+      "price_class": "assumption",
+      "sources": []
+    },
+    {
+      "id": "frame_cut",
+      "role": "Carbon frame plates cut from the generated geometry",
+      "identity": "3.0 mm bottom plate + 1.5 mm top plate, 3K carbon",
+      "qty": 1,
+      "computed_mass": true,
+      "unit_price_usd": 49.0,
+      "price_class": "lower_bound",
+      "price_note": "SendCutSend lists carbon fibre 'from $49' but only 1.0 and 1.6 mm on its standard list, so the 3.0 mm bottom plate needs a different cutter or a quote. Treated as a lower bound, not a quote.",
+      "sources": [
+        {
+          "url": "https://sendcutsend.com/carbon-fiber/",
+          "class": "maker_search",
+          "supports": "carbon fibre parts from 49 USD; 1.0 and 1.6 mm standard thicknesses"
+        }
+      ]
+    }
+  ],
+  "materials": {
+    "carbon_plate": {
+      "density_g_cm3": 1.55,
+      "density_range_g_cm3": [
+        1.5,
+        1.6
+      ],
+      "density_class": "assumption",
+      "density_note": "Typical cured 3K twill laminate. No supplier datasheet with a plate density was reached; the mass check is repeated at both ends of the range.",
+      "flexural_modulus_gpa": 55.2,
+      "modulus_low_gpa": 40.0,
+      "modulus_class": "maker_search",
+      "modulus_source": "https://customisedcomposites.squarespace.com/s/Technical-data-sheet-Veneer.pdf",
+      "modulus_note": "One UK plate maker's 3K twill laminate (42 % resin) reports a 55.2 GPa tensile modulus; 40 GPa is used as a pessimistic lower bound."
+    },
+    "aluminium_7075": {
+      "density_g_cm3": 2.81,
+      "class": "assumption",
+      "note": "Standard handbook value for 7075 aluminium."
+    }
+  },
+  "assumptions": {
+    "usable_capacity_fraction": {
+      "value": 0.8,
+      "why": "Land at about 3.7 V/cell under load; common LiPo practice."
+    },
+    "nominal_cell_v": {
+      "value": 3.7,
+      "why": "LiPo nominal voltage."
+    },
+    "avionics_power_w": {
+      "value": 4.0,
+      "why": "FC + GPS + receiver + camera + VTX at 350 mW output; not measured."
+    },
+    "air_density_kg_m3": {
+      "value": 1.225,
+      "why": "ISA sea level."
+    },
+    "gravity_m_s2": {
+      "value": 9.80665,
+      "why": "standard gravity"
+    },
+    "mass_limit_g": {
+      "value": 250.0,
+      "why": "EU C0 MTOM limit is 'less than 250 g'; FAA recreational registration exception is 'less than 250 grams'."
+    },
+    "mass_design_margin_g": {
+      "value": 15.0,
+      "why": "Kept free under the limit for scale error, glue, heat-shrink and a heavier cell."
+    },
+    "min_tw_ratio": {
+      "value": 3.0,
+      "why": "Lower bound for confident GPS/position-hold flight with wind margin on a 3-inch; racers run 6+."
+    },
+    "min_prop_clearance_mm": {
+      "value": 3.0,
+      "why": "Radial gap from a prop tip to any part that reaches the prop plane; above FDM/CNC tolerance and blade flex."
+    },
+    "min_adjacent_tip_gap_mm": {
+      "value": 10.0,
+      "why": "Gap between neighbouring prop discs."
+    },
+    "min_vertical_gap_mm": {
+      "value": 5.0,
+      "why": "Gap from the top of the prop hub to anything above the prop disc."
+    },
+    "max_cg_offset_mm": {
+      "value": 3.0,
+      "why": "Horizontal CG offset from the thrust centre that the controller trims without visible motor saturation."
+    },
+    "tip_mass_extra_g": {
+      "value": 0.8,
+      "why": "Four M2x6 screws and a prop nut per arm."
+    }
+  },
+  "regulation_sources": [
+    {
+      "url": "https://www.easa.europa.eu/en/document-library/easy-access-rules/online-publications/easy-access-rules-unmanned-aircraft-systems?page=19",
+      "class": "regulator_search",
+      "supports": "Class C0: MTOM less than 250 g including payload, 19 m/s, 120 m"
+    },
+    {
+      "url": "https://www.faa.gov/air_traffic/publications/aim_html/chap11_section_2.html",
+      "class": "regulator_search",
+      "supports": "FAA: registration exception for drones under 250 g flown under the recreational exception"
+    }
+  ]
+}
