@@ -1,0 +1,41 @@
+name: HS Product Factory — Generate Original 65/70/75mm Microdrone Products
+on:
+  pull_request:
+    paths:
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - "src/hardware_splicer/aerial_product_generator.py"
+      - "src/hardware_splicer/drone_product_delivery.py"
+      - "examples/drone_lab/**"
+      - ".github/workflows/hs-native-original-airframes.yml"
+  workflow_dispatch:
+jobs:
+  generate-real-printable-airframes:
+    name: HS original ${{ matrix.size }}mm airframe, CAD and product
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [65, 70, 75]
+    env:
+      HS_APPIMAGE_EXTRACT_AND_RUN: "1"
+      HS_DRONE_PRODUCT_CACHE: "${{ github.workspace }}/.cache/drone-tools"
+      HS_DRONE_PRODUCT_OUTPUT: "${{ github.workspace }}/.cache/product/WHOOP${{ matrix.size }}_ORIGINAL"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Use actual HS robot/mechanical engines to design and build this drone product
+        run: |
+          bash examples/drone_lab/produce_with_hs.sh "${{ matrix.size }}" | tee native-drone-result.json
+          unzip -l ".cache/product/WHOOP${{ matrix.size }}_ORIGINAL-PRODUCT.zip" | tail -22
+      - name: Distribute the physical-printable HS original airframe product
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-ORIGINAL-${{ matrix.size }}mm-PRINTABLE-FRAME-CAD-BOM-AND-PREVIEW
+          path: |
+            .cache/product/WHOOP${{ matrix.size }}_ORIGINAL-PRODUCT.zip
+            .cache/product/WHOOP${{ matrix.size }}_ORIGINAL/FRAME_PREVIEW.png
+            .cache/product/WHOOP${{ matrix.size }}_ORIGINAL/HS_PRODUCT_SCENE.glb
+            native-drone-result.json
+          if-no-files-found: error
+          retention-days: 90
