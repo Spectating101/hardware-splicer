@@ -22,6 +22,28 @@ from .project_store import (
 
 PRE_FABRICATION_PLAN_SCHEMA = "hardware_splicer.pre_fabrication_plan.v1"
 
+
+# Explicitly distinguish AI-proposed missing evidence from independently
+# observed deterministic findings. This field is a planning visibility
+# projection, not an engineering observation ledger or physical sign-off.
+_ASSESSMENT_BLOCKER_PREFIX = "pre_fabrication_missing_evidence: "
+
+
+def _assessment_missing_evidence(assessment: Mapping[str, Any]) -> list[str]:
+    raw = assessment.get("blockers", [])
+    if raw is None:
+        return []
+    if not isinstance(raw, list) or any(
+        not isinstance(item, str) for item in raw
+    ):
+        raise ValueError("assessment.blockers must be a list of strings")
+    return list(dict.fromkeys(
+        _ASSESSMENT_BLOCKER_PREFIX + text
+        for item in raw
+        if (text := item.strip())
+    ))
+
+
 # engineeringFindings is intentionally omitted. Pre-fab quarantine pops generated
 # plan surfaces; it does not rewrite the observed write-time finding ledger.
 # design_quality_gate entries come from AI sessions (not quarantined).
@@ -268,13 +290,21 @@ def create_project_pre_fabrication_plan_router(
                 "authority_effect": "none",
             }
             snapshot["preFabricationPlan"] = plan
-            snapshot["engineeringBlockers"] = list(
-                dict.fromkeys(
-                    str(item)
-                    for item in snapshot.get("engineeringBlockers") or []
-                    if str(item)
-                )
-            )
+            # The former implementation copied only existing blockers. A
+            # newly created repair project could therefore list concrete
+            # missing measurements in assessment.blockers but present an EMPTY
+            # top-level engineeringBlockers list. Project views and packages
+            # must not hide that evidence gap. Replace our previous prefixed
+            # projection when replanning; preserve non-prefixed blockers and
+            # the separate provenance-bearing engineering findings ledger.
+            snapshot["engineeringBlockers"] = list(dict.fromkeys(
+                [
+                    text for item in (snapshot.get("engineeringBlockers") or [])
+                    if (text := str(item).strip())
+                    and not text.startswith(_ASSESSMENT_BLOCKER_PREFIX)
+                ]
+                + _assessment_missing_evidence(request.assessment)
+            ))
             snapshot["engineering_readiness"] = {
                 **(
                     dict(snapshot.get("engineering_readiness"))
