@@ -1,0 +1,1210 @@
+{
+  "arm": {
+    "I_mm4": 27.0,
+    "arm_mass_g": 2.504,
+    "blade_pass_hover_hz": 515.9,
+    "f1_crossing_rpm": 19209,
+    "f1_hz": 320.1,
+    "f1_inside_rotor_band": true,
+    "free_length_mm": 44.87,
+    "root_stress_full_thrust_mpa": 7.36,
+    "rotor_freq_hover_hz": 172.0,
+    "rotor_freq_max_hz": 464.8,
+    "section_mm": [
+      12.0,
+      3.0
+    ],
+    "stiffness_n_per_mm": 49.49,
+    "tip_deflection_full_thrust_mm": 0.0597,
+    "tip_mass_g": 11.64
+  },
+  "arm_low_modulus": {
+    "I_mm4": 27.0,
+    "arm_mass_g": 2.504,
+    "blade_pass_hover_hz": 515.9,
+    "f1_crossing_rpm": 16351,
+    "f1_hz": 272.5,
+    "f1_inside_rotor_band": true,
+    "free_length_mm": 44.87,
+    "root_stress_full_thrust_mpa": 7.36,
+    "rotor_freq_hover_hz": 172.0,
+    "rotor_freq_max_hz": 464.8,
+    "section_mm": [
+      12.0,
+      3.0
+    ],
+    "stiffness_n_per_mm": 35.86,
+    "tip_deflection_full_thrust_mm": 0.0823,
+    "tip_mass_g": 11.64
+  },
+  "assumptions": {
+    "air_density_kg_m3": {
+      "value": 1.225,
+      "why": "ISA sea level."
+    },
+    "avionics_power_w": {
+      "value": 4.0,
+      "why": "FC + GPS + receiver + camera + VTX at 350 mW output; not measured."
+    },
+    "gravity_m_s2": {
+      "value": 9.80665,
+      "why": "standard gravity"
+    },
+    "mass_design_margin_g": {
+      "value": 15.0,
+      "why": "Kept free under the limit for scale error, glue, heat-shrink and a heavier cell."
+    },
+    "mass_limit_g": {
+      "value": 250.0,
+      "why": "EU C0 MTOM limit is 'less than 250 g'; FAA recreational registration exception is 'less than 250 grams'."
+    },
+    "max_cg_offset_mm": {
+      "value": 3.0,
+      "why": "Horizontal CG offset from the thrust centre that the controller trims without visible motor saturation."
+    },
+    "min_adjacent_tip_gap_mm": {
+      "value": 10.0,
+      "why": "Gap between neighbouring prop discs."
+    },
+    "min_prop_clearance_mm": {
+      "value": 3.0,
+      "why": "Radial gap from a prop tip to any part that reaches the prop plane; above FDM/CNC tolerance and blade flex."
+    },
+    "min_tw_ratio": {
+      "value": 3.0,
+      "why": "Lower bound for confident GPS/position-hold flight with wind margin on a 3-inch; racers run 6+."
+    },
+    "min_vertical_gap_mm": {
+      "value": 5.0,
+      "why": "Gap from the top of the prop hub to anything above the prop disc."
+    },
+    "nominal_cell_v": {
+      "value": 3.7,
+      "why": "LiPo nominal voltage."
+    },
+    "tip_mass_extra_g": {
+      "value": 0.8,
+      "why": "Four M2x6 screws and a prop nut per arm."
+    },
+    "usable_capacity_fraction": {
+      "value": 0.8,
+      "why": "Land at about 3.7 V/cell under load; common LiPo practice."
+    }
+  },
+  "audit": {
+    "bom": {
+      "build_over_cheapest_bnf_pct": 85.9,
+      "charger_median_twd": 498,
+      "charger_p25_twd": 399,
+      "charger_shared_figure_used_twd": 498,
+      "cheapest_bnf": {
+        "id": "Mobula6 (BNF)",
+        "min_twd": 2950
+      },
+      "corrected_build_min_twd": 5484,
+      "corrected_if_1900_board_is_5in1_twd": 4997,
+      "lines": [
+        {
+          "changed": false,
+          "corrected_title": "3DEX browser quote 2026-11-05 from PR #276 QUOTE_ESTIMATE.json (never submitted)",
+          "corrected_unit_twd": 526,
+          "id": "frame_print",
+          "pr291_title": "3DEX browser quote 2026-11-05 from PR #276 QUOTE_ESTIMATE.json (never submitted)",
+          "pr291_unit_twd": 526,
+          "qty": 1
+        },
+        {
+          "changed": true,
+          "corrected_title": "Happymodel SE0702 KV23000/260001S一體式外轉子無刷穿越 馬達",
+          "corrected_unit_twd": 416.0,
+          "id": "motors",
+          "pr291_title": "【大熊優選】Happymodel SE0702無刷馬達配件 一體化外轉子帶磁鐵 1mm出軸",
+          "pr291_unit_twd": 225.0,
+          "qty": 4
+        },
+        {
+          "changed": true,
+          "corrected_title": "BETAFPV Matrix 1S aio V2飛控 組五合一整合電調一體FPV航",
+          "corrected_unit_twd": 2387.0,
+          "id": "fc_esc",
+          "pr291_title": "<BETAFPV Matrix 1S無刷飛控板STM32G473>集成12A電調一體 AIO適用大疆O4圖傳 陀螺儀",
+          "pr291_unit_twd": 1900.0,
+          "qty": 1
+        },
+        {
+          "changed": false,
+          "corrected_title": "[史巴克] 乾豐Gemfan 31mm-2 (1210) 31mm二葉槳 超小穿越機槳葉 (4對)",
+          "corrected_unit_twd": 60.0,
+          "id": "props",
+          "pr291_title": "[史巴克] 乾豐Gemfan 31mm-2 (1210) 31mm二葉槳 超小穿越機槳葉 (4對)",
+          "pr291_unit_twd": 60.0,
+          "qty": 1
+        },
+        {
+          "changed": true,
+          "corrected_title": "BETAFPV C03 2.1mm競速穿越無人機模擬攝像頭用於Meteor自售 諮詢",
+          "corrected_unit_twd": 467.0,
+          "id": "camera",
+          "pr291_title": "【滿300出貨】BETAFPV Micro 輕量頂蓋FPV高畫質數傳穿越機C02 C03機",
+          "pr291_unit_twd": 270.0,
+          "qty": 1
+        },
+        {
+          "changed": false,
+          "corrected_title": "格氏Tattu 1S 300mAh 金磚口香糖 高壓鋰電池BT2.0接頭穿越機3.8Viphone",
+          "corrected_unit_twd": 181.0,
+          "id": "batteries",
+          "pr291_title": "格氏Tattu 1S 300mAh 金磚口香糖 高壓鋰電池BT2.0接頭穿越機3.8Viphone",
+          "pr291_unit_twd": 181.0,
+          "qty": 2
+        },
+        {
+          "changed": false,
+          "corrected_title": "全館含稅【20隻一組】m1.2m1.4 1.6m1.7不鏽鋼平頭十字鐵板牙螺絲KA 不鏽鋼平頭十字自攻牙螺絲 細微 極小",
+          "corrected_unit_twd": 18.0,
+          "id": "hardware",
+          "pr291_title": "全館含稅【20隻一組】m1.2m1.4 1.6m1.7不鏽鋼平頭十字鐵板牙螺絲KA 不鏽鋼平頭十字自攻牙螺絲 細微 極小",
+          "pr291_unit_twd": 18.0,
+          "qty": 1
+        }
+      ],
+      "pr291_build_min_twd": 4036,
+      "pr291_committed_build_min_twd": 4036
+    },
+    "external_inputs": {
+      "betafpv_air65_pp_frame_g": 2.67,
+      "betafpv_bt20_300mah_pack_g": 8.28,
+      "betafpv_bt20_300mah_pack_mm": [
+        67.3,
+        11.8,
+        6.1
+      ],
+      "matrix1s_ii_esc_cont_a": 12.0,
+      "matrix1s_v1_esc_cont_a": 5.0,
+      "pybullet_cf2x_mass_g": 27.0,
+      "vsergeev_65mm_build_without_battery_g": 24.4,
+      "vsergeev_65mm_frame_asa_g": 4.8,
+      "vsergeev_prop_cage_d_for_31mm_mm": 33.0
+    },
+    "external_sources": {
+      "betafpv_air65_pp_frame_g": "BETAFPV Air65 frame product page: 2.67 g, PP (audit 276-29)",
+      "betafpv_bt20_300mah_pack_mm": "BETAFPV BT2.0 300 mAh 1S product page via search extract, matching GetFPV and fpv24 (audit 276-13)",
+      "matrix1s_ii_esc_cont_a": "BETAFPV Matrix 1S 5IN1 II page via search extract (audit 276-6, 291-16)",
+      "pybullet_cf2x_mass_g": "gym-pybullet-drones CF2X model used by #276's flight_lab.py (audit 276-44)",
+      "vsergeev_65mm_build_without_battery_g": "https://github.com/vsergeev/3d-parametric-whoop README at commit 13cf8c29 (audit 276-2, 276-30)",
+      "vsergeev_prop_cage_d_for_31mm_mm": "vsergeev whoop.scad: 33 mm cage for 31 mm props (audit 276-17)"
+    },
+    "geometry": {
+      "auw_g": 38.0,
+      "auw_increase_pct": 16.3,
+      "battery_l_real_mm": 67.3,
+      "battery_l_used_mm": 27,
+      "bbox_committed_mm": 82.962,
+      "bbox_from_ribs_mm": 82.962,
+      "cradle_channel_l_mm": 23.0,
+      "cradle_g": 1.099,
+      "dry_g": 29.7,
+      "duct_outer_r_mm": 17.5,
+      "esc_headroom_ii_pct": 65.0,
+      "esc_headroom_v1_pct": 16.0,
+      "fc_pitch_mm": 26,
+      "frame_g": 9.038,
+      "frame_vs_air65_x": 3.38,
+      "frame_vs_vsergeev_x": 1.88,
+      "gemfan_source_field": "https://betafpv.com/products/0702-brushless-motors",
+      "hover_thrust_per_motor_g": 9.5,
+      "motor_bolt": "M1.4",
+      "motor_bolts": 3,
+      "motor_max_a": 4.2,
+      "motor_offset_mm": 22.981,
+      "motor_pcd_mm": 6.6,
+      "pack_overhang_mm": 44.3,
+      "prop_clearance_used_mm": 0.8,
+      "prop_clearance_vsergeev_mm": 1.0,
+      "prop_d_mm": 31,
+      "reference_auw_g": 32.7,
+      "rib_end_r_mm": 18.5,
+      "rib_protrusion_mm": 1.0,
+      "thrust_per_motor_for_2to1_g": 19.0
+    }
+  },
+  "battery_strap_ok": true,
+  "bnf_compare": {
+    "build_minus_bnf_alt_usd": 96.99,
+    "build_minus_bnf_usd": 58.49,
+    "price": 278.49,
+    "price_alt": 239.99
+  },
+  "bom": [
+    {
+      "id": "stack",
+      "identity": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 16 MB flash; BLS 35A Mini V2 ESC)",
+      "line_usd": 59.99,
+      "price_class": "retailer_search",
+      "qty": 1,
+      "unit_usd": 59.99,
+      "url": "https://www.racedayquads.com/products/speedybee-f405-mini-bls-35a-20x20-stack"
+    },
+    {
+      "id": "motor",
+      "identity": "T-Motor (T-Hobby) F1404 3800KV, 9N12P, 3-4S",
+      "line_usd": 67.56,
+      "price_class": "maker_page",
+      "qty": 4,
+      "unit_usd": 16.89,
+      "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html"
+    },
+    {
+      "id": "prop",
+      "identity": "HQProp T3x3x3 PC (3 in, 3 in pitch, 3 blades), 1.5 mm shaft",
+      "line_usd": 4.58,
+      "price_class": "retailer_search",
+      "qty": 2,
+      "unit_usd": 2.29,
+      "url": "https://www.getfpv.com/hqprop-dp-3x3x3-pc-propeller-3-blade-black-set-of-4.html"
+    },
+    {
+      "id": "battery",
+      "identity": "CNHL MiniStar 650 mAh 4S 70C LiPo, XT30",
+      "line_usd": 37.98,
+      "price_class": "maker_search",
+      "qty": 2,
+      "unit_usd": 18.99,
+      "url": "https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug"
+    },
+    {
+      "id": "gps",
+      "identity": "Matek M10Q-5883 (u-blox M10, QMC5883L)",
+      "line_usd": 39.99,
+      "price_class": "retailer_search",
+      "qty": 1,
+      "unit_usd": 39.99,
+      "url": "https://www.racedayquads.com/products/matek-m10q-5883-gnss-compass"
+    },
+    {
+      "id": "receiver",
+      "identity": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+      "line_usd": 18.99,
+      "price_class": "maker_search",
+      "qty": 1,
+      "unit_usd": 18.99,
+      "url": "https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver"
+    },
+    {
+      "id": "camera",
+      "identity": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+      "line_usd": 17.9,
+      "price_class": "retailer_search",
+      "qty": 1,
+      "unit_usd": 17.9,
+      "url": "https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14"
+    },
+    {
+      "id": "vtx",
+      "identity": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+      "line_usd": 24.99,
+      "price_class": "retailer_search",
+      "qty": 1,
+      "unit_usd": 24.99,
+      "url": "https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html"
+    },
+    {
+      "id": "standoff",
+      "identity": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+      "line_usd": 2.0,
+      "price_class": "assumption",
+      "qty": 4,
+      "unit_usd": 0.5,
+      "url": null
+    },
+    {
+      "id": "hardware",
+      "identity": "16x M2x6 motor screws, 8x M3 screws, 4x M3 nylon nuts, 20 mm battery strap",
+      "line_usd": 8.0,
+      "price_class": "assumption",
+      "qty": 1,
+      "unit_usd": 8.0,
+      "url": null
+    },
+    {
+      "id": "wiring",
+      "identity": "allowance",
+      "line_usd": 6.0,
+      "price_class": "assumption",
+      "qty": 1,
+      "unit_usd": 6.0,
+      "url": null
+    },
+    {
+      "id": "frame_cut",
+      "identity": "3.0 mm bottom plate + 1.5 mm top plate, 3K carbon",
+      "line_usd": 49.0,
+      "price_class": "lower_bound",
+      "qty": 1,
+      "unit_usd": 49.0,
+      "url": "https://sendcutsend.com/carbon-fiber/"
+    }
+  ],
+  "bom_assumed_or_lower_bound_usd": 65.0,
+  "bom_total_usd": 336.98,
+  "cad_files": {
+    "bottom_plate_dxf": "hs3g_bottom_plate.dxf",
+    "bottom_plate_step": "hs3g_bottom_plate.step",
+    "bottom_plate_stl": "hs3g_bottom_plate.stl",
+    "top_plate_dxf": "hs3g_top_plate.dxf",
+    "top_plate_step": "hs3g_top_plate.step",
+    "top_plate_stl": "hs3g_top_plate.stl"
+  },
+  "cad_measured": {
+    "adjacent_motor_spacing_mm": [
+      95.459,
+      95.459,
+      95.459,
+      95.459
+    ],
+    "bottom_bbox_mm": [
+      114.459,
+      114.459,
+      3.0
+    ],
+    "bottom_centroid_mm": [
+      -0.0,
+      0.0,
+      1.5
+    ],
+    "bottom_is_valid": true,
+    "bottom_solids": 1,
+    "bottom_volume_mm3": 13120.696,
+    "diagonal_motor_spacing_mm": [
+      135.0,
+      135.0
+    ],
+    "m3_hole_count_bottom": 8,
+    "motor_bolt_pcd_counts": {
+      "12": 16,
+      "9": 16
+    },
+    "motor_centres_mm": [
+      [
+        -47.73,
+        -47.73
+      ],
+      [
+        47.73,
+        -47.73
+      ],
+      [
+        47.73,
+        47.73
+      ],
+      [
+        -47.73,
+        47.73
+      ]
+    ],
+    "motor_count": 4,
+    "top_bbox_mm": [
+      56.0,
+      27.0,
+      1.5
+    ],
+    "top_centroid_mm": [
+      -0.0,
+      -0.0,
+      0.75
+    ],
+    "top_is_valid": true,
+    "top_solids": 1,
+    "top_volume_mm3": 2208.157
+  },
+  "cg": {
+    "battery_x_mm": 1.05,
+    "cg_mm": [
+      0.0,
+      0.0,
+      1.55
+    ],
+    "cg_z_below_prop_plane_mm": 18.05,
+    "mass_g": 203.86
+  },
+  "checks": {
+    "adjacent_tip_gap_ok": true,
+    "auw_under_limit_with_margin": true,
+    "battery_burst_covers_full_throttle": true,
+    "battery_continuous_covers_full_throttle": false,
+    "battery_continuous_covers_limited_throttle": true,
+    "battery_covers_strap_slots": true,
+    "both_motor_patterns_present": true,
+    "cg_within_limit": true,
+    "esc_continuous_covers_full_throttle": true,
+    "frame_single_valid_solids": true,
+    "frame_watertight": true,
+    "motor_spacing_matches_wheelbase": true,
+    "prop_radial_clearance_ok": true,
+    "prop_vertical_gap_ok": true,
+    "tw_ratio_at_250g_ge_min": true,
+    "tw_ratio_limited_ge_min": true
+  },
+  "clearance": {
+    "adjacent_tip_gap_mm": 19.26,
+    "min_radial_mm": 3.59,
+    "min_vertical_above_mm": null,
+    "radial": [
+      {
+        "clearance_mm": 15.26,
+        "id": "vtx"
+      },
+      {
+        "clearance_mm": 3.59,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.59,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.59,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.59,
+        "id": "standoff"
+      }
+    ],
+    "vertical": [
+      {
+        "below": true,
+        "gap_mm": 19.6,
+        "id": "battery"
+      }
+    ]
+  },
+  "frame_parameters": {
+    "arm_w_mm": 12.0,
+    "body_corner_r_mm": 4.0,
+    "body_l_mm": 60.0,
+    "body_w_mm": 32.0,
+    "bottom_t_mm": 3.0,
+    "motor_bolt_hole_d_mm": 2.2,
+    "motor_center_hole_d_mm": 5.5,
+    "motor_pcd_a_mm": 9.0,
+    "motor_pcd_b_mm": 12.0,
+    "pad_d_mm": 19.0,
+    "stack_hole_d_mm": 3.2,
+    "stack_pitch_mm": 20.0,
+    "standoff_af_mm": 5.0,
+    "standoff_hole_d_mm": 3.2,
+    "standoff_len_mm": 30.0,
+    "standoff_x_mm": 24.0,
+    "standoff_y_mm": 10.0,
+    "strap_slot_l_mm": 20.0,
+    "strap_slot_w_mm": 3.0,
+    "strap_slot_x_mm": 17.0,
+    "top_corner_r_mm": 3.0,
+    "top_l_mm": 56.0,
+    "top_t_mm": 1.5,
+    "top_w_mm": 27.0,
+    "wheelbase_mm": 135.0
+  },
+  "mass": {
+    "auw_g": 203.87,
+    "dry_g": 116.87,
+    "frame_g": 23.76,
+    "rows": [
+      {
+        "id": "stack",
+        "n": 1,
+        "total_g": 13.5,
+        "unit_g": 13.5
+      },
+      {
+        "id": "motor",
+        "n": 4,
+        "total_g": 37.36,
+        "unit_g": 9.34
+      },
+      {
+        "id": "prop",
+        "n": 1,
+        "total_g": 6.0,
+        "unit_g": 6.0
+      },
+      {
+        "id": "battery",
+        "n": 1,
+        "total_g": 87,
+        "unit_g": 87
+      },
+      {
+        "id": "gps",
+        "n": 1,
+        "total_g": 8,
+        "unit_g": 8
+      },
+      {
+        "id": "receiver",
+        "n": 1,
+        "total_g": 2.2,
+        "unit_g": 2.2
+      },
+      {
+        "id": "camera",
+        "n": 1,
+        "total_g": 2.0,
+        "unit_g": 2.0
+      },
+      {
+        "id": "vtx",
+        "n": 1,
+        "total_g": 2.4,
+        "unit_g": 2.4
+      },
+      {
+        "id": "standoff",
+        "n": 4,
+        "total_g": 5.645,
+        "unit_g": 1.411
+      },
+      {
+        "id": "hardware",
+        "n": 1,
+        "total_g": 6.0,
+        "unit_g": 6.0
+      },
+      {
+        "id": "wiring",
+        "n": 1,
+        "total_g": 10.0,
+        "unit_g": 10.0
+      },
+      {
+        "id": "frame_cut",
+        "n": 1,
+        "total_g": 23.76,
+        "unit_g": 23.76
+      }
+    ],
+    "standoff_each_g": 1.411
+  },
+  "mass_density_high": {
+    "auw_g": 204.63,
+    "density": 1.6,
+    "frame_g": 24.526
+  },
+  "mass_density_low": {
+    "auw_g": 203.1,
+    "density": 1.5,
+    "frame_g": 22.993
+  },
+  "mass_design_margin_g": 15.0,
+  "mass_limit_g": 250.0,
+  "materials": {
+    "aluminium_7075": {
+      "class": "assumption",
+      "density_g_cm3": 2.81,
+      "note": "Standard handbook value for 7075 aluminium."
+    },
+    "carbon_plate": {
+      "density_class": "assumption",
+      "density_g_cm3": 1.55,
+      "density_note": "Typical cured 3K twill laminate. No supplier datasheet with a plate density was reached; the mass check is repeated at both ends of the range.",
+      "density_range_g_cm3": [
+        1.5,
+        1.6
+      ],
+      "flexural_modulus_gpa": 55.2,
+      "modulus_class": "maker_search",
+      "modulus_low_gpa": 40.0,
+      "modulus_note": "One UK plate maker's 3K twill laminate (42 % resin) reports a 55.2 GPa tensile modulus; 40 GPa is used as a pessimistic lower bound.",
+      "modulus_source": "https://customisedcomposites.squarespace.com/s/Technical-data-sheet-Veneer.pdf"
+    }
+  },
+  "mesh": {
+    "bottom_plate": {
+      "bbox_mm": [
+        114.457,
+        114.457,
+        3.0
+      ],
+      "cad_volume_mm3": 13120.696,
+      "degenerate_triangles": 0,
+      "edges": 38310,
+      "file": "hs3g_bottom_plate.stl",
+      "inconsistently_oriented_edges": 0,
+      "non_manifold_edges": 0,
+      "repo_reader": {
+        "dimensions_mm": [
+          114.457,
+          114.457,
+          3.0
+        ],
+        "triangles": 25540
+      },
+      "signed_volume_mm3": 13119.91,
+      "triangles": 25540,
+      "volume_error_pct": -0.006,
+      "watertight": true
+    },
+    "top_plate": {
+      "bbox_mm": [
+        56.0,
+        27.0,
+        1.5
+      ],
+      "cad_volume_mm3": 2208.157,
+      "degenerate_triangles": 0,
+      "edges": 3834,
+      "file": "hs3g_top_plate.stl",
+      "inconsistently_oriented_edges": 0,
+      "non_manifold_edges": 0,
+      "repo_reader": {
+        "dimensions_mm": [
+          56.0,
+          27.0,
+          1.5
+        ],
+        "triangles": 2556
+      },
+      "signed_volume_mm3": 2208.16,
+      "triangles": 2556,
+      "volume_error_pct": 0.0,
+      "watertight": true
+    }
+  },
+  "parts": [
+    {
+      "esc_burst_a": 45,
+      "esc_burst_s": 5,
+      "esc_continuous_a": 35,
+      "footprint_mm": [
+        35,
+        35
+      ],
+      "height_mm": 14.2,
+      "id": "stack",
+      "identity": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 16 MB flash; BLS 35A Mini V2 ESC)",
+      "mass_note": "Listings disagree (FC 9.6 g, ESC 7.2 g, stack 13.5 g with 32x35x14.2 mm, or about 15 g). 13.5 g is used; replace it with a scale reading.",
+      "mount_hole_d_mm": 3.5,
+      "mount_pitch_mm": 20,
+      "qty": 1,
+      "role": "Flight controller + 4-in-1 ESC (20x20 stack)",
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "US price 59.99 USD",
+          "url": "https://www.racedayquads.com/products/speedybee-f405-mini-bls-35a-20x20-stack"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "35 A x 4 continuous, 45 A burst (5 s), DShot300/600",
+          "url": "https://www.fpvfaster.com.au/products/speedybee-f405-mini-stack-flight-controller-bls-35a-mini-v2-4in1-esc-20x20mm"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "13.5 g, 32 x 35 x 14.2 mm",
+          "url": "https://racer.lt/datasheet/speedybee-f405-mini-bls-35a-20x20-stack-1795"
+        },
+        {
+          "class": "repo",
+          "supports": "INAV target exists: UART1-6 (UART4 routed to BLE), DPS310 baro, M25P16 flash, blackbox on by default",
+          "url": "https://github.com/iNavFlight/inav/blob/940b9281bbefb06b85d442ac5b456c81ae8672c9/src/main/target/SPEEDYBEEF405MINI/target.h"
+        },
+        {
+          "class": "repo",
+          "supports": "ArduPilot hwdef exists: SERIAL_ORDER OTG1 USART1 USART2 USART3 UART4 UART5 USART6",
+          "url": "https://github.com/ArduPilot/ardupilot/blob/20ed31186c01a551b06d8d29e866aaca8c5387a3/libraries/AP_HAL_ChibiOS/hwdef/SpeedyBeeF405Mini/hwdef.dat"
+        }
+      ],
+      "uart_needs": [
+        "receiver (CRSF)",
+        "GNSS",
+        "VTX SmartAudio/Tramp"
+      ],
+      "uarts_hw": 6,
+      "uarts_reserved": {
+        "UART4": "routed to the on-board Bluetooth module (INAV target.h)"
+      },
+      "unit_mass_g": 13.5,
+      "unit_price_usd": 59.99
+    },
+    {
+      "body_diameter_mm": 17.9,
+      "body_height_mm": 16.6,
+      "id": "motor",
+      "identity": "T-Motor (T-Hobby) F1404 3800KV, 9N12P, 3-4S",
+      "mount_bolt": "M2",
+      "mount_note": "The maker page shows the bolt pattern only as a drawing image. BETAFPV's 1404 listing says the 1404 pattern moved from 12 mm to 9 mm PCD. The frame carries both patterns; caliper the motor before cutting.",
+      "mount_pcd_candidates_mm": [
+        9.0,
+        12.0
+      ],
+      "peak_current_60s_a": 19,
+      "qty": 4,
+      "role": "Motor",
+      "sources": [
+        {
+          "class": "maker_page",
+          "supports": "9.34 g incl. cable, 9N12P, 3-4S, peak 19 A (60 s), 195 mOhm, body 17.9 x 16.6 mm, thrust table",
+          "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "16.89 USD",
+          "url": "https://www.racedayquads.com/collections/all/products/t-motor-f1404-3800kv-micro-motor"
+        },
+        {
+          "class": "maker_search",
+          "supports": "1404 mount moved from 12 mm to 9 mm PCD; M2 holes",
+          "url": "https://betafpv.com/products/1404-3800kv-brushless-motors"
+        }
+      ],
+      "unit_mass_g": 9.34,
+      "unit_price_usd": 16.89
+    },
+    {
+      "diameter_mm": 76.2,
+      "hub_height_mm": 6.0,
+      "hub_height_note": "assumption: not published; measure the hub.",
+      "id": "prop",
+      "identity": "HQProp T3x3x3 PC (3 in, 3 in pitch, 3 blades), 1.5 mm shaft",
+      "mass_note": "1.5 g per prop x 4 props per pack; only one pack is on the aircraft.",
+      "on_aircraft_packs": 1,
+      "qty": 2,
+      "qty_note": "Two 4-packs: one flying set and one spare set.",
+      "role": "Propeller (set of 4, 2CW + 2CCW)",
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "1.5 g per prop, 1.5 mm shaft",
+          "url": "https://www.getfpv.com/hqprop-dp-3x3x3-pc-propeller-3-blade-black-set-of-4.html"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "2.29 USD per 4-pack",
+          "url": "https://www.racedayquads.com/products/hq-t3x3x3-pc-dp-durable-prop-for-3-three-hole-mount"
+        }
+      ],
+      "unit_mass_g": 6.0,
+      "unit_price_usd": 2.29
+    },
+    {
+      "c_burst": 140,
+      "c_continuous": 70,
+      "capacity_mah": 650,
+      "cells": 4,
+      "id": "battery",
+      "identity": "CNHL MiniStar 650 mAh 4S 70C LiPo, XT30",
+      "on_aircraft": 1,
+      "qty": 2,
+      "role": "Battery",
+      "size_mm": [
+        58,
+        30,
+        27
+      ],
+      "sources": [
+        {
+          "class": "maker_search",
+          "supports": "650 mAh, 4S, 70C continuous / 140C burst, 87 g incl. cable and plug, 27 x 30 x 58 mm, XT30",
+          "url": "https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "18.99 USD",
+          "url": "https://www.racedayquads.com/products/cnhl-650mah-4s-70c-ministar-fpv-lipo-for-2-3-quads-xt30"
+        }
+      ],
+      "unit_mass_g": 87,
+      "unit_price_usd": 18.99
+    },
+    {
+      "availability_note": "One retailer says Matek marks this module end-of-life; a same-footprint M10 + compass module may be needed.",
+      "id": "gps",
+      "identity": "Matek M10Q-5883 (u-blox M10, QMC5883L)",
+      "qty": 1,
+      "role": "GNSS + compass",
+      "size_mm": [
+        20,
+        20,
+        12.4
+      ],
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "39.99 USD, 8 g, 20 x 20 x 12.4 mm",
+          "url": "https://www.racedayquads.com/products/matek-m10q-5883-gnss-compass"
+        },
+        {
+          "class": "retailer_search",
+          "supports": "EOL note",
+          "url": "https://openelab.io/products/matek-m10q-5883-gps-compass"
+        }
+      ],
+      "unit_mass_g": 8,
+      "unit_price_usd": 39.99
+    },
+    {
+      "id": "receiver",
+      "identity": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+      "qty": 1,
+      "role": "Radio receiver",
+      "sources": [
+        {
+          "class": "maker_search",
+          "supports": "18.99 USD, 2.2 g with antenna, 5 V",
+          "url": "https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver"
+        }
+      ],
+      "unit_mass_g": 2.2,
+      "unit_price_usd": 18.99
+    },
+    {
+      "id": "camera",
+      "identity": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+      "qty": 1,
+      "role": "Analog FPV camera",
+      "size_mm": [
+        14,
+        14,
+        14
+      ],
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "about 2 g, 17.90 USD",
+          "url": "https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14"
+        }
+      ],
+      "unit_mass_g": 2.0,
+      "unit_price_usd": 17.9
+    },
+    {
+      "id": "vtx",
+      "identity": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+      "qty": 1,
+      "role": "Analog video transmitter",
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "unit net weight 2.4 g (maker figure quoted), 24.99 USD (shown out of stock)",
+          "url": "https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html"
+        }
+      ],
+      "unit_mass_g": 2.4,
+      "unit_price_usd": 24.99
+    },
+    {
+      "computed_mass": true,
+      "id": "standoff",
+      "identity": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+      "price_class": "assumption",
+      "qty": 4,
+      "role": "Top-plate standoff",
+      "sources": [],
+      "unit_price_usd": 0.5
+    },
+    {
+      "id": "hardware",
+      "identity": "16x M2x6 motor screws, 8x M3 screws, 4x M3 nylon nuts, 20 mm battery strap",
+      "price_class": "assumption",
+      "qty": 1,
+      "role": "Screws, nuts, grommets, battery strap",
+      "sources": [],
+      "unit_mass_g": 6.0,
+      "unit_price_usd": 8.0
+    },
+    {
+      "id": "wiring",
+      "identity": "allowance",
+      "price_class": "assumption",
+      "qty": 1,
+      "role": "Wiring, XT30 pigtail, low-ESR capacitor, VTX antenna, camera and GPS mounts",
+      "sources": [],
+      "unit_mass_g": 10.0,
+      "unit_price_usd": 6.0
+    },
+    {
+      "computed_mass": true,
+      "id": "frame_cut",
+      "identity": "3.0 mm bottom plate + 1.5 mm top plate, 3K carbon",
+      "price_class": "lower_bound",
+      "price_note": "SendCutSend lists carbon fibre 'from $49' but only 1.0 and 1.6 mm on its standard list, so the 3.0 mm bottom plate needs a different cutter or a quote. Treated as a lower bound, not a quote.",
+      "qty": 1,
+      "role": "Carbon frame plates cut from the generated geometry",
+      "sources": [
+        {
+          "class": "maker_search",
+          "supports": "carbon fibre parts from 49 USD; 1.0 and 1.6 mm standard thicknesses",
+          "url": "https://sendcutsend.com/carbon-fiber/"
+        }
+      ],
+      "unit_price_usd": 49.0
+    }
+  ],
+  "payload_allowance_g": 30.4,
+  "prop_disc": {
+    "r": 38.1,
+    "z0": 19.6,
+    "z1": 25.6
+  },
+  "propulsion": {
+    "battery_burst_a": 91.0,
+    "battery_burst_ok_at_full": true,
+    "battery_cont_a": 45.5,
+    "battery_cont_ok_at_full": false,
+    "bench_voltage_v": 15.8,
+    "c_rate_hover": 6.0,
+    "esc_margin_full": 1.8,
+    "fit_exponent": 1.835,
+    "fit_rows_throttle_pct": [
+      50,
+      55,
+      60,
+      65,
+      70
+    ],
+    "hover_current_a": 3.9,
+    "hover_power_per_motor_fit_w": 8.6,
+    "hover_power_per_motor_n15_w": 13.43,
+    "hover_power_per_motor_used_w": 13.43,
+    "hover_rpm_est": 10319,
+    "hover_thrust_per_motor_g": 50.97,
+    "hover_time_min": 8.0,
+    "ideal_induced_power_per_motor_w": 3.343,
+    "max_current_a": 77.9,
+    "max_rpm": 27887,
+    "max_thrust_total_g": 1204.1,
+    "motor_peak_current_table_a": 19.4,
+    "motor_peak_rating_a": 19,
+    "overall_efficiency_hover": 0.249,
+    "prop": "HQ 3x3x3",
+    "table_min_thrust_g": 187.04,
+    "throttle_limit_current_a": 44.2,
+    "throttle_limit_pct": 70,
+    "throttle_limit_thrust_total_g": 1036.6,
+    "tip_mach": 0.324,
+    "tip_speed_m_s": 111.3,
+    "tw_ratio_full": 5.91,
+    "tw_ratio_limited": 5.08
+  },
+  "propulsion_at_249g": {
+    "battery_burst_a": 91.0,
+    "battery_burst_ok_at_full": true,
+    "battery_cont_a": 45.5,
+    "battery_cont_ok_at_full": false,
+    "bench_voltage_v": 15.8,
+    "c_rate_hover": 7.95,
+    "esc_margin_full": 1.8,
+    "fit_exponent": 1.835,
+    "fit_rows_throttle_pct": [
+      50,
+      55,
+      60,
+      65,
+      70
+    ],
+    "hover_current_a": 5.17,
+    "hover_power_per_motor_fit_w": 12.41,
+    "hover_power_per_motor_n15_w": 18.13,
+    "hover_power_per_motor_used_w": 18.13,
+    "hover_rpm_est": 11404,
+    "hover_thrust_per_motor_g": 62.25,
+    "hover_time_min": 6.0,
+    "ideal_induced_power_per_motor_w": 4.512,
+    "max_current_a": 77.9,
+    "max_rpm": 27887,
+    "max_thrust_total_g": 1204.1,
+    "motor_peak_current_table_a": 19.4,
+    "motor_peak_rating_a": 19,
+    "overall_efficiency_hover": 0.249,
+    "prop": "HQ 3x3x3",
+    "table_min_thrust_g": 187.04,
+    "throttle_limit_current_a": 44.2,
+    "throttle_limit_pct": 70,
+    "throttle_limit_thrust_total_g": 1036.6,
+    "tip_mach": 0.324,
+    "tip_speed_m_s": 111.3,
+    "tw_ratio_full": 4.84,
+    "tw_ratio_limited": 4.16
+  },
+  "propulsion_gf3016": {
+    "battery_burst_a": 91.0,
+    "battery_burst_ok_at_full": true,
+    "battery_cont_a": 45.5,
+    "battery_cont_ok_at_full": false,
+    "bench_voltage_v": 15.9,
+    "c_rate_hover": 5.61,
+    "esc_margin_full": 2.16,
+    "fit_exponent": 1.65,
+    "fit_rows_throttle_pct": [
+      50,
+      55,
+      60,
+      65,
+      70
+    ],
+    "hover_current_a": 3.65,
+    "hover_power_per_motor_fit_w": 10.41,
+    "hover_power_per_motor_n15_w": 12.5,
+    "hover_power_per_motor_used_w": 12.5,
+    "hover_rpm_est": 12926,
+    "hover_thrust_per_motor_g": 50.97,
+    "hover_time_min": 8.6,
+    "ideal_induced_power_per_motor_w": 3.343,
+    "max_current_a": 65.0,
+    "max_rpm": 37705,
+    "max_thrust_total_g": 1298.1,
+    "motor_peak_current_table_a": 16.19,
+    "motor_peak_rating_a": 19,
+    "overall_efficiency_hover": 0.267,
+    "prop": "GF3016",
+    "table_min_thrust_g": 158.01,
+    "throttle_limit_current_a": 45.1,
+    "throttle_limit_pct": 80,
+    "throttle_limit_thrust_total_g": 1102.6,
+    "tip_mach": 0.439,
+    "tip_speed_m_s": 150.4,
+    "tw_ratio_full": 6.37,
+    "tw_ratio_limited": 5.41
+  },
+  "regulation_sources": [
+    {
+      "class": "regulator_search",
+      "supports": "Class C0: MTOM less than 250 g including payload, 19 m/s, 120 m",
+      "url": "https://www.easa.europa.eu/en/document-library/easy-access-rules/online-publications/easy-access-rules-unmanned-aircraft-systems?page=19"
+    },
+    {
+      "class": "regulator_search",
+      "supports": "FAA: registration exception for drones under 250 g flown under the recreational exception",
+      "url": "https://www.faa.gov/air_traffic/publications/aim_html/chap11_section_2.html"
+    }
+  ],
+  "schema": "hs.drone_proving_ground.results.v1",
+  "standoff_volume_mm3": 502.26,
+  "strategies": [
+    {
+      "against": "No HS design content: the integration loop the mission asks for (sizing, stack, UART map, frame, payload mount) is done by the vendor. Payload mounting is whatever the frame allows.",
+      "currency": "USD",
+      "flight_time_min": null,
+      "for": "Cheapest path to a flying GPS sub-250 g aircraft; tuned by the maker; no fabrication risk.",
+      "id": "buy_bnf_3in_class_gps",
+      "identity": "Flywoo Explorer LR 4 V2.2 analog BNF with GPS (4-inch, 1404 2750KV, GOKU stack)",
+      "kind": "buy",
+      "name": "Buy a sub-250 g GPS micro long-range BNF",
+      "open_firmware": "Betaflight/INAV-capable F4 stack (vendor configuration)",
+      "payload_g": null,
+      "price": 278.49,
+      "price_alt": 239.99,
+      "price_alt_note": "same item shown sold out on a collection page",
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "278.49 USD regular price; 239.99 USD sold out on a collection page; GPS; 1404 2750KV",
+          "url": "https://www.racedayquads.com/products/flywoo-bnf-explorer-lr-4-v2-2-4-4s-analog-choose-receiver-gps"
+        },
+        {
+          "class": "maker_search",
+          "supports": "O4 Wide: about 162 g without battery, about 229 g with Flywoo 4S 750 mAh; 359.99 USD; GOKU GM10 Mini V3 GPS about 4.5 g",
+          "url": "https://flywoo.net/products/explorer-lr4-o4-wide"
+        }
+      ],
+      "takeoff_mass_g": 229,
+      "takeoff_mass_note": "Flywoo lists about 229 g takeoff for the O4 Wide version with its 4S 750 mAh pack; the analog V2.2 figure was not reached."
+    },
+    {
+      "against": "Over the 250 g line before the battery is fitted (ratio computed below), so registration and larger-prop hazards apply; costs more than any other option; needs an outdoor field for every test.",
+      "currency": "USD",
+      "flight_time_min": 18,
+      "flight_time_note": "Holybro: about 18 min hover, no payload, 5000 mAh",
+      "for": "Best autonomy stack and the largest payload of any option; mature open firmware and documentation.",
+      "id": "px4_pixhawk_kit",
+      "identity": "Holybro PX4 Development Kit X500 v2 (Pixhawk 6C, M10 GPS, 915 MHz telemetry)",
+      "kind": "open_design_kit",
+      "name": "PX4/Pixhawk open development kit",
+      "open_firmware": "PX4 (shipped), ArduPilot",
+      "payload_g": 1500,
+      "price": 609.0,
+      "sources": [
+        {
+          "class": "maker_page",
+          "supports": "609.00 USD; 610 g; about 18 min hover with 5000 mAh; 1500 g payload at 70 % throttle; 16x16 / 19x19 motor mounts",
+          "url": "https://holybro.com/products/px4-development-kit-x500-v2"
+        }
+      ],
+      "takeoff_mass_g": 610,
+      "takeoff_mass_note": "Kit weight without battery per Holybro; a 4S 3000-5000 mAh pack adds several hundred grams."
+    },
+    {
+      "against": "A finished product, indoor-only, with the smallest payload and endurance in the table. It does not answer 'from obtainable parts'.",
+      "currency": "USD",
+      "flight_time_min": 7,
+      "for": "Excellent firmware and sensing testbed; already integrated in this repository.",
+      "id": "crazyflie_reference",
+      "identity": "Bitcraze Crazyflie 2.1+ with an HS sensor deck (PR #230/#231)",
+      "kind": "buy_closed_platform",
+      "name": "Closed nano reference (existing System Example 001)",
+      "open_firmware": "Crazyflie firmware (open source)",
+      "payload_g": 15,
+      "price": 240.0,
+      "price_class": "audit_estimate",
+      "price_note": "Not on the Bitcraze product page; the 2026-11-13 audit gives 'about US$240 bare' from store and RobotShop listings.",
+      "sources": [
+        {
+          "class": "maker_page",
+          "supports": "29 g takeoff; 92 x 92 x 29 mm; 7 min; 15 g max payload",
+          "url": "https://www.bitcraze.io/products/crazyflie-2-1-plus/"
+        }
+      ],
+      "takeoff_mass_g": 29
+    },
+    {
+      "against": "Corrected build minimum is above the cheapest BNF; FDM frame is heavier than the PP and printed frames it replaces; payload is zero; governing thrust number unpublished.",
+      "currency": "TWD",
+      "flight_time_min": null,
+      "for": "Cheapest first print-and-fit loop; indoor-safe.",
+      "id": "whoop65_build",
+      "identity": "HS65 printed frame + BETAFPV Matrix 1S 5-in-1 + 0702 motors + Gemfan 1210-2",
+      "kind": "custom_micro",
+      "name": "65 mm printed whoop build (PR #276 / #291)",
+      "open_firmware": "Betaflight",
+      "payload_g": 0,
+      "price_from_evidence": true,
+      "sources": [
+        {
+          "class": "repo",
+          "supports": "Ruten asking prices 2026-11-06",
+          "url": "repo:examples/arbitrage_lab/build_vs_buy/evidence/drone_whoop65_20261106.json"
+        },
+        {
+          "class": "repo",
+          "supports": "HS65 frame and cradle volumes",
+          "url": "repo:examples/drone_lab/fabrication/20261105/GEOMETRY_AUDIT.json"
+        }
+      ],
+      "takeoff_mass_from_audit": true
+    },
+    {
+      "against": "Costs more than the GPS BNF (section 5 decision); nothing about it has been built, weighed or flown.",
+      "currency": "USD",
+      "for": "Every engineering variable is HS's to set and check; open firmware with GPS return-to-home; payload mass and mount are designed in; parts are commodity and individually replaceable; the method carries to a 5-inch.",
+      "id": "custom_3in_gps",
+      "identity": "HS-3G: HS-generated carbon frame + SpeedyBee F405 Mini stack + 4x F1404 3800KV + HQ T3x3x3 + M10Q-5883 + 4S 650 mAh, INAV or ArduPilot",
+      "kind": "custom_build",
+      "name": "Custom sub-250 g 3-inch GPS quad (this package)",
+      "open_firmware": "INAV (SPEEDYBEEF405MINI) or ArduPilot (SpeedyBeeF405Mini)",
+      "price_from_bom": true,
+      "sources": [
+        {
+          "class": "repo",
+          "supports": "every part identity, mass and price",
+          "url": "inputs/parts.json"
+        }
+      ]
+    }
+  ],
+  "thrust_source": {
+    "class": "maker_page",
+    "note": "Maker bench data, transcribed row by row. Bench supply about 15.9 V, ambient 8 C. Motor surface temperature after 1 min at 100 % throttle: 45 C (HQ 3x3x3), 48 C (GF3016). The table starts at 50 % throttle, so hover is an extrapolation.",
+    "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html"
+  }
+}
