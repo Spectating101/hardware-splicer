@@ -15,6 +15,10 @@ directory, never writes into the package, and exits 1 if the committed
 README.md, generated/results.json or either STL differs from the fresh run
 (STEP and DXF carry export timestamps, so they are regenerated but not
 byte-compared).
+
+Both modes need ``PYTHONPATH=src`` (the STLs are cross-checked with the repo's
+own reader) and CadQuery; without either the script exits 2 with a message
+saying which is missing, rather than reporting drift.
 """
 from __future__ import annotations
 
@@ -40,33 +44,45 @@ def _load(name: str) -> dict[str, Any]:
     return json.loads((HERE / "inputs" / name).read_text())
 
 
-def _source_stl_info(path: Path) -> dict[str, Any] | None:
-    """Cross-check with the repo's own STL reader (drone_product_delivery)."""
+class SetupError(RuntimeError):
+    """The build cannot run in this environment (missing PYTHONPATH=src or CadQuery)."""
+
+
+PYTHONPATH_MESSAGE = (
+    "hardware_splicer is not importable, so the STL cross-check with the repo's own reader cannot run. "
+    "Run from the repository root with PYTHONPATH=src, e.g.\n"
+    "    PYTHONPATH=src python examples/drone_proving_ground/build_hs3g_package.py --check")
+CADQUERY_MESSAGE = ("CadQuery is not importable; the frame CAD cannot be regenerated. "
+                    "Use a Python environment with cadquery installed.")
+
+
+def require_environment() -> None:
+    """Fail with a clear message instead of producing results that would read as drift."""
     try:
-        from hardware_splicer.drone_product_delivery import source_binary_stl_info
-    except Exception:  # pragma: no cover - src/ not on PYTHONPATH
-        return None
+        import hardware_splicer.drone_product_delivery  # noqa: F401
+    except ModuleNotFoundError as exc:
+        if (exc.name or "").split(".")[0] in {"hardware_splicer", "mecha_splicer"}:
+            raise SetupError(PYTHONPATH_MESSAGE) from exc
+        raise
+    if frame_mod.cq is None:
+        raise SetupError(CADQUERY_MESSAGE)
+
+
+def _source_stl_info(path: Path) -> dict[str, Any]:
+    """Cross-check with the repo's own STL reader (drone_product_delivery)."""
+    from hardware_splicer.drone_product_delivery import source_binary_stl_info
     info = source_binary_stl_info(path)
     return {"triangles": info["triangles"], "dimensions_mm": info["dimensions_mm"]}
 
 
-def compute(out_dir: Path) -> dict[str, Any]:
-    inputs = _load("parts.json")
-    table = _load("motor_f1404_3800kv_thrust.json")
-    strategies = _load("strategies.json")
-    review = _load("review_2026_11_14.json")
-    parts = inputs["parts"]
-    a = inputs["assumptions"]
-    mats = inputs["materials"]
-    cp = mats["carbon_plate"]
-    # cutter's stated density, converted: 1 lb = 453.59237 g, 1 in^3 = 16.387064 cm^3
-    rho = round(cp["density_lb_in3"] * 453.59237 / 16.387064, 4)
-    mats = json.loads(json.dumps(mats))
-    mats["carbon_plate"]["density_g_cm3"] = rho
-    F = frame_mod.FRAME
-    hw = design.hardware(F, parts, inputs["hardware_spec"])
+CAD_KEYS = ("frame_parameters", "cad_files", "cad_measured", "manufacturability", "mesh")
 
-    # --- CAD -------------------------------------------------------------
+
+def cad_stage(out_dir: Path) -> dict[str, Any]:
+    """Build, measure and export the frame; the only stage that needs CadQuery."""
+    require_environment()
+    inputs = _load("parts.json")
+    F = frame_mod.FRAME
     solids = frame_mod.build(F)
     measured = frame_mod.measure(solids, F)
     dfm = frame_mod.manufacturability(solids, F, inputs["cutter_rules"])
@@ -80,6 +96,34 @@ def compute(out_dir: Path) -> dict[str, Any]:
         rep["volume_error_pct"] = round(100.0 * (rep["signed_volume_mm3"] / cad_v - 1.0), 3)
         rep["repo_reader"] = _source_stl_info(stl)
         meshes[name] = rep
+    return {"frame_parameters": F, "cad_files": files, "cad_measured": measured,
+            "manufacturability": dfm, "mesh": meshes}
+
+
+def compute(out_dir: Path) -> dict[str, Any]:
+    return derive(cad_stage(out_dir))
+
+
+def derive(cad: dict[str, Any]) -> dict[str, Any]:
+    """Every number that follows from the CAD measurements and the cited inputs.
+
+    Pure Python: the tests rerun it on the committed CAD measurements without CadQuery.
+    """
+    inputs = _load("parts.json")
+    table = _load("motor_f1404_3800kv_thrust.json")
+    strategies = _load("strategies.json")
+    review = _load("review_2026_11_14.json")
+    parts = inputs["parts"]
+    a = inputs["assumptions"]
+    mats = inputs["materials"]
+    cp = mats["carbon_plate"]
+    # cutter's stated density, converted: 1 lb = 453.59237 g, 1 in^3 = 16.387064 cm^3
+    rho = round(cp["density_lb_in3"] * 453.59237 / 16.387064, 4)
+    mats = json.loads(json.dumps(mats))
+    mats["carbon_plate"]["density_g_cm3"] = rho
+    F = cad["frame_parameters"]
+    measured, dfm, files, meshes = cad["cad_measured"], cad["manufacturability"], cad["cad_files"], cad["mesh"]
+    hw = design.hardware(F, parts, inputs["hardware_spec"])
 
     # --- mass ------------------------------------------------------------
     vols = {"bottom": measured["bottom_volume_mm3"], "top": measured["top_volume_mm3"]}
@@ -267,6 +311,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="regenerate into a temp dir; exit 1 if committed README/results/STL differ")
     ap.add_argument("--pkg", type=Path, default=HERE, help=argparse.SUPPRESS)  # used by the tests
     args = ap.parse_args(argv)
+    try:
+        require_environment()
+    except SetupError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     if args.check:
         drift = check(args.pkg)
         for d in drift:

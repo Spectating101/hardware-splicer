@@ -24,7 +24,10 @@ from __future__ import annotations
 import math
 from typing import Any
 
-import cadquery as cq
+try:
+    import cadquery as cq
+except ImportError:  # FRAME and the pure-geometry helpers below still work without CadQuery
+    cq = None
 
 FRAME: dict[str, float] = {
     "wheelbase_mm": 135.0,          # motor-to-motor diagonal
@@ -152,6 +155,8 @@ def standoff_volume_mm3(p: dict[str, float] = FRAME, thread_d_mm: float = 2.5) -
 
 
 def build(p: dict[str, float] = FRAME) -> dict[str, cq.Workplane]:
+    if cq is None:
+        raise ImportError("hs3g_frame.build needs CadQuery; run with a Python that has cadquery installed")
     return {"bottom_plate": bottom_plate(p), "top_plate": top_plate(p)}
 
 
