@@ -1,4 +1,4 @@
-# HS cyberdeck hinge: retained shaft + modeled external cable
+# HS cyberdeck hinge: grooved shaft (retention FAILS as typed) + modeled external cable
 
 This is a **new reference engineering experiment**, stacked on the
 two-leaf hinge project in PR #333. Its purpose is to move beyond an
@@ -21,11 +21,29 @@ but does NOT claim measurements from a purchased phone or screen.
 - Source BRep check: 1.85 mm minimum retaining-ring to moving-leaf
   gap over 37 sampled hinge positions; 3.7 mm modeled TOTAL nominal
   permitted axial shaft float between both stop locations.
-- Ring outer radial diameter exceeds source knuckle bore and ring
-  inner radius clears the machined reference groove. STEP import
-  confirms distinct actual shaft/left/right hardware geometries.
+- Ring outer diameter exceeds the 3.5 mm knuckle bore by 2.7 mm and
+  the 0.70 mm ring sits in the 0.95 mm groove with 0.25 mm axial play.
+  STEP import confirms distinct actual shaft/left/right geometries.
+- **Retention check FAILS (status `FAILED_BLOCKED`).** A retaining
+  ring holds because its free inside diameter is *smaller* than the
+  groove diameter, so it springs onto the groove. The modeled ring's
+  2.34 mm free inside diameter is *larger* than the 2.2 mm groove
+  (interference -0.14 mm), so as typed it cannot grip the groove and
+  does not retain the pin. An earlier version of this check
+  (`ring_inner_clears_small_groove`) required the inside diameter to be
+  larger than the groove, which is the opposite condition, and
+  reported retention as passing. The corrected checks are
+  `ring_free_inside_diameter_below_groove_diameter`,
+  `ring_thickness_fits_groove_with_axial_play` (assumed 0.05 to 0.30 mm
+  play), `ring_outside_diameter_exceeds_bore_by_margin` (assumed at
+  least 1.6 mm over the bore) and `groove_diameter_below_pin_diameter`.
+  The dimensions were not changed; `nominal_retainer_geometry.blockers`
+  lists what must be fixed. The play and margin limits are assumptions
+  for a mechanical engineer to confirm.
 - No metal parts have been purchased, grooved or tested. The
-  modeled C-ring geometry is NOT a catalog-qualified circlip.
+  modeled C-ring geometry is NOT a catalog-qualified circlip
+  (`standard_part_verified: false`: the ring dimensions could not be
+  matched to a catalogue or standard ring).
   Retainer pullout load, vibrational motion, shaft wear, ring elastic
   deformation and realistic machining tolerances remain unknown.
 

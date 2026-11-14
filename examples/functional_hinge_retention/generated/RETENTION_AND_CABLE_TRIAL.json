@@ -94,18 +94,27 @@
     }
   },
   "nominal_retainer_geometry": {
+    "blockers": [
+      "ring free inside diameter 2.340 mm is not below groove diameter 2.200 mm: the ring cannot grip the groove",
+      "the rings are not shown to oppose axial escape (ring grip, overlap with bore or stop gap not satisfied)",
+      "standard part not verified: Ring dimensions are hand-typed and were not matched to any catalogue or standard retaining ring (e.g. DIN 471 / ISO 464 style); source a real ring and re-run the checks."
+    ],
     "checks": {
+      "groove_diameter_below_pin_diameter": true,
       "nominal_pin_running_clearance": true,
       "nominal_ring_to_5_knuckles_clearance": true,
       "nominal_total_axial_float_below_limit": true,
       "retention_cannot_be_axially_slid_past_full_shaft": true,
-      "ring_inner_clears_small_groove": true,
+      "ring_free_inside_diameter_below_groove_diameter": false,
+      "ring_outside_diameter_exceeds_bore_by_margin": true,
+      "ring_thickness_fits_groove_with_axial_play": true,
       "source_c_rings_are_valid_BRep": true,
       "source_pin_and_grooves_are_valid_BRep": true,
-      "two_ring_grooves_oppose_axial_escape": true
+      "two_ring_grooves_oppose_axial_escape": false
     },
     "clip_strength_or_axial_load_verified": false,
     "continuous_angle_clearance_certified": false,
+    "groove_diameter_mm": 2.2,
     "minimum_swept_clip_to_leaf_mm": 1.85,
     "minimum_swept_shaft_to_leaf_mm": 0.25,
     "motion_samples": [
@@ -295,15 +304,27 @@
         "minimum_retainer_ring_to_leaf_mm": 1.85
       }
     ],
-    "nominal_cad_checks_pass": true,
+    "nominal_cad_checks_pass": false,
     "nominal_clip_axial_stop_to_barrel_mm": 1.85,
-    "nominal_clip_groove_running_gap_mm": 0.07,
     "nominal_clip_radial_overlap_with_hinge_bore_mm": 1.35,
     "nominal_total_axial_float_mm": 3.7,
     "real_machined_pin_or_ring_available": false,
+    "retention_status": "FAILED_BLOCKED",
+    "ring_axial_play_in_groove_mm": 0.25,
+    "ring_check_assumptions": {
+      "grip_rule": "free inside diameter strictly less than groove diameter",
+      "ring_max_axial_play_mm": 0.3,
+      "ring_min_axial_play_mm": 0.05,
+      "ring_min_outside_diameter_excess_over_bore_mm": 1.6
+    },
+    "ring_free_inside_diameter_mm": 2.34,
+    "ring_interference_on_groove_mm": -0.14,
+    "ring_outside_diameter_excess_over_bore_mm": 2.7,
     "schema": "hs.cyberdeck_hinge_pin_retention_check.v1",
     "source_hinge": "balanced_60",
-    "spring_clip_installable_verified": false
+    "spring_clip_installable_verified": false,
+    "standard_part_note": "Ring dimensions are hand-typed and were not matched to any catalogue or standard retaining ring (e.g. DIN 471 / ISO 464 style); source a real ring and re-run the checks.",
+    "standard_part_verified": false
   },
   "schema": "hs.cyberdeck_hinge_retention_route_trial.v1",
   "selected_nominal_wire_fine_181_pose_sweep": {
@@ -7481,6 +7502,8 @@
   "source_parent_hinge_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
   "source_spec_sha256": "8bf1ac22d34b6d38e74be6a6ac6794f02eb2193593f587c0ee7677101865aeae",
   "validation_limitations": [
+    "Retention FAILS the corrected ring checks: the modeled ring free inside diameter (2.34mm) is larger than the 2.2mm groove, so it cannot grip it; see nominal_retainer_geometry.blockers.",
+    "Ring dimensions are not matched to any verified catalogue or standard retaining ring (standard_part_verified is false).",
     "Commercial spring clips and actual 3mm grooved metal shaft were not sourced.",
     "Split-ring elastic opening, groove tolerances, pullout load and endurance have not been measured.",
     "Wire spline endpoints deliberately float outside the printed panel: no physical anchors, connectors or strain relief.",
