@@ -129,7 +129,7 @@ def run_slicer_comparison(req:Mapping[str,Any],profile:Mapping[str,Any],
     _assert_valid_profile(profile,request)
     native_audit=audit_bundle(request,cad_dir)
     if native_audit["native_shape_count"]!=len(request["alternatives"]):
-        raise ValueError("not all candidate solids have been independently confirmed")
+        raise ValueError("not all candidate solids passed the native re-import audit")
     if out.exists():
         raise ValueError("no rerolls/overwrite: slicer experiment already exists")
     if not bin_path.is_file() or not bin_path.stat().st_size>0:

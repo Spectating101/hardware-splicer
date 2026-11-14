@@ -29,8 +29,8 @@ constraints. Failed candidates are retained and explained.
 
 ## Real toolchain and generated outputs
 
-CadQuery 2.6.1 authored six native solids; OCP independently reimported
-their STEP files; trimesh independently reimported their STL files and
+CadQuery 2.6.1 authored six native solids; OCP reimported
+their STEP files; trimesh reimported their STL files and
 confirmed each mesh is watertight. Each candidate passes nominal
 PCB-envelope nonintersection, declared slot clearance and wall thickness.
 
@@ -95,10 +95,16 @@ requirement-dependent, not one arbitrarily preferred shape.
 - The input geometry specification is versioned design_request.json.
 - Both original functional intent and native geometry generated
   artifacts carry SHA-256 source/provenance checks.
-- An independent audit reloads all STEP and STL files, recomputes
+- A native re-audit (NATIVE_AUDIT.json) reloads all STEP and STL files, recomputes
   BRep/mesh volumes, verifies SHA, prevents design-source substitutions,
   and confirms that the selected file is exactly the lowest-volume
   **feasible** candidate — not a fake output JSON label.
+- The audit's geometry comparison rebuilds each solid with the same
+  `build_cad` that wrote the STEP. It is reported as
+  `regeneration_determinism_verified` with
+  `regeneration_check_is_independent: false`: it shows the generator is
+  deterministic and the file was not edited, not that the geometry is
+  correct. No independent geometry checker exists.
 - Existing HS function-intent bridge creates five requirements,
   three functions, and one unresolved interface.
 - No new competing project registry is introduced.

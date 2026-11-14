@@ -110,3 +110,25 @@ def test_documented_example_reimport_against_source_if_present():
     audit=audit_bundle(original(),folder)
     assert audit["native_shape_count"]==6
     assert audit["selected"]=="ladder_58"
+
+
+def test_rebuild_comparison_is_labelled_regeneration_determinism_not_independent(tmp_path):
+    pytest.importorskip("cadquery")
+    req=original()
+    run_design(req,tmp_path/"trial")
+    audit=audit_bundle(req,tmp_path/"trial")
+    # The audit rebuilds with the very build_cad that wrote the STEP, so it
+    # can show determinism but not that the geometry is right.
+    assert audit["regeneration_determinism_verified"] is True
+    assert audit["regeneration_check_is_independent"] is False
+    assert "same build_cad" in audit["regeneration_check_method"]
+    assert audit["geometry_correctness_independently_verified"] is False
+    assert audit["real_CAD_and_STL_roundtrip_verified"] is True
+
+
+def test_committed_native_audit_and_slicer_copy_carry_the_same_labels():
+    committed=json.loads((HERE/"generated/NATIVE_AUDIT.json").read_text())
+    assert committed["regeneration_determinism_verified"] is True
+    assert committed["regeneration_check_is_independent"] is False
+    sliced=json.loads((HERE/"slicer_results/SLICER_COMPARISON.json").read_text())
+    assert sliced["native_CAD_audit"]==committed
