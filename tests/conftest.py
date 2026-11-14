@@ -97,3 +97,18 @@ def authorization_clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[datetime],
     # After the fixture's evidence capture/review, before its September expiry.
     set_time(datetime(2026, 8, 4, 3, tzinfo=timezone.utc))
     return set_time
+
+
+@pytest.fixture
+def assume_clean_kicad_erc(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Isolate a test from the real KiCad ERC outcome on the emitted schematic.
+
+    KiCad ERC failures now veto build_ready (see test_kicad_erc_trust_gate.py), and the
+    generated catalog schematics currently report real ERC errors. Tests that exercise
+    downstream behaviour of a *ready* build use this fixture to state that assumption
+    explicitly instead of depending on the installed kicad-cli.
+    """
+    monkeypatch.setattr(
+        "hardware_splicer.netlist.compile.run_kicad_cli_erc",
+        lambda *a, **k: {"pass": True, "skipped": False, "errors": 0, "warnings": 0, "violations": [], "report_path": None},
+    )

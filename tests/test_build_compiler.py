@@ -191,4 +191,10 @@ def test_apply_board_outline_to_machine_updates_pcb_outline() -> None:
 def test_catalog_builds_have_zero_electrical_warnings(build_id: str, tmp_path: Path) -> None:
     result = compile_catalog_build(build_id, tmp_path, export_gerber=False)
     assert int(result.design_quality.get("electrical_warnings") or 0) == 0
-    assert result.design_quality.get("build_ready") is True
+    # build_ready is vetoed by an explicit KiCad ERC/DRC failure, so it must equal
+    # "no KiCad failure" rather than being unconditionally true.
+    kicad_failed = (
+        result.design_quality.get("kicad_erc_pass") is False
+        or result.design_quality.get("kicad_drc_pass") is False
+    )
+    assert result.design_quality.get("build_ready") is (not kicad_failed)

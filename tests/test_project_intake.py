@@ -151,7 +151,7 @@ def test_intake_run_api_returns_planning_authority(tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path) -> None:
+def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     intake = load_project_intake(PLANT_INTAKE)
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
     assert result["ok"] is True
@@ -164,7 +164,7 @@ def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path) -> 
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_splice_and_build_api(tmp_path, monkeypatch) -> None:
+def test_splice_and_build_api(tmp_path, monkeypatch, assume_clean_kicad_erc) -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 

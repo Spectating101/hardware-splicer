@@ -37,6 +37,8 @@ def test_trust_report_marks_build_trusted_when_clean(tmp_path: Path) -> None:
         "kicad_drc_pass": True,
         "kicad_drc_errors": 0,
         "erc_pass": True,
+        "kicad_erc_pass": True,
+        "kicad_erc_errors": 0,
         "fab_recommendation": "review_required_preview_copper",
     }
     sim = {"simulation_pass": True, "skipped": False, "power_budget": {"estimated_load_a": 0.4, "margin_a": 0.5}}
@@ -63,6 +65,11 @@ def test_compile_emits_truthful_trust_report(tmp_path: Path) -> None:
         assert "no verification claim made" in payload["summary_markdown"].lower()
     else:
         assert payload["gates"]["kicad_drc_available"] is True
-        assert payload.get("trust_level") in {"build_trusted", "review_recommended"}
+        if payload["gates"]["kicad_erc_pass"]:
+            assert payload.get("trust_level") in {"build_trusted", "review_recommended"}
+        else:
+            # A KiCad ERC failure (or missing ERC receipt) must block trust, not be ignored.
+            assert payload.get("trust_level") == "blocked"
+            assert any("KiCad ERC" in row for row in payload["blockers"])
 
     assert result.design_quality.get("trust_report_path")

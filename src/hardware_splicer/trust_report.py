@@ -22,12 +22,17 @@ def build_trust_report(
     drc_errors = q.get("kicad_drc_errors")
     drc_available = drc_errors is not None or q.get("kicad_drc_pass") is not None
 
+    erc_available = q.get("kicad_erc_pass") is not None and not q.get("kicad_erc_skipped")
+    erc_errors = int(q.get("kicad_erc_errors") or 0)
+    drc_pass_value = bool(q.get("kicad_drc_pass")) and int(drc_errors or 0) == 0
+
     gates = {
         "erc_pass": bool(q.get("erc_pass") if q.get("erc_pass") is not None else erc_body.get("pass")),
         "electrical_safety_pass": bool(q.get("electrical_safety_pass")),
         "kicad_drc_available": bool(drc_available),
-        "kicad_drc_pass": bool(q.get("kicad_drc_pass")) if drc_available else False,
-        "kicad_erc_pass": bool(q.get("kicad_erc_pass", True)),
+        "kicad_drc_pass": drc_pass_value if drc_available else False,
+        "kicad_erc_available": bool(erc_available),
+        "kicad_erc_pass": bool(q.get("kicad_erc_pass")) if erc_available else False,
         "build_graph_compiled": bool(q.get("build_graph_compiled")),
         "simulation_pass": sim.get("simulation_pass"),
         "simulation_skipped": bool(sim.get("skipped")),
@@ -46,6 +51,10 @@ def build_trust_report(
         blockers.append(f"KiCad DRC has {int(drc_errors or 0)} error(s).")
     if gates["erc_pass"] is False:
         blockers.append("Schematic ERC failed.")
+    if not gates["kicad_erc_available"]:
+        blockers.append("KiCad ERC was not available; no clean ERC receipt exists.")
+    elif not gates["kicad_erc_pass"]:
+        blockers.append(f"KiCad ERC has {erc_errors} error(s).")
     if sim.get("enabled") and sim.get("simulation_pass") is False:
         blockers.append("Electrical simulation or power budget check failed.")
     for issue in (sim.get("power_budget") or {}).get("issues") or []:
@@ -60,6 +69,12 @@ def build_trust_report(
     if q.get("fab_recommendation"):
         warnings.append(f"Fab guidance: {q.get('fab_recommendation')}")
 
+    # A failed KiCad check overrides the compiler's own build_ready claim.
+    kicad_failed = (gates["kicad_drc_available"] and not gates["kicad_drc_pass"]) or (
+        gates["kicad_erc_available"] and not gates["kicad_erc_pass"]
+    )
+    effective_build_ready = bool(q.get("build_ready")) and not kicad_failed
+
     score = 0.0
     if gates["build_graph_compiled"]:
         score += 0.15
@@ -68,16 +83,18 @@ def build_trust_report(
     if gates["kicad_drc_pass"]:
         score += 0.25
     if gates["erc_pass"]:
-        score += 0.15
+        score += 0.10
+    if gates["kicad_erc_pass"]:
+        score += 0.05
     if sim.get("simulation_pass") is True:
         score += 0.15
     elif sim.get("skipped"):
         score += 0.05
-    if bool(q.get("build_ready")):
+    if effective_build_ready:
         score += 0.1
 
     trust_level = "blocked"
-    if not blockers and bool(q.get("build_ready")):
+    if not blockers and effective_build_ready:
         trust_level = "build_trusted"
     elif not blockers:
         trust_level = "review_recommended"
@@ -92,6 +109,12 @@ def build_trust_report(
         summary_lines.append("KiCad DRC: clean.")
     else:
         summary_lines.append("KiCad DRC: failed.")
+    if not gates["kicad_erc_available"]:
+        summary_lines.append("KiCad ERC: unavailable; no verification claim made.")
+    elif gates["kicad_erc_pass"]:
+        summary_lines.append("KiCad ERC: clean.")
+    else:
+        summary_lines.append("KiCad ERC: failed.")
     if sim.get("skipped"):
         summary_lines.append("Simulation: skipped.")
     elif sim.get("simulation_pass") is True:
@@ -114,7 +137,7 @@ def build_trust_report(
         "warnings": warnings,
         "summary_markdown": "\n".join(summary_lines),
         "design_quality": {
-            "build_ready": q.get("build_ready"),
+            "build_ready": effective_build_ready,
             "fabrication_ready": q.get("fabrication_ready"),
             "copper_tier": q.get("copper_tier"),
             "fab_recommendation": q.get("fab_recommendation"),
