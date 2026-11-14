@@ -36,7 +36,7 @@ def layout(frame: dict[str, float], parts: list[dict[str, Any]], motors: list[tu
     gps = part(parts, "gps")
     bat = part(parts, "battery")
     top_z = t + frame["standoff_len_mm"]
-    stack_z0 = t + 1.0  # grommet lift
+    stack_z0 = t + frame["stack_spacer_len_mm"]  # ESC sits on nylon spacers; the strap passes under it
     items: list[dict[str, Any]] = [
         {"id": "stack", "xy": (0.0, 0.0), "half": (stack["footprint_mm"][0] / 2, stack["footprint_mm"][1] / 2),
          "z": (stack_z0, stack_z0 + stack["height_mm"])},
@@ -49,7 +49,8 @@ def layout(frame: dict[str, float], parts: list[dict[str, Any]], motors: list[tu
          "z": (top_z, top_z + frame["top_t_mm"])},
         {"id": "gps", "xy": (-14.0, 0.0), "half": (gps["size_mm"][0] / 2, gps["size_mm"][1] / 2),
          "z": (top_z + frame["top_t_mm"], top_z + frame["top_t_mm"] + gps["size_mm"][2])},
-        {"id": "battery", "xy": (0.0, 0.0), "half": (bat["size_mm"][0] / 2, bat["size_mm"][1] / 2),
+        # crosswise: the pack's long side runs along y, so the strap wraps its 30 mm width
+        {"id": "battery", "xy": (0.0, 0.0), "half": (bat["size_mm"][1] / 2, bat["size_mm"][0] / 2),
          "z": (-bat["size_mm"][2], 0.0)},
     ]
     for sx in (-1, 1):
@@ -63,6 +64,89 @@ def layout(frame: dict[str, float], parts: list[dict[str, Any]], motors: list[tu
     return items
 
 
+def battery_strap(frame: dict[str, float], parts: list[dict[str, Any]], battery_x: float,
+                  slot_l_mm: float) -> dict[str, Any]:
+    """Does the strap, as drawn, wrap the pack and clear the stack?
+
+    The strap runs along x: up through one slot, over the plate top under the
+    ESC, down through the other slot and round the underside of the pack. That
+    works only if (1) both slots lie outside the pack's x extent, so the strap
+    can pass down the pack's sides; (2) the strap's top run, |y| <= w/2, clears
+    the stack's M3 spacers at y = +-pitch/2; (3) the spacer height leaves room
+    for the strap under the ESC; (4) the slots are at least as long as the strap
+    is wide.
+    """
+    bat = part(parts, "battery")
+    half_x = bat["size_mm"][1] / 2.0  # crosswise
+    slot_inner = frame["strap_slot_x_mm"] - frame["strap_slot_w_mm"] / 2.0
+    pack_x = (battery_x - half_x, battery_x + half_x)
+    spacer_r = frame["stack_spacer_af_mm"] / math.sqrt(3)  # hex circumradius
+    side_gap = frame["stack_pitch_mm"] / 2.0 - spacer_r - frame["strap_w_mm"] / 2.0
+    under_gap = frame["stack_spacer_len_mm"] - frame["strap_t_mm"]
+    slot_y_end = slot_l_mm / 2.0
+    return {
+        "pack_orientation": "crosswise (58 mm side along y)",
+        "pack_x_extent_mm": [round(v, 2) for v in pack_x],
+        "slot_inner_edges_x_mm": [round(-slot_inner, 2), round(slot_inner, 2)],
+        "pack_side_to_slot_mm": [round(pack_x[0] + slot_inner, 2), round(slot_inner - pack_x[1], 2)],
+        "strap_w_mm": frame["strap_w_mm"],
+        "slot_y_end_mm": round(slot_y_end, 2),
+        "strap_side_gap_to_stack_spacer_mm": round(side_gap, 2),
+        "strap_gap_under_esc_mm": round(under_gap, 2),
+        "slots_outside_pack": -slot_inner <= pack_x[0] and pack_x[1] <= slot_inner,
+        "strap_clears_stack_spacers": side_gap > 0,
+        "strap_fits_under_esc": under_gap > 0,
+        "slot_fits_strap": slot_l_mm >= frame["strap_w_mm"],
+        "pack_spans_strap": bat["size_mm"][0] >= frame["strap_w_mm"],
+    }
+
+
+def screw_mass_g(d_mm: float, length_mm: float, head_d_mm: float, head_h_mm: float, rho: float) -> float:
+    """Shank as a full-diameter cylinder plus the head as a cylinder: an upper bound."""
+    v = math.pi / 4 * d_mm ** 2 * length_mm + math.pi / 4 * head_d_mm ** 2 * head_h_mm
+    return v * rho / 1000.0
+
+
+def hardware(frame: dict[str, float], parts: list[dict[str, Any]], spec: dict[str, Any]) -> dict[str, Any]:
+    """Itemised fasteners with lengths chosen from the stack-up, and their mass."""
+    stack = part(parts, "stack")
+    rho = {k: v["density_g_cm3"] for k, v in spec["materials"].items()}
+    t = frame["bottom_t_mm"]
+    heads = spec["button_heads_iso7380"]
+    std = spec["standard_lengths_mm"]
+    # stack screw: from under the plate through plate, spacer, the stack, and a nylon lock nut
+    need_stack = t + frame["stack_spacer_len_mm"] + stack["height_mm"] + spec["m3_nylon_locknut_h_mm"]
+    stack_len = min(L for L in std["M3"] if L >= need_stack)
+    motor_len = spec["motor_screw_len_mm"]
+    engagement = motor_len - t
+    items = [
+        {"id": "motor_screw", "what": f"M2 x {motor_len:g} button head, steel", "qty": 16,
+         "unit_g": screw_mass_g(2.0, motor_len, *heads["M2"], rho["steel"])},
+        {"id": "stack_screw", "what": f"M3 x {stack_len:g} button head, titanium", "qty": 4,
+         "unit_g": screw_mass_g(3.0, stack_len, *heads["M3"], rho["titanium"])},
+        {"id": "standoff_screw", "what": "M3 x 6 button head, titanium", "qty": 8,
+         "unit_g": screw_mass_g(3.0, 6.0, *heads["M3"], rho["titanium"])},
+        {"id": "stack_spacer", "what": f"M3 x {frame['stack_spacer_len_mm']:g} nylon hex spacer, {frame['stack_spacer_af_mm']:g} mm AF",
+         "qty": 4, "unit_g": (math.sqrt(3) / 2 * frame["stack_spacer_af_mm"] ** 2 - math.pi / 4 * 3.2 ** 2)
+         * frame["stack_spacer_len_mm"] * rho["nylon"] / 1000.0},
+        {"id": "stack_nut", "what": "M3 nylon lock nut", "qty": 4, "unit_g": spec["m3_nylon_locknut_g"]},
+        {"id": "strap", "what": f"{frame['strap_w_mm']:g} mm battery strap", "qty": 1, "unit_g": spec["strap_g"]},
+    ]
+    for it in items:
+        it["unit_g"] = round(it["unit_g"], 3)
+        it["total_g"] = round(it["unit_g"] * it["qty"], 3)
+    return {
+        "items": items,
+        "total_g": round(sum(it["total_g"] for it in items), 2),
+        "stack_screw_needed_mm": round(need_stack, 2),
+        "stack_screw_len_mm": stack_len,
+        "motor_screw_len_mm": motor_len,
+        "motor_thread_engagement_mm": round(engagement, 2),
+        "motor_thread_engagement_x_d": round(engagement / 2.0, 2),
+        "motor_thread_depth_verified": False,
+    }
+
+
 def prop_disc(frame: dict[str, float], parts: list[dict[str, Any]]) -> dict[str, float]:
     motor, prop = part(parts, "motor"), part(parts, "prop")
     z0 = frame["bottom_t_mm"] + motor["body_height_mm"]
@@ -70,17 +154,22 @@ def prop_disc(frame: dict[str, float], parts: list[dict[str, Any]]) -> dict[str,
 
 
 def mass_budget(parts: list[dict[str, Any]], frame_volumes_mm3: dict[str, float], standoff_mm3: float,
-                materials: dict[str, Any], density: float | None = None) -> dict[str, Any]:
+                materials: dict[str, Any], density: float | None = None,
+                hardware_g: float | None = None) -> dict[str, Any]:
     rho_cf = materials["carbon_plate"]["density_g_cm3"] if density is None else density
     rho_al = materials["aluminium_7075"]["density_g_cm3"]
     rows: list[dict[str, Any]] = []
     frame_g = (frame_volumes_mm3["bottom"] + frame_volumes_mm3["top"]) * rho_cf / 1000.0
     standoff_g = standoff_mm3 * rho_al / 1000.0
     for p in parts:
-        if p["id"] == "frame_cut":
+        if "component_masses_g" in p:
+            m, n = sum(p["component_masses_g"].values()), p["qty"]
+        elif p["id"] == "frame_cut":
             m, n = frame_g, 1
         elif p["id"] == "standoff":
             m, n = standoff_g, p["qty"]
+        elif p["id"] == "hardware" and hardware_g is not None:
+            m, n = hardware_g, 1
         elif p["id"] == "battery":
             m, n = p["unit_mass_g"], p["on_aircraft"]
         elif p["id"] == "prop":
@@ -199,6 +288,9 @@ def propulsion(table: dict[str, Any], prop_name: str, auw_g: float, cells: int, 
     i_hover = p_total / v_nom
     usable_ah = battery["capacity_mah"] / 1000.0 * a["usable_capacity_fraction"]["value"]
     t_hover_min = usable_ah / i_hover * 60.0
+    # the optimistic branch, quoted only as an upper bound
+    i_hover_fit = (4 * min(p_fit, p_15) + a["avionics_power_w"]["value"]) / v_nom
+    t_hover_fit_min = usable_ah / i_hover_fit * 60.0
 
     full = rows[-1]
     max_thrust = 4 * full["thrust_g"]
@@ -225,6 +317,8 @@ def propulsion(table: dict[str, Any], prop_name: str, auw_g: float, cells: int, 
         "overall_efficiency_hover": round(p_ideal / p_motor, 3),
         "hover_current_a": round(i_hover, 2),
         "hover_time_min": round(t_hover_min, 1),
+        "hover_time_upper_bound_min": round(t_hover_fit_min, 1),
+        "hover_extrapolation_x": round(rows[0]["thrust_g"] / hover_g, 2),
         "max_thrust_total_g": round(max_thrust, 1),
         "tw_ratio_full": round(max_thrust / auw_g, 2),
         "max_current_a": round(i_max, 1),
@@ -251,16 +345,33 @@ def propulsion(table: dict[str, Any], prop_name: str, auw_g: float, cells: int, 
 # ---------------------------------------------------------------------------
 
 
-def arm_root_radius(frame: dict[str, float]) -> float:
-    """Where the 45-degree arm axis leaves the body rectangle."""
+def arm_root_radius(frame: dict[str, float], clamp: str = "axis") -> float:
+    """Distance from the frame centre, along the 45-degree arm axis, of the clamp.
+
+    ``axis``: where the arm's centre line leaves the body rectangle (stiffest
+    reasonable clamp). ``far_edge``: where the arm's leading edge leaves the
+    body, i.e. the whole arm width is free beyond this point (most flexible).
+    """
     hx, hy = frame["body_l_mm"] / 2.0, frame["body_w_mm"] / 2.0
-    s = min(hx, hy)  # along the diagonal the smaller half-size is reached first
-    return math.hypot(s, s)
+    c = math.sqrt(0.5)
+    if clamp == "axis":
+        return min(hx, hy) / c
+    h = frame["arm_w_mm"] / 2.0
+    # edge line: (c(s - h), c(s + h)); it leaves through y = hy or x = hx
+    return min(hy / c - h, hx / c + h)
+
+
+def bias_modulus_gpa(e1_gpa: float, e2_gpa: float, g12_gpa: float, nu12: float, theta_deg: float) -> float:
+    """Off-axis Young's modulus of an orthotropic ply (classical lamination theory)."""
+    c, s = math.cos(math.radians(theta_deg)), math.sin(math.radians(theta_deg))
+    inv = c ** 4 / e1_gpa + s ** 4 / e2_gpa + (1.0 / g12_gpa - 2.0 * nu12 / e1_gpa) * s * s * c * c
+    return 1.0 / inv
 
 
 def arm_dynamics(frame: dict[str, float], e_gpa: float, rho_g_cm3: float, tip_g: float,
-                 max_thrust_g: float, hover_rpm: float, max_rpm: float, blades: int, g: float) -> dict[str, Any]:
-    L = frame["wheelbase_mm"] / 2.0 - arm_root_radius(frame)  # mm
+                 max_thrust_g: float, hover_rpm: float, max_rpm: float, blades: int, g: float,
+                 clamp: str = "axis") -> dict[str, Any]:
+    L = frame["wheelbase_mm"] / 2.0 - arm_root_radius(frame, clamp)  # mm
     b, h = frame["arm_w_mm"], frame["bottom_t_mm"]
     I = b * h ** 3 / 12.0  # mm^4, bending out of plane (thrust direction)
     E = e_gpa * 1000.0  # N/mm^2
@@ -275,6 +386,8 @@ def arm_dynamics(frame: dict[str, float], e_gpa: float, rho_g_cm3: float, tip_g:
     in_band = f_rot_hover <= f1 <= f_rot_max
     crossing_rpm = f1 * 60.0
     return {
+        "clamp": clamp,
+        "e_gpa": round(e_gpa, 2),
         "free_length_mm": round(L, 2),
         "section_mm": [b, h],
         "I_mm4": round(I, 2),
