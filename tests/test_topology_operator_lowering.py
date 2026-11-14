@@ -53,7 +53,7 @@ def test_h_bridge_synthesis_does_not_bypass_unknown_carrier_current_contract(tmp
     assert current_constraint["value"]["driver_rating_a"] is None
 
 
-def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tmp_path) -> None:
+def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tmp_path, assume_clean_kicad_erc) -> None:
     result = synthesize_circuit(
         {
             "goal": "condition a noisy 5V analog sensor output into an ESP32 ADC with an RC filter",
@@ -93,7 +93,7 @@ def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tm
     assert bom_lines["C1"]["footprint"] == "Capacitor_SMD:C_0603_1608Metric"
 
 
-def test_i2c_pullup_lowering_emits_two_physical_bus_resistors(tmp_path) -> None:
+def test_i2c_pullup_lowering_emits_two_physical_bus_resistors(tmp_path, assume_clean_kicad_erc) -> None:
     result = synthesize_circuit(
         {
             "goal": "wire an ESP32 to a BME280 environmental sensor",
@@ -120,7 +120,7 @@ def test_i2c_pullup_lowering_emits_two_physical_bus_resistors(tmp_path) -> None:
     assert result["compose_result"]["netlist"]["metadata"]["physical_support_lowering"]["node_count"] == 2
 
 
-def test_battery_power_lowering_emits_protected_cell_evidence_item(tmp_path) -> None:
+def test_battery_power_lowering_emits_protected_cell_evidence_item(tmp_path, assume_clean_kicad_erc) -> None:
     result = synthesize_circuit(
         {
             "goal": "make a portable 5V rail from a protected LiPo using TP4056 and boost",

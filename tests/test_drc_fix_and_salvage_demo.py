@@ -187,7 +187,7 @@ def test_drc_fix_loop_records_attempts(tmp_path: Path, monkeypatch: pytest.Monke
     not (ROOT / "examples" / "intakes" / "salvage_wifi_logger_brief.json").is_file(),
     reason="salvage intake missing",
 )
-def test_salvage_bringup_demo_script(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_salvage_bringup_demo_script(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, assume_clean_kicad_erc: None) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
     from hardware_splicer.salvage_bringup import run_salvage_bringup

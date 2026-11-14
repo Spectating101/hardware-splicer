@@ -122,7 +122,7 @@ async def list_tools() -> list[Tool]:
                     "export_gerber": {"type": "boolean", "default": False},
                     "fab_profile": {"type": "boolean", "default": False},
                     "arbitrary": {"type": "boolean", "default": False},
-                    "allow_llm_first": {"type": "boolean", "default": True},
+                    "allow_llm_first": {"type": "boolean", "default": False},
                     "drc_fixup": {
                         "type": "object",
                         "description": "Geometry hints from prior DRC loop (edge_pad_extra_mm, module_gap_extra_mm, via_clearance_mm).",
@@ -161,7 +161,7 @@ async def list_tools() -> list[Tool]:
                     "salvage_mode": {"type": "boolean"},
                     "out_dir": {"type": "string"},
                     "export_gerber": {"type": "boolean", "default": False},
-                    "allow_llm_first": {"type": "boolean", "default": True},
+                    "allow_llm_first": {"type": "boolean", "default": False},
                     "drc_fixup": {"type": "object"},
                     "max_manual_retries": {"type": "integer", "default": 2},
                     "finalize_package": {"type": "boolean", "default": False},
@@ -260,6 +260,7 @@ async def list_tools() -> list[Tool]:
                     "out_dir": {"type": "string"},
                     "export_gerber": {"type": "boolean", "default": False},
                     "allow_qwen": {"type": "boolean", "default": True},
+                    "allow_llm_first": {"type": "boolean", "default": False},
                 },
                 "required": ["goal"],
             },
@@ -566,7 +567,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 export_gerber=bool(args.get("export_gerber")),
                 fab_profile=bool(args.get("fab_profile")),
                 arbitrary=bool(args.get("arbitrary")),
-                allow_llm_first=bool(args.get("allow_llm_first", True)),
+                allow_llm_first=bool(args.get("allow_llm_first", False)),
                 drc_fixup=args.get("drc_fixup"),
             )
         )
@@ -587,7 +588,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 salvage_mode=bool(args.get("salvage_mode")),
                 out_dir=args.get("out_dir"),
                 export_gerber=bool(args.get("export_gerber")),
-                allow_llm_first=bool(args.get("allow_llm_first", True)),
+                allow_llm_first=bool(args.get("allow_llm_first", False)),
                 drc_fixup=args.get("drc_fixup"),
                 max_manual_retries=int(args.get("max_manual_retries", 2)),
                 finalize_package=bool(args.get("finalize_package")),
@@ -654,6 +655,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 out_dir=args.get("out_dir"),
                 export_gerber=bool(args.get("export_gerber")),
                 allow_qwen=bool(args.get("allow_qwen", True)),
+                allow_llm_first=bool(args.get("allow_llm_first", False)),
             )
         )
     if name == "hs_donor_board_vision":

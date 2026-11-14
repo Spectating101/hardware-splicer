@@ -99,7 +99,7 @@ def test_bringup_from_compiled_graph_marks_sourced() -> None:
     assert "compiled build_graph" in " ".join(card.get("bench_checks") or [])
 
 
-def test_enabot_post_compile_bringup_matches_graph(tmp_path: Path) -> None:
+def test_enabot_post_compile_bringup_matches_graph(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     intake = load_project_intake(ROOT / "examples" / "intakes" / "splice_vibe_enabot_lite_brief.json")
     result = splice_and_build_from_intake(
         intake,

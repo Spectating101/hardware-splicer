@@ -135,3 +135,14 @@ def test_gateway_rejects_invalid_raw_base64_before_backend_dispatch():
                 app=app,
             )
         )
+
+
+def test_readme_operation_count_is_not_stale():
+    """README may state a backend operation count only if it equals the generated catalog."""
+    import re
+    from pathlib import Path
+
+    readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+    real = len(operation_catalog(create_product_app()))
+    stated = {int(n) for n in re.findall(r"\b(\d{2,4})\s+canonical\s+backend\s+operations", readme)}
+    assert stated <= {real}, f"README states {stated}, generated catalog has {real}"

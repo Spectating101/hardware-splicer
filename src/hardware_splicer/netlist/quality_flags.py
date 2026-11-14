@@ -85,9 +85,21 @@ def finalize_launch_quality(quality: Dict[str, Any]) -> Dict[str, Any]:
         "ok": quality.get("freerouting_ok"),
         "track_count": quality.get("freerouting_track_count"),
     }
-    return attach_launch_quality_flags(
+    quality = attach_launch_quality_flags(
         quality,
         freerouting_report=freerouting,
         kicad_drc=kicad_drc,
         kicad_erc=kicad_erc,
     )
+    # An explicit KiCad failure overrides the compiler's own build_ready claim.
+    # A skipped/unavailable KiCad run (pass is None) never upgrades or downgrades it.
+    kicad_blockers = []
+    if quality.get("kicad_erc_pass") is False:
+        kicad_blockers.append(f"KiCad ERC failed with {int(quality.get('kicad_erc_errors') or 0)} error(s).")
+    if quality.get("kicad_drc_pass") is False or int(quality.get("kicad_drc_errors") or 0) > 0:
+        kicad_blockers.append(f"KiCad DRC failed with {int(quality.get('kicad_drc_errors') or 0)} error(s).")
+    if kicad_blockers:
+        quality["build_ready"] = False
+        quality["fabrication_ready"] = False
+        quality["kicad_blockers"] = kicad_blockers
+    return quality
