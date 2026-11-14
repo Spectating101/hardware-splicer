@@ -1,4 +1,4 @@
-name: Keyboard splice - copper island model
+name: Keyboard splice - native geometry and interposer
 
 on:
   pull_request:
@@ -28,12 +28,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install HS test dependencies and exact optional copper solver
+      - name: Install HS tests and native polygon solver
         run: python -m pip install -e '.[dev,keyboard-splice]'
-      - name: Assert actual Shapely is installed (no synthetic success)
-        run: python -c "import shapely; print('Shapely', shapely.__version__)"
-      - name: Test cut geometry, copper graph, closed-loop replay and release denial
+      - name: Confirm genuine NumPy and Shapely
+        run: python -c "import shapely,numpy; print('Shapely',shapely.__version__,'NumPy',numpy.__version__)"
+      - name: Exercise cut search, copper pours, bridge replay, and guarded release
         env:
           PYTHONPATH: src
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
-        run: python -m pytest -q -p no:cacheprovider tests/test_keyboard_splice.py tests/test_keyboard_splice_islands.py tests/test_keyboard_splice_handoff.py
+        run: |
+          python -m pytest -q -p no:cacheprovider \
+            tests/test_keyboard_splice.py \
+            tests/test_keyboard_splice_islands.py \
+            tests/test_keyboard_splice_path.py \
+            tests/test_keyboard_splice_handoff.py \
+            tests/test_keyboard_splice_evidence.py
+
+  check-native-kicad-interposer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install KiCad 9 with actual PCB and footprints
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends kicad kicad-footprints
+          case "$(kicad-cli version)" in
+            9.*) ;;
+            *) echo "Native KiCad 9.x required" >&2; exit 1;;
+          esac
+          /usr/bin/python3 -c "import pcbnew; print(pcbnew.Version())"
+          test -f /usr/share/kicad/footprints/Connector_PinHeader_2.54mm.pretty/PinHeader_1x03_P2.54mm_Vertical.kicad_mod
+      - name: Install HS test harness
+        run: python -m pip install -e '.[dev,keyboard-splice]'
+      - name: Verify native PCB generation, DRC and refused physical release
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: python -m pytest -q -p no:cacheprovider tests/test_keyboard_splice_interposer.py

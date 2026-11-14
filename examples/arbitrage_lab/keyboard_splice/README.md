@@ -127,3 +127,64 @@ Proof files:
 6. **Membrane keyboards:** Silver-ink membrane circuits are not rigid-PCB copper. They require a distinct conductor/connector and mechanical-process model.
 
 **Commerce outcome:** no donor acquisition, no recovered products and no validated resale economics. This is an engineering-enablement milestone for a future merchant conversion workflow, not proof that conversions are economically viable.
+
+
+## Stage III: copper pours, stepped cuts, native KiCad bridge PCB (2026-11-15)
+
+This section **supersedes the limitations in Stages I–II** above. Their frozen results remain unchanged as a baseline. The native system now models the source's filled copper zones, optimizes a bounded non-straight saw path, virtually cuts the copper geometry, computes disconnected islands, generates proposed bridge channels, and builds a real editable KiCad 9 board with standard-library 2.54-mm pin-header footprints.
+
+**No physical keyboard, cable, PCB, part order, soldering, or real test has occurred.**
+
+### One-command engineering replay
+
+Run within Hardware Splicer using a PCB reference previously confirmed compatible with native KiCad 9. An optional Shapely/NumPy Python and a separate KiCad Python may be used:
+
+    python -m pip install -e '.[dev,keyboard-splice]'
+
+    PYTHONPATH=src python scripts/hs_keyboard_splice_probe.py \
+      --pcb /path/to/reference.kicad_pcb \
+      --system-python /usr/bin/python3 \
+      --topology-python /path/to/hs-venv/bin/python \
+      --out /tmp/reuse/CUT_OVERVIEW.json \
+      --postcut-islands-json /tmp/reuse/POSTCUT_ISLANDS.json \
+      --postcut-edges-csv /tmp/reuse/BRIDGE_CANDIDATES.csv \
+      --machine-project-json /tmp/reuse/MACHINE_PROJECT_HANDOFF.json \
+      --optimize-stepped \
+      --stepped-path-json /tmp/reuse/STEPPED_CUT.json \
+      --interposer-out /tmp/reuse/interposer
+
+This produces hash-linked reports and a native `reference_bridge_interposer.kicad_pcb`, with native KiCad DRC verification. It **does not** produce a fabrication-authorized package, a physically valid cable pinout, an ordered PCB, or proof of electrical function.
+
+### Reproduced GH60 comparison
+
+| Metric | Original straight/track-only model | New zone-aware optimized path |
+|---|---:|---:|
+| Proposed cut form | 1 mm straight kerf | 1 mm stepped polyline |
+| Original model islands | 105 | 77 |
+| Model islands after material removal | 146 | 110 |
+| Original groups split | 31 | 25 |
+| Candidate solderable bridge channels | 22 | 19 |
+| Groups still disconnected after virtual bridge replay | 11 | **8** |
+| Path risk | Not clear of switches/pads | 1 pad, 2 switch keepouts; 0 vias, 0 critical controller keepouts |
+| Native interposer | Not generated | KiCad 9 PCB; DRC: 0 errors, 0 warnings, 0 unconnected |
+| Physical/fabrication release | DENIED | **DENIED** |
+
+These are **different models and cuts**, so the count reductions combine better copper representation and a changed cut route; they are not evidence of measured labor savings. The stepped path affects 25 named reference nets and is 116.4 mm long. The 19-channel PCB is a real, DRC-clean, research-only pass-through *interposer preview*. The second-stage track-only result had omitted copper pours, while the new importer includes two filled GND copper zones and correctly treats five rule areas as nonconducting.
+
+KiCad 9's import of the old GH60 copper fill contains self-intersecting zone boundaries. Shapely repairs their polygonal geometry for analysis, but zero-width contact topology is uncertain, and **ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR** remains an explicit blocker. Oval-pad geometry is also approximate. The source includes unverified alternative key footprints, and no physical model registration exists.
+
+The interposer J1/J2 use actual KiCad standard-library `Connector_PinHeader_2.54mm` footprints. This is **not an established mating connector choice for a split keyboard**. The 2.54-mm pitch is a routing demonstration, not a validated physical interface; no cable, locking mechanism, strain relief, connector MPN, enclosure, IPC manufacturing review, bench test, or supplier quote is provided. Repeated source nets are deliberately routed on independent channel nets rather than shorted indiscriminately.
+
+### Frozen proof and tests
+
+- `evidence/gh60_round2/CUT_OVERVIEW.json`: result plus blocked canonical release.
+- `evidence/gh60_round2/STEPPED_CUT.json`: immutable proposed route and collision inventory.
+- `evidence/gh60_round2/POSTCUT_ISLANDS.json`: zone-aware island graph, source hash, candidate pads and bridge replay.
+- `evidence/gh60_round2/BRIDGE_CANDIDATES.csv`: modeled bridge edges, not a soldering instruction.
+- `evidence/gh60_round2/MACHINE_PROJECT_HANDOFF.json`: canonical HS blocked physical requirements and verification.
+- `evidence/gh60_round2/interposer/reference_bridge_interposer.kicad_pcb`: actual editable PCB preview.
+- `evidence/gh60_round2/interposer/INTERPOSER_CHANNEL_MAP.json`: source-island to independent prototype-channel mapping.
+- `evidence/gh60_round2/interposer/INTERPOSER_NATIVE_DRC.json` and `INTERPOSER_VERIFICATION.json`: original KiCad results and source-bound compact receipt.
+- New tests cover filled/unfilled copper zones, incomplete pads, invalid zone repair, stepped path collision/receipt tampering, unique-channel KiCad DRC and no physical-authority promotion. Two distinct CI jobs test pure topology and the native KiCad board.
+
+**Commercial verdict:** this is now a working *electrical feasibility and parametric interposer generator*, not a physically validated keyboard recycler. The next highest-value software work is (i) exact physical switch-population verification and custom-pad/zone reliability, (ii) optional-key sacrifice/path scoring tied to final recovered function, and (iii) true flexible/locking ribbon-harness and enclosure/strain-relief design, followed by physical acceptance only when a real donor is available.

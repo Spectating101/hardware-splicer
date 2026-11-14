@@ -8,6 +8,7 @@ import tempfile
 import json
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 
 REPO=Path(__file__).resolve().parents[1]
@@ -27,6 +28,9 @@ def main() -> int:
     ap.add_argument("--postcut-islands-json",type=Path,default=None)
     ap.add_argument("--postcut-edges-csv",type=Path,default=None)
     ap.add_argument("--machine-project-json",type=Path,default=None)
+    ap.add_argument("--optimize-stepped",action="store_true")
+    ap.add_argument("--stepped-path-json",type=Path,default=None)
+    ap.add_argument("--interposer-out",type=Path,default=None)
     ap.add_argument("--x",type=float,default=None,help="Optional x coordinate to assess without searching a cut route")
     args=ap.parse_args()
     if not args.pcb.is_file(): raise SystemExit("PCB file not found")
@@ -40,10 +44,48 @@ def main() -> int:
     except json.JSONDecodeError as exc: raise SystemExit("Unparseable pcbnew extraction; refuse design authorization") from exc
     result=evaluate_cut(board,cfg=CutConfig(),requested_x_mm=args.x)
     topology_result=None
+    chosen_stepped=None
+    if args.optimize_stepped:
+        if not args.stepped_path_json or not args.postcut_islands_json:
+            raise SystemExit("stepped analysis requires --stepped-path-json and --postcut-islands-json")
+    if args.interposer_out and (not args.postcut_islands_json or not args.machine_project_json):
+        raise SystemExit("interposer preview requires both topology and canonical machine handoff")
     if args.postcut_islands_json:
         # The plan may only restore circuits actually affected in THIS revision.
         # This is not an inferred set of solder points or an authority to cut.
         target = result["best_scanned_straight_seam"]["all_intersected_nets"]
+        if args.optimize_stepped:
+            path_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_path.py"
+            with tempfile.TemporaryDirectory(prefix="hs-virtual-cutpath-") as temp:
+                input_path=Path(temp)/"source_board.json"
+                input_path.write_text(json.dumps(board),encoding="utf-8")
+                proc=subprocess.run([
+                    args.topology_python or args.system_python, str(path_helper),
+                    "--board-json",str(input_path),
+                    "--output",str(args.stepped_path_json.resolve()),
+                ],capture_output=True,text=True,timeout=160,check=False)
+                if proc.returncode:
+                    raise SystemExit("Stepped cut solver unavailable: "+proc.stderr[-1200:])
+            chosen_stepped=json.loads(args.stepped_path_json.read_text(encoding="utf-8"))
+            original={k:v for k,v in chosen_stepped.items() if k!="payload_sha256"}
+            digest=hashlib.sha256(json.dumps(original,sort_keys=True,ensure_ascii=False,
+                                           separators=(",",":")).encode()).hexdigest()
+            if (chosen_stepped.get("payload_sha256")!=digest or
+                chosen_stepped.get("source_sha256")!=result["source_file_sha256"] or
+                chosen_stepped.get("release")!="PROPOSED_CUT_ONLY_NOT_VERIFIED" or
+                chosen_stepped.get("physical_cut_authorized") is not False):
+                raise SystemExit("Proposed stepped cut source or authority was tampered")
+            target=chosen_stepped["affected_nets"]
+            result["stepped_path_summary"]={
+                k:chosen_stepped[k] for k in (
+                    "payload_sha256","nominal_path_length_mm","collision_counts",
+                    "affected_net_count","source_geometry_issues","release",
+                    "physical_cut_authorized",
+                )
+            }
+            result["blockers"].append(
+                "Stepped cut is only a modeled path; component destruction and actual populated donor layout unverified"
+            )
         island_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_islands.py"
         with tempfile.TemporaryDirectory(prefix="hs-virtual-copper-") as temp:
             board_file=Path(temp)/"board.json"
@@ -59,6 +101,8 @@ def main() -> int:
             ]
             if args.postcut_edges_csv:
                 cmd.extend(["--bridge-csv",str(args.postcut_edges_csv.resolve())])
+            if chosen_stepped is not None:
+                cmd.extend(["--cut-path-json",str(args.stepped_path_json.resolve())])
             analysis=subprocess.run(cmd,capture_output=True,text=True,check=False,timeout=160)
             if analysis.returncode != 0:
                 raise SystemExit("Native KiCad-island model unavailable: "+analysis.stderr[-1600:])
@@ -73,6 +117,11 @@ def main() -> int:
             raise SystemExit("Topological cutline differs from reference scan")
         if topology_result.get("target_net_count") != len(target):
             raise SystemExit("Topological net inventory differs from source")
+        if chosen_stepped is not None:
+            if topology_result.get("cut_path_sha256") != chosen_stepped["payload_sha256"]:
+                raise SystemExit("Copper model did not evaluate the selected stepped path")
+        elif topology_result.get("cut_path_sha256") is not None:
+            raise SystemExit("Copper model unexpectedly substituted a stepped path")
         if topology_result.get("qualified_for_build") is not False or topology_result.get("release") != "BLOCKED_REFERENCE_TOPOLOGY_ONLY":
             raise SystemExit("Topological tool attempted physical authority promotion")
         result["postcut_topology_summary"]={
@@ -93,6 +142,64 @@ def main() -> int:
         args.machine_project_json.parent.mkdir(parents=True,exist_ok=True)
         args.machine_project_json.write_text(json.dumps(handoff,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         result["canonical_machine_release"]=handoff["canonical_summary"]
+    if args.interposer_out:
+        interposer_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_interposer.py"
+        build=subprocess.run(
+            [args.system_python,str(interposer_helper),
+             "--topology-json",str(args.postcut_islands_json.resolve()),
+             "--out",str(args.interposer_out.resolve())],
+            capture_output=True,text=True,timeout=120,check=False
+        )
+        if build.returncode:
+            raise SystemExit("Interposer KiCad preview failed: "+build.stderr[-1400:])
+        manifest=json.loads((args.interposer_out/"INTERPOSER_CHANNEL_MAP.json").read_text(encoding="utf-8"))
+        if (manifest.get("source_reference_sha256")!=result["source_file_sha256"] or
+            manifest.get("topology_sha256")!=topology_result["payload_sha256"] or
+            manifest.get("fabrication_release")!="BLOCKED_PREVIEW_ONLY" or
+            manifest.get("physical_authority_granted") is not False):
+            raise SystemExit("Interposer preview source or physical authority mismatch")
+        kicad_cli=shutil.which("kicad-cli")
+        if not kicad_cli:
+            raise SystemExit("Actual KiCad DRC unavailable; refuse interposer verification claim")
+        pcb_path=args.interposer_out/"reference_bridge_interposer.kicad_pcb"
+        drc_path=args.interposer_out/"INTERPOSER_NATIVE_DRC.json"
+        checked=subprocess.run(
+            [kicad_cli,"pcb","drc","--format","json",
+             "--output",str(drc_path.resolve()),str(pcb_path.resolve())],
+            capture_output=True,text=True,timeout=180,check=False
+        )
+        if not drc_path.is_file():
+            raise SystemExit("Native KiCad returned no verifiable DRC report")
+        drc=json.loads(drc_path.read_text(encoding="utf-8"))
+        n_errors=sum(str(row.get("severity","")).lower()=="error" for row in drc.get("violations",[]))
+        n_warnings=sum(str(row.get("severity","")).lower()=="warning" for row in drc.get("violations",[]))
+        n_open=len(drc.get("unconnected_items",[]))
+        ver={
+            "schema":"hs.keyboard-interposer-native-drc.v1",
+            "source_sha256":result["source_file_sha256"],
+            "topology_sha256":topology_result["payload_sha256"],
+            "pcb_sha256":hashlib.sha256(pcb_path.read_bytes()).hexdigest(),
+            "pcb_filename":pcb_path.name,
+            "channel_count":manifest["channel_count"],
+            "native_kicad_exit":checked.returncode,
+            "native_drc_errors":n_errors,
+            "native_drc_warnings":n_warnings,
+            "native_unconnected_items":n_open,
+            "native_design_checks_passed":checked.returncode==0 and n_errors==0 and n_open==0,
+            "physical_authority_granted":False,
+            "fabrication_release":"BLOCKED_PREVIEW_ONLY",
+        }
+        (args.interposer_out/"INTERPOSER_VERIFICATION.json").write_text(
+            json.dumps(ver,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        result["interposer_preview_summary"]={
+            "channels":ver["channel_count"],"pcb_sha256":ver["pcb_sha256"],
+            "native_drc_errors":n_errors,"native_drc_warnings":n_warnings,
+            "native_unconnected_items":n_open,
+            "native_design_checks_passed":ver["native_design_checks_passed"],
+            "fabrication_release":ver["fabrication_release"]
+        }
+        if not ver["native_design_checks_passed"]:
+            raise SystemExit("Native KiCad interposer PCB verification failed; inspect DRC report")
     write_report(result,args.out)
     if args.harness_csv:
         args.harness_csv.parent.mkdir(parents=True,exist_ok=True)

@@ -1,0 +1,516 @@
+{
+  "schema": "hs.keyboard-splice-interposer-preview.v1",
+  "source_reference_sha256": "a99aafb9f1ca77c5cac67037d161fa849b9b200de5dec9f63964520af3ff3daf",
+  "topology_sha256": "851f0ce67cf7ca5e5fe47f2abb15c3158fe404ba46a104981fadd62222d1c421",
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_PREVIEW_ONLY",
+  "actual_donor_reworked": false,
+  "remaining_disconnected_groups": 8,
+  "unanchored_groups": 8,
+  "channel_count": 19,
+  "board_width_mm": 40.64,
+  "board_height_mm": 63.5,
+  "pin_pitch_mm": 2.54,
+  "connector_mpn": null,
+  "connector_mating_verified": false,
+  "cable_pinout_verified": false,
+  "strain_relief_verified": false,
+  "assembly_bom_complete": false,
+  "drc_success_is_not_build_authorization": true,
+  "channel_mapping": [
+    {
+      "channel": 1,
+      "pcb_net": "CH_01",
+      "J1_pad": 1,
+      "J2_pad": 1,
+      "source_net": "/GPIO2",
+      "from_model_island": "/GPIO2::pre3::post3",
+      "to_model_island": "/GPIO2::pre3::post31",
+      "from_candidate_pad": {
+        "ref": "P9",
+        "pad": "1",
+        "x": 133.35,
+        "y": 153.67,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P40",
+        "pad": "1",
+        "x": 233.426,
+        "y": 76.2,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 2,
+      "pcb_net": "CH_02",
+      "J1_pad": 2,
+      "J2_pad": 2,
+      "source_net": "/GPIO2",
+      "from_model_island": "/GPIO2::pre3::post3",
+      "to_model_island": "/GPIO2::pre3::post40",
+      "from_candidate_pad": {
+        "ref": "P9",
+        "pad": "1",
+        "x": 133.35,
+        "y": 153.67,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "R10",
+        "pad": "1",
+        "x": 304.8,
+        "y": 116.078,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 3,
+      "pcb_net": "CH_03",
+      "J1_pad": 3,
+      "J2_pad": 3,
+      "source_net": "/Leds/lcol10",
+      "from_model_island": "/Leds/lcol10::pre152::post118",
+      "to_model_island": "/Leds/lcol10::pre152::post139",
+      "from_candidate_pad": {
+        "ref": "DB47",
+        "pad": "1",
+        "x": 251.1425,
+        "y": 97.94875,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB50",
+        "pad": "1",
+        "x": 339.4075,
+        "y": 68.73875,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 4,
+      "pcb_net": "CH_04",
+      "J1_pad": 4,
+      "J2_pad": 4,
+      "source_net": "/Leds/lcol10",
+      "from_model_island": "/Leds/lcol10::pre152::post118",
+      "to_model_island": "/Leds/lcol10::pre152::post158",
+      "from_candidate_pad": {
+        "ref": "DB47",
+        "pad": "1",
+        "x": 251.1425,
+        "y": 97.94875,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB46",
+        "pad": "1",
+        "x": 241.6175,
+        "y": 78.89875,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 5,
+      "pcb_net": "CH_05",
+      "J1_pad": 5,
+      "J2_pad": 5,
+      "source_net": "/Leds/lcol11",
+      "from_model_island": "/Leds/lcol11::pre189::post195",
+      "to_model_island": "/Leds/lcol11::pre189::post198",
+      "from_candidate_pad": {
+        "ref": "DB51",
+        "pad": "1",
+        "x": 260.6675,
+        "y": 78.89875,
+        "net": "/Leds/lcol11",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P33",
+        "pad": "1",
+        "x": 214.376,
+        "y": 68.58,
+        "net": "/Leds/lcol11",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 6,
+      "pcb_net": "CH_06",
+      "J1_pad": 6,
+      "J2_pad": 6,
+      "source_net": "/Leds/lcol12",
+      "from_model_island": "/Leds/lcol12::pre225::post208",
+      "to_model_island": "/Leds/lcol12::pre225::post242",
+      "from_candidate_pad": {
+        "ref": "DB56",
+        "pad": "1",
+        "x": 279.7175,
+        "y": 78.89875,
+        "net": "/Leds/lcol12",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P34",
+        "pad": "1",
+        "x": 214.376,
+        "y": 73.66,
+        "net": "/Leds/lcol12",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 7,
+      "pcb_net": "CH_07",
+      "J1_pad": 7,
+      "J2_pad": 7,
+      "source_net": "/Leds/lcol13",
+      "from_model_island": "/Leds/lcol13::pre257::post265",
+      "to_model_island": "/Leds/lcol13::pre257::post278",
+      "from_candidate_pad": {
+        "ref": "P35",
+        "pad": "1",
+        "x": 214.376,
+        "y": 71.12,
+        "net": "/Leds/lcol13",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB61",
+        "pad": "1",
+        "x": 298.7675,
+        "y": 78.89875,
+        "net": "/Leds/lcol13",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 8,
+      "pcb_net": "CH_08",
+      "J1_pad": 8,
+      "J2_pad": 8,
+      "source_net": "/Leds/lcol14",
+      "from_model_island": "/Leds/lcol14::pre287::post296",
+      "to_model_island": "/Leds/lcol14::pre287::post337",
+      "from_candidate_pad": {
+        "ref": "DB66",
+        "pad": "1",
+        "x": 317.8175,
+        "y": 78.89875,
+        "net": "/Leds/lcol14",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P36",
+        "pad": "1",
+        "x": 214.376,
+        "y": 76.2,
+        "net": "/Leds/lcol14",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 9,
+      "pcb_net": "CH_09",
+      "J1_pad": 9,
+      "J2_pad": 9,
+      "source_net": "/Leds/lrow1",
+      "from_model_island": "/Leds/lrow1::pre389::post394",
+      "to_model_island": "/Leds/lrow1::pre389::post401",
+      "from_candidate_pad": {
+        "ref": "DB46",
+        "pad": "2",
+        "x": 244.1575,
+        "y": 78.89875,
+        "net": "/Leds/lrow1",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB51",
+        "pad": "2",
+        "x": 263.2075,
+        "y": 78.89875,
+        "net": "/Leds/lrow1",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 10,
+      "pcb_net": "CH_10",
+      "J1_pad": 10,
+      "J2_pad": 10,
+      "source_net": "/Leds/lrow2",
+      "from_model_island": "/Leds/lrow2::pre438::post450",
+      "to_model_island": "/Leds/lrow2::pre438::post469",
+      "from_candidate_pad": {
+        "ref": "DB42",
+        "pad": "2",
+        "x": 234.6325,
+        "y": 97.94875,
+        "net": "/Leds/lrow2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB47",
+        "pad": "2",
+        "x": 253.6825,
+        "y": 97.94875,
+        "net": "/Leds/lrow2",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 11,
+      "pcb_net": "CH_11",
+      "J1_pad": 11,
+      "J2_pad": 11,
+      "source_net": "/Leds/lrow3",
+      "from_model_island": "/Leds/lrow3::pre503::post516",
+      "to_model_island": "/Leds/lrow3::pre503::post534",
+      "from_candidate_pad": {
+        "ref": "DB43",
+        "pad": "2",
+        "x": 239.395,
+        "y": 116.99875,
+        "net": "/Leds/lrow3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB48",
+        "pad": "2",
+        "x": 258.445,
+        "y": 116.99875,
+        "net": "/Leds/lrow3",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 12,
+      "pcb_net": "CH_12",
+      "J1_pad": 12,
+      "J2_pad": 12,
+      "source_net": "/Leds/lrow4",
+      "from_model_island": "/Leds/lrow4::pre630::post588",
+      "to_model_island": "/Leds/lrow4::pre630::post645",
+      "from_candidate_pad": {
+        "ref": "DB49",
+        "pad": "2",
+        "x": 248.92,
+        "y": 136.04875,
+        "net": "/Leds/lrow4",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB44",
+        "pad": "2",
+        "x": 229.87,
+        "y": 136.04875,
+        "net": "/Leds/lrow4",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 13,
+      "pcb_net": "CH_13",
+      "J1_pad": 13,
+      "J2_pad": 13,
+      "source_net": "/Leds/lrow5",
+      "from_model_island": "/Leds/lrow5::pre716::post731",
+      "to_model_island": "/Leds/lrow5::pre716::post780",
+      "from_candidate_pad": {
+        "ref": "DB55",
+        "pad": "2",
+        "x": 265.50875,
+        "y": 155.09875,
+        "net": "/Leds/lrow5",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB301",
+        "pad": "2",
+        "x": 206.0575,
+        "y": 155.09875,
+        "net": "/Leds/lrow5",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 14,
+      "pcb_net": "CH_14",
+      "J1_pad": 14,
+      "J2_pad": 14,
+      "source_net": "/Matrix/row1",
+      "from_model_island": "/Matrix/row1::pre1080::post1044",
+      "to_model_island": "/Matrix/row1::pre1080::post1102",
+      "from_candidate_pad": {
+        "ref": "S51",
+        "pad": "1",
+        "x": 258.1275,
+        "y": 71.28002,
+        "net": "/Matrix/row1",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S46",
+        "pad": "1",
+        "x": 239.0775,
+        "y": 71.28002,
+        "net": "/Matrix/row1",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 15,
+      "pcb_net": "CH_15",
+      "J1_pad": 15,
+      "J2_pad": 15,
+      "source_net": "/Matrix/row2",
+      "from_model_island": "/Matrix/row2::pre1109::post1131",
+      "to_model_island": "/Matrix/row2::pre1109::post1168",
+      "from_candidate_pad": {
+        "ref": "S42",
+        "pad": "1",
+        "x": 229.5525,
+        "y": 90.33002,
+        "net": "/Matrix/row2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S47",
+        "pad": "1",
+        "x": 248.6025,
+        "y": 90.33002,
+        "net": "/Matrix/row2",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 16,
+      "pcb_net": "CH_16",
+      "J1_pad": 16,
+      "J2_pad": 16,
+      "source_net": "/Matrix/row3",
+      "from_model_island": "/Matrix/row3::pre1241::post1202",
+      "to_model_island": "/Matrix/row3::pre1241::post1207",
+      "from_candidate_pad": {
+        "ref": "S43",
+        "pad": "1",
+        "x": 234.315,
+        "y": 109.38002,
+        "net": "/Matrix/row3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S48",
+        "pad": "1",
+        "x": 253.365,
+        "y": 109.38002,
+        "net": "/Matrix/row3",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 17,
+      "pcb_net": "CH_17",
+      "J1_pad": 17,
+      "J2_pad": 17,
+      "source_net": "/Matrix/row4",
+      "from_model_island": "/Matrix/row4::pre1335::post1285",
+      "to_model_island": "/Matrix/row4::pre1335::post1360",
+      "from_candidate_pad": {
+        "ref": "S44",
+        "pad": "1",
+        "x": 224.79,
+        "y": 128.43002,
+        "net": "/Matrix/row4",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S49",
+        "pad": "1",
+        "x": 243.84,
+        "y": 128.43002,
+        "net": "/Matrix/row4",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 18,
+      "pcb_net": "CH_18",
+      "J1_pad": 18,
+      "J2_pad": 18,
+      "source_net": "/Matrix/row5",
+      "from_model_island": "/Matrix/row5::pre1368::post1413",
+      "to_model_island": "/Matrix/row5::pre1368::post1428",
+      "from_candidate_pad": {
+        "ref": "S55",
+        "pad": "1",
+        "x": 260.50875,
+        "y": 147.47875,
+        "net": "/Matrix/row5",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S301",
+        "pad": "1",
+        "x": 200.9775,
+        "y": 147.48002,
+        "net": "/Matrix/row5",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 19,
+      "pcb_net": "CH_19",
+      "J1_pad": 19,
+      "J2_pad": 19,
+      "source_net": "VCC",
+      "from_model_island": "VCC::pre1681::post1710",
+      "to_model_island": "VCC::pre1681::post1795",
+      "from_candidate_pad": {
+        "ref": "P2",
+        "pad": "1",
+        "x": 222.25,
+        "y": 156.21,
+        "net": "VCC",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DF23",
+        "pad": "1",
+        "x": 286.91125,
+        "y": 155.09875,
+        "net": "VCC",
+        "layer": "F.Cu"
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    }
+  ]
+}

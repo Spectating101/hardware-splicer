@@ -140,3 +140,94 @@ def test_unsupported_pad_shape_fail_closed_with_issue(tmp_path):
     r=run_model(tmp_path,a,["row1"])
     assert "PAD_SHAPE_UNSUPPORTED:99" in r["issues"]
     assert r["release"]=="BLOCKED_REFERENCE_TOPOLOGY_ONLY"
+
+
+def test_real_filled_zone_connects_gap_that_unfilled_tracks_cannot(tmp_path):
+    a=board()
+    a["tracks"]=[
+        {"x1":10,"y1":10,"x2":35,"y2":10,"width_mm":0.4,"net":"row1","layer":"F.Cu"},
+        {"x1":65,"y1":10,"x2":90,"y2":10,"width_mm":0.4,"net":"row1","layer":"F.Cu"},
+    ]
+    a["pads"]=[p for p in a["pads"] if p["net"]=="row1" and p["y"]==10]
+    without=run_model(tmp_path,a,["row1"])
+    assert without["model_pre_cut_island_count"]==2
+    assert without["candidate_graph_edges"]==0
+    a["filled_zones"]=[{
+        "net":"row1","layer":"F.Cu","is_filled":True,
+        "polygons":[{"shell":[[0,8],[100,8],[100,12],[0,12]],"holes":[]}],
+    }]
+    a["zone_count"]=1
+    with_zone=run_model(tmp_path,a,["row1"])
+    assert with_zone["model_pre_cut_island_count"]==1
+    assert with_zone["model_post_cut_island_count"]==2
+    assert with_zone["candidate_graph_edges"]==1
+    assert with_zone["model_replay_remaining_split_components"]==0
+    assert "UNMODELED_COPPER_ZONES" not in with_zone["issues"]
+    assert with_zone["qualified_for_build"] is False
+
+
+def test_unfilled_zone_does_not_imply_conduction(tmp_path):
+    a=board()
+    a["tracks"]=[
+        {"x1":10,"y1":10,"x2":35,"y2":10,"width_mm":0.4,"net":"row1","layer":"F.Cu"},
+        {"x1":65,"y1":10,"x2":90,"y2":10,"width_mm":0.4,"net":"row1","layer":"F.Cu"},
+    ]
+    a["pads"]=[p for p in a["pads"] if p["net"]=="row1" and p["y"]==10]
+    a["filled_zones"]=[{"net":"row1","layer":"F.Cu","is_filled":False,"polygons":[]}]
+    a["zone_count"]=1
+    r=run_model(tmp_path,a,["row1"])
+    assert r["model_pre_cut_island_count"]==2
+    assert "RELEVANT_COPPER_ZONE_UNFILLED" in r["issues"]
+    assert not r["qualified_for_build"]
+
+
+def test_invalid_zone_is_marked_reconstructed_not_source_exact(tmp_path):
+    a=board()
+    a["filled_zones"]=[{
+        "net":"row1","layer":"F.Cu","is_filled":True,
+        "polygons":[{"shell":[[0,0],[100,30],[100,0],[0,30]],"holes":[]}],
+    }]
+    r=run_model(tmp_path,a,["row1"])
+    assert "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR" in r["issues"]
+    assert r["release"]=="BLOCKED_REFERENCE_TOPOLOGY_ONLY"
+
+
+def test_stepped_cut_receipt_and_affected_net_inventory_fail_closed(tmp_path):
+    import hashlib
+    a=board()
+    plan={
+        "source_sha256":a["source_sha256"],"release":"PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "kerf_mm":1.0,"cut_points_mm":[[50,0],[53,20],[50,40]],
+    }
+    plan["payload_sha256"]=hashlib.sha256(json.dumps(plan,sort_keys=True,ensure_ascii=False,
+                                                   separators=(",",":")).encode()).hexdigest()
+    bfile=tmp_path/"board_path.json"
+    nfile=tmp_path/"nets.json"
+    pfile=tmp_path/"cut_path.json"
+    outfile=tmp_path/"island_path.json"
+    bfile.write_text(json.dumps(a),encoding="utf-8")
+    nfile.write_text(json.dumps(["row1","col1"]),encoding="utf-8")
+    pfile.write_text(json.dumps(plan),encoding="utf-8")
+    base=[PYTHON,str(HELPER),"--board-json",str(bfile),
+          "--net-inventory-json",str(nfile),"--cut-x-mm","50",
+          "--cut-path-json",str(pfile),"--output",str(outfile)]
+    success=subprocess.run(base,capture_output=True,text=True,timeout=35)
+    assert success.returncode==0,success.stderr
+    data=json.loads(outfile.read_text())
+    assert data["cut_path_sha256"]==plan["payload_sha256"]
+    assert data["cut_path_kind"]=="stepped_polyline"
+    assert data["qualified_for_build"] is False
+    # No path can silently substitute a different revision or exclude a net
+    plan["cut_points_mm"]=[[50,0],[55,20],[50,40]]
+    pfile.write_text(json.dumps(plan),encoding="utf-8")
+    bad=subprocess.run(base,capture_output=True,text=True,timeout=35)
+    assert bad.returncode!=0
+    assert "digest invalid" in bad.stderr
+    pfile.write_text(json.dumps({**plan,"payload_sha256":hashlib.sha256(
+        json.dumps({k:v for k,v in plan.items() if k!="payload_sha256"},
+                   sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()
+    ).hexdigest()}),encoding="utf-8")
+    nfile.write_text(json.dumps(["row1"]),encoding="utf-8")
+    omitted=subprocess.run(base,capture_output=True,text=True,timeout=35)
+    assert omitted.returncode!=0
+    assert "net inventory mismatch" in omitted.stderr

@@ -14,8 +14,9 @@ import hashlib
 import json
 from pathlib import Path
 
+from shapely import make_valid
 from shapely.affinity import rotate
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
@@ -144,11 +145,63 @@ def _feature_geometries(board: dict, target_nets: set[str], issues: set[str]) ->
         for layer in LAYERS:
             add(net, layer, Point(float(via["x"]), float(via["y"])).buffer(radius, resolution=12),
                 "via", f"via:{i}:{layer}", physical_id=physical_id)
+    # Respect KiCad's *filled* copper polygons, not just the zone outlines
+    # (a fill has thermal spokes, clearance cutouts and disconnected islands).
+    # Rule areas and keepouts are not conducting copper and are never added.
+    if "filled_zones" not in board:
+        if board.get("zone_count",0):
+            issues.add("UNMODELED_COPPER_ZONES")
+    else:
+        for zone_index, zone in enumerate(board["filled_zones"]):
+            if zone.get("net") not in target_nets:
+                continue
+            if not zone.get("is_filled"):
+                issues.add("RELEVANT_COPPER_ZONE_UNFILLED")
+                continue
+            polygons=zone.get("polygons", [])
+            if not polygons:
+                issues.add("RELEVANT_COPPER_ZONE_MISSING_GEOMETRY")
+                continue
+            for poly_index, data in enumerate(polygons):
+                poly=Polygon(data["shell"],data.get("holes", []))
+                if poly.is_empty:
+                    issues.add("RELEVANT_COPPER_ZONE_EMPTY_POLYGON")
+                    continue
+                if not poly.is_valid:
+                    # KiCad 9 may read legacy touch/self-intersection zone
+                    # boundaries. GEOS make_valid keeps the polygonal areas
+                    # while preserving a blocker for ambiguous zero-width
+                    # contacts and edges.
+                    poly=make_valid(poly)
+                    issues.add("ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR")
+                converted=_polygon_parts(poly)
+                if not converted:
+                    issues.add("RELEVANT_COPPER_ZONE_UNUSABLE")
+                for part_index, piece in enumerate(converted):
+                    add(zone["net"],zone["layer"],piece,"zone",
+                        f"zone:{zone_index}:{poly_index}:{part_index}")
     return features
 
 
-def _fragments(features: list[dict], cut_x: float | None, kerf_mm: float) -> list[dict]:
-    kerf = box(cut_x - kerf_mm / 2, -1e8, cut_x + kerf_mm / 2, 1e8) if cut_x is not None else None
+def _seam_x_at_y(path: list[list[float]] | None, y: float, default_x: float) -> float:
+    if path is None:
+        return default_x
+    if y <= float(path[0][1]):
+        return float(path[0][0])
+    if y >= float(path[-1][1]):
+        return float(path[-1][0])
+    for (x1,y1),(x2,y2) in zip(path,path[1:]):
+        if float(y1) <= y <= float(y2):
+            t=(y-float(y1))/(float(y2)-float(y1))
+            return float(x1)+(float(x2)-float(x1))*t
+    raise ValueError("cut path does not span target y")
+
+
+def _fragments(features: list[dict], cut_x: float | None, kerf_mm: float,
+               *, cut_shape=None, stepped_path=None) -> list[dict]:
+    kerf = cut_shape if cut_shape is not None else (
+        box(cut_x - kerf_mm / 2, -1e8, cut_x + kerf_mm / 2, 1e8) if cut_x is not None else None
+    )
     out = []
     for feature in features:
         polys = [feature["geometry"]] if kerf is None else _polygon_parts(feature["geometry"].difference(kerf))
@@ -156,7 +209,8 @@ def _fragments(features: list[dict], cut_x: float | None, kerf_mm: float) -> lis
             f = {k: v for k, v in feature.items() if k != "geometry"}
             f["geometry"] = poly
             f["origin_id"] = feature["id"]
-            f["side"] = "full" if kerf is None else ("left" if poly.centroid.x < cut_x else "right")
+            x_at_y = _seam_x_at_y(stepped_path,float(poly.centroid.y),float(cut_x or 0))
+            f["side"] = "full" if kerf is None else ("left" if poly.centroid.x < x_at_y else "right")
             f["fragment_id"] = (feature["id"], j)
             # A partly sawn-through pad is not a reliable solder endpoint.
             f["intact_pad"] = (
@@ -201,7 +255,7 @@ def _islands(fragments, ds):
     return grouped
 
 
-def _pad_candidates(fragments, component_idxs: list[int], seam: float) -> list[dict]:
+def _pad_candidates(fragments, component_idxs: list[int], seam: float, stepped_path=None) -> list[dict]:
     pads = {}
     for idx in component_idxs:
         f = fragments[idx]
@@ -210,11 +264,11 @@ def _pad_candidates(fragments, component_idxs: list[int], seam: float) -> list[d
         p = f["pad"]
         key = (p["ref"], p["pad"], p["x"], p["y"])
         pads[key] = p
-    return sorted(pads.values(), key=lambda p: (abs(float(p["x"]) - seam), str(p["ref"]), str(p["pad"])))[:4]
+    return sorted(pads.values(), key=lambda p: (abs(float(p["x"]) - _seam_x_at_y(stepped_path,float(p["y"]),seam)), str(p["ref"]), str(p["pad"])))[:4]
 
 
 def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
-                     target_nets: list[str] | None = None) -> dict:
+                     target_nets: list[str] | None = None, cut_path: dict | None = None) -> dict:
     if not board.get("source_sha256"):
         raise ValueError("missing source digest")
     if kerf_mm <= 0:
@@ -223,17 +277,55 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
     xmax = float(board["outline_bbox_mm"]["x_max"])
     if not xmin < cut_x_mm < xmax:
         raise ValueError("cut must pass through the documented board extent")
+    stepped_path=None
+    cut_shape=None
+    path_digest=None
+    if cut_path is not None:
+        digest=cut_path.get("payload_sha256")
+        body={k:v for k,v in cut_path.items() if k!="payload_sha256"}
+        actual=hashlib.sha256(json.dumps(body,sort_keys=True,ensure_ascii=False,
+                                         separators=(",",":")).encode()).hexdigest()
+        if not digest or actual != digest:
+            raise ValueError("cut path receipt digest invalid")
+        if cut_path.get("source_sha256") != board["source_sha256"]:
+            raise ValueError("cut path revision does not match PCB")
+        if cut_path.get("release") != "PROPOSED_CUT_ONLY_NOT_VERIFIED":
+            raise ValueError("cut path authority state unsupported")
+        if abs(float(cut_path.get("kerf_mm",0))-kerf_mm)>1e-9:
+            raise ValueError("topology and path kerf differ")
+        stepped_path=cut_path.get("cut_points_mm",[])
+        b=board["outline_bbox_mm"]
+        if (len(stepped_path)<2 or
+            abs(float(stepped_path[0][1])-float(b["y_min"]))>.05 or
+            abs(float(stepped_path[-1][1])-float(b["y_max"]))>.05):
+            raise ValueError("path endpoints must span board")
+        if any(not xmin<float(p[0])<xmax for p in stepped_path):
+            raise ValueError("path has point outside PCB x bounds")
+        if any(not float(a[1])<float(c[1]) for a,c in zip(stepped_path,stepped_path[1:])):
+            raise ValueError("path y points must be monotone")
+        cut_shape=LineString(stepped_path).buffer(kerf_mm/2,cap_style="flat",join_style="mitre")
+        path_digest=digest
     if target_nets is None:
         raise ValueError("explicit target-net inventory required")
     requested = set(target_nets)
     if not requested or "" in requested:
         raise ValueError("target nets must be nonempty and named")
     issues = set()
-    if board.get("zone_count", 0):
-        issues.add("UNMODELED_COPPER_ZONES")
+    if board.get("copper_layer_count", 2) != 2:
+        issues.add("MULTILAYER_PCB_UNSUPPORTED")
     if board.get("source_warnings"):
         issues.add("SOURCE_IMPORT_WARNINGS")
-    # A two-layer rigid PCB is the only qualified electrical abstraction.
+    # Verify against *all known* physical copper, not just the caller's
+    # shortlisted nets, so a target list cannot omit a cut supply return.
+    if stepped_path is not None:
+        known_nets={str(t["net"]) for family in ("tracks","pads","vias","filled_zones")
+                    for t in board.get(family,[]) if t.get("net")}
+        check_features=_feature_geometries(board,known_nets,issues)
+        physically_cut={f["net"] for f in check_features if f["geometry"].intersects(cut_shape)}
+        if physically_cut != requested:
+            absent=sorted(physically_cut-requested)
+            extra=sorted(requested-physically_cut)
+            raise ValueError(f"cut path net inventory mismatch: missing={absent[:8]} extra={extra[:8]}")
     features = _feature_geometries(board, requested, issues)
     if not features:
         raise ValueError("no compatible source copper geometry")
@@ -242,7 +334,7 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
     before_components = _islands(before, before_ds)
     before_of_feature = {f["origin_id"]: (f["net"], before_ds.find(i)) for i, f in enumerate(before)}
 
-    after = _fragments(features, cut_x_mm, kerf_mm)
+    after = _fragments(features, cut_x_mm, kerf_mm, cut_shape=cut_shape,stepped_path=stepped_path)
     after_ds = _connect(after)
     after_groups = _islands(after, after_ds)
     # Only check original *connected copper groups*. Never assume a shared net
@@ -264,7 +356,7 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         islands = []
         for suffix, indexes in sorted(groups.items()):
             sides = sorted({after[idx]["side"] for idx in indexes})
-            pads = _pad_candidates(after, indexes, cut_x_mm)
+            pads = _pad_candidates(after, indexes, cut_x_mm, stepped_path=stepped_path)
             islands.append({
                 "model_island_id": f"{net}::pre{original_component}::post{suffix}",
                 "sides": sides,
@@ -318,8 +410,12 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         "schema": "hs.keyboard-postcut-copper-islands.v1",
         "source_sha256": board["source_sha256"],
         "cut_x_mm": cut_x_mm,
+        "cut_path_sha256": path_digest,
+        "cut_path_kind": "stepped_polyline" if stepped_path is not None else "straight",
         "kerf_mm": kerf_mm,
-        "model_basis": "Native KiCad tracks/pads/vias approximated by planar copper polygons; zones omitted",
+        "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+        "conductive_zones_imported": len(board.get("filled_zones", [])),
+        "rule_areas_ignored_for_connectivity": board.get("rule_area_count",0),
         "qualified_for_build": False,
         "target_net_count": len(requested),
         "model_pre_cut_island_count": len(before_components),
@@ -345,6 +441,7 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--board-json",type=Path,required=True)
     ap.add_argument("--net-inventory-json",type=Path,required=True)
+    ap.add_argument("--cut-path-json",type=Path,default=None)
     ap.add_argument("--cut-x-mm",type=float,required=True)
     ap.add_argument("--kerf-mm",type=float,default=1.0)
     ap.add_argument("--output",type=Path,required=True)
@@ -352,7 +449,8 @@ def main():
     args=ap.parse_args()
     body=json.loads(args.board_json.read_text(encoding="utf-8"))
     names=json.loads(args.net_inventory_json.read_text(encoding="utf-8"))
-    result=simulate_islands(body,args.cut_x_mm,args.kerf_mm,names)
+    path=json.loads(args.cut_path_json.read_text(encoding="utf-8")) if args.cut_path_json else None
+    result=simulate_islands(body,args.cut_x_mm,args.kerf_mm,names,cut_path=path)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
     if args.bridge_csv:

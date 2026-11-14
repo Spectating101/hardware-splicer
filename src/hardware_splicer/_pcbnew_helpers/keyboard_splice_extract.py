@@ -37,6 +37,29 @@ def main() -> int:
             xpad,ypad=u(pad.GetPosition().x),u(pad.GetPosition().y)
             sz=pad.GetSize()
             pads.append({"ref":ref,"pad":pad.GetNumber(),"x":xpad,"y":ypad,"size_x_mm":u(sz.x),"size_y_mm":u(sz.y),"orientation_degrees":pad.GetOrientationDegrees(),"pad_shape":int(pad.GetShape()),"pad_attribute":int(pad.GetAttribute()),"net":pad.GetNetname(),"layer":pad.GetLayerName()})
+    conductive_zones=[]
+    rule_area_count=0
+    for zone_index, zone in enumerate(board.Zones()):
+        if zone.GetIsRuleArea():
+            rule_area_count+=1
+            continue
+        record={
+            "net":zone.GetNetname(), "layer":zone.GetLayerName(),
+            "is_filled":bool(zone.IsFilled()),"polygons":[],
+            "source_zone_index":zone_index,
+        }
+        if zone.IsFilled():
+            polys=zone.GetFilledPolysList(zone.GetLayer())
+            for poly_index in range(polys.OutlineCount()):
+                def points(chain):
+                    return [[round(u(chain.CPoint(k).x),6),round(u(chain.CPoint(k).y),6)]
+                            for k in range(chain.PointCount())]
+                shell=points(polys.COutline(poly_index))
+                holes=[points(polys.CHole(poly_index,j))
+                       for j in range(polys.HoleCount(poly_index))]
+                if len(shell)>=3:
+                    record["polygons"].append({"shell":shell,"holes":holes})
+        conductive_zones.append(record)
     print(json.dumps({
         "source_label":source.name,
         "source_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -44,6 +67,10 @@ def main() -> int:
         "pcbnew_version":p.Version(),
         "outline_bbox_mm":bbox,
         "zone_count":len(board.Zones()),
+        "rule_area_count":rule_area_count,
+        "conductive_zone_count":len(conductive_zones),
+        "filled_zones":conductive_zones,
+        "copper_layer_count":board.GetCopperLayerCount(),
         "tracks":tracks,"vias":vias,"pads":pads,"footprints":footprints,"switch_positions":switches
     },ensure_ascii=False))
     return 0

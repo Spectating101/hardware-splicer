@@ -27,6 +27,17 @@ def build_keyboard_splice_handoff(cut: Mapping[str, Any], topology: Mapping[str,
     seam = (cut.get("best_scanned_straight_seam") or {}).get("x_mm")
     if seam != topology.get("cut_x_mm"):
         raise ValueError("cut path and electrical connectivity use different seam coordinates")
+    optimized=cut.get("stepped_path_summary")
+    if optimized:
+        if (optimized.get("physical_cut_authorized") is not False or
+            optimized.get("release")!="PROPOSED_CUT_ONLY_NOT_VERIFIED"):
+            raise ValueError("stepped path tried to grant cutting authority")
+        if topology.get("cut_path_sha256")!=optimized.get("payload_sha256"):
+            raise ValueError("copper model does not use the declared stepped cut")
+        if topology.get("cut_path_kind")!="stepped_polyline":
+            raise ValueError("copper model did not assess a stepped polyline")
+    elif topology.get("cut_path_sha256") is not None:
+        raise ValueError("unrecorded stepped cut in canonical project")
     project=machine_project_from_intake({
         "project_name":"keyboard-pcb-reuse-virtual-cut",
         "goal":"Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
@@ -89,6 +100,7 @@ def build_keyboard_splice_handoff(cut: Mapping[str, Any], topology: Mapping[str,
         "reference_source_sha256":cut["source_file_sha256"],
         "model_sha256":topology["payload_sha256"],
         "cut_x_mm":seam,
+        "stepped_path_sha256":optimized["payload_sha256"] if optimized else None,
         "physical_donor_verified":False,"fabrication_authorized":False,
     }
     gate=project.assess_release(ReleaseState.BUILD_READY)

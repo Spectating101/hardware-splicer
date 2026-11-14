@@ -51,3 +51,25 @@ def test_cut_release_tampering_never_upgrades_to_physical_authority():
     cut["release"]="BUILD_READY"
     with pytest.raises(ValueError):
         build_keyboard_splice_handoff(cut,topology)
+
+
+def test_canonical_project_binds_exact_stepped_cut_receipt():
+    cut,topology=data()
+    sha="e"*64
+    cut["stepped_path_summary"]={
+        "payload_sha256":sha,"release":"PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "physical_cut_authorized":False,
+    }
+    topology["cut_path_sha256"]=sha
+    topology["cut_path_kind"]="stepped_polyline"
+    passed=build_keyboard_splice_handoff(cut,topology)
+    assert passed["project"]["discipline_payloads"]["keyboard_splice"]["stepped_path_sha256"]==sha
+    assert passed["release_assessment"]["achieved_state"]=="design_ready"
+    assert not passed["canonical_summary"]["allowed"]
+    topology["cut_path_sha256"]="f"*64
+    with pytest.raises(ValueError,match="selected|declared stepped"):
+        build_keyboard_splice_handoff(cut,topology)
+    topology["cut_path_sha256"]=sha
+    cut["stepped_path_summary"]["physical_cut_authorized"]=True
+    with pytest.raises(ValueError,match="cutting authority"):
+        build_keyboard_splice_handoff(cut,topology)
