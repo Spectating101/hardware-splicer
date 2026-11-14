@@ -15,9 +15,12 @@ Fail-closed rules:
   Any other word, punctuation or line/paragraph separator in between means
   the negation does not reach the verb. Double negatives are not prohibitions.
 * Every free-text string AND every mapping key of the plan is scanned.
-* Text is folded (NFKD, format/control/combining characters removed) before
-  matching, and a word that mixes ASCII letters with non-ASCII letters
-  (homoglyphs) is reported rather than mapped.
+* Suspicious text is REJECTED, never repaired: any control (other than \n and
+  \t), format, combining or private-use character, and any letter outside
+  ASCII plus a few unit symbols (omega, mu), fails the gate with a distinct
+  reason. Known limitation: legitimately accented or non-English text is
+  therefore rejected too. Only line separators are mapped (to "\n") and
+  compatibility forms are NFKC-folded before matching.
 """
 from __future__ import annotations
 
@@ -46,27 +49,25 @@ _WORD = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)?|\S")
 _ID = re.compile(r"^[A-Za-z]{1,2}\d{1,4}$")
 # Characters that end a line or paragraph; mapped to "\n" before matching.
 _LINE_SEPARATORS = dict.fromkeys(
-    map(ord, "\u0085  \x0b\x0c\x1c\x1d\x1e\x1f。！？；…‥"),
+    map(ord, "\u0085\u2028\u2029\x0b\x0c\x1c\x1d\x1e\x1f\u3002\uff01\uff1f\uff1b\u2026\u2025"),
     "\n",
 )
-_ALLOWED_NON_ASCII_LETTERS = frozenset("Ωμ")  # omega, mu: unit symbols
+_ALLOWED_NON_ASCII_LETTERS = frozenset("\u03a9\u2126\u03bc\u00b5")  # omega, ohm sign, mu, micro sign
+REASON_CONTROL = "disallowed_control_or_format_character"
+REASON_LETTER = "disallowed_non_ascii_letter"
+
+
+def _line_folded(text: str) -> str:
+    return text.replace("\r\n", "\n").replace("\r", "\n").translate(_LINE_SEPARATORS)
 
 
 def fold(text: str) -> str:
-    """Canonical text for matching.
-
-    NFKD, then every format (Cf), combining (Mn, Me) and control (Cc,
-    except newline and tab) character is removed, so invisible characters
-    and combining accents cannot split a word. Line and sentence separators
-    become newlines first. Quotes and minus signs are unified.
-    """
-    text = unicodedata.normalize("NFKD", text).translate(_LINE_SEPARATORS)
-    text = "".join(
-        ch for ch in text
-        if ch in "\n\t" or unicodedata.category(ch) not in ("Cf", "Mn", "Me", "Cc")
-    )
-    text = text.replace("’", "'").replace("‘", "'").replace("`", "'")
-    text = text.replace("−", "-").replace("‐", "-").replace("‑", "-")
+    """Canonical text for matching: line separators to "\n", NFKC, unified
+    quotes and minus signs. Nothing is deleted; use disallowed_text_reasons()
+    first, which rejects what fold() would otherwise have to guess about."""
+    text = unicodedata.normalize("NFKC", _line_folded(text))
+    text = text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
+    text = text.replace("\u2212", "-").replace("\u2010", "-").replace("\u2011", "-")
     return text
 
 
@@ -75,18 +76,31 @@ def normalise(text: str) -> str:
     return re.sub(r"(?<=\w)[-_/](?=\w)", " ", fold(text))
 
 
-def mixed_script_words(text: str) -> list[str]:
-    """Words mixing ASCII letters with non-ASCII letters (homoglyph risk).
+def disallowed_text_reasons(text: str) -> list[tuple[str, str]]:
+    """(reason, offending characters) for text that must fail the gate outright.
 
-    Accented Latin letters are folded to ASCII by fold() and never appear
-    here; Greek omega and mu (unit symbols) are tolerated.
+    Checked on the line-folded text before AND after NFKC, so a character
+    that only appears after compatibility folding is caught as well.
     """
-    bad = []
-    for word in re.findall(r"[^\W\d_]+", fold(text)):
-        non_ascii = [c for c in word if ord(c) > 127 and c not in _ALLOWED_NON_ASCII_LETTERS]
-        if non_ascii and any(c.isascii() and c.isalpha() for c in word):
-            bad.append(word)
-    return bad
+    folded = _line_folded(text)
+    seen: dict[str, list[str]] = {}
+    for candidate in (folded, unicodedata.normalize("NFKC", folded)):
+        for ch in candidate:
+            category = unicodedata.category(ch)
+            if ch in "\n\t":
+                continue
+            if category in ("Cc", "Cf", "Mn", "Me", "Cs", "Co", "Cn"):
+                bucket = seen.setdefault(REASON_CONTROL, [])
+            elif ord(ch) > 127 and (category[0] == "L" or category == "Nd"
+                                    or category in ("Nl", "No")) \
+                    and ch not in _ALLOWED_NON_ASCII_LETTERS:
+                bucket = seen.setdefault(REASON_LETTER, [])
+            else:
+                continue
+            if ch not in bucket:
+                bucket.append(ch)
+    return [(reason, "".join(f"U+{ord(c):04X}" + " " for c in chars).strip())
+            for reason, chars in seen.items()]
 
 
 def iter_plan_text(
@@ -133,6 +147,8 @@ def _negation_covers(text: str, start: int) -> bool:
     if not negators:
         return False
     last = negators[-1]
+    if "\n" in text[last.end():start]:
+        return False
     for token in _WORD.findall(text[last.end():start]):
         low = token.lower()
         if token == "," or low in _FILLERS or low in _JOINERS or _HAZARD_VERB.match(token):
@@ -167,11 +183,11 @@ def unsafe_action_findings(
 ) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
     for field, raw in iter_plan_text(plan, permitted_ids):
-        for word in mixed_script_words(raw):
+        for reason, chars in disallowed_text_reasons(raw):
             findings.append({
                 "field": field,
-                "matched_action_class": word[:100],
-                "reason": "Word mixes ASCII and non-ASCII letters (possible look-alike spelling): fail closed.",
+                "matched_action_class": chars[:100],
+                "reason": reason,
             })
         text = normalise(raw)
         seen: set[int] = set()

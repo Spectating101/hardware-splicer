@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping
 
-from .restoration_safety_semantics import fold, iter_plan_text, mixed_script_words
+from .restoration_safety_semantics import disallowed_text_reasons, fold, iter_plan_text
 
 _NUM = r"[-+]?(?:\d+(?:[.,]\d+)?|\.\d+)"
 _PFX = r"(?:kilo|mega|giga|milli|micro|nano|[kmgµμunp])"
@@ -105,11 +105,11 @@ def unsourced_thresholds(
         return []
     findings = []
     for source, raw in iter_plan_text(plan):
-        for word in mixed_script_words(raw):
+        for reason, chars in disallowed_text_reasons(raw):
             findings.append({
                 "field": source,
-                "limit": word,
-                "explanation": "Word mixes ASCII and non-ASCII letters (possible look-alike spelling): fail closed.",
+                "limit": chars,
+                "explanation": reason,
             })
         text = fold(raw)
         for start, end in _spans(text):

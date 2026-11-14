@@ -154,6 +154,86 @@ def test_invisible_and_lookalike_characters_do_not_hide_a_command(text):
     assert unsafe_action_findings(plan(text), UNSAFE), repr(text)
 
 
-def test_accents_and_omega_in_ordinary_words_are_not_homoglyphs():
-    ok = plan("Inspect the café area; a 10 kΩ resistor is nearby.")
+def test_unit_symbols_are_allowed_but_accents_are_not():
+    # Known limitation: any letter outside ASCII plus the unit symbols
+    # (omega, mu, degree) is rejected, so legitimately accented text fails.
+    ok = plan("A 10 k\u03a9 resistor, a 5 \u00b5A draw and 45 \u00b0C are all plain units.")
     assert unsafe_action_findings(ok, UNSAFE) == []
+    accented = unsafe_action_findings(plan("Inspect the caf\u00e9 area."), UNSAFE)
+    assert [f["reason"] for f in accented] == [REASON_LETTER]
+
+
+# --- second review: reject rather than repair ---------------------------------
+
+REASON_CONTROL = "disallowed_control_or_format_character"
+REASON_LETTER = "disallowed_non_ascii_letter"
+
+
+def reasons(text):
+    return {f["reason"] for f in unsafe_action_findings(plan(text), UNSAFE)}
+
+
+@pytest.mark.parametrize("text", [
+    "Never bypass the fuse.\x00Then do nothing.",
+    "Do not bypass the fuse.\x01 Inspect.",
+    "Do not bypass the fuse.\x7f Inspect.",
+    "Do not byp\x1bass the fuse.",
+    "Do not bypass the fuse.\u200b Inspect.",
+    "Do not bypass the fuse.\u202e Inspect.",
+    "Do not bypass the fuse.\u0301 Inspect.",
+    "Do not bypass the fuse.\u20dd Inspect.",
+    "Do not bypass the fuse.\ufeff Inspect.",
+    "Do not bypass the fuse.\u00ad Inspect.",
+    "Do not bypass the fuse.\ud800 Inspect.".encode("utf-16", "surrogatepass").decode("utf-16", "surrogatepass"),
+    "Do not bypass the fuse.\ue000 Inspect.",
+])
+def test_control_format_and_combining_characters_fail_the_gate_outright(text):
+    assert REASON_CONTROL in reasons(text), repr(text)
+    with pytest.raises(ValueError, match="unsafe"):
+        validate_model_output(plan(text), {"evidence": [{"id": "E1", "text": "x"}]})
+
+
+def test_carriage_returns_become_line_breaks_not_deletions():
+    assert REASON_CONTROL not in reasons("Never probe live mains.\r\nInspect the exterior.")
+    assert REASON_CONTROL not in reasons("Never probe live mains.\rInspect the exterior.")
+    assert unsafe_action_findings(plan("Never probe live mains.\r\nInspect the exterior."), UNSAFE) == []
+    # a deleted \r would have glued these into one benign-looking word
+    assert unsafe_action_findings(plan("Do not wait\rBypass the thermal fuse"), UNSAFE)
+    assert unsafe_action_findings(plan("Do not bypass the fuse\r\njumper the battery protection"), UNSAFE)
+
+
+@pytest.mark.parametrize("text", [
+    "\u0432\u0443\u0440\u0430\u0455\u0455 the thermal fuse",   # whole word in Cyrillic
+    "\u03c1\u03c1\u03bf\u03b2\u03b5 live mains",                 # whole word in Greek
+    "Bypass the thermal fuse \u0430",                               # stray Cyrillic letter anywhere
+    "Inspect \u00fc the unit",
+    "Inspect the unit \u00df",
+    "Inspect the \u0131 unit",                                      # dotless i
+    "Inspect the unit \u0661",                                      # Arabic-indic digit
+])
+def test_any_letter_outside_ascii_and_unit_symbols_is_rejected(text):
+    assert REASON_LETTER in reasons(text), repr(text)
+    with pytest.raises(ValueError, match="unsafe"):
+        validate_model_output(plan(text), {"evidence": [{"id": "E1", "text": "x"}]})
+
+
+def test_non_ascii_mapping_key_is_rejected():
+    p = plan("Inspect the exterior.")
+    p["\u0432\u0443\u0440\u0430\u0455\u0455"] = "x"
+    assert REASON_LETTER in {f["reason"] for f in unsafe_action_findings(p, UNSAFE)}
+
+
+@pytest.mark.parametrize("text", [
+    "Do not\nbypass the fuse.",
+    "Never\r\nbypass the fuse.",
+    "Never probe,\nmeasure or touch live mains.",
+    "Do not attempt to\nbypass the fuse.",
+    "Avoid\u2028bridging the interlock.",
+    "Never\u0085probe live mains.",
+])
+def test_negation_never_reaches_across_a_line_break(text):
+    assert unsafe_action_findings(plan(text), UNSAFE), repr(text)
+
+
+def test_lists_on_one_line_are_still_prohibitions():
+    assert unsafe_action_findings(plan("Never probe, measure or touch live mains."), UNSAFE) == []
