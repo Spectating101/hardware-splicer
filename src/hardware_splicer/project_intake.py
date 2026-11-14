@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .build_compiler import compile_catalog_build, resolve_build_id
-from .design_quality import build_design_quality_gate
+from .design_quality import apply_goal_coverage, build_design_quality_gate
 from .fabrication_inspection import inspect_fabrication_package
 from .functional_delivery import build_functional_delivery_score
 from .evidence_extractor import _merge_evidence, enrich_intake_with_extracted_evidence
@@ -296,6 +296,11 @@ def splice_and_build_from_intake(
             splice_plan=graph_input if isinstance(graph_input, dict) else None,
             resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
         )
+    apply_goal_coverage(
+        compile_result.design_quality,
+        salvage_package.get("goal_coverage"),
+        quality_file=compile_result.design_quality_file,
+    )
     gate = build_design_quality_gate(compile_result.design_quality)
     gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
     gate_path.parent.mkdir(parents=True, exist_ok=True)
@@ -986,6 +991,7 @@ def _compile_spec(
             "resolved_modules": salvage.get("resolved_modules") or [],
             "module_overrides": salvage.get("module_overrides") or {},
             "splice_verdict": salvage.get("verdict"),
+            "goal_coverage": salvage.get("goal_coverage"),
         }
         if salvage.get("splice_plan"):
             spec["build_compilation"]["splice_plan"] = salvage["splice_plan"]
