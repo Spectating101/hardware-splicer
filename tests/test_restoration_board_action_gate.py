@@ -48,15 +48,32 @@ def test_pin_guidance_disallowed_when_board_not_verified(phrase):
     with pytest.raises(UnverifiedBoardPinAction):
         reject_unverified_board_pin_actions(p,context()["engineering_reference"])
 
+def scrub_reference_prose(p):
+    """Replace the saved plan's pin-level topology prose with pin-free prose."""
+    p["summary"]="The reference schematic routes battery power through the DC jack; the target board revision is unverified."
+    p["uncertainty"]="The board revision claim is unverified and conduction across multi-pin parts cannot be assumed from a static netlist."
+    for hyp in p["hypotheses"]:
+        hyp["mechanism"]="Open circuit or high resistance somewhere on the battery path (reference-level hypothesis)."
+        hyp["why"]="The reference nets suggest the battery path passes the DC jack; this is reference-level reasoning only."
+    return p
+
 def test_reference_circuit_rationale_is_allowed_without_actionable_pin_test():
-    p=copy.deepcopy(previous()["plan"])
+    # CHANGED: the gate now scans every free-text field, so pin-level
+    # reference topology in `why`/`summary` is withheld as well. The saved
+    # plan's rationale cited "BT1 pin 1" / "DC1 pin 3"; this test now uses
+    # pin-free rationale and checks the old prose IS flagged.
+    original=copy.deepcopy(previous()["plan"])
+    assert "BT1 pin 1" in original["hypotheses"][0]["why"] or "DC1 pin 3" in original["hypotheses"][1]["why"]
+    p=scrub_reference_prose(copy.deepcopy(original))
     p["hypotheses"][0]["safe_test"]="Keep the unit unpowered, inspect external terminals and verify the printed mainboard revision before any internal test."
     p["hypotheses"][1]["safe_test"]="First confirm the physical PCB marking. Do not probe internal parts yet."
     p["hypotheses"][2]["safe_test"]="Inspect outer battery contacts, with batteries removed."
     p["next_safe_check"]="Observe battery compartment corrosion and confirm the actual printed board revision, without disassembly."
     assert not unsafe_pin_actions(p,context()["engineering_reference"])
-    assert "BT1 pin 1" in p["hypotheses"][0]["why"] or "DC1 pin 3" in p["hypotheses"][1]["why"]
     validate_model_output(p,context())
+    q=copy.deepcopy(p)
+    q["hypotheses"][0]["why"]=original["hypotheses"][0]["why"]
+    assert any(x["field"]=="hypotheses[1].why" for x in unsafe_pin_actions(q,context()["engineering_reference"]))
 
 def test_detects_tampered_and_mismatched_corrective_chain():
     a=context();old=previous()
@@ -73,7 +90,7 @@ def test_single_mock_correction_reuses_real_netlist_without_actions():
     a=context();old=previous()
     def safe_model(messages,**kwargs):
         assert "PHYSICAL BOARD AUTHORITY CORRECTION" in messages[0]["content"]
-        p=copy.deepcopy(old["plan"])
+        p=scrub_reference_prose(copy.deepcopy(old["plan"]))  # CHANGED: rationale prose is scanned too
         for hyp in p["hypotheses"]:
             hyp["safe_test"]="With all power removed, identify the silkscreen board revision before planning internal checks."
         p["next_safe_check"]="Inspect the battery compartment externally and confirm the physical board marking first."
@@ -89,7 +106,7 @@ def test_single_mock_correction_reuses_real_netlist_without_actions():
     assert r["correction"]["repair_authorized"] is False
 
 def test_no_model_retry_when_previous_plan_not_a_pin_action():
-    a=context();old=previous();old["plan"]=copy.deepcopy(old["plan"])
+    a=context();old=previous();old["plan"]=scrub_reference_prose(copy.deepcopy(old["plan"]))  # CHANGED: rationale prose is scanned too
     for h in old["plan"]["hypotheses"]:
         h["safe_test"]="Observe the external battery contacts while unpowered."
     old["plan"]["next_safe_check"]="Check batteries externally."

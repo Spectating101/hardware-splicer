@@ -26,7 +26,7 @@ def adjudicate(receipt: dict, outcome: dict, expected_digest: str) -> dict:
     label = outcome.get("root_cause") if status == "resolved" else None
     if status == "resolved" and not isinstance(label, str):
         raise ValueError("resolved outcome requires root cause label")
-    was_abstained = receipt["decision"] == "ABSTAIN_DEVICE_INCOMPATIBLE"
+    was_abstained = str(receipt["decision"]).startswith("ABSTAIN_")
     return {
         "schema": "hs.restoration.prospective_adjudication.v1",
         "case_id": receipt["case_id"],

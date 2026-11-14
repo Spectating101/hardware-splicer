@@ -21,11 +21,18 @@ SCHEMA = "hs.restoration.free_text_diagnostic_v1"
 PROMPT_VERSION = "hs.restoration.reasoning_prompt.v1"
 LOOPBACK = "http://127.0.0.1:11434/api/chat"
 UNSAFE = re.compile(
-    r"\b(?:bypass|short\s*out|jump(?:er)?|bridge)\b.{0,45}"
-    r"\b(?:interlock|safety|fuse|battery|thermal|protection)\b"
-    r"|\b(?:probe|measure|touch|test)\b.{0,40}\b(?:live\s*(?:ac|mains)|mains\s*(?:voltage|power)|energized\s*(?:psu|power))\b"
-    r"|\b(?:charge|jumpstart|recharge)\b.{0,30}\b(?:raw|damaged|swollen|unprotected)\s*(?:li|battery|cell)\b"
-    r"|\b(?:factory\s*reset|wipe\s*(?:the\s*)?data|erase\s*user\s*data)\b",
+    r"\b(?:bypass(?:es|ed|ing)?|short(?:s|ed|ing)?\W*out|short(?:ed|ing)?\W+(?:the|a|an|it|across)"
+    r"|short\W*circuit(?:s|ed|ing)?|jump(?:er|ers|ered|ering|ed|ing|s)?|bridg(?:e|es|ed|ing)"
+    r"|defeat(?:s|ed|ing)?|disabl(?:e|es|ed|ing)|override|overrid(?:es|ing)"
+    r"|circumvent(?:s|ed|ing)?)\b.{0,45}"
+    r"\b(?:interlock|safety|fuse|battery|thermal|protection)s?\b"
+    r"|\b(?:prob(?:e|es|ed|ing)|measur(?:e|es|ed|ing)|touch(?:es|ed|ing)?|test(?:s|ed|ing)?)\b.{0,40}"
+    r"\b(?:live\W*(?:ac|mains)|mains\W*(?:voltage|power|side|input|supply)|line\W*voltage"
+    r"|energi[sz]ed\W*(?:psu|power|supply|mains))\b"
+    r"|\b(?:charg(?:e|es|ed|ing)|jump\W*start(?:s|ed|ing)?|jumpstart(?:s|ed|ing)?|recharg(?:e|es|ed|ing))\b.{0,30}"
+    r"\b(?:raw|damaged|swollen|puffed|bloated|unprotected)\W*(?:li(?:thium)?(?:\W*ion)?|battery|cell|pack)\b"
+    r"|\b(?:factory\W*reset(?:s|ting)?|wip(?:e|es|ing)\W*(?:the\W*)?(?:user\W*)?data"
+    r"|eras(?:e|es|ing)\W*(?:the\W*)?user\W*data)\b",
     re.IGNORECASE
 )
 FORBIDDEN_KEYS = frozenset({
@@ -363,7 +370,7 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
     for h in value["hypotheses"]:
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
     from .restoration_safety_semantics import unsafe_action_findings
-    if unsafe_action_findings(value,UNSAFE):
+    if unsafe_action_findings(value,UNSAFE,permitted):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
     ledger = (context.get("hs_engineering_ledger")
               or context.get("engineering_reference")
@@ -374,11 +381,11 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         reject_unsourced_thresholds(value,ledger)
     if context.get("engineering_reference"):
         from .restoration_board_action_gate import reject_unverified_board_pin_actions
-        reject_unverified_board_pin_actions(value,context["engineering_reference"])
+        reject_unverified_board_pin_actions(value,context["engineering_reference"],permitted)
     if context.get("investigator_reference"):
         from .restoration_board_action_gate import reject_unverified_board_pin_actions
         reject_unverified_board_pin_actions(
-            value,{"target_board_physically_verified":False}
+            value,{"target_board_physically_verified":False},permitted
         )
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],

@@ -35,5 +35,11 @@ def test_real_board_authority_correction_is_sealed_and_passive():
     assert r["receipt_sha256"]==sha({
         k:v for k,v in r.items() if k not in ("receipt_sha256","elapsed_seconds")
     })
-    assert not unsafe_pin_actions(r["plan"],ref)
+    # CHANGED: the gate now scans every free-text field. The saved correction
+    # keeps pin-level reference topology in `summary` and `why` (with explicit
+    # unverified-board disclaimers) and is now withheld for that prose; its
+    # action fields (safe_test, next_safe_check) remain free of pin references.
+    flagged={row["field"] for row in unsafe_pin_actions(r["plan"],ref)}
+    assert flagged and flagged<={"summary","hypotheses[1].why","hypotheses[2].why"}
+    assert not any(f.endswith("safe_test") or f=="next_safe_check" for f in flagged)
     assert "board revision" in r["plan"]["next_safe_check"].lower()

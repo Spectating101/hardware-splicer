@@ -14,6 +14,7 @@ import hashlib
 import json
 import math
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -30,13 +31,93 @@ UNITS = {"voltage":"V","resistance":"ohm","current":"A"}
 NUMBER = re.compile(r"(?<![\w.])-?\d+(?:\.\d+)?(?![\w.])")
 
 
-def _literal_number_anchored(anchor: str, value: float) -> bool:
-    # A VTT source may spell zero as "zero volts"; other numeric
-    # magnitudes must appear literally as decimal/integer tokens.
-    if float(value) == 0 and re.search(r"\bzero\b",anchor,re.IGNORECASE):
+_QUANTITY = re.compile(
+    r"(?<![\w.])(?P<num>-?\d+(?:\.\d+)?)(?![\w.])"
+    r"(?:\s*(?P<pfx>(?i:kilo|milli|mega|micro)|[kMm\u00b5\u03bcu])?\s*"
+    r"(?P<unit>(?i:volts?|amperes?|amps?|ohms?)|[VA\u03a9])(?!\w))?"
+)
+_ZERO_QUANTITY = re.compile(
+    r"(?i)\bzero\s*(?P<unit>volts?|amperes?|amps?|ohms?)(?!\w)"
+)
+_PREFIX = {"k":1e3,"kilo":1e3,"m":1e-3,"milli":1e-3,"M":1e6,"mega":1e6,
+           "\u00b5":1e-6,"\u03bc":1e-6,"u":1e-6,"micro":1e-6}
+_RANGE_JOIN = re.compile(r"(?i)^\s*(?:to|and|through|until|-|\u2013|\u2014)\s*$")
+
+
+def _canonical_unit(word: str) -> str:
+    low=word.lower()
+    if low.startswith("volt") or word=="V":
+        return "V"
+    if low.startswith("amp") or word=="A":
+        return "A"
+    return "ohm"
+
+
+def _anchor_quantities(anchor: str) -> list[tuple[float,str|None]]:
+    """(value in base units, base unit or None) for every number in an anchor.
+
+    A prefix is normalised ("400 mA" is 0.4 A). A bare number inherits the
+    unit of the number a range joins it to ("6.0 to 6.4 V"); any other bare
+    number has unit None and can never satisfy a claim.
+    """
+    text=unicodedata.normalize("NFKC",anchor)
+    found=[(m.start(),m.end(),float(m.group("num")),m.group("pfx"),m.group("unit"))
+           for m in _QUANTITY.finditer(text)]
+    out:list[tuple[float,str|None]]=[]
+    for i,(start,end,num,pfx,unit) in enumerate(found):
+        if unit is None and i+1<len(found) and found[i+1][4] is not None \
+                and _RANGE_JOIN.match(text[end:found[i+1][0]]):
+            pfx,unit=found[i+1][3],found[i+1][4]
+        if unit is None:
+            out.append((num,None))
+            continue
+        out.append((num*_PREFIX.get(pfx or "",1.0),_canonical_unit(unit)))
+    out.extend((0.0,_canonical_unit(m.group("unit"))) for m in _ZERO_QUANTITY.finditer(text))
+    return out
+
+
+def _literal_number_anchored(anchor: str, value: float, unit: str|None=None) -> bool:
+    """The value must appear at the anchor WITH the claimed unit (prefix-normalised).
+
+    ``unit`` None keeps the old number-only check for callers that have no unit.
+    """
+    for number,found_unit in _anchor_quantities(anchor):
+        if unit is not None and found_unit!=unit:
+            continue
+        if math.isclose(number,float(value),rel_tol=1e-9,abs_tol=1e-12):
+            return True
+    return False
+
+
+_NEGATION = re.compile(
+    r"(?i)(?<![\w'])(?:not|no|never|none|nothing|nobody|cannot|neither|nor|"
+    r"without|unlikely|avoid|ignore|disregard|hardly|rarely|seldom|"
+    r"dont|doesnt|didnt|wont|cant|isnt|arent|wasnt|shouldnt|wouldnt|couldnt)"
+    r"(?![\w])|n['\u2019]t(?![\w])"
+)
+_SOURCE_BREAK = re.compile(r"(?:(?<!\d)[.!?]|[.!?](?!\d)|[;:<>\n])")
+
+
+def _negated_in_source(anchor: str, body: str) -> bool:
+    """True if ANY occurrence of the anchor sits in a negated statement.
+
+    Looks at the anchor itself plus up to 8 words before and 4 words after it,
+    never crossing a sentence, tag or line break. The negation may therefore
+    be outside the anchor text. Fail-closed: one negated occurrence suffices.
+    """
+    norm=" ".join(unicodedata.normalize("NFKC",body).lower().split())
+    needle=" ".join(unicodedata.normalize("NFKC",anchor).lower().split())
+    if _NEGATION.search(needle):
         return True
-    return any(abs(float(m.group(0))-float(value))<1e-9
-               for m in NUMBER.finditer(anchor))
+    start=norm.find(needle)
+    while start!=-1:
+        end=start+len(needle)
+        before=_SOURCE_BREAK.split(norm[:start])[-1].split()[-8:]
+        after=_SOURCE_BREAK.split(norm[end:])[0].split()[:4]
+        if _NEGATION.search(" ".join(before+after)):
+            return True
+        start=norm.find(needle,start+1)
+    return False
 
 
 def _read_local(path: Path, expected_sha256: str) -> bytes:
@@ -77,8 +158,12 @@ def _validate_one(source: Mapping[str,Any],claim: Mapping[str,Any],artifact:Path
     anchor=str(claim.get("anchor",""))
     if not 6 <= len(anchor) <= 140 or not _literal_number_anchored(anchor,float(value)):
         raise ValueError("numeric value has no matching source passage")
+    if not _literal_number_anchored(anchor,float(value),unit):
+        raise ValueError("claimed unit does not match the unit at the source anchor")
     if upper is not None and not _literal_number_anchored(anchor,float(upper)):
         raise ValueError("reference upper bound has no source-number anchor")
+    if upper is not None and not _literal_number_anchored(anchor,float(upper),unit):
+        raise ValueError("claimed unit does not match the unit at the source anchor")
     if source_type=="video_caption":
         start,end=claim.get("window_start_s"),claim.get("window_end_s")
         if not isinstance(start,int) or not isinstance(end,int) or end<=start or end>600:
@@ -100,6 +185,8 @@ def _validate_one(source: Mapping[str,Any],claim: Mapping[str,Any],artifact:Path
             raise ValueError("published numerical statement lacks expectation wording")
     if " ".join(anchor.lower().split()) not in " ".join(body.lower().split()):
         raise ValueError("quantitative passage not present at claimed source and time")
+    if _negated_in_source(anchor,body):
+        raise ValueError("source statement is negated and cannot be registered as an expectation or reading")
     allowed=set(("id","claim_type","quantity","value","upper_value","unit",
                  "anchor","window_start_s","window_end_s","condition_id",
                  "condition_description","device_board_verified"))
