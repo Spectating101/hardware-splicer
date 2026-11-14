@@ -218,8 +218,14 @@ def jarvis_build(
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
     allow_qwen: bool = True,
+    allow_llm_first: bool = False,
 ) -> Dict[str, Any]:
-    """Primary electrical path: NL goal (+ optional salvage parts) → compile → trust → JARVIS narrative."""
+    """Primary electrical path: NL goal (+ optional salvage parts) → compile → trust → JARVIS narrative.
+
+    ``allow_llm_first`` is opt-in (matching the REST default): a model-written netlist is
+    compiled on the open path only when it is set, because that path returns ok without a
+    human review step.
+    """
     load_env_local()
     apply_engine_defaults()
     target = Path(out_dir) if out_dir else Path(os.environ.get("TMPDIR", "/tmp")) / "hardware_splicer_jarvis"
@@ -249,7 +255,7 @@ def jarvis_build(
         build_id = splice.get("build_id")
         compile_result = None
     else:
-        if llm_first_enabled() and allow_qwen:
+        if llm_first_enabled() and allow_qwen and allow_llm_first:
             open_result = _open_compose_llm_first(
                 goal,
                 target,
@@ -318,7 +324,7 @@ def jarvis_build(
         "electrical_simulation": simulation,
         "jarvis": narrative,
         "jarvis_enabled": jarvis_narrative_enabled(),
-        "llm_first": llm_first_enabled() and allow_qwen and not parts,
+        "llm_first": llm_first_enabled() and allow_qwen and allow_llm_first and not parts,
         "requires_human_review": requires_human_review,
         "semantic_intent": semantic_intent,
         "semantic_candidate_set": semantic_candidate_set,
