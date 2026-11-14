@@ -92,6 +92,9 @@ def test_invisible_and_lookalike_characters_do_not_hide_a_pin_action(text):
     "Keep the unit unpowered and verify the printed mainboard revision.",
     "Inspect outer battery contacts, with batteries removed.",
     "Photograph the silkscreen marking near the battery compartment.",
+    "Inspect the HDMI port for bent pins.",                 # visual, no probing verb
+    "Damage is consistent with E1 and E2; bent pins.",      # evidence IDs are not parts
+    "Look for SW1 markings, terminal corrosion or residue.",  # punctuation ends the gap
 ])
 def test_plain_external_inspection_is_still_allowed(text):
     assert not unsafe_pin_actions(plan(next_safe_check=text), REF)

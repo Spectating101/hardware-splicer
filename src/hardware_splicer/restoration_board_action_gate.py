@@ -23,6 +23,13 @@ from .restoration_safety_semantics import (
 )
 
 _DES = r"[A-Z]{1,3}\d{1,4}"
+# Proximity patterns skip evidence IDs ("E1", "E12"), which are not parts.
+_PART_DES = r"(?!E\d)[A-Z]{1,3}\d{1,4}"
+# Words allowed between a designator and a pin-like word: no punctuation.
+_GAP = r"[\s'\u2019()]+"
+_ACT = (r"(?:probe|probing|measure|measuring|check|checking|test|testing|touch|"
+        r"meter|multimeter|continuity|voltage|resistance|reading|short|jumper|"
+        r"apply|connect|solder|ground)")
 _PIN = r"(?:pins?|pads?|terminals?|contacts?|leads?|legs?|balls?|poles?)"
 _NUM = r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|[a-z]{1,2}\d{1,2})"
 _ORD = r"(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|last|\d+(?:st|nd|rd|th))"
@@ -38,10 +45,10 @@ PATTERNS = [
     _COMPONENT_PIN,
     re.compile(rf"\b{_PIN}\s*(?:(?:no|num|number)\b\.?)?\s*[:#]?\s*{_NUM}\b", re.I),
     re.compile(rf"\b{_ORD}\s+{_PIN}\b", re.I),
-    re.compile(rf"\b{_DES}\s*[-–./:_#]\s*\d{{1,3}}\b", re.I),
-    re.compile(rf"\b{_DES}\b(?:\W+\w+){{0,3}}?\W+{_PIN}\b", re.I),
-    re.compile(rf"\b{_PIN}\b(?:\W+\w+){{0,3}}?\W+(?:of|on|at|in|from)\W+(?:the\W+)?{_DES}\b", re.I),
-    re.compile(rf"\bpins?\b(?:\W+\w+){{0,3}}?\W+(?:of|on|at|in)\W+(?:the\W+)?(?:\w+\W+){{0,2}}?{_PART}\b", re.I),
+    re.compile(rf"\b{_PART_DES}\s*[-\u2013./:_#]\s*\d{{1,3}}\b", re.I),
+    re.compile(rf"\b{_PART_DES}\b(?:{_GAP}\w+){{0,3}}?{_GAP}{_PIN}\b", re.I),
+    re.compile(rf"\b{_PIN}\b(?:{_GAP}\w+){{0,3}}?{_GAP}(?:of|on|at|in|from){_GAP}(?:the{_GAP})?{_PART_DES}\b", re.I),
+    re.compile(rf"\b{_ACT}\b[^.;:!?\n]{{0,60}}?\bpins?\b(?:{_GAP}\w+){{0,3}}?{_GAP}(?:of|on|at|in){_GAP}(?:the{_GAP})?(?:\w+{_GAP}){{0,2}}?{_PART}\b", re.I),
 ]
 
 
