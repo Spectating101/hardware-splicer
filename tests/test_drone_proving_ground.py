@@ -1,8 +1,15 @@
 """HS-3G drone proving-ground package: regenerate it and check CAD, numbers and README.
 
-The package lives in examples/drone_proving_ground/. These tests rebuild the
-frame in a temporary directory, so they never touch the committed files, and
-fail if the committed README or results.json drift from a fresh regeneration.
+The package lives in examples/drone_proving_ground/. Two kinds of test:
+
+* Tests on the ``committed`` fixture need no CadQuery. They read the committed
+  results.json, README and STLs, rerun every non-CAD number from the committed
+  CAD measurements and the cited inputs (``build_hs3g_package.derive``), and
+  check the numbers, review corrections and README against them.
+* Tests on the ``regen`` fixture rebuild the frame with CadQuery in a temporary
+  directory (never touching the committed files) and fail if the committed CAD
+  measurements, README or results.json drift from a fresh regeneration. They
+  skip one by one, with a reason, where CadQuery is not installed.
 """
 from __future__ import annotations
 
@@ -15,18 +22,35 @@ from pathlib import Path
 
 import pytest
 
-cq = pytest.importorskip("cadquery")
-
 PKG = Path(__file__).resolve().parents[1] / "examples" / "drone_proving_ground"
 sys.path.insert(0, str(PKG))
 
 import build_hs3g_package  # noqa: E402
+import hs3g_audit as audit_corrections  # noqa: E402
 import hs3g_design as design  # noqa: E402
+import hs3g_frame as frame_mod  # noqa: E402
 import hs3g_readme as render_readme  # noqa: E402
+
+NEEDS_CADQUERY = "CadQuery is not installed; this test regenerates the frame CAD"
+
+
+def _cadquery():
+    return pytest.importorskip("cadquery", reason=NEEDS_CADQUERY)
+
+
+def _dump(res) -> str:
+    return json.dumps(res, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+@pytest.fixture(scope="module")
+def committed():
+    """The committed results.json; every test on it runs without CadQuery."""
+    return json.loads((PKG / "generated" / "results.json").read_text())
 
 
 @pytest.fixture(scope="module")
 def regen(tmp_path_factory):
+    _cadquery()
     out = tmp_path_factory.mktemp("drone_proving_ground")
     res = build_hs3g_package.compute(out)
     return out, res
@@ -40,6 +64,7 @@ def test_drone_frame_step_and_stl_are_generated(regen):
 
 
 def test_drone_frame_step_reimports_as_one_solid_with_cad_volume(regen):
+    cq = _cadquery()
     out, res = regen
     for plate in ("bottom_plate", "top_plate"):
         shape = cq.importers.importStep(str(out / res["cad_files"][f"{plate}_step"])).val()
@@ -48,8 +73,12 @@ def test_drone_frame_step_reimports_as_one_solid_with_cad_volume(regen):
         assert shape.Volume() == pytest.approx(cad_v, rel=1e-4)
 
 
-def test_drone_frame_stl_is_watertight_and_matches_cad_volume(regen):
-    out, res = regen
+@pytest.mark.parametrize("which", ["committed", "regenerated"])
+def test_drone_frame_stl_is_watertight_and_matches_cad_volume(which, request, committed):
+    if which == "committed":
+        out, res = PKG / "generated", committed
+    else:
+        out, res = request.getfixturevalue("regen")
     for plate in ("bottom_plate", "top_plate"):
         rep = design.mesh_report(out / res["cad_files"][f"{plate}_stl"])
         assert rep["degenerate_triangles"] == 0
@@ -60,8 +89,8 @@ def test_drone_frame_stl_is_watertight_and_matches_cad_volume(regen):
         assert rep["signed_volume_mm3"] == pytest.approx(cad_v, rel=2e-3)
 
 
-def test_drone_frame_mass_follows_volume_and_density(regen):
-    _, res = regen
+def test_drone_frame_mass_follows_volume_and_density(committed):
+    res = committed
     rho = res["carbon_density_g_cm3"]
     # the cutter's 0.06 lb/in^3, converted
     assert rho == pytest.approx(0.06 * 453.59237 / 16.387064, abs=1e-4)
@@ -71,8 +100,8 @@ def test_drone_frame_mass_follows_volume_and_density(regen):
     assert res["cg"]["mass_g"] == pytest.approx(res["mass"]["auw_g"], abs=0.05)
 
 
-def test_drone_frame_motor_spacing_and_prop_clearance(regen):
-    _, res = regen
+def test_drone_frame_motor_spacing_and_prop_clearance(committed):
+    res = committed
     F = res["frame_parameters"]
     m = res["cad_measured"]
     assert m["motor_count"] == 4
@@ -87,8 +116,8 @@ def test_drone_frame_motor_spacing_and_prop_clearance(regen):
     assert res["clearance"]["min_radial_mm"] >= a["min_prop_clearance_mm"]["value"]
 
 
-def test_drone_checks_pass_except_the_documented_full_throttle_c_rating(regen):
-    _, res = regen
+def test_drone_checks_pass_except_the_documented_full_throttle_c_rating(committed):
+    res = committed
     failing = {k for k, v in res["checks"].items() if not v}
     assert failing == {"battery_continuous_covers_full_throttle", "cutter_rules_met_everywhere"}
     p = res["propulsion"]
@@ -96,8 +125,8 @@ def test_drone_checks_pass_except_the_documented_full_throttle_c_rating(regen):
     assert res["mass_density_high"]["auw_g"] <= res["mass_limit_g"] - res["mass_design_margin_g"]
 
 
-def test_drone_propulsion_numbers_follow_the_maker_table(regen):
-    _, res = regen
+def test_drone_propulsion_numbers_follow_the_maker_table(committed):
+    res = committed
     table = json.loads((PKG / "inputs" / "motor_f1404_3800kv_thrust.json").read_text())
     rows = table["props"]["HQ 3x3x3"]
     p = res["propulsion"]
@@ -109,8 +138,8 @@ def test_drone_propulsion_numbers_follow_the_maker_table(regen):
     assert p["hover_power_per_motor_used_w"] >= p["hover_power_per_motor_fit_w"]
 
 
-def test_drone_audit_corrections_reproduce_the_audit(regen):
-    _, res = regen
+def test_drone_audit_corrections_reproduce_the_audit(committed):
+    res = committed
     bom = res["audit"]["bom"]
     geo = res["audit"]["geometry"]
     assert bom["pr291_build_min_twd"] == bom["pr291_committed_build_min_twd"] == 4036
@@ -119,13 +148,29 @@ def test_drone_audit_corrections_reproduce_the_audit(regen):
     assert geo["auw_g"] == pytest.approx(38.0, abs=0.05)
     assert geo["rib_protrusion_mm"] == pytest.approx(1.0, abs=1e-6)
     assert geo["bbox_from_ribs_mm"] == pytest.approx(geo["bbox_committed_mm"], abs=1e-3)
+    # recomputed now from the files the audited PRs committed, not copied
+    assert _dump(audit_corrections.compute(build_hs3g_package.REPO)) == _dump(res["audit"])
 
 
 def test_drone_readme_and_results_match_a_fresh_regeneration(regen):
     _, res = regen
-    fresh = json.dumps(res, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
-    assert (PKG / "generated" / "results.json").read_text() == fresh, "rerun build_hs3g_package.py"
+    assert (PKG / "generated" / "results.json").read_text() == _dump(res), "rerun build_hs3g_package.py"
     assert (PKG / "README.md").read_text() == render_readme.render(res), "rerun build_hs3g_package.py"
+
+
+def test_drone_numbers_rederive_from_committed_cad_measurements_and_inputs(committed):
+    # Everything except the CAD stage is pure Python: rerun it on the committed
+    # CAD measurements and the cited inputs, and the whole results.json and
+    # README must come back byte for byte. The regen tests close the loop by
+    # checking those CAD measurements against a fresh CadQuery build.
+    cad = {k: committed[k] for k in build_hs3g_package.CAD_KEYS}
+    res = build_hs3g_package.derive(cad)
+    assert _dump(res) == _dump(committed)
+    assert (PKG / "README.md").read_text() == render_readme.render(res)
+    # an input edit shows up in the numbers, so the test is not vacuous
+    edited = json.loads(json.dumps(cad))
+    edited["cad_measured"]["bottom_volume_mm3"] += 1000.0
+    assert build_hs3g_package.derive(edited)["mass"]["auw_g"] > committed["mass"]["auw_g"]
 
 
 def test_drone_readme_covers_strategies_corrections_and_physical_unknowns():
@@ -154,8 +199,8 @@ def test_drone_package_has_no_local_paths_or_personal_details():
             assert "/home/" not in text and "@gmail" not in text, path
 
 
-def test_drone_review_corrections_are_applied(regen):
-    _, res = regen
+def test_drone_review_corrections_are_applied(committed):
+    res = committed
     parts = {p["id"]: p for p in res["parts"]}
     st = parts["stack"]
     assert sum(st["component_masses_g"].values()) == pytest.approx(16.8)
@@ -174,8 +219,8 @@ def test_drone_review_corrections_are_applied(regen):
         res["mass_limit_g"] - res["mass_design_margin_g"] - res["auw_heavy_case_g"], abs=0.051)
 
 
-def test_drone_frame_meets_cutter_rules_except_at_motor_pads(regen):
-    _, res = regen
+def test_drone_frame_meets_cutter_rules_except_at_motor_pads(committed):
+    res = committed
     rules = res["cutter_rules"]
     for plate, d in res["manufacturability"].items():
         for k, v in d["smallest_hole_by_feature_mm"].items():
@@ -190,7 +235,6 @@ def test_drone_frame_meets_cutter_rules_except_at_motor_pads(regen):
 
 
 def test_drone_frame_junctions_are_filleted(regen):
-    import hs3g_frame as frame_mod
     _, res = regen
     assert res["cad_measured"]["bottom_sharp_concave_corners"] == 0
     sharp = dict(frame_mod.FRAME, junction_fillet_r_mm=0.0)
@@ -198,8 +242,8 @@ def test_drone_frame_junctions_are_filleted(regen):
     assert frame_mod._sharp_concave_corners(frame_mod.bottom_outline(sharp).val()) == 16
 
 
-def test_drone_battery_strap_check_tests_what_it_claims(regen):
-    _, res = regen
+def test_drone_battery_strap_check_tests_what_it_claims(committed):
+    res = committed
     s = res["battery_strap"]
     lo, hi = s["slot_inner_edges_x_mm"]
     assert lo <= s["pack_x_extent_mm"][0] and s["pack_x_extent_mm"][1] <= hi
@@ -214,8 +258,8 @@ def test_drone_battery_strap_check_tests_what_it_claims(regen):
     assert not design.battery_strap(wide, parts, res["cg"]["battery_x_mm"], 21.0)["strap_clears_stack_spacers"]
 
 
-def test_drone_arm_mode_is_reported_as_a_range(regen):
-    _, res = regen
+def test_drone_arm_mode_is_reported_as_a_range(committed):
+    res = committed
     cases = res["arm_cases"]
     f = [c["f1_hz"] for c in cases.values()]
     assert res["arm_range"]["f1_max_hz"] == max(f) == cases["on_axis_clamp_axis"]["f1_hz"]
@@ -224,8 +268,8 @@ def test_drone_arm_mode_is_reported_as_a_range(regen):
     assert 10.0 < res["arm_range"]["e_bias_gpa"] < 25.0
 
 
-def test_drone_hardware_lists_stack_screws_and_motor_engagement(regen):
-    _, res = regen
+def test_drone_hardware_lists_stack_screws_and_motor_engagement(committed):
+    res = committed
     hw = res["hardware"]
     ids = {it["id"]: it for it in hw["items"]}
     assert ids["stack_screw"]["qty"] == 4
@@ -236,7 +280,7 @@ def test_drone_hardware_lists_stack_screws_and_motor_engagement(regen):
     assert next(r for r in res["mass"]["rows"] if r["id"] == "hardware")["total_g"] == pytest.approx(hw["total_g"])
 
 
-def test_drone_readme_states_review_gates(regen):
+def test_drone_readme_states_review_gates():
     text = (PKG / "README.md").read_text()
     assert "## 10. Order in two stages" in text and "measure before cutting" in text.lower()
     assert "law.moj.gov.tw" in text and "natural person" in text and "visual line of sight" in text
@@ -253,6 +297,7 @@ def _copy_package(dst: Path) -> Path:
 
 
 def test_drone_check_passes_on_committed_copy_and_writes_nothing(tmp_path):
+    _cadquery()
     pkg = _copy_package(tmp_path / "pkg")
     before = {f: f.read_bytes() for f in pkg.rglob("*") if f.is_file()}
     assert build_hs3g_package.main(["--check", "--pkg", str(pkg)]) == 0
@@ -261,6 +306,7 @@ def test_drone_check_passes_on_committed_copy_and_writes_nothing(tmp_path):
 
 
 def test_drone_check_fails_on_hand_edited_results(tmp_path):
+    _cadquery()
     pkg = _copy_package(tmp_path / "pkg")
     res_path = pkg / "generated" / "results.json"
     data = json.loads(res_path.read_text())
@@ -269,3 +315,26 @@ def test_drone_check_fails_on_hand_edited_results(tmp_path):
     res_path.write_text(edited)
     assert build_hs3g_package.main(["--check", "--pkg", str(pkg)]) == 1
     assert res_path.read_text() == edited  # --check never restores or overwrites
+
+
+@pytest.mark.parametrize("missing", ["pythonpath", "cadquery"])
+def test_drone_check_stops_with_setup_message_instead_of_drift(missing, tmp_path, monkeypatch, capsys):
+    if missing == "pythonpath":
+        # what `python build_hs3g_package.py --check` sees without PYTHONPATH=src
+        monkeypatch.setitem(sys.modules, "hardware_splicer", None)
+        monkeypatch.setitem(sys.modules, "hardware_splicer.drone_product_delivery", None)
+        expected = "PYTHONPATH=src"
+    else:
+        monkeypatch.setattr(frame_mod, "cq", None)
+        expected = "CadQuery is not importable"
+    pkg = _copy_package(tmp_path / "pkg")
+    before = {f: f.read_bytes() for f in pkg.rglob("*") if f.is_file()}
+    for argv in (["--check", "--pkg", str(pkg)], ["--out", str(tmp_path / "out")]):
+        assert build_hs3g_package.main(argv) == 2
+        captured = capsys.readouterr()
+        assert expected in captured.err
+        assert "DRIFT" not in captured.out + captured.err
+    assert {f: f.read_bytes() for f in pkg.rglob("*") if f.is_file()} == before
+    assert not (tmp_path / "out").exists()
+    with pytest.raises(build_hs3g_package.SetupError, match=expected.split()[0]):
+        build_hs3g_package.compute(tmp_path / "out2")
