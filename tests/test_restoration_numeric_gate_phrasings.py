@@ -92,3 +92,21 @@ def test_extra_keys_and_mapping_keys_are_scanned():
     q = plan()
     q["extra"] = "reading below 4.5 volts"
     assert unsourced_thresholds(q, LEDGER)
+
+
+@pytest.mark.parametrize("text,folded", [
+    ("A healthy unit shows \u2265 4.5 V.", ">= 4.5 V"),
+    ("A healthy unit shows \u2264 10 mA.", "<= 10 mA"),
+    ("A healthy unit shows 4.5\u20135.5 V.", "4.5-5.5 V"),
+    ("A healthy unit shows below\u00a04.5\u202fV.", "below 4.5 V"),
+])
+def test_typographic_comparators_fold_to_ascii_and_are_caught(text, folded):
+    rows = unsourced_thresholds(plan(next_safe_check=text), LEDGER)
+    assert rows and any(folded in r["limit"] for r in rows), rows
+    assert not any(r["explanation"].startswith("disallowed") for r in rows)
+
+
+def test_accents_and_cyrillic_are_still_rejected_by_the_numeric_gate():
+    for text in ("Check the caf\u00e9 rail", "Check the \u0431\u0443\u043c rail"):
+        rows = unsourced_thresholds(plan(next_safe_check=text), LEDGER)
+        assert rows and rows[0]["explanation"] == "disallowed_non_ascii_letter"

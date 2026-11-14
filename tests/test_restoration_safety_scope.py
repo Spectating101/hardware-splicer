@@ -266,12 +266,11 @@ def test_unit_symbols_are_accepted_only_in_unit_position(text):
 
 
 @pytest.mark.parametrize("text", [
-    "Inspect the unit → then wait",       # arrow
-    "Inspect the unit — then wait",       # em dash
-    "Inspect the unit “now”",       # curly quotes
-    "Inspect the unit ≥ 5",               # comparison symbol
-    "Inspect the unit • now",             # bullet
-    "Inspect the unit ©",                 # copyright sign
+    "Inspect the unit \u2192 then wait",       # arrow
+    "Inspect the unit \u00a9",                 # copyright sign
+    "Inspect the unit \u2248 5",               # approximately-equal sign (not in the fold table)
+    "Inspect the caf\u00e9",                   # accented letter
+    "Inspect the unit \u0431\u0443\u043c",   # Cyrillic word
 ])
 def test_every_other_non_ascii_character_fails_whatever_its_category(text):
     assert REASON_LETTER in reasons(text), repr(text)
@@ -284,3 +283,44 @@ def test_every_other_non_ascii_character_fails_whatever_its_category(text):
 ])
 def test_unit_position_symbols_remain_allowed(text):
     assert unsafe_action_findings(plan(text), UNSAFE) == [], text
+
+
+# --- typography is folded to ASCII, never rejected, and then matched normally --
+
+@pytest.mark.parametrize("dash", ["\u2013", "\u2014", "\u2012", "\u2015", "\u2212"])
+def test_dash_between_negator_and_verb_breaks_the_negation(dash):
+    assert unsafe_action_findings(plan(f"Never bypass the fuse {dash} jumper the battery protection"), UNSAFE)
+    assert unsafe_action_findings(plan(f"Do not wait{dash}bypass the thermal fuse"), UNSAFE)
+
+
+@pytest.mark.parametrize("text", [
+    "Never bypass the fuse\u2026 jumper the battery protection",
+    "Never bypass the fuse \u2022 jumper the battery protection",
+    "Never bypass the fuse \u00b7 jumper the battery protection",
+    "Never\u00a0bypass the fuse. Then\u202fshort out the thermal fuse.",
+    "Do not bypass the fuse, \u201cbut\u201d jumper the battery protection",
+])
+def test_folded_typography_still_hits_the_hazard_matchers(text):
+    assert unsafe_action_findings(plan(text), UNSAFE), repr(text)
+
+
+@pytest.mark.parametrize("text", [
+    "Don\u2019t bypass the fuse. \u201cInspect\u201d the unit\u2026 then wait \u2014 carefully.",
+    "Never probe live mains\u2009voltage; check the \u2018label\u2019 \u2013 externally only.",
+    "Never probe\u00a0live mains.",
+    "Inspect \u2022 photograph \u00b7 note the \u2033 mark and the \u201a case",
+    "A 10 \u00b5A draw \u2260 a fault \u2264 \u2265 are only symbols.",
+])
+def test_ordinary_typography_is_not_rejected(text):
+    assert unsafe_action_findings(plan(text), UNSAFE) == [], repr(text)
+
+
+def test_fold_table_adds_or_keeps_a_word_boundary():
+    from hardware_splicer.restoration_safety_semantics import fold
+    assert fold("a\u2014b") == "a-b"
+    assert fold("\u2018x\u2019") == "'x'"
+    assert fold("x\u2026y") == "x...y"
+    assert fold("a\u2022b") == "a - b"
+    assert fold("a\u00b7b") == "a - b"
+    assert fold("a\u00a0b\u202fc\u2009d\u2007e") == "a b c d e"
+    assert fold("1\u22652") == "1>=2" and fold("1\u22642") == "1<=2" and fold("1\u22602") == "1!=2"

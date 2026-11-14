@@ -20,9 +20,10 @@ Fail-closed rules:
   ANY non-ASCII character (after NFKC) other than the degree, plus-minus and
   multiplication signs and a micro sign / ohm sign written in unit position
   ("10 \u00b5A", "4.7 k\u03a9"). Known limitation: accented or non-English text,
-  typographic dashes and quotes, arrows and comparison symbols are therefore
-  rejected too. Only line separators are mapped (to "\n") and compatibility
-  forms are NFKC-folded before matching.
+  arrows and symbols outside the fold table are therefore
+  rejected too. Before that check a fixed table folds ordinary typography to
+  ASCII (curly quotes, dashes, ellipsis, >=, <=, !=, bullets, no-break spaces);
+  line separators map to "\n" and compatibility forms are NFKC-folded.
 """
 from __future__ import annotations
 
@@ -51,7 +52,7 @@ _WORD = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)?|\S")
 _ID = re.compile(r"^[A-Za-z]{1,2}\d{1,4}$")
 # Characters that end a line or paragraph; mapped to "\n" before matching.
 _LINE_SEPARATORS = dict.fromkeys(
-    map(ord, "\u0085\u2028\u2029\x0b\x0c\x1c\x1d\x1e\x1f\u3002\uff01\uff1f\uff1b\u2026\u2025"),
+    map(ord, "\u0085\u2028\u2029\x0b\x0c\x1c\x1d\x1e\x1f\u3002\uff01\uff1f\uff1b\u2025"),
     "\n",
 )
 # Deny by default: after NFKC the only non-ASCII characters accepted are these
@@ -63,8 +64,23 @@ REASON_CONTROL = "disallowed_control_or_format_character"
 REASON_LETTER = "disallowed_non_ascii_letter"
 
 
+# A FIXED table of ordinary typographic punctuation, folded to ASCII before the
+# deny-by-default check. Nothing else is folded. Every replacement keeps or adds
+# a word boundary, never removes one.
+_TYPOGRAPHY = {
+    **dict.fromkeys(map(ord, "\u2018\u2019\u201a\u2032"), "'"),
+    **dict.fromkeys(map(ord, "\u201c\u201d\u201e\u2033"), '"'),
+    **dict.fromkeys(map(ord, "\u2013\u2014\u2012\u2015\u2212"), "-"),
+    ord("\u2026"): "...",
+    ord("\u2265"): ">=", ord("\u2264"): "<=", ord("\u2260"): "!=",
+    **dict.fromkeys(map(ord, "\u2022\u00b7"), " - "),
+    **dict.fromkeys(map(ord, "\u00a0\u202f\u2009\u2007"), " "),
+}
+
+
 def _line_folded(text: str) -> str:
-    return text.replace("\r\n", "\n").replace("\r", "\n").translate(_LINE_SEPARATORS)
+    text = text.replace("\r\n", "\n").replace("\r", "\n").translate(_LINE_SEPARATORS)
+    return text.translate(_TYPOGRAPHY)
 
 
 def fold(text: str) -> str:
