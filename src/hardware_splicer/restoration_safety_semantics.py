@@ -5,97 +5,148 @@ authorization system or comprehensive electrical standard. It is intended
 to prevent the regex rule treating "Never probe live mains" as an
 instruction to DO so. Potentially unsafe positive proposals still fail.
 
-A negation covers only its own clause. A prohibition earlier in the text
-never masks a later hazardous command: every hazardous verb occurrence is
-judged separately, and a negator only protects an occurrence when nothing
-that ends or redirects a clause (punctuation, "but", "then", "instead",
-"unless", a double negative such as "do not hesitate to", ...) sits between
-the two. The check is fail-closed: when in doubt the action is reported.
+Fail-closed rules:
+
+* Every hazardous verb occurrence is judged on its own (overlapping matches
+  included), so a prohibition earlier in the text never masks a later one.
+* A negator protects a hazardous verb only when it is DIRECTLY followed by it,
+  allowing just a fixed set of fillers ("attempt to", "ever", "try to") or a
+  list made solely of hazardous verbs ("never probe, measure or touch ...").
+  Any other word, punctuation or line/paragraph separator in between means
+  the negation does not reach the verb. Double negatives are not prohibitions.
+* Every free-text string AND every mapping key of the plan is scanned.
+* Text is folded (NFKD, format/control/combining characters removed) before
+  matching, and a word that mixes ASCII letters with non-ASCII letters
+  (homoglyphs) is reported rather than mapped.
 """
 from __future__ import annotations
 
 import re
 import unicodedata
-from typing import Any, Iterator, Mapping, Pattern
+from typing import Any, Collection, Iterator, Mapping, Pattern
 
 NEGATED = re.compile(
     r"(?i)\b(?:do\s+not|don't|never|avoid|must\s+not|should\s+not|"
     r"not\s+safe\s+to|refrain\s+from|not\s+recommended\s+to)\b"
 )
-# Hard clause boundaries: a negation never crosses these.
-CLAUSE_BREAK = re.compile(r"[.;!?:\n\r—–|•(){}\[\]\"]|\s-+\s")
-CHANGE_OF_DIRECTION = re.compile(
-    r"(?i)\b(?:but|instead|however|then|next|rather|otherwise|afterwards?|"
-    r"alternatively|unless|except|although|though|yet|still|whereas|while|"
-    r"also|later|before|after|once|when|whenever|if|because|since|until|"
-    r"first|finally|meanwhile|besides|additionally|furthermore|moreover|plus|"
-    r"and\s+then|or\s+else|only)\b"
-)
-# "do not hesitate/forget/fail to X" is an instruction to do X.
-DOUBLE_NEGATION = re.compile(
-    r"(?i)\b(?:forget|forgetting|hesitate|hesitating|fail|failing|neglect|"
-    r"neglecting|refuse|refusing|omit|omitting|skip|skipping|no\s+need|"
-    r"not\s+only|wait|waiting|stop|cease|ever\s+fail)\b"
-)
-WORD = re.compile(r"\b[\w]+(?:'[\w]+)?\b")
-# A comma ends the negated clause, except in a plain list of verbs
-# ("never probe, measure or touch live mains").
-_LIST_WORDS = frozenset({
-    "or", "and", "nor", "to", "attempt", "ever", "try", "even", "bypass",
-    "bypassing", "short", "shorting", "jump", "jumper", "jumping", "bridge",
-    "bridging", "probe", "probing", "measure", "measuring", "touch",
-    "touching", "test", "testing", "charge", "charging", "recharge",
-    "recharging", "jumpstart", "defeat", "defeating", "disable", "disabling",
-    "override", "overriding", "circumvent", "circumventing", "out",
+# Words that may sit between a negator and the hazardous verb it governs.
+_FILLERS = frozenset({
+    "attempt", "attempting", "to", "ever", "try", "trying", "even", "again",
 })
-_ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍⁠﻿­"))
+_JOINERS = frozenset({"or", "and", "nor"})
+_HAZARD_VERB = re.compile(
+    r"(?i)^(?:bypass(?:es|ed|ing)?|shorts?|shorted|shorting|"
+    r"jump(?:er|ers|ered|ering|ed|ing|s)?|bridg(?:e|es|ed|ing)|"
+    r"defeat(?:s|ed|ing)?|disabl(?:e|es|ed|ing)|overrid(?:e|es|ing)|"
+    r"circumvent(?:s|ed|ing)?|prob(?:e|es|ed|ing)|measur(?:e|es|ed|ing)|"
+    r"touch(?:es|ed|ing)?|test(?:s|ed|ing)?|charg(?:e|es|ed|ing)|"
+    r"recharg(?:e|es|ed|ing)|factory|wip(?:e|es|ing)|eras(?:e|es|ing)|out)$"
+)
+_WORD = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)?|\S")
+_ID = re.compile(r"^[A-Za-z]{1,2}\d{1,4}$")
+# Characters that end a line or paragraph; mapped to "\n" before matching.
+_LINE_SEPARATORS = dict.fromkeys(
+    map(ord, "\u0085  \x0b\x0c\x1c\x1d\x1e\x1f。！？；…‥"),
+    "\n",
+)
+_ALLOWED_NON_ASCII_LETTERS = frozenset("Ωμ")  # omega, mu: unit symbols
 
 
-def normalise(text: str) -> str:
-    """Fold look-alike spellings so a matcher sees one canonical form."""
-    text = unicodedata.normalize("NFKC", text).translate(_ZERO_WIDTH)
+def fold(text: str) -> str:
+    """Canonical text for matching.
+
+    NFKD, then every format (Cf), combining (Mn, Me) and control (Cc,
+    except newline and tab) character is removed, so invisible characters
+    and combining accents cannot split a word. Line and sentence separators
+    become newlines first. Quotes and minus signs are unified.
+    """
+    text = unicodedata.normalize("NFKD", text).translate(_LINE_SEPARATORS)
+    text = "".join(
+        ch for ch in text
+        if ch in "\n\t" or unicodedata.category(ch) not in ("Cf", "Mn", "Me", "Cc")
+    )
     text = text.replace("’", "'").replace("‘", "'").replace("`", "'")
-    text = re.sub(r"(?<=\w)[-_/‐‑](?=\w)", " ", text)
+    text = text.replace("−", "-").replace("‐", "-").replace("‑", "-")
     return text
 
 
-def iter_plan_text(plan: Mapping[str, Any]) -> Iterator[tuple[str, str]]:
-    """Yield (field path, text) for every free-text string in a plan.
+def normalise(text: str) -> str:
+    """fold() plus hyphen/underscore/slash joins read as spaces ("short-out")."""
+    return re.sub(r"(?<=\w)[-_/](?=\w)", " ", fold(text))
 
-    Walks the whole structure, not a fixed field list, so an extra or
-    renamed key cannot hide text from a gate. Evidence ID lists are
-    identifiers, not prose, and are skipped.
+
+def mixed_script_words(text: str) -> list[str]:
+    """Words mixing ASCII letters with non-ASCII letters (homoglyph risk).
+
+    Accented Latin letters are folded to ASCII by fold() and never appear
+    here; Greek omega and mu (unit symbols) are tolerated.
     """
-    def walk(path: str, node: Any) -> Iterator[tuple[str, str]]:
+    bad = []
+    for word in re.findall(r"[^\W\d_]+", fold(text)):
+        non_ascii = [c for c in word if ord(c) > 127 and c not in _ALLOWED_NON_ASCII_LETTERS]
+        if non_ascii and any(c.isascii() and c.isalpha() for c in word):
+            bad.append(word)
+    return bad
+
+
+def iter_plan_text(
+    plan: Mapping[str, Any], permitted_ids: Collection[str] | None = None
+) -> Iterator[tuple[str, str]]:
+    """Yield (field path, text) for every string AND mapping key in a plan.
+
+    The walk is structural, not a fixed field list, so an extra or renamed
+    key cannot hide text from a gate. The only thing skipped is a hypothesis'
+    own ``evidence_ids`` when it is a list of well-formed evidence IDs (members
+    of ``permitted_ids`` when given). An ``evidence_ids`` anywhere else, or
+    one holding anything else, is scanned like any other text.
+    """
+    def is_id_list(value: Any) -> bool:
+        if not isinstance(value, list) or not value:
+            return False
+        return all(
+            isinstance(v, str) and _ID.fullmatch(v)
+            and (permitted_ids is None or v in permitted_ids)
+            for v in value
+        )
+
+    def walk(path: str, node: Any, hypothesis: bool) -> Iterator[tuple[str, str]]:
         if isinstance(node, str):
             yield path, node
         elif isinstance(node, Mapping):
             for key, value in node.items():
-                if key == "evidence_ids":
+                child = f"{path}.{key}" if path else str(key)
+                if isinstance(key, str):
+                    yield f"{child}[key]", key
+                if hypothesis and key == "evidence_ids" and is_id_list(value):
                     continue
-                yield from walk(f"{path}.{key}" if path else str(key), value)
+                yield from walk(child, value, False)
         elif isinstance(node, (list, tuple)):
             for index, value in enumerate(node, 1):
-                yield from walk(f"{path}[{index}]", value)
-    yield from walk("", plan)
+                yield from walk(f"{path}[{index}]", value, path == "hypotheses")
+
+    yield from walk("", plan, False)
 
 
 def _negation_covers(text: str, start: int) -> bool:
-    """True only if a negator in the SAME clause governs the verb at start."""
-    before = text[:start]
-    clause = CLAUSE_BREAK.split(before)[-1]
-    matches = list(NEGATED.finditer(clause))
-    if not matches:
+    """True only if a negator directly governs the hazardous verb at start."""
+    negators = list(NEGATED.finditer(text, 0, start))
+    if not negators:
         return False
-    tail = clause[matches[-1].end():]
-    if CHANGE_OF_DIRECTION.search(tail) or DOUBLE_NEGATION.search(tail):
+    last = negators[-1]
+    for token in _WORD.findall(text[last.end():start]):
+        low = token.lower()
+        if token == "," or low in _FILLERS or low in _JOINERS or _HAZARD_VERB.match(token):
+            continue
         return False
-    words = [w.lower() for w in WORD.findall(tail)]
-    if "," in tail and not all(w in _LIST_WORDS for w in words):
+    # A double negative ("do not refrain from", "do not not") is an instruction:
+    # two negators with nothing but filler between them.
+    if len(negators) > 1 and not _has_content(text[negators[-2].end():last.start()]):
         return False
-    # A local prohibition can have a short "attempt to", "ever", "the"
-    # interposition before the prohibited verb phrase.
-    return len(words) <= 6
+    return True
+
+
+def _has_content(gap: str) -> bool:
+    return any(t.lower() not in _FILLERS and t != "," for t in _WORD.findall(gap))
 
 
 def _clearly_negated(text: str, match_start: int) -> bool:
@@ -111,10 +162,17 @@ def _all_matches(matcher: Pattern[str], text: str) -> Iterator[re.Match[str]]:
 
 
 def unsafe_action_findings(
-    plan: Mapping[str, Any], matcher: Pattern[str]
+    plan: Mapping[str, Any], matcher: Pattern[str],
+    permitted_ids: Collection[str] | None = None,
 ) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
-    for field, raw in iter_plan_text(plan):
+    for field, raw in iter_plan_text(plan, permitted_ids):
+        for word in mixed_script_words(raw):
+            findings.append({
+                "field": field,
+                "matched_action_class": word[:100],
+                "reason": "Word mixes ASCII and non-ASCII letters (possible look-alike spelling): fail closed.",
+            })
         text = normalise(raw)
         seen: set[int] = set()
         for m in _all_matches(matcher, text):
