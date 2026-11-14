@@ -80,8 +80,11 @@ def test_followups_and_missing_architecture_fail_closed(tmp_path):
     c = deepcopy(CASE)
     c["device_power"]["architecture"] = "not_declared"
     path.write_text(json.dumps(c))
-    with pytest.raises(ValueError, match="unqualified architecture"):
-        predict(path)
+    # CHANGED: an unknown architecture used to raise "unqualified architecture";
+    # it now returns an explicit abstention (see test_restoration_prospective_abstention).
+    receipt = predict(path)
+    assert receipt["decision"] == "ABSTAIN_UNQUALIFIED_ARCHITECTURE"
+    assert receipt["qualified_hypothesis_ids"] == []
 
 
 def test_synthetic_unresolved_label_neither_scores_nor_repairs():
