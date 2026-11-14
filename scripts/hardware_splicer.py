@@ -340,6 +340,7 @@ def _run_jarvis_build(args: argparse.Namespace) -> int:
         out_dir=args.out,
         export_gerber=not args.no_gerber,
         allow_qwen=not args.no_qwen,
+        allow_llm_first=bool(getattr(args, "allow_llm_first", False)),
     )
     if args.json:
         print(json.dumps(result, indent=2, default=str))
@@ -827,6 +828,11 @@ def main() -> int:
     jarvis_parser.add_argument("--out", required=True, help="Output directory.")
     jarvis_parser.add_argument("--no-gerber", action="store_true", help="Skip Gerber export.")
     jarvis_parser.add_argument("--no-qwen", action="store_true", help="Disable Qwen netlist + JARVIS narrative.")
+    jarvis_parser.add_argument(
+        "--allow-llm-first",
+        action="store_true",
+        help="Opt in to compiling a model-written netlist on the open path (default: deterministic scratch pipeline).",
+    )
     jarvis_parser.add_argument("--workshop-trace", action="store_true", help="Write LLM_WORKSHOP_TRACE.json per build step.")
     jarvis_parser.add_argument("--workshop-review", action="store_true", help="Enable Qwen salvage workshop review (HARDWARE_SPLICER_QWEN_WORKSHOP=1).")
     jarvis_parser.add_argument("--no-simulate", action="store_true", help="Skip ngspice power simulation gate.")

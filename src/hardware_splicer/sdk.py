@@ -217,7 +217,7 @@ def compose_design(
     export_gerber: bool = False,
     fab_profile: bool = False,
     arbitrary: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
 ) -> Dict[str, Any]:
     """Compose NL phrase, module list, or canvas graph → KiCad artifacts."""
@@ -264,7 +264,7 @@ def compose_design_agent_loop(
     salvage_mode: bool = False,
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
     max_manual_retries: int = 2,
     finalize_package: bool = False,
@@ -309,8 +309,13 @@ def jarvis_build(
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
     allow_qwen: bool = True,
+    allow_llm_first: bool = False,
 ) -> Dict[str, Any]:
-    """LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative."""
+    """LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative.
+
+    A model-written netlist is only compiled on the open path when ``allow_llm_first`` is
+    set explicitly; otherwise the deterministic scratch pipeline runs.
+    """
     from .jarvis_build import jarvis_build as _jarvis_build
 
     return _jarvis_build(
@@ -321,6 +326,7 @@ def jarvis_build(
         out_dir=out_dir,
         export_gerber=export_gerber,
         allow_qwen=allow_qwen,
+        allow_llm_first=allow_llm_first,
     )
 
 
@@ -446,7 +452,7 @@ def compose_agent_bench_loop(
     salvage_mode: bool = False,
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
     max_manual_retries: int = 2,
     goal: str | None = None,
