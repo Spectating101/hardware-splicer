@@ -1,11 +1,11 @@
-References,Quantity,Value,Manufacturer,Manufacturer Part Number,Footprint,Initial Assembly,Purpose
-J1,1,HOST_SPI_1x06,Samtec,TSW-106-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,FIT,3.3 V host SPI interface
-JP1,1,ENABLE_AFTER_RAIL_CHECK,Samtec,TSW-102-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,FIT,Enable header only; NO SHUNT fitted or supplied
-U1,1,TXU0304PWR,Texas Instruments,TXU0304PWR,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,FIT,3+1 fixed-direction SPI level translation
-U2,1,W25Q128JWSIQ,Winbond Electronics,W25Q128JWSIQ,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,FIT,1.8 V 128-Mbit SPI NOR target
-U3,1,TLV75518PDBVR,Texas Instruments,TLV75518PDBVR,Package_TO_SOT_SMD:SOT-23-5,FIT,3.3 V to 1.8 V regulation
-R1 R4,2,0R,Yageo,RC0603JR-070RL,Resistor_SMD:R_0603_1608Metric,DNP,Supply loose for reviewed bring-up; initially open rail links
-R2 R3 R5 R6 R7,5,10k,Yageo,RC0603FR-0710KL,Resistor_SMD:R_0603_1608Metric,FIT,IO2/IO3 and CS pull-ups; OE default-disable pull-down
-C1 C6,2,1uF 10V X7R,Murata,GRM188R71A105KA61D,Capacitor_SMD:C_0603_1608Metric,FIT,Input and DUT-domain bulk bypass
-C2,1,4.7uF 6.3V X5R,Murata,GRM188R60J475KE19D,Capacitor_SMD:C_0603_1608Metric,FIT,LDO output bypass
-C3 C4 C5,3,100nF 16V X7R,Murata,GRM188R71C104KA01D,Capacitor_SMD:C_0603_1608Metric,FIT,Local high-frequency bypass
+References,Quantity,Value,Manufacturer,Manufacturer Part Number,Footprint,Initial Assembly,Purpose,Procurement,LCSC Part #,Source URL,Checked Date,Stock,Sourcing Notes
+J1,1,HOST_SPI_1x06,Samtec,TSW-106-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,FIT,3.3 V host SPI interface,hand-solder,,,2026-11-15,Not checked; hand-solder procurement required,Through-hole; buy exact Samtec header separately.
+JP1,1,ENABLE_AFTER_RAIL_CHECK,Samtec,TSW-102-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,FIT,Enable header only; NO SHUNT fitted or supplied,hand-solder,,,2026-11-15,Not checked; hand-solder procurement required,Through-hole header only; no enable shunt fitted or supplied.
+U1,1,TXU0304PWR,Texas Instruments,TXU0304PWR,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,FIT,3+1 fixed-direction SPI level translation,JLCPCB,C4364118,https://www.lcsc.com/product-detail/C4364118.html,2026-11-15,Not exposed by public page; availability unconfirmed,
+U2,1,W25Q128JWSIQ,Winbond Electronics,W25Q128JWSIQ,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,FIT,1.8 V 128-Mbit SPI NOR target,JLCPCB,C7150045,https://www.lcsc.com/product-detail/C7150045.html,2026-11-15,Not exposed by public page; availability unconfirmed,"Public page identifies W25Q128JWSIQ (TR is tape/reel); SOIC-8 208-mil, not 150-mil JV or 3.3 V part."
+U3,1,TLV75518PDBVR,Texas Instruments,TLV75518PDBVR,Package_TO_SOT_SMD:SOT-23-5,FIT,3.3 V to 1.8 V regulation,JLCPCB,C2877863,https://www.lcsc.com/pl/product-detail/Linear-Voltage-Regulators-LDO_Texas-Instruments-TLV75518PDBVR_C2877863.html,2026-11-15,Not exposed by public page; availability unconfirmed,DBV SOT-23-5 fixed 1.8 V only; C544744 is a different regulator and must not be substituted.
+R1 R4,2,0R,Yageo,RC0603JR-070RL,Resistor_SMD:R_0603_1608Metric,DNP,Supply loose for reviewed bring-up; initially open rail links,hand-solder,C95177,https://www.lcsc.com/es/product-detail/C95177.html,2026-11-15,Not exposed by public page; availability unconfirmed,DNP; supply two loose 0R links for later bench steps. R1 stays open with external bench supply.
+R2 R3 R5 R6 R7,5,10k,Yageo,RC0603FR-0710KL,Resistor_SMD:R_0603_1608Metric,FIT,IO2/IO3 and CS pull-ups; OE default-disable pull-down,JLCPCB,C98220,https://www.lcsc.com/product-detail/C98220.html,2026-11-15,Not exposed by public page; availability unconfirmed,
+C1 C6,2,1uF 10V X7R,Murata,GRM188R71A105KA61D,Capacitor_SMD:C_0603_1608Metric,FIT,Input and DUT-domain bulk bypass,JLCPCB,C97888,https://www.lcsc.com/es/product-detail/C97888.html,2026-11-15,Not exposed by public page; availability unconfirmed,
+C2,1,4.7uF 6.3V X5R,Murata,GRM188R60J475KE19D,Capacitor_SMD:C_0603_1608Metric,FIT,LDO output bypass,hand-solder,,,2026-11-15,Not checked; hand-solder procurement required,Exact LCSC listing not established; buy exact Murata part separately and hand-solder before power.
+C3 C4 C5,3,100nF 16V X7R,Murata,GRM188R71C104KA01D,Capacitor_SMD:C_0603_1608Metric,FIT,Local high-frequency bypass,JLCPCB,C45000,https://www.lcsc.com/es/product-detail/C45000.html,2026-11-15,Not exposed by public page; availability unconfirmed,
