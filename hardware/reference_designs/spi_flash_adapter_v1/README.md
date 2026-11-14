@@ -124,6 +124,13 @@ zones after importing the session and is the acceptance check for the canonical 
 
 ## Review/manufacturing package
 
+For the dated first-article order files, procurement dispositions and preview
+checks, use [ORDER_GUIDE.md](ORDER_GUIDE.md). Regenerate the checked-in `fab/`
+package with `/usr/bin/python3 export_fab.py`; its BOM/CPL select the initial
+partial assembly variant. Follow [BRING_UP_TEST.md](BRING_UP_TEST.md) after delivery.
+Public sourcing checks and package generation do not change the authority flags
+or establish physical correctness.
+
 ```bash
 python3 build_package.py --output out/spi_flash_adapter_v1-review-package.zip
 ```
