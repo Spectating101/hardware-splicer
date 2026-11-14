@@ -94,6 +94,7 @@ def test_invisible_and_lookalike_characters_do_not_hide_a_pin_action(text):
     "Keep the unit unpowered and verify the printed mainboard revision.",
     "Inspect outer battery contacts, with batteries removed.",
     "Photograph the silkscreen marking near the battery compartment.",
+    "Inspect the A53 phone and the ADC12 chip, model U7 revision 3.",   # no separator: not DES-number
     "Inspect the HDMI port for bent pins.",                 # no number, no part named after the pin
 ])
 def test_plain_external_inspection_is_still_allowed(text):
@@ -158,3 +159,12 @@ def test_everything_the_original_gate_caught_is_still_caught():
             assert unsafe_pin_actions(plan(next_safe_check=text), REF), text
             assert unsafe_pin_actions(plan(next_safe_check=text), REF, evidence_ids={"E1", "E5"}), text
     assert checked > 1000
+
+
+@pytest.mark.parametrize("phrase", [
+    "pin\u20143", "pin \u2022 3", "pin\u00b73", "pin - 3", "pin-3", "pin:3", "pin\u20264", "pin \u2026 4",
+    "DC1 pin\u20144", "DC1\u20144", "DC1\u20264", "pad\u2013 4", "terminal \u2022 2",
+    "the fourth\u2014pin", "pins\u20143",
+])
+def test_dash_bullet_and_ellipsis_between_pin_and_number_are_flagged(phrase):
+    assert unsafe_pin_actions(plan(next_safe_check=phrase), REF), phrase

@@ -97,7 +97,7 @@ def test_extra_keys_and_mapping_keys_are_scanned():
 @pytest.mark.parametrize("text,folded", [
     ("A healthy unit shows \u2265 4.5 V.", ">= 4.5 V"),
     ("A healthy unit shows \u2264 10 mA.", "<= 10 mA"),
-    ("A healthy unit shows 4.5\u20135.5 V.", "4.5-5.5 V"),
+    ("A healthy unit shows 4.5\u20135.5 V.", "4.5 - 5.5 V"),
     ("A healthy unit shows below\u00a04.5\u202fV.", "below 4.5 V"),
 ])
 def test_typographic_comparators_fold_to_ascii_and_are_caught(text, folded):
@@ -110,3 +110,23 @@ def test_accents_and_cyrillic_are_still_rejected_by_the_numeric_gate():
     for text in ("Check the caf\u00e9 rail", "Check the \u0431\u0443\u043c rail"):
         rows = unsourced_thresholds(plan(next_safe_check=text), LEDGER)
         assert rows and rows[0]["explanation"] == "disallowed_non_ascii_letter"
+
+
+@pytest.mark.parametrize("text", [
+    "A healthy unit shows greater\u2026than 2 ohms",
+    "A healthy unit shows at\u2026least 0.4 A",
+    "A healthy unit shows more than\u2026 2 ohms",
+    "A healthy unit shows below \u2026 4.5 V",
+    "A healthy unit shows 4.5\u2026V or less",
+    "A healthy unit shows up\u2026to 15 W",
+    "A healthy unit shows 4.5 V or\u2026more",
+    "A healthy unit shows 45 degrees\u2026C or more",
+    "Anything above 5\u2014V is fine",
+])
+def test_ellipsis_and_dash_gaps_do_not_hide_a_cutoff(text):
+    assert unsourced_thresholds(plan(next_safe_check=text), LEDGER), repr(text)
+
+
+def test_not_equal_sign_stays_rejected_rather_than_folded():
+    rows = unsourced_thresholds(plan(next_safe_check="Reading \u2260 4.5 V"), LEDGER)
+    assert rows and rows[0]["explanation"] == "disallowed_non_ascii_letter"

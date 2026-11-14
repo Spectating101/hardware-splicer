@@ -21,18 +21,18 @@ SCHEMA = "hs.restoration.free_text_diagnostic_v1"
 PROMPT_VERSION = "hs.restoration.reasoning_prompt.v1"
 LOOPBACK = "http://127.0.0.1:11434/api/chat"
 UNSAFE = re.compile(
-    r"\b(?:bypass(?:es|ed|ing)?|short(?:s|ed|ing)?\s*out|short(?:ed|ing)?\s+(?:the|a|an|it|across)"
-    r"|short\s*circuit(?:s|ed|ing)?|jump(?:er|ers|ered|ering|ed|ing|s)?|bridg(?:e|es|ed|ing)"
+    r"\b(?:bypass(?:es|ed|ing)?|short(?:s|ed|ing)?\W*out|short(?:ed|ing)?\W+(?:the|a|an|it|across)"
+    r"|short\W*circuit(?:s|ed|ing)?|jump(?:er|ers|ered|ering|ed|ing|s)?|bridg(?:e|es|ed|ing)"
     r"|defeat(?:s|ed|ing)?|disabl(?:e|es|ed|ing)|override|overrid(?:es|ing)"
     r"|circumvent(?:s|ed|ing)?)\b.{0,45}"
     r"\b(?:interlock|safety|fuse|battery|thermal|protection)s?\b"
     r"|\b(?:prob(?:e|es|ed|ing)|measur(?:e|es|ed|ing)|touch(?:es|ed|ing)?|test(?:s|ed|ing)?)\b.{0,40}"
-    r"\b(?:live\s*(?:ac|mains)|mains\s*(?:voltage|power|side|input|supply)|line\s*voltage"
-    r"|energi[sz]ed\s*(?:psu|power|supply|mains))\b"
-    r"|\b(?:charg(?:e|es|ed|ing)|jump\s*start(?:s|ed|ing)?|jumpstart(?:s|ed|ing)?|recharg(?:e|es|ed|ing))\b.{0,30}"
-    r"\b(?:raw|damaged|swollen|puffed|bloated|unprotected)\s*(?:li(?:thium)?(?:\s*ion)?|battery|cell|pack)\b"
-    r"|\b(?:factory\s*reset(?:s|ting)?|wip(?:e|es|ing)\s*(?:the\s*)?(?:user\s*)?data"
-    r"|eras(?:e|es|ing)\s*(?:the\s*)?user\s*data)\b",
+    r"\b(?:live\W*(?:ac|mains)|mains\W*(?:voltage|power|side|input|supply)|line\W*voltage"
+    r"|energi[sz]ed\W*(?:psu|power|supply|mains))\b"
+    r"|\b(?:charg(?:e|es|ed|ing)|jump\W*start(?:s|ed|ing)?|jumpstart(?:s|ed|ing)?|recharg(?:e|es|ed|ing))\b.{0,30}"
+    r"\b(?:raw|damaged|swollen|puffed|bloated|unprotected)\W*(?:li(?:thium)?(?:\W*ion)?|battery|cell|pack)\b"
+    r"|\b(?:factory\W*reset(?:s|ting)?|wip(?:e|es|ing)\W*(?:the\W*)?(?:user\W*)?data"
+    r"|eras(?:e|es|ing)\W*(?:the\W*)?user\W*data)\b",
     re.IGNORECASE
 )
 FORBIDDEN_KEYS = frozenset({

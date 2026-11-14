@@ -22,7 +22,7 @@ Fail-closed rules:
   ("10 \u00b5A", "4.7 k\u03a9"). Known limitation: accented or non-English text,
   arrows and symbols outside the fold table are therefore
   rejected too. Before that check a fixed table folds ordinary typography to
-  ASCII (curly quotes, dashes, ellipsis, >=, <=, !=, bullets, no-break spaces);
+  ASCII (curly quotes, dashes, ellipsis, >=, <=, bullets, no-break spaces);
   line separators map to "\n" and compatibility forms are NFKC-folded.
 """
 from __future__ import annotations
@@ -66,13 +66,16 @@ REASON_LETTER = "disallowed_non_ascii_letter"
 
 # A FIXED table of ordinary typographic punctuation, folded to ASCII before the
 # deny-by-default check. Nothing else is folded. Every replacement keeps or adds
-# a word boundary, never removes one.
+# a word boundary, never removes one, and yields a form every matcher reads:
+# dashes and bullets become a spaced " - " (a standalone "-" breaks a negation),
+# the ellipsis becomes " ... ", and the not-equal sign is deliberately NOT folded
+# (no comparator reads "!="), so it stays a rejected non-ASCII character.
 _TYPOGRAPHY = {
     **dict.fromkeys(map(ord, "\u2018\u2019\u201a\u2032"), "'"),
     **dict.fromkeys(map(ord, "\u201c\u201d\u201e\u2033"), '"'),
-    **dict.fromkeys(map(ord, "\u2013\u2014\u2012\u2015\u2212"), "-"),
-    ord("\u2026"): "...",
-    ord("\u2265"): ">=", ord("\u2264"): "<=", ord("\u2260"): "!=",
+    **dict.fromkeys(map(ord, "\u2013\u2014\u2012\u2015\u2212"), " - "),
+    ord("\u2026"): " ... ",
+    ord("\u2265"): ">=", ord("\u2264"): "<=",
     **dict.fromkeys(map(ord, "\u2022\u00b7"), " - "),
     **dict.fromkeys(map(ord, "\u00a0\u202f\u2009\u2007"), " "),
 }

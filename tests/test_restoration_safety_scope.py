@@ -309,7 +309,7 @@ def test_folded_typography_still_hits_the_hazard_matchers(text):
     "Never probe live mains\u2009voltage; check the \u2018label\u2019 \u2013 externally only.",
     "Never probe\u00a0live mains.",
     "Inspect \u2022 photograph \u00b7 note the \u2033 mark and the \u201a case",
-    "A 10 \u00b5A draw \u2260 a fault \u2264 \u2265 are only symbols.",
+    "A 10 \u00b5A draw is not a fault \u2264 \u2265 are only symbols.",
 ])
 def test_ordinary_typography_is_not_rejected(text):
     assert unsafe_action_findings(plan(text), UNSAFE) == [], repr(text)
@@ -317,10 +317,42 @@ def test_ordinary_typography_is_not_rejected(text):
 
 def test_fold_table_adds_or_keeps_a_word_boundary():
     from hardware_splicer.restoration_safety_semantics import fold
-    assert fold("a\u2014b") == "a-b"
+    assert fold("a\u2014b") == "a - b"
     assert fold("\u2018x\u2019") == "'x'"
-    assert fold("x\u2026y") == "x...y"
+    assert fold("x\u2026y") == "x ... y"
     assert fold("a\u2022b") == "a - b"
     assert fold("a\u00b7b") == "a - b"
     assert fold("a\u00a0b\u202fc\u2009d\u2007e") == "a b c d e"
-    assert fold("1\u22652") == "1>=2" and fold("1\u22642") == "1<=2" and fold("1\u22602") == "1!=2"
+    assert fold("1\u22652") == "1>=2" and fold("1\u22642") == "1<=2"
+    assert fold("1\u22602") == "1\u22602"      # not folded: stays a rejected non-ASCII character
+
+
+# --- folded forms must be read by every downstream matcher ----------------------
+
+@pytest.mark.parametrize("text", [
+    "Never probe\u2014short the fuse",
+    "Never\u2014bypass the fuse",
+    "Never probe\u2013short the fuse",
+    "Never\u2212bypass the fuse",
+    "Do not\u2015jumper the battery protection",
+])
+def test_dash_between_words_is_a_negation_breaker_not_a_joiner(text):
+    assert unsafe_action_findings(plan(text), UNSAFE), repr(text)
+
+
+@pytest.mark.parametrize("text", [
+    "Short\u2026out the thermal fuse",
+    "Short \u2026 out the thermal fuse",
+    "Short\u2014out the thermal fuse",
+    "Jump\u2026start the swollen battery",
+    "Factory\u2026reset the phone",
+    "Probe live\u2026mains voltage",
+    "Charge the damaged\u2026battery",
+    "Short\u2026circuit the fuse",
+])
+def test_multiword_hazards_accept_any_non_word_gap(text):
+    assert unsafe_action_findings(plan(text), UNSAFE), repr(text)
+
+
+def test_not_equal_sign_is_not_folded_and_stays_rejected():
+    assert REASON_LETTER in reasons("Reading \u2260 4.5 V is fine")

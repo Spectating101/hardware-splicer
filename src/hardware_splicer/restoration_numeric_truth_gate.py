@@ -29,7 +29,7 @@ _LONG = r"(?:volts?|amps?|amperes?|watts?|(?:kil|meg|gig)?ohms?|hertz)"
 _SHORT = r"(?:v|a|w|hz|ω)"
 _UNIT = (
     r"(?:[°º]\s*[cf]|degrees?\s*(?:celsius|fahrenheit|[cf])|celsius|fahrenheit"
-    rf"|(?:{_PFX}[\s-]*)?{_LONG}|{_PFX}?{_SHORT}|c)(?!\w)"
+    rf"|(?:{_PFX}(?:\s|-|\.\.\.)*)?{_LONG}|{_PFX}?{_SHORT}|c)(?!\w)"
 )
 _QTY = rf"(?<![\w.]){_NUM}\s*{_UNIT}"
 _QTY_NO_UNIT = rf"(?<![\w.]){_NUM}"
@@ -45,7 +45,7 @@ _COMP_WORD = (
     r"approximately|approx\.?|about|around|roughly|circa|nearly|almost|"
     r"close\s+to|near|between|from)\b"
 )
-_FILL = r"[^\d.;:!?\n]{0,20}?"
+_FILL = r"(?:[^\d.;:!?\n]|\.\.\.){0,20}?"
 _TRAIL = (
     r"(?:\s*(?:or|and|and/or|/)?\s*(?:more|less|greater|lower|higher|fewer|"
     r"above|below|over|under|up|down|upwards?|downwards?|bigger|smaller|"
@@ -58,13 +58,25 @@ _CUT = (
 )
 _NEAR = r"[^;:!?\n\d]{0,30}?"
 
+# The folded ellipsis (" ... ") and a spaced dash count as whitespace between the
+# parts of a phrase ("greater ... than", "4.5 ... V"), so folding typography can
+# never split a comparator, number or unit into pieces the patterns miss.
+_GAP = r"(?:\s|-|\.\.\.)"
+
+
+def _p(source: str) -> re.Pattern[str]:
+    for plain, gap in ((r"\s*", "*"), (r"\s+", "+"), (r"\s?", "?")):
+        source = source.replace(plain, _GAP + gap)
+    return re.compile(source, re.I)
+
+
 PATTERNS = [
-    re.compile(rf"(?:{_COMP_SYMBOL}|{_COMP_WORD}){_FILL}{_QTY}", re.I),
-    re.compile(rf"{_QTY}{_TRAIL}", re.I),
-    re.compile(rf"{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:-|–|—|\bto\b|\bthrough\b)\s*{_QTY}", re.I),
-    re.compile(rf"\bbetween\s+{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:and|&)\s*{_QTY}", re.I),
-    re.compile(rf"\b{_CUT}\b{_NEAR}{_QTY}", re.I),
-    re.compile(rf"{_QTY}{_NEAR}\b{_CUT}\b", re.I),
+    _p(rf"(?:{_COMP_SYMBOL}|{_COMP_WORD}){_FILL}{_QTY}"),
+    _p(rf"{_QTY}{_TRAIL}"),
+    _p(rf"{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:-|–|—|\bto\b|\bthrough\b)\s*{_QTY}"),
+    _p(rf"\bbetween\s+{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:and|&)\s*{_QTY}"),
+    _p(rf"\b{_CUT}\b{_NEAR}{_QTY}"),
+    _p(rf"{_QTY}{_NEAR}\b{_CUT}\b"),
 ]
 
 

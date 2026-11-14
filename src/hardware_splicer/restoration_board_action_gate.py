@@ -23,6 +23,9 @@ from .restoration_safety_semantics import (
 )
 
 _DES = r"[A-Z]{1,3}\d{1,4}"
+# Separators accepted between a pin word / designator and its number: space,
+# colon, #, hyphen, dot, slash, underscore, and the folded ellipsis.
+_JOIN = r"(?:\.\.\.|[:#\-./_])"
 _PIN = r"(?:pins?|pads?|terminals?|contacts?|leads?|legs?|balls?|poles?)"
 _NUM = r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|[a-z]{1,2}\d{1,2})"
 _ORD = r"(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|last|\d+(?:st|nd|rd|th))"
@@ -37,8 +40,8 @@ _COMPONENT_PIN = re.compile(
 # Run on the text as written (the original pattern is always among them).
 PATTERNS = [
     _COMPONENT_PIN,
-    re.compile(rf"\b{_PIN}\s*(?:(?:no|num|number)\b\.?)?\s*[:#]?\s*{_NUM}\b", re.I),
-    re.compile(rf"\b{_ORD}\s+{_PIN}\b", re.I),
+    re.compile(rf"\b{_PIN}(?:\s|{_JOIN}|(?:no|num|number)\b\.?)*{_NUM}\b", re.I),
+    re.compile(rf"\b{_ORD}(?:\s|{_JOIN})+{_PIN}\b", re.I),
     re.compile(rf"\bpins?\b(?:\W+\w+){{0,3}}?\W+(?:of|on|at|in)\W+(?:the\W+)?(?:\w+\W+){{0,2}}?{_PART}\b", re.I),
 ]
 # Designator-proximity patterns. These run on text in which tokens that are
@@ -46,7 +49,7 @@ PATTERNS = [
 # citation next to the word "pins" is not a part reference. Only IDs actually
 # supplied by the caller are masked; the shape "E<digit>" is never exempt.
 PROXIMITY_PATTERNS = [
-    re.compile(rf"\b{_DES}\s*[-\u2013./:_#]\s*\d{{1,3}}\b", re.I),
+    re.compile(rf"\b{_DES}\s*{_JOIN}(?:\s|{_JOIN})*\d{{1,3}}\b", re.I),
     re.compile(rf"\b{_DES}\b(?:\W+\w+){{0,3}}?\W+{_PIN}\b", re.I),
     re.compile(rf"\b{_PIN}\b(?:\W+\w+){{0,3}}?\W+(?:of|on|at|in|from)\W+(?:the\W+)?{_DES}\b", re.I),
 ]
