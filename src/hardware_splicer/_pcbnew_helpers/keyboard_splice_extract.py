@@ -20,11 +20,11 @@ def main() -> int:
     tracks=[];vias=[]
     for t in board.GetTracks():
         if type(t).__name__=="PCB_VIA":
-            vias.append({"x":u(t.GetPosition().x),"y":u(t.GetPosition().y),"diameter_mm":u(t.GetWidth(p.F_Cu)),"net":t.GetNetname()})
+            vias.append({"x":u(t.GetPosition().x),"y":u(t.GetPosition().y),"diameter_mm":u(t.GetWidth(p.F_Cu)),"net":t.GetNetname(),"via_type":str(t.GetViaType())})
         else:
             # These are native copper-track segments, NOT an autorouted netlist.
             s,e=t.GetStart(),t.GetEnd()
-            tracks.append({"x1":u(s.x),"y1":u(s.y),"x2":u(e.x),"y2":u(e.y),"net":t.GetNetname(),"layer":t.GetLayerName()})
+            tracks.append({"x1":u(s.x),"y1":u(s.y),"x2":u(e.x),"y2":u(e.y),"width_mm":u(t.GetWidth()),"net":t.GetNetname(),"layer":t.GetLayerName()})
     pads=[];footprints=[];switches=[]
     for f in board.GetFootprints():
         x,y=u(f.GetPosition().x),u(f.GetPosition().y)
@@ -36,7 +36,7 @@ def main() -> int:
         for pad in f.Pads():
             xpad,ypad=u(pad.GetPosition().x),u(pad.GetPosition().y)
             sz=pad.GetSize()
-            pads.append({"ref":ref,"pad":pad.GetNumber(),"x":xpad,"y":ypad,"size_x_mm":u(sz.x),"size_y_mm":u(sz.y),"net":pad.GetNetname(),"layer":pad.GetLayerName()})
+            pads.append({"ref":ref,"pad":pad.GetNumber(),"x":xpad,"y":ypad,"size_x_mm":u(sz.x),"size_y_mm":u(sz.y),"orientation_degrees":pad.GetOrientationDegrees(),"pad_shape":int(pad.GetShape()),"pad_attribute":int(pad.GetAttribute()),"net":pad.GetNetname(),"layer":pad.GetLayerName()})
     print(json.dumps({
         "source_label":source.name,
         "source_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),

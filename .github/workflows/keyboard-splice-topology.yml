@@ -1,0 +1,39 @@
+name: Keyboard splice - copper island model
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/keyboard_splice*.py"
+      - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
+      - "scripts/hs_keyboard_splice_probe.py"
+      - "tests/test_keyboard_splice*.py"
+      - "pyproject.toml"
+      - ".github/workflows/keyboard-splice-topology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/hardware_splicer/keyboard_splice*.py"
+      - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
+      - "scripts/hs_keyboard_splice_probe.py"
+      - "tests/test_keyboard_splice*.py"
+      - "pyproject.toml"
+      - ".github/workflows/keyboard-splice-topology.yml"
+  workflow_dispatch:
+
+jobs:
+  check-virtual-copper:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS test dependencies and exact optional copper solver
+        run: python -m pip install -e '.[dev,keyboard-splice]'
+      - name: Assert actual Shapely is installed (no synthetic success)
+        run: python -c "import shapely; print('Shapely', shapely.__version__)"
+      - name: Test cut geometry, copper graph, closed-loop replay and release denial
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: python -m pytest -q -p no:cacheprovider tests/test_keyboard_splice.py tests/test_keyboard_splice_islands.py tests/test_keyboard_splice_handoff.py

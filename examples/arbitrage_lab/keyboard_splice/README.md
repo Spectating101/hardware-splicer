@@ -68,3 +68,62 @@ For a salvaged **rigid-PCB** mechanical keyboard:
 7. Record all new parts, disassembly time, conversion hours, yield and saleable QA grade before claiming profitable resale.
 
 **Decision:** no fundamental architectural prohibition in HS. The gap is a specialized, evidence-bound *subtractive manufacturing + net restoration* operator, a real matched donor, and independent electrical/physical acceptance. The first pilot proves a meaningful subset and honestly fails the rest.
+
+## 2026-11-15 extension: native post-cut copper-island reconstruction and HS release integration
+
+This phase upgrades the original crossing-net worksheet to a **bounded subtractive electrical topology model**. It is a prototype using actual KiCad copper geometry, not a replacement for board reverse engineering or continuity tests.
+
+### What was integrated
+
+- **KiCad pcbnew extraction:** Width-aware copper tracks, pad size/type/rotation, vias and 2-layer attributes are imported from the same revision-bound reference board. No source PCB is modified.
+- **Shapely island engine:** Polygonal material removal is applied to pads, vias and traces for a given straight kerf. The graph distinguishes preexisting disconnected copper from newly separated islands and joins plated-through-hole connectivity between layers when not severed.
+- **Bridge graph candidates:** The original copper groups that split are represented as model islands; the engine proposes edges only when both sides expose intact candidate pads from the **same original connected component**.
+- **Closed-loop graph replay:** The proposed bridge edges are virtually applied back to the modeled geometry. Any remaining disconnected groups remain blockers; nothing is silently marked repaired.
+- **MachineProject release integration:** The original reference, virtual model digest, unresolved two-half electrical interface and blocked physical verification are recorded in HS's canonical project structure. A real BUILD_READY release is denied.
+
+For clean setups, install the optional keyboard-splice dependency with pip install -e '.[dev,keyboard-splice]' in the normal HS environment, and pass --topology-python /path/to/hs-venv/bin/python. Native KiCad pcbnew may remain in /usr/bin/python3. If no topology interpreter with Shapely is available, this step fails explicitly; it never generates fake successful topology evidence. The outer operator requires its normal HS environment for Pydantic and project release assessment.
+
+Run a complete evaluation (no hardware modification):
+
+    PYTHONPATH=src python scripts/hs_keyboard_splice_probe.py \
+      --pcb /path/to/known-reference.kicad_pcb \
+      --out /tmp/hs_cut.json \
+      --topology-python /path/to/hs-venv/bin/python \
+      --harness-csv /tmp/hs_original_crossing_candidates.csv \
+      --postcut-islands-json /tmp/hs_postcut_islands.json \
+      --postcut-edges-csv /tmp/hs_model_bridge_edges.csv \
+      --machine-project-json /tmp/hs_machine_handoff.json
+
+### Actual GH60 integrated run
+
+| Electrical-model metric | Observation |
+|---|---:|
+| Original track/pad/via-only connected components (for 31 affected net labels) | 105 |
+| Post-cut components after modeled 1 mm straight kerf | 146 |
+| Original copper groups split by the virtual kerf | 31 |
+| Candidate bridge edges where intact solder pads exist | 22 |
+| Split groups remaining disconnected when those edges are replayed | **11** |
+| Matrix signal source names crossing the kerf | 11 |
+| Matrix groups without fully anchored bridge candidates | **6** |
+| Source warning / copper pours | Legacy-format translation / 7 zone objects |
+| Source model physical authorization | **DENIED** |
+| Canonical HS requested vs achieved release | BUILD_READY requested; DESIGN_READY modeled; **not allowed** |
+
+These numbers do **not** imply 105 independent physical circuits or a 22-wire real repair. Missing copper-pour conductivity and approximate pad polygons can alter apparent connectivity, and the reference board includes several alternative switch layouts. Among the 11 matrix signals crossing the selected virtual cut, five row groups have bridgeable pads in the track-only model; other matrix groups are unanchored or fragmented into additional islands. Nothing should be cut from this report.
+
+Proof files:
+- evidence/gh60_integrated_cut_20261115.json: source-bound overview and canonical blocked release.
+- evidence/gh60_postcut_islands_20261115.json: source-bound model islands, candidate pads and graph replay.
+- evidence/gh60_postcut_bridge_candidates_20261115.csv: candidate model island edges, NOT a soldering harness.
+- evidence/gh60_canonical_machine_handoff_20261115.json: HS MachineProject with declared electrical interface, blocked bench test and simulated evidence.
+
+### Remaining indispensable engineering gaps
+
+1. **Zone-aware connectivity:** Native filled copper shapes, return paths, thermal spokes and any custom-pad primitives need an independent per-layer reconstruction before cut wires can be counted.
+2. **Actual populated donor:** The GH60 reference file includes alternative switch footprints and is not a verified used physical board. Exact model, mounting and revision must be established.
+3. **Stepped cut / sacrificial-key optimizer:** A clear cut may require sacrificing a few keys or stepping around occupied zones. Straight paths were blocked on GH60; the island tool currently models vertical kerfs only.
+4. **Manufacturable bridge:** Real ribbon connector footprints, copper preparation points, strain relief, insulation and an actual KiCad interposer/flex board must be generated and tested.
+5. **Electrical + functional acceptance:** Every retained switch, original MCU, USB/ESD/power return and safe isolation need real bench evidence, plus long-term key/hinge durability and recycling costs.
+6. **Membrane keyboards:** Silver-ink membrane circuits are not rigid-PCB copper. They require a distinct conductor/connector and mechanical-process model.
+
+**Commerce outcome:** no donor acquisition, no recovered products and no validated resale economics. This is an engineering-enablement milestone for a future merchant conversion workflow, not proof that conversions are economically viable.
