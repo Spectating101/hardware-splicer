@@ -19,7 +19,7 @@
   "source_sha256": {
     "BOM.csv": "bc0ae5d0e0586da5e1afb7c6361135c04e25fe0cfd358673a8c0c7f18bc04b66",
     "BRING_UP_TEST.md": "3d84fd55ec7d346042f34f3fcad90300112deecb76a48b2925de697759ac2c67",
-    "ORDER_GUIDE.md": "54139d4843a53d6bd2a23674816dd9f28305cb368d0b3d30a7c3cbf41f63f52b",
+    "ORDER_GUIDE.md": "1bbc9718274414ab15040fa6a1e11fa413064346a381048f511ac30027c2e2dd",
     "export_fab.py": "bcb17c8d0fe20424a2c5807639cf395ce4e87cebfbbb8b121dfd21f467c787fc",
     "spi_flash_adapter_v1.kicad_pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
     "spi_flash_adapter_v1.kicad_pro": "0eb65723c01e3f41d0de831091968da861ebf61f01f0f1c8c82dcfd81fcad36f",

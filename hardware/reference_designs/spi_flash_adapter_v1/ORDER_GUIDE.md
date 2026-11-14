@@ -20,6 +20,18 @@ cd fab && sha256sum -c SHA256SUMS.txt
 or modify the CAD. `manifest.json` binds the PCB, schematic, project, procurement
 BOM, exporter and procedures by SHA-256. The Gerber/drill header epoch and ZIP
 timestamps are fixed for reproducibility; they are not measurement or sourcing dates.
+`SHA256SUMS.txt` hashes the exact files from that export, including the ZIP and
+`manifest.json`; these are upload-integrity hashes, not hashes of normalized data.
+KiCad 9 patch/build versions remain truthful in the headers and manifest, so hashes
+can differ between installations. The regeneration test normalizes only the version
+in Gerber `%TF.GenerationSoftware` and `G04 Created by KiCad (PCBNEW …)` headers,
+Excellon `; #@! TF.GenerationSoftware` and `; DRILL file {KiCad …}` headers, and
+manifest `kicad_cli`. It compares all other artwork/drill bytes exactly, including
+the fixed `TF.CreationDate` and comment dates. ZIP metadata and uncompressed members
+are checked; CRCs, sizes and compressed bytes follow the version-bearing contents.
+Each export's hashes are verified against its own unmodified files before comparing
+checksum manifests with only digest fields masked; filenames, order and whitespace
+must still match exactly.
 Archive this manifest and the exact uploaded ZIP with the private order record.
 
 ## Board options
