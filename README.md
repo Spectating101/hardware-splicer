@@ -122,7 +122,8 @@ At the current external-proof checkpoint, exact-head CI has exercised:
 - the installed canonical MCP entry point;
 - frozen ten-case external corpus inventory;
 - the non-golden external trace audit;
-- **193 canonical backend operations**;
+- every canonical backend operation in the generated OpenAPI catalog (the live count is
+  `backend_contract()["operation_count"]`; it changes as the API grows, so it is not restated here);
 - `physical_authority_granted = false` at the MCP boundary.
 
 This proves the engineering surface and proof harness exist. Separate durable Astra evidence now
