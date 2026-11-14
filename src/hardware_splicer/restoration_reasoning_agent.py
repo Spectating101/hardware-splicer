@@ -370,7 +370,7 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
     for h in value["hypotheses"]:
         combined += [h[k] for k in ("mechanism", "why", "safe_test")]
     from .restoration_safety_semantics import unsafe_action_findings
-    if unsafe_action_findings(value,UNSAFE):
+    if unsafe_action_findings(value,UNSAFE,permitted):
         raise ValueError("unsafe or irreversible proposed action; fail closed")
     ledger = (context.get("hs_engineering_ledger")
               or context.get("engineering_reference")
