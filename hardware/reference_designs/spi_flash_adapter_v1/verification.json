@@ -5,7 +5,7 @@
     "reviewed_nonpad_library_differences": []
   },
   "artifact_sha256": {
-    "bom": "a3043de521aae29f03a4b195da6b448f799f676f617bd37d7f38e9c0dfaaef71",
+    "bom": "bc0ae5d0e0586da5e1afb7c6361135c04e25fe0cfd358673a8c0c7f18bc04b66",
     "design_manifest": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
     "electrical_contract": "6b93387dc7afeded96c515abe7519dbec9c5956eeb2d200493aadb1663800622",
     "pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
