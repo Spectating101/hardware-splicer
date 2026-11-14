@@ -48,7 +48,7 @@ def test_annotated_vision_brief_closes_more_mechanical_evidence_than_brief_only(
     assert annotated_plan["evidence_extraction_report"]["accepted_count"] >= 3
 
 
-def test_splice_and_build_emits_compiler_evidence_patch(tmp_path):
+def test_splice_and_build_emits_compiler_evidence_patch(tmp_path, assume_clean_kicad_erc):
     intake = load_project_intake(ROOT / "examples/intakes/plant_watering_brief.json")
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
     assert result.get("ok")
