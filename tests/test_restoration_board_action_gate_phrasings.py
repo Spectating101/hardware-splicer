@@ -1,4 +1,6 @@
 """Pin-specific physical checks are withheld however they are phrased, in any field."""
+import re
+
 import pytest
 
 from hardware_splicer.restoration_board_action_gate import (
@@ -92,9 +94,7 @@ def test_invisible_and_lookalike_characters_do_not_hide_a_pin_action(text):
     "Keep the unit unpowered and verify the printed mainboard revision.",
     "Inspect outer battery contacts, with batteries removed.",
     "Photograph the silkscreen marking near the battery compartment.",
-    "Inspect the HDMI port for bent pins.",                 # visual, no probing verb
-    "Damage is consistent with E1 and E2; bent pins.",      # evidence IDs are not parts
-    "Look for SW1 markings, terminal corrosion or residue.",  # punctuation ends the gap
+    "Inspect the HDMI port for bent pins.",                 # no number, no part named after the pin
 ])
 def test_plain_external_inspection_is_still_allowed(text):
     assert not unsafe_pin_actions(plan(next_safe_check=text), REF)
@@ -105,3 +105,56 @@ def test_gate_stays_off_when_board_is_verified_or_flag_missing():
     assert not unsafe_pin_actions(p, {"target_board_physically_verified": True})
     assert not unsafe_pin_actions(p, {})
     assert not unsafe_pin_actions(p, None)
+
+
+@pytest.mark.parametrize("phrase", [
+    "DC1, pin 4", "DC1 \u2014 pin 4", "DC1 - pin 4", "DC1: pin 4", "DC1; pin 4",
+    "DC1 / pin 4", "DC1, terminal", "DC1 \u2014 pad", "Look for SW1 markings, terminal corrosion",
+    "Probe pin 4, DC1", "Inspect pins of the DC jack", "Inspect the pin of the barrel jack",
+    "Look at the pin on the USB connector", "Look at bent pins on an HDMI port",
+    "E5 pin 2", "E5 terminal", "E5-2", "Probe the E5 pad",
+])
+def test_separators_and_unconditional_pin_of_part_phrasings_are_caught(phrase):
+    assert unsafe_pin_actions(plan(next_safe_check=phrase), REF), phrase
+
+
+def test_evidence_ids_are_exempt_only_when_they_are_real_evidence_ids():
+    p = plan(summary="Damage is consistent with E1 and E2; bent pins.")
+    assert unsafe_pin_actions(p, REF)                                     # no ID set: not exempt
+    assert not unsafe_pin_actions(p, REF, evidence_ids={"E1", "E2"})     # real evidence IDs
+    q = plan(summary="Damage is consistent with E5; bent pins.")
+    assert unsafe_pin_actions(q, REF, evidence_ids={"E1", "E2"})         # E5 is not one of them
+    r = plan(next_safe_check="Probe E5 pin 2 and the E5 terminal")
+    assert unsafe_pin_actions(r, REF, evidence_ids={"E1", "E2"})
+
+
+# Differential check against the ORIGINAL gate: whatever it caught must still be caught.
+_ORIGINAL = re.compile(
+    r"(?i)\b(?:[A-Z]{1,3}\d{1,4})\s*(?:pin\s*#?\s*\d+|[.]\d+|pins\s*\d+\s*(?:and|to|-)\s*\d+)\b"
+    r"|\bpin\s*#?\s*\d+\s+(?:on|of|at)\s+[A-Z]{1,3}\d{1,4}\b"
+)
+
+
+def _corpus():
+    designators = ["DC1", "U7", "BT1", "SW1", "J12", "IC3", "Q1", "R100", "E5", "E1", "TP4", "CN2"]
+    forms = ["{d} pin 4", "{d} pin4", "{d} pin #4", "{d} pin# 4", "{d}.4", "{d}.12",
+             "{d} pins 3 and 4", "{d} pins 1 to 2", "{d} pins 1 - 2", "{d}pin 3",
+             "pin 4 of {d}", "pin 4 on {d}", "pin4 at {d}", "pin #4 of {d}", "PIN 4 OF {d}"]
+    leads = ["", "Check ", "Probe the ", "Measure continuity between ", "With power removed, meter ",
+             "No pin-specific advice, but "]
+    tails = ["", " and BT1 pin 1", " with a meter.", ", then stop"]
+    for d in designators:
+        for f in forms:
+            for lead in leads:
+                for tail in tails:
+                    yield lead + f.format(d=d) + tail
+
+
+def test_everything_the_original_gate_caught_is_still_caught():
+    checked = 0
+    for text in _corpus():
+        if _ORIGINAL.search(text):
+            checked += 1
+            assert unsafe_pin_actions(plan(next_safe_check=text), REF), text
+            assert unsafe_pin_actions(plan(next_safe_check=text), REF, evidence_ids={"E1", "E5"}), text
+    assert checked > 1000

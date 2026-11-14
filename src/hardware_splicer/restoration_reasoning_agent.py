@@ -381,11 +381,11 @@ def validate_model_output(value: Any, context: Mapping[str, Any]) -> dict[str, A
         reject_unsourced_thresholds(value,ledger)
     if context.get("engineering_reference"):
         from .restoration_board_action_gate import reject_unverified_board_pin_actions
-        reject_unverified_board_pin_actions(value,context["engineering_reference"])
+        reject_unverified_board_pin_actions(value,context["engineering_reference"],permitted)
     if context.get("investigator_reference"):
         from .restoration_board_action_gate import reject_unverified_board_pin_actions
         reject_unverified_board_pin_actions(
-            value,{"target_board_physically_verified":False}
+            value,{"target_board_physically_verified":False},permitted
         )
     return {
         "summary": value["summary"][:1600], "hypotheses": value["hypotheses"],
