@@ -10,9 +10,10 @@ def _n(v: float, d: int = 1) -> str:
 
 def _src(s: dict[str, Any]) -> str:
     url = s["url"]
+    acc = f", {s['accessed']}" if s.get("accessed") else ""
     if url.startswith("repo:") or url.startswith("inputs/"):
-        return f"`{url.removeprefix('repo:')}` ({s['class']})"
-    return f"<{url}> ({s['class']})"
+        return f"`{url.removeprefix('repo:')}` ({s['class']}{acc})"
+    return f"<{url}> ({s['class']}{acc})"
 
 
 def render(res: dict[str, Any]) -> str:
@@ -23,6 +24,8 @@ def render(res: dict[str, Any]) -> str:
     ph = res["propulsion_at_249g"]
     arm = res["arm"]
     arml = res["arm_low_modulus"]
+    ac = res["arm_cases"]
+    ar = res["arm_range"]
     cl = res["clearance"]
     cg = res["cg"]
     cm = res["cad_measured"]
@@ -38,12 +41,34 @@ def render(res: dict[str, Any]) -> str:
     bat = parts["battery"]
     mot = parts["motor"]
     prop = parts["prop"]
+    gps = parts["gps"]
     bnf = res["bnf_compare"]
     strategies = {s["id"]: s for s in res["strategies"]}
     limit = res["mass_limit_g"]
     checks = res["checks"]
+    hw = res["hardware"]
+    strap = res["battery_strap"]
+    dfm = res["manufacturability"]
+    rules = res["cutter_rules"]
+    cp = res["materials"]["carbon_plate"]
+    rho = res["carbon_density_g_cm3"]
+    rv = res["review"]["was"]
+    rest = res["review"]["reviewer_estimates"]
+    stack_g = sum(st["component_masses_g"].values())
     uarts_free = st["uarts_hw"] - len(st["uarts_reserved"])
+    uarts_spare = uarts_free - len(st["uart_needs"])
     mot_line = {l["id"]: l for l in bom["lines"]}
+    mrow = {r["id"]: r for r in m["rows"]}
+    db = dfm["bottom_plate"]
+    hover_rotor = ac["on_axis_clamp_axis"]["rotor_freq_hover_hz"]
+    max_rotor = ac["on_axis_clamp_axis"]["rotor_freq_max_hz"]
+    arm_labels = {
+        "on_axis_clamp_axis": "fibres along the arm, clamp where the arm axis leaves the body",
+        "on_axis_clamp_far_edge": "fibres along the arm, clamp at the far arm edge",
+        "low_e_clamp_far_edge": f"pessimistic {cp['modulus_low_gpa']:g} GPa, clamp at the far arm edge",
+        "bias_clamp_axis": "arm on the fibre bias (45 degrees), clamp on the axis",
+        "bias_clamp_far_edge": "arm on the fibre bias, clamp at the far arm edge",
+    }
 
     L: list[str] = []
     w = L.append
@@ -57,7 +82,7 @@ def render(res: dict[str, Any]) -> str:
     w("")
     w("```bash")
     w("PYTHONPATH=src <python with cadquery> examples/drone_proving_ground/build_hs3g_package.py          # rewrite README, results, CAD")
-    w("PYTHONPATH=src <python with cadquery> examples/drone_proving_ground/build_hs3g_package.py --check  # fail on drift")
+    w("PYTHONPATH=src <python with cadquery> examples/drone_proving_ground/build_hs3g_package.py --check  # regenerate in a temp dir; exit 1 on drift")
     w("```")
     w("")
 
@@ -82,49 +107,82 @@ def render(res: dict[str, Any]) -> str:
     # ------------------------------------------------------------------
     w("## 2. What this package adds")
     w("")
-    w("- **A requirements decision** (sub-250 g 3-inch, section 4) with the numbers that justify it.")
-    w(f"- **Five strategies compared with sources** (section 5): buy a GPS BNF, a PX4/Pixhawk kit, the Crazyflie reference, the corrected whoop build, and a custom 3-inch.")
-    w("- **A chosen architecture with exact part identities and prices** (section 6), each tied to a URL and a source class.")
-    w("- **Quantitative checks computed in code** (section 7): all-up mass with density sensitivity, thrust-to-weight from the maker's thrust table, hover power, current and flight time, battery C-rating, ESC current margin, arm stiffness and first bending mode against the rotor-frequency band, prop clearances and centre of gravity.")
-    w("- **A parametric CadQuery frame** exported to STEP, STL and a DXF cut profile, with checks read back off the solid and the mesh (section 8).")
-    w("- **The audit's corrections recomputed from the committed PR files** (section 3), not copied.")
-    w("- **A list of what only physical testing can prove** (section 9).")
+    w("- **A requirements decision** (sub-250 g 3-inch, section 5) with the numbers that justify it, including Taiwan's registration and flight rules.")
+    w("- **Five strategies compared with sources** (section 6): buy a GPS BNF, a PX4/Pixhawk kit, the Crazyflie reference, the corrected whoop build, and a custom 3-inch.")
+    w("- **A chosen architecture with exact part identities and prices** (section 7), each tied to a URL, a source class and an access date, plus an itemised fastener list.")
+    w("- **Quantitative checks computed in code** (section 8): all-up mass with density sensitivity, thrust-to-weight from the maker's thrust table, hover power, current and flight time, battery C-rating, ESC current margin, arm stiffness and a range of first bending modes against the rotor-frequency band, prop clearances, centre of gravity and battery-strap fit.")
+    w("- **A parametric CadQuery frame** exported to STEP, STL and a DXF cut profile, with checks read back off the solid and the mesh, including the cutter's published hole and web rules (section 9).")
+    w("- **A two-stage order plan with a measure-before-cutting gate** (section 10).")
+    w("- **The audit's corrections recomputed from the committed PR files** (section 3), and **the pre-purchase review's corrections applied** (section 4).")
+    w("- **A list of what only physical testing can prove** (section 11).")
     w("")
 
-    # ------------------------------------------------------------------
-    w("## 3. Corrections from the audit and where they are applied")
+    w("## 3. Corrections from the 2026-11-13 audit and where they are applied")
     w("")
     w("`hs3g_audit.py` re-derives each corrected number from the files #276 and #291 committed. The source "
       "files themselves are left unchanged: they are dated records whose STL/SCAD hashes and evidence snapshot other "
-      "files and tests refer to (see the owner decision in section 10).")
+      "files and tests refer to (see the owner decision in section 12).")
     w("")
     w("| # | Audit ref | Was | Corrected (recomputed here) | Where applied |")
     w("|---|---|---|---|---|")
-    w(f"| 1 | 276-13 | Battery cradle sized for a {geo['battery_l_used_mm']} mm pack | The BT2.0 300 mAh pack is {ext['betafpv_bt20_300mah_pack_mm'][0]} mm long; the {geo['cradle_channel_l_mm']:g} mm channel leaves {geo['pack_overhang_mm']} mm overhanging | `hs3g_audit.whoop_geometry`; HS-3G takes its pack size from the maker listing and clearance-checks it in 3D (section 7.6) |")
+    w(f"| 1 | 276-13 | Battery cradle sized for a {geo['battery_l_used_mm']} mm pack | The BT2.0 300 mAh pack is {ext['betafpv_bt20_300mah_pack_mm'][0]} mm long; the {geo['cradle_channel_l_mm']:g} mm channel leaves {geo['pack_overhang_mm']} mm overhanging | `hs3g_audit.whoop_geometry`; HS-3G takes its pack size from the maker listing and clearance-checks it in 3D (section 8.6) |")
     w(f"| 2 | 291-2 | Motor line: NT${mot_line['motors']['pr291_unit_twd']:g}/unit (a spare rotor bell) | First whole motor NT${mot_line['motors']['corrected_unit_twd']:g}/unit | `hs3g_audit.LINE_RULES['motors']` excludes 配件/外轉子帶磁鐵 titles |")
     w(f"| 3 | 291-4 | FC line: NT${mot_line['fc_esc']['pr291_unit_twd']:g} (O4 / 3-in-1 board) | First 5-in-1 listing NT${mot_line['fc_esc']['corrected_unit_twd']:g} | `LINE_RULES['fc_esc']` requires 五合一, excludes O4/三合 |")
     w(f"| 4 | 291-6 | Camera line: NT${mot_line['camera']['pr291_unit_twd']:g} (a canopy) | First C03 camera NT${mot_line['camera']['corrected_unit_twd']:g} | `LINE_RULES['camera']` excludes 頂蓋 |")
-    w(f"| 5 | 291-11 | Build minimum NT${bom['pr291_build_min_twd']:,} | NT${bom['corrected_build_min_twd']:,} (NT${bom['corrected_if_1900_board_is_5in1_twd']:,} if the NT${mot_line['fc_esc']['pr291_unit_twd']:g} board is a true 5-in-1): {bom['build_over_cheapest_bnf_pct']} % above the cheapest BNF ({bom['cheapest_bnf']['id']}, NT${bom['cheapest_bnf']['min_twd']:,}) | `corrected_whoop_bom`; whoop row of the strategy table (section 5) |")
+    w(f"| 5 | 291-11 | Build minimum NT${bom['pr291_build_min_twd']:,} | NT${bom['corrected_build_min_twd']:,} (NT${bom['corrected_if_1900_board_is_5in1_twd']:,} if the NT${mot_line['fc_esc']['pr291_unit_twd']:g} board is a true 5-in-1): {bom['build_over_cheapest_bnf_pct']} % above the cheapest BNF ({bom['cheapest_bnf']['id']}, NT${bom['cheapest_bnf']['min_twd']:,}) | `corrected_whoop_bom`; whoop row of the strategy table (section 6) |")
     w(f"| 6 | 291-10 | Charger \"p25 NT${bom['charger_shared_figure_used_twd']}\" | That figure is the median; p25 is NT${bom['charger_p25_twd']} (excluded from both sides either way) | `corrected_whoop_bom` reports both |")
-    w(f"| 7 | 276-38 | All-up mass never stated | {geo['dry_g']} g dry, {geo['auw_g']} g AUW vs {geo['reference_auw_g']} g for the reference build (+{geo['auw_increase_pct']} %); {geo['thrust_per_motor_for_2to1_g']} g/motor needed for 2:1 | `whoop_geometry`; section 5 |")
+    w(f"| 7 | 276-38 | All-up mass never stated | {geo['dry_g']} g dry, {geo['auw_g']} g AUW vs {geo['reference_auw_g']} g for the reference build (+{geo['auw_increase_pct']} %); {geo['thrust_per_motor_for_2to1_g']} g/motor needed for 2:1 | `whoop_geometry`; section 6 |")
     w(f"| 8 | 276-30 | \"> 3x frame-mass disadvantage\" | {geo['frame_g']} g PETG frame = {geo['frame_vs_vsergeev_x']}x the {ext['vsergeev_65mm_frame_asa_g']} g printed frame it replaces, {geo['frame_vs_air65_x']}x the {ext['betafpv_air65_pp_frame_g']} g PP frame | `whoop_geometry`; it is the reason HS-3G uses cut carbon, not FDM |")
     w(f"| 9 | 276-18 | Frame outline taken as the duct | Ribs end at r = {geo['rib_end_r_mm']} mm, {geo['rib_protrusion_mm']} mm past the {geo['duct_outer_r_mm']} mm duct (bbox {geo['bbox_from_ribs_mm']} mm, matching the committed {geo['bbox_committed_mm']} mm): a snag point | `whoop_geometry` |")
-    w(f"| 10 | 276-17 | Prop radial clearance {geo['prop_clearance_used_mm']} mm, unsourced | vsergeev uses {geo['prop_clearance_vsergeev_mm']} mm; both are inside FDM tolerance plus blade flex | HS-3G sets a {a['min_prop_clearance_mm']['value']:g} mm minimum and checks it against the solid layout (section 7.6) |")
-    w(f"| 11 | 276-6 / 291-16 | Matrix 1S ESC \"5 A\" | Board on sale is the 5IN1 II, {ext['matrix1s_ii_esc_cont_a']:g} A: headroom over the {geo['motor_max_a']} A motor is {geo['esc_headroom_v1_pct']} % (V1) or {geo['esc_headroom_ii_pct']} % (II) | `whoop_geometry`; HS-3G checks ESC margin against the maker's full-throttle current (section 7.4) |")
+    w(f"| 10 | 276-17 | Prop radial clearance {geo['prop_clearance_used_mm']} mm, unsourced | vsergeev uses {geo['prop_clearance_vsergeev_mm']} mm; both are inside FDM tolerance plus blade flex | HS-3G sets a {a['min_prop_clearance_mm']['value']:g} mm minimum and checks it against the solid layout (section 8.6) |")
+    w(f"| 11 | 276-6 / 291-16 | Matrix 1S ESC \"5 A\" | Board on sale is the 5IN1 II, {ext['matrix1s_ii_esc_cont_a']:g} A: headroom over the {geo['motor_max_a']} A motor is {geo['esc_headroom_v1_pct']} % (V1) or {geo['esc_headroom_ii_pct']} % (II) | `whoop_geometry`; HS-3G checks ESC margin against the maker's full-throttle current (section 8.4) |")
     w(f"| 12 | 276-10 | Gemfan prop `source` points to a BETAFPV motor page (`{geo['gemfan_source_field']}`) | Each input needs its own source | Every HS-3G input in `inputs/parts.json` carries its own URL and source class |")
     w("| 13 | 230-20 | Three-gate run \"queued\" | It failed; #231's run passed | Section 1 |")
     w("| 14 | 230-21, 276-44, 276-45 | Simulations read as flight evidence | Both simulators fly the stock Crazyflie | Section 1; HS-3G makes no flight claim from any simulation |")
-    w("| 15 | Proving-ground section | 65 mm whoop as the first proving ground | Sub-250 g 3-inch with GPS; whoop optional; 5-inch second | The whole package (section 4) |")
-    w("| 16 | 230 engineering note | Crazyflie counted as progress toward an obtainable-parts drone | It is a firmware and sensing testbed | Strategy table, section 5 |")
-    w("| — | 291-28 (ThinkPad comparator), 291-3/291-7 (p25/median contamination) | — | **Not applied.** The first is a cyberdeck line; the second needs the full listing set, which the evidence file does not keep | Section 10 |")
+    w("| 15 | Proving-ground section | 65 mm whoop as the first proving ground | Sub-250 g 3-inch with GPS; whoop optional; 5-inch second | The whole package (section 5) |")
+    w("| 16 | 230 engineering note | Crazyflie counted as progress toward an obtainable-parts drone | It is a firmware and sensing testbed | Strategy table, section 6 |")
+    w("| — | 291-28 (ThinkPad comparator), 291-3/291-7 (p25/median contamination) | — | **Not applied.** The first is a cyberdeck line; the second needs the full listing set, which the evidence file does not keep | Section 12 |")
+    w("")
+
+
+    # ------------------------------------------------------------------
+    w("## 4. Corrections from the pre-purchase review and where they are applied")
+    w("")
+    w("An independent pre-purchase review (2026-11-14) recomputed the previous version of this package and found its "
+      "sizing sound but the frame not ready to cut. The \"was\" column is recorded in `inputs/review_2026_11_14.json`; "
+      "the \"now\" column is recomputed by the build.")
+    w("")
+    w("| # | Review item | Was | Now | Where applied |")
+    w("|---|---|---|---|---|")
+    w(f"| a1 | W1 stack mass | {rv['stack_mass_g']:g} g | {_n(stack_g, 1)} g = FC {st['component_masses_g']['fc']:g} g + ESC {st['component_masses_g']['esc']:g} g until weighed | `inputs/parts.json` `stack.component_masses_g`; `hs3g_design.mass_budget` sums them |")
+    w(f"| a2 | W2 carbon density | {rv['carbon_density_g_cm3']:g} g/cm³ | {rho:g} g/cm³, converted from the cutter's {cp['density_lb_in3']:g} lb/in³; {cp['density_range_g_cm3'][0]:g}-{cp['density_range_g_cm3'][1]:g} g/cm³ kept as sensitivity | `materials.carbon_plate.density_lb_in3`; `build_hs3g_package.compute`; section 8.1 |")
+    w(f"| a3 | W3 flash | {rv['flash_mb']} MB | 8 MB | Stack identity, section 7 |")
+    w(f"| a4 | W4 UARTs | {rv['uarts_usable']} usable, {rv['uarts_spare']} spare | {uarts_free} usable (UART4 Bluetooth, UART5 ESC telemetry), {uarts_spare} spare | `stack.uarts_reserved`; section 7 |")
+    w(f"| a5 | W5 stack price | US${rv['stack_price_usd']:.2f} | US${st['unit_price_usd']:.2f} at the maker | `stack.unit_price_usd`; BOM |")
+    w(f"| a6 | W9 camera price | US${rv['camera_price_usd']:.2f} | US${parts['camera']['unit_price_usd']:.2f} | `camera.unit_price_usd`; BOM. The VTX is out of stock at the cited shop: re-price at order time |")
+    w(f"| a7 | All-up mass | {rv['auw_g']} g (review estimate about {rest['auw_g']:g} g) | {_n(m['auw_g'], 2)} g; payload allowance {rv['payload_allowance_g']} → {res['payload_allowance_g']} g; T/W {rv['tw_full']} / {rv['tw_limited']} → {p['tw_ratio_full']} / {p['tw_ratio_limited']} | Section 8.1-8.2. Heavier than the review's estimate because the hardware is now itemised (row h1) and the body grew to meet the cutter's web rule (row b2) |")
+    w(f"| b1 | W6 cutter thicknesses | \"{rv['cutter_thicknesses']}\" | 3.00 mm and 1.60 mm are both stock; plates drawn at {F['bottom_t_mm']:g} and {F['top_t_mm']:g} mm | `FRAME`; `frame_cut` source |")
+    w(f"| b2 | W6 cutter rules (hole >= {rules['min_hole_d_mm']:g} mm, web >= {rules['min_web_over_t']:g} x t) | Not checked; smallest web {rv['smallest_web_mm']} mm | Checked off the cut face: met everywhere except the motor pads, where no 1404 pattern can meet them (section 9.2) | `hs3g_frame.manufacturability`; check `cutter_rules_met_away_from_motor_pads` |")
+    w(f"| c | Motor mount | {rv['motor_patterns']} | One `motor_pcd_mm` = {F['motor_pcd_mm']:g} mm (source in section 7), centre hole {F['motor_center_hole_d_mm']:g} mm; smallest pad web {db['smallest_web_by_pair_mm']['motor_bolt_hole-motor_centre_hole']} mm; measure-before-cutting gate | `FRAME`; `motor_bolt_holes`; section 10 |")
+    w(f"| d | Battery strap | {rv['strap']} | Pack crosswise; {F['strap_w_mm']:g} mm strap in {F['strap_w_mm'] + 1:g} mm slots at x = ±{F['strap_slot_x_mm']:g} mm, outboard of the pack; strap passes {strap['strap_side_gap_to_stack_spacer_mm']} mm clear of the stack spacers and {strap['strap_gap_under_esc_mm']} mm under the ESC; layout, CG and slots use the same orientation | `hs3g_design.layout`, `battery_strap`; checks `battery_strap_wraps_pack`, `battery_strap_clears_stack` (the old `battery_covers_strap_slots` is gone) |")
+    w(f"| e1 | No fillets | Sharp arm roots | {F['junction_fillet_r_mm']:g} mm fillets at every arm root and arm-to-pad junction; {cm['bottom_sharp_concave_corners']} sharp concave corners measured on the solid | `bottom_outline`; check `arm_root_and_pad_junctions_filleted` |")
+    w(f"| e2 | W7 arm mode | {rv['arm_f1_hz']:g} Hz ({rv['arm_f1_low_hz']:g} Hz pessimistic) | {_n(ar['f1_min_hz'], 0)}-{_n(ar['f1_max_hz'], 0)} Hz over fibre direction and clamp position; bias modulus {ar['e_bias_gpa']} GPa computed (review assumed {rest['arm_bias_e_gpa']:g} GPa, {rest['arm_f1_bias_hz']:g} Hz) | `arm_dynamics(clamp=...)`, `bias_modulus_gpa`; section 8.5 |")
+    w(f"| f | GNSS end-of-life | {rv['gps']} | {gps['identity']}, {gps['unit_mass_g']:g} g, US${gps['unit_price_usd']:.2f} | `parts.json` `gps`; section 7 |")
+    w(f"| g | W8 `--check` | Wrote results.json before comparing; could not fail on it | Regenerates into a temporary directory and byte-compares README, results.json and both STLs; writes nothing in the package | `build_hs3g_package.check`; test `test_drone_check_fails_on_hand_edited_results` |")
+    w(f"| h1 | Hardware list | {rv['hardware_g']:g} g allowance; stack screws {rv['stack_screws']} | {len(hw['items'])} itemised lines, {_n(hw['total_g'], 2)} g, including 4 x M3 x {hw['stack_screw_len_mm']:g} stack screws (stack-up needs {hw['stack_screw_needed_mm']} mm) | `hs3g_design.hardware`; section 7 |")
+    w(f"| h2 | Motor screws | {rv['motor_screw']} | M2 x {hw['motor_screw_len_mm']:g} through the {F['bottom_t_mm']:g} mm plate leaves {hw['motor_thread_engagement_mm']} mm ({hw['motor_thread_engagement_x_d']} d) in the motor; the motor's thread depth is **unverified** | `hardware`; gate in section 10 |")
+    w(f"| i1 | Hover time | {rv['hover_time_min']} min | {p['hover_time_min']} min (T^1.5), {p['hover_time_upper_bound_min']} min as an upper bound (log-log); thrust-stand before quoting | Section 8.3 |")
+    w("| i2 | Vibration plan | Relied on RPM filtering | No reliance: the pinned INAV target shows no bidirectional DShot and the ESC ships with BLHeli_S | Section 8.5 |")
+    w("| i3 | Taiwan rule | Not stated | 250 g line applies to a natural-person owner only; Art. 99-14 flight rules, including visual line of sight, at every weight | Section 5 |")
+    w("| i4 | Order plan | One order | Two stages: propulsion and electronics, then frame and GNSS after the motor is measured | Section 10 |")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 4. Requirements: sub-250 g 3-inch, decided")
+    w("## 5. Requirements: sub-250 g 3-inch, decided")
     w("")
     w("| Requirement | Value | Why |")
     w("|---|---|---|")
-    w(f"| Take-off mass | < {limit:g} g with a {res['mass_design_margin_g']:g} g design margin | EU class C0 is \"MTOM less than 250 g including payload\"; the FAA's recreational registration exception is \"less than 250 grams\" (sources below). Below the line, registration and prop-energy exposure stay low for a first physical loop. |")
+    w(f"| Take-off mass | < {limit:g} g with a {res['mass_design_margin_g']:g} g design margin | EU class C0 is \"MTOM less than 250 g including payload\"; the FAA's recreational registration exception is \"less than 250 grams\"; Taiwan registers a natural person's drone at 250 g or more (sources below). Below the line, registration and prop-energy exposure stay low for a first physical loop. |")
     w(f"| Useful function a commodity whoop lacks | GPS position hold and return-to-home, a payload allowance, outdoor flight | The audit's point that \"useful\" fails at 65 mm (payload 0, indoor, a few minutes) |")
     w(f"| Thrust-to-weight | >= {a['min_tw_ratio']['value']:g} at the throttle limit, also at {limit - 1:g} g | Wind margin for GPS modes and gusts |")
     w(f"| Hover endurance | Report it | Not a hard gate: it is an extrapolation until measured |")
@@ -136,12 +194,22 @@ def render(res: dict[str, Any]) -> str:
       "test yet on any HS aircraft, the first physical loop should be the safer one. The method here (sizing, stack, "
       "UART map, GPS failsafe, frame) carries over unchanged; only the inputs change.")
     w("")
-    w("Regulation sources: " + "; ".join(_src(s) for s in res["regulation_sources"]) + ". Taiwan's CAA threshold "
-      "should be confirmed on drone.caa.gov.tw by the owner (section 10).")
+    w("**Taiwan.** Civil Aviation Act Article 99-10 requires registration for a drone of 250 g or more maximum "
+      "take-off weight **owned by a natural person**; a drone owned by a government body, school or legal person "
+      "must be registered at any weight. So the sub-250 g exemption holds only if a private individual owns the "
+      f"aircraft, and only while the take-off mass, payload and pack included, stays under {limit:g} g. "
+      "Article 99-14's flight rules apply at every weight: not above 400 ft, not over crowds, not between sunset and "
+      "sunrise, and **within visual line of sight with no aid other than corrective lenses**, with the operator "
+      "watching the aircraft at all times. Article 99-13 bans prohibited and restricted areas and airport surroundings. "
+      "This design carries an FPV camera; flying it through goggles alone does not meet the visual-line-of-sight rule "
+      "as written. How the management rules treat goggles with an observer, the radio approval of a 350 mW 5.8 GHz "
+      "video transmitter, and the weight at which radio identification starts were not checked (section 12).")
+    w("")
+    w("Regulation sources: " + "; ".join(_src(s) for s in res["regulation_sources"]) + ".")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 5. Strategies compared")
+    w("## 6. Strategies compared")
     w("")
     w("Radio, goggles and charger are needed by every option and are left out of every row. Prices are as listed on "
       "the access date in the seller's currency; nothing was ordered.")
@@ -155,7 +223,7 @@ def render(res: dict[str, Any]) -> str:
             mass = f"{geo['auw_g']} g (computed)"
             ft, pl = "unmeasured", f"{s['payload_g']} g"
         elif sid == "custom_3in_gps":
-            price = f"US${_n(res['bom_total_usd'], 2)} (section 6)"
+            price = f"US${_n(res['bom_total_usd'], 2)} (section 7)"
             mass = f"{_n(m['auw_g'], 1)} g (computed)"
             ft = f"{p['hover_time_min']} min hover (extrapolated)"
             pl = f"{res['payload_allowance_g']} g allowance"
@@ -185,7 +253,7 @@ def render(res: dict[str, Any]) -> str:
       "The reason to build is the mission, not the money: the BNF does the integration loop for you, and the "
       "proving ground exists to show HS doing it (sizing, current budget, UART map, frame, payload mount, "
       "failsafe configuration) on an aircraft whose parts can each be checked and replaced. "
-      "If the owner only wants a GPS sub-250 g aircraft, buy the BNF (section 10).")
+      "If the owner only wants a GPS sub-250 g aircraft, buy the BNF (section 12).")
     w("")
     px4 = strategies["px4_pixhawk_kit"]
     w(f"The PX4 kit is the right tool for autonomy work but is not a sub-250 g aircraft: {px4['takeoff_mass_g']} g without a battery is "
@@ -194,104 +262,141 @@ def render(res: dict[str, Any]) -> str:
     w("")
 
     # ------------------------------------------------------------------
-    w("## 6. Chosen architecture: HS-3G")
+    w("## 7. Chosen architecture: HS-3G")
     w("")
     w(f"X quad, {F['wheelbase_mm']:g} mm motor-to-motor diagonal, {prop['diameter_mm']:g} mm (3-inch) props, 4S. "
       f"{st['identity']}. Firmware: INAV (`SPEEDYBEEF405MINI`) first, ArduPilot (`SpeedyBeeF405Mini`) as the alternative; "
-      f"both targets exist upstream at the pinned commits in `inputs/parts.json`. The FC has {st['uarts_hw']} hardware UARTs, "
-      f"{len(st['uarts_reserved'])} of them routed to Bluetooth, leaving {uarts_free} for "
-      f"{len(st['uart_needs'])} needs ({', '.join(st['uart_needs'])}) and {uarts_free - len(st['uart_needs'])} spare for a payload or telemetry link. "
-      "The battery hangs under the bottom plate on a strap, so nothing heavy is in the prop plane; the GNSS/compass sits on the "
-      f"top plate {F['standoff_len_mm']:g} mm above the bottom plate, away from ESC current.")
+      f"both targets exist upstream at the pinned commits in `inputs/parts.json`. The FC has {st['uarts_hw']} hardware UARTs; "
+      + ", ".join(f"{k} is {v}" for k, v in st["uarts_reserved"].items()) +
+      f". That leaves **{uarts_free} usable** for {len(st['uart_needs'])} needs ({', '.join(st['uart_needs'])}) and "
+      f"**{uarts_spare} spare** for a payload or telemetry link. "
+      f"The battery hangs crosswise under the bottom plate on a {F['strap_w_mm']:g} mm strap, so nothing heavy is in the prop plane; the GNSS/compass sits on the "
+      f"top plate {F['standoff_len_mm']:g} mm above the bottom plate, away from ESC current. The ESC sits on "
+      f"{F['stack_spacer_len_mm']:g} mm nylon spacers so the strap passes underneath it.")
     w("")
-    w("| Part | Identity | Qty | Unit US$ | Line US$ | On-aircraft mass g | Price source |")
-    w("|---|---|---|---|---|---|---|")
-    mrow = {r["id"]: r for r in m["rows"]}
+    w("| Part | Identity | Qty | Unit US$ | Line US$ | On-aircraft mass g | Stage | Price source |")
+    w("|---|---|---|---|---|---|---|---|")
     for r in res["bom"]:
-        url = f"<{r['url']}>" if r["url"] else "—"
+        url = f"<{r['url']}> ({r['accessed']})" if r["url"] else "—"
         w(f"| {parts[r['id']]['role']} | {r['identity']} | {r['qty']} | {_n(r['unit_usd'], 2)} | {_n(r['line_usd'], 2)} | "
-          f"{_n(mrow[r['id']]['total_g'], 2)} | {r['price_class']}: {url} |")
-    w(f"| **Total** | | | | **{_n(res['bom_total_usd'], 2)}** | **{_n(m['auw_g'], 2)}** | |")
+          f"{_n(mrow[r['id']]['total_g'], 2)} | {r['order_stage']} | {r['price_class']}: {url} |")
+    w(f"| **Total** | | | | **{_n(res['bom_total_usd'], 2)}** | **{_n(m['auw_g'], 2)}** | | |")
     w("")
-    w("Source classes: `maker_page` fetched directly; `maker_search` / `retailer_search` seen only through a search "
-      "extract because the shop refused or rate-limited direct requests (as in the audit); `assumption` and "
-      "`lower_bound` are not quotes. Re-check every price before ordering.")
+    w("Source classes: `maker_page` and `retailer_page` fetched directly; `maker_search` / `retailer_search` seen only through a search "
+      "extract because the shop refused or rate-limited direct requests; `assumption` and "
+      "`lower_bound` are not quotes. Re-check every price before ordering. Every source with its date is in `inputs/parts.json`.")
     w("")
     for pid in ("stack", "motor", "battery", "gps", "frame_cut"):
         x = parts[pid]
-        note = x.get("mass_note") or x.get("mount_note") or x.get("availability_note") or x.get("price_note")
-        if note:
-            w(f"- {x['role']}: {note}")
+        for key in ("mass_note", "mount_note", "availability_note", "price_note"):
+            if x.get(key):
+                w(f"- {x['role']}: {x[key]}")
+    w("")
+    w("**Fasteners and mounting hardware** (`hs3g_design.hardware`; masses are upper bounds, head modelled as a cylinder):")
+    w("")
+    w("| Item | Qty | Unit g | Total g |")
+    w("|---|---|---|---|")
+    for it in hw["items"]:
+        w(f"| {it['what']} | {it['qty']} | {_n(it['unit_g'], 3)} | {_n(it['total_g'], 2)} |")
+    w(f"| **Total** | | | **{_n(hw['total_g'], 2)}** |")
+    w("")
+    w(f"Stack screws must pass the {F['bottom_t_mm']:g} mm plate, the {F['stack_spacer_len_mm']:g} mm spacer, the "
+      f"{st['height_mm']:g} mm stack and a {res['hardware_spec']['m3_nylon_locknut_h_mm']:g} mm lock nut: {hw['stack_screw_needed_mm']} mm, so "
+      f"M3 x {hw['stack_screw_len_mm']:g}. Motor screws: M2 x {hw['motor_screw_len_mm']:g} through the {F['bottom_t_mm']:g} mm plate put "
+      f"{hw['motor_thread_engagement_mm']} mm of thread into the motor ({hw['motor_thread_engagement_x_d']} x diameter). The depth of the "
+      "motor's tapped holes is **not published and not verified**: a screw that bottoms out can touch the stator windings. "
+      "Measure it before the first screw goes in (section 10).")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 7. Quantitative checks")
+    w("## 8. Quantitative checks")
     w("")
-    w("### 7.1 All-up mass")
+    w("### 8.1 All-up mass")
     w("")
     w(f"AUW **{_n(m['auw_g'], 2)} g** ({_n(m['dry_g'], 2)} g dry + {bat['unit_mass_g']:g} g pack). The carbon frame is "
       f"{_n(m['frame_g'], 2)} g from the CadQuery volume ({_n(cm['bottom_volume_mm3'] / 1000, 3)} + {_n(cm['top_volume_mm3'] / 1000, 3)} cm³) "
-      f"at {res['materials']['carbon_plate']['density_g_cm3']:g} g/cm³; across the assumed {res['mass_density_low']['density']:g}-{res['mass_density_high']['density']:g} g/cm³ "
-      f"range the AUW is {_n(res['mass_density_low']['auw_g'], 2)}-{_n(res['mass_density_high']['auw_g'], 2)} g. "
+      f"at the cutter's {rho:g} g/cm³; at the {res['mass_density_low']['density']:g}-{res['mass_density_high']['density']:g} g/cm³ "
+      f"typical laminate range the AUW is {_n(res['mass_density_low']['auw_g'], 2)}-{_n(res['mass_density_high']['auw_g'], 2)} g. "
       f"Standoffs are {_n(m['standoff_each_g'], 3)} g each ({_n(res['standoff_volume_mm3'], 1)} mm³ of 7075 at "
-      f"{res['materials']['aluminium_7075']['density_g_cm3']:g} g/cm³). "
+      f"{res['materials']['aluminium_7075']['density_g_cm3']:g} g/cm³). Fasteners are {_n(hw['total_g'], 2)} g (section 7). "
       f"Under the {limit:g} g line with the {res['mass_design_margin_g']:g} g margin, **{res['payload_allowance_g']} g is left for a payload** "
-      f"(computed at the heavy end of the density range).")
+      f"(computed at the heaviest case, {_n(res['auw_heavy_case_g'], 2)} g).")
     w("")
-    w("### 7.2 Thrust-to-weight")
+    w("### 8.2 Thrust-to-weight")
     w("")
     w(f"From the maker's bench table for the F1404 3800KV on {p['prop']} at about {p['bench_voltage_v']} V ({res['thrust_source']['url']}): "
-      f"{_n(p['max_thrust_total_g'], 1)} g total at 100 % throttle, **T/W {p['tw_ratio_full']}**. With the throttle limit from 7.4 "
+      f"{_n(p['max_thrust_total_g'], 1)} g total at 100 % throttle, **T/W {p['tw_ratio_full']}**. With the throttle limit from 8.4 "
       f"({p['throttle_limit_pct']} %), {_n(p['throttle_limit_thrust_total_g'], 1)} g, **T/W {p['tw_ratio_limited']}**. "
       f"At a {limit - 1:g} g take-off mass (the whole payload allowance used and more) the limited T/W is {ph['tw_ratio_limited']}. "
       f"All three clear the {a['min_tw_ratio']['value']:g} requirement. Bench voltage is above a sagging 4S pack, so these are upper bounds.")
     w("")
-    w("### 7.3 Hover power, current and flight time")
+    w("### 8.3 Hover power, current and flight time")
     w("")
-    w(f"Hover needs {p['hover_thrust_per_motor_g']} g per motor, far below the table's lowest row ({p['table_min_thrust_g']} g at 50 %), "
-      f"so hover is an extrapolation. A log-log fit over the {p['fit_rows_throttle_pct'][0]}-{p['fit_rows_throttle_pct'][-1]} % rows gives "
-      f"P ∝ T^{p['fit_exponent']} and {p['hover_power_per_motor_fit_w']} W/motor; momentum-theory scaling (P ∝ T^1.5) from the 50 % row gives "
-      f"{p['hover_power_per_motor_n15_w']} W/motor. The package uses the more pessimistic **{p['hover_power_per_motor_used_w']} W/motor**. "
-      f"Ideal induced power is {p['ideal_induced_power_per_motor_w']} W/motor (air density {a['air_density_kg_m3']['value']:g} kg/m³), "
-      f"an overall hover efficiency of {p['overall_efficiency_hover']}, which is in the plausible range for a small motor at low load. "
+    w(f"Hover needs {p['hover_thrust_per_motor_g']} g per motor. The table's lowest row is {p['table_min_thrust_g']} g at 50 %, "
+      f"**{p['hover_extrapolation_x']}x above hover**, so every hover figure is an extrapolation. Momentum-theory scaling "
+      f"(P ∝ T^1.5) from the 50 % row gives **{p['hover_power_per_motor_n15_w']} W/motor**, holding overall efficiency at the "
+      f"50 % row's value; this is the figure used. A log-log fit over the {p['fit_rows_throttle_pct'][0]}-{p['fit_rows_throttle_pct'][-1]} % rows "
+      f"gives P ∝ T^{p['fit_exponent']} and {p['hover_power_per_motor_fit_w']} W/motor, but it extends an efficiency trend far past the data, "
+      f"so it is only an upper bound on endurance. Ideal induced power is {p['ideal_induced_power_per_motor_w']} W/motor (air density "
+      f"{a['air_density_kg_m3']['value']:g} kg/m³), an overall hover efficiency of {p['overall_efficiency_hover']}. "
       f"Estimated hover rpm {p['hover_rpm_est']:,} (rpm ∝ √T).")
     w("")
     w(f"With {a['avionics_power_w']['value']:g} W of avionics at {bat['cells'] * a['nominal_cell_v']['value']:.1f} V nominal, hover draws "
       f"**{p['hover_current_a']} A** ({p['c_rate_hover']}C). Using {a['usable_capacity_fraction']['value']:.0%} of {bat['capacity_mah']} mAh, "
-      f"**hover time is about {p['hover_time_min']} min** ({ph['hover_time_min']} min at {limit - 1:g} g). With the GF3016 prop instead, "
-      f"{pg['hover_time_min']} min; its blade count is not stated on the maker table, so it is not the primary choice. "
-      "Forward flight, wind and pack sag change this; only a logged flight measures it.")
+      f"**hover time is about {p['hover_time_min']} min** on the T^1.5 figure, with **{p['hover_time_upper_bound_min']} min as an upper bound** "
+      f"from the log-log fit ({ph['hover_time_min']} min at {limit - 1:g} g). **Thrust-stand the hover point before quoting either.** "
+      f"With the GF3016 prop instead, {pg['hover_time_min']} min; its blade count is not stated on the maker table, so it is not the primary choice. "
+      "Forward flight, wind and pack sag change all of this; only a logged flight measures it.")
     w("")
-    w("### 7.4 Battery C-rating and ESC current margin")
+    w("### 8.4 Battery C-rating and ESC current margin")
     w("")
     w(f"Full throttle draws {p['max_current_a']} A (4 x {p['motor_peak_current_table_a']} A + avionics). The pack's rated "
       f"{bat['c_continuous']}C continuous is {p['battery_cont_a']} A and {bat['c_burst']}C burst is {p['battery_burst_a']} A. "
       f"**Sustained full throttle exceeds the continuous rating** (burst covers it). The design therefore limits throttle to "
       f"about **{p['throttle_limit_pct']} %** of the bench ESC command (INAV `throttle_scale`, ArduPilot `MOT_SPIN_MAX`; how a setting maps "
       "to ESC command is itself a bench check), which draws "
-      f"{p['throttle_limit_current_a']} A, inside the continuous rating, and still gives T/W {p['tw_ratio_limited']}. "
-      "Hobby C-ratings are optimistic; a logged current trace on the first pack decides whether the limit can rise.")
+      f"{p['throttle_limit_current_a']} A, {_n(100 * (1 - p['throttle_limit_current_a'] / p['battery_cont_a']), 1)} % under the continuous rating, and still gives T/W {p['tw_ratio_limited']}. "
+      "That margin is thin for a hobby C-rating; a logged current trace on the first pack decides whether the limit holds.")
     w("")
     w(f"The ESC is rated {st['esc_continuous_a']} A continuous per motor ({st['esc_burst_a']} A for {st['esc_burst_s']} s). The worst table row is "
       f"{p['motor_peak_current_table_a']} A per motor, a **{p['esc_margin_full']}x margin**; the motor's own 60 s peak rating is {p['motor_peak_rating_a']} A. "
       f"Prop tip speed at full throttle is {p['tip_speed_m_s']} m/s (Mach {p['tip_mach']}).")
     w("")
-    w("### 7.5 Arm stiffness and first bending mode")
+    w("### 8.5 Arm stiffness, first bending mode and the vibration plan")
     w("")
-    w(f"Each arm is a {arm['section_mm'][0]:g} x {arm['section_mm'][1]:g} mm carbon cantilever with a free length of {arm['free_length_mm']} mm "
-      f"(motor centre to where the arm axis leaves the body) and a {arm['tip_mass_g']} g tip mass (motor, prop, screws). "
-      f"With E = {res['materials']['carbon_plate']['flexural_modulus_gpa']:g} GPa: stiffness {arm['stiffness_n_per_mm']} N/mm, tip deflection "
-      f"{arm['tip_deflection_full_thrust_mm']} mm and root stress {arm['root_stress_full_thrust_mpa']} MPa at full thrust; "
-      f"**first out-of-plane bending mode about {_n(arm['f1_hz'], 0)} Hz**. With the pessimistic E = {res['materials']['carbon_plate']['modulus_low_gpa']:g} GPa it is "
-      f"{_n(arml['f1_hz'], 0)} Hz.")
+    w(f"**Laminate.** The plate is {cp['laminate']}. A woven 0/90 plate is stiff along its fibres and soft on the 45-degree "
+      f"bias. The four arms run at 45 degrees to the body, so they lie on the fibre axes only if the cutter nests the "
+      f"DXF rotated 45 degrees on the sheet; a cutter that places it square puts every arm on the bias. Classical "
+      f"lamination theory with the cited on-axis modulus ({cp['flexural_modulus_gpa']:g} GPa) and an assumed in-plane shear modulus "
+      f"of {cp['shear_modulus_g12_gpa']:g} GPa (ν = {cp['poisson_nu12']:g}) gives a bias modulus of **{ar['e_bias_gpa']} GPa**.")
     w("")
-    w(f"Rotor frequency runs from about {_n(arm['rotor_freq_hover_hz'], 0)} Hz at hover to {_n(arm['rotor_freq_max_hz'], 0)} Hz at full throttle, "
-      f"so the arm mode **is inside the operating band** (crossed near {arm['f1_crossing_rpm']:,} rpm, or {arml['f1_crossing_rpm']:,} rpm at low E). "
-      f"Hover blade-pass is about {_n(arm['blade_pass_hover_hz'], 0)} Hz. That is normal for 3-inch frames and is what RPM-based "
-      "notch filtering (INAV/ArduPilot with bidirectional DShot) is for; static deflection and stress are negligible. Crash loads, "
-      "not flight loads, size these arms, and only a crash or drop test measures them.")
+    w(f"Each arm is a {arm['section_mm'][0]:g} x {arm['section_mm'][1]:g} mm cantilever carrying a tip mass of {arm['tip_mass_g']} g "
+      "(motor, prop, screws). Where it is clamped is uncertain too: the body holds the arm's centre line from where it leaves "
+      "the body, but the leading edge is free from further in. The five cases:")
     w("")
-    w("### 7.6 Prop clearance and centre of gravity")
+    w("| Case | E (GPa) | Free length (mm) | Stiffness (N/mm) | First mode (Hz) | Inside rotor band |")
+    w("|---|---|---|---|---|---|")
+    for k, c in ac.items():
+        w(f"| {arm_labels[k]} | {c['e_gpa']:g} | {c['free_length_mm']} | {c['stiffness_n_per_mm']} | {_n(c['f1_hz'], 0)} | {c['f1_inside_rotor_band']} |")
+    w("")
+    w(f"So the first out-of-plane mode lies somewhere in **{_n(ar['f1_min_hz'], 0)}-{_n(ar['f1_max_hz'], 0)} Hz**, and "
+      f"{_n(ar['f1_max_hz'], 0)} Hz is the top of that range, not its middle. Rotor frequency runs from about {_n(hover_rotor, 0)} Hz "
+      f"at hover to {_n(max_rotor, 0)} Hz at full throttle (hover blade-pass about {_n(arm['blade_pass_hover_hz'], 0)} Hz), so in most "
+      "cases the mode sits inside the operating band, and in the softest case it sits just below hover. Static deflection "
+      f"({arm['tip_deflection_full_thrust_mm']} mm) and root stress ({arm['root_stress_full_thrust_mpa']} MPa) at full thrust are negligible; "
+      "crash loads, not flight loads, size these arms.")
+    w("")
+    w("**Vibration plan, without RPM filtering.** RPM-based notch filtering needs bidirectional DShot from both the "
+      "flight firmware and the ESC. The pinned INAV target defines DShot and an ESC sensor but nothing for bidirectional "
+      f"DShot, and the ESC ships with {st['esc_firmware']}; bidirectional DShot on a BLHeli_S ESC would need different "
+      "firmware (Bluejay), which is **unverified** for this board. ArduPilot's README for this board does list bidirectional "
+      "DShot on channels 1-4, but that still depends on the ESC firmware. The plan is therefore: (1) ask the cutter to nest "
+      "the arms on the fibre axes, which moves the mode toward the top of the range; (2) fly the first pack with INAV's "
+      "dynamic gyro notch and default low-pass filters and log blackbox gyro data across the throttle range; (3) find the "
+      "arm mode in that spectrum and, if it sits on hover, add a static notch or stiffen the arm (wider arms or a "
+      "4 mm plate) and recut. Flashing Bluejay is an owner decision (section 12), not an assumption here.")
+    w("")
+    w("### 8.6 Prop clearance, centre of gravity and battery strap")
     w("")
     w(f"The prop disc spans z = {disc['z0']:g}-{disc['z1']:g} mm (motor height plus an assumed {prop['hub_height_mm']:g} mm hub). "
       f"Adjacent prop tips are **{cl['adjacent_tip_gap_mm']} mm** apart (minimum {a['min_adjacent_tip_gap_mm']['value']:g}). Parts that reach the prop plane "
@@ -303,20 +408,30 @@ def render(res: dict[str, Any]) -> str:
       f"; the underslung battery sits {next(v['gap_mm'] for v in cl['vertical'] if v['id'] == 'battery')} mm below the prop plane.")
     w("")
     w(f"Placing every part at its layout position, the battery centre must sit **{cg['battery_x_mm']} mm** forward of the "
-      f"frame centre for a zero x offset; the {bat['size_mm'][0]:g} mm pack still spans both strap slots. The CG is then "
-      f"{cg['cg_z_below_prop_plane_mm']} mm below the prop plane (z = {cg['cg_mm'][2]} mm), with {cg['mass_g']} g accounted for.")
+      f"frame centre for a zero x offset. The CG is then {cg['cg_z_below_prop_plane_mm']} mm below the prop plane "
+      f"(z = {cg['cg_mm'][2]} mm), with {cg['mass_g']} g accounted for.")
+    w("")
+    w(f"The pack lies **{strap['pack_orientation']}**, so its {bat['size_mm'][1]:g} mm side runs along x and spans "
+      f"x = {strap['pack_x_extent_mm'][0]} to {strap['pack_x_extent_mm'][1]} mm at that CG position. The slots' inner edges are at "
+      f"x = {strap['slot_inner_edges_x_mm'][0]} and {strap['slot_inner_edges_x_mm'][1]} mm, {strap['pack_side_to_slot_mm'][0]} and "
+      f"{strap['pack_side_to_slot_mm'][1]} mm outside the pack's sides, so the strap drops past both sides and wraps the "
+      f"pack the short way. The slots run to y = ±{strap['slot_y_end_mm']} mm. The strap's top run passes under the ESC with "
+      f"{strap['strap_gap_under_esc_mm']} mm to spare and {strap['strap_side_gap_to_stack_spacer_mm']} mm from each stack spacer. "
+      "Those numbers are the check: `battery_strap_wraps_pack` fails if either pack side reaches a slot, and "
+      "`battery_strap_clears_stack` fails if the strap touches a spacer or cannot fit under the ESC.")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 8. Frame CAD")
+    w("## 9. Frame CAD")
     w("")
     w(f"`hs3g_frame.py` builds two plates in CadQuery: a {F['bottom_t_mm']:g} mm unibody bottom plate ({F['body_l_mm']:g} x {F['body_w_mm']:g} mm body, "
-      f"{F['arm_w_mm']:g} mm arms, {F['pad_d_mm']:g} mm motor pads, {F['stack_pitch_mm']:g} x {F['stack_pitch_mm']:g} M3 stack holes, two strap slots) and a {F['top_t_mm']:g} mm top plate "
-      f"on four M3 x {F['standoff_len_mm']:g} mm standoffs. Each motor pad carries **both** a {F['motor_pcd_a_mm']:g} mm and a {F['motor_pcd_b_mm']:g} mm "
-      "M2 bolt circle, because the F1404 drawing could not be read and listings disagree. `build_hs3g_package.py` exports STEP, binary "
-      "STL and a DXF cut profile per plate into `generated/`.")
+      f"{F['arm_w_mm']:g} mm arms, {F['pad_d_mm']:g} mm motor pads, {F['junction_fillet_r_mm']:g} mm fillets at arm roots and pad junctions, "
+      f"{F['stack_pitch_mm']:g} x {F['stack_pitch_mm']:g} M3 stack holes, two strap slots) and a {F['top_t_mm']:g} mm top plate "
+      f"on four M3 x {F['standoff_len_mm']:g} mm standoffs. Each motor pad carries **one** M2 pattern on a "
+      f"{F['motor_pcd_mm']:g} mm bolt circle (`motor_pcd_mm`) around a {F['motor_center_hole_d_mm']:g} mm centre hole. "
+      "`build_hs3g_package.py` exports STEP, binary STL and a DXF cut profile per plate into `generated/`.")
     w("")
-    w("Checks, all read back off the generated solid or mesh rather than the parameters:")
+    w("### 9.1 Checks read off the solid and the mesh")
     w("")
     w("| Check | Bottom plate | Top plate |")
     w("|---|---|---|")
@@ -329,62 +444,122 @@ def render(res: dict[str, Any]) -> str:
     rr = b.get("repo_reader")
     if rr:
         w(f"| Repo reader `drone_product_delivery.source_binary_stl_info` | {rr['triangles']:,} triangles, {' x '.join(f'{v:g}' for v in rr['dimensions_mm'])} | {t['repo_reader']['triangles']:,} triangles |")
-    w(f"| Mass at {res['materials']['carbon_plate']['density_g_cm3']:g} g/cm³ | {_n(cm['bottom_volume_mm3'] * res['materials']['carbon_plate']['density_g_cm3'] / 1000, 2)} g | {_n(cm['top_volume_mm3'] * res['materials']['carbon_plate']['density_g_cm3'] / 1000, 2)} g |")
+    w(f"| Mass at {rho:g} g/cm³ | {_n(cm['bottom_volume_mm3'] * rho / 1000, 2)} g | {_n(cm['top_volume_mm3'] * rho / 1000, 2)} g |")
+    w(f"| Sharp concave corners on the outline | {cm['bottom_sharp_concave_corners']} | — |")
     w("")
     w(f"Motor spacing measured from the four {F['motor_center_hole_d_mm']:g} mm centre holes: diagonals "
       f"{', '.join(f'{d:g}' for d in cm['diagonal_motor_spacing_mm'])} mm (target {F['wheelbase_mm']:g}), adjacent "
       f"{cm['adjacent_motor_spacing_mm'][0]:g} mm. M2 bolt holes found by bolt-circle diameter: "
       + ", ".join(f"{k} mm x {v}" for k, v in cm["motor_bolt_pcd_counts"].items()) + ".")
     w("")
+    w("### 9.2 The cutter's design rules")
+    w("")
+    w(f"The cutter the BOM names publishes a minimum hole of about {rules['min_hole_d_mm']:g} mm and a minimum web of "
+      f"{rules['min_web_over_t']:g} x material thickness ({db['min_web_rule_mm']:g} mm on the bottom plate, "
+      f"{dfm['top_plate']['min_web_rule_mm']:g} mm on the top plate) ({rules['url']}, {rules['accessed']}). `manufacturability()` "
+      "measures every hole and every hole-to-hole and hole-to-outline web on the cut face:")
+    w("")
+    w("| Plate | Feature or pair | Smallest (mm) | Rule (mm) | Meets |")
+    w("|---|---|---|---|---|")
+    for plate, d in dfm.items():
+        for k, v in d["smallest_hole_by_feature_mm"].items():
+            w(f"| {plate} | hole: {k} | {v:g} | {d['min_hole_rule_mm']:g} | {k not in d['holes_below_rule']} |")
+        for k, v in d["smallest_web_by_pair_mm"].items():
+            if v < 3 * d["min_web_rule_mm"]:
+                w(f"| {plate} | web: {k} | {v:g} | {d['min_web_rule_mm']:g} | {k not in d['webs_below_rule']} |")
+    w("")
+    w("Webs more than three times the rule are omitted from the table; all are in `generated/results.json`. "
+      "**What breaks the rules, and why:** only the motor pads. "
+      f"The 16 M2 clearance holes are {F['motor_bolt_hole_d_mm']:g} mm, under the {rules['min_hole_d_mm']:g} mm minimum, because an M2 "
+      "screw in a 3.2 mm hole lets the motor shift and bears on a smaller ring under the head. The webs between those holes, the "
+      "centre hole and the pad edge are under 6 mm because the motor's own bolt pattern puts four M2 holes within a few "
+      "millimetres of its shaft; no 1404-class pattern can meet a 6 mm web. Everything else (stack, standoff and strap "
+      "features on both plates) meets both rules; that is the check `cutter_rules_met_away_from_motor_pads`. Two "
+      "ways forward: ask this cutter (or a cutter that does FPV frames) to accept the pads as drawn, or have the "
+      "plate cut without the 16 M2 holes and drill them through a printed 1:1 template after the motor is measured.")
+    w("")
     w("The CAD is evidence of geometry only: it says nothing about how a cutter handles 3 mm carbon, edge "
-      "delamination, hole tolerance, or crash strength.")
+      "delamination, hole tolerance, or crash strength. There is no camera mount, GNSS mount or landing surface in the "
+      "CAD yet; the aircraft lands on its pack.")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 9. What only physical testing can prove")
+    w("## 10. Order in two stages")
+    w("")
+    w(f"**Stage 1: propulsion and electronics, US${_n(res['bom_stage_usd']['1'], 2)}:** "
+      + "; ".join(parts[r["id"]]["role"] for r in res["bom"] if r["order_stage"] == 1) +
+      ". These sizing numbers held under independent recomputation, and they do not depend on the frame.")
+    w("")
+    w(f"**Stage 2: frame and GNSS, US${_n(res['bom_stage_usd']['2'], 2)}, only after the gate below passes:** "
+      + "; ".join(parts[r["id"]]["role"] for r in res["bom"] if r["order_stage"] == 2) + ".")
+    w("")
+    w("**Gate: measure before cutting.** With a stage-1 motor, stack and pack in hand, measure each item, enter it in "
+      "the named parameter, rerun `build_hs3g_package.py`, confirm `--check` passes and every check in `results.json` "
+      "still holds, and only then send the DXFs to a cutter.")
+    w("")
+    w("| Measure | With | Parameter it sets | Current value |")
+    w("|---|---|---|---|")
+    w(f"| F1404 bolt-circle diameter (hole centre to opposite hole centre) | Calipers | `FRAME['motor_pcd_mm']` | {F['motor_pcd_mm']:g} mm (a guess, section 7) |")
+    w(f"| Shaft end and circlip diameter under the motor | Calipers | `FRAME['motor_center_hole_d_mm']` (at least 0.5 mm larger) | {F['motor_center_hole_d_mm']:g} mm |")
+    w(f"| Depth of the motor's tapped M2 holes | Depth gauge or a screw and calipers | `hardware_spec.motor_screw_len_mm` (plate + engagement, never bottoming) | M2 x {hw['motor_screw_len_mm']:g} |")
+    w(f"| Stack mass and height, assembled | Scale, calipers | `stack.component_masses_g`, `stack.height_mm` | {_n(stack_g, 1)} g, {st['height_mm']:g} mm |")
+    w(f"| Pack dimensions | Calipers | `battery.size_mm` (strap slot fit) | {' x '.join(f'{v:g}' for v in bat['size_mm'])} mm |")
+    w(f"| Strap width and thickness | Calipers | `FRAME['strap_w_mm']`, `FRAME['strap_t_mm']` | {F['strap_w_mm']:g} x {F['strap_t_mm']:g} mm |")
+    w(f"| Prop hub height above the motor | Calipers | `prop.hub_height_mm` | {prop['hub_height_mm']:g} mm |")
+    w("")
+    w("Nothing has been ordered and no supplier has been contacted.")
+    w("")
+
+    # ------------------------------------------------------------------
+    w("## 11. What only physical testing can prove")
     w("")
     w("Each item names the test that would settle it. Until then the corresponding number above is a prediction.")
     w("")
-    w(f"1. **Real masses.** Weigh every part and the cut plates (predicted frame {_n(m['frame_g'], 2)} g, AUW {_n(m['auw_g'], 2)} g). Bench scale.")
-    w(f"2. **Motor bolt pattern and fit.** Caliper the F1404 base ({F['motor_pcd_a_mm']:g} vs {F['motor_pcd_b_mm']:g} mm PCD); test-fit motors, stack and standoffs on the cut plate.")
-    w(f"3. **Hover thrust and power at {p['hover_thrust_per_motor_g']} g/motor.** Thrust stand below the {p['fit_rows_throttle_pct'][0]} % throttle row where the maker table starts; this replaces the extrapolation in 7.3.")
-    w(f"4. **Pack current and sag.** Logged current at the {p['throttle_limit_pct']} % limit and in punch-outs; confirms or moves the throttle limit (7.4).")
-    w(f"5. **Flight time.** Hover and cruise on a logged pack to the {a['usable_capacity_fraction']['value']:.0%} capacity line (predicted {p['hover_time_min']} min hover).")
-    w(f"6. **Frame resonance.** Blackbox gyro spectrum across the throttle range; look for the predicted arm mode near {_n(arml['f1_hz'], 0)}-{_n(arm['f1_hz'], 0)} Hz and set notch filters.")
-    w("7. **Motor and ESC temperature** after a hard pack (the maker's bench temperatures are recorded in `inputs/motor_f1404_3800kv_thrust.json`).")
-    w("8. **Compass interference.** Compass calibration and a current-vs-heading log with motors running.")
-    w("9. **GPS failsafe and return-to-home.** Props-off failsafe checks first, then a supervised RTH test in an open field; legal flying site required.")
-    w("10. **Prop clearance under load.** Video at full throttle; blade flex and the assumed hub height are not modelled.")
-    w("11. **Crash survival.** Drop and crash tests of the arms and pads; flight-load stress here is negligible, so crashes decide arm size.")
-    w("12. **Radio and video range** with the chosen antennas and mounting.")
+    w(f"1. **Real masses.** Weigh every part and the cut plates (predicted frame {_n(m['frame_g'], 2)} g, fasteners {_n(hw['total_g'], 2)} g, AUW {_n(m['auw_g'], 2)} g). Bench scale.")
+    w(f"2. **Motor bolt pattern, shaft end and thread depth.** The section 10 gate ({F['motor_pcd_mm']:g} mm bolt circle assumed); then test-fit motors, stack, spacers and standoffs on the cut plate.")
+    w(f"3. **Hover thrust and power at {p['hover_thrust_per_motor_g']} g/motor.** Thrust stand below the {p['fit_rows_throttle_pct'][0]} % throttle row where the maker table starts; this replaces both extrapolations in 8.3.")
+    w(f"4. **Pack current and sag.** Logged current at the {p['throttle_limit_pct']} % limit and in punch-outs; confirms or moves the throttle limit (8.4).")
+    w(f"5. **Flight time.** Hover and cruise on a logged pack to the {a['usable_capacity_fraction']['value']:.0%} capacity line (predicted {p['hover_time_min']} min hover, at most about {p['hover_time_upper_bound_min']} min).")
+    w(f"6. **Frame resonance.** Blackbox gyro spectrum across the throttle range; look for the arm mode in the predicted {_n(ar['f1_min_hz'], 0)}-{_n(ar['f1_max_hz'], 0)} Hz range and set filters (8.5).")
+    w("7. **Laminate.** Real density and stiffness of the cut plate: weigh it and tap-test or deflection-test one arm.")
+    w("8. **Motor and ESC temperature** after a hard pack (the maker's bench temperatures are recorded in `inputs/motor_f1404_3800kv_thrust.json`).")
+    w("9. **Compass interference.** Compass calibration and a current-vs-heading log with motors running.")
+    w("10. **GPS failsafe and return-to-home.** Props-off failsafe checks first, then a supervised RTH test in an open field, within visual line of sight; legal flying site required.")
+    w("11. **Prop clearance under load.** Video at full throttle; blade flex and the assumed hub height are not modelled.")
+    w("12. **Battery retention.** A drop and a hard landing with the strap as drawn; the strap's grip is not modelled.")
+    w("13. **Crash survival.** Drop and crash tests of the arms and pads; flight-load stress here is negligible, so crashes decide arm size.")
+    w("14. **Radio and video range** with the chosen antennas and mounting.")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 10. Decisions for the owner")
+    w("## 12. Decisions for the owner")
     w("")
-    w(f"1. **Build or buy.** Building costs US${_n(bnf['build_minus_bnf_usd'], 2)} more than the GPS BNF on today's listings. Build only if the proving-ground value (section 5) is the point.")
-    w(f"2. **Frame cutting.** The {F['bottom_t_mm']:g} mm bottom plate is not on SendCutSend's standard carbon list; choose a cutter and get a real quote for the DXFs in `generated/`.")
-    w("3. **INAV or ArduPilot.** INAV is the recommended first firmware (simpler multirotor GPS setup on this class); ArduPilot is supported by the same FC.")
-    w("4. **Whoop source files.** The audit's corrections are recomputed here but not written into `examples/drone_lab/` or `examples/arbitrage_lab/build_vs_buy/`, because those are dated records with committed hashes. Decide whether to correct them in place.")
-    w("5. **Taiwan registration threshold.** Confirm on drone.caa.gov.tw that 250 g is the line that applies.")
-    w("6. **Mission document.** `docs/HARDWARE_SPLICER_MISSION_FREEZE.md` is still not on main.")
-    w("7. **Not applied from the audit:** 291-28 (cyberdeck comparator) and the p25/median recomputation in 291-3/291-7, which needs #291's price tool to keep every listing.")
+    w(f"1. **Build or buy.** Building costs US${_n(bnf['build_minus_bnf_usd'], 2)} more than the GPS BNF on today's listings. Build only if the proving-ground value (section 6) is the point.")
+    w("2. **Frame cutter.** The named cutter stocks 3.00 mm carbon but its published rules reject the motor-pad holes and webs (section 9.2) and it does not let you choose fibre orientation (section 8.5). Choose: ask it to accept the pads, drill the M2 holes by template, or use a cutter that cuts FPV frames and can nest the arms on the fibre axes. Get a real quote; the US$49 line is a placeholder.")
+    w(f"3. **Payload versus fasteners.** Itemised fasteners weigh {_n(hw['total_g'], 2)} g against the old 6 g allowance, which leaves a {res['payload_allowance_g']} g payload allowance. Nylon stack screws or a lighter strap would buy some back.")
+    w("4. **INAV or ArduPilot, and Bluejay.** INAV is the recommended first firmware; ArduPilot is supported by the same FC. Whether to flash Bluejay onto the ESC for bidirectional DShot and RPM filtering is a separate decision (section 8.5).")
+    w(f"5. **GNSS stock.** The {gps['identity']} is listed but not confirmed in stock everywhere; check before stage 2.")
+    w("6. **Taiwan.** The sub-250 g exemption holds only for a private individual owner. FPV flight through goggles alone does not satisfy Article 99-14's visual-line-of-sight rule as written; decide how the aircraft will be flown, and check VTX radio approval and the radio-identification threshold.")
+    w("7. **Whoop source files.** The audit's corrections are recomputed here but not written into `examples/drone_lab/` or `examples/arbitrage_lab/build_vs_buy/`, because those are dated records with committed hashes. Decide whether to correct them in place.")
+    w("8. **Mission document.** `docs/HARDWARE_SPLICER_MISSION_FREEZE.md` is still not on main.")
+    w("9. **Not applied from the audit:** 291-28 (cyberdeck comparator) and the p25/median recomputation in 291-3/291-7, which needs #291's price tool to keep every listing.")
     w("")
 
     # ------------------------------------------------------------------
-    w("## 11. Files")
+    w("## 13. Files")
     w("")
     w("| File | Role |")
     w("|---|---|")
-    w("| `inputs/parts.json` | Part identities, masses, prices, source URLs and classes; materials; named assumptions |")
+    w("| `inputs/parts.json` | Part identities, masses, prices, source URLs, classes and access dates; materials; cutter rules; fastener spec; named assumptions |")
     w("| `inputs/motor_f1404_3800kv_thrust.json` | The maker's F1404 3800KV thrust table, transcribed |")
     w("| `inputs/strategies.json` | Strategy comparison inputs and sources |")
-    w("| `hs3g_frame.py` | Parametric CadQuery frame, measurement and export |")
-    w("| `hs3g_design.py` | Mass, CG, clearance, propulsion, arm and mesh checks |")
+    w("| `inputs/review_2026_11_14.json` | The previous version's values that the pre-purchase review corrected |")
+    w("| `hs3g_frame.py` | Parametric CadQuery frame, measurement, cutter-rule check and export |")
+    w("| `hs3g_design.py` | Mass, fasteners, CG, strap, clearance, propulsion, arm and mesh checks |")
     w("| `hs3g_audit.py` | Audit corrections recomputed from the #276/#291 files |")
-    w("| `build_hs3g_package.py` | Regenerates everything; `--check` fails on drift |")
+    w("| `build_hs3g_package.py` | Regenerates everything; `--check` regenerates in a temp dir and fails on drift |")
     w("| `hs3g_readme.py` | Renders this README from `generated/results.json` |")
     w("| `generated/` | `results.json`, STEP, STL and DXF for both plates |")
-    w("| `tests/test_drone_proving_ground.py` | Regenerates into a temp dir and checks CAD, numbers and README |")
+    w("| `tests/test_drone_proving_ground.py` | Regenerates into a temp dir and checks CAD, numbers, README and `--check` |")
     w("")
     return "\n".join(L)
