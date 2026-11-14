@@ -8,6 +8,7 @@ from hardware_splicer.function_print_geometry import canonical
 from hardware_splicer.functional_hinge_cable_anchors import (
     validate,make_anchors,machine_function_intent,score_route,route_pose,
     cable_against_mounts,printed_mount_clearance,audit,
+    cable_saddle_clamp_check,min_wall_around_hole,screw_hole_wall_check,
 )
 
 ROOT=Path(__file__).resolve().parents[1]/"examples/functional_hinge_cable_anchors"
@@ -140,4 +141,74 @@ def test_fake_success_not_accepted_even_with_real_printed_solids(tmp_path):
     data["build_gate"]="READY_TO_BUILD"
     p.write_text(json.dumps(data))
     with pytest.raises(ValueError,match="invalid promotion"):
+        audit(src,hinge,ret,where)
+
+
+def test_saddle_channel_is_a_guide_not_a_clamp_by_computed_interference():
+    src,hinge,ret=sources()
+    check=cable_saddle_clamp_check(src)
+    # 1.6 mm closed channel around a 1.1 mm wire: 0.25 mm slack per side.
+    assert check["channel_diameter_mm"]==1.6
+    assert check["wire_diameter_mm"]==1.1
+    assert check["clamp_interference_mm"]==-0.5
+    assert check["radial_slack_per_side_mm"]==0.25
+    assert check["min_clamp_interference_mm"]==0.1
+    assert check["clamps_wire"] is False
+    assert check["saddle_function"]=="guide_only"
+    assert check["strain_relief_satisfied"] is False
+    assert any("does not clamp" in b for b in check["blockers"])
+    # Even a channel that squeezes the wire is not proof of strain relief.
+    tight=copy.deepcopy(src);tight["mount"]["channel_nominal_radius_mm"]=.5
+    squeeze=cable_saddle_clamp_check(tight)
+    assert squeeze["clamps_wire"] is True
+    assert squeeze["saddle_function"]=="clamp_geometry_only"
+    assert squeeze["strain_relief_satisfied"] is False
+    assert any("pull-out" in b for b in squeeze["blockers"])
+
+def test_min_wall_helper_measures_real_solid_material():
+    cq=pytest.importorskip("cadquery")
+    block=cq.Workplane("XY").box(10,10,5,centered=(False,False,False))
+    block=block.cut(cq.Workplane("XY").center(8,5).circle(1.1).extrude(5))
+    solid=block.val()
+    # Hole edge at x=9.1, block face at x=10: 0.9 mm wall.
+    assert min_wall_around_hole(solid,8,5,1.1,(2.5,))==pytest.approx(.9,abs=.005)
+
+def test_screw_holes_leave_a_wall_thinner_than_the_fdm_minimum():
+    pytest.importorskip("cadquery")
+    src,hinge,ret=sources()
+    check=screw_hole_wall_check(src,make_anchors(src,hinge))
+    assert check["min_wall_required_mm"]==1.2
+    assert "three 0.4 mm perimeters" in check["assumption"]
+    for side in ("lower","upper"):
+        base=check["parts"][side+"_leaf_integral_saddle"]
+        assert base["min_wall_mm"]==pytest.approx(.9,abs=.01)
+        assert base["passes"] is False
+        cap=check["parts"][side+"_removable_saddle_cap"]
+        assert cap["min_wall_mm"]>=1.2 and cap["passes"] is True
+    assert check["all_parts_meet_minimum_wall"] is False
+    assert any("0.9" in b for b in check["blockers"])
+
+def test_committed_report_labels_saddle_as_guide_with_blockers():
+    report=experiment()
+    assert report["build_gate"]=="BLOCKED_BY_CABLE_AND_CONNECTOR_MISMATCH"
+    check=report["cable_saddle_clamp_check"]
+    assert check["clamps_wire"] is False
+    assert report["saddle_function"]=="guide_only"
+    assert report["strain_relief_satisfied"] is False
+    assert report["screw_hole_wall_check"]["all_parts_meet_minimum_wall"] is False
+    assert any("does not clamp" in b for b in report["saddle_blockers"])
+    assert any("wall" in b for b in report["saddle_blockers"])
+    assert not any("anchored endpoints" in f for f in report["engineering_findings"])
+
+def test_forged_clamp_claim_is_rejected_by_independent_audit(tmp_path):
+    pytest.importorskip("cadquery");pytest.importorskip("trimesh")
+    src,hinge,ret=sources()
+    where=tmp_path/"forged";shutil.copytree(OUT,where)
+    p=where/"ANCHORED_CABLE_TRIAL.json"
+    data=json.loads(p.read_text())
+    data["cable_saddle_clamp_check"]["clamps_wire"]=True
+    data["saddle_function"]="clamp"
+    data["strain_relief_satisfied"]=True
+    p.write_text(json.dumps(data))
+    with pytest.raises(ValueError,match="saddle clamp"):
         audit(src,hinge,ret,where)

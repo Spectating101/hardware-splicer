@@ -14,6 +14,94 @@ from .functional_hinge_retention import checked_sources
 SCHEMA="hs.cyberdeck_anchored_wire_pilot.v1"
 OUTPUT="hs.cyberdeck_cable_anchor_mechanical_trial.v1"
 
+# Engineering assumptions, stated so they can be challenged.
+MIN_CLAMP_INTERFERENCE_MM=0.1  # closed channel must be this much smaller than the wire to squeeze it
+FDM_PERIMETERS=3
+FDM_NOZZLE_MM=0.4
+FDM_MIN_WALL_MM=FDM_PERIMETERS*FDM_NOZZLE_MM   # 1.2 mm
+FDM_WALL_ASSUMPTION=("Minimum printable wall is three 0.4 mm perimeters (1.2 mm) for a "
+                     "0.4 mm nozzle; this is an assumption, not a measured print result.")
+
+def cable_saddle_clamp_check(s:Mapping[str,Any])->dict[str,Any]:
+    """Computed clamping interference of the closed saddle channel on the wire.
+
+    The channel is a half-round groove in the base and in the cap, so the
+    closed channel diameter is twice the nominal groove radius. A saddle
+    clamps only if that diameter is smaller than the wire by at least
+    MIN_CLAMP_INTERFERENCE_MM. Otherwise it is only a guide.
+    """
+    channel=2*s["mount"]["channel_nominal_radius_mm"]
+    wire=s["wire"]["diameter_mm"]
+    interference=round(wire-channel,6)
+    clamps=interference+1e-9>=MIN_CLAMP_INTERFERENCE_MM
+    blockers=[]
+    if not clamps:
+        blockers.append(
+            "saddle channel %.3f mm does not clamp the %.3f mm wire: interference %.3f mm "
+            "(radial slack %.3f mm per side), required at least +%.2f mm; it is a guide only"
+            %(channel,wire,interference,(channel-wire)/2,MIN_CLAMP_INTERFERENCE_MM))
+    blockers.append("no clamping force or cable pull-out test exists, so strain relief is not demonstrated")
+    return {
+        "channel_diameter_mm":round(channel,6),
+        "wire_diameter_mm":round(wire,6),
+        "clamp_interference_mm":interference,
+        "radial_slack_per_side_mm":round((channel-wire)/2,6),
+        "min_clamp_interference_mm":MIN_CLAMP_INTERFERENCE_MM,
+        "clamps_wire":clamps,
+        "saddle_function":"clamp_geometry_only" if clamps else "guide_only",
+        "strain_relief_satisfied":False,
+        "assumption":"Closed channel assumed to seal exactly at the base/cap split plane; "
+                     "clamping needs interference of at least %.2f mm and a measured pull-out force."%MIN_CLAMP_INTERFERENCE_MM,
+        "blockers":blockers,
+    }
+
+def min_wall_around_hole(solid:Any,cx:float,cy:float,radius:float,
+                         zs:Any,*,max_probe:float=5.0)->float:
+    """Thinnest material between a vertical hole and the first void or outer face.
+
+    Probes the real solid outward from the hole edge in 16 directions at each
+    height in ``zs``; returns the smallest material thickness found, capped at
+    ``max_probe``.
+    """
+    import cadquery as cq
+    best=max_probe
+    for z in zs:
+        for k in range(16):
+            a=2*math.pi*k/16;dx,dy=math.cos(a),math.sin(a)
+            def inside(d:float)->bool:
+                return solid.isInside(cq.Vector(cx+dx*(radius+d),cy+dy*(radius+d),z))
+            if not inside(0.005):
+                continue  # not material right next to the hole: not a wall direction
+            d=0.005;step=0.05
+            while d<best and inside(d):d+=step
+            if d>=best:continue
+            low,high=d-step,d
+            for _ in range(14):
+                mid=(low+high)/2
+                if inside(mid):low=mid
+                else:high=mid
+            best=min(best,high)
+    return round(best,3)
+
+def screw_hole_wall_check(s:Mapping[str,Any],parts:Mapping[str,Any])->dict[str,Any]:
+    """Minimum wall next to each screw clearance hole, from the real solids."""
+    m=s["mount"];r=m["screw_nominal_clearance_diameter_mm"]/2
+    out={};blockers=[]
+    for name,body in parts.items():
+        side="lower" if name.startswith("lower") else "upper"
+        yc=m[side+"_y_mm"]
+        zs=(m["wire_center_z_mm"]-4,m["wire_center_z_mm"]-2.5,m["wire_center_z_mm"]-.5) if "leaf" in name \
+            else (m["cap_bottom_z_mm"]+.5,m["cap_bottom_z_mm"]+1.4,m["cap_top_z_mm"]-.5)
+        wall=min(min_wall_around_hole(body,x,yc,r,zs) for x in m["screw_x_mm"])
+        ok=wall+1e-9>=FDM_MIN_WALL_MM
+        out[name]={"min_wall_mm":wall,"passes":ok}
+        if not ok:
+            blockers.append("%s: wall beside screw hole is %.3f mm, below the %.1f mm FDM minimum (%d x %.1f mm perimeters)"
+                            %(name,wall,FDM_MIN_WALL_MM,FDM_PERIMETERS,FDM_NOZZLE_MM))
+    return {"min_wall_required_mm":round(FDM_MIN_WALL_MM,6),"assumption":FDM_WALL_ASSUMPTION,
+            "parts":out,"all_parts_meet_minimum_wall":all(v["passes"] for v in out.values()),
+            "blockers":blockers}
+
 def validate(s:Mapping[str,Any],hinge:Mapping[str,Any],retainer:Mapping[str,Any])->dict[str,Any]:
     p=verify_parent(hinge);checked_sources(retainer,p)
     if s.get("schema")!=SCHEMA or s.get("project_id")!=p["project_id"] or s.get("reference_selected_hinge")!="balanced_60":
@@ -72,11 +160,11 @@ def make_anchors(s:Mapping[str,Any],parent:Mapping[str,Any])->dict[str,Any]:
         # Actual half-round opposed groove, 0.8mm nominal radius
         # around a hypothetical 0.55mm-radius wire. Fastener bores
         # remain clearance holes until commercial M2 bolts are sourced.
-        groove=(cq.Workplane("XZ").center(81.6,5).circle(.8)
+        groove=(cq.Workplane("XZ").center(81.6,5).circle(m["channel_nominal_radius_mm"])
                 .extrude(12).translate((0,yc+6,0)))
         base=base.cut(groove);cap=cap.cut(groove)
         for x in m["screw_x_mm"]:
-            drill=cq.Workplane("XY").center(x,yc).circle(1.1).extrude(9)
+            drill=cq.Workplane("XY").center(x,yc).circle(m["screw_nominal_clearance_diameter_mm"]/2).extrude(9)
             base=base.cut(drill);cap=cap.cut(drill)
         assembled=cq.Workplane("XY").newObject([leaf]).union(base).clean().val()
         cap=cap.clean().val()
@@ -292,10 +380,10 @@ def machine_function_intent(s:Mapping[str,Any],parent:Mapping[str,Any],
     intent["subsystems"].append({
         "id":"S_WIRE_CAPS","name":"Printed wire saddle caps",
         "domain":"mechanical",
-        "purpose":"Nominal cable passage interface with M2 clearance holes; clamping force unproven",
+        "purpose":"Nominal cable guide channel with M2 clearance holes; channel is larger than the wire so it does not clamp",
         "requirements":["R_GUIDE_MATE","R_WIRE_ANCHOR_SWEEP","R_DISPLAY_CABLE"]})
     intent["interfaces"].append({
-        "id":"I_WIRE_CLAMP","name":"Serviceable cable clamp/guide beside printed hinge",
+        "id":"I_WIRE_CLAMP","name":"Printed cable guide saddle beside hinge (computed not to clamp the wire)",
         "from":"S_WIRE_CAPS","to":"S_LOWER","medium":"mechanical",
         "requirements":["R_GUIDE_MATE","R_WIRE_ANCHOR_SWEEP"],
         "unresolved":["no actual clamping screws or nuts sourced",
@@ -336,6 +424,8 @@ def execute(s:Mapping[str,Any],parent:Mapping[str,Any],retainer:Mapping[str,Any]
                      "actual_M2_hardware_installed":False,
                      "qualified_for_3D_printing":False}
     fit=printed_mount_clearance(source,parts,step=15)
+    clamp=cable_saddle_clamp_check(source)
+    walls=screw_hole_wall_check(source,parts)
     routes=[score_route(source,route) for route in source["routes"]]
     # One representative 44mm service loop gets full 3D tube-to-mount
     # OCP checks at three poses; every alternative also receives the
@@ -362,11 +452,16 @@ def execute(s:Mapping[str,Any],parent:Mapping[str,Any],retainer:Mapping[str,Any]
         "selected_physically_promotable_design":None,
         "cable_scenarios_satisfying_all_nominal_geometry_screens":successful,
         "build_gate":"BLOCKED_BY_CABLE_AND_CONNECTOR_MISMATCH",
+        "cable_saddle_clamp_check":clamp,
+        "screw_hole_wall_check":walls,
+        "saddle_function":clamp["saddle_function"],
+        "strain_relief_satisfied":False,
+        "saddle_blockers":clamp["blockers"]+walls["blockers"],
         "real_display_data_compatibility":False,
         "engineering_findings":[
            "Four separate printed candidate bodies exist as native STEP/STL, but no M2 fasteners or physical compression tests exist.",
            "Nominal tube cable path collides with removable saddle caps at sampled fold angles.",
-           "Fixed nominal round-wire route with anchored endpoints cannot satisfy both 2mm modeled bend radius and 20mm folded envelope in this candidate family.",
+           "Fixed nominal round-wire route with endpoints held at the saddle exits (modelled, not physically anchored) cannot satisfy both 2mm modeled bend radius and 20mm folded envelope in this candidate family.",
            "Manufacturer general guidance for flexible cables may require a larger dynamic radius, e.g. a 5× outer diameter scenario; NOT a real specification for this unsourced round wire.",
            "The real Molex display LVDS FPC connector family is flat, multi-conductor and physically incompatible with a 1.6mm nominal round cable saddle.",
            "No electrical connector footprints, pin mappings, real display electronics or hinge-flex cycle measurement are available.",
@@ -438,11 +533,21 @@ def audit(s:Mapping[str,Any],parent:Mapping[str,Any],retainer:Mapping[str,Any],o
                 raise ValueError("original 3D cable tube-to-mount penetration result was falsified")
     if not any(x["per_angle"][0]["sampled_printed_interference_mm3"]>0 for x in actual):
         raise ValueError("reported source collision is not reproducible")
+    clamp=cable_saddle_clamp_check(source)
+    if (report.get("cable_saddle_clamp_check")!=clamp
+        or report.get("saddle_function")!=clamp["saddle_function"]
+        or report.get("strain_relief_satisfied") is not False):
+        raise ValueError("recorded saddle clamp verdict does not match channel and wire dimensions")
+    if report.get("screw_hole_wall_check")!=screw_hole_wall_check(source,originals):
+        raise ValueError("recorded screw-hole wall check does not match the real solids")
     if report["selected_physically_promotable_design"] is not None or report["build_gate"]!="BLOCKED_BY_CABLE_AND_CONNECTOR_MISMATCH" or any(report["authority"].values()):
         raise ValueError("invalid promotion of incomplete cable geometry")
     return {"schema":"hs.anchored_cable_source_audit.v1",
             "reimported_printable_CAD_parts":len(originals),
             "actual_wire_screens_recomputed":len(source["routes"]),
             "native_source_integrity_pass":True,
+            "saddle_function":clamp["saddle_function"],
+            "strain_relief_satisfied":False,
+            "screw_hole_walls_meet_fdm_minimum":report["screw_hole_wall_check"]["all_parts_meet_minimum_wall"],
             "physical_fabrication_authorized":False,
             "real_display_connection_proven":False}

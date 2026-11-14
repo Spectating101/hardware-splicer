@@ -170,7 +170,7 @@
       "from": "S_WIRE_CAPS",
       "id": "I_WIRE_CLAMP",
       "medium": "mechanical",
-      "name": "Serviceable cable clamp/guide beside printed hinge",
+      "name": "Printed cable guide saddle beside hinge (computed not to clamp the wire)",
       "requirements": [
         "R_GUIDE_MATE",
         "R_WIRE_ANCHOR_SWEEP"
@@ -429,7 +429,7 @@
       "domain": "mechanical",
       "id": "S_WIRE_CAPS",
       "name": "Printed wire saddle caps",
-      "purpose": "Nominal cable passage interface with M2 clearance holes; clamping force unproven",
+      "purpose": "Nominal cable guide channel with M2 clearance holes; channel is larger than the wire so it does not clamp",
       "requirements": [
         "R_GUIDE_MATE",
         "R_WIRE_ANCHOR_SWEEP",

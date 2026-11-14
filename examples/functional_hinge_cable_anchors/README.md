@@ -1,4 +1,4 @@
-# HS cable anchor and display-compatibility failure pilot
+# HS cable guide-saddle and display-compatibility failure pilot
 
 **Verdict: physical cable harness BLOCKED.** Actual CAD parts were generated
 and independently sliced, but the nominal cable intersects the printed
@@ -18,9 +18,25 @@ Four actual STEP and STL parts are in generated/. All have verified
 single-solid valid STEP and watertight STL roundtrip. No actual M2
 fasteners, nuts, sourced wire or clamping force tests are available.
 
+**These saddles are cable guides, not clamps or strain relief.** The
+closed channel is 1.6 mm in diameter around a 1.1 mm wire: 0.25 mm
+radial slack per side and -0.50 mm interference, where a clamp needs
+at least +0.10 mm (an assumed minimum). The report computes this in
+`cable_saddle_clamp_check` (`clamps_wire: false`, `saddle_function:
+guide_only`, `strain_relief_satisfied: false`). Even a channel tight
+enough to squeeze the wire would not demonstrate strain relief
+without a measured pull-out force.
+
+**Screw-hole walls are too thin for FDM as modeled.** The integral
+saddle bases leave a 0.9 mm wall between each outer screw hole and the
+base face (x 87.1 to 88 mm), measured on the real solids by
+`screw_hole_wall_check`. The assumed minimum is 1.2 mm (three 0.4 mm
+perimeters). The two caps measure 1.5 mm and pass. Dimensions were
+not changed; both findings are listed in `saddle_blockers`.
+
 Saddle centers are local (81.6,10,5) and (81.6,-20,5) mm.
 The round-wire channel is radius 0.8mm around an assumed cable
-of radius 0.55mm. Existing HS function-intent/MachineProject
+of radius 0.55mm (a loose guide, see above). Existing HS function-intent/MachineProject
 traceability is expanded to 12 requirements and seven functions.
 
 The newly added opposite saddle protrusions do not intersect one
@@ -133,4 +149,5 @@ fixed exit tangents, measured cable dimensions and actual rated
 flex constraints. Reoptimize the hinge architecture and closed
 envelope without reducing source acceptance limits. Then use
 physical hinge coupons, sourced fasteners and repeated folding
-tests before declaring strain relief functional.
+tests before declaring strain relief functional. Strain relief is
+NOT achieved by the current geometry.

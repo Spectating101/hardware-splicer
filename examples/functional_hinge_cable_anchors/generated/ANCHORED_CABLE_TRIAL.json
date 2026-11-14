@@ -9,6 +9,21 @@
     "sourced_M2_fasteners_installed": false
   },
   "build_gate": "BLOCKED_BY_CABLE_AND_CONNECTOR_MISMATCH",
+  "cable_saddle_clamp_check": {
+    "assumption": "Closed channel assumed to seal exactly at the base/cap split plane; clamping needs interference of at least 0.10 mm and a measured pull-out force.",
+    "blockers": [
+      "saddle channel 1.600 mm does not clamp the 1.100 mm wire: interference -0.500 mm (radial slack 0.250 mm per side), required at least +0.10 mm; it is a guide only",
+      "no clamping force or cable pull-out test exists, so strain relief is not demonstrated"
+    ],
+    "channel_diameter_mm": 1.6,
+    "clamp_interference_mm": -0.5,
+    "clamps_wire": false,
+    "min_clamp_interference_mm": 0.1,
+    "radial_slack_per_side_mm": 0.25,
+    "saddle_function": "guide_only",
+    "strain_relief_satisfied": false,
+    "wire_diameter_mm": 1.1
+  },
   "cable_scenarios_satisfying_all_nominal_geometry_screens": [],
   "cross_leaf_full_hinge_motion": {
     "added_mounts_not_colliding_with_each_other": true,
@@ -89,7 +104,7 @@
   "engineering_findings": [
     "Four separate printed candidate bodies exist as native STEP/STL, but no M2 fasteners or physical compression tests exist.",
     "Nominal tube cable path collides with removable saddle caps at sampled fold angles.",
-    "Fixed nominal round-wire route with anchored endpoints cannot satisfy both 2mm modeled bend radius and 20mm folded envelope in this candidate family.",
+    "Fixed nominal round-wire route with endpoints held at the saddle exits (modelled, not physically anchored) cannot satisfy both 2mm modeled bend radius and 20mm folded envelope in this candidate family.",
     "Manufacturer general guidance for flexible cables may require a larger dynamic radius, e.g. a 5\u00d7 outer diameter scenario; NOT a real specification for this unsourced round wire.",
     "The real Molex display LVDS FPC connector family is flat, multi-conductor and physically incompatible with a 1.6mm nominal round cable saddle.",
     "No electrical connector footprints, pin mappings, real display electronics or hinge-flex cycle measurement are available."
@@ -214,7 +229,7 @@
     "project_id": "dual_panel_cyberdeck_hinge_reference_v1",
     "requirements_count": 12,
     "schema_version": "hardware_splicer.function_intent_gate.v1",
-    "source_spec_sha256": "840a937c353f08494b257467bf54188e3a36c716c975cfba66e434eed588c542",
+    "source_spec_sha256": "e1ecf37e6d92403ee3f002b63fe09d670e4c31e48e14888f4550307ef3091a93",
     "status": "FUNCTIONAL_CONCEPT_ONLY",
     "subsystem_disciplines": {
       "S_CABLE": "mechanical",
@@ -225,7 +240,7 @@
       "S_WIRE_CAPS": "mechanical"
     }
   },
-  "native_function_intent_sha256": "840a937c353f08494b257467bf54188e3a36c716c975cfba66e434eed588c542",
+  "native_function_intent_sha256": "e1ecf37e6d92403ee3f002b63fe09d670e4c31e48e14888f4550307ef3091a93",
   "native_printed_mount_parts": {
     "lower_leaf_integral_saddle": {
       "actual_M2_hardware_installed": false,
@@ -261,7 +276,41 @@
     }
   },
   "real_display_data_compatibility": false,
+  "saddle_blockers": [
+    "saddle channel 1.600 mm does not clamp the 1.100 mm wire: interference -0.500 mm (radial slack 0.250 mm per side), required at least +0.10 mm; it is a guide only",
+    "no clamping force or cable pull-out test exists, so strain relief is not demonstrated",
+    "lower_leaf_integral_saddle: wall beside screw hole is 0.900 mm, below the 1.2 mm FDM minimum (3 x 0.4 mm perimeters)",
+    "upper_leaf_integral_saddle: wall beside screw hole is 0.900 mm, below the 1.2 mm FDM minimum (3 x 0.4 mm perimeters)"
+  ],
+  "saddle_function": "guide_only",
   "schema": "hs.cyberdeck_cable_anchor_mechanical_trial.v1",
+  "screw_hole_wall_check": {
+    "all_parts_meet_minimum_wall": false,
+    "assumption": "Minimum printable wall is three 0.4 mm perimeters (1.2 mm) for a 0.4 mm nozzle; this is an assumption, not a measured print result.",
+    "blockers": [
+      "lower_leaf_integral_saddle: wall beside screw hole is 0.900 mm, below the 1.2 mm FDM minimum (3 x 0.4 mm perimeters)",
+      "upper_leaf_integral_saddle: wall beside screw hole is 0.900 mm, below the 1.2 mm FDM minimum (3 x 0.4 mm perimeters)"
+    ],
+    "min_wall_required_mm": 1.2,
+    "parts": {
+      "lower_leaf_integral_saddle": {
+        "min_wall_mm": 0.9,
+        "passes": false
+      },
+      "lower_removable_saddle_cap": {
+        "min_wall_mm": 1.5,
+        "passes": true
+      },
+      "upper_leaf_integral_saddle": {
+        "min_wall_mm": 0.9,
+        "passes": false
+      },
+      "upper_removable_saddle_cap": {
+        "min_wall_mm": 1.5,
+        "passes": true
+      }
+    }
+  },
   "selected_physically_promotable_design": null,
   "source_bounded_wire_routes": [
     {
@@ -1535,5 +1584,6 @@
   ],
   "source_hinge_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
   "source_retention_sha256": "8bf1ac22d34b6d38e74be6a6ac6794f02eb2193593f587c0ee7677101865aeae",
-  "source_spec_sha256": "67fcd929fe2decdf97fd58bf1a26451e05b5d9b7193ece1428af69c57fca59ca"
+  "source_spec_sha256": "67fcd929fe2decdf97fd58bf1a26451e05b5d9b7193ece1428af69c57fca59ca",
+  "strain_relief_satisfied": false
 }
