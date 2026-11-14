@@ -36,6 +36,7 @@ NEGATED = re.compile(
     r"not\s+safe\s+to|refrain\s+from|not\s+recommended\s+to)\b"
 )
 # Words that may sit between a negator and the hazardous verb it governs.
+MAX_NEGATION_REACH = 200   # a negator further away than this governs nothing
 _FILLERS = frozenset({
     "attempt", "attempting", "to", "ever", "try", "trying", "even", "again",
 })
@@ -59,9 +60,11 @@ _LINE_SEPARATORS = dict.fromkeys(
 # plain symbols plus mu and omega IN UNIT POSITION (see _unit_symbol_positions).
 _ALLOWED_NON_ASCII = frozenset("\u00b0\u00b1\u00d7")  # degree, plus-minus, multiplication
 _MICRO_UNIT = re.compile(r"\d\s*(\u03bc)(?=[AVWFHsgm](?!\w))")
-_OHM_UNIT = re.compile(r"\d\s*[kM]?\s*(\u03a9)(?!\w)")
+_OHM_UNIT = re.compile(r"\d\s*(?:[kM]\s*)?(\u03a9)(?!\w)")
 REASON_CONTROL = "disallowed_control_or_format_character"
 REASON_LETTER = "disallowed_non_ascii_letter"
+REASON_TOO_LONG = "text_field_too_long"
+MAX_FIELD_CHARS = 20_000   # a longer single field is rejected, never scanned
 
 
 # A FIXED table of ordinary typographic punctuation, folded to ASCII before the
@@ -93,7 +96,26 @@ def fold(text: str) -> str:
     text = unicodedata.normalize("NFKC", _line_folded(text))
     text = text.replace("\u2019", "'").replace("\u2018", "'").replace("`", "'")
     text = text.replace("\u2212", "-").replace("\u2010", "-").replace("\u2011", "-")
-    return text
+    return collapse_gaps(text)
+
+
+# A run that contains a dash or an ellipsis (with any whitespace, dashes and
+# ellipses around it) becomes ONE canonical gap token, " - ". Matchers therefore
+# only ever meet a single space or " - " between words, never "--", "- - ", "...".
+# The pattern starts at the dash/ellipsis, so it is linear on any input.
+_GAP_RUN = re.compile(r"(?:-|\.\.\.)(?:\s|-|\.\.\.)*")
+_SPACES = re.compile(r"\s+")   # a whitespace run is one space, or one newline if it held one
+
+
+def collapse_gaps(text: str) -> str:
+    out: list[str] = []
+    last = 0
+    for m in _GAP_RUN.finditer(text):
+        out.append(text[last:m.start()].rstrip(" \t"))
+        out.append(" - ")
+        last = m.end()
+    out.append(text[last:])
+    return _SPACES.sub(lambda m: "\n" if "\n" in m.group() else " ", "".join(out))
 
 
 def normalise(text: str) -> str:
@@ -112,6 +134,8 @@ def disallowed_text_reasons(text: str) -> list[tuple[str, str]]:
     before AND after NFKC. Every non-ASCII character left after NFKC is then
     rejected unless it is an allowed symbol or a unit-position mu/omega.
     """
+    if len(text) > MAX_FIELD_CHARS:
+        return [(REASON_TOO_LONG, f"{len(text)} characters")]
     folded = _line_folded(text)
     nfkc = unicodedata.normalize("NFKC", folded)
     seen: dict[str, list[str]] = {}
@@ -175,13 +199,15 @@ def iter_plan_text(
     yield from walk("", plan, False)
 
 
-def _negation_covers(text: str, start: int) -> bool:
+def _negation_covers(text: str, start: int, negators: list[re.Match[str]] | None = None) -> bool:
     """True only if a negator directly governs the hazardous verb at start."""
-    negators = list(NEGATED.finditer(text, 0, start))
-    if not negators:
+    if negators is None:
+        negators = list(NEGATED.finditer(text))
+    before = [m for m in negators if m.end() <= start]
+    if not before:
         return False
-    last = negators[-1]
-    if "\n" in text[last.end():start]:
+    last = before[-1]
+    if start - last.end() > MAX_NEGATION_REACH or "\n" in text[last.end():start]:
         return False
     for token in _WORD.findall(text[last.end():start]):
         low = token.lower()
@@ -190,7 +216,7 @@ def _negation_covers(text: str, start: int) -> bool:
         return False
     # A double negative ("do not refrain from", "do not not") is an instruction:
     # two negators with nothing but filler between them.
-    if len(negators) > 1 and not _has_content(text[negators[-2].end():last.start()]):
+    if len(before) > 1 and not _has_content(text[before[-2].end():last.start()]):
         return False
     return True
 
@@ -223,10 +249,13 @@ def unsafe_action_findings(
                 "matched_action_class": chars[:100],
                 "reason": reason,
             })
+        if len(raw) > MAX_FIELD_CHARS:
+            continue
         text = normalise(raw)
+        negators = list(NEGATED.finditer(text))
         seen: set[int] = set()
         for m in _all_matches(matcher, text):
-            if m.start() in seen or _negation_covers(text, m.start()):
+            if m.start() in seen or _negation_covers(text, m.start(), negators):
                 continue
             seen.add(m.start())
             findings.append({

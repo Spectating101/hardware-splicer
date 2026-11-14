@@ -19,13 +19,13 @@ import re
 from typing import Any, Collection, Mapping
 
 from .restoration_safety_semantics import (
-    disallowed_text_reasons, fold, iter_plan_text,
+    REASON_TOO_LONG, disallowed_text_reasons, fold, iter_plan_text,
 )
 
 _DES = r"[A-Z]{1,3}\d{1,4}"
 # Separators accepted between a pin word / designator and its number: space,
 # colon, #, hyphen, dot, slash, underscore, and the folded ellipsis.
-_JOIN = r"(?:\.\.\.|[:#\-./_])"
+_JOIN = r"[:#\-./_]"
 _PIN = r"(?:pins?|pads?|terminals?|contacts?|leads?|legs?|balls?|poles?)"
 _NUM = r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|[a-z]{1,2}\d{1,2})"
 _ORD = r"(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|last|\d+(?:st|nd|rd|th))"
@@ -88,8 +88,11 @@ def unsafe_pin_actions(
         return []
     issues=[]
     for field,raw in iter_plan_text(plan, evidence_ids):
-        for reason,chars in disallowed_text_reasons(raw):
+        reasons=disallowed_text_reasons(raw)
+        for reason,chars in reasons:
             issues.append({"field":field,"pin_reference":chars,"reason":reason})
+        if any(reason==REASON_TOO_LONG for reason,_ in reasons):
+            continue
         text=fold(raw)
         for start,end in _spans(text,evidence_ids):
             issues.append({

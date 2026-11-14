@@ -319,7 +319,7 @@ def test_fold_table_adds_or_keeps_a_word_boundary():
     from hardware_splicer.restoration_safety_semantics import fold
     assert fold("a\u2014b") == "a - b"
     assert fold("\u2018x\u2019") == "'x'"
-    assert fold("x\u2026y") == "x ... y"
+    assert fold("x\u2026y") == "x - y"   # CHANGED: runs of dashes/ellipses collapse to one gap token
     assert fold("a\u2022b") == "a - b"
     assert fold("a\u00b7b") == "a - b"
     assert fold("a\u00a0b\u202fc\u2009d\u2007e") == "a b c d e"

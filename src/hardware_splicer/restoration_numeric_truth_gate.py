@@ -21,7 +21,9 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping
 
-from .restoration_safety_semantics import disallowed_text_reasons, fold, iter_plan_text
+from .restoration_safety_semantics import (
+    REASON_TOO_LONG, disallowed_text_reasons, fold, iter_plan_text,
+)
 
 _NUM = r"[-+]?(?:\d+(?:[.,]\d+)?|\.\d+)"
 _PFX = r"(?:kilo|mega|giga|milli|micro|nano|[kmgµμunp])"
@@ -29,7 +31,7 @@ _LONG = r"(?:volts?|amps?|amperes?|watts?|(?:kil|meg|gig)?ohms?|hertz)"
 _SHORT = r"(?:v|a|w|hz|ω)"
 _UNIT = (
     r"(?:[°º]\s*[cf]|degrees?\s*(?:celsius|fahrenheit|[cf])|celsius|fahrenheit"
-    rf"|(?:{_PFX}(?:\s|-|\.\.\.)*)?{_LONG}|{_PFX}?{_SHORT}|c)(?!\w)"
+    rf"|(?:{_PFX}(?:\s-)?\s?)?{_LONG}|{_PFX}?{_SHORT}|c)(?!\w)"
 )
 _QTY = rf"(?<![\w.]){_NUM}\s*{_UNIT}"
 _QTY_NO_UNIT = rf"(?<![\w.]){_NUM}"
@@ -45,7 +47,7 @@ _COMP_WORD = (
     r"approximately|approx\.?|about|around|roughly|circa|nearly|almost|"
     r"close\s+to|near|between|from)\b"
 )
-_FILL = r"(?:[^\d.;:!?\n]|\.\.\.){0,20}?"
+_FILL = r"[^\d.;:!?\n]{0,20}?"
 _TRAIL = (
     r"(?:\s*(?:or|and|and/or|/)?\s*(?:more|less|greater|lower|higher|fewer|"
     r"above|below|over|under|up|down|upwards?|downwards?|bigger|smaller|"
@@ -53,27 +55,28 @@ _TRAIL = (
     r"or\s+so)\b|\+)"
 )
 _CUT = (
-    r"(?:cut-?\s?off|threshold|trip\s*(?:point|level)|pass\s*/?\s*fail|"
+    r"(?:cut\s?off|threshold|trip\s*(?:point|level)|pass\s*/?\s*fail|"
     r"go\s*/?\s*no\s*/?\s*go|limit|set\s*point|healthy\s+(?:range|value|reading))"
 )
 _NEAR = r"[^;:!?\n\d]{0,30}?"
 
-# The folded ellipsis (" ... ") and a spaced dash count as whitespace between the
-# parts of a phrase ("greater ... than", "4.5 ... V"), so folding typography can
-# never split a comparator, number or unit into pieces the patterns miss.
-_GAP = r"(?:\s|-|\.\.\.)"
+# fold() collapses every run of whitespace, dashes and ellipses into a single
+# space or the single token " - ", so a gap between two parts of a phrase is
+# exactly one of those. The two forms are disjoint after the first character
+# (an optional " -" then one whitespace), so matching stays linear.
+_GAP = r"(?:\s-)?\s"
 
 
 def _p(source: str) -> re.Pattern[str]:
     for plain, gap in ((r"\s*", "*"), (r"\s+", "+"), (r"\s?", "?")):
-        source = source.replace(plain, _GAP + gap)
+        source = source.replace(plain, f"(?:{_GAP}){gap}")
     return re.compile(source, re.I)
 
 
 PATTERNS = [
     _p(rf"(?:{_COMP_SYMBOL}|{_COMP_WORD}){_FILL}{_QTY}"),
     _p(rf"{_QTY}{_TRAIL}"),
-    _p(rf"{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:-|–|—|\bto\b|\bthrough\b)\s*{_QTY}"),
+    _p(rf"{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:-|\bto\b|\bthrough\b)\s*{_QTY}"),
     _p(rf"\bbetween\s+{_QTY_NO_UNIT}\s*(?:{_UNIT})?\s*(?:and|&)\s*{_QTY}"),
     _p(rf"\b{_CUT}\b{_NEAR}{_QTY}"),
     _p(rf"{_QTY}{_NEAR}\b{_CUT}\b"),
@@ -117,12 +120,15 @@ def unsourced_thresholds(
         return []
     findings = []
     for source, raw in iter_plan_text(plan):
-        for reason, chars in disallowed_text_reasons(raw):
+        reasons = disallowed_text_reasons(raw)
+        for reason, chars in reasons:
             findings.append({
                 "field": source,
                 "limit": chars,
                 "explanation": reason,
             })
+        if any(reason == REASON_TOO_LONG for reason, _ in reasons):
+            continue
         text = fold(raw)
         for start, end in _spans(text):
             findings.append({
