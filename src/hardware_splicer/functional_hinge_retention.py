@@ -4,7 +4,9 @@ Real CadQuery/OCP grooved shaft and open C-ring stop geometries are
 created and inspected. The cable is an angle-dependent 3D *reference*
 centerline that conserves nominal free length, not a connected FPC.
 No hardware datasheets, elastic circlip assembly, anchor fit, strain
-relief, real cable fatigue or physical release is asserted.
+relief, real cable fatigue or physical release is asserted. The ring
+dimensions fail the C-ring grip check (free ID must be below groove
+diameter); the result is reported as FAILED_BLOCKED, not hidden.
 """
 from __future__ import annotations
 
@@ -118,6 +120,81 @@ def make_retainer(req:Mapping[str,Any],parent:Mapping[str,Any])->dict[str,Any]:
         raise ValueError("nominal retainer source solid failed OCP validity")
     return {"shaft":shaft,"ring_left":rings["left"],"ring_right":rings["right"]}
 
+# Engineering assumptions for the ring checks. Stated, not catalogue values:
+# a mechanical engineer should confirm them against the real ring standard.
+RING_MIN_AXIAL_PLAY_MM=0.05      # ring must not be wedged in its groove
+RING_MAX_AXIAL_PLAY_MM=0.30      # more play than this lets the pin rattle
+RING_MIN_OD_EXCESS_OVER_BORE_MM=1.6   # diameter excess (0.8 mm per side)
+STANDARD_PART_NOTE=("Ring dimensions are hand-typed and were not matched to "
+                    "any catalogue or standard retaining ring (e.g. DIN 471 / "
+                    "ISO 464 style); source a real ring and re-run the checks.")
+
+
+def ring_retention_checks(r:Mapping[str,Any],bore_mm:float)->dict[str,Any]:
+    """Geometric conditions under which an external C-ring retains a pin.
+
+    A retaining ring holds because its FREE inside diameter is smaller than
+    the groove diameter (it springs onto the groove), it sits in the groove
+    with a little axial play, and its outside diameter stands proud of the
+    bore of the part it stops. Dimensions only: no spring force is modelled.
+    """
+    free_id=r["retaining_ring_inside_diameter_mm"]
+    groove=r["groove_minor_diameter_mm"]
+    pin=r["shaft_nominal_diameter_mm"]
+    play=r["groove_axial_width_mm"]-r["retaining_ring_axial_thickness_mm"]
+    od_excess=r["retaining_ring_outside_diameter_mm"]-bore_mm
+    checks={
+        "ring_free_inside_diameter_below_groove_diameter":free_id<groove,
+        "ring_thickness_fits_groove_with_axial_play":
+            RING_MIN_AXIAL_PLAY_MM<=play+1e-9 and play<=RING_MAX_AXIAL_PLAY_MM+1e-9,
+        "ring_outside_diameter_exceeds_bore_by_margin":
+            od_excess+1e-9>=RING_MIN_OD_EXCESS_OVER_BORE_MM,
+        "groove_diameter_below_pin_diameter":groove<pin,
+    }
+    return {
+        "checks":checks,
+        "ring_free_inside_diameter_mm":round(free_id,3),
+        "groove_diameter_mm":round(groove,3),
+        "ring_interference_on_groove_mm":round(groove-free_id,3),
+        "ring_axial_play_in_groove_mm":round(play,3),
+        "ring_outside_diameter_excess_over_bore_mm":round(od_excess,3),
+        "assumptions":{
+            "ring_min_axial_play_mm":RING_MIN_AXIAL_PLAY_MM,
+            "ring_max_axial_play_mm":RING_MAX_AXIAL_PLAY_MM,
+            "ring_min_outside_diameter_excess_over_bore_mm":RING_MIN_OD_EXCESS_OVER_BORE_MM,
+            "grip_rule":"free inside diameter strictly less than groove diameter",
+        },
+    }
+
+
+def _retention_verdict(pin_checks:Mapping[str,bool],ring:Mapping[str,Any])->tuple[str,list[str]]:
+    """Status and blocker list derived only from computed check results."""
+    blockers=[]
+    text={
+        "ring_free_inside_diameter_below_groove_diameter":
+            "ring free inside diameter %.3f mm is not below groove diameter %.3f mm: the ring cannot grip the groove"
+            %(ring["ring_free_inside_diameter_mm"],ring["groove_diameter_mm"]),
+        "ring_thickness_fits_groove_with_axial_play":
+            "ring axial play in groove %.3f mm is outside the assumed %.2f to %.2f mm window"
+            %(ring["ring_axial_play_in_groove_mm"],RING_MIN_AXIAL_PLAY_MM,RING_MAX_AXIAL_PLAY_MM),
+        "ring_outside_diameter_exceeds_bore_by_margin":
+            "ring outside diameter exceeds the bore by only %.3f mm (assumed minimum %.2f mm)"
+            %(ring["ring_outside_diameter_excess_over_bore_mm"],RING_MIN_OD_EXCESS_OVER_BORE_MM),
+        "groove_diameter_below_pin_diameter":"groove diameter is not below the pin diameter",
+        "two_ring_grooves_oppose_axial_escape":
+            "the rings are not shown to oppose axial escape (ring grip, overlap with bore or stop gap not satisfied)",
+    }
+    for name,message in text.items():
+        if not pin_checks[name]:
+            blockers.append(message)
+    for name,ok in pin_checks.items():
+        if not ok and name not in text:
+            blockers.append("check failed: "+name)
+    blockers.append("standard part not verified: "+STANDARD_PART_NOTE)
+    failed=any(not v for v in pin_checks.values())
+    return ("FAILED_BLOCKED" if failed else "NOMINAL_CAD_ONLY_STANDARD_PART_UNVERIFIED"),blockers
+
+
 def inspect_pin(req:Mapping[str,Any],parent:Mapping[str,Any],
                 *,angles=range(0,181,5))->dict[str,Any]:
     """Check actual OCP clearance vs moving leaves and nonprinted rings."""
@@ -132,7 +209,8 @@ def inspect_pin(req:Mapping[str,Any],parent:Mapping[str,Any],
                    -r["retaining_ring_axial_thickness_mm"]/2-barrel_end)
     axial_float_total=2*axial_stop_gap
     clip_overlap=r["retaining_ring_outside_diameter_mm"]/2-orig["mechanical"]["hinge_bore_nominal_diameter_mm"]/2
-    radial_groove_clearance=(r["retaining_ring_inside_diameter_mm"]-r["groove_minor_diameter_mm"])/2
+    ring_eval=ring_retention_checks(r,orig["mechanical"]["hinge_bore_nominal_diameter_mm"])
+    ring_grips=ring_eval["checks"]["ring_free_inside_diameter_below_groove_diameter"]
     min_clip=1e5
     min_shaft=1e5
     records=[]
@@ -150,22 +228,33 @@ def inspect_pin(req:Mapping[str,Any],parent:Mapping[str,Any],
     checks={
         "source_pin_and_grooves_are_valid_BRep":shaft.isValid(),
         "source_c_rings_are_valid_BRep":all(hardware[n].isValid() for n in ("ring_left","ring_right")),
-        "two_ring_grooves_oppose_axial_escape":clip_overlap>.8 and axial_stop_gap>0,
+        # A ring that does not grip its groove cannot oppose axial escape.
+        "two_ring_grooves_oppose_axial_escape":clip_overlap>.8 and axial_stop_gap>0 and ring_grips,
         "nominal_total_axial_float_below_limit":axial_float_total<=r["max_nominal_pin_float_total_mm"],
         "nominal_ring_to_5_knuckles_clearance":min_clip>=r["min_clearance_ring_to_printed_leaf_mm"],
         "nominal_pin_running_clearance":min_shaft>=.2,
-        "ring_inner_clears_small_groove":radial_groove_clearance>.05,
+        **ring_eval["checks"],
         "retention_cannot_be_axially_slid_past_full_shaft":(
             r["retaining_ring_inside_diameter_mm"]<r["shaft_nominal_diameter_mm"]
         ),
     }
+    status,blockers=_retention_verdict(checks,ring_eval)
     return {
         "schema":"hs.cyberdeck_hinge_pin_retention_check.v1",
         "source_hinge":"balanced_60",
+        "retention_status":status,
+        "blockers":blockers,
+        "standard_part_verified":False,
+        "standard_part_note":STANDARD_PART_NOTE,
+        "ring_free_inside_diameter_mm":ring_eval["ring_free_inside_diameter_mm"],
+        "groove_diameter_mm":ring_eval["groove_diameter_mm"],
+        "ring_interference_on_groove_mm":ring_eval["ring_interference_on_groove_mm"],
+        "ring_axial_play_in_groove_mm":ring_eval["ring_axial_play_in_groove_mm"],
+        "ring_outside_diameter_excess_over_bore_mm":ring_eval["ring_outside_diameter_excess_over_bore_mm"],
+        "ring_check_assumptions":ring_eval["assumptions"],
         "nominal_clip_axial_stop_to_barrel_mm":round(axial_stop_gap,3),
         "nominal_total_axial_float_mm":round(axial_float_total,3),
         "nominal_clip_radial_overlap_with_hinge_bore_mm":round(clip_overlap,3),
-        "nominal_clip_groove_running_gap_mm":round(radial_groove_clearance,3),
         "minimum_swept_clip_to_leaf_mm":round(min_clip,4),
         "minimum_swept_shaft_to_leaf_mm":round(min_shaft,4),
         "motion_samples":records,
@@ -420,9 +509,9 @@ def run(req:Mapping[str,Any],parent:Mapping[str,Any],*,out:Path)->dict[str,Any]:
         raise ValueError("existing HS functional-intent chain rejected retention and route")
     if any(gate["physical_authority"].values()):
         raise ValueError("unverified new functional geometry was falsely authorized")
+    # A failed retention verdict is reported (status + blockers), not hidden by
+    # refusing to write the evidence: the other geometry is still recorded.
     pin=inspect_pin(source,orig)
-    if not pin["nominal_cad_checks_pass"]:
-        raise ValueError("retention model failed to demonstrate nominal geometric shaft capture")
     routes=evaluate_routes(source,orig)
     selected=routes["selected_virtual_route"]
     if selected is None:
@@ -485,6 +574,8 @@ def run(req:Mapping[str,Any],parent:Mapping[str,Any],*,out:Path)->dict[str,Any]:
         "new_reference_geometry":originals,
         "cable_sweep_and_six_solid_assembly":output,
         "validation_limitations":[
+            "Retention FAILS the corrected ring checks: the modeled ring free inside diameter (2.34mm) is larger than the 2.2mm groove, so it cannot grip it; see nominal_retainer_geometry.blockers.",
+            "Ring dimensions are not matched to any verified catalogue or standard retaining ring (standard_part_verified is false).",
             "Commercial spring clips and actual 3mm grooved metal shaft were not sourced.",
             "Split-ring elastic opening, groove tolerances, pullout load and endurance have not been measured.",
             "Wire spline endpoints deliberately float outside the printed panel: no physical anchors, connectors or strain relief.",
@@ -559,8 +650,14 @@ def audit(req:Mapping[str,Any],parent:Mapping[str,Any],*,out:Path)->dict[str,Any
             raise ValueError("original explicit cable solid no longer matches modelled route")
         if record["virtual_cable_connected_to_actual_device"] is not False:
             raise ValueError("unsourced cable connection falsely claimed verified")
-    if not report["nominal_retainer_geometry"]["nominal_cad_checks_pass"]:
-        raise ValueError("source pin cannot be retained under nominal CAD model")
+    recorded=report["nominal_retainer_geometry"]
+    ring_now=ring_retention_checks(source["pin_retention"],orig["mechanical"]["hinge_bore_nominal_diameter_mm"])
+    if any(recorded["checks"].get(k)!=v for k,v in ring_now["checks"].items()):
+        raise ValueError("recorded retention verdict does not match the ring dimensions")
+    if recorded["nominal_cad_checks_pass"]!=all(recorded["checks"].values()):
+        raise ValueError("recorded retention verdict does not match its own checks")
+    if recorded.get("standard_part_verified") is not False:
+        raise ValueError("ring was falsely marked as a verified standard part")
     if report["wire_routing_sweep"]["selected_virtual_route"]!="roomy_bend_relief":
         raise ValueError("nominal reference spline selection changed")
     if any(report["authority"].values()):
@@ -573,6 +670,10 @@ def audit(req:Mapping[str,Any],parent:Mapping[str,Any],*,out:Path)->dict[str,Any
         "actual_reimported_six_part_pose_STEPS":3,
         "actual_reimported_cable_tubes":3,
         "retention_grooved_shaft_source_consistent":True,
+        "retention_nominal_cad_checks_pass":recorded["nominal_cad_checks_pass"],
+        "retention_status":recorded["retention_status"],
+        "retention_blockers":recorded["blockers"],
+        "retention_standard_part_verified":False,
         "sampled_cable_routes_source_consistent":True,
         "new_nominal_route_meets_declared_cable_constraints":True,
         "original_reserved_space_fails_to_contain_route":True,

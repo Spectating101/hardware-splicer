@@ -6,7 +6,7 @@ import pytest
 
 from hardware_splicer.functional_hinge_retention import (
     checked_sources,make_retainer,inspect_pin,evaluate_routes,_cable_samples,
-    make_cable_envelope,extra_function_intent,audit,
+    make_cable_envelope,extra_function_intent,audit,ring_retention_checks,
 )
 from hardware_splicer.function_intent_bridge import parse_intent
 from hardware_splicer.function_print_geometry import canonical
@@ -35,12 +35,30 @@ def test_fixed_source_and_nominal_pin_retaining_geometry():
     record=receipt()
     assert record["source_spec_sha256"]==hashlib.sha256(canonical(req)).hexdigest()
     pin=record["nominal_retainer_geometry"]
-    assert pin["nominal_cad_checks_pass"] is True
+    # The hand-typed ring (free ID 2.34 mm) is LARGER than the 2.2 mm groove,
+    # so it cannot spring onto the groove: the corrected check must fail.
+    assert pin["nominal_cad_checks_pass"] is False
+    assert pin["retention_status"]=="FAILED_BLOCKED"
     assert pin["nominal_total_axial_float_mm"]==3.7
     assert pin["nominal_clip_axial_stop_to_barrel_mm"]==1.85
     assert pin["minimum_swept_clip_to_leaf_mm"]==1.85
     assert pin["minimum_swept_shaft_to_leaf_mm"]==.25
-    assert all(pin["checks"].values())
+    failed={k for k,v in pin["checks"].items() if not v}
+    assert failed=={"ring_free_inside_diameter_below_groove_diameter",
+                    "two_ring_grooves_oppose_axial_escape"}
+    assert pin["checks"]["ring_thickness_fits_groove_with_axial_play"] is True
+    assert pin["checks"]["ring_outside_diameter_exceeds_bore_by_margin"] is True
+    assert pin["checks"]["groove_diameter_below_pin_diameter"] is True
+    assert "ring_inner_clears_small_groove" not in pin["checks"]
+    assert pin["ring_free_inside_diameter_mm"]==2.34
+    assert pin["groove_diameter_mm"]==2.2
+    assert pin["ring_interference_on_groove_mm"]==-0.14
+    assert pin["ring_axial_play_in_groove_mm"]==0.25
+    assert pin["ring_outside_diameter_excess_over_bore_mm"]==2.7
+    assert pin["standard_part_verified"] is False
+    assert "catalogue" in pin["standard_part_note"]
+    assert any("free inside diameter" in b for b in pin["blockers"])
+    assert any("standard" in b for b in pin["blockers"])
     assert len(pin["motion_samples"])==37
     assert all(not pin[k] for k in (
        "spring_clip_installable_verified","clip_strength_or_axial_load_verified",
@@ -57,7 +75,8 @@ def test_real_C_clips_are_open_and_groove_is_actual_BREP():
     assert shapes["ring_right"].Volume()<18
     assert 660<shapes["shaft"].Volume()<680
     eval_=inspect_pin(req,base,angles=(0,90,180))
-    assert eval_["nominal_cad_checks_pass"] is True
+    assert eval_["nominal_cad_checks_pass"] is False
+    assert eval_["checks"]["source_c_rings_are_valid_BRep"] is True
     assert eval_["minimum_swept_clip_to_leaf_mm"]>=.65
 
 def test_four_route_candidates_avoid_unsupported_success_claim():
@@ -157,3 +176,52 @@ def test_thickness_source_and_cable_anchor_claims_remain_distinct():
     assert data["wire_routing_sweep"]["routing_is_not_an_electrical_connection"]
     assert data["nominal_retainer_geometry"]["real_machined_pin_or_ring_available"] is False
     assert data["cable_sweep_and_six_solid_assembly"]["folded_180"]["virtual_cable_connected_to_actual_device"] is False
+
+
+def _ring(**kw):
+    base=dict(shaft_nominal_diameter_mm=3.0,groove_minor_diameter_mm=2.2,
+              groove_axial_width_mm=.95,retaining_ring_outside_diameter_mm=6.2,
+              retaining_ring_inside_diameter_mm=2.0,retaining_ring_axial_thickness_mm=.8)
+    base.update(kw)
+    return ring_retention_checks(base,3.5)
+
+def test_ring_checks_accept_a_ring_that_springs_onto_its_groove():
+    checks=_ring()["checks"]
+    assert all(checks.values()),checks
+
+def test_ring_checks_reject_each_wrong_condition_independently():
+    # Free ID larger than (or equal to) the groove cannot grip it.
+    assert not _ring(retaining_ring_inside_diameter_mm=2.34)["checks"]["ring_free_inside_diameter_below_groove_diameter"]
+    assert not _ring(retaining_ring_inside_diameter_mm=2.2)["checks"]["ring_free_inside_diameter_below_groove_diameter"]
+    # Ring thicker than the groove, or with sloppy axial play.
+    assert not _ring(retaining_ring_axial_thickness_mm=.95)["checks"]["ring_thickness_fits_groove_with_axial_play"]
+    assert not _ring(retaining_ring_axial_thickness_mm=1.0)["checks"]["ring_thickness_fits_groove_with_axial_play"]
+    assert not _ring(retaining_ring_axial_thickness_mm=.5)["checks"]["ring_thickness_fits_groove_with_axial_play"]
+    # Ring must stand proud of the 3.5 mm bore by the stated margin.
+    assert not _ring(retaining_ring_outside_diameter_mm=3.6)["checks"]["ring_outside_diameter_exceeds_bore_by_margin"]
+    assert not _ring(retaining_ring_outside_diameter_mm=3.5)["checks"]["ring_outside_diameter_exceeds_bore_by_margin"]
+    # A groove at or above the pin diameter is not a groove.
+    assert not _ring(groove_minor_diameter_mm=3.0)["checks"]["groove_diameter_below_pin_diameter"]
+
+def test_retention_blocked_report_never_reports_nominal_pass_while_ring_is_loose():
+    req,base=specimen()
+    pin=receipt()["nominal_retainer_geometry"]
+    assert pin["nominal_cad_checks_pass"] is False
+    assert pin["checks"]["two_ring_grooves_oppose_axial_escape"] is False
+
+def test_audit_reports_retention_failure_and_rejects_forged_pass(tmp_path):
+    pytest.importorskip("cadquery")
+    req,base=specimen()
+    a=audit(req,base,out=HERE/"generated")
+    assert a["retention_nominal_cad_checks_pass"] is False
+    assert a["retention_status"]=="FAILED_BLOCKED"
+    folder=tmp_path/"forged"
+    shutil.copytree(HERE/"generated",folder)
+    path=folder/"RETENTION_AND_CABLE_TRIAL.json"
+    data=json.loads(path.read_text())
+    pin=data["nominal_retainer_geometry"]
+    pin["checks"]["ring_free_inside_diameter_below_groove_diameter"]=True
+    pin["nominal_cad_checks_pass"]=True
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError,match="retention verdict"):
+        audit(req,base,out=folder)

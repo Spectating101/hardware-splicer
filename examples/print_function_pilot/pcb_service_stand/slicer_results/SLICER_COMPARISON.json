@@ -748,9 +748,13 @@
     "No live physical hardware measurements: board envelope and mass are hypothetical baseline values."
   ],
   "native_CAD_audit": {
+    "geometry_correctness_independently_verified": false,
     "native_shape_count": 6,
     "nonfabrication_authority_preserved": true,
     "real_CAD_and_STL_roundtrip_verified": true,
+    "regeneration_check_is_independent": false,
+    "regeneration_check_method": "exported STEP volume compared with a rebuild by the same build_cad function that generated it; shows the generator is deterministic and the file was not edited, not that the geometry is correct",
+    "regeneration_determinism_verified": true,
     "schema": "hs.function_to_printable_cad_native_audit.v1",
     "selected": "ladder_58",
     "source_concept_traceability_verified": true,

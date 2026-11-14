@@ -312,7 +312,13 @@ def run_design(req: Mapping[str,Any],out:Path)->dict[str,Any]:
 
 
 def audit_bundle(req: Mapping[str,Any],out:Path)->dict[str,Any]:
-    """Independent native STEP/STL re-import and original design-source audit."""
+    """Re-import native STEP/STL and recompute results from the design source.
+
+This is a consistency audit by the same code base, NOT an independent
+geometry check: the solid it compares against is rebuilt with the same
+``build_cad`` that produced the exported STEP, so that comparison shows
+regeneration determinism only.
+"""
     import cadquery as cq
     import trimesh
     source=validate_design(req)
@@ -342,11 +348,13 @@ def audit_bundle(req: Mapping[str,Any],out:Path)->dict[str,Any]:
             raise ValueError("STEP volume does not match reported CAD outcome")
         if not math.isclose(float(mesh.volume),row["geometry"]["volume_mm3"],rel_tol=.005):
             raise ValueError("STL mesh volume does not match reported CAD outcome")
-        # Independently reconstruct the complete intended solid from the
-        # versioned source spec, rather than trusting declared JSON scores.
+        # Regeneration-determinism check: rebuild the solid from the source
+        # spec with the SAME build_cad that wrote the STEP and compare volumes.
+        # It catches an edited file or a non-deterministic build; it cannot
+        # catch an error that build_cad makes consistently.
         expected=build_cad(source,alt)
         if not math.isclose(expected.val().Volume(),original.val().Volume(),abs_tol=.05):
-            raise ValueError("native STEP shape differs from requested source design")
+            raise ValueError("exported STEP differs from regeneration by the same build_cad")
         bounds=original.val().BoundingBox()
         dims=[round(bounds.xlen,3),round(bounds.ylen,3),round(bounds.zlen,3)]
         if dims!=row["geometry"]["bounds_mm"]:
@@ -407,4 +415,10 @@ def audit_bundle(req: Mapping[str,Any],out:Path)->dict[str,Any]:
         "nonfabrication_authority_preserved":True,
         "source_concept_traceability_verified":True,
         "real_CAD_and_STL_roundtrip_verified":True,
+        "regeneration_determinism_verified":True,
+        "regeneration_check_is_independent":False,
+        "regeneration_check_method":(
+            "exported STEP volume compared with a rebuild by the same build_cad function that generated it; "
+            "shows the generator is deterministic and the file was not edited, not that the geometry is correct"),
+        "geometry_correctness_independently_verified":False,
     }

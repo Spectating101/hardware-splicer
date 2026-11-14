@@ -1,4 +1,8 @@
-"""Run and independently audit one function-to-printable-CAD candidate search."""
+"""Run and re-audit one function-to-printable-CAD candidate search.
+
+The audit rebuilds each solid with the same build_cad that generated it, so
+that comparison is a regeneration-determinism check, not an independent one.
+"""
 from __future__ import annotations
 import argparse
 import json

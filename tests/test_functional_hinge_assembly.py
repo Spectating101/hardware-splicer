@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from hardware_splicer.functional_hinge_assembly import (
-    validate,machine_function_intent,make_parts,evaluate_motion,spin
+    validate,machine_function_intent,make_parts,evaluate_motion,spin,knuckle_axial_play
 )
 from hardware_splicer.functional_hinge_audit import audit,fine_selected
 from hardware_splicer.function_intent_bridge import parse_intent
@@ -153,3 +153,69 @@ def test_source_or_STL_mutation_is_detected(tmp_path):
     t.write_bytes(t.read_bytes()+b"unauthorized")
     with pytest.raises(ValueError,match="tampered"):
         audit(req(),dest)
+
+
+def test_knuckle_axial_play_is_computed_from_registered_positions():
+    play=knuckle_axial_play(validate(req()))
+    # Lid knuckles at -36/0/36 and base at -18/18, each 14 mm long: 4 mm gaps.
+    assert play["knuckle_extents_x_mm"]==[
+        ["lid",-43.0,-29.0],["base",-25.0,-11.0],["lid",-7.0,7.0],
+        ["base",11.0,25.0],["lid",29.0,43.0]]
+    assert play["adjacent_gaps_mm"]==[4.0,4.0,4.0,4.0]
+    assert play["axial_play_mm"]==8.0
+    assert play["axial_play_limit_mm"]==0.5
+    assert play["within_limit"] is False
+    assert "0.5" in play["assumption"]
+    assert play["blockers"] and "axial" in play["blockers"][0]
+
+def test_knuckle_axial_play_limit_and_geometry_are_not_hardcoded():
+    spec=req()
+    tight=copy.deepcopy(spec)
+    tight["mechanical"]["barrel_knuckle_length_mm"]=17.7   # knuckle pitch 18 mm: 0.3 mm gaps
+    play=knuckle_axial_play(tight)
+    assert play["adjacent_gaps_mm"]==[pytest.approx(.3)]*4
+    assert play["axial_play_mm"]==pytest.approx(.6)
+    tighter=copy.deepcopy(spec)
+    tighter["mechanical"]["barrel_knuckle_length_mm"]=17.8
+    play=knuckle_axial_play(tighter)
+    assert play["axial_play_mm"]==pytest.approx(.4)
+    assert play["within_limit"] is True and play["blockers"]==[]
+
+def test_axial_play_matches_real_committed_knuckle_geometry():
+    cq=pytest.importorskip("cadquery")
+    alt=next(a for a in req()["alternatives"] if a["id"]=="balanced_60")
+    spans=[]
+    for name in ("lower_leaf","upper_leaf"):
+        shape=cq.importers.importStep(str(GENERATED/"selected"/(name+".step"))).val()
+        for face in shape.Faces():
+            if face.geomType()=="CYLINDER" and abs(face._geomAdaptor().Cylinder().Radius()-alt["barrel_radius_mm"])<1e-3:
+                box=face.BoundingBox()
+                spans.append((round(box.xmin,2),round(box.xmax,2)))
+    spans=sorted(set(spans))
+    assert spans==[(-43.0,-29.0),(-25.0,-11.0),(-7.0,7.0),(11.0,25.0),(29.0,43.0)]
+    gaps=[b[0]-a[1] for a,b in zip(spans,spans[1:])]
+    assert gaps==[4.0]*4
+
+def test_committed_report_lists_axial_play_blocker_for_every_candidate():
+    report=data()
+    for row in report["candidates"]:
+        loc=row["axial_location"]
+        assert loc["axial_play_mm"]==8.0 and loc["within_limit"] is False
+        assert row["knuckle_axial_location_verified"] is False
+        assert any("axial" in b for b in row["blockers"])
+    assert report["selected"]=="balanced_60"
+    assert any("axial" in b for b in report["selected_candidate_blockers"])
+    assert not any(report["authority"].values())
+
+def test_forged_axial_location_claim_is_rejected_by_audit(tmp_path):
+    pytest.importorskip("cadquery");pytest.importorskip("trimesh")
+    folder=tmp_path/"forged";shutil.copytree(GENERATED,folder)
+    path=folder/"HINGE_EVALUATION.json"
+    forged=json.loads(path.read_text())
+    for row in forged["candidates"]:
+        row["axial_location"]["axial_play_mm"]=0.2
+        row["axial_location"]["within_limit"]=True
+        row["blockers"]=[]
+    path.write_text(json.dumps(forged))
+    with pytest.raises(ValueError,match="axial"):
+        audit(req(),folder)

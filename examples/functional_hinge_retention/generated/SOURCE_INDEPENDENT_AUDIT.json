@@ -6,7 +6,15 @@
   "new_nominal_route_meets_declared_cable_constraints": true,
   "original_reserved_space_fails_to_contain_route": true,
   "physical_assembly_certified": false,
+  "retention_blockers": [
+    "ring free inside diameter 2.340 mm is not below groove diameter 2.200 mm: the ring cannot grip the groove",
+    "the rings are not shown to oppose axial escape (ring grip, overlap with bore or stop gap not satisfied)",
+    "standard part not verified: Ring dimensions are hand-typed and were not matched to any catalogue or standard retaining ring (e.g. DIN 471 / ISO 464 style); source a real ring and re-run the checks."
+  ],
   "retention_grooved_shaft_source_consistent": true,
+  "retention_nominal_cad_checks_pass": false,
+  "retention_standard_part_verified": false,
+  "retention_status": "FAILED_BLOCKED",
   "sampled_cable_routes_source_consistent": true,
   "schema": "hs.cyberdeck_retention_cable_offline_audit.v1",
   "source_hinge_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",

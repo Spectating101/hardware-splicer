@@ -13,5 +13,9 @@
   "selected": "ladder_58",
   "nonfabrication_authority_preserved": true,
   "source_concept_traceability_verified": true,
-  "real_CAD_and_STL_roundtrip_verified": true
+  "real_CAD_and_STL_roundtrip_verified": true,
+  "regeneration_determinism_verified": true,
+  "regeneration_check_is_independent": false,
+  "regeneration_check_method": "exported STEP volume compared with a rebuild by the same build_cad function that generated it; shows the generator is deterministic and the file was not edited, not that the geometry is correct",
+  "geometry_correctness_independently_verified": false
 }

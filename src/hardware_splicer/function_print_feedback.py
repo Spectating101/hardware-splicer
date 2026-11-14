@@ -62,9 +62,9 @@ def interpret_feedback(req:Mapping[str,Any],profile:Mapping[str,Any],
     source_cad={x["id"]:x for x in cad_report["alternatives"]}
     if (cad_report.get("schema")!="hs.function_to_printable_cad_trial.v1"
             or cad_report.get("source_design_sha256")!=expected_source):
-        raise ValueError("independent source CAD evaluation does not match design")
+        raise ValueError("source CAD evaluation does not match design")
     if set(alternatives)!=set(source_cad):
-        raise ValueError("not every original real CAD body was independently validated")
+        raise ValueError("not every original real CAD body was validated")
     rows=[]
     for layer in profile["profiles"]:
         record=[]
