@@ -1,0 +1,36 @@
+name: HS within-job native checkpoint (offline acceptance)
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/spi_checkpoint.py"
+      - "scripts/hs_spi_checkpoint.py"
+      - "tests/test_spi_checkpoint.py"
+      - "hardware/reference_designs/spi_flash_adapter_v1/verify_design.py"
+      - "hardware/reference_designs/spi_flash_adapter_v1/verification.json"
+      - ".github/workflows/hs-spi-checkpoint.yml"
+  push:
+    branches: ["feature/hs-spi-native-checkpoint-20261115"]
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint-offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile the bounded checkpoint code
+        run: |
+          python -m py_compile src/hardware_splicer/spi_checkpoint.py
+          python -m py_compile scripts/hs_spi_checkpoint.py
+          python -m py_compile hardware/reference_designs/spi_flash_adapter_v1/verify_design.py
+      - name: Offline recovery and negative tests
+        run: PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p test_spi_checkpoint.py -v
+      - name: Exclude native KiCad claims on hosted runners
+        run: |
+          python -c "import shutil; print('kicad-cli installed:', bool(shutil.which('kicad-cli')))"
+          echo 'Native ERC/DRC acceptance is separately verified on authorized Optiplex.'
