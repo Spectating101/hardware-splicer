@@ -1,0 +1,126 @@
+{
+  "schema": "hs.drone_proving_ground.strategies.v1",
+  "accessed": "2026-11-14",
+  "note": "Comparison inputs. Prices are as listed on the access date, in the seller's currency; nothing was ordered. The radio transmitter, goggles and charger are needed by every option and are left out of every row.",
+  "strategies": [
+    {
+      "id": "buy_bnf_3in_class_gps",
+      "name": "Buy a sub-250 g GPS micro long-range BNF",
+      "identity": "Flywoo Explorer LR 4 V2.2 analog BNF with GPS (4-inch, 1404 2750KV, GOKU stack)",
+      "kind": "buy",
+      "price": 278.49,
+      "price_alt": 239.99,
+      "price_alt_note": "same item shown sold out on a collection page",
+      "currency": "USD",
+      "takeoff_mass_g": 229,
+      "takeoff_mass_note": "Flywoo lists about 229 g takeoff for the O4 Wide version with its 4S 750 mAh pack; the analog V2.2 figure was not reached.",
+      "flight_time_min": null,
+      "payload_g": null,
+      "open_firmware": "Betaflight/INAV-capable F4 stack (vendor configuration)",
+      "sources": [
+        {
+          "url": "https://www.racedayquads.com/products/flywoo-bnf-explorer-lr-4-v2-2-4-4s-analog-choose-receiver-gps",
+          "class": "retailer_search",
+          "supports": "278.49 USD regular price; 239.99 USD sold out on a collection page; GPS; 1404 2750KV"
+        },
+        {
+          "url": "https://flywoo.net/products/explorer-lr4-o4-wide",
+          "class": "maker_search",
+          "supports": "O4 Wide: about 162 g without battery, about 229 g with Flywoo 4S 750 mAh; 359.99 USD; GOKU GM10 Mini V3 GPS about 4.5 g"
+        }
+      ],
+      "for": "Cheapest path to a flying GPS sub-250 g aircraft; tuned by the maker; no fabrication risk.",
+      "against": "No HS design content: the integration loop the mission asks for (sizing, stack, UART map, frame, payload mount) is done by the vendor. Payload mounting is whatever the frame allows."
+    },
+    {
+      "id": "px4_pixhawk_kit",
+      "name": "PX4/Pixhawk open development kit",
+      "identity": "Holybro PX4 Development Kit X500 v2 (Pixhawk 6C, M10 GPS, 915 MHz telemetry)",
+      "kind": "open_design_kit",
+      "price": 609.0,
+      "currency": "USD",
+      "takeoff_mass_g": 610,
+      "takeoff_mass_note": "Kit weight without battery per Holybro; a 4S 3000-5000 mAh pack adds several hundred grams.",
+      "flight_time_min": 18,
+      "flight_time_note": "Holybro: about 18 min hover, no payload, 5000 mAh",
+      "payload_g": 1500,
+      "open_firmware": "PX4 (shipped), ArduPilot",
+      "sources": [
+        {
+          "url": "https://holybro.com/products/px4-development-kit-x500-v2",
+          "class": "maker_page",
+          "supports": "609.00 USD; 610 g; about 18 min hover with 5000 mAh; 1500 g payload at 70 % throttle; 16x16 / 19x19 motor mounts"
+        }
+      ],
+      "for": "Best autonomy stack and the largest payload of any option; mature open firmware and documentation.",
+      "against": "Over the 250 g line before the battery is fitted (ratio computed below), so registration and larger-prop hazards apply; costs more than any other option; needs an outdoor field for every test."
+    },
+    {
+      "id": "crazyflie_reference",
+      "name": "Closed nano reference (existing System Example 001)",
+      "identity": "Bitcraze Crazyflie 2.1+ with an HS sensor deck (PR #230/#231)",
+      "kind": "buy_closed_platform",
+      "price": 240.0,
+      "price_class": "audit_estimate",
+      "price_note": "Not on the Bitcraze product page; the 2026-11-13 audit gives 'about US$240 bare' from store and RobotShop listings.",
+      "currency": "USD",
+      "takeoff_mass_g": 29,
+      "flight_time_min": 7,
+      "payload_g": 15,
+      "open_firmware": "Crazyflie firmware (open source)",
+      "sources": [
+        {
+          "url": "https://www.bitcraze.io/products/crazyflie-2-1-plus/",
+          "class": "maker_page",
+          "supports": "29 g takeoff; 92 x 92 x 29 mm; 7 min; 15 g max payload"
+        }
+      ],
+      "for": "Excellent firmware and sensing testbed; already integrated in this repository.",
+      "against": "A finished product, indoor-only, with the smallest payload and endurance in the table. It does not answer 'from obtainable parts'."
+    },
+    {
+      "id": "whoop65_build",
+      "name": "65 mm printed whoop build (PR #276 / #291)",
+      "identity": "HS65 printed frame + BETAFPV Matrix 1S 5-in-1 + 0702 motors + Gemfan 1210-2",
+      "kind": "custom_micro",
+      "price_from_evidence": true,
+      "currency": "TWD",
+      "takeoff_mass_from_audit": true,
+      "flight_time_min": null,
+      "payload_g": 0,
+      "open_firmware": "Betaflight",
+      "sources": [
+        {
+          "url": "repo:examples/arbitrage_lab/build_vs_buy/evidence/drone_whoop65_20261106.json",
+          "class": "repo",
+          "supports": "Ruten asking prices 2026-11-06"
+        },
+        {
+          "url": "repo:examples/drone_lab/fabrication/20261105/GEOMETRY_AUDIT.json",
+          "class": "repo",
+          "supports": "HS65 frame and cradle volumes"
+        }
+      ],
+      "for": "Cheapest first print-and-fit loop; indoor-safe.",
+      "against": "Corrected build minimum is above the cheapest BNF; FDM frame is heavier than the PP and printed frames it replaces; payload is zero; governing thrust number unpublished."
+    },
+    {
+      "id": "custom_3in_gps",
+      "name": "Custom sub-250 g 3-inch GPS quad (this package)",
+      "identity": "HS-3G: HS-generated carbon frame + SpeedyBee F405 Mini stack + 4x F1404 3800KV + HQ T3x3x3 + M10Q-5883 + 4S 650 mAh, INAV or ArduPilot",
+      "kind": "custom_build",
+      "price_from_bom": true,
+      "currency": "USD",
+      "open_firmware": "INAV (SPEEDYBEEF405MINI) or ArduPilot (SpeedyBeeF405Mini)",
+      "sources": [
+        {
+          "url": "inputs/parts.json",
+          "class": "repo",
+          "supports": "every part identity, mass and price"
+        }
+      ],
+      "for": "Every engineering variable is HS's to set and check; open firmware with GPS return-to-home; payload mass and mount are designed in; parts are commodity and individually replaceable; the method carries to a 5-inch.",
+      "against": "Costs more than the GPS BNF (section 5 decision); nothing about it has been built, weighed or flown."
+    }
+  ]
+}
