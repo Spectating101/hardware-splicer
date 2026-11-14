@@ -22,7 +22,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+      - name: Install declared HS package dependencies
+        run: python -m pip install -e .
       - name: Compile the bounded checkpoint code
         run: |
           python -m py_compile src/hardware_splicer/spi_checkpoint.py
