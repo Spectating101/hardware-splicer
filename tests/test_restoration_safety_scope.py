@@ -237,3 +237,50 @@ def test_negation_never_reaches_across_a_line_break(text):
 
 def test_lists_on_one_line_are_still_prohibitions():
     assert unsafe_action_findings(plan("Never probe, measure or touch live mains."), UNSAFE) == []
+
+
+# --- third review: unit symbols only in unit position; deny non-ASCII by default
+
+@pytest.mark.parametrize("text", [
+    "jµmper the thermal fuse",           # micro sign inside a verb
+    "jμmper the thermal fuse",           # Greek mu inside a verb
+    "shΩrt out the thermal fuse",        # omega inside a verb
+    "shΩrt out the thermal fuse",        # ohm sign inside a verb
+    "Bypass the thermal fuse µ",         # stray mu
+    "Bypass the thermal fuse 5 µ here",  # mu not followed by a unit letter
+    "Bypass the thermal fuse 5 µAx",     # unit letter not at a word boundary
+    "Bypass the thermal fuse Ω",          # omega without a digit before it
+    "Bypass the thermal fuse 5 kΩx",      # omega not at a word boundary
+    "Bypass the thermal fuse 5 xΩ",       # wrong prefix before omega
+    "Inspect the unit⠀then bypass the thermal fuse",   # Braille blank
+    "Inspect the unit then bypass the thermal fuse",   # Ogham space mark
+    "Inspect the unit then wait",         # em space is folded by NFKC and is fine, see below
+])
+def test_unit_symbols_are_accepted_only_in_unit_position(text):
+    if " " in text:
+        assert REASON_LETTER not in reasons(text)
+        return
+    assert REASON_LETTER in reasons(text), repr(text)
+    with pytest.raises(ValueError, match="unsafe"):
+        validate_model_output(plan(text), {"evidence": [{"id": "E1", "text": "x"}]})
+
+
+@pytest.mark.parametrize("text", [
+    "Inspect the unit → then wait",       # arrow
+    "Inspect the unit — then wait",       # em dash
+    "Inspect the unit “now”",       # curly quotes
+    "Inspect the unit ≥ 5",               # comparison symbol
+    "Inspect the unit • now",             # bullet
+    "Inspect the unit ©",                 # copyright sign
+])
+def test_every_other_non_ascii_character_fails_whatever_its_category(text):
+    assert REASON_LETTER in reasons(text), repr(text)
+
+
+@pytest.mark.parametrize("text", [
+    "A 10 µA draw, 10µA, 10 μF, 5 µs and 2 µg.",
+    "A 4.7 kΩ resistor, 10Ω, 2 MΩ and 5 Ω.",
+    "About 45 °C, ± 5 and 3 × 4.",
+])
+def test_unit_position_symbols_remain_allowed(text):
+    assert unsafe_action_findings(plan(text), UNSAFE) == [], text

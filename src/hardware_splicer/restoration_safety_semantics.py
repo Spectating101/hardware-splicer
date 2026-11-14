@@ -16,11 +16,13 @@ Fail-closed rules:
   the negation does not reach the verb. Double negatives are not prohibitions.
 * Every free-text string AND every mapping key of the plan is scanned.
 * Suspicious text is REJECTED, never repaired: any control (other than \n and
-  \t), format, combining or private-use character, and any letter outside
-  ASCII plus a few unit symbols (omega, mu), fails the gate with a distinct
-  reason. Known limitation: legitimately accented or non-English text is
-  therefore rejected too. Only line separators are mapped (to "\n") and
-  compatibility forms are NFKC-folded before matching.
+  \t), format, combining or private-use character fails the gate, and so does
+  ANY non-ASCII character (after NFKC) other than the degree, plus-minus and
+  multiplication signs and a micro sign / ohm sign written in unit position
+  ("10 \u00b5A", "4.7 k\u03a9"). Known limitation: accented or non-English text,
+  typographic dashes and quotes, arrows and comparison symbols are therefore
+  rejected too. Only line separators are mapped (to "\n") and compatibility
+  forms are NFKC-folded before matching.
 """
 from __future__ import annotations
 
@@ -52,7 +54,11 @@ _LINE_SEPARATORS = dict.fromkeys(
     map(ord, "\u0085\u2028\u2029\x0b\x0c\x1c\x1d\x1e\x1f\u3002\uff01\uff1f\uff1b\u2026\u2025"),
     "\n",
 )
-_ALLOWED_NON_ASCII_LETTERS = frozenset("\u03a9\u2126\u03bc\u00b5")  # omega, ohm sign, mu, micro sign
+# Deny by default: after NFKC the only non-ASCII characters accepted are these
+# plain symbols plus mu and omega IN UNIT POSITION (see _unit_symbol_positions).
+_ALLOWED_NON_ASCII = frozenset("\u00b0\u00b1\u00d7")  # degree, plus-minus, multiplication
+_MICRO_UNIT = re.compile(r"\d\s*(\u03bc)(?=[AVWFHsgm](?!\w))")
+_OHM_UNIT = re.compile(r"\d\s*[kM]?\s*(\u03a9)(?!\w)")
 REASON_CONTROL = "disallowed_control_or_format_character"
 REASON_LETTER = "disallowed_non_ascii_letter"
 
@@ -76,30 +82,39 @@ def normalise(text: str) -> str:
     return re.sub(r"(?<=\w)[-_/](?=\w)", " ", fold(text))
 
 
+def _unit_symbol_positions(text: str) -> set[int]:
+    return {m.start(1) for pattern in (_MICRO_UNIT, _OHM_UNIT) for m in pattern.finditer(text)}
+
+
 def disallowed_text_reasons(text: str) -> list[tuple[str, str]]:
     """(reason, offending characters) for text that must fail the gate outright.
 
-    Checked on the line-folded text before AND after NFKC, so a character
-    that only appears after compatibility folding is caught as well.
+    Control/format/combining characters are checked on the line-folded text
+    before AND after NFKC. Every non-ASCII character left after NFKC is then
+    rejected unless it is an allowed symbol or a unit-position mu/omega.
     """
     folded = _line_folded(text)
+    nfkc = unicodedata.normalize("NFKC", folded)
     seen: dict[str, list[str]] = {}
-    for candidate in (folded, unicodedata.normalize("NFKC", folded)):
+
+    def note(reason: str, ch: str) -> None:
+        bucket = seen.setdefault(reason, [])
+        if ch not in bucket:
+            bucket.append(ch)
+
+    for candidate in (folded, nfkc):
         for ch in candidate:
-            category = unicodedata.category(ch)
-            if ch in "\n\t":
-                continue
-            if category in ("Cc", "Cf", "Mn", "Me", "Cs", "Co", "Cn"):
-                bucket = seen.setdefault(REASON_CONTROL, [])
-            elif ord(ch) > 127 and (category[0] == "L" or category == "Nd"
-                                    or category in ("Nl", "No")) \
-                    and ch not in _ALLOWED_NON_ASCII_LETTERS:
-                bucket = seen.setdefault(REASON_LETTER, [])
-            else:
-                continue
-            if ch not in bucket:
-                bucket.append(ch)
-    return [(reason, "".join(f"U+{ord(c):04X}" + " " for c in chars).strip())
+            if ch not in "\n\t" and unicodedata.category(ch) in (
+                    "Cc", "Cf", "Mn", "Me", "Cs", "Co", "Cn"):
+                note(REASON_CONTROL, ch)
+    unit_positions = _unit_symbol_positions(nfkc)
+    for index, ch in enumerate(nfkc):
+        if ord(ch) < 128 or ch in _ALLOWED_NON_ASCII or index in unit_positions:
+            continue
+        if unicodedata.category(ch) in ("Cc", "Cf", "Mn", "Me", "Cs", "Co", "Cn"):
+            continue  # already reported with the control reason
+        note(REASON_LETTER, ch)
+    return [(reason, " ".join(f"U+{ord(c):04X}" for c in chars))
             for reason, chars in seen.items()]
 
 
