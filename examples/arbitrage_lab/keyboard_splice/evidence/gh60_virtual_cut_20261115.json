@@ -1,0 +1,851 @@
+{
+  "schema": "hs.keyboard-cut-splice-screen.v1",
+  "source_file_sha256": "a99aafb9f1ca77c5cac67037d161fa849b9b200de5dec9f63964520af3ff3daf",
+  "source_label": "gh60.kicad_pcb",
+  "source_design_only": true,
+  "physical_donor_exists": false,
+  "analysis_tool": "Native KiCad pcbnew geometry extraction + HS bounded geometry screen",
+  "config": {
+    "kerf_mm": 1.0,
+    "pad_clearance_mm": 1.0,
+    "switch_keepout_mm": 8.0,
+    "min_key_side_fraction": 0.3,
+    "scan_fraction_min": 0.3,
+    "scan_fraction_max": 0.7,
+    "scan_step_mm": 1.0
+  },
+  "board": {
+    "outline_bbox_mm": {
+      "x_min": 62.24045,
+      "x_max": 347.33955,
+      "y_min": 64.57045,
+      "y_max": 159.26955
+    },
+    "zone_count": 7
+  },
+  "counts": {
+    "tracks": 3305,
+    "pads": 912,
+    "via_count": 179,
+    "switch_footprint_candidates": 84
+  },
+  "scanned_straight_seams": 115,
+  "passing_seams": 0,
+  "midpoint": {
+    "x_mm": 204.79,
+    "track_segments_touched": 42,
+    "distinct_nets_touched": 33,
+    "net_categories": {
+      "key_matrix": 13,
+      "lighting_optional": 10,
+      "other_unknown_do_not_discard": 8,
+      "power_safety_review": 2
+    },
+    "matrix_nets_touched": [
+      "/Matrix/CAPS_LED",
+      "/Matrix/col10",
+      "/Matrix/col11",
+      "/Matrix/col12",
+      "/Matrix/col13",
+      "/Matrix/col14",
+      "/Matrix/col8",
+      "/Matrix/col9",
+      "/Matrix/row1",
+      "/Matrix/row2",
+      "/Matrix/row3",
+      "/Matrix/row4",
+      "/Matrix/row5"
+    ],
+    "pads_at_risk": 14,
+    "vias_at_risk": 2,
+    "switch_centers_at_risk": 4,
+    "switch_candidates_left": 41,
+    "switch_candidates_right": 43,
+    "key_balance_pass": true,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "/GPIO0",
+      "/GPIO1",
+      "/GPIO2",
+      "/GPIO3",
+      "/Leds/lcol10",
+      "/Leds/lcol6",
+      "/Leds/lcol7",
+      "/Leds/lcol8",
+      "/Leds/lcol9",
+      "/Leds/lrow1",
+      "/Leds/lrow2",
+      "/Leds/lrow3",
+      "/Leds/lrow4",
+      "/Leds/lrow5",
+      "/Matrix/CAPS_LED",
+      "/Matrix/col10",
+      "/Matrix/col11",
+      "/Matrix/col12",
+      "/Matrix/col13",
+      "/Matrix/col14",
+      "/Matrix/col8",
+      "/Matrix/col9",
+      "/Matrix/row1",
+      "/Matrix/row2",
+      "/Matrix/row3",
+      "/Matrix/row4",
+      "/Matrix/row5",
+      "/~{RES}",
+      "GND",
+      "N-000091",
+      "N-000126",
+      "N-000129",
+      "VCC"
+    ]
+  },
+  "best_scanned_straight_seam": {
+    "x_mm": 224.77,
+    "track_segments_touched": 48,
+    "distinct_nets_touched": 31,
+    "net_categories": {
+      "key_matrix": 11,
+      "lighting_optional": 12,
+      "other_unknown_do_not_discard": 6,
+      "power_safety_review": 2
+    },
+    "matrix_nets_touched": [
+      "/Matrix/col10",
+      "/Matrix/col11",
+      "/Matrix/col12",
+      "/Matrix/col13",
+      "/Matrix/col14",
+      "/Matrix/col9",
+      "/Matrix/row1",
+      "/Matrix/row2",
+      "/Matrix/row3",
+      "/Matrix/row4",
+      "/Matrix/row5"
+    ],
+    "pads_at_risk": 9,
+    "vias_at_risk": 1,
+    "switch_centers_at_risk": 3,
+    "switch_candidates_left": 45,
+    "switch_candidates_right": 39,
+    "key_balance_pass": true,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "/GPIO0",
+      "/GPIO1",
+      "/GPIO2",
+      "/GPIO3",
+      "/Leds/lcol10",
+      "/Leds/lcol11",
+      "/Leds/lcol12",
+      "/Leds/lcol13",
+      "/Leds/lcol14",
+      "/Leds/lcol8",
+      "/Leds/lcol9",
+      "/Leds/lrow1",
+      "/Leds/lrow2",
+      "/Leds/lrow3",
+      "/Leds/lrow4",
+      "/Leds/lrow5",
+      "/Matrix/col10",
+      "/Matrix/col11",
+      "/Matrix/col12",
+      "/Matrix/col13",
+      "/Matrix/col14",
+      "/Matrix/col9",
+      "/Matrix/row1",
+      "/Matrix/row2",
+      "/Matrix/row3",
+      "/Matrix/row4",
+      "/Matrix/row5",
+      "GND",
+      "N-000077",
+      "N-000116",
+      "VCC"
+    ],
+    "harness_candidates": [
+      {
+        "net": "/GPIO0",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "36",
+          "x": 155.56992,
+          "y": 151.31034,
+          "layer": "F.Cu",
+          "net": "/GPIO0"
+        },
+        "right_candidate_pad": {
+          "ref": "P38",
+          "pad": "1",
+          "x": 233.426,
+          "y": 68.58,
+          "layer": "F.Cu",
+          "net": "/GPIO0"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/GPIO1",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "37",
+          "x": 155.56992,
+          "y": 150.51024,
+          "layer": "F.Cu",
+          "net": "/GPIO1"
+        },
+        "right_candidate_pad": {
+          "ref": "P39",
+          "pad": "1",
+          "x": 233.426,
+          "y": 73.66,
+          "layer": "F.Cu",
+          "net": "/GPIO1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/GPIO2",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "38",
+          "x": 155.56992,
+          "y": 149.71014,
+          "layer": "F.Cu",
+          "net": "/GPIO2"
+        },
+        "right_candidate_pad": {
+          "ref": "P40",
+          "pad": "1",
+          "x": 233.426,
+          "y": 76.2,
+          "layer": "F.Cu",
+          "net": "/GPIO2"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/GPIO3",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "39",
+          "x": 155.56992,
+          "y": 148.91004,
+          "layer": "F.Cu",
+          "net": "/GPIO3"
+        },
+        "right_candidate_pad": {
+          "ref": "P41",
+          "pad": "1",
+          "x": 233.426,
+          "y": 71.12,
+          "layer": "F.Cu",
+          "net": "/GPIO3"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol10",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "P32",
+          "pad": "1",
+          "x": 195.326,
+          "y": 73.66,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol10"
+        },
+        "right_candidate_pad": {
+          "ref": "DB46",
+          "pad": "1",
+          "x": 241.6175,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol10"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol11",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "P33",
+          "pad": "1",
+          "x": 214.376,
+          "y": 68.58,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol11"
+        },
+        "right_candidate_pad": {
+          "ref": "DB51",
+          "pad": "1",
+          "x": 260.6675,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol11"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol12",
+        "function_class": "lighting_optional",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "P34",
+          "pad": "1",
+          "x": 214.376,
+          "y": 73.66,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol12"
+        },
+        "right_candidate_pad": {
+          "ref": "DB56",
+          "pad": "1",
+          "x": 279.7175,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol12"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol13",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "P35",
+          "pad": "1",
+          "x": 214.376,
+          "y": 71.12,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol13"
+        },
+        "right_candidate_pad": {
+          "ref": "DB61",
+          "pad": "1",
+          "x": 298.7675,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol13"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol14",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "P36",
+          "pad": "1",
+          "x": 214.376,
+          "y": 76.2,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol14"
+        },
+        "right_candidate_pad": {
+          "ref": "DB66",
+          "pad": "1",
+          "x": 317.8175,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol14"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol8",
+        "function_class": "lighting_optional",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "DB38",
+          "pad": "1",
+          "x": 217.805,
+          "y": 116.99875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol8"
+        },
+        "right_candidate_pad": null,
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lcol9",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "DB41",
+          "pad": "1",
+          "x": 222.5675,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol9"
+        },
+        "right_candidate_pad": {
+          "ref": "DB44",
+          "pad": "1",
+          "x": 227.33,
+          "y": 136.04875,
+          "layer": "F.Cu",
+          "net": "/Leds/lcol9"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lrow1",
+        "function_class": "lighting_optional",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "DB36",
+          "pad": "2",
+          "x": 206.0575,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow1"
+        },
+        "right_candidate_pad": {
+          "ref": "DB46",
+          "pad": "2",
+          "x": 244.1575,
+          "y": 78.89875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lrow2",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "DB37",
+          "pad": "2",
+          "x": 215.5825,
+          "y": 97.94875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow2"
+        },
+        "right_candidate_pad": {
+          "ref": "DB42",
+          "pad": "2",
+          "x": 234.6325,
+          "y": 97.94875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow2"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lrow3",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "DB38",
+          "pad": "2",
+          "x": 220.345,
+          "y": 116.99875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow3"
+        },
+        "right_candidate_pad": {
+          "ref": "DB43",
+          "pad": "2",
+          "x": 239.395,
+          "y": 116.99875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow3"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lrow4",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "DB39",
+          "pad": "2",
+          "x": 210.82,
+          "y": 136.04875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow4"
+        },
+        "right_candidate_pad": {
+          "ref": "DB44",
+          "pad": "2",
+          "x": 229.87,
+          "y": 136.04875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow4"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Leds/lrow5",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "DB301",
+          "pad": "2",
+          "x": 206.0575,
+          "y": 155.09875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow5"
+        },
+        "right_candidate_pad": {
+          "ref": "DB55",
+          "pad": "2",
+          "x": 265.50875,
+          "y": 155.09875,
+          "layer": "F.Cu",
+          "net": "/Leds/lrow5"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col10",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "29",
+          "x": 160.48482,
+          "y": 154.62504,
+          "layer": "F.Cu",
+          "net": "/Matrix/col10"
+        },
+        "right_candidate_pad": {
+          "ref": "D46",
+          "pad": "1",
+          "x": 236.9185,
+          "y": 78.359,
+          "layer": "F.Cu",
+          "net": "/Matrix/col10"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col11",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "28",
+          "x": 161.28492,
+          "y": 154.62504,
+          "layer": "F.Cu",
+          "net": "/Matrix/col11"
+        },
+        "right_candidate_pad": {
+          "ref": "D51",
+          "pad": "1",
+          "x": 255.0795,
+          "y": 78.359,
+          "layer": "F.Cu",
+          "net": "/Matrix/col11"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col12",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "27",
+          "x": 162.08502,
+          "y": 154.62504,
+          "layer": "F.Cu",
+          "net": "/Matrix/col12"
+        },
+        "right_candidate_pad": {
+          "ref": "D56",
+          "pad": "1",
+          "x": 274.2565,
+          "y": 78.359,
+          "layer": "F.Cu",
+          "net": "/Matrix/col12"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col13",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "26",
+          "x": 162.88512,
+          "y": 154.62504,
+          "layer": "F.Cu",
+          "net": "/Matrix/col13"
+        },
+        "right_candidate_pad": {
+          "ref": "D61",
+          "pad": "1",
+          "x": 293.3065,
+          "y": 78.359,
+          "layer": "F.Cu",
+          "net": "/Matrix/col13"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col14",
+        "function_class": "key_matrix",
+        "crossed_segments": 4,
+        "left_candidate_pad": {
+          "ref": "IC1",
+          "pad": "11",
+          "x": 165.28542,
+          "y": 143.19504,
+          "layer": "F.Cu",
+          "net": "/Matrix/col14"
+        },
+        "right_candidate_pad": {
+          "ref": "D69",
+          "pad": "1",
+          "x": 318.3255,
+          "y": 124.079,
+          "layer": "F.Cu",
+          "net": "/Matrix/col14"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/col9",
+        "function_class": "key_matrix",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "D44",
+          "pad": "1",
+          "x": 221.8055,
+          "y": 135.382,
+          "layer": "F.Cu",
+          "net": "/Matrix/col9"
+        },
+        "right_candidate_pad": {
+          "ref": "D42",
+          "pad": "1",
+          "x": 227.0125,
+          "y": 97.409,
+          "layer": "F.Cu",
+          "net": "/Matrix/col9"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/row1",
+        "function_class": "key_matrix",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "S41",
+          "pad": "1",
+          "x": 220.0275,
+          "y": 71.28002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row1"
+        },
+        "right_candidate_pad": {
+          "ref": "S46",
+          "pad": "1",
+          "x": 239.0775,
+          "y": 71.28002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/row2",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "S37",
+          "pad": "1",
+          "x": 210.5025,
+          "y": 90.33002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row2"
+        },
+        "right_candidate_pad": {
+          "ref": "S42",
+          "pad": "1",
+          "x": 229.5525,
+          "y": 90.33002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row2"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/row3",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "S38",
+          "pad": "1",
+          "x": 215.265,
+          "y": 109.38002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row3"
+        },
+        "right_candidate_pad": {
+          "ref": "S43",
+          "pad": "1",
+          "x": 234.315,
+          "y": 109.38002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row3"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/row4",
+        "function_class": "key_matrix",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "S39",
+          "pad": "1",
+          "x": 205.74,
+          "y": 128.43002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row4"
+        },
+        "right_candidate_pad": {
+          "ref": "S49",
+          "pad": "1",
+          "x": 243.84,
+          "y": 128.43002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row4"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/Matrix/row5",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "S301",
+          "pad": "1",
+          "x": 200.9775,
+          "y": 147.48002,
+          "layer": "F.Cu",
+          "net": "/Matrix/row5"
+        },
+        "right_candidate_pad": {
+          "ref": "S55",
+          "pad": "1",
+          "x": 260.50875,
+          "y": 147.47875,
+          "layer": "F.Cu",
+          "net": "/Matrix/row5"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "GND",
+        "function_class": "power_safety_review",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "P42",
+          "pad": "1",
+          "x": 214.376,
+          "y": 78.74,
+          "layer": "F.Cu",
+          "net": "GND"
+        },
+        "right_candidate_pad": {
+          "ref": "P6",
+          "pad": "1",
+          "x": 227.33,
+          "y": 156.21,
+          "layer": "F.Cu",
+          "net": "GND"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "N-000077",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "D41",
+          "pad": "2",
+          "x": 219.3925,
+          "y": 78.359,
+          "layer": "F.Cu",
+          "net": "N-000077"
+        },
+        "right_candidate_pad": {
+          "ref": "S41",
+          "pad": "2",
+          "x": 226.3775,
+          "y": 68.74002,
+          "layer": "F.Cu",
+          "net": "N-000077"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "N-000116",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 2,
+        "left_candidate_pad": null,
+        "right_candidate_pad": {
+          "ref": "S44",
+          "pad": "2",
+          "x": 231.14,
+          "y": 125.89002,
+          "layer": "F.Cu",
+          "net": "N-000116"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "VCC",
+        "function_class": "power_safety_review",
+        "crossed_segments": 5,
+        "left_candidate_pad": {
+          "ref": "P2",
+          "pad": "1",
+          "x": 222.25,
+          "y": 156.21,
+          "layer": "F.Cu",
+          "net": "VCC"
+        },
+        "right_candidate_pad": {
+          "ref": "P37",
+          "pad": "1",
+          "x": 233.426,
+          "y": 78.74,
+          "layer": "F.Cu",
+          "net": "VCC"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      }
+    ]
+  },
+  "requested_seam": null,
+  "release": "BLOCKED_REFERENCE_ONLY",
+  "next_action": "Identify one exact-model salvaged keyboard; obtain both PCB images and unpowered continuity; identify controller/optional circuits; design stepped cut and interposer based on real measurements",
+  "blockers": [
+    "NO SAFE STRAIGHT SEAM found under conservative footprint/pad/via keepout",
+    "No evidence that a physical donor PCB matches this reference PCB revision",
+    "Copper planes, actual connected paths, and multi-crossing net topology are not proven by segment intersections",
+    "Cut-edge tolerances, component/plate keepouts and case/fastener clearances need physical registration",
+    "Candidate pad locations are not checked for solderability or post-cut continuity",
+    "Firmware matrix behavior, original controller, USB, ESD and safety require a physical test",
+    "No authority to cut, solder, fabricate or sell hardware from this design scan",
+    "2 crossed nets lack a pad on one or both sides",
+    "7 copper zone objects need fill/return-path validation after cutting",
+    "PCB source import reported source warnings; see evidence"
+  ]
+}
