@@ -1,0 +1,2569 @@
+{
+  "schema": "hs.keyboard-postcut-copper-islands.v1",
+  "source_sha256": "a99aafb9f1ca77c5cac67037d161fa849b9b200de5dec9f63964520af3ff3daf",
+  "cut_x_mm": 224.77,
+  "kerf_mm": 1.0,
+  "model_basis": "Native KiCad tracks/pads/vias approximated by planar copper polygons; zones omitted",
+  "qualified_for_build": false,
+  "target_net_count": 31,
+  "model_pre_cut_island_count": 105,
+  "model_post_cut_island_count": 146,
+  "split_pre_cut_components": 31,
+  "candidate_graph_edges": 22,
+  "unanchored_split_components": 11,
+  "model_replay_remaining_split_components": 11,
+  "model_replay_achieved_full_restoration": false,
+  "issues": [
+    "OVAL_PAD_APPROXIMATION",
+    "SOURCE_IMPORT_WARNINGS",
+    "UNMODELED_COPPER_ZONES"
+  ],
+  "sections": [
+    {
+      "net": "/GPIO0",
+      "precut_track_only_component": 5,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/GPIO0::pre5::post5",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 57,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "R7",
+              "pad": "1",
+              "x": 147.447,
+              "y": 97.917,
+              "net": "/GPIO0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P7",
+              "pad": "1",
+              "x": 135.89,
+              "y": 153.67,
+              "net": "/GPIO0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R8",
+              "pad": "1",
+              "x": 132.842,
+              "y": 106.807,
+              "net": "/GPIO0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R6",
+              "pad": "1",
+              "x": 128.651,
+              "y": 97.917,
+              "net": "/GPIO0",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO0::pre5::post45",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 16,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P38",
+              "pad": "1",
+              "x": 233.426,
+              "y": 68.58,
+              "net": "/GPIO0",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/GPIO1",
+      "precut_track_only_component": 84,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/GPIO1::pre84::post57",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 68,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "IC1",
+              "pad": "37",
+              "x": 155.56992,
+              "y": 150.51024,
+              "net": "/GPIO1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P8",
+              "pad": "1",
+              "x": 135.89,
+              "y": 156.21,
+              "net": "/GPIO1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R12",
+              "pad": "1",
+              "x": 65.786,
+              "y": 98.933,
+              "net": "/GPIO1",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO1::pre84::post94",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 14,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P39",
+              "pad": "1",
+              "x": 233.426,
+              "y": 73.66,
+              "net": "/GPIO1",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/GPIO2",
+      "precut_track_only_component": 119,
+      "postcut_track_only_island_count": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/GPIO2::pre119::post121",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 41,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P9",
+              "pad": "1",
+              "x": 133.35,
+              "y": 153.67,
+              "net": "/GPIO2",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO2::pre119::post150",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 16,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P40",
+              "pad": "1",
+              "x": 233.426,
+              "y": 76.2,
+              "net": "/GPIO2",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO2::pre119::post159",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 8,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "R10",
+              "pad": "1",
+              "x": 304.8,
+              "y": 116.078,
+              "net": "/GPIO2",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/GPIO3",
+      "precut_track_only_component": 170,
+      "postcut_track_only_island_count": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/GPIO3::pre170::post175",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 14,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P41",
+              "pad": "1",
+              "x": 233.426,
+              "y": 71.12,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO3::pre170::post191",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 46,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P10",
+              "pad": "1",
+              "x": 133.35,
+              "y": 156.21,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/GPIO3::pre170::post217",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 34,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "R15",
+              "pad": "1",
+              "x": 276.225,
+              "y": 146.685,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R11",
+              "pad": "1",
+              "x": 295.275,
+              "y": 132.715,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R13",
+              "pad": "1",
+              "x": 300.355,
+              "y": 146.685,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "R14",
+              "pad": "1",
+              "x": 323.85,
+              "y": 146.685,
+              "net": "/GPIO3",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol10",
+      "precut_track_only_component": 268,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol10::pre268::post252",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 11,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P32",
+              "pad": "1",
+              "x": 195.326,
+              "y": 73.66,
+              "net": "/Leds/lcol10",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol10::pre268::post275",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 55,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB46",
+              "pad": "1",
+              "x": 241.6175,
+              "y": 78.89875,
+              "net": "/Leds/lcol10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB49",
+              "pad": "1",
+              "x": 246.38,
+              "y": 136.04875,
+              "net": "/Leds/lcol10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB47",
+              "pad": "1",
+              "x": 251.1425,
+              "y": 97.94875,
+              "net": "/Leds/lcol10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB48",
+              "pad": "1",
+              "x": 255.905,
+              "y": 116.99875,
+              "net": "/Leds/lcol10",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol11",
+      "precut_track_only_component": 305,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol11::pre305::post312",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 54,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB51",
+              "pad": "1",
+              "x": 260.6675,
+              "y": 78.89875,
+              "net": "/Leds/lcol11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB55",
+              "pad": "1",
+              "x": 263.04875,
+              "y": 155.09875,
+              "net": "/Leds/lcol11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB54",
+              "pad": "1",
+              "x": 265.43,
+              "y": 136.04875,
+              "net": "/Leds/lcol11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB551",
+              "pad": "1",
+              "x": 267.97,
+              "y": 155.09875,
+              "net": "/Leds/lcol11",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol11::pre305::post318",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P33",
+              "pad": "1",
+              "x": 214.376,
+              "y": 68.58,
+              "net": "/Leds/lcol11",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol12",
+      "precut_track_only_component": 341,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol12::pre341::post349",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 43,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB56",
+              "pad": "1",
+              "x": 279.7175,
+              "y": 78.89875,
+              "net": "/Leds/lcol12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB59",
+              "pad": "1",
+              "x": 284.48,
+              "y": 136.04875,
+              "net": "/Leds/lcol12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB57",
+              "pad": "1",
+              "x": 289.2425,
+              "y": 97.94875,
+              "net": "/Leds/lcol12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB58",
+              "pad": "1",
+              "x": 294.005,
+              "y": 116.99875,
+              "net": "/Leds/lcol12",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol12::pre341::post358",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P34",
+              "pad": "1",
+              "x": 214.376,
+              "y": 73.66,
+              "net": "/Leds/lcol12",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol13",
+      "precut_track_only_component": 373,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol13::pre373::post389",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 15,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P35",
+              "pad": "1",
+              "x": 214.376,
+              "y": 71.12,
+              "net": "/Leds/lcol13",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol13::pre373::post394",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 40,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB61",
+              "pad": "1",
+              "x": 298.7675,
+              "y": 78.89875,
+              "net": "/Leds/lcol13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB62",
+              "pad": "1",
+              "x": 308.2925,
+              "y": 97.94875,
+              "net": "/Leds/lcol13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB63",
+              "pad": "1",
+              "x": 313.055,
+              "y": 116.99875,
+              "net": "/Leds/lcol13",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol14",
+      "precut_track_only_component": 403,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol14::pre403::post412",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 93,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB66",
+              "pad": "1",
+              "x": 317.8175,
+              "y": 78.89875,
+              "net": "/Leds/lcol14",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB68",
+              "pad": "1",
+              "x": 324.96125,
+              "y": 116.99875,
+              "net": "/Leds/lcol14",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB661",
+              "pad": "1",
+              "x": 327.3425,
+              "y": 78.89875,
+              "net": "/Leds/lcol14",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB69",
+              "pad": "1",
+              "x": 329.72375,
+              "y": 136.04875,
+              "net": "/Leds/lcol14",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol14::pre403::post454",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P36",
+              "pad": "1",
+              "x": 214.376,
+              "y": 76.2,
+              "net": "/Leds/lcol14",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol8",
+      "precut_track_only_component": 468,
+      "postcut_track_only_island_count": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol8::pre468::post478",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 20,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB37",
+              "pad": "1",
+              "x": 213.0425,
+              "y": 97.94875,
+              "net": "/Leds/lcol8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB36",
+              "pad": "1",
+              "x": 203.5175,
+              "y": 78.89875,
+              "net": "/Leds/lcol8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P30",
+              "pad": "1",
+              "x": 195.326,
+              "y": 78.74,
+              "net": "/Leds/lcol8",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol8::pre468::post491",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Leds/lcol8::pre468::post493",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 13,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB38",
+              "pad": "1",
+              "x": 217.805,
+              "y": 116.99875,
+              "net": "/Leds/lcol8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB39",
+              "pad": "1",
+              "x": 208.28,
+              "y": 136.04875,
+              "net": "/Leds/lcol8",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lcol9",
+      "precut_track_only_component": 499,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lcol9::pre499::post500",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 27,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB44",
+              "pad": "1",
+              "x": 227.33,
+              "y": 136.04875,
+              "net": "/Leds/lcol9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB42",
+              "pad": "1",
+              "x": 232.0925,
+              "y": 97.94875,
+              "net": "/Leds/lcol9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB43",
+              "pad": "1",
+              "x": 236.855,
+              "y": 116.99875,
+              "net": "/Leds/lcol9",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lcol9::pre499::post512",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB41",
+              "pad": "1",
+              "x": 222.5675,
+              "y": 78.89875,
+              "net": "/Leds/lcol9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P31",
+              "pad": "1",
+              "x": 195.326,
+              "y": 76.2,
+              "net": "/Leds/lcol9",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lrow1",
+      "precut_track_only_component": 529,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lrow1::pre529::post537",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 52,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB36",
+              "pad": "2",
+              "x": 206.0575,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB31",
+              "pad": "2",
+              "x": 187.0075,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB26",
+              "pad": "2",
+              "x": 167.9575,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P18",
+              "pad": "1",
+              "x": 157.226,
+              "y": 78.74,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lrow1::pre529::post543",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 41,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB46",
+              "pad": "2",
+              "x": 244.1575,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB51",
+              "pad": "2",
+              "x": 263.2075,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB56",
+              "pad": "2",
+              "x": 282.2575,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB61",
+              "pad": "2",
+              "x": 301.3075,
+              "y": 78.89875,
+              "net": "/Leds/lrow1",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lrow2",
+      "precut_track_only_component": 578,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lrow2::pre578::post592",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 58,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB37",
+              "pad": "2",
+              "x": 215.5825,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB32",
+              "pad": "2",
+              "x": 196.5325,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB27",
+              "pad": "2",
+              "x": 177.4825,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB22",
+              "pad": "2",
+              "x": 158.4325,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lrow2::pre578::post611",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 32,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB42",
+              "pad": "2",
+              "x": 234.6325,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB47",
+              "pad": "2",
+              "x": 253.6825,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB52",
+              "pad": "2",
+              "x": 272.7325,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB57",
+              "pad": "2",
+              "x": 291.7825,
+              "y": 97.94875,
+              "net": "/Leds/lrow2",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lrow3",
+      "precut_track_only_component": 643,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lrow3::pre643::post658",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 34,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB38",
+              "pad": "2",
+              "x": 220.345,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB33",
+              "pad": "2",
+              "x": 201.295,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB28",
+              "pad": "2",
+              "x": 182.245,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB23",
+              "pad": "2",
+              "x": 163.195,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lrow3::pre643::post672",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 65,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB43",
+              "pad": "2",
+              "x": 239.395,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB48",
+              "pad": "2",
+              "x": 258.445,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB53",
+              "pad": "2",
+              "x": 277.495,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB58",
+              "pad": "2",
+              "x": 296.545,
+              "y": 116.99875,
+              "net": "/Leds/lrow3",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lrow4",
+      "precut_track_only_component": 770,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lrow4::pre770::post726",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 46,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB44",
+              "pad": "2",
+              "x": 229.87,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB49",
+              "pad": "2",
+              "x": 248.92,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB54",
+              "pad": "2",
+              "x": 267.97,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB59",
+              "pad": "2",
+              "x": 287.02,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lrow4::pre770::post787",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 113,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB39",
+              "pad": "2",
+              "x": 210.82,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB34",
+              "pad": "2",
+              "x": 191.77,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB29",
+              "pad": "2",
+              "x": 172.72,
+              "y": 136.04875,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P21",
+              "pad": "1",
+              "x": 157.226,
+              "y": 76.2,
+              "net": "/Leds/lrow4",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Leds/lrow5",
+      "precut_track_only_component": 856,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Leds/lrow5::pre856::post873",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 35,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB55",
+              "pad": "2",
+              "x": 265.50875,
+              "y": 155.09875,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB50",
+              "pad": "2",
+              "x": 336.8675,
+              "y": 68.73875,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Leds/lrow5::pre856::post922",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 112,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DB301",
+              "pad": "2",
+              "x": 206.0575,
+              "y": 155.09875,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB30",
+              "pad": "2",
+              "x": 194.15125,
+              "y": 155.09875,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DB302",
+              "pad": "2",
+              "x": 187.0075,
+              "y": 155.09875,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P22",
+              "pad": "1",
+              "x": 157.226,
+              "y": 68.58,
+              "net": "/Leds/lrow5",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col10",
+      "precut_track_only_component": 945,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col10::pre945::post954",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 15,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col10::pre945::post964",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 45,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col11",
+      "precut_track_only_component": 1000,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col11::pre1000::post1020",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 13,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col11::pre1000::post1025",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 25,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col12",
+      "precut_track_only_component": 1037,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col12::pre1037::post1058",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 14,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "IC1",
+              "pad": "27",
+              "x": 162.08502,
+              "y": 154.62504,
+              "net": "/Matrix/col12",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/col12::pre1037::post1069",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 33,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col13",
+      "precut_track_only_component": 1053,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col13::pre1053::post1076",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 13,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col13::pre1053::post1104",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 29,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col14",
+      "precut_track_only_component": 1119,
+      "postcut_track_only_island_count": 4,
+      "candidate_graph_edges_needed": 3,
+      "unanchored_islands": 4,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col14::pre1119::post1119",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 32,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col14::pre1119::post1140",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 47,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col14::pre1119::post2174",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 2,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col14::pre1119::post2175",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 2,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/col9",
+      "precut_track_only_component": 1182,
+      "postcut_track_only_island_count": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 3,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/col9::pre1182::post1181",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 13,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col9::pre1182::post1194",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 2,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "/Matrix/col9::pre1182::post1205",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 24,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/row1",
+      "precut_track_only_component": 1253,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/row1::pre1253::post1218",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 44,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S46",
+              "pad": "1",
+              "x": 239.0775,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S51",
+              "pad": "1",
+              "x": 258.1275,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S56",
+              "pad": "1",
+              "x": 277.1775,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S61",
+              "pad": "1",
+              "x": 296.2275,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/row1::pre1253::post1276",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 79,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S41",
+              "pad": "1",
+              "x": 220.0275,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S36",
+              "pad": "1",
+              "x": 200.9775,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S31",
+              "pad": "1",
+              "x": 181.9275,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S26",
+              "pad": "1",
+              "x": 162.8775,
+              "y": 71.28002,
+              "net": "/Matrix/row1",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/row2",
+      "precut_track_only_component": 1282,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/row2::pre1282::post1305",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 65,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S37",
+              "pad": "1",
+              "x": 210.5025,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S32",
+              "pad": "1",
+              "x": 191.4525,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S27",
+              "pad": "1",
+              "x": 172.4025,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S22",
+              "pad": "1",
+              "x": 153.3525,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/row2::pre1282::post1342",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 42,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S42",
+              "pad": "1",
+              "x": 229.5525,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S47",
+              "pad": "1",
+              "x": 248.6025,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S52",
+              "pad": "1",
+              "x": 267.6525,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S57",
+              "pad": "1",
+              "x": 286.7025,
+              "y": 90.33002,
+              "net": "/Matrix/row2",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/row3",
+      "precut_track_only_component": 1414,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/row3::pre1414::post1376",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 73,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S38",
+              "pad": "1",
+              "x": 215.265,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S33",
+              "pad": "1",
+              "x": 196.215,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S28",
+              "pad": "1",
+              "x": 177.165,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "IC1",
+              "pad": "20",
+              "x": 166.99992,
+              "y": 151.31034,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/row3::pre1414::post1381",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 60,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S43",
+              "pad": "1",
+              "x": 234.315,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S48",
+              "pad": "1",
+              "x": 253.365,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S53",
+              "pad": "1",
+              "x": 272.415,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S58",
+              "pad": "1",
+              "x": 291.465,
+              "y": 109.38002,
+              "net": "/Matrix/row3",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/row4",
+      "precut_track_only_component": 1508,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/row4::pre1508::post1528",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 67,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S39",
+              "pad": "1",
+              "x": 205.74,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S34",
+              "pad": "1",
+              "x": 186.69,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S29",
+              "pad": "1",
+              "x": 167.64,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S24",
+              "pad": "1",
+              "x": 148.59,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/row4::pre1508::post1533",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 70,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S49",
+              "pad": "1",
+              "x": 243.84,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S54",
+              "pad": "1",
+              "x": 262.89,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S59",
+              "pad": "1",
+              "x": 281.94,
+              "y": 128.43002,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S64",
+              "pad": "2",
+              "x": 307.34,
+              "y": 125.88875,
+              "net": "/Matrix/row4",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "/Matrix/row5",
+      "precut_track_only_component": 1541,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/Matrix/row5::pre1541::post1586",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 82,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S55",
+              "pad": "1",
+              "x": 260.50875,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S552",
+              "pad": "1",
+              "x": 262.89,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S601",
+              "pad": "1",
+              "x": 281.94,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S60",
+              "pad": "1",
+              "x": 284.32125,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "/Matrix/row5::pre1541::post1601",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 81,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S301",
+              "pad": "1",
+              "x": 200.9775,
+              "y": 147.48002,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S30",
+              "pad": "1",
+              "x": 189.07125,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S302",
+              "pad": "1",
+              "x": 181.9275,
+              "y": 147.47875,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "S151",
+              "pad": "1",
+              "x": 120.015,
+              "y": 147.447,
+              "net": "/Matrix/row5",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "GND",
+      "precut_track_only_component": 1660,
+      "postcut_track_only_island_count": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "GND::pre1660::post1686",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 245,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "IC1",
+              "pad": "5",
+              "x": 160.48482,
+              "y": 143.19504,
+              "net": "GND",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P17",
+              "pad": "1",
+              "x": 138.43,
+              "y": 153.67,
+              "net": "GND",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "GND::pre1660::post1733",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 14,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P6",
+              "pad": "1",
+              "x": 227.33,
+              "y": 156.21,
+              "net": "GND",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "GND::pre1660::post1824",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 33,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "N-000077",
+      "precut_track_only_component": 1846,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "N-000077::pre1846::post1874",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 7,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "N-000077::pre1846::post1879",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    },
+    {
+      "net": "N-000116",
+      "precut_track_only_component": 1853,
+      "postcut_track_only_island_count": 2,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "N-000116::pre1853::post1883",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 1,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "N-000116::pre1853::post1886",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 8,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "S44",
+              "pad": "2",
+              "x": 231.14,
+              "y": 125.89002,
+              "net": "N-000116",
+              "layer": "F.Cu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "net": "VCC",
+      "precut_track_only_component": 1868,
+      "postcut_track_only_island_count": 5,
+      "candidate_graph_edges_needed": 4,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "VCC::pre1868::post1897",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 191,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P2",
+              "pad": "1",
+              "x": 222.25,
+              "y": 156.21,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "C4",
+              "pad": "1",
+              "x": 153.0985,
+              "y": 153.162,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DW2",
+              "pad": "1",
+              "x": 141.605,
+              "y": 116.99875,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "P16",
+              "pad": "1",
+              "x": 138.43,
+              "y": 156.21,
+              "net": "VCC",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "VCC::pre1868::post1982",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 64,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "DF23",
+              "pad": "1",
+              "x": 286.91125,
+              "y": 155.09875,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DF232",
+              "pad": "1",
+              "x": 291.7825,
+              "y": 155.09875,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DF11",
+              "pad": "1",
+              "x": 303.53,
+              "y": 136.04875,
+              "net": "VCC",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "DF20",
+              "pad": "1",
+              "x": 310.67375,
+              "y": 136.04875,
+              "net": "VCC",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "VCC::pre1868::post2087",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 10,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "P37",
+              "pad": "1",
+              "x": 233.426,
+              "y": 78.74,
+              "net": "VCC",
+              "layer": "F.Cu"
+            }
+          ]
+        },
+        {
+          "model_island_id": "VCC::pre1868::post2089",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 6,
+          "intact_solder_pad_candidates": []
+        },
+        {
+          "model_island_id": "VCC::pre1868::post2092",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": []
+        }
+      ]
+    }
+  ],
+  "bridge_edges": [
+    {
+      "net": "/GPIO0",
+      "from_island": "/GPIO0::pre5::post5",
+      "to_island": "/GPIO0::pre5::post45",
+      "from_candidate_pad": {
+        "ref": "R7",
+        "pad": "1",
+        "x": 147.447,
+        "y": 97.917,
+        "net": "/GPIO0",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P38",
+        "pad": "1",
+        "x": 233.426,
+        "y": 68.58,
+        "net": "/GPIO0",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/GPIO1",
+      "from_island": "/GPIO1::pre84::post57",
+      "to_island": "/GPIO1::pre84::post94",
+      "from_candidate_pad": {
+        "ref": "IC1",
+        "pad": "37",
+        "x": 155.56992,
+        "y": 150.51024,
+        "net": "/GPIO1",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P39",
+        "pad": "1",
+        "x": 233.426,
+        "y": 73.66,
+        "net": "/GPIO1",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/GPIO2",
+      "from_island": "/GPIO2::pre119::post121",
+      "to_island": "/GPIO2::pre119::post150",
+      "from_candidate_pad": {
+        "ref": "P9",
+        "pad": "1",
+        "x": 133.35,
+        "y": 153.67,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P40",
+        "pad": "1",
+        "x": 233.426,
+        "y": 76.2,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/GPIO2",
+      "from_island": "/GPIO2::pre119::post121",
+      "to_island": "/GPIO2::pre119::post159",
+      "from_candidate_pad": {
+        "ref": "P9",
+        "pad": "1",
+        "x": 133.35,
+        "y": 153.67,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "R10",
+        "pad": "1",
+        "x": 304.8,
+        "y": 116.078,
+        "net": "/GPIO2",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/GPIO3",
+      "from_island": "/GPIO3::pre170::post175",
+      "to_island": "/GPIO3::pre170::post191",
+      "from_candidate_pad": {
+        "ref": "P41",
+        "pad": "1",
+        "x": 233.426,
+        "y": 71.12,
+        "net": "/GPIO3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P10",
+        "pad": "1",
+        "x": 133.35,
+        "y": 156.21,
+        "net": "/GPIO3",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/GPIO3",
+      "from_island": "/GPIO3::pre170::post175",
+      "to_island": "/GPIO3::pre170::post217",
+      "from_candidate_pad": {
+        "ref": "P41",
+        "pad": "1",
+        "x": 233.426,
+        "y": 71.12,
+        "net": "/GPIO3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "R15",
+        "pad": "1",
+        "x": 276.225,
+        "y": 146.685,
+        "net": "/GPIO3",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol10",
+      "from_island": "/Leds/lcol10::pre268::post252",
+      "to_island": "/Leds/lcol10::pre268::post275",
+      "from_candidate_pad": {
+        "ref": "P32",
+        "pad": "1",
+        "x": 195.326,
+        "y": 73.66,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB46",
+        "pad": "1",
+        "x": 241.6175,
+        "y": 78.89875,
+        "net": "/Leds/lcol10",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol11",
+      "from_island": "/Leds/lcol11::pre305::post312",
+      "to_island": "/Leds/lcol11::pre305::post318",
+      "from_candidate_pad": {
+        "ref": "DB51",
+        "pad": "1",
+        "x": 260.6675,
+        "y": 78.89875,
+        "net": "/Leds/lcol11",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P33",
+        "pad": "1",
+        "x": 214.376,
+        "y": 68.58,
+        "net": "/Leds/lcol11",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol12",
+      "from_island": "/Leds/lcol12::pre341::post349",
+      "to_island": "/Leds/lcol12::pre341::post358",
+      "from_candidate_pad": {
+        "ref": "DB56",
+        "pad": "1",
+        "x": 279.7175,
+        "y": 78.89875,
+        "net": "/Leds/lcol12",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P34",
+        "pad": "1",
+        "x": 214.376,
+        "y": 73.66,
+        "net": "/Leds/lcol12",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol13",
+      "from_island": "/Leds/lcol13::pre373::post389",
+      "to_island": "/Leds/lcol13::pre373::post394",
+      "from_candidate_pad": {
+        "ref": "P35",
+        "pad": "1",
+        "x": 214.376,
+        "y": 71.12,
+        "net": "/Leds/lcol13",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB61",
+        "pad": "1",
+        "x": 298.7675,
+        "y": 78.89875,
+        "net": "/Leds/lcol13",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol14",
+      "from_island": "/Leds/lcol14::pre403::post412",
+      "to_island": "/Leds/lcol14::pre403::post454",
+      "from_candidate_pad": {
+        "ref": "DB66",
+        "pad": "1",
+        "x": 317.8175,
+        "y": 78.89875,
+        "net": "/Leds/lcol14",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "P36",
+        "pad": "1",
+        "x": 214.376,
+        "y": 76.2,
+        "net": "/Leds/lcol14",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lcol9",
+      "from_island": "/Leds/lcol9::pre499::post500",
+      "to_island": "/Leds/lcol9::pre499::post512",
+      "from_candidate_pad": {
+        "ref": "DB44",
+        "pad": "1",
+        "x": 227.33,
+        "y": 136.04875,
+        "net": "/Leds/lcol9",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB41",
+        "pad": "1",
+        "x": 222.5675,
+        "y": 78.89875,
+        "net": "/Leds/lcol9",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lrow1",
+      "from_island": "/Leds/lrow1::pre529::post537",
+      "to_island": "/Leds/lrow1::pre529::post543",
+      "from_candidate_pad": {
+        "ref": "DB36",
+        "pad": "2",
+        "x": 206.0575,
+        "y": 78.89875,
+        "net": "/Leds/lrow1",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB46",
+        "pad": "2",
+        "x": 244.1575,
+        "y": 78.89875,
+        "net": "/Leds/lrow1",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lrow2",
+      "from_island": "/Leds/lrow2::pre578::post592",
+      "to_island": "/Leds/lrow2::pre578::post611",
+      "from_candidate_pad": {
+        "ref": "DB37",
+        "pad": "2",
+        "x": 215.5825,
+        "y": 97.94875,
+        "net": "/Leds/lrow2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB42",
+        "pad": "2",
+        "x": 234.6325,
+        "y": 97.94875,
+        "net": "/Leds/lrow2",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lrow3",
+      "from_island": "/Leds/lrow3::pre643::post658",
+      "to_island": "/Leds/lrow3::pre643::post672",
+      "from_candidate_pad": {
+        "ref": "DB38",
+        "pad": "2",
+        "x": 220.345,
+        "y": 116.99875,
+        "net": "/Leds/lrow3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB43",
+        "pad": "2",
+        "x": 239.395,
+        "y": 116.99875,
+        "net": "/Leds/lrow3",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lrow4",
+      "from_island": "/Leds/lrow4::pre770::post726",
+      "to_island": "/Leds/lrow4::pre770::post787",
+      "from_candidate_pad": {
+        "ref": "DB44",
+        "pad": "2",
+        "x": 229.87,
+        "y": 136.04875,
+        "net": "/Leds/lrow4",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB39",
+        "pad": "2",
+        "x": 210.82,
+        "y": 136.04875,
+        "net": "/Leds/lrow4",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Leds/lrow5",
+      "from_island": "/Leds/lrow5::pre856::post873",
+      "to_island": "/Leds/lrow5::pre856::post922",
+      "from_candidate_pad": {
+        "ref": "DB55",
+        "pad": "2",
+        "x": 265.50875,
+        "y": 155.09875,
+        "net": "/Leds/lrow5",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "DB301",
+        "pad": "2",
+        "x": 206.0575,
+        "y": 155.09875,
+        "net": "/Leds/lrow5",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Matrix/row1",
+      "from_island": "/Matrix/row1::pre1253::post1218",
+      "to_island": "/Matrix/row1::pre1253::post1276",
+      "from_candidate_pad": {
+        "ref": "S46",
+        "pad": "1",
+        "x": 239.0775,
+        "y": 71.28002,
+        "net": "/Matrix/row1",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S41",
+        "pad": "1",
+        "x": 220.0275,
+        "y": 71.28002,
+        "net": "/Matrix/row1",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Matrix/row2",
+      "from_island": "/Matrix/row2::pre1282::post1305",
+      "to_island": "/Matrix/row2::pre1282::post1342",
+      "from_candidate_pad": {
+        "ref": "S37",
+        "pad": "1",
+        "x": 210.5025,
+        "y": 90.33002,
+        "net": "/Matrix/row2",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S42",
+        "pad": "1",
+        "x": 229.5525,
+        "y": 90.33002,
+        "net": "/Matrix/row2",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Matrix/row3",
+      "from_island": "/Matrix/row3::pre1414::post1376",
+      "to_island": "/Matrix/row3::pre1414::post1381",
+      "from_candidate_pad": {
+        "ref": "S38",
+        "pad": "1",
+        "x": 215.265,
+        "y": 109.38002,
+        "net": "/Matrix/row3",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S43",
+        "pad": "1",
+        "x": 234.315,
+        "y": 109.38002,
+        "net": "/Matrix/row3",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Matrix/row4",
+      "from_island": "/Matrix/row4::pre1508::post1528",
+      "to_island": "/Matrix/row4::pre1508::post1533",
+      "from_candidate_pad": {
+        "ref": "S39",
+        "pad": "1",
+        "x": 205.74,
+        "y": 128.43002,
+        "net": "/Matrix/row4",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S49",
+        "pad": "1",
+        "x": 243.84,
+        "y": 128.43002,
+        "net": "/Matrix/row4",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/Matrix/row5",
+      "from_island": "/Matrix/row5::pre1541::post1586",
+      "to_island": "/Matrix/row5::pre1541::post1601",
+      "from_candidate_pad": {
+        "ref": "S55",
+        "pad": "1",
+        "x": 260.50875,
+        "y": 147.47875,
+        "net": "/Matrix/row5",
+        "layer": "F.Cu"
+      },
+      "to_candidate_pad": {
+        "ref": "S301",
+        "pad": "1",
+        "x": 200.9775,
+        "y": 147.48002,
+        "net": "/Matrix/row5",
+        "layer": "F.Cu"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    }
+  ],
+  "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+  "payload_sha256": "d64aae5960aaf61ee74e239ef5facf25e858c1e1ba186952f5ae32cc82c23d56"
+}
