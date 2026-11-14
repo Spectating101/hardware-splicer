@@ -48,6 +48,16 @@ Selected Balanced 6.0mm was also re-evaluated with a separate
 minimum printed-part clearance 1.1814mm; screen-to-screen 2.6mm;
 screen-to-opposite-leaf 3.1623mm; reserved cable space 2.5mm.
 
+**Axial location is NOT achieved.** The knuckles are 14 mm long on an
+18 mm pitch, leaving 4 mm between each neighbouring pair, so each leaf
+can slide 8 mm along the pin relative to the other (4 mm each way).
+`axial_location.axial_play_mm` records this for every candidate against
+an assumed 0.5 mm limit, and `blockers` / `selected_candidate_blockers`
+list it. It is deliberately not folded into
+`nominal_mechanism_feasible`, which only covers the swept-motion and
+envelope gates, so the ranking is unchanged. The pin retention rings do
+not locate the leaves either.
+
 These are DISCRETE, NOMINAL, undistorted part positions. Sampling
 cannot certify clearance continuously between angles, under
 real manufacturing tolerances or under mechanical loads.

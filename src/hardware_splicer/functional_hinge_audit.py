@@ -13,7 +13,7 @@ from typing import Any,Mapping
 
 from .function_print_geometry import canonical,file_sha
 from .functional_hinge_assembly import (
-    OUTPUT,validate,machine_function_intent,make_parts,evaluate_motion
+    OUTPUT,validate,machine_function_intent,make_parts,evaluate_motion,knuckle_axial_play
 )
 
 def audit(req:Mapping[str,Any],out:Path)->dict[str,Any]:
@@ -35,6 +35,11 @@ def audit(req:Mapping[str,Any],out:Path)->dict[str,Any]:
     for alt,row in zip(validated["alternatives"],report["candidates"]):
         if row["id"]!=alt["id"]:
             raise ValueError("candidate source order changed")
+        expected_axial=knuckle_axial_play(validated)
+        if (row.get("axial_location")!=expected_axial
+            or row.get("blockers")!=expected_axial["blockers"]
+            or row.get("knuckle_axial_location_verified") is not False):
+            raise ValueError("recorded knuckle axial play does not match the knuckle positions")
         if row["nominal_mechanism_feasible"]!=all(row["checks"].values()):
             raise ValueError("source candidate pass was misclassified")
         sweep=row["discrete_sweep"]
@@ -69,6 +74,9 @@ def audit(req:Mapping[str,Any],out:Path)->dict[str,Any]:
     eligible.sort(key=lambda x:(x["geometry"]["solid_volume_mm3"],x["geometry"]["folded_solid_height_mm"],x["id"]))
     if report["feasible_order"]!=[x["id"] for x in eligible] or report["selected"]!=(eligible[0]["id"] if eligible else None):
         raise ValueError("selected mechanism is not the least-material feasible source design")
+    picked=report["selected"]
+    if report.get("selected_candidate_blockers")!=(next(r["blockers"] for r in report["candidates"] if r["id"]==picked) if picked else []):
+        raise ValueError("selected candidate blocker list does not match its axial location result")
     if any(report["authority"].values()):
         raise ValueError("unverified physical/production authority was promoted")
     chosen=report["selected"]

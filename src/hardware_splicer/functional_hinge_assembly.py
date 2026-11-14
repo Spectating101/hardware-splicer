@@ -198,6 +198,50 @@ def _distance(first:Any,second:Any)->float:
         raise ValueError("genuine OpenCascade solid-to-solid proximity failed")
     return float(d.Value())
 
+AXIAL_PLAY_LIMIT_MM=0.5   # assumption: more free travel along the pin than this is not "located"
+AXIAL_PLAY_ASSUMPTION=("Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to "
+                       "the other leaf before its knuckles bear on the neighbours; not a measured value.")
+
+def knuckle_axial_play(req:Mapping[str,Any])->dict[str,Any]:
+    """Free axial travel of one leaf relative to the other, from knuckle positions.
+
+    Knuckles alternate between leaves. A leaf can slide along the pin until
+    one of its knuckles meets an opposite-leaf neighbour; the free travel is
+    the smallest gap on the left plus the smallest gap on the right. The pin
+    and its rings do not locate the leaves, so only the knuckles are used.
+    """
+    h=req["mechanical"];length=float(h["barrel_knuckle_length_mm"])
+    spans=sorted([(owner,xc-length/2,xc+length/2)
+                  for owner,key in (("base","base_barrel_x_centres_mm"),("lid","lid_barrel_x_centres_mm"))
+                  for xc in h[key]],key=lambda t:t[1])
+    def nearest(owner:str,idx:int,step:int)->float|None:
+        j=idx+step
+        while 0<=j<len(spans):
+            if spans[j][0]!=owner:
+                return (spans[idx][1]-spans[j][2]) if step<0 else (spans[j][1]-spans[idx][2])
+            j+=step
+        return None
+    gaps=[round(spans[i+1][1]-spans[i][2],6) for i in range(len(spans)-1)]
+    # Contact pairs seen from the base leaf equal those seen from the lid leaf,
+    # so the base leaf alone gives the relative travel.
+    left=[g for g in (nearest(o,i,-1) for i,(o,_,_) in enumerate(spans) if o=="base") if g is not None]
+    right=[g for g in (nearest(o,i,1) for i,(o,_,_) in enumerate(spans) if o=="base") if g is not None]
+    base_n=sum(1 for o,_,_ in spans if o=="base")
+    play=min(left)+min(right) if len(left)==base_n and len(right)==base_n and base_n else float("inf")
+    play=round(play,6)
+    ok=play<=AXIAL_PLAY_LIMIT_MM+1e-9
+    return {
+        "knuckle_extents_x_mm":[[o,round(a,6),round(b,6)] for o,a,b in spans],
+        "adjacent_gaps_mm":gaps,
+        "axial_play_mm":play,
+        "axial_play_limit_mm":AXIAL_PLAY_LIMIT_MM,
+        "within_limit":ok,
+        "assumption":AXIAL_PLAY_ASSUMPTION,
+        "blockers":[] if ok else [
+            "knuckle axial play %.3f mm exceeds the assumed %.1f mm limit: each leaf can slide along the pin "
+            "(no axial locating feature between the leaves)"%(play,AXIAL_PLAY_LIMIT_MM)],
+    }
+
 def evaluate_motion(req:Mapping[str,Any],alt:Mapping[str,Any],parts:Mapping[str,Any],
                     *,step_deg:int|None=None)->dict[str,Any]:
     import cadquery as cq
@@ -240,6 +284,7 @@ def evaluate_motion(req:Mapping[str,Any],alt:Mapping[str,Any],parts:Mapping[str,
     folded_z=bbox.zmax - bbox.zmin
     c=req["cable"];h=req["mechanical"];d=req["design_reference"]
     shaft=parts["shaft_reference"]
+    axial=knuckle_axial_play(req)
     checks={
         "valid_two_separate_source_leaf_solids":all(x.isValid() for x in (lower,upper)),
         "nominal_pin_clearance_both_leaves":min(
@@ -282,6 +327,8 @@ def evaluate_motion(req:Mapping[str,Any],alt:Mapping[str,Any],parts:Mapping[str,
                     "min_screen_to_other_leaf_gap_mm":min(x["screen_to_other_leaf_distance_mm"] for x in measures),
                     "min_reserved_cable_corridor_separation_mm":min(x["external_cable_reservation_distance_mm"] for x in measures)},
         "discrete_sweep":measures,
+        "axial_location":axial,"blockers":list(axial["blockers"]),
+        "knuckle_axial_location_verified":False,
         "checks":checks,"nominal_mechanism_feasible":all(checks.values()),
         "physical_screen_or_cable_test_completed":False,
         "shaft_retention_verified":False,"actual_cable_routed":False,
@@ -367,6 +414,7 @@ def execute(req:Mapping[str,Any],out:Path)->dict[str,Any]:
         "native_function_gate":gate,
         "candidates":rows,"feasible_order":[r["id"] for r in eligible],
         "selected":chosen,
+        "selected_candidate_blockers":(next(r["blockers"] for r in rows if r["id"]==chosen) if chosen else []),
         "selection_reason":"lowest genuine printable-leaf BRep volume among candidates meeting discrete motion, screen/cable keepout and folded thickness proxy gates",
         "source_uncertainties":[
             "The screen package is an assumed BRep box, not a sourced display module.",

@@ -10,6 +10,51 @@
   "candidates": [
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -411,7 +456,9 @@
         "upper_volume_mm3": 29975.206
       },
       "id": "slim_43",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -450,6 +497,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -851,7 +943,9 @@
         "upper_volume_mm3": 30542.65
       },
       "id": "compact_51",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -890,6 +984,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -1291,7 +1430,9 @@
         "upper_volume_mm3": 30964.019
       },
       "id": "balanced_60",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -1330,6 +1471,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": false,
@@ -1731,7 +1917,9 @@
         "upper_volume_mm3": 30964.019
       },
       "id": "crowded_cable_60",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -1770,6 +1958,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -2171,7 +2404,9 @@
         "upper_volume_mm3": 30232.266
       },
       "id": "thin_wall_60",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -2210,6 +2445,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -2611,7 +2891,9 @@
         "upper_volume_mm3": 31477.368
       },
       "id": "reinforced_64",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -2650,6 +2932,51 @@
     },
     {
       "actual_cable_routed": false,
+      "axial_location": {
+        "adjacent_gaps_mm": [
+          4.0,
+          4.0,
+          4.0,
+          4.0
+        ],
+        "assumption": "Assumed limit: each leaf may slide at most 0.5 mm along the pin relative to the other leaf before its knuckles bear on the neighbours; not a measured value.",
+        "axial_play_limit_mm": 0.5,
+        "axial_play_mm": 8.0,
+        "blockers": [
+          "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+        ],
+        "knuckle_extents_x_mm": [
+          [
+            "lid",
+            -43.0,
+            -29.0
+          ],
+          [
+            "base",
+            -25.0,
+            -11.0
+          ],
+          [
+            "lid",
+            -7.0,
+            7.0
+          ],
+          [
+            "base",
+            11.0,
+            25.0
+          ],
+          [
+            "lid",
+            29.0,
+            43.0
+          ]
+        ],
+        "within_limit": false
+      },
+      "blockers": [
+        "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+      ],
       "checks": {
         "cable_corridor_within_nominal_max_width": true,
         "external_cable_corridor_avoids_printed_solids": true,
@@ -3051,7 +3378,9 @@
         "upper_volume_mm3": 32148.029
       },
       "id": "tall_73",
+      "knuckle_axial_location_verified": false,
       "mechanism": {
+        "angle_step_deg": 5,
         "axis": "X",
         "interval_samples": 37,
         "moving_part": "upper_leaf",
@@ -3139,6 +3468,9 @@
   "reference_spec_sha256": "ae14effd130e0752e7df71689d45a688698aa5451c805729aca165fdd69d0587",
   "schema": "hs.cyberdeck_mating_hinge_cad.v1",
   "selected": "balanced_60",
+  "selected_candidate_blockers": [
+    "knuckle axial play 8.000 mm exceeds the assumed 0.5 mm limit: each leaf can slide along the pin (no axial locating feature between the leaves)"
+  ],
   "selection_reason": "lowest genuine printable-leaf BRep volume among candidates meeting discrete motion, screen/cable keepout and folded thickness proxy gates",
   "source_uncertainties": [
     "The screen package is an assumed BRep box, not a sourced display module.",
