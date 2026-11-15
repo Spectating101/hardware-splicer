@@ -1,0 +1,54 @@
+{
+  "schema": "hs.keyboard-copper-repair-loop.v1",
+  "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+  "cut_path_sha256": "bf1d14e284536ea979073c34ce09181027966733ced703639768e6b1c1e1790d",
+  "selected_strategy": "adaptive_functional",
+  "iterations": [
+    {
+      "strategy": "pad_only",
+      "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+      "topology_sha256": "81bb7f2cc09c6a08d9a62d103d94b1772ae16148f543859277660dcf47749cd9",
+      "bridge_channels": 0,
+      "strict_unconnected_groups": 8,
+      "unconnected_required_groups": 8,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 0,
+      "preexisting_source_terminal_net_gaps": 8,
+      "contact_kinds": {},
+      "required_graph_connected_in_model": false
+    },
+    {
+      "strategy": "adaptive",
+      "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+      "topology_sha256": "9b54a7382a5a6378c79eab20a7bbabb1e8fa4bb65756d966cb269d2c00f228c9",
+      "bridge_channels": 0,
+      "strict_unconnected_groups": 8,
+      "unconnected_required_groups": 8,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 0,
+      "preexisting_source_terminal_net_gaps": 8,
+      "contact_kinds": {},
+      "required_graph_connected_in_model": false
+    },
+    {
+      "strategy": "adaptive_functional",
+      "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+      "topology_sha256": "e9e0ec339c3a534093eb50f4825d455afc65b4bab17eb9d5a0b3a1387bfcc889",
+      "bridge_channels": 0,
+      "strict_unconnected_groups": 8,
+      "unconnected_required_groups": 8,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 0,
+      "preexisting_source_terminal_net_gaps": 8,
+      "contact_kinds": {},
+      "required_graph_connected_in_model": false
+    }
+  ],
+  "total_iterations": 3,
+  "required_graph_connected_in_model": false,
+  "unresolved_source_baseline_terminal_net_gaps": 8,
+  "verified_original_keyboard_firmware_function": false,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_REFERENCE_ONLY",
+  "result": "POSTCUT_REQUIRED_GRAPH_STILL_DISCONNECTED"
+}

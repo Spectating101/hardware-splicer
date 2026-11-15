@@ -115,6 +115,17 @@ def _feature_geometries(board: dict, target_nets: set[str], issues: set[str]) ->
         elif shape == 1:  # rectangular
             poly = box(x - w / 2, y - h / 2, x + w / 2, y + h / 2)
             poly = rotate(poly, -float(pad.get("orientation_degrees", 0)), origin=(x, y))
+        elif shape == 4:  # KiCad PAD_SHAPE_ROUNDRECT, native radius
+            radius=pad.get("roundrect_radius_mm")
+            if radius is None or not (0<=float(radius)<=min(w,h)/2):
+                issues.add("ROUNDRECT_PAD_RADIUS_MISSING_OR_INVALID")
+                continue
+            r=float(radius)
+            if r>0:
+                poly=box(x-w/2+r,y-h/2+r,x+w/2-r,y+h/2-r).buffer(r,resolution=12)
+            else:
+                poly=box(x-w/2,y-h/2,x+w/2,y+h/2)
+            poly=rotate(poly,-float(pad.get("orientation_degrees",0)),origin=(x,y))
         elif shape == 2:  # oval; use bounding rectangle: conservative approximation flagged
             issues.add("OVAL_PAD_APPROXIMATION")
             poly = box(x - w / 2, y - h / 2, x + w / 2, y + h / 2)

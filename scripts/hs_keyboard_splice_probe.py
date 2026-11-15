@@ -159,64 +159,72 @@ def main() -> int:
         args.machine_project_json.parent.mkdir(parents=True,exist_ok=True)
         args.machine_project_json.write_text(json.dumps(handoff,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         result["canonical_machine_release"]=handoff["canonical_summary"]
-    if args.interposer_out:
-        interposer_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_interposer.py"
-        build=subprocess.run(
-            [args.system_python,str(interposer_helper),
-             "--topology-json",str(args.postcut_islands_json.resolve()),
-             "--out",str(args.interposer_out.resolve())],
-            capture_output=True,text=True,timeout=120,check=False
-        )
-        if build.returncode:
-            raise SystemExit("Interposer KiCad preview failed: "+build.stderr[-1400:])
-        manifest=json.loads((args.interposer_out/"INTERPOSER_CHANNEL_MAP.json").read_text(encoding="utf-8"))
-        if (manifest.get("source_reference_sha256")!=result["source_file_sha256"] or
-            manifest.get("topology_sha256")!=topology_result["payload_sha256"] or
-            manifest.get("fabrication_release")!="BLOCKED_PREVIEW_ONLY" or
-            manifest.get("physical_authority_granted") is not False):
-            raise SystemExit("Interposer preview source or physical authority mismatch")
-        kicad_cli=shutil.which("kicad-cli")
-        if not kicad_cli:
-            raise SystemExit("Actual KiCad DRC unavailable; refuse interposer verification claim")
-        pcb_path=args.interposer_out/"reference_bridge_interposer.kicad_pcb"
-        drc_path=args.interposer_out/"INTERPOSER_NATIVE_DRC.json"
-        checked=subprocess.run(
-            [kicad_cli,"pcb","drc","--format","json",
-             "--output",str(drc_path.resolve()),str(pcb_path.resolve())],
-            capture_output=True,text=True,timeout=180,check=False
-        )
-        if not drc_path.is_file():
-            raise SystemExit("Native KiCad returned no verifiable DRC report")
-        drc=json.loads(drc_path.read_text(encoding="utf-8"))
-        n_errors=sum(str(row.get("severity","")).lower()=="error" for row in drc.get("violations",[]))
-        n_warnings=sum(str(row.get("severity","")).lower()=="warning" for row in drc.get("violations",[]))
-        n_open=len(drc.get("unconnected_items",[]))
-        ver={
-            "schema":"hs.keyboard-interposer-native-drc.v1",
-            "source_sha256":result["source_file_sha256"],
-            "topology_sha256":topology_result["payload_sha256"],
-            "pcb_sha256":hashlib.sha256(pcb_path.read_bytes()).hexdigest(),
-            "pcb_filename":pcb_path.name,
-            "channel_count":manifest["channel_count"],
-            "native_kicad_exit":checked.returncode,
-            "native_drc_errors":n_errors,
-            "native_drc_warnings":n_warnings,
-            "native_unconnected_items":n_open,
-            "native_design_checks_passed":checked.returncode==0 and n_errors==0 and n_open==0,
-            "physical_authority_granted":False,
-            "fabrication_release":"BLOCKED_PREVIEW_ONLY",
-        }
-        (args.interposer_out/"INTERPOSER_VERIFICATION.json").write_text(
-            json.dumps(ver,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    if args.interposer_out and topology_result is not None and not topology_result.get("bridge_edges"):
         result["interposer_preview_summary"]={
-            "channels":ver["channel_count"],"pcb_sha256":ver["pcb_sha256"],
-            "native_drc_errors":n_errors,"native_drc_warnings":n_warnings,
-            "native_unconnected_items":n_open,
-            "native_design_checks_passed":ver["native_design_checks_passed"],
-            "fabrication_release":ver["fabrication_release"]
+            "channels":0,
+            "native_design_checks_passed":False,
+            "skipped_due_to_no_source_connected_bridge_endpoints":True,
+            "fabrication_release":"BLOCKED_NO_QUALIFYING_CONNECTIONS",
         }
-        if not ver["native_design_checks_passed"]:
-            raise SystemExit("Native KiCad interposer PCB verification failed; inspect DRC report")
+    else:
+        if args.interposer_out:
+            interposer_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_interposer.py"
+            build=subprocess.run(
+                [args.system_python,str(interposer_helper),
+                 "--topology-json",str(args.postcut_islands_json.resolve()),
+                 "--out",str(args.interposer_out.resolve())],
+                capture_output=True,text=True,timeout=120,check=False
+            )
+            if build.returncode:
+                raise SystemExit("Interposer KiCad preview failed: "+build.stderr[-1400:])
+            manifest=json.loads((args.interposer_out/"INTERPOSER_CHANNEL_MAP.json").read_text(encoding="utf-8"))
+            if (manifest.get("source_reference_sha256")!=result["source_file_sha256"] or
+                manifest.get("topology_sha256")!=topology_result["payload_sha256"] or
+                manifest.get("fabrication_release")!="BLOCKED_PREVIEW_ONLY" or
+                manifest.get("physical_authority_granted") is not False):
+                raise SystemExit("Interposer preview source or physical authority mismatch")
+            kicad_cli=shutil.which("kicad-cli")
+            if not kicad_cli:
+                raise SystemExit("Actual KiCad DRC unavailable; refuse interposer verification claim")
+            pcb_path=args.interposer_out/"reference_bridge_interposer.kicad_pcb"
+            drc_path=args.interposer_out/"INTERPOSER_NATIVE_DRC.json"
+            checked=subprocess.run(
+                [kicad_cli,"pcb","drc","--format","json",
+                 "--output",str(drc_path.resolve()),str(pcb_path.resolve())],
+                capture_output=True,text=True,timeout=180,check=False
+            )
+            if not drc_path.is_file():
+                raise SystemExit("Native KiCad returned no verifiable DRC report")
+            drc=json.loads(drc_path.read_text(encoding="utf-8"))
+            n_errors=sum(str(row.get("severity","")).lower()=="error" for row in drc.get("violations",[]))
+            n_warnings=sum(str(row.get("severity","")).lower()=="warning" for row in drc.get("violations",[]))
+            n_open=len(drc.get("unconnected_items",[]))
+            ver={
+                "schema":"hs.keyboard-interposer-native-drc.v1",
+                "source_sha256":result["source_file_sha256"],
+                "topology_sha256":topology_result["payload_sha256"],
+                "pcb_sha256":hashlib.sha256(pcb_path.read_bytes()).hexdigest(),
+                "pcb_filename":pcb_path.name,
+                "channel_count":manifest["channel_count"],
+                "native_kicad_exit":checked.returncode,
+                "native_drc_errors":n_errors,
+                "native_drc_warnings":n_warnings,
+                "native_unconnected_items":n_open,
+                "native_design_checks_passed":checked.returncode==0 and n_errors==0 and n_open==0,
+                "physical_authority_granted":False,
+                "fabrication_release":"BLOCKED_PREVIEW_ONLY",
+            }
+            (args.interposer_out/"INTERPOSER_VERIFICATION.json").write_text(
+                json.dumps(ver,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+            result["interposer_preview_summary"]={
+                "channels":ver["channel_count"],"pcb_sha256":ver["pcb_sha256"],
+                "native_drc_errors":n_errors,"native_drc_warnings":n_warnings,
+                "native_unconnected_items":n_open,
+                "native_design_checks_passed":ver["native_design_checks_passed"],
+                "fabrication_release":ver["fabrication_release"]
+            }
+            if not ver["native_design_checks_passed"]:
+                raise SystemExit("Native KiCad interposer PCB verification failed; inspect DRC report")
     if args.passive_matrix_json:
         if topology_result is None or chosen_stepped is None:
             raise SystemExit("Passive matrix verification needs the original source and stepped reconstruction")

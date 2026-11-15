@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -26,29 +27,68 @@ def main() -> int:
             s,e=t.GetStart(),t.GetEnd()
             tracks.append({"x1":u(s.x),"y1":u(s.y),"x2":u(e.x),"y2":u(e.y),"width_mm":u(t.GetWidth()),"net":t.GetNetname(),"layer":t.GetLayerName()})
     pads=[];footprints=[];switches=[]
+    warnings=[]
+    # Original PCB vendors use K*, S*, SW*, or MX* key refs. Footprint
+    # identities are stronger evidence than a source-specific reference.
+    keyboard_footprint = re.compile(
+        r"(?i)(?:cherry|kailh|mxonly|mx1a|mx[_-]?alps|"
+        r"sw[_-]?choc|choc[_-]?switch|mx[_-]?[0-9]u)"
+    )
     for f in board.GetFootprints():
         x,y=u(f.GetPosition().x),u(f.GetPosition().y)
         rec={"ref":f.GetReference(),"value":f.GetValue(),"footprint":f.GetFPIDAsString(),"x":x,"y":y}
         footprints.append(rec)
         ref=f.GetReference()
-        if ref.startswith("S") and ("mx" in f.GetValue().lower() or "switch" in f.GetValue().lower() or "sw_push" in f.GetValue().lower()):
+        identity=f.GetFPIDAsString()
+        value=f.GetValue()
+        is_key=bool(keyboard_footprint.search(identity))
+        if not is_key and re.fullmatch(r"(?i)MX[0-9]+",ref):
+            is_key=bool("mx" in value.lower() or "mx" in identity.lower())
+        if not is_key and ref.upper().startswith(("SW","S")):
+            is_key=bool(re.fullmatch(r"(?i)MX[0-9A-Za-z_-]*",value))
+        # Bespoke keyboard PCBs sometimes use a non-MX tactile switch
+        # library (e.g. ML1A in Kinesis F-keys). Treat such switches as
+        # *candidates*, retaining their evidence rather than assuming MX.
+        if not is_key and re.fullmatch(r"(?i)S(?:W)?[0-9]+",ref):
+            # Kinesis uses ML1A tact switches for actual F-key caps. A broad
+            # library-name "keyboard" match would incorrectly classify e.g.
+            # a SKQG reset pushbutton as a retained typing key.
+            if re.search(r"(?i)ML1A[ _-]?11JW",identity+" "+value):
+                conductive={pad.GetNetname() for pad in f.Pads() if pad.GetNetname()}
+                is_key=len(conductive)>=2
+        if is_key:
+            rec["detected_as_keyboard_switch"]=True
+            rec["switch_detected_from"]=(
+                "known_keyboard_footprint" if keyboard_footprint.search(identity)
+                else "candidate_switch_footprint_or_ref"
+            )
             switches.append(rec)
         for pad in f.Pads():
             xpad,ypad=u(pad.GetPosition().x),u(pad.GetPosition().y)
             sz=pad.GetSize()
-            pads.append({"ref":ref,"pad":pad.GetNumber(),"x":xpad,"y":ypad,"size_x_mm":u(sz.x),"size_y_mm":u(sz.y),"orientation_degrees":pad.GetOrientationDegrees(),"pad_shape":int(pad.GetShape()),"pad_attribute":int(pad.GetAttribute()),"net":pad.GetNetname(),"layer":pad.GetLayerName()})
+            pads.append({"ref":ref,"pad":pad.GetNumber(),"x":xpad,"y":ypad,"size_x_mm":u(sz.x),"size_y_mm":u(sz.y), "orientation_degrees":pad.GetOrientationDegrees(),
+                         "roundrect_radius_mm":u(int(pad.GetRoundRectCornerRadius()))
+                             if int(pad.GetShape())==int(p.PAD_SHAPE_ROUNDRECT) else None,
+                         "pad_shape":int(pad.GetShape()),"pad_attribute":int(pad.GetAttribute()),"net":pad.GetNetname(),"layer":pad.GetLayerName()})
     conductive_zones=[]
     rule_area_count=0
     for zone_index, zone in enumerate(board.Zones()):
         if zone.GetIsRuleArea():
             rule_area_count+=1
             continue
+        # zone.IsFilled() can be true on an imported board even when KiCad
+        # carries *no filled polygon list for the requested layer*. Calling
+        # GetFilledPolysList there can abort the native process, not merely
+        # raise a Python exception; consult the layer-specific accessor first.
+        has_fill=bool(zone.IsFilled() and zone.HasFilledPolysForLayer(zone.GetLayer()))
         record={
             "net":zone.GetNetname(), "layer":zone.GetLayerName(),
-            "is_filled":bool(zone.IsFilled()),"polygons":[],
+            "is_filled":has_fill,"polygons":[],
             "source_zone_index":zone_index,
         }
-        if zone.IsFilled():
+        if not has_fill and zone.GetNetname():
+            warnings.append(f"unfilled_zone:{zone_index}:{zone.GetNetname()}")
+        if has_fill:
             polys=zone.GetFilledPolysList(zone.GetLayer())
             for poly_index in range(polys.OutlineCount()):
                 def points(chain):
@@ -63,7 +103,11 @@ def main() -> int:
     print(json.dumps({
         "source_label":source.name,
         "source_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
-        "source_warnings":(["legacy_format_conversion_requires_independent_board_review"] if "(version 4)" in source.read_text(encoding="utf-8",errors="replace")[:100] else []),
+        "source_warnings":(
+            (["legacy_format_conversion_requires_independent_board_review"]
+             if "(version 4)" in source.read_text(encoding="utf-8",errors="replace")[:100] else [])
+            + warnings
+        ),
         "pcbnew_version":p.Version(),
         "outline_bbox_mm":bbox,
         "zone_count":len(board.Zones()),

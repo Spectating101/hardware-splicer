@@ -1,0 +1,9 @@
+SOURCE_SHA256 6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15
+SCAN 115 passing 0
+CENTRAL 35 segments; 21 nets; 6 switch keepouts
+BEST 192.396 mm; 22 nets; 14 matrix nets; 3 switch keepouts; 13 pads
+REPAIR_ITERATIONS 3 strategy adaptive_functional
+MODELED_REQUIRED_GRAPH_CONNECTED False source_baseline_terminal_gaps 20
+VERDICT BLOCKED_REFERENCE_ONLY report /tmp/hs-keyboard-splice-20261115/examples/arbitrage_lab/keyboard_splice/arbitrary_corpus/evidence_final_20261115/vyom60/run/CUT.json
+
+STDERR:

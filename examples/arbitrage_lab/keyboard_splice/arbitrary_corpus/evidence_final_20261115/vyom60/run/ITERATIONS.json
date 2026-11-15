@@ -1,0 +1,62 @@
+{
+  "schema": "hs.keyboard-copper-repair-loop.v1",
+  "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+  "cut_path_sha256": "f73e8c767ae5934b747700d6fd1393285607de3193788e465fd0cf1859cb3d2e",
+  "selected_strategy": "adaptive_functional",
+  "iterations": [
+    {
+      "strategy": "pad_only",
+      "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+      "topology_sha256": "82a8f8602f61b102aaf14c2f0c7220eeb26f74f5bb2ebdc2631757d9a47fdeb9",
+      "bridge_channels": 6,
+      "strict_unconnected_groups": 16,
+      "unconnected_required_groups": 16,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 3,
+      "preexisting_source_terminal_net_gaps": 20,
+      "contact_kinds": {
+        "existing_pad": 12
+      },
+      "required_graph_connected_in_model": false
+    },
+    {
+      "strategy": "adaptive",
+      "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+      "topology_sha256": "58b8ff55cda2b7a594ccc2f063101bb8c6300562c8deb22d2ea2c66e09ef5fd5",
+      "bridge_channels": 11,
+      "strict_unconnected_groups": 15,
+      "unconnected_required_groups": 15,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 3,
+      "preexisting_source_terminal_net_gaps": 20,
+      "contact_kinds": {
+        "existing_pad": 12,
+        "trace_exposure": 10
+      },
+      "required_graph_connected_in_model": false
+    },
+    {
+      "strategy": "adaptive_functional",
+      "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+      "topology_sha256": "e878f222de6ca4573bb6647d5da073d319a8984f0c4c3781511e5b71e9e53926",
+      "bridge_channels": 11,
+      "strict_unconnected_groups": 15,
+      "unconnected_required_groups": 13,
+      "isolated_terminal_free_remnants": 4,
+      "damaged_electrical_pads": 3,
+      "preexisting_source_terminal_net_gaps": 20,
+      "contact_kinds": {
+        "existing_pad": 12,
+        "trace_exposure": 10
+      },
+      "required_graph_connected_in_model": false
+    }
+  ],
+  "total_iterations": 3,
+  "required_graph_connected_in_model": false,
+  "unresolved_source_baseline_terminal_net_gaps": 20,
+  "verified_original_keyboard_firmware_function": false,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_REFERENCE_ONLY",
+  "result": "POSTCUT_REQUIRED_GRAPH_STILL_DISCONNECTED"
+}

@@ -1,0 +1,99 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "st40",
+  "repository": "coarse/st40",
+  "reference_path": "st40.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/coarse/st40/master/st40.kicad_pcb",
+  "expected_source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+  "intake": {
+    "schema": "hs.arbitrary-keyboard-intake.v1",
+    "reference_source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+    "reference_source_filename": "st40.kicad_pcb",
+    "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+    "copper_layers": 2,
+    "footprints": 110,
+    "key_switch_candidates": 49,
+    "switch_detection_methods": {
+      "known_keyboard_footprint": 49
+    },
+    "routed_track_count": 737,
+    "plated_via_count": 23,
+    "routed_conductive_zone_count": 0,
+    "unfilled_conductive_zone_names": [],
+    "source_warnings": [],
+    "eligible_for_bounded_virtual_reconstruction": true,
+    "blocker_codes": [],
+    "claimed_physical_donor_present": false,
+    "physical_authority_granted": false
+  },
+  "native_source_drc": {
+    "exit": 0,
+    "violations": 180,
+    "unconnected_items": 0,
+    "kicad_version": "9.0.2",
+    "report_present": true
+  },
+  "engine_execution": {
+    "exit": 0,
+    "timeout": false,
+    "error_tail": null
+  },
+  "status": "REPAIR_INCOMPLETE",
+  "verdict": {
+    "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+    "status": "REPAIR_INCOMPLETE",
+    "gates": {
+      "required_reconnection_complete_in_model": false,
+      "source_terminals_connected_in_model": false,
+      "modeled_cut_clear_of_components": true,
+      "original_native_drc_clean": false,
+      "bridge_native_drc_clean": false,
+      "source_geometry_reliable_without_legacy_repairs": false
+    },
+    "strict_reference_digital_pass": false,
+    "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+    "actual_discarded_keyboard_tested": false,
+    "arbitrary_unphotographed_junk_supported": false,
+    "real_keyboard_function_verified": false,
+    "physical_release": "BLOCKED_NOT_TESTED",
+    "build_ready": false
+  },
+  "cut": {
+    "left_switch_candidates": 33,
+    "right_switch_candidates": 16,
+    "collisions": {
+      "pads": 0,
+      "vias": 0,
+      "switches": 0,
+      "critical": 0
+    },
+    "affected_nets": 8
+  },
+  "reconstruction": {
+    "mode": "adaptive_functional",
+    "bridge_channels": 0,
+    "remaining_required_groups": 8,
+    "preexisting_terminal_net_gaps": 8,
+    "inert_remnants_to_isolate": 0,
+    "model_issues": [
+      "OVAL_PAD_APPROXIMATION"
+    ]
+  },
+  "iterations": [
+    {
+      "mode": "pad_only",
+      "remaining": 8
+    },
+    {
+      "mode": "adaptive",
+      "remaining": 8
+    },
+    {
+      "mode": "adaptive_functional",
+      "remaining": 8
+    }
+  ]
+}

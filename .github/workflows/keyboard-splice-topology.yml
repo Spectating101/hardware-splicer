@@ -44,6 +44,8 @@ jobs:
             tests/test_keyboard_splice_handoff.py \
             tests/test_keyboard_splice_repair_loop.py \
             tests/test_keyboard_splice_matrix.py \
+            tests/test_keyboard_splice_arbitrary.py \
+            tests/test_keyboard_splice_arbitrary_evidence.py \
             tests/test_keyboard_splice_evidence.py \
             tests/test_keyboard_splice_recovery_evidence.py
 

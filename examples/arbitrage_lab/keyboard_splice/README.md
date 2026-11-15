@@ -247,3 +247,20 @@ Frozen one-row matrix: `reference_1x6/one_row_six_key_source.kicad_pcb`, generat
 For the verified 1x6 single-row reference only, append `--passive-matrix-json /tmp/hs/MATRIX_PROOF.json` to additionally run native source DRC and all 64 ideal passive keypress combinations. Multi-row diode/ghosting cases are deliberately not inferred by that test.
 
 No physical item was procured, cut, powered or sold. This is a verified **virtual electrical-reconstruction workflow**, not certification of an unregistered recycled keyboard or a purchasable compliant product.
+
+
+## Stage V — arbitrary-source adversarial pilot (November 15, 2026)
+
+The new [eight-board public PCB reference corpus](arbitrary_corpus/README.md) covers seven independent GitHub repositories without author-specified cutlines or hand-written wiring maps.
+
+- **1/8:** original modeled copper reconnected, but selected cut crosses switch/PCB keepouts (f.60)
+- **4/8:** unsolved required modeled connections (ST40, NHW68, Vyom practice 2×2, Vyom 60%)
+- **3/8:** rejected at intake due missing conductive-zone fills, unsupported four-layer design or newer KiCad version
+- **0/8:** complete strict digital conversion pass
+- **0 physical discarded keyboards tested**
+
+The importer now recognizes diverse MX/Cherry/Kailh and documented ML1A footprint identities, guards KiCad's native zone fill extraction against an actual crash, and reconstructs rounded-rectangle pad copper from the KiCad radius. The reusable benchmark runner pins source SHA-256, processes every case without manual pin mapping, preserves failed outcomes and refuses stale artifacts or fabricated success claims.
+
+Run with `PYTHONPATH=src python scripts/run_arbitrary_keyboard_pilot.py --sources /path/to/pinned-PCBs --out /new/output --fetch`. Full evidence: `arbitrary_corpus/evidence_final_20261115/BENCHMARK.json`.
+
+**Not an arbitrary e-waste success claim**: these are KiCad reference files, not unidentified physical PCBs or membranes photographed from a junk pile. The external corpus is deliberately negative on strict acceptance so HS's next work targets genuine arbitrary donor reverse engineering and physically clear layouts.

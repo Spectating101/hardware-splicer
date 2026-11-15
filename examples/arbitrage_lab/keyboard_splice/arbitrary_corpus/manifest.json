@@ -1,0 +1,80 @@
+{
+  "schema": "hs.keyboard.arbitrary-corpus.v1",
+  "date": "2026-11-15",
+  "selection": "Convenience set of eight independent public PCB references, not a random sample, not physical discarded keyboards; no hand-authored cut or wiring map",
+  "source_repository": "external_public_github",
+  "cases": [
+    {
+      "id": "st40",
+      "repository": "coarse/st40",
+      "ref": "master",
+      "path": "st40.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/coarse/st40/master/st40.kicad_pcb",
+      "filename": "st40.kicad_pcb",
+      "sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04"
+    },
+    {
+      "id": "kinesis_fkeys",
+      "repository": "dodotronix/kinesis_board",
+      "ref": "main",
+      "path": "kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/dodotronix/kinesis_board/main/kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+      "filename": "kinesis_fkeys.kicad_pcb",
+      "sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da"
+    },
+    {
+      "id": "shortcut_keyboard",
+      "repository": "bhoppe-dev/Shortcut_Keyboard",
+      "ref": "main",
+      "path": "01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/bhoppe-dev/Shortcut_Keyboard/main/01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+      "filename": "shortcut_keyboard.kicad_pcb",
+      "sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718"
+    },
+    {
+      "id": "plink_kicad",
+      "repository": "Logan-Fouts/Plink",
+      "ref": "master",
+      "path": "hardware/plink_kicad/plink_kicad.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/Logan-Fouts/Plink/master/hardware/plink_kicad/plink_kicad.kicad_pcb",
+      "filename": "plink_kicad.kicad_pcb",
+      "sha256": "3f342a51a596b808f348295f2cc35cf35bea36ec51d907eb31a7e6fbb81127c9"
+    },
+    {
+      "id": "f60",
+      "repository": "robertcalvert/f.60",
+      "ref": "master",
+      "path": "hardware/keyboard.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/robertcalvert/f.60/master/hardware/keyboard.kicad_pcb",
+      "filename": "f60.kicad_pcb",
+      "sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6"
+    },
+    {
+      "id": "nhw68",
+      "repository": "dingyifei/NHW68",
+      "ref": "master",
+      "path": "hardware/PCB/PCB.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/dingyifei/NHW68/master/hardware/PCB/PCB.kicad_pcb",
+      "filename": "nhw68.kicad_pcb",
+      "sha256": "9cc1dacb5ebf294c86c8a929dc58a58a2add61dfa7c7371364a42b2459738308"
+    },
+    {
+      "id": "practice2by2",
+      "repository": "Vyom88/Mechanical-Keyboard-PCBs",
+      "ref": "main",
+      "path": "Practice 2by3/2by2.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/Vyom88/Mechanical-Keyboard-PCBs/main/Practice%202by3/2by2.kicad_pcb",
+      "filename": "practice2by2.kicad_pcb",
+      "sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525"
+    },
+    {
+      "id": "vyom60",
+      "repository": "Vyom88/Mechanical-Keyboard-PCBs",
+      "ref": "main",
+      "path": "60% Pcb/60_Pcb.kicad_pcb",
+      "raw_url": "https://raw.githubusercontent.com/Vyom88/Mechanical-Keyboard-PCBs/main/60%25%20Pcb/60_Pcb.kicad_pcb",
+      "filename": "vyom60.kicad_pcb",
+      "sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15"
+    }
+  ]
+}
