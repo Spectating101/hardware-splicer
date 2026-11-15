@@ -64,17 +64,25 @@ def _x_at_y(path,y):
 
 
 def optimize_stepped_path(board: dict, *, step_mm: float=1.0, max_lateral_step_mm: float=3.0,
-                          kerf_mm: float=1.0, allow_sacrificial_keys: bool=True):
+                          kerf_mm: float=1.0, allow_sacrificial_keys: bool=True,
+                          x_fraction_min: float=.30, x_fraction_max: float=.70,
+                          target_fraction: float=.50,
+                          switch_penalty: float | None=None,
+                          pad_penalty: float=20000.0):
     if not board.get("source_sha256"):
         raise ValueError("PCB source identity is missing")
     if step_mm<=0 or max_lateral_step_mm<=0 or kerf_mm<=0:
         raise ValueError("invalid physical cut parameters")
+    if not (0.005 <= x_fraction_min < target_fraction < x_fraction_max <= 0.995):
+        raise ValueError("invalid fractional cut search region")
+    if pad_penalty <= 0 or (switch_penalty is not None and switch_penalty <= 0):
+        raise ValueError("invalid cut loss penalties")
     b=board["outline_bbox_mm"]
     xmin,xmax=float(b["x_min"]),float(b["x_max"])
     ymin,ymax=float(b["y_min"]),float(b["y_max"])
     if min(xmax-xmin,ymax-ymin)<=0:
         raise ValueError("invalid board extent")
-    xlo=xmin+.30*(xmax-xmin); xhi=xmin+.70*(xmax-xmin)
+    xlo=xmin+x_fraction_min*(xmax-xmin); xhi=xmin+x_fraction_max*(xmax-xmin)
     nx=int(math.ceil((xhi-xlo)/step_mm))+1
     ny=int(math.ceil((ymax-ymin)/step_mm))+1
     if nx*ny>120000:
@@ -92,11 +100,11 @@ def optimize_stepped_path(board: dict, *, step_mm: float=1.0, max_lateral_step_m
     if not obs["critical"]:
         raise ValueError("no distinguishable controller/connector footprints")
     cost=np.zeros((ny,nx),dtype=float)
-    cost+=mask["switches"]*(300 if allow_sacrificial_keys else 90000)
-    cost+=(mask["pads"]|mask["vias"])*20000
+    cost+=mask["switches"]*(switch_penalty if switch_penalty is not None else (300 if allow_sacrificial_keys else 90000))
+    cost+=(mask["pads"]|mask["vias"])*pad_penalty
     cost+=mask["critical"]*1000000
     # Tie break toward center to avoid a disingenuous extreme one-sided split.
-    mid=(xmin+xmax)/2
+    mid=xmin+(xmax-xmin)*target_fraction
     cost+=(np.abs(xs-mid)[None,:])*0.04
     prev=cost[0].copy()
     paths=np.full((ny,nx),-1,dtype=np.int32)
@@ -157,6 +165,11 @@ def optimize_stepped_path(board: dict, *, step_mm: float=1.0, max_lateral_step_m
         "grid_step_mm":step_mm,
         "max_lateral_step_mm":max_lateral_step_mm,
         "objective_score":round(dp_cost,3),
+        "search_parameters":{"x_fraction_min":x_fraction_min,"x_fraction_max":x_fraction_max,
+                             "target_fraction":target_fraction,
+                             "switch_penalty":switch_penalty if switch_penalty is not None else
+                                (300 if allow_sacrificial_keys else 90000),
+                             "pad_penalty":pad_penalty},
         "switch_candidates_left":left,"switch_candidates_right":right,
         "nominal_path_length_mm":round(float(LineString(trimmed).length),3),
         "collision_counts":collisions,

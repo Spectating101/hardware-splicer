@@ -43,3 +43,14 @@ The --fetch option downloads any missing pinned public source file, verifying it
 - A disconnected board with **zero reconstructable bridge channels** now records a blocked interposer result rather than throwing away the already generated analysis report.
 
 **Not proven:** reading arbitrary unknown e-waste PCBs from photographs, fabricating or physically sawing any used board, repairing flex-membrane keyboard silver ink, a universal connector/cable, firmware validation, production yields, commercial value, or a passing fully arbitrary e-waste conversion. Those are open tasks, not successful test claims.
+
+
+## Follow-up virtual recovery (2026-11-16): source-preserving key remount
+
+The strict eight-board benchmark above remains unchanged (0/8 physically complete or strict digital passes). For the externally authored **f.60** source, HS now searches 12 cut alternatives, selects a balanced route with no modeled live-pad/via/controller damage, *retires five key locations* and generates a second native KiCad daughterboard to remount those five original key functions. The selected split retains 24 original key positions left and 33 right; adding the five-key daughterboard accounts for all **62 source switch positions**.
+
+The reconnection PCB has **17 native KiCad channels**; the five-key daughterboard provides **ten source net-bound wire endpoints**. Both PCBs have passed their own KiCad DRCs (0 violations / 0 opens), and the cut-related graph has no remaining required disconnections in the model. The source f.60's own legacy PCB DRC **timed out**, however, and the physical connector/assembly/firmware are unverified.
+
+Full evidence, assembly/wiring preview and run command: [f60_remount_round5/README.md](f60_remount_round5/README.md).
+
+**Conditional source-based electrical reconstruction is not arbitrary physical-junk proof**, and the strict 0/8 benchmark score is intentionally retained.

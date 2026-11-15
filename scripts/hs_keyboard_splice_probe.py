@@ -36,6 +36,8 @@ def main() -> int:
     ap.add_argument("--machine-project-json",type=Path,default=None)
     ap.add_argument("--optimize-stepped",action="store_true")
     ap.add_argument("--stepped-path-json",type=Path,default=None)
+    ap.add_argument("--multi-route-json",type=Path,default=None)
+    ap.add_argument("--key-relocation-out",type=Path,default=None)
     ap.add_argument("--interposer-out",type=Path,default=None)
     ap.add_argument("--x",type=float,default=None,help="Optional x coordinate to assess without searching a cut route")
     args=ap.parse_args()
@@ -54,6 +56,10 @@ def main() -> int:
     if args.optimize_stepped:
         if not args.stepped_path_json or not args.postcut_islands_json:
             raise SystemExit("stepped analysis requires --stepped-path-json and --postcut-islands-json")
+    if args.multi_route_json and not args.optimize_stepped:
+        raise SystemExit("multi-route reconstruction requires --optimize-stepped")
+    if args.key_relocation_out and not args.multi_route_json:
+        raise SystemExit("key relocation needs a source-bound multi-route audit")
     if args.interposer_out and (not args.postcut_islands_json or not args.machine_project_json):
         raise SystemExit("interposer preview requires both topology and canonical machine handoff")
     if args.postcut_islands_json:
@@ -61,17 +67,47 @@ def main() -> int:
         # This is not an inferred set of solder points or an authority to cut.
         target = result["best_scanned_straight_seam"]["all_intersected_nets"]
         if args.optimize_stepped:
-            path_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_path.py"
+            route_search=bool(args.multi_route_json)
+            path_helper=REPO/(
+                "src/hardware_splicer/_pcbnew_helpers/keyboard_splice_route_search.py"
+                if route_search else
+                "src/hardware_splicer/_pcbnew_helpers/keyboard_splice_path.py"
+            )
             with tempfile.TemporaryDirectory(prefix="hs-virtual-cutpath-") as temp:
                 input_path=Path(temp)/"source_board.json"
                 input_path.write_text(json.dumps(board),encoding="utf-8")
-                proc=subprocess.run([
-                    args.topology_python or args.system_python, str(path_helper),
-                    "--board-json",str(input_path),
-                    "--output",str(args.stepped_path_json.resolve()),
-                ],capture_output=True,text=True,timeout=160,check=False)
+                cmd=[args.topology_python or args.system_python, str(path_helper),
+                     "--board-json",str(input_path)]
+                if route_search:
+                    cmd.extend(["--output",str(args.multi_route_json.resolve()),
+                                "--selected-cut-json",str(args.stepped_path_json.resolve())])
+                else:
+                    cmd.extend(["--output",str(args.stepped_path_json.resolve())])
+                proc=subprocess.run(
+                    cmd,capture_output=True,text=True,timeout=160,check=False
+                )
                 if proc.returncode:
-                    raise SystemExit("Stepped cut solver unavailable: "+proc.stderr[-1200:])
+                    raise SystemExit("Cut route solver unavailable: "+proc.stderr[-1400:])
+            if route_search:
+                multi=json.loads(args.multi_route_json.read_text(encoding="utf-8"))
+                audit=multi.get("selected_consequence",{})
+                if (multi.get("source_sha256")!=board["source_sha256"] or
+                    multi.get("fabrication_authorized") is not False or
+                    multi.get("release")!="BLOCKED_RESEARCH_ROUTE_ONLY" or
+                    audit.get("source_sha256")!=board["source_sha256"] or
+                    audit.get("manufacturing_authority") is not False):
+                    raise SystemExit("Multi-route audit did not preserve source identity or release boundary")
+                result["multi_route_summary"]={
+                    "selected_strategy":multi["selected_strategy"],
+                    "attempted_strategies":multi["attempted_strategies"],
+                    "unique_proposed_paths":multi["unique_proposed_paths"],
+                    "sacrificed_key_count":audit["sacrificed_key_count"],
+                    "retained_keys":audit["remaining_switches"],
+                    "retained_left":audit["remaining_left"],
+                    "retained_right":audit["remaining_right"],
+                    "model_critical_clear":audit["nominally_salvageable_except_sacrificed_switches"],
+                    "physical_authority_granted":False,
+                }
             chosen_stepped=json.loads(args.stepped_path_json.read_text(encoding="utf-8"))
             original={k:v for k,v in chosen_stepped.items() if k!="payload_sha256"}
             digest=hashlib.sha256(json.dumps(original,sort_keys=True,ensure_ascii=False,
@@ -225,6 +261,80 @@ def main() -> int:
             }
             if not ver["native_design_checks_passed"]:
                 raise SystemExit("Native KiCad interposer PCB verification failed; inspect DRC report")
+    if args.key_relocation_out:
+        if (topology_result is None or chosen_stepped is None or
+            not result.get("repair_loop_summary",{}).get("required_graph_connected_in_model") or
+            not result.get("interposer_preview_summary",{}).get("native_design_checks_passed")):
+            raise SystemExit("Cannot generate replacement keys before modeled continuity and KiCad bridge checks")
+        if topology_result.get("preexisting_unconnected_terminal_net_count") != 0:
+            raise SystemExit("Cannot relabel source keypad before original source terminal connectivity is modeled")
+        multi=json.loads(args.multi_route_json.read_text(encoding="utf-8"))
+        audit=multi.get("selected_consequence",{})
+        if (audit.get("nominally_salvageable_except_sacrificed_switches") is not True or
+            audit.get("cut_path_sha256")!=chosen_stepped["payload_sha256"] or
+            multi.get("source_sha256")!=board["source_sha256"]):
+            raise SystemExit("Selected path damages an unremovable component or is unbound")
+        key_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_key_relocation.py"
+        with tempfile.TemporaryDirectory(prefix="hs-key-source-audit-") as source_tmp:
+            pcb_data=Path(source_tmp)/"board.json"
+            pcb_data.write_text(json.dumps(board),encoding="utf-8")
+            process=subprocess.run([
+                args.system_python,str(key_helper),
+                "--board-json",str(pcb_data),
+                "--route-search-json",str(args.multi_route_json.resolve()),
+                "--out",str(args.key_relocation_out.resolve()),
+            ],capture_output=True,text=True,check=False,timeout=120)
+            if process.returncode:
+                raise SystemExit("Source-bound relocation board failed: "+process.stderr[-1400:])
+        remount_path=args.key_relocation_out/"remount_keys.kicad_pcb"
+        mapping=json.loads((args.key_relocation_out/"RELOCATION_MAP.json").read_text(encoding="utf-8"))
+        if (mapping.get("source_sha256")!=board["source_sha256"] or
+            mapping.get("cut_path_sha256")!=chosen_stepped["payload_sha256"] or
+            mapping.get("fabrication_release")!="BLOCKED_RELOCATION_PREVIEW_ONLY" or
+            mapping.get("physical_authority_granted") is not False or
+            mapping.get("total_original_switch_positions_accounted")!=len(board["switch_positions"])):
+            raise SystemExit("Replacement-key source, count, or authority mismatch")
+        kicad_cli=shutil.which("kicad-cli")
+        if not kicad_cli:
+            raise SystemExit("Native KiCad unavailable for replacement-key electrical design check")
+        drc_path=args.key_relocation_out/"RELOCATION_NATIVE_DRC.json"
+        proc=subprocess.run([
+            kicad_cli,"pcb","drc","--format","json",
+            "--output",str(drc_path.resolve()),str(remount_path.resolve())
+        ],capture_output=True,text=True,check=False,timeout=120)
+        if not drc_path.is_file():
+            raise SystemExit("KiCad produced no replacement-key verification receipt")
+        native=json.loads(drc_path.read_text(encoding="utf-8"))
+        violations=len(native.get("violations",[]))
+        opens=len(native.get("unconnected_items",[]))
+        check={
+            "schema":"hs.source-bound-relocated-keys-kicad-check.v1",
+            "source_sha256":board["source_sha256"],
+            "cut_path_sha256":chosen_stepped["payload_sha256"],
+            "remount_pcb_sha256":hashlib.sha256(remount_path.read_bytes()).hexdigest(),
+            "relocated_key_count":mapping["key_switches_relocated"],
+            "reference_original_keys_accounted":mapping["total_original_switch_positions_accounted"],
+            "native_kicad_drc_exit":proc.returncode,
+            "drc_violations":violations,
+            "unconnected_items":opens,
+            "geometry_model_verified":proc.returncode==0 and violations==0 and opens==0,
+            "original_keyboard_source_drc_certified":False,
+            "physical_authority_granted":False,
+            "fabrication_release":"BLOCKED_RELOCATION_PREVIEW_ONLY",
+        }
+        (args.key_relocation_out/"RELOCATION_VERIFICATION.json").write_text(
+            json.dumps(check,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        result["key_relocation_summary"]={
+            "relocated_keys":mapping["key_switches_relocated"],
+            "original_switch_positions_accounted":mapping["total_original_switch_positions_accounted"],
+            "native_drc_violations":violations,
+            "native_unconnected_items":opens,
+            "geometry_model_verified":check["geometry_model_verified"],
+            "source_original_assembly_certified":False,
+            "fabrication_release":check["fabrication_release"],
+        }
+        if not check["geometry_model_verified"]:
+            raise SystemExit("KiCad replacement-key daughterboard failed native DRC")
     if args.passive_matrix_json:
         if topology_result is None or chosen_stepped is None:
             raise SystemExit("Passive matrix verification needs the original source and stepped reconstruction")

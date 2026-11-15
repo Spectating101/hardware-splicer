@@ -264,3 +264,18 @@ The importer now recognizes diverse MX/Cherry/Kailh and documented ML1A footprin
 Run with `PYTHONPATH=src python scripts/run_arbitrary_keyboard_pilot.py --sources /path/to/pinned-PCBs --out /new/output --fetch`. Full evidence: `arbitrary_corpus/evidence_final_20261115/BENCHMARK.json`.
 
 **Not an arbitrary e-waste success claim**: these are KiCad reference files, not unidentified physical PCBs or membranes photographed from a junk pile. The external corpus is deliberately negative on strict acceptance so HS's next work targets genuine arbitrary donor reverse engineering and physically clear layouts.
+
+
+## Stage VI — automatic multi-route key recovery (2026-11-16)
+
+HS now has a **12-strategy cut-path search**, comparing cut damage at original switch bodies, electrical pads, vias, connectors and structural mounting features, as well as retained left/right balance. The tool does not prefer a fake 'no lost keys' route that damages live PCB terminals, or an extreme 56/6 split merely because its saw route is cleaner.
+
+For the independently authored [f.60](arbitrary_corpus/f60_remount_round5/README.md) reference, the chosen balanced, source-bound path preserves 57 original switch locations and flags five positions (**T, G, B, 5 and 6**) for relocation. HS generated:
+- A native KiCad 17-channel cut-net restoration board (DRC clean);
+- A separate native KiCad five-switch relocation daughterboard with ten source-bound independent wire terminals (DRC clean);
+- A SHA-bound record of each original PCB pad/net and its corresponding daughterboard switch/header contact;
+- A canonical still-blocked MachineProject (no physical/fabrication authority).
+
+The complete virtual design now accounts for **62/62 source switch positions** (57 retained in two halves, five relocated). **This is not physical proof**: the original f.60 design DRC timed out under KiCad 9, actual PCB population is unverified, physical wire routing/strain relief and firmware are untested, and no fabrication or sale is approved. The previous 0/8 strict external-board benchmark is unchanged.
+
+Run with `--optimize-stepped --multi-route-json /path/MULTI_ROUTE.json --stepped-path-json /path/CUT.json --key-relocation-out /path/remount` alongside the normal post-cut/repair/interposer flags. Only generate key remount previews when the source-bound model has restored all required cut-created connections and the bridge PCB has passed native KiCad DRC.

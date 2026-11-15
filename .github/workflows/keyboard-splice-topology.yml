@@ -41,11 +41,13 @@ jobs:
             tests/test_keyboard_splice.py \
             tests/test_keyboard_splice_islands.py \
             tests/test_keyboard_splice_path.py \
+            tests/test_keyboard_splice_route_search.py \
             tests/test_keyboard_splice_handoff.py \
             tests/test_keyboard_splice_repair_loop.py \
             tests/test_keyboard_splice_matrix.py \
             tests/test_keyboard_splice_arbitrary.py \
             tests/test_keyboard_splice_arbitrary_evidence.py \
+            tests/test_keyboard_splice_f60_relocation_evidence.py \
             tests/test_keyboard_splice_evidence.py \
             tests/test_keyboard_splice_recovery_evidence.py
 
@@ -78,4 +80,5 @@ jobs:
         run: |
           python -m pytest -q -p no:cacheprovider \
             tests/test_keyboard_splice_interposer.py \
+            tests/test_keyboard_splice_key_relocation.py \
             tests/test_keyboard_splice_reference_1x6.py
