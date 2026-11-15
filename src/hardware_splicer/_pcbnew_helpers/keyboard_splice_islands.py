@@ -19,6 +19,7 @@ from shapely.affinity import rotate
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
+from keyboard_splice_repair import recover_contacts, classify_inert_cut_remnant
 
 LAYERS = ("F.Cu", "B.Cu")
 
@@ -268,9 +269,12 @@ def _pad_candidates(fragments, component_idxs: list[int], seam: float, stepped_p
 
 
 def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
-                     target_nets: list[str] | None = None, cut_path: dict | None = None) -> dict:
+                     target_nets: list[str] | None = None, cut_path: dict | None = None,
+                     repair_mode: str = "pad_only") -> dict:
     if not board.get("source_sha256"):
         raise ValueError("missing source digest")
+    if repair_mode not in ("pad_only", "adaptive", "adaptive_functional"):
+        raise ValueError("unsupported copper island repair mode")
     if kerf_mm <= 0:
         raise ValueError("kerf must be positive")
     xmin = float(board["outline_bbox_mm"]["x_min"])
@@ -348,6 +352,9 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
 
     sections = []
     bridge_edges = []
+    def seam_at(y):
+        return _seam_x_at_y(stepped_path, y, cut_x_mm)
+
     for original_key in sorted(roots):
         groups = roots[original_key]
         net, original_component = original_key
@@ -357,33 +364,58 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         for suffix, indexes in sorted(groups.items()):
             sides = sorted({after[idx]["side"] for idx in indexes})
             pads = _pad_candidates(after, indexes, cut_x_mm, stepped_path=stepped_path)
+            if repair_mode in ("adaptive", "adaptive_functional"):
+                contacts = recover_contacts(
+                    board, after, indexes, cut_shape or box(
+                        cut_x_mm - kerf_mm/2, -1e8, cut_x_mm + kerf_mm/2, 1e8
+                    ), seam_at
+                )
+            else:
+                contacts = [
+                    {**pad, "contact_type": "existing_pad", "physical_access_verified": False}
+                    for pad in pads
+                ]
+            inert = (classify_inert_cut_remnant(after, indexes)
+                     if repair_mode == "adaptive_functional" else None)
             islands.append({
                 "model_island_id": f"{net}::pre{original_component}::post{suffix}",
                 "sides": sides,
                 "copper_fragment_count": len(indexes),
                 "intact_solder_pad_candidates": pads,
+                "source_copper_contact_candidates": contacts,
+                "inert_track_remnant_plan": inert,
+                "restoration_required": inert is None,
             })
-        # For each original connected piece fragmented by the cut, restoring
-        # connectivity would need at least N-1 connections *within this partial
-        # track-only model*. This is NOT a verified real-board conductor count.
-        anchored = [x for x in islands if x["intact_solder_pad_candidates"]]
-        missing = len(islands) - len(anchored)
+        needed = [item for item in islands if item["restoration_required"]]
+        anchored = [item for item in needed if item["source_copper_contact_candidates"]]
+        missing = len(needed) - len(anchored)
         sections.append({
             "net": net,
             "precut_track_only_component": original_component,
             "postcut_track_only_island_count": len(islands),
-            "candidate_graph_edges_needed": len(islands) - 1,
+            "required_island_count": len(needed),
+            "planned_inert_track_remnants": len(islands) - len(needed),
+            "candidate_graph_edges_needed": max(0,len(needed) - 1),
             "unanchored_islands": missing,
             "islands": islands,
         })
-        if not missing:
+        if not missing and anchored:
+            # Each newly severed island needs one modeled graph connection
+            # to restore its own pre-cut copper component. A repeated source
+            # net name alone is never grounds for connecting unrelated islands.
             hub = anchored[0]
             for follower in anchored[1:]:
+                a = hub["source_copper_contact_candidates"][0]
+                b = follower["source_copper_contact_candidates"][0]
                 bridge_edges.append({
-                    "net": net, "from_island": hub["model_island_id"],
+                    "net": net,
+                    "from_island": hub["model_island_id"],
                     "to_island": follower["model_island_id"],
-                    "from_candidate_pad": hub["intact_solder_pad_candidates"][0],
-                    "to_candidate_pad": follower["intact_solder_pad_candidates"][0],
+                    "from_candidate_contact": a,
+                    "to_candidate_contact": b,
+                    # Historical contract preserved for genuine pad endpoints.
+                    "from_candidate_pad": a if a["contact_type"]=="existing_pad" else None,
+                    "to_candidate_pad": b if b["contact_type"]=="existing_pad" else None,
                     "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION",
                 })
     # Replay the proposed bridge edges in the same *partial* connectivity
@@ -406,6 +438,27 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         len({closure.find(indexes[0]) for indexes in groups.values()}) > 1
         for groups in roots.values() if len(groups)>1
     )
+    active_islands = {
+        i["model_island_id"] for section in sections for i in section["islands"]
+        if i["restoration_required"]
+    }
+    remaining_required_splits = sum(
+        len({closure.find(indexes[0]) for suffix,indexes in groups.items()
+             if f"{original[0]}::pre{original[1]}::post{suffix}" in active_islands}) > 1
+        for original,groups in roots.items() if len(groups)>1
+    )
+    damaged_pads = [
+        {"net":f["net"], "ref":f["pad"]["ref"], "pad":f["pad"]["pad"]}
+        for f in features if f["kind"]=="pad" and f["pad"]
+        and (cut_shape or box(cut_x_mm-kerf_mm/2,-1e8,cut_x_mm+kerf_mm/2,1e8)).intersects(f["geometry"])
+    ]
+    baseline_terminal_islands = defaultdict(set)
+    for i,f in enumerate(before):
+        if f["kind"] == "pad" and f["pad"]:
+            baseline_terminal_islands[f["net"]].add(before_ds.find(i))
+    preexisting_terminal_disconnections={
+        net:len(roots_) for net,roots_ in baseline_terminal_islands.items() if len(roots_)>1
+    }
     result = {
         "schema": "hs.keyboard-postcut-copper-islands.v1",
         "source_sha256": board["source_sha256"],
@@ -414,6 +467,8 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         "cut_path_kind": "stepped_polyline" if stepped_path is not None else "straight",
         "kerf_mm": kerf_mm,
         "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+        "repair_mode": repair_mode,
+        "trace_exposure_requires_mask_removal_and_strain_relief": repair_mode in ("adaptive","adaptive_functional"),
         "conductive_zones_imported": len(board.get("filled_zones", [])),
         "rule_areas_ignored_for_connectivity": board.get("rule_area_count",0),
         "qualified_for_build": False,
@@ -424,6 +479,16 @@ def simulate_islands(board: dict, cut_x_mm: float, kerf_mm: float = 1.0,
         "candidate_graph_edges": len(bridge_edges),
         "unanchored_split_components": sum(x["unanchored_islands"]>0 for x in sections),
         "model_replay_remaining_split_components": remaining_splits,
+        "model_replay_remaining_required_components": remaining_required_splits,
+        "model_replay_achieved_required_restoration": remaining_required_splits == 0 and bool(sections)
+            and not damaged_pads,
+        "planned_inert_track_remnants": sum(
+            x["planned_inert_track_remnants"] for x in sections
+        ),
+        "damaged_electrical_pad_count": len(damaged_pads),
+        "damaged_electrical_pads": damaged_pads,
+        "preexisting_unconnected_terminal_net_count": len(preexisting_terminal_disconnections),
+        "preexisting_unconnected_terminal_nets": preexisting_terminal_disconnections,
         "model_replay_achieved_full_restoration": remaining_splits == 0 and bool(sections),
         "issues": sorted(issues),
         "sections": sections,
@@ -446,11 +511,12 @@ def main():
     ap.add_argument("--kerf-mm",type=float,default=1.0)
     ap.add_argument("--output",type=Path,required=True)
     ap.add_argument("--bridge-csv",type=Path)
+    ap.add_argument("--repair-mode",choices=("pad_only","adaptive","adaptive_functional"),default="pad_only")
     args=ap.parse_args()
     body=json.loads(args.board_json.read_text(encoding="utf-8"))
     names=json.loads(args.net_inventory_json.read_text(encoding="utf-8"))
     path=json.loads(args.cut_path_json.read_text(encoding="utf-8")) if args.cut_path_json else None
-    result=simulate_islands(body,args.cut_x_mm,args.kerf_mm,names,cut_path=path)
+    result=simulate_islands(body,args.cut_x_mm,args.kerf_mm,names,cut_path=path,repair_mode=args.repair_mode)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
     if args.bridge_csv:
@@ -459,7 +525,7 @@ def main():
             writer=csv.writer(f,lineterminator="\n")
             writer.writerow(["net","from_pad","to_pad","model_status"])
             for edge in result["bridge_edges"]:
-                x,y=edge["from_candidate_pad"],edge["to_candidate_pad"]
+                x,y=edge["from_candidate_contact"],edge["to_candidate_contact"]
                 writer.writerow([edge["net"],str(x["ref"])+"/"+str(x["pad"]),
                                  str(y["ref"])+"/"+str(y["pad"]),edge["status"]])
     print("MODELED_SOURCE_ISLANDS",result["model_pre_cut_island_count"])
@@ -467,6 +533,10 @@ def main():
     print("SPLIT_PRECUT_GROUPS",result["split_pre_cut_components"])
     print("CANDIDATE_BRIDGE_EDGES",result["candidate_graph_edges"])
     print("UNANCHORED_GROUPS",result["unanchored_split_components"])
+    print("REQUIRED_REMAINING",result["model_replay_remaining_required_components"])
+    print("ISOLATE_INERT",result["planned_inert_track_remnants"])
+    print("DAMAGED_COPPER_PADS",result["damaged_electrical_pad_count"])
+    print("PREEXISTING_TERMINAL_NET_GAPS",result["preexisting_unconnected_terminal_net_count"])
     print("ISSUES",",".join(result["issues"]))
     print("VERDICT",result["release"])
 

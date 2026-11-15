@@ -188,3 +188,62 @@ The interposer J1/J2 use actual KiCad standard-library `Connector_PinHeader_2.54
 - New tests cover filled/unfilled copper zones, incomplete pads, invalid zone repair, stepped path collision/receipt tampering, unique-channel KiCad DRC and no physical-authority promotion. Two distinct CI jobs test pure topology and the native KiCad board.
 
 **Commercial verdict:** this is now a working *electrical feasibility and parametric interposer generator*, not a physically validated keyboard recycler. The next highest-value software work is (i) exact physical switch-population verification and custom-pad/zone reliability, (ii) optional-key sacrifice/path scoring tied to final recovered function, and (iii) true flexible/locking ribbon-harness and enclosure/strain-relief design, followed by physical acceptance only when a real donor is available.
+
+
+## Stage IV: iterative repair, zero unresolved required cut groups (2026-11-15)
+
+**The engineering change:** The core now runs an **actual repair-design loop**, rather than stopping on the first inaccessible solder pad. Three source-constrained strategies are attempted in order: original pads, original pads plus proven copper vias/long traces, and removal of tiny inert *track-only* remnants that retain no pad, via or zone. The solver virtually replays every candidate graph connection and stops only when every **required source-island connection** is restored in the modeled circuit or every strategy is exhausted.
+
+The source-constrained repair contact helper reuses actual KiCad geometry; it cannot invent a pad, connect different original nets, or claim that a via can be soldered without inspection. Trace exposure is allowed only for at least 2 mm of >=0.35 mm source copper surviving the kerf, subject to independent verification. Inert-remnant cleanup is allowed only on terminal-free track fragments <=7 mm², not MCU/diode/switch pads, vias, return planes or unmodified functional nets.
+
+### Real GH60 reference: three repair iterations
+
+| Strategy | Candidate channels | Required model gaps | Isolated inert remnants |
+|---|---:|---:|---:|
+| Existing solder pads only | 19 | 8 | 0 |
+| + Original via/trace contact discovery | 24 | 3 | 0 |
+| + Controlled dead-copper isolation | **29** | **0** | **4** |
+
+The final native KiCad 29-channel prototype interposer has **0 DRC errors, 0 warnings, 0 unconnected items**. The 29 channels represent proposed model connections; via contact accessibility, true donor component population and physical mating remain unverified.
+
+**Do not confuse zero *cut-caused* required gaps with a working GH60 keyboard.** The old GH60 source still exhibits **13 named nets whose source terminals were not already connected in the original imported model**, likely involving alternative layouts and/or legacy geometric limitations. The proposed saw route still encroaches on 2 switch keepouts and 1 non-plated mechanical switch hole. The canonical HS release stays at simulated DESIGN_READY, with BUILD_READY refused.
+
+Frozen GH60 run: `evidence/gh60_round4/`, including `REPAIR_ITERATIONS.json`, `POSTCUT_ISLANDS.json`, `MACHINE_PROJECT_HANDOFF.json`, original KiCad DRC receipts and the editable 29-channel interposer board.
+
+### Separate, independently generated native KiCad reference with no baseline gaps
+
+To prove the same end-to-end repair engine can finish an *internally consistent actual PCB topology*, `reference_1x6/build_source.py` builds a source-native **six-key MX switch matrix**, with one common row and six columns brought to a seven-pin external controller header (not an embedded USB MCU). Switches are spaced for a 3+3 physical split, with F.Cu row, B.Cu columns and six plated vias.
+
+The resulting actual KiCad 9 source board passes DRC with **zero violations and zero unconnected items**. Its entire virtual engineering run provides:
+
+| Native reference milestone | Result |
+|---|---|
+| Original source PCB | 6 MX switches, 1 row, 6 columns, 7-pin external controller |
+| Source DRC | 0 violations / 0 unconnected |
+| Virtual split | 3 keys left / 3 keys right, 1 mm cut corridor |
+| Cut collisions | **0 switch / 0 pad / 0 via / 0 critical** |
+| Source terminal net gaps | **0** |
+| Auto repair iterations | **1**, existing pads sufficient |
+| Full cut-created model graph remaining gaps | **0** |
+| Native KiCad bridge board | **4 channels**, 0 DRC errors, 0 unconnected |
+| Passive key-matrix functional simulation | **64/64 ideal switch combinations**, 0 incorrect reads |
+
+The operator also runs native DRC on the exact original KiCad source and a 64-combination passive switch-closure regression for the external controller header. This checks all six switch-to-column net assignments and one shared row, but **does not verify any powered firmware, USB communication or actual switch performance**. See `reference_1x6/evidence/MATRIX_PROOF.json`.
+
+Frozen one-row matrix: `reference_1x6/one_row_six_key_source.kicad_pcb`, generator `reference_1x6/build_source.py` and `reference_1x6/evidence/`, including full cut/reconstruction/bridge/channel-map and DRC receipts.
+
+### Reproduce the completed iterative workflow
+
+    PYTHONPATH=src python scripts/hs_keyboard_splice_probe.py \
+      --pcb /path/to/known_revision.kicad_pcb \
+      --out /tmp/hs/CUT_OVERVIEW.json \
+      --optimize-stepped --stepped-path-json /tmp/hs/STEPPED_CUT.json \
+      --repair-mode auto --repair-iterations-json /tmp/hs/REPAIR_ITERATIONS.json \
+      --postcut-islands-json /tmp/hs/POSTCUT_ISLANDS.json \
+      --postcut-edges-csv /tmp/hs/BRIDGE_CANDIDATES.csv \
+      --machine-project-json /tmp/hs/MACHINE_PROJECT_HANDOFF.json \
+      --interposer-out /tmp/hs/interposer
+
+For the verified 1x6 single-row reference only, append `--passive-matrix-json /tmp/hs/MATRIX_PROOF.json` to additionally run native source DRC and all 64 ideal passive keypress combinations. Multi-row diode/ghosting cases are deliberately not inferred by that test.
+
+No physical item was procured, cut, powered or sold. This is a verified **virtual electrical-reconstruction workflow**, not certification of an unregistered recycled keyboard or a purchasable compliant product.

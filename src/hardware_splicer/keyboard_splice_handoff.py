@@ -101,6 +101,14 @@ def build_keyboard_splice_handoff(cut: Mapping[str, Any], topology: Mapping[str,
         "model_sha256":topology["payload_sha256"],
         "cut_x_mm":seam,
         "stepped_path_sha256":optimized["payload_sha256"] if optimized else None,
+        "model_required_copper_connected":topology.get(
+            "model_replay_achieved_required_restoration", False),
+        "model_unresolved_required_groups":topology.get(
+            "model_replay_remaining_required_components",
+            topology.get("model_replay_remaining_split_components")),
+        "inert_copper_fragments_to_isolate":topology.get("planned_inert_track_remnants", 0),
+        "source_preexisting_terminal_net_gaps":topology.get(
+            "preexisting_unconnected_terminal_net_count",0),
         "physical_donor_verified":False,"fabrication_authorized":False,
     }
     gate=project.assess_release(ReleaseState.BUILD_READY)

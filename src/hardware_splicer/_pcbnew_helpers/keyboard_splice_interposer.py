@@ -49,11 +49,24 @@ def _validate(result: dict):
     for index, edge in enumerate(edges):
         if edge.get("status") != "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION":
             raise ValueError("unapproved bridge edge at channel " + str(index))
-        a, b = edge.get("from_candidate_pad"), edge.get("to_candidate_pad")
+        a = edge.get("from_candidate_contact") or edge.get("from_candidate_pad")
+        b = edge.get("to_candidate_contact") or edge.get("to_candidate_pad")
         if not isinstance(a, dict) or not isinstance(b, dict):
             raise ValueError("unanchored bridge")
         if a.get("net") != edge.get("net") or b.get("net") != edge.get("net"):
             raise ValueError("cross-net bridge candidate")
+        for contact in (a, b):
+            kind = contact.get("contact_type", "existing_pad")
+            if kind not in ("existing_pad", "via_annulus", "trace_exposure"):
+                raise ValueError("unqualified contact method")
+            if not contact.get("ref") or not contact.get("pad"):
+                raise ValueError("missing source contact identity")
+            if kind == "trace_exposure":
+                if (float(contact.get("exposure_length_mm") or 0) < 2.0 or
+                    float(contact.get("conductor_width_mm") or 0) < 0.35):
+                    raise ValueError("track exposure too small for modeled repair")
+            if kind == "via_annulus" and not str(contact["ref"]).startswith("VIA"):
+                raise ValueError("missing source via identity")
         key = (edge.get("from_island"), edge.get("to_island"))
         if not all(key) or key in seen:
             raise ValueError("duplicated or unidentified island edge")
@@ -128,8 +141,8 @@ def make_interposer(result: dict, output_dir: Path) -> dict:
             "source_net": edge["net"],
             "from_model_island": edge["from_island"],
             "to_model_island": edge["to_island"],
-            "from_candidate_pad": edge["from_candidate_pad"],
-            "to_candidate_pad": edge["to_candidate_pad"],
+            "from_candidate_contact": edge.get("from_candidate_contact") or edge["from_candidate_pad"],
+            "to_candidate_contact": edge.get("to_candidate_contact") or edge["to_candidate_pad"],
             "status": "UNVERIFIED_DONOR_SOLDER_LOCATION",
         })
     manifest = {
@@ -140,6 +153,12 @@ def make_interposer(result: dict, output_dir: Path) -> dict:
         "fabrication_release": "BLOCKED_PREVIEW_ONLY",
         "actual_donor_reworked": False,
         "remaining_disconnected_groups": result["model_replay_remaining_split_components"],
+        "remaining_required_groups": result.get(
+            "model_replay_remaining_required_components",
+            result["model_replay_remaining_split_components"]
+        ),
+        "inert_remnants_to_isolate": result.get("planned_inert_track_remnants", 0),
+        "preexisting_terminal_net_gaps": result.get("preexisting_unconnected_terminal_net_count", 0),
         "unanchored_groups": result["unanchored_split_components"],
         "channel_count": count,
         "board_width_mm": BOARD_WIDTH_MM,

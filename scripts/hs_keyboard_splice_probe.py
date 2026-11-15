@@ -15,6 +15,8 @@ REPO=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(REPO/"src"))
 from hardware_splicer.keyboard_splice import CutConfig,evaluate_cut,write_report
 from hardware_splicer.keyboard_splice_handoff import build_keyboard_splice_handoff
+from hardware_splicer.keyboard_splice_repair_loop import run_repair_loop
+from hardware_splicer.keyboard_splice_matrix import verify_one_row_matrix
 
 def main() -> int:
     ap=argparse.ArgumentParser()
@@ -27,6 +29,10 @@ def main() -> int:
     ap.add_argument("--harness-csv",type=Path,default=None)
     ap.add_argument("--postcut-islands-json",type=Path,default=None)
     ap.add_argument("--postcut-edges-csv",type=Path,default=None)
+    ap.add_argument("--repair-mode",choices=("auto","pad_only","adaptive","adaptive_functional"),
+                    default="auto")
+    ap.add_argument("--repair-iterations-json",type=Path,default=None)
+    ap.add_argument("--passive-matrix-json",type=Path,default=None)
     ap.add_argument("--machine-project-json",type=Path,default=None)
     ap.add_argument("--optimize-stepped",action="store_true")
     ap.add_argument("--stepped-path-json",type=Path,default=None)
@@ -87,25 +93,31 @@ def main() -> int:
                 "Stepped cut is only a modeled path; component destruction and actual populated donor layout unverified"
             )
         island_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_islands.py"
-        with tempfile.TemporaryDirectory(prefix="hs-virtual-copper-") as temp:
-            board_file=Path(temp)/"board.json"
-            nets_file=Path(temp)/"nets.json"
-            board_file.write_text(json.dumps(board), encoding="utf-8")
-            nets_file.write_text(json.dumps(target), encoding="utf-8")
-            cmd = [
-                args.topology_python or args.system_python, str(island_helper), "--board-json", str(board_file),
-                "--net-inventory-json", str(nets_file),
-                "--cut-x-mm", str(result["best_scanned_straight_seam"]["x_mm"]),
-                "--kerf-mm", str(CutConfig().kerf_mm),
-                "--output", str(args.postcut_islands_json.resolve()),
-            ]
-            if args.postcut_edges_csv:
-                cmd.extend(["--bridge-csv",str(args.postcut_edges_csv.resolve())])
-            if chosen_stepped is not None:
-                cmd.extend(["--cut-path-json",str(args.stepped_path_json.resolve())])
-            analysis=subprocess.run(cmd,capture_output=True,text=True,check=False,timeout=160)
-            if analysis.returncode != 0:
-                raise SystemExit("Native KiCad-island model unavailable: "+analysis.stderr[-1600:])
+        restoration=run_repair_loop(
+            script=island_helper,
+            interpreter=args.topology_python or args.system_python,
+            source_board=board,
+            net_names=target,
+            seam_x=result["best_scanned_straight_seam"]["x_mm"],
+            kerf_mm=CutConfig().kerf_mm,
+            path_file=args.stepped_path_json if chosen_stepped is not None else None,
+            topology_file=args.postcut_islands_json.resolve(),
+            edge_csv=args.postcut_edges_csv.resolve() if args.postcut_edges_csv else None,
+            repair_mode=args.repair_mode,
+        )
+        result["repair_loop_summary"]={
+            "selected_strategy":restoration["selected_strategy"],
+            "total_iterations":restoration["total_iterations"],
+            "required_graph_connected_in_model":restoration["required_graph_connected_in_model"],
+            "unresolved_source_baseline_terminal_net_gaps":restoration[
+                "unresolved_source_baseline_terminal_net_gaps"],
+            "physical_authority_granted":False,
+            "result":restoration["result"],
+        }
+        if args.repair_iterations_json:
+            args.repair_iterations_json.parent.mkdir(parents=True,exist_ok=True)
+            args.repair_iterations_json.write_text(json.dumps(
+                restoration,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         topology_result=json.loads(args.postcut_islands_json.read_text(encoding="utf-8"))
         digest=topology_result.pop("payload_sha256",None)
         payload=json.dumps(topology_result,sort_keys=True,ensure_ascii=False,separators=(",",":"))
@@ -129,6 +141,11 @@ def main() -> int:
                 "model_pre_cut_island_count", "model_post_cut_island_count",
                 "split_pre_cut_components", "candidate_graph_edges",
                 "unanchored_split_components", "model_replay_remaining_split_components",
+                "model_replay_remaining_required_components",
+                "model_replay_achieved_required_restoration",
+                "planned_inert_track_remnants", "damaged_electrical_pad_count",
+                "preexisting_unconnected_terminal_net_count",
+                "repair_mode",
                 "model_replay_achieved_full_restoration", "issues", "release", "payload_sha256"
             )
         }
@@ -200,6 +217,33 @@ def main() -> int:
         }
         if not ver["native_design_checks_passed"]:
             raise SystemExit("Native KiCad interposer PCB verification failed; inspect DRC report")
+    if args.passive_matrix_json:
+        if topology_result is None or chosen_stepped is None:
+            raise SystemExit("Passive matrix verification needs the original source and stepped reconstruction")
+        kicad_cli=shutil.which("kicad-cli")
+        if not kicad_cli:
+            raise SystemExit("Native KiCad source DRC unavailable")
+        with tempfile.TemporaryDirectory(prefix="hs-source-matrix-drc-") as tmp:
+            path=Path(tmp)/"source_drc.json"
+            checked=subprocess.run([
+                kicad_cli,"pcb","drc","--format","json",
+                "--output",str(path),str(args.pcb.resolve())
+            ],capture_output=True,text=True,timeout=120,check=False)
+            if checked.returncode or not path.is_file():
+                raise SystemExit("Original keyboard PCB fails native DRC; cannot assert matrix function")
+            source_drc=json.loads(path.read_text(encoding="utf-8"))
+        functional=verify_one_row_matrix(board,topology_result,chosen_stepped,source_drc)
+        args.passive_matrix_json.parent.mkdir(parents=True,exist_ok=True)
+        args.passive_matrix_json.write_text(json.dumps(
+            functional,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        result["passive_matrix_summary"]={
+            "model_passed":functional["passive_keyboard_matrix_model_passed"],
+            "key_switch_count":functional["keys"],
+            "ideal_combinations_tested":functional["ideal_switch_combinations_tested"],
+            "ideal_combinations_failed":functional["ideal_switch_combinations_failed"],
+            "payload_sha256":functional["payload_sha256"],
+            "physical_repair_verified":False,
+        }
     write_report(result,args.out)
     if args.harness_csv:
         args.harness_csv.parent.mkdir(parents=True,exist_ok=True)
@@ -221,6 +265,11 @@ def main() -> int:
     print("SCAN",result["scanned_straight_seams"],"passing",result["passing_seams"])
     print("CENTRAL",mid["track_segments_touched"],"segments;",mid["distinct_nets_touched"],"nets;",mid["switch_centers_at_risk"],"switch keepouts")
     print("BEST",best["x_mm"],"mm;",best["distinct_nets_touched"],"nets;",len(best["matrix_nets_touched"]),"matrix nets;",best["switch_centers_at_risk"],"switch keepouts;",best["pads_at_risk"],"pads")
+    if result.get("repair_loop_summary"):
+        s=result["repair_loop_summary"]
+        print("REPAIR_ITERATIONS",s["total_iterations"],"strategy",s["selected_strategy"])
+        print("MODELED_REQUIRED_GRAPH_CONNECTED",s["required_graph_connected_in_model"],
+              "source_baseline_terminal_gaps",s["unresolved_source_baseline_terminal_net_gaps"])
     print("VERDICT",result["release"],"report",args.out)
     return 0
 
