@@ -1,15 +1,286 @@
 {
   "advisories": {
-    "library_revision_mismatch_warnings": 0,
+    "library_revision_mismatch_warnings": 18,
     "policy": "Only footprint-library warnings with independently matching pad stacks are advisory; unknown schemas, severities and count disagreements fail closed.",
-    "reviewed_nonpad_library_differences": []
+    "reviewed_nonpad_library_differences": [
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP1",
+            "pos": {
+              "x": 110.0,
+              "y": 65.0
+            },
+            "uuid": "08571c9b-1b4e-4816-8182-9902b6e479ee"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP9",
+            "pos": {
+              "x": 118.0,
+              "y": 96.0
+            },
+            "uuid": "0c2e94da-1682-4382-84b9-379a8b4aa30d"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP12",
+            "pos": {
+              "x": 160.0,
+              "y": 98.0
+            },
+            "uuid": "0ca901ca-afe5-422b-9778-daba942a00e8"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP18",
+            "pos": {
+              "x": 175.0,
+              "y": 101.0
+            },
+            "uuid": "0ed0ff47-2bed-493a-849f-01c97b92d844"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP14",
+            "pos": {
+              "x": 181.0,
+              "y": 96.0
+            },
+            "uuid": "12b0d242-a820-4b79-a88e-5cd4b83b7f18"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP3",
+            "pos": {
+              "x": 135.0,
+              "y": 65.0
+            },
+            "uuid": "1a3736d6-5828-4076-81c6-a41569dfa627"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP10",
+            "pos": {
+              "x": 155.0,
+              "y": 94.0
+            },
+            "uuid": "2cc4bc22-4fc1-4568-b2d6-3d2d53d8d7d7"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP11",
+            "pos": {
+              "x": 128.0,
+              "y": 101.0
+            },
+            "uuid": "2f5f1e6c-7850-4878-a424-6d80f31366c0"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP16",
+            "pos": {
+              "x": 155.0,
+              "y": 101.0
+            },
+            "uuid": "6016e067-6302-4004-a543-3ef0e2bb2c60"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP17",
+            "pos": {
+              "x": 146.0,
+              "y": 93.0
+            },
+            "uuid": "7ed8aec6-6610-46e3-9bc9-b2e4d12d231b"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP13",
+            "pos": {
+              "x": 172.0,
+              "y": 98.0
+            },
+            "uuid": "91537d8f-056c-4364-9c6e-40a70bb51ece"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP8",
+            "pos": {
+              "x": 160.0,
+              "y": 82.0
+            },
+            "uuid": "b393ad7d-3be6-457b-b09c-7c50796f3d00"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP15",
+            "pos": {
+              "x": 143.0,
+              "y": 74.0
+            },
+            "uuid": "c6bebab0-0663-44da-8cc0-c98f41f31bae"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP4",
+            "pos": {
+              "x": 143.0,
+              "y": 65.0
+            },
+            "uuid": "cb738574-b356-4459-b8ce-0d24efc95425"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP7",
+            "pos": {
+              "x": 123.0,
+              "y": 90.0
+            },
+            "uuid": "d83ab9bd-37b5-4cc7-81cc-94c8e9e29066"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP6",
+            "pos": {
+              "x": 155.0,
+              "y": 80.0
+            },
+            "uuid": "dad21eb0-4a82-4b6b-aed7-97f000e37a4b"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP5",
+            "pos": {
+              "x": 118.0,
+              "y": 84.0
+            },
+            "uuid": "e09557a1-33d4-47c6-8fd5-28fc3cfff21d"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      },
+      {
+        "description": "Footprint 'TestPoint_Pad_D1.5mm' does not match copy in library 'TestPoint'.",
+        "items": [
+          {
+            "description": "Footprint TP2",
+            "pos": {
+              "x": 116.0,
+              "y": 65.0
+            },
+            "uuid": "f35f49ce-692a-4587-bea7-3e7a28445a61"
+          }
+        ],
+        "severity": "warning",
+        "type": "lib_footprint_mismatch"
+      }
+    ]
   },
   "artifact_sha256": {
-    "bom": "bc0ae5d0e0586da5e1afb7c6361135c04e25fe0cfd358673a8c0c7f18bc04b66",
+    "bom": "aabb09707953975e778379882258b7cc4e789d7f49b8c725ace1173d710fff95",
     "design_manifest": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
-    "electrical_contract": "6b93387dc7afeded96c515abe7519dbec9c5956eeb2d200493aadb1663800622",
-    "pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
-    "project_rules": "0eb65723c01e3f41d0de831091968da861ebf61f01f0f1c8c82dcfd81fcad36f",
+    "electrical_contract": "2ff9705a73b70c04c4bf26df23ec97d448d562c5f033d54f146674a9250809a1",
+    "pcb": "43a354a4624b69e8c26915680a69fea02b84e1b7e1e9816056522070c2269d24",
+    "project_rules": "c5da091481ccc6984fc522ef9a01adf3dde842021fa5daa1d37400a9464454ef",
     "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
     "symbol_library": "5da7075c6cbbad3ec371cf9583b03224a94bb274d968959eaf2d9a633d6f1a47",
     "symbol_library_table": "a6342889d662299506eebfbe8f77c92ba3485a1a2e8f004dcb62251cb4167977",

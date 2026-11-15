@@ -120,6 +120,9 @@ def validate_rules(project: dict) -> None:
         "min_clearance": 0.2, "min_track_width": 0.15,
         "min_copper_edge_clearance": 0.5, "min_through_hole_diameter": 0.3,
         "min_via_diameter": 0.6, "min_via_annular_width": 0.1,
+        # Published fab legend limits, so ordinary DRC reports legend defects.
+        "min_silk_clearance": 0.15, "min_text_height": 1.0,
+        "min_text_thickness": 0.15,
     }
     for name, value in minimums.items():
         require(settings["rules"].get(name) == value, f"unreviewed design rule: {name}")

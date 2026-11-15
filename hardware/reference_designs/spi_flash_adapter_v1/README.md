@@ -122,12 +122,20 @@ credit unless the imported result passes KiCad DRC, connectivity, and schematic 
 Freerouting's zone/clearance diagnostics are printed separately. KiCad refills the ground
 zones after importing the session and is the acceptance check for the canonical result.
 
+The legend rules in `generate_pcb.py` (0.15 mm strokes, 1.0 mm text, 1.00 mm test-pad
+circles) apply to a fresh build. To apply them to an already routed board without
+rerouting, run `/usr/bin/python3 generate_pcb.py --restyle-silkscreen spi_flash_adapter_v1.kicad_pcb`;
+it edits F.Silkscreen only.
+The project rules in `spi_flash_adapter_v1.kicad_pro` carry the same limits (silk
+clearance 0.15 mm, text height 1.0 mm, text thickness 0.15 mm), so KiCad DRC reports a
+legend defect and `verify_design.py` rejects a project file that relaxes them.
+
 ## Review/manufacturing package
 
 For the dated first-article order files, procurement dispositions and preview
 checks, use [ORDER_GUIDE.md](ORDER_GUIDE.md). Regenerate the checked-in `fab/`
 package with `/usr/bin/python3 export_fab.py`; its BOM/CPL select the initial
-partial assembly variant. Follow [BRING_UP_TEST.md](BRING_UP_TEST.md) after delivery.
+partial assembly variant, which leaves U2 and U3 for hand soldering. Follow [BRING_UP_TEST.md](BRING_UP_TEST.md) after delivery.
 Public sourcing checks and package generation do not change the authority flags
 or establish physical correctness.
 
