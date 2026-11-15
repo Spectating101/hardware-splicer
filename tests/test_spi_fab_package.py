@@ -122,12 +122,14 @@ def test_spi_fab_procurement_covers_all_parts_and_safe_variant() -> None:
             assert re.fullmatch(r"C\d+", row["LCSC Part #"])
             assert row["Source URL"].startswith("https://www.lcsc.com/")
             assembled.update({ref: row for ref in refs})
-    assert hand == {"J1", "JP1", "C2", "R1", "R4"}
+    # U2/U3 stay out of factory placement until an exact-part rotation is proven.
+    assert hand == {"J1", "JP1", "C2", "R1", "R4", "U2", "U3"}
     assert {ref for row in rows(FAB / "HAND_SOLDER.csv") for ref in row["References"].split()} == hand
     bom = rows(FAB / "JLCPCB_BOM.csv")
     assert list(bom[0]) == ["Comment", "Designator", "Footprint", "LCSC Part #"]
     uploaded = [ref for row in bom for ref in row["Designator"].split(",")]
-    assert len(uploaded) == len(set(uploaded)) == 13
+    assert len(bom) == 4
+    assert len(uploaded) == len(set(uploaded)) == 11
     assert set(uploaded) == set(assembled)
     for row in bom:
         for ref in row["Designator"].split(","):
@@ -135,7 +137,7 @@ def test_spi_fab_procurement_covers_all_parts_and_safe_variant() -> None:
             assert row["LCSC Part #"] == assembled[ref]["LCSC Part #"]
     cpl = rows(FAB / "JLCPCB_CPL.csv")
     assert list(cpl[0]) == ["Designator", "Mid X", "Mid Y", "Layer", "Rotation"]
-    assert len(cpl) == len({row["Designator"] for row in cpl}) == 13
+    assert len(cpl) == len({row["Designator"] for row in cpl}) == 11
     assert {row["Designator"] for row in cpl} == set(uploaded)
     native = {row["Ref"]: row for row in rows(FAB / "kicad-positions.csv")}
     for row in cpl:

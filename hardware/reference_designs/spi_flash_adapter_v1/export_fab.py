@@ -109,6 +109,11 @@ def export(output: Path) -> None:
                     raise ValueError("Only top assembly has been qualified")
                 # KiCad absolute export already flips Y into Gerber's +up frame.
                 # Preserve it, including its negative sign. No arbitrary translation.
+                # Rotation is KiCad's, unmodified. A per-part JLCPCB offset belongs
+                # here only with exact-part proof. None exists: on 2026-11-15 the tape
+                # drawings and the EasyEDA/LCSC footprints for C7150045 (U2) and
+                # C2877863 (U3) did not establish one angle, so BOM.csv marks both
+                # hand-solder and they never reach this loop. See ORDER_GUIDE.md.
                 cpl.append({"Designator": ref, "Mid X": f'{float(position["PosX"]):.4f}mm',
                             "Mid Y": f'{float(position["PosY"]):.4f}mm', "Layer": "Top",
                             "Rotation": f'{float(position["Rot"]) % 360:.2f}'})

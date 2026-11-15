@@ -132,7 +132,7 @@ it edits F.Silkscreen only.
 For the dated first-article order files, procurement dispositions and preview
 checks, use [ORDER_GUIDE.md](ORDER_GUIDE.md). Regenerate the checked-in `fab/`
 package with `/usr/bin/python3 export_fab.py`; its BOM/CPL select the initial
-partial assembly variant. Follow [BRING_UP_TEST.md](BRING_UP_TEST.md) after delivery.
+partial assembly variant, which leaves U2 and U3 for hand soldering. Follow [BRING_UP_TEST.md](BRING_UP_TEST.md) after delivery.
 Public sourcing checks and package generation do not change the authority flags
 or establish physical correctness.
 
