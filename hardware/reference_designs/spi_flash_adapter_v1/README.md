@@ -122,6 +122,11 @@ credit unless the imported result passes KiCad DRC, connectivity, and schematic 
 Freerouting's zone/clearance diagnostics are printed separately. KiCad refills the ground
 zones after importing the session and is the acceptance check for the canonical result.
 
+The legend rules in `generate_pcb.py` (0.15 mm strokes, 1.0 mm text, 1.00 mm test-pad
+circles) apply to a fresh build. To apply them to an already routed board without
+rerouting, run `/usr/bin/python3 generate_pcb.py --restyle-silkscreen spi_flash_adapter_v1.kicad_pcb`;
+it edits F.Silkscreen only.
+
 ## Review/manufacturing package
 
 For the dated first-article order files, procurement dispositions and preview

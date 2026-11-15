@@ -146,6 +146,36 @@ def test_spi_fab_procurement_covers_all_parts_and_safe_variant() -> None:
         assert float(row["Rotation"]) == float(original["Rot"]) % 360
 
 
+def test_spi_fab_top_legend_meets_published_limits() -> None:
+    # JLCPCB: stroke >= 0.15 mm, text height >= 1.0 mm, pad-to-silk >= 0.15 mm.
+    legend = (FAB / "gerbers" / f"{NAME}.GTO").read_text()
+    apertures = {code: float(diameter) for code, diameter in re.findall(r"%ADD(\d+)C,([\d.]+)\*%", legend)}
+    drawn, current = set(), None
+    for line in legend.splitlines():
+        selected = re.fullmatch(r"D(\d{2,})\*", line)
+        if selected:
+            current = selected[1]
+        elif line.endswith("D01*"):
+            drawn.add(current)
+    assert drawn and drawn <= set(apertures), "legend strokes must use round apertures"
+    assert min(apertures[code] for code in drawn) >= 0.15
+    board = (DESIGN / f"{NAME}.kicad_pcb").read_text()
+    text = (r'\(%s "[^"]*"\s*\(at [^)]*\)\s*\(layer "F\.SilkS"\)\s*\(uuid "[^"]*"\)\s*\(effects\s*'
+            r'\(font\s*\(size ([\d.]+) ([\d.]+)\)\s*\(thickness ([\d.]+)\)')
+    labels = re.findall(text % "gr_text", board)
+    references = re.findall(text % 'property "Reference"', board)
+    assert len(labels) == 5 and len(references) == 36  # H1-H4 references are hidden
+    for height, width, thickness in labels + references:
+        assert float(height) >= 1.0 and float(width) >= 1.0 and float(thickness) >= 0.15
+    testpoints = re.findall(
+        r'\(fp_circle\s*\(center 0 0\)\s*\(end ([\d.]+) 0\)\s*\(stroke\s*\(width ([\d.]+)\)'
+        r'\s*\(type solid\)\s*\)\s*\(fill \w+\)\s*\(layer "F\.SilkS"\)', board)
+    assert len(testpoints) == 18
+    for radius, width in testpoints:
+        # Circle inner edge to the 0.75 mm radius pad.
+        assert float(radius) - float(width) / 2 - 0.75 >= 0.15
+
+
 def test_spi_fab_regenerates_from_canonical_board(tmp_path: Path) -> None:
     version = require_kicad9()
     # Actual CLI export. Different KiCad 9 builds may identify themselves differently

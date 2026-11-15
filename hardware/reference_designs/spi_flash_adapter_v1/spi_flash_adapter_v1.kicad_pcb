@@ -179,7 +179,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -189,7 +189,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -322,7 +322,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP1"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "3a29c4c7-db8e-4477-981f-1ba13e18e2ab")
 			(effects
@@ -373,9 +373,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -420,7 +420,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP9"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "e36f1896-5ed4-4a88-8fa1-226e3fd81003")
 			(effects
@@ -471,9 +471,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -518,7 +518,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP12"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "d5e44a97-6829-4fa7-9d4a-42521a49ce79")
 			(effects
@@ -569,9 +569,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -616,7 +616,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP18"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "63cd574c-18fc-41b2-8438-04bcb8f23bb2")
 			(effects
@@ -667,9 +667,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -714,7 +714,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP14"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "5e50647a-7140-4d56-ac91-7180fb0adf2c")
 			(effects
@@ -765,9 +765,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -812,7 +812,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP3"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "4d867d33-ce52-4a43-8889-d9d27d4c7dfd")
 			(effects
@@ -863,9 +863,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -985,7 +985,7 @@
 			(start -1.38 -1.38)
 			(end 0 -1.38)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -995,7 +995,7 @@
 			(start -1.38 0)
 			(end -1.38 -1.38)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1005,7 +1005,7 @@
 			(start -1.38 1.27)
 			(end -1.38 3.92)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1015,7 +1015,7 @@
 			(start -1.38 1.27)
 			(end 1.38 1.27)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1025,7 +1025,7 @@
 			(start -1.38 3.92)
 			(end 1.38 3.92)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1035,7 +1035,7 @@
 			(start 1.38 1.27)
 			(end 1.38 3.92)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1255,7 +1255,7 @@
 			(start -2.76 -2.76)
 			(end -2.76 -2.49)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1265,7 +1265,7 @@
 			(start -2.76 2.76)
 			(end -2.76 2.49)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1275,7 +1275,7 @@
 			(start 0 -2.76)
 			(end -2.76 -2.76)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1285,7 +1285,7 @@
 			(start 0 -2.76)
 			(end 2.76 -2.76)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1295,7 +1295,7 @@
 			(start 0 2.76)
 			(end -2.76 2.76)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1305,7 +1305,7 @@
 			(start 0 2.76)
 			(end 2.76 2.76)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1315,7 +1315,7 @@
 			(start 2.76 -2.76)
 			(end 2.76 -2.49)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1325,7 +1325,7 @@
 			(start 2.76 2.76)
 			(end 2.76 2.49)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1336,7 +1336,7 @@
 				(xy -3.525 -2.49) (xy -3.765 -2.82) (xy -3.285 -2.82)
 			)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill yes)
@@ -1683,7 +1683,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1693,7 +1693,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1826,7 +1826,7 @@
 		(descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor")
 		(property "Reference" "R6"
-			(at 0 -1.43 0)
+			(at 0 1.43 0)
 			(layer "F.SilkS")
 			(uuid "c50e57b8-0fbd-4d6a-98f9-e70c1f79105b")
 			(effects
@@ -1901,7 +1901,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -1911,7 +1911,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2044,7 +2044,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP10"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "d2cdc572-678c-462d-af3a-9c060bc175f0")
 			(effects
@@ -2095,9 +2095,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -2217,7 +2217,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2227,7 +2227,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2360,7 +2360,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP11"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "45bfaa9e-a1df-46e0-b468-a4aa7c99917b")
 			(effects
@@ -2411,9 +2411,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -2533,7 +2533,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2543,7 +2543,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2751,7 +2751,7 @@
 			(start -1.38 -1.38)
 			(end 0 -1.38)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2761,7 +2761,7 @@
 			(start -1.38 0)
 			(end -1.38 -1.38)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2771,7 +2771,7 @@
 			(start -1.38 1.27)
 			(end -1.38 14.08)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2781,7 +2781,7 @@
 			(start -1.38 1.27)
 			(end 1.38 1.27)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2791,7 +2791,7 @@
 			(start -1.38 14.08)
 			(end 1.38 14.08)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -2801,7 +2801,7 @@
 			(start 1.38 1.27)
 			(end 1.38 14.08)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3057,7 +3057,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3067,7 +3067,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3200,7 +3200,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP16"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "9a0418c3-fcfd-486f-89ba-5b8d1bf5a15b")
 			(effects
@@ -3251,9 +3251,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -3469,7 +3469,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3479,7 +3479,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3687,7 +3687,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3697,7 +3697,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -3830,7 +3830,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP17"
-			(at 0 -1.648 0)
+			(at -3.3 0 0)
 			(layer "F.SilkS")
 			(uuid "a8332501-c99e-4ade-aaca-e690582a5ed2")
 			(effects
@@ -3881,9 +3881,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -3928,7 +3928,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP13"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "aac02685-a61b-4adc-a501-b93bc719bfd6")
 			(effects
@@ -3979,9 +3979,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -4197,7 +4197,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4207,7 +4207,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4415,7 +4415,7 @@
 			(start -0.14058 -0.51)
 			(end 0.14058 -0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4425,7 +4425,7 @@
 			(start -0.14058 0.51)
 			(end 0.14058 0.51)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4633,7 +4633,7 @@
 			(start 0 -1.56)
 			(end -0.8 -1.56)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4643,7 +4643,7 @@
 			(start 0 -1.56)
 			(end 0.8 -1.56)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4653,7 +4653,7 @@
 			(start 0 1.56)
 			(end -0.8 1.56)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4663,7 +4663,7 @@
 			(start 0 1.56)
 			(end 0.8 1.56)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -4674,7 +4674,7 @@
 				(xy -1.3 -1.51) (xy -1.54 -1.84) (xy -1.06 -1.84)
 			)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill yes)
@@ -4922,7 +4922,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP8"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "1432842a-2551-4bb5-a376-6f172f55eeca")
 			(effects
@@ -4973,9 +4973,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5095,7 +5095,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -5105,7 +5105,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -5238,7 +5238,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP15"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "8db57a5f-347d-4296-983c-e0a1a88516f8")
 			(effects
@@ -5289,9 +5289,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5336,7 +5336,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP4"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "216f5798-d69d-47e4-a9ad-97842bc1c1da")
 			(effects
@@ -5387,9 +5387,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5530,7 +5530,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP7"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "568b3518-4ea8-4363-8e00-eca06cf1f802")
 			(effects
@@ -5581,9 +5581,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5628,7 +5628,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP6"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "f5baded8-3704-48ef-9028-fd83c2f89f35")
 			(effects
@@ -5679,9 +5679,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5726,7 +5726,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP5"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "106ca0a4-a466-473a-8693-248d635450cf")
 			(effects
@@ -5777,9 +5777,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -5995,7 +5995,7 @@
 			(start 0 -2.61)
 			(end -2.2 -2.61)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6005,7 +6005,7 @@
 			(start 0 -2.61)
 			(end 2.2 -2.61)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6015,7 +6015,7 @@
 			(start 0 2.61)
 			(end -2.2 2.61)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6025,7 +6025,7 @@
 			(start 0 2.61)
 			(end 2.2 2.61)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6036,7 +6036,7 @@
 				(xy -2.9 -2.41) (xy -3.14 -2.74) (xy -2.66 -2.74)
 			)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill yes)
@@ -6356,7 +6356,7 @@
 		(descr "SMD pad as test Point, diameter 1.5mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP2"
-			(at 0 -1.648 0)
+			(at 0 -1.713 0)
 			(layer "F.SilkS")
 			(uuid "983fe6fc-1e23-43f8-a57b-61b10b3fb72a")
 			(effects
@@ -6407,9 +6407,9 @@
 		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
-			(end 0 0.95)
+			(end 1 0)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(fill no)
@@ -6529,7 +6529,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6539,7 +6539,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6747,7 +6747,7 @@
 			(start -0.237258 -0.5225)
 			(end 0.237258 -0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6757,7 +6757,7 @@
 			(start -0.237258 0.5225)
 			(end 0.237258 0.5225)
 			(stroke
-				(width 0.12)
+				(width 0.15)
 				(type solid)
 			)
 			(layer "F.SilkS")
@@ -6924,23 +6924,23 @@
 		(uuid "aef3ddab-534c-445f-addb-21d19739e86a")
 	)
 	(gr_text "ENABLE AFTER RAIL CHECK + CS HIGH"
-		(at 160 62 0)
+		(at 162 62 0)
 		(layer "F.SilkS")
 		(uuid "28a79514-3430-4213-83cc-fecb13af4e00")
 		(effects
 			(font
-				(size 0.8 0.8)
+				(size 1 1)
 				(thickness 0.15)
 			)
 		)
 	)
 	(gr_text "MODELED - NOT POWER AUTHORIZED"
-		(at 145 105 0)
+		(at 145 105.25 0)
 		(layer "F.SilkS")
 		(uuid "2e87d091-c100-4cee-bbd0-94488b1343f0")
 		(effects
 			(font
-				(size 0.9 0.9)
+				(size 1 1)
 				(thickness 0.15)
 			)
 		)
@@ -6957,23 +6957,23 @@
 		)
 	)
 	(gr_text "JP1 OPEN AT POWER UP/DOWN"
-		(at 168 104 0)
+		(at 172 103.8 0)
 		(layer "F.SilkS")
 		(uuid "3f35a00e-de0d-499c-bac4-eda9ed19ee57")
 		(effects
 			(font
-				(size 0.8 0.8)
+				(size 1 1)
 				(thickness 0.15)
 			)
 		)
 	)
 	(gr_text "J1: 3V3 GND CLK MOSI CS# MISO"
-		(at 116 107 0)
+		(at 117.5 103.2 0)
 		(layer "F.SilkS")
 		(uuid "7590861b-b038-4801-bcc9-d42b55d83857")
 		(effects
 			(font
-				(size 0.8 0.8)
+				(size 1 1)
 				(thickness 0.15)
 			)
 		)

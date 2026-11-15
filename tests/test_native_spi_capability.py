@@ -20,9 +20,13 @@ def fixture():
     erc={"$schema":"https://schemas.kicad.org/erc.v1.json",
          "source":"spi_flash_adapter_v1.kicad_sch",
          "sheets":[{"violations":[]}]}
+    # The legend fix enlarges the test-pad silk circles, so native DRC reports
+    # each test point as differing from its library copy. Stand in for that
+    # report with exactly the warnings the receipt records as reviewed.
     drc={"$schema":"https://schemas.kicad.org/drc.v1.json",
          "source":"spi_flash_adapter_v1.kicad_pcb",
-         "violations":[],"unconnected_items":[],"schematic_parity":[]}
+         "violations":copy.deepcopy(receipt["advisories"]["reviewed_nonpad_library_differences"]),
+         "unconnected_items":[],"schematic_parity":[]}
     hashes={key:module.sha((DESIGN/name).read_bytes())
             for key,name in module.RECEIPT_FILES.items()}
     return receipt,manifest,erc,drc,hashes
@@ -69,7 +73,7 @@ def test_missing_schematic_parity_cannot_be_claimed():
 
 def test_forged_zero_drc_when_actual_report_warning_present_rejected():
     receipt,manifest,erc,drc,hashes=fixture()
-    drc["violations"]=[{"type":"clearance","severity":"warning"}]
+    drc["violations"].append({"type":"clearance","severity":"warning"})
     with pytest.raises(ValueError,match="finding count"):
         module.verify_native_reports(receipt,manifest,erc,drc,hashes)
 
