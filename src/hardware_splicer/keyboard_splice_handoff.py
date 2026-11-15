@@ -12,6 +12,7 @@ from .machine_project import (
     AuthorityState, EvidenceRef, ReleaseState, Requirement,
     Interface, InterfaceContract, InterfaceEndpoint, Subsystem, Domain,
     RequirementKind, VerificationMethod, VerificationStatus, VerificationType,
+    MachineProject,
 )
 
 
@@ -123,5 +124,157 @@ def build_keyboard_splice_handoff(cut: Mapping[str, Any], topology: Mapping[str,
             "achieved":gate.achieved_state.value,
             "allowed":gate.allowed,
             "blocker_codes":[issue.code for issue in gate.blockers],
+        },
+    }
+
+
+def extend_keyboard_splice_handoff(
+    existing: Mapping[str, Any],
+    source_audit: Mapping[str, Any],
+    matrix: Mapping[str, Any],
+    junction: Mapping[str, Any],
+    junction_verification: Mapping[str, Any],
+) -> dict:
+    """Attach source-bound firmware and junction design without physical authority.
+
+    Supports *simulated and public-reference* machine evidence. Cannot turn a
+    DRC clean PCB into a tested physical product.
+    """
+    if existing.get("physical_authority_granted") is not False:
+        raise ValueError("earlier machine handoff already claims physical authority")
+    project=MachineProject.model_validate(existing["project"])
+    source=project.discipline_payloads.get("keyboard_splice",{}).get("reference_source_sha256")
+    if (not source or
+        source_audit.get("original_pcb_sha256")!=source or
+        matrix.get("source_sha256")!=source or
+        junction.get("source_sha256")!=source or
+        junction_verification.get("source_sha256")!=source):
+        raise ValueError("firmware / harness / original PCB evidence revisions differ")
+    if source_audit.get("net_assignment_equivalence") is not True:
+        raise ValueError("source schematic electrical mapping is not verified")
+    if (matrix.get("ideal_directed_diode_matrix_model_passed") is not True
+        or matrix.get("mismatched_ideal_patterns")!=0 or
+        matrix.get("released_for_fabrication") is not False):
+        raise ValueError("source full matrix simulation is unresolved")
+    if junction.get("fabrication_release")!="BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW":
+        raise ValueError("harness tried to grant physical authority")
+    if (junction.get("physical_assembly_authorized") is not False or
+        junction_verification.get("fabrication_release")!="BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW" or
+        junction_verification.get("native_design_checks_passed") is not True or
+        junction_verification.get("drc_violations")!=0 or
+        junction_verification.get("unconnected_items")!=0):
+        raise ValueError("native junction design proof missing or claims physical authority")
+    if (junction.get("topology_sha256")!=
+        project.discipline_payloads["keyboard_splice"]["model_sha256"]):
+        raise ValueError("junction references different cut copper topology")
+    if (junction.get("full_matrix_sha256")!=matrix.get("payload_sha256")
+        or junction_verification.get("full_matrix_sha256")!=matrix.get("payload_sha256")
+        or junction.get("independent_schematic_and_firmware_audit_sha256")
+           !=source_audit.get("payload_sha256")):
+        raise ValueError("firmware or source audit receipt mismatch")
+    if junction.get("total_junction_board_pins")!=(
+        junction.get("source_original_pads_with_only_one_wire_each",0)+
+        junction.get("relocated_key_header_pins",0)
+    ):
+        raise ValueError("harness wire inventory is incomplete")
+
+    subsystems=("remounted-key-pcb","source-bound-junction-bus")
+    if any(s.subsystem_id in subsystems for s in project.subsystems):
+        raise ValueError("already integrated source-junction hardware module")
+    project.subsystems.extend([
+        Subsystem(
+            subsystem_id="remounted-key-pcb",
+            name="Five detached source-key circuits represented by a new KiCad daughterboard",
+            parent_subsystem_id="system",
+            domain=Domain.ELECTRICAL,
+        ),
+        Subsystem(
+            subsystem_id="source-bound-junction-bus",
+            name="Source-net-pinned junction connector PCB, conditional only",
+            parent_subsystem_id="system",
+            domain=Domain.ELECTRICAL,
+        ),
+    ])
+    for endpoint in ("donor-left-pcb","donor-right-pcb","remounted-key-pcb"):
+        project.interfaces.append(Interface(
+            interface_id="interface-junction-"+endpoint,
+            name="Unverified physical cable between full source-net junction and "+endpoint,
+            kind="electrical_wiring",
+            endpoints=[
+                InterfaceEndpoint(object_id="source-bound-junction-bus",port="source_net_header_clusters"),
+                InterfaceEndpoint(object_id=endpoint,port="unverified_original_mating_pads"),
+            ],
+            contracts=[InterfaceContract(
+                contract_type="original_source_net_reference",
+                values={
+                    "junction_net_clusters":junction["unique_source_nets_joined"],
+                    "source_pins":junction["source_original_pads_with_only_one_wire_each"],
+                    "remount_pins":junction["relocated_key_header_pins"],
+                },
+                unresolved_fields=[
+                    "physical_donor_identity","cable_mpn","connector_mating",
+                    "assembly_tolerance","strain_relief","firmware_validation",
+                ],
+                authority=AuthorityState.PROPOSED,
+            )],
+            authority=AuthorityState.PROPOSED,
+        ))
+    project.evidence.extend([
+        EvidenceRef(
+            evidence_id="f60-source-independent-schematic-firmware-audit",
+            kind="public_schematic_vs_pcb_netlist_equality",
+            basis="Independent SHA-pinned public schematic netlist and TMK firmware",
+            ref=source_audit["payload_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ),
+        EvidenceRef(
+            evidence_id="f60-62-key-ideal-matrix-press-test",
+            kind="source_bound_ideal_keyboard_scan_model",
+            basis="Original source-derived 62-key/62-diode controller matrix, no USB hardware",
+            ref=matrix["payload_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ),
+        EvidenceRef(
+            evidence_id="f60-kicad-source-junction-native-drc",
+            kind="native_kicad_electrical_routing_check",
+            basis="Twenty independent source-net junction buses; physical wiring not tested",
+            ref=junction_verification["pcb_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ),
+    ])
+    project.discipline_payloads["keyboard_splice"].update({
+        "source_connected_schematic_pad_nodes":source_audit["matched_original_pcb_net_nodes"],
+        "firmware_source_matrix_positions":source_audit["pcb_switch_diode_firmware_position_verified"],
+        "simulated_ideal_press_patterns":matrix["total_ideal_press_patterns_tested"],
+        "independent_schematic_audit_sha256":source_audit["payload_sha256"],
+        "full_62_key_matrix_sha256":matrix["payload_sha256"],
+        "native_junction_design_sha256":junction_verification["pcb_sha256"],
+        "junction_source_net_groups":junction["unique_source_nets_joined"],
+        "junction_donor_original_pad_wires":junction["source_original_pads_with_only_one_wire_each"],
+        "junction_daughterboard_port_wires":junction["relocated_key_header_pins"],
+        "native_source_pcb_full_drc_complete":False,
+        "physical_harness_cable_verified":False,
+        "original_teensy_firmware_compiled_flashed_or_verified":False,
+        "physical_donor_verified":False,
+        "fabrication_authorized":False,
+    })
+    gate=project.assess_release(ReleaseState.BUILD_READY)
+    if gate.allowed or gate.achieved_state==ReleaseState.BUILD_READY:
+        raise ValueError("source-only schematic and KiCad DRC cannot authorize physical build")
+    return {
+        "project":project.model_dump(mode="json"),
+        "release_assessment":gate.model_dump(mode="json"),
+        "physical_authority_granted":False,
+        "canonical_summary":{
+            "requested":gate.requested_state.value,
+            "achieved":gate.achieved_state.value,
+            "allowed":gate.allowed,
+            "blocker_codes":[block.code for block in gate.blockers],
         },
     }

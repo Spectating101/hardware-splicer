@@ -54,3 +54,16 @@ The reconnection PCB has **17 native KiCad channels**; the five-key daughterboar
 Full evidence, assembly/wiring preview and run command: [f60_remount_round5/README.md](f60_remount_round5/README.md).
 
 **Conditional source-based electrical reconstruction is not arbitrary physical-junk proof**, and the strict 0/8 benchmark score is intentionally retained.
+
+
+## Full original f.60 source equivalence and consolidated wiring (2026-11-16)
+
+The conditional f.60 recovery now includes a SHA-pinned comparison with its independently authored schematic/netlist and original TMK firmware:
+
+- 267 electrically connected schematic node assignments match all 267 actual source PCB pad net assignments.
+- 62 actual source switches each connect through one diode to one of 5 firmware rows × 14 firmware columns, and all 62 firmware keymap entries match the source keys.
+- 91,230 ideal simulated press patterns passed, including cross-row combinations and every one-row subset.
+- A 20-net-group, 49-pin source-reference KiCad junction board removes double-terminating donor solder pads: 39 unique original donor pads and 10 relocated-key leads. Its native KiCad DRC is clean.
+- HS canonical MachineProject declares the source firmware, full matrix, junction and three proposed unverified physical interfaces but still refuses fabrication.
+
+See [f60_remount_round5/README.md](f60_remount_round5/README.md) and its full original-source SHA and machine evidence. The earlier original f.60 board DRC timeout and lack of a real donor remain unresolved, so the **strict eight-board arbitrary-junk success score remains 0/8**.

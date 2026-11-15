@@ -36,5 +36,20 @@
   "physical_donor_or_assembly_tested": false,
   "original_keyboard_full_function_proven": false,
   "physically_build_ready": false,
-  "verdict": "CONDITIONAL_SOURCE_REFERENCE_RELOCATION_PREVIEW"
+  "verdict": "CONDITIONAL_SOURCE_REFERENCE_RELOCATION_PREVIEW",
+  "independent_schematic_pcb_connected_pad_matches": 267,
+  "firmware_matrix_rows": 5,
+  "firmware_matrix_columns": 14,
+  "firmware_key_positions_verified": 62,
+  "firmware_keymap_layers": 3,
+  "ideal_multikey_patterns_checked": 91230,
+  "ideal_multikey_patterns_failed": 0,
+  "source_bound_diodes_verified": 62,
+  "unified_harness_net_groups": 20,
+  "unified_harness_donor_wire_contacts": 39,
+  "unified_harness_remount_wire_contacts": 10,
+  "unified_harness_total_junction_ports": 49,
+  "unified_harness_native_drc_passed": true,
+  "original_firmware_compiled_or_tested": false,
+  "physical_harness_connected_or_tested": false
 }

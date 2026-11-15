@@ -14,9 +14,14 @@ import sys
 REPO=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(REPO/"src"))
 from hardware_splicer.keyboard_splice import CutConfig,evaluate_cut,write_report
-from hardware_splicer.keyboard_splice_handoff import build_keyboard_splice_handoff
+from hardware_splicer.keyboard_splice_handoff import (
+    build_keyboard_splice_handoff,
+    extend_keyboard_splice_handoff,
+)
 from hardware_splicer.keyboard_splice_repair_loop import run_repair_loop
 from hardware_splicer.keyboard_splice_matrix import verify_one_row_matrix
+from hardware_splicer.keyboard_splice_full_matrix import full_matrix_proof
+from hardware_splicer.keyboard_splice_source_audit import audit_independent_source
 
 def main() -> int:
     ap=argparse.ArgumentParser()
@@ -38,6 +43,11 @@ def main() -> int:
     ap.add_argument("--stepped-path-json",type=Path,default=None)
     ap.add_argument("--multi-route-json",type=Path,default=None)
     ap.add_argument("--key-relocation-out",type=Path,default=None)
+    ap.add_argument("--independent-source-dir",type=Path,default=None)
+    ap.add_argument("--source-pin-manifest",type=Path,default=None)
+    ap.add_argument("--independent-source-audit-json",type=Path,default=None)
+    ap.add_argument("--full-matrix-proof-json",type=Path,default=None)
+    ap.add_argument("--full-junction-out",type=Path,default=None)
     ap.add_argument("--interposer-out",type=Path,default=None)
     ap.add_argument("--x",type=float,default=None,help="Optional x coordinate to assess without searching a cut route")
     args=ap.parse_args()
@@ -335,6 +345,176 @@ def main() -> int:
         }
         if not check["geometry_model_verified"]:
             raise SystemExit("KiCad replacement-key daughterboard failed native DRC")
+    if args.full_matrix_proof_json or args.independent_source_audit_json:
+        required=(
+            args.full_matrix_proof_json,args.independent_source_audit_json,
+            args.independent_source_dir,args.source_pin_manifest,
+            args.key_relocation_out,args.multi_route_json,
+            args.postcut_islands_json,args.interposer_out
+        )
+        if any(x is None for x in required):
+            raise SystemExit(
+                "Full matrix proof requires original firmware/netlist source, SHA manifest, "
+                "cut topology, remounted keys, bridge evidence, and both output paths"
+            )
+        manifest=json.loads(args.source_pin_manifest.read_text(encoding="utf-8"))
+        if manifest.get("original_pcb_source_sha256")!=board["source_sha256"]:
+            raise SystemExit("Independent source pin manifest does not match this PCB")
+        expected={entry["name"]:entry["sha256"] for entry in manifest["files"]}
+        needed=("keyboard.net","config.h","matrix.c","keymap_common.h","keymap.c")
+        if set(expected)!=set(needed):
+            raise SystemExit("Independent source pin manifest must contain five pinned source files")
+        sources={}
+        for name in needed:
+            file=args.independent_source_dir/name
+            if not file.is_file() or file.stat().st_size>200000:
+                raise SystemExit("Original upstream netlist or firmware file missing/unbounded: "+name)
+            sources[name]=file.read_bytes()
+        upstream_audit=audit_independent_source(
+            board,*(sources[name] for name in needed),expected_hashes=expected
+        )
+        multi=json.loads(args.multi_route_json.read_text(encoding="utf-8"))
+        remount=json.loads(
+            (args.key_relocation_out/"RELOCATION_MAP.json").read_text(encoding="utf-8")
+        )
+        remount_receipt=json.loads(
+            (args.key_relocation_out/"RELOCATION_VERIFICATION.json").read_text(encoding="utf-8")
+        )
+        bridge=json.loads(
+            (args.interposer_out/"INTERPOSER_CHANNEL_MAP.json").read_text(encoding="utf-8")
+        )
+        bridge_receipt=json.loads(
+            (args.interposer_out/"INTERPOSER_VERIFICATION.json").read_text(encoding="utf-8")
+        )
+        complete=full_matrix_proof(
+            board,chosen_stepped,topology_result,multi,remount,remount_receipt,
+            bridge,bridge_receipt,
+        )
+        if (upstream_audit["pcb_switch_diode_firmware_position_verified"]
+                !=complete["original_switch_count"]):
+            raise SystemExit("Original schematic/firmware does not cover every tested key")
+        if (upstream_audit["firmware_matrix_rows"]!=complete["source_row_count"]
+            or upstream_audit["firmware_matrix_columns"]!=complete["source_column_count"]):
+            raise SystemExit("Original firmware and physical PCB disagree on scan dimensions")
+        original_positions=upstream_audit["original_switch_to_firmware_default_keycode"]
+        for link in complete["source_switch_diode_controller_map"]:
+            if link["ref"] not in original_positions:
+                raise SystemExit("Firmware has no keycode for source switch "+link["ref"])
+        args.independent_source_audit_json.parent.mkdir(parents=True,exist_ok=True)
+        args.full_matrix_proof_json.parent.mkdir(parents=True,exist_ok=True)
+        args.independent_source_audit_json.write_text(
+            json.dumps(upstream_audit,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+        )
+        args.full_matrix_proof_json.write_text(
+            json.dumps(complete,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+        )
+        result["full_matrix_summary"]={
+            "schematic_connected_nodes_verified":upstream_audit["matched_original_pcb_net_nodes"],
+            "firmware_key_positions_verified":upstream_audit["pcb_switch_diode_firmware_position_verified"],
+            "original_source_sha256":board["source_sha256"],
+            "upstream_audit_sha256":upstream_audit["payload_sha256"],
+            "matrix_proof_sha256":complete["payload_sha256"],
+            "ideal_press_patterns":complete["total_ideal_press_patterns_tested"],
+            "simulated_pattern_failures":complete["mismatched_ideal_patterns"],
+            "real_keyboard_function_verified":False,
+            "firmware_compiled":False,
+            "original_source_kicad_drc_completed":False,
+            "release":"PASS_SOURCE_BOUND_IDEAL_MATRIX_ONLY",
+        }
+    if args.full_junction_out:
+        if not all((
+            args.full_matrix_proof_json,args.independent_source_audit_json,
+            args.postcut_islands_json,args.interposer_out,args.key_relocation_out
+        )):
+            raise SystemExit("Unified junction requires independent schematic, full keyboard matrix and remount evidence")
+        if not args.full_matrix_proof_json.is_file():
+            raise SystemExit("Full matrix proof must complete before junction routing")
+        junction_helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_harness_bus.py"
+        with tempfile.TemporaryDirectory(prefix="hs-junction-source-") as source_tmp:
+            pcb_data=Path(source_tmp)/"exact_board.json"
+            pcb_data.write_text(json.dumps(board),encoding="utf-8")
+            action=subprocess.run([
+                args.system_python,str(junction_helper),
+                "--source-json",str(pcb_data),
+                "--topology-json",str(args.postcut_islands_json.resolve()),
+                "--bridge-json",str((args.interposer_out/"INTERPOSER_CHANNEL_MAP.json").resolve()),
+                "--remount-json",str((args.key_relocation_out/"RELOCATION_MAP.json").resolve()),
+                "--matrix-json",str(args.full_matrix_proof_json.resolve()),
+                "--source-audit-json",str(args.independent_source_audit_json.resolve()),
+                "--out",str(args.full_junction_out.resolve()),
+            ],capture_output=True,text=True,timeout=120,check=False)
+            if action.returncode:
+                raise SystemExit("Source-bound junction board generation failed: "+action.stderr[-1400:])
+        junction=json.loads((args.full_junction_out/"FULL_JUNCTION_WIRING.json").read_text(encoding="utf-8"))
+        proof=json.loads(args.full_matrix_proof_json.read_text(encoding="utf-8"))
+        if (junction["source_sha256"]!=board["source_sha256"] or
+            junction["full_matrix_sha256"]!=proof["payload_sha256"] or
+            junction["topology_sha256"]!=topology_result["payload_sha256"] or
+            junction["physical_assembly_authorized"] is not False or
+            junction["fabrication_release"]!="BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW"):
+            raise SystemExit("Junction wrong source, incomplete graph or invalid physical release")
+        kicad_cli=shutil.which("kicad-cli")
+        if not kicad_cli:
+            raise SystemExit("Native KiCad is unavailable for unified junction DRC")
+        pcb_path=args.full_junction_out/"keyboard_recovery_junction.kicad_pcb"
+        drc_path=args.full_junction_out/"NATIVE_JUNCTION_DRC.json"
+        checked=subprocess.run([
+            kicad_cli,"pcb","drc","--format","json",
+            "--output",str(drc_path.resolve()),str(pcb_path.resolve())
+        ],capture_output=True,text=True,timeout=120,check=False)
+        if not drc_path.is_file():
+            raise SystemExit("KiCad produced no junction DRC evidence")
+        drc=json.loads(drc_path.read_text(encoding="utf-8"))
+        failures=len(drc.get("violations",[]))
+        opens=len(drc.get("unconnected_items",[]))
+        ver={
+            "schema":"hs.native-full-junction-check.v1",
+            "source_sha256":board["source_sha256"],
+            "full_matrix_sha256":proof["payload_sha256"],
+            "topology_sha256":topology_result["payload_sha256"],
+            "pcb_sha256":hashlib.sha256(pcb_path.read_bytes()).hexdigest(),
+            "junction_net_groups":junction["unique_source_nets_joined"],
+            "donor_source_wires":junction["source_original_pads_with_only_one_wire_each"],
+            "remounted_key_port_wires":junction["relocated_key_header_pins"],
+            "total_physical_source_wire_assignments":junction["total_junction_board_pins"],
+            "native_kicad_drc_exit":checked.returncode,
+            "drc_violations":failures,"unconnected_items":opens,
+            "native_design_checks_passed":checked.returncode==0 and not failures and not opens,
+            "source_original_native_drc_completed":False,
+            "physical_harness_verified":False,
+            "fabrication_release":"BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW",
+        }
+        (args.full_junction_out/"JUNCTION_VERIFICATION.json").write_text(
+            json.dumps(ver,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        result["full_junction_summary"]={
+            "source_sha256":board["source_sha256"],
+            "unique_net_groups":junction["unique_source_nets_joined"],
+            "donor_source_contacts":junction["source_original_pads_with_only_one_wire_each"],
+            "remounted_key_wires":junction["relocated_key_header_pins"],
+            "total_junction_pins":junction["total_junction_board_pins"],
+            "native_design_checks_passed":ver["native_design_checks_passed"],
+            "fabrication_release":ver["fabrication_release"],
+        }
+        if not ver["native_design_checks_passed"]:
+            raise SystemExit("KiCad full junction board failed DRC")
+        if args.machine_project_json is not None:
+            previous_handoff=json.loads(
+                args.machine_project_json.read_text(encoding="utf-8")
+            )
+            enriched=extend_keyboard_splice_handoff(
+                previous_handoff,
+                json.loads(args.independent_source_audit_json.read_text(encoding="utf-8")),
+                proof,
+                junction,
+                ver,
+            )
+            args.machine_project_json.write_text(
+                json.dumps(enriched,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+            )
+            result["canonical_machine_release"]=enriched["canonical_summary"]
+            result["full_junction_summary"]["canonical_machine_authorized"]=(
+                enriched["canonical_summary"]["allowed"]
+            )
     if args.passive_matrix_json:
         if topology_result is None or chosen_stepped is None:
             raise SystemExit("Passive matrix verification needs the original source and stepped reconstruction")

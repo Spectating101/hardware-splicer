@@ -45,6 +45,9 @@ jobs:
             tests/test_keyboard_splice_handoff.py \
             tests/test_keyboard_splice_repair_loop.py \
             tests/test_keyboard_splice_matrix.py \
+            tests/test_keyboard_splice_source_audit.py \
+            tests/test_keyboard_splice_full_matrix.py \
+            tests/test_keyboard_splice_handoff_extended.py \
             tests/test_keyboard_splice_arbitrary.py \
             tests/test_keyboard_splice_arbitrary_evidence.py \
             tests/test_keyboard_splice_f60_relocation_evidence.py \
@@ -81,4 +84,5 @@ jobs:
           python -m pytest -q -p no:cacheprovider \
             tests/test_keyboard_splice_interposer.py \
             tests/test_keyboard_splice_key_relocation.py \
+            tests/test_keyboard_splice_harness_bus.py \
             tests/test_keyboard_splice_reference_1x6.py

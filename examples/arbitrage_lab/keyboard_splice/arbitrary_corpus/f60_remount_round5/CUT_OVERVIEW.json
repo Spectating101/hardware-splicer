@@ -411,6 +411,9 @@
     "allowed": false,
     "blocker_codes": [
       "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
       "safety_not_closed",
       "verification_not_passed",
       "release_state_not_reached"
@@ -418,7 +421,7 @@
   },
   "interposer_preview_summary": {
     "channels": 17,
-    "pcb_sha256": "80b371d08b3978d9cd492e5bb2ba045785a5055b062442a718c1a567086e43f0",
+    "pcb_sha256": "9896a73e8a5c1691bc41c2a5414dafb2874bc309de1abf5ba1a7b688f9e92c1b",
     "native_drc_errors": 0,
     "native_drc_warnings": 0,
     "native_unconnected_items": 0,
@@ -433,5 +436,28 @@
     "geometry_model_verified": true,
     "source_original_assembly_certified": false,
     "fabrication_release": "BLOCKED_RELOCATION_PREVIEW_ONLY"
+  },
+  "full_matrix_summary": {
+    "schematic_connected_nodes_verified": 267,
+    "firmware_key_positions_verified": 62,
+    "original_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "upstream_audit_sha256": "ca3090a90b450c5eed461c43fa25719d5d8e98fb4732d64696ea1e9812f9860c",
+    "matrix_proof_sha256": "687d0f81298531d4cd60221f11e88753e4980a26ecf3e80a8790eda45b3db457",
+    "ideal_press_patterns": 91230,
+    "simulated_pattern_failures": 0,
+    "real_keyboard_function_verified": false,
+    "firmware_compiled": false,
+    "original_source_kicad_drc_completed": false,
+    "release": "PASS_SOURCE_BOUND_IDEAL_MATRIX_ONLY"
+  },
+  "full_junction_summary": {
+    "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "unique_net_groups": 20,
+    "donor_source_contacts": 39,
+    "remounted_key_wires": 10,
+    "total_junction_pins": 49,
+    "native_design_checks_passed": true,
+    "fabrication_release": "BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW",
+    "canonical_machine_authorized": false
   }
 }

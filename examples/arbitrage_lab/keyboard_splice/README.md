@@ -279,3 +279,17 @@ For the independently authored [f.60](arbitrary_corpus/f60_remount_round5/README
 The complete virtual design now accounts for **62/62 source switch positions** (57 retained in two halves, five relocated). **This is not physical proof**: the original f.60 design DRC timed out under KiCad 9, actual PCB population is unverified, physical wire routing/strain relief and firmware are untested, and no fabrication or sale is approved. The previous 0/8 strict external-board benchmark is unchanged.
 
 Run with `--optimize-stepped --multi-route-json /path/MULTI_ROUTE.json --stepped-path-json /path/CUT.json --key-relocation-out /path/remount` alongside the normal post-cut/repair/interposer flags. Only generate key remount previews when the source-bound model has restored all required cut-created connections and the bridge PCB has passed native KiCad DRC.
+
+
+## Stage VII — original TMK firmware + independent schematic-to-PCB audit + complete connection bus (2026-11-16)
+
+The independent f.60 [upstream schematic netlist and original TMK firmware](arbitrary_corpus/f60_remount_round5/README.md) now validate the 62-reference-switch proposal *without relying on HS's copper inference alone*.
+
+- **267/267** connected PCB pad/net assignments matched against the separately downloaded SHA-pinned KiCad 4 schematic export, plus 12 clearly isolated original controller no-connect pins.
+- Original TMK `matrix.c`, `config.h`, `keymap_common.h` and `keymap.c` agree on a **5-row × 14-column** key matrix, exactly 62 populated key positions and three original firmware keymaps.
+- Native source-to-controller diode mapping assigns all **62 source switches to 62 separate source diodes**, with no duplicate matrix addresses.
+- A purely ideal passive matrix simulator covered **91,230 simultaneous-keypress patterns with zero mismatches**. This is a model, not a hardware scan/firmware build.
+- A new alternative **20-net-group, 49-terminal unified junction PCB** combines all 17 cut-net repairs with the five-key relocation source contacts: **39 unique donor-board pads + 10 daughterboard contacts**, native KiCad DRC **0 violations, 0 open nets**. This replaces the older isolated 17-channel interposer when used, rather than installing them together.
+- The source-bound junction, original firmware audit, simulation evidence and unresolved physical interfaces now participate in the canonical HS MachineProject, which **still refuses BUILD_READY**.
+
+The original legacy f.60 PCB's full native DRC **still does not complete**. The new junction is a large (~195 mm) reference board and has no qualified mating connector, harness strain relief, case, source-board continuity proof or physical donor. All data are reference-only. The public-source arbitrary benchmark's strict original **0/8 passed** score is unchanged.
