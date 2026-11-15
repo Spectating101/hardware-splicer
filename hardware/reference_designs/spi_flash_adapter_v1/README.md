@@ -126,6 +126,9 @@ The legend rules in `generate_pcb.py` (0.15 mm strokes, 1.0 mm text, 1.00 mm tes
 circles) apply to a fresh build. To apply them to an already routed board without
 rerouting, run `/usr/bin/python3 generate_pcb.py --restyle-silkscreen spi_flash_adapter_v1.kicad_pcb`;
 it edits F.Silkscreen only.
+The project rules in `spi_flash_adapter_v1.kicad_pro` carry the same limits (silk
+clearance 0.15 mm, text height 1.0 mm, text thickness 0.15 mm), so KiCad DRC reports a
+legend defect and `verify_design.py` rejects a project file that relaxes them.
 
 ## Review/manufacturing package
 
