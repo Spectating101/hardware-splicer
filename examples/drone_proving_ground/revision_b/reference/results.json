@@ -189,7 +189,7 @@
       "id": "frame_cut",
       "identity": "2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop",
       "line_usd_snapshot": 49.0,
-      "pricing_basis": "2026-11-16 snapshot",
+      "pricing_basis": "retained baseline snapshot/assumption",
       "qty_to_buy": 1,
       "source": "https://sendcutsend.com/materials/carbon-fiber/",
       "unit_usd_snapshot": 49.0
@@ -968,7 +968,7 @@
     "hs3g_design.py": "b2e78495f30c7416e48efec0f63b6d2d85cdad8b250b9680b6abc867d8f1e77b",
     "hs3g_frame.py": "812b1a6c5347806687db1420022ca32a50cebe93c23da7bf878dfe1089c2f295",
     "inputs/parts.json": "3e5be63816eb925c41353e52cda7e4dda2e26a24ce6d580f6787f0ffe8176589",
-    "revision_b/build_package.py": "6b3ec7bd98a3e13e6d26e70c2b12b22e74639e5cbacdd907835b76c1c1e02740",
+    "revision_b/build_package.py": "c1017bf7e3e003ce7a8fd5b56c33b843a7eabb938540e2cf930e41cf8f81360c",
     "revision_b/inputs/candidate.json": "e8983fba1d49ad4f500693c0bb2ba9c4451493e8bfd7fcce41704bcf0c18128e",
     "revision_b/inputs/firmware-lock.json": "7a9f87931da2fcce78f85bf28140a21c4873f7eac56c1d88468c20c905025f1a",
     "revision_b/inputs/thrust_table.json": "b252b377a0bb691bface220bc2c8b12fbccde152705ef3dcb207ea8d09e28586",

@@ -40,6 +40,7 @@ def test_revision_preserves_function_and_rejects_the_first_clearance_candidate(r
     assert reference["power"]["design_current_a"] <= 35
     assert reference["power"]["throttle_limit_relied_on"] is False
     assert reference["power"]["battery_continuous_a"] == 59.5
+    assert next(row for row in reference["bom"] if row["id"] == "frame_cut")["pricing_basis"] == "retained baseline snapshot/assumption"
 
 
 def test_original_small_connector_is_not_hidden_by_throttle_scaling(reference, monkeypatch):

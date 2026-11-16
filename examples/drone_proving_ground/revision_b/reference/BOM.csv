@@ -10,4 +10,4 @@ vtx,HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount),1,24
 standoff,"M3 x 30 mm aluminium hex standoff, 5 mm across flats",4,0.5,2.0,assumption,retained baseline snapshot/assumption
 hardware,16x M2x5 motor screws; 4x M3 stack screws (length computed); 8x M3x6 standoff screws; 4x M3x5 nylon spacers; 4x M3 nylon lock nuts; 10x200 mm battery strap,1,12.0,12.0,assumption,retained baseline snapshot/assumption
 wiring,"12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly",1,6.0,6.0,assumption,retained baseline snapshot/assumption
-frame_cut,2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop,1,49.0,49.0,https://sendcutsend.com/materials/carbon-fiber/,2026-11-16 snapshot
+frame_cut,2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop,1,49.0,49.0,https://sendcutsend.com/materials/carbon-fiber/,retained baseline snapshot/assumption

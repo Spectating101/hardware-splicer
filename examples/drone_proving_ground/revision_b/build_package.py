@@ -86,7 +86,7 @@ def analyze(measured, *, frame_parameters=None):
         for clamp in ["axis", "far_edge"] for e in [40.0, 55.2]}
     bom = [{"id": p["id"], "identity": p["identity"], "qty_to_buy": p["qty"], "unit_usd_snapshot": p["unit_price_usd"],
             "line_usd_snapshot": round(p["qty"] * p["unit_price_usd"], 2), "source": p["sources"][0]["url"] if p["sources"] else "assumption",
-            "pricing_basis": "2026-11-16 snapshot" if p["id"] in cfg["part_overrides"] and p["sources"] else "retained baseline snapshot/assumption"} for p in parts]
+            "pricing_basis": "2026-11-16 snapshot" if p["id"] in {"motor", "prop", "battery"} else "retained baseline snapshot/assumption"} for p in parts]
     mp = cfg["mass_policy"]
     checks = {"nominal_mass_reserve": mass["auw_g"] <= 250 - mp["nominal_reserve_g"],
               "battery_uncertainty_reserve": mass["auw_g"] + mp["battery_uncertainty_g"] <= 250 - mp["reserve_after_battery_uncertainty_g"],
