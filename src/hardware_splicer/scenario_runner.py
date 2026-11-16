@@ -193,6 +193,9 @@ def build_project_authority_packet(
             circuit_build_ready,
             "Compiled circuit passed its build readiness gate.",
             "Compiled circuit is not build ready: " + "; ".join(circuit_blockers or ["build readiness was not established"]),
+            blocking=bool(platform.get("production_authorized"))
+            and bool(mechatronics.get("production_authorized"))
+            and bool(simulation.get("simulation_ready")),
         )
     blocking_checks = [row for row in checks if row["severity"] == "block" and not row["passed"]]
     claimable = bool(result.ok) and not blocking_checks
@@ -206,6 +209,11 @@ def build_project_authority_packet(
     next_actions = _next_actions(blockers, simulation, platform, mechatronics, mechanical, actuation)
     if source_blockers_are_next_actions:
         next_actions = _dedupe_strings(source_blockers + next_actions)[:12]
+    if has_build_quality and not circuit_build_ready:
+        # A planning package can remain useful while its circuit is unfinished.
+        # Keep that limitation visible even when it does not veto the planning scope.
+        circuit_message = next(row["message"] for row in checks if row["id"] == "circuit_build_ready")
+        next_actions = _dedupe_strings([circuit_message] + next_actions)[:12]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -525,9 +533,9 @@ def _capabilities(
     ]
     if simulation.get("simulation_ready"):
         capabilities.append("Use deterministic margins for current, runtime, drive speed, traction, servo load, and safety gates.")
-    if _level_at_least(str(platform.get("current_authority_level") or ""), "simulation_bench_authority", ROBOTICS_PLATFORM_LEVELS):
+    if claimable and _level_at_least(str(platform.get("current_authority_level") or ""), "simulation_bench_authority", ROBOTICS_PLATFORM_LEVELS):
         capabilities.append("Defend a bench-ready robotics/mechatronics project claim with traceable evidence.")
-    if bool(mechatronics.get("production_authorized")):
+    if claimable and bool(mechatronics.get("production_authorized")):
         capabilities.append("Defend scoped Hardware-Splicer release across circuit, mechanism, packaging, and integrated bench evidence.")
     if claimable:
         capabilities.append("Claim scoped project package readiness for the declared scenario boundary.")
@@ -555,12 +563,12 @@ def _next_actions(
     return _dedupe_strings([row for row in actions if row])[:12]
 
 
-def _check(checks: List[Dict[str, Any]], check_id: str, passed: bool, pass_message: str, fail_message: str) -> None:
+def _check(checks: List[Dict[str, Any]], check_id: str, passed: bool, pass_message: str, fail_message: str, *, blocking: bool = True) -> None:
     checks.append(
         {
             "id": check_id,
             "passed": bool(passed),
-            "severity": "info" if passed else "block",
+            "severity": "info" if passed else ("block" if blocking else "warn"),
             "message": pass_message if passed else fail_message,
         }
     )

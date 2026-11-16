@@ -57,6 +57,8 @@ def test_failed_circuit_receipt_overrides_stale_positive_summary(tmp_path, fault
     assert packet["dashboard"]["build_ready"] is False
     assert packet["dashboard"]["hardware_splicer_release"] is False
     assert any(message in blocker for blocker in packet["blockers"])
+    assert not any("Defend" in capability and "claim" in capability for capability in packet["can"])
+    assert not any("Defend scoped Hardware-Splicer release" in capability for capability in packet["can"])
 
 
 def test_failed_stored_gate_is_not_overridden_by_raw_ready_flag(tmp_path):
@@ -73,6 +75,22 @@ def test_clean_circuit_and_scenarios_without_build_compilation_keep_their_claims
         packet = _packet(candidate)
         assert packet["claimable"] is True
         assert packet["project_authority_level"] == "production_ready_project_package"
+
+
+def test_unfinished_circuit_keeps_planning_scope_and_exposes_the_remaining_work(tmp_path):
+    result = _release_result(tmp_path, _clean_quality(kicad_erc_pass=False, kicad_erc_errors=4))
+    result = replace(result, robotics_simulation={"simulation_ready": False},
+        robotics_platform_authority={"production_authorized": False, "current_authority_level": "control_safety_architecture"},
+        mechatronics_authority={"production_authorized": False})
+    packet = _packet(result)
+    assert packet["claimable"] is True
+    assert packet["project_authority_level"] == "control_safety_project_package"
+    assert packet["dashboard"]["build_ready"] is False
+    assert packet["dashboard"]["hardware_splicer_release"] is False
+    circuit_check = next(row for row in packet["checks"] if row["id"] == "circuit_build_ready")
+    assert circuit_check["passed"] is False
+    assert circuit_check["severity"] == "warn"
+    assert any("KiCad ERC failed with 4 error(s)" in action for action in packet["next_actions"])
 
 
 def test_erc_failure_is_preserved_in_saved_intake_authority(tmp_path, monkeypatch):
