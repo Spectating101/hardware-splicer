@@ -10,7 +10,18 @@ from typing import Any
 import pytest
 
 from hardware_splicer import jarvis_build as jarvis_module
-from hardware_splicer import mcp_server, sdk
+from hardware_splicer import sdk
+
+
+@pytest.fixture
+def mcp_server() -> Any:
+    # The default dev install does not include the legacy MCP SDK. Keep the
+    # SDK/REST defaults covered there, and exercise MCP only with its extra.
+    pytest.importorskip("mcp.server", reason="requires the optional legacy MCP SDK")
+    pytest.importorskip("mcp.types", reason="requires the optional legacy MCP SDK")
+    from hardware_splicer import mcp_server as server
+
+    return server
 
 
 @pytest.mark.parametrize(
@@ -34,7 +45,7 @@ def test_rest_default_is_still_false() -> None:
     assert ComposeRequest(phrase="x").allow_llm_first is False
 
 
-def test_mcp_tool_schemas_default_allow_llm_first_false() -> None:
+def test_mcp_tool_schemas_default_allow_llm_first_false(mcp_server: Any) -> None:
     tools = asyncio.run(mcp_server.list_tools())
     seen = {}
     for tool in tools:
@@ -55,7 +66,8 @@ def test_mcp_tool_schemas_default_allow_llm_first_false() -> None:
     ],
 )
 def test_mcp_handlers_do_not_enable_llm_first_when_omitted(
-    monkeypatch: pytest.MonkeyPatch, tool: str, sdk_name: str, args: dict[str, Any]
+    monkeypatch: pytest.MonkeyPatch, mcp_server: Any,
+    tool: str, sdk_name: str, args: dict[str, Any]
 ) -> None:
     calls: list[dict[str, Any]] = []
 
