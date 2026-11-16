@@ -68,6 +68,19 @@ make setup-cadquery
 HARDWARE_SPLICER_RUN_VISION_LIVE=1 pytest tests/test_vision_live_optional.py -q
 ```
 
+The [extended native verification](GITHUB_FEATURE_INTEGRATION_2026-11-16.md#extended-native-verification) exercises 29 of those previously skipped cases using CadQuery, trimesh, PyBullet, native `pcbnew`, pinned vendor libraries and restored public source fixtures. The complete run and the 105-test follow-up are recorded separately; their overlapping counts must not be added. The remaining three gaps are live-vision provider checks. A separate Gemini attempt failed because its configured key was invalid.
+
+For this profile, use one Python environment that can import all required packages, including packages used by CLI subprocesses:
+
+```bash
+"$NATIVE_PYTHON" -c 'import pytest, cadquery, trimesh, pybullet, pcbnew, pypdf'
+PYTHONPATH=src "$NATIVE_PYTHON" -m pytest tests -q --tb=short
+```
+
+The exact fixture URLs, immutable commits, file hashes, dependency versions and opt-in environment settings are in the [extended receipt](status/generated/extended-native-verification-2026-11-16.json). External source tests retain their existing explicit availability gates; restore the recorded source files to the locations they expect before claiming that coverage. Both Java routing paths force headless operation.
+
+Positive evidence-closure tests using `assume_clean_kicad_erc` test downstream behavior under that stated assumption. Their success does not validate the example circuit. The real KiCad replay rejects the plant package's production claim with four ERC errors, while retaining its planning-only package and listing the electrical work still required.
+
 ## Router / footprint behavior
 
 - **Dual-routable modules** (e.g. buck converters with corner pads): real pad positions from `module-footprints.ts`.
