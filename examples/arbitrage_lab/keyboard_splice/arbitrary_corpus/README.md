@@ -78,3 +78,12 @@ All **19 original Teensy 2.0 matrix GPIO pins** match the official PJRC pinout a
 These proofs do **not** change the original eight-board *arbitrary donor* strict benchmark (0/8). They are derived from the known f.60 reference, not actual physical e-waste.
 
 [Inspect source, DRC, controller and compact KiCad design proof](f60_remount_round5/README.md).
+
+
+## New source-bound f.60 mechanical cut check: corrected four-key route (2026-11-16)
+
+The earlier conditional f.60 five-key virtual cut is superseded **for mechanical switch plate clearance**, because the original saw corridor clipped the V switch's nominal 14 mm aperture. New automatic 17×17 mm square keepouts find a 58-original-key / four-relocated-key variant: left/right **35/23**, relocating **I, J, N, 9**. All retained original keys fit the two native KiCad Edge.Cuts-derived OpenSCAD half plates, minimum modeled clearance 1.7784 mm.
+
+The corrected source copper model replays to zero required cut-related disconnections with 18 bridge edges and five terminal-free copper islands deliberately floating in the proposed assembly, subject to insulation/ESD verification. Source-bound remount and net junction boards have passed native KiCad DRC, including an optional compact latching IDC50 preview with 42 active pins and eight deliberately unassigned. HS remains design-only without physical case mounting, actual donor/recycled keyboard measurements or powered firmware proof.
+
+Inspect [f60_mechanical_round10/README.md](f60_mechanical_round10/README.md). The eight-board blind external benchmark's strict **0/8 verified conversion** score is unchanged.

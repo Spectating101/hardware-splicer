@@ -17,6 +17,7 @@ from hardware_splicer.keyboard_splice import CutConfig,evaluate_cut,write_report
 from hardware_splicer.keyboard_splice_handoff import (
     build_keyboard_splice_handoff,
     extend_keyboard_splice_handoff,
+    extend_keyboard_splice_mechanical,
 )
 from hardware_splicer.keyboard_splice_repair_loop import run_repair_loop
 from hardware_splicer.keyboard_splice_matrix import verify_one_row_matrix
@@ -54,6 +55,7 @@ def main() -> int:
     ap.add_argument("--legacy-zone-drc-receipt-json",type=Path,default=None)
     ap.add_argument("--full-junction-out",type=Path,default=None)
     ap.add_argument("--compact-junction-out",type=Path,default=None)
+    ap.add_argument("--mechanical-plate-out",type=Path,default=None)
     ap.add_argument("--interposer-out",type=Path,default=None)
     ap.add_argument("--x",type=float,default=None,help="Optional x coordinate to assess without searching a cut route")
     args=ap.parse_args()
@@ -80,6 +82,11 @@ def main() -> int:
         raise SystemExit("interposer preview requires both topology and canonical machine handoff")
     if args.compact_junction_out and not args.full_junction_out:
         raise SystemExit("compact IDC junction requires the already verified full source-net junction")
+    if args.mechanical_plate_out and not all((
+        args.multi_route_json,args.stepped_path_json,
+        args.key_relocation_out,args.full_junction_out,args.machine_project_json,
+    )):
+        raise SystemExit("Switch plate design requires source-bound full wiring, cut route, key relocation and MachineProject")
 
     if args.postcut_islands_json:
         # The plan may only restore circuits actually affected in THIS revision.
@@ -622,6 +629,74 @@ def main() -> int:
             result["canonical_machine_release"]=enriched["canonical_summary"]
             result["full_junction_summary"]["canonical_machine_authorized"]=(
                 enriched["canonical_summary"]["allowed"]
+            )
+    if args.mechanical_plate_out:
+        if not result.get("full_junction_summary",{}).get("native_design_checks_passed"):
+            raise SystemExit("Cannot generate PCB half plates before full electrical junction DRC")
+        if topology_result is None or topology_result["model_replay_remaining_required_components"]!=0:
+            raise SystemExit("Cannot design retained-key plates with unresolved electrical connections")
+        args.mechanical_plate_out.mkdir(parents=True,exist_ok=True)
+        outline_path=args.mechanical_plate_out/"SOURCE_BOARD_OUTLINE.json"
+        native_outline=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_board_outline.py"
+        exported=subprocess.run([
+            args.system_python,str(native_outline),
+            "--pcb",str(args.pcb.resolve()),
+            "--output",str(outline_path.resolve())
+        ],capture_output=True,text=True,timeout=100,check=False)
+        if exported.returncode:
+            raise SystemExit("Native KiCad source Board Edge.Cuts extraction failed: "+exported.stderr[-1500:])
+        original_outline=json.loads(outline_path.read_text(encoding="utf-8"))
+        if original_outline["source_file_sha256"]!=board["source_sha256"]:
+            raise SystemExit("Native board outline references a different source PCB")
+        with tempfile.TemporaryDirectory(prefix="hs-switchplate-source-") as tmp:
+            original_board=Path(tmp)/"board.json"
+            original_board.write_text(json.dumps(board),encoding="utf-8")
+            plate_helper=REPO/"src/hardware_splicer/keyboard_splice_plate.py"
+            proposed=subprocess.run([
+                args.topology_python or args.system_python,str(plate_helper),
+                "--source-json",str(original_board),
+                "--route-json",str(args.stepped_path_json.resolve()),
+                "--multi-route-json",str(args.multi_route_json.resolve()),
+                "--outline-json",str(outline_path.resolve()),
+                "--out",str(args.mechanical_plate_out.resolve()),
+            ],capture_output=True,text=True,timeout=120,check=False)
+            if proposed.returncode:
+                raise SystemExit("Modeled PCB halves fail switch plate clearance: "+proposed.stderr[-1400:])
+        plate=json.loads(
+            (args.mechanical_plate_out/"PLATE_GEOMETRY_CHECK.json").read_text(encoding="utf-8")
+        )
+        if (plate["source_sha256"]!=board["source_sha256"]
+            or plate["cut_path_sha256"]!=chosen_stepped["payload_sha256"]
+            or plate["fabrication_release"]!="BLOCKED_MECHANICAL_REFERENCE_ONLY"
+            or plate["original_switch_population_physically_confirmed"] is not False
+            or plate["accounted_original_switch_count"]!=len(board["switch_positions"])
+            or plate["switch_cutout_to_cut_web_pass"] is not True):
+            raise SystemExit("Plate source evidence, geometry or release state inconsistent")
+        result["mechanical_plate_summary"]={
+            "original_edge_vertices":plate["original_board_outline_vertices"],
+            "retained_switches_per_half":plate["retained_switch_positions_left_right"],
+            "relocated_switches":plate["source_switches_relocated"],
+            "minimum_aperture_edge_clearance_mm":plate[
+                "minimum_modeled_aperture_to_source_outline_or_cut_mm"
+            ],
+            "plate_model_passed":True,
+            "real_plate_rendered_or_printed":False,
+            "fabrication_release":plate["fabrication_release"],
+        }
+        if args.machine_project_json is not None:
+            existing_machine=json.loads(
+                args.machine_project_json.read_text(encoding="utf-8")
+            )
+            expanded=extend_keyboard_splice_mechanical(
+                existing_machine,plate,board["source_sha256"],
+                chosen_stepped["payload_sha256"]
+            )
+            args.machine_project_json.write_text(
+                json.dumps(expanded,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+            )
+            result["canonical_machine_release"]=expanded["canonical_summary"]
+            result["mechanical_plate_summary"]["canonical_release_allowed"]=(
+                expanded["canonical_summary"]["allowed"]
             )
     if args.passive_matrix_json:
         if topology_result is None or chosen_stepped is None:

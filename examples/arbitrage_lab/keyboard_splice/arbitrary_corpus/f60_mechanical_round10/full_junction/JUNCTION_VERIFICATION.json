@@ -1,0 +1,18 @@
+{
+  "schema": "hs.native-full-junction-check.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "full_matrix_sha256": "779413641cdabb75d46be52ea1e0c6b7778229ad239778ccb1a96bd0325badb7",
+  "topology_sha256": "7aea0abecad58c97ed9290e3c8c1b2d10b0f86518a01114f36158475b090adf6",
+  "pcb_sha256": "6b7765daf6e515ce5bd7375f74652761aaaa74070aff08ace52809a43968d49e",
+  "junction_net_groups": 16,
+  "donor_source_wires": 34,
+  "remounted_key_port_wires": 8,
+  "total_physical_source_wire_assignments": 42,
+  "native_kicad_drc_exit": 0,
+  "drc_violations": 0,
+  "unconnected_items": 0,
+  "native_design_checks_passed": true,
+  "source_original_native_drc_completed": false,
+  "physical_harness_verified": false,
+  "fabrication_release": "BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW"
+}

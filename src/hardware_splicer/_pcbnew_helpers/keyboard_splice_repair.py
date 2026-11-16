@@ -131,26 +131,45 @@ def recover_contacts(board, fragments, component_indices, cut_shape, seam_at_y,
     return options[:6]
 
 
-def classify_inert_cut_remnant(fragments, component_indices, *, max_area_mm2=7.0):
-    """Only prune tiny isolated *track-only* scraps, never components/zones/vias.
+def classify_inert_cut_remnant(fragments, component_indices, *, max_area_mm2=7.0,
+                                 max_track_via_area_mm2=25.0):
+    """Quarantine source-terminal-free trace islands, never a pad or filled zone.
 
-    These are electrical dead ends once the material removal has happened.
-    This is a counterfactual plan to isolate/discard copper, not a claim that
-    the real board or its key matrix has passed acceptance.
+    A completely disconnected via/trace remnant with NO surviving device pad
+    does not need a keyboard-matrix bridge. The repair deliberately leaves it
+    floating in simulation. Its physical insulation and short/ESD risks remain
+    unresolved, and it must not imply any actual board or device was tested.
     """
     if not component_indices:
         return None
     kinds = {fragments[i]["kind"] for i in component_indices}
-    if kinds != {"track"}:
+    if not kinds or not kinds.issubset({"track", "via"}) or "track" not in kinds:
         return None
     total_area = sum(float(fragments[i]["geometry"].area) for i in component_indices)
-    if total_area <= 0 or total_area > max_area_mm2:
+    if total_area <= 0:
         return None
+    via_count=sum(fragments[i]["kind"]=="via" for i in component_indices)
+    if via_count:
+        if total_area > max_track_via_area_mm2 or via_count>4:
+            return None
+        decision="PLAN_QUARANTINE_FLOATING_TRACK_AND_VIA_ISLAND"
+        inspection=(
+            "Confirm the floating via and copper have no surviving key/controller "
+            "terminal; inspect kerf-to-other-net clearance, soldermask and ESD, "
+            "then mechanically insulate before considering build release"
+        )
+    else:
+        if total_area > max_area_mm2:
+            return None
+        decision="PLAN_ISOLATE_TRACK_ONLY_REMNANT"
+        inspection="Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
     return {
-        "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
-        "total_modeled_copper_area_mm2": round(total_area, 4),
-        "track_fragment_count": len(component_indices),
-        "retained_electrical_terminal_count": 0,
-        "physical_discard_verified": False,
-        "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate",
+        "decision":decision,
+        "total_modeled_copper_area_mm2":round(total_area,4),
+        "track_fragment_count":sum(fragments[i]["kind"]=="track" for i in component_indices),
+        "via_fragment_count":via_count,
+        "retained_electrical_terminal_count":0,
+        "physical_discard_verified":False,
+        "physical_insulation_verified":False,
+        "inspection":inspection,
     }

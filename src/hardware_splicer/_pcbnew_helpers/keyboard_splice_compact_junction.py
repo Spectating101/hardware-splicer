@@ -32,16 +32,19 @@ def make_compact(original:dict,out:Path)->dict:
         original.get("valid_connection_model") is not True):
         raise ValueError("unverified or authorized original source junction")
     assignments=original.get("source_terminal_mapping",[])
-    if not isinstance(assignments,list) or len(assignments)!=49:
-        raise ValueError("expected 49 source-bound wire leads")
-    if original.get("total_junction_board_pins")!=49:
+    if not isinstance(assignments,list) or not (2<=len(assignments)<=49):
+        raise ValueError("IDC-50 source-bound preview requires 2..49 wire leads")
+    lead_count=len(assignments)
+    if original.get("total_junction_board_pins")!=lead_count:
         raise ValueError("source junction lead count inconsistent")
-    if original.get("unique_source_nets_joined")!=20:
-        raise ValueError("unexpected source-net group count")
-    if original.get("source_original_pads_with_only_one_wire_each")!=39 or (
-        original.get("relocated_key_header_pins")!=10
-    ):
-        raise ValueError("original donor pads and relocations must remain distinct")
+    group_count=original.get("unique_source_nets_joined")
+    if not isinstance(group_count,int) or not (2<=group_count<=20):
+        raise ValueError("source-net group count outside bounded IDC preview")
+    donor_count=original.get("source_original_pads_with_only_one_wire_each")
+    remount_count=original.get("relocated_key_header_pins")
+    if (not isinstance(donor_count,int) or not isinstance(remount_count,int)
+        or donor_count<1 or remount_count<0 or donor_count+remount_count!=lead_count):
+        raise ValueError("source donor and relocated pad counts inconsistent")
     distinct=set()
     by_net=defaultdict(list)
     for row in assignments:
@@ -54,7 +57,7 @@ def make_compact(original:dict,out:Path)->dict:
         if row.get("physical_wire_installed") is not False:
             raise ValueError("unmeasured source contact advertised as installed")
         by_net[net].append(row)
-    if len(by_net)!=20 or any(len(v)<2 for v in by_net.values()):
+    if len(by_net)!=group_count or any(len(v)<2 for v in by_net.values()):
         raise ValueError("shorted source bus groups or unpaired source lead")
     footprint_file=LIBRARY/(NAME+".kicad_mod")
     if not footprint_file.is_file():
@@ -110,10 +113,10 @@ def make_compact(original:dict,out:Path)->dict:
             board.Add(tr)
         previous_buses.append(occupied)
 
-    if pin!=50:
+    if pin!=lead_count+1:
         raise ValueError("missing original donor or daughterboard source wire")
-    if pads[50].GetNetname():
-        raise ValueError("50th unused IDC pin must remain electrically unassigned")
+    if any(pads[i].GetNetname() for i in range(lead_count+1,51)):
+        raise ValueError("unused IDC pins must remain electrically unassigned")
     footprint_box=f.GetBoundingBox()
     if not (p.ToMM(footprint_box.GetX())>=.5
             and p.ToMM(footprint_box.GetY())>=.5
@@ -140,11 +143,11 @@ def make_compact(original:dict,out:Path)->dict:
         "source_junction_original_net_groups":original["unique_source_nets_joined"],
         "source_original_wiring_assignments":original["total_junction_board_pins"],
         "IDC_pin_count":50,
-        "IDC_used_pins":49,
+        "IDC_used_pins":lead_count,
         "IDC_unused_insulated_pin":50,
-        "independent_source_bus_net_count":20,
-        "original_source_donor_contacts":39,
-        "original_remounted_key_ports":10,
+        "independent_source_bus_net_count":group_count,
+        "original_source_donor_contacts":donor_count,
+        "original_remounted_key_ports":remount_count,
         "full_size_junction_width_mm":original["physical_junction_board_width_mm"],
         "full_size_junction_height_mm":original["physical_junction_board_height_mm"],
         "full_size_junction_area_mm2":round(original_area,2),
@@ -164,6 +167,9 @@ def make_compact(original:dict,out:Path)->dict:
         "fabrication_authorized":False,
         "release":"BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW",
     }
+    if lead_count!=49:
+        manifest["IDC_unused_insulated_pins"]=list(range(lead_count+1,51))
+        manifest["source_original_interposer_mutually_exclusive"]=True
     (out/"COMPACT_JUNCTION_WIRING.json").write_text(
         json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
     )

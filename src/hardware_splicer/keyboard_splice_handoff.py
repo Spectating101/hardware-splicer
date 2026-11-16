@@ -221,8 +221,10 @@ def extend_keyboard_splice_handoff(
             or compact_junction_verification.get("unconnected_items")!=0
             or compact_junction_verification.get("fabrication_release")!="BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW"):
             raise ValueError("compact connector source-net identity, DRC or physical authority mismatch")
-        if (compact_junction.get("IDC_used_pins")!=49
-            or compact_junction.get("total_junction_pin_count",49)!=49
+        lead_count=junction["total_junction_board_pins"]
+        if (not 2<=lead_count<=49
+            or compact_junction.get("IDC_used_pins")!=lead_count
+            or compact_junction.get("total_junction_pin_count",lead_count)!=lead_count
             or compact_junction.get("board_area_reduction_percent",0)<=0):
             raise ValueError("compact connector fails source lead count or reduction proof")
 
@@ -232,7 +234,7 @@ def extend_keyboard_splice_handoff(
     project.subsystems.extend([
         Subsystem(
             subsystem_id="remounted-key-pcb",
-            name="Five detached source-key circuits represented by a new KiCad daughterboard",
+            name=f"{junction['relocated_key_header_pins']//2} detached source-key circuits represented by a new KiCad daughterboard",
             parent_subsystem_id="system",
             domain=Domain.ELECTRICAL,
         ),
@@ -320,7 +322,11 @@ def extend_keyboard_splice_handoff(
         project.evidence.append(EvidenceRef(
             evidence_id="f60-compact-50pin-IDC-header-native-drc",
             kind="native_kicad_alternative_compact_wiring_board",
-            basis="Original source-net grouped junction, 49 pins and 20 buses, actual standard KiCad latching IDC footprint",
+            basis=(
+                "Original source-net grouped junction, 49 pins and 20 buses, actual standard KiCad latching IDC footprint"
+                if junction["total_junction_board_pins"]==49 and junction["unique_source_nets_joined"]==20
+                else f"Original source-net grouped junction, {junction['total_junction_board_pins']} pins and {junction['unique_source_nets_joined']} buses, native KiCad IDC footprint"
+            ),
             ref=compact_junction_verification["pcb_sha256"],
             supports=["system"],
             authority=AuthorityState.DECLARED,
@@ -370,5 +376,121 @@ def extend_keyboard_splice_handoff(
             "achieved":gate.achieved_state.value,
             "allowed":gate.allowed,
             "blocker_codes":[block.code for block in gate.blockers],
+        },
+    }
+
+
+def extend_keyboard_splice_mechanical(
+    existing: Mapping[str, Any],
+    plate: Mapping[str, Any],
+    source_sha256: str,
+    cut_path_sha256: str,
+) -> dict:
+    """Bind exact Edge.Cuts, cut route and proposed key-plate outlines to HS.
+
+    Mechanical geometry is design-only. No OpenSCAD render, print, physical
+    mount or donor-population evidence can be inferred from a source PCB.
+    """
+    if existing.get("physical_authority_granted") is not False:
+        raise ValueError("upstream MachineProject claimed physical authority")
+    project=MachineProject.model_validate(existing["project"])
+    source=project.discipline_payloads.get("keyboard_splice",{}).get("reference_source_sha256")
+    if (not source or source!=source_sha256 or plate.get("source_sha256")!=source
+        or plate.get("cut_path_sha256")!=cut_path_sha256):
+        raise ValueError("original PCB and mechanical plate source/cut identity mismatch")
+    if (plate.get("fabrication_release")!="BLOCKED_MECHANICAL_REFERENCE_ONLY"
+        or plate.get("switch_cutout_to_cut_web_pass") is not True
+        or plate.get("original_switch_population_physically_confirmed") is not False
+        or plate.get("native_scad_render_or_print_verified") is not False
+        or plate.get("actual_case_mounting_design_verified") is not False):
+        raise ValueError("non-source-bound or physically authorized switch plate")
+    if (not isinstance(plate.get("retained_switch_positions_left_right"),list)
+        or len(plate["retained_switch_positions_left_right"])!=2
+        or min(plate["retained_switch_positions_left_right"])<2
+        or sum(plate["retained_switch_positions_left_right"])
+              +len(plate.get("source_switches_relocated",[]))
+              !=plate.get("accounted_original_switch_count")):
+        raise ValueError("mechanical key inventory not complete")
+    if any(s.subsystem_id in ("switch-plate-left","switch-plate-right")
+           for s in project.subsystems):
+        raise ValueError("mechanical plate already integrated")
+    for side in ("left","right"):
+        project.subsystems.append(Subsystem(
+            subsystem_id=f"switch-plate-{side}",
+            name=f"Source-bound modeled MX key switch plate for {side} half",
+            parent_subsystem_id="system",domain=Domain.MECHANICAL,
+        ))
+        project.interfaces.append(Interface(
+            interface_id=f"interface-switch-plate-{side}",
+            name=f"Physical plate registration to retained donor PCB {side} half",
+            kind="mechanical_plate_to_donor_board",
+            endpoints=[
+                InterfaceEndpoint(object_id=f"switch-plate-{side}",
+                                  port="proposed_cutout_support_faces"),
+                InterfaceEndpoint(object_id=f"donor-{side}-pcb",
+                                  port="unknown_actual_component_population"),
+            ],
+            contracts=[InterfaceContract(
+                contract_type="original_source_switch_aperture_14mm",
+                values={
+                    "nominal_cutout_side_mm":14.0,
+                    "minimum_modeled_plate_web_mm":
+                       plate["minimum_modeled_aperture_to_source_outline_or_cut_mm"],
+                    "retained_keys_per_half":plate["retained_switch_positions_left_right"],
+                },
+                unresolved_fields=[
+                    "printed_or_machined_plate_physical_tolerances",
+                    "actual_switch_footprint_populated_layout",
+                    "plate_to_PCB_mounting_without_new_donor_holes",
+                    "stabilizer_and_keycap_clearance",
+                    "case_screws_or_clips",
+                    "material_and_structural_strength",
+                ],
+                authority=AuthorityState.PROPOSED,
+            )],
+            authority=AuthorityState.PROPOSED,
+        ))
+    project.verifications.append(VerificationMethod(
+        verification_id="verification-physical-switch-plates",
+        name="Assembled plate clearance, mounting, stabilizers and cut-edge strain test",
+        method_type=VerificationType.INSPECTION,
+        status=VerificationStatus.BLOCKED,
+        target_ids=["switch-plate-left","switch-plate-right"],
+        procedure="Requires an actual legally acquired donor, source revision, fabricated plate and measured fit",
+    ))
+    project.evidence.append(EvidenceRef(
+        evidence_id="f60-original-edgecut-matched-keyplate-preview",
+        kind="native_kicad_edge_cuts_to_openscad_plate_analysis",
+        basis="Source board polygon and exact virtual kerf; no real physical case",
+        ref=plate["cut_path_sha256"],
+        supports=["switch-plate-left","switch-plate-right"],
+        authority=AuthorityState.DECLARED,
+        simulated=True,
+    ))
+    project.discipline_payloads["keyboard_splice"].update({
+        "native_original_outline_source_sha256":source_sha256,
+        "mechanical_cut_path_sha256":cut_path_sha256,
+        "mechanical_plate_key_distribution":
+            plate["retained_switch_positions_left_right"],
+        "mechanical_plate_model_minimum_clearance_mm":
+            plate["minimum_modeled_aperture_to_source_outline_or_cut_mm"],
+        "source_switch_occupied_locations_physically_verified":False,
+        "OpenSCAD_plate_rendered_or_physically_produced":False,
+        "actual_case_assembly_or_screws_verified":False,
+        "physical_donor_verified":False,
+        "fabrication_authorized":False,
+    })
+    gate=project.assess_release(ReleaseState.BUILD_READY)
+    if gate.allowed or gate.achieved_state==ReleaseState.BUILD_READY:
+        raise ValueError("unrendered switch plate model cannot qualify as build-ready")
+    return {
+        "project":project.model_dump(mode="json"),
+        "release_assessment":gate.model_dump(mode="json"),
+        "physical_authority_granted":False,
+        "canonical_summary":{
+            "requested":gate.requested_state.value,
+            "achieved":gate.achieved_state.value,
+            "allowed":gate.allowed,
+            "blocker_codes":[item.code for item in gate.blockers],
         },
     }
