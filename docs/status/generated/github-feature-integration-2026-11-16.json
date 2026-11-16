@@ -126,9 +126,12 @@
     }
   ],
   "splice_ui_build": "passed",
-  "full_repository_suite_run": false,
+  "full_repository_suite_run": true,
   "remote_cluster_healthy": false,
   "github_mutations_performed": false,
   "physical_authority_granted": false,
-  "active_local_branch": "integration/github-features-20261116"
+  "active_local_branch": "integration/github-features-20261116",
+  "full_suite_verification": "docs/status/generated/full-suite-verification-2026-11-16.json",
+  "full_suite_verified_source_head": "c54d10fb5bb165ed5bfe6dd4c7dcb91c827eaf00",
+  "full_suite_scope": "all tests collected from tests/; live providers and optional toolchains remain behind their existing gates"
 }

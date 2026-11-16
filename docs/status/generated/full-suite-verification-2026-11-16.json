@@ -1,0 +1,171 @@
+{
+  "schema": "hardware_splicer.full_suite_verification.v1",
+  "branch": "integration/github-features-20261116",
+  "baseline_source_head": "7f5cf7156c666b3fa76e554d9214b69047428ef6",
+  "verified_source_head": "c54d10fb5bb165ed5bfe6dd4c7dcb91c827eaf00",
+  "original_local_work_sha256": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "original_local_work_preserved": true,
+  "root_scope": "all tests collected from tests/; live providers and optional toolchains remain behind their existing gates",
+  "baseline": {
+    "pytest_passed": 4194,
+    "pytest_failed": 5,
+    "pytest_skipped": 32,
+    "passing_subtests": 3,
+    "tests": 4234,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 32,
+    "seconds": 1185.247,
+    "junit_path": ".cache/hardware-splicer/full-suite-20261116/root-results.xml",
+    "junit_sha256": "dd24838a83d2db7a93a65b3f2d6de5e2fbc297e7ee9de57a2054b649c6eab0d5",
+    "failed_tests": [
+      {
+        "test": "tests.test_cleanroom_replay::test_invented_evidence_identity_becomes_hard_cleanroom_failure",
+        "details": "tests/test_cleanroom_replay.py:145: in test_invented_evidence_identity_becomes_hard_cleanroom_failure\n    assert report[\"hard_failure_count\"] == 1\nE   assert 0 == 1"
+      },
+      {
+        "test": "tests.test_cleanroom_retrospective_evidence::test_unknown_evidence_identity_maps_to_evidence_model",
+        "details": "tests/test_cleanroom_retrospective_evidence.py:79: in test_unknown_evidence_identity_maps_to_evidence_model\n    assert diagnosis[\"confidence\"] == \"high\"\nE   AssertionError: assert 'medium' == 'high'\nE     \nE     - high\nE     + medium"
+      },
+      {
+        "test": "tests.test_compose_agent_loop_salvage::test_compose_agent_loop_http_donor_context",
+        "details": "tests/test_compose_agent_loop_salvage.py:135: in test_compose_agent_loop_http_donor_context\n    assert payload.get(\"agent_loop\", {}).get(\"final_kicad_drc_errors\") == 0, _drc_diagnostics(out_dir)\nE   AssertionError: {'reports': [], 'root': '/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/full-suite-20261116/pytest-temp/test_compose_agent_loop_http_d0/http_salvage_agent_loop'}\nE   assert 1 == 0\nE    +  where 1 = <built-in method get of dict object at 0x7f830e31ae40>('final_kicad_drc_errors')\nE    +    where <built-in method get of dict object at 0x7f830e31ae40> = {'copper_tier': 'cosmetic_preview', 'fab_recommendation': 'blocked_drc', 'final_drc_fixup': {}, 'final_kicad_drc_errors': 1, ...}.get\nE    +      where {'copper_tier': 'cosmetic_preview', 'fab_recommendation': 'blocked_drc', 'final_drc_fixup': {}, 'final_kicad_drc_errors': 1, ...} = <built-in method get of dict object at 0x7f830e0f2400>('agent_loop', {})\nE    +        where <built-in method get of dict object at 0x7f830e0f2400> = {'agent_loop': {'copper_tier': 'cosmetic_preview', 'fab_recommendation': 'blocked_drc', 'final_drc_fixup': {}, 'final_...l-suite-20261116/pytest-temp/test_compose_agent_loop_http_d0/http_salvage_agent_loop/BENCH_CAPTURE_TEMPLATE.json', ...}.get"
+      },
+      {
+        "test": "tests.test_dual_agent_cleanroom::test_embedded_operator_rejects_invented_evidence_identity",
+        "details": "tests/test_dual_agent_cleanroom.py:114: in test_embedded_operator_rejects_invented_evidence_identity\n    with pytest.raises(CleanroomContractError, match=\"invented product evidence identities\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE <class 'hardware_splicer.dual_agent_cleanroom.CleanroomContractError'>"
+      },
+      {
+        "test": "tests.test_finding_provenance::test_failed_check_deterministic_only_for_executor_registry",
+        "details": "tests/test_finding_provenance.py:223: in test_failed_check_deterministic_only_for_executor_registry\n    assert by_id[\"action-unknown-tool\"][\"provenance\"][\"kind\"] == \"unknown\"\nE   AssertionError: assert 'deterministic' == 'unknown'\nE     \nE     - unknown\nE     + deterministic"
+      }
+    ],
+    "skip_reasons": {
+      "archived real project unavailable": 1,
+      "pinned vendor libraries not available (set HS_VENDOR_LIBS to a PlatformIO libdeps directory)": 1,
+      "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision": 1,
+      "CadQuery is not installed; this test regenerates the frame CAD": 7,
+      "real third-party trial source absent": 1,
+      "public reference repo not cloned": 1,
+      "java + freerouting jar required": 1,
+      "set HS_LIVE_NET=1 to call iFixit for real": 1,
+      "live third-party guide not available": 1,
+      "donor geometry not available": 1,
+      "real CAD and PCB source unavailable": 1,
+      "requires optional 'cadquery' package (install the cad extra)": 2,
+      "could not import 'pybullet': No module named 'pybullet'": 2,
+      "HARDWARE_SPLICER_FREEROUTING_JAR is not configured": 1,
+      "production scenario authority requires full 3D runtime": 1,
+      "closed pan/tilt STEP authority requires full 3D and KiCad runtimes": 1,
+      "production scenario API authority requires full 3D runtime": 1,
+      "9/9 production scoring requires full 3D runtime": 2,
+      "native pcbnew is not available on a generic CI runner": 1,
+      "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test": 1,
+      "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision": 1,
+      "requires native KiCad + pcbnew": 2
+    }
+  },
+  "final": {
+    "pytest_passed": 4202,
+    "pytest_failed": 0,
+    "pytest_skipped": 32,
+    "passing_subtests": 3,
+    "tests": 4237,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 32,
+    "seconds": 927.556,
+    "junit_path": ".cache/hardware-splicer/full-suite-20261116/root-recheck-results.xml",
+    "junit_sha256": "44841462004378653438370e285734c4ff5f9cd50b2cd4f37543dda5e728dd37",
+    "failed_tests": [],
+    "skip_reasons": {
+      "archived real project unavailable": 1,
+      "pinned vendor libraries not available (set HS_VENDOR_LIBS to a PlatformIO libdeps directory)": 1,
+      "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision": 1,
+      "CadQuery is not installed; this test regenerates the frame CAD": 7,
+      "real third-party trial source absent": 1,
+      "public reference repo not cloned": 1,
+      "java + freerouting jar required": 1,
+      "set HS_LIVE_NET=1 to call iFixit for real": 1,
+      "live third-party guide not available": 1,
+      "donor geometry not available": 1,
+      "real CAD and PCB source unavailable": 1,
+      "requires optional 'cadquery' package (install the cad extra)": 2,
+      "could not import 'pybullet': No module named 'pybullet'": 2,
+      "HARDWARE_SPLICER_FREEROUTING_JAR is not configured": 1,
+      "production scenario authority requires full 3D runtime": 1,
+      "closed pan/tilt STEP authority requires full 3D and KiCad runtimes": 1,
+      "production scenario API authority requires full 3D runtime": 1,
+      "9/9 production scoring requires full 3D runtime": 2,
+      "native pcbnew is not available on a generic CI runner": 1,
+      "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test": 1,
+      "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision": 1,
+      "requires native KiCad + pcbnew": 2
+    }
+  },
+  "supplemental_suites": {
+    "mecha": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 5.598,
+      "junit_path": ".cache/hardware-splicer/full-suite-20261116/mecha-results.xml",
+      "junit_sha256": "b7d2dcee6b9550135463b10b276fb382bdd45fa0dec84948bf1d132e2faa4e96",
+      "failed_tests": [],
+      "skip_reasons": {}
+    },
+    "3d": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 38.918,
+      "junit_path": ".cache/hardware-splicer/full-suite-20261116/3d-results.xml",
+      "junit_sha256": "89a0a9e5a2b19c953022d7a2f34559c01dd269a6eee5608425a064c4399627c9",
+      "failed_tests": [],
+      "skip_reasons": {}
+    }
+  },
+  "corrections": [
+    {
+      "commit": "98ac320e",
+      "change": "Retain the cleanroom rejection of unknown evidence IDs after source alias normalization; cover all proposal families"
+    },
+    {
+      "commit": "c54d10fb",
+      "change": "Use an actually unimplemented executor in the provenance negative fixture; preserve its unknown-provenance assertion"
+    }
+  ],
+  "transient_native_failure": {
+    "test": "tests/test_compose_agent_loop_salvage.py::test_compose_agent_loop_http_donor_context",
+    "baseline": "native KiCad DRC timed out after 120 seconds; original report retained",
+    "isolated_reproduction": "passed",
+    "final_suite": "passed with native DRC 0 errors; independent ERC blockers still prevent build/fabrication readiness",
+    "timeout_policy_changed": false
+  },
+  "execution": {
+    "python": "3.13.5",
+    "test_workers": 1,
+    "cpu_affinity_final": [
+      0,
+      3
+    ],
+    "blas_threads": 1,
+    "remote_cluster_used": false
+  },
+  "root_command": "PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 .venv/bin/python -m pytest tests -q --tb=short",
+  "log_sha256": {
+    "root-pytest.log": "0cb35a3637ba2bbeef8856ed2097474f9aeea27713f4b55253bedb45527bb97d",
+    "root-recheck.log": "56a7e90b3dfb2c8cffff1c7c6ffe06d02ff9ef0b4ac6a487e25afa7a2eaa508e",
+    "mecha-pytest.log": "e5929f00c827ffbb70f3aeaa48c064bc7c9fd4aa7a772d016c6de0b894b4142f",
+    "3d-pytest.log": "553e1663df4df09c4e72fd90eb4cd2729913b6eb341bbd585eebe3e1aac48c3a"
+  },
+  "app_generated_artifact_changes_restored": 13,
+  "github_mutations_performed": false,
+  "junit_counts_include_subtests": true
+}

@@ -43,7 +43,15 @@ The native operator pilot was actually rerun after integration. Its source diges
 | Splice UI tests | 82 passed |
 | Splice UI production build | Passed |
 
-These are focused test batches, with some overlapping coverage; they are not a summed unique test count or a claim that the complete repository suite ran. Remote test workers were unavailable, so no cluster proof is claimed.
+These were the initial focused test batches, with overlapping coverage. The subsequent full verification below runs the complete root Python suite. Remote workers were unavailable, so both full runs used one local test worker, two CPU cores and single-threaded BLAS settings.
+
+### Full suite verification
+
+The complete rerun on source commit `c54d10fb5bb165ed5bfe6dd4c7dcb91c827eaf00`, including the three preserved local files, passed: **4,202 passed, 32 skipped, zero failures**, plus **three passing subtests**, in 927.66 seconds. The separate Mecha-Splicer and 3D-Splicer suites passed **32** and **15** tests respectively. Optional skips cover unavailable CAD/native bindings, external fixtures, live providers and configured toolchains.
+
+The first full run exposed five failures: three manifestations of a cleanroom evidence-ID regression, one stale executor fixture, and one native KiCad DRC timeout. The cleanroom guard now rejects unresolved references retained by source-alias normalization, with regressions for requirements, candidates and actions. The provenance negative fixture now uses an actually unimplemented tool; ERC is an implemented executor. The timeout case passed in isolation and in the complete rerun, with a fresh zero-error DRC report. Its independent ERC errors still block build and fabrication readiness; the timeout policy and readiness checks are unchanged.
+
+Both runs, exact source revisions, skipped-test reasons, fixes and log hashes are preserved in the [full-suite verification receipt](status/generated/full-suite-verification-2026-11-16.json). Local JUnit reports and logs are under `.cache/hardware-splicer/full-suite-20261116/`. Generated artifacts changed by the Mecha tests were restored; the original three local files retain their starting SHA-256 hashes.
 
 A real native SPI operator run passes its engineering checks while reporting `verified_design_only_physical_blocked`. An interrupted checkpoint run reuses three completed stages and executes the remaining two; its verification receipt is byte-identical to the uninterrupted five-stage run. A fresh controlled six-key keyboard reconstruction connects its required modeled copper groups, passes all 64 ideal switch combinations, and generates a four-channel native interposer with zero DRC errors or open connections. The overall keyboard verdict remains `BLOCKED_REFERENCE_ONLY`. Real CAD regeneration also produces the HS-3G STEP/STL package; its battery-current and cutter-rule checks remain blocking.
 
