@@ -1,5 +1,7 @@
 # Hardware Splicer
 
+**Integrated GitHub features:** [available functionality, entry points and combined validation, November 16, 2026](docs/GITHUB_FEATURE_INTEGRATION_2026-11-16.md).
+
 **Broader engineering-agent mission and operating contract:** [`docs/HARDWARE_SPLICER_MISSION_FREEZE.md`](docs/HARDWARE_SPLICER_MISSION_FREEZE.md). The bounded SPI adapter demonstration below is evidence of a particular current capability, not the full intended product scope.
 
 **Software that runs the checks a hardware engineer would run before a circuit board is built, and packages the result so anyone can rebuild and verify it.**

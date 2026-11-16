@@ -1,0 +1,134 @@
+{
+  "schema": "hardware_splicer.github_feature_integration.v1",
+  "imported_refs": {
+    "original_checkout": "445a894520e4305d03c6a8dd738504a0cf2ee4b5",
+    "remote_main": "38dbad2b759a9313b81a5b10bfde7f20d64f308c",
+    "reviewed_consolidation_pr337": "b3f9e3151eecfaa7e6f661c9f0fe0063cad8621c",
+    "cad_optional_pr339": "4214002f48d791ac7705f91533b5f974058d10d0",
+    "drone_design_pr338": "a0ee2ee997aa773efa769050d681f1d0d9245ac8",
+    "operator_pr315": "3d500733cc0c2e1502e1b53177f9cd301068376d",
+    "checkpoint_pr343": "bdf304789ea9fdb86ded35b43f8b3a34d3894335",
+    "checkpoint_custody_fix": "f53db9aefd6e7fa2b714a6316c4b9492390ce1e9",
+    "keyboard_pr342": "f2310b96fb42c1bd140bcd89c6a1791f9e501a70"
+  },
+  "isolated_commits": [
+    "5fc735b2",
+    "6383d1f1",
+    "15f3c234",
+    "c8eb5fe0",
+    "283fb80c"
+  ],
+  "original_worktree_backup": "/tmp/hs-original-wip-integration-20261116",
+  "original_wip_sha256": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "native_spi": {
+    "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
+    "status": "verified_design_only_physical_blocked",
+    "engineering_acceptance": true,
+    "physical_validation": false,
+    "fabrication_authorized": false,
+    "receipt_sha256": "6fa005f1d3544275997c8588af277277a67bef6c8d30c1c4da2eab356982596b"
+  },
+  "native_checkpoint": {
+    "full": {
+      "engineering_acceptance": true,
+      "executed_stage_names": [
+        "source",
+        "netlist",
+        "erc",
+        "drc",
+        "verification"
+      ],
+      "physical_authority": false,
+      "run_dir": "/tmp/hs-integrated-checkpoint-full-20261116",
+      "source_head": "5845e5b0ba01a8cbccde12b885db3adca09c8e7a",
+      "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
+      "stages_executed": 5,
+      "stages_reused": 0,
+      "status": "verified_design_only_physical_blocked"
+    },
+    "resumed": {
+      "engineering_acceptance": true,
+      "executed_stage_names": [
+        "drc",
+        "verification"
+      ],
+      "physical_authority": false,
+      "run_dir": "/tmp/hs-integrated-checkpoint-interrupted-20261116",
+      "source_head": "5845e5b0ba01a8cbccde12b885db3adca09c8e7a",
+      "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
+      "stages_executed": 2,
+      "stages_reused": 3,
+      "status": "verified_design_only_physical_blocked"
+    }
+  },
+  "native_checkpoint_verification_receipts_byte_identical": true,
+  "keyboard_reference": {
+    "source_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+    "ideal_switch_combinations_tested": 64,
+    "ideal_switch_combinations_failed": [],
+    "passive_keyboard_matrix_model_passed": true,
+    "required_postcut_copper_groups_unresolved": 0,
+    "physical_repair_verified": false,
+    "release": "SIMULATED_PASSIVE_MATRIX_ONLY"
+  },
+  "native_interposer": {
+    "channel_count": 4,
+    "native_drc_errors": 0,
+    "native_drc_warnings": 0,
+    "native_unconnected_items": 0,
+    "native_design_checks_passed": true,
+    "physical_authority_granted": false,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  },
+  "test_batches": [
+    {
+      "name": "core and pricing",
+      "passed": 81
+    },
+    {
+      "name": "readiness and defaults",
+      "passed": 36
+    },
+    {
+      "name": "keyboard",
+      "passed": 121
+    },
+    {
+      "name": "tool features",
+      "passed": 126
+    },
+    {
+      "name": "SPI capability, checkpoints, reference and custody",
+      "passed": 66,
+      "skipped": 3
+    },
+    {
+      "name": "original source and mission features",
+      "passed": 29,
+      "skipped": 6
+    },
+    {
+      "name": "drone with CAD",
+      "passed": 24
+    },
+    {
+      "name": "splice UI",
+      "passed": 82
+    },
+    {
+      "name": "intake, SDK, scratch compiler, JARVIS, fabrication planning and scoring",
+      "passed": 97,
+      "skipped": 4
+    }
+  ],
+  "splice_ui_build": "passed",
+  "full_repository_suite_run": false,
+  "remote_cluster_healthy": false,
+  "github_mutations_performed": false,
+  "physical_authority_granted": false,
+  "active_local_branch": "integration/github-features-20261116"
+}
