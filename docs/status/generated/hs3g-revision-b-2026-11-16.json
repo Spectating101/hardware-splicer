@@ -1,0 +1,248 @@
+{
+  "schema": "hardware_splicer.hs3g_revision_b_delivery.v1",
+  "date": "2026-11-16",
+  "source_head": "11b9efe41f471a48783e085d32b91ddfb10fca28",
+  "branch": "integration/github-features-20261116",
+  "scope": "Revised digital HS-3G package using the registered workshop operator; native verification, not hardware completion.",
+  "implementation_commits": [
+    "19bce248",
+    "11b9efe4"
+  ],
+  "package": "examples/drone_proving_ground/revision_b/reference",
+  "package_artifact_count": 28,
+  "independent_check_count": 44,
+  "reference_verification_sha256": "72a5832738824f2632c3d092088e4265321494d653c6fd78d0281103cb3d0f4a",
+  "source_sha256": {
+    "hs3g_design.py": "b2e78495f30c7416e48efec0f63b6d2d85cdad8b250b9680b6abc867d8f1e77b",
+    "hs3g_frame.py": "812b1a6c5347806687db1420022ca32a50cebe93c23da7bf878dfe1089c2f295",
+    "inputs/parts.json": "3e5be63816eb925c41353e52cda7e4dda2e26a24ce6d580f6787f0ffe8176589",
+    "revision_b/build_package.py": "c1017bf7e3e003ce7a8fd5b56c33b843a7eabb938540e2cf930e41cf8f81360c",
+    "revision_b/inputs/candidate.json": "e8983fba1d49ad4f500693c0bb2ba9c4451493e8bfd7fcce41704bcf0c18128e",
+    "revision_b/inputs/firmware-lock.json": "7a9f87931da2fcce78f85bf28140a21c4873f7eac56c1d88468c20c905025f1a",
+    "revision_b/inputs/thrust_table.json": "b252b377a0bb691bface220bc2c8b12fbccde152705ef3dcb207ea8d09e28586",
+    "revision_b/verify_package.py": "3be066225903332506c79ef5e27c7337a05a0c32d1b5a851893ba30bb56fb407"
+  },
+  "candidate": {
+    "retained_functions": [
+      "GPS navigation",
+      "receiver",
+      "analog FPV camera and VTX"
+    ],
+    "wheelbase_mm": 137.0,
+    "design_iterations": [
+      {
+        "failed_checks": [
+          "prop_radial_clearance"
+        ],
+        "measured_mass_g": 234.76,
+        "min_prop_clearance_mm": 2.38,
+        "wheelbase_mm": 135.0
+      },
+      {
+        "failed_checks": [],
+        "measured_mass_g": 234.9,
+        "min_prop_clearance_mm": 3.34,
+        "wheelbase_mm": 137.0
+      }
+    ],
+    "modeled_auw_g": 234.9,
+    "nominal_mass_reserve_g": 15.1,
+    "mass_policy": {
+      "battery_uncertainty_g": 5.0,
+      "nominal_reserve_g": 15.0,
+      "reserve_after_battery_uncertainty_g": 10.0
+    },
+    "power": {
+      "battery_continuous_a": 59.5,
+      "bench_total_a": 25.8,
+      "connector_rated_a": 35.0,
+      "connector_rating_conditions": "12AWG, temperature rise below 85 C in maker 2021V1 specification; this is not a promise of acceptable in-aircraft temperature",
+      "design_current_a": 31.244,
+      "design_factor": 1.2,
+      "esc_per_motor_a": 35,
+      "full_pack_voltage_sensitivity_factor": 1.00839,
+      "throttle_limit_relied_on": false,
+      "voltage_adjusted_total_a": 26.037
+    },
+    "bom_total_usd_snapshot": 346.91,
+    "pricing_limit": "Only motor, prop and battery prices were refreshed. Cutting and remaining rows retain snapshot/allowance prices. No checkout, freight, tax or tooling quote.",
+    "manufacturing": "Cut blanks omit 16 M2 motor holes. Finished CAD, coordinates and 1:1 sheet specify separate shop drilling, still unqualified.",
+    "firmware": "Hash-checked official INAV 9.1.0 SPEEDYBEEF405MINI image, pinned upstream sources/licence, partial review-only CLI. HS did not compile or flash it.",
+    "component_geometry": "Assembly STEP uses component bounding envelopes, rather than detailed vendor CAD or verified mounts."
+  },
+  "operator_result_path": ".cache/hardware-splicer/drone-revision-20261116/operator-published/HS_OPERATOR_RESULT.json",
+  "operator_result_sha256": "a97f9cdb8fe77dac8109f35dcacd7d84aa3edea29a4686e9155a90fb8d444faf",
+  "operator_result": {
+    "artifacts_sha256": {
+      "candidate/BOM.csv": "f7f28a1c05e590e8cb87b3b5809fa5450f15d4745a16174f07a97dfd277c3ac1",
+      "candidate/POST_DRILL_COORDINATES.csv": "dd74b3577dda882ef42845fdc82b2d561f98080705697e330a2a64bacfab7ad0",
+      "candidate/results.json": "28c0653e1a7dedaf5be7d86c13a4610dcdf9388427d0abc307753920610066f8",
+      "candidate/verification.json": "ec075a2ab51d8ab9a0a393c326f80eaf7d48ff4aea0b045dc4d28df8669cadc6"
+    },
+    "canonical_machine_release": {
+      "achieved": "build_ready",
+      "allowed": false,
+      "blockers": [
+        {
+          "code": "safety_not_closed",
+          "message": "safety requirement 'req-physical' is not closed by passing verification"
+        },
+        {
+          "code": "release_state_not_reached",
+          "message": "requested operationally_authorized, but evidence supports only build_ready"
+        }
+      ],
+      "physical_measurements_count": 0,
+      "requested": "operationally_authorized",
+      "software_evidence_count": 1,
+      "verification_states": {
+        "verify-physical": "planned",
+        "verify-software": "passed"
+      }
+    },
+    "case_id": "hs3g_drone_revision_b",
+    "chosen_route": "native_drone_design_iteration",
+    "engineering_acceptance": true,
+    "execute_requested": true,
+    "fabrication_authorized": false,
+    "objective": "Revise the existing GPS/FPV drone, regenerate CAD, and verify its candidate package",
+    "open_actions": [
+      "Confirm exact controller stock and delivery; the maker marks this stack discontinued.",
+      "Get a composite shop quote for both cut blanks and the separately specified 16-hole drilling operation; qualify drilling quality and frame stiffness.",
+      "Measure actual motor mounting, M2 thread depth, propeller boss and battery envelope; verify the 200 mm strap and weigh the complete aircraft.",
+      "Complete receiver/GPS/VTX setup, motor ordering, compass/accelerometer calibration, failsafe and current-sensor calibration before supervised bench work.",
+      "Measure current/sag and connector/lead/motor temperatures under controlled load. Manufacturer C-ratings and voltage scaling assumptions are not bench measurements.",
+      "Review arm resonance using measured vibration data; the beam model does not qualify the thinner laminate or drilled motor pads."
+    ],
+    "physical_validation": false,
+    "power_on_authorized": false,
+    "real_repair_confirmed": false,
+    "registered_source": "examples/drone_proving_ground",
+    "schema_version": "hardware_splicer.workshop_operator.v1",
+    "source_sha256": "0225a36cfbf2cc179e8c571255450b5eb02760750fecc71b6fcff8d037148510",
+    "status": "verified_candidate_design_only_physical_blocked",
+    "trace": [
+      {
+        "details": "Reuse the existing drone project, frame engine, mass model and maker data; preserve GPS and FPV.",
+        "existing_engine": "HS-3G source-backed revision inputs",
+        "stage": "selection",
+        "state": "passed"
+      },
+      {
+        "details": "Measured bounded frame candidates; retained the first design satisfying the fixed constraints.",
+        "existing_engine": "CadQuery + HS mass/clearance/propulsion engines",
+        "returncode": 0,
+        "stage": "design_iteration",
+        "state": "passed",
+        "stderr": "",
+        "stdout": "{\n  \"revision\": \"HS-3G-B\",\n  \"auw_g\": 234.9,\n  \"checks\": {\n    \"nominal_mass_reserve\": true,\n    \"battery_uncertainty_reserve\": true,\n    \"battery_continuous_at_design_current\": true,\n    \"connector_at_design_current\": true,\n    \"esc_at_design_current\": true,\n    \"tw_at_249g\": true,\n    \"prop_radial_clearance\": true,\n    \"prop_adjacent_gap\": true,\n    \"prop_vertical_clearance\": true,\n    \"strap_wraps_pack\": true,\n    \"strap_clears_stack\": true,\n    \"strap_length\": true,\n    \"arm_roots_filleted\": true,\n    \"motor_pattern\": true,\n    \"cutter_blank_rules\": true\n  }\n}\n"
+      },
+      {
+        "details": "Separate verifier reread produced artifacts and bound its result to their hashes; physical work remains unverified.",
+        "existing_engine": "STEP reimport + DXF/STL inspection + pinned firmware/HEX checks",
+        "failed_checks": [],
+        "returncode": 0,
+        "source_unchanged": true,
+        "stage": "independent_acceptance",
+        "state": "passed",
+        "stderr": "",
+        "stdout": "{\n  \"engineering_acceptance\": true,\n  \"failed_checks\": []\n}\n"
+      }
+    ]
+  },
+  "focused_native_tests": {
+    "tests": 48,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 48,
+    "seconds": 26.814,
+    "junit_path": ".cache/hardware-splicer/drone-revision-20261116/native-focused-final.xml",
+    "junit_sha256": "28399c46c082b93ffe8b10aff128d09f68b5c945e41049cceddeda59dbb70a94",
+    "failed_tests": [],
+    "skip_reasons": {}
+  },
+  "complete_native_root_suite": {
+    "tests": 4250,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 4247,
+    "seconds": 1037.433,
+    "junit_path": ".cache/hardware-splicer/drone-revision-20261116/full-native-results.xml",
+    "junit_sha256": "cb3f46a0f7bce30872a661c107b68123cd3576d10b450fcd7981c81f81c47adf",
+    "failed_tests": [],
+    "skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    }
+  },
+  "complete_run_command": "DISPLAY= WAYLAND_DISPLAY= HS_LIVE_NET=1 HS_VENDOR_LIBS=<retained pinned vendor cache> HARDWARE_SPLICER_RUN_FREEROUTING=1 HARDWARE_SPLICER_FREEROUTING_JAR=<pinned 2.1.0 jar> OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 PYTHONPATH=src taskset -c 0,3 /tmp/hs-function-cad-venv/bin/python .cache/hardware-splicer/extended-verification-20261116/run_native_profile.py tests -q --tb=short --basetemp=.cache/hardware-splicer/drone-revision-20261116/full-pytest-temp --junitxml=.cache/hardware-splicer/drone-revision-20261116/full-native-results.xml",
+  "complete_run_log": ".cache/hardware-splicer/drone-revision-20261116/full-native.log",
+  "complete_run_log_sha256": "0498923ca2235422852592e503a48736c3667bc81a265d77f18bd0ee94eadfc7",
+  "interrupted_preliminary_run": {
+    "reason": "Stopped deliberately to correct the retained cutting-price label, then regenerated and independently verified the package and restarted the complete suite on final source.",
+    "outcome": "261 passed, zero failures before interruption; not counted as complete coverage.",
+    "log": ".cache/hardware-splicer/drone-revision-20261116/full-native.log.interrupted-pricing-label"
+  },
+  "native_runtime": {
+    "versions": {
+      "python": "3.13.5",
+      "pytest": "8.4.2",
+      "cadquery": "2.6.1",
+      "trimesh": "4.12.2",
+      "pybullet": "3.2.7",
+      "pypdf": "6.18.1",
+      "numpy": "2.5.4",
+      "ezdxf": "1.4.5",
+      "PyYAML": "6.0.3"
+    },
+    "interpreter": "/tmp/hs-function-cad-venv/bin/python",
+    "dependency_fallback": ".venv/lib/python3.13/site-packages",
+    "runner": ".cache/hardware-splicer/extended-verification-20261116/run_native_profile.py",
+    "cpu_affinity": [
+      0,
+      3
+    ],
+    "blas_threads": 1,
+    "test_workers": 1,
+    "display": "Empty DISPLAY and WAYLAND_DISPLAY",
+    "remote_workers": "Cluster health below minimum: all three remote SSH probes failed. Bounded local native verification used.",
+    "opt_ins": [
+      "HS_LIVE_NET=1 (iFixit)",
+      "HS_VENDOR_LIBS (retained pinned Adafruit libraries)",
+      "HARDWARE_SPLICER_RUN_FREEROUTING=1 (headless regression checks)"
+    ]
+  },
+  "unverified_live_providers": "Three vision checks require provider configuration. The preceding verification found missing Qwen keys and an invalid Gemini key; no successful live vision result is claimed.",
+  "unchanged_app_suites": "No app source changes in this revision. Earlier Mecha 32, 3D 15 and UI 82/build results are recorded in full-suite-verification-2026-11-16.json.",
+  "visual_qa": {
+    "artifact": "POST_DRILL_1_TO_1.svg",
+    "result": "Viewed real headless Chrome rendering: native outline, black cutter holes, 16 red post-drill holes and 100 mm calibration line visible.",
+    "preview_path": ".cache/hardware-splicer/drone-revision-20261116/browser-drill-preview.png",
+    "preview_sha256": "5e3194d0857dac3ded2cb6f05f026246b1debcf4b25935a832d1a5a5e0171ffa",
+    "scope": "Visual inspection; not a physical print-scale or machining accuracy measurement."
+  },
+  "original_local_work_sha256": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "original_local_work_unchanged": true,
+  "engineering_acceptance": true,
+  "purchase_ready": false,
+  "fabrication_authorized": false,
+  "physical_validation": false,
+  "power_on_authorized": false,
+  "flight_authorized": false,
+  "open_actions": [
+    "Confirm exact controller stock and delivery; the maker marks this stack discontinued.",
+    "Get a composite shop quote for both cut blanks and the separately specified 16-hole drilling operation; qualify drilling quality and frame stiffness.",
+    "Measure actual motor mounting, M2 thread depth, propeller boss and battery envelope; verify the 200 mm strap and weigh the complete aircraft.",
+    "Complete receiver/GPS/VTX setup, motor ordering, compass/accelerometer calibration, failsafe and current-sensor calibration before supervised bench work.",
+    "Measure current/sag and connector/lead/motor temperatures under controlled load. Manufacturer C-ratings and voltage scaling assumptions are not bench measurements.",
+    "Review arm resonance using measured vibration data; the beam model does not qualify the thinner laminate or drilled motor pads."
+  ],
+  "git_remote_writes": false
+}
