@@ -1,0 +1,138 @@
+{
+  "schema": "hardware_splicer.hs3g_revision.v1",
+  "revision": "HS-3G-B",
+  "objective": "Preserve the 3-inch sub-250 g GPS/FPV quad; resolve battery-current and cutter-process mismatches using exact sourced parts and native CAD.",
+  "frame_overrides": {
+    "bottom_t_mm": 2.01,
+    "top_t_mm": 1.02,
+    "body_l_mm": 63.0,
+    "arm_w_mm": 10.0,
+    "standoff_x_mm": 25.5,
+    "standoff_y_mm": 10.0,
+    "top_l_mm": 61.0,
+    "top_w_mm": 28.0,
+    "strap_slot_x_mm": 20.0
+  },
+  "part_overrides": {
+    "motor": {
+      "identity": "T-Hobby F1404 KV2900, 4-6S, 9N12P",
+      "peak_current_60s_a": 10.45,
+      "unit_price_usd": 16.9,
+      "mount_note": "Maker drawing dimensionally confirms 9 mm mounting PCD and 1.5 mm prop boss. The 2 mm text specification refers to a different/ambiguous shaft dimension. Measure the actual unit and usable M2 thread depth before machining.",
+      "sources": [
+        {
+          "url": "https://www.ligpower.com/product/f1404-fpv-motor.html",
+          "class": "maker_page",
+          "accessed": "2026-11-16",
+          "supports": "KV2900 4-6S, 9.34 g with leads, 10.45 A 60-second peak; 4S GF3028-3 bench table; 16.90 USD"
+        },
+        {
+          "url": "https://www.ligpower.com/images/202408/091723192759157166.jpg",
+          "class": "maker_drawing",
+          "accessed": "2026-11-16",
+          "sha256": "a5302d0a54590f249c1950563fe6a4454a69940795e1da37a723c2760c6b6820",
+          "supports": "9 mm mounting PCD, four M2 holes; 1.5 mm prop boss; 17.9 mm body diameter and 16.6 mm body length"
+        }
+      ]
+    },
+    "prop": {
+      "identity": "Gemfan Windancer 3028-3 PMPC3028-3, 1.5 mm T-mount, 2CW+2CCW pack",
+      "unit_mass_g": 5.96,
+      "unit_price_usd": 2.69,
+      "diameter_mm": 77.06,
+      "hub_height_mm": 5.5,
+      "hub_height_note": "Maker store dimensional specification. Match the 1.5 mm variant to the actual motor boss.",
+      "sources": [
+        {
+          "url": "https://www.gfprops.com/products/gemfan-windancer-3028-3.html",
+          "class": "maker_page",
+          "accessed": "2026-11-16",
+          "supports": "PMPC3028-3; 1.5 mm variant; 1.49 g each; 77.06 mm diameter; 5.5 mm hub; 2.69 USD per four-pack. Maker calls pitch 2.1 inches despite model name 3028; do not infer geometry from the name."
+        }
+      ]
+    },
+    "battery": {
+      "identity": "CNHL MiniStar 85704G, 850 mAh 4S 70C LiPo, factory XT60, 12AWG leads",
+      "unit_mass_g": 110,
+      "unit_price_usd": 14.99,
+      "capacity_mah": 850,
+      "size_mm": [
+        62,
+        33,
+        33
+      ],
+      "c_continuous": 70,
+      "c_burst": 140,
+      "sources": [
+        {
+          "url": "https://chinahobbyline.com/collections/cnhl-softcase-lipo-battery/products/cnhl-ministar-series-850mah-14-8v-4s-70c-lipo-battery-with-xt60-plug",
+          "class": "maker_page",
+          "accessed": "2026-11-16",
+          "supports": "85704G; 850 mAh, 4S, 70C/140C, factory XT60 and 12AWG leads, approx 110 g. Page gives both 62x30x33 and 62x33x30 mm; use a conservative 62x33x33 envelope. Price uses the displayed 29.98 USD two-pack upper snapshot (warehouse variants differ); checkout and shipping unconfirmed."
+        }
+      ]
+    },
+    "wiring": {
+      "unit_mass_g": 12.0,
+      "identity": "12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly"
+    },
+    "frame_cut": {
+      "identity": "2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop",
+      "sources": [
+        {
+          "url": "https://sendcutsend.com/materials/carbon-fiber/",
+          "class": "retailer_page",
+          "accessed": "2026-11-16",
+          "supports": "2.01 and 1.02 mm stock; approx 3.2 mm minimum hole and 2x thickness web for the cutting operation. This is a geometry screen, not a quote or cutter acceptance."
+        }
+      ]
+    },
+    "hardware": {
+      "identity": "16x M2x5 motor screws; 4x M3 stack screws (length computed); 8x M3x6 standoff screws; 4x M3x5 nylon spacers; 4x M3 nylon lock nuts; 10x200 mm battery strap"
+    }
+  },
+  "hardware_overrides": {
+    "motor_screw_len_mm": 5.0
+  },
+  "power_path": {
+    "connector": "AMASS XT60 with 12AWG on both mating leads",
+    "rated_current_a": 35.0,
+    "rating_conditions": "12AWG, temperature rise below 85 C in maker 2021V1 specification; this is not a promise of acceptable in-aircraft temperature",
+    "source": "https://atta.szlcsc.com/upload/public/pdf/source/20240904/A35598E9EA0595B0DBCDE5A44329EFC0.pdf",
+    "original_xt30_rated_current_a": 15.0,
+    "original_xt30_source": "https://www.china-amass.com/public/upload/20240608/810c62b3f7ace2287989748538eb2a6b.pdf",
+    "design_current_factor": 1.2,
+    "max_cell_charge_v": 4.2,
+    "min_cell_operating_v": 3.3
+  },
+  "mass_policy": {
+    "nominal_reserve_g": 15.0,
+    "battery_uncertainty_g": 5.0,
+    "reserve_after_battery_uncertainty_g": 10.0
+  },
+  "procurement": {
+    "controller_status": "Maker marks SB-F4MINI-STACK discontinued; retain this exact supported controller only with confirmed existing/dealer stock, do not silently substitute a similarly named board.",
+    "maker_url": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/",
+    "dealer_lead_url": "https://race-drones.com/product/speedybee-f405-mini-bls-35a-20x20-stack/",
+    "dealer_lead_status": "Listed in stock on 2026-11-16; shipping to the user and physical inventory not confirmed.",
+    "purchase_ready": false
+  },
+  "sources_accessed": "2026-11-16",
+  "wheelbase_candidates_mm": [
+    135.0,
+    137.0,
+    139.0
+  ],
+  "firmware_settings": {
+    "motor_pwm_protocol": "DSHOT300",
+    "motor_poles": 12,
+    "throttle_scale": 1.0,
+    "serialrx_provider": "CRSF",
+    "gps_provider": "UBLOX",
+    "battery_capacity_unit": "MAH",
+    "battery_capacity": 850,
+    "vbat_max_cell_voltage": 420,
+    "vbat_min_cell_voltage": 330,
+    "vbat_warning_cell_voltage": 350
+  }
+}

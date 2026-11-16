@@ -1,0 +1,13 @@
+id,identity,qty_to_buy,unit_usd_snapshot,line_usd_snapshot,source,pricing_basis
+stack,"SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 8 MB flash; BLS 35A Mini V2 ESC, BLHeli_S J-H-40)",1,64.99,64.99,https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/,retained baseline snapshot/assumption
+motor,"T-Hobby F1404 KV2900, 4-6S, 9N12P",4,16.9,67.6,https://www.ligpower.com/product/f1404-fpv-motor.html,2026-11-16 snapshot
+prop,"Gemfan Windancer 3028-3 PMPC3028-3, 1.5 mm T-mount, 2CW+2CCW pack",2,2.69,5.38,https://www.gfprops.com/products/gemfan-windancer-3028-3.html,2026-11-16 snapshot
+battery,"CNHL MiniStar 85704G, 850 mAh 4S 70C LiPo, factory XT60, 12AWG leads",2,14.99,29.98,https://chinahobbyline.com/collections/cnhl-softcase-lipo-battery/products/cnhl-ministar-series-850mah-14-8v-4s-70c-lipo-battery-with-xt60-plug,2026-11-16 snapshot
+gps,"iFlight BLITZ Mini M10 GPS V2 (20x20 mm; u-blox M10, QMC5883L compass)",1,47.99,47.99,https://www.robotshop.com/products/iflight-blitz-mini-m10-gps-v22x20mm,retained baseline snapshot/assumption
+receiver,RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver,1,18.99,18.99,https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver,retained baseline snapshot/assumption
+camera,Caddx Ant 1200TVL nano (14 x 14 mm),1,17.99,17.99,https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14,retained baseline snapshot/assumption
+vtx,HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount),1,24.99,24.99,https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html,retained baseline snapshot/assumption
+standoff,"M3 x 30 mm aluminium hex standoff, 5 mm across flats",4,0.5,2.0,assumption,retained baseline snapshot/assumption
+hardware,16x M2x5 motor screws; 4x M3 stack screws (length computed); 8x M3x6 standoff screws; 4x M3x5 nylon spacers; 4x M3 nylon lock nuts; 10x200 mm battery strap,1,12.0,12.0,assumption,retained baseline snapshot/assumption
+wiring,"12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly",1,6.0,6.0,assumption,retained baseline snapshot/assumption
+frame_cut,2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop,1,49.0,49.0,https://sendcutsend.com/materials/carbon-fiber/,2026-11-16 snapshot

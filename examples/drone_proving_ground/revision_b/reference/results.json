@@ -1,0 +1,1003 @@
+{
+  "arm_sensitivity": {
+    "axis_40.0": {
+      "I_mm4": 6.77,
+      "arm_mass_g": 1.342,
+      "blade_pass_hover_hz": 709.7,
+      "clamp": "axis",
+      "e_gpa": 40.0,
+      "f1_crossing_rpm": 9762,
+      "f1_hz": 162.7,
+      "f1_inside_rotor_band": false,
+      "free_length_mm": 40.22,
+      "root_stress_full_thrust_mpa": 17.28,
+      "rotor_freq_hover_hz": 236.6,
+      "rotor_freq_max_hz": 522.1,
+      "section_mm": [
+        10.0,
+        2.01
+      ],
+      "stiffness_n_per_mm": 12.49,
+      "tip_deflection_full_thrust_mm": 0.2317,
+      "tip_mass_g": 11.63
+    },
+    "axis_55.2": {
+      "I_mm4": 6.77,
+      "arm_mass_g": 1.342,
+      "blade_pass_hover_hz": 709.7,
+      "clamp": "axis",
+      "e_gpa": 55.2,
+      "f1_crossing_rpm": 11468,
+      "f1_hz": 191.1,
+      "f1_inside_rotor_band": false,
+      "free_length_mm": 40.22,
+      "root_stress_full_thrust_mpa": 17.28,
+      "rotor_freq_hover_hz": 236.6,
+      "rotor_freq_max_hz": 522.1,
+      "section_mm": [
+        10.0,
+        2.01
+      ],
+      "stiffness_n_per_mm": 17.23,
+      "tip_deflection_full_thrust_mm": 0.1679,
+      "tip_mass_g": 11.63
+    },
+    "far_edge_40.0": {
+      "I_mm4": 6.77,
+      "arm_mass_g": 1.509,
+      "blade_pass_hover_hz": 709.7,
+      "clamp": "far_edge",
+      "e_gpa": 40.0,
+      "f1_crossing_rpm": 8175,
+      "f1_hz": 136.3,
+      "f1_inside_rotor_band": false,
+      "free_length_mm": 45.22,
+      "root_stress_full_thrust_mpa": 19.42,
+      "rotor_freq_hover_hz": 236.6,
+      "rotor_freq_max_hz": 522.1,
+      "section_mm": [
+        10.0,
+        2.01
+      ],
+      "stiffness_n_per_mm": 8.78,
+      "tip_deflection_full_thrust_mm": 0.3293,
+      "tip_mass_g": 11.63
+    },
+    "far_edge_55.2": {
+      "I_mm4": 6.77,
+      "arm_mass_g": 1.509,
+      "blade_pass_hover_hz": 709.7,
+      "clamp": "far_edge",
+      "e_gpa": 55.2,
+      "f1_crossing_rpm": 9604,
+      "f1_hz": 160.1,
+      "f1_inside_rotor_band": false,
+      "free_length_mm": 45.22,
+      "root_stress_full_thrust_mpa": 19.42,
+      "rotor_freq_hover_hz": 236.6,
+      "rotor_freq_max_hz": 522.1,
+      "section_mm": [
+        10.0,
+        2.01
+      ],
+      "stiffness_n_per_mm": 12.12,
+      "tip_deflection_full_thrust_mm": 0.2386,
+      "tip_mass_g": 11.63
+    }
+  },
+  "bom": [
+    {
+      "id": "stack",
+      "identity": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 8 MB flash; BLS 35A Mini V2 ESC, BLHeli_S J-H-40)",
+      "line_usd_snapshot": 64.99,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/",
+      "unit_usd_snapshot": 64.99
+    },
+    {
+      "id": "motor",
+      "identity": "T-Hobby F1404 KV2900, 4-6S, 9N12P",
+      "line_usd_snapshot": 67.6,
+      "pricing_basis": "2026-11-16 snapshot",
+      "qty_to_buy": 4,
+      "source": "https://www.ligpower.com/product/f1404-fpv-motor.html",
+      "unit_usd_snapshot": 16.9
+    },
+    {
+      "id": "prop",
+      "identity": "Gemfan Windancer 3028-3 PMPC3028-3, 1.5 mm T-mount, 2CW+2CCW pack",
+      "line_usd_snapshot": 5.38,
+      "pricing_basis": "2026-11-16 snapshot",
+      "qty_to_buy": 2,
+      "source": "https://www.gfprops.com/products/gemfan-windancer-3028-3.html",
+      "unit_usd_snapshot": 2.69
+    },
+    {
+      "id": "battery",
+      "identity": "CNHL MiniStar 85704G, 850 mAh 4S 70C LiPo, factory XT60, 12AWG leads",
+      "line_usd_snapshot": 29.98,
+      "pricing_basis": "2026-11-16 snapshot",
+      "qty_to_buy": 2,
+      "source": "https://chinahobbyline.com/collections/cnhl-softcase-lipo-battery/products/cnhl-ministar-series-850mah-14-8v-4s-70c-lipo-battery-with-xt60-plug",
+      "unit_usd_snapshot": 14.99
+    },
+    {
+      "id": "gps",
+      "identity": "iFlight BLITZ Mini M10 GPS V2 (20x20 mm; u-blox M10, QMC5883L compass)",
+      "line_usd_snapshot": 47.99,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "https://www.robotshop.com/products/iflight-blitz-mini-m10-gps-v22x20mm",
+      "unit_usd_snapshot": 47.99
+    },
+    {
+      "id": "receiver",
+      "identity": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+      "line_usd_snapshot": 18.99,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver",
+      "unit_usd_snapshot": 18.99
+    },
+    {
+      "id": "camera",
+      "identity": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+      "line_usd_snapshot": 17.99,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14",
+      "unit_usd_snapshot": 17.99
+    },
+    {
+      "id": "vtx",
+      "identity": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+      "line_usd_snapshot": 24.99,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html",
+      "unit_usd_snapshot": 24.99
+    },
+    {
+      "id": "standoff",
+      "identity": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+      "line_usd_snapshot": 2.0,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 4,
+      "source": "assumption",
+      "unit_usd_snapshot": 0.5
+    },
+    {
+      "id": "hardware",
+      "identity": "16x M2x5 motor screws; 4x M3 stack screws (length computed); 8x M3x6 standoff screws; 4x M3x5 nylon spacers; 4x M3 nylon lock nuts; 10x200 mm battery strap",
+      "line_usd_snapshot": 12.0,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "assumption",
+      "unit_usd_snapshot": 12.0
+    },
+    {
+      "id": "wiring",
+      "identity": "12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly",
+      "line_usd_snapshot": 6.0,
+      "pricing_basis": "retained baseline snapshot/assumption",
+      "qty_to_buy": 1,
+      "source": "assumption",
+      "unit_usd_snapshot": 6.0
+    },
+    {
+      "id": "frame_cut",
+      "identity": "2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop",
+      "line_usd_snapshot": 49.0,
+      "pricing_basis": "2026-11-16 snapshot",
+      "qty_to_buy": 1,
+      "source": "https://sendcutsend.com/materials/carbon-fiber/",
+      "unit_usd_snapshot": 49.0
+    }
+  ],
+  "bom_total_usd_snapshot": 346.91,
+  "cg": {
+    "battery_x_mm": 0.84,
+    "cg_mm": [
+      0.0,
+      0.0,
+      -1.18
+    ],
+    "cg_z_below_prop_plane_mm": 19.79,
+    "mass_g": 234.89
+  },
+  "checks": {
+    "arm_roots_filleted": true,
+    "battery_continuous_at_design_current": true,
+    "battery_uncertainty_reserve": true,
+    "connector_at_design_current": true,
+    "cutter_blank_rules": true,
+    "esc_at_design_current": true,
+    "motor_pattern": true,
+    "nominal_mass_reserve": true,
+    "prop_adjacent_gap": true,
+    "prop_radial_clearance": true,
+    "prop_vertical_clearance": true,
+    "strap_clears_stack": true,
+    "strap_length": true,
+    "strap_wraps_pack": true,
+    "tw_at_249g": true
+  },
+  "clearance": {
+    "adjacent_tip_gap_mm": 19.81,
+    "min_radial_mm": 3.34,
+    "min_vertical_above_mm": null,
+    "radial": [
+      {
+        "clearance_mm": 5.22,
+        "id": "stack"
+      },
+      {
+        "clearance_mm": 15.83,
+        "id": "vtx"
+      },
+      {
+        "clearance_mm": 3.34,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.34,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.34,
+        "id": "standoff"
+      },
+      {
+        "clearance_mm": 3.34,
+        "id": "standoff"
+      }
+    ],
+    "vertical": [
+      {
+        "below": true,
+        "gap_mm": 18.61,
+        "id": "battery"
+      }
+    ]
+  },
+  "design_iterations": [
+    {
+      "failed_checks": [
+        "prop_radial_clearance"
+      ],
+      "measured_mass_g": 234.76,
+      "min_prop_clearance_mm": 2.38,
+      "wheelbase_mm": 135.0
+    },
+    {
+      "failed_checks": [],
+      "measured_mass_g": 234.9,
+      "min_prop_clearance_mm": 3.34,
+      "wheelbase_mm": 137.0
+    }
+  ],
+  "fabrication_authorized": false,
+  "flight_authorized": false,
+  "frame_parameters": {
+    "arm_w_mm": 10.0,
+    "body_corner_r_mm": 4.0,
+    "body_l_mm": 63.0,
+    "body_w_mm": 40.0,
+    "bottom_t_mm": 2.01,
+    "junction_fillet_r_mm": 3.0,
+    "motor_bolt_hole_d_mm": 2.2,
+    "motor_center_hole_d_mm": 4.0,
+    "motor_pcd_mm": 9.0,
+    "pad_d_mm": 19.0,
+    "stack_hole_d_mm": 3.2,
+    "stack_pitch_mm": 20.0,
+    "stack_spacer_af_mm": 5.0,
+    "stack_spacer_len_mm": 5.0,
+    "standoff_af_mm": 5.0,
+    "standoff_hole_d_mm": 3.2,
+    "standoff_len_mm": 30.0,
+    "standoff_x_mm": 25.5,
+    "standoff_y_mm": 10.0,
+    "strap_slot_w_mm": 3.2,
+    "strap_slot_x_mm": 20.0,
+    "strap_t_mm": 1.5,
+    "strap_w_mm": 10.0,
+    "top_corner_r_mm": 3.0,
+    "top_l_mm": 61.0,
+    "top_t_mm": 1.02,
+    "top_w_mm": 28.0,
+    "wheelbase_mm": 137.0
+  },
+  "hardware": {
+    "items": [
+      {
+        "id": "motor_screw",
+        "qty": 16,
+        "total_g": 3.536,
+        "unit_g": 0.221,
+        "what": "M2 x 5 button head, steel"
+      },
+      {
+        "id": "stack_screw",
+        "qty": 4,
+        "total_g": 4.504,
+        "unit_g": 1.126,
+        "what": "M3 x 30 button head, titanium"
+      },
+      {
+        "id": "standoff_screw",
+        "qty": 8,
+        "total_g": 2.992,
+        "unit_g": 0.374,
+        "what": "M3 x 6 button head, titanium"
+      },
+      {
+        "id": "stack_spacer",
+        "qty": 4,
+        "total_g": 0.312,
+        "unit_g": 0.078,
+        "what": "M3 x 5 nylon hex spacer, 5 mm AF"
+      },
+      {
+        "id": "stack_nut",
+        "qty": 4,
+        "total_g": 0.8,
+        "unit_g": 0.2,
+        "what": "M3 nylon lock nut"
+      },
+      {
+        "id": "strap",
+        "qty": 1,
+        "total_g": 2.0,
+        "unit_g": 2.0,
+        "what": "10 mm battery strap"
+      }
+    ],
+    "motor_screw_len_mm": 5.0,
+    "motor_thread_depth_verified": false,
+    "motor_thread_engagement_mm": 2.99,
+    "motor_thread_engagement_x_d": 1.5,
+    "stack_screw_len_mm": 30,
+    "stack_screw_needed_mm": 25.21,
+    "total_g": 14.14
+  },
+  "manufacturing": {
+    "cutter_acceptance_obtained": false,
+    "cutter_blank": {
+      "bottom_plate": {
+        "holes_below_rule": [],
+        "min_hole_rule_mm": 3.2,
+        "min_web_rule_mm": 4.02,
+        "smallest_hole_by_feature_mm": {
+          "motor_centre_hole": 4.319,
+          "stack_hole": 3.455,
+          "standoff_hole": 3.455,
+          "strap_slot": 3.824
+        },
+        "smallest_web_by_pair_mm": {
+          "motor_centre_hole-motor_centre_hole": 92.874,
+          "motor_centre_hole-outline": 7.5,
+          "motor_centre_hole-stack_hole": 50.758,
+          "motor_centre_hole-standoff_hole": 41.16,
+          "motor_centre_hole-strap_slot": 49.241,
+          "stack_hole-outline": 8.4,
+          "stack_hole-stack_hole": 16.8,
+          "stack_hole-standoff_hole": 12.3,
+          "stack_hole-strap_slot": 8.514,
+          "standoff_hole-outline": 4.4,
+          "standoff_hole-standoff_hole": 16.8,
+          "standoff_hole-strap_slot": 5.013,
+          "strap_slot-outline": 9.9,
+          "strap_slot-strap_slot": 36.8
+        },
+        "smallest_web_mm": 4.4,
+        "thickness_mm": 2.01,
+        "webs_below_rule": []
+      },
+      "top_plate": {
+        "holes_below_rule": [],
+        "min_hole_rule_mm": 3.2,
+        "min_web_rule_mm": 2.04,
+        "smallest_hole_by_feature_mm": {
+          "standoff_hole": 3.455
+        },
+        "smallest_web_by_pair_mm": {
+          "standoff_hole-outline": 2.4,
+          "standoff_hole-standoff_hole": 16.8
+        },
+        "smallest_web_mm": 2.4,
+        "thickness_mm": 1.02,
+        "webs_below_rule": []
+      }
+    },
+    "finished_geometry_against_cutting_rules": {
+      "bottom_plate": {
+        "holes_below_rule": [
+          "motor_bolt_hole"
+        ],
+        "min_hole_rule_mm": 3.2,
+        "min_web_rule_mm": 4.02,
+        "smallest_hole_by_feature_mm": {
+          "motor_bolt_hole": 2.375,
+          "motor_centre_hole": 4.319,
+          "stack_hole": 3.455,
+          "standoff_hole": 3.455,
+          "strap_slot": 3.824
+        },
+        "smallest_web_by_pair_mm": {
+          "motor_bolt_hole-motor_bolt_hole": 4.164,
+          "motor_bolt_hole-motor_centre_hole": 1.4,
+          "motor_bolt_hole-outline": 3.9,
+          "motor_bolt_hole-stack_hole": 48.575,
+          "motor_bolt_hole-standoff_hole": 38.261,
+          "motor_bolt_hole-strap_slot": 46.408,
+          "motor_centre_hole-motor_centre_hole": 92.874,
+          "motor_centre_hole-outline": 7.5,
+          "motor_centre_hole-stack_hole": 50.758,
+          "motor_centre_hole-standoff_hole": 41.16,
+          "motor_centre_hole-strap_slot": 49.241,
+          "stack_hole-outline": 8.4,
+          "stack_hole-stack_hole": 16.8,
+          "stack_hole-standoff_hole": 12.3,
+          "stack_hole-strap_slot": 8.514,
+          "standoff_hole-outline": 4.4,
+          "standoff_hole-standoff_hole": 16.8,
+          "standoff_hole-strap_slot": 5.013,
+          "strap_slot-outline": 9.9,
+          "strap_slot-strap_slot": 36.8
+        },
+        "smallest_web_mm": 1.4,
+        "thickness_mm": 2.01,
+        "webs_below_rule": [
+          "motor_bolt_hole-motor_centre_hole",
+          "motor_bolt_hole-outline"
+        ]
+      },
+      "top_plate": {
+        "holes_below_rule": [],
+        "min_hole_rule_mm": 3.2,
+        "min_web_rule_mm": 2.04,
+        "smallest_hole_by_feature_mm": {
+          "standoff_hole": 3.455
+        },
+        "smallest_web_by_pair_mm": {
+          "standoff_hole-outline": 2.4,
+          "standoff_hole-standoff_hole": 16.8
+        },
+        "smallest_web_mm": 2.4,
+        "thickness_mm": 1.02,
+        "webs_below_rule": []
+      }
+    },
+    "post_drilled_holes": 16,
+    "shop_drilling_qualified": false
+  },
+  "mass": {
+    "auw_g": 234.9,
+    "dry_g": 124.9,
+    "frame_g": 18.391,
+    "rows": [
+      {
+        "id": "stack",
+        "n": 1,
+        "total_g": 16.8,
+        "unit_g": 16.8
+      },
+      {
+        "id": "motor",
+        "n": 4,
+        "total_g": 37.36,
+        "unit_g": 9.34
+      },
+      {
+        "id": "prop",
+        "n": 1,
+        "total_g": 5.96,
+        "unit_g": 5.96
+      },
+      {
+        "id": "battery",
+        "n": 1,
+        "total_g": 110,
+        "unit_g": 110
+      },
+      {
+        "id": "gps",
+        "n": 1,
+        "total_g": 8.0,
+        "unit_g": 8.0
+      },
+      {
+        "id": "receiver",
+        "n": 1,
+        "total_g": 2.2,
+        "unit_g": 2.2
+      },
+      {
+        "id": "camera",
+        "n": 1,
+        "total_g": 2.0,
+        "unit_g": 2.0
+      },
+      {
+        "id": "vtx",
+        "n": 1,
+        "total_g": 2.4,
+        "unit_g": 2.4
+      },
+      {
+        "id": "standoff",
+        "n": 4,
+        "total_g": 5.645,
+        "unit_g": 1.411
+      },
+      {
+        "id": "hardware",
+        "n": 1,
+        "total_g": 14.14,
+        "unit_g": 14.14
+      },
+      {
+        "id": "wiring",
+        "n": 1,
+        "total_g": 12.0,
+        "unit_g": 12.0
+      },
+      {
+        "id": "frame_cut",
+        "n": 1,
+        "total_g": 18.391,
+        "unit_g": 18.391
+      }
+    ],
+    "standoff_each_g": 1.411
+  },
+  "mass_policy": {
+    "battery_uncertainty_g": 5.0,
+    "nominal_reserve_g": 15.0,
+    "reserve_after_battery_uncertainty_g": 10.0
+  },
+  "measured": {
+    "adjacent_motor_spacing_mm": [
+      96.874,
+      96.874,
+      96.874,
+      96.874
+    ],
+    "bottom_bbox_mm": [
+      115.874,
+      115.874,
+      2.01
+    ],
+    "bottom_centroid_mm": [
+      -0.0,
+      -0.0,
+      1.005
+    ],
+    "bottom_is_valid": true,
+    "bottom_sharp_concave_corners": 0,
+    "bottom_solids": 1,
+    "bottom_volume_mm3": 9372.012,
+    "diagonal_motor_spacing_mm": [
+      137.0,
+      137.0
+    ],
+    "m3_hole_count_bottom": 12,
+    "motor_bolt_pcd_counts": {
+      "9": 16
+    },
+    "motor_centres_mm": [
+      [
+        -48.437,
+        -48.437
+      ],
+      [
+        48.437,
+        -48.437
+      ],
+      [
+        48.437,
+        48.437
+      ],
+      [
+        -48.437,
+        48.437
+      ]
+    ],
+    "motor_count": 4,
+    "top_bbox_mm": [
+      61.0,
+      28.0,
+      1.02
+    ],
+    "top_centroid_mm": [
+      -0.0,
+      -0.0,
+      0.51
+    ],
+    "top_is_valid": true,
+    "top_solids": 1,
+    "top_volume_mm3": 1701.467
+  },
+  "parts": [
+    {
+      "component_masses_g": {
+        "esc": 7.2,
+        "fc": 9.6
+      },
+      "esc_burst_a": 45,
+      "esc_burst_s": 5,
+      "esc_continuous_a": 35,
+      "esc_firmware": "BLHeli_S J-H-40",
+      "footprint_mm": [
+        35,
+        35
+      ],
+      "height_mm": 14.2,
+      "id": "stack",
+      "identity": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 8 MB flash; BLS 35A Mini V2 ESC, BLHeli_S J-H-40)",
+      "mass_note": "The maker lists the FC at 9.6 g and the ESC at 7.2 g but the stack at 13.5 g; the parts sum to more than the whole, so the sum (16.8 g) is used until the stack is weighed.",
+      "mount_hole_d_mm": 3.5,
+      "mount_pitch_mm": 20,
+      "order_stage": 1,
+      "price_class": "maker_page",
+      "qty": 1,
+      "role": "Flight controller + 4-in-1 ESC (20x20 stack)",
+      "sources": [
+        {
+          "accessed": "2026-11-14",
+          "class": "maker_page",
+          "supports": "US$64.99 (the page banner still says $59.99); FC 9.6 g, ESC 7.2 g, stack 13.5 g; 32 x 35 x 14.2 mm; 35 A x 4 continuous, 45 A burst (5 s); 20 x 20 mount; 8 MB onboard flash; '4 x UARTs'; UART4 dedicated to Bluetooth, UART5 to ESC telemetry; ESC firmware BLHeli_S J-H-40",
+          "url": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/"
+        },
+        {
+          "accessed": "2026-11-14",
+          "class": "repo",
+          "supports": "INAV target exists: UART1-6 (UART4 routed to BLE), DPS310 baro, blackbox on by default; DShot and ESC sensor defined, nothing for bidirectional DShot",
+          "url": "https://github.com/iNavFlight/inav/blob/940b9281bbefb06b85d442ac5b456c81ae8672c9/src/main/target/SPEEDYBEEF405MINI/target.h"
+        },
+        {
+          "accessed": "2026-11-14",
+          "class": "repo",
+          "supports": "ArduPilot hwdef exists; its README: 8 Mb flash logging, SERIAL4 not usable by ArduPilot, SERIAL5 RX only on the ESC connector, bidirectional DShot on channels 1-4",
+          "url": "https://github.com/ArduPilot/ardupilot/blob/20ed31186c01a551b06d8d29e866aaca8c5387a3/libraries/AP_HAL_ChibiOS/hwdef/SpeedyBeeF405Mini/hwdef.dat"
+        }
+      ],
+      "uart_needs": [
+        "receiver (CRSF)",
+        "GNSS",
+        "VTX SmartAudio/Tramp"
+      ],
+      "uarts_hw": 6,
+      "uarts_reserved": {
+        "UART4": "dedicated to the on-board Bluetooth module (maker page; INAV target.h)",
+        "UART5": "ESC telemetry, RX only on the ESC connector (maker page; ArduPilot README)"
+      },
+      "unit_price_usd": 64.99
+    },
+    {
+      "body_diameter_mm": 17.9,
+      "body_height_mm": 16.6,
+      "id": "motor",
+      "identity": "T-Hobby F1404 KV2900, 4-6S, 9N12P",
+      "mount_bolt": "M2",
+      "mount_note": "Maker drawing dimensionally confirms 9 mm mounting PCD and 1.5 mm prop boss. The 2 mm text specification refers to a different/ambiguous shaft dimension. Measure the actual unit and usable M2 thread depth before machining.",
+      "mount_pcd_default_mm": 9.0,
+      "order_stage": 1,
+      "peak_current_60s_a": 10.45,
+      "qty": 4,
+      "role": "Motor",
+      "sources": [
+        {
+          "accessed": "2026-11-16",
+          "class": "maker_page",
+          "supports": "KV2900 4-6S, 9.34 g with leads, 10.45 A 60-second peak; 4S GF3028-3 bench table; 16.90 USD",
+          "url": "https://www.ligpower.com/product/f1404-fpv-motor.html"
+        },
+        {
+          "accessed": "2026-11-16",
+          "class": "maker_drawing",
+          "sha256": "a5302d0a54590f249c1950563fe6a4454a69940795e1da37a723c2760c6b6820",
+          "supports": "9 mm mounting PCD, four M2 holes; 1.5 mm prop boss; 17.9 mm body diameter and 16.6 mm body length",
+          "url": "https://www.ligpower.com/images/202408/091723192759157166.jpg"
+        }
+      ],
+      "unit_mass_g": 9.34,
+      "unit_price_usd": 16.9
+    },
+    {
+      "diameter_mm": 77.06,
+      "hub_height_mm": 5.5,
+      "hub_height_note": "Maker store dimensional specification. Match the 1.5 mm variant to the actual motor boss.",
+      "id": "prop",
+      "identity": "Gemfan Windancer 3028-3 PMPC3028-3, 1.5 mm T-mount, 2CW+2CCW pack",
+      "mass_note": "1.5 g per prop x 4 props per pack; only one pack is on the aircraft.",
+      "on_aircraft_packs": 1,
+      "order_stage": 1,
+      "qty": 2,
+      "qty_note": "Two 4-packs: one flying set and one spare set.",
+      "role": "Propeller (set of 4, 2CW + 2CCW)",
+      "sources": [
+        {
+          "accessed": "2026-11-16",
+          "class": "maker_page",
+          "supports": "PMPC3028-3; 1.5 mm variant; 1.49 g each; 77.06 mm diameter; 5.5 mm hub; 2.69 USD per four-pack. Maker calls pitch 2.1 inches despite model name 3028; do not infer geometry from the name.",
+          "url": "https://www.gfprops.com/products/gemfan-windancer-3028-3.html"
+        }
+      ],
+      "unit_mass_g": 5.96,
+      "unit_price_usd": 2.69
+    },
+    {
+      "c_burst": 140,
+      "c_continuous": 70,
+      "capacity_mah": 850,
+      "cells": 4,
+      "id": "battery",
+      "identity": "CNHL MiniStar 85704G, 850 mAh 4S 70C LiPo, factory XT60, 12AWG leads",
+      "on_aircraft": 1,
+      "order_stage": 1,
+      "qty": 2,
+      "role": "Battery",
+      "size_mm": [
+        62,
+        33,
+        33
+      ],
+      "sources": [
+        {
+          "accessed": "2026-11-16",
+          "class": "maker_page",
+          "supports": "85704G; 850 mAh, 4S, 70C/140C, factory XT60 and 12AWG leads, approx 110 g. Page gives both 62x30x33 and 62x33x30 mm; use a conservative 62x33x33 envelope. Price uses the displayed 29.98 USD two-pack upper snapshot (warehouse variants differ); checkout and shipping unconfirmed.",
+          "url": "https://chinahobbyline.com/collections/cnhl-softcase-lipo-battery/products/cnhl-ministar-series-850mah-14-8v-4s-70c-lipo-battery-with-xt60-plug"
+        }
+      ],
+      "unit_mass_g": 110,
+      "unit_price_usd": 14.99
+    },
+    {
+      "availability_note": "Replaces the Matek M10Q-5883, which Matek marks end-of-life and GetFPV files under /discontinued/. No listing found marks the BLITZ Mini M10 V2 discontinued, but iFlight's own shop URL returned 404 and RobotShop shows it as 'special order'; WREKD showed it in stock (search extract). Mass: RobotShop and two other retailers say 8 g; one listing says 5.2 g, so 8 g is used. Confirm stock and the compass pinout before ordering. Foxeer M10Q-180 (7.5 g, 18 x 18 x 8 mm) is the fallback, but one retailer marks it discontinued.",
+      "id": "gps",
+      "identity": "iFlight BLITZ Mini M10 GPS V2 (20x20 mm; u-blox M10, QMC5883L compass)",
+      "mount_pitch_mm": 20,
+      "order_stage": 2,
+      "qty": 1,
+      "role": "GNSS + compass",
+      "size_mm": [
+        20,
+        21,
+        6.5
+      ],
+      "sources": [
+        {
+          "accessed": "2026-11-14",
+          "class": "retailer_page",
+          "supports": "8 g, u-blox M10, QMC5883L compass, 20 x 20 mm, US$46.99, availability 'special order'",
+          "url": "https://www.robotshop.com/products/iflight-blitz-mini-m10-gps-v22x20mm"
+        },
+        {
+          "accessed": "2026-11-14",
+          "class": "retailer_search",
+          "supports": "US$47.99, in stock, 20 x 21 x 6.5 mm",
+          "url": "https://wrekd.com/products/iflight-blitz-m10-gps-compass-10th-gen"
+        },
+        {
+          "accessed": "2026-11-14",
+          "class": "retailer_search",
+          "supports": "the Matek M10Q-5883 previously chosen is filed under discontinued",
+          "url": "https://www.getfpv.com/discontinued/mateksys-m10q-5883-gnss-compass.html"
+        }
+      ],
+      "unit_mass_g": 8.0,
+      "unit_price_usd": 47.99
+    },
+    {
+      "id": "receiver",
+      "identity": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+      "order_stage": 1,
+      "qty": 1,
+      "role": "Radio receiver",
+      "sources": [
+        {
+          "class": "maker_search",
+          "supports": "18.99 USD, 2.2 g with antenna, 5 V",
+          "url": "https://www.radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver"
+        }
+      ],
+      "unit_mass_g": 2.2,
+      "unit_price_usd": 18.99
+    },
+    {
+      "id": "camera",
+      "identity": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+      "order_stage": 1,
+      "qty": 1,
+      "role": "Analog FPV camera",
+      "size_mm": [
+        14,
+        14,
+        14
+      ],
+      "sources": [
+        {
+          "accessed": "2026-11-14",
+          "class": "retailer_page",
+          "supports": "2 g net, 14 x 14 mm (19 x 19 with bracket), 3.7-18 V, US$17.99",
+          "url": "https://flywoo.net/products/caddx-ant-1200tvl-1-8mm-fpv-nano-camera-14x14"
+        }
+      ],
+      "unit_mass_g": 2.0,
+      "unit_price_usd": 17.99
+    },
+    {
+      "id": "vtx",
+      "identity": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+      "order_stage": 1,
+      "qty": 1,
+      "role": "Analog video transmitter",
+      "sources": [
+        {
+          "class": "retailer_search",
+          "supports": "unit net weight 2.4 g (maker figure quoted), 24.99 USD (shown out of stock)",
+          "url": "https://www.getfpv.com/fpv/video-transmitters/5-8ghz/hglrc-zeus-nano-350mw-16mm-20mm-25-5mm-vtx.html"
+        }
+      ],
+      "unit_mass_g": 2.4,
+      "unit_price_usd": 24.99
+    },
+    {
+      "computed_mass": true,
+      "id": "standoff",
+      "identity": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+      "order_stage": 2,
+      "price_class": "assumption",
+      "qty": 4,
+      "role": "Top-plate standoff",
+      "sources": [],
+      "unit_price_usd": 0.5
+    },
+    {
+      "computed_mass": true,
+      "id": "hardware",
+      "identity": "16x M2x5 motor screws; 4x M3 stack screws (length computed); 8x M3x6 standoff screws; 4x M3x5 nylon spacers; 4x M3 nylon lock nuts; 10x200 mm battery strap",
+      "order_stage": 2,
+      "price_class": "assumption",
+      "qty": 1,
+      "role": "Screws, nuts, grommets, battery strap",
+      "sources": [],
+      "unit_price_usd": 12.0
+    },
+    {
+      "id": "wiring",
+      "identity": "12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly",
+      "order_stage": 1,
+      "price_class": "assumption",
+      "qty": 1,
+      "role": "Wiring, XT30 pigtail, low-ESR capacitor, VTX antenna, camera and GPS mounts",
+      "sources": [],
+      "unit_mass_g": 12.0,
+      "unit_price_usd": 6.0
+    },
+    {
+      "computed_mass": true,
+      "id": "frame_cut",
+      "identity": "2.01 mm bottom blank plus 1.02 mm top carbon plate; 16 motor holes post-drilled by a composite machine shop",
+      "order_stage": 2,
+      "price_class": "assumption",
+      "price_note": "Placeholder, not a quote: the 'from $49' figure is not on the cutter's page as of 2026-11-14. Get a quote for the DXFs.",
+      "qty": 1,
+      "role": "Carbon frame plates cut from the generated geometry",
+      "sources": [
+        {
+          "accessed": "2026-11-16",
+          "class": "retailer_page",
+          "supports": "2.01 and 1.02 mm stock; approx 3.2 mm minimum hole and 2x thickness web for the cutting operation. This is a geometry screen, not a quote or cutter acceptance.",
+          "url": "https://sendcutsend.com/materials/carbon-fiber/"
+        }
+      ],
+      "unit_price_usd": 49.0
+    }
+  ],
+  "physical_validation": false,
+  "power": {
+    "battery_continuous_a": 59.5,
+    "bench_total_a": 25.8,
+    "connector_rated_a": 35.0,
+    "connector_rating_conditions": "12AWG, temperature rise below 85 C in maker 2021V1 specification; this is not a promise of acceptable in-aircraft temperature",
+    "design_current_a": 31.244,
+    "design_factor": 1.2,
+    "esc_per_motor_a": 35,
+    "full_pack_voltage_sensitivity_factor": 1.00839,
+    "throttle_limit_relied_on": false,
+    "voltage_adjusted_total_a": 26.037
+  },
+  "power_on_authorized": false,
+  "procurement": {
+    "controller_status": "Maker marks SB-F4MINI-STACK discontinued; retain this exact supported controller only with confirmed existing/dealer stock, do not silently substitute a similarly named board.",
+    "dealer_lead_status": "Listed in stock on 2026-11-16; shipping to the user and physical inventory not confirmed.",
+    "dealer_lead_url": "https://race-drones.com/product/speedybee-f405-mini-bls-35a-20x20-stack/",
+    "maker_url": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/",
+    "purchase_ready": false
+  },
+  "propulsion": {
+    "battery_burst_a": 119.0,
+    "battery_burst_ok_at_full": true,
+    "battery_cont_a": 59.5,
+    "battery_cont_ok_at_full": true,
+    "bench_voltage_v": 16.8,
+    "c_rate_hover": 4.21,
+    "esc_margin_full": 5.49,
+    "fit_exponent": 1.32,
+    "fit_rows_throttle_pct": [
+      50.0,
+      55.0,
+      60.0,
+      65.0,
+      70.0
+    ],
+    "hover_current_a": 3.58,
+    "hover_extrapolation_x": 1.72,
+    "hover_power_per_motor_fit_w": 12.23,
+    "hover_power_per_motor_n15_w": 11.07,
+    "hover_power_per_motor_used_w": 12.23,
+    "hover_rpm_est": 14193,
+    "hover_thrust_per_motor_g": 58.73,
+    "hover_time_min": 11.4,
+    "hover_time_upper_bound_min": 12.5,
+    "ideal_induced_power_per_motor_w": 4.088,
+    "max_current_a": 25.8,
+    "max_rpm": 31327.0,
+    "max_thrust_total_g": 1179.9,
+    "motor_peak_current_table_a": 6.38,
+    "motor_peak_rating_a": 10.45,
+    "overall_efficiency_hover": 0.334,
+    "prop": "GF3028-3",
+    "table_min_thrust_g": 101.14,
+    "throttle_limit_current_a": 25.8,
+    "throttle_limit_pct": 100.0,
+    "throttle_limit_thrust_total_g": 1179.9,
+    "tip_mach": 0.369,
+    "tip_speed_m_s": 126.4,
+    "tw_ratio_full": 5.02,
+    "tw_ratio_limited": 5.02
+  },
+  "revision": "HS-3G-B",
+  "schema": "hardware_splicer.hs3g_revision_results.v1",
+  "source_sha256": {
+    "hs3g_design.py": "b2e78495f30c7416e48efec0f63b6d2d85cdad8b250b9680b6abc867d8f1e77b",
+    "hs3g_frame.py": "812b1a6c5347806687db1420022ca32a50cebe93c23da7bf878dfe1089c2f295",
+    "inputs/parts.json": "3e5be63816eb925c41353e52cda7e4dda2e26a24ce6d580f6787f0ffe8176589",
+    "revision_b/build_package.py": "6b3ec7bd98a3e13e6d26e70c2b12b22e74639e5cbacdd907835b76c1c1e02740",
+    "revision_b/inputs/candidate.json": "e8983fba1d49ad4f500693c0bb2ba9c4451493e8bfd7fcce41704bcf0c18128e",
+    "revision_b/inputs/firmware-lock.json": "7a9f87931da2fcce78f85bf28140a21c4873f7eac56c1d88468c20c905025f1a",
+    "revision_b/inputs/thrust_table.json": "b252b377a0bb691bface220bc2c8b12fbccde152705ef3dcb207ea8d09e28586",
+    "revision_b/verify_package.py": "3be066225903332506c79ef5e27c7337a05a0c32d1b5a851893ba30bb56fb407"
+  },
+  "strap": {
+    "pack_orientation": "crosswise (62 mm side along y)",
+    "pack_side_to_slot_mm": [
+      2.74,
+      1.06
+    ],
+    "pack_spans_strap": true,
+    "pack_x_extent_mm": [
+      -15.66,
+      17.34
+    ],
+    "required_length_mm": 176.02,
+    "slot_fits_strap": true,
+    "slot_inner_edges_x_mm": [
+      -18.4,
+      18.4
+    ],
+    "slot_y_end_mm": 5.5,
+    "slots_outside_pack": true,
+    "specified_length_mm": 200,
+    "strap_clears_stack_spacers": true,
+    "strap_fits_under_esc": true,
+    "strap_gap_under_esc_mm": 3.5,
+    "strap_side_gap_to_stack_spacer_mm": 2.11,
+    "strap_w_mm": 10.0
+  }
+}

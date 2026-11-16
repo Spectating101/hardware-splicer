@@ -1,0 +1,7 @@
+# Preserve native CAD and pinned upstream bytes; review their source and receipts.
+reference/**/*.step -text -diff -whitespace
+reference/**/*.dxf -text -diff -whitespace
+reference/**/*.stl -text
+reference/*.csv -text whitespace=cr-at-eol
+reference/firmware/** -text -whitespace
+reference/firmware/*.hex -diff

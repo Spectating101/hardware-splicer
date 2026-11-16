@@ -5,11 +5,13 @@ specific workflow gap: tool selection -> a bounded software engineering action
 -> independent acceptance -> an evidence-bound human handoff. No LLM result,
 design-rule success or simulated bench automatically authorizes physical work.
 
-The two deliberately different registered routes are:
+The deliberately different registered routes are:
 * SPI_REFERENCE: reproduce the native KiCad/Python parity, ERC, DRC and BOM
   verifier on a staged *copy* of the published SPI design.
 * RC_REPAIR: use existing donor/repair intake; DO NOT invoke the generic
   catalog compiler when the actual donor architecture remains unresolved.
+* HS3G_DRONE: regenerate a sourced drone revision using bounded CAD search,
+  then independently inspect geometry, model, manufacturing and firmware evidence.
 """
 from __future__ import annotations
 
@@ -29,6 +31,7 @@ SPI_ROOT = "hardware/reference_designs/spi_flash_adapter_v1"
 SPLICE_MANIFEST = "examples/splice/manifest.json"
 SPI_ID = "spi_flash_adapter_reference"
 RC_ID = "robot_repair_cafe_s3"
+DRONE_ID = "hs3g_drone_revision_b"
 REGISTERED = {
     SPI_ID: {
         "description": "Independent rebuild/check of the existing SPI adapter",
@@ -39,6 +42,11 @@ REGISTERED = {
         "description": "RC toy donor diagnosis and repair/splice build",
         "route": "existing_splice_intake",
         "source": "examples/intakes/splice_robot_drive_vision_repair_brief.json",
+    },
+    DRONE_ID: {
+        "description": "Revise the existing GPS/FPV drone, regenerate CAD, and verify its candidate package",
+        "route": "native_drone_design_iteration",
+        "source": "examples/drone_proving_ground",
     },
 }
 
@@ -349,6 +357,65 @@ def _repair(run_dir: Path, intake_path: Path, report: dict[str, Any]) -> None:
 
 
 
+def _native_drone(run_dir: Path, source: Path, report: dict[str, Any]) -> None:
+    """Stage the retained project, run its bounded CAD search, then a separate verifier."""
+    stage = run_dir / "source_copy"
+    originals = _registered_source_files(REPO_ROOT, source)
+    before = {p.relative_to(source).as_posix(): _hash(p) for p in originals}
+    for original in originals:
+        target = stage / original.relative_to(source)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(original, target)
+    package = run_dir / "candidate"
+    builder = stage / "revision_b/build_package.py"
+    verifier = stage / "revision_b/verify_package.py"
+    _trace(report, "selection", "HS-3G source-backed revision inputs", "passed",
+           "Reuse the existing drone project, frame engine, mass model and maker data; preserve GPS and FPV.")
+    command = [sys.executable, str(builder), "--out", str(package)]
+    cache = os.environ.get("HS_DRONE_EVIDENCE_CACHE")
+    if cache:
+        command += ["--evidence-cache", str(Path(cache).resolve())]
+    try:
+        built = subprocess.run(command, cwd=stage, capture_output=True, text=True, timeout=240, check=False)
+        _trace(report, "design_iteration", "CadQuery + HS mass/clearance/propulsion engines", "passed" if built.returncode == 0 else "failed",
+               "Measured bounded frame candidates; retained the first design satisfying the fixed constraints.",
+               returncode=built.returncode, stdout=built.stdout[-MAX_STDOUT:], stderr=built.stderr[-MAX_STDOUT:])
+        if built.returncode != 0:
+            report["status"] = "blocked_drone_candidate_generation"
+            report["open_actions"] = ["Resolve the reported native CAD, evidence identity or engineering constraint failure."]
+            return
+        checked = subprocess.run([sys.executable, str(verifier), str(package)], cwd=stage,
+                                 capture_output=True, text=True, timeout=120, check=False)
+        receipt_path = package / "verification.json"
+        receipt = json.loads(receipt_path.read_text()) if receipt_path.is_file() else {}
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        report["status"] = "blocked_drone_tool_execution"
+        report["open_actions"] = [f"Native drone workflow could not complete: {type(exc).__name__}: {str(exc)[-300:]}"]
+        return
+    checks = receipt.get("checks") or {}
+    required = {"native_solids", "cut_blank_dfm", "configured_frame_dimensions", "official_hex_records", "source_identity", "no_physical_authority"}
+    outputs = [p for p in package.rglob("*") if p.is_file() and p != receipt_path]
+    output_hashes = _record_artifacts(outputs, package)
+    required_artifacts = {"results.json", "BOM.csv", "POST_DRILL_COORDINATES.csv",
+                          "cutter_blanks/hs3g_bottom_plate.step", "finished_geometry/hs3g_bottom_plate.step",
+                          "firmware/inav_9.1.0_SPEEDYBEEF405MINI.hex"}
+    staged_unchanged = all(_hash(stage / name) == digest for name, digest in before.items())
+    original_unchanged = all(_hash(source / name) == digest for name, digest in before.items())
+    accepted = (checked.returncode == 0 and receipt.get("engineering_acceptance") is True
+                and required <= set(checks) and all(type(v) is bool and v for v in checks.values())
+                and required_artifacts <= set(output_hashes)
+                and receipt.get("artifact_sha256") == output_hashes and staged_unchanged and original_unchanged
+                and all(receipt.get(k) is False for k in ["purchase_ready", "fabrication_authorized", "power_on_authorized", "flight_authorized"]))
+    _trace(report, "independent_acceptance", "STEP reimport + DXF/STL inspection + pinned firmware/HEX checks", "passed" if accepted else "failed",
+           "Separate verifier reread produced artifacts and bound its result to their hashes; physical work remains unverified.",
+           returncode=checked.returncode, source_unchanged=staged_unchanged and original_unchanged,
+           failed_checks=receipt.get("failed_checks"), stdout=checked.stdout[-MAX_STDOUT:], stderr=checked.stderr[-MAX_STDOUT:])
+    report["engineering_acceptance"] = accepted
+    report["status"] = "verified_candidate_design_only_physical_blocked" if accepted else "blocked_drone_independent_verification"
+    report["open_actions"] = list(receipt.get("open_actions") or ["Resolve the independent verification failure."])
+    report["artifacts_sha256"] = _record_artifacts([p for p in [receipt_path, package / "results.json", package / "BOM.csv", package / "POST_DRILL_COORDINATES.csv"] if p.is_file()], run_dir)
+
+
 def _machine_release(report: Mapping[str, Any]) -> dict[str, Any]:
     """Reuse the canonical HS release authority model, never a custom PASS flag."""
     from .machine_project import (
@@ -360,7 +427,7 @@ def _machine_release(report: Mapping[str, Any]) -> dict[str, Any]:
     evidence = ([EvidenceRef(
         evidence_id="bounded-software-tool-receipt",
         kind="independent native engineering execution",
-        basis="Native KiCad + project verification; no energized physical device",
+        basis="Registered native engineering tools + project verification; no energized physical device",
         ref="HS_OPERATOR_RESULT.json",
         authority=AuthorityState.OBSERVED,
         simulated=False,
@@ -471,6 +538,8 @@ def run_workshop_operator(case_id:str,*,out_dir:str|Path,execute:bool=False,
         _native_spi(output,source,report)
     elif case_id==RC_ID:
         _repair(output,source,report)
+    elif case_id==DRONE_ID:
+        _native_drone(output,source,report)
     else:
         raise AssertionError("unregistered adapter")
     # Final authority is bounded irrespective of internal model/case output.

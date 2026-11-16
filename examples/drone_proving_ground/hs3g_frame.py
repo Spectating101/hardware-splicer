@@ -114,7 +114,7 @@ def motor_bolt_holes(p: dict[str, float] = FRAME) -> list[tuple[float, float, fl
     return out
 
 
-def bottom_plate(p: dict[str, float] = FRAME) -> cq.Workplane:
+def bottom_plate(p: dict[str, float] = FRAME, *, motor_bolts: bool = True) -> cq.Workplane:
     t = p["bottom_t_mm"]
     plate = bottom_outline(p)
     holes: list[tuple[float, float, float]] = []
@@ -123,7 +123,8 @@ def bottom_plate(p: dict[str, float] = FRAME) -> cq.Workplane:
     holes += [(sx * p["standoff_x_mm"], sy * p["standoff_y_mm"], p["standoff_hole_d_mm"])
               for sx in (-1, 1) for sy in (-1, 1)]
     holes += [(mx, my, p["motor_center_hole_d_mm"]) for (mx, my) in motor_positions(p)]
-    holes += motor_bolt_holes(p)
+    if motor_bolts:
+        holes += motor_bolt_holes(p)
     for (hx, hy, d) in holes:
         plate = plate.cut(cq.Workplane("XY").center(hx, hy).circle(d / 2.0).extrude(t))
 

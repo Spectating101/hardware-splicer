@@ -1,0 +1,16 @@
+# HS-3G-B / INAV 9.1.0 SPEEDYBEEF405MINI — review before any hardware use
+# Partial starting configuration, not a flight-ready or tuned profile. No save/arm commands.
+# Assign UART1 serial receiver and UART2 GPS in Configurator; reserve UART4 for BLE.
+set motor_pwm_protocol = DSHOT300
+set motor_poles = 12
+set throttle_scale = 1.0
+set serialrx_provider = CRSF
+set gps_provider = UBLOX
+set battery_capacity_unit = MAH
+set battery_capacity = 850
+set vbat_max_cell_voltage = 420
+set vbat_min_cell_voltage = 330
+set vbat_warning_cell_voltage = 350
+# Confirm battery capacity unit, receiver/GPS ports, QUADX mixer, motor order/direction,
+# compass alignment, failsafe and calibrated current scale before supervised testing.
+# throttle_scale is not a hard motor-output cap; no power check relies on it.

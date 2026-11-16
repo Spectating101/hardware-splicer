@@ -1,0 +1,8 @@
+function,device,connection,status
+main power,factory XT60 battery,XT60 / 12AWG matching lead to ESC BAT+ and BAT-,"verify polarity, soldering, strain relief and temperature before loading"
+receiver,RadioMaster RP1 V2,TX -> RX1; RX -> TX1; 5V and GND,configure UART1 serial RX / CRSF; check actual pad labels
+GNSS,BLITZ Mini M10 GPS V2,TX -> RX2; RX -> TX2; approved module supply and GND,configure UART2 GPS; verify module voltage and padout
+compass,GNSS compass,SDA -> SDA; SCL -> SCL; common GND,I2C1 PB9/PB8; verify orientation and calibration
+VTX control,HGLRC Zeus Nano,reserve UART3 TX3 for supported control protocol,confirm actual VTX protocol; not preconfigured
+reserved,onboard Bluetooth,UART4,do not allocate to another peripheral
+ESC telemetry,ESC connector,UART5 RX,not a spare full-duplex UART

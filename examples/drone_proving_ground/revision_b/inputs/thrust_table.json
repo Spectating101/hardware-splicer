@@ -1,0 +1,120 @@
+{
+  "schema": "hs.drone_proving_ground.thrust_table.v1",
+  "motor": "T-Hobby F1404 KV2900",
+  "source": "https://www.ligpower.com/product/f1404-fpv-motor.html",
+  "source_class": "maker_page",
+  "accessed": "2026-11-16",
+  "note": "4S GF3028-3 rows parsed from maker HTML, 24 C ambient; maker reports motor surface temperature after a one-minute full-command bench run, not indefinite thermal qualification.",
+  "columns": [
+    "throttle_pct",
+    "thrust_g",
+    "voltage_v",
+    "current_a",
+    "rpm",
+    "power_w",
+    "efficiency_g_per_w"
+  ],
+  "props": {
+    "GF3028-3": [
+      [
+        50.0,
+        101.14,
+        16.79,
+        1.49,
+        18626.0,
+        25.02,
+        4.04
+      ],
+      [
+        55.0,
+        116.37,
+        16.78,
+        1.81,
+        20037.0,
+        30.37,
+        3.83
+      ],
+      [
+        60.0,
+        133.92,
+        16.78,
+        2.16,
+        21386.0,
+        36.24,
+        3.69
+      ],
+      [
+        65.0,
+        152.76,
+        16.78,
+        2.55,
+        22764.0,
+        42.79,
+        3.57
+      ],
+      [
+        70.0,
+        170.61,
+        16.78,
+        3.0,
+        24257.0,
+        50.34,
+        3.39
+      ],
+      [
+        75.0,
+        188.96,
+        16.77,
+        3.45,
+        25447.0,
+        57.86,
+        3.27
+      ],
+      [
+        80.0,
+        209.26,
+        16.76,
+        3.93,
+        26608.0,
+        65.87,
+        3.18
+      ],
+      [
+        85.0,
+        230.6,
+        16.76,
+        4.49,
+        27892.0,
+        75.25,
+        3.06
+      ],
+      [
+        90.0,
+        253.06,
+        16.75,
+        5.1,
+        29113.0,
+        85.43,
+        2.96
+      ],
+      [
+        95.0,
+        276.26,
+        16.74,
+        5.78,
+        30312.0,
+        96.76,
+        2.86
+      ],
+      [
+        100.0,
+        294.98,
+        16.73,
+        6.38,
+        31327.0,
+        106.74,
+        2.76
+      ]
+    ]
+  }
+}
