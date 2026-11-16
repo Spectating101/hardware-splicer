@@ -1,0 +1,80 @@
+{
+  "schema_version": "hardware_splicer.aerial_product_request.v1",
+  "controller": {
+    "manufacturer": "BETAFPV",
+    "model": "Matrix 1S 5IN1",
+    "cells": 1,
+    "esc_current_a": 5,
+    "fc_mount_pitch_mm": 26,
+    "motor_connector": "JST1.25",
+    "battery_connector": "BT2.0",
+    "rx": "ELRS 2.4GHz",
+    "source": "https://betafpv.com/products/matrix-1s-brushless-flight-controller"
+  },
+  "motor_mount": {
+    "bolt_count": 3,
+    "bolt_pcd_mm": 6.6,
+    "bolt_size": "M1.4"
+  },
+  "hardware_purchased": false,
+  "hardware_printed": false,
+  "hardware_tested": false,
+  "airframe_origin": "NEW_HS_MECHA_SPLICER_CSG",
+  "source_reused_airframe": false,
+  "product_id": "HS-WHOOP65-NATIVE-ORIGINAL",
+  "goal": "Design/build a new, guarded 65mm 1S quad with an HS-generated printable airframe and 31mm propellers",
+  "dimensions": {
+    "wheelbase_mm": 65,
+    "prop_diameter_mm": 31,
+    "fc_mount_pitch_mm": 26,
+    "motor_bolt_pcd_mm": 6.6,
+    "motor_bolt_hole_d_mm": 1.6,
+    "motor_wire_hole_d_mm": 2.9,
+    "motor_plate_diameter_mm": 11.5,
+    "fc_mount_hole_d_mm": 2,
+    "fc_boss_diameter_mm": 6,
+    "prop_radial_clearance_mm": 0.8,
+    "duct_wall_mm": 1.2,
+    "duct_height_mm": 16,
+    "plate_thickness_mm": 2.2,
+    "strut_width_mm": 2.6,
+    "battery_w_mm": 11.9,
+    "battery_h_mm": 7,
+    "battery_l_mm": 27,
+    "battery_clearance_mm": 0.5,
+    "battery_cradle_wall_mm": 1.2
+  },
+  "motor": {
+    "model": "GTS V3 0702 27000KV",
+    "manufacturer": "RCinPower",
+    "quantity": 4,
+    "kv": 27000,
+    "cells": 1,
+    "mount_pcd_mm": 6.6,
+    "shaft_mm": 1,
+    "max_current_a": 4.2,
+    "source": "https://aeroflow.in/products/rcinpower-gts-v3-0702-micro-motor"
+  },
+  "propeller": {
+    "name": "Gemfan 1210-2 31mm",
+    "diameter_mm": 31,
+    "shaft_mm": 1,
+    "source": "https://betafpv.com/products/0702-brushless-motors"
+  },
+  "battery": {
+    "cells": 1,
+    "capacity_mah": 300,
+    "connector": "BT2.0",
+    "dimensions_measured": false,
+    "chemistry": "verify LiHV/LiPo and charger with actual pack"
+  },
+  "radio": "ELRS 2.4GHz receiver with compatible ELRS transmitter",
+  "print_material": "PETG",
+  "print_density_g_cm3": 1.27,
+  "statuses": {
+    "physical_fit": false,
+    "frame_strength": false,
+    "flight_dynamics_calibrated": false,
+    "aircraft_flown": false
+  }
+}

@@ -1,0 +1,1189 @@
+{
+ "schema": "hs.build_vs_buy.v1",
+ "product": "FieldDeck v0: used Advantech AIM8I rugged tablet + keyboard dock + Gigabit Ethernet + isolated RS-485/CAN/DI-DO field I/O",
+ "source_design": "PR #111 (PF-003 Taiwan FieldDeck): donor NT$2,000, target MSRP NT$12,900, modeled COGS NT$6,633 of which 'FieldDock + FieldIO + new parts' is an unpriced NT$2,500 assumption",
+ "captured_utc": "2026-11-06T06:17:33+00:00",
+ "requests": 61,
+ "lines": [
+  {
+   "id": "donor_aim8i",
+   "qty": 1,
+   "role": "build",
+   "spec": "used Advantech AIM8I tablet (condition unknown; #111 assumes 80% usable yield, unmeasured)",
+   "listings_seen": 58,
+   "listings_kept": 3,
+   "dropped": {
+    "title does not name the part": {
+     "count": 53,
+     "examples": [
+      "47000 | 【量大可優惠】研華工控 IPC-610L AImB-785G2/第6、7代i3 i5 i7 CPU/8G/1T",
+      "36000 | 【量大可優惠】研華工控i3-2120/8G/1T AImB-701VG主板5PCI槽IPC-610L上架式主",
+      "38016 | [支援急件]IPC-7120/AImB-701VG/i7-3770/8GB/Windows10 研華還有半年質保"
+     ]
+    },
+    "excluded keyword": {
+     "count": 2,
+     "examples": [
+      "1333 | 現貨下殺！AIM-BAT-10 全新 適用於 研華科技 aim8i電池 2300mAh",
+      "1710 | 金牌推薦～免運～研華科技 aim8i 維修電池 神基 ADHNTECH  AIM-BAT-8 AIM保壹年"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 2000.0,
+    "p25": 2000,
+    "median": 2000
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22516220086521",
+     "title": "二手研華科技工業平板電腦AIM8I (已經恢復原廠設定狀況如圖當銷帳零件品",
+     "price_twd": 2000,
+     "price_range": [
+      2000,
+      2000
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22516220086521/",
+     "pack": 1,
+     "unit_price_twd": 2000.0
+    },
+    {
+     "id": "22516220077352",
+     "title": "二手研華科技工業平板電腦AIM8I (已經恢復原廠設定狀況如圖當銷帳零件品",
+     "price_twd": 2000,
+     "price_range": [
+      2000,
+      2000
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22516220077352/",
+     "pack": 1,
+     "unit_price_twd": 2000.0
+    },
+    {
+     "id": "22515174308648",
+     "title": "二手  研華科技工業平板電腦AIM8I (已經恢復原廠設定狀況如圖當銷帳零件品",
+     "price_twd": 2000,
+     "price_range": [
+      2000,
+      2000
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22515174308648/",
+     "pack": 1,
+     "unit_price_twd": 2000.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "donor_power",
+   "qty": 1,
+   "role": "build",
+   "spec": "power adapter for the donor (write-off listings do not say one is included)",
+   "listings_seen": 0,
+   "listings_kept": 0,
+   "unit_price_twd": {
+    "min": null,
+    "p25": null,
+    "median": null
+   },
+   "with_sales": 0,
+   "cheapest": [],
+   "fixed_price_twd": 350,
+   "fixed_price_basis": "ASSUMED generic adapter allowance; the AIM8I input rating and plug were not checked against a listing"
+  },
+  {
+   "id": "keyboard",
+   "qty": 1,
+   "role": "build",
+   "spec": "compact wired/2.4 GHz keyboard with touchpad for the dock",
+   "listings_seen": 50,
+   "listings_kept": 45,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 5,
+     "examples": [
+      "114 | 【可開統編】迷你USB2.4G無線帶觸控板滑鼠數字鍵盤辦公便攜輕薄電腦鍵盤切換",
+      "87 | 迷你無線鍵鼠 mini I8+ 鍵盤滑鼠 2.4G大觸控板鼠鍵 樹莓派小鍵盤",
+      "67 | mini 2.4G 觸控板 小鍵盤 迷你鍵盤無線 線鍵盤 掌中鍵盤 帶背夜光"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 228.0,
+    "p25": 615,
+    "median": 727
+   },
+   "with_sales": 2,
+   "cheapest": [
+    {
+     "id": "22642936187189",
+     "title": "迷你無線鍵鼠 mini I8+ 鍵盤滑鼠 2.4G大觸控板鼠鍵 樹莓派小鍵盤",
+     "price_twd": 228,
+     "price_range": [
+      228,
+      383
+     ],
+     "sold_qty": 0,
+     "stock": 90,
+     "url": "https://www.ruten.com.tw/item/22642936187189/",
+     "pack": 1,
+     "unit_price_twd": 228.0
+    },
+    {
+     "id": "22640781700940",
+     "title": "【優選】USB無線2.4G鍵盤迷你小鍵盤無線帶觸控板數字鍵盤輕薄便攜",
+     "price_twd": 356,
+     "price_range": [
+      356,
+      356
+     ],
+     "sold_qty": 0,
+     "stock": 198,
+     "url": "https://www.ruten.com.tw/item/22640781700940/",
+     "pack": 1,
+     "unit_price_twd": 356.0
+    },
+    {
+     "id": "22635486797065",
+     "title": "雙模藍牙無線鍵鼠mini迷你鍵盤滑鼠組觸控板小型2.4g可充電遙控",
+     "price_twd": 396,
+     "price_range": [
+      396,
+      396
+     ],
+     "sold_qty": 0,
+     "stock": 1000,
+     "url": "https://www.ruten.com.tw/item/22635486797065/",
+     "pack": 1,
+     "unit_price_twd": 396.0
+    },
+    {
+     "id": "22640793518265",
+     "title": "【可議價】迷你鍵盤無線藍牙2.4G雙模觸控板鍵鼠一體套裝手機便攜小鍵盤",
+     "price_twd": 482,
+     "price_range": [
+      482,
+      482
+     ],
+     "sold_qty": 0,
+     "stock": 99,
+     "url": "https://www.ruten.com.tw/item/22640793518265/",
+     "pack": 1,
+     "unit_price_twd": 482.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "gbe_usb3",
+   "qty": 1,
+   "role": "build",
+   "spec": "USB 3.0 Gigabit Ethernet adapter (the AIM8I has no RJ45; a laptop or Toughbook does)",
+   "listings_seen": 80,
+   "listings_kept": 66,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 7,
+     "examples": [
+      "99380 | 【樺仔3C】新品 Belkin USB3.0千兆網卡 USB 3.0 轉 Gigabit 乙太網路轉接器 B2B048",
+      "99380 | 【樺仔3C】新品 Belkin USB3.0千兆網卡 USB 3.0 轉 Gigabit 乙太網路轉接器 B2B048",
+      "99380 | 【樺仔3C】新品 Belkin USB3.0千兆網卡 USB 3.0 轉 Gigabit 乙太網路轉接器 B2B048"
+     ]
+    },
+    "masked price": {
+     "count": 1,
+     "examples": [
+      "949998 | PYCUHC3TypeC轉1GRJ453埠USB3.0集線器HUB乙太網陸有線網卡Gigabit"
+     ]
+    },
+    "title does not name the part": {
+     "count": 5,
+     "examples": [
+      "945 | [含稅]高速USB Ethernet 轉Gigabit 3.0 RJ45介面1000M網卡轉接線",
+      "503 | 【現貨秒發】type-c轉rj45千兆以太網拓展塢免驅千兆網口usb網卡3.0hub分線器",
+      "926 | 【好康免運】威迅網線轉接口usb轉以太網口千兆網卡轉換器USB網卡3.0 HUB rj45"
+     ]
+    },
+    "excluded keyword": {
+     "count": 1,
+     "examples": [
+      "980 | 【好物優選】macbook type c轉RJ45千兆網口/usb 3.0/SD TF讀卡多功能擴展器"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 205.0,
+    "p25": 343,
+    "median": 444
+   },
+   "with_sales": 7,
+   "cheapest": [
+    {
+     "id": "22621742687568",
+     "title": "【良品優選】熱賣usb3.0轉RJ45千兆網卡 Type-c轉3口USB3.0HUB集線 器帶網口",
+     "price_twd": 205,
+     "price_range": [
+      205,
+      675
+     ],
+     "sold_qty": 0,
+     "stock": 891,
+     "url": "https://www.ruten.com.tw/item/22621742687568/",
+     "pack": 1,
+     "unit_price_twd": 205.0
+    },
+    {
+     "id": "22644066277860",
+     "title": "【優選】熱賣usb3.0轉RJ45千兆網絡卡 Type-c轉3口USB3.0HUB集線 器帶網口",
+     "price_twd": 205,
+     "price_range": [
+      205,
+      675
+     ],
+     "sold_qty": 0,
+     "stock": 450,
+     "url": "https://www.ruten.com.tw/item/22644066277860/",
+     "pack": 1,
+     "unit_price_twd": 205.0
+    },
+    {
+     "id": "22626000527147",
+     "title": "【量大可優惠】鋁合金USB3.0轉RJ45千兆網口免驅動手筆記型腦外接擴充件網絡卡  全新貨，質保一年，不接受任何理由的",
+     "price_twd": 250,
+     "price_range": [
+      250,
+      310
+     ],
+     "sold_qty": 0,
+     "stock": 1193,
+     "url": "https://www.ruten.com.tw/item/22626000527147/",
+     "pack": 1,
+     "unit_price_twd": 250.0
+    },
+    {
+     "id": "22638680650657",
+     "title": "【 Net】臺灣現貨 快速發貨 USB3.0千兆網卡 轉RJ45 乙太網路 Gigabit 瑞昱 RTL8153",
+     "price_twd": 258,
+     "price_range": [
+      258,
+      258
+     ],
+     "sold_qty": 0,
+     "stock": 999,
+     "url": "https://www.ruten.com.tw/item/22638680650657/",
+     "pack": 1,
+     "unit_price_twd": 258.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "usb_hub",
+   "qty": 1,
+   "role": "build",
+   "spec": "USB 3.0 4-port hub inside the dock (the donor exposes one USB 3.0 path through its dock connector)",
+   "listings_seen": 40,
+   "listings_kept": 23,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 12,
+     "examples": [
+      "1025 | 【可開統編】夏普A-4U30M1工業級Usb3.0集線器4埠筆記本桌面擴充套件支援12至24V連接器電源",
+      "1529 | USB3.0集線器 擴展器 4埠HUB 免驅動隨插即用 樹莓派擴展板 高速傳輸 筆電桌機適用",
+      "1477 | USB3.0 集線器 4埠 高速擴充座 筆電配件 鋁合金 分線器 多口HUB 隨插即用 輕巧便攜"
+     ]
+    },
+    "excluded keyword": {
+     "count": 4,
+     "examples": [
+      "565 | USB3.0 集線器 4埠HUB 擴充塢 高速傳輸 供電口 筆電平板 即插即用 熱插拔 輕巧便携",
+      "800 | Type-C轉RJ45 擴充埠 筆電擴充器 USB3.0千兆網卡 4合1 6合1 8合1 多功能集線器 支援雷電四",
+      "792 | Type-C轉RJ45 擴充埠 筆電擴充器 USB3.0千兆網卡 4合1 6合1 8合1 多功能集線器 支援雷電四"
+     ]
+    },
+    "title does not name the part": {
+     "count": 1,
+     "examples": [
+      "948 | 臺灣現貨11合1C形基座Usb集線器3.0紛佩氣多埠適配器4KHDMI相容RJ45SDTF"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 147.0,
+    "p25": 348,
+    "median": 490
+   },
+   "with_sales": 12,
+   "cheapest": [
+    {
+     "id": "22638702048642",
+     "title": "【USB3.0高速4埠分線器HUB集線器筆電擴衝周邊一拖四掇工能擴展器臺灣路添是級權臺罪打得網陸購務",
+     "price_twd": 147,
+     "price_range": [
+      147,
+      315
+     ],
+     "sold_qty": 0,
+     "stock": 3585,
+     "url": "https://www.ruten.com.tw/item/22638702048642/",
+     "pack": 1,
+     "unit_price_twd": 147.0
+    },
+    {
+     "id": "22025719626372",
+     "title": "【DD351】USB3.0 HUB 集線器 4口 集線器4埠 帶LED開關 高速集線器 分配器 擴充器",
+     "price_twd": 195,
+     "price_range": [
+      195,
+      195
+     ],
+     "sold_qty": 28,
+     "stock": 100,
+     "url": "https://www.ruten.com.tw/item/22025719626372/",
+     "pack": 1,
+     "unit_price_twd": 195.0
+    },
+    {
+     "id": "21746331379736",
+     "title": "【MR3C】含稅附發票 DigiFusion 伽利略 PEC-HS080 4埠 USB3.0 HUB集線器",
+     "price_twd": 270,
+     "price_range": [
+      270,
+      270
+     ],
+     "sold_qty": 24,
+     "stock": 44,
+     "url": "https://www.ruten.com.tw/item/21746331379736/",
+     "pack": 1,
+     "unit_price_twd": 270.0
+    },
+    {
+     "id": "22226559135709",
+     "title": "SY-T5340 免驅動 4埠 極速集線器 USB3.0 Hub 獨立開關及指示燈 連接電腦筆電擴充USB接口",
+     "price_twd": 300,
+     "price_range": [
+      300,
+      300
+     ],
+     "sold_qty": 7,
+     "stock": 999,
+     "url": "https://www.ruten.com.tw/item/22226559135709/",
+     "pack": 1,
+     "unit_price_twd": 300.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "dock_print",
+   "qty": 1,
+   "role": "build",
+   "spec": "printed clamshell dock body with hinge and tablet clamp",
+   "listings_seen": 0,
+   "listings_kept": 0,
+   "unit_price_twd": {
+    "min": null,
+    "p25": null,
+    "median": null
+   },
+   "with_sales": 0,
+   "cheapest": [],
+   "fixed_price_twd": 1200,
+   "fixed_price_basis": "ASSUMED: scaled from the NT$526 3DEX quote for the drone frame+cradle (larger part plus hinge hardware); no dock design or quote exists"
+  },
+  {
+   "id": "dock_connector",
+   "qty": 1,
+   "role": "build",
+   "spec": "mating 16-pin dock / 14-pin extension connection (pogo block or cable) and internal wiring",
+   "listings_seen": 0,
+   "listings_kept": 0,
+   "unit_price_twd": {
+    "min": null,
+    "p25": null,
+    "median": null
+   },
+   "with_sales": 0,
+   "cheapest": [],
+   "fixed_price_twd": 300,
+   "fixed_price_basis": "ASSUMED: the AIM8I dock connector part number and pinout are not in hand; #111 lists real pin behaviour as an open gate"
+  },
+  {
+   "id": "rs485_iso",
+   "qty": 2,
+   "role": "shared",
+   "spec": "isolated USB to RS-485 converter (proxy for FieldIO's two isolated RS-485 channels)",
+   "listings_seen": 51,
+   "listings_kept": 29,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 6,
+     "examples": [
+      "4410 | 宇泰UT-868 USB轉8口RS-485 光電隔離轉換器 工業級多串口擴充 高速穩定傳輸 抗干擾防雷擊 工控設備適用",
+      "44 | 工業級usb轉rs485全隔離型TVS防護序列埠資料轉換器模組序列埠通訊",
+      "6300 | 【可開票】原裝I-7561 USB轉RS-232/RS-485/RS-422模組(隔離保護RS-422/485)"
+     ]
+    },
+    "excluded keyword": {
+     "count": 13,
+     "examples": [
+      "1519 | 微雪 FT4232HL 工業級 USB轉RS232 隔離型串口轉換模塊 RS485 RS422 TTL 四通道 附收據",
+      "1459 | 工業級多協議轉換器 USB轉RS232 RS485 TTL 多介面轉換器 板載隔離保護 工業控制 監控設備 高效穩定",
+      "1151 | FT232RNL USB 轉 RS232/485/422/TTL 轉換器 工業級隔離型"
+     ]
+    },
+    "variant listing: lowest variant is probably a different item": {
+     "count": 3,
+     "examples": [
+      "2164 | RS232 RS485轉換器 工業級穩定 串口通訊模組 USB轉串口 隔離型轉換器 監控設備 工控電腦 自動化設備",
+      "2663 | 【可開統編】【4個com口】USB轉4路RS485序列埠通訊轉換器工業級隔離防雷防浪湧  露天市集  全",
+      "2663 | 【可開發票】【4個com口】USB轉4路RS485串口通訊轉換器工業級隔離防雷防浪湧"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 275.0,
+    "p25": 985,
+    "median": 1176
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22638665663665",
+     "title": "適用艾莫迅USB轉RS232/485/422工業級磁隔離轉換器序列埠轉接器通訊模組",
+     "price_twd": 275,
+     "price_range": [
+      275,
+      1958
+     ],
+     "sold_qty": 0,
+     "stock": 7000,
+     "url": "https://www.ruten.com.tw/item/22638665663665/",
+     "pack": 1,
+     "unit_price_twd": 275.0
+    },
+    {
+     "id": "22629108620682",
+     "title": "【滿額免運】H485 隔離型工業級usb轉rs485通訊模塊 TVS防護 短路保護CH340E",
+     "price_twd": 314,
+     "price_range": [
+      314,
+      314
+     ],
+     "sold_qty": 0,
+     "stock": 200,
+     "url": "https://www.ruten.com.tw/item/22629108620682/",
+     "pack": 1,
+     "unit_price_twd": 314.0
+    },
+    {
+     "id": "22545404744551",
+     "title": "【好康免運】工業級USB轉RS485/RS422模塊雙向轉換串口通信原裝FT232RNL帶隔離",
+     "price_twd": 872,
+     "price_range": [
+      872,
+      872
+     ],
+     "sold_qty": 0,
+     "stock": 923,
+     "url": "https://www.ruten.com.tw/item/22545404744551/",
+     "pack": 1,
+     "unit_price_twd": 872.0
+    },
+    {
+     "id": "22640818924310",
+     "title": "USB轉RS485磁耦合3000V隔離轉換器 FT230XS EVC8001",
+     "price_twd": 882,
+     "price_range": [
+      882,
+      882
+     ],
+     "sold_qty": 0,
+     "stock": 999,
+     "url": "https://www.ruten.com.tw/item/22640818924310/",
+     "pack": 1,
+     "unit_price_twd": 882.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "can_usb",
+   "qty": 1,
+   "role": "shared",
+   "spec": "USB to CAN adapter, isolated where listed (proxy for FieldIO's CAN channel)",
+   "listings_seen": 74,
+   "listings_kept": 52,
+   "dropped": {
+    "excluded keyword": {
+     "count": 7,
+     "examples": [
+      "13524 | 周立功USBCAN-II USB轉CAN分析儀 CAN盒 CAN報文分析儀 新能源汽車診斷 原裝正品 附發票",
+      "3971 | 【台灣現貨】USB轉CAN分析儀汽車CAN調試J1939解析USBCAN-I總線通信usbcan卡",
+      "7350 | 【量大價優】PEAK IPEH-002021 USB轉CAN分析儀 德國原裝，拆機件，實物拍攝，成色如圖，功能正常"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 15,
+     "examples": [
+      "9800 | 【可急件】吉陽光can盒Gy8507新能源usb轉can分析儀吉陽can盒usbcan協議盒",
+      "107 | USB轉CAN分析儀調試器公業通訊轉換氣磨組5Kbps-1MBPS寬串列傳輸速",
+      "5281 | USB-CAN-B 工業級CAN匯流排分析儀 USB轉CAN介面轉換器 CAN-bus 雙向傳輸 車載診斷 工程開發"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 276.0,
+    "p25": 531,
+    "median": 719
+   },
+   "with_sales": 3,
+   "cheapest": [
+    {
+     "id": "22629144612751",
+     "title": "usb轉can模塊( tja1051t/3 非隔離版本) can總試助手 can總",
+     "price_twd": 276,
+     "price_range": [
+      276,
+      276
+     ],
+     "sold_qty": 0,
+     "stock": 4709,
+     "url": "https://www.ruten.com.tw/item/22629144612751/",
+     "pack": 1,
+     "unit_price_twd": 276.0
+    },
+    {
+     "id": "22551769014822",
+     "title": "【免運】Makerbase CANable usb轉can模塊 can調試助手can總線分析儀 隔離",
+     "price_twd": 339,
+     "price_range": [
+      339,
+      565
+     ],
+     "sold_qty": 0,
+     "stock": 1890,
+     "url": "https://www.ruten.com.tw/item/22551769014822/",
+     "pack": 1,
+     "unit_price_twd": 339.0
+    },
+    {
+     "id": "22644059898423",
+     "title": "USB-CANV2USB轉CANmodbusCANOpen工業級轉換器CAN分析儀序列埠轉CANTTL",
+     "price_twd": 390,
+     "price_range": [
+      390,
+      390
+     ],
+     "sold_qty": 0,
+     "stock": 141,
+     "url": "https://www.ruten.com.tw/item/22644059898423/",
+     "pack": 1,
+     "unit_price_twd": 390.0
+    },
+    {
+     "id": "22639712492412",
+     "title": "USB-CANV2USB轉CANmodbusCANOpen工業級轉換器CAN分析儀序列埠轉CANTTL",
+     "price_twd": 390,
+     "price_range": [
+      390,
+      390
+     ],
+     "sold_qty": 0,
+     "stock": 92,
+     "url": "https://www.ruten.com.tw/item/22639712492412/",
+     "pack": 1,
+     "unit_price_twd": 390.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "dio_iso",
+   "qty": 1,
+   "role": "shared",
+   "spec": "USB optically isolated digital I/O / relay module (proxy for FieldIO's protected DI/DO)",
+   "listings_seen": 15,
+   "listings_kept": 15,
+   "dropped": {},
+   "unit_price_twd": {
+    "min": 344.0,
+    "p25": 751,
+    "median": 960
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22644050198517",
+     "title": "【咚咚電子】開源繼電器模組USB光耦隔離1路高低電平觸發5V小型控制開關直發熱賣批發廠家",
+     "price_twd": 344,
+     "price_range": [
+      344,
+      344
+     ],
+     "sold_qty": 0,
+     "stock": 192,
+     "url": "https://www.ruten.com.tw/item/22644050198517/",
+     "pack": 1,
+     "unit_price_twd": 344.0
+    },
+    {
+     "id": "22644051821184",
+     "title": "1/2/4/8路USB序列埠控制繼電器 帶光耦隔離繼電器模組 LCUS繼電器",
+     "price_twd": 387,
+     "price_range": [
+      387,
+      1738
+     ],
+     "sold_qty": 0,
+     "stock": 14000,
+     "url": "https://www.ruten.com.tw/item/22644051821184/",
+     "pack": 1,
+     "unit_price_twd": 387.0
+    },
+    {
+     "id": "22633389791283",
+     "title": "USB轉CH340串口繼電器模組 多路控制 1/2/3/4路可選 光耦隔離保護 Type-C接口 工業控制適用",
+     "price_twd": 515,
+     "price_range": [
+      515,
+      906
+     ],
+     "sold_qty": 0,
+     "stock": 4995,
+     "url": "https://www.ruten.com.tw/item/22633389791283/",
+     "pack": 1,
+     "unit_price_twd": 515.0
+    },
+    {
+     "id": "22645101147250",
+     "title": "【品譽優選】 莓派Pico工業級8路繼電器模組 USB通訊5V電源 光耦隔離導軌外殼大量優惠",
+     "price_twd": 751,
+     "price_range": [
+      751,
+      751
+     ],
+     "sold_qty": 0,
+     "stock": 668,
+     "url": "https://www.ruten.com.tw/item/22645101147250/",
+     "pack": 1,
+     "unit_price_twd": 751.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  }
+ ],
+ "buy_alternatives": [
+  {
+   "id": "used Toughbook laptop",
+   "qty": 1,
+   "role": "build",
+   "spec": "used Panasonic Toughbook CF-19/CF-31/CF-54/CF-20 (rugged; CF-19/CF-31/CF-54 have a native RS-232 port)",
+   "listings_seen": 67,
+   "listings_kept": 16,
+   "dropped": {
+    "excluded keyword": {
+     "count": 9,
+     "examples": [
+      "1174 | 【大熊優選】松下/Panasonic TOUGHBOOK CF-19筆記本硬碟架硬碟盒",
+      "2380 | 全球購優惠特價-全新原裝Panasoni松下Toughbook CF19 CF-VZSU48 三防筆記本電池",
+      "1367 | Panasonic 松下 TOUGHBOOK CF-31 CF-30 硬碟盒 硬碟抽取盒 軍規防摔 嚴選品質"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 33,
+     "examples": [
+      "44.11 | NEW Media Cover Market Panasonic Toughbook CF-19ZE001BJ [10.",
+      "1150 | Panasonic Toughbook CF-19 i5 2520M 4GB 240GB Touch Win10 Use",
+      "531.53 | Panasonic TOUGHBOOK CF-19 Laptop Core i5 3320M 8GB RAM 256GB"
+     ]
+    },
+    "masked price": {
+     "count": 9,
+     "examples": [
+      "195540 | Panasonic/松下TOUGHBOOK CF-54C/FZ-55三防筆記型電腦軍工加固",
+      "207530 | 熱賣Panasonic/松下TOUGHBOOK CF-54C/FZ-55三防筆記型電腦軍工加固iphone詢價",
+      "172666 | 【議價】Panasonic/松下TOUGHBOOK CF-54C/FZ-55三防筆記型電腦軍工加固"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 6500.0,
+    "p25": 14237,
+    "median": 15817
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22544301637153",
+     "title": "Panasonic 強固型 PC TOUGHBOOK CF-31 電腦用於半導體/汽修/重機/工業工程/設備編程診斷電腦",
+     "price_twd": 6500,
+     "price_range": [
+      6500,
+      6500
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22544301637153/",
+     "pack": 1,
+     "unit_price_twd": 6500.0
+    },
+    {
+     "id": "22633354052386",
+     "title": "【量大可優惠】Panasonic/松下 CF-31 三防筆記本 腦TOUGHBOOK CF-31 i5 2520，三防筆",
+     "price_twd": 6800,
+     "price_range": [
+      6800,
+      6800
+     ],
+     "sold_qty": 0,
+     "stock": 100,
+     "url": "https://www.ruten.com.tw/item/22633354052386/",
+     "pack": 1,
+     "unit_price_twd": 6800.0
+    },
+    {
+     "id": "22636571038991",
+     "title": "Panasonic/松下 TOUGHBOOK CF-31 win10系統13寸三防工控筆記本",
+     "price_twd": 12836,
+     "price_range": [
+      12836,
+      12836
+     ],
+     "sold_qty": 0,
+     "stock": 900,
+     "url": "https://www.ruten.com.tw/item/22636571038991/",
+     "pack": 1,
+     "unit_price_twd": 12836.0
+    },
+    {
+     "id": "22630185691733",
+     "title": "嚴Panasonic/松下 TOUGHBOOK CF19Z",
+     "price_twd": 13827,
+     "price_range": [
+      13827,
+      13827
+     ],
+     "sold_qty": 0,
+     "stock": 998,
+     "url": "https://www.ruten.com.tw/item/22630185691733/",
+     "pack": 1,
+     "unit_price_twd": 13827.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "used Toughpad tablet",
+   "qty": 1,
+   "role": "build",
+   "spec": "used Panasonic Toughpad FZ-G1/FZ-M1 rugged tablet (closest like-for-like to the AIM8I)",
+   "listings_seen": 49,
+   "listings_kept": 2,
+   "dropped": {
+    "excluded keyword": {
+     "count": 9,
+     "examples": [
+      "4480 | 全球購優惠特價-全新原裝Panasoni松下Toughpad FZ-G1三防平板電池FZ-VZSU84U/84R",
+      "1532 | 【3C驗證】FOR PANASONIC FZ-G1 FZ-VZSU84AU TOUGHPAD AABDXER BAT",
+      "3598 | 適用松下 Toughpad FZ-M1 FZ-B2 FZ-M1C 電池FZ-VZSU95W/VZSU95R"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 38,
+     "examples": [
+      "720 | USB轉航空頭4孔 適用PANASONIC松下FZ-G1 TOUGHPAD平板電腦數據線",
+      "311.66 | Panasonic TOUGHPAD FZ-G1W3000VJ 10.1 Inch Tablet Core i5-730",
+      "44.5 | NEW Media Cover Market Panasonic Toughpad FZ-G1L3021CJ [10.1"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 7500.0,
+    "p25": 7500,
+    "median": 10750
+   },
+   "with_sales": 1,
+   "cheapest": [
+    {
+     "id": "21806674920993",
+     "title": "大人的玩具Panasonic Toughpad FZ-M1 軍規三防平板(I5-4302Y/4G/7吋/120g)SSD",
+     "price_twd": 7500,
+     "price_range": [
+      7500,
+      7500
+     ],
+     "sold_qty": 3,
+     "stock": 4,
+     "url": "https://www.ruten.com.tw/item/21806674920993/",
+     "pack": 1,
+     "unit_price_twd": 7500.0
+    },
+    {
+     "id": "22152593874817",
+     "title": "大人的玩具Panasonic Toughpad FZ-M1 軍規三防平板(I5-7Y57/4G/7吋/120g)SSD",
+     "price_twd": 14000,
+     "price_range": [
+      14000,
+      14000
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22152593874817/",
+     "pack": 1,
+     "unit_price_twd": 14000.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "new IP65 industrial tablet",
+   "qty": 1,
+   "role": "build",
+   "spec": "new 8-10 inch IP65+ rugged Windows/Android tablet (current-market price anchor)",
+   "listings_seen": 40,
+   "listings_kept": 36,
+   "dropped": {
+    "masked price": {
+     "count": 2,
+     "examples": [
+      "105692 | 48h出貨丶騰裕三防工業平板12.2寸高清觸控IP65防護I7高性能處理器平板電腦",
+      "369936 | 【量大價優】東田12.2英寸便攜式加固三防平板IP65長待嘰物流分揀  露天市集  全臺最大的網路購物市集"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 1,
+     "examples": [
+      "88080 | 東田12.2英寸便攜式加固三防平板IP65長待機物流分揀二維碼掃描"
+     ]
+    },
+    "excluded keyword": {
+     "count": 1,
+     "examples": [
+      "3080 | 【人氣爆款】七寸工業三防平板外殼三防IP65工業防摔平板外殼手持終端PDA"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 5374.0,
+    "p25": 13040,
+    "median": 20881
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22638672077943",
+     "title": "【海外之家】億道三防平板電腦12寸膏畫質觸控IP65房護I7高性能處理器平板電腦",
+     "price_twd": 5374,
+     "price_range": [
+      5374,
+      34848
+     ],
+     "sold_qty": 0,
+     "stock": 803,
+     "url": "https://www.ruten.com.tw/item/22638672077943/",
+     "pack": 1,
+     "unit_price_twd": 5374.0
+    },
+    {
+     "id": "22545411998268",
+     "title": "【可開發票】億道三防平板電腦12寸高清觸控IP65防護I7高性能處理器 平板電腦",
+     "price_twd": 5632,
+     "price_range": [
+      5632,
+      72080
+     ],
+     "sold_qty": 0,
+     "stock": 4738,
+     "url": "https://www.ruten.com.tw/item/22545411998268/",
+     "pack": 1,
+     "unit_price_twd": 5632.0
+    },
+    {
+     "id": "22638701270851",
+     "title": "【精品現貨】【免運】三防工業平板電腦8小時長續航IP65級防水防摔爆4G二維碼掃描手持路添是級權抬",
+     "price_twd": 7072,
+     "price_range": [
+      7072,
+      44872
+     ],
+     "sold_qty": 0,
+     "stock": 594,
+     "url": "https://www.ruten.com.tw/item/22638701270851/",
+     "pack": 1,
+     "unit_price_twd": 7072.0
+    },
+    {
+     "id": "22530313216682",
+     "title": "【嚴選好物】三防工業平板電腦8小時長續航IP65級防水防摔爆4G二維碼掃描手持",
+     "price_twd": 7090,
+     "price_range": [
+      7090,
+      44890
+     ],
+     "sold_qty": 0,
+     "stock": 541,
+     "url": "https://www.ruten.com.tw/item/22530313216682/",
+     "pack": 1,
+     "unit_price_twd": 7090.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "used business laptop",
+   "qty": 1,
+   "role": "build",
+   "spec": "used 14-inch i5 8th-gen laptop (functional baseline; has native Ethernet)",
+   "listings_seen": 41,
+   "listings_kept": 14,
+   "dropped": {
+    "excluded keyword": {
+     "count": 25,
+     "examples": [
+      "4014 | 戴爾筆電 二手筆電 i5六代8G 128G固態硬碟 辦公筆電 文書筆電 商務筆電 測試完好 電池待機短",
+      "3973 | 戴爾筆電 二手筆電 i5六代8G 128G固態硬碟 辦公筆電 文書筆電 商務筆電 測試完好 電池待機短",
+      "4987 | 二手華碩ASUS X555L i5五代四核2G獨顯8/240SSD 15.6寸筆電 功能正常電池可儲電."
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 1,
+     "examples": [
+      "40151 | 【三防加固】松下FZ-G2平板電腦 三防平板 軍規平板 工業平板 強固型平板 二手筆電 10代i5 8G+512G GT"
+     ]
+    },
+    "masked price": {
+     "count": 1,
+     "examples": [
+      "997800 | 【樺仔二手電腦】Dell Latitude 3480 Win10系統 I5七代 8G記憶體 14吋商務筆電"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 3200.0,
+    "p25": 5668,
+    "median": 6240
+   },
+   "with_sales": 3,
+   "cheapest": [
+    {
+     "id": "22628068758071",
+     "title": "Lenovo ThinkPad T450 五代 i5-5300U/8G/240G SSD 二手筆電 良品",
+     "price_twd": 3200,
+     "price_range": [
+      3200,
+      3200
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22628068758071/",
+     "pack": 1,
+     "unit_price_twd": 3200.0
+    },
+    {
+     "id": "22410935432892",
+     "title": "[二手良品]聯想筆電Lenovo G50-80 15吋筆電、i5五代、8G記憶體、256G SSD，功能正常，便宜賣！",
+     "price_twd": 4500,
+     "price_range": [
+      4500,
+      4500
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22410935432892/",
+     "pack": 1,
+     "unit_price_twd": 4500.0
+    },
+    {
+     "id": "22504696150415",
+     "title": "[二手良品]聯想筆電Lenovo ideapad 300-15isk 15吋筆電、i5六代、8G記憶體、256G 、獨顯",
+     "price_twd": 5600,
+     "price_range": [
+      5600,
+      5600
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22504696150415/",
+     "pack": 1,
+     "unit_price_twd": 5600.0
+    },
+    {
+     "id": "22543248991379",
+     "title": "A87 UZ3C二手筆電 ACER V3-372 i5 六代四核2.8G/8G/固態256G/13吋 輕薄文書追劇高解析",
+     "price_twd": 5690,
+     "price_range": [
+      5690,
+      5690
+     ],
+     "sold_qty": 0,
+     "stock": 1,
+     "url": "https://www.ruten.com.tw/item/22543248991379/",
+     "pack": 1,
+     "unit_price_twd": 5690.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "GPD MicroPC",
+   "qty": 1,
+   "role": "build",
+   "spec": "x86 handheld with a native RS-232 port and RJ45 (the anchor #111 used)",
+   "listings_seen": 40,
+   "listings_kept": 26,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 13,
+     "examples": [
+      "1116 | 【人氣爆款】AEC4941107-2S1P AES4841105-2S1P適用GPD MicroPC電腦原裝電池",
+      "222 | 新款GPD MicroPC鋼化膜Pocket3/2二代貼膜XD2代保護膜P3MAX筆記本保護膜口袋迷你WIN10貼膜Wi",
+      "42979 | 現貨GPD MicroPC 2代迷你掌上電腦7英寸觸控屏便攜口袋微型筆記本"
+     ]
+    },
+    "excluded keyword": {
+     "count": 1,
+     "examples": [
+      "366 | 云尚優品 GPD MicroPC/win2/win1掌上電腦收納包6寸皮套防摔防水同用保護包"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 11999.0,
+    "p25": 12048,
+    "median": 13796
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22540086805156",
+     "title": "GPD MicroPC迷妳筆記本電腦6英寸工程師超級本微小型Win10遊戲機",
+     "price_twd": 11999,
+     "price_range": [
+      11999,
+      16755
+     ],
+     "sold_qty": 0,
+     "stock": 600,
+     "url": "https://www.ruten.com.tw/item/22540086805156/",
+     "pack": 1,
+     "unit_price_twd": 11999.0
+    },
+    {
+     "id": "22638674097846",
+     "title": "（可開發票）【現貨可開發票】GPD MicroPC迷妳筆記本電腦6英寸工程師超級本微小型in10遊戲機（滿額免運）",
+     "price_twd": 12021,
+     "price_range": [
+      12021,
+      16776
+     ],
+     "sold_qty": 0,
+     "stock": 396,
+     "url": "https://www.ruten.com.tw/item/22638674097846/",
+     "pack": 1,
+     "unit_price_twd": 12021.0
+    },
+    {
+     "id": "22636573022356",
+     "title": "【現貨可開發票】GPD MicroPC迷妳筆記本電腦6英寸工程師超級本微小型Win10遊戲機",
+     "price_twd": 12023,
+     "price_range": [
+      12023,
+      16779
+     ],
+     "sold_qty": 0,
+     "stock": 996,
+     "url": "https://www.ruten.com.tw/item/22636573022356/",
+     "pack": 1,
+     "unit_price_twd": 12023.0
+    },
+    {
+     "id": "22552843669743",
+     "title": "【現貨可開發票】GPD MicroPC迷妳筆記本電腦6英寸工程師超級本微小型Win10遊戲機",
+     "price_twd": 12024,
+     "price_range": [
+      12024,
+      16780
+     ],
+     "sold_qty": 0,
+     "stock": 1993,
+     "url": "https://www.ruten.com.tw/item/22552843669743/",
+     "pack": 1,
+     "unit_price_twd": 12024.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  }
+ ],
+ "comparison": {
+  "build_min_twd": 4430,
+  "build_plus_shared_min_twd": 5600,
+  "build_p25_twd": 5156,
+  "build_plus_shared_p25_twd": 8408,
+  "build_median_twd": 5511,
+  "build_plus_shared_median_twd": 9542,
+  "unpriced_build_lines": [],
+  "shared_lines_excluded_from_both_sides": {
+   "rs485_iso": 2352,
+   "can_usb": 719,
+   "dio_iso": 960
+  },
+  "alternatives": [
+   {
+    "alternative": "used Toughbook laptop",
+    "spec": "used Panasonic Toughbook CF-19/CF-31/CF-54/CF-20 (rugged; CF-19/CF-31/CF-54 have a native RS-232 port)",
+    "buy_p25_twd": 14237,
+    "listings_kept": 16,
+    "build_minus_buy_p25_twd": -9081
+   },
+   {
+    "alternative": "used Toughpad tablet",
+    "spec": "used Panasonic Toughpad FZ-G1/FZ-M1 rugged tablet (closest like-for-like to the AIM8I)",
+    "buy_p25_twd": 7500,
+    "listings_kept": 2,
+    "build_minus_buy_p25_twd": -2344
+   },
+   {
+    "alternative": "new IP65 industrial tablet",
+    "spec": "new 8-10 inch IP65+ rugged Windows/Android tablet (current-market price anchor)",
+    "buy_p25_twd": 13040,
+    "listings_kept": 36,
+    "build_minus_buy_p25_twd": -7884
+   },
+   {
+    "alternative": "used business laptop",
+    "spec": "used 14-inch i5 8th-gen laptop (functional baseline; has native Ethernet)",
+    "buy_p25_twd": 5668,
+    "listings_kept": 14,
+    "build_minus_buy_p25_twd": -512
+   },
+   {
+    "alternative": "GPD MicroPC",
+    "spec": "x86 handheld with a native RS-232 port and RJ45 (the anchor #111 used)",
+    "buy_p25_twd": 12048,
+    "listings_kept": 26,
+    "build_minus_buy_p25_twd": -6892
+   }
+  ]
+ },
+ "boundary": "Ruten asking prices on one day; verify each cheapest listing by hand before buying. Nothing ordered."
+}

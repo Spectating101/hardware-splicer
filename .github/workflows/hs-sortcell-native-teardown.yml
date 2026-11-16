@@ -1,0 +1,116 @@
+name: HS Teardown Sortcell — Real OpenArm CAD Workcell
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/hs-sortcell-native-teardown.yml"
+      - "assets/teardown/hs_sort_workcell_main.js"
+      - "assets/teardown/hs_product_studio.js"
+      - "scripts/prepare_sort_workcell_001.py"
+      - "scripts/verify_sort_workcell_browser_001.mjs"
+      - "scripts/verify_sort_workcell_frontend_001.mjs"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+      - "apps/splice-ui/src/App.jsx"
+      - "apps/splice-ui/src/nav.js"
+      - "apps/splice-ui/src/components/SortingWorkcell*"
+  workflow_dispatch:
+jobs:
+  run-real-source-cad-workcell:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      OPENARM_REV: 0c0852bd76ee7026f97875d6eac789d189a0012a
+      TEARDOWN_REV: a91262ac1109051e014662d42ecb0b7bc1f113b1
+      TEARDOWN_OUT: .cache/hs-sortcell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch original 542-component robot CAD, not a placeholder
+        run: |
+          mkdir -p .cache/hs-original
+          base="https://raw.githubusercontent.com/Utsav92/openarm-3d-cad-assembly/$OPENARM_REV/models"
+          curl --fail --location --silent --show-error --retry 3 "$base/openarm_follower.glb" \
+            --output .cache/hs-original/openarm_follower.glb
+          curl --fail --location --silent --show-error --retry 3 "$base/follower_metadata.json" \
+            --output .cache/hs-original/follower_metadata.json
+          test "$(stat -c%s .cache/hs-original/openarm_follower.glb)" -gt 20000000
+      - name: Prepare source-attributed actual workcell bundle
+        run: |
+          python scripts/prepare_sort_workcell_001.py \
+            --glb .cache/hs-original/openarm_follower.glb \
+            --metadata .cache/hs-original/follower_metadata.json \
+            --out "$TEARDOWN_OUT"
+      - name: Solve official OpenArm URDF with external PyBullet IK and FK
+        run: |
+          python -m pip install --no-input 'pybullet==3.2.7'
+          curl --fail --location --silent --show-error --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            --output .cache/hs-original/openarm_v10.urdf
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/hs-original/openarm_v10.urdf \
+            --output "$TEARDOWN_OUT/source_motion"
+      - name: Build using original Teardown runtime and its native offline HTML packaging
+        run: |
+          git clone --quiet https://github.com/elvarofficial/teardown.git .cache/teardown-upstream
+          git -C .cache/teardown-upstream checkout --quiet --detach "$TEARDOWN_REV"
+          test "$(git -C .cache/teardown-upstream rev-parse HEAD)" = "$TEARDOWN_REV"
+          npm --prefix .cache/teardown-upstream ci --no-audit --no-fund
+          node .cache/teardown-upstream/sims/build.mjs "$TEARDOWN_OUT/machine"
+          test -s "$TEARDOWN_OUT/dist/machine.html"
+          test -s "$TEARDOWN_OUT/dist/robot.glb"
+      - name: Publish source CAD and native Teardown workcell inside existing React app
+        run: |
+          mkdir -p apps/splice-ui/public/sortcell
+          cp "$TEARDOWN_OUT/dist/machine.html" apps/splice-ui/public/sortcell/machine.html
+          cp "$TEARDOWN_OUT/dist/robot.glb" apps/splice-ui/public/sortcell/robot.glb
+          cp "$TEARDOWN_OUT/SOURCE_RECEIPT.json" apps/splice-ui/public/sortcell/manifest.json
+          cp "$TEARDOWN_OUT/source_motion/OPENARM_SOURCE_JOINT_TRAJECTORY.json" \
+            apps/splice-ui/public/sortcell/robot_joint_trajectory.json
+          cp "$TEARDOWN_OUT/ATTRIBUTION.md" apps/splice-ui/public/sortcell/ATTRIBUTION.md
+          npm --prefix apps/splice-ui ci --no-audit --no-fund
+          npm --prefix apps/splice-ui run build
+          test -s apps/splice-ui/dist/sortcell/machine.html
+          test -s apps/splice-ui/dist/sortcell/robot.glb
+          test -s apps/splice-ui/dist/sortcell/robot_joint_trajectory.json
+      - name: Install original Teardown Playwright browser driver
+        run: |
+          cd .cache/teardown-upstream
+          npx playwright install --with-deps chromium
+      - name: Prove full rendered 542-component robot CAD and changing task states
+        run: |
+          mkdir -p "$TEARDOWN_OUT/proof"
+          npm --prefix apps/splice-ui run preview -- --host 127.0.0.1 --port 4173 \
+            > "$TEARDOWN_OUT/VITE_FRONTEND.log" 2>&1 &
+          node scripts/verify_sort_workcell_browser_001.mjs \
+            .cache/teardown-upstream \
+            http://127.0.0.1:4173/sortcell/machine.html \
+            "$TEARDOWN_OUT/proof"
+      - name: Confirm 3D workcell accessible through actual HS React navigation
+        run: |
+          node scripts/verify_sort_workcell_frontend_001.mjs \
+            .cache/teardown-upstream http://127.0.0.1:4173/
+      - name: Preserve source receipts and visible task-phase browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-real-openarm-teardown-sortcell-proof-001
+          path: |
+            .cache/hs-sortcell/SOURCE_RECEIPT.json
+            .cache/hs-sortcell/source_motion/
+            .cache/hs-sortcell/ATTRIBUTION.md
+            .cache/hs-sortcell/proof/
+            .cache/hs-sortcell/VITE_FRONTEND.log
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Deliver real runnable HS frontend with source CAD and Teardown workcell
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-sortcell-s1-runnable-site-001
+          path: apps/splice-ui/dist/
+          retention-days: 30
+          if-no-files-found: error

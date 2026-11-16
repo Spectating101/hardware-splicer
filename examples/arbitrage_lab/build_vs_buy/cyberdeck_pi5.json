@@ -1,0 +1,181 @@
+{
+  "product": "Pi 5 cyberdeck: 7-inch touch, mini keyboard, 2x18650 UPS, printed shell",
+  "source_design": "cyberdeck lane: PR #165 (Pi Zero 2 W + 7-inch costing), PR #111 (AIM8I FieldDeck donor), PR #183 (cyberdeck physics); this is a Pi 5 variant so the comparison is against current handhelds",
+  "scope": "A self-powered Linux handheld terminal. Compared with finished compact Linux/Windows handhelds, a used business laptop (the honest functional baseline) and the #111 rugged-tablet donor.",
+  "lines": [
+    {
+      "id": "pi5_4gb",
+      "qty": 1,
+      "spec": "Raspberry Pi 5 4GB board only",
+      "queries": [
+        "Raspberry Pi 5 4GB",
+        "樹莓派5 4GB"
+      ],
+      "must": "(Pi\\s*5|樹莓派\\s*5|樹莓派5|Raspberry\\s*Pi\\s*5).*4\\s*G|4\\s*G.*(Pi\\s*5|樹莓派\\s*5|樹莓派5)",
+      "exclude": "外殼|殼|散熱|風扇|電源供應|套件|kit|Kit|CM5|Pico|Zero|Pi\\s*4|樹莓派\\s*4|攝像頭|螢幕",
+      "unit_price_band_twd": [
+        1500,
+        3500
+      ]
+    },
+    {
+      "id": "cooler",
+      "qty": 1,
+      "spec": "Pi 5 active cooler",
+      "queries": [
+        "Pi 5 Active Cooler",
+        "樹莓派5 散熱風扇"
+      ],
+      "must": "(Pi\\s*5|樹莓派\\s*5|樹莓派5).*(散熱|風扇|Cooler)|(散熱|風扇|Cooler).*(Pi\\s*5|樹莓派5)",
+      "unit_price_band_twd": [
+        80,
+        600
+      ]
+    },
+    {
+      "id": "microsd_64",
+      "qty": 1,
+      "spec": "64 GB microSD A2 (multi-capacity listings may show the lowest-capacity price: a small underestimate)",
+      "queries": [
+        "64GB microSD A2"
+      ],
+      "must": "64G",
+      "exclude": "讀卡|卡盒|收納",
+      "unit_price_band_twd": [
+        120,
+        700
+      ]
+    },
+    {
+      "id": "screen_7in_touch",
+      "qty": 1,
+      "spec": "7-inch HDMI IPS capacitive touch panel",
+      "queries": [
+        "7吋 HDMI 觸控螢幕",
+        "樹莓派 7吋 觸控螢幕"
+      ],
+      "must": "(7吋|7寸|7英寸|7inch|7\\s*inch).*(觸控|觸摸|touch)|(觸控|觸摸|touch).*(7吋|7寸|7英寸|7inch)",
+      "exclude": "行車|車用|倒車|導航|平板|手機|保護|支架",
+      "unit_price_band_twd": [
+        700,
+        3500
+      ]
+    },
+    {
+      "id": "keyboard",
+      "qty": 1,
+      "spec": "mini 2.4 GHz keyboard with touchpad",
+      "queries": [
+        "迷你鍵盤 觸控板 2.4G"
+      ],
+      "must": "鍵盤.*(觸控板|觸摸板|touchpad)|(觸控板|觸摸板|touchpad).*鍵盤",
+      "exclude": "保護膜|鍵帽|皮套|平板殼",
+      "unit_price_band_twd": [
+        200,
+        1500
+      ]
+    },
+    {
+      "id": "ups_hat",
+      "qty": 1,
+      "spec": "UPS board that names Pi 5 support (5V/5A class); Pi 4 3A boards cannot feed a Pi 5 plus a USB screen",
+      "queries": [
+        "樹莓派 UPS 18650",
+        "Raspberry Pi UPS HAT 18650"
+      ],
+      "must": "UPS.*(Pi\\s*5|樹莓派\\s*5|5B|X12\\d\\d)|(Pi\\s*5|樹莓派\\s*5|5B|X12\\d\\d).*UPS",
+      "unit_price_band_twd": [
+        250,
+        2500
+      ]
+    },
+    {
+      "id": "cells_18650",
+      "qty": 2,
+      "packs": true,
+      "spec": "18650 Li-ion cell, ~3000 mAh, branded",
+      "queries": [
+        "18650 電池 3000mAh"
+      ],
+      "must": "18650",
+      "exclude": "充電器|電池盒|電池座|頭燈|手電筒|風扇",
+      "unit_price_band_twd": [
+        60,
+        450
+      ]
+    },
+    {
+      "id": "shell_print",
+      "qty": 1,
+      "spec": "printed deck shell (~7-inch clamshell)",
+      "fixed_price_twd": 900,
+      "fixed_price_basis": "ASSUMED: scaled from the NT$526 3DEX quote for the drone frame+cradle; no shell design or quote exists yet"
+    },
+    {
+      "id": "cables_misc",
+      "qty": 1,
+      "spec": "micro-HDMI adapter, short USB cables, standoffs",
+      "fixed_price_twd": 250,
+      "fixed_price_basis": "ASSUMED small-parts allowance"
+    }
+  ],
+  "buy_alternatives": [
+    {
+      "id": "ClockworkPi uConsole",
+      "spec": "finished CM4 handheld terminal",
+      "queries": [
+        "uConsole"
+      ],
+      "must": "uConsole",
+      "exclude": "擴展板|擴充板|殼|鍵盤(?!.*主機)|配件|模組",
+      "unit_price_band_twd": [
+        5000,
+        25000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "GPD MicroPC",
+      "spec": "finished x86 handheld PC",
+      "queries": [
+        "GPD MicroPC"
+      ],
+      "must": "MicroPC",
+      "unit_price_band_twd": [
+        5000,
+        35000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "used business laptop",
+      "spec": "used 14-inch i5 8th-gen laptop (functional baseline)",
+      "queries": [
+        "二手 筆電 i5 8代",
+        "中古 筆電 i5-8250U"
+      ],
+      "must": "i5",
+      "exclude": "螢幕|主機板|鍵盤|電池|變壓器|殼|觸控板",
+      "unit_price_band_twd": [
+        2500,
+        15000
+      ],
+      "allow_used": true
+    },
+    {
+      "id": "AIM8I rugged tablet (donor)",
+      "spec": "used Advantech AIM8I, #111's FieldDeck donor",
+      "queries": [
+        "AIM8I",
+        "研華 AIM-8"
+      ],
+      "must": "AIM\\s*-?\\s*8",
+      "unit_price_band_twd": [
+        800,
+        8000
+      ],
+      "allow_used": true,
+      "exclude": "電池|BAT|充電|底座|座充|保護|皮套"
+    }
+  ]
+}

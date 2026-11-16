@@ -77,6 +77,18 @@ export function deriveProjectTruth(session = {}) {
     designState = "unknown";
   }
 
+  const fidelity = session.displayResult?.design_quality_gate?.request_fidelity;
+  const requestMismatch = sessionHasBuild(session) && fidelity?.status === "mismatch";
+  if (requestMismatch) designState = "request_mismatch";
+  const requestDetail = requestMismatch
+    ? (fidelity.missing_parts || [])
+        .map(
+          (row) =>
+            `Design leaves out requested part ${row.module_id}: requested ${row.requested}, design has ${row.in_design} (${(row.names || []).join(", ")}).`,
+        )
+        .join(" ")
+    : "";
+
   const copperTier = pick(dq.copper_tier, gates.copper_tier, agent.copper_tier);
   let copperState = "not_available";
   let copperLabel = "Copper not assessed";
@@ -150,6 +162,10 @@ export function deriveProjectTruth(session = {}) {
     overallState = "needs_design";
     headline = "Design and compile the board";
     nextAction = { label: "Open Design", stage: STAGES.design };
+  } else if (designState === "request_mismatch") {
+    overallState = "needs_verification";
+    headline = "The design leaves out a part you asked for";
+    nextAction = { label: "Open Verify", stage: STAGES.verify };
   } else if (designState === "drc_errors" || designState === "unknown") {
     overallState = "needs_verification";
     headline = "Review design verification before handoff";
@@ -185,10 +201,13 @@ export function deriveProjectTruth(session = {}) {
       state: designState,
       errors,
       warnings,
+      detail: requestDetail,
       label:
         designState === "not_compiled"
           ? "Not compiled"
-          : designState === "drc_errors"
+          : designState === "request_mismatch"
+            ? "Missing requested part"
+            : designState === "drc_errors"
             ? `${errors ?? "?"} DRC error(s)`
             : designState === "drc_clean"
               ? "DRC clean"

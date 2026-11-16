@@ -22,6 +22,9 @@ fi
 if [[ "${INSTALL_DEV:-0}" == "1" ]]; then
   "$PIP" install -e "$ROOT[dev]"
 fi
+if [[ "${INSTALL_CAD:-0}" == "1" ]]; then
+  "$PIP" install -e "$ROOT[cad]"
+fi
 
 echo "==> KiCad build compiler (Node) — required for compile"
 if command -v npm >/dev/null 2>&1; then
@@ -43,4 +46,5 @@ echo ""
 echo "Done. Activate: source $VENV/bin/activate"
 echo "  hs-doctor | hs-serve --port 8787 | hs-mcp"
 echo "  make verify-splice-v1   # developers: INSTALL_DEV=1 before running tests"
+echo "  3D CAD (STEP/STL, hinge and print studies, full test suite): rerun with INSTALL_CAD=1"
 echo "Prerequisites: kicad-cli 9+, Node 18+ — see docs/SETUP.md"

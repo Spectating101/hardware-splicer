@@ -1,0 +1,55 @@
+{
+  "candidates": [
+    {
+      "adapter_id": "signal-akcli-schematic-review",
+      "capability_id": "signal-akcli-schematic-review",
+      "commit_sha": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "discovered_only": false,
+      "discovery_source": "github_repository_search",
+      "executed": true,
+      "license_claim": "MIT",
+      "repository": "tipoLi5890/akcli",
+      "state": "executed_native",
+      "url": "https://github.com/tipoLi5890/akcli"
+    }
+  ],
+  "capability": {
+    "adapter": "akcli_readonly_schematic_check",
+    "compatible_input": true,
+    "diagnostics_file": "akcli_schematic_findings.json",
+    "diagnostics_sha256": "42819f4b5302f170bd9dc7cd964279bc694b449fa1b2e5ba57e0ad9e4bed1f2f",
+    "discovered": true,
+    "electrical_correctness_verified": false,
+    "execution_isolated_from_network": true,
+    "fabrication_authorized": false,
+    "finding_count": 27,
+    "findings": {
+      "info": 6,
+      "note": 5,
+      "warning": 16
+    },
+    "id": "signal-akcli-schematic-review",
+    "input_name": "spi_flash_adapter_v1.kicad_sch",
+    "input_sha256": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "layer": "electrical",
+    "license": "MIT",
+    "license_checked": true,
+    "machine_tested": true,
+    "name": "akcli external schematic analysis",
+    "native_upstream_executed": true,
+    "next_action": "Human review of heuristic diagnostics; no automatic board changes.",
+    "physical_device_connected": false,
+    "pinned_revision": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+    "project_used": true,
+    "read_only_tool_invocation": true,
+    "repository": "tipoLi5890/akcli",
+    "repository_url": "https://github.com/tipoLi5890/akcli",
+    "sandbox_backend": "bwrap",
+    "source": "github_repository_search",
+    "source_pin_checked": true
+  },
+  "discovery_note": "Normalized GitHub search/signal input, not a live GitHub Signals API.",
+  "ok": true,
+  "physical_authority": false,
+  "schema_version": "hardware_splicer.github_signal_capability.v1"
+}

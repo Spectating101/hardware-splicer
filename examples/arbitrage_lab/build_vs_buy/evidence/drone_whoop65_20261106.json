@@ -1,0 +1,1094 @@
+{
+ "schema": "hs.build_vs_buy.v1",
+ "product": "HS Whoop65: 65 mm printed 1S brushless FPV whoop",
+ "source_design": "PR #276 examples/drone_lab/hs_whoop65_build.json (branch feature/hs-first-flyable-microdrone-20261104); build basis vsergeev/3d-parametric-whoop 65mm, CC-BY-4.0",
+ "captured_utc": "2026-11-05T22:35:11+00:00",
+ "requests": 55,
+ "lines": [
+  {
+   "id": "frame_print",
+   "qty": 1,
+   "role": "build",
+   "spec": "printed 65 mm frame + battery cradle, PETG 50%",
+   "listings_seen": 0,
+   "listings_kept": 0,
+   "unit_price_twd": {
+    "min": null,
+    "p25": null,
+    "median": null
+   },
+   "with_sales": 0,
+   "cheapest": [],
+   "fixed_price_twd": 526,
+   "fixed_price_basis": "3DEX browser quote 2026-11-05 from PR #276 QUOTE_ESTIMATE.json (never submitted)"
+  },
+  {
+   "id": "motors",
+   "qty": 4,
+   "role": "build",
+   "spec": "0702 1S brushless, 1 mm shaft (RCinPower GTS V3 0702 27000KV per source build; Happymodel SE0702 23000-26000KV is a same-size substitute)",
+   "listings_seen": 73,
+   "listings_kept": 28,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 34,
+     "examples": [
+      "2505 | 【極速競技】0702無刷馬達 競速無人機 穿越機 無刷電機 30000kv 高轉速馬達 無人機配件",
+      "2147 | VCI 0702PRO-DB 無刷馬達 雙滾珠軸承 高轉速 低阻力 耐撞擊 6S電壓 23000KV 27000KV",
+      "2490 | BETAFPV 0702無刷馬達穿越 無  fpv電 航 配件適配Air65 II"
+     ]
+    },
+    "variant listing: lowest variant is probably a different item": {
+     "count": 10,
+     "examples": [
+      "750 | RCinpower致盈動力GTS V3 0702無刷馬達花飛競速室內穿越機動力1s",
+      "702 | RCinpower致盈動力GTS V3 0702無刷馬達花飛競速室內穿越機動力1s",
+      "830 | 優選 現貨RCinpower致盈動力GTS V3 0702無刷馬達花飛競速室內穿越機動力1s（滿300出貨）"
+     ]
+    },
+    "excluded keyword": {
+     "count": 1,
+     "examples": [
+      "36 | Happymodel SE0702 SE0802 EX0802無刷馬達專用墊圈 C卡簧"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 225.0,
+    "p25": 532,
+    "median": 780
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22630206956854",
+     "title": "【大熊優選】Happymodel SE0702無刷馬達配件 一體化外轉子帶磁鐵 1mm出軸",
+     "price_twd": 225,
+     "price_range": [
+      225,
+      225
+     ],
+     "sold_qty": 0,
+     "stock": 50,
+     "url": "https://www.ruten.com.tw/item/22630206956854/",
+     "pack": 1,
+     "unit_price_twd": 225.0
+    },
+    {
+     "id": "22640812157806",
+     "title": "特價 現貨 Happymodel SE0702無刷馬達配件 一體化外轉子帶磁鐵 1mm出軸自售",
+     "price_twd": 325,
+     "price_range": [
+      325,
+      325
+     ],
+     "sold_qty": 0,
+     "stock": 100,
+     "url": "https://www.ruten.com.tw/item/22640812157806/",
+     "pack": 1,
+     "unit_price_twd": 325.0
+    },
+    {
+     "id": "22639733772315",
+     "title": "Happymodel SE0702 KV23000/260001S一體式外轉子無刷穿越 馬達",
+     "price_twd": 416,
+     "price_range": [
+      416,
+      416
+     ],
+     "sold_qty": 0,
+     "stock": 297,
+     "url": "https://www.ruten.com.tw/item/22639733772315/",
+     "pack": 1,
+     "unit_price_twd": 416.0
+    },
+    {
+     "id": "22639733772258",
+     "title": "Happymodel SE0702 KV23000/260001S一體式外轉子無刷穿越 馬達",
+     "price_twd": 416,
+     "price_range": [
+      416,
+      416
+     ],
+     "sold_qty": 0,
+     "stock": 297,
+     "url": "https://www.ruten.com.tw/item/22639733772258/",
+     "pack": 1,
+     "unit_price_twd": 416.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "fc_esc",
+   "qty": 1,
+   "role": "build",
+   "spec": "BETAFPV Matrix 1S AIO with VTX+ELRS (5IN1). Current listings are the 12A 'II' revision with 3-point mounting: the printed 26x26 frame must be adapted",
+   "listings_seen": 49,
+   "listings_kept": 26,
+   "dropped": {
+    "excluded keyword": {
+     "count": 22,
+     "examples": [
+      "2548 | 【五合一集成】Matrix 1S aio飛控模塊 飛控 電調 FPV 航模 穿越機 無人機配件",
+      "3124 | 【可開統編】BETAFPV Matrix 1S飛控模塊aio飛控五合壹集成電調壹體穿越機配件",
+      "3270 | 【台灣現貨】betafpv matrix 1s飛控模塊aio飛控五合一集成電一體穿越機配件"
+     ]
+    },
+    "title does not name the part": {
+     "count": 1,
+     "examples": [
+      "3428 | 【LT】Matrix 1 43 積架美洲虎雙門轎跑車模型 Jagr XJ-S 198"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 1900.0,
+    "p25": 2746,
+    "median": 3132
+   },
+   "with_sales": 2,
+   "cheapest": [
+    {
+     "id": "22225506595025",
+     "title": "<BETAFPV Matrix 1S無刷飛控板STM32G473>集成12A電調一體 AIO適用大疆O4圖傳 陀螺儀",
+     "price_twd": 1900,
+     "price_range": [
+      1900,
+      1900
+     ],
+     "sold_qty": 2,
+     "stock": 10,
+     "url": "https://www.ruten.com.tw/item/22225506595025/",
+     "pack": 1,
+     "unit_price_twd": 1900.0
+    },
+    {
+     "id": "22630214340467",
+     "title": "BETFPV Matrix 1S飛控三合集成電調aio塊適用疆DJ O4",
+     "price_twd": 2268,
+     "price_range": [
+      2268,
+      2268
+     ],
+     "sold_qty": 0,
+     "stock": 499,
+     "url": "https://www.ruten.com.tw/item/22630214340467/",
+     "pack": 1,
+     "unit_price_twd": 2268.0
+    },
+    {
+     "id": "22628059869917",
+     "title": "BETAFPV Matrix 1S aio V2飛控 組五合一整合電調一體FPV航",
+     "price_twd": 2387,
+     "price_range": [
+      2387,
+      2457
+     ],
+     "sold_qty": 0,
+     "stock": 200,
+     "url": "https://www.ruten.com.tw/item/22628059869917/",
+     "pack": 1,
+     "unit_price_twd": 2387.0
+    },
+    {
+     "id": "22615466570532",
+     "title": "<BETAFPV Matrix 1S無刷飛控板STM32G473>五合一AIO集成12A電調Air ICM42688P ",
+     "price_twd": 2500,
+     "price_range": [
+      2500,
+      2500
+     ],
+     "sold_qty": 1,
+     "stock": 5,
+     "url": "https://www.ruten.com.tw/item/22615466570532/",
+     "pack": 1,
+     "unit_price_twd": 2500.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "props",
+   "qty": 1,
+   "role": "build",
+   "spec": "Gemfan 1210-2 31 mm, 1 mm shaft, matched CW/CCW set",
+   "listings_seen": 68,
+   "listings_kept": 47,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 5,
+     "examples": [
+      "517 | 24小時發貨】Gemfan 幹豐 Tiny Whoop 31MM 1210-2",
+      "479 | 24小時發貨】HQProp 31MMX3-1MM (2正2反)1.2寸三葉槳 室",
+      "517 | 24小時發貨】幹豐GEMF A N 1220 四葉槳 31mm 1mm電機孔徑"
+     ]
+    },
+    "excluded keyword": {
+     "count": 16,
+     "examples": [
+      "36 | 【可開發票】詢價kingkong 1S 空心杯 2-3S無刷 31mm 40mm螺旋槳卸槳器1545 1540槳",
+      "117 | 【小音國際購】幹豐31MM 1219 3葉槳 Mobula6 HD 65mm穿越機 betaFPV槳葉1MM孔",
+      "215 | 【愛拼好貨】Gemfan幹豐 1219S 31mm彩色三葉槳 適用於微型穿越機無 人機1mm孔"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 60.0,
+    "p25": 148,
+    "median": 191
+   },
+   "with_sales": 1,
+   "cheapest": [
+    {
+     "id": "22405737901471",
+     "title": "[史巴克] 乾豐Gemfan 31mm-2 (1210) 31mm二葉槳 超小穿越機槳葉 (4對)",
+     "price_twd": 60,
+     "price_range": [
+      60,
+      60
+     ],
+     "sold_qty": 2,
+     "stock": 15,
+     "url": "https://www.ruten.com.tw/item/22405737901471/",
+     "pack": 1,
+     "unit_price_twd": 60.0
+    },
+    {
+     "id": "22641868655014",
+     "title": "【小音國際購】Gemfan 幹豐 Tiny Whoop 31MM 1210-2 兩葉 無刷馬達 空心杯1MM孔",
+     "price_twd": 117,
+     "price_range": [
+      117,
+      117
+     ],
+     "sold_qty": 0,
+     "stock": 7,
+     "url": "https://www.ruten.com.tw/item/22641868655014/",
+     "pack": 1,
+     "unit_price_twd": 117.0
+    },
+    {
+     "id": "22632297103377",
+     "title": "Gemfan 幹豐 Tiny Whoop 31MM 1210-2 兩葉 無刷馬達 空心杯1MM孔",
+     "price_twd": 117,
+     "price_range": [
+      117,
+      117
+     ],
+     "sold_qty": 0,
+     "stock": 7,
+     "url": "https://www.ruten.com.tw/item/22632297103377/",
+     "pack": 1,
+     "unit_price_twd": 117.0
+    },
+    {
+     "id": "22641868736249",
+     "title": "【小音國際購】幹豐GEMFAN 1220 四葉槳 31mm 1mm電機孔徑 室內穿越機 mobula6",
+     "price_twd": 117,
+     "price_range": [
+      117,
+      117
+     ],
+     "sold_qty": 0,
+     "stock": 24,
+     "url": "https://www.ruten.com.tw/item/22641868736249/",
+     "pack": 1,
+     "unit_price_twd": 117.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "camera",
+   "qty": 1,
+   "role": "build",
+   "spec": "BETAFPV C03 FPV micro camera (fits the source canopy)",
+   "listings_seen": 28,
+   "listings_kept": 21,
+   "dropped": {
+    "title does not name the part": {
+     "count": 6,
+     "examples": [
+      "190 | 【小新嚴選】BETAFPV Micro  Air輕量頂蓋高清數傳C02/03攝像頭無刷穿越機機蓋",
+      "60 | 《炸機王》BETAFPV Micro Air 輕量化機蓋 頭罩 C02/03",
+      "190 | 【現貨～可開發票～免運】BETAFPV Air輕量頂蓋C02/03攝像頭無刷穿越機機蓋配"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 1,
+     "examples": [
+      "166.5 | Ansta Shukou Stage Rannagisa #c03d61"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 270.0,
+    "p25": 620,
+    "median": 797
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22627011404492",
+     "title": "【滿300出貨】BETAFPV Micro 輕量頂蓋FPV高畫質數傳穿越機C02 C03機",
+     "price_twd": 270,
+     "price_range": [
+      270,
+      270
+     ],
+     "sold_qty": 0,
+     "stock": 198,
+     "url": "https://www.ruten.com.tw/item/22627011404492/",
+     "pack": 1,
+     "unit_price_twd": 270.0
+    },
+    {
+     "id": "22627011848843",
+     "title": "【滿300出貨】BETAFPV  II輕量頂蓋適配C02/C03室內1S穿越機圈圈機",
+     "price_twd": 340,
+     "price_range": [
+      340,
+      340
+     ],
+     "sold_qty": 0,
+     "stock": 396,
+     "url": "https://www.ruten.com.tw/item/22627011848843/",
+     "pack": 1,
+     "unit_price_twd": 340.0
+    },
+    {
+     "id": "22645095298811",
+     "title": "BETAFPV C03 2.1mm競速穿越無人機模擬攝像頭用於Meteor自售 諮詢",
+     "price_twd": 467,
+     "price_range": [
+      467,
+      467
+     ],
+     "sold_qty": 0,
+     "stock": 41,
+     "url": "https://www.ruten.com.tw/item/22645095298811/",
+     "pack": 1,
+     "unit_price_twd": 467.0
+    },
+    {
+     "id": "22640776855080",
+     "title": "BETAFPV C03 2.1mm競速穿越無人機模擬攝像頭用於Meteor自售 諮詢",
+     "price_twd": 472,
+     "price_range": [
+      472,
+      472
+     ],
+     "sold_qty": 0,
+     "stock": 200,
+     "url": "https://www.ruten.com.tw/item/22640776855080/",
+     "pack": 1,
+     "unit_price_twd": 472.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "batteries",
+   "qty": 2,
+   "role": "build",
+   "spec": "1S 300 mAh LiHV, BT2.0",
+   "listings_seen": 54,
+   "listings_kept": 35,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 10,
+     "examples": [
+      "640 | 【台灣現貨】betafpv 300mah1s鋰cetus穿越迷你無人30c bt2.0/ph2.0埠",
+      "946 | BETAFPV 6口 電器1S穿越 迷妳高壓鋰電 PH2.0 BT2.0 300mah",
+      "956 | BETAFPV 6口 電器1S穿越 迷妳高壓鋰電 PH2.0 BT2.0 300mah"
+     ]
+    },
+    "excluded keyword": {
+     "count": 8,
+     "examples": [
+      "937 | 【迷你高壓】6口並充充電器 穿越機充電器 1S鋰電池充電器 PH2.0 BT2.0 300mah 電器配件",
+      "928 | 【迷你高壓】6口並充充電器 穿越機充電器 1S鋰電池充電器 PH2.0 BT2.0 300mah 電器配件",
+      "1130 | Betafpv 6端口充電器1S穿越機迷妳高壓電池Ph2.0 Bt2.0 300Mah"
+     ]
+    },
+    "variant listing: lowest variant is probably a different item": {
+     "count": 1,
+     "examples": [
+      "253 | 【淘淘屋】BETAFPV 300/450mAh1S鋰電池Cetus Pro小型穿越機FPV 30C BT2.0"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 181.0,
+    "p25": 200,
+    "median": 253
+   },
+   "with_sales": 1,
+   "cheapest": [
+    {
+     "id": "22640800904049",
+     "title": "格氏Tattu 1S 300mAh 金磚口香糖 高壓鋰電池BT2.0接頭穿越機3.8Viphone",
+     "price_twd": 181,
+     "price_range": [
+      181,
+      181
+     ],
+     "sold_qty": 0,
+     "stock": 200,
+     "url": "https://www.ruten.com.tw/item/22640800904049/",
+     "pack": 1,
+     "unit_price_twd": 181.0
+    },
+    {
+     "id": "22637599115303",
+     "title": "格氏Tattu 1S 300mAh 金磚口香糖 高壓鋰電池BT2.0接頭穿越機3.8Viphone",
+     "price_twd": 181,
+     "price_range": [
+      181,
+      181
+     ],
+     "sold_qty": 0,
+     "stock": 184,
+     "url": "https://www.ruten.com.tw/item/22637599115303/",
+     "pack": 1,
+     "unit_price_twd": 181.0
+    },
+    {
+     "id": "22635518210072",
+     "title": "格氏Tattu 1S 300mAh 金磚口香糖 高壓鋰電池BT2.0接頭穿越機3.8V",
+     "price_twd": 184,
+     "price_range": [
+      184,
+      184
+     ],
+     "sold_qty": 0,
+     "stock": 90,
+     "url": "https://www.ruten.com.tw/item/22635518210072/",
+     "pack": 1,
+     "unit_price_twd": 184.0
+    },
+    {
+     "id": "22635513712164",
+     "title": "BETAFPV 300/450mAh1S Cetus Pro 鋰電池 穿越機 FPV 30C BT2.0",
+     "price_twd": 184,
+     "price_range": [
+      184,
+      224
+     ],
+     "sold_qty": 0,
+     "stock": 400,
+     "url": "https://www.ruten.com.tw/item/22635513712164/",
+     "pack": 1,
+     "unit_price_twd": 184.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "hardware",
+   "qty": 1,
+   "role": "build",
+   "spec": "M1.4 screws/nuts for motors, FC and canopy",
+   "listings_seen": 40,
+   "listings_kept": 30,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 6,
+     "examples": [
+      "11 | 【不囉嗦24H送出】M1.4 M1.6 螺絲 長度2  -20mm 全牙 圓頭內六角 加長螺絲 304不鏽鋼 機械牙",
+      "2 | ⟡全館含稅⟡【請詢價購買】平頭十字m1m1.2m1.4m1.6m1.7*長2~25mm不鏽鋼皿頭十字螺絲 微型螺絲",
+      "10 | 一站採購~鍍鎳十字沉頭螺絲釘評頭螺絲機牙KM機螺釘螺栓M1.2M1.4M1.7M2.5"
+     ]
+    },
+    "excluded keyword": {
+     "count": 2,
+     "examples": [
+      "30 | ⟡全館含稅⟡【螺絲專賣】m1  m1.2 m1.4 m1.6微型螺帽 細小螺帽  航空模型 鐘錶 眼鏡",
+      "10 | ⟡全館含稅⟡【螺絲專賣】m1.2 m1.4 m1.5 m1.7 各尺寸十字螺絲 微型螺絲 PA 鐵板牙 丸頭十字航空模型"
+     ]
+    },
+    "title does not name the part": {
+     "count": 2,
+     "examples": [
+      "10 | ⟡全館含稅⟡【螺絲專賣】黑鋅薄型華司 m1-1.4mm 超窄 超薄 特規 平華司 平墊圈",
+      "27 | 【M1 M2 1.6好品質 1.4 1.2 2.5】304不銹鋼沉頭十字螺絲釘"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 18.0,
+    "p25": 23,
+    "median": 30
+   },
+   "with_sales": 25,
+   "cheapest": [
+    {
+     "id": "22007284142967",
+     "title": "全館含稅【20隻一組】m1.2m1.4 1.6m1.7不鏽鋼平頭十字鐵板牙螺絲KA 不鏽鋼平頭十字自攻牙螺絲 細微 極小",
+     "price_twd": 18,
+     "price_range": [
+      18,
+      20
+     ],
+     "sold_qty": 520,
+     "stock": 16420,
+     "url": "https://www.ruten.com.tw/item/22007284142967/",
+     "pack": 1,
+     "unit_price_twd": 18.0
+    },
+    {
+     "id": "22022626563545",
+     "title": "⟡全館含稅⟡M1.2M1.4 M1.7 各尺寸鐵染黑皿頭十字 電腦小螺絲",
+     "price_twd": 20,
+     "price_range": [
+      20,
+      20
+     ],
+     "sold_qty": 44,
+     "stock": 10144,
+     "url": "https://www.ruten.com.tw/item/22022626563545/",
+     "pack": 1,
+     "unit_price_twd": 20.0
+    },
+    {
+     "id": "22412119786766",
+     "title": "【M1 M1.6 M2 M1.4 M2.5】304不銹鋼十字圓頭機牙螺絲/十字盤頭螺釘",
+     "price_twd": 22,
+     "price_range": [
+      22,
+      55
+     ],
+     "sold_qty": 108,
+     "stock": 29892,
+     "url": "https://www.ruten.com.tw/item/22412119786766/",
+     "pack": 1,
+     "unit_price_twd": 22.0
+    },
+    {
+     "id": "22415291355492",
+     "title": "【 M1-M2.6 】304不鏽鋼十字沉頭平尾自攻螺絲平頭平尾十字螺絲釘木牙自攻螺釘M1.2M1.4M1.7M2M2.",
+     "price_twd": 22,
+     "price_range": [
+      22,
+      44
+     ],
+     "sold_qty": 6,
+     "stock": 29994,
+     "url": "https://www.ruten.com.tw/item/22415291355492/",
+     "pack": 1,
+     "unit_price_twd": 22.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "charger",
+   "qty": 1,
+   "role": "shared",
+   "spec": "1S BT2.0 LiHV charger",
+   "listings_seen": 53,
+   "listings_kept": 30,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 7,
+     "examples": [
+      "1680 | BETAFPV 1S室內穿越機小四軸 高壓電池6路并充BT2.0充電器",
+      "113 | 青蜂號電池專用充電器 CX405充電器 穿越機充電器 BT2.0充電器",
+      "100 | 青蜂號電池專用充電器 CX405充電器 穿越機充電器 BT2.0充電器"
+     ]
+    },
+    "title does not name the part": {
+     "count": 2,
+     "examples": [
+      "1881 | 關芳ISDTE6256通道1S/2.5A穿越機BT/PH2.0鋰電持充電器",
+      "2000 | 【我要曝光】VIFLY三代WhoopStor3充電器BT/PH2.0接口穿越機1S LiPo/LiHV"
+     ]
+    },
+    "excluded keyword": {
+     "count": 14,
+     "examples": [
+      "1676 | 【六路高效】V3充電器 穿越機充電器 1S電池充電器 BT2.0插頭充電器 PH2.0充電器 多路並充 模型專用",
+      "705 | BETAFPV 6口充電器1S穿越機迷你無人機高壓鋰電池PH2.0/BT2.0兼容自售 諮詢",
+      "1277 | 【新品快報】搶先買BETA FPV 6口充電器1S穿越機高壓鋰電池PH2.0/BT2.0兼容 3.7V"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 310.0,
+    "p25": 399,
+    "median": 498
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22644060893509",
+     "title": "SKYRC B6neo充電器1S LiPo 充電擴展模塊適用PH2.0/BT2.0轉接板iPhone18",
+     "price_twd": 310,
+     "price_range": [
+      310,
+      401
+     ],
+     "sold_qty": 0,
+     "stock": 198,
+     "url": "https://www.ruten.com.tw/item/22644060893509/",
+     "pack": 1,
+     "unit_price_twd": 310.0
+    },
+    {
+     "id": "22641868784680",
+     "title": "【小音國際購】1S空心杯無刷鋰電池充電線串聯BT2.0 穿越機B6neo M6 M7 T6充電器",
+     "price_twd": 319,
+     "price_range": [
+      319,
+      439
+     ],
+     "sold_qty": 0,
+     "stock": 600,
+     "url": "https://www.ruten.com.tw/item/22641868784680/",
+     "pack": 1,
+     "unit_price_twd": 319.0
+    },
+    {
+     "id": "22639737218921",
+     "title": "SKYRC B6neo充電器1S LiPo 充電擴展模塊適用PH2.0/BT2.0轉接板",
+     "price_twd": 342,
+     "price_range": [
+      342,
+      441
+     ],
+     "sold_qty": 0,
+     "stock": 198,
+     "url": "https://www.ruten.com.tw/item/22639737218921/",
+     "pack": 1,
+     "unit_price_twd": 342.0
+    },
+    {
+     "id": "22635513161881",
+     "title": "1S PH2.0 BT2.0充電器SKYRC轉接板B6neo/D6PRO/D300/T6/T8/B6/M6D",
+     "price_twd": 344,
+     "price_range": [
+      344,
+      344
+     ],
+     "sold_qty": 0,
+     "stock": 800,
+     "url": "https://www.ruten.com.tw/item/22635513161881/",
+     "pack": 1,
+     "unit_price_twd": 344.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "radio",
+   "qty": 1,
+   "role": "shared",
+   "spec": "RadioMaster Pocket ELRS 2.4 GHz transmitter",
+   "listings_seen": 40,
+   "listings_kept": 35,
+   "dropped": {
+    "unit price N outside band N-N": {
+     "count": 3,
+     "examples": [
+      "1476 | RadioMaster POCKET遙控器fpv穿越機航模口袋遙控 Elrs新品.現.",
+      "1170 | RadioMaster POCKET遙控器霍爾遙桿便攜Elrs協議fpv穿越機航模",
+      "6680 | RadioMaster POCKET遙控器fpv穿越機航模便攜 Elrs協議多協議霍爾"
+     ]
+    },
+    "excluded keyword": {
+     "count": 2,
+     "examples": [
+      "2520 | 【獅子王模型】Radiomaster  POCKET遙控器開源ELRS航模穿越機FPV發射機多協議 CC2500",
+      "2400 | 【飛鷹模型】Radiomaster  POCKET遙控器開源ELRS航模穿越機FPV發射機多協議 CC2500"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 2637.0,
+    "p25": 2990,
+    "median": 2990
+   },
+   "with_sales": 2,
+   "cheapest": [
+    {
+     "id": "22644028363167",
+     "title": "【霍爾搖桿】RadioMaster POCKET遙控器 FPV遙控器 航模遙控器 ELRS協議 多協議遙控器 便攜遙控器",
+     "price_twd": 2637,
+     "price_range": [
+      2637,
+      3284
+     ],
+     "sold_qty": 0,
+     "stock": 3978,
+     "url": "https://www.ruten.com.tw/item/22644028363167/",
+     "pack": 1,
+     "unit_price_twd": 2637.0
+    },
+    {
+     "id": "22516241346073",
+     "title": "Radiomaster POCKET遙控器開源ELRS航模穿越機FPV發射機多協議TBS",
+     "price_twd": 2691,
+     "price_range": [
+      2691,
+      3501
+     ],
+     "sold_qty": 0,
+     "stock": 800,
+     "url": "https://www.ruten.com.tw/item/22516241346073/",
+     "pack": 1,
+     "unit_price_twd": 2691.0
+    },
+    {
+     "id": "22642916677923",
+     "title": "秒發貨 Radiomaster Pocket遙控器 穿越機 無人機足球 ELRS協議 航模 FPV 空拍機",
+     "price_twd": 2699,
+     "price_range": [
+      2699,
+      2699
+     ],
+     "sold_qty": 1,
+     "stock": 3,
+     "url": "https://www.ruten.com.tw/item/22642916677923/",
+     "pack": 1,
+     "unit_price_twd": 2699.0
+    },
+    {
+     "id": "22629115943497",
+     "title": "Radiomaster POCKET遙控器開源ELRS航模穿越機FPV發射機多協議TBS[樂營航模]",
+     "price_twd": 2843,
+     "price_range": [
+      2843,
+      4554
+     ],
+     "sold_qty": 0,
+     "stock": 1400,
+     "url": "https://www.ruten.com.tw/item/22629115943497/",
+     "pack": 1,
+     "unit_price_twd": 2843.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  }
+ ],
+ "buy_alternatives": [
+  {
+   "id": "Meteor65 (BNF)",
+   "qty": 1,
+   "role": "build",
+   "spec": "BETAFPV Meteor65 / Meteor65 Pro 1S brushless whoop, ready to bind (analog only; HD/O4 variants excluded to match the analog build)",
+   "listings_seen": 65,
+   "listings_kept": 9,
+   "dropped": {
+    "excluded keyword": {
+     "count": 45,
+     "examples": [
+      "385 | Meteor65 Pro機架航模FPV無人機配件35mm槳葉機架室內外",
+      "30 | 【可開發票】詢價BETAFPV BT2.0公母端子頭1S鋰電池室內穿越機迷妳無人機Meteor65",
+      "318 | 【可開發票】詢價BETAFPV哈鳴Meteor65 Frame穿越機機架FPV航模65mm機架顏色隨機"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 11,
+     "examples": [
+      "758 | 【銷售冠軍】1s競速穿越0802se 19500kv 無刷電機meteor65 pro",
+      "331 | 【臺灣】betafpv bt2.0公母端子頭1s鋰 穿越機迷妳meteor65",
+      "258 | 【限時下殺】清倉送新版頭殼 BETAFPV Meteor65 ELRS無人機fpv 穿越機 電機1S"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 5370.0,
+    "p25": 6095,
+    "median": 6790
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22644041723588",
+     "title": "全新BETAFPV Meteor65 Pro ELRS遠航室",
+     "price_twd": 5370,
+     "price_range": [
+      5370,
+      5370
+     ],
+     "sold_qty": 0,
+     "stock": 14,
+     "url": "https://www.ruten.com.tw/item/22644041723588/",
+     "pack": 1,
+     "unit_price_twd": 5370.0
+    },
+    {
+     "id": "22642911282627",
+     "title": "新款BETFPV Meteor65PRO無 第一視覺迷你穿越無",
+     "price_twd": 5990,
+     "price_range": [
+      5990,
+      15990
+     ],
+     "sold_qty": 0,
+     "stock": 200,
+     "url": "https://www.ruten.com.tw/item/22642911282627/",
+     "pack": 1,
+     "unit_price_twd": 5990.0
+    },
+    {
+     "id": "22547519835090",
+     "title": "BETAFPV1S迷妳是餒歪空心杯無刷競速穿越無人機Meteor65 Pro ELRS",
+     "price_twd": 6200,
+     "price_range": [
+      6200,
+      8500
+     ],
+     "sold_qty": 0,
+     "stock": 31,
+     "url": "https://www.ruten.com.tw/item/22547519835090/",
+     "pack": 1,
+     "unit_price_twd": 6200.0
+    },
+    {
+     "id": "22517301474321",
+     "title": "BETAFPV1S迷你室內外空心杯無刷競速穿越Meteor65 Pro ELR",
+     "price_twd": 6450,
+     "price_range": [
+      6450,
+      8390
+     ],
+     "sold_qty": 0,
+     "stock": 21,
+     "url": "https://www.ruten.com.tw/item/22517301474321/",
+     "pack": 1,
+     "unit_price_twd": 6450.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "Air65 (BNF)",
+   "qty": 1,
+   "role": "build",
+   "spec": "BETAFPV Air65 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+   "listings_seen": 40,
+   "listings_kept": 5,
+   "dropped": {
+    "excluded keyword": {
+     "count": 21,
+     "examples": [
+      "3308 | BETAFPV Air65 75穿越 FPV無  超輕無刷飛控集成五合壹aio 塊",
+      "2992 | 【客之坊】BETAFPV Air超輕無刷飛控集成電子調速器壹體aio模塊適用Air65/75穿越機",
+      "2835 | 【客之坊】BETAFPV Air超輕無刷飛控集成電調一體aio模塊適用Air65/75穿越機"
+     ]
+    },
+    "title does not name the part": {
+     "count": 14,
+     "examples": [
+      "3267 | 【大熊優選】MAMBA 曼巴MK4 F722 MINI飛塔30A 40A 55A 65A電調適配DJI O3 Air",
+      "3141 | 【淘淘屋】DJI 65W車載充電器DJI Flip/Neo/Avata 2/Air 3S/Mavic 3 Pro配",
+      "3141 | 【淘淘屋】DJI大疆65W車載充電器AVATA 2/Mavic3 Classic無人機Air3原裝配"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 4944.0,
+    "p25": 5302,
+    "median": 5936
+   },
+   "with_sales": 0,
+   "cheapest": [
+    {
+     "id": "22511890921763",
+     "title": "【淘淘屋】BETAFPV Air65無人 機FPV競速輕量化1S無刷入門級65mm圈圈機",
+     "price_twd": 4944,
+     "price_range": [
+      4944,
+      4944
+     ],
+     "sold_qty": 0,
+     "stock": 241,
+     "url": "https://www.ruten.com.tw/item/22511890921763/",
+     "pack": 1,
+     "unit_price_twd": 4944.0
+    },
+    {
+     "id": "22438747221956",
+     "title": "【客之坊】BETAFPV 百達 Air65圈圈機FPV競速輕量化1S無刷入門級65mm小飛機",
+     "price_twd": 5661,
+     "price_range": [
+      5661,
+      5661
+     ],
+     "sold_qty": 0,
+     "stock": 204,
+     "url": "https://www.ruten.com.tw/item/22438747221956/",
+     "pack": 1,
+     "unit_price_twd": 5661.0
+    },
+    {
+     "id": "22511889595050",
+     "title": "【淘淘屋】BETAFPV Air65競速輕量化1S無人 機FPV室內外65mm四軸圈圈機",
+     "price_twd": 5936,
+     "price_range": [
+      5936,
+      5936
+     ],
+     "sold_qty": 0,
+     "stock": 120,
+     "url": "https://www.ruten.com.tw/item/22511889595050/",
+     "pack": 1,
+     "unit_price_twd": 5936.0
+    },
+    {
+     "id": "22439804066352",
+     "title": "【客之坊】BETAFPV Air65穿越機FPV競速輕量化1S無刷入門級65mm圈圈機",
+     "price_twd": 6680,
+     "price_range": [
+      6680,
+      6680
+     ],
+     "sold_qty": 0,
+     "stock": 378,
+     "url": "https://www.ruten.com.tw/item/22439804066352/",
+     "pack": 1,
+     "unit_price_twd": 6680.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  },
+  {
+   "id": "Mobula6 (BNF)",
+   "qty": 1,
+   "role": "build",
+   "spec": "Happymodel Mobula6 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+   "listings_seen": 40,
+   "listings_kept": 9,
+   "dropped": {
+    "excluded keyword": {
+     "count": 28,
+     "examples": [
+      "3258 | 🔥 Crazybee F4 Lite 1s Mobula6 飛控集成圖傳VTX 電調 接收嘰 配【三井航模】",
+      "3192 | Crazybee F4 Lite 1s Mobula6 飛控集成圖傳VTX 電調 接收機 配#航模 配件",
+      "3010 | Crazybee F4 Lite 1s Mobula6穿越機 飛控集成圖傳VTX 電調 接收"
+     ]
+    },
+    "unit price N outside band N-N": {
+     "count": 3,
+     "examples": [
+      "14125 | Mobula6 1S 65MM FPV無刷室內穿越練習機 到手可飛 5.8G DVR錄影 競賽版25000KV",
+      "10820 | mobula6穿越機到手飛TPRO遙控器beta FPV視頻眼鏡1S 65MM迷你5.8G",
+      "9212 | Mobula6 65MM FPV無刷室內穿越機 練習機到手飛 5.8G DVR ELRS 1S 輕巧耐摔 新手入門"
+     ]
+    }
+   },
+   "unit_price_twd": {
+    "min": 2950.0,
+    "p25": 2950,
+    "median": 4811
+   },
+   "with_sales": 2,
+   "cheapest": [
+    {
+     "id": "22302932936393",
+     "title": "Happymodel Mobula6 1S 65MM 5.8G VTX 無刷練習機 ELRS2.0 協議",
+     "price_twd": 2950,
+     "price_range": [
+      2950,
+      2950
+     ],
+     "sold_qty": 1,
+     "stock": 6,
+     "url": "https://www.ruten.com.tw/item/22302932936393/",
+     "pack": 1,
+     "unit_price_twd": 2950.0
+    },
+    {
+     "id": "22232050449643",
+     "title": "DKCK~魔布拉室內四軸機 Happymodel Mobula6 ELRS 2.4GHz  1S 65mm 內附4顆電",
+     "price_twd": 2950,
+     "price_range": [
+      2950,
+      2950
+     ],
+     "sold_qty": 1,
+     "stock": 2,
+     "url": "https://www.ruten.com.tw/item/22232050449643/",
+     "pack": 1,
+     "unit_price_twd": 2950.0
+    },
+    {
+     "id": "22232048365670",
+     "title": "DKCK~魔布拉室內四軸機 Happymodel Mobula6 ELRS 2.4GHz  1S 65mm 內附4顆電",
+     "price_twd": 2950,
+     "price_range": [
+      2950,
+      2950
+     ],
+     "sold_qty": 0,
+     "stock": 2,
+     "url": "https://www.ruten.com.tw/item/22232048365670/",
+     "pack": 1,
+     "unit_price_twd": 2950.0
+    },
+    {
+     "id": "22640782878521",
+     "title": "Happymodel Mobula6 ELRS 2.4G 0",
+     "price_twd": 4312,
+     "price_range": [
+      4312,
+      4312
+     ],
+     "sold_qty": 0,
+     "stock": 805,
+     "url": "https://www.ruten.com.tw/item/22640782878521/",
+     "pack": 1,
+     "unit_price_twd": 4312.0
+    }
+   ],
+   "fixed_price_twd": null,
+   "fixed_price_basis": null
+  }
+ ],
+ "comparison": {
+  "build_min_twd": 4036,
+  "build_p25_twd": 6591,
+  "build_median_twd": 8302,
+  "unpriced_build_lines": [],
+  "shared_lines_excluded_from_both_sides": {
+   "charger": 498,
+   "radio": 2990
+  },
+  "alternatives": [
+   {
+    "alternative": "Meteor65 (BNF)",
+    "spec": "BETAFPV Meteor65 / Meteor65 Pro 1S brushless whoop, ready to bind (analog only; HD/O4 variants excluded to match the analog build)",
+    "buy_p25_twd": 6095,
+    "listings_kept": 9,
+    "build_minus_buy_p25_twd": 496
+   },
+   {
+    "alternative": "Air65 (BNF)",
+    "spec": "BETAFPV Air65 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+    "buy_p25_twd": 5302,
+    "listings_kept": 5,
+    "build_minus_buy_p25_twd": 1289
+   },
+   {
+    "alternative": "Mobula6 (BNF)",
+    "spec": "Happymodel Mobula6 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+    "buy_p25_twd": 2950,
+    "listings_kept": 9,
+    "build_minus_buy_p25_twd": 3641
+   }
+  ]
+ },
+ "boundary": "Ruten asking prices on one day; verify each cheapest listing by hand before buying. Nothing ordered."
+}

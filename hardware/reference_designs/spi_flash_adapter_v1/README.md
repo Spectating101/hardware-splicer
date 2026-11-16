@@ -59,8 +59,12 @@ read-only restriction is an operating procedure, not a hardware command filter.
 Run:
 
 ```bash
-python3 verify_design.py
+/usr/bin/python3 verify_design.py
 ```
+
+Use the Python that KiCad installed its `pcbnew` module for (the system `python3` on
+Debian and Ubuntu). The project virtualenv cannot import `pcbnew`, so
+`.venv/bin/python verify_design.py` stops with `ModuleNotFoundError`.
 
 The verifier fails closed unless all of the following are zero:
 

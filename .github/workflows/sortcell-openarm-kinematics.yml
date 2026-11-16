@@ -1,0 +1,54 @@
+name: HS Sortcell Source-Native PyBullet Kinematics
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sortcell-openarm-kinematics.yml"
+      - "scripts/solve_sortcell_openarm_pybullet_001.py"
+  workflow_dispatch:
+jobs:
+  source-urdf-pybullet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install external PyBullet kinematics engine (no custom IK implementation)
+        run: python -m pip install --no-input 'pybullet==3.2.7'
+      - name: Fetch original official source-version OpenArm v1.0 robot URDF
+        run: |
+          mkdir -p .cache/openarm-source
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+      - name: Solve original 7-DOF OpenArm motion in PyBullet and preserve actual numerical FK/IK
+        run: |
+          python -m scripts.solve_sortcell_openarm_pybullet_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --output .cache/sortcell-kinematics
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path(".cache/sortcell-kinematics/OPENARM_SOURCE_JOINT_TRAJECTORY.json").read_text())
+          assert p["native_robot"]["joint_count"]==25
+          assert p["native_robot"]["movable_joint_count"]>=14
+          assert p["task"]["trajectory_samples"]>=65
+          assert p["task"]["achieved_grasp_to_place_distance_m"]>.1
+          assert max(w["error_m"] for w in p["task"]["reference_waypoints"])<.012
+          assert len(p["workcell_reach_audit"]["targets"])==4
+          assert p["workcell_reach_audit"]["world_to_robot_mount_calibrated"] is False
+          assert all(t["calibrated_workcell_reach_verified"] is False for t in p["workcell_reach_audit"]["targets"])
+          assert p["motion"]["robot_commands_authorized"] is False
+          assert p["task"]["world_space_fixture_registration_verified"] is False
+          print("SOURCE-NATIVE PYBULLET OK:",p["task"]["trajectory_samples"],"frames")
+          PY
+      - name: Attach reusable joint trajectory and traceable engine receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-openarm-official-source-pybullet-joint-trajectory
+          path: |
+            .cache/sortcell-kinematics/
+          retention-days: 30
+          if-no-files-found: warn

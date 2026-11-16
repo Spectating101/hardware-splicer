@@ -1,0 +1,24 @@
+.sw-shell{display:flex;flex-direction:column;gap:17px;padding:18px 0 26px}
+.sw-heading{display:flex;justify-content:space-between;align-items:center;gap:26px;padding:10px 22px}
+.sw-heading h1{font-size:32px;letter-spacing:-.045em;margin:7px 0 10px}
+.sw-heading p{font-size:13px;max-width:840px;line-height:1.65}
+.sw-heading a{flex-shrink:0;border:1px solid #4b8fa5;border-radius:10px;padding:12px 17px;color:#a2ebf6;text-decoration:none;font-size:13px}
+.sw-shell iframe{border:1px solid #416478;border-radius:14px;width:100%;height:min(77vh,830px);min-height:540px;background:#233748}
+.sw-shell footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;padding:0 15px;font-size:11px;color:var(--muted,#94a3b8)}
+.sw-unavailable{min-height:260px;display:grid;align-content:center;text-align:center;border:1px dashed #5b7b91;border-radius:14px;padding:36px}
+.sw-unavailable h2{font-size:19px}.sw-unavailable p{font-size:13px}
+@media(max-width:750px){.sw-heading{display:block}.sw-heading a{display:inline-block;margin-top:14px}.sw-shell iframe{min-height:580px}}
+.sw-motion-evidence{margin:0 18px;padding:18px 22px;border-radius:13px;border:1px solid #416d85;background:linear-gradient(140deg,#122b3c,#143b4c);color:#e7f4fc}
+.sw-motion-evidence h2{font-size:22px;letter-spacing:-.03em;margin:7px 0}
+.sw-motion-evidence p{color:#b9d1e2;font-size:12px;line-height:1.6;max-width:900px}
+.sw-motion-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;align-items:center}
+.sw-motion-stats span{padding:9px 14px;border:1px solid #456779;border-radius:9px;font-size:11px;color:#bdd8e5}
+.sw-motion-stats b{color:#70e5ed;font-size:17px}
+.sw-motion-stats a{font-size:12px;color:#74e4f4;text-decoration:underline;text-underline-offset:3px}
+.sw-motion-evidence .sw-motion-warning{margin-top:16px;color:#f6cc9b}
+
+.sw-motion-targets{margin-top:16px;padding:13px;border:1px solid #527485;border-radius:9px}
+.sw-motion-targets>b{display:block;color:#d9ebf1;font-size:12px;margin-bottom:9px}
+.sw-motion-targets div{display:flex;align-items:center;justify-content:space-between;gap:9px;border-top:1px solid #47647670;padding:8px 0;font-size:11px}
+.sw-motion-targets div span:first-child{text-transform:capitalize}
+.sw-motion-targets strong{color:#f0c18e}

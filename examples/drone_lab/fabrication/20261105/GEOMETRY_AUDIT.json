@@ -1,0 +1,53 @@
+{
+  "stage": "fabrication_quote_preorder_not_manufactured",
+  "date": "2026-11-05",
+  "original_pr": 276,
+  "source_branch": "feature/hs-first-flyable-microdrone-20261104",
+  "design_sha": "67567063eed43cf1623545d424e2052526dc107a",
+  "units": "mm",
+  "STL": {
+    "aerial_frame.stl": {
+      "triangles": 29980,
+      "bbox_mm": [
+        82.962,
+        82.962,
+        16.0
+      ],
+      "volume_cm3": 7.1164,
+      "estimated_solid_PETG_mass_g_1p27": 9.038,
+      "non_2_manifold_edges": 0,
+      "independent_edge_manifold_check": true
+    },
+    "battery_cradle.stl": {
+      "triangles": 92,
+      "bbox_mm": [
+        20.8,
+        23.0,
+        8.7
+      ],
+      "volume_cm3": 0.8657,
+      "estimated_solid_PETG_mass_g_1p27": 1.099,
+      "non_2_manifold_edges": 0,
+      "independent_edge_manifold_check": true
+    }
+  },
+  "files": {
+    "aerial_frame.stl": {
+      "sha256": "d812dea05b71d670561d565db22d3f54409cbafe94d1add78b092f32d3d7cd18",
+      "bytes": 1499084
+    },
+    "battery_cradle.stl": {
+      "sha256": "84c24fbcce9d50a8372b6bf56331cc41da610f7f984702c12b5e0b57b791066a",
+      "bytes": 4684
+    },
+    "aerial_frame.scad": {
+      "sha256": "93c50ce657c379b7ddcf007199cb568232dfdb7434f374d34bf98629356732ee",
+      "bytes": 3104
+    },
+    "battery_cradle.scad": {
+      "sha256": "520e7086875594bb6d9f6e49348d1b9dcbd1557f58b3688a6385eabc3530721e",
+      "bytes": 805
+    }
+  },
+  "verification_limits": "Mesh topology and CAD mass estimates only; not a slice, print, fit, structural, thrust, electrical or flight test."
+}

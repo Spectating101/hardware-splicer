@@ -1,0 +1,647 @@
+{
+  "findings": [
+    {
+      "code": "POWER_GROUND",
+      "message": "1 ground net(s): GND",
+      "refs": [
+        "GND"
+      ],
+      "severity": "info"
+    },
+    {
+      "code": "POWER_RAIL",
+      "message": "rail '1V8' @ ~1.8V (from name): 4 consumer(s): C2, R4, TP3, U3",
+      "refs": [
+        "1V8"
+      ],
+      "severity": "info"
+    },
+    {
+      "code": "POWER_RAIL",
+      "message": "rail '3V3' @ ~3.3V (from name): 7 consumer(s): #FLG03, C1, C3, R1, TP2, U1, U3",
+      "refs": [
+        "3V3"
+      ],
+      "severity": "info"
+    },
+    {
+      "code": "POWER_RAIL",
+      "message": "rail 'DUT_1V8' @ ~1.8V (from name): 12 consumer(s): #FLG04, C4, C5, C6, JP1, R2, R3, R4, R6, TP15, U1, U2",
+      "refs": [
+        "DUT_1V8"
+      ],
+      "severity": "info"
+    },
+    {
+      "code": "POWER_RAIL",
+      "message": "rail 'HOST_3V3' @ ~3.3V (from name): 5 consumer(s): #FLG01, J1, R1, R5, TP1",
+      "refs": [
+        "HOST_3V3"
+      ],
+      "severity": "info"
+    },
+    {
+      "code": "BOM_CLASS_SUMMARY",
+      "message": "bom eligibility: 16 fitted, 2 dnp, 0 external, 18 no-part (no-part excluded from checks)",
+      "refs": [],
+      "severity": "info"
+    },
+    {
+      "code": "BOM_DNP_HAS_ORDER_ID",
+      "message": "R1 is marked DNP but carries an order id (RC0603JR-070RL) \u2014 confirm the intent (stale id, or should it be fitted?)",
+      "pos": [
+        1900.0,
+        1750.0
+      ],
+      "refs": [
+        "R1"
+      ],
+      "severity": "note"
+    },
+    {
+      "code": "BOM_DNP_HAS_ORDER_ID",
+      "message": "R4 is marked DNP but carries an order id (RC0603JR-070RL) \u2014 confirm the intent (stale id, or should it be fitted?)",
+      "pos": [
+        4900.0,
+        1750.0
+      ],
+      "refs": [
+        "R4"
+      ],
+      "severity": "note"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_3V3",
+          "kind": "label",
+          "pos": [
+            1000.0,
+            3550.0
+          ]
+        },
+        {
+          "id": "J1",
+          "kind": "component",
+          "pos": [
+            1400.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_3V3' at (1000,3550) runs over J1 (1400,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        1000.0,
+        3550.0
+      ],
+      "refs": [
+        "HOST_3V3",
+        "J1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_SCLK",
+          "kind": "label",
+          "pos": [
+            1000.0,
+            3750.0
+          ]
+        },
+        {
+          "id": "J1",
+          "kind": "component",
+          "pos": [
+            1400.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_SCLK' at (1000,3750) runs over J1 (1400,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        1000.0,
+        3750.0
+      ],
+      "refs": [
+        "HOST_SCLK",
+        "J1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_MOSI",
+          "kind": "label",
+          "pos": [
+            1000.0,
+            3850.0
+          ]
+        },
+        {
+          "id": "J1",
+          "kind": "component",
+          "pos": [
+            1400.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_MOSI' at (1000,3850) runs over J1 (1400,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        1000.0,
+        3850.0
+      ],
+      "refs": [
+        "HOST_MOSI",
+        "J1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_CS_N",
+          "kind": "label",
+          "pos": [
+            1000.0,
+            3950.0
+          ]
+        },
+        {
+          "id": "J1",
+          "kind": "component",
+          "pos": [
+            1400.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_CS_N' at (1000,3950) runs over J1 (1400,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        1000.0,
+        3950.0
+      ],
+      "refs": [
+        "HOST_CS_N",
+        "J1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_SCLK",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            3450.0
+          ]
+        },
+        {
+          "id": "U1",
+          "kind": "component",
+          "pos": [
+            4150.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_SCLK' at (3550,3450) runs over U1 (4150,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        3550.0,
+        3450.0
+      ],
+      "refs": [
+        "HOST_SCLK",
+        "U1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_MOSI",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            3650.0
+          ]
+        },
+        {
+          "id": "U1",
+          "kind": "component",
+          "pos": [
+            4150.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_MOSI' at (3550,3650) runs over U1 (4150,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        3550.0,
+        3650.0
+      ],
+      "refs": [
+        "HOST_MOSI",
+        "U1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_CS_N",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            3850.0
+          ]
+        },
+        {
+          "id": "U1",
+          "kind": "component",
+          "pos": [
+            4150.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_CS_N' at (3550,3850) runs over U1 (4150,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        3550.0,
+        3850.0
+      ],
+      "refs": [
+        "HOST_CS_N",
+        "U1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_MISO",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            4050.0
+          ]
+        },
+        {
+          "id": "U1",
+          "kind": "component",
+          "pos": [
+            4150.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_MISO' at (3550,4050) runs over U1 (4150,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        3550.0,
+        4050.0
+      ],
+      "refs": [
+        "HOST_MISO",
+        "U1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "TRANSLATOR_OE",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            4350.0
+          ]
+        },
+        {
+          "id": "U1",
+          "kind": "component",
+          "pos": [
+            4150.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'TRANSLATOR_OE' at (3550,4350) runs over U1 (4150,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        3550.0,
+        4350.0
+      ],
+      "refs": [
+        "TRANSLATOR_OE",
+        "U1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "DUT_CS_N",
+          "kind": "label",
+          "pos": [
+            5700.0,
+            3550.0
+          ]
+        },
+        {
+          "id": "U2",
+          "kind": "component",
+          "pos": [
+            6300.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'DUT_CS_N' at (5700,3550) runs over U2 (6300,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        5700.0,
+        3550.0
+      ],
+      "refs": [
+        "DUT_CS_N",
+        "U2"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "DUT_SCLK",
+          "kind": "label",
+          "pos": [
+            5700.0,
+            3750.0
+          ]
+        },
+        {
+          "id": "U2",
+          "kind": "component",
+          "pos": [
+            6300.0,
+            3750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'DUT_SCLK' at (5700,3750) runs over U2 (6300,3750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        5700.0,
+        3750.0
+      ],
+      "refs": [
+        "DUT_SCLK",
+        "U2"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "DUT_1V8",
+          "kind": "label",
+          "pos": [
+            8650.0,
+            5700.0
+          ]
+        },
+        {
+          "id": "JP1",
+          "kind": "component",
+          "pos": [
+            9050.0,
+            5700.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'DUT_1V8' at (8650,5700) runs over JP1 (9050,5700) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        8650.0,
+        5700.0
+      ],
+      "refs": [
+        "DUT_1V8",
+        "JP1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "TRANSLATOR_OE",
+          "kind": "label",
+          "pos": [
+            8650.0,
+            5800.0
+          ]
+        },
+        {
+          "id": "JP1",
+          "kind": "component",
+          "pos": [
+            9050.0,
+            5700.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'TRANSLATOR_OE' at (8650,5800) runs over JP1 (9050,5700) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        8650.0,
+        5800.0
+      ],
+      "refs": [
+        "TRANSLATOR_OE",
+        "JP1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "HOST_3V3",
+          "kind": "label",
+          "pos": [
+            1600.0,
+            1750.0
+          ]
+        },
+        {
+          "id": "R1",
+          "kind": "component",
+          "pos": [
+            1900.0,
+            1750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_SYMBOL",
+      "message": "label 'HOST_3V3' at (1600,1750) runs over R1 (1900,1750) \u2014 reorient it away from the symbol (the writer auto-orients labels anchored on pins) or move it to a wire stub",
+      "pos": [
+        1600.0,
+        1750.0
+      ],
+      "refs": [
+        "HOST_3V3",
+        "R1"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "TRANSLATOR_OE",
+          "kind": "label",
+          "pos": [
+            3550.0,
+            4350.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_WIRE",
+      "message": "label 'TRANSLATOR_OE' at (3550,4350) runs over the wire (3750,4250)-(3750,4350) it is not attached to \u2014 move or reorient the label",
+      "pos": [
+        3550.0,
+        4350.0
+      ],
+      "refs": [
+        "TRANSLATOR_OE"
+      ],
+      "severity": "note"
+    },
+    {
+      "anchors": [
+        {
+          "id": "DUT_IO2_WP_N",
+          "kind": "label",
+          "pos": [
+            7300.0,
+            2900.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_WIRE",
+      "message": "label 'DUT_IO2_WP_N' at (7300,2900) runs over the wire (7850,3100)-(7850,2900) it is not attached to \u2014 move or reorient the label",
+      "pos": [
+        7300.0,
+        2900.0
+      ],
+      "refs": [
+        "DUT_IO2_WP_N"
+      ],
+      "severity": "note"
+    },
+    {
+      "anchors": [
+        {
+          "id": "3V3",
+          "kind": "label",
+          "pos": [
+            2350.0,
+            1750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVER_WIRE",
+      "message": "label '3V3' at (2350,1750) runs over the wire (2650,1750)-(2450,1750) it is not attached to \u2014 move or reorient the label",
+      "pos": [
+        2350.0,
+        1750.0
+      ],
+      "refs": [
+        "3V3"
+      ],
+      "severity": "note"
+    },
+    {
+      "anchors": [
+        {
+          "id": "3V3",
+          "kind": "label",
+          "pos": [
+            2450.0,
+            1750.0
+          ]
+        },
+        {
+          "id": "3V3",
+          "kind": "label",
+          "pos": [
+            2350.0,
+            1750.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVERLAP",
+      "message": "labels '3V3' at (2450,1750) and '3V3' at (2350,1750) overlap \u2014 separate them or shorten the text",
+      "pos": [
+        2450.0,
+        1750.0
+      ],
+      "refs": [
+        "3V3",
+        "3V3"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchors": [
+        {
+          "id": "DUT_IO2_WP_N",
+          "kind": "label",
+          "pos": [
+            7300.0,
+            2900.0
+          ]
+        },
+        {
+          "id": "DUT_IO3_HOLD_N",
+          "kind": "label",
+          "pos": [
+            7850.0,
+            2900.0
+          ]
+        }
+      ],
+      "code": "LAYOUT_LABEL_OVERLAP",
+      "message": "labels 'DUT_IO2_WP_N' at (7300,2900) and 'DUT_IO3_HOLD_N' at (7850,2900) overlap \u2014 separate them or shorten the text",
+      "pos": [
+        7300.0,
+        2900.0
+      ],
+      "refs": [
+        "DUT_IO2_WP_N",
+        "DUT_IO3_HOLD_N"
+      ],
+      "severity": "warning"
+    }
+  ],
+  "metadata": {
+    "component_count": 40,
+    "config_waived": "0 (0 demoted)",
+    "frac_present": false,
+    "no_erc_suppressed": 3,
+    "passive_pin_ratio": 0.6265060240963856,
+    "pin_count": 83,
+    "undesignated_count": 0,
+    "unnamed_net_count": 3
+  },
+  "schema_version": "2.0"
+}

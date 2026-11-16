@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ..spec import (
     BeltReductionSpec,
+    MountingPlateSpec,
     BracketSpec,
     Cutout,
     EnclosureSpec,
@@ -1115,3 +1116,22 @@ def _linear_axis_rod_holder(a: LinearAxisSpec) -> str:
     lines.append("  translate([w*0.75, od*0.75, 0]) cylinder(h=4, d=nut_flat, $fn=6, center=false);")
     lines.append("}")
     return "\n".join(lines) + "\n"
+
+
+def generate_mounting_plate_scad(plate: MountingPlateSpec) -> str:
+    """4-hole plate as actual editable parametric CSG, not a screenshot."""
+    text = [
+        _header(f"mounting_plate={plate.name}"),
+        f"w={plate.w_mm}; d={plate.d_mm}; t={plate.t_mm};",
+        f"px={plate.pitch_x_mm}; py={plate.pitch_y_mm};",
+        f"hd={plate.hole_d_mm}; winw={plate.window_w_mm}; wind={plate.window_d_mm};",
+        "difference() {",
+        "  cube([w,d,t]);",
+        "  for (x=[(w-px)/2,(w+px)/2])",
+        "    for (y=[(d-py)/2,(d+py)/2])",
+        "      translate([x,y,-1]) cylinder(d=hd,h=t+2);",
+    ]
+    if plate.window_w_mm and plate.window_d_mm:
+        text.append("  translate([(w-winw)/2,(d-wind)/2,-1]) cube([winw,wind,t+2]);")
+    text.append("}")
+    return "\n".join(text) + "\n"
