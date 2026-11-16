@@ -103,3 +103,64 @@ Assuming a separately fetched SHA-identical f.60 PCB and the five pinned upstrea
 Reference fixtures, canonical handoff, source pin graph, original DRC failure receipts and all editable generated KiCad files are bundled in this folder. The source-only CI regression runs without importing or redistributing original third-party PCB and firmware files.
 
 **Final status remains conditional source-reference engineering**, not manufacturing-ready or proof of arbitrary discarded keyboard conversion. The original f.60 legacy KiCad board's complete DRC still times out; this independent schematic/firmware agreement cannot substitute for physical interconnect reliability, clearance, diode/USB validation or real donor tests.
+
+
+## Stage VIII — recovering the legacy KiCad DRC, confirming Teensy pinout, halving junction area (2026-11-16)
+
+These results **supersede the earlier source DRC timeout notes above**, but do not grant physical manufacturing approval.
+
+### 1. Native KiCad 9 refills the original two netless legacy zones
+
+The original byte-identical 2017 f.60 KiCad board was still hanging during native KiCad 9 DRC. HS now provides `scripts/hs_verify_legacy_zone_drc.py`, a source SHA-256 checked operator that:
+
+1. Loads the exact original source file **without modifying it**.
+2. Saves a separate temporary copy after un-filling and regenerating its two inherited copper polygons with native KiCad's zone filler.
+3. Compares the original and converted board's **485 pads, 489 copper track segments, 18 vias, 129 footprint locations and 62 keys** as unordered electrical geometry (rejecting any changed copper/terminal).
+4. Runs **full-severity native KiCad 9 DRC on the converted copy**, recording all original warnings and errors.
+5. Keeps only frozen DRC/geometry receipts in HS (no derivative third-party KiCad PCB is published).
+
+Measured results: **0 DRC errors, 0 unconnected items and 321 warnings** after refill. Warnings are **200 `silk_over_copper` and 121 `lib_footprint_issues`**. The source polygon fills are **not byte-identical** after reconstruction, and the warnings and original-source quality still require resolution. The prior 65-second native DRC timeout is isolated to the legacy filled-zone representation; the recovered, converted-source DRC is a meaningful electrical-model check but **not a clean physical production release**.
+
+Reproduce on the SHA-pinned upstream PCB:
+
+    PYTHONPATH=src python scripts/hs_verify_legacy_zone_drc.py \
+      --pcb /path/to/f60.kicad_pcb \
+      --expected-sha256 e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6 \
+      --out /tmp/zone_drc_refilled_copy_receipts
+
+Frozen details: `legacy_zone_drc_round9/LEGACY_ZONE_DRC_RECEIPT.json` and `legacy_zone_drc_round9/NATIVE_REFILLED_COPY_DRC.json`.
+
+### 2. Original Teensy 2.0 C pinout checked independently
+
+The original source-owned `Teensy_20.kicad_mod` footprint (SHA-pinned in `SOURCE_PIN_MANIFEST.json`) was reconciled with the original PCB's **31 U1 pad locations** and the official [PJRC Teensy 2.0 C-language pinout card](https://www.pjrc.com/teensy/card2a_rev5_web.pdf).
+
+All **19 original TMK firmware row/column GPIOs** resolve to the correct Teensy 2.0 KiCad physical pad numbers: 5 scan rows and 14 scan columns. No pin swaps were required in the modeled restoration. Evidence: `PJRC_TEENSY2_PINOUT_PROOF.json`.
+
+This confirms the *source reference's static pin assignment*; it **does not test a Teensy device, firmware binary, USB power or diode condition**.
+
+### 3. Compact 2×25 IDC alternative junction: 49.1% less board area
+
+The earlier 20-group source-net junction needed a ~195 × 39.78 mm PCB for 49 physical wire terminals. The new `keyboard_splice_compact_junction.py` generates a **42 × 94 mm** native KiCad board using the standard KiCad `IDC-Header_2x25_P2.54mm_Latch_Vertical` footprint.
+
+- All **20 original source-net groups** are preserved and never cross-shortened.
+- There are **49 used header pins** (39 distinct donor terminals plus 10 relocated-key contacts). Header pin 50 remains unassigned.
+- The grouped 20-net IDC PCB passes native KiCad 9 **full DRC with zero errors, warnings or unconnected items**.
+- Area comparison: **7,757.1 → 3,948 mm²**, a **49.1% nominal PCB area reduction**.
+- This single compact junction is an **alternative to both** the large unified junction and original 17-channel interposer. Do **not** install these boards together.
+
+Artifacts: `compact_idc50_round8/compact_idc50_junction.kicad_pcb`, `COMPACT_JUNCTION_WIRING.json`, `COMPACT_JUNCTION_VERIFICATION.json` and `NATIVE_COMPACT_DRC.json`.
+
+The design is not a verified commercial IDC component selection, stock BOM, low-stress ribbon routing or mechanically constrained enclosure. All cable mating, insulation, source solderpad accessibility, support, and physical testing remain pending.
+
+### Single source-bound HS engineering run with these added proofs
+
+After the DRC diagnostic above and with all **six exact upstream files** from `SOURCE_PIN_MANIFEST.json` available locally, run the Stage VII command and additionally pass:
+
+    --source-teensy2-footprint /tmp/f60_upstream/Teensy_20.kicad_mod \
+    --pjrc-pinout-proof-json /tmp/f60/PJRC_TEENSY2_PINOUT_PROOF.json \
+    --legacy-zone-drc-receipt-json /tmp/zone_drc_refilled_copy_receipts/LEGACY_ZONE_DRC_RECEIPT.json \
+    --compact-junction-out /tmp/f60/compact_idc50
+
+All seven source-bound evidence items are recorded in the canonical HS MachineProject; the status remains **DESIGN_READY modeled, BUILD_READY denied**.
+
+**Physical constraint:** This remains a conditional virtual design for a known source PCB, not proof that arbitrary physically discarded keyboards can be cut, rewired and sold reliably.

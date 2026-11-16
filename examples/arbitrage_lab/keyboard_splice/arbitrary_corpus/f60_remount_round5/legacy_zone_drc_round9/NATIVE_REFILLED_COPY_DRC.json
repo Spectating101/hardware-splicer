@@ -1,0 +1,4826 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-16T17:39:07+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "converted_refilled_copy.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "The current configuration does not include the footprint library 'keyboard_parts'.",
+            "items": [
+                {
+                    "description": "Footprint MH1",
+                    "pos": {
+                        "x": 44.425,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005887ca6a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'keyboard_parts'.",
+            "items": [
+                {
+                    "description": "Footprint MH2",
+                    "pos": {
+                        "x": 147.6375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005887ca86"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'keyboard_parts'.",
+            "items": [
+                {
+                    "description": "Footprint MH4",
+                    "pos": {
+                        "x": 279.411,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005887caca"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'keyboard_parts'.",
+            "items": [
+                {
+                    "description": "Footprint MH3",
+                    "pos": {
+                        "x": 209.725,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588b692a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K11",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf6fb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K12",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf703"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K13",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf70b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K14",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf713"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K15",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf71b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K16",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf723"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K17",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf72b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K18",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf733"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K19",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf73b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K21",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf74b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K22",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf753"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K23",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf75b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K24",
+                    "pos": {
+                        "x": 119.0625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf763"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K25",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf76b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K26",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf773"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K27",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf77b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K28",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf783"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K29",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf78b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K30",
+                    "pos": {
+                        "x": 30.95625,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf793"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K31",
+                    "pos": {
+                        "x": 52.3875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf79b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K32",
+                    "pos": {
+                        "x": 71.4375,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7a3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K33",
+                    "pos": {
+                        "x": 90.4875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7ab"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K34",
+                    "pos": {
+                        "x": 109.5375,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7b3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K35",
+                    "pos": {
+                        "x": 128.5875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7bb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K36",
+                    "pos": {
+                        "x": 147.6375,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7c3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K37",
+                    "pos": {
+                        "x": 166.6875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7cb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K38",
+                    "pos": {
+                        "x": 185.7375,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K39",
+                    "pos": {
+                        "x": 204.7875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7db"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K40",
+                    "pos": {
+                        "x": 30.95625,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7e3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K41",
+                    "pos": {
+                        "x": 54.76875,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7eb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K42",
+                    "pos": {
+                        "x": 78.58125,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf7f3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]1",
+                    "pos": {
+                        "x": 47.625,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf80f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]2",
+                    "pos": {
+                        "x": 66.675,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf817"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]3",
+                    "pos": {
+                        "x": 85.725,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf81f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]4",
+                    "pos": {
+                        "x": 104.775,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf827"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]5",
+                    "pos": {
+                        "x": 123.825,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf82f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]6",
+                    "pos": {
+                        "x": 142.875,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf837"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]7",
+                    "pos": {
+                        "x": 161.925,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf83f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]8",
+                    "pos": {
+                        "x": 180.975,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf847"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[0]9",
+                    "pos": {
+                        "x": 200.025,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf84f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[A]0",
+                    "pos": {
+                        "x": 219.075,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf857"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[A]1",
+                    "pos": {
+                        "x": 228.6,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf85f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[A]2",
+                    "pos": {
+                        "x": 233.3625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf867"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[A]3",
+                    "pos": {
+                        "x": 223.8375,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf86f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[A]4",
+                    "pos": {
+                        "x": 221.45625,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf877"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[B]0",
+                    "pos": {
+                        "x": 238.125,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf87f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[B]1",
+                    "pos": {
+                        "x": 247.65,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf887"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[B]2",
+                    "pos": {
+                        "x": 252.4125,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf88f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[B]3",
+                    "pos": {
+                        "x": 242.8875,
+                        "y": 85.725
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf897"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[B]4",
+                    "pos": {
+                        "x": 245.26875,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf89f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[C]0",
+                    "pos": {
+                        "x": 257.175,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8a7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[C]1",
+                    "pos": {
+                        "x": 266.7,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8af"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[C]2",
+                    "pos": {
+                        "x": 271.4625,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8b7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[C]4",
+                    "pos": {
+                        "x": 269.08125,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8cb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint K[D]4",
+                    "pos": {
+                        "x": 292.89375,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8eb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D10",
+                    "pos": {
+                        "x": 33.3375,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a42"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D11",
+                    "pos": {
+                        "x": 66.675,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a48"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D12",
+                    "pos": {
+                        "x": 85.725,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a4e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D13",
+                    "pos": {
+                        "x": 104.775,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a54"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D14",
+                    "pos": {
+                        "x": 123.825,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a5a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D15",
+                    "pos": {
+                        "x": 142.875,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a60"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D16",
+                    "pos": {
+                        "x": 161.925,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a66"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D17",
+                    "pos": {
+                        "x": 180.975,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a6c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D18",
+                    "pos": {
+                        "x": 200.025,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a72"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D19",
+                    "pos": {
+                        "x": 219.075,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a78"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D20",
+                    "pos": {
+                        "x": 45.24375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a7e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D21",
+                    "pos": {
+                        "x": 71.4375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a84"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D22",
+                    "pos": {
+                        "x": 90.4875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a8a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D23",
+                    "pos": {
+                        "x": 109.5375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a90"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D24",
+                    "pos": {
+                        "x": 128.5875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a96"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D25",
+                    "pos": {
+                        "x": 147.6375,
+                        "y": 76.2
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826a9c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D26",
+                    "pos": {
+                        "x": 166.6875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826aa2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D27",
+                    "pos": {
+                        "x": 185.7375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826aa8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D28",
+                    "pos": {
+                        "x": 204.7875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826aae"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D29",
+                    "pos": {
+                        "x": 223.8375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ab4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D30",
+                    "pos": {
+                        "x": 40.48125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826aba"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D31",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ac0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D32",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ac6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D33",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826acc"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D34",
+                    "pos": {
+                        "x": 119.0625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ad2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D35",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ad8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D36",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ade"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D37",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ae4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D38",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826aea"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D39",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826af0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D40",
+                    "pos": {
+                        "x": 40.48125,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826af6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D41",
+                    "pos": {
+                        "x": 64.29375,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826afc"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D42",
+                    "pos": {
+                        "x": 88.10625,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b02"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D46",
+                    "pos": {
+                        "x": 159.54375,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b08"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]1",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b14"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]2",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b1a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]3",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b20"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]4",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b26"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]5",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b2c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]6",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b32"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]7",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b38"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]8",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b3e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[0]9",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b44"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[A]0",
+                    "pos": {
+                        "x": 228.6,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b4a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[A]1",
+                    "pos": {
+                        "x": 238.125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b50"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[A]2",
+                    "pos": {
+                        "x": 242.8875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b56"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[A]3",
+                    "pos": {
+                        "x": 233.3625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b5c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[A]4",
+                    "pos": {
+                        "x": 230.98125,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b62"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[B]0",
+                    "pos": {
+                        "x": 247.65,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b68"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[B]1",
+                    "pos": {
+                        "x": 257.175,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b6e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[B]2",
+                    "pos": {
+                        "x": 261.9375,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b74"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[B]3",
+                    "pos": {
+                        "x": 252.4125,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b7a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[B]4",
+                    "pos": {
+                        "x": 254.79375,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b80"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[C]0",
+                    "pos": {
+                        "x": 257.175,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b86"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[C]1",
+                    "pos": {
+                        "x": 266.7,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b8c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[C]2",
+                    "pos": {
+                        "x": 280.9875,
+                        "y": 66.675
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b92"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[C]3",
+                    "pos": {
+                        "x": 259.55625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b98"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[C]4",
+                    "pos": {
+                        "x": 278.60625,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826b9e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[D]0",
+                    "pos": {
+                        "x": 266.7,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826ba4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[D]2",
+                    "pos": {
+                        "x": 297.65625,
+                        "y": 83.34375
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826baa"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint D[D]4",
+                    "pos": {
+                        "x": 283.36875,
+                        "y": 104.775
+                    },
+                    "uuid": "00000000-0000-0000-0000-000058826bb0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'.",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 123.825,
+                        "y": 102.39375
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000588bf8f3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D10-Pad2)] of K10",
+                    "pos": {
+                        "x": 35.8775,
+                        "y": 42.545
+                    },
+                    "uuid": "bef90af8-5314-4f2b-8e81-f25984ecef38"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D10-Pad2)] of K10",
+                    "pos": {
+                        "x": 35.8775,
+                        "y": 42.545
+                    },
+                    "uuid": "bef90af8-5314-4f2b-8e81-f25984ecef38"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K10",
+                    "pos": {
+                        "x": 29.5275,
+                        "y": 45.085
+                    },
+                    "uuid": "c347ecab-c15d-480b-8609-30d1893405e5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K10",
+                    "pos": {
+                        "x": 29.5275,
+                        "y": 45.085
+                    },
+                    "uuid": "c347ecab-c15d-480b-8609-30d1893405e5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D11-Pad2)] of K11",
+                    "pos": {
+                        "x": 59.69,
+                        "y": 42.545
+                    },
+                    "uuid": "e4e6a6ff-48d4-4e6e-8561-6322c8fbd742"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D11-Pad2)] of K11",
+                    "pos": {
+                        "x": 59.69,
+                        "y": 42.545
+                    },
+                    "uuid": "e4e6a6ff-48d4-4e6e-8561-6322c8fbd742"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K11",
+                    "pos": {
+                        "x": 53.34,
+                        "y": 45.085
+                    },
+                    "uuid": "0974cd1c-4d69-4c4c-8c59-7e08ecb90f16"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K11",
+                    "pos": {
+                        "x": 53.34,
+                        "y": 45.085
+                    },
+                    "uuid": "0974cd1c-4d69-4c4c-8c59-7e08ecb90f16"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D12-Pad2)] of K12",
+                    "pos": {
+                        "x": 78.74,
+                        "y": 42.545
+                    },
+                    "uuid": "08fbf873-4501-4de0-824a-075ce34545ce"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D12-Pad2)] of K12",
+                    "pos": {
+                        "x": 78.74,
+                        "y": 42.545
+                    },
+                    "uuid": "08fbf873-4501-4de0-824a-075ce34545ce"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K12",
+                    "pos": {
+                        "x": 72.39,
+                        "y": 45.085
+                    },
+                    "uuid": "a9ef2b67-505a-4dbe-ba86-589b9287b49f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K12",
+                    "pos": {
+                        "x": 72.39,
+                        "y": 45.085
+                    },
+                    "uuid": "a9ef2b67-505a-4dbe-ba86-589b9287b49f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D13-Pad2)] of K13",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 42.545
+                    },
+                    "uuid": "7da6c1ce-7912-4d93-979d-3a1106d679a8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D13-Pad2)] of K13",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 42.545
+                    },
+                    "uuid": "7da6c1ce-7912-4d93-979d-3a1106d679a8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K13",
+                    "pos": {
+                        "x": 91.44,
+                        "y": 45.085
+                    },
+                    "uuid": "4b96da04-ebe4-41a4-b618-e008b1cb27b8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K13",
+                    "pos": {
+                        "x": 91.44,
+                        "y": 45.085
+                    },
+                    "uuid": "4b96da04-ebe4-41a4-b618-e008b1cb27b8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D14-Pad2)] of K14",
+                    "pos": {
+                        "x": 116.84,
+                        "y": 42.545
+                    },
+                    "uuid": "baa15c48-b501-42fa-8228-c4c1592e9e73"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D14-Pad2)] of K14",
+                    "pos": {
+                        "x": 116.84,
+                        "y": 42.545
+                    },
+                    "uuid": "baa15c48-b501-42fa-8228-c4c1592e9e73"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K14",
+                    "pos": {
+                        "x": 110.49,
+                        "y": 45.085
+                    },
+                    "uuid": "bfd5a8bc-1e56-4357-986d-08b2aa3321b1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K14",
+                    "pos": {
+                        "x": 110.49,
+                        "y": 45.085
+                    },
+                    "uuid": "bfd5a8bc-1e56-4357-986d-08b2aa3321b1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D15-Pad2)] of K15",
+                    "pos": {
+                        "x": 135.89,
+                        "y": 42.545
+                    },
+                    "uuid": "966fcc1e-063f-46a4-bcef-03f1f6263770"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D15-Pad2)] of K15",
+                    "pos": {
+                        "x": 135.89,
+                        "y": 42.545
+                    },
+                    "uuid": "966fcc1e-063f-46a4-bcef-03f1f6263770"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K15",
+                    "pos": {
+                        "x": 129.54,
+                        "y": 45.085
+                    },
+                    "uuid": "beb95179-3024-42ab-a067-5dbb0eec8493"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K15",
+                    "pos": {
+                        "x": 129.54,
+                        "y": 45.085
+                    },
+                    "uuid": "beb95179-3024-42ab-a067-5dbb0eec8493"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D16-Pad2)] of K16",
+                    "pos": {
+                        "x": 154.94,
+                        "y": 42.545
+                    },
+                    "uuid": "e1fc221c-f021-4444-b587-b6b5dd690305"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D16-Pad2)] of K16",
+                    "pos": {
+                        "x": 154.94,
+                        "y": 42.545
+                    },
+                    "uuid": "e1fc221c-f021-4444-b587-b6b5dd690305"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K16",
+                    "pos": {
+                        "x": 148.59,
+                        "y": 45.085
+                    },
+                    "uuid": "9ad64aaa-5051-4a4c-8d1a-036d0c348907"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K16",
+                    "pos": {
+                        "x": 148.59,
+                        "y": 45.085
+                    },
+                    "uuid": "9ad64aaa-5051-4a4c-8d1a-036d0c348907"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D17-Pad2)] of K17",
+                    "pos": {
+                        "x": 173.99,
+                        "y": 42.545
+                    },
+                    "uuid": "88ede269-c723-4d21-9a65-3f756b5df7a9"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D17-Pad2)] of K17",
+                    "pos": {
+                        "x": 173.99,
+                        "y": 42.545
+                    },
+                    "uuid": "88ede269-c723-4d21-9a65-3f756b5df7a9"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K17",
+                    "pos": {
+                        "x": 167.64,
+                        "y": 45.085
+                    },
+                    "uuid": "ff8fa4dc-ec99-4413-b8a9-fe97612ab23e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K17",
+                    "pos": {
+                        "x": 167.64,
+                        "y": 45.085
+                    },
+                    "uuid": "ff8fa4dc-ec99-4413-b8a9-fe97612ab23e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D18-Pad2)] of K18",
+                    "pos": {
+                        "x": 193.04,
+                        "y": 42.545
+                    },
+                    "uuid": "2508e0ca-180c-401d-89cd-b9bcb3196c2a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D18-Pad2)] of K18",
+                    "pos": {
+                        "x": 193.04,
+                        "y": 42.545
+                    },
+                    "uuid": "2508e0ca-180c-401d-89cd-b9bcb3196c2a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K18",
+                    "pos": {
+                        "x": 186.69,
+                        "y": 45.085
+                    },
+                    "uuid": "cd54f838-aac3-46ae-8d8f-90b3d40a415d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K18",
+                    "pos": {
+                        "x": 186.69,
+                        "y": 45.085
+                    },
+                    "uuid": "cd54f838-aac3-46ae-8d8f-90b3d40a415d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D19-Pad2)] of K19",
+                    "pos": {
+                        "x": 212.09,
+                        "y": 42.545
+                    },
+                    "uuid": "f9de4c81-fdb4-4ed0-a350-8739cfeeca3f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D19-Pad2)] of K19",
+                    "pos": {
+                        "x": 212.09,
+                        "y": 42.545
+                    },
+                    "uuid": "f9de4c81-fdb4-4ed0-a350-8739cfeeca3f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K19",
+                    "pos": {
+                        "x": 205.74,
+                        "y": 45.085
+                    },
+                    "uuid": "57b69cd9-02a7-419f-b4f9-b3628de229d7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K19",
+                    "pos": {
+                        "x": 205.74,
+                        "y": 45.085
+                    },
+                    "uuid": "57b69cd9-02a7-419f-b4f9-b3628de229d7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D20-Pad2)] of K20",
+                    "pos": {
+                        "x": 38.25875,
+                        "y": 61.595
+                    },
+                    "uuid": "ee3eacd9-8346-4e78-be91-9c9c1b965192"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D20-Pad2)] of K20",
+                    "pos": {
+                        "x": 38.25875,
+                        "y": 61.595
+                    },
+                    "uuid": "ee3eacd9-8346-4e78-be91-9c9c1b965192"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K20",
+                    "pos": {
+                        "x": 31.90875,
+                        "y": 64.135
+                    },
+                    "uuid": "f0a6ef17-f8b6-4d7f-a556-a2784fd335f1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K20",
+                    "pos": {
+                        "x": 31.90875,
+                        "y": 64.135
+                    },
+                    "uuid": "f0a6ef17-f8b6-4d7f-a556-a2784fd335f1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D21-Pad2)] of K21",
+                    "pos": {
+                        "x": 64.4525,
+                        "y": 61.595
+                    },
+                    "uuid": "7ae79ea3-75c1-4e77-8d90-25ddf1e84f33"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D21-Pad2)] of K21",
+                    "pos": {
+                        "x": 64.4525,
+                        "y": 61.595
+                    },
+                    "uuid": "7ae79ea3-75c1-4e77-8d90-25ddf1e84f33"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K21",
+                    "pos": {
+                        "x": 58.1025,
+                        "y": 64.135
+                    },
+                    "uuid": "cf9e74a6-3eab-44cf-9b31-85cc2e098eec"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K21",
+                    "pos": {
+                        "x": 58.1025,
+                        "y": 64.135
+                    },
+                    "uuid": "cf9e74a6-3eab-44cf-9b31-85cc2e098eec"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D22-Pad2)] of K22",
+                    "pos": {
+                        "x": 83.5025,
+                        "y": 61.595
+                    },
+                    "uuid": "51e061d7-3ad9-4e1a-bd93-9caa507351b8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D22-Pad2)] of K22",
+                    "pos": {
+                        "x": 83.5025,
+                        "y": 61.595
+                    },
+                    "uuid": "51e061d7-3ad9-4e1a-bd93-9caa507351b8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K22",
+                    "pos": {
+                        "x": 77.1525,
+                        "y": 64.135
+                    },
+                    "uuid": "4d1c4d09-ba7e-4dad-a04a-86c068b65c0f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K22",
+                    "pos": {
+                        "x": 77.1525,
+                        "y": 64.135
+                    },
+                    "uuid": "4d1c4d09-ba7e-4dad-a04a-86c068b65c0f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D23-Pad2)] of K23",
+                    "pos": {
+                        "x": 102.5525,
+                        "y": 61.595
+                    },
+                    "uuid": "d8165a6e-f348-4c35-a713-29b9bd7c4543"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D23-Pad2)] of K23",
+                    "pos": {
+                        "x": 102.5525,
+                        "y": 61.595
+                    },
+                    "uuid": "d8165a6e-f348-4c35-a713-29b9bd7c4543"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K23",
+                    "pos": {
+                        "x": 96.2025,
+                        "y": 64.135
+                    },
+                    "uuid": "f8c3c7ef-51c7-4861-8013-2a917ea14d59"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K23",
+                    "pos": {
+                        "x": 96.2025,
+                        "y": 64.135
+                    },
+                    "uuid": "f8c3c7ef-51c7-4861-8013-2a917ea14d59"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D24-Pad2)] of K24",
+                    "pos": {
+                        "x": 121.6025,
+                        "y": 61.595
+                    },
+                    "uuid": "80f6dd2c-0860-486b-b9a4-b8621a5d809d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D24-Pad2)] of K24",
+                    "pos": {
+                        "x": 121.6025,
+                        "y": 61.595
+                    },
+                    "uuid": "80f6dd2c-0860-486b-b9a4-b8621a5d809d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K24",
+                    "pos": {
+                        "x": 115.2525,
+                        "y": 64.135
+                    },
+                    "uuid": "80dba6ae-824b-4f74-baba-55d13202580c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K24",
+                    "pos": {
+                        "x": 115.2525,
+                        "y": 64.135
+                    },
+                    "uuid": "80dba6ae-824b-4f74-baba-55d13202580c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D25-Pad2)] of K25",
+                    "pos": {
+                        "x": 140.6525,
+                        "y": 61.595
+                    },
+                    "uuid": "13841e73-0f79-4156-a643-f657889a1da1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D25-Pad2)] of K25",
+                    "pos": {
+                        "x": 140.6525,
+                        "y": 61.595
+                    },
+                    "uuid": "13841e73-0f79-4156-a643-f657889a1da1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K25",
+                    "pos": {
+                        "x": 134.3025,
+                        "y": 64.135
+                    },
+                    "uuid": "c6c965e2-4f4f-47de-9fc7-9d2ffbe0b8f5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K25",
+                    "pos": {
+                        "x": 134.3025,
+                        "y": 64.135
+                    },
+                    "uuid": "c6c965e2-4f4f-47de-9fc7-9d2ffbe0b8f5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D26-Pad2)] of K26",
+                    "pos": {
+                        "x": 159.7025,
+                        "y": 61.595
+                    },
+                    "uuid": "4d4dd93d-d013-481c-b980-ff444e0debf3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D26-Pad2)] of K26",
+                    "pos": {
+                        "x": 159.7025,
+                        "y": 61.595
+                    },
+                    "uuid": "4d4dd93d-d013-481c-b980-ff444e0debf3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K26",
+                    "pos": {
+                        "x": 153.3525,
+                        "y": 64.135
+                    },
+                    "uuid": "9fa3a747-1d6b-46c1-a521-edc335fb1e92"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K26",
+                    "pos": {
+                        "x": 153.3525,
+                        "y": 64.135
+                    },
+                    "uuid": "9fa3a747-1d6b-46c1-a521-edc335fb1e92"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D27-Pad2)] of K27",
+                    "pos": {
+                        "x": 178.7525,
+                        "y": 61.595
+                    },
+                    "uuid": "e131cc10-007f-445a-ba87-0035682d58c5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D27-Pad2)] of K27",
+                    "pos": {
+                        "x": 178.7525,
+                        "y": 61.595
+                    },
+                    "uuid": "e131cc10-007f-445a-ba87-0035682d58c5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K27",
+                    "pos": {
+                        "x": 172.4025,
+                        "y": 64.135
+                    },
+                    "uuid": "e42f848c-aefc-4758-acee-8e111abd582c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K27",
+                    "pos": {
+                        "x": 172.4025,
+                        "y": 64.135
+                    },
+                    "uuid": "e42f848c-aefc-4758-acee-8e111abd582c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D28-Pad2)] of K28",
+                    "pos": {
+                        "x": 197.8025,
+                        "y": 61.595
+                    },
+                    "uuid": "1969d99d-9357-40f6-b2e8-8a450ba14a94"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D28-Pad2)] of K28",
+                    "pos": {
+                        "x": 197.8025,
+                        "y": 61.595
+                    },
+                    "uuid": "1969d99d-9357-40f6-b2e8-8a450ba14a94"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K28",
+                    "pos": {
+                        "x": 191.4525,
+                        "y": 64.135
+                    },
+                    "uuid": "3960e21e-17e3-4be5-b57b-814d89c37535"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K28",
+                    "pos": {
+                        "x": 191.4525,
+                        "y": 64.135
+                    },
+                    "uuid": "3960e21e-17e3-4be5-b57b-814d89c37535"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D29-Pad2)] of K29",
+                    "pos": {
+                        "x": 216.8525,
+                        "y": 61.595
+                    },
+                    "uuid": "6ea02512-5ff5-4e9d-b564-cf740a1aafef"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D29-Pad2)] of K29",
+                    "pos": {
+                        "x": 216.8525,
+                        "y": 61.595
+                    },
+                    "uuid": "6ea02512-5ff5-4e9d-b564-cf740a1aafef"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K29",
+                    "pos": {
+                        "x": 210.5025,
+                        "y": 64.135
+                    },
+                    "uuid": "60e67282-4791-4877-83d0-6caeadaddf49"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K29",
+                    "pos": {
+                        "x": 210.5025,
+                        "y": 64.135
+                    },
+                    "uuid": "60e67282-4791-4877-83d0-6caeadaddf49"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D30-Pad2)] of K30",
+                    "pos": {
+                        "x": 33.49625,
+                        "y": 80.645
+                    },
+                    "uuid": "073dfedf-1ea9-4334-8063-39d4ddebd22d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D30-Pad2)] of K30",
+                    "pos": {
+                        "x": 33.49625,
+                        "y": 80.645
+                    },
+                    "uuid": "073dfedf-1ea9-4334-8063-39d4ddebd22d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K30",
+                    "pos": {
+                        "x": 27.14625,
+                        "y": 83.185
+                    },
+                    "uuid": "a6bdee23-356f-4835-bd81-a2f8b545e37d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K30",
+                    "pos": {
+                        "x": 27.14625,
+                        "y": 83.185
+                    },
+                    "uuid": "a6bdee23-356f-4835-bd81-a2f8b545e37d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D31-Pad2)] of K31",
+                    "pos": {
+                        "x": 54.9275,
+                        "y": 80.645
+                    },
+                    "uuid": "759a3ee4-3bd7-4979-b2e5-d700272927d4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D31-Pad2)] of K31",
+                    "pos": {
+                        "x": 54.9275,
+                        "y": 80.645
+                    },
+                    "uuid": "759a3ee4-3bd7-4979-b2e5-d700272927d4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K31",
+                    "pos": {
+                        "x": 48.5775,
+                        "y": 83.185
+                    },
+                    "uuid": "7348387c-227e-4829-a1be-91a81649c307"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K31",
+                    "pos": {
+                        "x": 48.5775,
+                        "y": 83.185
+                    },
+                    "uuid": "7348387c-227e-4829-a1be-91a81649c307"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D32-Pad2)] of K32",
+                    "pos": {
+                        "x": 73.9775,
+                        "y": 80.645
+                    },
+                    "uuid": "fb3c8c0a-3189-432e-a463-6814d686ec07"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D32-Pad2)] of K32",
+                    "pos": {
+                        "x": 73.9775,
+                        "y": 80.645
+                    },
+                    "uuid": "fb3c8c0a-3189-432e-a463-6814d686ec07"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K32",
+                    "pos": {
+                        "x": 67.6275,
+                        "y": 83.185
+                    },
+                    "uuid": "e2dcd77b-7213-495e-b0ee-7c299c3c32d2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K32",
+                    "pos": {
+                        "x": 67.6275,
+                        "y": 83.185
+                    },
+                    "uuid": "e2dcd77b-7213-495e-b0ee-7c299c3c32d2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D33-Pad2)] of K33",
+                    "pos": {
+                        "x": 93.0275,
+                        "y": 80.645
+                    },
+                    "uuid": "bd3bb49b-82fd-4e9f-8802-6af7ba4fc6f0"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D33-Pad2)] of K33",
+                    "pos": {
+                        "x": 93.0275,
+                        "y": 80.645
+                    },
+                    "uuid": "bd3bb49b-82fd-4e9f-8802-6af7ba4fc6f0"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K33",
+                    "pos": {
+                        "x": 86.6775,
+                        "y": 83.185
+                    },
+                    "uuid": "43bbef57-68e3-4d5d-9342-d18e9fa4cf36"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K33",
+                    "pos": {
+                        "x": 86.6775,
+                        "y": 83.185
+                    },
+                    "uuid": "43bbef57-68e3-4d5d-9342-d18e9fa4cf36"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D34-Pad2)] of K34",
+                    "pos": {
+                        "x": 112.0775,
+                        "y": 80.645
+                    },
+                    "uuid": "3f944a6b-922b-4f85-9a05-04c5f7d9c5c6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D34-Pad2)] of K34",
+                    "pos": {
+                        "x": 112.0775,
+                        "y": 80.645
+                    },
+                    "uuid": "3f944a6b-922b-4f85-9a05-04c5f7d9c5c6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K34",
+                    "pos": {
+                        "x": 105.7275,
+                        "y": 83.185
+                    },
+                    "uuid": "bdc42899-aa43-4280-b6e4-40c2a0acbad8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K34",
+                    "pos": {
+                        "x": 105.7275,
+                        "y": 83.185
+                    },
+                    "uuid": "bdc42899-aa43-4280-b6e4-40c2a0acbad8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D35-Pad2)] of K35",
+                    "pos": {
+                        "x": 131.1275,
+                        "y": 80.645
+                    },
+                    "uuid": "b58aa972-bed2-4418-b08d-6de96cb45254"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D35-Pad2)] of K35",
+                    "pos": {
+                        "x": 131.1275,
+                        "y": 80.645
+                    },
+                    "uuid": "b58aa972-bed2-4418-b08d-6de96cb45254"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K35",
+                    "pos": {
+                        "x": 124.7775,
+                        "y": 83.185
+                    },
+                    "uuid": "3641b86a-62f2-459c-8805-145860ca9bee"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K35",
+                    "pos": {
+                        "x": 124.7775,
+                        "y": 83.185
+                    },
+                    "uuid": "3641b86a-62f2-459c-8805-145860ca9bee"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D36-Pad2)] of K36",
+                    "pos": {
+                        "x": 150.1775,
+                        "y": 80.645
+                    },
+                    "uuid": "baf42e2e-c6dd-43c9-b764-a3676790b788"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D36-Pad2)] of K36",
+                    "pos": {
+                        "x": 150.1775,
+                        "y": 80.645
+                    },
+                    "uuid": "baf42e2e-c6dd-43c9-b764-a3676790b788"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K36",
+                    "pos": {
+                        "x": 143.8275,
+                        "y": 83.185
+                    },
+                    "uuid": "10cddee4-5888-4afa-b070-509ce8c7de5b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K36",
+                    "pos": {
+                        "x": 143.8275,
+                        "y": 83.185
+                    },
+                    "uuid": "10cddee4-5888-4afa-b070-509ce8c7de5b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D37-Pad2)] of K37",
+                    "pos": {
+                        "x": 169.2275,
+                        "y": 80.645
+                    },
+                    "uuid": "d914a1d9-e795-4fe9-b5e2-b13fd589cfd1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D37-Pad2)] of K37",
+                    "pos": {
+                        "x": 169.2275,
+                        "y": 80.645
+                    },
+                    "uuid": "d914a1d9-e795-4fe9-b5e2-b13fd589cfd1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K37",
+                    "pos": {
+                        "x": 162.8775,
+                        "y": 83.185
+                    },
+                    "uuid": "23302b68-23d0-4418-901f-698536850cee"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K37",
+                    "pos": {
+                        "x": 162.8775,
+                        "y": 83.185
+                    },
+                    "uuid": "23302b68-23d0-4418-901f-698536850cee"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D38-Pad2)] of K38",
+                    "pos": {
+                        "x": 188.2775,
+                        "y": 80.645
+                    },
+                    "uuid": "97d19ceb-6f05-439e-a366-c249fd48a4e7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D38-Pad2)] of K38",
+                    "pos": {
+                        "x": 188.2775,
+                        "y": 80.645
+                    },
+                    "uuid": "97d19ceb-6f05-439e-a366-c249fd48a4e7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K38",
+                    "pos": {
+                        "x": 181.9275,
+                        "y": 83.185
+                    },
+                    "uuid": "e1c71071-d249-4612-9d5e-b5d75732cc8c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K38",
+                    "pos": {
+                        "x": 181.9275,
+                        "y": 83.185
+                    },
+                    "uuid": "e1c71071-d249-4612-9d5e-b5d75732cc8c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D39-Pad2)] of K39",
+                    "pos": {
+                        "x": 207.3275,
+                        "y": 80.645
+                    },
+                    "uuid": "a7968154-4aba-43c5-8ccd-7486d61eb11d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D39-Pad2)] of K39",
+                    "pos": {
+                        "x": 207.3275,
+                        "y": 80.645
+                    },
+                    "uuid": "a7968154-4aba-43c5-8ccd-7486d61eb11d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K39",
+                    "pos": {
+                        "x": 200.9775,
+                        "y": 83.185
+                    },
+                    "uuid": "ea3539ec-9dc5-45c1-9c37-7d6c56fc35a5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K39",
+                    "pos": {
+                        "x": 200.9775,
+                        "y": 83.185
+                    },
+                    "uuid": "ea3539ec-9dc5-45c1-9c37-7d6c56fc35a5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D40-Pad2)] of K40",
+                    "pos": {
+                        "x": 33.49625,
+                        "y": 99.695
+                    },
+                    "uuid": "aa3ee93c-47bb-4134-9278-aca32bdd98f8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D40-Pad2)] of K40",
+                    "pos": {
+                        "x": 33.49625,
+                        "y": 99.695
+                    },
+                    "uuid": "aa3ee93c-47bb-4134-9278-aca32bdd98f8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K40",
+                    "pos": {
+                        "x": 27.14625,
+                        "y": 102.235
+                    },
+                    "uuid": "7c88df81-30bc-40d0-ad1e-d9fdbd13b3e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K40",
+                    "pos": {
+                        "x": 27.14625,
+                        "y": 102.235
+                    },
+                    "uuid": "7c88df81-30bc-40d0-ad1e-d9fdbd13b3e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D41-Pad2)] of K41",
+                    "pos": {
+                        "x": 57.30875,
+                        "y": 99.695
+                    },
+                    "uuid": "b359c157-aa70-445d-a0f6-a98d2033a6b2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D41-Pad2)] of K41",
+                    "pos": {
+                        "x": 57.30875,
+                        "y": 99.695
+                    },
+                    "uuid": "b359c157-aa70-445d-a0f6-a98d2033a6b2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K41",
+                    "pos": {
+                        "x": 50.95875,
+                        "y": 102.235
+                    },
+                    "uuid": "b3dbe700-a39a-42a5-a949-ca540ed4597e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K41",
+                    "pos": {
+                        "x": 50.95875,
+                        "y": 102.235
+                    },
+                    "uuid": "b3dbe700-a39a-42a5-a949-ca540ed4597e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D42-Pad2)] of K42",
+                    "pos": {
+                        "x": 81.12125,
+                        "y": 99.695
+                    },
+                    "uuid": "f87039a4-9fb1-48ff-b47a-97d0b3a60fcc"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D42-Pad2)] of K42",
+                    "pos": {
+                        "x": 81.12125,
+                        "y": 99.695
+                    },
+                    "uuid": "f87039a4-9fb1-48ff-b47a-97d0b3a60fcc"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K42",
+                    "pos": {
+                        "x": 74.77125,
+                        "y": 102.235
+                    },
+                    "uuid": "c1a7010e-e504-4c22-b4a2-9b9f7747132e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K42",
+                    "pos": {
+                        "x": 74.77125,
+                        "y": 102.235
+                    },
+                    "uuid": "c1a7010e-e504-4c22-b4a2-9b9f7747132e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D46-Pad2)] of K46",
+                    "pos": {
+                        "x": 152.55875,
+                        "y": 99.695
+                    },
+                    "uuid": "2ff9d6d1-bea2-4e88-8787-755f12195347"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D46-Pad2)] of K46",
+                    "pos": {
+                        "x": 152.55875,
+                        "y": 99.695
+                    },
+                    "uuid": "2ff9d6d1-bea2-4e88-8787-755f12195347"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K46",
+                    "pos": {
+                        "x": 146.20875,
+                        "y": 102.235
+                    },
+                    "uuid": "1275a100-ca2d-440c-9788-98fe6b3caa5f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K46",
+                    "pos": {
+                        "x": 146.20875,
+                        "y": 102.235
+                    },
+                    "uuid": "1275a100-ca2d-440c-9788-98fe6b3caa5f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]0-Pad2)] of K[0]0",
+                    "pos": {
+                        "x": 31.115,
+                        "y": 23.495
+                    },
+                    "uuid": "f9e3b52d-eb90-435b-85f6-a63828fd2867"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]0-Pad2)] of K[0]0",
+                    "pos": {
+                        "x": 31.115,
+                        "y": 23.495
+                    },
+                    "uuid": "f9e3b52d-eb90-435b-85f6-a63828fd2867"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K[0]0",
+                    "pos": {
+                        "x": 24.765,
+                        "y": 26.035
+                    },
+                    "uuid": "00a2c47f-d46e-45bc-968b-b412b204a4b6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C0] of K[0]0",
+                    "pos": {
+                        "x": 24.765,
+                        "y": 26.035
+                    },
+                    "uuid": "00a2c47f-d46e-45bc-968b-b412b204a4b6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]1-Pad2)] of K[0]1",
+                    "pos": {
+                        "x": 50.165,
+                        "y": 23.495
+                    },
+                    "uuid": "29ec8a4f-00cd-4dc1-8ec6-f42a22a0e405"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]1-Pad2)] of K[0]1",
+                    "pos": {
+                        "x": 50.165,
+                        "y": 23.495
+                    },
+                    "uuid": "29ec8a4f-00cd-4dc1-8ec6-f42a22a0e405"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K[0]1",
+                    "pos": {
+                        "x": 43.815,
+                        "y": 26.035
+                    },
+                    "uuid": "1839078e-acff-49b5-8009-a8bf1f9aedd2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C1] of K[0]1",
+                    "pos": {
+                        "x": 43.815,
+                        "y": 26.035
+                    },
+                    "uuid": "1839078e-acff-49b5-8009-a8bf1f9aedd2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]2-Pad2)] of K[0]2",
+                    "pos": {
+                        "x": 69.215,
+                        "y": 23.495
+                    },
+                    "uuid": "cc78e492-90b4-4a9c-9bda-4dc433c9f73c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]2-Pad2)] of K[0]2",
+                    "pos": {
+                        "x": 69.215,
+                        "y": 23.495
+                    },
+                    "uuid": "cc78e492-90b4-4a9c-9bda-4dc433c9f73c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K[0]2",
+                    "pos": {
+                        "x": 62.865,
+                        "y": 26.035
+                    },
+                    "uuid": "c034f475-5972-40d9-b86b-25b54b8bd44c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C2] of K[0]2",
+                    "pos": {
+                        "x": 62.865,
+                        "y": 26.035
+                    },
+                    "uuid": "c034f475-5972-40d9-b86b-25b54b8bd44c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]3-Pad2)] of K[0]3",
+                    "pos": {
+                        "x": 88.265,
+                        "y": 23.495
+                    },
+                    "uuid": "3010b623-8758-4602-b205-898f3a7c2e36"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]3-Pad2)] of K[0]3",
+                    "pos": {
+                        "x": 88.265,
+                        "y": 23.495
+                    },
+                    "uuid": "3010b623-8758-4602-b205-898f3a7c2e36"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K[0]3",
+                    "pos": {
+                        "x": 81.915,
+                        "y": 26.035
+                    },
+                    "uuid": "a51148f1-9ad8-47c8-88e7-47809f615bbe"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C3] of K[0]3",
+                    "pos": {
+                        "x": 81.915,
+                        "y": 26.035
+                    },
+                    "uuid": "a51148f1-9ad8-47c8-88e7-47809f615bbe"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]4-Pad2)] of K[0]4",
+                    "pos": {
+                        "x": 107.315,
+                        "y": 23.495
+                    },
+                    "uuid": "fae4e5b3-dc4d-420f-9f90-303ec6698ed2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]4-Pad2)] of K[0]4",
+                    "pos": {
+                        "x": 107.315,
+                        "y": 23.495
+                    },
+                    "uuid": "fae4e5b3-dc4d-420f-9f90-303ec6698ed2"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K[0]4",
+                    "pos": {
+                        "x": 100.965,
+                        "y": 26.035
+                    },
+                    "uuid": "f04db322-8dd1-48cc-b2da-149d0448141a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C4] of K[0]4",
+                    "pos": {
+                        "x": 100.965,
+                        "y": 26.035
+                    },
+                    "uuid": "f04db322-8dd1-48cc-b2da-149d0448141a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]5-Pad2)] of K[0]5",
+                    "pos": {
+                        "x": 126.365,
+                        "y": 23.495
+                    },
+                    "uuid": "1cd7073f-e96b-45b1-b5fa-e1baac5fee62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]5-Pad2)] of K[0]5",
+                    "pos": {
+                        "x": 126.365,
+                        "y": 23.495
+                    },
+                    "uuid": "1cd7073f-e96b-45b1-b5fa-e1baac5fee62"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K[0]5",
+                    "pos": {
+                        "x": 120.015,
+                        "y": 26.035
+                    },
+                    "uuid": "a792d4d8-3326-4fda-b767-a9928b32a560"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C5] of K[0]5",
+                    "pos": {
+                        "x": 120.015,
+                        "y": 26.035
+                    },
+                    "uuid": "a792d4d8-3326-4fda-b767-a9928b32a560"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]6-Pad2)] of K[0]6",
+                    "pos": {
+                        "x": 145.415,
+                        "y": 23.495
+                    },
+                    "uuid": "ec8b4352-8d5f-4976-bff8-531d40a6b00e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]6-Pad2)] of K[0]6",
+                    "pos": {
+                        "x": 145.415,
+                        "y": 23.495
+                    },
+                    "uuid": "ec8b4352-8d5f-4976-bff8-531d40a6b00e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K[0]6",
+                    "pos": {
+                        "x": 139.065,
+                        "y": 26.035
+                    },
+                    "uuid": "c3dd1d87-0c5f-420c-bf30-f8c469835a31"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C6] of K[0]6",
+                    "pos": {
+                        "x": 139.065,
+                        "y": 26.035
+                    },
+                    "uuid": "c3dd1d87-0c5f-420c-bf30-f8c469835a31"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]7-Pad2)] of K[0]7",
+                    "pos": {
+                        "x": 164.465,
+                        "y": 23.495
+                    },
+                    "uuid": "ac8c8b0d-1b58-4c53-8541-20f663788ef6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]7-Pad2)] of K[0]7",
+                    "pos": {
+                        "x": 164.465,
+                        "y": 23.495
+                    },
+                    "uuid": "ac8c8b0d-1b58-4c53-8541-20f663788ef6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K[0]7",
+                    "pos": {
+                        "x": 158.115,
+                        "y": 26.035
+                    },
+                    "uuid": "20f0edc4-aa7e-453a-8784-79bbbc78f119"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C7] of K[0]7",
+                    "pos": {
+                        "x": 158.115,
+                        "y": 26.035
+                    },
+                    "uuid": "20f0edc4-aa7e-453a-8784-79bbbc78f119"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]8-Pad2)] of K[0]8",
+                    "pos": {
+                        "x": 183.515,
+                        "y": 23.495
+                    },
+                    "uuid": "3849f1be-7538-4149-b1ac-e206aa43fbe8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]8-Pad2)] of K[0]8",
+                    "pos": {
+                        "x": 183.515,
+                        "y": 23.495
+                    },
+                    "uuid": "3849f1be-7538-4149-b1ac-e206aa43fbe8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K[0]8",
+                    "pos": {
+                        "x": 177.165,
+                        "y": 26.035
+                    },
+                    "uuid": "d878a806-2c13-4354-a475-50f616e4d7f3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C8] of K[0]8",
+                    "pos": {
+                        "x": 177.165,
+                        "y": 26.035
+                    },
+                    "uuid": "d878a806-2c13-4354-a475-50f616e4d7f3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]9-Pad2)] of K[0]9",
+                    "pos": {
+                        "x": 202.565,
+                        "y": 23.495
+                    },
+                    "uuid": "dce25abd-96f6-4e32-b0e8-947490f7d3d5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[0]9-Pad2)] of K[0]9",
+                    "pos": {
+                        "x": 202.565,
+                        "y": 23.495
+                    },
+                    "uuid": "dce25abd-96f6-4e32-b0e8-947490f7d3d5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K[0]9",
+                    "pos": {
+                        "x": 196.215,
+                        "y": 26.035
+                    },
+                    "uuid": "62020580-80e0-4d14-bf9b-c8dc2e582d83"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C9] of K[0]9",
+                    "pos": {
+                        "x": 196.215,
+                        "y": 26.035
+                    },
+                    "uuid": "62020580-80e0-4d14-bf9b-c8dc2e582d83"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]0-Pad2)] of K[A]0",
+                    "pos": {
+                        "x": 221.615,
+                        "y": 23.495
+                    },
+                    "uuid": "3205de6c-0eed-4834-8a99-c1423dfbca92"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]0-Pad2)] of K[A]0",
+                    "pos": {
+                        "x": 221.615,
+                        "y": 23.495
+                    },
+                    "uuid": "3205de6c-0eed-4834-8a99-c1423dfbca92"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]0",
+                    "pos": {
+                        "x": 215.265,
+                        "y": 26.035
+                    },
+                    "uuid": "afed2bbd-fe7b-41ed-9ee4-0afcace8fb2e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]0",
+                    "pos": {
+                        "x": 215.265,
+                        "y": 26.035
+                    },
+                    "uuid": "afed2bbd-fe7b-41ed-9ee4-0afcace8fb2e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]1-Pad2)] of K[A]1",
+                    "pos": {
+                        "x": 231.14,
+                        "y": 42.545
+                    },
+                    "uuid": "edf752cd-c1ef-4eb2-8b02-91b82335f79d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]1-Pad2)] of K[A]1",
+                    "pos": {
+                        "x": 231.14,
+                        "y": 42.545
+                    },
+                    "uuid": "edf752cd-c1ef-4eb2-8b02-91b82335f79d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]1",
+                    "pos": {
+                        "x": 224.79,
+                        "y": 45.085
+                    },
+                    "uuid": "19b5aa24-b9e3-44f7-ad96-91d34bfba984"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]1",
+                    "pos": {
+                        "x": 224.79,
+                        "y": 45.085
+                    },
+                    "uuid": "19b5aa24-b9e3-44f7-ad96-91d34bfba984"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]2-Pad2)] of K[A]2",
+                    "pos": {
+                        "x": 235.9025,
+                        "y": 61.595
+                    },
+                    "uuid": "502fbc7d-b894-4666-8ee6-3db24ef06c48"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]2-Pad2)] of K[A]2",
+                    "pos": {
+                        "x": 235.9025,
+                        "y": 61.595
+                    },
+                    "uuid": "502fbc7d-b894-4666-8ee6-3db24ef06c48"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]2",
+                    "pos": {
+                        "x": 229.5525,
+                        "y": 64.135
+                    },
+                    "uuid": "44ef2422-d211-493a-af09-08a6304e8833"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]2",
+                    "pos": {
+                        "x": 229.5525,
+                        "y": 64.135
+                    },
+                    "uuid": "44ef2422-d211-493a-af09-08a6304e8833"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]3-Pad2)] of K[A]3",
+                    "pos": {
+                        "x": 226.3775,
+                        "y": 80.645
+                    },
+                    "uuid": "5317bf75-891d-49f4-a7b6-332f498b9b2d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]3-Pad2)] of K[A]3",
+                    "pos": {
+                        "x": 226.3775,
+                        "y": 80.645
+                    },
+                    "uuid": "5317bf75-891d-49f4-a7b6-332f498b9b2d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]3",
+                    "pos": {
+                        "x": 220.0275,
+                        "y": 83.185
+                    },
+                    "uuid": "b1c4e672-c72e-4e4b-8a85-934c0a0cf863"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]3",
+                    "pos": {
+                        "x": 220.0275,
+                        "y": 83.185
+                    },
+                    "uuid": "b1c4e672-c72e-4e4b-8a85-934c0a0cf863"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]4-Pad2)] of K[A]4",
+                    "pos": {
+                        "x": 223.99625,
+                        "y": 99.695
+                    },
+                    "uuid": "322e25a5-44a8-44ef-970a-3525cdb12fea"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[A]4-Pad2)] of K[A]4",
+                    "pos": {
+                        "x": 223.99625,
+                        "y": 99.695
+                    },
+                    "uuid": "322e25a5-44a8-44ef-970a-3525cdb12fea"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]4",
+                    "pos": {
+                        "x": 217.64625,
+                        "y": 102.235
+                    },
+                    "uuid": "33a578c5-0a4b-4849-875a-76472631b2e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C10] of K[A]4",
+                    "pos": {
+                        "x": 217.64625,
+                        "y": 102.235
+                    },
+                    "uuid": "33a578c5-0a4b-4849-875a-76472631b2e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[B]0-Pad2)] of K[B]0",
+                    "pos": {
+                        "x": 240.665,
+                        "y": 23.495
+                    },
+                    "uuid": "69dec4a4-d576-481a-b1d6-1065e6ace23c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D[B]0-Pad2)] of K[B]0",
+                    "pos": {
+                        "x": 240.665,
+                        "y": 23.495
+                    },
+                    "uuid": "69dec4a4-d576-481a-b1d6-1065e6ace23c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C11] of K[B]0",
+                    "pos": {
+                        "x": 234.315,
+                        "y": 26.035
+                    },
+                    "uuid": "2a8e96af-52db-4b6b-ae99-f8d79c59b765"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/C11] of K[B]0",
+                    "pos": {
+                        "x": 234.315,
+                        "y": 26.035
+                    },
+                    "uuid": "2a8e96af-52db-4b6b-ae99-f8d79c59b765"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        }
+    ]
+}

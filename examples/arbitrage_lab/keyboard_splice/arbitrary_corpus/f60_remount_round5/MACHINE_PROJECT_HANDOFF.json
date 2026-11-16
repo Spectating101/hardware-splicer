@@ -444,7 +444,43 @@
         "evidence_id": "f60-kicad-source-junction-native-drc",
         "kind": "native_kicad_electrical_routing_check",
         "basis": "Twenty independent source-net junction buses; physical wiring not tested",
-        "ref": "02e558d4651f60254f297651e143c2fb12738f0772f715f7aef65ea86a163423",
+        "ref": "8b7720714855533859bbc4329142bff9683fdce3ffe36b306c7131b260c9c15e",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-pjrc-teensy2-original-controller-pad-mapping",
+        "kind": "official_c_pinout_source_footprint_vs_firmware_GPIO",
+        "basis": "31 external KiCad footprint pads, 19 source firmware GPIO and PJRC C-language pinout",
+        "ref": "cc639bd90c1babd769d223ef596fc33449d4d9272d26ab5e4604e3db757fd0cb",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-refilled-legacy-zone-copy-native-drc",
+        "kind": "native_kicad9_converted_source_copy_drc",
+        "basis": "SHA-pinned original copper non-zone equivalence and converted zone-fill native DRC; original file unchanged",
+        "ref": "6624bab4eda67a8d9a155af97a78397eab0796153d3caf845f6fbcb370c169fe",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-compact-50pin-IDC-header-native-drc",
+        "kind": "native_kicad_alternative_compact_wiring_board",
+        "basis": "Original source-net grouped junction, 49 pins and 20 buses, actual standard KiCad latching IDC footprint",
+        "ref": "532a9dc2e4670dee325c625d6271b3cabe29bcfde37359d59c7500686bf0ad85",
         "supports": [
           "system"
         ],
@@ -487,11 +523,19 @@
         "simulated_ideal_press_patterns": 91230,
         "independent_schematic_audit_sha256": "ca3090a90b450c5eed461c43fa25719d5d8e98fb4732d64696ea1e9812f9860c",
         "full_62_key_matrix_sha256": "687d0f81298531d4cd60221f11e88753e4980a26ecf3e80a8790eda45b3db457",
-        "native_junction_design_sha256": "02e558d4651f60254f297651e143c2fb12738f0772f715f7aef65ea86a163423",
+        "native_junction_design_sha256": "8b7720714855533859bbc4329142bff9683fdce3ffe36b306c7131b260c9c15e",
         "junction_source_net_groups": 20,
         "junction_donor_original_pad_wires": 39,
         "junction_daughterboard_port_wires": 10,
         "native_source_pcb_full_drc_complete": false,
+        "official_teensy2_source_pinout_19_signal_match": true,
+        "original_teensy_footprint_all_31_pads_source_matched": true,
+        "source_refilled_zone_copy_drc_no_errors": true,
+        "source_refilled_zone_copy_drc_warnings": 321,
+        "source_original_byte_identical_full_drc_verified": false,
+        "compact_IDC_source_net_preview_available": true,
+        "compact_IDC_area_reduction_percent": 49.1,
+        "compact_and_original_full_junction_mutually_exclusive": true,
         "physical_harness_cable_verified": false,
         "original_teensy_firmware_compiled_flashed_or_verified": false
       }

@@ -22,6 +22,8 @@ from hardware_splicer.keyboard_splice_repair_loop import run_repair_loop
 from hardware_splicer.keyboard_splice_matrix import verify_one_row_matrix
 from hardware_splicer.keyboard_splice_full_matrix import full_matrix_proof
 from hardware_splicer.keyboard_splice_source_audit import audit_independent_source
+from hardware_splicer.keyboard_splice_teensy2 import audit_teensy2_gpio
+from hardware_splicer.keyboard_splice_zone_drc import verify_legacy_refilled_copy_receipt
 
 def main() -> int:
     ap=argparse.ArgumentParser()
@@ -47,7 +49,11 @@ def main() -> int:
     ap.add_argument("--source-pin-manifest",type=Path,default=None)
     ap.add_argument("--independent-source-audit-json",type=Path,default=None)
     ap.add_argument("--full-matrix-proof-json",type=Path,default=None)
+    ap.add_argument("--source-teensy2-footprint",type=Path,default=None)
+    ap.add_argument("--pjrc-pinout-proof-json",type=Path,default=None)
+    ap.add_argument("--legacy-zone-drc-receipt-json",type=Path,default=None)
     ap.add_argument("--full-junction-out",type=Path,default=None)
+    ap.add_argument("--compact-junction-out",type=Path,default=None)
     ap.add_argument("--interposer-out",type=Path,default=None)
     ap.add_argument("--x",type=float,default=None,help="Optional x coordinate to assess without searching a cut route")
     args=ap.parse_args()
@@ -72,6 +78,9 @@ def main() -> int:
         raise SystemExit("key relocation needs a source-bound multi-route audit")
     if args.interposer_out and (not args.postcut_islands_json or not args.machine_project_json):
         raise SystemExit("interposer preview requires both topology and canonical machine handoff")
+    if args.compact_junction_out and not args.full_junction_out:
+        raise SystemExit("compact IDC junction requires the already verified full source-net junction")
+
     if args.postcut_islands_json:
         # The plan may only restore circuits actually affected in THIS revision.
         # This is not an inferred set of solder points or an authority to cut.
@@ -345,6 +354,10 @@ def main() -> int:
         }
         if not check["geometry_model_verified"]:
             raise SystemExit("KiCad replacement-key daughterboard failed native DRC")
+    if (args.source_teensy2_footprint is None) != (args.pjrc_pinout_proof_json is None):
+        raise SystemExit("PJRC Teensy pinout requires both pinned original footprint and output")
+    if args.pjrc_pinout_proof_json and not args.full_matrix_proof_json:
+        raise SystemExit("Original firmware/keymap proof must be generated before Teensy pinout audit")
     if args.full_matrix_proof_json or args.independent_source_audit_json:
         required=(
             args.full_matrix_proof_json,args.independent_source_audit_json,
@@ -362,8 +375,10 @@ def main() -> int:
             raise SystemExit("Independent source pin manifest does not match this PCB")
         expected={entry["name"]:entry["sha256"] for entry in manifest["files"]}
         needed=("keyboard.net","config.h","matrix.c","keymap_common.h","keymap.c")
-        if set(expected)!=set(needed):
-            raise SystemExit("Independent source pin manifest must contain five pinned source files")
+        if not set(needed).issubset(set(expected)):
+            raise SystemExit("Independent source pin manifest missing required original netlist/firmware")
+        if any(len(value)!=64 for value in expected.values()):
+            raise SystemExit("Independent source pin hashes must all be SHA256 identifiers")
         sources={}
         for name in needed:
             file=args.independent_source_dir/name
@@ -371,7 +386,8 @@ def main() -> int:
                 raise SystemExit("Original upstream netlist or firmware file missing/unbounded: "+name)
             sources[name]=file.read_bytes()
         upstream_audit=audit_independent_source(
-            board,*(sources[name] for name in needed),expected_hashes=expected
+            board,*(sources[name] for name in needed),
+            expected_hashes={name:expected[name] for name in needed},
         )
         multi=json.loads(args.multi_route_json.read_text(encoding="utf-8"))
         remount=json.loads(
@@ -408,6 +424,29 @@ def main() -> int:
         args.full_matrix_proof_json.write_text(
             json.dumps(complete,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
         )
+        if args.pjrc_pinout_proof_json:
+            footprint_filename="Teensy_20.kicad_mod"
+            expected_footprint_sha=expected.get(footprint_filename)
+            if not expected_footprint_sha:
+                raise SystemExit("Pinned original source manifest lacks Teensy footprint SHA256")
+            if (not args.source_teensy2_footprint.is_file() or
+                args.source_teensy2_footprint.stat().st_size>25000):
+                raise SystemExit("Original Teensy footprint missing/unbounded")
+            pinout=audit_teensy2_gpio(
+                board,upstream_audit,complete,
+                args.source_teensy2_footprint.read_bytes(),
+                expected_footprint_sha256=expected_footprint_sha,
+            )
+            args.pjrc_pinout_proof_json.parent.mkdir(parents=True,exist_ok=True)
+            args.pjrc_pinout_proof_json.write_text(
+                json.dumps(pinout,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+            result["source_controller_pinout_summary"]={
+                "original_physical_pads_mapped":pinout["source_original_controller_pads_positionally_verified"],
+                "firmware_matrix_GPIOs_mapped":pinout["firmware_total_gpio_assignments_verified"],
+                "pinout_proof_sha256":pinout["payload_sha256"],
+                "official_reference":pinout["external_PJRC_C_pinout_reference"],
+                "physical_controller_tested":False,
+            }
         result["full_matrix_summary"]={
             "schematic_connected_nodes_verified":upstream_audit["matched_original_pcb_net_nodes"],
             "firmware_key_positions_verified":upstream_audit["pcb_switch_diode_firmware_position_verified"],
@@ -497,6 +536,65 @@ def main() -> int:
         }
         if not ver["native_design_checks_passed"]:
             raise SystemExit("KiCad full junction board failed DRC")
+        compact_manifest=None
+        compact_verified=None
+        if args.compact_junction_out:
+            helper=REPO/"src/hardware_splicer/_pcbnew_helpers/keyboard_splice_compact_junction.py"
+            operation=subprocess.run([
+                args.system_python,str(helper),
+                "--full-junction-json",
+                str((args.full_junction_out/"FULL_JUNCTION_WIRING.json").resolve()),
+                "--out",str(args.compact_junction_out.resolve()),
+            ],capture_output=True,text=True,check=False,timeout=120)
+            if operation.returncode:
+                raise SystemExit("Compact IDC junction source-net routing failed: "+operation.stderr[-1200:])
+            compact_manifest=json.loads(
+                (args.compact_junction_out/"COMPACT_JUNCTION_WIRING.json").read_text(encoding="utf-8")
+            )
+            if (compact_manifest["source_sha256"]!=board["source_sha256"]
+                or compact_manifest["source_original_wiring_assignments"]!=junction["total_junction_board_pins"]
+                or compact_manifest["source_junction_original_net_groups"]!=junction["unique_source_nets_joined"]
+                or compact_manifest["fabrication_authorized"] is not False
+                or compact_manifest["release"]!="BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW"):
+                raise SystemExit("Compact junction revision, topology or authority mismatched")
+            compact_pcb=args.compact_junction_out/"compact_idc50_junction.kicad_pcb"
+            compact_drc=args.compact_junction_out/"NATIVE_COMPACT_DRC.json"
+            checked=subprocess.run([
+                kicad_cli,"pcb","drc","--severity-all","--format","json",
+                "--output",str(compact_drc.resolve()),str(compact_pcb.resolve())
+            ],capture_output=True,text=True,check=False,timeout=120)
+            if not compact_drc.is_file():
+                raise SystemExit("KiCad did not report compact junction electrical geometry")
+            report=json.loads(compact_drc.read_text(encoding="utf-8"))
+            errors=len([r for r in report["violations"] if r.get("severity")=="error"])
+            warnings=len([r for r in report["violations"] if r.get("severity")=="warning"])
+            opens=len(report.get("unconnected_items",[]))
+            compact_verified={
+                "schema":"hs.native-compact-junction-drc.v1",
+                "source_sha256":board["source_sha256"],
+                "full_source_junction_model_sha256":junction["full_matrix_sha256"],
+                "pcb_sha256":hashlib.sha256(compact_pcb.read_bytes()).hexdigest(),
+                "native_kicad_exit":checked.returncode,
+                "errors":errors,"warnings":warnings,"unconnected_items":opens,
+                "native_drc_passed":checked.returncode==0 and errors==0 and warnings==0 and opens==0,
+                "physical_harness_verified":False,
+                "fabrication_release":"BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW",
+            }
+            (args.compact_junction_out/"COMPACT_JUNCTION_VERIFICATION.json").write_text(
+                json.dumps(compact_verified,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
+            )
+            if not compact_verified["native_drc_passed"]:
+                raise SystemExit("Compact source-net IDC PCB did not pass native DRC")
+            result["compact_junction_summary"]={
+                "source_sha256":board["source_sha256"],
+                "original_board_area_mm2":compact_manifest["full_size_junction_area_mm2"],
+                "compact_board_area_mm2":compact_manifest["compact_board_area_mm2"],
+                "area_reduction_percent":compact_manifest["board_area_reduction_percent"],
+                "source_nets":compact_manifest["independent_source_bus_net_count"],
+                "donor_contacts":compact_manifest["original_source_donor_contacts"],
+                "remounted_key_wires":compact_manifest["original_remounted_key_ports"],
+                "native_drc_passed":True,"fabrication_authorized":False,
+            }
         if args.machine_project_json is not None:
             previous_handoff=json.loads(
                 args.machine_project_json.read_text(encoding="utf-8")
@@ -507,6 +605,16 @@ def main() -> int:
                 proof,
                 junction,
                 ver,
+                pinout_proof=(
+                    json.loads(args.pjrc_pinout_proof_json.read_text(encoding="utf-8"))
+                    if args.pjrc_pinout_proof_json else None
+                ),
+                legacy_zone_drc_receipt=(
+                    json.loads(args.legacy_zone_drc_receipt_json.read_text(encoding="utf-8"))
+                    if args.legacy_zone_drc_receipt_json else None
+                ),
+                compact_junction=compact_manifest,
+                compact_junction_verification=compact_verified,
             )
             args.machine_project_json.write_text(
                 json.dumps(enriched,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"
@@ -542,6 +650,14 @@ def main() -> int:
             "payload_sha256":functional["payload_sha256"],
             "physical_repair_verified":False,
         }
+    if args.legacy_zone_drc_receipt_json:
+        original_zone_receipt=json.loads(
+            args.legacy_zone_drc_receipt_json.read_text(encoding="utf-8")
+        )
+        verified=verify_legacy_refilled_copy_receipt(
+            original_zone_receipt,board["source_sha256"]
+        )
+        result["source_legacy_zone_drc_summary"]=verified
     write_report(result,args.out)
     if args.harness_csv:
         args.harness_csv.parent.mkdir(parents=True,exist_ok=True)

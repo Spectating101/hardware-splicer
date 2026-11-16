@@ -6,7 +6,10 @@ island result can NEVER be used alone to grant physical authority.
 from __future__ import annotations
 
 from typing import Any, Mapping
+import hashlib
+import json
 
+from .keyboard_splice_zone_drc import verify_legacy_refilled_copy_receipt
 from .machine_project_seed import machine_project_from_intake
 from .machine_project import (
     AuthorityState, EvidenceRef, ReleaseState, Requirement,
@@ -134,6 +137,10 @@ def extend_keyboard_splice_handoff(
     matrix: Mapping[str, Any],
     junction: Mapping[str, Any],
     junction_verification: Mapping[str, Any],
+    pinout_proof: Mapping[str, Any] | None=None,
+    legacy_zone_drc_receipt: Mapping[str, Any] | None=None,
+    compact_junction: Mapping[str, Any] | None=None,
+    compact_junction_verification: Mapping[str, Any] | None=None,
 ) -> dict:
     """Attach source-bound firmware and junction design without physical authority.
 
@@ -177,6 +184,47 @@ def extend_keyboard_splice_handoff(
         junction.get("relocated_key_header_pins",0)
     ):
         raise ValueError("harness wire inventory is incomplete")
+    official_gpio=None
+    if pinout_proof is not None:
+        body={k:v for k,v in pinout_proof.items() if k!="payload_sha256"}
+        packed=json.dumps(body,sort_keys=True,ensure_ascii=False,separators=(",",":"))
+        digest=hashlib.sha256(packed.encode()).hexdigest()
+        if (digest!=pinout_proof.get("payload_sha256")
+            or pinout_proof.get("original_source_sha256")!=source
+            or pinout_proof.get("source_audit_sha256")!=source_audit.get("payload_sha256")
+            or pinout_proof.get("full_matrix_proof_sha256")!=matrix.get("payload_sha256")
+            or pinout_proof.get("firmware_total_gpio_assignments_verified")!=19
+            or pinout_proof.get("source_original_controller_pads_positionally_verified")!=31
+            or pinout_proof.get("fabrication_authorized") is not False):
+            raise ValueError("source Teensy physical pin assignment evidence mismatch")
+        official_gpio=pinout_proof
+    legacy_drc=None
+    if legacy_zone_drc_receipt is not None:
+        legacy_drc=verify_legacy_refilled_copy_receipt(
+            legacy_zone_drc_receipt,source
+        )
+    if (compact_junction is None) != (compact_junction_verification is None):
+        raise ValueError("native compact IDC routing and native DRC must be supplied together")
+    if compact_junction is not None:
+        if (compact_junction.get("source_sha256")!=source
+            or compact_junction.get("source_original_wiring_assignments")!=junction.get("total_junction_board_pins")
+            or compact_junction.get("source_junction_original_net_groups")!=junction.get("unique_source_nets_joined")
+            or compact_junction.get("independent_source_bus_net_count")!=junction.get("unique_source_nets_joined")
+            or compact_junction.get("fabrication_authorized") is not False
+            or compact_junction.get("release")!="BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW"
+            or compact_junction.get("source_original_junction_mutually_exclusive") is not True
+            or compact_junction_verification.get("source_sha256")!=source
+            or compact_junction_verification.get("full_source_junction_model_sha256")!=matrix["payload_sha256"]
+            or compact_junction_verification.get("native_drc_passed") is not True
+            or compact_junction_verification.get("errors")!=0
+            or compact_junction_verification.get("warnings")!=0
+            or compact_junction_verification.get("unconnected_items")!=0
+            or compact_junction_verification.get("fabrication_release")!="BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW"):
+            raise ValueError("compact connector source-net identity, DRC or physical authority mismatch")
+        if (compact_junction.get("IDC_used_pins")!=49
+            or compact_junction.get("total_junction_pin_count",49)!=49
+            or compact_junction.get("board_area_reduction_percent",0)<=0):
+            raise ValueError("compact connector fails source lead count or reduction proof")
 
     subsystems=("remounted-key-pcb","source-bound-junction-bus")
     if any(s.subsystem_id in subsystems for s in project.subsystems):
@@ -248,6 +296,36 @@ def extend_keyboard_splice_handoff(
             simulated=True,
         ),
     ])
+    if official_gpio is not None:
+        project.evidence.append(EvidenceRef(
+            evidence_id="f60-pjrc-teensy2-original-controller-pad-mapping",
+            kind="official_c_pinout_source_footprint_vs_firmware_GPIO",
+            basis="31 external KiCad footprint pads, 19 source firmware GPIO and PJRC C-language pinout",
+            ref=official_gpio["payload_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ))
+    if legacy_drc is not None:
+        project.evidence.append(EvidenceRef(
+            evidence_id="f60-refilled-legacy-zone-copy-native-drc",
+            kind="native_kicad9_converted_source_copy_drc",
+            basis="SHA-pinned original copper non-zone equivalence and converted zone-fill native DRC; original file unchanged",
+            ref=legacy_drc["evidence_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ))
+    if compact_junction is not None:
+        project.evidence.append(EvidenceRef(
+            evidence_id="f60-compact-50pin-IDC-header-native-drc",
+            kind="native_kicad_alternative_compact_wiring_board",
+            basis="Original source-net grouped junction, 49 pins and 20 buses, actual standard KiCad latching IDC footprint",
+            ref=compact_junction_verification["pcb_sha256"],
+            supports=["system"],
+            authority=AuthorityState.DECLARED,
+            simulated=True,
+        ))
     project.discipline_payloads["keyboard_splice"].update({
         "source_connected_schematic_pad_nodes":source_audit["matched_original_pcb_net_nodes"],
         "firmware_source_matrix_positions":source_audit["pcb_switch_diode_firmware_position_verified"],
@@ -259,6 +337,22 @@ def extend_keyboard_splice_handoff(
         "junction_donor_original_pad_wires":junction["source_original_pads_with_only_one_wire_each"],
         "junction_daughterboard_port_wires":junction["relocated_key_header_pins"],
         "native_source_pcb_full_drc_complete":False,
+        "official_teensy2_source_pinout_19_signal_match":official_gpio is not None,
+        "original_teensy_footprint_all_31_pads_source_matched":official_gpio is not None,
+        "source_refilled_zone_copy_drc_no_errors":legacy_drc is not None,
+        "source_refilled_zone_copy_drc_warnings":(
+            legacy_drc["converted_zone_refill_drc_warnings"] if legacy_drc else None
+        ),
+        "source_original_byte_identical_full_drc_verified":False,
+        "compact_IDC_source_net_preview_available":compact_junction is not None,
+        "compact_IDC_area_reduction_percent":(
+            compact_junction["board_area_reduction_percent"]
+            if compact_junction else None
+        ),
+        "compact_and_original_full_junction_mutually_exclusive":(
+            bool(compact_junction and
+                 compact_junction["source_original_junction_mutually_exclusive"])
+        ),
         "physical_harness_cable_verified":False,
         "original_teensy_firmware_compiled_flashed_or_verified":False,
         "physical_donor_verified":False,

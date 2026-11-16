@@ -28,6 +28,11 @@
       "name": "keymap.c",
       "repository_path": "firmware/keymap.c",
       "sha256": "db17e2282380bcdfdacaf2261d599b18c61c5e6aca7f13328b18c37b68918581"
+    },
+    {
+      "name": "Teensy_20.kicad_mod",
+      "repository_path": "hardware/lib/footprints.pretty/Teensy_20.kicad_mod",
+      "sha256": "426868884418397d65c55bc7e6db2be776928dc83c7daffff28ffbbb552970d5"
     }
   ],
   "note": "Exact raw source files remain outside HS; derived hashes and checks only. Covers legacy schematic netlist and the original TMK matrix wiring, not powered firmware verification."

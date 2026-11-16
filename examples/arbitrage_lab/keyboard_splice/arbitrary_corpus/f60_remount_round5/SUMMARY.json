@@ -51,5 +51,23 @@
   "unified_harness_total_junction_ports": 49,
   "unified_harness_native_drc_passed": true,
   "original_firmware_compiled_or_tested": false,
-  "physical_harness_connected_or_tested": false
+  "physical_harness_connected_or_tested": false,
+  "official_PJRC_teensy2_GPIO_assignments_verified": 19,
+  "original_teensy2_physical_footprint_pads_verified": 31,
+  "legacy_kicad_zone_refill_conversion_reproducible": true,
+  "converted_source_copy_native_drc_errors": 0,
+  "converted_source_copy_native_drc_warnings": 321,
+  "converted_source_copy_native_drc_unconnected": 0,
+  "original_source_byte_identical_native_full_drc_done": false,
+  "physical_parts_validated": false,
+  "compact_idc50_latching_header_net_groups": 20,
+  "compact_idc50_latching_header_size_mm": [
+    42.0,
+    94.0
+  ],
+  "compact_idc50_board_area_reduction_percent": 49.1,
+  "compact_idc50_native_drc_passed": true,
+  "compact_idc50_native_drc_warnings": 0,
+  "compact_board_and_full_junction_mutually_exclusive": true,
+  "physical_cable_qualified": false
 }

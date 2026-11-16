@@ -67,3 +67,14 @@ The conditional f.60 recovery now includes a SHA-pinned comparison with its inde
 - HS canonical MachineProject declares the source firmware, full matrix, junction and three proposed unverified physical interfaces but still refuses fabrication.
 
 See [f60_remount_round5/README.md](f60_remount_round5/README.md) and its full original-source SHA and machine evidence. The earlier original f.60 board DRC timeout and lack of a real donor remain unresolved, so the **strict eight-board arbitrary-junk success score remains 0/8**.
+
+
+## Source DRC and smaller ID-connected conversion (2026-11-16)
+
+Source-attested f.60 follow-up now has a **KiCad 9 refilled-zone copy with zero DRC errors and zero unconnected copper** (but **321 warnings**) while preserving every original pad, track, via, switch and component position outside the filled copper areas. The previously unfinishable legacy source DRC is thus understood and reproducibly bounded.
+
+All **19 original Teensy 2.0 matrix GPIO pins** match the official PJRC pinout and exact original KiCad footprint, and the original 62-key TMK mapping remains fully source-attested. A new 50-pin latching IDC option retains the same 49 donor/remount source connections on a PCB with **49.1% less area** and zero native PCB DRC errors.
+
+These proofs do **not** change the original eight-board *arbitrary donor* strict benchmark (0/8). They are derived from the known f.60 reference, not actual physical e-waste.
+
+[Inspect source, DRC, controller and compact KiCad design proof](f60_remount_round5/README.md).
