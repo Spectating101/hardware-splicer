@@ -271,7 +271,8 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
 
 
 @pytest.mark.requires_cadquery
-def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
+def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path, assume_clean_kicad_erc):
+    # Positive evidence closure assumes clean ERC; the failure path has its own regression.
     intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
 
     result = run_project_intake(intake, out_dir=tmp_path / "plant-evidence", start_splicer=False, request_id="plant-evidence")
@@ -300,7 +301,8 @@ def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path)
 
 
 @pytest.mark.requires_cadquery
-def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
+def test_project_intake_extracts_notes_into_production_evidence(tmp_path, assume_clean_kicad_erc):
+    # Isolate note extraction from the catalog schematic's native ERC defects.
     intake = load_project_intake(PLANT_NOTES_INTAKE)
 
     plan = plan_project_from_intake(intake)

@@ -26,7 +26,9 @@ FULL_3D_RUNTIME = importlib.util.find_spec("cadquery") is not None
         ("examples/intakes/plant_watering_tier5_brief.json", 9),
     ],
 )
-def test_plant_release_briefs_hit_nine_of_nine_gates(tmp_path, brief_rel, expected_gates):
+def test_plant_release_briefs_hit_nine_of_nine_gates(tmp_path, brief_rel, expected_gates, assume_clean_kicad_erc):
+    # Exercise downstream evidence scoring with an explicitly clean circuit receipt.
+    # Native failures are covered by test_scenario_circuit_release_gate.py.
     intake = load_project_intake(ROOT / brief_rel)
     vision = dict(intake.get("vision_assistance") or {})
     vision["live"] = False

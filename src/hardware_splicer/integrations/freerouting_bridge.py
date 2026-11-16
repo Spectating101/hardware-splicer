@@ -96,6 +96,7 @@ def run_freerouting_pipeline(
 
         cmd = [
             "java",
+            "-Djava.awt.headless=true",
             "-jar",
             str(jar),
             "-de",
