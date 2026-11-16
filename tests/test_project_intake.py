@@ -270,6 +270,7 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     assert plan["scenario"]["expected"]["minimum_authority_level"] == "field_validation_authority"
 
 
+@pytest.mark.requires_cadquery
 def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
     intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
 
@@ -298,6 +299,7 @@ def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path)
     assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
 
 
+@pytest.mark.requires_cadquery
 def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
     intake = load_project_intake(PLANT_NOTES_INTAKE)
 

@@ -2,10 +2,49 @@
 
 from __future__ import annotations
 
+import importlib.util
 from collections.abc import Callable
 from datetime import datetime, timezone, tzinfo
 
 import pytest
+
+# Optional ``cad`` extra. Tests marked ``requires_cadquery`` / ``requires_trimesh``
+# are skipped, with a reason, when the package cannot be found.
+_OPTIONAL_CAD_MODULES = {
+    "requires_cadquery": "cadquery",
+    "requires_trimesh": "trimesh",
+}
+
+
+def _module_available(name: str) -> bool:
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    for marker, module in _OPTIONAL_CAD_MODULES.items():
+        config.addinivalue_line(
+            "markers",
+            f"{marker}: skipped when the optional '{module}' package (cad extra) is not installed",
+        )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    missing = {
+        marker: module
+        for marker, module in _OPTIONAL_CAD_MODULES.items()
+        if not _module_available(module)
+    }
+    for item in items:
+        for marker, module in missing.items():
+            if item.get_closest_marker(marker) is not None:
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=f"requires optional '{module}' package (install the cad extra)"
+                    )
+                )
 
 
 @pytest.fixture(autouse=True)
