@@ -1,0 +1,450 @@
+{
+  "schema": "hs.keyboard-postcut-copper-islands.v1",
+  "source_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+  "cut_x_mm": 147.973,
+  "cut_path_sha256": "16556371a6488cd09152c6b2f196ea405d731a26728955cbb4527c19f9aba86d",
+  "cut_path_kind": "stepped_polyline",
+  "kerf_mm": 1.0,
+  "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+  "repair_mode": "adaptive_functional",
+  "trace_exposure_requires_mask_removal_and_strain_relief": true,
+  "conductive_zones_imported": 1,
+  "rule_areas_ignored_for_connectivity": 0,
+  "qualified_for_build": false,
+  "target_net_count": 4,
+  "model_pre_cut_island_count": 12,
+  "model_post_cut_island_count": 16,
+  "split_pre_cut_components": 4,
+  "candidate_graph_edges": 2,
+  "unanchored_split_components": 2,
+  "model_replay_remaining_split_components": 2,
+  "model_replay_remaining_required_components": 1,
+  "model_replay_achieved_required_restoration": false,
+  "planned_inert_track_remnants": 1,
+  "damaged_electrical_pad_count": 0,
+  "damaged_electrical_pads": [],
+  "preexisting_unconnected_terminal_net_count": 4,
+  "preexisting_unconnected_terminal_nets": {
+    "/COL 1": 2,
+    "/COL 0": 2,
+    "/ROW 0": 3,
+    "/ROW 1": 3
+  },
+  "model_replay_achieved_full_restoration": false,
+  "issues": [
+    "OVAL_PAD_APPROXIMATION",
+    "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+  ],
+  "sections": [
+    {
+      "net": "/COL 0",
+      "precut_track_only_component": 27,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/COL 0::pre27::post29",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 6,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "via_annulus",
+              "ref": "VIA9",
+              "pad": "ANNULUS",
+              "x": 123.698,
+              "y": 84.836,
+              "layer": "F.Cu",
+              "net": "/COL 0",
+              "source_geometry_id": "via:9:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": 0.8,
+              "physical_access_verified": false,
+              "inspection": "Verify via plating, tenting, annulus, access and wire strain relief"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/COL 0::pre27::post30",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX1",
+              "pad": "1",
+              "x": 138.33475,
+              "y": 65.69075,
+              "net": "/COL 0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX3",
+              "pad": "1",
+              "x": 138.33475,
+              "y": 84.74075,
+              "net": "/COL 0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX1",
+              "pad": "1",
+              "x": 139.64475,
+              "y": 64.23075,
+              "net": "/COL 0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX3",
+              "pad": "1",
+              "x": 139.64475,
+              "y": 83.28075,
+              "net": "/COL 0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX1",
+              "pad": "1",
+              "x": 138.3348,
+              "y": 65.6907,
+              "layer": "F.Cu",
+              "net": "/COL 0",
+              "source_geometry_id": "pad:30:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX3",
+              "pad": "1",
+              "x": 139.6447,
+              "y": 83.2807,
+              "layer": "F.Cu",
+              "net": "/COL 0",
+              "source_geometry_id": "pad:12:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/COL 1",
+      "precut_track_only_component": 33,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/COL 1::pre33::post37",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 7,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "via_annulus",
+              "ref": "VIA10",
+              "pad": "ANNULUS",
+              "x": 124.714,
+              "y": 85.725,
+              "layer": "F.Cu",
+              "net": "/COL 1",
+              "source_geometry_id": "via:10:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": 0.8,
+              "physical_access_verified": false,
+              "inspection": "Verify via plating, tenting, annulus, access and wire strain relief"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/COL 1::pre33::post42",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 16,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX2",
+              "pad": "1",
+              "x": 157.38475,
+              "y": 65.69075,
+              "net": "/COL 1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX4",
+              "pad": "1",
+              "x": 157.38475,
+              "y": 84.74075,
+              "net": "/COL 1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX2",
+              "pad": "1",
+              "x": 158.69475,
+              "y": 64.23075,
+              "net": "/COL 1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX4",
+              "pad": "1",
+              "x": 158.69475,
+              "y": 83.28075,
+              "net": "/COL 1",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX2",
+              "pad": "1",
+              "x": 157.3847,
+              "y": 65.6907,
+              "layer": "F.Cu",
+              "net": "/COL 1",
+              "source_geometry_id": "pad:21:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX4",
+              "pad": "1",
+              "x": 158.6947,
+              "y": 83.2807,
+              "layer": "F.Cu",
+              "net": "/COL 1",
+              "source_geometry_id": "pad:3:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/ROW 0",
+      "precut_track_only_component": 1,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "/ROW 0::pre1::post1",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "via_annulus",
+              "ref": "VIA8",
+              "pad": "ANNULUS",
+              "x": 125.7935,
+              "y": 86.4235,
+              "layer": "F.Cu",
+              "net": "/ROW 0",
+              "source_geometry_id": "via:8:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": 0.8,
+              "physical_access_verified": false,
+              "inspection": "Verify via plating, tenting, annulus, access and wire strain relief"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/ROW 0::pre1::post5",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 10,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/ROW 1",
+      "precut_track_only_component": 18,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 1,
+      "planned_inert_track_remnants": 1,
+      "candidate_graph_edges_needed": 0,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "/ROW 1::pre18::post19",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 7,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/ROW 1::pre18::post20",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
+            "total_modeled_copper_area_mm2": 3.7262,
+            "track_fragment_count": 3,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
+          },
+          "restoration_required": false
+        }
+      ]
+    }
+  ],
+  "bridge_edges": [
+    {
+      "net": "/COL 0",
+      "from_island": "/COL 0::pre27::post29",
+      "to_island": "/COL 0::pre27::post30",
+      "from_candidate_contact": {
+        "contact_type": "via_annulus",
+        "ref": "VIA9",
+        "pad": "ANNULUS",
+        "x": 123.698,
+        "y": 84.836,
+        "layer": "F.Cu",
+        "net": "/COL 0",
+        "source_geometry_id": "via:9:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": 0.8,
+        "physical_access_verified": false,
+        "inspection": "Verify via plating, tenting, annulus, access and wire strain relief"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "MX1",
+        "pad": "1",
+        "x": 138.3348,
+        "y": 65.6907,
+        "layer": "F.Cu",
+        "net": "/COL 0",
+        "source_geometry_id": "pad:30:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": null,
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "MX1",
+        "pad": "1",
+        "x": 138.3348,
+        "y": 65.6907,
+        "layer": "F.Cu",
+        "net": "/COL 0",
+        "source_geometry_id": "pad:30:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/COL 1",
+      "from_island": "/COL 1::pre33::post37",
+      "to_island": "/COL 1::pre33::post42",
+      "from_candidate_contact": {
+        "contact_type": "via_annulus",
+        "ref": "VIA10",
+        "pad": "ANNULUS",
+        "x": 124.714,
+        "y": 85.725,
+        "layer": "F.Cu",
+        "net": "/COL 1",
+        "source_geometry_id": "via:10:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": 0.8,
+        "physical_access_verified": false,
+        "inspection": "Verify via plating, tenting, annulus, access and wire strain relief"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "MX2",
+        "pad": "1",
+        "x": 157.3847,
+        "y": 65.6907,
+        "layer": "F.Cu",
+        "net": "/COL 1",
+        "source_geometry_id": "pad:21:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": null,
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "MX2",
+        "pad": "1",
+        "x": 157.3847,
+        "y": 65.6907,
+        "layer": "F.Cu",
+        "net": "/COL 1",
+        "source_geometry_id": "pad:21:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    }
+  ],
+  "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+  "payload_sha256": "efbef1e0e1156181734c7dc4acd32867a7d1e77bfd91dd12eaebbfdd031d1a0e"
+}

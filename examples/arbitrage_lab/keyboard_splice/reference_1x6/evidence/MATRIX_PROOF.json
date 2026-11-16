@@ -1,0 +1,37 @@
+{
+  "schema": "hs.keyboard-single-row-matrix-proof.v1",
+  "source_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+  "topology_sha256": "cde922aa725fc08181484dbe32b36dca596922edce722e17c3ea733da7038439",
+  "cut_path_sha256": "47eaa1e3f29ba50917d2581e8a203bd1c0e4be5299a5a8208f8845df9efbe216",
+  "native_source_kicad_version": "9.0.2",
+  "row_net": "ROW_0",
+  "column_nets": [
+    "COL_0",
+    "COL_1",
+    "COL_2",
+    "COL_3",
+    "COL_4",
+    "COL_5"
+  ],
+  "key_switches": [
+    "SW1",
+    "SW2",
+    "SW3",
+    "SW4",
+    "SW5",
+    "SW6"
+  ],
+  "keys": 6,
+  "ideal_switch_combinations_tested": 64,
+  "ideal_switch_combinations_failed": [],
+  "passive_keyboard_matrix_model_passed": true,
+  "required_postcut_copper_groups_unresolved": 0,
+  "original_source_terminal_gap_count": 0,
+  "native_source_drc_violations": 0,
+  "physical_controller_connected": false,
+  "firmware_loaded": false,
+  "real_key_switches_tested": false,
+  "physical_repair_verified": false,
+  "release": "SIMULATED_PASSIVE_MATRIX_ONLY",
+  "payload_sha256": "7b9cb10ffbfe1eadad0f41e2506c5b46f65d78afd8521166a8ec27139dd73e42"
+}

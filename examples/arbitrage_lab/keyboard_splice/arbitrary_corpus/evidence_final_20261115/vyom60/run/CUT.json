@@ -1,0 +1,707 @@
+{
+  "schema": "hs.keyboard-cut-splice-screen.v1",
+  "source_file_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+  "source_label": "vyom60.kicad_pcb",
+  "source_design_only": true,
+  "physical_donor_exists": false,
+  "analysis_tool": "Native KiCad pcbnew geometry extraction + HS bounded geometry screen",
+  "config": {
+    "kerf_mm": 1.0,
+    "pad_clearance_mm": 1.0,
+    "switch_keepout_mm": 8.0,
+    "min_key_side_fraction": 0.3,
+    "scan_fraction_min": 0.3,
+    "scan_fraction_max": 0.7,
+    "scan_step_mm": 1.0
+  },
+  "board": {
+    "outline_bbox_mm": {
+      "x_min": 78.80625,
+      "x_max": 364.10625,
+      "y_min": 52.0625,
+      "y_max": 147.4625
+    },
+    "zone_count": 4
+  },
+  "counts": {
+    "tracks": 2838,
+    "pads": 1233,
+    "via_count": 359,
+    "switch_footprint_candidates": 91
+  },
+  "scanned_straight_seams": 115,
+  "passing_seams": 0,
+  "midpoint": {
+    "x_mm": 221.456,
+    "track_segments_touched": 35,
+    "distinct_nets_touched": 21,
+    "net_categories": {
+      "key_matrix": 13,
+      "lighting_optional": 3,
+      "other_unknown_do_not_discard": 5
+    },
+    "matrix_nets_touched": [
+      "COL10",
+      "COL11",
+      "COL12",
+      "COL13",
+      "COL14",
+      "COL7",
+      "COL8",
+      "COL9",
+      "ROW0",
+      "ROW1",
+      "ROW2",
+      "ROW3",
+      "ROW4"
+    ],
+    "pads_at_risk": 21,
+    "vias_at_risk": 4,
+    "switch_centers_at_risk": 6,
+    "switch_candidates_left": 42,
+    "switch_candidates_right": 49,
+    "key_balance_pass": true,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "+5V",
+      "COL10",
+      "COL11",
+      "COL12",
+      "COL13",
+      "COL14",
+      "COL7",
+      "COL8",
+      "COL9",
+      "LEDGND",
+      "Net-(D36-Pad2)",
+      "Net-(D62-Pad2)",
+      "Net-(K_N1-Pad4)",
+      "Net-(K_SPACE2_1-Pad4)",
+      "Net-(RGB12-Pad2)",
+      "Net-(RGB4-Pad2)",
+      "ROW0",
+      "ROW1",
+      "ROW2",
+      "ROW3",
+      "ROW4"
+    ]
+  },
+  "best_scanned_straight_seam": {
+    "x_mm": 192.396,
+    "track_segments_touched": 32,
+    "distinct_nets_touched": 22,
+    "net_categories": {
+      "key_matrix": 14,
+      "lighting_optional": 3,
+      "other_unknown_do_not_discard": 5
+    },
+    "matrix_nets_touched": [
+      "COL10",
+      "COL11",
+      "COL12",
+      "COL13",
+      "COL14",
+      "COL6",
+      "COL7",
+      "COL8",
+      "COL9",
+      "ROW0",
+      "ROW1",
+      "ROW2",
+      "ROW3",
+      "ROW4"
+    ],
+    "pads_at_risk": 13,
+    "vias_at_risk": 1,
+    "switch_centers_at_risk": 3,
+    "switch_candidates_left": 33,
+    "switch_candidates_right": 58,
+    "key_balance_pass": true,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "+5V",
+      "COL10",
+      "COL11",
+      "COL12",
+      "COL13",
+      "COL14",
+      "COL6",
+      "COL7",
+      "COL8",
+      "COL9",
+      "LEDGND",
+      "Net-(D35-Pad2)",
+      "Net-(D49-Pad2)",
+      "Net-(K_G1-Pad4)",
+      "Net-(K_SPACE1_1-Pad4)",
+      "Net-(RGB13-Pad2)",
+      "Net-(RGB3-Pad2)",
+      "ROW0",
+      "ROW1",
+      "ROW2",
+      "ROW3",
+      "ROW4"
+    ],
+    "harness_candidates": [
+      {
+        "net": "+5V",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "K_V1",
+          "pad": "3",
+          "x": 189.38875,
+          "y": 124.1425,
+          "layer": "F.Cu",
+          "net": "+5V"
+        },
+        "right_candidate_pad": {
+          "ref": "K_T1",
+          "pad": "3",
+          "x": 194.15125,
+          "y": 86.0425,
+          "layer": "F.Cu",
+          "net": "+5V"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL10",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "40",
+          "x": 108.25,
+          "y": 89.25,
+          "layer": "F.Cu",
+          "net": "COL10"
+        },
+        "right_candidate_pad": {
+          "ref": "K_O1",
+          "pad": "1",
+          "x": 265.27125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL10"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL11",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "41",
+          "x": 108.75,
+          "y": 89.25,
+          "layer": "F.Cu",
+          "net": "COL11"
+        },
+        "right_candidate_pad": {
+          "ref": "K_P1",
+          "pad": "1",
+          "x": 284.32125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL11"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL12",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "2",
+          "x": 113.85,
+          "y": 91.35,
+          "layer": "F.Cu",
+          "net": "COL12"
+        },
+        "right_candidate_pad": {
+          "ref": "K_[1",
+          "pad": "1",
+          "x": 303.37125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL12"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL13",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "3",
+          "x": 113.85,
+          "y": 91.85,
+          "layer": "F.Cu",
+          "net": "COL13"
+        },
+        "right_candidate_pad": {
+          "ref": "K_RFN3",
+          "pad": "1",
+          "x": 322.42125,
+          "y": 135.5725,
+          "layer": "F.Cu",
+          "net": "COL13"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL14",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "4",
+          "x": 113.85,
+          "y": 92.35,
+          "layer": "F.Cu",
+          "net": "COL14"
+        },
+        "right_candidate_pad": {
+          "ref": "K_ENTER1",
+          "pad": "1",
+          "x": 339.09,
+          "y": 97.4725,
+          "layer": "F.Cu",
+          "net": "COL14"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL6",
+        "function_class": "key_matrix",
+        "crossed_segments": 4,
+        "left_candidate_pad": {
+          "ref": "K_T1",
+          "pad": "1",
+          "x": 189.07125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL6"
+        },
+        "right_candidate_pad": {
+          "ref": "K_#6",
+          "pad": "1",
+          "x": 198.59625,
+          "y": 59.3725,
+          "layer": "F.Cu",
+          "net": "COL6"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL7",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "19",
+          "x": 109.25,
+          "y": 97.95,
+          "layer": "F.Cu",
+          "net": "COL7"
+        },
+        "right_candidate_pad": {
+          "ref": "K_Y1",
+          "pad": "1",
+          "x": 208.12125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL7"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL8",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "38",
+          "x": 107.25,
+          "y": 89.25,
+          "layer": "F.Cu",
+          "net": "COL8"
+        },
+        "right_candidate_pad": {
+          "ref": "K_U1",
+          "pad": "1",
+          "x": 227.17125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL8"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL9",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "39",
+          "x": 107.75,
+          "y": 89.25,
+          "layer": "F.Cu",
+          "net": "COL9"
+        },
+        "right_candidate_pad": {
+          "ref": "K_I1",
+          "pad": "1",
+          "x": 246.22125,
+          "y": 78.4225,
+          "layer": "F.Cu",
+          "net": "COL9"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "LEDGND",
+        "function_class": "lighting_optional",
+        "crossed_segments": 6,
+        "left_candidate_pad": {
+          "ref": "R21",
+          "pad": "2",
+          "x": 188.11875,
+          "y": 86.165625,
+          "layer": "F.Cu",
+          "net": "LEDGND"
+        },
+        "right_candidate_pad": {
+          "ref": "R61",
+          "pad": "2",
+          "x": 196.6468,
+          "y": 143.3442,
+          "layer": "F.Cu",
+          "net": "LEDGND"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(D35-Pad2)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "D35",
+          "pad": "2",
+          "x": 189.8015,
+          "y": 97.1697,
+          "layer": "F.Cu",
+          "net": "Net-(D35-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "K_G1",
+          "pad": "2",
+          "x": 200.18375,
+          "y": 94.9325,
+          "layer": "F.Cu",
+          "net": "Net-(D35-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(D49-Pad2)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "K_V1",
+          "pad": "2",
+          "x": 190.65875,
+          "y": 113.9825,
+          "layer": "F.Cu",
+          "net": "Net-(D49-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "D49",
+          "pad": "2",
+          "x": 196.453125,
+          "y": 116.221875,
+          "layer": "F.Cu",
+          "net": "Net-(D49-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(K_G1-Pad4)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": null,
+        "right_candidate_pad": {
+          "ref": "K_G1",
+          "pad": "4",
+          "x": 196.37375,
+          "y": 105.0925,
+          "layer": "F.Cu",
+          "net": "Net-(K_G1-Pad4)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(K_SPACE1_1-Pad4)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "K_SPACE1_3",
+          "pad": "4",
+          "x": 182.245,
+          "y": 143.1925,
+          "layer": "F.Cu",
+          "net": "Net-(K_SPACE1_1-Pad4)"
+        },
+        "right_candidate_pad": {
+          "ref": "R61",
+          "pad": "1",
+          "x": 196.6468,
+          "y": 144.8442,
+          "layer": "F.Cu",
+          "net": "Net-(K_SPACE1_1-Pad4)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(RGB13-Pad2)",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "RGB14",
+          "pad": "4",
+          "x": 174.55,
+          "y": 126.65,
+          "layer": "F.Cu",
+          "net": "Net-(RGB13-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "RGB13",
+          "pad": "2",
+          "x": 209.73,
+          "y": 130.27,
+          "layer": "F.Cu",
+          "net": "Net-(RGB13-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(RGB3-Pad2)",
+        "function_class": "lighting_optional",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "RGB3",
+          "pad": "2",
+          "x": 175.39,
+          "y": 72.68,
+          "layer": "F.Cu",
+          "net": "Net-(RGB3-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "RGB4",
+          "pad": "4",
+          "x": 206.02,
+          "y": 69.9,
+          "layer": "F.Cu",
+          "net": "Net-(RGB3-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW0",
+        "function_class": "key_matrix",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "D5",
+          "pad": "1",
+          "x": 172.640625,
+          "y": 62.371875,
+          "layer": "F.Cu",
+          "net": "ROW0"
+        },
+        "right_candidate_pad": {
+          "ref": "D7",
+          "pad": "1",
+          "x": 210.740625,
+          "y": 62.371875,
+          "layer": "F.Cu",
+          "net": "ROW0"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW1",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "D20",
+          "pad": "1",
+          "x": 182.165625,
+          "y": 81.421875,
+          "layer": "F.Cu",
+          "net": "ROW1"
+        },
+        "right_candidate_pad": {
+          "ref": "D21",
+          "pad": "1",
+          "x": 201.215625,
+          "y": 81.421875,
+          "layer": "F.Cu",
+          "net": "ROW1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW2",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "D35",
+          "pad": "1",
+          "x": 189.8015,
+          "y": 100.4697,
+          "layer": "F.Cu",
+          "net": "ROW2"
+        },
+        "right_candidate_pad": {
+          "ref": "D36",
+          "pad": "1",
+          "x": 225.028125,
+          "y": 100.471875,
+          "layer": "F.Cu",
+          "net": "ROW2"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW3",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "D48",
+          "pad": "1",
+          "x": 177.403125,
+          "y": 119.521875,
+          "layer": "F.Cu",
+          "net": "ROW3"
+        },
+        "right_candidate_pad": {
+          "ref": "D49",
+          "pad": "1",
+          "x": 196.453125,
+          "y": 119.521875,
+          "layer": "F.Cu",
+          "net": "ROW3"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW4",
+        "function_class": "key_matrix",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "D61",
+          "pad": "1",
+          "x": 189.309375,
+          "y": 138.571875,
+          "layer": "F.Cu",
+          "net": "ROW4"
+        },
+        "right_candidate_pad": {
+          "ref": "D62",
+          "pad": "1",
+          "x": 229.790625,
+          "y": 139.7625,
+          "layer": "F.Cu",
+          "net": "ROW4"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      }
+    ]
+  },
+  "requested_seam": null,
+  "release": "BLOCKED_REFERENCE_ONLY",
+  "next_action": "Identify one exact-model salvaged keyboard; obtain both PCB images and unpowered continuity; identify controller/optional circuits; design stepped cut and interposer based on real measurements",
+  "blockers": [
+    "NO SAFE STRAIGHT SEAM found under conservative footprint/pad/via keepout",
+    "No evidence that a physical donor PCB matches this reference PCB revision",
+    "Copper planes, actual connected paths, and multi-crossing net topology are not proven by segment intersections",
+    "Cut-edge tolerances, component/plate keepouts and case/fastener clearances need physical registration",
+    "Candidate pad locations are not checked for solderability or post-cut continuity",
+    "Firmware matrix behavior, original controller, USB, ESD and safety require a physical test",
+    "No authority to cut, solder, fabricate or sell hardware from this design scan",
+    "1 crossed nets lack a pad on one or both sides",
+    "4 copper zone objects need fill/return-path validation after cutting",
+    "Stepped cut is only a modeled path; component destruction and actual populated donor layout unverified",
+    "Modeled electrical islands are partial track/pad/via evidence, not validated post-cut conductivity"
+  ],
+  "stepped_path_summary": {
+    "payload_sha256": "f73e8c767ae5934b747700d6fd1393285607de3193788e465fd0cf1859cb3d2e",
+    "nominal_path_length_mm": 129.872,
+    "collision_counts": {
+      "pads": 5,
+      "vias": 2,
+      "switches": 6,
+      "critical": 0
+    },
+    "affected_net_count": 20,
+    "source_geometry_issues": [
+      "OVAL_PAD_APPROXIMATION",
+      "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+    ],
+    "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+    "physical_cut_authorized": false
+  },
+  "repair_loop_summary": {
+    "selected_strategy": "adaptive_functional",
+    "total_iterations": 3,
+    "required_graph_connected_in_model": false,
+    "unresolved_source_baseline_terminal_net_gaps": 20,
+    "physical_authority_granted": false,
+    "result": "POSTCUT_REQUIRED_GRAPH_STILL_DISCONNECTED"
+  },
+  "postcut_topology_summary": {
+    "model_pre_cut_island_count": 215,
+    "model_post_cut_island_count": 244,
+    "split_pre_cut_components": 19,
+    "candidate_graph_edges": 11,
+    "unanchored_split_components": 14,
+    "model_replay_remaining_split_components": 15,
+    "model_replay_remaining_required_components": 13,
+    "model_replay_achieved_required_restoration": false,
+    "planned_inert_track_remnants": 4,
+    "damaged_electrical_pad_count": 3,
+    "preexisting_unconnected_terminal_net_count": 20,
+    "repair_mode": "adaptive_functional",
+    "model_replay_achieved_full_restoration": false,
+    "issues": [
+      "OVAL_PAD_APPROXIMATION",
+      "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+    ],
+    "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+    "payload_sha256": "e878f222de6ca4573bb6647d5da073d319a8984f0c4c3781511e5b71e9e53926"
+  },
+  "canonical_machine_release": {
+    "requested": "build_ready",
+    "achieved": "design_ready",
+    "allowed": false,
+    "blocker_codes": [
+      "unresolved_interface",
+      "safety_not_closed",
+      "verification_not_passed",
+      "release_state_not_reached"
+    ]
+  },
+  "interposer_preview_summary": {
+    "channels": 11,
+    "pcb_sha256": "dd87df7c300cb5641335bf3a98ac9f5bfbb43b41697ab5ae2f9ecbead50fb7a6",
+    "native_drc_errors": 0,
+    "native_drc_warnings": 0,
+    "native_unconnected_items": 0,
+    "native_design_checks_passed": true,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  }
+}

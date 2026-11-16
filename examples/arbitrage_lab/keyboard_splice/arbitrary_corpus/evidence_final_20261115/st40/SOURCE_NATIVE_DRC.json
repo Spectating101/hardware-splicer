@@ -1,0 +1,3215 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-15T15:31:40+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "st40.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [+3V3] on B.Cu, length 0.4209 mm",
+                    "pos": {
+                        "x": 3.869528,
+                        "y": 25.30076
+                    },
+                    "uuid": "77eaf8e1-118d-495b-9b6e-1602c2ef0a8d"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [VBUS] on B.Cu, length 0.0049 mm",
+                    "pos": {
+                        "x": 7.42001,
+                        "y": 0.669991
+                    },
+                    "uuid": "2bf1ab15-977d-4088-b29b-9c5921bd4517"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [row2] on B.Cu, length 0.2300 mm",
+                    "pos": {
+                        "x": 41.0,
+                        "y": 44.162509
+                    },
+                    "uuid": "fbcb5194-30e7-4224-8937-3634e4bca458"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.0601 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D43-Pad2)] of MX43",
+                    "pos": {
+                        "x": 116.84,
+                        "y": 52.07
+                    },
+                    "uuid": "bd3be1b9-7da6-4b8d-baf0-06aeb6b5bedd"
+                },
+                {
+                    "description": "NPTH pad of MX49",
+                    "pos": {
+                        "x": 116.68125,
+                        "y": 48.895
+                    },
+                    "uuid": "677911b7-8bd5-4fbe-a7e0-1b0bc3334905"
+                }
+            ],
+            "severity": "error",
+            "type": "hole_clearance"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint D25",
+                    "pos": {
+                        "x": 4.7625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd36"
+                },
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 9.524992,
+                        "y": 47.62496
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720421"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Courtyards overlap",
+            "items": [
+                {
+                    "description": "Footprint D37",
+                    "pos": {
+                        "x": 4.7625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe62"
+                },
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 9.524992,
+                        "y": 47.62496
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720421"
+                }
+            ],
+            "severity": "error",
+            "type": "courtyards_overlap"
+        },
+        {
+            "description": "Board edge clearance violation (board setup constraints edge clearance 0.5000 mm; actual 0.4800 mm)",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": -6.25,
+                        "y": -8.25
+                    },
+                    "uuid": "78af8422-ef4a-4f05-b26a-df3a47b57e71"
+                },
+                {
+                    "description": "PTH pad 6 [GND] of J1",
+                    "pos": {
+                        "x": 13.175,
+                        "y": -6.82
+                    },
+                    "uuid": "c69a820a-33a1-4379-833a-ddb056d12459"
+                }
+            ],
+            "severity": "error",
+            "type": "copper_edge_clearance"
+        },
+        {
+            "description": "Board edge clearance violation (board setup constraints edge clearance 0.5000 mm; actual 0.4800 mm)",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": -6.25,
+                        "y": -8.25
+                    },
+                    "uuid": "78af8422-ef4a-4f05-b26a-df3a47b57e71"
+                },
+                {
+                    "description": "PTH pad 6 [GND] of J1",
+                    "pos": {
+                        "x": 5.875,
+                        "y": -6.82
+                    },
+                    "uuid": "6aeabd62-7fa9-4168-a1ee-6b7f60e89be0"
+                }
+            ],
+            "severity": "error",
+            "type": "copper_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": -6.25,
+                        "y": -8.25
+                    },
+                    "uuid": "78af8422-ef4a-4f05-b26a-df3a47b57e71"
+                },
+                {
+                    "description": "Segment of J1 on B.SilkS",
+                    "pos": {
+                        "x": 5.875,
+                        "y": -2.0
+                    },
+                    "uuid": "a7752883-acb6-4a10-a8d7-6bad5dc253c1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": -6.25,
+                        "y": -8.25
+                    },
+                    "uuid": "78af8422-ef4a-4f05-b26a-df3a47b57e71"
+                },
+                {
+                    "description": "Segment of J1 on B.SilkS",
+                    "pos": {
+                        "x": 13.175,
+                        "y": -11.2
+                    },
+                    "uuid": "8d634632-37ef-438e-99b7-70e981687c29"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "NPTH pad of MX42",
+                    "pos": {
+                        "x": 100.33,
+                        "y": 57.15
+                    },
+                    "uuid": "20942303-d257-4bc8-abe2-4a793ec6f8ef"
+                },
+                {
+                    "description": "NPTH pad of MX49",
+                    "pos": {
+                        "x": 99.695,
+                        "y": 57.15
+                    },
+                    "uuid": "37a95b92-5a32-4c68-ab21-e29fced04936"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "NPTH pad of MX43",
+                    "pos": {
+                        "x": 109.22,
+                        "y": 57.15
+                    },
+                    "uuid": "9a1accb1-9875-44be-b45b-5c7e2047aa17"
+                },
+                {
+                    "description": "NPTH pad of MX49",
+                    "pos": {
+                        "x": 109.855,
+                        "y": 57.15
+                    },
+                    "uuid": "db76f929-f457-49cf-a07f-1a312ac712bd"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX1",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c723a04"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX13",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759182"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D21",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fcd2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D22",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fceb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D24",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd1d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX26",
+                    "pos": {
+                        "x": 19.05,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c72e7ec"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX25",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759272"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D43",
+                    "pos": {
+                        "x": 120.253125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fef8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX33",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759312"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX27",
+                    "pos": {
+                        "x": 38.1,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75929a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint SW2",
+                    "pos": {
+                        "x": 28.574976,
+                        "y": 28.574976
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720440"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 9.524992,
+                        "y": 47.62496
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720421"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C1",
+                    "pos": {
+                        "x": 8.52,
+                        "y": 19.95
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fa5f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C2",
+                    "pos": {
+                        "x": 2.97656,
+                        "y": 25.003104
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fa70"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C3",
+                    "pos": {
+                        "x": 16.07,
+                        "y": 30.91
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fa81"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C4",
+                    "pos": {
+                        "x": 13.096864,
+                        "y": 22.026581
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fa92"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C5",
+                    "pos": {
+                        "x": 6.548443,
+                        "y": 7.143756
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c730332"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C6",
+                    "pos": {
+                        "x": 6.548443,
+                        "y": 9.525008
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fab4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint C7",
+                    "pos": {
+                        "x": 8.48,
+                        "y": 41.969496
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fac5"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D1",
+                    "pos": {
+                        "x": 2.54,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c722341"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D2",
+                    "pos": {
+                        "x": 23.8125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7261a1"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D3",
+                    "pos": {
+                        "x": 42.8625,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fb10"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D4",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fb29"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D5",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fb42"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D6",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c73180c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D7",
+                    "pos": {
+                        "x": 119.0625,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fb74"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D8",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fb8d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D9",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fba6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D10",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fbbf"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D11",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fbd8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D12",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 4.7625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fbf1"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D13",
+                    "pos": {
+                        "x": 2.54,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc0a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D14",
+                    "pos": {
+                        "x": 23.8125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc23"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D15",
+                    "pos": {
+                        "x": 42.8625,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc3c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D16",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc55"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D17",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc6e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D18",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fc87"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D19",
+                    "pos": {
+                        "x": 119.0625,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fca0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D20",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fcb9"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D23",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd04"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D25",
+                    "pos": {
+                        "x": 4.7625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd36"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D26",
+                    "pos": {
+                        "x": 23.8125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd4f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D27",
+                    "pos": {
+                        "x": 42.8625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd68"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D28",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd81"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D29",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fd9a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D30",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fdb3"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D31",
+                    "pos": {
+                        "x": 119.0625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fdcc"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D32",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fde5"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D33",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fdfe"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D34",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe17"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D35",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe30"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D36",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 42.8625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe49"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D37",
+                    "pos": {
+                        "x": 4.7625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe62"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D38",
+                    "pos": {
+                        "x": 23.8125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe7b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D39",
+                    "pos": {
+                        "x": 42.8625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fe94"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D40",
+                    "pos": {
+                        "x": 61.9125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fead"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D41",
+                    "pos": {
+                        "x": 80.9625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fec6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D42",
+                    "pos": {
+                        "x": 100.0125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71fedf"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D44",
+                    "pos": {
+                        "x": 138.1125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71ff11"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D45",
+                    "pos": {
+                        "x": 157.1625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71ff2a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D46",
+                    "pos": {
+                        "x": 176.2125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71ff43"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D47",
+                    "pos": {
+                        "x": 195.2625,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71ff5c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint D48",
+                    "pos": {
+                        "x": 214.3125,
+                        "y": 47.625
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c71ff75"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint J1",
+                    "pos": {
+                        "x": 9.525,
+                        "y": -2.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c6d0731"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint R1",
+                    "pos": {
+                        "x": 23.04,
+                        "y": 26.39
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720402"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 13.096875,
+                        "y": 9.525
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c720456"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'pcb-parts'.",
+            "items": [
+                {
+                    "description": "Footprint U2",
+                    "pos": {
+                        "x": 9.525,
+                        "y": 28.575
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c728494"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX2",
+                    "pos": {
+                        "x": 19.05,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7590a6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX3",
+                    "pos": {
+                        "x": 38.1,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7590ba"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX4",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7590ce"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX5",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7590e2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX6",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7590f6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX7",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75910a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX8",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75911e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX9",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759132"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX10",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759146"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX11",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75915a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX12",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 0.0
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75916e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX15",
+                    "pos": {
+                        "x": 38.1,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7591aa"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX16",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7591be"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX17",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7591d2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX18",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7591e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX19",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7591fa"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX20",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75920e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX21",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759222"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX22",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759236"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX23",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75924a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX24",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75925e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX28",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7592ae"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX29",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7592c2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX30",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7592d6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX32",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7592fe"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX34",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759326"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX35",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75933a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX37",
+                    "pos": {
+                        "x": 0.0,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759362"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX38",
+                    "pos": {
+                        "x": 19.05,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759376"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX39",
+                    "pos": {
+                        "x": 38.1,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75938a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX40",
+                    "pos": {
+                        "x": 57.15,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75939e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX41",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7593b2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX42",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7593c6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX43",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7593da"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX44",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c7593ee"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX45",
+                    "pos": {
+                        "x": 152.4,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759402"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX46",
+                    "pos": {
+                        "x": 171.45,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759416"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX47",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75942a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX48",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c75943e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX49",
+                    "pos": {
+                        "x": 104.775,
+                        "y": 57.15
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c759452"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX31",
+                    "pos": {
+                        "x": 114.3,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c700340"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX36",
+                    "pos": {
+                        "x": 209.55,
+                        "y": 38.1
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c700355"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX14",
+                    "pos": {
+                        "x": 19.05,
+                        "y": 19.05
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005c6cf929"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of J1 on B.SilkS",
+                    "pos": {
+                        "x": 13.175,
+                        "y": -2.0
+                    },
+                    "uuid": "eece6b10-1300-4e66-8f59-c5c8166ae83e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of J1 on B.SilkS",
+                    "pos": {
+                        "x": 5.875,
+                        "y": -2.0
+                    },
+                    "uuid": "a7752883-acb6-4a10-a8d7-6bad5dc253c1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of J1 on B.SilkS",
+                    "pos": {
+                        "x": 13.175,
+                        "y": -11.2
+                    },
+                    "uuid": "8d634632-37ef-438e-99b7-70e981687c29"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of U2",
+                    "pos": {
+                        "x": 15.375,
+                        "y": 28.575
+                    },
+                    "uuid": "82b5e2f8-d44d-4d96-8c71-e7885bdb0249"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Front solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 5 [GND] of J1",
+                    "pos": {
+                        "x": 11.125,
+                        "y": -1.4
+                    },
+                    "uuid": "88b82c20-c692-4a18-a8c4-e43ff7307173"
+                },
+                {
+                    "description": "PTH pad 4 [Net-(J1-Pad4)] of J1",
+                    "pos": {
+                        "x": 10.325,
+                        "y": -2.6
+                    },
+                    "uuid": "1e2e9b34-d1b5-40bb-b685-d7e92caea2a0"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 5 [GND] of J1",
+                    "pos": {
+                        "x": 11.125,
+                        "y": -1.4
+                    },
+                    "uuid": "88b82c20-c692-4a18-a8c4-e43ff7307173"
+                },
+                {
+                    "description": "PTH pad 4 [Net-(J1-Pad4)] of J1",
+                    "pos": {
+                        "x": 10.325,
+                        "y": -2.6
+                    },
+                    "uuid": "1e2e9b34-d1b5-40bb-b685-d7e92caea2a0"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Front solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 4 [Net-(J1-Pad4)] of J1",
+                    "pos": {
+                        "x": 10.325,
+                        "y": -2.6
+                    },
+                    "uuid": "1e2e9b34-d1b5-40bb-b685-d7e92caea2a0"
+                },
+                {
+                    "description": "PTH pad 3 [D+] of J1",
+                    "pos": {
+                        "x": 9.525,
+                        "y": -1.4
+                    },
+                    "uuid": "58eb8899-f2c0-48da-8ad0-7b3022c75a70"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 4 [Net-(J1-Pad4)] of J1",
+                    "pos": {
+                        "x": 10.325,
+                        "y": -2.6
+                    },
+                    "uuid": "1e2e9b34-d1b5-40bb-b685-d7e92caea2a0"
+                },
+                {
+                    "description": "PTH pad 3 [D+] of J1",
+                    "pos": {
+                        "x": 9.525,
+                        "y": -1.4
+                    },
+                    "uuid": "58eb8899-f2c0-48da-8ad0-7b3022c75a70"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Front solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 3 [D+] of J1",
+                    "pos": {
+                        "x": 9.525,
+                        "y": -1.4
+                    },
+                    "uuid": "58eb8899-f2c0-48da-8ad0-7b3022c75a70"
+                },
+                {
+                    "description": "PTH pad 2 [D-] of J1",
+                    "pos": {
+                        "x": 8.725,
+                        "y": -2.6
+                    },
+                    "uuid": "4bcddfda-a306-4dd6-b5d4-31365bc89263"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 3 [D+] of J1",
+                    "pos": {
+                        "x": 9.525,
+                        "y": -1.4
+                    },
+                    "uuid": "58eb8899-f2c0-48da-8ad0-7b3022c75a70"
+                },
+                {
+                    "description": "PTH pad 2 [D-] of J1",
+                    "pos": {
+                        "x": 8.725,
+                        "y": -2.6
+                    },
+                    "uuid": "4bcddfda-a306-4dd6-b5d4-31365bc89263"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Front solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 2 [D-] of J1",
+                    "pos": {
+                        "x": 8.725,
+                        "y": -2.6
+                    },
+                    "uuid": "4bcddfda-a306-4dd6-b5d4-31365bc89263"
+                },
+                {
+                    "description": "PTH pad 1 [VBUS] of J1",
+                    "pos": {
+                        "x": 7.925,
+                        "y": -1.4
+                    },
+                    "uuid": "5c39ac2c-3d2c-4a3d-af4a-4866042ffb93"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 2 [D-] of J1",
+                    "pos": {
+                        "x": 8.725,
+                        "y": -2.6
+                    },
+                    "uuid": "4bcddfda-a306-4dd6-b5d4-31365bc89263"
+                },
+                {
+                    "description": "PTH pad 1 [VBUS] of J1",
+                    "pos": {
+                        "x": 7.925,
+                        "y": -1.4
+                    },
+                    "uuid": "5c39ac2c-3d2c-4a3d-af4a-4866042ffb93"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "PTH pad 6 [GND] of J1",
+                    "pos": {
+                        "x": 13.175,
+                        "y": -2.0
+                    },
+                    "uuid": "668a051c-f09d-45d2-abe8-4e39075c8d9a"
+                },
+                {
+                    "description": "PTH pad 1 [colB] of MX2",
+                    "pos": {
+                        "x": 15.24,
+                        "y": -2.54
+                    },
+                    "uuid": "5cb1678e-efbf-4f99-bde1-4246d7069912"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 1 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 12.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "ece4d2c3-46b0-4af8-ba7f-7ece7fd97490"
+                },
+                {
+                    "description": "Pad 2 [colH] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "d81a6461-aa25-4dd8-b840-0ce260cd8f9f"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 2 [colH] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "d81a6461-aa25-4dd8-b840-0ce260cd8f9f"
+                },
+                {
+                    "description": "Pad 3 [colI] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "384d4627-75f6-4150-96f9-cd4e425918d4"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 3 [colI] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "384d4627-75f6-4150-96f9-cd4e425918d4"
+                },
+                {
+                    "description": "Pad 4 [colJ] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "59b87693-63f4-4926-a9ed-11a94eb09621"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 4 [colJ] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "59b87693-63f4-4926-a9ed-11a94eb09621"
+                },
+                {
+                    "description": "Pad 5 [colK] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "69119ab1-9470-4252-b71f-065d16a73b97"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 5 [colK] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "69119ab1-9470-4252-b71f-065d16a73b97"
+                },
+                {
+                    "description": "Pad 6 [colL] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "b589191f-86a2-41c3-90d5-ad6fde332b04"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 6 [colL] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "b589191f-86a2-41c3-90d5-ad6fde332b04"
+                },
+                {
+                    "description": "Pad 7 [NRST] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "35be3027-0e5c-4d94-b8d3-ba0bf9a78473"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 7 [NRST] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "35be3027-0e5c-4d94-b8d3-ba0bf9a78473"
+                },
+                {
+                    "description": "Pad 8 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "cf4fa5bb-0eb9-49e8-b09b-0281c4263126"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 8 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "cf4fa5bb-0eb9-49e8-b09b-0281c4263126"
+                },
+                {
+                    "description": "Pad 9 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "9b19d12e-e833-487a-ab68-ff98b1138afb"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 9 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "9b19d12e-e833-487a-ab68-ff98b1138afb"
+                },
+                {
+                    "description": "Pad 10 [row2] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "9d290760-3e00-4992-a730-28af03b76d65"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 10 [row2] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "9d290760-3e00-4992-a730-28af03b76d65"
+                },
+                {
+                    "description": "Pad 11 [row3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "7024246e-1957-4cb6-a5a3-1694791dc3b4"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 11 [row3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.275,
+                        "y": 32.7375
+                    },
+                    "uuid": "7024246e-1957-4cb6-a5a3-1694791dc3b4"
+                },
+                {
+                    "description": "Pad 12 [Net-(U2-Pad12)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 6.775,
+                        "y": 32.7375
+                    },
+                    "uuid": "73f126c5-fab1-459b-aeac-3349b87bf05b"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 13 [Net-(U2-Pad13)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 31.325
+                    },
+                    "uuid": "a525e017-cc6d-418c-b03f-915e02c4e51f"
+                },
+                {
+                    "description": "Pad 14 [Net-(U2-Pad14)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 30.825
+                    },
+                    "uuid": "b16df3eb-c5dd-47f4-b354-7760e81582e0"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 14 [Net-(U2-Pad14)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 30.825
+                    },
+                    "uuid": "b16df3eb-c5dd-47f4-b354-7760e81582e0"
+                },
+                {
+                    "description": "Pad 15 [Net-(U2-Pad15)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 30.325
+                    },
+                    "uuid": "3b310c8d-e630-42ec-8971-8b320f713307"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 15 [Net-(U2-Pad15)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 30.325
+                    },
+                    "uuid": "3b310c8d-e630-42ec-8971-8b320f713307"
+                },
+                {
+                    "description": "Pad 16 [Net-(U2-Pad16)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 29.825
+                    },
+                    "uuid": "e8f2d46c-58c1-49d0-b8dc-424f32110641"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 16 [Net-(U2-Pad16)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 29.825
+                    },
+                    "uuid": "e8f2d46c-58c1-49d0-b8dc-424f32110641"
+                },
+                {
+                    "description": "Pad 17 [Net-(U2-Pad17)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 29.325
+                    },
+                    "uuid": "7510b33e-5420-4df4-9ae8-d4b74ac758ec"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 17 [Net-(U2-Pad17)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 29.325
+                    },
+                    "uuid": "7510b33e-5420-4df4-9ae8-d4b74ac758ec"
+                },
+                {
+                    "description": "Pad 18 [Net-(U2-Pad18)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 28.825
+                    },
+                    "uuid": "c4aa9789-c3e2-41de-9bb2-ecb81c6581a1"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 18 [Net-(U2-Pad18)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 28.825
+                    },
+                    "uuid": "c4aa9789-c3e2-41de-9bb2-ecb81c6581a1"
+                },
+                {
+                    "description": "Pad 19 [Net-(U2-Pad19)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 28.325
+                    },
+                    "uuid": "c4ec8855-e44e-4f1c-8a80-0fc09346b846"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 19 [Net-(U2-Pad19)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 28.325
+                    },
+                    "uuid": "c4ec8855-e44e-4f1c-8a80-0fc09346b846"
+                },
+                {
+                    "description": "Pad 20 [colA] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 27.825
+                    },
+                    "uuid": "0c256a59-4da1-4dd0-86f4-8a97158c1337"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 20 [colA] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 27.825
+                    },
+                    "uuid": "0c256a59-4da1-4dd0-86f4-8a97158c1337"
+                },
+                {
+                    "description": "Pad 21 [row1] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 27.325
+                    },
+                    "uuid": "9980abbf-04a5-4a63-9bc3-0f0ffff13660"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 21 [row1] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 27.325
+                    },
+                    "uuid": "9980abbf-04a5-4a63-9bc3-0f0ffff13660"
+                },
+                {
+                    "description": "Pad 22 [row0] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 26.825
+                    },
+                    "uuid": "484ac55b-69cd-41de-84e7-3071d4b930b8"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 22 [row0] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 26.825
+                    },
+                    "uuid": "484ac55b-69cd-41de-84e7-3071d4b930b8"
+                },
+                {
+                    "description": "Pad 23 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 26.325
+                    },
+                    "uuid": "0f3b07e4-64aa-4568-b031-3ec7e9285ab7"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 23 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 26.325
+                    },
+                    "uuid": "0f3b07e4-64aa-4568-b031-3ec7e9285ab7"
+                },
+                {
+                    "description": "Pad 24 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 5.3625,
+                        "y": 25.825
+                    },
+                    "uuid": "0464c277-1f0a-4bf5-939d-606431aad7a1"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 25 [Net-(U2-Pad25)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 6.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "8daa0e21-8fa9-46f7-8acc-a6267a6e5eb5"
+                },
+                {
+                    "description": "Pad 26 [Net-(U2-Pad26)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "13ba4645-c51f-40eb-95fc-aabd63aab573"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 26 [Net-(U2-Pad26)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "13ba4645-c51f-40eb-95fc-aabd63aab573"
+                },
+                {
+                    "description": "Pad 27 [Net-(U2-Pad27)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "85b8a684-f0d5-4349-bcb8-85ac392bdb41"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 27 [Net-(U2-Pad27)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 7.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "85b8a684-f0d5-4349-bcb8-85ac392bdb41"
+                },
+                {
+                    "description": "Pad 28 [Net-(U2-Pad28)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "6933844e-f391-409c-8fcc-505e8bd90ce0"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 28 [Net-(U2-Pad28)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "6933844e-f391-409c-8fcc-505e8bd90ce0"
+                },
+                {
+                    "description": "Pad 29 [Net-(U2-Pad29)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "aab985f4-1d51-4b25-aa20-2f9fb8e39f1a"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 29 [Net-(U2-Pad29)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 8.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "aab985f4-1d51-4b25-aa20-2f9fb8e39f1a"
+                },
+                {
+                    "description": "Pad 30 [Net-(U2-Pad30)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "91ece522-c16b-46b9-9237-0b508385bdf6"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 30 [Net-(U2-Pad30)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "91ece522-c16b-46b9-9237-0b508385bdf6"
+                },
+                {
+                    "description": "Pad 31 [Net-(U2-Pad31)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "92d40c4b-caa0-46be-a90b-bf3f1338f776"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 31 [Net-(U2-Pad31)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 9.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "92d40c4b-caa0-46be-a90b-bf3f1338f776"
+                },
+                {
+                    "description": "Pad 32 [D-] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "f106342c-300e-4bb7-ab34-4f7a067420ac"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 32 [D-] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "f106342c-300e-4bb7-ab34-4f7a067420ac"
+                },
+                {
+                    "description": "Pad 33 [D+] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "7bc17f5e-8f28-42ca-997d-f09764b3e1b8"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 33 [D+] of U2 on B.Cu",
+                    "pos": {
+                        "x": 10.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "7bc17f5e-8f28-42ca-997d-f09764b3e1b8"
+                },
+                {
+                    "description": "Pad 34 [Net-(U2-Pad34)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "6dbfa606-f993-4c2f-ae26-c3a20288fed8"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 34 [Net-(U2-Pad34)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "6dbfa606-f993-4c2f-ae26-c3a20288fed8"
+                },
+                {
+                    "description": "Pad 35 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "a1ce620f-df0a-4faf-b42a-7f325fb3e364"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 35 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 11.775,
+                        "y": 24.4125
+                    },
+                    "uuid": "a1ce620f-df0a-4faf-b42a-7f325fb3e364"
+                },
+                {
+                    "description": "Pad 36 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 12.275,
+                        "y": 24.4125
+                    },
+                    "uuid": "ce84a2dc-a832-4162-b2c2-d1ed0b259ed7"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 37 [colG] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 25.825
+                    },
+                    "uuid": "5ad6c160-741b-4fbf-8799-ca4442e6bb85"
+                },
+                {
+                    "description": "Pad 38 [colF] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 26.325
+                    },
+                    "uuid": "9bf0b0dd-0d5f-411f-b125-c17924971aa4"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 38 [colF] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 26.325
+                    },
+                    "uuid": "9bf0b0dd-0d5f-411f-b125-c17924971aa4"
+                },
+                {
+                    "description": "Pad 39 [colE] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 26.825
+                    },
+                    "uuid": "045dcb33-00cc-4d59-88e6-00fecb54f1fd"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 39 [colE] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 26.825
+                    },
+                    "uuid": "045dcb33-00cc-4d59-88e6-00fecb54f1fd"
+                },
+                {
+                    "description": "Pad 40 [colD] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 27.325
+                    },
+                    "uuid": "be57e47e-1e22-41e0-9275-aecce7e2bdfb"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 40 [colD] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 27.325
+                    },
+                    "uuid": "be57e47e-1e22-41e0-9275-aecce7e2bdfb"
+                },
+                {
+                    "description": "Pad 41 [colC] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 27.825
+                    },
+                    "uuid": "b368b21b-76ec-4553-8ec5-49efe84bd04a"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 41 [colC] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 27.825
+                    },
+                    "uuid": "b368b21b-76ec-4553-8ec5-49efe84bd04a"
+                },
+                {
+                    "description": "Pad 42 [Net-(U2-Pad42)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 28.325
+                    },
+                    "uuid": "d02744f4-a9e3-48eb-9b9a-92b8077dc752"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 42 [Net-(U2-Pad42)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 28.325
+                    },
+                    "uuid": "d02744f4-a9e3-48eb-9b9a-92b8077dc752"
+                },
+                {
+                    "description": "Pad 43 [Net-(U2-Pad43)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 28.825
+                    },
+                    "uuid": "3c66a096-9a41-42d5-895e-441a41cc2f28"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 43 [Net-(U2-Pad43)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 28.825
+                    },
+                    "uuid": "3c66a096-9a41-42d5-895e-441a41cc2f28"
+                },
+                {
+                    "description": "Pad 44 [BOOT0] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 29.325
+                    },
+                    "uuid": "05bfe8cc-2857-4e41-b8d2-a8ab16426f01"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 44 [BOOT0] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 29.325
+                    },
+                    "uuid": "05bfe8cc-2857-4e41-b8d2-a8ab16426f01"
+                },
+                {
+                    "description": "Pad 45 [colB] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 29.825
+                    },
+                    "uuid": "5759e27b-d434-4c1a-b68f-bb855779e5ac"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 45 [colB] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 29.825
+                    },
+                    "uuid": "5759e27b-d434-4c1a-b68f-bb855779e5ac"
+                },
+                {
+                    "description": "Pad 46 [Net-(U2-Pad46)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 30.325
+                    },
+                    "uuid": "888cc111-c437-4eb4-bd15-293b1642d9b7"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 46 [Net-(U2-Pad46)] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 30.325
+                    },
+                    "uuid": "888cc111-c437-4eb4-bd15-293b1642d9b7"
+                },
+                {
+                    "description": "Pad 47 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 30.825
+                    },
+                    "uuid": "bd1835ab-dec0-4a6a-a8da-366cf7c98d9e"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Pad 47 [GND] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 30.825
+                    },
+                    "uuid": "bd1835ab-dec0-4a6a-a8da-366cf7c98d9e"
+                },
+                {
+                    "description": "Pad 48 [+3V3] of U2 on B.Cu",
+                    "pos": {
+                        "x": 13.6875,
+                        "y": 31.325
+                    },
+                    "uuid": "88118cd5-6626-4a18-862a-7bbac67c5765"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        },
+        {
+            "description": "Rear solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "NPTH pad of MX49",
+                    "pos": {
+                        "x": 116.68125,
+                        "y": 48.895
+                    },
+                    "uuid": "677911b7-8bd5-4fbe-a7e0-1b0bc3334905"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(D43-Pad2)] of MX43",
+                    "pos": {
+                        "x": 116.84,
+                        "y": 52.07
+                    },
+                    "uuid": "bd3be1b9-7da6-4b8d-baf0-06aeb6b5bedd"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        }
+    ]
+}

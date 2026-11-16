@@ -1,0 +1,12 @@
+{
+  "schema": "hs.f60-original-legacy-source-drc.v1",
+  "external_source": "robertcalvert/f.60 hardware/keyboard.kicad_pcb",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "native_kicad_version": "9.0.2",
+  "run_timeout_seconds": 65,
+  "completed": false,
+  "exit_code": 124,
+  "verification_status": "UNKNOWN_TIMEOUT_NOT_CLEAN",
+  "original_source_electrical_and_manufacturing_quality_approved": false,
+  "note": "Legacy KiCad 4-era board requires independent original-source review; timeout is NOT zero DRC violations."
+}

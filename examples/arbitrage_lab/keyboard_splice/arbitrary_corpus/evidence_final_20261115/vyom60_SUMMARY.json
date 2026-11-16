@@ -1,0 +1,105 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "vyom60",
+  "repository": "Vyom88/Mechanical-Keyboard-PCBs",
+  "reference_path": "60% Pcb/60_Pcb.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/Vyom88/Mechanical-Keyboard-PCBs/main/60%25%20Pcb/60_Pcb.kicad_pcb",
+  "expected_source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+  "intake": {
+    "schema": "hs.arbitrary-keyboard-intake.v1",
+    "reference_source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+    "reference_source_filename": "vyom60.kicad_pcb",
+    "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+    "copper_layers": 2,
+    "footprints": 286,
+    "key_switch_candidates": 91,
+    "switch_detection_methods": {
+      "known_keyboard_footprint": 91
+    },
+    "routed_track_count": 2838,
+    "plated_via_count": 359,
+    "routed_conductive_zone_count": 2,
+    "unfilled_conductive_zone_names": [],
+    "source_warnings": [],
+    "eligible_for_bounded_virtual_reconstruction": true,
+    "blocker_codes": [],
+    "claimed_physical_donor_present": false,
+    "physical_authority_granted": false
+  },
+  "native_source_drc": {
+    "exit": 0,
+    "violations": 880,
+    "unconnected_items": 0,
+    "kicad_version": "9.0.2",
+    "report_present": true
+  },
+  "engine_execution": {
+    "exit": 0,
+    "timeout": false,
+    "error_tail": null
+  },
+  "status": "REPAIR_INCOMPLETE",
+  "verdict": {
+    "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+    "status": "REPAIR_INCOMPLETE",
+    "gates": {
+      "required_reconnection_complete_in_model": false,
+      "source_terminals_connected_in_model": false,
+      "modeled_cut_clear_of_components": false,
+      "original_native_drc_clean": false,
+      "bridge_native_drc_clean": true,
+      "source_geometry_reliable_without_legacy_repairs": false
+    },
+    "strict_reference_digital_pass": false,
+    "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+    "actual_discarded_keyboard_tested": false,
+    "arbitrary_unphotographed_junk_supported": false,
+    "real_keyboard_function_verified": false,
+    "physical_release": "BLOCKED_NOT_TESTED",
+    "build_ready": false
+  },
+  "cut": {
+    "left_switch_candidates": 39,
+    "right_switch_candidates": 52,
+    "collisions": {
+      "pads": 5,
+      "vias": 2,
+      "switches": 6,
+      "critical": 0
+    },
+    "affected_nets": 20
+  },
+  "reconstruction": {
+    "mode": "adaptive_functional",
+    "bridge_channels": 11,
+    "remaining_required_groups": 13,
+    "preexisting_terminal_net_gaps": 20,
+    "inert_remnants_to_isolate": 4,
+    "model_issues": [
+      "OVAL_PAD_APPROXIMATION",
+      "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+    ]
+  },
+  "iterations": [
+    {
+      "mode": "pad_only",
+      "remaining": 16
+    },
+    {
+      "mode": "adaptive",
+      "remaining": 15
+    },
+    {
+      "mode": "adaptive_functional",
+      "remaining": 13
+    }
+  ],
+  "interposer": {
+    "native_drc_pass": true,
+    "channel_count": 11,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  }
+}

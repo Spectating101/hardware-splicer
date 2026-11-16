@@ -1,0 +1,145 @@
+{
+  "schema": "hs.keyboard-splice-interposer-preview.v1",
+  "source_reference_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+  "topology_sha256": "cde922aa725fc08181484dbe32b36dca596922edce722e17c3ea733da7038439",
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_PREVIEW_ONLY",
+  "actual_donor_reworked": false,
+  "remaining_disconnected_groups": 0,
+  "remaining_required_groups": 0,
+  "inert_remnants_to_isolate": 0,
+  "preexisting_terminal_net_gaps": 0,
+  "unanchored_groups": 0,
+  "channel_count": 4,
+  "board_width_mm": 40.64,
+  "board_height_mm": 25.4,
+  "pin_pitch_mm": 2.54,
+  "connector_mpn": null,
+  "connector_mating_verified": false,
+  "cable_pinout_verified": false,
+  "strain_relief_verified": false,
+  "assembly_bom_complete": false,
+  "drc_success_is_not_build_authorization": true,
+  "channel_mapping": [
+    {
+      "channel": 1,
+      "pcb_net": "CH_01",
+      "J1_pad": 1,
+      "J2_pad": 1,
+      "source_net": "COL_3",
+      "from_model_island": "COL_3::pre8::post9",
+      "to_model_island": "COL_3::pre8::post10",
+      "from_candidate_contact": {
+        "ref": "SW4",
+        "pad": "2",
+        "x": 93.65,
+        "y": 27.54,
+        "net": "COL_3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "J1",
+        "pad": "4",
+        "x": 10.0,
+        "y": 57.62,
+        "net": "COL_3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 2,
+      "pcb_net": "CH_02",
+      "J1_pad": 2,
+      "J2_pad": 2,
+      "source_net": "COL_4",
+      "from_model_island": "COL_4::pre10::post12",
+      "to_model_island": "COL_4::pre10::post13",
+      "from_candidate_contact": {
+        "ref": "SW5",
+        "pad": "2",
+        "x": 118.65,
+        "y": 27.54,
+        "net": "COL_4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "J1",
+        "pad": "5",
+        "x": 10.0,
+        "y": 60.16,
+        "net": "COL_4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 3,
+      "pcb_net": "CH_03",
+      "J1_pad": 3,
+      "J2_pad": 3,
+      "source_net": "COL_5",
+      "from_model_island": "COL_5::pre12::post15",
+      "to_model_island": "COL_5::pre12::post16",
+      "from_candidate_contact": {
+        "ref": "SW6",
+        "pad": "2",
+        "x": 143.65,
+        "y": 27.54,
+        "net": "COL_5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "J1",
+        "pad": "6",
+        "x": 10.0,
+        "y": 62.7,
+        "net": "COL_5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    },
+    {
+      "channel": 4,
+      "pcb_net": "CH_04",
+      "J1_pad": 4,
+      "J2_pad": 4,
+      "source_net": "ROW_0",
+      "from_model_island": "ROW_0::pre2::post1",
+      "to_model_island": "ROW_0::pre2::post2",
+      "from_candidate_contact": {
+        "ref": "SW3",
+        "pad": "1",
+        "x": 75.0,
+        "y": 25.0,
+        "net": "ROW_0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "SW4",
+        "pad": "1",
+        "x": 100.0,
+        "y": 25.0,
+        "net": "ROW_0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "UNVERIFIED_DONOR_SOLDER_LOCATION"
+    }
+  ]
+}

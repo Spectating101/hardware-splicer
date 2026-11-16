@@ -1,0 +1,34 @@
+{
+  "schema": "hs.keyboard.f60-independent-source-pins.v1",
+  "original_pcb_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "upstream_repo": "https://github.com/robertcalvert/f.60",
+  "repository_ref": "master",
+  "files": [
+    {
+      "name": "keyboard.net",
+      "repository_path": "hardware/keyboard.net",
+      "sha256": "8d3921ec4ecf93cbaf2f72e640a7f56cc1496b1153eed1436faa0356a4fa97c7"
+    },
+    {
+      "name": "config.h",
+      "repository_path": "firmware/config.h",
+      "sha256": "c615353f1d3c15a322a2949982d4e9a1300614ff4bf336c8f6751914a2e2f9e2"
+    },
+    {
+      "name": "matrix.c",
+      "repository_path": "firmware/matrix.c",
+      "sha256": "4467d3054cb8355fae8c1f85d1d895f6f48739e15aafd8e63017539c615ca65e"
+    },
+    {
+      "name": "keymap_common.h",
+      "repository_path": "firmware/keymap_common.h",
+      "sha256": "bbf10c9d3af4d78db104d6f104723228d4529bc4fbe3db5f0df4f93209ac82dc"
+    },
+    {
+      "name": "keymap.c",
+      "repository_path": "firmware/keymap.c",
+      "sha256": "db17e2282380bcdfdacaf2261d599b18c61c5e6aca7f13328b18c37b68918581"
+    }
+  ],
+  "note": "Exact raw source files remain outside HS; derived hashes and checks only. Covers legacy schematic netlist and the original TMK matrix wiring, not powered firmware verification."
+}

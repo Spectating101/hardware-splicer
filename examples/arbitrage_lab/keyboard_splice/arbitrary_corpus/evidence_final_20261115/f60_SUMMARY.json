@@ -1,0 +1,99 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "f60",
+  "repository": "robertcalvert/f.60",
+  "reference_path": "hardware/keyboard.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/robertcalvert/f.60/master/hardware/keyboard.kicad_pcb",
+  "expected_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "intake": {
+    "schema": "hs.arbitrary-keyboard-intake.v1",
+    "reference_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "reference_source_filename": "f60.kicad_pcb",
+    "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+    "copper_layers": 2,
+    "footprints": 129,
+    "key_switch_candidates": 62,
+    "switch_detection_methods": {
+      "known_keyboard_footprint": 62
+    },
+    "routed_track_count": 489,
+    "plated_via_count": 18,
+    "routed_conductive_zone_count": 0,
+    "unfilled_conductive_zone_names": [],
+    "source_warnings": [
+      "legacy_format_conversion_requires_independent_board_review"
+    ],
+    "eligible_for_bounded_virtual_reconstruction": true,
+    "blocker_codes": [],
+    "claimed_physical_donor_present": false,
+    "physical_authority_granted": false
+  },
+  "native_source_drc": {
+    "exit": 124,
+    "violations": null,
+    "unconnected_items": null,
+    "kicad_version": null,
+    "report_present": false,
+    "error": "PROCESS_TIMEOUT"
+  },
+  "engine_execution": {
+    "exit": 0,
+    "timeout": false,
+    "error_tail": null
+  },
+  "status": "RECONNECTED_BUT_CUT_COLLIDES",
+  "verdict": {
+    "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+    "status": "RECONNECTED_BUT_CUT_COLLIDES",
+    "gates": {
+      "required_reconnection_complete_in_model": true,
+      "source_terminals_connected_in_model": true,
+      "modeled_cut_clear_of_components": false,
+      "original_native_drc_clean": false,
+      "bridge_native_drc_clean": true,
+      "source_geometry_reliable_without_legacy_repairs": false
+    },
+    "strict_reference_digital_pass": false,
+    "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "actual_discarded_keyboard_tested": false,
+    "arbitrary_unphotographed_junk_supported": false,
+    "real_keyboard_function_verified": false,
+    "physical_release": "BLOCKED_NOT_TESTED",
+    "build_ready": false
+  },
+  "cut": {
+    "left_switch_candidates": 25,
+    "right_switch_candidates": 37,
+    "collisions": {
+      "pads": 1,
+      "vias": 0,
+      "switches": 5,
+      "critical": 0
+    },
+    "affected_nets": 15
+  },
+  "reconstruction": {
+    "mode": "pad_only",
+    "bridge_channels": 17,
+    "remaining_required_groups": 0,
+    "preexisting_terminal_net_gaps": 0,
+    "inert_remnants_to_isolate": 0,
+    "model_issues": [
+      "SOURCE_IMPORT_WARNINGS"
+    ]
+  },
+  "iterations": [
+    {
+      "mode": "pad_only",
+      "remaining": 0
+    }
+  ],
+  "interposer": {
+    "native_drc_pass": true,
+    "channel_count": 17,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  }
+}

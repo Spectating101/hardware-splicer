@@ -1,0 +1,357 @@
+{
+  "project": {
+    "schema_version": "hardware_splicer.machine_project.v1",
+    "project_id": "keyboard-pcb-reuse-virtual-cut",
+    "name": "keyboard-pcb-reuse-virtual-cut",
+    "purpose": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+    "lifecycle_state": "architecture",
+    "requested_release_state": "concept",
+    "requirements": [
+      {
+        "requirement_id": "req-primary-purpose",
+        "statement": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [
+          "system"
+        ],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "source_field": "goal"
+        }
+      },
+      {
+        "requirement_id": "req-prove-physical-postcut-electrical-safety",
+        "statement": "Verify physical PCB identity, copper continuity, USB/ESD and every intended key before energizing",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [
+          "system"
+        ],
+        "verification_method_ids": [
+          "verification-postcut-bench"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      }
+    ],
+    "functions": [
+      {
+        "function_id": "function-primary",
+        "name": "Deliver primary machine purpose",
+        "description": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "parent_function_id": null,
+        "allocated_subsystem_ids": [
+          "electrical-system",
+          "firmware-control"
+        ],
+        "requirement_ids": [
+          "req-primary-purpose"
+        ],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "subsystems": [
+      {
+        "subsystem_id": "system",
+        "name": "Machine system",
+        "domain": "system",
+        "purpose": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "parent_subsystem_id": null,
+        "requirement_ids": [
+          "req-primary-purpose"
+        ],
+        "function_ids": [
+          "function-primary"
+        ],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "electrical-system",
+        "name": "Electrical System",
+        "domain": "electrical",
+        "purpose": "Seeded from declared structured intake fields.",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [
+          "reference-PCB"
+        ],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "firmware-control",
+        "name": "Firmware and control",
+        "domain": "firmware",
+        "purpose": "Control behavior and embedded software.",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "donor-left-pcb",
+        "name": "Remaining donor PCB left half",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "donor-right-pcb",
+        "name": "Remaining donor PCB right half",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "components": [
+      {
+        "component_id": "reference-PCB",
+        "name": "reference PCB",
+        "domain": "electrical",
+        "subsystem_id": "electrical-system",
+        "role": "electrical",
+        "source": "unknown",
+        "part": null,
+        "requirement_ids": [],
+        "function_ids": [],
+        "artifact_refs": [],
+        "authority": "declared",
+        "metadata": {
+          "intake_part": {
+            "name": "reference PCB",
+            "source": "external",
+            "role": "electrical",
+            "domain": "electrical"
+          },
+          "domain_projection_source": "declared_domain",
+          "discipline_allocation_unresolved": false
+        }
+      }
+    ],
+    "interfaces": [
+      {
+        "interface_id": "interface-cut-restoration-harness",
+        "name": "Original copper topology restored across physical split",
+        "kind": "electrical_interposer",
+        "endpoints": [
+          {
+            "object_id": "donor-left-pcb",
+            "port": "unknown_actual_testpads",
+            "role": ""
+          },
+          {
+            "object_id": "donor-right-pcb",
+            "port": "unknown_actual_testpads",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "postcut_original_net_continuity",
+            "values": {
+              "model_candidate_graph_edges": 22
+            },
+            "unresolved_fields": [
+              "original_board_revision",
+              "exact_copper_islands",
+              "solderable_pads",
+              "harness_pinout",
+              "return_current_path",
+              "cable_strain_relief"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_id": "constraint-cut_type",
+        "name": "Cut Type",
+        "domain": "system",
+        "statement": "cut type shall be physical_subtractive_work.",
+        "severity": "required",
+        "applies_to": [
+          "system"
+        ],
+        "source_requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "raw_value": "physical_subtractive_work"
+        }
+      },
+      {
+        "constraint_id": "constraint-retained_controller",
+        "name": "Retained Controller",
+        "domain": "system",
+        "statement": "retained controller shall be enabled.",
+        "severity": "required",
+        "applies_to": [
+          "system"
+        ],
+        "source_requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "raw_value": true
+        }
+      }
+    ],
+    "verifications": [
+      {
+        "verification_id": "verification-postcut-bench",
+        "name": "Donor PCB registration, safe mechanical cut, solder inspection, and powered key scan",
+        "method_type": "test",
+        "status": "blocked",
+        "requirement_ids": [
+          "req-prove-physical-postcut-electrical-safety"
+        ],
+        "target_ids": [
+          "system"
+        ],
+        "evidence_ids": [],
+        "procedure": "Requires an actual matched donor, solderable connectors and independent physical measurements",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "evidence-source-bound-virtual-cut",
+        "kind": "reference_copper_geometry_model",
+        "basis": "KiCad reference board and conservative modeled material removal",
+        "ref": "a99aafb9f1ca77c5cac67037d161fa849b9b200de5dec9f63964520af3ff3daf",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {
+          "topology_sha256": "d64aae5960aaf61ee74e239ef5facf25e858c1e1ba186952f5ae32cc82c23d56"
+        }
+      }
+    ],
+    "artifacts": [],
+    "discipline_payloads": {
+      "project_intake": {
+        "project_name": "keyboard-pcb-reuse-virtual-cut",
+        "goal": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "available_parts": [
+          {
+            "name": "reference PCB",
+            "source": "external",
+            "role": "electrical",
+            "domain": "electrical"
+          }
+        ],
+        "constraints": {
+          "retained_controller": true,
+          "cut_type": "physical_subtractive_work"
+        }
+      },
+      "keyboard_splice": {
+        "reference_source_sha256": "a99aafb9f1ca77c5cac67037d161fa849b9b200de5dec9f63964520af3ff3daf",
+        "model_sha256": "d64aae5960aaf61ee74e239ef5facf25e858c1e1ba186952f5ae32cc82c23d56",
+        "cut_x_mm": 224.77,
+        "physical_donor_verified": false,
+        "fabrication_authorized": false
+      }
+    },
+    "metadata": {
+      "seed": "machine_project_from_intake.v2",
+      "interfaces_inferred": false,
+      "verification_inferred": false,
+      "authority_preserved_without_upgrade": true,
+      "part_domain_projection": "structured_declared_fields_or_offline_legacy",
+      "unresolved_component_allocation_ids": []
+    }
+  },
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "design_ready",
+    "blockers": [
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-cut-restoration-harness' has unresolved fields: cable_strain_relief, exact_copper_islands, harness_pinout, original_board_revision, return_current_path, solderable_pads",
+        "object_id": "interface-cut-restoration-harness",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'req-prove-physical-postcut-electrical-safety' is not closed by passing verification",
+        "object_id": "req-prove-physical-postcut-electrical-safety",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'verification-postcut-bench' is blocked",
+        "object_id": "verification-postcut-bench",
+        "severity": "error"
+      },
+      {
+        "code": "release_state_not_reached",
+        "message": "requested build_ready, but evidence supports only design_ready",
+        "object_id": "keyboard-pcb-reuse-virtual-cut",
+        "severity": "error"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "unverified_requirement",
+        "message": "requirement 'req-primary-purpose' has no verification method",
+        "object_id": "req-primary-purpose",
+        "severity": "warning"
+      }
+    ]
+  },
+  "physical_authority_granted": false,
+  "canonical_summary": {
+    "requested": "build_ready",
+    "achieved": "design_ready",
+    "allowed": false,
+    "blocker_codes": [
+      "unresolved_interface",
+      "safety_not_closed",
+      "verification_not_passed",
+      "release_state_not_reached"
+    ]
+  }
+}
