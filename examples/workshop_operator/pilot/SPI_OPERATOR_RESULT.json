@@ -42,7 +42,7 @@
   "real_repair_confirmed": false,
   "registered_source": "hardware/reference_designs/spi_flash_adapter_v1",
   "schema_version": "hardware_splicer.workshop_operator.v1",
-  "source_sha256": "d333b92067ff27747fda7d9dc2adeb8382cd7669191c786d46fabd7057681503",
+  "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
   "status": "verified_design_only_physical_blocked",
   "tool_versions": {
     "kicad_cli": "9.0.2",

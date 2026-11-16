@@ -73,3 +73,37 @@ def test_the_pan_tilt_demo_request_is_not_build_ready_because_the_second_servo_w
     assert gate["request_fidelity"]["status"] == "mismatch"
     assert gate["build_ready"] is False
     assert any("sg90" in blocker and "requested 2" in blocker for blocker in gate["blockers"])
+
+
+def test_splice_intake_preserves_goal_coverage_and_requested_parts_gates(
+    tmp_path, monkeypatch, assume_clean_kicad_erc
+) -> None:
+    import json
+    from pathlib import Path
+
+    from hardware_splicer import project_intake
+
+    original_planner = project_intake.plan_project_from_intake
+
+    def uncovered_plan(intake):
+        plan = original_planner(intake)
+        plan["salvage_package"]["goal_coverage"] = {
+            "covered": False, "reason": "selected scaffold does not cover the goal"
+        }
+        return plan
+
+    monkeypatch.setattr(project_intake, "plan_project_from_intake", uncovered_plan)
+    root = Path(__file__).resolve().parents[1]
+    intake = project_intake.load_project_intake(
+        root / "examples/intakes/splice_physical_pan_tilt_loop.json"
+    )
+    project_intake.splice_and_build_from_intake(
+        intake, out_dir=tmp_path / "combined", export_gerber=False
+    )
+    gate = json.loads(
+        (tmp_path / "combined/build_compilation/DESIGN_QUALITY_GATE.json").read_text()
+    )
+    assert gate["build_ready"] is False
+    assert gate["request_fidelity"]["status"] == "mismatch"
+    assert any("goal_not_covered_by_selected_design" in row for row in gate["blockers"])
+    assert any("sg90" in row and "requested 2" in row for row in gate["blockers"])
