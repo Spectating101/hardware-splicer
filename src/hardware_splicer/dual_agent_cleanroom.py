@@ -123,7 +123,15 @@ def _assert_evidence_references_resolve(session: Mapping[str, Any]) -> None:
         raise CleanroomContractError("embedded operator session is missing sanitized context")
     known = _known_source_ids(context)
     referenced = _referenced_source_ids(session)
-    invented = sorted(referenced - known)
+    # The orchestrator canonicalizes valid source aliases and moves unresolved
+    # references out of source_ids. That normalization must not hide invented
+    # evidence identities from the stricter cleanroom boundary.
+    unresolved = {
+        str(value or "").strip()
+        for value in session.get("unrecognized_source_references") or []
+        if str(value or "").strip()
+    }
+    invented = sorted((referenced - known) | unresolved)
     if invented:
         raise CleanroomContractError(
             "embedded operator invented product evidence identities: " + ", ".join(invented)
