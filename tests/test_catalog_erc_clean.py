@@ -124,3 +124,24 @@ def test_a_failed_skipped_or_missing_erc_run_is_not_accepted_as_clean(bad_run: d
     assert _errors(bad_run) == set()
     with pytest.raises(AssertionError):
         assert_erc_executed_and_clean(bad_run)
+
+
+def test_a_normal_dht11_circuit_passes_real_erc(tmp_path: Path) -> None:
+    from hardware_splicer.netlist.ir import CircuitNetlist, ComponentInstance, Net, PinRef
+
+    netlist = CircuitNetlist(
+        components=[
+            ComponentInstance(ref="J1", module_id="usb-power-5v"),
+            ComponentInstance(ref="U1", module_id="esp32-devkit"),
+            ComponentInstance(ref="U2", module_id="dht11"),
+        ],
+        nets=[
+            Net("GND", [PinRef("J1", "GND"), PinRef("U1", "GND"), PinRef("U2", "GND")]),
+            Net("+5V", [PinRef("J1", "V+"), PinRef("U1", "VIN")]),
+            Net("+3V3", [PinRef("U1", "3V3"), PinRef("U2", "VCC")]),
+            Net("DATA", [PinRef("U1", "GPIO4"), PinRef("U2", "DATA")]),
+        ],
+    )
+    sch = tmp_path / "dht11.kicad_sch"
+    write_schematic_for_netlist(netlist, sch)
+    assert_erc_executed_and_clean(run_kicad_cli_erc(sch, out_dir=tmp_path / "erc"))
