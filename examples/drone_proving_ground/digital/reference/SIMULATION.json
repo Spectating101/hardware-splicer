@@ -1,4 +1,33 @@
 {
+  "constraints": [
+    {
+      "actual": 234.9,
+      "id": "nominal_mass",
+      "label": "Nominal mass",
+      "limit": 250.0,
+      "margin": 15.099999999999994,
+      "passed": true,
+      "unit": "g"
+    },
+    {
+      "actual": 239.9,
+      "id": "mass_uncertainty",
+      "label": "Mass with 5 g uncertainty",
+      "limit": 250.0,
+      "margin": 10.099999999999994,
+      "passed": true,
+      "unit": "g"
+    },
+    {
+      "actual": 0.023146111731037616,
+      "id": "inertia_approximation",
+      "label": "Relative omitted products of inertia",
+      "limit": 0.05,
+      "margin": 0.026853888268962386,
+      "passed": true,
+      "unit": ""
+    }
+  ],
   "controller": "Simulation position PID / SO(3) attitude PD, 60 Hz",
   "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
   "gravity_oracle": {
@@ -15,6 +44,12 @@
   "physical_validation": false,
   "physical_work_requested": false,
   "requested_scope": "digital_only_3d_representation_and_simulation",
+  "requirements": {
+    "gust_scale": 1.0,
+    "max_mass_g": 250.0,
+    "payload_mass_g": 0.0
+  },
+  "requirements_met": true,
   "scenarios": [
     {
       "accepted": true,
@@ -160,16 +195,17 @@
   ],
   "simulation_acceptance": true,
   "source_sha256": {
-    "build_digital.py": "5a07ad35a0aeea0642eab4ca3c97d1c82bdfcdebef2c070dba0c116b2ec3981d",
-    "hs3g_model.py": "98a66aec394ba8a4fa7ff849fbe9fe46fa37e86f7034bac923d1a9e7a8449426",
+    "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+    "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
     "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
-    "rerun_simulation.py": "2fd2b6fd87a4ae95f2168046bde9dfff8b3502857a19e772edbc82cc4c580a0c",
+    "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
     "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+    "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
     "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
     "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
     "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
     "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
-    "verify_digital.py": "23f314f03d6e31cf3816d75570687b0823cad0fada45723ffeee9cbb2ee123c9",
-    "viewer.html": "61818bd1dff5dbebab55373d78b3ced811b21d61542729e6cd771495f3fb744e"
+    "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+    "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
   }
 }

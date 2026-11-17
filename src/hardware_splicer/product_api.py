@@ -112,6 +112,9 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     resolved_store = install_at_save_retention(project_store or CompatibleProjectStore())
     app = create_engine_app()
     app.state.project_store = resolved_store
+    app.state.job_backend.project_store = resolved_store
+    from .digital_project_api import create_digital_project_router
+    app.include_router(create_digital_project_router(resolved_store, app.state.job_backend))
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -165,6 +168,11 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_conflict_router())
     app.include_router(create_engineering_review_router())
     app.include_router(create_engineering_review_identity_router())
+    # The engine mounts the optional SPA before these product routes. Keep its
+    # catch-all last so real GET endpoints (including digital assets) can match.
+    spa_fallbacks = [route for route in app.router.routes if getattr(route, 'name', '') == 'splice_ui_spa']
+    if spa_fallbacks:
+        app.router.routes = [route for route in app.router.routes if route not in spa_fallbacks] + spa_fallbacks
     return app
 
 

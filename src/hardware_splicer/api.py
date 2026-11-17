@@ -496,6 +496,7 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         try:
+            job_backend.start()
             yield
         finally:
             job_backend.stop()

@@ -17,6 +17,7 @@ HERE = Path(__file__).resolve().parent
 BASE = HERE.parent
 sys.path.insert(0, str(BASE))
 import hs3g_design as design
+from study_requirements import validate
 
 
 def dump(path, value):
@@ -53,9 +54,10 @@ def mass_properties(proxies):
     return total, centre, tensor
 
 
-def build_model(design_dir: Path, out: Path):
+def build_model(design_dir: Path, out: Path, requirements=None):
     import cadquery as cq
     import trimesh
+    requirements = validate(requirements)
     r = json.loads((design_dir / 'results.json').read_text())
     receipt = json.loads((design_dir / 'verification.json').read_text())
     if receipt.get('engineering_acceptance') is not True:
@@ -174,6 +176,13 @@ def build_model(design_dir: Path, out: Path):
     # Representative strap, excluded from the mass model because hardware is already budgeted.
     for z in [-33.75, f['bottom_t_mm'] + 0.75]:
         add('strap_' + ('bottom' if z < 0 else 'top'), 'Battery strap', box([43, 10, 1.5], [0, 0, z]), [0.16, 0.17, 0.19, 1], [0,0,-0.04 if z < 0 else 0])
+    if requirements['payload_mass_g']:
+        # Explicit representative mounted above the front of the retained top plate.
+        # Assigned mass, not material density or a claim of a physical attachment.
+        z = f['bottom_t_mm'] + f['standoff_len_mm'] + f['top_t_mm'] + 4
+        payload = add('study_payload', 'Study payload', box([14, 12, 8], [16, 0, z]),
+                      [0.66, 0.35, 0.91, 1], [0, 0, .065])
+        mass('study_payload', payload, requirements['payload_mass_g'])
     total, cg, tensor = mass_properties(proxies)
     scene = trimesh.Scene()
     for entry, mesh in visuals:
@@ -186,6 +195,8 @@ def build_model(design_dir: Path, out: Path):
     off_diagonal = tensor - np.diag(np.diag(tensor))
     model = {'schema': 'hardware_splicer.hs3g_digital_model.v1', 'revision': 'HS-3G-B',
              'units': 'metres, kilograms, seconds; editable STEP uses millimetres',
+             'requirements': requirements,
+             'payload_representation': '14 x 12 x 8 mm box above front top plate; assigned mass; rigid attachment assumed.',
              'parts': [entry for entry, _ in visuals], 'mass_proxies': proxy_records,
              'mass_kg': total, 'centre_of_mass_m': cg.tolist(),
              'inertia_tensor_kg_m2': tensor.tolist(), 'dynamics_inertia_diagonal_kg_m2': np.diag(tensor).tolist(),

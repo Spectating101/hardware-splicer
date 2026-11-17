@@ -160,7 +160,9 @@ def test_design_quality_gate_trusts_compiler_verified_over_draft() -> None:
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_plant_watering_intake_emits_build_artifacts(tmp_path: Path) -> None:
+def test_plant_watering_intake_emits_build_artifacts(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+    # This exercises artifact delivery after ERC acceptance. The native ERC veto
+    # is covered independently in test_kicad_erc_trust_gate.py.
     from hardware_splicer.project_intake import load_project_intake, run_project_intake
 
     brief = load_project_intake(ROOT / "examples" / "intakes" / "plant_watering_brief.json")

@@ -2,6 +2,8 @@
 
 The requested deliverable is digital only. No parts or hardware are needed.
 
+Study payload: 0.00 g. Mass limit: 250.00 g. Gust force scale: 1.00. Requirements met: True. A completed computation can retain failed engineering requirements; inspect `SIMULATION.json` and `verification.json`.
+
 **Start with `VIEWER.html`: open it directly in a WebGL browser.** It contains its 3D library, model and recorded states, and makes no network requests. Orbit, zoom, explode the assembly, choose a scenario, play, pause and scrub. PNG/GIF views are included if WebGL is unavailable.
 
 ## Included results
@@ -16,7 +18,7 @@ The requested deliverable is digital only. No parts or hardware are needed.
 
 ## What was simulated
 
-The existing 137 mm HS-3G-B design is the model, rather than the separate legacy Crazyflie demonstration. Its modeled mass is 234.90 g. Native frame geometry and the retained component layout define the mass distribution. The sourced F1404 KV2900/GF3028-3 table defines rotor force; behavior below its first row is extrapolated. PyBullet integrates the body under per-rotor thrust, yaw torque, gravity, drag, a gust and ground contact. The controller reads the simulated state; it never resets the aircraft to its target. Nominal and +5 g payload runs take off, track a square, turn, recover from a gust and land. The payload is located at the modeled centre of mass; the controller still uses nominal mass. The stopped-motor scenario deliberately loses control and reaches the ground; detecting that loss is the expected digital result.
+The existing 137 mm HS-3G-B design is the model, rather than the separate legacy Crazyflie demonstration. Its modeled mass is 234.90 g. Native frame geometry and the retained component layout define the mass distribution. The sourced F1404 KV2900/GF3028-3 table defines rotor force; behavior below its first row is extrapolated. PyBullet integrates the body under per-rotor thrust, yaw torque, gravity, drag, a gust and ground contact. The controller reads the simulated state; it never resets the aircraft to its target. Nominal and +5 g mass-uncertainty missions request takeoff, square tracking, turning, gust recovery and landing. Telemetry and acceptance checks record what each mission achieved. The extra 5 g sensitivity case adds uncertainty at the modeled centre of mass; the controller still uses nominal mass. A requested study payload is a separate visible box above the top plate and changes nominal mass, centre of mass and inertia. The stopped-motor scenario deliberately loses control and reaches the ground; detecting that loss is the expected digital result.
 
 This is a parameterized representative, not a physically calibrated twin. The assembly uses simplified electronics and blades. The full calculated inertia tensor is recorded; the small off-diagonal terms are omitted by the dynamics model. Motor lag, yaw torque, drag and gains are declared assumptions. State feedback is ideal. There is no sensor/RF, INAV SITL, frame-flexibility, CFD, battery-chemistry or thermal simulation. Estimated current and short-mission energy are not measured endurance. The separate design package retains its firmware research; this simulation does not execute or flash that firmware.
 

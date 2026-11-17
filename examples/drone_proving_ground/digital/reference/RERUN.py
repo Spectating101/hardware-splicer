@@ -8,6 +8,7 @@ import sys
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 from hs3g_sim import run,assess,freefall_oracle
+from study_requirements import constraints, validate
 
 
 def main():
@@ -26,13 +27,18 @@ def main():
         rows=run(model,table,config,scenario,args.out,render=args.render and scenario['id']=='nominal')
         scenarios.append(assess(rows,model,config,scenario))
     oracle=freefall_oracle(model,table,config)
+    requirements = validate(model.get('requirements'))
+    requirement_checks = constraints(model, requirements)
     result={'schema':'hardware_splicer.hs3g_packaged_simulation_run.v1',
             'simulation_acceptance':all(x['accepted'] for x in scenarios) and oracle['accepted'],
             'scenarios':scenarios,'gravity_oracle':oracle,
             'scope_limits':config['scope_limits'],'physical_work_requested':False,'physical_validation':False}
+    result.update({'requirements': requirements, 'constraints': requirement_checks,
+                   'requirements_met': result['simulation_acceptance'] and all(c['passed'] for c in requirement_checks)})
     (args.out/'SIMULATION.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
-    print(json.dumps({'simulation_acceptance':result['simulation_acceptance'],'scenarios':[{'id':x['scenario']['id'],'accepted':x['accepted']} for x in scenarios]}))
-    return 0 if result['simulation_acceptance'] else 1
+    print(json.dumps({'simulation_acceptance':result['simulation_acceptance'], 'requirements_met': result['requirements_met'],
+                      'scenarios':[{'id':x['scenario']['id'],'accepted':x['accepted']} for x in scenarios]}))
+    return 0 if result['requirements_met'] else 2
 
 
 if __name__=='__main__':raise SystemExit(main())

@@ -1,4 +1,5 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
+import DigitalStudyPanel from "./DigitalStudyPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
 import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx";
@@ -55,7 +56,11 @@ export default function ProjectWorkspace({
   onBenchCaptureSubmit,
   onToast,
   activeJobId,
+  onProjectReload,
 }) {
+  if (session.mode === "digital") {
+    return <DigitalStudyPanel key={session.projectId} session={session} onProjectReload={onProjectReload} />;
+  }
   const pkg = session.projectPackage;
   const buildDir = session.buildDir || pkg?.build_dir || null;
   const stage = session.currentStage || STAGES.intake;

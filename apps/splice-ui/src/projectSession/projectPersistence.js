@@ -168,7 +168,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   }, [dispatch, enabled, session?.intake, session?.machineProject, session?.projectId]);
 
   useEffect(() => {
-    if (!enabled || !sessionIsPersistable(session)) return undefined;
+    if (!enabled || session?.mode === "digital" || !sessionIsPersistable(session)) return undefined;
 
     const snapshot = projectSnapshot(session);
     let serialized;

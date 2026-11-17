@@ -14,10 +14,11 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from hs3g_model import build_model, dump, sha
 from hs3g_sim import run, assess, freefall_oracle
+from study_requirements import validate, configure, constraints
 
 
-def read_inputs():
-    return (json.loads((HERE/'simulation.json').read_text()),
+def read_inputs(requirements=None):
+    return (configure(json.loads((HERE/'simulation.json').read_text()), requirements),
             json.loads((HERE.parent/'revision_b/inputs/thrust_table.json').read_text()))
 
 
@@ -63,7 +64,8 @@ def write_viewer(out, model, simulations, config):
                                 'rpm':rpm.tolist(), 'angles':angle.tolist(),
                                 'current':row['current_a_est'], 'phase':row['phase']})
         playback[name] = records
-    data = {'model':model,'scenarios':playback,'playback_hz':config['control_hz']}
+    data = {'model':model,'scenarios':playback,'playback_hz':config['control_hz'],
+            'scenario_mass_kg': {s['id']: model['mass_kg'] + s.get('extra_mass_g', 0)/1000 for s in config['scenarios']}}
     vendor = (HERE/'vendor/three.min.js').read_text()
     page = (HERE/'viewer.html').read_text().replace('/*THREE_VENDOR*/',vendor)
     page = page.replace('/*MODEL_DATA*/',json.dumps(data,separators=(',',':'),allow_nan=False).replace('</',r'<\/'))
@@ -72,17 +74,19 @@ def write_viewer(out, model, simulations, config):
     shutil.copyfile(HERE/'vendor/HS-LICENSE.txt',out/'HS-LICENSE.txt')
 
 
-def build(design_dir: Path, out: Path):
+def build(design_dir: Path, out: Path, requirements=None):
     if out.exists() and any(out.iterdir()):
         raise ValueError('Use a new/empty output directory')
     out.mkdir(parents=True,exist_ok=True)
-    config, table = read_inputs()
+    requirements = validate(requirements)
+    config, table = read_inputs(requirements)
     dump(out/'simulation-contract.json',config)
     dump(out/'thrust-table.json',table)
     shutil.copyfile(HERE/'hs3g_sim.py',out/'hs3g_sim.py')
+    shutil.copyfile(HERE/'study_requirements.py',out/'study_requirements.py')
     shutil.copyfile(HERE/'rerun_simulation.py',out/'RERUN.py')
     (out/'REQUIREMENTS.txt').write_text('numpy>=2,<3\npybullet==3.2.7\npillow>=10\n')
-    model = build_model(design_dir,out)
+    model = build_model(design_dir,out,requirements)
     simulations, results = {}, []
     for scenario in config['scenarios']:
         rows = run(model,table,config,scenario,out,render=scenario['id']=='nominal')
@@ -90,11 +94,15 @@ def build(design_dir: Path, out: Path):
         result = assess(rows,model,config,scenario);results.append(result)
         print(json.dumps({'scenario':scenario['id'],'accepted':result['accepted'],'metrics':result['metrics']},allow_nan=False),flush=True)
     oracle = freefall_oracle(model,table,config)
+    mass_constraints = constraints(model, requirements)
+    simulation_ok = all(x['accepted'] for x in results) and oracle['accepted']
     report = {'schema':'hardware_splicer.hs3g_digital_simulation.v1',
               'requested_scope':'digital_only_3d_representation_and_simulation',
               'engine':'PyBullet DIRECT, 240 Hz native rigid-body integration',
               'controller':'Simulation position PID / SO(3) attitude PD, 60 Hz',
-              'simulation_acceptance':all(x['accepted'] for x in results) and oracle['accepted'],
+              'simulation_acceptance':simulation_ok,
+              'requirements': requirements, 'constraints': mass_constraints,
+              'requirements_met': simulation_ok and all(x['passed'] for x in mass_constraints),
               'scenarios':results,'gravity_oracle':oracle,
               'scope_limits':config['scope_limits'],
               'physical_work_requested':False, 'physical_validation':False,
@@ -105,6 +113,9 @@ def build(design_dir: Path, out: Path):
     (out/'README.md').write_text(
         '# HS-3G-B completed digital study\n\n'
         'The requested deliverable is digital only. No parts or hardware are needed.\n\n'
+        f'Study payload: {requirements["payload_mass_g"]:.2f} g. Mass limit: {requirements["max_mass_g"]:.2f} g. '
+        f'Gust force scale: {requirements["gust_scale"]:.2f}. Requirements met: {report["requirements_met"]}. '
+        'A completed computation can retain failed engineering requirements; inspect `SIMULATION.json` and `verification.json`.\n\n'
         '**Start with `VIEWER.html`: open it directly in a WebGL browser.** It contains its 3D library, model and recorded states, and makes no network requests. Orbit, zoom, explode the assembly, choose a scenario, play, pause and scrub. PNG/GIF views are included if WebGL is unavailable.\n\n'
         '## Included results\n\n'
         '- `HS3G_B_ASSEMBLY.step`: named editable assembly in millimetres; native retained frame and explicitly representative components.\n'
@@ -120,8 +131,10 @@ def build(design_dir: Path, out: Path):
         'The sourced F1404 KV2900/GF3028-3 table defines rotor force; behavior below its first row is extrapolated. '
         'PyBullet integrates the body under per-rotor thrust, yaw torque, gravity, drag, a gust and ground contact. '
         'The controller reads the simulated state; it never resets the aircraft to its target. '
-        'Nominal and +5 g payload runs take off, track a square, turn, recover from a gust and land. '
-        'The payload is located at the modeled centre of mass; the controller still uses nominal mass. '
+        'Nominal and +5 g mass-uncertainty missions request takeoff, square tracking, turning, gust recovery and landing. '
+        'Telemetry and acceptance checks record what each mission achieved. '
+        'The extra 5 g sensitivity case adds uncertainty at the modeled centre of mass; the controller still uses nominal mass. '
+        'A requested study payload is a separate visible box above the top plate and changes nominal mass, centre of mass and inertia. '
         'The stopped-motor scenario deliberately loses control and reaches the ground; detecting that loss is the expected digital result.\n\n'
         'This is a parameterized representative, not a physically calibrated twin. The assembly uses simplified electronics and blades. '
         'The full calculated inertia tensor is recorded; the small off-diagonal terms are omitted by the dynamics model. '
@@ -148,8 +161,11 @@ def build(design_dir: Path, out: Path):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--design',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
-    args=p.parse_args();r=build(args.design,args.out)
-    return 0 if r['simulation_acceptance'] else 1
+    p.add_argument('--requirements', type=Path, help='Validated digital study requirements JSON')
+    args=p.parse_args()
+    requirements = json.loads(args.requirements.read_text()) if args.requirements else None
+    r=build(args.design,args.out,requirements)
+    return 0 if r['requirements_met'] else 2
 
 
 if __name__=='__main__':

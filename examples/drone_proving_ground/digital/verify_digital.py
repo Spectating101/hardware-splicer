@@ -17,6 +17,7 @@ sys.path.insert(0,str(HERE))
 from hs3g_model import dump, sha, source_hashes
 from hs3g_sim import assess, freefall_oracle
 from build_digital import read_inputs
+from study_requirements import validate, constraints
 
 
 def read_rows(path):
@@ -48,8 +49,9 @@ def verify(out: Path, design_dir: Path):
     import cadquery as cq
     import trimesh
     from PIL import Image
-    config, table = read_inputs()
     model = json.loads((out/'model.json').read_text())
+    requirements = validate(model.get('requirements'))
+    config, table = read_inputs(requirements)
     report = json.loads((out/'SIMULATION.json').read_text())
     design = json.loads((design_dir/'results.json').read_text())
     checks = {}
@@ -58,8 +60,28 @@ def verify(out: Path, design_dir: Path):
     checks['declared_simulation_contract'] = json.loads((out/'simulation-contract.json').read_text())==config
     checks['packaged_thrust_table'] = json.loads((out/'thrust-table.json').read_text())==table
     checks['standalone_runtime_source'] = sha(out/'hs3g_sim.py')==sha(HERE/'hs3g_sim.py') and sha(out/'RERUN.py')==sha(HERE/'rerun_simulation.py')
+    checks['standalone_requirements_source'] = sha(out/'study_requirements.py')==sha(HERE/'study_requirements.py')
     checks['redistributed_licences'] = sha(out/'THREE-LICENSE.txt')==sha(HERE/'vendor/THREE-LICENSE.txt') and sha(out/'HS-LICENSE.txt')==sha(HERE/'vendor/HS-LICENSE.txt')
-    checks['same_aircraft_mass'] = abs(model['mass_kg']*1000-design['mass']['auw_g'])<1e-8
+    checks['same_aircraft_mass'] = abs(model['mass_kg']*1000-design['mass']['auw_g']-requirements['payload_mass_g'])<1e-8
+    payloads = [p for p in model['mass_proxies'] if p['id']=='study_payload']
+    checks['declared_payload_mass'] = (len(payloads)==1 and payloads[0]['mass_g']==requirements['payload_mass_g']) if requirements['payload_mass_g'] else not payloads
+    payload_parts = [p for p in model['parts'] if p['id']=='study_payload']
+    checks['payload_geometry'] = not payload_parts and not requirements['payload_mass_g']
+    if requirements['payload_mass_g'] and len(payload_parts)==1 and len(payloads)==1:
+        vertices = np.array(payload_parts[0]['vertices_m'])
+        f = design['frame_parameters']
+        expected_centre = [.016, 0, (f['bottom_t_mm']+f['standoff_len_mm']+f['top_t_mm']+4)/1000]
+        checks['payload_geometry'] = bool(np.allclose(np.ptp(vertices,axis=0),[.014,.012,.008],atol=1e-7)
+                                           and np.allclose(vertices.mean(axis=0),expected_centre,atol=1e-7)
+                                           and np.allclose(payloads[0]['centre_m'],expected_centre,atol=1e-9))
+    payload_parts = [p for p in model['parts'] if p['id']=='study_payload']
+    if requirements['payload_mass_g']:
+        expected_centre = [0.016, 0, (design['frame_parameters']['bottom_t_mm'] + design['frame_parameters']['standoff_len_mm'] + design['frame_parameters']['top_t_mm'] + 4)/1000]
+        checks['payload_geometry_and_location'] = len(payload_parts)==1 and np.allclose(
+            np.ptp(np.array(payload_parts[0]['vertices_m']), axis=0), [.014, .012, .008], atol=1e-7) and np.allclose(
+            payloads[0]['centre_m'], expected_centre, atol=1e-7)
+    else:
+        checks['payload_geometry_and_location'] = not payload_parts
     checks['same_rotor_layout'] = np.allclose(np.array(model['rotor_centres_m'])[:,:2],np.array(design['measured']['motor_centres_mm'])/1000,atol=1e-9)
     checks['four_rotors'] = sum(p['rotor_index'] is not None for p in model['parts'])==4
     checks['native_frame_identified'] = {p['id'] for p in model['parts'] if p['native_frame']}=={'bottom_plate','top_plate'}
@@ -88,6 +110,7 @@ def verify(out: Path, design_dir: Path):
     inline = re.search(r'<script id="model-data" type="application/json">(.*?)</script>',page,re.S)
     viewer = json.loads(inline.group(1)) if inline else {}
     checks['offline_viewer_contains_native_model'] = viewer.get('model')==model and (HERE/'vendor/three.min.js').read_text() in page
+    checks['viewer_scenario_masses'] = viewer.get('scenario_mass_kg') == {s['id']: model['mass_kg']+s.get('extra_mass_g',0)/1000 for s in config['scenarios']}
     application = page.rsplit('<script>',1)[-1]
     checks['viewer_no_network_dependency'] = not re.search(r'<script[^>]+src=|<link[^>]+href=["\']https?://',page) and 'fetch(' not in application
     assessments = [];framing=None
@@ -109,7 +132,15 @@ def verify(out: Path, design_dir: Path):
             and actual['q']==[expected['quat_'+axis] for axis in 'xyzw']
             and actual['rpm']==[expected[f'rpm_{i}'] for i in range(1,5)]
             for actual,expected in zip(actual_records,expected_records))
-    checks['simulation_summary_matches_logs'] = assessments==report.get('scenarios') and report.get('simulation_acceptance') is True
+    simulation_ok = all(x['accepted'] for x in assessments) and report.get('gravity_oracle',{}).get('accepted') is True
+    mass_constraints = constraints(model,requirements)
+    checks['simulation_summary_matches_logs'] = assessments==report.get('scenarios') and report.get('simulation_acceptance') == simulation_ok
+    checks['requirements_match_model'] = report.get('requirements') == requirements
+    checks['constraints_match_model'] = report.get('constraints') == mass_constraints
+    requirements_met = simulation_ok and all(x['passed'] for x in mass_constraints)
+    checks['requirements_summary_matches'] = report.get('requirements_met') == requirements_met
+    for constraint in mass_constraints:
+        checks[constraint['id']+'_requirement'] = constraint['passed']
     oracle = freefall_oracle(model,table,config)
     checks['native_zero_thrust_gravity_oracle'] = oracle['accepted'] and oracle==report.get('gravity_oracle')
     for name in ['ASSEMBLY.png','EXPLODED.png','TELEMETRY.png']:
@@ -119,8 +150,20 @@ def verify(out: Path, design_dir: Path):
         checks['native_flight_animation'] = gif.n_frames>=config['duration_s']*config['render_hz']-1 and gif.width>=480
     checks['digital_scope_only'] = report.get('requested_scope')=='digital_only_3d_representation_and_simulation' and report.get('physical_work_requested') is False and report.get('physical_validation') is False
     accepted = all(checks.values())
+    # A valid computation may fail engineering requirements. Never publish corrupt
+    # telemetry/CAD as a valid revision, but retain an honest failed design study.
+    integrity_checks = dict(checks)
+    integrity_checks.pop('small_omitted_products_of_inertia')
+    for c in mass_constraints:
+        integrity_checks.pop(c['id']+'_requirement')
+    for assessed in assessments:
+        for key in assessed['checks']:
+            if key not in {'finite_state','timebase','position_velocity_consistency','native_force_balance'}:
+                integrity_checks.pop(assessed['scenario']['id']+'_'+key)
     result = {'schema':'hardware_splicer.hs3g_digital_verification.v1',
               'digital_objective_complete':accepted,'engineering_acceptance':accepted,
+              'artifact_integrity': all(integrity_checks.values()),
+              'integrity_checks': integrity_checks, 'requirements_met': accepted,
               'scope':'Native 3D representative, offline physics playback and parameterized PyBullet mission/failure study',
               'checks':checks,'failed_checks':[k for k,v in checks.items() if not v],
               'scenarios':assessments,'native_gravity_oracle':oracle,'recording_framing':framing,
@@ -128,13 +171,14 @@ def verify(out: Path, design_dir: Path):
               'fabrication_authorized':False,'power_on_authorized':False,'flight_authorized':False,
               'scope_limits':config['scope_limits'],
               'open_actions':[] if accepted else ['Resolve failed digital acceptance checks.']}
-    result['artifact_sha256']={p.relative_to(out).as_posix():sha(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='verification.json'}
+    result['artifact_sha256']={p.relative_to(out).as_posix():sha(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='verification.json' and '__pycache__' not in p.parts}
     dump(out/'verification.json',result)
     return result
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('package',type=Path);p.add_argument('--design',type=Path,required=True)
+    p.add_argument('--study',action='store_true',help='Accept intact runs even when engineering requirements fail')
     args=p.parse_args()
     try:
         r=verify(args.package,args.design)
@@ -142,7 +186,8 @@ def main():
         dump(args.package/'verification.json',{'engineering_acceptance':False,'digital_objective_complete':False,'error':str(exc)})
         print(str(exc),file=sys.stderr);return 1
     print(json.dumps({'digital_objective_complete':r['digital_objective_complete'],'failed_checks':r['failed_checks']}))
-    return 0 if r['digital_objective_complete'] else 1
+    accepted = r['artifact_integrity'] if args.study else r['digital_objective_complete']
+    return 0 if accepted else 1
 
 
 if __name__=='__main__':

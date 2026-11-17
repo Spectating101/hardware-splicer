@@ -117,6 +117,14 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
         # Full-snapshot write: client-supplied engineeringFindings are stored
         # as given. The findings projection validates ledger rows on read.
         try:
+            if request.snapshot.get('mode') == 'digital':
+                raise ValueError('Digital revisions are saved by completed simulation jobs. Use the digital study workflow.')
+            try:
+                current = project_store.load(project_id)
+            except ProjectNotFound:
+                current = None
+            if current and current['snapshot'].get('mode') == 'digital':
+                raise ValueError('Digital revisions are saved by completed simulation jobs. Use the digital study workflow.')
             envelope = project_store.save(
                 project_id,
                 request.snapshot,
@@ -208,7 +216,11 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
     @router.post("/{project_id}/duplicate", status_code=status.HTTP_201_CREATED)
     def duplicate_project(project_id: str, request: ProjectDuplicateRequest) -> Dict[str, Any]:
         try:
-            envelope = project_store.duplicate(project_id, request.target_project_id)
+            if project_store.load(project_id)['snapshot'].get('mode') == 'digital':
+                from .digital_project import duplicate_project as duplicate_digital
+                envelope = duplicate_digital(project_store, project_id, request.target_project_id)
+            else:
+                envelope = project_store.duplicate(project_id, request.target_project_id)
         except Exception as exc:
             raise _project_error(exc) from exc
         retention = retention_after_save(

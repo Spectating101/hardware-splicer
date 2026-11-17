@@ -59,6 +59,11 @@
   "objective": "Complete a digital-only HS-3G-B 3D representative and runnable rigid-body flight simulation.",
   "physics_hz": 240,
   "render_hz": 6,
+  "requirements": {
+    "gust_scale": 1.0,
+    "max_mass_g": 250.0,
+    "payload_mass_g": 0.0
+  },
   "scenarios": [
     {
       "expected": "controlled_landing",

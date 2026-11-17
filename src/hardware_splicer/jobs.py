@@ -10,7 +10,7 @@ import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from .compiler import compile_hardware_bundle
 from .schemas import HardwareCompileSpec
@@ -193,6 +193,15 @@ class JobStore:
                 rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
             return [self._record_from_row(row) for row in rows]
 
+    def list_digital_jobs(self, project_id: str) -> List[JobRecord]:
+        with self._lock, self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM jobs WHERE json_extract(options_json, '$.job_type') = 'digital_study' "
+                "AND json_extract(options_json, '$.payload.project_id') = ? ORDER BY created_at DESC LIMIT 100",
+                (project_id,),
+            ).fetchall()
+            return [self._record_from_row(row) for row in rows]
+
     def stats(self) -> Dict[str, Any]:
         with self._lock, self._connect() as conn:
             rows = conn.execute("SELECT status, COUNT(*) AS count FROM jobs GROUP BY status").fetchall()
@@ -257,6 +266,29 @@ class JobStore:
                 (now, now, _json(result), job_id),
             )
 
+    def complete_with_publication(self, job: JobRecord, publish: Callable[[], Dict[str, Any]]) -> bool:
+        """Serialize publication against cancellation/timeout and retried attempts.
+
+        The slow native computation has already finished. Only the short project
+        revision commit runs here; a cancelled or superseded attempt cannot save.
+        """
+        with self._lock, self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                row = conn.execute("SELECT status, started_at FROM jobs WHERE job_id = ?", (job.job_id,)).fetchone()
+                if not row or row['status'] != 'running' or row['started_at'] != job.started_at:
+                    conn.execute("ROLLBACK")
+                    return False
+                result = publish()
+                now = _utc_now()
+                conn.execute("UPDATE jobs SET status='succeeded', finished_at=?, updated_at=?, result_json=?, error_json=NULL WHERE job_id=?",
+                             (now, now, _json(result), job.job_id))
+                conn.execute("COMMIT")
+                return True
+            except BaseException:
+                conn.execute("ROLLBACK")
+                raise
+
     def fail_job(self, job_id: str, error: Dict[str, Any]) -> None:
         now = _utc_now()
         with self._lock, self._connect() as conn:
@@ -272,13 +304,15 @@ class JobStore:
     def cancel_job(self, job_id: str) -> bool:
         now = _utc_now()
         with self._lock, self._connect() as conn:
+            row = conn.execute("SELECT options_json FROM jobs WHERE job_id=?", (job_id,)).fetchone()
+            running_allowed = bool(row and _loads(row['options_json'], {}).get('job_type') == 'digital_study')
             cursor = conn.execute(
                 """
                 UPDATE jobs
                 SET status = 'cancelled', finished_at = ?, updated_at = ?
-                WHERE job_id = ? AND status = 'queued'
+                WHERE job_id = ? AND (status = 'queued' OR (status = 'running' AND ?))
                 """,
-                (now, now, job_id),
+                (now, now, job_id, running_allowed),
             )
             return cursor.rowcount > 0
 
@@ -410,6 +444,14 @@ class JobBackend:
 
     def _run_job(self, job: JobRecord) -> None:
         timeout_s = _job_timeout_s()
+        if job.options.get('job_type') == 'digital_study':
+            try:
+                digital_timeout = float(os.getenv('HARDWARE_SPLICER_DIGITAL_TIMEOUT_S', '600'))
+                if not 30 <= digital_timeout <= 3600:
+                    digital_timeout = 600
+            except ValueError:
+                digital_timeout = 600
+            timeout_s = max(timeout_s, digital_timeout)
         # Helper thread so a hung LLM/subprocess cannot leave the job "running" forever.
         error_box: list[BaseException] = []
         done = threading.Event()
@@ -459,6 +501,11 @@ class JobBackend:
     def _execute_job(self, job: JobRecord) -> None:
         job_type = str(job.options.get("job_type") or "compile_bundle")
         try:
+            if job_type == 'digital_study':
+                from .digital_project import execute_study
+
+                execute_study(self, job)
+                return
             if job_type == "compose":
                 from .compose_dispatch import compose_dispatch
                 from .sdk import finalize_compose_job_result
