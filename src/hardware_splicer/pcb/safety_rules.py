@@ -75,6 +75,13 @@ def _voltage_range(v: Optional[str]) -> Optional[Tuple[float, float]]:
     return (single, single) if single is not None else None
 
 
+def _is_active_low_strap(resolved: Mapping[str, Any]) -> bool:
+    pin = resolved.get("pin") or {}
+    return str(pin.get("role") or "") == "digital_in" and bool(
+        re.search(r"active[- ]low", str(pin.get("notes") or ""), re.I)
+    )
+
+
 def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
     warnings: List[BuildWarning] = []
 
@@ -88,6 +95,10 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         b_role = _effective_role(graph, b)
         a_gnd = a_role == "gnd"
         b_gnd = b_role == "gnd"
+        if a_gnd != b_gnd and _is_active_low_strap(a if b_gnd else b):
+            # An input the module data documents as an active-low enable (e.g. A4988 EN) is held
+            # enabled by tying it to ground; that is a configuration strap, not a short.
+            continue
         if a_gnd != b_gnd:
             warnings.append(
                 {
