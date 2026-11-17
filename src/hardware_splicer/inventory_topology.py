@@ -165,7 +165,7 @@ def _remap_recipe_pins_for_modules(recipe: Recipe) -> Recipe:
             if w.get("from", {}).get("role") == "mcu"
         }
         candidates = [
-            p for p in ("GPIO14", "GPIO15", "GPIO4", "GPIO2", "D4", "D5") if p in mcu_pins and p not in used
+            p for p in ("GPIO14", "GPIO15", "GPIO4", "GPIO2") if p in mcu_pins and p not in used
         ]
         # Prefer aliased names already remapped.
         candidates = [aliases.get(p, p) for p in candidates]
