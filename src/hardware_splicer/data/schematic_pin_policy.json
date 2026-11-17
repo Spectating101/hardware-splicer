@@ -113,8 +113,8 @@
     }
   },
   "module_output_terminals": {
-    "mosfet-irlz44n": {"pins": ["VOUT-"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load."},
-    "mosfet-irf520": {"pins": ["VOUT-"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load."}
+    "mosfet-irlz44n": {"pins": ["VOUT-"], "fed_when": ["VIN-", "GND"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load, so it is only as supplied as the module ground (VIN-/GND) that feeds it."},
+    "mosfet-irf520": {"pins": ["VOUT-"], "fed_when": ["VIN-", "GND"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load, so it is only as supplied as the module ground (VIN-/GND) that feeds it."}
   },
   "common_ground": {
     "buck-mp1584": [["IN-", "OUT-"]],
