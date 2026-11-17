@@ -88,12 +88,6 @@
         "IN4": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."}
       }
     },
-    "small_audio_amp_box": {
-      "max98357a-i2s-amp": {
-        "SPK+": {"disposition": "off_board_terminal", "reason": "Recipe note: connect a 4 ohm+ speaker across SPK+/SPK-."},
-        "SPK-": {"disposition": "off_board_terminal", "reason": "Recipe note: connect a 4 ohm+ speaker across SPK+/SPK-."}
-      }
-    },
     "smart_relay_box": {
       "relay-1ch-5v": {
         "COM": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},

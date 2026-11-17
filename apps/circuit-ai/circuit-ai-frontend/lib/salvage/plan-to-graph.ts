@@ -841,6 +841,7 @@ const RECIPES: Record<string, Recipe> = {
       { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "amp", moduleId: "max98357a-i2s-amp" },
+      { role: "spk", moduleId: "terminal-block-2p" },
     ],
     wires: [
       ...usbToMcu("usb", "mcu", "VIN"),
@@ -849,9 +850,11 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "GPIO21" }, to: { role: "amp", pin: "LRC" } },
       { from: { role: "mcu", pin: "GPIO22" }, to: { role: "amp", pin: "BCLK" } },
       { from: { role: "mcu", pin: "GPIO4" }, to: { role: "amp", pin: "DIN" } },
+      { from: { role: "amp", pin: "SPK+" }, to: { role: "spk", pin: "1" } },
+      { from: { role: "amp", pin: "SPK-" }, to: { role: "spk", pin: "2" } },
     ],
     notes: [
-      "MAX98357A I2S Class-D mono amp — connect 4Ω+ speaker across SPK+/SPK-.",
+      "MAX98357A I2S Class-D mono amp — connect a 4Ω+ speaker to the 2-pin terminal (1 = SPK+, 2 = SPK-). The outputs are bridge-tied, so never ground SPK-.",
     ],
   },
 
