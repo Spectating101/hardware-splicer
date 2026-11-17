@@ -1,0 +1,174 @@
+{
+  "status": "digital_geometry_checks_passed",
+  "source": "reimported exported STEP/STL plus unmodified manufacturer BRep",
+  "assembly_valid": true,
+  "assembly_solids": 38,
+  "custom_parts": [
+    {
+      "name": "seam_plate_1",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "seam_plate_2",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "seam_plate_3",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "seam_plate_4",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "seam_plate_5",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "seam_plate_6",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "tray_front_left",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.003
+    },
+    {
+      "name": "face_front_left",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.001
+    },
+    {
+      "name": "tray_front_right",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.004
+    },
+    {
+      "name": "face_front_right",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.001
+    },
+    {
+      "name": "tray_rear_left",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.013
+    },
+    {
+      "name": "face_rear_left",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.011
+    },
+    {
+      "name": "tray_rear_right",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.012
+    },
+    {
+      "name": "face_rear_right",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.001
+    },
+    {
+      "name": "fan_guard",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.069
+    },
+    {
+      "name": "fan_duct",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.0
+    },
+    {
+      "name": "foot_1",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.093
+    },
+    {
+      "name": "foot_2",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.093
+    },
+    {
+      "name": "foot_3",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.093
+    },
+    {
+      "name": "foot_4",
+      "valid_closed_step": true,
+      "watertight_stl": true,
+      "bed_fit_220mm": true,
+      "mesh_volume_error_percent": 0.093
+    }
+  ],
+  "display_mount_axes_independently_extracted": [
+    [
+      85.0,
+      174.645
+    ],
+    [
+      85.0,
+      245.355
+    ],
+    [
+      225.0,
+      174.645
+    ],
+    [
+      225.0,
+      245.355
+    ]
+  ],
+  "screw_holes_and_support_seats_checked": true,
+  "exported_custom_pair_and_display_intersections_mm3_over_0_1": [],
+  "authoring_model_other_nominal_module_intersections": [],
+  "all_flexible_cables_and_fasteners_modelled": false,
+  "physical_fit_or_operation_proven": false,
+  "scope": "Rigid source and nominal envelope geometry only; no manufacturing calibration, full contact/structural/thermal analysis or ARM boot.",
+  "assembly_step_sha256": "b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+  "author_cad_sha256": "bea650213c3a69719c69b79bc7893afc633889bfef0a612fd1b6a05406e472e6"
+}

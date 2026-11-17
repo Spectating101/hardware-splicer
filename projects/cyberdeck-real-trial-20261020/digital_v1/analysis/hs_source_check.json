@@ -1,0 +1,92 @@
+{
+  "ok": true,
+  "registered": true,
+  "revision": 20,
+  "project_id": "hs-flex-cyberdeck",
+  "source_bundle_run": {
+    "schema_version": "hardware_splicer.project_source_bundle.v1",
+    "input_sources": {
+      "FIELDDECK_7.step": {
+        "sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "kind": "step_cad"
+      },
+      "touch_display2_7inch.step": {
+        "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "kind": "step_cad"
+      }
+    },
+    "software_tool": "source_type_auto_dispatch",
+    "status": "analyzed_non_electrical_sources",
+    "project_context": "not_applicable",
+    "software_checks": {},
+    "geometry": {
+      "touch_display2_7inch.step": {
+        "status": "imported_brep",
+        "cad_kernel": "CadQuery/OpenCascade",
+        "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "solid_count": 5,
+        "bounding_box_mm": {
+          "span": {
+            "x": 120.24,
+            "y": 189.32,
+            "z": 14.96
+          },
+          "min": {
+            "x": -60.12,
+            "y": -91.725,
+            "z": -9.94
+          },
+          "max": {
+            "x": 60.12,
+            "y": 97.595,
+            "z": 5.02
+          }
+        },
+        "coordinate_axes_are_original_source_orientation": true,
+        "mounting_interfaces_verified": false,
+        "physical_clearances_verified": false,
+        "manufacturer_design_maturity_unverified": true,
+        "fabrication_authorized": false
+      },
+      "FIELDDECK_7.step": {
+        "status": "imported_brep",
+        "cad_kernel": "CadQuery/OpenCascade",
+        "source_sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "solid_count": 38,
+        "bounding_box_mm": {
+          "span": {
+            "x": 310.0,
+            "y": 285.7,
+            "z": 72.0
+          },
+          "min": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -6.0
+          },
+          "max": {
+            "x": 310.0,
+            "y": 285.7,
+            "z": 66.0
+          }
+        },
+        "coordinate_axes_are_original_source_orientation": true,
+        "mounting_interfaces_verified": false,
+        "physical_clearances_verified": false,
+        "manufacturer_design_maturity_unverified": true,
+        "fabrication_authorized": false
+      }
+    },
+    "repair_evidence": {},
+    "release_authorized": false,
+    "manufacturing_approved": false,
+    "source_analysis_failures": [],
+    "semantic_limitations": [
+      "Extracted source facts do not prove physical fit or a finished design.",
+      "Unknown physical measurements, safety and procurement remain blocked."
+    ],
+    "source_set_sha256": "sha256:bb973dfdf3e8e3f827104d1e5dc21429f7563f2832107c6e32585b2f527e1b27",
+    "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431"
+  },
+  "physical_authority_unchanged": true
+}

@@ -1,0 +1,7 @@
+# CAD and immutable content-addressed blobs are reviewed through their readers.
+cad/**/*.step binary
+cad/*.step binary
+sources/*.step binary
+hs_project/hs-flex-cyberdeck/sources/sha256/** binary
+# Preserve the manufacturer's original CRLF license bytes.
+sources/touch_display2_LICENSE.txt whitespace=cr-at-eol

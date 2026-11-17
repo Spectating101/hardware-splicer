@@ -1,5 +1,7 @@
 # Hardware Splicer — REAL cyberdeck capability trial (20 October 2026)
 
+**17 November continuation:** [Fielddeck 7](digital_v1/README.md) now provides an assistant-engineered digital device: editable assembly, 20 printable parts, sourced module BOM, matching assembly/connections, and calculated power/runtime scenarios. Exported solids and meshes were reopened and checked. This is a fresh durable recovery of the same objective; the old temporary store is unavailable. It is not an autonomous-HS success or a physical build. The original trial result below remains the historical finding.
+
 **Verdict: FAIL to produce an engineering-ready device.** This is an **actual invocation** of the HS backend and its internal AI and design endpoints against a practical project, not synthetic test fixtures. The material facts are in [`evidence_summary.json`](./evidence_summary.json), including **SHA-256 hashes of thirteen original request, response and external validation files** preserved on the Optiplex trial machine.
 
 ## Exact assignment

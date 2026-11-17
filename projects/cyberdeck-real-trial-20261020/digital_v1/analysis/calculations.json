@@ -1,0 +1,126 @@
+{
+  "calculation_type": "first_order_scenarios_not_physical_simulation",
+  "battery_nominal_cell_energy_wh": 36,
+  "usable_output_energy_wh": [
+    22.95,
+    32.4
+  ],
+  "battery_basis": "10Ah x assumed 3.6V cell nominal; 75-90% conversion, 85-100% usable capacity. Not 10Ah at 5V.",
+  "load_scenarios": [
+    {
+      "name": "light",
+      "pi_current_a": 0.65,
+      "display_w": 2.4,
+      "keyboard_a": 0.1,
+      "current_a": 1.3,
+      "power_w": 6.5,
+      "current_headroom_a": 1.7,
+      "runtime_h": [
+        3.53,
+        4.98
+      ]
+    },
+    {
+      "name": "work",
+      "pi_current_a": 1,
+      "display_w": 2.4,
+      "keyboard_a": 0.1,
+      "current_a": 1.65,
+      "power_w": 8.25,
+      "current_headroom_a": 1.35,
+      "runtime_h": [
+        2.78,
+        3.93
+      ]
+    },
+    {
+      "name": "stress_allocation",
+      "pi_current_a": 1.75,
+      "display_w": 3,
+      "keyboard_a": 0.1,
+      "current_a": 2.52,
+      "power_w": 12.6,
+      "current_headroom_a": 0.48,
+      "runtime_h": [
+        1.82,
+        2.57
+      ]
+    },
+    {
+      "name": "high_power_keyboard_sensitivity",
+      "pi_current_a": 1.75,
+      "display_w": 3,
+      "keyboard_a": 0.5,
+      "current_a": 2.92,
+      "power_w": 14.6,
+      "current_headroom_a": 0.08,
+      "runtime_h": [
+        1.57,
+        2.22
+      ]
+    }
+  ],
+  "bank_single_port_limit_a": 3,
+  "pi_usb_aggregate_limit_a": 1.2,
+  "power_cable_loop_resistance_ohm": [
+    0.0535,
+    0.10350000000000001,
+    0.1535
+  ],
+  "stress_cable_drop_v": [
+    0.135,
+    0.261,
+    0.387
+  ],
+  "stress_pi_voltage_if_bank_exactly_5v": [
+    4.865,
+    4.739,
+    4.613
+  ],
+  "voltage_caveat": "At the upper contact resistance, Pi input can approach/breach its undervoltage threshold. A 3A wattage margin does not establish voltage stability.",
+  "custom_solid_volume_cm3": 661.36,
+  "custom_100_percent_solid_petg_mass_g": 839.9,
+  "mass_note": "Actual sliced mass not computed; 30% infill does not imply 30% of this mass. Display mass budget 250-350g; other module/hardware mass assumptions recorded in README.",
+  "post_lateral_2g_check": {
+    "panel_mass_assumption_kg": 0.35,
+    "load_per_post_n": 1.7161637499999998,
+    "length_mm": 49.54,
+    "section_second_moment_mm4": 427.2566008882119,
+    "elastic_modulus_assumption_mpa": 1500,
+    "allowable_stress_assumption_mpa": 10,
+    "bending_stress_mpa": 0.9949378429526526,
+    "tip_deflection_mm": 0.10852391090903903,
+    "scope": "Ideal cantilever with equal load sharing; excludes base/root, layers, screws, seams, glass and impact. Not a drop rating."
+  },
+  "cooling_sensitivity": {
+    "heat_assumption_w": 12.6,
+    "fan_free_air_m3_h": 8.9,
+    "delivered_fraction": [
+      0.05,
+      0.1,
+      0.2,
+      0.4
+    ],
+    "bulk_air_rise_c": [
+      84.52121415394933,
+      42.260607076974665,
+      21.130303538487333,
+      10.565151769243666
+    ],
+    "scope": "Energy balance, not CFD, CPU junction temperature or a fan/system operating point."
+  },
+  "cost_usd": {
+    "observed_retail_subtotal": 249.24,
+    "explicit_allowance_subtotal": 87.49,
+    "planning_total": 336.73,
+    "scope": "Reference US retail observations and explicit planning allowances; excludes tax, shipping, tools, printing labour and any purchase. No user country or budget was assumed."
+  },
+  "open_digital_fit_items": [
+    "bank ports/button and built-in cable not dimensioned",
+    "keyboard underside/pad retention and cable bend not manufacturer CAD",
+    "display lug thread/engagement nominal only",
+    "GPIO extension connector rating and retention unverified",
+    "flexible cable bends/routing not solid interference verified"
+  ],
+  "physical_validation_performed": false
+}
