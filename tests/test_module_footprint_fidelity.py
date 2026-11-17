@@ -185,3 +185,23 @@ def test_esp32_devkit_names_its_variant_and_the_flash_pins_are_not_offered_as_gp
     spec = registry.find_module("esp32-devkit")
     flash = [p for p in spec["pins"] if p["id"] in {"GPIO6", "GPIO7", "GPIO8", "GPIO9", "GPIO10", "GPIO11"}]
     assert len(flash) == 6 and all(p["role"] == "other" and "flash" in p["notes"] for p in flash)
+
+
+# ---- ESP32-CAM (AI-Thinker) ---------------------------------------------------------------------
+
+
+def test_esp32_cam_has_both_eight_pin_rows_in_the_ai_thinker_order() -> None:
+    pads = table("esp32-cam-module")
+    left = [p for p in pads if p["x"] < 0]
+    right = [p for p in pads if p["x"] > 0]
+    assert [p["pinId"] for p in left] == ["5V", "GND", "GPIO12", "GPIO13", "GPIO15", "GPIO14", "GPIO2", "GPIO4"]
+    assert [p["pinId"] for p in right] == ["3V3", "GPIO16", "GPIO0", "GND_2", "VCC", "U0R", "U0T", "GND_3"]
+    for column in (left, right):
+        assert {round(b["y"] - a["y"], 3) for a, b in zip(column, column[1:])} == {2.54}
+    assert {p["pinId"] for p in pads} <= spec_pin_ids("esp32-cam-module")
+
+
+def test_esp32_cam_is_unverified_because_the_row_spacing_is_not_published() -> None:
+    record = fit("esp32-cam-module")
+    assert record["status"] == "unverified_variant"
+    assert "row" in record["reason"] and "assumed" in record["reason"]

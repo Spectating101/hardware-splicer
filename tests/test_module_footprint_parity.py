@@ -68,7 +68,6 @@ PINS_WITHOUT_A_PAD = {
     "ch340-usb-ttl": {"USB"},
     # Known gaps in the table as it was moved into the data file; each is removed when its module is corrected.
     "max98357a-i2s-amp": {"GAIN"},
-    "esp32-cam-module": {"GPIO4"},
 }
 
 
