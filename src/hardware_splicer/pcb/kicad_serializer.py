@@ -103,6 +103,13 @@ def _footprint_block(
             f"    (pad {_quote(str(pad.get('num')))} {pad_type} {shape} (at {lx} {ly}) (size {w} {h}){drill} (layers {layers}){net_str})"
         )
     pads = "\n".join(pad_lines)
+    source_note = ""
+    if fp.get("synthetic_package_geometry"):
+        warning = "LOGICAL PREVIEW - synthetic pads; source footprint: " + str(fp.get("source_footprint") or "unresolved")
+        source_note = (
+            f'    (fp_text user {_quote(warning)} (at 0 5) (layer "F.Fab") '
+            '(effects (font (size 0.8 0.8) (thickness 0.12))))'
+        )
     at = fp.get("at") or {}
     return f"""  (footprint {_quote(lib)} (layer "{fp.get('layer', 'F.Cu')}")
     (at {_n(float(at.get('x', 0)))} {_n(float(at.get('y', 0)))} {_n(float(at.get('rot_deg', 0)))})
@@ -110,6 +117,7 @@ def _footprint_block(
     (fp_text reference {_quote(str(fp.get('ref') or f'U{idx + 1}'))} (at 0 -3) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
     (fp_text value {_quote(str(fp.get('value') or fp.get('ref') or ''))} (at 0 3) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
 {body}
+{source_note}
 {pads}
   )"""
 

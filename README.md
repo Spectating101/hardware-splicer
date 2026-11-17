@@ -43,6 +43,13 @@ requirements retain their artifacts. The current focus is the backend engine;
 frontend work is deferred. See the [engine guide](docs/ENGINE.md#headless-digital-engine).
 No HTTP server, browser, physical parts or model-service key is required.
 
+**Native source splicing:** uploaded KiCad boards can become editable project
+revisions with their original footprints, pad/net identities and supplied project
+rules. Engineering actions can import those sources and propose native edits;
+reviews retain their original base, and native ZIP exports include the rule
+companions. Source changes invalidate inherited verification results. See the
+[native editing workflow](docs/ENGINE.md#native-source-editing-and-splicing).
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

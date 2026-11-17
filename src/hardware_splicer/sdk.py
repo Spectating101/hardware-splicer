@@ -40,6 +40,43 @@ def digital_engine(*, project_root: str | Path | None = None, job_db: str | Path
     return DigitalStudyEngine(project_root=project_root, job_db=job_db)
 
 
+def promote_source_bundle(project_id: str, *, expected_revision: int, source_ids=None,
+                          primary_source_id=None, project_root=None):
+    """Make registered native source bytes editable without recompiling their geometry."""
+    from .source_project_editing import promote_kicad_source_bundle
+    from .project_store import ProjectStore
+
+    return promote_kicad_source_bundle(ProjectStore(project_root), project_id,
+        expected_revision=expected_revision, source_ids=source_ids, primary_source_id=primary_source_id)
+
+
+def propose_native_edit(project_id: str, *, kind: str, ops, base_revision: int,
+                        author: str = 'sdk', note: str = '', project_root=None):
+    """Propose an edit of a retained native design; the review remains pending."""
+    from .project_candidates import propose_candidate
+    from .project_store import ProjectStore
+
+    return propose_candidate(ProjectStore(project_root), project_id, kind=kind, ops=ops,
+        base_revision=base_revision, author=author, note=note)
+
+
+def export_native_edit(project_id: str, candidate_id: str, *, project_root=None) -> bytes:
+    """Export an edit plus preserved native project/rule bytes as one checked ZIP."""
+    from .source_project_editing import native_candidate_bundle
+    from .project_store import ProjectStore
+
+    return native_candidate_bundle(ProjectStore(project_root), project_id, candidate_id)
+
+
+def check_native_design(project_id: str, *, expected_revision: int, kind: str = 'pcb', project_root=None):
+    """Run native DRC/ERC on the exact retained design and its project/rule bytes."""
+    from .source_project_editing import check_retained_native_design
+    from .project_store import ProjectStore
+
+    return check_retained_native_design(ProjectStore(project_root), project_id,
+                                        expected_revision=expected_revision, kind=kind)
+
+
 def assess_materials(project_id: str, *, expected_revision: int, requirements, inventory, project_root=None):
     """Match exact material requirements to declared or imported stock."""
     from .project_materials import assess_project_materials

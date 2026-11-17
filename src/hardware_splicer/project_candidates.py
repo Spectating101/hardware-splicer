@@ -27,20 +27,24 @@ from typing import Any, Iterator, Mapping, Sequence
 
 from .artifact_retention import (
     ARTIFACT_KINDS,
+    ARTIFACT_SIDECARS,
     _is_symlink,
     _lexical_absolute,
     _read_regular_file,
     derive_snapshot_build_dir,
-    read_pinned_artifact,
+    read_pinned_artifact_bytes,
+    read_pinned_artifact_sidecars,
+    validate_kicad_rule_bytes,
 )
 from .bounded_process import BoundedProcessError, run_bounded
 from .build_files_security import assert_build_dir_allowed, max_kicad_content_bytes, output_roots
 from .kicad_diff import KicadDiffError, diff_kicad_text
 from .kicad_edit import KicadEditError, apply_edit_ops
 from .model3d import capability_probe, resolve_kicad_cli
-from .project_review_store import ProjectReviewError, ProjectReviewStore
+from .project_review_store import ProjectReviewError, ProjectReviewStore, validate_review_id
 from .routing_engine import RoutingError, RoutingUnavailable, capability_probe as routing_capability_probe, route_pcb
 from .project_store import ProjectStore, validate_project_id
+from .source_revision_impact import invalidate_source_derived_outputs
 
 CANDIDATE_SCHEMA = "hardware_splicer.candidate.v1"
 CANDIDATE_ID_RE = re.compile(r"^cand-[0-9a-f]{12}$")
@@ -220,26 +224,38 @@ def sanitise_filename(relative: str, kind: str) -> str:
 
 
 def unique_filenames(entries: Sequence[tuple[str, str]]) -> dict[str, str]:
-    """Sanitise pin relatives and disambiguate if two kinds collapse to one name."""
+    """Keep shared project stems only for the same original source project.
 
-    taken: set[str] = set()
+    Distinct schematic/PCB basenames can sanitize to the same string. Separate
+    their stems even though their file extensions differ, otherwise one design
+    would silently inherit the other design's project/rule companions.
+    """
+
+    taken_stems: set[str] = set()
+    project_stems: dict[str, str] = {}
     out: dict[str, str] = {}
     for kind, relative in entries:
         expected = _kind_suffix(kind)
         name = sanitise_filename(relative, kind)
-        if name in taken:
-            stem = name[: -len(expected)]
+        source_project = str(Path(relative.replace("\\", "/")).with_suffix(""))
+        if source_project in project_stems:
+            out[kind] = project_stems[source_project] + expected
+            continue
+        stem = name[: -len(expected)]
+        chosen = stem
+        if chosen.casefold() in taken_stems:
             index = 2
             while True:
                 suffix = f"_{index}"
                 room = MAX_FILENAME - len(expected) - len(suffix)
-                candidate = (stem[: max(1, room)] + suffix + expected)
-                if candidate not in taken:
-                    name = candidate
+                candidate = stem[: max(1, room)] + suffix
+                if candidate.casefold() not in taken_stems:
+                    chosen = candidate
                     break
                 index += 1
-        taken.add(name)
-        out[kind] = name
+        taken_stems.add(chosen.casefold())
+        project_stems[source_project] = chosen
+        out[kind] = chosen + expected
     return out
 
 
@@ -708,7 +724,8 @@ def _path_only_env(home: Path) -> dict[str, str]:
     return {"PATH": os.pathsep.join(parts) or "/usr/bin:/bin", "HOME": str(home)}
 
 
-def _run_one_check(kind: str, text: str, *, timeout_s: float) -> dict[str, Any]:
+def _run_one_check(kind: str, text: str, *, timeout_s: float,
+                   sidecars: Mapping[str, bytes] | None = None) -> dict[str, Any]:
     binary = resolve_kicad_cli()
     if not binary:
         raise _CheckFailed(REASON_UNAVAILABLE)
@@ -727,6 +744,24 @@ def _run_one_check(kind: str, text: str, *, timeout_s: float) -> dict[str, Any]:
         report_path = work / report_name
         src_path.write_text(text, encoding="utf-8")
         os.chmod(src_path, 0o600)
+        for role, content in (sidecars or {}).items():
+            suffix = ARTIFACT_SIDECARS.get(role)
+            if suffix is None or not isinstance(content, bytes):
+                raise _CheckFailed(REASON_FAILED)
+            if role == "project":
+                try:
+                    if not isinstance(json.loads(content), dict):
+                        raise ValueError("project settings must be an object")
+                except (ValueError, UnicodeDecodeError):
+                    raise _CheckFailed(REASON_FAILED) from None
+            if role == "rules":
+                try:
+                    validate_kicad_rule_bytes(content)
+                except ValueError:
+                    raise _CheckFailed("retained custom rules are unsupported or malformed") from None
+            companion = src_path.with_suffix(suffix)
+            companion.write_bytes(content)
+            os.chmod(companion, 0o600)
         try:
             result = run_bounded(
                 [
@@ -777,22 +812,33 @@ def run_candidate_checks(
     after_text: str,
     *,
     timeout_s: float | None = None,
+    sidecars: Mapping[str, bytes] | None = None,
 ) -> dict[str, Any]:
     """Optional DRC/ERC counts. Never decides whether a candidate may exist."""
 
+    context = {
+        "rule_scope": "retained_project_and_custom_rules" if kind == "pcb" and sidecars and set(sidecars) == {"project", "rules"}
+                      else "retained_project_settings" if sidecars and "project" in sidecars
+                      else "retained_custom_rules" if kind == "pcb" and sidecars and "rules" in sidecars
+                      else "artifact_defaults_no_retained_sidecars",
+        "sidecar_sha256": {role: _sha256_bytes(data) for role, data in (sidecars or {}).items()
+                           if role in ARTIFACT_SIDECARS and isinstance(data, bytes)},
+    }
+    def contextual(checks):
+        return {**checks, "source_context": context}
     probe = capability_probe()
     version = probe.get("version") if isinstance(probe.get("version"), str) else None
     if not probe.get("available"):
-        return _empty_checks(available=False, version=None, reason=REASON_UNAVAILABLE)
+        return contextual(_empty_checks(available=False, version=None, reason=REASON_UNAVAILABLE))
     limit = _CHECK_TIMEOUT_S if timeout_s is None else float(timeout_s)
     try:
-        before = _run_one_check(kind, before_text, timeout_s=limit)
-        after = _run_one_check(kind, after_text, timeout_s=limit)
+        before = _run_one_check(kind, before_text, timeout_s=limit, sidecars=sidecars)
+        after = _run_one_check(kind, after_text, timeout_s=limit, sidecars=sidecars)
     except _CheckFailed as exc:
-        return _empty_checks(available=True, version=version, reason=exc.reason)
+        return contextual(_empty_checks(available=True, version=version, reason=exc.reason))
     except Exception:
-        return _empty_checks(available=True, version=version, reason=REASON_FAILED)
-    return {
+        return contextual(_empty_checks(available=True, version=version, reason=REASON_FAILED))
+    return contextual({
         "engine": "kicad-cli",
         "available": True,
         "version": version,
@@ -801,7 +847,7 @@ def run_candidate_checks(
         "before": before,
         "after": after,
         "new_violations": new_violations(before, after),
-    }
+    })
 
 
 def _cleanup_proposal(
@@ -908,6 +954,7 @@ class _Edited:
     base_text: str
     base_bytes: bytes
     pin_entry: Mapping[str, Any]
+    sidecars: Mapping[str, tuple[bytes, Mapping[str, Any]]]
     edited: Mapping[str, Any]
     edited_text: str
     edited_bytes: bytes
@@ -936,11 +983,15 @@ def _edit_retained(
     if not isinstance(snapshot, Mapping):
         raise CandidateValidationError("revision snapshot is not usable")
 
-    pinned = read_pinned_artifact(store, safe_id, resolved_revision, kind)
+    pinned = read_pinned_artifact_bytes(store, safe_id, resolved_revision, kind)
     if pinned is None:
         raise ArtifactNotRetained(f"revision {resolved_revision} has no retained {kind} artifact")
-    base_text, pin_entry = pinned
-    base_bytes = base_text.encode("utf-8")
+    base_bytes, pin_entry = pinned
+    try:
+        base_text = base_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        raise InvalidEdit("retained KiCad artifact is not UTF-8") from None
+    sidecars = read_pinned_artifact_sidecars(store, safe_id, resolved_revision, kind)
 
     if route_options is not None:
         try:
@@ -983,6 +1034,7 @@ def _edit_retained(
         base_text=base_text,
         base_bytes=base_bytes,
         pin_entry=pin_entry,
+        sidecars=sidecars,
         edited=edited,
         edited_text=edited_text,
         edited_bytes=edited_bytes,
@@ -1036,13 +1088,27 @@ def propose_candidate(
     other_bytes: bytes | None = None
     other_entry: Mapping[str, Any] | None = None
     name_entries: list[tuple[str, str]] = [(kind, str(pin_entry.get("relative") or ""))]
-    other_pinned = read_pinned_artifact(store, safe_id, resolved_revision, other_kind)
+    other_pinned = read_pinned_artifact_bytes(store, safe_id, resolved_revision, other_kind)
     if other_pinned is not None:
-        other_text, other_entry = other_pinned
-        other_bytes = other_text.encode("utf-8")
+        other_bytes, other_entry = other_pinned
         _assert_write_size(other_bytes, label="copied")
         name_entries.append((other_kind, str(other_entry.get("relative") or "")))
     filenames = unique_filenames(name_entries)
+    sidecar_bundles = {kind: result.sidecars}
+    if other_pinned is not None:
+        sidecar_bundles[other_kind] = read_pinned_artifact_sidecars(store, safe_id, resolved_revision, other_kind)
+    copied_sidecars = {}
+    sidecar_files = {}
+    for owner, bundle in sidecar_bundles.items():
+        for role, (content, entry) in bundle.items():
+            name = str(Path(filenames[owner]).with_suffix(ARTIFACT_SIDECARS[role]))
+            if name in copied_sidecars and copied_sidecars[name] != content:
+                raise CandidateValidationError("retained project rule filenames conflict after sanitizing")
+            copied_sidecars[name] = content
+            sidecar_files.setdefault(owner, {})[role] = {
+                "relative": name, "retained_relative": entry["relative"],
+                "sha256": _sha256_bytes(content), "role": "copied",
+            }
 
     created_dir = False
     candidate_dir: Path | None = None
@@ -1110,8 +1176,25 @@ def propose_candidate(
                     "sha256": _sha256_bytes(other_bytes),
                     "role": "copied",
                 }
-            checks = run_candidate_checks(kind, base_text, edited_text)
+            for name, content in copied_sidecars.items():
+                _assert_write_size(content, label="copied sidecar")
+                _write_named_create_only(candidate_dir, name, content)
+            checks = run_candidate_checks(kind, base_text, edited_text,
+                                           sidecars={role: data for role, (data, _) in result.sidecars.items()})
             candidate_snapshot = rewrite_snapshot_build_dirs(snapshot, str(candidate_dir))
+            promotion = snapshot.get("sourceEditing")
+            source_ids = promotion.get("source_ids", []) if isinstance(promotion, Mapping) else []
+            source_ids = [value for value in source_ids if isinstance(value, str)] if isinstance(source_ids, list) else []
+            candidate_snapshot = invalidate_source_derived_outputs(
+                candidate_snapshot, changed_source_ids=source_ids,
+                changed_artifact_kinds=[kind], basis="native_candidate_edit",
+            )
+            if checks.get("ran") is True:
+                candidate_snapshot["sourceRevisionImpact"]["families"]["native_rule_checks"] = {
+                    "status": "rechecked_candidate_only", "artifact_kind": kind,
+                    "artifact_sha256": _sha256_bytes(edited_bytes), "receipt": checks,
+                    "physical_authority_granted": False,
+                }
             if derive_snapshot_build_dir(candidate_snapshot) != str(candidate_dir):
                 raise CandidateError("candidate snapshot did not retain the candidate build directory")
             _proposal_hook("before_review", path=candidate_dir)
@@ -1143,6 +1226,7 @@ def propose_candidate(
                     "checks": checks,
                     "authority": dict(AUTHORITY),
                     "files": files,
+                    **({"sidecars": sidecar_files} if sidecar_files else {}),
                 }
             )
             record_path = _record_path(store, safe_id, candidate_id)
@@ -1212,6 +1296,7 @@ def preview_edit(
         "applied": list(result.edited.get("applied") or []),
         "warnings": list(result.edited.get("warnings") or []),
         "diff": result.diff,
+        "sidecars": {role: dict(entry) for role, (_, entry) in result.sidecars.items()},
     }
 
 
@@ -1269,6 +1354,61 @@ def decide_candidate(
     note = _require_note(note)
     reviews.decide(validate_project_id(project_id), str(record["review_id"]), decision=normalized, actor=actor, note=note)
     return {"candidate": record, "review_state": review_state(store, reviews, project_id, record)}
+
+
+def validate_candidate_review_artifacts(store: ProjectStore, project_id: str, review_id: str) -> None:
+    """Verify a candidate review's exact primary/rule bytes before acceptance.
+
+    Ordinary reviews have no candidate build directory and need no candidate
+    validation. Read the proposal directly: ``reviews.get`` may finish an
+    interrupted acceptance, which must not happen before this check.
+    """
+    safe_id = validate_project_id(project_id)
+    safe_review = validate_review_id(review_id)
+    proposal_path = store._project_dir(safe_id) / "reviews" / safe_review / "proposal.json"
+    try:
+        proposal = json.loads(_read_regular_file(proposal_path, limit=max_kicad_content_bytes()))
+    except (OSError, ValueError) as exc:
+        raise CandidateIntegrityError("candidate review proposal is unreadable") from exc
+    raw_dir = derive_snapshot_build_dir(proposal.get("candidate_snapshot")) if isinstance(proposal, dict) else None
+    if not raw_dir:
+        return
+    candidate_id = Path(raw_dir).name
+    if not CANDIDATE_ID_RE.fullmatch(candidate_id):
+        return
+    directory = _candidate_build_dir(safe_id, candidate_id)
+    if _lexical_absolute(Path(raw_dir)) != _lexical_absolute(directory):
+        return
+    _assert_existing_components_not_symlinks(_output_root(), ("candidates", safe_id, candidate_id))
+    record = _read_record(store, safe_id, candidate_id)
+    if record.get("review_id") != safe_review:
+        raise CandidateIntegrityError("candidate artifact review binding differs")
+    files = record.get("files")
+    if not isinstance(files, Mapping) or set(files) != set(ARTIFACT_KINDS):
+        raise CandidateIntegrityError("candidate artifact inventory is invalid")
+    expected_names = set()
+    for kind, entry in files.items():
+        if entry is not None:
+            read_candidate_file(store, safe_id, candidate_id, kind)
+            expected_names.add(sanitise_filename(entry["relative"], kind))
+    sidecars = record.get("sidecars", {})
+    if not isinstance(sidecars, Mapping) or set(sidecars) - set(ARTIFACT_KINDS):
+        raise CandidateIntegrityError("candidate rule inventory is invalid")
+    for kind, entries in sidecars.items():
+        if not isinstance(files.get(kind), Mapping) or not isinstance(entries, Mapping) or set(entries) - set(ARTIFACT_SIDECARS):
+            raise CandidateIntegrityError("candidate rule inventory is invalid")
+        for role, entry in entries.items():
+            name = str(Path(sanitise_filename(files[kind]["relative"], kind)).with_suffix(ARTIFACT_SIDECARS[role]))
+            if not isinstance(entry, Mapping) or entry.get("relative") != name:
+                raise CandidateIntegrityError("candidate rule filename differs from its design")
+            content = _read_named_nofollow(directory, name, limit=max_kicad_content_bytes())
+            if _sha256_bytes(content) != entry.get("sha256"):
+                raise CandidateIntegrityError("candidate rule file failed hash verification")
+            expected_names.add(name)
+    suffixes = {".kicad_sch", ".kicad_pcb", *ARTIFACT_SIDECARS.values()}
+    actual_names = {path.name for path in directory.iterdir() if path.suffix.lower() in suffixes}
+    if actual_names != expected_names:
+        raise CandidateIntegrityError("candidate KiCad bundle contains unrecorded or missing files")
 
 
 def load_candidate(store: ProjectStore, project_id: str, candidate_id: str) -> dict[str, Any]:

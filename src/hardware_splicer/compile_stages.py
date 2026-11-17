@@ -15,7 +15,7 @@ from .compile_casefile import write_compile_casefile
 from .firmware_scaffold import write_firmware_scaffold
 from .netlist.compile import compile_netlist_to_artifacts
 from .netlist.lower import build_graph_to_netlist
-from .netlist.quality_flags import finalize_launch_quality
+from .netlist.quality_flags import apply_compile_input_fidelity, finalize_launch_quality
 from .pcb.geometry_compile import compile_graph_to_artifacts
 from .plan_to_graph import splice_plan_to_build_graph
 
@@ -173,13 +173,14 @@ def run_graph_stage_node(
         return GraphStageResult(
             ok=False,
             contract_version=GRAPH_STAGE_CONTRACT_VERSION,
-            quality={
+            quality=apply_compile_input_fidelity({
                 "build_ready": False,
                 "build_graph_compiled": False,
                 "circuit_readiness": "empty_graph",
                 "notes": notes,
                 "warnings": warnings,
-            },
+                **({"composition_request": dict(graph["composition_request"])} if graph.get("composition_request") else {}),
+            }),
             paths=empty_paths,
             error=summary,
         )

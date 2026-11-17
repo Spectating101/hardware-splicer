@@ -191,6 +191,93 @@ Historical studies retain their original input bytes. Native audit reruns the in
 
 The [dated device execution record](status/generated/device-engineering-20261117.json) retains actual cyberdeck and plotter revision results, native audits, source hashes and remaining physical unknowns. Its proof records distinguish model requirements from artifact integrity.
 
+## Native source editing and splicing
+
+Registered KiCad sources now connect to the existing editable-candidate workflow.
+This path keeps supplied native geometry instead of recompiling it through generic
+module footprints. It works on a selected project stem, with a PCB and/or schematic
+and optional matching `.kicad_pro` and `.kicad_dru` files.
+
+Create a normal project and upload each file through
+`POST /v1/projects/{id}/sources/ingest`, using the current `expected_revision` for
+each upload. Keep the returned source IDs and revision. Then call
+`POST /v1/projects/{id}/sources/promote-to-editable` with `expected_revision` and
+optional `source_ids` or `primary_source_id`. Multiple project stems require an
+explicit selection. Only same-project, hash-verified upload bytes are used; callers
+cannot supply output paths or executable commands. Original sources and prior
+revisions remain unchanged.
+
+Promotion copies exact bytes to a fresh controlled workspace and saves one project
+revision. The SDK exposes the same operation and the existing candidate editor:
+
+```python
+from hardware_splicer.sdk import promote_source_bundle, propose_native_edit, export_native_edit
+
+imported = promote_source_bundle(
+    "PROJECT_ID", project_root="/tmp/hs-projects", expected_revision=4,
+    source_ids=["PCB_SOURCE_ID", "PROJECT_SOURCE_ID", "RULE_SOURCE_ID"],
+)
+proposal = propose_native_edit(
+    "PROJECT_ID", project_root="/tmp/hs-projects", base_revision=imported["revision"],
+    kind="pcb", ops=[{"op": "move", "ref": "J1", "x_mm": 35, "y_mm": 22}],
+    note="Move the supplied connector",
+)
+candidate = proposal["candidate"]
+native_zip = export_native_edit("PROJECT_ID", candidate["candidate_id"], project_root="/tmp/hs-projects")
+```
+
+Use a reference/UUID actually present in the supplied design. Supported edits move
+or rotate native objects, change properties/track widths, and perform the existing
+bounded schematic edits. Moving a footprint does not automatically reconnect its
+old copper; native checks report introduced violations. The proposal stays pending
+and does not advance the active project revision. Existing review decisions govern
+acceptance. Both candidate and general-review acceptance revalidate the exact
+primary and rule bytes.
+
+`GET /v1/projects/{id}/candidates/{candidate}/native-bundle` exports the edited
+PCB/schematic, exact same-stem rule companions and a hash manifest. Repeated exports
+of unchanged candidates produce the same ZIP bytes. Original `.kicad_pro` and
+`.kicad_dru` settings are carried into native before/after checks and accepted
+revision retention. Standalone files remain editable, with an explicit defaults-only
+or custom-rules-only check scope. This does not close external library or
+hierarchical-sheet dependencies; unresolved libraries remain visible in native
+findings. Unsupported custom-rule directives such as includes are rejected.
+
+`POST /v1/projects/{id}/native/check` accepts `expected_revision` and `kind`
+(`pcb` or `schematic`). The SDK equivalent is `check_native_design`. These read-only
+operations check the exact retained revision and rule bytes, including accepted
+edits or an explicitly requested historical revision. Results distinguish check
+execution from rule findings; an unavailable tool never reports a successful
+check. The AI `run_drc`/`run_erc` actions use this retained design when present.
+`inspect_registered_sources` continues to inspect the original uploads.
+
+The project engineering executor now accepts `promote_registered_sources` and
+`propose_kicad_edit`. Structured `run_compose` actions preserve explicit netlists,
+canvas connections, resolved modules and splice plans. Action input schemas are
+published by `GET /v1/engineering/ai/tools/schema`. Native edit execution uses an
+immutable receipt without creating a bookkeeping revision that would stale its
+review. `GET /v1/projects/{id}/ai-sessions/{session}/actions/{action}/execution`
+returns the receipt and live review state. Repeated/concurrent retries reuse the
+same proposal; changed source identities require a new action.
+
+Each source change records `sourceRevisionImpact` for native checks, mechanical fit,
+wiring, materials, firmware, 3D models and manufacturing packages. Inherited passed
+or running canonical verifications become blocked, so the existing release
+assessment requires new evidence. Historical evidence remains retained. Native
+candidate checks record their own fresh result; other families require explicit
+rechecks rather than an assumed enclosure or firmware regeneration.
+
+The generic compile path also preserves supplied references, alphanumeric pad IDs,
+singleton nets and named nets. Unresolved catalog IDs fail without disappearing
+from the request record. Unfamiliar physical packages remain clearly labeled
+logical previews with fabrication blockers; clean rule checks cannot turn generic
+through-hole preview geometry into an exact QFN or connector footprint. Use the
+native source path when supplied footprint geometry must be retained.
+
+The [dated source workflow evidence](status/generated/source-workflow-connection-20261118.json)
+records the real-board edit/recheck/export probe, generic package fidelity checks,
+full-suite coverage and remaining limits.
+
 ## Exact materials and InvenTree inventory
 
 The backend compares a design's material requirements with available inventory and produces a reusable/missing/make list. It accepts a declared inventory or imports a direct assembly BOM and inventory from [InvenTree](https://github.com/inventree/InvenTree). The integration reads the upstream REST API. Local assessments work independently of an inventory server.

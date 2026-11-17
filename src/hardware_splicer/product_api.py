@@ -38,6 +38,7 @@ from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
 from .engineering_review_identity_api import create_engineering_review_identity_router
 from .engineering_source_ingestion_api import create_engineering_source_ingestion_router
+from .source_project_editing_api import create_source_project_editing_router
 from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
@@ -141,6 +142,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_semantic_circuit_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_engineering_source_ingestion_router(resolved_store))
+    app.include_router(create_source_project_editing_router(resolved_store))
     app.include_router(create_engineering_source_multipart_router(resolved_store))
     app.include_router(create_source_upload_session_router(resolved_store))
     app.include_router(create_source_storage_operations_router(resolved_store))

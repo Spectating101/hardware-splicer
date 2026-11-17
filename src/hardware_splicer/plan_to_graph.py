@@ -82,8 +82,10 @@ def splice_plan_to_build_graph(
         return {"nodes": [], "wires": []}, None, notes, warnings
 
     custom_graph = plan.get("custom_graph") or {}
-    if custom_graph.get("nodes"):
+    if custom_graph.get("nodes") or (custom_graph.get("composition_request") or {}).get("unresolved_module_ids"):
         notes.append("Using inventory-composed custom_graph from salvage bridge.")
+        if (custom_graph.get("composition_request") or {}).get("unresolved_module_ids"):
+            warnings.append("Custom graph contains unresolved requested module identities; catalog fallback is not allowed.")
         return dict(custom_graph), build_id, notes, warnings
 
     if plan.get("compose_from_inventory") and plan.get("resolved_modules"):

@@ -606,20 +606,43 @@ def pick_modules_for_requirements(req_any: List[List[str]]) -> List[ModuleSpec]:
 
 def compose_build_graph_from_module_ids(module_ids: List[str]) -> ComposeResult:
     modules = [find_module(mid) for mid in module_ids]
+    unresolved = [mid for mid, module in zip(module_ids, modules) if module is None]
+    request = {
+        "requested_module_ids": list(module_ids),
+        "resolved_module_ids": [mid for mid, module in zip(module_ids, modules) if module is not None],
+        "unresolved_module_ids": unresolved,
+        "status": "unresolved" if unresolved else "resolved",
+    }
+    if unresolved:
+        return {
+            "graph": {"nodes": [], "wires": [], "composition_request": request},
+            "build_id": "generic_low_voltage_build",
+            "notes": [],
+            "warnings": [
+                "Cannot auto-wire unidentified module IDs: " + ", ".join(str(mid) for mid in unresolved)
+                + ". Supply an explicit netlist or a source-bound interface; donor pinouts are not inferred."
+            ],
+            "composition_status": request["status"],
+            **{key: value for key, value in request.items() if key != "status"},
+        }
     modules = [m for m in modules if m]
     if len(modules) < 2:
         return {
-            "graph": {"nodes": [], "wires": []},
+            "graph": {"nodes": [], "wires": [], "composition_request": request},
             "build_id": "generic_low_voltage_build",
             "notes": [],
             "warnings": ["Need at least two known module ids to compose a graph."],
+            "composition_status": request["status"],
+            **{key: value for key, value in request.items() if key != "status"},
         }
     recipe = auto_wire_picked_modules(modules)
     return {
-        "graph": _recipe_to_build_graph(recipe),
+        "graph": {**_recipe_to_build_graph(recipe), "composition_request": request},
         "build_id": "generic_low_voltage_build",
         "notes": list(recipe.get("notes") or []),
         "warnings": [],
+        "composition_status": request["status"],
+        **{key: value for key, value in request.items() if key != "status"},
     }
 
 
@@ -628,6 +651,18 @@ def compose_build_graph_from_canvas_nodes(
 ) -> BuildGraph:
     specs: List[ModuleSpec] = []
     node_ids: List[str] = []
+    unresolved = [str(node.get("moduleId") or "") for node in nodes if find_module(str(node.get("moduleId") or "")) is None]
+    if unresolved:
+        return {
+            "nodes": [], "wires": [],
+            "composition_request": {
+                "requested_module_ids": [str(node.get("moduleId") or "") for node in nodes],
+                "resolved_module_ids": [str(node.get("moduleId") or "") for node in nodes if find_module(str(node.get("moduleId") or "")) is not None],
+                "unresolved_module_ids": unresolved,
+                "requested_nodes": [dict(node) for node in nodes],
+                "status": "unresolved",
+            },
+        }
     for node in nodes:
         spec = find_module(str(node.get("moduleId") or ""))
         if not spec:

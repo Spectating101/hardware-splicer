@@ -1,7 +1,7 @@
 """Execute explicitly accepted, software-side AI project previews.
 
-This module is deliberately narrower than the AI proposal vocabulary. It can run
-only deterministic guided planning and deterministic compose previews. It never
+This module is deliberately narrower than the AI proposal vocabulary. It runs
+deterministic previews, imports registered sources and stages native edits. It never
 runs arbitrary commands, enables LLM-first compose, touches devices, or elevates
 fabrication, flashing, power, motion, operational, or release authority.
 """
@@ -17,6 +17,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Sequence
 
+from .ai_project_action_inputs import validate_action_inputs
+from .ai_project_execution_receipts import (
+    candidate_execution_lock,
+    load_candidate_execution_receipt,
+    store_candidate_execution_receipt,
+    unchanged_execution_base,
+)
 from .compose_dispatch import compose_dispatch
 from .engineering_project_source_bundle import analyze_registered_project_bundle
 from .engineering_cad_carrier import generate_registered_pcb_carrier
@@ -34,6 +41,8 @@ EXECUTABLE_AI_PREVIEW_ACTIONS = (
     "run_drc",
     "inspect_registered_sources",
     "generate_board_carrier_candidate",
+    "promote_registered_sources",
+    "propose_kicad_edit",
 )
 
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
@@ -229,6 +238,19 @@ def _compose_summary(result: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+def load_ai_project_action_execution(
+    store: ProjectStore, project_id: str, session: Mapping[str, Any], action: Mapping[str, Any]
+) -> Dict[str, Any] | None:
+    """Read persisted execution, including detached native candidate receipts."""
+    if isinstance(action.get("tool_result"), Mapping):
+        return dict(action["tool_result"])
+    if action.get("action_type") != "propose_kicad_edit":
+        return None
+    run_dir, _ = _run_root(store, project_id, str(session.get("session_id") or ""), str(action.get("action_id") or ""))
+    receipt = load_candidate_execution_receipt(run_dir, project_id, session, action)
+    return dict(receipt["tool_result"]) if receipt is not None else None
+
+
 def execute_ai_project_action_preview(
     store: ProjectStore,
     project_id: str,
@@ -237,8 +259,35 @@ def execute_ai_project_action_preview(
     *,
     guided_planner: Callable[..., Dict[str, Any]] | None = None,
     compose_callable: Callable[..., Dict[str, Any]] | None = None,
+    execution_revision: int | None = None,
+    prepared_snapshot_sink: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> Dict[str, Any]:
     """Execute one accepted allowlisted action against its pinned project revision."""
+
+    kwargs = {
+        "guided_planner": guided_planner,
+        "compose_callable": compose_callable,
+        "execution_revision": execution_revision,
+        "prepared_snapshot_sink": prepared_snapshot_sink,
+    }
+    if action.get("action_type") == "propose_kicad_edit":
+        run_dir, _ = _run_root(store, project_id, str(session.get("session_id") or ""), str(action.get("action_id") or ""))
+        with candidate_execution_lock(run_dir):
+            return _execute_action(store, project_id, session, action, **kwargs)
+    return _execute_action(store, project_id, session, action, **kwargs)
+
+
+def _execute_action(
+    store: ProjectStore,
+    project_id: str,
+    session: Mapping[str, Any],
+    action: Mapping[str, Any],
+    *,
+    guided_planner: Callable[..., Dict[str, Any]] | None,
+    compose_callable: Callable[..., Dict[str, Any]] | None,
+    execution_revision: int | None,
+    prepared_snapshot_sink: Callable[[Mapping[str, Any]], None] | None,
+) -> Dict[str, Any]:
 
     action_type = str(action.get("action_type") or "")
     if action_type not in EXECUTABLE_AI_PREVIEW_ACTIONS:
@@ -272,10 +321,74 @@ def execute_ai_project_action_preview(
     pinned = store.load(project_id, revision=pinned_revision)
     snapshot = dict(pinned["snapshot"])
     run_dir, relative_run_dir = _run_root(store, project_id, session_id, action_id)
+    execution_identity: dict[str, Any] = {}
+    if action_type == "propose_kicad_edit":
+        receipt = load_candidate_execution_receipt(run_dir, project_id, session, action)
+        if receipt is not None:
+            return dict(receipt["tool_result"])
+    if action_type in {"promote_registered_sources", "propose_kicad_edit"}:
+        current, execution_identity = unchanged_execution_base(
+            store, project_id, pinned_revision=pinned_revision,
+            expected_revision=execution_revision,
+            require_native_pin=action_type == "propose_kicad_edit",
+        )
     started_at = _utc_now()
+    prepared_bundle: dict[str, Any] | None = None
 
     try:
-        if action_type == "run_guided_plan":
+        if action_type == "promote_registered_sources":
+            from .source_project_editing import prepare_kicad_source_bundle
+
+            inputs = validate_action_inputs(action_type, _mapping(action.get("inputs")))
+            prepared = prepare_kicad_source_bundle(
+                store, project_id, expected_revision=int(current["revision"]),
+                source_ids=inputs.get("source_ids"),
+                primary_source_id=inputs.get("primary_source_id"),
+            )
+            prepared_bundle = prepared
+            artifact_name = "source_promotion.json"
+            artifact = _atomic_write_json(run_dir / artifact_name, prepared["promotion"])
+            summary = {
+                "ok": True, "promotion": prepared["promotion"],
+                "prepared_build_dir": prepared["build_dir"],
+                "source_identity": execution_identity,
+                "source_revision_impact": prepared["snapshot"].get("sourceRevisionImpact"),
+                "automatic_execution": False,
+            }
+            if prepared_snapshot_sink is not None:
+                prepared_snapshot_sink(prepared["snapshot"])
+        elif action_type == "propose_kicad_edit":
+            from .project_candidates import propose_candidate
+            from .project_review_store import ProjectReviewStore
+
+            inputs = validate_action_inputs(action_type, _mapping(action.get("inputs")))
+            proposed = propose_candidate(
+                store, project_id, kind=inputs["kind"], ops=inputs["ops"],
+                author=AI_TOOL_EXECUTOR_IDENTITY,
+                note=inputs.get("note") or str(action.get("title") or "AI proposed native edit"),
+                base_revision=int(current["revision"]),
+                verified=False,
+            )
+            candidate = proposed["candidate"]
+            review = ProjectReviewStore(store).get(project_id, candidate["review_id"])
+            artifact_name = "kicad_candidate.json"
+            artifact = _atomic_write_json(run_dir / artifact_name, proposed)
+            summary = {
+                "ok": True,
+                "candidate_id": candidate["candidate_id"],
+                "review_id": candidate["review_id"],
+                "base_revision": candidate["base_revision"],
+                "kind": candidate["kind"],
+                "base_sha256": candidate["base_sha256"],
+                "edited_sha256": candidate["edited_sha256"],
+                "source_identity": execution_identity,
+                "checks": candidate["checks"],
+                "source_revision_impact": _mapping(review.get("candidate_snapshot")).get("sourceRevisionImpact"),
+                "review_status": "pending",
+                "candidate_accepted": False,
+                "automatic_execution": False,
+            }
+        elif action_type == "run_guided_plan":
             planner = guided_planner or plan_guided_engineering_project
             intake = _planner_intake(project_id, snapshot, session, action)
             plan = planner(
@@ -347,43 +460,75 @@ def execute_ai_project_action_preview(
             }
             artifact_name = artifact_path.name
         elif action_type in {"run_erc", "run_drc"}:
-            # Always use the model's PINNED original registered source set, not
-            # model-supplied paths or shell flags. Companions are hash-verified.
-            checked = analyze_registered_project_bundle(
-                project_id, _rows(snapshot.get("engineeringSources")),
-                project_root=store.root,
-            )
+            from .artifact_retention import load_artifact_pin
+
             gate = "erc" if action_type == "run_erc" else "drc"
-            actual = _mapping(_mapping(checked.get("software_checks")).get(gate))
-            if checked.get("project_context") != "source_bundle_sibling_files_present" or not actual.get("check_executed"):
-                raise ValueError(f"complete registered KiCad project required for {gate} preview")
-            artifact_path = run_dir / f"{gate}_registered_project.json"
+            kind = "schematic" if gate == "erc" else "pcb"
+            pin = load_artifact_pin(store, project_id, pinned_revision)
+            if pin is not None and _mapping(pin.get("artifacts")).get(kind) is not None:
+                from .source_project_editing import check_retained_native_design
+
+                # Check this action's design revision, including accepted native
+                # edits. Later bookkeeping or design revisions never rebase it.
+                checked = check_retained_native_design(
+                    store, project_id, expected_revision=pinned_revision, kind=kind,
+                )
+                checks = _mapping(checked.get("checks"))
+                if checks.get("ran") is not True:
+                    raise ValueError(f"retained native {gate} check did not run: {checks.get('reason') or 'unavailable'}")
+                actual = _mapping(checks.get("after"))
+                artifact_path = run_dir / f"{gate}_retained_project.json"
+                summary = {
+                    "ok": True, "source_revision": pinned_revision,
+                    "source_sha256": checked.get("source_sha256"),
+                    "source_context": checked.get("source_context"),
+                    "project_context": "retained_native_revision",
+                    "check": gate, "check_executed": True,
+                    "check_status": "executed",
+                    "rule_finding_count": actual.get("total"),
+                    "rule_findings_by_type": actual.get("by_type"),
+                    "checks": checks,
+                }
+            else:
+                # Legacy projects without a native pin retain the original
+                # uploaded-source behavior, still bound to the pinned snapshot.
+                checked = analyze_registered_project_bundle(
+                    project_id, _rows(snapshot.get("engineeringSources")), project_root=store.root,
+                )
+                actual = _mapping(_mapping(checked.get("software_checks")).get(gate))
+                if checked.get("project_context") != "source_bundle_sibling_files_present" or not actual.get("check_executed"):
+                    raise ValueError(f"complete registered KiCad project required for {gate} preview")
+                artifact_path = run_dir / f"{gate}_registered_project.json"
+                summary = {
+                    "ok": True, "source_set_sha256": checked.get("source_set_sha256"),
+                    "project_context": checked.get("project_context"),
+                    "project_stem": checked.get("project_stem"),
+                    "check": gate, "check_executed": True,
+                    "check_status": actual.get("status"),
+                    "rule_finding_count": actual.get("rule_finding_count"),
+                    "rule_findings_by_type": actual.get("rule_findings_by_type"),
+                    "report_sha256": actual.get("report_sha256"),
+                }
             artifact = _atomic_write_json(artifact_path, checked)
-            summary = {
-                "ok": True, "source_set_sha256": checked.get("source_set_sha256"),
-                "project_context": checked.get("project_context"),
-                "project_stem": checked.get("project_stem"),
-                "check": gate, "check_executed": True,
-                "check_status": actual.get("status"),
-                "rule_finding_count": actual.get("rule_finding_count"),
-                "rule_findings_by_type": actual.get("rule_findings_by_type"),
-                "report_sha256": actual.get("report_sha256"),
+            summary.update({
                 "source_design_is_not_validated": True,
                 "manufacturing_approved": False,
                 "automatic_execution": False,
-            }
+            })
             artifact_name = artifact_path.name
         elif action_type == "run_compose":
             compose = compose_callable or compose_dispatch
-            inputs = _mapping(action.get("inputs"))
+            inputs = validate_action_inputs(action_type, _mapping(action.get("inputs")))
             phrase = str(
                 inputs.get("phrase")
                 or inputs.get("goal")
                 or session.get("mission")
                 or ""
             ).strip()
-            if not phrase:
-                raise ValueError("run_compose requires a phrase or session mission")
+            if not phrase and not any(
+                inputs.get(key) for key in ("module_ids", "resolved_modules", "canvas_nodes", "netlist")
+            ):
+                raise ValueError("run_compose requires a goal or structured circuit inputs")
             constraints = {
                 **_mapping(session.get("constraints")),
                 **_mapping(inputs.get("constraints")),
@@ -391,12 +536,15 @@ def execute_ai_project_action_preview(
             compose_dir = run_dir / "compose"
             result = compose(
                 out_dir=compose_dir,
-                phrase=phrase,
-                module_ids=(
-                    [str(row) for row in inputs.get("module_ids")]
-                    if isinstance(inputs.get("module_ids"), list)
-                    else None
-                ),
+                phrase=phrase or None,
+                module_ids=inputs.get("module_ids"),
+                resolved_modules=inputs.get("resolved_modules"),
+                canvas_nodes=inputs.get("canvas_nodes"),
+                canvas_wires=inputs.get("canvas_wires"),
+                netlist=inputs.get("netlist"),
+                splice_plan=inputs.get("splice_plan"),
+                build_id=inputs.get("build_id"),
+                drc_fixup=inputs.get("drc_fixup"),
                 constraints=constraints,
                 material_mode=(
                     str(inputs.get("material_mode"))
@@ -418,6 +566,9 @@ def execute_ai_project_action_preview(
         status_value = "succeeded"
         error = None
     except Exception as exc:
+        if prepared_bundle is not None:
+            from .source_project_editing import discard_prepared_kicad_source_bundle
+            discard_prepared_kicad_source_bundle(prepared_bundle, store=store)
         status_value = "failed"
         summary = {
             "ok": False,
@@ -431,7 +582,7 @@ def execute_ai_project_action_preview(
         error = {"type": type(exc).__name__, "message": str(exc)}
 
     completed_at = _utc_now()
-    return {
+    result = {
         "schema_version": AI_TOOL_RESULT_SCHEMA,
         "executor_identity": AI_TOOL_EXECUTOR_IDENTITY,
         "project_id": project_id,
@@ -457,3 +608,10 @@ def execute_ai_project_action_preview(
         "operational_authorized": False,
         "release_authorized": False,
     }
+    if action_type == "propose_kicad_edit":
+        result["execution_receipt_relative_path"] = f"{relative_run_dir}/execution_receipt.json"
+        result["project_revision_advanced"] = False
+        store_candidate_execution_receipt(
+            run_dir, project_id, session, action, identity=execution_identity, result=result,
+        )
+    return result

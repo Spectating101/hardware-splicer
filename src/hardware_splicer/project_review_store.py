@@ -400,6 +400,7 @@ class ProjectReviewStore:
         try:
             existing = self.project_store.load(project_id, revision=expected_revision)
         except ProjectNotFound:
+            self._validate_candidate_artifacts(project_id, review_id)
             latest = self.project_store.load_latest_with_recovery(project_id)
             if int(latest["revision"]) != base_revision:
                 raise RevisionConflict(
@@ -426,6 +427,16 @@ class ProjectReviewStore:
             )
         self._complete_acceptance(project_id, review_id, review, intent)
         return self.get(project_id, review_id)
+
+    def _validate_candidate_artifacts(self, project_id: str, review_id: str) -> None:
+        # Candidate reviews may also be accepted through the general review API.
+        # Keep the same source-byte guard on both paths, including retries.
+        from .project_candidates import CandidateError, validate_candidate_review_artifacts
+
+        try:
+            validate_candidate_review_artifacts(self.project_store, project_id, review_id)
+        except CandidateError as exc:
+            raise ReviewConflict(str(exc)) from exc
 
     def decide(
         self,
@@ -473,6 +484,7 @@ class ProjectReviewStore:
             )
             return self.get(project_id, review_id)
 
+        self._validate_candidate_artifacts(project_id, review_id)
         latest = self.project_store.load_latest_with_recovery(project_id)
         base_revision = int(review["base_revision"])
         if int(latest["revision"]) != base_revision:

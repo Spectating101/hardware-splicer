@@ -1,0 +1,967 @@
+{
+  "project_id": "connected-pic-2239e61c",
+  "source_revision": 4,
+  "promoted_revision": 6,
+  "review_base_revision": 7,
+  "production_app": true,
+  "source_board": "Official KiCad9.0.2 PIC programmer demo, GPL fixture",
+  "provided_configuration": "Explicit minimal project settings and a declared custom0.8mm track rule for this digital integration probe; not manufacturer approval.",
+  "accepted_action_context": "Deterministic software test fixture under user authorization for digital integration; no human hardware review claimed.",
+  "input_sha256": {
+    "published donor.kicad_pcb": "sha256:470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+    "published donor.kicad_pro": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+    "published donor.kicad_dru": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+  },
+  "native_footprint_count": 63,
+  "native_copper_item_count": 376,
+  "source_ref_pad_net_identity_preserved": true,
+  "untouched_copper_preserved": true,
+  "original_revision_bytes_unchanged": true,
+  "native_checks": {
+    "engine": "kicad-cli",
+    "available": true,
+    "version": "9.0.2",
+    "ran": true,
+    "reason": null,
+    "before": {
+      "errors": 207,
+      "warnings": 67,
+      "total": 274,
+      "by_type": {
+        "hole_clearance": 4,
+        "silk_edge_clearance": 4,
+        "lib_footprint_issues": 63,
+        "track_width": 199,
+        "starved_thermal": 4
+      }
+    },
+    "after": {
+      "errors": 212,
+      "warnings": 72,
+      "total": 284,
+      "by_type": {
+        "clearance": 2,
+        "hole_clearance": 5,
+        "courtyards_overlap": 1,
+        "silk_edge_clearance": 4,
+        "lib_footprint_issues": 63,
+        "track_width": 199,
+        "starved_thermal": 4,
+        "silk_over_copper": 2,
+        "solder_mask_bridge": 1,
+        "silk_overlap": 3
+      }
+    },
+    "new_violations": 10,
+    "source_context": {
+      "rule_scope": "retained_project_and_custom_rules",
+      "sidecar_sha256": {
+        "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+        "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+      }
+    }
+  },
+  "promotion_summary": {
+    "ok": true,
+    "promotion": {
+      "schema_version": "hardware_splicer.source_project_editing.v1",
+      "bundle_id": "bundle-d4550e0ded3a4c6a838507488e634db5",
+      "project_id": "connected-pic-2239e61c",
+      "machine_project_id": "connected-pic-2239e61c",
+      "source_revision": 5,
+      "build_dir": "$OUTPUT_ROOT/source_edits/connected-pic-2239e61c/bundle-d4550e0ded3a4c6a838507488e634db5",
+      "primary_source_id": "upload-470e9b32954f3c92e1c7",
+      "primary_filename": "published donor.kicad_pcb",
+      "source_ids": [
+        "upload-470e9b32954f3c92e1c7",
+        "upload-4f9de530099b2285227c",
+        "upload-329e139ffecccbe616ad"
+      ],
+      "sources": {
+        "published donor.kicad_pcb": {
+          "source_id": "upload-470e9b32954f3c92e1c7",
+          "content_hash": "sha256:470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+          "sha256": "sha256:470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9"
+        },
+        "published donor.kicad_pro": {
+          "source_id": "upload-4f9de530099b2285227c",
+          "content_hash": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+          "sha256": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab"
+        },
+        "published donor.kicad_dru": {
+          "source_id": "upload-329e139ffecccbe616ad",
+          "content_hash": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b",
+          "sha256": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+        }
+      },
+      "editable_kinds": [
+        "pcb"
+      ],
+      "check_scope": "source_project_rules",
+      "warnings": [],
+      "native_source_bytes_unchanged": true,
+      "physical_authority_granted": false,
+      "manufacturing_approved": false
+    },
+    "prepared_build_dir": "$OUTPUT_ROOT/source_edits/connected-pic-2239e61c/bundle-d4550e0ded3a4c6a838507488e634db5",
+    "source_identity": {
+      "design_revision": 4,
+      "review_base_revision": 5,
+      "design_snapshot_sha256": "428bc01ea78e59fc73cb8237d83200f17b8c35e1e73b509a1aea4739b0929316",
+      "registered_sources_sha256": "6ef1ff638c3e267ba9fdae9dfec08cc80052c23f550c281981fb036f0cdb63b6"
+    },
+    "source_revision_impact": {
+      "schema_version": "hardware_splicer.source_revision_impact.v1",
+      "status": "requires_recheck",
+      "basis": "registered_source_promotion",
+      "changed_source_ids": [
+        "upload-470e9b32954f3c92e1c7",
+        "upload-4f9de530099b2285227c",
+        "upload-329e139ffecccbe616ad"
+      ],
+      "changed_artifact_kinds": [
+        "pcb"
+      ],
+      "families": {
+        "native_rule_checks": {
+          "status": "requires_recheck"
+        },
+        "mechanical_fit": {
+          "status": "requires_recheck"
+        },
+        "wiring": {
+          "status": "requires_recheck"
+        },
+        "materials": {
+          "status": "requires_recheck"
+        },
+        "firmware": {
+          "status": "requires_recheck"
+        },
+        "model3d": {
+          "status": "requires_recheck"
+        },
+        "manufacturing_package": {
+          "status": "requires_recheck"
+        }
+      },
+      "previous_impact_schema": null,
+      "evidence_impact": {
+        "schema_version": "hardware_splicer.evidence_impact.v1",
+        "status": "evaluated",
+        "validation_errors": [],
+        "changed_dependency_ids": [
+          "artifact:pcb",
+          "native_source_bundle",
+          "source:upload-329e139ffecccbe616ad",
+          "source:upload-470e9b32954f3c92e1c7",
+          "source:upload-4f9de530099b2285227c"
+        ],
+        "unresolved_dependency_ids": [],
+        "results": [
+          {
+            "evidence_id": "native_rule_checks",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "mechanical_fit",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "wiring",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "materials",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "firmware",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "model3d",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          },
+          {
+            "evidence_id": "manufacturing_package",
+            "status": "invalidated",
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "dependencies_complete": false,
+            "reasons": [
+              {
+                "kind": "changed_dependency",
+                "ids": [
+                  "native_source_bundle"
+                ]
+              }
+            ],
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            }
+          }
+        ],
+        "summary": {
+          "retained": 0,
+          "invalidated": 7,
+          "blocked": 0
+        },
+        "metadata": {
+          "automatic_authorization": false,
+          "physical_authority_granted": false,
+          "unknown_dependency_coverage_blocks_reuse": true
+        }
+      },
+      "automatic_regeneration": false,
+      "physical_authority_granted": false,
+      "invalidated_verification_ids": []
+    },
+    "automatic_execution": false
+  },
+  "edit_summary": {
+    "ok": true,
+    "candidate_id": "cand-6acc00302214",
+    "review_id": "review-74ceafb9177f41bb",
+    "base_revision": 7,
+    "kind": "pcb",
+    "base_sha256": "sha256:470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+    "edited_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+    "source_identity": {
+      "design_revision": 6,
+      "review_base_revision": 7,
+      "design_snapshot_sha256": "612e2127db77db25baa5e70e0cefde4c49d98d46b31a4503d3c5277207dd733b",
+      "registered_sources_sha256": "6ef1ff638c3e267ba9fdae9dfec08cc80052c23f550c281981fb036f0cdb63b6",
+      "artifact_pin_sha256": "76851abf0cc8b3d3fd667e0e87860de1f473ccb4d51b0ee923fbf1ed421122f8"
+    },
+    "checks": {
+      "engine": "kicad-cli",
+      "available": true,
+      "version": "9.0.2",
+      "ran": true,
+      "reason": null,
+      "before": {
+        "errors": 207,
+        "warnings": 67,
+        "total": 274,
+        "by_type": {
+          "hole_clearance": 4,
+          "silk_edge_clearance": 4,
+          "lib_footprint_issues": 63,
+          "track_width": 199,
+          "starved_thermal": 4
+        }
+      },
+      "after": {
+        "errors": 212,
+        "warnings": 72,
+        "total": 284,
+        "by_type": {
+          "clearance": 2,
+          "hole_clearance": 5,
+          "courtyards_overlap": 1,
+          "silk_edge_clearance": 4,
+          "lib_footprint_issues": 63,
+          "track_width": 199,
+          "starved_thermal": 4,
+          "silk_over_copper": 2,
+          "solder_mask_bridge": 1,
+          "silk_overlap": 3
+        }
+      },
+      "new_violations": 10,
+      "source_context": {
+        "rule_scope": "retained_project_and_custom_rules",
+        "sidecar_sha256": {
+          "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+          "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+        }
+      }
+    },
+    "source_revision_impact": {
+      "automatic_regeneration": false,
+      "basis": "native_candidate_edit",
+      "changed_artifact_kinds": [
+        "pcb"
+      ],
+      "changed_source_ids": [
+        "upload-470e9b32954f3c92e1c7",
+        "upload-4f9de530099b2285227c",
+        "upload-329e139ffecccbe616ad"
+      ],
+      "evidence_impact": {
+        "changed_dependency_ids": [
+          "artifact:pcb",
+          "native_source_bundle",
+          "source:upload-329e139ffecccbe616ad",
+          "source:upload-470e9b32954f3c92e1c7",
+          "source:upload-4f9de530099b2285227c"
+        ],
+        "metadata": {
+          "automatic_authorization": false,
+          "physical_authority_granted": false,
+          "unknown_dependency_coverage_blocks_reuse": true
+        },
+        "results": [
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "native_rule_checks",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "mechanical_fit",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "wiring",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "materials",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "firmware",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "model3d",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          },
+          {
+            "dependencies_complete": false,
+            "depends_on": [
+              "native_source_bundle"
+            ],
+            "evidence_id": "manufacturing_package",
+            "metadata": {
+              "scope": "conservative_recheck_after_source_change"
+            },
+            "reasons": [
+              {
+                "ids": [
+                  "native_source_bundle"
+                ],
+                "kind": "changed_dependency"
+              }
+            ],
+            "status": "invalidated"
+          }
+        ],
+        "schema_version": "hardware_splicer.evidence_impact.v1",
+        "status": "evaluated",
+        "summary": {
+          "blocked": 0,
+          "invalidated": 7,
+          "retained": 0
+        },
+        "unresolved_dependency_ids": [],
+        "validation_errors": []
+      },
+      "families": {
+        "firmware": {
+          "status": "requires_recheck"
+        },
+        "manufacturing_package": {
+          "status": "requires_recheck"
+        },
+        "materials": {
+          "status": "requires_recheck"
+        },
+        "mechanical_fit": {
+          "status": "requires_recheck"
+        },
+        "model3d": {
+          "status": "requires_recheck"
+        },
+        "native_rule_checks": {
+          "artifact_kind": "pcb",
+          "artifact_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+          "physical_authority_granted": false,
+          "receipt": {
+            "after": {
+              "by_type": {
+                "clearance": 2,
+                "courtyards_overlap": 1,
+                "hole_clearance": 5,
+                "lib_footprint_issues": 63,
+                "silk_edge_clearance": 4,
+                "silk_over_copper": 2,
+                "silk_overlap": 3,
+                "solder_mask_bridge": 1,
+                "starved_thermal": 4,
+                "track_width": 199
+              },
+              "errors": 212,
+              "total": 284,
+              "warnings": 72
+            },
+            "available": true,
+            "before": {
+              "by_type": {
+                "hole_clearance": 4,
+                "lib_footprint_issues": 63,
+                "silk_edge_clearance": 4,
+                "starved_thermal": 4,
+                "track_width": 199
+              },
+              "errors": 207,
+              "total": 274,
+              "warnings": 67
+            },
+            "engine": "kicad-cli",
+            "new_violations": 10,
+            "ran": true,
+            "reason": null,
+            "source_context": {
+              "rule_scope": "retained_project_and_custom_rules",
+              "sidecar_sha256": {
+                "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+                "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+              }
+            },
+            "version": "9.0.2"
+          },
+          "status": "rechecked_candidate_only"
+        },
+        "wiring": {
+          "status": "requires_recheck"
+        }
+      },
+      "invalidated_verification_ids": [],
+      "physical_authority_granted": false,
+      "previous_impact_schema": "hardware_splicer.source_revision_impact.v1",
+      "schema_version": "hardware_splicer.source_revision_impact.v1",
+      "status": "requires_recheck"
+    },
+    "review_status": "pending",
+    "candidate_accepted": false,
+    "automatic_execution": false
+  },
+  "source_revision_impact": {
+    "automatic_regeneration": false,
+    "basis": "native_candidate_edit",
+    "changed_artifact_kinds": [
+      "pcb"
+    ],
+    "changed_source_ids": [
+      "upload-470e9b32954f3c92e1c7",
+      "upload-4f9de530099b2285227c",
+      "upload-329e139ffecccbe616ad"
+    ],
+    "evidence_impact": {
+      "changed_dependency_ids": [
+        "artifact:pcb",
+        "native_source_bundle",
+        "source:upload-329e139ffecccbe616ad",
+        "source:upload-470e9b32954f3c92e1c7",
+        "source:upload-4f9de530099b2285227c"
+      ],
+      "metadata": {
+        "automatic_authorization": false,
+        "physical_authority_granted": false,
+        "unknown_dependency_coverage_blocks_reuse": true
+      },
+      "results": [
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "native_rule_checks",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "mechanical_fit",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "wiring",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "materials",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "firmware",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "model3d",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        },
+        {
+          "dependencies_complete": false,
+          "depends_on": [
+            "native_source_bundle"
+          ],
+          "evidence_id": "manufacturing_package",
+          "metadata": {
+            "scope": "conservative_recheck_after_source_change"
+          },
+          "reasons": [
+            {
+              "ids": [
+                "native_source_bundle"
+              ],
+              "kind": "changed_dependency"
+            }
+          ],
+          "status": "invalidated"
+        }
+      ],
+      "schema_version": "hardware_splicer.evidence_impact.v1",
+      "status": "evaluated",
+      "summary": {
+        "blocked": 0,
+        "invalidated": 7,
+        "retained": 0
+      },
+      "unresolved_dependency_ids": [],
+      "validation_errors": []
+    },
+    "families": {
+      "firmware": {
+        "status": "requires_recheck"
+      },
+      "manufacturing_package": {
+        "status": "requires_recheck"
+      },
+      "materials": {
+        "status": "requires_recheck"
+      },
+      "mechanical_fit": {
+        "status": "requires_recheck"
+      },
+      "model3d": {
+        "status": "requires_recheck"
+      },
+      "native_rule_checks": {
+        "artifact_kind": "pcb",
+        "artifact_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+        "physical_authority_granted": false,
+        "receipt": {
+          "after": {
+            "by_type": {
+              "clearance": 2,
+              "courtyards_overlap": 1,
+              "hole_clearance": 5,
+              "lib_footprint_issues": 63,
+              "silk_edge_clearance": 4,
+              "silk_over_copper": 2,
+              "silk_overlap": 3,
+              "solder_mask_bridge": 1,
+              "starved_thermal": 4,
+              "track_width": 199
+            },
+            "errors": 212,
+            "total": 284,
+            "warnings": 72
+          },
+          "available": true,
+          "before": {
+            "by_type": {
+              "hole_clearance": 4,
+              "lib_footprint_issues": 63,
+              "silk_edge_clearance": 4,
+              "starved_thermal": 4,
+              "track_width": 199
+            },
+            "errors": 207,
+            "total": 274,
+            "warnings": 67
+          },
+          "engine": "kicad-cli",
+          "new_violations": 10,
+          "ran": true,
+          "reason": null,
+          "source_context": {
+            "rule_scope": "retained_project_and_custom_rules",
+            "sidecar_sha256": {
+              "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+              "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+            }
+          },
+          "version": "9.0.2"
+        },
+        "status": "rechecked_candidate_only"
+      },
+      "wiring": {
+        "status": "requires_recheck"
+      }
+    },
+    "invalidated_verification_ids": [],
+    "physical_authority_granted": false,
+    "previous_impact_schema": "hardware_splicer.source_revision_impact.v1",
+    "schema_version": "hardware_splicer.source_revision_impact.v1",
+    "status": "requires_recheck"
+  },
+  "repeat_idempotent": true,
+  "project_revision_not_advanced_by_proposal": true,
+  "candidate_review_status": "pending",
+  "execution_read_http": 200,
+  "physical_validation_performed": false,
+  "physical_authority_granted": false,
+  "native_export": {
+    "size_bytes": 146660,
+    "sha256": "sha256:21de0ead202f0b9867d0c7ccdb793e4682a696b71e55a0919742ade04c56f402",
+    "deterministic": true
+  },
+  "accepted_native_recheck": {
+    "accepted_digital_revision": 8,
+    "decision_scope": "Controlled software integration fixture only; native findings remain unresolved.",
+    "source_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+    "original_sha256": "sha256:470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+    "checked_edited_bytes_not_original_upload": true,
+    "historical_original_still_checkable": true,
+    "summary": {
+      "ok": true,
+      "source_revision": 8,
+      "source_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+      "source_context": {
+        "rule_scope": "retained_project_and_custom_rules",
+        "sidecar_sha256": {
+          "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+          "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+        }
+      },
+      "project_context": "retained_native_revision",
+      "check": "drc",
+      "check_executed": true,
+      "check_status": "executed",
+      "rule_finding_count": 284,
+      "rule_findings_by_type": {
+        "clearance": 2,
+        "hole_clearance": 5,
+        "courtyards_overlap": 1,
+        "silk_edge_clearance": 4,
+        "lib_footprint_issues": 63,
+        "track_width": 199,
+        "starved_thermal": 4,
+        "silk_over_copper": 2,
+        "solder_mask_bridge": 1,
+        "silk_overlap": 3
+      },
+      "checks": {
+        "engine": "kicad-cli",
+        "available": true,
+        "version": "9.0.2",
+        "ran": true,
+        "reason": null,
+        "before": {
+          "errors": 212,
+          "warnings": 72,
+          "total": 284,
+          "by_type": {
+            "clearance": 2,
+            "hole_clearance": 5,
+            "courtyards_overlap": 1,
+            "silk_edge_clearance": 4,
+            "lib_footprint_issues": 63,
+            "track_width": 199,
+            "starved_thermal": 4,
+            "silk_over_copper": 2,
+            "solder_mask_bridge": 1,
+            "silk_overlap": 3
+          }
+        },
+        "after": {
+          "errors": 212,
+          "warnings": 72,
+          "total": 284,
+          "by_type": {
+            "clearance": 2,
+            "hole_clearance": 5,
+            "courtyards_overlap": 1,
+            "silk_edge_clearance": 4,
+            "lib_footprint_issues": 63,
+            "track_width": 199,
+            "starved_thermal": 4,
+            "silk_over_copper": 2,
+            "solder_mask_bridge": 1,
+            "silk_overlap": 3
+          }
+        },
+        "new_violations": 0,
+        "source_context": {
+          "rule_scope": "retained_project_and_custom_rules",
+          "sidecar_sha256": {
+            "project": "sha256:4f9de530099b2285227c51cc84e4a0b0ee6face31aca513dcf7f58e93f7c4fab",
+            "rules": "sha256:329e139ffecccbe616adbc1bf5c8208cadf91fde86ead311a57c427435470a2b"
+          }
+        }
+      },
+      "source_design_is_not_validated": true,
+      "manufacturing_approved": false,
+      "automatic_execution": false
+    },
+    "physical_authority_granted": false
+  }
+}

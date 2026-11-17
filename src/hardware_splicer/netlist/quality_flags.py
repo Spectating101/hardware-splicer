@@ -5,6 +5,38 @@ from __future__ import annotations
 from typing import Any, Dict, Mapping
 
 
+def apply_compile_input_fidelity(quality: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep a partial catalog request or logical package preview below fabrication readiness.
+
+    These checks qualify the generated inputs. They do not duplicate request-count,
+    electrical, native DRC or copper-routing checks, and cannot upgrade their results.
+    """
+    request = dict(quality.get("composition_request") or {})
+    unresolved = list(request.get("unresolved_module_ids") or [])
+    fidelity = dict(quality.get("geometry_fidelity") or {})
+    blockers = list(quality.get("fabrication_blockers") or [])
+    if fidelity.get("requires_native_source_geometry"):
+        blockers.extend(fidelity.get("fabrication_blockers") or [
+            "Synthetic package geometry is a logical preview; exact native source geometry is required before fabrication."
+        ])
+        quality["fabrication_ready"] = False
+        if quality.get("build_ready"):
+            quality["circuit_readiness"] = "logical_preview"
+        if quality.get("fab_recommendation") not in {"blocked_drc", "blocked_erc"}:
+            quality["fab_recommendation"] = "blocked_geometry_fidelity"
+    if unresolved:
+        message = "Unresolved requested module IDs: " + ", ".join(str(value) for value in unresolved)
+        blockers.append(message)
+        quality["input_fidelity_blockers"] = [message]
+        quality["build_ready"] = False
+        quality["fabrication_ready"] = False
+        quality["circuit_readiness"] = "unresolved_modules"
+        quality["fab_recommendation"] = "blocked_unresolved_modules"
+    if blockers:
+        quality["fabrication_blockers"] = list(dict.fromkeys(blockers))
+    return quality
+
+
 def copper_tier(*, freerouting_ok: bool, track_count: int, segment_count: int) -> str:
     if freerouting_ok and track_count > 0:
         return "autorouted"
@@ -67,7 +99,7 @@ def attach_launch_quality_flags(
         and copper == "autorouted"
         and gerber_ready
     )
-    return quality
+    return apply_compile_input_fidelity(quality)
 
 
 def finalize_launch_quality(quality: Dict[str, Any]) -> Dict[str, Any]:

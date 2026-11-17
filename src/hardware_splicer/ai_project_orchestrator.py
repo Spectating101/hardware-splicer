@@ -17,6 +17,8 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 
 from .integrations.llm_text_client import call_llm_chat
 
+from .ai_project_action_inputs import ACTION_INPUT_HINT, ACTION_INPUT_MODELS, validate_action_inputs
+
 AI_PROJECT_ORCHESTRATOR_SCHEMA = "hardware_splicer.ai_project_orchestrator.v1"
 AI_PROJECT_SESSION_SCHEMA = "hardware_splicer.ai_project_session.v1"
 AI_PROJECT_ACTION_SCHEMA = "hardware_splicer.ai_project_action.v1"
@@ -36,6 +38,8 @@ ALLOWED_AI_ACTION_TYPES = (
     "run_drc",
     "inspect_registered_sources",
     "generate_board_carrier_candidate",
+    "promote_registered_sources",
+    "propose_kicad_edit",
     "revise_candidate",
     "prepare_verification",
     "prepare_engineering_package",
@@ -329,6 +333,7 @@ def build_ai_project_prompt(context: Mapping[str, Any], *, max_actions: int) -> 
         "must be a JSON object. Empty evidence source_ids must be [] rather than "
         "invented document references.\n\n"
         f"Allowed action_type values: {action_types}.\n"
+        f"{ACTION_INPUT_HINT}\n"
         "Every action is a proposal only. Never emit shell commands, arbitrary URLs, secrets, "
         "raw file content, device operations, fabrication orders, flashing, power-on, or motion.\n\n"
         f"PROJECT_CONTEXT={_canonical_json(context)}"
@@ -450,7 +455,14 @@ def parse_ai_project_response(
         raw_inputs = row.get("inputs")
         if raw_inputs is not None and not isinstance(raw_inputs, Mapping):
             raise InvalidAIProjectResponse(f"actions[{index}].inputs must be an object")
-        inputs = _sanitize_value(dict(raw_inputs or {}))
+        try:
+            inputs = (
+                validate_action_inputs(action_type, dict(raw_inputs or {}))
+                if action_type in ACTION_INPUT_MODELS
+                else _sanitize_value(dict(raw_inputs or {}))
+            )
+        except (TypeError, ValueError) as exc:
+            raise InvalidAIProjectResponse(f"actions[{index}].inputs: {exc}") from exc
         _validate_no_authority_elevation(inputs, path=f"actions[{index}].inputs")
         identity_seed = {
             "session_id": session_id,

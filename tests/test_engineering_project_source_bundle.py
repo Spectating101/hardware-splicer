@@ -62,3 +62,26 @@ def test_actual_source_bundle_works_when_available():
     assert r['netlist']['net_count']==47
     assert r['geometry']['Front Case.stl']['status']=='parsed_raw_bounds'
     assert not r['release_authorized']
+
+
+def test_native_registered_rule_companion_is_used_in_project_source_checks():
+    import shutil
+    if shutil.which('kicad-cli') is None:
+        pytest.skip('Native KiCad CLI unavailable')
+    root = Path(__file__).resolve().parents[1] / 'hardware/reference_designs/spi_flash_adapter_v1'
+    stem = 'spi_flash_adapter_v1'
+    named = {stem + suffix: (root / (stem + suffix)).read_bytes()
+             for suffix in ('.kicad_pcb', '.kicad_sch', '.kicad_pro')}
+    rules = b'(version 1)\n(rule "source-width" (constraint track_width (min 0.8mm)))\n'
+    named[stem + '.kicad_dru'] = rules
+    result = analyze_project_bundle(named)
+    assert result['input_sources'][stem + '.kicad_dru']['kind'] == 'kicad_design_rules'
+    assert result['input_sources'][stem + '.kicad_dru']['sha256'] == 'sha256:' + hashlib.sha256(rules).hexdigest()
+    assert result['software_checks']['drc']['check_executed']
+    assert result['software_checks']['drc']['rule_findings_by_type'].get('track_width', 0) > 0
+    assert result['manufacturing_approved'] is False
+
+
+def test_unsupported_rule_directives_cannot_be_ignored_by_source_checks():
+    with pytest.raises(ValueError, match='not supported'):
+        analyze_project_bundle({'source.kicad_dru': b'(version 1)\n(include "/tmp/other.kicad_dru")\n'})

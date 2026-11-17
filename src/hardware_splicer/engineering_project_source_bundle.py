@@ -21,6 +21,7 @@ from .stored_source_parser import read_registered_source_bytes
 from .engineering_reference_bom_audit import audit_markdown_reference_bom
 from .engineering_multidomain_sources import inspect_step_brep, inspect_repair_guide_html, inspect_scad_polyhedron
 from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
+from .artifact_retention import validate_kicad_rule_bytes
 
 
 def _digest(raw: bytes) -> str:
@@ -60,6 +61,9 @@ def _source_kind(name: str, data: bytes) -> str | None:
         return 'kicad_schematic'
     if name.endswith('.kicad_pcb') and data.lstrip().startswith(b'(kicad_pcb'):
         return 'kicad_board'
+    if name.endswith('.kicad_dru'):
+        validate_kicad_rule_bytes(data)
+        return 'kicad_design_rules'
     if name.lower().endswith('.stl') and len(data) >= 84:
         return 'binary_stl_candidate'
     if name.lower().endswith('.md') and b'estimated total by category' in data[:300_000].lower():
@@ -244,7 +248,7 @@ def analyze_registered_project_bundle(project_id: str, sources: list[Mapping[str
         if not filename or Path(filename).name != filename or '/' in filename or '\\' in filename:
             continue
         suffix = Path(filename).suffix.lower()
-        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.stl','.step','.stp','.html','.scad','.md'}:
+        if suffix not in {'.kicad_pro','.kicad_sch','.kicad_pcb','.kicad_dru','.stl','.step','.stp','.html','.scad','.md'}:
             continue
         if filename in selected:
             raise ValueError('ambiguous multiple source identities for '+filename)

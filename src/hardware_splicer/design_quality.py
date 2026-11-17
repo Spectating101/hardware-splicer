@@ -85,6 +85,8 @@ def build_design_quality_gate(
     request_fidelity: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     body = dict(design_quality or {})
+    from .netlist.quality_flags import apply_compile_input_fidelity
+    body = apply_compile_input_fidelity(body)
     engineering = dict(engineering or {})
     analysis = dict(engineering.get("analysis") or {})
     circuit = dict(analysis.get("circuit") or {})
@@ -98,6 +100,7 @@ def build_design_quality_gate(
     bom_ready = bool(body.get("bom_ready"))
 
     blockers = []
+    blockers.extend(body.get("input_fidelity_blockers") or [])
     if not body.get("build_graph_compiled"):
         blockers.append("Catalog build graph did not compile.")
     if not electrical_pass:
@@ -133,7 +136,7 @@ def build_design_quality_gate(
                 f"design has {row['in_design']} ({', '.join(row['names'])})."
             )
 
-    fabrication_blockers = list(blockers)
+    fabrication_blockers = list(dict.fromkeys([*blockers, *body.get("fabrication_blockers", [])]))
     if not gerber_ready:
         fabrication_blockers.append("Gerber export is not ready.")
     if not bom_ready:
@@ -162,11 +165,12 @@ def build_design_quality_gate(
         "build_ready": strict_build_ready,
         "fabrication_ready": fabrication_ready,
         "compiler_verified": compiler_verified,
-        "circuit_readiness": "build_ready" if compiler_verified else readiness,
+        "circuit_readiness": "logical_preview" if compiler_verified and (body.get("geometry_fidelity") or {}).get("requires_native_source_geometry") else "build_ready" if compiler_verified else readiness,
         "drc_pass": drc_pass,
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
         "blockers": blockers,
+        "fabrication_blockers": fabrication_blockers,
         "summary": body,
     }
     if request_fidelity is not None:
