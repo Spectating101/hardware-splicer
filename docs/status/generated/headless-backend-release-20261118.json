@@ -1,0 +1,306 @@
+{
+  "schema": "hardware_splicer.headless_backend_release_evidence.v1",
+  "recorded_at_utc": "2026-11-17T19:19:35.533774+00:00",
+  "candidate_commit": "7934cf1a43871e52cb19baf35ecf30c0cb507dd4",
+  "scope": "Linux self-hosted backend on a trusted workstation, using a source checkout.",
+  "github_main": {
+    "commit": "38dbad2b759a9313b81a5b10bfde7f20d64f308c",
+    "candidate_includes_main": true,
+    "candidate_published_or_checked_in_remote_ci": false
+  },
+  "full_root_suite": {
+    "collected": 4593,
+    "passed": 4533,
+    "skipped": 60,
+    "failures": 0,
+    "passing_subtests": 3,
+    "batches": [
+      {
+        "tests": 1164,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 6,
+        "junit_sha256": "4e833f724bdf8b832c7a490183ea1c0b2697af938e5018ec69d4c7ad2eb71772",
+        "passed": 1158,
+        "passing_subtests": 0,
+        "log_sha256": "0bb0a37bf8a3f293fe9b64eefbdc60ca3417fae997ac26d9be29eb2451ba21f4",
+        "files": 127
+      },
+      {
+        "tests": 1173,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 10,
+        "junit_sha256": "26dda35b681efbc4ca74adcea1fae1539b8269986b72b06b04678e8e2adb43a8",
+        "passed": 1160,
+        "passing_subtests": 3,
+        "log_sha256": "9fa47301603084c44daa660ef37b67ad03e6a58b3434432a91ce32452862f487",
+        "files": 125
+      },
+      {
+        "tests": 1139,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 19,
+        "junit_sha256": "8931fab647e7457e461668698769a929d87b102c6b11e59716bd3b59a3159b1b",
+        "passed": 1120,
+        "passing_subtests": 0,
+        "log_sha256": "16e74d9433071632e699b64b5962c126375c94b70fb8aca2eebdeadfb92720d7",
+        "files": 129
+      },
+      {
+        "tests": 1120,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 25,
+        "passed": 1095,
+        "passing_subtests": 0,
+        "parallel_retry": [
+          {
+            "tests": 262,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "junit_sha256": "aa490b132a1edb95de9f79d1437dadfb126673b755b66f3292a598d959c89be5",
+            "passed": 260,
+            "passing_subtests": 0,
+            "log_sha256": "1726b35fc276c07b42062fbcdba5891cc9745fb27e2826babd2ca395726d4259"
+          },
+          {
+            "tests": 328,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 15,
+            "junit_sha256": "c00cc6b74c7682c36f47e027f465f535e216aabc5d17086d43f2086ebbca3af5",
+            "passed": 313,
+            "passing_subtests": 0,
+            "log_sha256": "e6f227dbf362d1c62ade745dca24b7a5668e8b44edd165bf801b3ad8fe8894e5"
+          },
+          {
+            "tests": 265,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 5,
+            "junit_sha256": "a9faea1eed8ed407bb7cd605aa06583500c80afa1736ad6d36b0ddaf6223cd87",
+            "passed": 260,
+            "passing_subtests": 0,
+            "log_sha256": "f66bff075516c914aad09e25fb7a09366a2ba2a2d46bcaa9fd796d7c74bf91c8"
+          },
+          {
+            "tests": 265,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 3,
+            "junit_sha256": "f3cb28485fd4d24faf0327e6e7ddad443475586d87fa3f0fe570f4a13eed6cfc",
+            "passed": 262,
+            "passing_subtests": 0,
+            "log_sha256": "d7c033196037dbaaccd23e353ff13306814a03b1ab4560fe4b5ef834a317730d"
+          }
+        ],
+        "files": 128
+      }
+    ],
+    "collection_log_sha256": "890cd1ea0d91272363446a17aac53e5268afe87e80c71c4c1bf7a5ceeb162911",
+    "scope": "Every collected root test file. Existing live, native-tool and frontend-build gates apply."
+  },
+  "supplemental_suites": {
+    "mecha": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "57cbd9ffc1c857211ff1e802bfbf396878bb83c870647debd4ddbe6ec0c2a1c7",
+      "passed": 32
+    },
+    "3d": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "17da774dbfa1ca515d572720717129c79a5454e1d6f8baf244b812141c7c4c3a",
+      "passed": 15
+    },
+    "native": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "a6ec0938151f396d1955a4e050eab47b0a2e9fd71d3acb6b1b51f4d551c27f61",
+      "passed": 2
+    },
+    "substitution": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "01bc3be89ed94815e8b3e48d0b441404a4089feda946600d77cc74c4b2b43801",
+      "passed": 15
+    }
+  },
+  "fresh_install": {
+    "profile": "digital,backend-mcp,keyboard-splice",
+    "dependency_check": "pass",
+    "resolved_constraints_sha256": "162886674a4ea058852ebc668ececfa432c92bf21d3decbfd9641150fcb460fd"
+  },
+  "loopback_service": {
+    "version": "1.1.0",
+    "python": "3.13.5",
+    "cases": [
+      "ender3-penplotter",
+      "fielddeck-5"
+    ],
+    "api_case_registry_matches_cli": true,
+    "queued_job_survived_restart": true,
+    "native_audit": {
+      "requested": true,
+      "performed": true,
+      "passed": true,
+      "returncode": 0,
+      "engineering_acceptance": false
+    },
+    "same_engine_sources": true,
+    "baseline_and_revision_runtime_h": [
+      3.166,
+      2.55
+    ],
+    "bundle_sha256": "0e4e03218cd6488cfe1cd8f34d97579547c2123f9bc7c3cf8717e05fa9d6e061",
+    "bundle_http_cli_identical": true,
+    "physical_validation_performed": false
+  },
+  "state_restore": {
+    "sqlite_integrity_check": "ok",
+    "reopened_after_copy": true,
+    "restored_bundle_sha256": "0e4e03218cd6488cfe1cd8f34d97579547c2123f9bc7c3cf8717e05fa9d6e061"
+  },
+  "stdio_mcp": {
+    "canonical_operation_count": 278,
+    "canonical_read_invocation": "pass",
+    "canonical_stateful_write_read_delete": "pass",
+    "mcp_connection": "pass",
+    "mcp_tool_discovery": "pass",
+    "negotiated_protocol_version": "2026-07-28",
+    "operation_description": "pass",
+    "operation_discovery": "pass",
+    "physical_authority_granted": false,
+    "task_operation_manifest": "pass",
+    "same_saved_revision_from_mcp": true,
+    "project_id": "digital-e431c0391af34fb291fdcd7ab190fa62",
+    "revision": 2,
+    "requirements_met": false
+  },
+  "native_spi": {
+    "kicad": "9.0.2",
+    "pcbnew": "9.0.2",
+    "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
+    "engineering_acceptance": true,
+    "checks": {
+      "assembly_variant_issues": 0,
+      "board_identity_issues": 0,
+      "bom_parity_issues": 0,
+      "drc_actionable_violations": 0,
+      "erc_errors": 0,
+      "erc_warnings": 0,
+      "footprint_errors": 0,
+      "ground_reference_issues": 0,
+      "required_topology_issues": 0,
+      "schematic_parity_issues": 0,
+      "unconnected_pads": 0
+    }
+  },
+  "fielddeck_5_battery_screen": {
+    "schema": "hardware_splicer.fielddeck_5_power_bank_screen.v1",
+    "base_archive_sha256": "302c0d25372e06d0c80e0c347f461d37a2c3dc08fb7ab61c4a6f9b30a33772c7",
+    "base_assembly_sha256": "70ee0cf5f3fbb8357cf1c7e2654f849b17d9ff52380e8560f2d8b1878290f183",
+    "candidate": {
+      "manufacturer": "NITECORE",
+      "model": "Carbon Battery 12K",
+      "sources": [
+        "https://www.nitecore.com/product/Carbon_Battery_12K_Kit",
+        "https://www.nitecore.com/storage/images/album/uploads/CHARGERS/download/carbonbatery12k.pdf"
+      ],
+      "manual_sha256": "266fd04c47851acb951c827047c4a7f0e04e975b836bd00db439fa8dd4e3fcc9",
+      "body_dimensions_mm": [
+        95.5,
+        45.7,
+        24.3
+      ],
+      "nominal_cell_energy_wh": 43.2,
+      "manufacturer_typical_usb_output_energy_wh": 34.5,
+      "published_single_port": {
+        "connector": "USB-C",
+        "voltage_v": 5,
+        "current_a": 3
+      }
+    },
+    "evaluation": {
+      "modelled_usable_energy_wh": [
+        27.54,
+        38.88
+      ],
+      "work_runtime_target_h": 3,
+      "scenarios": [
+        {
+          "scenario": "work_published_panel_power",
+          "system_w": 9.0,
+          "original_h": [
+            2.55,
+            3.6
+          ],
+          "substitute_h": [
+            3.06,
+            4.32
+          ],
+          "margin_a": 1.2
+        },
+        {
+          "scenario": "stress_design_allocation",
+          "system_w": 12.6,
+          "original_h": [
+            1.821,
+            2.571
+          ],
+          "substitute_h": [
+            2.186,
+            3.086
+          ],
+          "margin_a": 0.48
+        },
+        {
+          "scenario": "high_keyboard_demand",
+          "system_w": 14.6,
+          "original_h": [
+            1.572,
+            2.219
+          ],
+          "substitute_h": [
+            1.886,
+            2.663
+          ],
+          "margin_a": 0.08
+        }
+      ],
+      "model_meets_work_target": true,
+      "lower_bound_margin_minutes": 3.6,
+      "physical_validation_performed": false
+    },
+    "native_geometry": {
+      "retained_solids": 46,
+      "reimported_solids": 47,
+      "nominal_battery_origin_mm": [
+        19.3,
+        29.25,
+        4.0
+      ],
+      "included_geometry": "Battery body envelope",
+      "overlap_with_retained_solids_mm3": 0.0,
+      "revised_assembly_sha256": "e6ec041d0de0f6fd89156b58d22095792ee570c4f4759be5a54a081014a68a3a"
+    },
+    "unresolved": [
+      "Installed USB-C plug and cable path, button access and removable retention",
+      "Measured USB power behavior, cable voltage drop and battery runtime"
+    ],
+    "digital_package_sha256": "a1901597862ea470693beb7ef0fac8b12e8e7ad2012d62fa972110ab21662621"
+  },
+  "public_service_access_verified": false,
+  "physical_validation_performed": false
+}

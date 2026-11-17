@@ -51,6 +51,9 @@ Treat the HTTP service as a trusted operator interface. Keep its listener privat
 and use an authenticated proxy for network access. Digital study verdicts cover
 the declared model and requirements. Physical verification requires bench evidence.
 
+The [backend release evidence](status/generated/headless-backend-release-20261118.json)
+records the fresh install, full test collection, native checks and state restore.
+
 ---
 
 ## Splice Agent v1.0 packaging reference
