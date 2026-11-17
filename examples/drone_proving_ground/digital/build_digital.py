@@ -13,13 +13,23 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from hs3g_model import build_model, dump, sha
+from revision_b import build_package as revision_b
 from hs3g_sim import run, assess, freefall_oracle
-from study_requirements import validate, configure, constraints
+from study_requirements import validate, configure, constraints, verdict_basis
 
 
 def read_inputs(requirements=None):
-    return (configure(json.loads((HERE/'simulation.json').read_text()), requirements),
-            json.loads((HERE.parent/'revision_b/inputs/thrust_table.json').read_text()))
+    config = json.loads((HERE/'simulation.json').read_text())
+    _, candidate, parts, _, _, table = revision_b.inputs()
+    battery = next(p for p in parts if p['id']=='battery')
+    overrides = candidate['part_overrides'].get('battery', {})
+    for key in ['capacity_mah', 'cells', 'c_continuous']:
+        config['battery'][key]['value'] = battery.get(key)
+        config['battery'][key]['source'] = (
+            f'../revision_b/inputs/candidate.json#part_overrides/battery/{key}' if key in overrides
+            else f'../inputs/parts.json#parts/battery/{key}')
+    config['motor_table']['value'] = table
+    return configure(config, requirements), table
 
 
 def plot_telemetry(out, simulations):
@@ -94,7 +104,7 @@ def build(design_dir: Path, out: Path, requirements=None):
         result = assess(rows,model,config,scenario);results.append(result)
         print(json.dumps({'scenario':scenario['id'],'accepted':result['accepted'],'metrics':result['metrics']},allow_nan=False),flush=True)
     oracle = freefall_oracle(model,table,config)
-    mass_constraints = constraints(model, requirements)
+    mass_constraints = constraints(model, requirements, results)
     simulation_ok = all(x['accepted'] for x in results) and oracle['accepted']
     report = {'schema':'hardware_splicer.hs3g_digital_simulation.v1',
               'requested_scope':'digital_only_3d_representation_and_simulation',
@@ -102,6 +112,8 @@ def build(design_dir: Path, out: Path, requirements=None):
               'controller':'Simulation position PID / SO(3) attitude PD, 60 Hz',
               'simulation_acceptance':simulation_ok,
               'requirements': requirements, 'constraints': mass_constraints,
+              'mass_budget': all(x['passed'] for x in mass_constraints if x.get('kind')=='mass_budget'),
+              'verdict_basis': verdict_basis(requirements),
               'requirements_met': simulation_ok and all(x['passed'] for x in mass_constraints),
               'scenarios':results,'gravity_oracle':oracle,
               'scope_limits':config['scope_limits'],
@@ -114,8 +126,10 @@ def build(design_dir: Path, out: Path, requirements=None):
         '# HS-3G-B completed digital study\n\n'
         'The requested deliverable is digital only. No parts or hardware are needed.\n\n'
         f'Study payload: {requirements["payload_mass_g"]:.2f} g. Mass limit: {requirements["max_mass_g"]:.2f} g. '
-        f'Gust force scale: {requirements["gust_scale"]:.2f}. Requirements met: {report["requirements_met"]}. '
-        'A completed computation can retain failed engineering requirements; inspect `SIMULATION.json` and `verification.json`.\n\n'
+        f'Gust force scale: {requirements["gust_scale"]:.2f}. Mass budget passed: {report["mass_budget"]}. '
+        f'Verdict basis: {report["verdict_basis"]}. Combined declared checks and simulation acceptance: {report["requirements_met"]}. '
+        'A completed computation can retain failed checks; inspect `SIMULATION.json`. '
+        'Separate verification prints JSON or writes an explicit `--out` receipt outside this package; it never updates this directory.\n\n'
         '**Start with `VIEWER.html`: open it directly in a WebGL browser.** It contains its 3D library, model and recorded states, and makes no network requests. Orbit, zoom, explode the assembly, choose a scenario, play, pause and scrub. PNG/GIF views are included if WebGL is unavailable.\n\n'
         '## Included results\n\n'
         '- `HS3G_B_ASSEMBLY.step`: named editable assembly in millimetres; native retained frame and explicitly representative components.\n'
@@ -124,7 +138,7 @@ def build(design_dir: Path, out: Path, requirements=None):
         '- `nominal.csv`, `mass_plus_5g.csv`, `motor_failure.csv`: full 240 Hz physics states, forces, targets, rotor RPMs and estimated current.\n'
         '- `TELEMETRY.png`: paths, altitude, position error and motor outputs.\n'
         '- `model.json`: geometry, mass proxies, centre of mass and inertia tensor.\n'
-        '- `SIMULATION.json`, `simulation-contract.json`, `verification.json`: assumptions, acceptance results and artifact identities.\n\n'
+        '- `SIMULATION.json`, `simulation-contract.json`: assumptions and acceptance results. Artifact verification receipts are written separately outside this package.\n\n'
         '## What was simulated\n\n'
         'The existing 137 mm HS-3G-B design is the model, rather than the separate legacy Crazyflie demonstration. '
         f'Its modeled mass is {model["mass_kg"]*1000:.2f} g. Native frame geometry and the retained component layout define the mass distribution. '
@@ -140,7 +154,11 @@ def build(design_dir: Path, out: Path, requirements=None):
         'The full calculated inertia tensor is recorded; the small off-diagonal terms are omitted by the dynamics model. '
         'Motor lag, yaw torque, drag and gains are declared assumptions. State feedback is ideal. '
         'There is no sensor/RF, INAV SITL, frame-flexibility, CFD, battery-chemistry or thermal simulation. '
-        'Estimated current and short-mission energy are not measured endurance. '
+        f'The {config["battery"]["cells"]["value"]}S battery uses {config["battery"]["capacity_mah"]["value"]} mAh from revision B\'s merged parts, assumed OCV and resistance, coulomb counting and a voltage-dependent RPM ceiling. '
+        'Thrust-table current also supplies the steady hover estimate to 80% depth of discharge or an earlier voltage/thrust limit. '
+        'The original design power-law result (3.58 A, 11.4 min with 850 mAh) is an alternate estimate with explicit differences. '
+        'Voltage, sourced C-rating and minimum-voltage thrust-to-weight have separate gates; endurance is gated only if declared as a requirement. '
+        'Estimated current, energy and hover duration are not hardware measurements. '
         'The separate design package retains its firmware research; this simulation does not execute or flash that firmware.\n\n'
         '## Completion\n\n'
         'Digital completion requires the native assembly exports, working offline viewer, full mission telemetry, nominal/payload acceptance, detected motor-loss descent, analytic gravity comparison and separate artifact verification. '

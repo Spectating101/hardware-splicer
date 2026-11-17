@@ -36,13 +36,24 @@
     "gust_recovery_error_m": 0.07,
     "landing_speed_m_s": 0.15,
     "force_balance_rms_m_s2": 0.03,
-    "max_tracking_tilt_deg": 35.0
+    "max_tracking_tilt_deg": 35.0,
+    "min_terminal_cell_v": {
+      "value": 3.3,
+      "source": "assumption",
+      "reason": "Minimum allowed terminal voltage under load; not pack qualification."
+    },
+    "min_thrust_to_weight": {
+      "value": 2.0,
+      "source": "assumption",
+      "reason": "Minimum full-throttle thrust-to-weight at the minimum terminal voltage."
+    }
   },
   "scope_limits": [
     "Parameterized representative, not a physically calibrated digital twin.",
     "Native CAD frame; simplified component, propeller and collision geometry.",
     "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
     "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+    "Battery sag and coulomb counting use an assumed OCV curve and internal resistance; current versus RPM is extrapolated below the bench table and is not voltage-calibrated.",
     "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
     "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
     "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
@@ -51,5 +62,29 @@
     "https://github.com/bulletphysics/bullet3/blob/master/docs/pybullet_quickstart_guide/PyBulletQuickstartGuide.md.html",
     "https://mathweb.ucsd.edu/~mleok/pdf/LeLeMc2010_quadrotor.pdf",
     "https://www.ligpower.com/product/f1404-fpv-motor.html"
-  ]
+  ],
+  "motor_table": {
+    "source": "../revision_b/inputs/thrust_table.json"
+  },
+  "battery": {
+    "capacity_mah": {"value": 850, "source": "../revision_b/inputs/candidate.json#part_overrides/battery/capacity_mah"},
+    "cells": {"value": 4, "source": "../inputs/parts.json#parts/battery/cells"},
+    "c_continuous": {"value": 70, "source": "../revision_b/inputs/candidate.json#part_overrides/battery/c_continuous"},
+    "internal_resistance_ohm": {"value": 0.08, "source": "assumption", "reason": "Pack-level resistance including leads; no measured resistance is available."},
+    "initial_soc": {"value": 1.0, "source": "assumption", "reason": "Each scenario starts with a fully charged pack."},
+    "ocv_curve_soc_cell_v": {"value": [[0, 3.0], [0.1, 3.5], [0.2, 3.7], [0.5, 3.85], [0.8, 4.0], [1, 4.2]], "source": "assumption", "reason": "Piecewise-linear representative LiPo open-circuit curve, not measured pack data."},
+    "usable_capacity_fraction": {"value": 0.8, "source": "../inputs/parts.json#assumptions/usable_capacity_fraction"},
+    "avionics_power_w": {"value": 4.0, "source": "../inputs/parts.json#assumptions/avionics_power_w"},
+    "bench_voltage_v": {"value": 16.8, "source": "assumption", "reason": "Rounded 4S bench reference for the retained thrust table (rows near 16.8 V)."},
+    "hover_step_s": {"value": 1.0, "source": "assumption", "reason": "One-second numerical integration steps for the steady hover estimate."},
+    "hover_assumptions": "Four healthy motors in steady hover without gusts or maneuvering; constant required rotor RPM and current from the bench table, not voltage-calibrated; integrate coulomb count and avionics load to 80% depth of discharge, stopping earlier at the voltage or available-thrust limit; no temperature, aging or Peukert correction."
+  },
+  "alternate_estimate": {
+    "source": "../revision_b/reference/results.json#propulsion",
+    "current_a": {"value": 3.58, "source": "../revision_b/reference/results.json#propulsion/hover_current_a"},
+    "endurance_min": {"value": 11.4, "source": "../revision_b/reference/results.json#propulsion/hover_time_min"},
+    "capacity_mah": {"value": 850, "source": "../revision_b/reference/results.json#parts/battery/capacity_mah"},
+    "mass_g": {"value": 234.9, "source": "../revision_b/reference/results.json#mass/auw_g"},
+    "note": "Original design power-law estimate at its 850 mAh capacity and nominal voltage; it is not adjusted for payload or sag and is not used by the simulation."
+  }
 }

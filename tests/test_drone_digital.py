@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -159,3 +160,116 @@ def test_independent_verifier_rejects_changed_physics_or_mass(native,tmp_path,ta
     receipt=verify.verify(copy,DESIGN)
     assert receipt['digital_objective_complete'] is False
     assert failed in receipt['failed_checks']
+
+
+@pytest.fixture
+def battery_inputs():
+    pytest.importorskip('numpy')
+    build=module('hs3g_battery_build_test','build_digital.py')
+    sim=module('hs3g_battery_sim_test','hs3g_sim.py')
+    config,table=build.read_inputs()
+    return config,table,sim
+
+
+def test_simulated_battery_uses_revision_b_overrides(tmp_path,monkeypatch):
+    pytest.importorskip('numpy')
+    build=module('hs3g_battery_revision_build_test','build_digital.py')
+    candidate=json.loads((build.revision_b.HERE/'inputs/candidate.json').read_text())
+    config,_=build.read_inputs()
+    assert config['battery']['capacity_mah']['value']==candidate['part_overrides']['battery']['capacity_mah']==850
+    for key in ['capacity_mah','c_continuous']:
+        assert config['battery'][key]['source']==f'../revision_b/inputs/candidate.json#part_overrides/battery/{key}'
+    assert config['battery']['cells']['value']==4
+    assert config['battery']['cells']['source']=='../inputs/parts.json#parts/battery/cells'
+
+    staged_inputs=tmp_path/'inputs';staged_inputs.mkdir()
+    shutil.copyfile(build.revision_b.HERE/'inputs/thrust_table.json',staged_inputs/'thrust_table.json')
+    changed={'capacity_mah':400,'cells':3,'c_continuous':25}
+    candidate['part_overrides']['battery'].update(changed)
+    (staged_inputs/'candidate.json').write_text(json.dumps(candidate))
+    monkeypatch.setattr(build.revision_b,'HERE',tmp_path)
+    updated,_=build.read_inputs()
+    for key,value in changed.items():
+        assert updated['battery'][key]['value']==value
+        assert updated['battery'][key]['source']==f'../revision_b/inputs/candidate.json#part_overrides/battery/{key}'
+
+
+def test_voltage_sag_lowers_available_full_throttle_thrust(battery_inputs):
+    import numpy as np
+    config,table,sim=battery_inputs
+    motor=sim.MotorTable(table,config)
+    requested=np.full(4,motor.max_rpm)
+    voltage,_,rpms=sim.Battery(config,motor).load(requested)
+    ideal=copy.deepcopy(config);ideal['battery']['internal_resistance_ohm']['value']=0
+    ideal_voltage,_,ideal_rpms=sim.Battery(ideal,motor).load(requested)
+    assert voltage<ideal_voltage
+    assert np.sum(motor.force_at_rpm(rpms))<np.sum(motor.force_at_rpm(ideal_rpms))
+
+
+def test_tiny_capacity_fails_terminal_voltage_gate(battery_inputs,tmp_path):
+    pytest.importorskip('pybullet')
+    config,table,sim=battery_inputs
+    config['battery']['capacity_mah']['value']=.001
+    model=json.loads((REFERENCE/'model.json').read_text())
+    scenario=config['scenarios'][0]
+    rows=sim.run(model,table,config,scenario,tmp_path)
+    assessment=sim.assess(rows,model,config,scenario)
+    assert assessment['checks']['terminal_voltage'] is False
+    assert assessment['accepted'] is False
+
+
+def test_current_requirements_state_mass_budget_only_and_expose_tight_margin():
+    requirements=module('hs3g_mass_requirements_test','study_requirements.py')
+    current=requirements.validate({'payload_mass_g':10})
+    model={'mass_kg':.2449,'inertia_off_diagonal_relative_max':0}
+    checks=requirements.constraints(model,current)
+    assert requirements.verdict_basis(current)=='mass_budget_only'
+    assert all(c['verdict_basis']=='mass_budget_only' for c in checks)
+    mass_checks=[c for c in checks if c.get('kind')=='mass_budget']
+    assert len(mass_checks)==2
+    assert all(c['mass_budget']==c['passed'] and c['margin_g']==c['margin'] for c in mass_checks)
+    assert mass_checks[1]['margin_g']==pytest.approx(.1)
+
+
+def test_performance_requirements_need_an_assessment():
+    requirements=module('hs3g_performance_requirements_test','study_requirements.py')
+    requested={'min_hover_endurance_min':10,'min_thrust_to_weight':2.5}
+    model={'mass_kg':.2349,'inertia_off_diagonal_relative_max':0}
+    checks=requirements.constraints(model,requested)
+    assert all(c['status']=='not_evaluated' and c['passed'] is None for c in checks[-2:])
+    assessment={'metrics':{'estimated_hover_endurance_min':9,'thrust_to_weight_at_min_voltage':3}}
+    checked=requirements.constraints(model,requested,assessment)
+    assert checked[-2]['passed'] is False
+    assert checked[-1]['passed'] is True
+
+
+@pytest.mark.requires_cadquery
+def test_verifier_leaves_package_byte_identical(native,tmp_path):
+    _,_,_,_,verify,_=native
+    package=tmp_path/'package';shutil.copytree(REFERENCE,package)
+    def identities():
+        return {p.relative_to(package).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in package.rglob('*') if p.is_file()}
+    before=identities()
+    verify.verify(package,DESIGN)
+    assert identities()==before
+
+
+def test_verifier_cli_prints_or_writes_outside_package(tmp_path,monkeypatch,capsys):
+    pytest.importorskip('numpy')
+    verify=module('hs3g_readonly_verify_test','verify_digital.py')
+    package=tmp_path/'package';package.mkdir()
+    sentinel=package/'verification.json';sentinel.write_bytes(b'existing receipt\n')
+    monkeypatch.setattr(verify,'verify',lambda *a:{'digital_objective_complete':True,'artifact_integrity':True})
+    receipt=tmp_path/'receipt.json'
+    monkeypatch.setattr(sys,'argv',['verify_digital.py',str(package),'--design',str(DESIGN)])
+    assert verify.main()==0
+    assert json.loads(capsys.readouterr().out)['digital_objective_complete'] is True
+    assert list(package.iterdir())==[sentinel]
+    monkeypatch.setattr(sys,'argv',['verify_digital.py',str(package),'--design',str(DESIGN),'--out',str(receipt)])
+    assert verify.main()==0
+    assert json.loads(receipt.read_text())['digital_objective_complete'] is True
+    assert sentinel.read_bytes()==b'existing receipt\n'
+    monkeypatch.setattr(sys,'argv',['verify_digital.py',str(package),'--design',str(DESIGN),'--out',str(sentinel)])
+    with pytest.raises(SystemExit):verify.main()
+    assert sentinel.read_bytes()==b'existing receipt\n'
