@@ -20,7 +20,7 @@ def test_a_module_with_no_registered_footprint_is_never_verified() -> None:
 
 
 def test_fit_report_lists_unverified_modules_once_and_sorted() -> None:
-    report = module_fit_report(["usb-power-5v", "boost-mt3608", "usb-power-5v", "a4988-stepper", ""])
+    report = module_fit_report(["usb-power-5v", "boost-mt3608", "usb-power-5v", "a4988-stepper"])
     assert [r["module_id"] for r in report["module_fit"]] == ["usb-power-5v", "boost-mt3608", "a4988-stepper"]
     assert report["unverified_fit_modules"] == sorted(report["unverified_fit_modules"])
     assert "boost-mt3608" in report["unverified_fit_modules"]
@@ -113,3 +113,43 @@ def test_compiled_catalog_build_reports_its_unverified_modules(tmp_path: Path) -
     # Fit never changes the ERC/DRC/connectivity verdict.
     gate = build_design_quality_gate(quality)
     assert gate["build_ready"] == (not gate["blockers"] and bool(quality.get("build_ready")))
+
+
+# ---- fit is computed from the footprint geometry that is actually emitted ----------------------------
+
+
+def _quality_for_graph(tmp_path: Path, module_ids: list) -> dict:
+    from hardware_splicer.pcb.geometry_compile import compile_graph_to_artifacts
+
+    nodes = [{"id": f"n{i + 1}", "moduleId": mid} for i, mid in enumerate(module_ids)]
+    wires = [
+        {"id": "w1", "from": {"nodeId": "n1", "pinId": "GND"}, "to": {"nodeId": "n2", "pinId": "GND"}},
+    ]
+    return compile_graph_to_artifacts("custom", tmp_path, {"nodes": nodes, "wires": wires})["quality"]
+
+
+def test_a_module_id_that_only_matches_after_trimming_gets_a_synthetic_footprint_and_no_verification(
+    tmp_path: Path,
+) -> None:
+    # Geometry looks the id up exactly, so "arduino-nano " gets the synthetic placeholder, and the
+    # fit report must say so instead of certifying the real Nano.
+    report = module_fit_report(["arduino-nano "])
+    assert report["unverified_fit_modules"] == ["arduino-nano "]
+    quality = _quality_for_graph(tmp_path, ["arduino-nano ", "usb-power-5v"])
+    assert "arduino-nano " in quality["unverified_fit_modules"]
+    assert quality["fabrication_ready"] is False
+
+
+def test_an_empty_module_id_has_an_unverified_fit_record(tmp_path: Path) -> None:
+    report = module_fit_report(["", "arduino-nano"])
+    by_id = {row["module_id"]: row for row in report["module_fit"]}
+    assert by_id[""]["status"] == "unverified_variant"
+    assert "" in report["unverified_fit_modules"]
+    quality = _quality_for_graph(tmp_path, ["", "arduino-nano"])
+    assert quality["fabrication_ready"] is False and "" in quality["unverified_fit_modules"]
+
+
+def test_resolve_module_fit_does_not_normalise_the_id() -> None:
+    assert resolve_module_fit("arduino-nano")["status"] == "verified_against"
+    for raw in ("arduino-nano ", " arduino-nano", "ARDUINO-NANO", "", None):
+        assert resolve_module_fit(raw)["status"] == "unverified_variant", repr(raw)

@@ -17,11 +17,16 @@ UNVERIFIED_FIT_BLOCKER_PREFIX = "Module footprint fit is unverified"
 
 
 def module_fit_report(module_ids: Iterable[str]) -> Dict[str, Any]:
-    """Fit record for each distinct module id (first-seen order) plus the unverified ones."""
+    """Fit record for each distinct module id (first-seen order) plus the unverified ones.
+
+    Ids are used exactly as the geometry looks them up: never trimmed or case-folded, and an empty
+    id keeps its (unverified) record. Normalising here would certify a real footprint for an id
+    the geometry drew as a synthetic placeholder.
+    """
     seen: List[str] = []
     for module_id in module_ids:
-        text = str(module_id or "").strip()
-        if text and text not in seen:
+        text = "" if module_id is None else str(module_id)
+        if text not in seen:
             seen.append(text)
     rows: List[Dict[str, Any]] = []
     for module_id in seen:
