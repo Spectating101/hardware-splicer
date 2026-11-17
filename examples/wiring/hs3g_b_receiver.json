@@ -1,5 +1,5 @@
 {
-  "description": "HS-3G-B receiver UART1 review from revision_b/reference/WIRING.csv. Each 0.10 m conductor is a provisional design allowance; actual route, ratings, pin views and terminations remain unresolved.",
+  "description": "HS-3G-B UART1 receiver review: manual pad labels, retained INAV assignment, and provisional 0.10 m conductors. Supply tolerances, load current, logic limits, wire and terminations remain unresolved.",
   "endpoints": [
     {
       "endpoint_id": "flight_controller",
@@ -7,13 +7,40 @@
       "contract": {
         "manufacturer": "SpeedyBee",
         "mpn": "F405 Mini BLS 35A 20x20 Stack",
-        "description": "FC UART1 assignment from retained WIRING.csv and INAV target; physical padout still needs confirmation",
+        "description": "Selected UART1 pads: T1/R1 plus separate 5V/G pads; SpeedyBee manual p7. Not the adjacent 9V pad.",
         "pins": [
-          {"pin_id": "TX1", "label": "UART1 TX", "role": "signal_out", "signal": "CRSF-UART-data", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "RX1", "label": "UART1 RX", "role": "signal_in", "signal": "CRSF-UART-data", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "5V", "label": "nominal 5 V; limits unknown", "role": "power_out", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "GND", "label": "GND", "role": "ground", "required": "yes"}
-        ]
+          {
+            "pin_id": "T1",
+            "label": "UART1 TX",
+            "role": "signal_out",
+            "signal": "CRSF-UART-data",
+            "reference_pin": "G",
+            "required": "yes"
+          },
+          {
+            "pin_id": "R1",
+            "label": "UART1 RX",
+            "role": "signal_in",
+            "signal": "CRSF-UART-data",
+            "reference_pin": "G",
+            "required": "yes"
+          },
+          {
+            "pin_id": "5V",
+            "label": "nominal 5 V; limits unknown",
+            "role": "power_out",
+            "reference_pin": "G",
+            "required": "yes",
+            "current_a": "2"
+          },
+          {
+            "pin_id": "G",
+            "label": "GND",
+            "role": "ground",
+            "required": "yes"
+          }
+        ],
+        "pin_view": "Component side, USB-C at right, per manual p7: lower-edge T1/R1; use 5V and G directly above T1/R1. These are selected solder pads, not a four-position connector."
       }
     },
     {
@@ -22,44 +49,106 @@
       "contract": {
         "manufacturer": "RadioMaster",
         "mpn": "RP1 V2",
-        "description": "Retained RadioMaster RP1 V2 receiver assignment; physical padout and electrical limits unresolved",
+        "description": "RP1 manual pad names; the depicted board is V1.2 and selected RP1 V2 board revision remains unconfirmed.",
         "pins": [
-          {"pin_id": "TX", "label": "receiver TX", "role": "signal_out", "signal": "CRSF-UART-data", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "RX", "label": "receiver RX", "role": "signal_in", "signal": "CRSF-UART-data", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "5V", "label": "nominal 5 V; limits unknown", "role": "power_in", "reference_pin": "GND", "required": "yes"},
-          {"pin_id": "GND", "label": "GND", "role": "ground", "required": "yes"}
-        ]
+          {
+            "pin_id": "TX",
+            "label": "receiver TX",
+            "role": "signal_out",
+            "signal": "CRSF-UART-data",
+            "reference_pin": "G",
+            "required": "yes"
+          },
+          {
+            "pin_id": "RX",
+            "label": "receiver RX",
+            "role": "signal_in",
+            "signal": "CRSF-UART-data",
+            "reference_pin": "G",
+            "required": "yes"
+          },
+          {
+            "pin_id": "5V",
+            "label": "nominal 5 V; limits unknown",
+            "role": "power_in",
+            "reference_pin": "G",
+            "required": "yes"
+          },
+          {
+            "pin_id": "G",
+            "label": "GND",
+            "role": "ground",
+            "required": "yes"
+          }
+        ],
+        "pin_view": "RP1 manual p1 TOP view: U.FL upper left, LED upper right; bottom pads left-to-right RX, TX, 5V, G. Match actual RP1 V2 revision before use."
       }
     }
   ],
   "wires": [
     {
-      "wire_id": "fc_tx_to_receiver_rx", "material_id": "receiver_conductors",
-      "start": {"endpoint_id": "flight_controller", "pin_id": "TX1"},
-      "end": {"endpoint_id": "receiver", "pin_id": "RX"},
+      "wire_id": "fc_tx_to_receiver_rx",
+      "material_id": "receiver_conductors",
+      "start": {
+        "endpoint_id": "flight_controller",
+        "pin_id": "T1"
+      },
+      "end": {
+        "endpoint_id": "receiver",
+        "pin_id": "RX"
+      },
       "length_m": "0.10",
-      "contract": {"specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"}
+      "contract": {
+        "specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+      }
     },
     {
-      "wire_id": "receiver_tx_to_fc_rx", "material_id": "receiver_conductors",
-      "start": {"endpoint_id": "flight_controller", "pin_id": "RX1"},
-      "end": {"endpoint_id": "receiver", "pin_id": "TX"},
+      "wire_id": "receiver_tx_to_fc_rx",
+      "material_id": "receiver_conductors",
+      "start": {
+        "endpoint_id": "flight_controller",
+        "pin_id": "R1"
+      },
+      "end": {
+        "endpoint_id": "receiver",
+        "pin_id": "TX"
+      },
       "length_m": "0.10",
-      "contract": {"specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"}
+      "contract": {
+        "specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+      }
     },
     {
-      "wire_id": "receiver_supply", "material_id": "receiver_conductors",
-      "start": {"endpoint_id": "flight_controller", "pin_id": "5V"},
-      "end": {"endpoint_id": "receiver", "pin_id": "5V"},
+      "wire_id": "receiver_supply",
+      "material_id": "receiver_conductors",
+      "start": {
+        "endpoint_id": "flight_controller",
+        "pin_id": "5V"
+      },
+      "end": {
+        "endpoint_id": "receiver",
+        "pin_id": "5V"
+      },
       "length_m": "0.10",
-      "contract": {"specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"}
+      "contract": {
+        "specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+      }
     },
     {
-      "wire_id": "receiver_ground", "material_id": "receiver_conductors",
-      "start": {"endpoint_id": "flight_controller", "pin_id": "GND"},
-      "end": {"endpoint_id": "receiver", "pin_id": "GND"},
+      "wire_id": "receiver_ground",
+      "material_id": "receiver_conductors",
+      "start": {
+        "endpoint_id": "flight_controller",
+        "pin_id": "G"
+      },
+      "end": {
+        "endpoint_id": "receiver",
+        "pin_id": "G"
+      },
       "length_m": "0.10",
-      "contract": {"specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"}
+      "contract": {
+        "specification": "Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+      }
     }
   ]
 }

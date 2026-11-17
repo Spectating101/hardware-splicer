@@ -1,0 +1,44 @@
+{
+  "schema_version": "hardware_splicer.wiring_example_source_notes.v1",
+  "date": "2026-11-17",
+  "method": "Human/agent visual inspection of rendered manufacturer PDF pages and retained INAV target sources. These notes do not automatically register or authenticate contracts in the existing digital project.",
+  "sources": [
+    {
+      "manufacturer": "SpeedyBee",
+      "url": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/",
+      "manual_url": "https://store-fhxxhuiq8q.mybigcommerce.com/product_images/img_SpeedyBee_F405_Mini_BLS_35A/SpeedyBee-f405-mini-stack-Manual-en.pdf",
+      "manual_sha256": "d35df7611ca9f4ca0e8016b7853ec30616db05966fd6234c17cdbb2d36edc1ab",
+      "manual_page_1_based": 7,
+      "facts_used": [
+        "The component-side diagram has USB-C on the right. UART1 pads are labelled T1 and R1 at the lower edge near the DJI connections.",
+        "A separate 5V pad is directly above T1, and a G pad is directly above R1. The nearby lower-row 9V pad is not selected for this receiver.",
+        "The product page and manual layout label the 5V regulator as 2A; this is a shared rail nameplate, not a measured per-pad current guarantee."
+      ],
+      "qualification": "The illustrated ELRS default uses UART2; the retained HS configuration assigns UART1 to the receiver and UART2 to GPS. No firmware allocation was changed. Physical board matching, voltage tolerances and total shared-rail demand are unresolved."
+    },
+    {
+      "manufacturer": "RadioMaster",
+      "url": "https://radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver",
+      "manual_url": "https://cdn.shopify.com/s/files/1/0609/8324/7079/files/RP1_User_Manual.pdf?v=1722923320",
+      "manual_sha256": "37329d09053d99d0638b5a9b4f5520df0a9d50133cb963c8aef61768b0dea328",
+      "manual_page_1_based": 1,
+      "facts_used": [
+        "The TOP drawing has U.FL upper left and LED upper right; its lower pads run RX, TX, 5V, G from left to right.",
+        "The manual specifies nominal 5V input and CRSF."
+      ],
+      "qualification": "The drawing labels its PCB RP1 V1.2, while the selected product is sold as RP1 V2. Physical revision matching, receiver maximum current, logic levels and input-voltage tolerance are unconfirmed. Nominal 5V was not converted into a guaranteed operating range."
+    },
+    {
+      "path": "examples/drone_proving_ground/revision_b/reference/WIRING.csv",
+      "purpose": "Existing RX UART1 / GPS UART2 allocation and TX-to-RX crossing."
+    },
+    {
+      "path": "examples/drone_proving_ground/revision_b/reference/firmware/src/main/target/SPEEDYBEEF405MINI/target.h",
+      "purpose": "Retained upstream INAV hardware target; no new firmware image, build or flashing."
+    }
+  ],
+  "wire_length_m_each": "0.10",
+  "wire_length_basis": "Provisional design allowance, not CAD-routed or measured.",
+  "complete_harness_or_device_verified": false,
+  "physical_authority_granted": false
+}
