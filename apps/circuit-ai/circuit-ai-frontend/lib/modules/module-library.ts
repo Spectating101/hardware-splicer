@@ -325,6 +325,11 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
       { id: "HV1", label: "HV1", role: "digital_io", voltage: "5V" },
       { id: "LV2", label: "LV2", role: "digital_io", voltage: "3.3V" },
       { id: "HV2", label: "HV2", role: "digital_io", voltage: "5V" },
+      { id: "LV3", label: "LV3", role: "digital_io", voltage: "3.3V", notes: "Optional: spare channel; leave open" },
+      { id: "HV3", label: "HV3", role: "digital_io", voltage: "5V", notes: "Optional: spare channel; leave open" },
+      { id: "LV4", label: "LV4", role: "digital_io", voltage: "3.3V", notes: "Optional: spare channel; leave open" },
+      { id: "HV4", label: "HV4", role: "digital_io", voltage: "5V", notes: "Optional: spare channel; leave open" },
+      { id: "GND_2", label: "GND (HV side)", role: "gnd", notes: "Optional: second ground pad, tied to GND on the board; leave open" },
     ],
   },
   {

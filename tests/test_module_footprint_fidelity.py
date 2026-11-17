@@ -223,3 +223,23 @@ def test_barrel_jack_is_not_claimed_verified_for_the_named_part() -> None:
     record = fit("dc-barrel-12v")
     assert record["status"] == "unverified_variant"
     assert "PJ-002A" in record["reason"] and "slot" in record["reason"]
+
+
+# ---- 4-channel level shifter --------------------------------------------------------------------
+
+
+def test_level_shifter_is_a_two_by_six_header_with_every_channel() -> None:
+    pads = table("level-shifter-4ch")
+    left = [p for p in pads if p["x"] < 0]
+    right = [p for p in pads if p["x"] > 0]
+    assert [p["pinId"] for p in left] == ["LV1", "LV2", "LV", "GND", "LV3", "LV4"]
+    assert [p["pinId"] for p in right] == ["HV1", "HV2", "HV", "GND_2", "HV3", "HV4"]
+    for column in (left, right):
+        assert {round(b["y"] - a["y"], 3) for a, b in zip(column, column[1:])} == {2.54}
+    assert len(pads) == 12 and {p["pinId"] for p in pads} <= spec_pin_ids("level-shifter-4ch")
+
+
+def test_level_shifter_is_unverified_because_row_spacing_varies_by_vendor() -> None:
+    record = fit("level-shifter-4ch")
+    assert record["status"] == "unverified_variant"
+    assert "differs by vendor" in record["reason"]
