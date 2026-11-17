@@ -660,6 +660,21 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
     ],
   },
   {
+    id: "terminal-block-2p-dc",
+    label: "2-pin screw terminal block (DC output)",
+    category: "interface",
+    summary: "5.08 mm field-wiring terminal on the carrier PCB that hands a DC rail and its ground to off-board consumers.",
+    manufacturer: "Generic",
+    partNumber: "KF301-2P",
+    priceUsd: 0.5,
+    source: "curated",
+    capabilityTags: ["field_wiring"],
+    pins: [
+      { id: "V+", label: "V+", role: "power_in", voltage: "rail from the regulator", notes: "Takes the regulated rail and hands it off-board" },
+      { id: "GND", label: "GND", role: "gnd" },
+    ],
+  },
+  {
     id: "terminal-block-4p",
     label: "4-pin screw terminal block",
     category: "interface",

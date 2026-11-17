@@ -60,9 +60,6 @@
       "tp4056": {
         "BAT+": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."},
         "BAT-": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."}
-      },
-      "ldo-ams1117-3v3": {
-        "VOUT": {"disposition": "off_board_terminal", "reason": "Recipe note: 3.3V on LDO VOUT for sensors/MCU; the consumers are off-board."}
       }
     },
     "indicator_or_task_light": {

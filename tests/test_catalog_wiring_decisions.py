@@ -59,7 +59,7 @@ def test_exported_footprint_pads_match_the_python_pad_tables_for_modules_this_wo
     # esp32-devkit already differs between the TypeScript and Python tables (Python carries every
     # declared pin, TypeScript does not); that drift predates this work, so it is not asserted here.
     exported = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_footprints"]
-    touched = {"a4988-stepper", "terminal-block-2p", "terminal-block-4p", "resistor-10r", "ili9341_tft"}
+    touched = {"a4988-stepper", "terminal-block-2p", "terminal-block-2p-dc", "terminal-block-4p", "resistor-10r", "ili9341_tft"}
     for module_id, meta in exported.items():
         if module_id not in touched:
             continue
@@ -204,6 +204,26 @@ def test_speaker_outputs_land_on_a_two_pin_terminal_on_the_carrier() -> None:
 @pytest.mark.skipif(not shutil.which("node"), reason="node required")
 def test_audio_box_compiles_with_the_speaker_terminal_on_the_board(tmp_path: Path) -> None:
     result, netlist, pcb = _compile("small_audio_amp_box", tmp_path)
+    assert result.ok is True, result.error
+    assert result.design_quality.get("kicad_drc_pass") is True
+    assert netlist_pcb_parity(netlist, pcb)["pass"] is True
+
+
+# ---- bench_power_adapter ------------------------------------------------------------------------
+
+
+def test_bench_adapter_3v3_output_lands_on_a_two_pin_terminal() -> None:
+    # The AMS1117 breakout's VIN, GND and VOUT are all pads on the carrier PCB, so the consumers'
+    # wires need a terminal on the carrier; V+ is 3V3 and GND is ground. (A ground wire may only meet a gnd-role pin, so this is
+    # a separate part from the signal-style speaker terminal.)
+    assert _has_wire("bench_power_adapter", ("ldo-ams1117-3v3", "VOUT"), ("terminal-block-2p-dc", "V+"))
+    assert _has_wire("bench_power_adapter", ("ldo-ams1117-3v3", "GND"), ("terminal-block-2p-dc", "GND"))
+    assert "terminal" in " ".join(_recipe("bench_power_adapter")["notes"]).lower()
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node required")
+def test_bench_adapter_compiles_with_the_output_terminal_on_the_board(tmp_path: Path) -> None:
+    result, netlist, pcb = _compile("bench_power_adapter", tmp_path)
     assert result.ok is True, result.error
     assert result.design_quality.get("kicad_drc_pass") is True
     assert netlist_pcb_parity(netlist, pcb)["pass"] is True
