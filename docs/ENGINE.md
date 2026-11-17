@@ -278,6 +278,68 @@ The [dated source workflow evidence](status/generated/source-workflow-connection
 records the real-board edit/recheck/export probe, generic package fidelity checks,
 full-suite coverage and remaining limits.
 
+## Part substitution across a declared assembly
+
+Supply an assembly and one replacement profile. HS reports which interfaces
+match, which require adaptation, and which specifications are missing. Profiles
+can describe purchased parts or salvaged parts using the same fields for identity,
+functions, dimensions, mounting points, connectors, contact functions, protocol,
+voltage, current and stored energy.
+
+The replacement inherits the original assembly slot and placement. HS checks
+each connected load against the full supply voltage range and counts unchanged
+loads in the current budget. It reports connector, pin, protocol, enclosure and
+mounting conflicts. Power and runtime comparisons use steady-state declarations
+and require a complete, compatible power path. The assessment scope excludes
+timing, drivers, negotiation, transients and mechanical tolerances.
+
+Use `GET /v1/engineering/parts/substitution/schema` for the typed request.
+`POST /v1/projects/{id}/parts/substitutions` accepts `expected_revision`,
+`specification` and optional `generate_geometry`. The assessment is stored
+alongside that revision. A profile can bind its intrinsic specifications to a
+JSON upload using `{source_id, content_hash, pointer}`. Placement and assembly
+identifiers are design choices. Source binding verifies the supplied declaration
+against the registered file.
+
+```python
+import json
+from hardware_splicer.sdk import assess_part_substitution, export_part_substitution
+
+with open("examples/part_substitution/cyberdeck-display-replacement.json") as source:
+    specification = json.load(source)
+assessment = assess_part_substitution(
+    "PROJECT_ID", project_root="/tmp/hs-projects", expected_revision=2,
+    specification=specification, generate_geometry=True,
+)["assessment"]
+bundle = export_part_substitution(
+    "PROJECT_ID", assessment["assessment_id"], project_root="/tmp/hs-projects",
+)
+```
+
+The bundle contains the report, revised assembly, BOM CSV, connection plan and
+available native geometry. Optional CAD includes nominal assembly and replacement
+STEP/STL. When a supported rectangular hole pattern needs an adapter, explicit
+thickness and edge allowance can drive a plate proposal. Reimport checks confirm
+body placement, volume and drilled hole geometry. Fastener access, plate strength,
+adapter clearance inside the enclosure and physical fit require further evidence.
+
+`GET /v1/projects/{id}/parts/substitutions/{assessment}/bundle` returns the
+hash-checked ZIP. `POST .../{assessment}/propose` opens a pending review on a
+normal project with a canonical `machineProject`. The SDK equivalent is
+`propose_part_substitution`. Acceptance retains the revised `partAssembly` as
+the baseline for the next assessment and marks inherited engineering checks for
+recheck. Missing revised port mappings must be resolved before proposal.
+Historical studies remain available for export. Registered digital cases use
+substitution studies as separate assessments. Revised native electrical checks
+require a retained board or schematic for the revised assembly.
+
+The backend MCP discovers these operations through the canonical API. The
+[example runner](../examples/part_substitution/run_declared_examples.py) compares
+three independent cyberdeck swaps, an unidentified donor and a telemetry sensor
+using fictional simulation profiles.
+The [execution record](status/generated/part-substitution-proof.json) includes
+the modeled power and runtime changes and the native export hashes.
+
 ## Exact materials and InvenTree inventory
 
 The backend compares a design's material requirements with available inventory and produces a reusable/missing/make list. It accepts a declared inventory or imports a direct assembly BOM and inventory from [InvenTree](https://github.com/inventree/InvenTree). The integration reads the upstream REST API. Local assessments work independently of an inventory server.

@@ -50,6 +50,11 @@ reviews retain their original base, and native ZIP exports include the rule
 companions. Source changes invalidate inherited verification results. See the
 [native editing workflow](docs/ENGINE.md#native-source-editing-and-splicing).
 
+**Part substitution:** compare a supplied replacement against the whole declared
+assembly. HS reports electrical and mechanical conflicts, required adapters and
+missing donor specifications, then exports the revised BOM, connection plan and
+optional nominal STEP/STL. See the [substitution workflow](docs/ENGINE.md#part-substitution-across-a-declared-assembly).
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

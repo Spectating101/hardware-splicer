@@ -247,6 +247,9 @@ def build_ai_project_context(
             "declared_conflicts",
             "source_conflicts",
             "rankedNextAction",
+            "partAssembly",
+            "partSubstitution",
+            "sourceRevisionImpact",
         )
         if snapshot.get(key) is not None
     }

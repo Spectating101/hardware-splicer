@@ -1,0 +1,50 @@
+{
+  "schema": "hardware_splicer.declared_substitution_examples.v1",
+  "evidence_class": "declared_simulation_fixture",
+  "manufacturer_specification": false,
+  "owned_inventory": [],
+  "physical_validation_performed": false,
+  "purchase_or_stock_claims": false,
+  "scope": "Bounded backend compatibility assessments of fictional declared profiles. Numeric declarations are test data, not manufacturer ratings or measured donor evidence.",
+  "inspiration": {
+    "path": "projects/cyberdeck-real-trial-20261020/digital_v1/design.json",
+    "use": "Only the abstract display/controller/keyboard/regulated-power roles; no ratings, brand compatibility, stock or ownership inherited."
+  },
+  "examples": [
+    {
+      "file": "cyberdeck-display-replacement.json",
+      "sha256": "d833c0f3f210d449d539616b78bda5eb562da2526f1d77bc604c3bb4c97da897",
+      "replace_part_id": "panel/east.42",
+      "candidate_profile_id": "replacement-panel:wide.8",
+      "expected_status": "requires_adaptation"
+    },
+    {
+      "file": "cyberdeck-controller-replacement.json",
+      "sha256": "446577f2396d98e417d1d742ecffccf4f8a6daaec00942b23ebbae2b24e28a97",
+      "replace_part_id": "board@west.17",
+      "candidate_profile_id": "replacement-computer:beta",
+      "expected_status": "requires_adaptation"
+    },
+    {
+      "file": "cyberdeck-power-replacement.json",
+      "sha256": "3f3e01830f375a6b3d596d4727b7b947b0f4e42ba26a58433c5d6f207438f30b",
+      "replace_part_id": "energy-store:alpha",
+      "candidate_profile_id": "replacement-energy:gamma",
+      "expected_status": "requires_adaptation"
+    },
+    {
+      "file": "unidentified-donor.json",
+      "sha256": "5b8729b138145ed7f6fa242f6b854e8cb118cae483eb1dfc1f7e92b9d5dd60aa",
+      "replace_part_id": "panel/east.42",
+      "candidate_profile_id": "unidentified-donor.0001",
+      "expected_status": "unresolved"
+    },
+    {
+      "file": "telemetry-sensor-replacement.json",
+      "sha256": "f81a653bb2fc2df65e31300d78922ce7cd8e3522ae20660a75dd577925eb8e72",
+      "replace_part_id": "node:south#7",
+      "candidate_profile_id": "candidate:theta.99",
+      "expected_status": "passes_declared_checks"
+    }
+  ]
+}

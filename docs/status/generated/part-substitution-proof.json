@@ -1,0 +1,637 @@
+{
+  "schema_version": "hardware_splicer.declared_part_substitution_proof.v1",
+  "scope": "Fictional simulation fixtures. Actual canonical API, SDK export and native CAD.",
+  "mcp_discovered_operations": [
+    "/v1/engineering/parts/substitution/schema",
+    "/v1/projects/{project_id}/parts/substitutions",
+    "/v1/projects/{project_id}/parts/substitutions/{assessment_id}",
+    "/v1/projects/{project_id}/parts/substitutions/{assessment_id}/bundle",
+    "/v1/projects/{project_id}/parts/substitutions/{assessment_id}/propose"
+  ],
+  "outcomes": [
+    {
+      "fixture": "cyberdeck-display-replacement.json",
+      "fixture_sha256": "d833c0f3f210d449d539616b78bda5eb562da2526f1d77bc604c3bb4c97da897",
+      "status": "requires_adaptation",
+      "target_part_id": "panel/east.42",
+      "replacement_profile_id": "replacement-panel:wide.8",
+      "native_cad_status": "generated",
+      "geometry_files": {
+        "adapter_plate.step": {
+          "sha256": "sha256:6a36330b8b965c4e46bd8734c6e118243f6f23fc54aebbc6d02a9a24ed704782",
+          "size_bytes": 44663
+        },
+        "adapter_plate.stl": {
+          "sha256": "sha256:e817b31e949678c90371237dbd80328bd1ba016d3a1aa6147891af819e525a22",
+          "size_bytes": 203884
+        },
+        "nominal_assembly.step": {
+          "sha256": "sha256:fb2a63cfcaa9443ec9a5aa1a1ccb87b97072c164a8e6c439759d16d81e2b811f",
+          "size_bytes": 111746
+        },
+        "nominal_assembly.stl": {
+          "sha256": "sha256:1b89835bcb7c46707b6010f2d20f73413f095ae672e170147de68538563e89cb",
+          "size_bytes": 206284
+        },
+        "replacement_envelope.step": {
+          "sha256": "sha256:e8fdb685cba7ae4eb1bd8327ef9a548175bc7b66d002e2d9ba8ef938540d56af",
+          "size_bytes": 15492
+        },
+        "replacement_envelope.stl": {
+          "sha256": "sha256:9a71e8ad2de3e0daead217d60a9b8b5d0fac6014997b3a75dc548471e0797e69",
+          "size_bytes": 684
+        }
+      },
+      "source_bindings_checked": 5,
+      "replacement_dimensions_mm": {
+        "before": [
+          150,
+          90,
+          12
+        ],
+        "after": [
+          160.0,
+          94.0,
+          10.0
+        ]
+      },
+      "adaptations": [
+        "mount_adapter"
+      ],
+      "unresolved": [],
+      "steady_state_power_w": {
+        "before": [
+          9.065000000000001,
+          9.435
+        ],
+        "after": [
+          8.330000000000002,
+          8.67
+        ]
+      },
+      "runtime_h": {
+        "before": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.5437201907790143,
+              2.6475455046883614
+            ]
+          }
+        ],
+        "after": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.768166089965398,
+              2.881152460984393
+            ]
+          }
+        ]
+      },
+      "export_sha256": "06798747cf720ce10cb3c8fe20b1e05746c70f95dfb6c60821ef39b2c96ffba0",
+      "accepted_digital_revision": 3,
+      "next_assessment_status": "requires_adaptation",
+      "physical_authority_granted": false,
+      "native_shapes_reimported": [
+        "adapter_plate",
+        "nominal_assembly",
+        "replacement_envelope"
+      ],
+      "adapter_plate_reimport": {
+        "bounds_mm": [
+          28.0,
+          103.0,
+          17.0,
+          186.0,
+          197.0,
+          20.0
+        ],
+        "per_solid_bounds_mm": [
+          [
+            28.0,
+            103.0,
+            17.0,
+            186.0,
+            197.0,
+            20.0
+          ]
+        ],
+        "reimported_bores_mm": [
+          [
+            34.0,
+            109.0,
+            2.7
+          ],
+          [
+            34.0,
+            191.0,
+            2.7
+          ],
+          [
+            40.0,
+            115.0,
+            2.7
+          ],
+          [
+            40.0,
+            187.0,
+            2.7
+          ],
+          [
+            176.0,
+            109.0,
+            2.7
+          ],
+          [
+            176.0,
+            191.0,
+            2.7
+          ],
+          [
+            180.0,
+            115.0,
+            2.7
+          ],
+          [
+            180.0,
+            187.0,
+            2.7
+          ]
+        ],
+        "single_printable_part_claimed": false,
+        "solid_count": 1,
+        "step_valid": true,
+        "stl_bounds_verified": true,
+        "stl_watertight": true,
+        "through_drill_volume_verified": true,
+        "volume_mm3": 44418.58673733201
+      }
+    },
+    {
+      "fixture": "cyberdeck-controller-replacement.json",
+      "fixture_sha256": "446577f2396d98e417d1d742ecffccf4f8a6daaec00942b23ebbae2b24e28a97",
+      "status": "requires_adaptation",
+      "target_part_id": "board@west.17",
+      "replacement_profile_id": "replacement-computer:beta",
+      "native_cad_status": "generated",
+      "geometry_files": {
+        "adapter_plate.step": {
+          "sha256": "sha256:094714968c32f0c4a77d9952be47fc89811ba843c15301352758d41373639308",
+          "size_bytes": 44516
+        },
+        "adapter_plate.stl": {
+          "sha256": "sha256:0adfb5a59b259596e802d72257ddd0b67b820089d27c559a60461982cb29ad38",
+          "size_bytes": 203884
+        },
+        "nominal_assembly.step": {
+          "sha256": "sha256:0c602ee1ef2f6615978cb3aa8ffe635b3ee9cea631e957bd1c466edf6ac488ed",
+          "size_bytes": 111599
+        },
+        "nominal_assembly.stl": {
+          "sha256": "sha256:ba82e369bd470405076192839ac229964902541523d7fd6898014cc145357d5c",
+          "size_bytes": 206284
+        },
+        "replacement_envelope.step": {
+          "sha256": "sha256:7d4d92812774bcf7117a1afe4fd7506476a3af2b002f8e1c2e5f1e4afc1b814b",
+          "size_bytes": 15462
+        },
+        "replacement_envelope.stl": {
+          "sha256": "sha256:5b31417a647a9b8f966dd1a2e6497ff820805017f2533cb60a5d1abfc404bc32",
+          "size_bytes": 684
+        }
+      },
+      "source_bindings_checked": 5,
+      "replacement_dimensions_mm": {
+        "before": [
+          70,
+          50,
+          18
+        ],
+        "after": [
+          82.0,
+          55.0,
+          18.0
+        ]
+      },
+      "adaptations": [
+        "mount_adapter"
+      ],
+      "unresolved": [],
+      "steady_state_power_w": {
+        "before": [
+          9.065000000000001,
+          9.435
+        ],
+        "after": [
+          10.290000000000001,
+          10.709999999999999
+        ]
+      },
+      "runtime_h": {
+        "before": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.5437201907790143,
+              2.6475455046883614
+            ]
+          }
+        ],
+        "after": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.2408963585434174,
+              2.332361516034985
+            ]
+          }
+        ]
+      },
+      "export_sha256": "97eeed45d895909ffc02d7d664380bdb6f045306ac8333801d05fd934d151e5c",
+      "accepted_digital_revision": 3,
+      "next_assessment_status": "requires_adaptation",
+      "physical_authority_granted": false,
+      "native_shapes_reimported": [
+        "adapter_plate",
+        "nominal_assembly",
+        "replacement_envelope"
+      ],
+      "adapter_plate_reimport": {
+        "bounds_mm": [
+          28.0,
+          28.0,
+          7.0,
+          112.0,
+          85.0,
+          10.0
+        ],
+        "per_solid_bounds_mm": [
+          [
+            28.0,
+            28.0,
+            7.0,
+            112.0,
+            85.0,
+            10.0
+          ]
+        ],
+        "reimported_bores_mm": [
+          [
+            34.0,
+            34.0,
+            2.7
+          ],
+          [
+            34.0,
+            76.0,
+            2.7
+          ],
+          [
+            40.0,
+            40.0,
+            2.7
+          ],
+          [
+            40.0,
+            79.0,
+            2.7
+          ],
+          [
+            96.0,
+            34.0,
+            2.7
+          ],
+          [
+            96.0,
+            76.0,
+            2.7
+          ],
+          [
+            106.0,
+            40.0,
+            2.7
+          ],
+          [
+            106.0,
+            79.0,
+            2.7
+          ]
+        ],
+        "single_printable_part_claimed": false,
+        "solid_count": 1,
+        "step_valid": true,
+        "stl_bounds_verified": true,
+        "stl_watertight": true,
+        "through_drill_volume_verified": true,
+        "volume_mm3": 14226.586737331978
+      }
+    },
+    {
+      "fixture": "cyberdeck-power-replacement.json",
+      "fixture_sha256": "3f3e01830f375a6b3d596d4727b7b947b0f4e42ba26a58433c5d6f207438f30b",
+      "status": "requires_adaptation",
+      "target_part_id": "energy-store:alpha",
+      "replacement_profile_id": "replacement-energy:gamma",
+      "native_cad_status": "generated",
+      "geometry_files": {
+        "adapter_plate.step": {
+          "sha256": "sha256:c171e9529993c340add20a0949b6209d1f6c32db3fa17e9606cc37c5d93f922c",
+          "size_bytes": 44548
+        },
+        "adapter_plate.stl": {
+          "sha256": "sha256:3a8fc3cad9dfd274c7f1b3b0af2cf4f538d5c4768e7adfc791188a3ecd42f999",
+          "size_bytes": 203884
+        },
+        "nominal_assembly.step": {
+          "sha256": "sha256:cb984dfcabc1d603f127f4e5cceca1c41dbb2a59896b76b6754b8be83fa79256",
+          "size_bytes": 111635
+        },
+        "nominal_assembly.stl": {
+          "sha256": "sha256:42d5be608d66a15c84d9a2bc9c0d4ab4a8b6f634d426023b3885dc87e9dd0094",
+          "size_bytes": 206284
+        },
+        "replacement_envelope.step": {
+          "sha256": "sha256:9be13ddd6df615c3d782b5b8f8fe5ef424c50b03e2cdb96de867a03195e1e513",
+          "size_bytes": 15466
+        },
+        "replacement_envelope.stl": {
+          "sha256": "sha256:2d6b04df3c7150c646a77cfaa8b54c1e3323783e5053c64237c17a1b35e11957",
+          "size_bytes": 684
+        }
+      },
+      "source_bindings_checked": 5,
+      "replacement_dimensions_mm": {
+        "before": [
+          90,
+          40,
+          25
+        ],
+        "after": [
+          100.0,
+          45.0,
+          25.0
+        ]
+      },
+      "adaptations": [
+        "mount_adapter"
+      ],
+      "unresolved": [],
+      "steady_state_power_w": {
+        "before": [
+          9.065000000000001,
+          9.435
+        ],
+        "after": [
+          9.1575,
+          9.3425
+        ]
+      },
+      "runtime_h": {
+        "before": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.5437201907790143,
+              2.6475455046883614
+            ]
+          }
+        ],
+        "after": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              4.110248862724111,
+              4.193284193284193
+            ]
+          }
+        ]
+      },
+      "export_sha256": "68ec7a37e3b925796a84c635b938387cf85c0896bfd006510cc5e0e516ec2488",
+      "accepted_digital_revision": 3,
+      "next_assessment_status": "requires_adaptation",
+      "physical_authority_granted": false,
+      "native_shapes_reimported": [
+        "adapter_plate",
+        "nominal_assembly",
+        "replacement_envelope"
+      ],
+      "adapter_plate_reimport": {
+        "bounds_mm": [
+          148.0,
+          28.0,
+          5.0,
+          250.0,
+          75.0,
+          8.0
+        ],
+        "per_solid_bounds_mm": [
+          [
+            148.0,
+            28.0,
+            5.0,
+            250.0,
+            75.0,
+            8.0
+          ]
+        ],
+        "reimported_bores_mm": [
+          [
+            154.0,
+            34.0,
+            2.7
+          ],
+          [
+            154.0,
+            66.0,
+            2.7
+          ],
+          [
+            160.0,
+            40.0,
+            2.7
+          ],
+          [
+            160.0,
+            69.0,
+            2.7
+          ],
+          [
+            236.0,
+            34.0,
+            2.7
+          ],
+          [
+            236.0,
+            66.0,
+            2.7
+          ],
+          [
+            244.0,
+            40.0,
+            2.7
+          ],
+          [
+            244.0,
+            69.0,
+            2.7
+          ]
+        ],
+        "single_printable_part_claimed": false,
+        "solid_count": 1,
+        "step_valid": true,
+        "stl_bounds_verified": true,
+        "stl_watertight": true,
+        "through_drill_volume_verified": true,
+        "volume_mm3": 14244.586737331978
+      }
+    },
+    {
+      "fixture": "unidentified-donor.json",
+      "fixture_sha256": "5b8729b138145ed7f6fa242f6b854e8cb118cae483eb1dfc1f7e92b9d5dd60aa",
+      "status": "unresolved",
+      "target_part_id": "panel/east.42",
+      "replacement_profile_id": "unidentified-donor.0001",
+      "native_cad_status": "unknown",
+      "geometry_files": {},
+      "source_bindings_checked": 5,
+      "replacement_dimensions_mm": {
+        "before": [
+          150,
+          90,
+          12
+        ],
+        "after": null
+      },
+      "adaptations": [],
+      "unresolved": [
+        "connector_unknown",
+        "mechanical_envelope_unknown",
+        "mount_interface_unknown",
+        "pin_mapping_unknown",
+        "power_direction_unknown",
+        "protocol_unknown",
+        "replacement_identity_unknown",
+        "runtime_unknown",
+        "shared_supply_budget_unknown",
+        "signal_direction"
+      ],
+      "steady_state_power_w": {
+        "before": [
+          9.065000000000001,
+          9.435
+        ],
+        "after": null
+      },
+      "runtime_h": {
+        "before": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": [
+              2.5437201907790143,
+              2.6475455046883614
+            ]
+          }
+        ],
+        "after": [
+          {
+            "part_id": "energy-store:alpha",
+            "runtime_h": null
+          }
+        ]
+      },
+      "export_sha256": "0bd57f6adeac1cd35eb92e1c1dd317357bcef753df313eca383d047467f5b45b",
+      "accepted_digital_revision": null,
+      "next_assessment_status": null,
+      "physical_authority_granted": false,
+      "native_shapes_reimported": []
+    },
+    {
+      "fixture": "telemetry-sensor-replacement.json",
+      "fixture_sha256": "f81a653bb2fc2df65e31300d78922ce7cd8e3522ae20660a75dd577925eb8e72",
+      "status": "passes_declared_checks",
+      "target_part_id": "node:south#7",
+      "replacement_profile_id": "candidate:theta.99",
+      "native_cad_status": "generated",
+      "geometry_files": {
+        "nominal_assembly.step": {
+          "sha256": "sha256:8cc01fc67dd9f3eee7573d90079667589ea90076eda0befcd8ba334864f5ec86",
+          "size_bytes": 48253
+        },
+        "nominal_assembly.stl": {
+          "sha256": "sha256:bb67bbd8bdc0be2dc27418ca18db67b0cdf57522867f127532e2b43e656afe0a",
+          "size_bytes": 1884
+        },
+        "replacement_envelope.step": {
+          "sha256": "sha256:ae408c12922796e99564d46a4a88d751fb5eb09158eaeccdbf89628e1e3d79ad",
+          "size_bytes": 15415
+        },
+        "replacement_envelope.stl": {
+          "sha256": "sha256:354a180949683c2396c8df2497cb763677a09bb95aa5d7f9783c893ad161f90a",
+          "size_bytes": 684
+        }
+      },
+      "source_bindings_checked": 4,
+      "replacement_dimensions_mm": {
+        "before": [
+          30,
+          20,
+          8
+        ],
+        "after": [
+          30.0,
+          20.0,
+          8.0
+        ]
+      },
+      "adaptations": [],
+      "unresolved": [],
+      "steady_state_power_w": {
+        "before": [
+          2.205,
+          2.2949999999999995
+        ],
+        "after": [
+          2.107,
+          2.1929999999999996
+        ]
+      },
+      "runtime_h": {
+        "before": [],
+        "after": []
+      },
+      "export_sha256": "3f6f6bd8d9fc35d132925a705ecf833197971dd68d1a7d2870ecde87fea5ae51",
+      "accepted_digital_revision": 3,
+      "next_assessment_status": "passes_declared_checks",
+      "physical_authority_granted": false,
+      "native_shapes_reimported": [
+        "nominal_assembly",
+        "replacement_envelope"
+      ]
+    }
+  ],
+  "physical_validation_performed": false,
+  "verification": {
+    "canonical_api_cases": 5,
+    "sdk_export_matched_http_bytes": true,
+    "assessment_bound_to_uploaded_fixture_profiles": true,
+    "successive_assessments_from_accepted_baseline": 4,
+    "full_evidence_sha256": "1a9d138e812fa3da4892daee55f73bdc79fbaf281aaadd90d4c8f62522311ea2",
+    "test_runs": {
+      "substitution_and_native_geometry": {
+        "passed": 82,
+        "junit_sha256": "42a94de96266fc08bd1f3a838d462a6bdf0eba3a43c1bc1db7b0d412c1882ed7"
+      },
+      "project_review_ai_and_api_regressions": {
+        "passed": 91,
+        "junit_sha256": "8c75b080fe5f01df293217fcb9381dc97bdc3d647f7549f1bef66189102b1d44"
+      },
+      "digital_engine_and_archived_study_regressions": {
+        "passed": 70,
+        "junit_sha256": "f84375e4031aa8ba4746dc0add6b352ae01ea39d9363c3ba1807afb87145cb1a"
+      }
+    },
+    "unique_tests_passed": 224,
+    "scope": "Focused substitution, native CAD, API, review and digital engine regression tests."
+  }
+}

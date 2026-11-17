@@ -1,0 +1,335 @@
+{
+  "parts": [
+    {
+      "part_id": "rail/42",
+      "name": "DECLARED SIMULATION FIXTURE: regulated telemetry supply",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-REGULATED-TELEMETRY-SUPPLY",
+      "functions": [
+        "regulated telemetry supply"
+      ],
+      "dimensions_mm": [
+        40,
+        30,
+        16
+      ],
+      "position_mm": [
+        5,
+        5,
+        5
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            36,
+            4
+          ],
+          [
+            4,
+            26
+          ],
+          [
+            36,
+            26
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "output",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.9,
+            5.1
+          ],
+          "current_a": 0.8
+        }
+      ],
+      "shared_output_limit_a": 0.8
+    },
+    {
+      "part_id": "node:south#7",
+      "name": "DECLARED SIMULATION FIXTURE: temperature measurement",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-TEMPERATURE-MEASUREMENT",
+      "functions": [
+        "temperature measurement"
+      ],
+      "dimensions_mm": [
+        30,
+        20,
+        8
+      ],
+      "position_mm": [
+        60,
+        5,
+        5
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            26,
+            4
+          ],
+          [
+            4,
+            16
+          ],
+          [
+            26,
+            16
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "input",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.75,
+            5.25
+          ],
+          "current_a": 0.1
+        },
+        {
+          "port_id": "serial",
+          "kind": "signal",
+          "direction": "output",
+          "connector": "SIM-SERIAL-2",
+          "pin_functions": {
+            "TX": "DATA",
+            "R": "GND"
+          },
+          "protocol": "fixture-uart-1",
+          "voltage_range_v": [
+            0,
+            3.3
+          ]
+        }
+      ]
+    },
+    {
+      "part_id": "logger@west.9",
+      "name": "DECLARED SIMULATION FIXTURE: data logging",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-DATA-LOGGING",
+      "functions": [
+        "data logging"
+      ],
+      "dimensions_mm": [
+        45,
+        30,
+        12
+      ],
+      "position_mm": [
+        10,
+        50,
+        5
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            41,
+            4
+          ],
+          [
+            4,
+            26
+          ],
+          [
+            41,
+            26
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "input",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.75,
+            5.25
+          ],
+          "current_a": 0.35
+        },
+        {
+          "port_id": "serial",
+          "kind": "signal",
+          "direction": "input",
+          "connector": "SIM-SERIAL-2",
+          "pin_functions": {
+            "TX": "DATA",
+            "R": "GND"
+          },
+          "protocol": "fixture-uart-1",
+          "voltage_range_v": [
+            0,
+            3.6
+          ]
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "supply-sensor",
+      "from": {
+        "part_id": "rail/42",
+        "port_id": "dc"
+      },
+      "to": {
+        "part_id": "node:south#7",
+        "port_id": "dc"
+      }
+    },
+    {
+      "connection_id": "supply-logger",
+      "from": {
+        "part_id": "rail/42",
+        "port_id": "dc"
+      },
+      "to": {
+        "part_id": "logger@west.9",
+        "port_id": "dc"
+      }
+    },
+    {
+      "connection_id": "measurement-stream",
+      "from": {
+        "part_id": "node:south#7",
+        "port_id": "serial"
+      },
+      "to": {
+        "part_id": "logger@west.9",
+        "port_id": "serial"
+      }
+    }
+  ],
+  "replace_part_id": "node:south#7",
+  "candidate": {
+    "part_id": "candidate:theta.99",
+    "name": "DECLARED SIMULATION FIXTURE: lower-current telemetry sensor",
+    "manufacturer": "Fictional test declarations; not a product vendor",
+    "mpn": "SIM-SENSOR-B",
+    "functions": [
+      "temperature measurement"
+    ],
+    "dimensions_mm": [
+      30,
+      20,
+      8
+    ],
+    "mount": {
+      "holes_mm": [
+        [
+          4,
+          4
+        ],
+        [
+          26,
+          4
+        ],
+        [
+          4,
+          16
+        ],
+        [
+          26,
+          16
+        ]
+      ],
+      "hole_diameter_mm": 2.7,
+      "plane_z_mm": 0,
+      "fastener": "M2.5 declared fixture"
+    },
+    "ports": [
+      {
+        "port_id": "dc",
+        "kind": "power",
+        "direction": "input",
+        "connector": "SIM-DC-2",
+        "pin_functions": {
+          "1": "V+",
+          "2": "GND"
+        },
+        "voltage_range_v": [
+          4.75,
+          5.25
+        ],
+        "current_a": 0.08
+      },
+      {
+        "port_id": "serial",
+        "kind": "signal",
+        "direction": "output",
+        "connector": "SIM-SERIAL-2",
+        "pin_functions": {
+          "TX": "DATA",
+          "R": "GND"
+        },
+        "protocol": "fixture-uart-1",
+        "voltage_range_v": [
+          0,
+          3.3
+        ]
+      }
+    ]
+  },
+  "enclosure": {
+    "minimum_mm": [
+      0,
+      0,
+      0
+    ],
+    "maximum_mm": [
+      110,
+      100,
+      35
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "declared-normal",
+      "current_overrides": []
+    }
+  ]
+}

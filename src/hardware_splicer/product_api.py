@@ -126,6 +126,8 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_donor_router())
     app.include_router(create_parts_lookup_router())
     app.include_router(create_project_parts_router(resolved_store))
+    from .project_part_substitutions_api import create_project_part_substitutions_router
+    app.include_router(create_project_part_substitutions_router(resolved_store))
     app.include_router(create_project_materials_router(resolved_store))
     app.include_router(create_project_wiring_router(resolved_store))
     app.include_router(create_project_candidates_router(resolved_store))

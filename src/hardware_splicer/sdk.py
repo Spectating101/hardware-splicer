@@ -86,6 +86,34 @@ def assess_materials(project_id: str, *, expected_revision: int, requirements, i
                                     requirements=requirements, inventory=inventory)
 
 
+def assess_part_substitution(project_id: str, *, expected_revision: int, specification,
+                             generate_geometry: bool = False, project_root=None):
+    """Compare a replacement in its complete declared assembly; optionally export nominal CAD."""
+    from .project_part_substitutions import assess_project_substitution
+    from .project_store import ProjectStore
+
+    return assess_project_substitution(ProjectStore(project_root), project_id,
+        expected_revision=expected_revision, specification=specification, generate_geometry=generate_geometry)
+
+
+def propose_part_substitution(project_id: str, assessment_id: str, *, expected_revision: int,
+                              author: str = 'sdk', note: str = '', project_root=None):
+    """Open a pending review of the assessed declared assembly; no design is auto-accepted."""
+    from .project_part_substitutions import propose_project_substitution
+    from .project_store import ProjectStore
+
+    return propose_project_substitution(ProjectStore(project_root), project_id, assessment_id,
+        expected_revision=expected_revision, author=author, note=note)
+
+
+def export_part_substitution(project_id: str, assessment_id: str, *, project_root=None) -> bytes:
+    """Download the verified report, revised BOM/connections and generated nominal CAD."""
+    from .project_part_substitutions import export_substitution_bundle
+    from .project_store import ProjectStore
+
+    return export_substitution_bundle(ProjectStore(project_root), project_id, assessment_id)
+
+
 def import_inventree_materials(project_id: str, *, expected_revision: int, assembly_part_id: int, build_quantity: int = 1, project_root=None):
     """Read a direct InvenTree BOM and its inventory into this project revision."""
     from .project_materials import import_inventree_materials as import_materials

@@ -490,6 +490,8 @@ def _execute_action(
                     "checks": checks,
                 }
             else:
+                if snapshot.get('partSubstitution'):
+                    raise ValueError('The substituted assembly has no regenerated native electrical design to check; original-upload inspection remains separate.')
                 # Legacy projects without a native pin retain the original
                 # uploaded-source behavior, still bound to the pinned snapshot.
                 checked = analyze_registered_project_bundle(

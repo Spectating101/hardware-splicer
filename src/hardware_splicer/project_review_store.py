@@ -18,7 +18,7 @@ from typing import Any, Dict, Mapping
 
 from .machine_project import MachineProject
 from .machine_project_diff import diff_machine_projects
-from .project_store import ProjectNotFound, ProjectStore, RevisionConflict, validate_project_id
+from .project_store import CorruptProject, ProjectNotFound, ProjectStore, RevisionConflict, validate_project_id
 
 PROJECT_REVIEW_SCHEMA = "hardware_splicer.project_review.v1"
 PROJECT_REVIEW_EVENT_SCHEMA = "hardware_splicer.project_review_event.v1"
@@ -436,6 +436,12 @@ class ProjectReviewStore:
         try:
             validate_candidate_review_artifacts(self.project_store, project_id, review_id)
         except CandidateError as exc:
+            raise ReviewConflict(str(exc)) from exc
+        from .project_part_substitutions import validate_substitution_review
+        try:
+            proposal = _read_json(self._review_dir(project_id, review_id) / 'proposal.json')
+            validate_substitution_review(self.project_store, project_id, proposal)
+        except (ValueError, ProjectNotFound, CorruptProject) as exc:
             raise ReviewConflict(str(exc)) from exc
 
     def decide(
