@@ -358,13 +358,15 @@ class JobStore:
 
 
 class JobBackend:
-    def __init__(self, store: JobStore, *, worker_count: int = 1, poll_interval_s: float = 0.2):
+    def __init__(self, store: JobStore, *, worker_count: int = 1, poll_interval_s: float = 0.2,
+                 requeue_interrupted_on_start: bool | None = None):
         self.store = store
         self.worker_count = max(0, int(worker_count))
         self.poll_interval_s = max(0.05, float(poll_interval_s))
         self._stop = threading.Event()
         self._threads: List[threading.Thread] = []
         self._start_lock = threading.Lock()
+        self._requeue_interrupted_on_start = requeue_interrupted_on_start
 
     @classmethod
     def from_env(cls) -> "JobBackend":
@@ -374,13 +376,18 @@ class JobBackend:
         poll_interval_s = float(os.getenv("HARDWARE_SPLICER_JOB_POLL_INTERVAL_S", "0.2"))
         store = JobStore(db_path)
         requeue = os.getenv("HARDWARE_SPLICER_REQUEUE_INTERRUPTED_JOBS", "").lower() in {"1", "true", "yes"}
-        store.recover_interrupted_running(requeue=requeue)
-        return cls(store, worker_count=worker_count, poll_interval_s=poll_interval_s)
+        return cls(store, worker_count=worker_count, poll_interval_s=poll_interval_s,
+                   requeue_interrupted_on_start=requeue)
 
     def start(self) -> None:
         if self.worker_count <= 0:
             return
         with self._start_lock:
+            # App discovery and worker-free clients can share a database with
+            # an active worker. Recover only when this backend assumes ownership.
+            if self._requeue_interrupted_on_start is not None:
+                self.store.recover_interrupted_running(requeue=self._requeue_interrupted_on_start)
+                self._requeue_interrupted_on_start = None
             self._stop.clear()
             live = [thread for thread in self._threads if thread.is_alive()]
             self._threads = live

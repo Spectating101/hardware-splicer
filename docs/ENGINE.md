@@ -136,11 +136,12 @@ The digital study engine runs directly from Python or the CLI. It uses the exist
 | --- | --- |
 | `hs3g-b` (default) | Existing drone assembly, native PyBullet dynamics, payload/gust/mass studies |
 | `fielddeck-7` | Cyberdeck enclosure, checked mounts and fastener/tool envelopes, sourced display geometry, power/runtime/structural sensitivity studies |
+| `fielddeck-5` | Five-inch display revision with retained source geometry, ribbon clearance and workload/runtime studies |
 | `ender3-penplotter` | Published classic Ender-3 reference donor, parametric pen and hotend-parking mounts, emitted G-code and drawing-trajectory checks |
 
-Case selection is explicit. These cases do not identify arbitrary junk or automatically design every kind of hardware. The plotter's donor inventory is a documented virtual reference; the user's owned inventory remains empty. The two new cases execute fresh native scripts before publishing revision 1. Later revisions use the existing cancellable job queue and compare-and-swap publication.
+The plotter uses a documented reference donor inventory. The cyberdeck and plotter cases execute fresh native scripts before publishing revision 1. Later revisions use the cancellable job queue and compare-and-swap publication.
 
-Install the repository and native dependencies with `python -m pip install -e '.[drone-sim]'`. In this workspace the base environment can also use the native interpreter selected by `HARDWARE_SPLICER_DIGITAL_PYTHON`, or the prepared project-cache native environment. No model-service key or physical parts are required.
+Install from a repository checkout with `python -m pip install -e '.[digital]'` for the cyberdeck and plotter. Use `python -m pip install -e '.[drone-sim]'` for the drone case. `HARDWARE_SPLICER_DIGITAL_PYTHON` can select a separate native interpreter. See the [backend install and service setup](PACKAGING_AND_DEPLOYMENT.md#current-headless-backend).
 
 ```python
 from hardware_splicer.sdk import digital_engine

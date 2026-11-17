@@ -108,7 +108,11 @@ def test_erc_failure_is_preserved_in_saved_intake_authority(tmp_path, monkeypatc
     assert authority["dashboard"]["build_ready"] is False
     assert result["production_release_metrics"]["production_ready"] is False
     assert "circuit_release" in result["production_release_metrics"]["evidence_gap_ids"]
-    assert any("KiCad ERC failed with 4 error(s)" in blocker for blocker in authority["blockers"])
+    circuit = next(row for row in authority["checks"] if row["id"] == "circuit_build_ready")
+    assert circuit["passed"] is False
+    assert "KiCad ERC failed with 4 error(s)" in circuit["message"]
+    assert circuit["message"] in authority["blockers"] + authority["next_actions"]
     saved = json.loads((tmp_path / "plant" / "PROJECT_AUTHORITY.json").read_text())
     assert saved["claimable"] is False
     assert saved["release_decision"] == authority["release_decision"]
+    assert circuit in saved["checks"]

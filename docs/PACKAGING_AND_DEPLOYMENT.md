@@ -1,12 +1,61 @@
-# Packaging & deployment — Splice Agent v1.0
-
-**Purpose:** Concrete plan for **packaging** (installable product) and **deployment** (how it runs in production-ish settings).
-
-**Scope:** `Hardware-Splicer Splice Agent v1.0` only — not full monorepo (Circuit-AI UI, mecha-splicer, CadQuery).
+# Packaging and deployment
 
 **Related:** [`RELEASE_V1.md`](RELEASE_V1.md) · [`SETUP.md`](SETUP.md) · [`MCP.md`](MCP.md) · [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md)
 
+## Current headless backend
+
+Keep the source checkout with the deployment. It contains the registered study
+inputs, including CAD reference files, licenses, verification scripts and device
+profiles. Install the Python package into a dedicated environment from that checkout.
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-splice-v1.txt -e '.[digital,backend-mcp,keyboard-splice]'
+.venv/bin/python -m pip check
+.venv/bin/hs-doctor
+.venv/bin/hs-digital cases
+```
+
+The `digital` extra provides the native cyberdeck and plotter runtime. The
+`drone-sim` extra adds PyBullet for the HS-3G study. Where the pinned PyBullet
+version requires a source build, `HARDWARE_SPLICER_DIGITAL_PYTHON` can point to a
+prepared native environment. PCB compilation uses `kicad-cli` and the Node-based
+graph compiler. Install its dependencies with
+`npm --prefix apps/circuit-ai/circuit-ai-frontend ci` when deploying that capability.
+The native SPI workshop verifier also needs KiCad's `pcbnew` Python bindings.
+Run `scripts/hs_workshop_operator.py` with the host Python that can import them.
+The canonical MCP gateway runs locally over stdio with `.venv/bin/hs-backend-mcp`.
+
+For the optional HTTP process, give it a persistent state directory owned by the
+service account. Use one job worker process per SQLite database. Set
+`HARDWARE_SPLICER_JOB_WORKERS=0` on additional HTTP or MCP processes sharing the
+database when a separate process owns job execution. Use the same project root
+and job database for CLI inspection. Stop the worker before copying its state for
+backup. Keep the configured state paths when replacing the source checkout.
+
+```bash
+export HS_STATE_DIR="$HOME/.local/state/hardware-splicer"
+mkdir -p -- "$HS_STATE_DIR"
+export HARDWARE_SPLICER_STATE_DIR="$HS_STATE_DIR"
+export HARDWARE_SPLICER_PROJECT_ROOT="$HS_STATE_DIR/projects"
+export HARDWARE_SPLICER_OUTPUT_ROOT="$HS_STATE_DIR/builds"
+export HARDWARE_SPLICER_TMP_ROOT="$HS_STATE_DIR/scratch"
+export HARDWARE_SPLICER_JOB_WORKERS=1
+.venv/bin/hs-serve --host 127.0.0.1 --port 8787
+```
+
+Check `GET /health` for the service version and `GET /v1/digital/cases` for the
+registered source inputs. To check the native runtime, create a `fielddeck-5` or
+`ender3-penplotter` project and use `hs-digital audit PROJECT_ID --native`.
+Treat the HTTP service as a trusted operator interface. Keep its listener private
+and use an authenticated proxy for network access. Digital study verdicts cover
+the declared model and requirements. Physical verification requires bench evidence.
+
 ---
+
+## Splice Agent v1.0 packaging reference
+
+The following sections describe the original slim installer and release targets.
 
 ## 1. Recommendation (gun to head)
 

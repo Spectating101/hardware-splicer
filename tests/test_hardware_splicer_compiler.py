@@ -8,7 +8,7 @@ import pytest
 
 from hardware_splicer import HardwareCompileSpec, compile_hardware_bundle
 from hardware_splicer.api import create_app
-from hardware_splicer.jobs import JobStore
+from hardware_splicer.jobs import JobBackend, JobStore
 
 
 def _minimal_spec(use_3d_splicer: bool = False) -> HardwareCompileSpec:
@@ -364,3 +364,30 @@ def test_job_store_recovers_interrupted_running_jobs(tmp_path):
     assert job is not None
     assert job.status == "failed"
     assert job.error["type"] == "WorkerInterrupted"
+
+
+def test_job_backend_discovery_leaves_running_attempt_until_worker_start(tmp_path, monkeypatch):
+    monkeypatch.setenv("HARDWARE_SPLICER_JOB_DB", str(tmp_path / "jobs.sqlite3"))
+    monkeypatch.setenv("HARDWARE_SPLICER_REQUEUE_INTERRUPTED_JOBS", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_JOB_WORKERS", "0")
+    reader = JobBackend.from_env()
+    reader.store.create_job(
+        job_id="running-job", request_id="running-job", project_name="restart",
+        output_dir=str(tmp_path / "out"), spec={}, options={},
+    )
+    claimed = reader.store.claim_next()
+    assert claimed is not None and claimed.attempt_id
+
+    monkeypatch.setenv("HARDWARE_SPLICER_JOB_WORKERS", "1")
+    worker = JobBackend.from_env()
+    reader.start()
+    assert worker.store.get_job(claimed.job_id) == claimed
+
+    try:
+        worker.start()
+        recovered = reader.store.get_job(claimed.job_id)
+        assert recovered.status == "failed"
+        assert recovered.attempt_id is None
+        assert recovered.error["type"] == "WorkerInterrupted"
+    finally:
+        worker.stop()

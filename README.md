@@ -36,12 +36,15 @@ fabrication approval.
 **Headless digital engine:** `hs-digital` and `hardware_splicer.sdk.digital_engine`
 create/resume studies, change requirements, execute native CAD/physics jobs,
 compare revisions, audit their evidence and export verified packages. Registered
-cases include the HS-3G-B drone, [Fielddeck 7 cyberdeck](projects/cyberdeck-real-trial-20261020/digital_v1/README.md)
+cases include the HS-3G-B drone, [Fielddeck 7 cyberdeck](projects/cyberdeck-real-trial-20261020/digital_v1/README.md),
+[Fielddeck 5 display revision](docs/status/generated/fielddeck-5-registered-20261118.json)
 and [Ender-3 reference-donor pen plotter](projects/ender3-penplotter-digital/README.md).
 `hs-digital cases` lists their supported requirements. Failed
 requirements retain their artifacts. The current focus is the backend engine;
 frontend work is deferred. See the [engine guide](docs/ENGINE.md#headless-digital-engine).
 No HTTP server, browser, physical parts or model-service key is required.
+See the [backend install and deployment guide](docs/PACKAGING_AND_DEPLOYMENT.md#current-headless-backend)
+for the native dependencies, optional HTTP service and persistent state setup.
 
 **Native source splicing:** uploaded KiCad boards can become editable project
 revisions with their original footprints, pad/net identities and supplied project
