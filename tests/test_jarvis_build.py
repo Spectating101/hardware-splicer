@@ -9,9 +9,7 @@ import pytest
 from hardware_splicer.jarvis_build import _open_compose_llm_first, jarvis_build
 
 
-def test_jarvis_build_open_without_qwen(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, assume_clean_kicad_erc: None
-) -> None:
+def test_jarvis_build_open_without_qwen(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
     monkeypatch.delenv("QWEN_API_KEY", raising=False)
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_COMPOSE", "0")

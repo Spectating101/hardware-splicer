@@ -110,7 +110,7 @@ def test_prove_module_ids() -> None:
     assert proof["wires"] >= 3
 
 
-def test_splice_build_intake_scratch_brief(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+def test_splice_build_intake_scratch_brief(tmp_path: Path) -> None:
     intake = load_project_intake(ROOT / "examples" / "intakes" / "scratch_compose_brief.json")
     result = splice_and_build_from_intake(intake, out_dir=tmp_path, export_gerber=False)
     assert result.get("ok") is True

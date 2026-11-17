@@ -45,7 +45,7 @@ def test_kicad_netlist_ingest_places_all_components(tmp_path: Path) -> None:
     assert pcb.read_text(encoding="utf-8").count("(footprint") == len(netlist.components)
 
 
-def test_scratch_compose_targets_netlist_ir(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+def test_scratch_compose_targets_netlist_ir(tmp_path: Path) -> None:
     """NL scratch path emits circuit_netlist.json (gate 2.5)."""
     scratch = compile_scratch_build(
         module_ids=["usb-power-5v", "esp32-devkit", "bme280"],

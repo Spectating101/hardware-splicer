@@ -26,7 +26,7 @@ FULL_3D_RUNTIME = importlib.util.find_spec("cadquery") is not None
         ("examples/intakes/plant_watering_tier5_brief.json", 9),
     ],
 )
-def test_plant_release_briefs_hit_nine_of_nine_gates(tmp_path, brief_rel, expected_gates, assume_clean_kicad_erc):
+def test_plant_release_briefs_hit_nine_of_nine_gates(tmp_path, brief_rel, expected_gates):
     # Exercise downstream evidence scoring with an explicitly clean circuit receipt.
     # Native failures are covered by test_scenario_circuit_release_gate.py.
     intake = load_project_intake(ROOT / brief_rel)
@@ -50,7 +50,7 @@ def test_annotated_vision_brief_closes_more_mechanical_evidence_than_brief_only(
     assert annotated_plan["evidence_extraction_report"]["accepted_count"] >= 3
 
 
-def test_splice_and_build_emits_compiler_evidence_patch(tmp_path, assume_clean_kicad_erc):
+def test_splice_and_build_emits_compiler_evidence_patch(tmp_path):
     intake = load_project_intake(ROOT / "examples/intakes/plant_watering_brief.json")
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
     assert result.get("ok")
