@@ -1,0 +1,8 @@
+# Generated native/mesh data retain exact bytes; inspect their generators and receipts.
+reference/*.step -text -diff -whitespace
+reference/*.glb -text -diff
+reference/*.csv -text -diff
+reference/model.json -diff
+reference/*.py -diff
+reference/VIEWER.html -diff -whitespace
+vendor/*.js -diff -whitespace

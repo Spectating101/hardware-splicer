@@ -1,0 +1,49 @@
+{
+  "schema": "hardware_splicer.hs3g_digital_contract.v1",
+  "objective": "Complete a digital-only HS-3G-B 3D representative and runnable rigid-body flight simulation.",
+  "physics_hz": 240,
+  "control_hz": 60,
+  "duration_s": 28,
+  "render_hz": 6,
+  "gravity_m_s2": 9.80665,
+  "assumptions": {
+    "motor_time_constant_s": 0.035,
+    "yaw_torque_per_thrust_m": 0.006,
+    "linear_drag_n_per_m_s": 0.12,
+    "position_kp": [4.0, 4.0, 6.0],
+    "position_kd": [3.8, 3.8, 4.5],
+    "position_ki": [0.9, 0.9, 1.2],
+    "attitude_frequency_rad_s": 18.0,
+    "attitude_damping_ratio": 0.85,
+    "max_horizontal_acceleration_m_s2": 4.0,
+    "gust_force_n": [0.12, -0.08, 0.0],
+    "gust_interval_s": [16.0, 18.0]
+  },
+  "scenarios": [
+    {"id": "nominal", "extra_mass_g": 0.0, "motor_failure": null, "expected": "controlled_landing"},
+    {"id": "mass_plus_5g", "extra_mass_g": 5.0, "motor_failure": null, "expected": "controlled_landing"},
+    {"id": "motor_failure", "duration_s": 12, "extra_mass_g": 0.0, "motor_failure": {"index": 0, "at_s": 8.0}, "expected": "loss_of_control_detected"}
+  ],
+  "acceptance": {
+    "tracking_rms_m": 0.10,
+    "hover_error_m": 0.06,
+    "gust_recovery_error_m": 0.07,
+    "landing_speed_m_s": 0.15,
+    "force_balance_rms_m_s2": 0.03,
+    "max_tracking_tilt_deg": 35.0
+  },
+  "scope_limits": [
+    "Parameterized representative, not a physically calibrated digital twin.",
+    "Native CAD frame; simplified component, propeller and collision geometry.",
+    "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+    "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+    "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+    "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+    "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+  ],
+  "sources": [
+    "https://github.com/bulletphysics/bullet3/blob/master/docs/pybullet_quickstart_guide/PyBulletQuickstartGuide.md.html",
+    "https://mathweb.ucsd.edu/~mleok/pdf/LeLeMc2010_quadrotor.pdf",
+    "https://www.ligpower.com/product/f1404-fpv-motor.html"
+  ]
+}

@@ -31,9 +31,9 @@ def _result(out:Path)->dict:
 
 def test_registered_routes_are_vetted_existing_HS_components():
     rows=op.list_cases()
-    assert {r["case_id"] for r in rows} == {op.SPI_ID,op.RC_ID,op.DRONE_ID}
+    assert {r["case_id"] for r in rows} == {op.SPI_ID,op.RC_ID,op.DRONE_ID,op.DIGITAL_ID}
     assert {r["route"] for r in rows} == {
-        "reference_native_verifier","existing_splice_intake","native_drone_design_iteration"}
+        "reference_native_verifier","existing_splice_intake","native_drone_design_iteration","native_drone_digital_simulation"}
     assert all((ROOT/r["source"]).exists() for r in rows)
 
 

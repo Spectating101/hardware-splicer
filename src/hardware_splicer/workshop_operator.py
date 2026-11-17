@@ -12,6 +12,8 @@ The deliberately different registered routes are:
   catalog compiler when the actual donor architecture remains unresolved.
 * HS3G_DRONE: regenerate a sourced drone revision using bounded CAD search,
   then independently inspect geometry, model, manufacturing and firmware evidence.
+* HS3G_DIGITAL: complete the same design as a digital 3D representative and
+  native physics simulation, without requiring or authorizing physical work.
 """
 from __future__ import annotations
 
@@ -32,6 +34,7 @@ SPLICE_MANIFEST = "examples/splice/manifest.json"
 SPI_ID = "spi_flash_adapter_reference"
 RC_ID = "robot_repair_cafe_s3"
 DRONE_ID = "hs3g_drone_revision_b"
+DIGITAL_ID = "hs3g_drone_digital"
 REGISTERED = {
     SPI_ID: {
         "description": "Independent rebuild/check of the existing SPI adapter",
@@ -46,6 +49,11 @@ REGISTERED = {
     DRONE_ID: {
         "description": "Revise the existing GPS/FPV drone, regenerate CAD, and verify its candidate package",
         "route": "native_drone_design_iteration",
+        "source": "examples/drone_proving_ground",
+    },
+    DIGITAL_ID: {
+        "description": "Complete the HS-3G-B digital assembly, offline 3D viewer and native flight simulation",
+        "route": "native_drone_digital_simulation",
         "source": "examples/drone_proving_ground",
     },
 }
@@ -416,6 +424,67 @@ def _native_drone(run_dir: Path, source: Path, report: dict[str, Any]) -> None:
     report["artifacts_sha256"] = _record_artifacts([p for p in [receipt_path, package / "results.json", package / "BOM.csv", package / "POST_DRILL_COORDINATES.csv"] if p.is_file()], run_dir)
 
 
+def _native_drone_digital(run_dir: Path, source: Path, report: dict[str, Any]) -> None:
+    """Reuse the verified design route, then produce and inspect digital results."""
+    originals = _registered_source_files(REPO_ROOT, source)
+    before = {p.relative_to(source).as_posix(): _hash(p) for p in originals}
+    report.update(physical_work_requested=False, digital_objective_complete=False)
+    _native_drone(run_dir, source, report)
+    if not report["engineering_acceptance"]:
+        return
+    # Base design acceptance alone does not complete the digital work order.
+    report["engineering_acceptance"] = False
+    stage = run_dir / "source_copy"
+    design = run_dir / "candidate"
+    package = design / "digital"
+    try:
+        built = subprocess.run([sys.executable, str(stage / "digital/build_digital.py"),
+                                "--design", str(design), "--out", str(package)],
+                               cwd=stage, capture_output=True, text=True, timeout=600, check=False)
+        _trace(report, "digital_model_and_simulation", "Native STEP + representative assembly + PyBullet DIRECT",
+               "passed" if built.returncode == 0 else "failed",
+               "Operate the same drone model through takeoff, path tracking, yaw, gust, landing and a stopped-motor case.",
+               returncode=built.returncode, stdout=built.stdout[-MAX_STDOUT:], stderr=built.stderr[-MAX_STDOUT:])
+        if built.returncode != 0:
+            report["status"] = "blocked_digital_simulation"
+            report["open_actions"] = ["Resolve the reported digital model or simulation failure."]
+            return
+        checked = subprocess.run([sys.executable, str(stage / "digital/verify_digital.py"), str(package),
+                                  "--design", str(design)], cwd=stage,
+                                 capture_output=True, text=True, timeout=180, check=False)
+        path = package / "verification.json"
+        receipt = json.loads(path.read_text()) if path.is_file() else {}
+        outputs = _record_artifacts([p for p in package.rglob("*") if p.is_file() and p != path], package)
+        required = {"VIEWER.html", "HS3G_B_ASSEMBLY.step", "HS3G_B_ASSEMBLY.glb", "model.json", "SIMULATION.json",
+                    "nominal.csv", "mass_plus_5g.csv", "motor_failure.csv", "FLIGHT.gif", "ASSEMBLY.png", "EXPLODED.png", "TELEMETRY.png",
+                    "RERUN.py", "hs3g_sim.py", "thrust-table.json"}
+        required_checks = {"same_verified_design", "source_identity", "native_step_assembly", "glb_geometry_and_scale",
+                           "offline_viewer_contains_native_model", "nominal_native_force_balance", "mass_plus_5g_native_force_balance",
+                           "motor_failure_loss_of_control_observed", "native_zero_thrust_gravity_oracle", "digital_scope_only",
+                           "standalone_runtime_source", "packaged_thrust_table"}
+        checks = receipt.get("checks") or {}
+        unchanged = all(_hash(source / n) == v == _hash(stage / n) for n, v in before.items())
+        accepted = (checked.returncode == 0 and receipt.get("engineering_acceptance") is True
+                    and receipt.get("digital_objective_complete") is True
+                    and required <= set(outputs) and outputs == receipt.get("artifact_sha256")
+                    and required_checks <= set(checks) and all(type(v) is bool and v for v in checks.values())
+                    and unchanged and all(receipt.get(k) is False for k in ["physical_work_requested", "physical_validation", "fabrication_authorized", "power_on_authorized", "flight_authorized"]))
+        _trace(report, "digital_independent_acceptance", "CAD/GLB reimport + full telemetry reconstruction + native gravity oracle",
+               "passed" if accepted else "failed", "Digital completion is bound to actual artifacts; physical work is outside this requested objective.",
+               returncode=checked.returncode, source_unchanged=unchanged,
+               failed_checks=receipt.get("failed_checks"), stdout=checked.stdout[-MAX_STDOUT:], stderr=checked.stderr[-MAX_STDOUT:])
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        report["status"] = "blocked_digital_tool_execution"
+        report["open_actions"] = [f"Digital simulation could not complete: {type(exc).__name__}: {str(exc)[-300:]}"]
+        return
+    report["engineering_acceptance"] = report["digital_objective_complete"] = accepted
+    report["status"] = "verified_digital_simulation_complete" if accepted else "blocked_digital_independent_verification"
+    report["open_actions"] = [] if accepted else ["Resolve failed digital acceptance checks."]
+    report["completion_scope"] = "Digital 3D representation and parameterized simulation; physical completion not requested."
+    report["scope_limits"] = receipt.get("scope_limits", [])
+    report["artifacts_sha256"].update(_record_artifacts([p for p in [path, package / "SIMULATION.json", package / "model.json", package / "VIEWER.html"] if p.is_file()], run_dir))
+
+
 def _machine_release(report: Mapping[str, Any]) -> dict[str, Any]:
     """Reuse the canonical HS release authority model, never a custom PASS flag."""
     from .machine_project import (
@@ -499,6 +568,10 @@ def _handoff(report: Mapping[str,Any]) -> str:
         lines.append(f"- **{stage['stage']}** — {stage['existing_engine']}: "
                      f"{stage['state']}. {stage['details']}")
     lines.extend(["","## Evidence-bounded next actions",""])
+    if report.get("physical_work_requested") is False:
+        lines.extend(["Requested scope: digital-only 3D representation and simulation.",
+                      f"Digital objective complete: **{report.get('digital_objective_complete', False)}**.",
+                      "The canonical physical release assessment remains closed and is outside this requested completion scope.", ""])
     for row in report["open_actions"]:
         lines.append("- "+str(row))
     lines.extend(["","## What this does not establish","","No real device was built, repaired, powered, sold or bench-validated.",
@@ -540,6 +613,8 @@ def run_workshop_operator(case_id:str,*,out_dir:str|Path,execute:bool=False,
         _repair(output,source,report)
     elif case_id==DRONE_ID:
         _native_drone(output,source,report)
+    elif case_id==DIGITAL_ID:
+        _native_drone_digital(output,source,report)
     else:
         raise AssertionError("unregistered adapter")
     # Final authority is bounded irrespective of internal model/case output.

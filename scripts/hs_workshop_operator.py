@@ -32,6 +32,8 @@ def main()->int:
         "engineering_acceptance":result["engineering_acceptance"],
         "physical_validation":result["physical_validation"],
         "fabrication_authorized":result["fabrication_authorized"],
+        **({"digital_objective_complete": result["digital_objective_complete"],
+            "physical_work_requested": False} if "digital_objective_complete" in result else {}),
         "result_file":str(args.out/"HS_OPERATOR_RESULT.json"),
     },indent=2))
     return 0 if result["engineering_acceptance"] or not args.execute else 2
