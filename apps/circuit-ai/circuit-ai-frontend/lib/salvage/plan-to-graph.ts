@@ -610,14 +610,22 @@ const RECIPES: Record<string, Recipe> = {
       { role: "pwr", moduleId: "dc-barrel-12v" },
       { role: "psu", moduleId: "buck-mp1584" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
+      { role: "mcu", moduleId: "arduino-nano" },
     ],
     wires: [
       ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
+      // The Nano (5 V logic) rides on the same buck output and ground; D3 is its PWM pin.
+      { from: { role: "psu", pin: "OUT+" }, to: { role: "mcu", pin: "VIN" } },
+      { from: { role: "psu", pin: "OUT-" }, to: { role: "mcu", pin: "GND" } },
+      { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "SIG" } },
     ],
-    notes: ["LED load on VOUT+/VOUT- with appropriate series resistor."],
+    notes: [
+      "LED load on VOUT+/VOUT- with appropriate series resistor.",
+      "Arduino Nano D3 (PWM) drives the MOSFET SIG input to dim the light; set the buck output to 5-12 V for the Nano VIN pin.",
+    ],
   },
 
   low_voltage_motor_test_jig: {
