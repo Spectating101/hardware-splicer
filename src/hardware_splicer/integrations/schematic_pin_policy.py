@@ -157,7 +157,7 @@ def plan_no_connects(
     """Pins that may carry a no-connect flag.
 
     A pin qualifies only when no net references it and one of these documented reasons applies:
-    the module's own pin note says it is optional, the module is a microcontroller board and the
+    the module's own pin note says the pin is optional or internally not connected, the module is a microcontroller board and the
     pin is general-purpose I/O, or ``schematic_pin_policy.json`` lists the pin (per module or per
     build, citing the recipe note or datasheet). Per-build entries apply only when the netlist is
     provably that catalog recipe (``catalog_recipe_for``). Unlisted pins stay open for KiCad.
@@ -170,6 +170,9 @@ def plan_no_connects(
     mcu = rules.get("mcu_general_io") or {}
     mcu_roles = {str(r) for r in mcu.get("roles") or []}
     note_re = re.compile(str(rules.get("optional_note_pattern") or r"\boptional\b"), re.IGNORECASE)
+    internal_nc_re = re.compile(
+        str(rules.get("internal_nc_note_pattern") or r"\bnot (internally )?connected\b"), re.IGNORECASE
+    )
     plans: List[NoConnectPlan] = []
     for comp in netlist.components:
         module_id = str(comp.module_id or "")
@@ -197,6 +200,8 @@ def plan_no_connects(
                 plans.append(
                     NoConnectPlan(comp.ref, pin_id, str(entry.get("disposition") or "listed"), str(entry.get("reason") or ""))
                 )
+            elif internal_nc_re.search(str(pin.get("notes") or "")):
+                plans.append(NoConnectPlan(comp.ref, pin_id, "internally_not_connected", str(pin.get("notes"))))
             elif note_re.search(str(pin.get("notes") or "")):
                 plans.append(NoConnectPlan(comp.ref, pin_id, "optional_per_module_note", str(pin.get("notes"))))
             elif (
