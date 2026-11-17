@@ -91,11 +91,57 @@ class PowerFlagPlan:
     stub: bool = False
 
 
+def _canonical(netlist: CircuitNetlist) -> tuple:
+    components = tuple(sorted((c.ref, str(c.module_id or "")) for c in netlist.components))
+    nets = frozenset(frozenset((p.component_ref, p.pin) for p in net.pins) for net in netlist.nets)
+    return components, nets
+
+
+@lru_cache(maxsize=None)
+def _recipe_canonical(recipe_key: str) -> Optional[tuple]:
+    """Canonical form of the netlist the catalog recipe ``recipe_key`` lowers to, or None."""
+
+    from ..netlist.lower import build_graph_to_netlist
+    from ..plan_to_graph import load_catalog_data, splice_plan_to_build_graph
+
+    if recipe_key not in (load_catalog_data().get("recipes") or {}):
+        return None
+    graph, _id, _notes, _warnings = splice_plan_to_build_graph(
+        {"target": {"recommended_build_id": recipe_key}}
+    )
+    return _canonical(build_graph_to_netlist(graph))
+
+
+def catalog_recipe_for(netlist: CircuitNetlist, build_id: Optional[str]) -> Optional[str]:
+    """The catalog recipe key this netlist actually is, or None.
+
+    A caller-supplied build name is a claim, not evidence. Recipe-specific policy applies only
+    when the netlist's components and connectivity equal what the recipe lowers to (the USB
+    variant of a build counts as that build's recipe).
+    """
+
+    if not build_id:
+        return None
+    mine = _canonical(netlist)
+    for key in (build_id, f"{build_id}_usb"):
+        expected = _recipe_canonical(key)
+        if expected is not None and expected == mine:
+            return key
+    return None
+
+
+def _recipe_notes(recipe_key: str) -> str:
+    from ..plan_to_graph import load_catalog_data
+
+    recipe = (load_catalog_data().get("recipes") or {}).get(recipe_key) or {}
+    return " ".join(str(n) for n in recipe.get("notes") or [])
+
+
 def _pin_policy_entry(
-    policy: Mapping[str, Any], build_id: Optional[str], module_id: str, pin_id: str
+    policy: Mapping[str, Any], recipe_key: Optional[str], module_id: str, pin_id: str
 ) -> Optional[Mapping[str, Any]]:
-    if build_id:
-        entry = ((policy.get("build_pins") or {}).get(build_id) or {}).get(module_id, {}).get(pin_id)
+    if recipe_key:
+        entry = ((policy.get("build_pins") or {}).get(recipe_key) or {}).get(module_id, {}).get(pin_id)
         if isinstance(entry, Mapping):
             return entry
     entry = (policy.get("module_pins") or {}).get(module_id, {}).get(pin_id)
@@ -113,10 +159,13 @@ def plan_no_connects(
     A pin qualifies only when no net references it and one of these documented reasons applies:
     the module's own pin note says it is optional, the module is a microcontroller board and the
     pin is general-purpose I/O, or ``schematic_pin_policy.json`` lists the pin (per module or per
-    build, citing the recipe note or datasheet). Unlisted pins stay open for KiCad to report.
+    build, citing the recipe note or datasheet). Per-build entries apply only when the netlist is
+    provably that catalog recipe (``catalog_recipe_for``). Unlisted pins stay open for KiCad.
     """
 
     rules = policy if policy is not None else load_policy()
+    # Recipe-specific entries need proof the netlist is that recipe, not just its name.
+    recipe_key = catalog_recipe_for(netlist, build_id)
     referenced = {pin.key() for net in netlist.nets for pin in net.pins}
     mcu = rules.get("mcu_general_io") or {}
     mcu_roles = {str(r) for r in mcu.get("roles") or []}
@@ -135,7 +184,7 @@ def plan_no_connects(
             pin_id = str(pin.get("id"))
             if f"{comp.ref}.{pin_id}" in referenced:
                 continue
-            entry = _pin_policy_entry(rules, build_id, module_id, pin_id)
+            entry = _pin_policy_entry(rules, recipe_key, module_id, pin_id)
             if entry is not None:
                 needs = {str(x) for x in entry.get("requires_connected") or []}
                 if needs and not needs <= connected_here:

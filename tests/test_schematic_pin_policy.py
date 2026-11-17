@@ -32,15 +32,29 @@ def _nc(netlist: CircuitNetlist, build_id: str | None = None) -> set[str]:
 # ---- no-connect rules -------------------------------------------------------------------------
 
 
+def _recipe_netlist(build_id: str) -> CircuitNetlist:
+    from hardware_splicer.netlist.lower import build_graph_to_netlist
+    from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+    graph, _id, _notes, _warnings = splice_plan_to_build_graph({"target": {"recommended_build_id": build_id}})
+    return build_graph_to_netlist(graph)
+
+
 def test_connected_pin_never_gets_a_no_connect_even_when_policy_lists_it() -> None:
-    # The policy lists MOSFET VOUT+ for this build, but here the pump is wired to it.
+    from hardware_splicer.integrations.schematic_pin_policy import load_policy
+
+    # Module-level policy lists MOSFET VOUT+ and VOUT-, but here the pump is wired to VOUT+.
+    policy = {**load_policy(), "module_pins": {"mosfet-irlz44n": {
+        "VOUT+": {"disposition": "off_board_terminal", "reason": "test"},
+        "VOUT-": {"disposition": "off_board_terminal", "reason": "test"},
+    }}}
     netlist = _netlist(
         [("U1", "mosfet-irlz44n"), ("M1", "cooling_fan_5v")],
         {"LOAD": ["U1.VOUT+", "M1.VCC"]},
     )
-    flagged = _nc(netlist, "automatic_plant_watering")
+    flagged = {f"{p.ref}.{p.pin}" for p in plan_no_connects(netlist, policy=policy)}
     assert "U1.VOUT+" not in flagged
-    assert "U1.VOUT-" in flagged  # still open, and listed for the build
+    assert "U1.VOUT-" in flagged  # still open, and listed
 
 
 def test_unlisted_unconnected_pin_stays_open_for_kicad_to_report() -> None:
@@ -51,11 +65,15 @@ def test_unlisted_unconnected_pin_stays_open_for_kicad_to_report() -> None:
     assert "U3.VOUT+" not in _nc(netlist, None)
 
 
-def test_off_board_terminal_applies_only_to_the_build_that_names_it() -> None:
-    netlist = _netlist([("U3", "mosfet-irlz44n")], {})
-    assert {"U3.VOUT+", "U3.VOUT-"} <= _nc(netlist, "automatic_plant_watering")
-    assert "U3.SIG" not in _nc(netlist, "automatic_plant_watering")
-    assert "U3.VOUT+" not in _nc(netlist, "robot_drive_base")
+def test_off_board_terminal_applies_only_to_the_recipe_that_names_it() -> None:
+    plant = _recipe_netlist("automatic_plant_watering")
+    mosfet = next(c.ref for c in plant.components if c.module_id == "mosfet-irlz44n")
+    flagged = _nc(plant, "automatic_plant_watering")
+    assert {f"{mosfet}.VOUT+", f"{mosfet}.VOUT-"} <= flagged
+    assert f"{mosfet}.SIG" not in flagged
+    # The same recipe netlist under another build's name gets none of the plant's terminals.
+    assert f"{mosfet}.VOUT+" not in _nc(plant, "robot_drive_base")
+    assert f"{mosfet}.VOUT+" not in _nc(plant, None)
 
 
 def test_mcu_general_purpose_io_is_optional_but_its_supply_pins_are_not() -> None:
@@ -294,3 +312,21 @@ def test_pins_that_reach_the_carrier_through_a_connector_never_get_a_no_connect(
         for pin in info["pins"]:
             assert (module_id, pin) in wired, (module_id, pin)
         assert info["connector"] in roles.values()
+
+
+def test_recipe_specific_no_connects_need_the_netlist_to_come_from_that_recipe() -> None:
+    from hardware_splicer.netlist.lower import build_graph_to_netlist
+    from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+    # An arbitrary netlist that merely carries the catalog build name inherits nothing.
+    arbitrary = _netlist([("U6", "mosfet-irlz44n")], {})
+    assert "U6.VOUT+" not in _nc(arbitrary, "automatic_plant_watering")
+    # The real recipe netlist does get its documented terminals.
+    graph, _id, _n, _w = splice_plan_to_build_graph({"target": {"recommended_build_id": "automatic_plant_watering"}})
+    real = build_graph_to_netlist(graph)
+    mosfet = next(c.ref for c in real.components if c.module_id == "mosfet-irlz44n")
+    assert f"{mosfet}.VOUT+" in _nc(real, "automatic_plant_watering")
+    # A recipe netlist with an extra wire is no longer that recipe.
+    tampered = CircuitNetlist.from_dict(real.to_dict())
+    tampered.nets.append(Net(name="EXTRA", pins=[PinRef(mosfet, "SIG"), PinRef(mosfet, "GND")]))
+    assert f"{mosfet}.VOUT+" not in _nc(tampered, "automatic_plant_watering")
