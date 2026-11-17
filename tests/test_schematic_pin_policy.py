@@ -378,3 +378,21 @@ def test_l298n_5v_is_left_for_erc_unless_the_recipe_states_jumper_and_motor_supp
     assert f"{l298}.5V" not in {
         f"{p.ref}.{p.pin}" for p in plan_no_connects(real, build_id="robot_drive_base", policy=policy)
     }
+
+
+def test_generated_supply_stub_labels_never_collide_with_existing_nets() -> None:
+    netlist = _netlist(
+        [("U1", "ch340-usb-ttl"), ("U2", "esp32-devkit")],
+        {"U1_USB_EXT": ["U2.GND", "U1.GND"]},
+    )
+    stub = next(p for p in plan_power_flags(netlist) if p.stub)
+    assert stub.net != "U1_USB_EXT"
+    text = netlist_to_kicad_schematic(netlist)
+    assert text.count(f'(label "{stub.net}"') == 1
+    assert text.count('(label "U1_USB_EXT"') == 2  # only the two real GND pins carry it
+
+
+def test_two_stubs_whose_sanitised_names_match_stay_distinct() -> None:
+    netlist = _netlist([("U1", "ch340-usb-ttl"), ("U1_", "ch340-usb-ttl")], {})
+    names = [p.net for p in plan_power_flags(netlist) if p.stub]
+    assert len(names) == 2 and len(set(names)) == 2

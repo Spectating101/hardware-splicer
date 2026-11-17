@@ -216,8 +216,16 @@ def _is_source_connector(spec: Mapping[str, Any]) -> bool:
     return "power_out" in roles and "power_in" not in roles
 
 
-def _ext_net_name(ref: str, pin: str) -> str:
-    return re.sub(r"[^A-Za-z0-9_]", "_", f"{ref}_{pin}_EXT")
+def _ext_net_name(ref: str, pin: str, taken: set[str]) -> str:
+    """A label for an external-supply stub that no existing or earlier generated net uses."""
+
+    base = re.sub(r"[^A-Za-z0-9_]", "_", f"{ref}_{pin}_EXT")
+    name, n = base, 1
+    while name in taken:
+        n += 1
+        name = f"{base}_{n}"
+    taken.add(name)
+    return name
 
 
 def plan_power_flags(
@@ -325,6 +333,7 @@ def plan_power_flags(
         plans.append(PowerFlagPlan(net=net, ref=ref, pin=pin_id, source=source))
 
     connected = {p for pins in net_pins.values() for p in pins}
+    taken = set(net_pins)
     for comp in netlist.components:
         ext = external.get(str(comp.module_id or ""))
         if not isinstance(ext, Mapping):
@@ -334,7 +343,7 @@ def plan_power_flags(
                 continue
             plans.append(
                 PowerFlagPlan(
-                    net=_ext_net_name(comp.ref, pin_id),
+                    net=_ext_net_name(comp.ref, str(pin_id), taken),
                     ref=comp.ref,
                     pin=str(pin_id),
                     source=f"{comp.ref} ({comp.module_id}) {pin_id}: {ext.get('reason')}",
