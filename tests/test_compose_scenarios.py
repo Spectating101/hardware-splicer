@@ -17,7 +17,7 @@ from hardware_splicer.module_picker import pick_modules_for_goal
 from hardware_splicer.pcb.build_to_geometry import build_graph_to_geometry
 from hardware_splicer.pcb.drc import run_drc
 from hardware_splicer.pcb.safety_rules import analyze_build
-from known_router_gaps import xfail_if_amp_tracks_cross
+from known_router_gaps import xfail_known_amp_gap
 
 
 def _module_id_for_node(graph: Mapping[str, Any], node_id: str) -> Optional[str]:
@@ -76,17 +76,19 @@ def _verify_compose(phrase: str, *, sensor_id: Optional[str] = None, signal_pin:
     errors = [w for w in safety if w.get("level") == "error"]
     assert not errors, f"safety errors: {[w.get('message') for w in errors]}"
 
-    drc = run_drc(build_graph_to_geometry(graph))
-    if not drc.get("pass"):
-        xfail_if_amp_tracks_cross(
-            pick.module_ids, [str(v.get("message") or "") for v in drc.get("violations") or []]
-        )
-    assert drc.get("pass"), f"DRC fail: {drc.get('violations')}"
-
+    # Everything that does not depend on the DRC verdict runs first.
     if sensor_id and signal_pin:
         assert _mcu_gpio_to_sensor(graph, sensor_id, signal_pin), (
             f"missing MCU→{sensor_id}.{signal_pin}"
         )
+
+    drc = run_drc(build_graph_to_geometry(graph))
+    xfail_known_amp_gap(
+        [str(n.get("moduleId") or "") for n in graph.get("nodes") or []],
+        bool(drc.get("pass")),
+        [str(v.get("message") or "") for v in drc.get("violations") or []],
+    )
+    assert drc.get("pass"), f"DRC fail: {drc.get('violations')}"
 
 
 def _load_compose_cases() -> list[tuple[str, dict[str, str]]]:

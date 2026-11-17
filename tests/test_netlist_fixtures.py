@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from known_router_gaps import xfail_if_amp_tracks_cross
+from known_router_gaps import xfail_known_amp_gap
 
 from hardware_splicer.build_compiler import compile_from_netlist
 from hardware_splicer.integrations.circuit_json_import import circuit_json_to_netlist
@@ -40,14 +40,16 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
         netlist, tmp_path, build_id="generic_low_voltage_build", export_gerber=False
     )
     q = result.design_quality or {}
-    if not result.ok:
-        xfail_if_amp_tracks_cross(
-            [str(c.module_id or "") for c in netlist.components],
-            [str(v.get("message") or "") for v in q.get("drc_violations") or []],
-        )
+    # Copper tier does not depend on the DRC verdict, so it is asserted before the DRC-dependent checks.
+    assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
+    xfail_known_amp_gap(
+        [str(c.module_id or "") for c in netlist.components],
+        bool(result.ok),
+        [str(v.get("message") or "") for v in q.get("drc_violations") or []],
+        kicad_errors=int(q.get("kicad_drc_errors") or 0),
+    )
     assert result.ok, result.error
     assert int(q.get("kicad_drc_errors") or 0) == 0, q
-    assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
 
     # Fabrication recommendation is governed by the independent KiCad truth fields,
     # not the broader internal geometry/DRC state. A fixture with zero parsed error

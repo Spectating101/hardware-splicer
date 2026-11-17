@@ -18,7 +18,7 @@ from hardware_splicer.build_compiler import compile_from_netlist
 from hardware_splicer.module_picker import pick_modules_for_goal
 from hardware_splicer.netlist.lower import build_graph_to_netlist, netlist_to_build_graph
 from hardware_splicer.pcb.safety_rules import analyze_build
-from known_router_gaps import xfail_if_amp_tracks_cross
+from known_router_gaps import xfail_known_amp_gap
 
 _PHRASES_PATH = Path(__file__).resolve().parent / "data" / "compose_phrases.json"
 
@@ -69,12 +69,15 @@ def test_offline_phrase_netlist_roundtrip_respects_deterministic_truth(
         assert quality.get("circuit_readiness") == "erc_blocked"
         return
 
-    if not result.ok:
-        xfail_if_amp_tracks_cross(
-            pick.module_ids, [str(v.get("message") or "") for v in quality.get("drc_violations") or []]
-        )
-    assert result.ok is True, result.error
+    # The safety verdict does not depend on routing, so it is asserted before the DRC-dependent ones.
     assert quality.get("electrical_safety_pass") is True
+    xfail_known_amp_gap(
+        [str(c.module_id or "") for c in netlist.components],
+        bool(result.ok),
+        [str(v.get("message") or "") for v in quality.get("drc_violations") or []],
+        kicad_errors=int(quality.get("kicad_drc_errors") or 0),
+    )
+    assert result.ok is True, result.error
     assert int(quality.get("kicad_drc_errors") or 0) == 0
 
 
