@@ -229,8 +229,8 @@ def plan_power_flags(
 
     A net is fed when it holds a pin of an off-board supply connector (a power module that only
     emits power, such as the USB or barrel-jack inputs), a pin the policy names as externally
-    supplied (``external_supply``) or as a module output terminal (``module_output_terminals``,
-    e.g. a MOSFET module's switched return), or a ground pin that the policy declares common with another
+    supplied (``external_supply``), a module output terminal (``module_output_terminals``, e.g. a
+    MOSFET module's switched return) whose module return pins sit on an already fed net, or a ground pin that the policy declares common with another
     pin of the same non-isolated module whose net is itself fed. Nets with no such source get no
     flag, so KiCad keeps reporting them.
     """
@@ -272,14 +272,31 @@ def plan_power_flags(
                 set(ext.get("ground_pins") or []) | set(ext.get("supply_pins") or [])
             ):
                 mark(net, ref, pin_id, f"{ref} ({module_id}): {ext.get('reason')}")
-            out = outputs.get(module_id)
-            if isinstance(out, Mapping) and pin_id in set(out.get("pins") or []):
-                mark(net, ref, pin_id, f"{ref} ({module_id}) output terminal {pin_id}: {out.get('reason')}")
 
     changed = True
     while changed:
         changed = False
         for comp in netlist.components:
+            # A module output terminal (a MOSFET module's switched return) is fed only while the
+            # module's own return side (fed_when pins) sits on a net that is already fed.
+            out = outputs.get(str(comp.module_id or ""))
+            if isinstance(out, Mapping):
+                upstream = [
+                    (p, net_of.get((comp.ref, p))) for p in out.get("fed_when") or []
+                ]
+                source = next(((p, n) for p, n in upstream if n is not None and n in fed), None)
+                if source is not None:
+                    for pin_id in out.get("pins") or []:
+                        net = net_of.get((comp.ref, pin_id))
+                        if net is not None and net not in fed:
+                            mark(
+                                net,
+                                comp.ref,
+                                pin_id,
+                                f"{comp.ref} ({comp.module_id}) output terminal {pin_id}, "
+                                f"fed through {source[0]} on fed net {source[1]}: {out.get('reason')}",
+                            )
+                            changed = True
             groups = common.get(str(comp.module_id or "")) or []
             for group in groups:
                 live = [(p, net_of.get((comp.ref, p))) for p in group]
