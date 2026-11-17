@@ -101,3 +101,37 @@ and rollback/disable control before any integration enters the approved set.
 
 **No physical device, firmware, printer, machine or other hazardous actuator is
 ever controlled in this experiment.**
+
+## Report-only candidate vetting
+
+`scripts/vet_github_signal_candidates.py --feed <feed.json> --out <review.json>`
+adds a `vetting` record beside each candidate. Alternatively, use
+`--kicad-pcm <packages.json or repository.json or URL>` to import KiCad PCM
+metadata; repository descriptors require a matching packages SHA-256. Package
+licences, resources, all versions, archive URLs and `download_sha256` remain
+provenance. No package archive is downloaded. PCM provides no Git source pin;
+the importer leaves it unset, and the existing execution gate rejects such
+records until an independently reviewed source pin and adapter exist.
+
+Evidence sources are OpenSSF Scorecard (overall score, scored commit and eight
+security checks), repos.ecosyste.ms (SPDX licence and repository activity), and
+the feed's declared licence. `--offline` skips all HTTP and marks remote sources
+`unavailable`; remote PCM metadata must first be saved locally. Source errors
+and retrieval timestamps are retained for review. Scorecard evidence for a
+different or missing candidate commit is marked `different_commit` and never
+applied to candidate flags. The License check establishes presence only, not
+an SPDX expression. Licence disagreement and maintenance/security flags are
+review prompts, not licence clearance or security guarantees.
+
+The Python API also accepts an explicit already-fetched checkout for optional
+local ScanCode licence evidence. It verifies the full pin and clean checkout,
+then runs only the installed ScanCode scanner in a read-only, network-isolated
+bubblewrap process with a timeout. Missing ScanCode or bubblewrap is recorded
+as `unavailable`; there is no host-execution fallback or source fetch. The CLI
+does not select checkout paths from untrusted feed metadata.
+
+Vetting is **evidence only**: every result has `approval_effect: "none"` and
+`requires_human_review: true`. Discovery and task reports display it beside the
+candidate. It never adds approved adapters, changes approval decisions,
+installs software, or runs candidate code. Human adapter/revision review and
+all existing execution gates remain required.

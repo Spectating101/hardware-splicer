@@ -315,6 +315,7 @@ def run_task(
             "repository": selected[0]["repository"],
             "commit_sha": selected[0]["commit_sha"],
             "license_spdx_id": selected[0]["license_claim"],
+            **({"vetting": selected[0]["vetting"]} if "vetting" in selected[0] else {}),
         }]
         result = evaluate_signals(
             filtered, checkout=checkout, schematic=schematic,
@@ -360,7 +361,8 @@ def run_task(
             {"repository": c["repository"],
              "status": ("executed" if c["repository"] == plan["selected_repository"]
                         else ("discovered_only" if c["discovered_only"]
-                              else "approved_not_selected"))}
+                              else "approved_not_selected")),
+             **({"vetting": c["vetting"]} if "vetting" in c else {})}
             for c in candidates
         ],
         "evidence": evidence,

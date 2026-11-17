@@ -102,6 +102,8 @@ def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:
             "discovery_source": source,
             "discovered_only": not admitted,
             "adapter_id": adapter.get("capability_id") if admitted else None,
+            # Evidence is displayed only; it never participates in admission.
+            **({"vetting": record["vetting"]} if "vetting" in record else {}),
         })
     return out
 

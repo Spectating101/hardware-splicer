@@ -1,0 +1,59 @@
+{
+  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "packages": [
+    {
+      "identifier": "org.example.board-review",
+      "name": "Board Review",
+      "type": "plugin",
+      "license": "MIT",
+      "resources": {"homepage": "https://github.com/example/board-review"},
+      "versions": [
+        {
+          "version": "1.2.0",
+          "status": "stable",
+          "kicad_version": "9.0",
+          "download_url": "https://github.com/example/board-review/releases/download/v1.2.0/board-review.zip",
+          "download_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "version": "1.1.0",
+          "status": "stable",
+          "kicad_version": "8.0",
+          "download_url": "https://github.com/example/board-review/releases/download/v1.1.0/board-review.zip",
+          "download_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    },
+    {
+      "identifier": "org.example.connector-library",
+      "name": "Connector Library",
+      "type": "library",
+      "license": "CC-BY-SA-4.0",
+      "resources": {"homepage": "https://example.org/connectors"},
+      "versions": [
+        {
+          "version": "2.0.0",
+          "status": "stable",
+          "kicad_version": "9.0",
+          "download_url": "https://example.org/connectors-2.0.0.zip",
+          "download_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ]
+    },
+    {
+      "identifier": "org.example.outline-helper",
+      "name": "Outline Helper",
+      "type": "plugin",
+      "resources": {"github": "https://github.com/example/outline-helper.git"},
+      "versions": [
+        {
+          "version": "0.3.0",
+          "status": "testing",
+          "kicad_version": "8.0",
+          "download_url": "https://example.org/outline-helper-0.3.0.zip",
+          "download_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ]
+    }
+  ]
+}
