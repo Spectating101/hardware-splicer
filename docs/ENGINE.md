@@ -340,6 +340,38 @@ using fictional simulation profiles.
 The [execution record](status/generated/part-substitution-proof.json) includes
 the modeled power and runtime changes and the native export hashes.
 
+### Fielddeck 5 display revision
+
+The [Fielddeck display study](../projects/cyberdeck-real-trial-20261020/display_swap/build.py)
+uses the retained Fielddeck 7 assembly and Raspberry Pi's manufacturer STEP for
+the 5-inch Touch Display 2 (SC1975). It rebuilds the two rear face panels and two
+rear tray panels around the smaller display. Four spacers represent the difference
+between the STEP mounting seat and the deeper seat in the product drawing. The
+case study retains both source dimensions in the report.
+
+The backend compares the display interface using `evaluate_substitution`.
+Its 10-inch control case must report a protocol mismatch against the existing
+Pi 4 display port. The native study checks the bezel opening, screw paths and a
+clear middle section for the ribbon cable. Power scenarios keep the original
+stress allocation and use the published display consumption in the work scenario.
+Cable bends, connector contact ratings, appropriate screw engagement and physical
+fit remain open.
+
+From the repository root, run the study with the project's CadQuery and trimesh
+environment. Choose a fresh output directory.
+
+```bash
+PYTHONPATH=src python projects/cyberdeck-real-trial-20261020/display_swap/build.py \
+  --output /tmp/fielddeck-5
+python projects/cyberdeck-real-trial-20261020/display_swap/bundle.py \
+  --build /tmp/fielddeck-5 --output /tmp/fielddeck-5.zip
+```
+
+The ZIP contains the revised assembly STEP/GLB, changed and retained print
+parts, BOM, wiring notes, power comparison and source/geometry evidence.
+The [execution record](status/generated/fielddeck-display-swap-20261118.json)
+retains the source hashes, modeled results and checks from the native build.
+
 ## Exact materials and InvenTree inventory
 
 The backend compares a design's material requirements with available inventory and produces a reusable/missing/make list. It accepts a declared inventory or imports a direct assembly BOM and inventory from [InvenTree](https://github.com/inventree/InvenTree). The integration reads the upstream REST API. Local assessments work independently of an inventory server.

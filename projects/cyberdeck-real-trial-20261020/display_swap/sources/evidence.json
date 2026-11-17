@@ -1,0 +1,40 @@
+{
+  "vendor_step": {
+    "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-009152-DD-3-raspberry-pi-touch-display-2-step-5inch.zip",
+    "archive_sha256": "6552f6b12b1ec7f4b829a64ce2422fe827004ee8a149a3bc1d0f669629a449b4",
+    "step_sha256": "59ccde37460b578ac45fbe14300ffa812c0a4d8fbd1e693fa1c47430d2d651be",
+    "license_sha256": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc"
+  },
+  "product_brief": {
+    "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+    "sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75",
+    "documented_power_w": 1.4,
+    "landscape_glass_mm": [
+      143.4,
+      91.46
+    ],
+    "landscape_viewing_area_mm": [
+      111.4,
+      63.1
+    ],
+    "landscape_mount_pitch_mm": [
+      103.7,
+      51
+    ],
+    "nominal_lug_depth_mm": 14.92
+  },
+  "interface_doc": "https://www.raspberrypi.com/documentation/accessories/touch-display-2.html",
+  "lane_note": "https://www.raspberrypi.com/news/a-new-10-raspberry-pi-touch-display-2-available-now-at-80/",
+  "part_number_listing": "https://www.pishop.us/product/raspberry-pi-5-touch-display-2-portrait/",
+  "baseline": {
+    "revision": "Fielddeck 7 digital_v1",
+    "selected_part": "SC1635",
+    "files": {
+      "cad/FIELDDECK_7.step": "a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+      "cad/geometry_report.json": "0b2dd9a273bdf96e322351a033e0ecb3f107861fabf9bf4acb54686abc64f2dc",
+      "analysis/verification.json": "0f4faffa32086b67245fe6b3ffc333e224f5631db109975145a7d4953e018e49",
+      "design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+      "bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+    }
+  }
+}

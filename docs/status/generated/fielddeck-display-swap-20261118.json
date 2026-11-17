@@ -1,0 +1,313 @@
+{
+  "schema_version": "hardware_splicer.fielddeck_display_swap.v1",
+  "date": "2026-11-18",
+  "baseline_commit": "71c4dce7",
+  "revision": "Fielddeck 5 digital display swap",
+  "scope": "Real manufacturer display and retained digital Fielddeck geometry. No physical fit or hardware validation.",
+  "sources": {
+    "vendor_step": {
+      "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-009152-DD-3-raspberry-pi-touch-display-2-step-5inch.zip",
+      "archive_sha256": "6552f6b12b1ec7f4b829a64ce2422fe827004ee8a149a3bc1d0f669629a449b4",
+      "step_sha256": "59ccde37460b578ac45fbe14300ffa812c0a4d8fbd1e693fa1c47430d2d651be",
+      "license_sha256": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc"
+    },
+    "product_brief": {
+      "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+      "sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75",
+      "documented_power_w": 1.4,
+      "landscape_glass_mm": [
+        143.4,
+        91.46
+      ],
+      "landscape_viewing_area_mm": [
+        111.4,
+        63.1
+      ],
+      "landscape_mount_pitch_mm": [
+        103.7,
+        51
+      ],
+      "nominal_lug_depth_mm": 14.92
+    },
+    "interface_doc": "https://www.raspberrypi.com/documentation/accessories/touch-display-2.html",
+    "lane_note": "https://www.raspberrypi.com/news/a-new-10-raspberry-pi-touch-display-2-available-now-at-80/",
+    "part_number_listing": "https://www.pishop.us/product/raspberry-pi-5-touch-display-2-portrait/",
+    "baseline": {
+      "revision": "Fielddeck 7 digital_v1",
+      "selected_part": "SC1635",
+      "files": {
+        "cad/FIELDDECK_7.step": "a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+        "cad/geometry_report.json": "0b2dd9a273bdf96e322351a033e0ecb3f107861fabf9bf4acb54686abc64f2dc",
+        "analysis/verification.json": "0f4faffa32086b67245fe6b3ffc333e224f5631db109975145a7d4953e018e49",
+        "design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+      }
+    }
+  },
+  "compatible_reference": {
+    "part": "SC1975",
+    "manufacturer_declares_pi4_compatibility": true,
+    "generic_interface_result": "unresolved",
+    "open_checks": [
+      "pin_mapping_unknown",
+      "signal_voltage_unknown"
+    ]
+  },
+  "incompatible_control": {
+    "part": "10-inch Touch Display 2",
+    "status": "blocked",
+    "failed_checks": [
+      "enclosure_fit",
+      "connector_mismatch",
+      "protocol_mismatch"
+    ]
+  },
+  "geometry": {
+    "status": "nominal_geometry_checks_passed",
+    "display_mount": {
+      "glass_mm": [
+        143.4,
+        91.46
+      ],
+      "pose_mm": [
+        157.47,
+        210.0,
+        57.08
+      ],
+      "mount_xy_mm": [
+        [
+          103.15,
+          184.5
+        ],
+        [
+          103.15,
+          235.5
+        ],
+        [
+          206.85,
+          184.5
+        ],
+        [
+          206.85,
+          235.5
+        ]
+      ],
+      "mount_pitch_mm": [
+        103.7,
+        51.0
+      ],
+      "step_bore_entrance_z_mm": 51.6,
+      "drawing_support_seat_z_mm": 47.08,
+      "spacer_height_mm": 4.52,
+      "step_full_reference_envelope_depth_mm": 15.9,
+      "aperture_mm": [
+        114,
+        65.5
+      ]
+    },
+    "checks": {
+      "nominal_changed_pair_checks": 288,
+      "intersection_limit_mm3": 0.05,
+      "display_mount_paths_checked": 4,
+      "bezel_aperture_mm": [
+        114,
+        65.5
+      ],
+      "ffc_middle_corridor": {
+        "bounds_mm": [
+          50,
+          191.8,
+          31,
+          112,
+          208.3,
+          35
+        ],
+        "obstruction_free": true,
+        "plug_exits_and_bends_verified": false
+      }
+    },
+    "exports": {
+      "reimported_assembly_solids": 47,
+      "exported_parts": [
+        {
+          "part": "display_spacer_1",
+          "quantity": 4,
+          "dimensions_mm": [
+            7.0,
+            7.0,
+            4.52
+          ],
+          "step_sha256": "c1204c223a8eb2e9912d58e673cc94eeac4e6570b825bc6a92c113de1ddc1993",
+          "stl_sha256": "b9164b28fb03df98dc1156024017c9d2908a7d65a40d7319b8fe73992202d5fa"
+        },
+        {
+          "part": "face_rear_left",
+          "quantity": 1,
+          "dimensions_mm": [
+            154.85,
+            144.85,
+            3.0
+          ],
+          "step_sha256": "94c67fde373ff66a1bac0513ee0c1d05b59bb2a958bd51ca1b9f42ae974457fe",
+          "stl_sha256": "ee659b9d757f53fbfe929eb9defe2abf6cc7aee6e6ec70f9357dd3af31cc5f42"
+        },
+        {
+          "part": "face_rear_right",
+          "quantity": 1,
+          "dimensions_mm": [
+            154.85,
+            144.85,
+            3.0
+          ],
+          "step_sha256": "19f8e78c488e886b960cea117d8987065cf73f650e6ae8903d1d9b54259f65ce",
+          "stl_sha256": "7d223c49d9a8a5aa3f374a4cbf5b4d27ea0c1d57d594ded3d20993c3cd7eb289"
+        },
+        {
+          "part": "tray_rear_left",
+          "quantity": 1,
+          "dimensions_mm": [
+            154.85,
+            144.85,
+            61.0
+          ],
+          "step_sha256": "fd5fe3f4600b02895ad346888748e9e5dcfcb0cc18bfd04afff0333044a8f3d5",
+          "stl_sha256": "cb3d0b0f1e88613213221a41b0e186a9270a5a79bdddfd338cd1ed0482dc4cd7"
+        },
+        {
+          "part": "tray_rear_right",
+          "quantity": 1,
+          "dimensions_mm": [
+            154.85,
+            144.85,
+            61.0
+          ],
+          "step_sha256": "5f39dd6417f2de1e27fe54669a069c22f66576089c1d30ae90f95184134d9f84",
+          "stl_sha256": "c46f66e1f5700a3255b21b1e6f4a290f0d97f6f3b085dc03f4b99aa299f9ba58"
+        }
+      ],
+      "vendor_solid_reimport_check": "bounds, volume and placed centroid",
+      "assembly_step_sha256": "55d55a067981f4a697469a10e1d5d44f92af7c9c3466d824babf7c1310f457f5",
+      "assembly_glb_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+    },
+    "physical_fit_verified": false
+  },
+  "connections": {
+    "display": [
+      {
+        "from": "Pi 4 DISPLAY",
+        "to": "SC1975 DSI",
+        "path": "Existing 15-way to 15-way FFC format",
+        "retained_part": "Adafruit 1648, 300 mm",
+        "status": "documented_interface",
+        "open_item": "Installed cable exit, bend and strain relief remain to be checked."
+      },
+      {
+        "from": "Pi 4 GPIO 5 V and GND",
+        "to": "SC1975 power input",
+        "path": "Supplied GPIO lead with the retained extension concept",
+        "status": "documented_interface",
+        "open_item": "Confirm extension contact rating and delivered voltage; exact port limits are not published in the retained brief."
+      }
+    ],
+    "rigid_cad_check": {
+      "bounds_mm": [
+        50,
+        191.8,
+        31,
+        112,
+        208.3,
+        35
+      ],
+      "obstruction_free": true,
+      "plug_exits_and_bends_verified": false
+    }
+  },
+  "power": {
+    "usable_energy_wh": [
+      22.95,
+      32.4
+    ],
+    "scenarios": [
+      {
+        "scenario": "work_published_panel_power",
+        "original_7inch": {
+          "display_w": 2.4,
+          "system_w": 8.25,
+          "runtime_h": [
+            2.782,
+            3.927
+          ],
+          "source_margin_a": 1.35
+        },
+        "variant_5inch": {
+          "display_w": 1.4,
+          "system_w": 7.25,
+          "runtime_h": [
+            3.166,
+            4.469
+          ],
+          "source_margin_a": 1.55
+        }
+      },
+      {
+        "scenario": "stress_design_allocation",
+        "original_7inch": {
+          "display_w": 3.0,
+          "system_w": 12.6,
+          "runtime_h": [
+            1.821,
+            2.571
+          ],
+          "source_margin_a": 0.48
+        },
+        "variant_5inch": {
+          "display_w": 3.0,
+          "system_w": 12.6,
+          "runtime_h": [
+            1.821,
+            2.571
+          ],
+          "source_margin_a": 0.48
+        }
+      },
+      {
+        "scenario": "high_keyboard_demand",
+        "original_7inch": {
+          "display_w": 3.0,
+          "system_w": 14.6,
+          "runtime_h": [
+            1.572,
+            2.219
+          ],
+          "source_margin_a": 0.08
+        },
+        "variant_5inch": {
+          "display_w": 3.0,
+          "system_w": 14.6,
+          "runtime_h": [
+            1.572,
+            2.219
+          ],
+          "source_margin_a": 0.08
+        }
+      }
+    ],
+    "physical_validation_performed": false,
+    "limits": [
+      "Published panel consumption is a scenario input with no maximum implied.",
+      "Original 3 W panel allocation is retained for stress.",
+      "Bank regulation, cable contact resistance and duty cycle remain assumptions."
+    ]
+  },
+  "bundle": {
+    "sha256": "b813c4c986dcefd2e44c4d932ab5247da61a8f15d04b2840014be8ffd5211689",
+    "verified_payload_files": 53,
+    "unique_print_geometry_filesets": 21,
+    "bytes": 2254142
+  },
+  "focused_regressions": {
+    "passed": 76,
+    "junit_sha256": "2810880a3151911229f5133d5e07f30d8750882af792f80196f486de6fe7f611"
+  },
+  "physical_validation_performed": false
+}
