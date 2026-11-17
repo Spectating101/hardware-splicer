@@ -75,9 +75,7 @@ def test_the_pan_tilt_demo_request_is_not_build_ready_because_the_second_servo_w
     assert any("sg90" in blocker and "requested 2" in blocker for blocker in gate["blockers"])
 
 
-def test_splice_intake_preserves_goal_coverage_and_requested_parts_gates(
-    tmp_path, monkeypatch, assume_clean_kicad_erc
-) -> None:
+def test_splice_intake_preserves_goal_coverage_and_requested_parts_gates(tmp_path, monkeypatch) -> None:
     import json
     from pathlib import Path
 
