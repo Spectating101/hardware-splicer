@@ -171,13 +171,32 @@ def test_regulator_ground_is_flagged_only_through_a_fed_common_ground() -> None:
     assert _flagged_nets(unfed) == {}
 
 
-def test_switched_mosfet_return_feeds_the_load_ground_net() -> None:
-    netlist = _netlist(
+def test_switched_mosfet_return_is_flagged_only_when_its_module_ground_reaches_a_fed_net() -> None:
+    # Isolated: VIN-, GND, VOUT- and the load ground form one net with no supply anywhere.
+    isolated = _netlist(
+        [("U5", "mosfet-irlz44n"), ("M1", "cooling_fan_5v")],
+        {"ISO": ["U5.VIN-", "U5.GND", "U5.VOUT-", "M1.GND"]},
+    )
+    assert plan_power_flags(isolated) == []
+    # Load return alone, module ground unconnected: nothing upstream either.
+    return_only = _netlist(
         [("U5", "mosfet-irlz44n"), ("M1", "cooling_fan_5v")],
         {"GND_2": ["U5.VOUT-", "M1.GND"]},
     )
-    flags = _flagged_nets(netlist)
-    assert set(flags) == {"GND_2"} and "VOUT-" in flags["GND_2"]
+    assert plan_power_flags(return_only) == []
+    # Fed: the module's VIN- sits on the connector's ground, so the switched return is fed.
+    fed = _netlist(
+        [("J1", "usb-power-5v"), ("U5", "mosfet-irlz44n"), ("M1", "cooling_fan_5v")],
+        {"GND": ["J1.GND", "U5.VIN-"], "GND_2": ["U5.VOUT-", "M1.GND"]},
+    )
+    flags = _flagged_nets(fed)
+    assert set(flags) == {"GND", "GND_2"} and "VOUT-" in flags["GND_2"]
+    # Fed through a regulator: VIN- on a buck's OUT- that is common with a fed IN-.
+    via_buck = _netlist(
+        [("J1", "dc-barrel-12v"), ("U2", "buck-mp1584"), ("U5", "mosfet-irlz44n"), ("M1", "cooling_fan_5v")],
+        {"GND": ["J1.GND", "U2.IN-"], "GND_2": ["U2.OUT-", "U5.VIN-"], "GND_3": ["U5.VOUT-", "M1.GND"]},
+    )
+    assert "GND_3" in _flagged_nets(via_buck)
 
 
 def test_external_supply_pin_gets_its_own_flagged_stub_net_only_while_unconnected() -> None:
