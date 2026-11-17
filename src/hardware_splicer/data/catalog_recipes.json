@@ -178,16 +178,19 @@
       "modules": [
         {"role": "usb", "moduleId": "usb-power-5v"},
         {"role": "chg", "moduleId": "tp4056"},
-        {"role": "ldo", "moduleId": "ldo-ams1117-3v3"}
+        {"role": "ldo", "moduleId": "ldo-ams1117-3v3"},
+        {"role": "out", "moduleId": "terminal-block-2p-dc"}
       ],
       "wires": [
         {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "chg", "pin": "IN+"}},
         {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "chg", "pin": "IN-"}},
         {"from": {"role": "chg", "pin": "OUT+"}, "to": {"role": "ldo", "pin": "VIN"}},
-        {"from": {"role": "chg", "pin": "OUT-"}, "to": {"role": "ldo", "pin": "GND"}}
+        {"from": {"role": "chg", "pin": "OUT-"}, "to": {"role": "ldo", "pin": "GND"}},
+        {"from": {"role": "ldo", "pin": "VOUT"}, "to": {"role": "out", "pin": "V+"}},
+        {"from": {"role": "ldo", "pin": "GND"}, "to": {"role": "out", "pin": "GND"}}
       ],
       "notes": [
-        "3.3V on LDO VOUT for sensors/MCU.",
+        "3.3V for sensors/MCU on the 2-pin output terminal (V+ = LDO VOUT, GND).",
         "Optional Li-ion cell on TP4056 BAT+/BAT- for charging."
       ]
     },

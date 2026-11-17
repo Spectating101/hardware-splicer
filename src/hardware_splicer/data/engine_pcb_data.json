@@ -3340,6 +3340,33 @@
       ]
     },
     {
+      "id": "terminal-block-2p-dc",
+      "label": "2-pin screw terminal block (DC output)",
+      "category": "interface",
+      "summary": "5.08 mm field-wiring terminal on the carrier PCB that hands a DC rail and its ground to off-board consumers.",
+      "manufacturer": "Generic",
+      "partNumber": "KF301-2P",
+      "priceUsd": 0.5,
+      "source": "curated",
+      "capabilityTags": [
+        "field_wiring"
+      ],
+      "pins": [
+        {
+          "id": "V+",
+          "label": "V+",
+          "role": "power_in",
+          "voltage": "rail from the regulator",
+          "notes": "Takes the regulated rail and hands it off-board"
+        },
+        {
+          "id": "GND",
+          "label": "GND",
+          "role": "gnd"
+        }
+      ]
+    },
+    {
       "id": "terminal-block-4p",
       "label": "4-pin screw terminal block",
       "category": "interface",
@@ -10197,6 +10224,25 @@
         },
         {
           "pinId": "2",
+          "x": 2.54,
+          "y": 0
+        }
+      ]
+    },
+    "terminal-block-2p-dc": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+      "bodyMm": {
+        "w": 12,
+        "h": 10
+      },
+      "pads": [
+        {
+          "pinId": "V+",
+          "x": -2.54,
+          "y": 0
+        },
+        {
+          "pinId": "GND",
           "x": 2.54,
           "y": 0
         }
