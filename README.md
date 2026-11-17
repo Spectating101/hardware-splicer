@@ -33,6 +33,13 @@ show a successful SPI design check and a correctly blocked donor repair. This is
 software-level engineering evidence, **not** an autonomous physical repair or
 fabrication approval.
 
+**Digital design revisions:** choose **Start digital design** in the app to open
+the HS-3G-B proving case, change payload or gust requirements, run fresh native
+simulation, and compare saved revisions and their 3D models. Failed requirements
+retain their evidence. See the [digital workflow guide](examples/drone_proving_ground/digital/README.md)
+and [verification record](docs/status/generated/digital-project-completion-2026-11-17.json).
+This workflow needs no physical parts or model-service key.
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

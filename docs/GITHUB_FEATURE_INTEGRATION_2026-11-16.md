@@ -107,6 +107,18 @@ All **61 focused native tests** pass. The complete native root suite on final co
 
 GitHub main remained at `38dbad2b` when rechecked. The keyboard draft has newer unrelated work beyond the previously integrated head; it was not pulled into this digital-drone completion. These changes are committed locally; no remote push, PR or merge was performed.
 
+## Saved digital requirement revisions — 2026-11-17
+
+Implementation commit `0886eb0f` connects the digital drone to the existing project store, background jobs and app workspace. **Start digital design** creates a saved baseline. Payload changes rebuild the native assembly, assigned mass, centre of mass and inertia, then run the three PyBullet cases and independent artifact verification. The app compares metrics and 3D models, reopens history and exposes each revision's verified downloads. Payload requests are bounded and explicit; gust force and mass limits have separate controls. Physical work remains outside this workflow.
+
+The browser exercise retained four revisions: baseline **234.9 g / passed**, payload **244.9 g / passed**, overweight **264.9 g / requirements not met**, and a repaired requirement set **244.9 g / passed**. Each completed computation has its own artifacts; earlier revisions remained unchanged. The overweight computation was saved with both mass-limit failures, and its downloaded ZIP reran successfully in a minimal environment without CAD or repository imports, returning the expected failed-requirements status. Desktop and phone layouts, WebGL, visible payload geometry, job recovery after restart, and reopening all four revisions were checked. The [workflow guide](../examples/drone_proving_ground/digital/README.md) documents the supported scope and setup.
+
+The complete root invocation on this implementation finished with **4,286 passed, seven skipped, zero failures**, in 1,368.51 seconds. Four skips came from the system `pcbnew` extension being outside the rebuilt native environment; exposing that installed extension allowed **all four native follow-up checks to pass** in a separate invocation. Thus **4,290 unique root tests passed across the full run and follow-up**, with only three opt-in live-vision tests unexecuted. This is not a claim that one invocation had only three skips. The final UI suite has **86 passing tests**, and its production build passes with the existing bundle warnings.
+
+An initial full attempt was interrupted after missing CLI subprocess dependencies and an older plant-build test's unstated clean-ERC assumption. The native environment now includes the project dependencies; the artifact-delivery test uses the existing explicit clean-ERC fixture. Real KiCad still reports the plant schematic's four ERC errors, and the production ERC veto remains enabled. The build/guard tests passed separately before the complete rerun. No router feature changes were made.
+
+The regenerated baseline now includes **22 files and 106 independent checks**, plus the ZIP and standalone requirements evaluator. The earlier digital-completion receipt above remains historical evidence for its pinned source commit; the [new completion record](status/generated/digital-project-completion-2026-11-17.json) records the current source, archive, tests, four-revision exercise, native follow-up and screenshots. The three original local work files remain byte-identical and uncommitted. All changes remain local; no GitHub push, PR or merge was performed.
+
 ## Useful starting commands
 
 From the repository root:

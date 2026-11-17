@@ -1,0 +1,1272 @@
+{
+  "baseline": {
+    "archive_sha256": "ffbe2060a46cf516a7fc02470b1cde84ff70d92698ab806a530e589122c27aa5",
+    "independent_checks": 106,
+    "verification_sha256": "85cff44ff22804c2e4123ac07daf330ef628dcf1193ccaf00e1b68987bbf25f2"
+  },
+  "bounded_extreme_input_study": {
+    "assessment": {
+      "accepted": false,
+      "checks": {
+        "controlled_ground_contact": true,
+        "finite_state": true,
+        "gust_recovery_error_m": false,
+        "hover_error_m": true,
+        "landing_speed_m_s": true,
+        "max_tracking_tilt_deg": true,
+        "native_force_balance": true,
+        "position_velocity_consistency": true,
+        "timebase": true,
+        "tracking_rms_m": false,
+        "yaw_tracking": true
+      },
+      "metrics": {
+        "consumed_mah_est": 26.717102989831545,
+        "fault_detected": false,
+        "final_position_m": [
+          -0.03216082044983172,
+          0.02122236444149214,
+          0.039975494447121465
+        ],
+        "force_balance_rms_m_s2": 1.5353366787375423e-15,
+        "gust_recovery_error_m": 0.10169659138763795,
+        "hover_error_m": 0.010102191147579922,
+        "landed_contact": true,
+        "landing_speed_m_s": 0.11964158871669976,
+        "max_rpm": 17303.830061429348,
+        "max_tracking_tilt_deg": 10.029669916983217,
+        "peak_current_a_est": 4.043490353397846,
+        "position_velocity_rms_m_s": 4.4624173997457005e-15,
+        "rows": 6720,
+        "seconds": 28.0,
+        "tracking_rms_m": 0.10293309184780396,
+        "yaw_error_at_hold_deg": 0.002059387763619473
+      },
+      "scenario": {
+        "expected": "controlled_landing",
+        "extra_mass_g": 0.0,
+        "id": "nominal",
+        "motor_failure": null
+      }
+    },
+    "framing": {
+      "accepted": true,
+      "header_bottom_px": 47,
+      "margin_px": 8,
+      "max_xy_px": [
+        458.11395291102906,
+        295.6074374481512
+      ],
+      "min_xy_px": [
+        134.40585082658296,
+        61.334335380268264
+      ]
+    },
+    "mass_g": 284.9
+  },
+  "browser_flow": {
+    "download": {
+      "artifact_hashes_match_receipt": true,
+      "files": 22,
+      "revision": 3,
+      "zip_integrity": true,
+      "zip_sha256": "5dd52795fd8678e18c5910981592cc7b5a32dc8d38dbd017cb26da24c0dd7084"
+    },
+    "earlier_baseline_unchanged_in_browser_assertion": true,
+    "earlier_revisions_unchanged_after_revision_4": true,
+    "jobs": [
+      {
+        "job_id": "d768d7941bff52ddb427097a060be45d",
+        "result": {
+          "artifact_integrity": true,
+          "project_id": "digital-927c58837e094ca7af14b3a3adb10ccb",
+          "requirements_met": true,
+          "revision": 4,
+          "run_id": "de68c4fc38454d609ae90d855c301782"
+        },
+        "status": "succeeded"
+      },
+      {
+        "job_id": "f05a00c401635e89a75cf9c9f110718b",
+        "result": {
+          "artifact_integrity": true,
+          "project_id": "digital-927c58837e094ca7af14b3a3adb10ccb",
+          "requirements_met": false,
+          "revision": 3,
+          "run_id": "098a252b093c400a96d8f9e19d965594"
+        },
+        "status": "succeeded"
+      },
+      {
+        "job_id": "a7910e8ae14556fcb62537cf1de1455c",
+        "result": {
+          "artifact_integrity": true,
+          "project_id": "digital-927c58837e094ca7af14b3a3adb10ccb",
+          "requirements_met": true,
+          "revision": 2,
+          "run_id": "3679f62fefa94953802de5c11a203647"
+        },
+        "status": "succeeded"
+      }
+    ],
+    "latest_download": {
+      "bytes": 5872171,
+      "path": ".cache/hardware-splicer/digital-project-20261117/HS3G_PAYLOAD_10G_DIGITAL.zip",
+      "sha256": "df4bb7bb8e9bfa0cb2ae15956ada660403ff1620173d9b603fda8215b2a40348"
+    },
+    "project_id": "digital-927c58837e094ca7af14b3a3adb10ccb",
+    "revisions": [
+      {
+        "change_request": "Remove 20 g of payload",
+        "parent_revision": 3,
+        "revision": 4,
+        "run_id": "de68c4fc38454d609ae90d855c301782",
+        "summary": {
+          "artifact_integrity": true,
+          "centre_of_mass_mm": [
+            0.6553695242724364,
+            -4.789969349420739e-08,
+            0.33867257643578386
+          ],
+          "constraints": [
+            {
+              "actual": 244.9,
+              "id": "nominal_mass",
+              "label": "Nominal mass",
+              "limit": 250.0,
+              "margin": 5.099999999999994,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 249.9,
+              "id": "mass_uncertainty",
+              "label": "Mass with 5 g uncertainty",
+              "limit": 250.0,
+              "margin": 0.09999999999999432,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 0.003518300906597968,
+              "id": "inertia_approximation",
+              "label": "Relative omitted products of inertia",
+              "limit": 0.05,
+              "margin": 0.04648169909340204,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "nominal_controlled_ground_contact",
+              "label": "nominal \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03861389610204398,
+              "id": "nominal_gust_recovery_error_m",
+              "label": "nominal \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.011227909665295088,
+              "id": "nominal_hover_error_m",
+              "label": "nominal \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11676113873633127,
+              "id": "nominal_landing_speed_m_s",
+              "label": "nominal \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.51675793228596,
+              "id": "nominal_max_tracking_tilt_deg",
+              "label": "nominal \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05568679139910498,
+              "id": "nominal_tracking_rms_m",
+              "label": "nominal \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "nominal_yaw_tracking",
+              "label": "nominal \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_controlled_ground_contact",
+              "label": "mass plus 5g \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03884022919704738,
+              "id": "mass_plus_5g_gust_recovery_error_m",
+              "label": "mass plus 5g \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.0070101721972777,
+              "id": "mass_plus_5g_hover_error_m",
+              "label": "mass plus 5g \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11846323168558891,
+              "id": "mass_plus_5g_landing_speed_m_s",
+              "label": "mass plus 5g \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.49036694459354,
+              "id": "mass_plus_5g_max_tracking_tilt_deg",
+              "label": "mass plus 5g \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05600399473690476,
+              "id": "mass_plus_5g_tracking_rms_m",
+              "label": "mass plus 5g \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_yaw_tracking",
+              "label": "mass plus 5g \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_failure_reached_ground",
+              "label": "motor failure \u00b7 failure reached ground",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_injected_motor_stopped",
+              "label": "motor failure \u00b7 injected motor stopped",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_loss_of_control_observed",
+              "label": "motor failure \u00b7 loss of control observed",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            }
+          ],
+          "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+          "inertia_diagonal_kg_m2": [
+            0.00024256804451733044,
+            0.00023463995487729572,
+            0.0003094348437591488
+          ],
+          "mass_g": 244.9,
+          "mass_margin_g": 5.099999999999994,
+          "metrics": {
+            "consumed_mah_est": 21.632718805218307,
+            "fault_detected": false,
+            "final_position_m": [
+              -0.012598318376996959,
+              0.00810393882585503,
+              0.034824077792082436
+            ],
+            "force_balance_rms_m_s2": 1.437752216467839e-15,
+            "gust_recovery_error_m": 0.03861389610204398,
+            "hover_error_m": 0.011227909665295088,
+            "landed_contact": true,
+            "landing_speed_m_s": 0.11676113873633127,
+            "max_rpm": 15893.576217638314,
+            "max_tracking_tilt_deg": 4.51675793228596,
+            "peak_current_a_est": 3.2744347095357327,
+            "position_velocity_rms_m_s": 4.391892054166246e-15,
+            "rows": 6720,
+            "seconds": 28.0,
+            "tracking_rms_m": 0.05568679139910498,
+            "yaw_error_at_hold_deg": 0.00024261186309118023
+          },
+          "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+          "parts": 33,
+          "physical_work_requested": false,
+          "requirements": {
+            "gust_scale": 1.0,
+            "max_mass_g": 250.0,
+            "payload_mass_g": 10.0
+          },
+          "requirements_met": true,
+          "scope_limits": [
+            "Parameterized representative, not a physically calibrated digital twin.",
+            "Native CAD frame; simplified component, propeller and collision geometry.",
+            "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+            "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+            "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+            "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+            "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+          ],
+          "source_sha256": {
+            "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+            "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+            "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+            "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+            "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+            "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+            "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+            "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+            "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+            "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+            "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+            "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+          }
+        }
+      },
+      {
+        "change_request": "Add 20 g of payload",
+        "parent_revision": 2,
+        "revision": 3,
+        "run_id": "098a252b093c400a96d8f9e19d965594",
+        "summary": {
+          "artifact_integrity": true,
+          "centre_of_mass_mm": [
+            1.8138920214961098,
+            -4.428325759430498e-08,
+            3.108874722420247
+          ],
+          "constraints": [
+            {
+              "actual": 264.90000000000003,
+              "id": "nominal_mass",
+              "label": "Nominal mass",
+              "limit": 250.0,
+              "margin": -14.900000000000034,
+              "passed": false,
+              "unit": "g"
+            },
+            {
+              "actual": 269.90000000000003,
+              "id": "mass_uncertainty",
+              "label": "Mass with 5 g uncertainty",
+              "limit": 250.0,
+              "margin": -19.900000000000034,
+              "passed": false,
+              "unit": "g"
+            },
+            {
+              "actual": 0.04250799763178284,
+              "id": "inertia_approximation",
+              "label": "Relative omitted products of inertia",
+              "limit": 0.05,
+              "margin": 0.007492002368217163,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "nominal_controlled_ground_contact",
+              "label": "nominal \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03607892389500853,
+              "id": "nominal_gust_recovery_error_m",
+              "label": "nominal \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.010626278073937274,
+              "id": "nominal_hover_error_m",
+              "label": "nominal \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11832321935774627,
+              "id": "nominal_landing_speed_m_s",
+              "label": "nominal \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.492040273633646,
+              "id": "nominal_max_tracking_tilt_deg",
+              "label": "nominal \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05384221666687426,
+              "id": "nominal_tracking_rms_m",
+              "label": "nominal \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "nominal_yaw_tracking",
+              "label": "nominal \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_controlled_ground_contact",
+              "label": "mass plus 5g \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03627748553618747,
+              "id": "mass_plus_5g_gust_recovery_error_m",
+              "label": "mass plus 5g \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.0061801629354326345,
+              "id": "mass_plus_5g_hover_error_m",
+              "label": "mass plus 5g \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.1199845017208483,
+              "id": "mass_plus_5g_landing_speed_m_s",
+              "label": "mass plus 5g \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.468310005252932,
+              "id": "mass_plus_5g_max_tracking_tilt_deg",
+              "label": "mass plus 5g \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05412474481510848,
+              "id": "mass_plus_5g_tracking_rms_m",
+              "label": "mass plus 5g \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_yaw_tracking",
+              "label": "mass plus 5g \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_failure_reached_ground",
+              "label": "motor failure \u00b7 failure reached ground",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_injected_motor_stopped",
+              "label": "motor failure \u00b7 injected motor stopped",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_loss_of_control_observed",
+              "label": "motor failure \u00b7 loss of control observed",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            }
+          ],
+          "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+          "inertia_diagonal_kg_m2": [
+            0.00026780693346670556,
+            0.0002643191221897157,
+            0.00031435512212219375
+          ],
+          "mass_g": 264.90000000000003,
+          "mass_margin_g": -14.900000000000034,
+          "metrics": {
+            "consumed_mah_est": 24.10607420348268,
+            "fault_detected": false,
+            "final_position_m": [
+              -0.011474775660975189,
+              0.007387290349114746,
+              0.037593689606356215
+            ],
+            "force_balance_rms_m_s2": 1.4127380860588662e-15,
+            "gust_recovery_error_m": 0.03607892389500853,
+            "hover_error_m": 0.010626278073937274,
+            "landed_contact": true,
+            "landing_speed_m_s": 0.11832321935774627,
+            "max_rpm": 16614.854425850008,
+            "max_tracking_tilt_deg": 4.492040273633646,
+            "peak_current_a_est": 3.6510563026498692,
+            "position_velocity_rms_m_s": 4.413667404859292e-15,
+            "rows": 6720,
+            "seconds": 28.0,
+            "tracking_rms_m": 0.05384221666687426,
+            "yaw_error_at_hold_deg": 0.00023730770350969394
+          },
+          "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+          "parts": 33,
+          "physical_work_requested": false,
+          "requirements": {
+            "gust_scale": 1.0,
+            "max_mass_g": 250.0,
+            "payload_mass_g": 30.0
+          },
+          "requirements_met": false,
+          "scope_limits": [
+            "Parameterized representative, not a physically calibrated digital twin.",
+            "Native CAD frame; simplified component, propeller and collision geometry.",
+            "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+            "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+            "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+            "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+            "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+          ],
+          "source_sha256": {
+            "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+            "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+            "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+            "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+            "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+            "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+            "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+            "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+            "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+            "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+            "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+            "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+          }
+        }
+      },
+      {
+        "change_request": "Add 10 g of payload",
+        "parent_revision": 1,
+        "revision": 2,
+        "run_id": "3679f62fefa94953802de5c11a203647",
+        "summary": {
+          "artifact_integrity": true,
+          "centre_of_mass_mm": [
+            0.6553695242724364,
+            -4.789969349420739e-08,
+            0.33867257643578386
+          ],
+          "constraints": [
+            {
+              "actual": 244.9,
+              "id": "nominal_mass",
+              "label": "Nominal mass",
+              "limit": 250.0,
+              "margin": 5.099999999999994,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 249.9,
+              "id": "mass_uncertainty",
+              "label": "Mass with 5 g uncertainty",
+              "limit": 250.0,
+              "margin": 0.09999999999999432,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 0.003518300906597968,
+              "id": "inertia_approximation",
+              "label": "Relative omitted products of inertia",
+              "limit": 0.05,
+              "margin": 0.04648169909340204,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "nominal_controlled_ground_contact",
+              "label": "nominal \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03861389610204398,
+              "id": "nominal_gust_recovery_error_m",
+              "label": "nominal \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.011227909665295088,
+              "id": "nominal_hover_error_m",
+              "label": "nominal \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11676113873633127,
+              "id": "nominal_landing_speed_m_s",
+              "label": "nominal \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.51675793228596,
+              "id": "nominal_max_tracking_tilt_deg",
+              "label": "nominal \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05568679139910498,
+              "id": "nominal_tracking_rms_m",
+              "label": "nominal \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "nominal_yaw_tracking",
+              "label": "nominal \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_controlled_ground_contact",
+              "label": "mass plus 5g \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.03884022919704738,
+              "id": "mass_plus_5g_gust_recovery_error_m",
+              "label": "mass plus 5g \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.0070101721972777,
+              "id": "mass_plus_5g_hover_error_m",
+              "label": "mass plus 5g \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11846323168558891,
+              "id": "mass_plus_5g_landing_speed_m_s",
+              "label": "mass plus 5g \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.49036694459354,
+              "id": "mass_plus_5g_max_tracking_tilt_deg",
+              "label": "mass plus 5g \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05600399473690476,
+              "id": "mass_plus_5g_tracking_rms_m",
+              "label": "mass plus 5g \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_yaw_tracking",
+              "label": "mass plus 5g \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_failure_reached_ground",
+              "label": "motor failure \u00b7 failure reached ground",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_injected_motor_stopped",
+              "label": "motor failure \u00b7 injected motor stopped",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_loss_of_control_observed",
+              "label": "motor failure \u00b7 loss of control observed",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            }
+          ],
+          "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+          "inertia_diagonal_kg_m2": [
+            0.00024256804451733044,
+            0.00023463995487729572,
+            0.0003094348437591488
+          ],
+          "mass_g": 244.9,
+          "mass_margin_g": 5.099999999999994,
+          "metrics": {
+            "consumed_mah_est": 21.632718805218307,
+            "fault_detected": false,
+            "final_position_m": [
+              -0.012598318376996959,
+              0.00810393882585503,
+              0.034824077792082436
+            ],
+            "force_balance_rms_m_s2": 1.437752216467839e-15,
+            "gust_recovery_error_m": 0.03861389610204398,
+            "hover_error_m": 0.011227909665295088,
+            "landed_contact": true,
+            "landing_speed_m_s": 0.11676113873633127,
+            "max_rpm": 15893.576217638314,
+            "max_tracking_tilt_deg": 4.51675793228596,
+            "peak_current_a_est": 3.2744347095357327,
+            "position_velocity_rms_m_s": 4.391892054166246e-15,
+            "rows": 6720,
+            "seconds": 28.0,
+            "tracking_rms_m": 0.05568679139910498,
+            "yaw_error_at_hold_deg": 0.00024261186309118023
+          },
+          "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+          "parts": 33,
+          "physical_work_requested": false,
+          "requirements": {
+            "gust_scale": 1.0,
+            "max_mass_g": 250.0,
+            "payload_mass_g": 10.0
+          },
+          "requirements_met": true,
+          "scope_limits": [
+            "Parameterized representative, not a physically calibrated digital twin.",
+            "Native CAD frame; simplified component, propeller and collision geometry.",
+            "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+            "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+            "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+            "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+            "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+          ],
+          "source_sha256": {
+            "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+            "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+            "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+            "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+            "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+            "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+            "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+            "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+            "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+            "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+            "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+            "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+          }
+        }
+      },
+      {
+        "change_request": "Verified baseline",
+        "parent_revision": null,
+        "revision": 1,
+        "run_id": "15df704ad92644e385a5129eb589efaa",
+        "summary": {
+          "artifact_integrity": true,
+          "centre_of_mass_mm": [
+            0.002128550422817352,
+            -4.993884604823921e-08,
+            -1.223325185316631
+          ],
+          "constraints": [
+            {
+              "actual": 234.9,
+              "id": "nominal_mass",
+              "label": "Nominal mass",
+              "limit": 250.0,
+              "margin": 15.099999999999994,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 239.9,
+              "id": "mass_uncertainty",
+              "label": "Mass with 5 g uncertainty",
+              "limit": 250.0,
+              "margin": 10.099999999999994,
+              "passed": true,
+              "unit": "g"
+            },
+            {
+              "actual": 0.023146111731037616,
+              "id": "inertia_approximation",
+              "label": "Relative omitted products of inertia",
+              "limit": 0.05,
+              "margin": 0.026853888268962386,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "nominal_controlled_ground_contact",
+              "label": "nominal \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.04001556424009155,
+              "id": "nominal_gust_recovery_error_m",
+              "label": "nominal \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.011562468474567864,
+              "id": "nominal_hover_error_m",
+              "label": "nominal \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11659125272444161,
+              "id": "nominal_landing_speed_m_s",
+              "label": "nominal \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.53086516568853,
+              "id": "nominal_max_tracking_tilt_deg",
+              "label": "nominal \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.05675998083029617,
+              "id": "nominal_tracking_rms_m",
+              "label": "nominal \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "nominal_yaw_tracking",
+              "label": "nominal \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_controlled_ground_contact",
+              "label": "mass plus 5g \u00b7 controlled ground contact",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.04025798463744165,
+              "id": "mass_plus_5g_gust_recovery_error_m",
+              "label": "mass plus 5g \u00b7 gust recovery error m",
+              "limit": 0.07,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.007488030195550651,
+              "id": "mass_plus_5g_hover_error_m",
+              "label": "mass plus 5g \u00b7 hover error m",
+              "limit": 0.06,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": 0.11831814868332485,
+              "id": "mass_plus_5g_landing_speed_m_s",
+              "label": "mass plus 5g \u00b7 landing speed m s",
+              "limit": 0.15,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 4.502905281040545,
+              "id": "mass_plus_5g_max_tracking_tilt_deg",
+              "label": "mass plus 5g \u00b7 max tracking tilt deg",
+              "limit": 35.0,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": 0.0570975494391757,
+              "id": "mass_plus_5g_tracking_rms_m",
+              "label": "mass plus 5g \u00b7 tracking rms m",
+              "limit": 0.1,
+              "passed": true,
+              "unit": "m"
+            },
+            {
+              "actual": null,
+              "id": "mass_plus_5g_yaw_tracking",
+              "label": "mass plus 5g \u00b7 yaw tracking",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_failure_reached_ground",
+              "label": "motor failure \u00b7 failure reached ground",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_injected_motor_stopped",
+              "label": "motor failure \u00b7 injected motor stopped",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            },
+            {
+              "actual": null,
+              "id": "motor_failure_loss_of_control_observed",
+              "label": "motor failure \u00b7 loss of control observed",
+              "limit": null,
+              "passed": true,
+              "unit": ""
+            }
+          ],
+          "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+          "inertia_diagonal_kg_m2": [
+            0.00022835905838985182,
+            0.00021793282115856427,
+            0.0003066966961678959
+          ],
+          "mass_g": 234.9,
+          "mass_margin_g": 15.099999999999994,
+          "metrics": {
+            "consumed_mah_est": 20.439417161734806,
+            "fault_detected": false,
+            "final_position_m": [
+              -0.01313422286933502,
+              0.008435790856408979,
+              0.033262139493817414
+            ],
+            "force_balance_rms_m_s2": 1.4065561081657125e-15,
+            "gust_recovery_error_m": 0.04001556424009155,
+            "hover_error_m": 0.011562468474567864,
+            "landed_contact": true,
+            "landing_speed_m_s": 0.11659125272444161,
+            "max_rpm": 15519.219907397937,
+            "max_tracking_tilt_deg": 4.53086516568853,
+            "peak_current_a_est": 3.0922431793603975,
+            "position_velocity_rms_m_s": 4.400928988770165e-15,
+            "rows": 6720,
+            "seconds": 28.0,
+            "tracking_rms_m": 0.05675998083029617,
+            "yaw_error_at_hold_deg": 0.00024351102552849953
+          },
+          "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+          "parts": 32,
+          "physical_work_requested": false,
+          "requirements": {
+            "gust_scale": 1.0,
+            "max_mass_g": 250.0,
+            "payload_mass_g": 0.0
+          },
+          "requirements_met": true,
+          "scope_limits": [
+            "Parameterized representative, not a physically calibrated digital twin.",
+            "Native CAD frame; simplified component, propeller and collision geometry.",
+            "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+            "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+            "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+            "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+            "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+          ],
+          "source_sha256": {
+            "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+            "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+            "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+            "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+            "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+            "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+            "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+            "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+            "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+            "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+            "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+            "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+          }
+        }
+      }
+    ]
+  },
+  "browser_qa": {
+    "console_errors_after_final_reload": 0,
+    "desktop": [
+      1440,
+      1000
+    ],
+    "horizontal_overflow": false,
+    "mobile": [
+      390,
+      844
+    ],
+    "payload_visible_as_33rd_part": true,
+    "restart_recovered_queued_job": true,
+    "screenshots_sha256": {
+      "digital-revision-comparison-2026-11-17.png": "942654b16d0dbd72ea8eedb2236a3b8293c95d38fe05c3e6e4e68682b281f780",
+      "digital-revision-failed-2026-11-17.png": "4830bfb539d2d506cd176a2df7dd1cdb881cc7d042236674f637b7f2c83f0617",
+      "digital-revision-mobile-2026-11-17.png": "7b08be85056a5022761113b3bd86752b09117a388f15b83a125bef73e7ed98d1"
+    },
+    "webgl": true
+  },
+  "complete_native_root_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 4286,
+    "path": ".cache/hardware-splicer/digital-project-20261117/full-native.xml",
+    "seconds": 1368.396,
+    "sha256": "bfd080bdb608f6c7edd10282b3330e8f57e1ebf0174f39946ded5c84ba751d9f",
+    "skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_integrations::test_freerouting_pipeline_routes_sensor_logger": "pcbnew required",
+      "tests.test_spi_checkpoint.SpiCheckpointUnitTests::test_report_hash_input_cannot_be_partial": "native pcbnew is not available on a generic CI runner",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision",
+      "tests.test_workshop_operator::test_real_spi_reference_verification_replays_with_original_identity": "requires native KiCad + pcbnew",
+      "tests.test_workshop_operator::test_verifier_nonzero_even_if_generating_green_receipt_is_refused": "requires native KiCad + pcbnew"
+    },
+    "skipped": 7,
+    "tests": 4293
+  },
+  "coverage_after_native_followup": {
+    "note": "The complete invocation had seven skips. All four KiCad skips subsequently passed after exposing the installed system pcbnew extension to the native environment. These are separate invocations; only three opt-in vision tests remain unexecuted.",
+    "remaining_skips": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    },
+    "unique_root_tests_passed": 4290
+  },
+  "coverage_note": "The complete root run passed 4,286 and skipped 7. Four KiCad skips were subsequently executed and passed with the system pcbnew extension visible. Only the three opt-in live vision checks remain skipped; these counts do not describe a single 4,290-pass run.",
+  "date": "2026-11-17",
+  "digital_objective_complete": true,
+  "focused_native_suite_before_final_startup_regressions": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 41,
+    "path": ".cache/hardware-splicer/digital-project-20261117/focused-native.xml",
+    "seconds": 186.689,
+    "sha256": "92a4674cc0ca6f0ea890d89ee66771e775b8d081d05985b316784b3f86852e4f",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 41
+  },
+  "initial_full_run": {
+    "complete": false,
+    "erc_report_sha256": "2f3fa80b42caca57eca47d16ae6cf8448a9cc88074d21933918cd10a0af80628",
+    "log_sha256": "0d1ce2c9ec4e4584b111ed61741a7e07e1ea17bacac74048b2b959b8565da29f",
+    "native_erc_gate_disabled": false,
+    "native_legacy_plant_erc_errors": 4,
+    "reason": "Interrupted after CLI subprocess dependency failures and a legacy ready-build test that lacked the explicit clean-ERC assumption. Installed project dependencies in the native environment, made the test assumption explicit, then reran the complete suite."
+  },
+  "legacy_build_and_erc_gate_checks": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 59,
+    "path": ".cache/hardware-splicer/digital-project-20261117/build-erc.xml",
+    "seconds": 60.51,
+    "sha256": "d3aef9c0c029ccb3ad54e0c36bad265858b981d0cf73aa6362f6184b026bb883",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 59
+  },
+  "native_kicad_followup": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 4,
+    "path": ".cache/hardware-splicer/digital-project-20261117/native-kicad-followup.xml",
+    "seconds": 15.641,
+    "sha256": "eaf5d7cab1e6ee44a081a8cf046301042f3cb100886c7e0d161e6c6c72689c44",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 4
+  },
+  "objective": "Use the existing app to change digital requirements, compute fresh native CAD/physics, save revisions and compare results.",
+  "open_actions": [],
+  "original_local_work_preserved": true,
+  "original_local_work_sha256": {
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "physical_work_requested": false,
+  "production_ui_build": {
+    "index_sha256": "80ab70e8f785dea39d0075bf06613b8ae30993588948f25dc0cbc0e5cdbddef3",
+    "passed": true
+  },
+  "remaining_skips": {
+    "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+    "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+    "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+  },
+  "schema": "hardware_splicer.digital_project_completion.v1",
+  "source_head": "0886eb0f8c797885eb8554c9198d00b9547a0b14",
+  "source_scope": "Bounded HS-3G-B proving case; payload 0\u201350 g, gust force scale 0\u20133, mass limit 150\u2013500 g. Ideal feedback and extrapolated low-throttle motor data; no physical validation or arbitrary hardware redesign.",
+  "source_sha256": {
+    "apps/splice-ui/src/App.jsx": "9d55f51c3229a7580903af14348e9633243ca6c814418b968136aab9fd1ae63c",
+    "apps/splice-ui/src/projectSession/DigitalStudyPanel.jsx": "f5c99c07dfd03a820591cd2e0dce811db530957b27f8d0cac1c7ffd58c66f834",
+    "apps/splice-ui/src/projectSession/DigitalStudyPanel.test.jsx": "7b48cc22b2aa49158f5579d6b66c958ab04935808dfa9e2c1cc85c388c61b363",
+    "apps/splice-ui/src/projectSession/ProjectWorkspace.jsx": "d74853ffe4f7915f7fd732b92772ee44701b4a498c637b5c9f07515a83d180ac",
+    "apps/splice-ui/src/projectSession/digitalStudy.css": "e61c6d8bb0bd5f240621b602c999d8f0aad2213aba7f8efdad81fa25dc219139",
+    "apps/splice-ui/src/projectSession/digitalStudyApi.js": "6b79a4432b2754c1c2f44252e85d9fb8e657c5654984aa48ed3a9b8438f010e8",
+    "apps/splice-ui/src/projectSession/projectPersistence.js": "4979a428b9b95efe841f9cc848691d3f017b1579c5211e63a8346c0ffd96d10c",
+    "apps/splice-ui/src/projectSession/projectPersistenceState.test.js": "086bb0f3528397a821f4d4231382d3be1c6cbd2fb6ab71004bb23d3703fed78a",
+    "apps/splice-ui/src/projectSession/projectSession.js": "315b90257dfdf4e1dc2ff357e52895875b389a655d551bef5ff4075271a990e4",
+    "examples/drone_proving_ground/digital/HS3G_B_DIGITAL.zip": "ffbe2060a46cf516a7fc02470b1cde84ff70d92698ab806a530e589122c27aa5",
+    "examples/drone_proving_ground/digital/README.md": "75731e154d8647b9326960826216e369e744ac19ed7ea7817f9c5a1e21e0a2e7",
+    "examples/drone_proving_ground/digital/build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+    "examples/drone_proving_ground/digital/hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+    "examples/drone_proving_ground/digital/reference/HS3G_B_ASSEMBLY.step": "f308129b71648acbf7598818ec2b360595a54bc6e831e1e43167256b81f70841",
+    "examples/drone_proving_ground/digital/reference/README.md": "b261370bc93d483e5f909382604284050c571622d809603e60ce0f3bac0955be",
+    "examples/drone_proving_ground/digital/reference/RERUN.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+    "examples/drone_proving_ground/digital/reference/SIMULATION.json": "9dfc0cc7e5c172b9cb8d4948cbc6779dd132269ab334537040cdf7fa0dd2d017",
+    "examples/drone_proving_ground/digital/reference/TELEMETRY.png": "cff28f429cf91442fcbccb82d5f61acf36595424b05fafb32aead37dc6bb0b8a",
+    "examples/drone_proving_ground/digital/reference/VIEWER.html": "ce1de6c0f7280c4b61dc6e67ca5e2cde06dad8480a788800bec90fe8c33d1348",
+    "examples/drone_proving_ground/digital/reference/model.json": "46b414a9469fcd53b6ef182e9a08d5fb5b266255ca6caa27b838ab433aa49179",
+    "examples/drone_proving_ground/digital/reference/simulation-contract.json": "c8990109b6f7f4f2387b5142772668fa9774f2241b412f4b3fd351e84e9dbbf6",
+    "examples/drone_proving_ground/digital/reference/study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+    "examples/drone_proving_ground/digital/reference/verification.json": "85cff44ff22804c2e4123ac07daf330ef628dcf1193ccaf00e1b68987bbf25f2",
+    "examples/drone_proving_ground/digital/rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+    "examples/drone_proving_ground/digital/study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+    "examples/drone_proving_ground/digital/verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+    "examples/drone_proving_ground/digital/viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8",
+    "pyproject.toml": "860720d1a645ccf7fdb3be0048684bafa73d966d79e13496286246f661ba153e",
+    "src/hardware_splicer/api.py": "47f44f613a135e7ede2305d76fdda249102371c2752e0397f16933ca81795e91",
+    "src/hardware_splicer/digital_project.py": "0d971ca31a205848f3e654391f2389d52809455a3199ac1680e6a8d8bf6b3ae0",
+    "src/hardware_splicer/digital_project_api.py": "4c10a81d130b610668002c8ed4f7d15d8b67a0027bf8d69075e8f1f9b227993e",
+    "src/hardware_splicer/jobs.py": "4623addc62b176a8607cf2a3393624ce5b281f169ffc021a3c03ee5b993c1952",
+    "src/hardware_splicer/product_api.py": "6b37d39b06d9aa1ffc203cfc3283a5f6a5ade0025e27201872cfa0d16bb5f32a",
+    "src/hardware_splicer/project_api.py": "8698a3720d4971fc48531a269f076456cfdcc556c862a81c4d4bd7b2ac15e434",
+    "src/hardware_splicer/project_store.py": "9276a88b4a66b33bb25669b5946b8d34dda424b8fecd9dd60b0e9dc70639167e",
+    "tests/test_build_compiler.py": "ddfaa495dc0700c7960670f91a8ad4a1dcbcc499d91241f66b5e364f9070dc8b",
+    "tests/test_digital_project.py": "8b0a8f335e2fd9e83aad7f343005ebf87cdeee12e0f7fc9ca08879169cb0f2e0"
+  },
+  "standalone_failed_requirement_rerun": {
+    "exit_code": 2,
+    "no_cad_or_repository_imports": true,
+    "requirements": {
+      "gust_scale": 1.0,
+      "max_mass_g": 250.0,
+      "payload_mass_g": 30.0
+    },
+    "requirements_met": false,
+    "scenarios": [
+      true,
+      true,
+      true
+    ],
+    "simulation_acceptance": true
+  },
+  "ui_tests": {
+    "failures": 0,
+    "log_sha256": "388c312478f5dd746e7928f349b7a3b447e54c627f96a089d23b9922c506f087",
+    "passed": 86
+  },
+  "unique_root_checks_passed": 4290,
+  "versions": {
+    "cadquery": "2.6.1",
+    "fastapi": "0.163.1",
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.5",
+    "pillow": "13.0.0",
+    "pybullet": "3.2.7",
+    "pydantic": "2.14.3",
+    "pytest": "8.4.2",
+    "python": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+    "scipy": "1.18.1",
+    "trimesh": "4.12.2"
+  }
+}
