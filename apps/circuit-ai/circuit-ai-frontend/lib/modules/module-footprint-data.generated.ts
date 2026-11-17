@@ -19,11 +19,12 @@ export type ModuleFootprintMeta = {
 export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
   "dc-barrel-12v": {
     kicadFootprint: "Connector:BarrelJack_CUI_PJ-002A",
-    bodyMm: { w: 10, h: 10 },
-    fit: { status: "unverified_variant", reason: "Footprint geometry has not been checked against the real part." },
+    bodyMm: { w: 22, h: 12 },
+    fit: { status: "unverified_variant", reason: "Three terminals (tip V+, sleeve GND, sleeve switch SW) follow KiCad Connector_BarrelJack.pretty/BarrelJack_Horizontal, the closest standard: the CUI PJ-002A the name refers to is not in KiCad's library, and jack terminal layouts differ by part. The jack's terminals are 1 x 3 mm slots in the KiCad part, while the generator drills round 1.0 mm holes, so the blade terminals would not pass through." },
     pads: [
-      { pinId: "V+", x: -1.75, y: 0 },
-      { pinId: "GND", x: 1.75, y: 0 },
+      { pinId: "V+", x: 3, y: -2.35 },
+      { pinId: "GND", x: -3, y: -2.35 },
+      { pinId: "SW", x: 0, y: 2.35 },
     ],
   },
   "usb-power-5v": {

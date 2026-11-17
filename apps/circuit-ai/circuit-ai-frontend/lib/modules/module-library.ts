@@ -436,6 +436,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     pins: [
       { id: "V+", label: "V+", role: "power_out", voltage: "12V", notes: "Wall adapter input terminal" },
       { id: "GND", label: "GND", role: "gnd" },
+      { id: "SW", label: "SW", role: "other", notes: "Optional: sleeve-switch terminal, opens when a plug is inserted; leave open" },
     ],
     warnings: ["Fuse the input and verify polarity before connecting electronics."],
   },

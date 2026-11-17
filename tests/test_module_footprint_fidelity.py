@@ -205,3 +205,21 @@ def test_esp32_cam_is_unverified_because_the_row_spacing_is_not_published() -> N
     record = fit("esp32-cam-module")
     assert record["status"] == "unverified_variant"
     assert "row" in record["reason"] and "assumed" in record["reason"]
+
+
+# ---- DC barrel jack -----------------------------------------------------------------------------
+
+
+@needs_kicad_library
+def test_barrel_jack_has_all_three_terminals_at_kicad_geometry() -> None:
+    pads = table("dc-barrel-12v")
+    assert [p["pinId"] for p in pads] == ["V+", "GND", "SW"]
+    offsets = relative_to_kicad("dc-barrel-12v", "Connector_BarrelJack.pretty/BarrelJack_Horizontal.kicad_mod")
+    assert len(set(offsets)) == 1
+    assert {"V+", "GND", "SW"} <= spec_pin_ids("dc-barrel-12v")
+
+
+def test_barrel_jack_is_not_claimed_verified_for_the_named_part() -> None:
+    record = fit("dc-barrel-12v")
+    assert record["status"] == "unverified_variant"
+    assert "PJ-002A" in record["reason"] and "slot" in record["reason"]

@@ -1326,6 +1326,12 @@
           "id": "GND",
           "label": "GND",
           "role": "gnd"
+        },
+        {
+          "id": "SW",
+          "label": "SW",
+          "role": "other",
+          "notes": "Optional: sleeve-switch terminal, opens when a plug is inserted; leave open"
         }
       ],
       "warnings": [
