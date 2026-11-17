@@ -224,13 +224,14 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     },
     "a4988-stepper": {
         "kicadFootprint": "Driver:A4988-STEPSTICK",
-        # All 16 StepStick pins in Pololu order (top row left to right, then bottom row). The
-        # engine models a module as one pad row; the two-row 15.24 mm layout failed routing.
-        "bodyMm": {"w": 42, "h": 12},
-        "pads": _row(
-            ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR",
-             "VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"],
-            0, 0, _P,
+        # Pololu A4988 carrier: 2x8 header, 2.54 mm pitch, rows 12.7 mm apart, 15.2 x 20.3 mm.
+        # One row is ENABLE, MS1-MS3, RESET, SLEEP, STEP, DIR; the other VMOT, GND, 2B, 2A, 1A,
+        # 1B, VDD, GND. Pad coordinates are per pin, so the two rows are real, not a faked line.
+        "bodyMm": {"w": 15.2, "h": 20.3},
+        "pads": _dual_col(
+            ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR"],
+            ["VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"],
+            12.7,
         ),
     },
     "resistor-10r": {

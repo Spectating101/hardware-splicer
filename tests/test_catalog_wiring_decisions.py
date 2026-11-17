@@ -123,18 +123,58 @@ def test_a4988_footprint_has_a_pad_for_every_pin_including_reset_sleep_and_coils
     assert {p["id"] for p in spec["pins"]} <= pad_ids
 
 
+def _pads(module_id: str) -> list:
+    return resolve_module_pads(module_id, find_module(module_id))
+
+
+def test_a4988_footprint_is_the_real_two_by_eight_stepstick() -> None:
+    """Pololu A4988 carrier: 2x8 header, 2.54 mm pitch, rows 12.7 mm apart, ~15.2 x 20.3 mm."""
+    pads = _pads("a4988-stepper")
+    assert len(pads) == 16
+    columns: dict = {}
+    for pad in pads:
+        columns.setdefault(round(pad["x"], 3), []).append(pad)
+    assert len(columns) == 2
+    left, right = (sorted(col, key=lambda p: p["y"]) for _, col in sorted(columns.items()))
+    assert round(sorted(columns)[1] - sorted(columns)[0], 3) == 12.7
+    for col in (left, right):
+        assert len(col) == 8
+        assert [round(b["y"] - a["y"], 3) for a, b in zip(col, col[1:])] == [2.54] * 7
+    # Pololu pin order: one row ENABLE..DIR, the other VMOT, GND, 2B, 2A, 1A, 1B, VDD, GND.
+    assert [p["pinId"] for p in left] == ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR"]
+    assert [p["pinId"] for p in right] == ["VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"]
+    body = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_footprints"][
+        "a4988-stepper"
+    ]["bodyMm"]
+    assert (body["w"], body["h"]) == (15.2, 20.3)
+
+
+def test_added_connector_and_resistor_footprints_match_the_real_parts() -> None:
+    def pitch(module_id: str) -> set:
+        xs = sorted(p["x"] for p in _pads(module_id))
+        return {round(b - a, 3) for a, b in zip(xs, xs[1:])}
+
+    # 5.08 mm screw terminals (KF301) with 4, 2 and 2 positions; 10.16 mm axial 1/4 W resistor.
+    assert (len(_pads("terminal-block-4p")), pitch("terminal-block-4p")) == (4, {5.08})
+    assert (len(_pads("terminal-block-2p")), pitch("terminal-block-2p")) == (2, {5.08})
+    assert (len(_pads("terminal-block-2p-dc")), pitch("terminal-block-2p-dc")) == (2, {5.08})
+    assert (len(_pads("resistor-10r")), pitch("resistor-10r")) == (2, {10.16})
+
+
 @pytest.mark.skipif(not shutil.which("node"), reason="node required")
-def test_plotter_compiles_with_pcb_connectivity_matching_the_netlist(tmp_path: Path) -> None:
+def test_plotter_reports_its_real_kicad_drc_errors_and_is_not_build_ready(tmp_path: Path) -> None:
+    # With the true 2x8 footprint the engine's router leaves kicad-cli clearance errors (parallel
+    # via lanes 0.64 mm apart). The build must say so rather than pass on a false footprint.
     result, netlist, pcb = _compile("plotter_motion_stage", tmp_path)
-    assert result.design_quality.get("drc_pass") is True, result.design_quality.get("drc_violations")
-    assert result.design_quality.get("kicad_drc_pass") is True
-    parity = netlist_pcb_parity(netlist, pcb)
-    assert parity["pass"] is True, parity
-    # The RST-SLP strap and the coil terminal are physical nets on the board, not schematic-only.
-    assert any(
-        {"RST", "SLP"} <= {p.pin for p in net.pins}
-        for net in netlist.nets
-    )
+    quality = result.design_quality
+    assert quality.get("drc_pass") is True  # the engine's own DRC
+    assert quality.get("kicad_drc_pass") is False
+    assert quality.get("kicad_drc_errors", 0) > 0
+    assert quality.get("build_ready") is False
+    report = json.loads((tmp_path / "build_compilation" / "KICAD_DRC.json").read_text(encoding="utf-8"))
+    assert {v["type"] for v in report["violations"] if v["severity"] == "error"} == {"clearance"}
+    # Connectivity itself is intact: the board still matches the netlist.
+    assert netlist_pcb_parity(netlist, pcb)["pass"] is True
 
 
 # ---- indicator_or_task_light --------------------------------------------------------------------
