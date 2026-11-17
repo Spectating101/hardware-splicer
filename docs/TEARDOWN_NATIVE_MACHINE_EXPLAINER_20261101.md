@@ -1,5 +1,35 @@
 # HS product-facing native CAD explorer
 
+## November 18 robotics comparison
+
+HS already uses Elvar's Teardown runtime for the ClearBench explorer and the
+separate OpenArm Sortcell workcell. The Sortcell build now verifies both the
+source mesh and its metadata against the approved revision, and checks that all
+542 named mesh nodes match the source parts list. The Chromium replay verified
+all five task phases and the explode control. The PyBullet trajectory uses a
+separate OpenArm URDF. Under the candidate mounting transform, the reach check
+demonstrated zero of the four displayed fixture targets. The model and workcell
+coordinates still need registration. [Teardown source](https://github.com/elvarofficial/teardown)
+
+| Reference | What it adds to HS |
+| --- | --- |
+| [OpenAMRobot mobile base](https://github.com/openAMRobot/openamr-platform-hw) | A full assembly STEP, wiring, electrical and mechanical BOMs, and variant history. HS opened the full assembly and counted 2,924 CAD solids. The sources cover different configurations, so an exact build needs a revision-aware cross-reference. |
+| [SO-ARM102](https://github.com/roboninecom/SO-ARM102) | A smaller reproducible arm with itemized sourcing, printable parts, assemblies, an assembly guide and a URDF. HS imported its eight links and seven joints. This is a good reference for testing whether HS keeps fasteners, model joints and purchased components aligned. |
+| [PathOn SO-101 wrist](https://github.com/PathOn-AI/PathOnRoboticsOSS/tree/20940773bc2e6c83fea869580d53380ab1573795/hardware/robots/so101_6dof_wrist) | A useful comparison for adding a joint and changing the gripper. The original hardware has a restricted license, so the comparison links to the source. |
+| [Calibrex](https://github.com/rsasaki0109/calibrex) and [RoboSimStudio](https://github.com/robosimstudio/robosimstudio) | Calibrex can check calibration from recorded sensor data and report unobserved axes. RoboSimStudio is a comparison for reconstructing a physical scene and testing manipulation in simulation. |
+
+The [robotics signal feed](../examples/github_signals/robotics_candidates_20261118.json)
+pins the candidates for review through the existing GitHub signal pipeline. The
+[comparison evidence](status/generated/robotics-external-comparison-20261118.json)
+holds the exact inputs and observed results.
+
+The missing product workflow is a rebuildable teardown for one coherent revision.
+Selecting a part should reveal its native geometry, assembly location, exact BOM
+entry, and connected schematic or wiring source. A substitution should identify
+which mounting, electrical and motion checks need to run again. Evidence for
+that workflow and the public service controls are tracked in the
+[deployment guide](PACKAGING_AND_DEPLOYMENT.md#external-backend-release).
+
 ## Scope
 
 This branch upgrades the earlier Teardown engine adapter from an invisible/primitive viewer into a real product-facing, **assembled-first native CAD viewer** built with the actual upstream Teardown runtime. All rendered parts come from source-bound CADCLAW assembly STEP tessellation with native BRep identity checks, and an offline glTF bundle; the release authority remains **blocked**.

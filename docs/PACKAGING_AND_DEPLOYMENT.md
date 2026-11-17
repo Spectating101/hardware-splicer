@@ -54,6 +54,19 @@ the declared model and requirements. Physical verification requires bench eviden
 The [backend release evidence](status/generated/headless-backend-release-20261118.json)
 records the fresh install, full test collection, native checks and state restore.
 
+## External backend release
+
+The local release evidence supports a trusted operator. External engineering
+requests require authenticated project access, isolated job execution, resource
+limits and scoped artifact downloads. Validate an external user's project
+lifecycle, access boundaries, job limits and recovery on the deployment host
+before opening the backend to outside accounts.
+
+For the robotics workflow, the release evidence also needs one reference robot
+whose assembly, electrical sources, BOM and supported substitutions agree at a
+single revision. Sortcell demonstrates exploration of an existing model.
+See the [robotics comparison and evidence](TEARDOWN_NATIVE_MACHINE_EXPLAINER_20261101.md#november-18-robotics-comparison).
+
 ---
 
 ## Splice Agent v1.0 packaging reference

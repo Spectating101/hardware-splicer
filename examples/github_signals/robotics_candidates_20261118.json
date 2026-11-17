@@ -1,0 +1,31 @@
+{
+  "schema_version": "hardware_splicer.github_signal_feed.v1",
+  "source": "github_repository_search",
+  "candidates": [
+    {
+      "repository": "roboninecom/SO-ARM102",
+      "commit_sha": "43252799d077e7f9971d7c695fd59f31413aa9b6",
+      "license_spdx_id": "CERN-OHL-P-2.0 AND Apache-2.0 AND CC-BY-4.0",
+      "signal_url": "https://githubsignals.io/repo/roboninecom/so-arm-102/"
+    },
+    {
+      "repository": "rsasaki0109/calibrex",
+      "commit_sha": "75bbb1528f967ace2439b69627529a5d65585531",
+      "signal_url": "https://githubsignals.io/explore/"
+    },
+    {
+      "repository": "robosimstudio/robosimstudio",
+      "commit_sha": "ba3650c4669fffabb7bd52802f4fdf6cdc66cb19",
+      "signal_url": "https://githubsignals.io/repo/robosimstudio/robosimstudio/"
+    },
+    {
+      "repository": "openAMRobot/openamr-platform-hw",
+      "commit_sha": "8ed2b06a46115abe2dffadbf0d902ae731d278d1",
+      "license_spdx_id": "CERN-OHL-P-2.0"
+    },
+    {
+      "repository": "PathOn-AI/PathOnRoboticsOSS",
+      "commit_sha": "20940773bc2e6c83fea869580d53380ab1573795"
+    }
+  ]
+}

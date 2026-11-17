@@ -10,6 +10,7 @@ from pathlib import Path
 
 SOURCE_REF="0c0852bd76ee7026f97875d6eac789d189a0012a"
 SOURCE_SHA="767baf3450d758da2cfc14173d669e1ad5e49407d40a2007c88bdaf6ea156e65"
+METADATA_SHA="8785708507a17a0fea8023b5d2de3a16719c047907a57001eb37b6a085bcb58c"
 VIEWER_REPO="https://github.com/Utsav92/openarm-3d-cad-assembly"
 TEARDOWN_REF="a91262ac1109051e014662d42ecb0b7bc1f113b1"
 TEARDOWN_REPO="https://github.com/elvarofficial/teardown"
@@ -28,30 +29,42 @@ def build(glb:Path,metadata:Path,out:Path,root:Path)->dict:
  if hashlib.sha256(raw).hexdigest()!=SOURCE_SHA:raise ValueError("OpenArm source revision/content mismatch")
  if raw[:4]!=b"glTF" or struct.unpack("<II",raw[4:12])!=(2,len(raw)):
   raise ValueError("invalid source glTF")
- info=json.loads(Path(metadata).read_text())
+ metadata_bytes = Path(metadata).read_bytes()
+ if hashlib.sha256(metadata_bytes).hexdigest() != METADATA_SHA:
+  raise ValueError("OpenArm metadata revision/content mismatch")
+ info=json.loads(metadata_bytes)
  parts=info.get("parts")
  if info.get("totalParts")!=542 or not isinstance(parts,list) or len(parts)!=542:
   raise ValueError("not 542 original CAD parts")
  ids=[p.get("node") for p in parts]
  if not all(isinstance(n,str) and n for n in ids) or len(set(ids))!=542:
   raise ValueError("invalid original OpenArm part identities")
+ json_length, chunk_type = struct.unpack_from("<I4s", raw, 12)
+ if chunk_type != b"JSON" or json_length > len(raw) - 20:
+  raise ValueError("invalid source glTF JSON chunk")
+ geometry = json.loads(raw[20:20 + json_length])
+ mesh_nodes = [node.get("name") for node in geometry["nodes"] if "mesh" in node]
+ if len(mesh_nodes) != len(ids) or set(mesh_nodes) != set(ids):
+  raise ValueError("OpenArm metadata identities do not match the rendered CAD nodes")
  out.mkdir(parents=True,exist_ok=False)
  machine=out/"machine";machine.mkdir()
  sources={
    "main.js":root/"assets/teardown/hs_sort_workcell_main.js",
    "hs_product_studio.js":root/"assets/teardown/hs_product_studio.js",
-   "robot.glb":Path(glb),"robot_metadata.json":Path(metadata),
  }
- checks={}
  for name,file in sources.items():
   shutil.copy2(file,machine/name)
-  checks[name]={"sha256":sha(machine/name),"bytes":(machine/name).stat().st_size}
+ (machine/"robot.glb").write_bytes(raw)
+ (machine/"robot_metadata.json").write_bytes(metadata_bytes)
+ checks = {name: {"sha256":sha(machine/name), "bytes":(machine/name).stat().st_size}
+           for name in (*sources, "robot.glb", "robot_metadata.json")}
  (machine/"build.json").write_text(json.dumps({"external":{"robot.glb":"robot.glb"}})+"\n")
  receipt={
   "schema_version":"hardware_splicer.sortcell_source_receipt.v1",
   "product_id":"sortcell_s1_openarm",
   "source_cad":VIEWER_REPO,"source_cad_commit":SOURCE_REF,
   "openarm_component_count":542,
+  "metadata_matches_mesh_nodes":True,
   "teardown_engine":TEARDOWN_REPO,"teardown_engine_commit":TEARDOWN_REF,
   "geometry_authored_by_hs":False,
   "task_animation_physical_kinematics_verified":False,
