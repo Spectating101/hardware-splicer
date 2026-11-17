@@ -224,11 +224,19 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     },
     "a4988-stepper": {
         "kicadFootprint": "Driver:A4988-STEPSTICK",
-        "bodyMm": {"w": 20, "h": 15},
+        # All 16 StepStick pins in Pololu order (top row left to right, then bottom row). The
+        # engine models a module as one pad row; the two-row 15.24 mm layout failed routing.
+        "bodyMm": {"w": 42, "h": 12},
         "pads": _row(
-            ["VDD", "GND_LOGIC", "STEP", "DIR", "EN", "VMOT", "GND_MOTOR"],
-            0, 0, _P * 1.4,
+            ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR",
+             "VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"],
+            0, 0, _P,
         ),
+    },
+    "terminal-block-4p": {
+        "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
+        "bodyMm": {"w": 22, "h": 10},
+        "pads": _row(["COIL1_A", "COIL1_B", "COIL2_A", "COIL2_B"], 0, 0, 5.08),
     },
     "max98357a-i2s-amp": {
         "kicadFootprint": "Driver:MAX98357A-I2S",

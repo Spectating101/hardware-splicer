@@ -644,6 +644,24 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
     ],
   },
   {
+    id: "terminal-block-4p",
+    label: "4-pin screw terminal block",
+    category: "interface",
+    summary: "5.08 mm field-wiring terminal on the carrier PCB; carries a stepper motor's two coils off-board.",
+    manufacturer: "Generic",
+    partNumber: "KF301-4P",
+    priceUsd: 1,
+    source: "curated",
+    // Explicit non-planner tag: keeps this passive part out of capability-based module picking.
+    capabilityTags: ["field_wiring"],
+    pins: [
+      { id: "COIL1_A", label: "1", role: "other", notes: "Motor coil 1, end A" },
+      { id: "COIL1_B", label: "2", role: "other", notes: "Motor coil 1, end B" },
+      { id: "COIL2_A", label: "3", role: "other", notes: "Motor coil 2, end A" },
+      { id: "COIL2_B", label: "4", role: "other", notes: "Motor coil 2, end B" },
+    ],
+  },
+  {
     id: "esp32-cam-module",
     label: "ESP32-CAM (OV2640)",
     category: "mcu",

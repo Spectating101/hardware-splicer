@@ -88,14 +88,6 @@
         "IN4": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."}
       }
     },
-    "plotter_motion_stage": {
-      "a4988-stepper": {
-        "1A": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
-        "1B": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
-        "2A": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
-        "2B": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."}
-      }
-    },
     "small_audio_amp_box": {
       "max98357a-i2s-amp": {
         "SPK+": {"disposition": "off_board_terminal", "reason": "Recipe note: connect a 4 ohm+ speaker across SPK+/SPK-."},
