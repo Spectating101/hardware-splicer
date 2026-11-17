@@ -213,8 +213,13 @@ def _reuse_verified_baseline(monkeypatch):
     # separate native test below runs generation and independent verification.
     def command(backend, job, args, log):
         if '--out' in args:
-            shutil.copytree(digital.CASE / 'reference', args[args.index('--out') + 1],
-                            ignore=shutil.ignore_patterns('__pycache__'))
+            out = Path(args[args.index('--out') + 1])
+            if Path(args[0]).name == 'verify_digital.py':
+                # The verifier writes its receipt outside the package it inspects.
+                shutil.copyfile(digital.CASE / 'reference' / 'verification.json', out)
+            else:
+                shutil.copytree(digital.CASE / 'reference', out,
+                                ignore=shutil.ignore_patterns('__pycache__'))
         return 0
     monkeypatch.setattr(digital, '_command', command)
 

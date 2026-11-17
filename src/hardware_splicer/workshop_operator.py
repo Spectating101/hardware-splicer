@@ -449,10 +449,16 @@ def _native_drone_digital(run_dir: Path, source: Path, report: dict[str, Any]) -
             report["status"] = "blocked_digital_simulation"
             report["open_actions"] = ["Resolve the reported digital model or simulation failure."]
             return
+        # The verifier never writes into the package it inspects; file its receipt afterwards.
+        receipt_out = package.parent / "digital-verification.json"
+        receipt_out.unlink(missing_ok=True)
         checked = subprocess.run([sys.executable, str(stage / "digital/verify_digital.py"), str(package),
-                                  "--design", str(design)], cwd=stage,
+                                  "--design", str(design), "--out", str(receipt_out)], cwd=stage,
                                  capture_output=True, text=True, timeout=180, check=False)
         path = package / "verification.json"
+        path.unlink(missing_ok=True)
+        if receipt_out.is_file():
+            shutil.copyfile(receipt_out, path)
         receipt = json.loads(path.read_text()) if path.is_file() else {}
         outputs = _record_artifacts([p for p in package.rglob("*") if p.is_file() and p != path], package)
         required = {"VIEWER.html", "HS3G_B_ASSEMBLY.step", "HS3G_B_ASSEMBLY.glb", "model.json", "SIMULATION.json",

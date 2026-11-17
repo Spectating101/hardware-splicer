@@ -10,6 +10,9 @@ from pathlib import Path
 import re
 import sys
 
+# Verification must not create import caches in the package being inspected.
+sys.dont_write_bytecode = True
+
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
@@ -17,7 +20,7 @@ sys.path.insert(0,str(HERE))
 from hs3g_model import dump, sha, source_hashes
 from hs3g_sim import assess, freefall_oracle
 from build_digital import read_inputs
-from study_requirements import validate, constraints
+from study_requirements import validate, constraints, verdict_basis
 
 
 def read_rows(path):
@@ -133,7 +136,7 @@ def verify(out: Path, design_dir: Path):
             and actual['rpm']==[expected[f'rpm_{i}'] for i in range(1,5)]
             for actual,expected in zip(actual_records,expected_records))
     simulation_ok = all(x['accepted'] for x in assessments) and report.get('gravity_oracle',{}).get('accepted') is True
-    mass_constraints = constraints(model,requirements)
+    mass_constraints = constraints(model,requirements,assessments)
     checks['simulation_summary_matches_logs'] = assessments==report.get('scenarios') and report.get('simulation_acceptance') == simulation_ok
     checks['requirements_match_model'] = report.get('requirements') == requirements
     checks['constraints_match_model'] = report.get('constraints') == mass_constraints
@@ -164,6 +167,8 @@ def verify(out: Path, design_dir: Path):
               'digital_objective_complete':accepted,'engineering_acceptance':accepted,
               'artifact_integrity': all(integrity_checks.values()),
               'integrity_checks': integrity_checks, 'requirements_met': accepted,
+              'mass_budget': all(c['passed'] for c in mass_constraints if c.get('kind')=='mass_budget'),
+              'verdict_basis': verdict_basis(requirements),
               'scope':'Native 3D representative, offline physics playback and parameterized PyBullet mission/failure study',
               'checks':checks,'failed_checks':[k for k,v in checks.items() if not v],
               'scenarios':assessments,'native_gravity_oracle':oracle,'recording_framing':framing,
@@ -172,20 +177,26 @@ def verify(out: Path, design_dir: Path):
               'scope_limits':config['scope_limits'],
               'open_actions':[] if accepted else ['Resolve failed digital acceptance checks.']}
     result['artifact_sha256']={p.relative_to(out).as_posix():sha(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='verification.json' and '__pycache__' not in p.parts}
-    dump(out/'verification.json',result)
     return result
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('package',type=Path);p.add_argument('--design',type=Path,required=True)
     p.add_argument('--study',action='store_true',help='Accept intact runs even when engineering requirements fail')
+    p.add_argument('--out',type=Path,help='Write JSON outside the verified directory (default: stdout)')
     args=p.parse_args()
+    if args.out and args.out.resolve().is_relative_to(args.package.resolve()):
+        p.error('--out must be outside the verified directory')
     try:
         r=verify(args.package,args.design)
     except (OSError,ValueError,KeyError) as exc:
-        dump(args.package/'verification.json',{'engineering_acceptance':False,'digital_objective_complete':False,'error':str(exc)})
-        print(str(exc),file=sys.stderr);return 1
-    print(json.dumps({'digital_objective_complete':r['digital_objective_complete'],'failed_checks':r['failed_checks']}))
+        r={'engineering_acceptance':False,'digital_objective_complete':False,'error':str(exc)}
+    if args.out:
+        dump(args.out,r)
+    else:
+        print(json.dumps(r,indent=2,allow_nan=False))
+    if 'error' in r:
+        print(r['error'],file=sys.stderr);return 1
     accepted = r['artifact_integrity'] if args.study else r['digital_objective_complete']
     return 0 if accepted else 1
 

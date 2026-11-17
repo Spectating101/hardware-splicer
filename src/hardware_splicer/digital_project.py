@@ -290,13 +290,16 @@ def execute_study(backend, job):
         return
     if code not in (0, 2):
         raise RuntimeError('Native digital generation failed: ' + (attempt / 'build.log').read_text(errors='replace')[-1000:])
-    code = _command(backend, job, [CASE / 'verify_digital.py', package, '--design', design, '--study'],
-                    attempt / 'verification.log')
+    receipt = attempt / 'digital-verification.json'
+    code = _command(backend, job, [CASE / 'verify_digital.py', package, '--design', design, '--study',
+                                    '--out', receipt], attempt / 'verification.log')
     if code is None:
         return
     if code != 0:
         raise RuntimeError('Independent digital artifact verification failed: ' +
                            (attempt / 'verification.log').read_text(errors='replace')[-1000:])
+    # The verifier never writes into the package it inspects; file its receipt afterwards.
+    shutil.copyfile(receipt, package / 'verification.json')
     if not _active(backend, job):
         return
     seal = stage_run(store, project_id, package, change_request=payload['change_request'] or 'Updated study requirements',
