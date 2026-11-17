@@ -161,3 +161,28 @@ def test_indicator_light_compiles_with_the_nano_and_pcb_matches_the_netlist(tmp_
     assert result.design_quality.get("kicad_drc_pass") is True
     assert any({"D3", "SIG"} <= {p.pin for p in net.pins} for net in netlist.nets)
     assert netlist_pcb_parity(netlist, pcb)["pass"] is True
+
+
+# ---- room_display_station -----------------------------------------------------------------------
+
+
+def test_display_backlight_is_fed_from_3v3_through_a_stated_series_resistor() -> None:
+    spec = find_module("ili9341_tft")
+    led = next(p for p in spec["pins"] if p["id"] == "LED")
+    # The module data only says "Backlight": no onboard resistor or transistor is documented,
+    # so the recipe adds its own current limiter.
+    assert led["notes"] == "Backlight"
+    assert "resistor" not in json.dumps(spec).lower() and "transistor" not in json.dumps(spec).lower()
+    assert _has_wire("room_display_station", ("esp32-devkit", "3V3"), ("resistor-10r", "1"))
+    assert _has_wire("room_display_station", ("resistor-10r", "2"), ("ili9341_tft", "LED"))
+    assert "10" in find_module("resistor-10r")["label"]
+    note = " ".join(_recipe("room_display_station")["notes"])
+    assert "10 ohm" in note and "backlight" in note.lower()
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node required")
+def test_room_display_compiles_with_the_backlight_resistor_on_the_board(tmp_path: Path) -> None:
+    result, netlist, pcb = _compile("room_display_station", tmp_path)
+    assert result.ok is True, result.error
+    assert result.design_quality.get("kicad_drc_pass") is True
+    assert netlist_pcb_parity(netlist, pcb)["pass"] is True

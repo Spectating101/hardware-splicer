@@ -233,6 +233,11 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
             0, 0, _P,
         ),
     },
+    "resistor-10r": {
+        "kicadFootprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+        "bodyMm": {"w": 12, "h": 4},
+        "pads": _row(["1", "2"], 0, 0, 10.16),
+    },
     "terminal-block-4p": {
         "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
         "bodyMm": {"w": 22, "h": 10},

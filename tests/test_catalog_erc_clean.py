@@ -16,12 +16,10 @@ from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
 
 pytestmark = pytest.mark.skipif(not shutil.which("kicad-cli"), reason="kicad-cli required")
 
-# Builds whose recipe leaves a pin that the module data says must be wired. Each entry is the exact
-# remaining ERC finding; fixing the recipe (and its TypeScript mirror and footprint pads) must
-# remove the entry, not loosen the test.
-KNOWN_REMAINING_ERC_ERRORS = {
-    "room_display_station": {("pin_not_connected", "Pin LED")},
-}
+# Builds whose recipe still leaves a pin the module data says must be wired. Each entry is the
+# exact remaining ERC finding; fixing the recipe (and its TypeScript mirror and footprint pads)
+# must remove the entry, not loosen the test. Currently every catalog build is clean.
+KNOWN_REMAINING_ERC_ERRORS: dict[str, set[tuple[str, str]]] = {}
 
 
 def _schematic_erc(build_id: str, tmp_path: Path) -> dict:
@@ -66,13 +64,6 @@ def test_compiled_representative_builds_are_build_ready_under_real_erc(build_id:
         (tmp_path / "build_compilation" / "KICAD_ERC.json").read_text(encoding="utf-8")
     )
     assert not [v for v in report.get("violations", []) if v.get("severity") == "error"]
-
-
-@pytest.mark.parametrize("build_id", sorted(KNOWN_REMAINING_ERC_ERRORS))
-def test_builds_with_a_real_remaining_erc_error_are_not_build_ready(build_id: str, tmp_path: Path) -> None:
-    result = compile_catalog_build(build_id, tmp_path, export_gerber=False)
-    assert result.design_quality.get("kicad_erc_pass") is False
-    assert result.design_quality.get("build_ready") is False
 
 
 def test_generic_resistors_in_a_netlist_are_connected_under_real_erc(tmp_path: Path) -> None:
