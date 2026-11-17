@@ -49,6 +49,10 @@ def _compile(build_id: str, tmp_path: Path):
     build = tmp_path / "build_compilation"
     netlist = CircuitNetlist.from_dict(json.loads((build / "circuit_netlist.json").read_text(encoding="utf-8")))
     pcb = (build / "main_ctrl_build.kicad_pcb").read_text(encoding="utf-8")
+    quality = result.design_quality
+    # Real ERC must have executed and passed; a skipped or crashed run is not a clean one.
+    assert quality.get("kicad_erc_skipped") is False, quality.get("kicad_erc_reason")
+    assert quality.get("kicad_erc_pass") is True and quality.get("kicad_erc_errors") == 0
     return result, netlist, pcb
 
 
