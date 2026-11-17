@@ -106,3 +106,40 @@ def test_arduino_nano_declares_every_pad_as_a_pin_and_is_verified() -> None:
     assert {p["pinId"] for p in table("arduino-nano")} <= spec_pin_ids("arduino-nano")
     assert fit("arduino-nano")["status"] == "verified_against"
     assert "Arduino_Nano" in fit("arduino-nano")["verified_against"]
+
+
+# ---- Raspberry Pi Pico --------------------------------------------------------------------------
+
+
+@needs_kicad_library
+def test_rpi_pico_has_all_forty_pads_in_kicad_geometry_and_order() -> None:
+    pads = table("rpi-pico")
+    assert len(pads) == 40
+    assert len({p["pinId"] for p in pads}) == 40
+    assert len(set(relative_to_kicad("rpi-pico", "Module.pretty/RaspberryPi_Pico_Common_THT.kicad_mod"))) == 1
+    xs = sorted({p["x"] for p in pads})
+    assert round(xs[1] - xs[0], 3) == 17.78, "rows must be 17.78 mm apart"
+    for column in xs:
+        ys = sorted(p["y"] for p in pads if p["x"] == column)
+        assert len(ys) == 20
+        assert {round(b - a, 3) for a, b in zip(ys, ys[1:])} == {2.54}
+
+
+@needs_kicad_library
+def test_rpi_pico_pad_names_are_the_kicad_symbol_names() -> None:
+    names = kicad_pin_names("MCU_Module.kicad_sym", "RaspberryPi_Pico")
+    assert len(names) == 40
+    for number, pad in enumerate(table("rpi-pico"), start=1):
+        kicad = names[number]
+        if kicad.startswith("GPIO"):
+            kicad = "GP" + re.match(r"GPIO(\d+)", kicad).group(1)
+        ours = pad["pinId"]
+        if re.fullmatch(r"GND_\d", ours):
+            ours = "GND"
+        assert ours == kicad, (number, pad["pinId"], names[number])
+
+
+def test_rpi_pico_declares_every_pad_as_a_pin_and_is_verified() -> None:
+    assert {p["pinId"] for p in table("rpi-pico")} <= spec_pin_ids("rpi-pico")
+    assert fit("rpi-pico")["status"] == "verified_against"
+    assert "RaspberryPi_Pico_Common_THT" in fit("rpi-pico")["verified_against"]

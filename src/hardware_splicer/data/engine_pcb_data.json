@@ -378,6 +378,192 @@
           "label": "GP26 / ADC0",
           "role": "analog_in",
           "voltage": "0-3.3V"
+        },
+        {
+          "id": "GP2",
+          "label": "GP2",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP3",
+          "label": "GP3",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP6",
+          "label": "GP6",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP7",
+          "label": "GP7",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP8",
+          "label": "GP8",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP9",
+          "label": "GP9",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP10",
+          "label": "GP10",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP11",
+          "label": "GP11",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP12",
+          "label": "GP12",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP13",
+          "label": "GP13",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP14",
+          "label": "GP14",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP15",
+          "label": "GP15",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP16",
+          "label": "GP16",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP17",
+          "label": "GP17",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP18",
+          "label": "GP18",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP19",
+          "label": "GP19",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP20",
+          "label": "GP20",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP21",
+          "label": "GP21",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP22",
+          "label": "GP22",
+          "role": "digital_io",
+          "voltage": "3.3V"
+        },
+        {
+          "id": "GP27",
+          "label": "GP27 / ADC1",
+          "role": "analog_in",
+          "voltage": "0-3.3V"
+        },
+        {
+          "id": "GP28",
+          "label": "GP28 / ADC2",
+          "role": "analog_in",
+          "voltage": "0-3.3V"
+        },
+        {
+          "id": "RUN",
+          "label": "RUN",
+          "role": "reset",
+          "notes": "Optional: reset input, pulled high on the board; leave open"
+        },
+        {
+          "id": "3V3_EN",
+          "label": "3V3_EN",
+          "role": "other",
+          "notes": "Optional: regulator enable, pulled high on the board; leave open"
+        },
+        {
+          "id": "ADC_VREF",
+          "label": "ADC_VREF",
+          "role": "power_in",
+          "notes": "Optional: ADC reference, fed from the on-board filtered supply; leave open"
+        },
+        {
+          "id": "AGND",
+          "label": "AGND",
+          "role": "gnd",
+          "notes": "Optional: analog ground, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_2",
+          "label": "GND (pad 2)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_3",
+          "label": "GND (pad 3)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_4",
+          "label": "GND (pad 4)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_5",
+          "label": "GND (pad 5)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_6",
+          "label": "GND (pad 6)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
+        },
+        {
+          "id": "GND_7",
+          "label": "GND (pad 7)",
+          "role": "gnd",
+          "notes": "Optional: extra ground pad, tied to GND on the board; leave open"
         }
       ],
       "capabilityTags": [
