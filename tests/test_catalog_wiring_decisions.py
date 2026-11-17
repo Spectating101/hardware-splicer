@@ -135,3 +135,29 @@ def test_plotter_compiles_with_pcb_connectivity_matching_the_netlist(tmp_path: P
         {"RST", "SLP"} <= {p.pin for p in net.pins}
         for net in netlist.nets
     )
+
+
+# ---- indicator_or_task_light --------------------------------------------------------------------
+
+
+def test_indicator_light_has_a_microcontroller_that_drives_the_mosfet_from_a_pwm_pin() -> None:
+    recipe = _recipe("indicator_or_task_light")
+    assert "arduino-nano" in {m["moduleId"] for m in recipe["modules"]}
+    # Arduino Nano D3 is the pin the module data marks PWM-capable (role "pwm").
+    pwm_pins = {p["id"] for p in find_module("arduino-nano")["pins"] if p["role"] == "pwm"}
+    assert pwm_pins == {"D3"}
+    assert _has_wire("indicator_or_task_light", ("arduino-nano", "D3"), ("mosfet-irlz44n", "SIG"))
+    # The Nano is powered from the same buck output as the MOSFET rail and shares its ground.
+    assert _has_wire("indicator_or_task_light", ("buck-mp1584", "OUT+"), ("arduino-nano", "VIN"))
+    assert _has_wire("indicator_or_task_light", ("buck-mp1584", "OUT-"), ("arduino-nano", "GND"))
+    note = " ".join(recipe["notes"])
+    assert "D3" in note and "PWM" in note
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node required")
+def test_indicator_light_compiles_with_the_nano_and_pcb_matches_the_netlist(tmp_path: Path) -> None:
+    result, netlist, pcb = _compile("indicator_or_task_light", tmp_path)
+    assert result.ok is True, result.error
+    assert result.design_quality.get("kicad_drc_pass") is True
+    assert any({"D3", "SIG"} <= {p.pin for p in net.pins} for net in netlist.nets)
+    assert netlist_pcb_parity(netlist, pcb)["pass"] is True

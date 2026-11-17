@@ -20,7 +20,6 @@ pytestmark = pytest.mark.skipif(not shutil.which("kicad-cli"), reason="kicad-cli
 # remaining ERC finding; fixing the recipe (and its TypeScript mirror and footprint pads) must
 # remove the entry, not loosen the test.
 KNOWN_REMAINING_ERC_ERRORS = {
-    "indicator_or_task_light": {("pin_not_connected", "Pin SIG")},
     "room_display_station": {("pin_not_connected", "Pin LED")},
 }
 
