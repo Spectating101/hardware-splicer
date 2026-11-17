@@ -3315,6 +3315,45 @@
       ]
     },
     {
+      "id": "terminal-block-4p",
+      "label": "4-pin screw terminal block",
+      "category": "interface",
+      "summary": "5.08 mm field-wiring terminal on the carrier PCB; carries a stepper motor's two coils off-board.",
+      "manufacturer": "Generic",
+      "partNumber": "KF301-4P",
+      "priceUsd": 1,
+      "source": "curated",
+      "capabilityTags": [
+        "field_wiring"
+      ],
+      "pins": [
+        {
+          "id": "COIL1_A",
+          "label": "1",
+          "role": "other",
+          "notes": "Motor coil 1, end A"
+        },
+        {
+          "id": "COIL1_B",
+          "label": "2",
+          "role": "other",
+          "notes": "Motor coil 1, end B"
+        },
+        {
+          "id": "COIL2_A",
+          "label": "3",
+          "role": "other",
+          "notes": "Motor coil 2, end A"
+        },
+        {
+          "id": "COIL2_B",
+          "label": "4",
+          "role": "other",
+          "notes": "Motor coil 2, end B"
+        }
+      ]
+    },
+    {
       "id": "esp32-cam-module",
       "label": "ESP32-CAM (OV2640)",
       "category": "mcu",
@@ -9989,43 +10028,117 @@
     "a4988-stepper": {
       "kicadFootprint": "Driver:A4988-STEPSTICK",
       "bodyMm": {
-        "w": 20,
-        "h": 15
+        "w": 42,
+        "h": 12
       },
       "pads": [
         {
-          "pinId": "VDD",
-          "x": -10.668,
+          "pinId": "EN",
+          "x": -19.05,
           "y": 0
         },
         {
-          "pinId": "GND_LOGIC",
-          "x": -7.112,
+          "pinId": "MS1",
+          "x": -16.51,
+          "y": 0
+        },
+        {
+          "pinId": "MS2",
+          "x": -13.97,
+          "y": 0
+        },
+        {
+          "pinId": "MS3",
+          "x": -11.43,
+          "y": 0
+        },
+        {
+          "pinId": "RST",
+          "x": -8.89,
+          "y": 0
+        },
+        {
+          "pinId": "SLP",
+          "x": -6.350000000000001,
           "y": 0
         },
         {
           "pinId": "STEP",
-          "x": -3.556,
+          "x": -3.8100000000000005,
           "y": 0
         },
         {
           "pinId": "DIR",
-          "x": 0,
-          "y": 0
-        },
-        {
-          "pinId": "EN",
-          "x": 3.555999999999999,
+          "x": -1.2699999999999996,
           "y": 0
         },
         {
           "pinId": "VMOT",
-          "x": 7.111999999999998,
+          "x": 1.2699999999999996,
           "y": 0
         },
         {
           "pinId": "GND_MOTOR",
-          "x": 10.668,
+          "x": 3.8099999999999987,
+          "y": 0
+        },
+        {
+          "pinId": "2B",
+          "x": 6.349999999999998,
+          "y": 0
+        },
+        {
+          "pinId": "2A",
+          "x": 8.89,
+          "y": 0
+        },
+        {
+          "pinId": "1A",
+          "x": 11.43,
+          "y": 0
+        },
+        {
+          "pinId": "1B",
+          "x": 13.970000000000002,
+          "y": 0
+        },
+        {
+          "pinId": "VDD",
+          "x": 16.51,
+          "y": 0
+        },
+        {
+          "pinId": "GND_LOGIC",
+          "x": 19.05,
+          "y": 0
+        }
+      ]
+    },
+    "terminal-block-4p": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
+      "bodyMm": {
+        "w": 22,
+        "h": 10
+      },
+      "pads": [
+        {
+          "pinId": "COIL1_A",
+          "x": -7.62,
+          "y": 0
+        },
+        {
+          "pinId": "COIL1_B",
+          "x": -2.54,
+          "y": 0
+        },
+        {
+          "pinId": "COIL2_A",
+          "x": 2.54,
+          "y": 0
+        },
+        {
+          "pinId": "COIL2_B",
+          "x": 7.62,
           "y": 0
         }
       ]
