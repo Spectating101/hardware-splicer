@@ -677,6 +677,7 @@ const RECIPES: Record<string, Recipe> = {
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "ui", moduleId: "ili9341_tft" },
       { role: "sns", moduleId: "dht22" },
+      { role: "bl_r", moduleId: "resistor-10r" },
     ],
     wires: [
       ...usbToMcu("usb", "mcu", "VIN"),
@@ -690,9 +691,13 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
       { from: { role: "mcu", pin: "GPIO16" }, to: { role: "sns", pin: "DATA" } },
+      // Backlight from 3V3 through a series resistor (see note).
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "bl_r", pin: "1" } },
+      { from: { role: "bl_r", pin: "2" }, to: { role: "ui", pin: "LED" } },
     ],
     notes: [
       "ILI9341 color TFT on SPI; DHT22 on GPIO16.",
+      "Backlight (LED pin) is fed from the ESP32 3V3 through a 10 ohm series resistor. The module data documents no onboard backlight resistor or transistor, so the recipe limits the current itself: assuming about four white LEDs in parallel (Vf near 3.0 V), 10 ohm keeps the backlight near 30 mA and under about 50 mA if Vf falls to 2.8 V. Check your module's backlight rating, and drop the resistor if the breakout already has one.",
       "Install TFT_eSPI + DHT libraries — match User_Setup pins to wiring above.",
     ],
   },
