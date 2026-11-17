@@ -50,7 +50,7 @@ def compile_netlist_to_artifacts(
     )
 
     sch_path = out / "main_ctrl_build.kicad_sch"
-    write_schematic_for_netlist(netlist, sch_path, title=build_id)
+    write_schematic_for_netlist(netlist, sch_path, title=build_id, build_id=build_id)
     sch_erc = run_kicad_cli_erc(sch_path, out_dir=out)
 
     erc = run_erc(netlist)

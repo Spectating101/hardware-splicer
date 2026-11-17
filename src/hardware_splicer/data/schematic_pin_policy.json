@@ -1,0 +1,167 @@
+{
+  "schema_version": "hardware_splicer.schematic_pin_policy.v1",
+  "description": "Explicit, reviewable facts the KiCad schematic emitter may use to decide how a pin that the netlist does not connect is drawn, and which nets are fed from off-board. Every entry names the evidence it relies on. A pin the netlist connects is never given a no-connect, whatever this file says.",
+  "optional_note_pattern": "\\boptional\\b",
+  "mcu_general_io": {
+    "category": "mcu",
+    "reason": "Unused general-purpose I/O on a microcontroller board is normally left open.",
+    "roles": [
+      "digital_io", "digital_in", "digital_out", "analog_in", "pwm",
+      "i2c_sda", "i2c_scl", "spi_cs", "spi_sck", "spi_mosi", "spi_miso",
+      "uart_rx", "uart_tx"
+    ]
+  },
+  "module_pins": {
+    "arduino-nano": {
+      "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."},
+      "5V": {"disposition": "unused_supply_output", "reason": "On-board 5V rail output; nothing in the build has to consume it."}
+    },
+    "esp32-devkit": {
+      "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."}
+    },
+    "rpi-pico": {
+      "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."},
+      "VSYS": {"disposition": "alternate_supply_input", "requires_connected": ["VBUS"], "reason": "VBUS feeds VSYS through the Pico's on-board diode, so VSYS may stay open while VBUS is supplied."}
+    },
+    "l298n": {
+      "5V": {"disposition": "unused_supply_output", "reason": "On-board 5V logic regulator output; the recipe supplies logic power elsewhere."}
+    },
+    "a4988-stepper": {
+      "MS1": {"disposition": "optional_input", "reason": "A4988 MS1-MS3 have internal pull-downs, so open selects full-step mode (datasheet)."},
+      "MS2": {"disposition": "optional_input", "reason": "A4988 MS1-MS3 have internal pull-downs, so open selects full-step mode (datasheet)."},
+      "MS3": {"disposition": "optional_input", "reason": "A4988 MS1-MS3 have internal pull-downs, so open selects full-step mode (datasheet)."}
+    },
+    "max98357a-i2s-amp": {
+      "SD": {"disposition": "optional_input", "reason": "Module warning: SD has an internal 100K pulldown, float gives the left channel."},
+      "GAIN": {"disposition": "optional_input", "reason": "Pin note: gain is set by an optional resistor; an open GAIN pin selects the default gain (datasheet)."}
+    },
+    "level-shifter-4ch": {
+      "LV2": {"disposition": "unused_channel", "reason": "Second channel of a multi-channel shifter; builds use as many channels as they wire."},
+      "HV2": {"disposition": "unused_channel", "reason": "Second channel of a multi-channel shifter; builds use as many channels as they wire."}
+    },
+    "ili9341_tft": {
+      "SDO": {"disposition": "optional_input", "reason": "SPI MISO read-back is not used by write-only display drivers (TFT_eSPI)."}
+    }
+  },
+  "build_pins": {
+    "automatic_plant_watering": {
+      "mosfet-irlz44n": {
+        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
+      }
+    },
+    "automatic_plant_watering_usb": {
+      "mosfet-irlz44n": {
+        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
+      }
+    },
+    "bench_power_adapter": {
+      "tp4056": {
+        "BAT+": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."},
+        "BAT-": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."}
+      },
+      "ldo-ams1117-3v3": {
+        "VOUT": {"disposition": "off_board_terminal", "reason": "Recipe note: 3.3V on LDO VOUT for sensors/MCU; the consumers are off-board."}
+      }
+    },
+    "indicator_or_task_light": {
+      "mosfet-irlz44n": {
+        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."}
+      }
+    },
+    "low_voltage_motor_test_jig": {
+      "mosfet-irlz44n": {
+        "SIG": {"disposition": "off_board_terminal", "reason": "Recipe note: add a manual switch on SIG for benchtop on/off."},
+        "VOUT+": {"disposition": "off_board_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."},
+        "VOUT-": {"disposition": "off_board_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."}
+      }
+    },
+    "robot_drive_base": {
+      "l298n": {
+        "OUT1": {"disposition": "off_board_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
+        "OUT2": {"disposition": "off_board_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
+        "OUT3": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
+        "OUT4": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
+        "IN3": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
+        "IN4": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."}
+      }
+    },
+    "plotter_motion_stage": {
+      "a4988-stepper": {
+        "1A": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
+        "1B": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
+        "2A": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."},
+        "2B": {"disposition": "off_board_terminal", "reason": "The stepper motor is a user-supplied part of the stage; the recipe has no motor module."}
+      }
+    },
+    "small_audio_amp_box": {
+      "max98357a-i2s-amp": {
+        "SPK+": {"disposition": "off_board_terminal", "reason": "Recipe note: connect a 4 ohm+ speaker across SPK+/SPK-."},
+        "SPK-": {"disposition": "off_board_terminal", "reason": "Recipe note: connect a 4 ohm+ speaker across SPK+/SPK-."}
+      }
+    },
+    "smart_relay_box": {
+      "relay-1ch-5v": {
+        "COM": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
+        "NO": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
+        "NC": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."}
+      }
+    }
+  },
+  "external_supply": {
+    "ch340-usb-ttl": {
+      "reason": "Recipe note: the CH340 is powered from its own USB cable; the host is off-board.",
+      "supply_pins": ["USB"],
+      "ground_pins": ["GND"]
+    }
+  },
+  "module_output_terminals": {
+    "mosfet-irlz44n": {"pins": ["VOUT-"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load."},
+    "mosfet-irf520": {"pins": ["VOUT-"], "reason": "Low-side MOSFET module: VOUT- is the switched return the module drives for the load."}
+  },
+  "common_ground": {
+    "buck-mp1584": [["IN-", "OUT-"]],
+    "buck-lm2596": [["IN-", "OUT-"]],
+    "tp4056": [["IN-", "OUT-", "BAT-"]]
+  },
+  "direction_overrides": {
+    "sg90": {"SIG": {"direction": "input", "reason": "Servo control input; the catalog role 'pwm' describes the MCU side."}},
+    "bts7960-motor": {
+      "RPWM": {"direction": "input", "reason": "Driver PWM control input."},
+      "LPWM": {"direction": "input", "reason": "Driver PWM control input."}
+    },
+    "tb6612fng-motor": {
+      "PWMA": {"direction": "input", "reason": "Driver PWM control input."},
+      "PWMB": {"direction": "input", "reason": "Driver PWM control input."}
+    },
+    "tb6612_driver": {
+      "PWMA,_PWMB": {"direction": "input", "reason": "Driver PWM speed-control input."}
+    },
+    "soil_moisture": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "flame_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "rain_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "water_level": {"S": {"direction": "output", "reason": "Pin note: analog signal from the sensor."}},
+    "ky037_microphone": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-2_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-3_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-4_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-5_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-7_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-8_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-9_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "mq-135_gas_sensor": {"A0": {"direction": "output", "reason": "Pin note: analog output."}},
+    "acs712_5a": {"OUT": {"direction": "output", "reason": "Pin note: analog output."}},
+    "acs712_20a": {"OUT": {"direction": "output", "reason": "Pin note: analog output."}},
+    "acs712_30a": {"OUT": {"direction": "output", "reason": "Pin note: analog output."}},
+    "uv_sensor_ml8511": {"OUT": {"direction": "output", "reason": "Pin note: analog output."}},
+    "tcrt5000_line_follower": {"AO": {"direction": "output", "reason": "Pin note: analog out."}},
+    "lm35_temperature": {"2": {"direction": "output", "reason": "Pin note: Vout (analog)."}},
+    "mcp4725-dac": {"VOUT": {"direction": "output", "reason": "Pin note: DAC analog output 0..VDD."}},
+    "joystick_module": {
+      "VRx": {"direction": "output", "reason": "Potentiometer wiper output (X axis)."},
+      "VRy": {"direction": "output", "reason": "Potentiometer wiper output (Y axis)."}
+    }
+  }
+}
