@@ -1,0 +1,109 @@
+{
+  "source": "examples/arbitrage_lab/keyboard_splice/reference_1x6/one_row_six_key_source.kicad_pcb",
+  "source_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+  "source_bytes_unchanged": true,
+  "native_kicad": "9.0.2",
+  "requested_cut_x_mm": 107.0,
+  "selected_original_keys": [
+    "SW4"
+  ],
+  "remaining_left_right": [
+    3,
+    2
+  ],
+  "original_source_pad_nets": {
+    "1": {
+      "original_net": "ROW_0",
+      "x_mm": 100.0,
+      "y_mm": 25.0,
+      "pad_attribute": 0
+    },
+    "2": {
+      "original_net": "COL_3",
+      "x_mm": 93.65,
+      "y_mm": 27.54,
+      "pad_attribute": 0
+    }
+  },
+  "native_output_checks": {
+    "relocation": {
+      "returncode": 0,
+      "violations": 0,
+      "unconnected_items": 0,
+      "source_footprints": [
+        {
+          "ref": "SW1",
+          "xy_mm": [
+            22.0,
+            22.0
+          ],
+          "pad_nets": {
+            "1": "KEY01_CONTACT1",
+            "2": "KEY01_CONTACT2"
+          }
+        },
+        {
+          "ref": "J1",
+          "xy_mm": [
+            31.0,
+            36.0
+          ],
+          "pad_nets": {
+            "1": "KEY01_CONTACT1",
+            "2": "KEY01_CONTACT2"
+          }
+        }
+      ],
+      "tracks": 4
+    },
+    "interposer": {
+      "returncode": 0,
+      "violations": 0,
+      "unconnected_items": 0,
+      "source_footprints": [
+        {
+          "ref": "J2",
+          "xy_mm": [
+            31.75,
+            8.89
+          ],
+          "pad_nets": {
+            "1": "CH_01",
+            "2": "CH_02",
+            "3": "CH_03"
+          }
+        },
+        {
+          "ref": "J1",
+          "xy_mm": [
+            8.89,
+            8.89
+          ],
+          "pad_nets": {
+            "1": "CH_01",
+            "2": "CH_02",
+            "3": "CH_03"
+          }
+        }
+      ],
+      "tracks": 3
+    }
+  },
+  "topology": {
+    "bridge_edges": 3,
+    "remaining_required": 0,
+    "source_terminal_gaps": 0,
+    "damaged_pads": 0
+  },
+  "invalid_mutations": {
+    "live_pad_cut_with_valid_digest_and_false_safe_claim": {
+      "rejected": true,
+      "reason": "cut impacts a live source PCB terminal"
+    },
+    "cross_net_bridge_with_recomputed_receipt": {
+      "rejected": true,
+      "reason": "cross-net bridge candidate"
+    }
+  },
+  "physical_authority_granted": false
+}

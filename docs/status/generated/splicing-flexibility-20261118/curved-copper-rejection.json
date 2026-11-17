@@ -1,0 +1,10 @@
+{
+  "source_sha256": "ca22f2b6b77e84e8bdff364cff7677b5ee6c3dc2158fe7089cb7e968e8a65810",
+  "same_derived_source_as_pre_fix_proof": true,
+  "returncode": 1,
+  "explicit_arc_rejection": true,
+  "usable_extraction_emitted": false,
+  "source_bytes_unchanged": true,
+  "stderr": "Traceback (most recent call last):\n  File \"/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/_pcbnew_helpers/keyboard_splice_extract.py\", line 131, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/_pcbnew_helpers/keyboard_splice_extract.py\", line 27, in main\n    raise ValueError(\n    ...<2 lines>...\n    )\nValueError: Unsupported curved copper PCB_ARC in keyboard cut/topology extraction; arc geometry must be supported before this PCB can be modeled\n",
+  "extractor_sha256": "a77f50d078f4b9d5e3a73823c3265aa28aecee59fb8f38111683b77b647f46e2"
+}

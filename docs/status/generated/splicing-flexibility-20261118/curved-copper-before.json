@@ -1,0 +1,22 @@
+{
+  "source_kind": "Derived native KiCad arc geometry testcase; not an external donor acceptance proof",
+  "source_sha256": "ca22f2b6b77e84e8bdff364cff7677b5ee6c3dc2158fe7089cb7e968e8a65810",
+  "native_arc_type": "PCB_ARC",
+  "native_arc_midpoint_mm": [
+    15.0,
+    65.0
+  ],
+  "extracted_track": {
+    "x1": 10.0,
+    "y1": 70.0,
+    "x2": 20.0,
+    "y2": 70.0,
+    "width_mm": 0.4,
+    "net": "ROW_0",
+    "layer": "F.Cu"
+  },
+  "source_warnings": [],
+  "new_cut_intersects_actual_arc_midpoint": true,
+  "new_cut_intersects_extracted_chord": false,
+  "midpoint_to_extracted_copper_mm": 4.799999999999997
+}

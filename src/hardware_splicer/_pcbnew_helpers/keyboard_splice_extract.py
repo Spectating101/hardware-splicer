@@ -20,6 +20,14 @@ def main() -> int:
     bbox={"x_min":u(bb.GetX()),"x_max":u(bb.GetX()+bb.GetWidth()),"y_min":u(bb.GetY()),"y_max":u(bb.GetY()+bb.GetHeight())}
     tracks=[];vias=[]
     for t in board.GetTracks():
+        if type(t).__name__=="PCB_ARC":
+            # The downstream cut/island model consumes straight segments.
+            # An arc's endpoints define a chord, not its copper geometry;
+            # silently substituting that chord can miss an actual cut hit.
+            raise ValueError(
+                "Unsupported curved copper PCB_ARC in keyboard cut/topology extraction; "
+                "arc geometry must be supported before this PCB can be modeled"
+            )
         if type(t).__name__=="PCB_VIA":
             vias.append({"x":u(t.GetPosition().x),"y":u(t.GetPosition().y),"diameter_mm":u(t.GetWidth(p.F_Cu)),"net":t.GetNetname(),"via_type":str(t.GetViaType())})
         else:

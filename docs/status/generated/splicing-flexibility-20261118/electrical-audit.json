@@ -1,0 +1,153 @@
+{
+  "scope": "Read-only production-code audit plus fresh synthetic declared-input production-function probes. Only audit cache files written; no source modifications, full suites, native CAD, remote providers or hardware execution.",
+  "physical_validation_performed": false,
+  "conclusion": "HS has real reusable import/composition/contract-assessment primitives; it is not a general automatic reverse-engineer-and-transform system for arbitrary junk. The widest fresh input flexibility is explicit, source-bound contracts and connectivity. Catalog composition executes topology changes for supported families; undocumented donor interfaces remain unresolved.",
+  "source_sha256": {
+    "electrical_interchange.py": "22fd97fd7078332a65757700d9479aff360bd3e40bd26cd8a6e896c3db49b203",
+    "electrical_interchange_api.py": "4615bc760cc6e11f1a237fb7e1236cd88117604f5de2589aef0eafb21793b0f0",
+    "auto_wire.py": "c3765c903b4bc910e03a581ef696edf8ead0f113fb1b1ce69d77d06ad1ecdfcb",
+    "donor_capture.py": "0e69a9352877d60944862a3e6f0baddd8ffa1160608a66f0f795d940177ca199",
+    "donor/interface_contract.py": "0e91127e6697da7ee6de83eb0a567fe374b783ab3777482793ebca443b470f50",
+    "module_resolution_truth.py": "65912731bad24886558640774348d0f004a6b974644d4e220c2523e855b8644b",
+    "evidence_contract_store.py": "751f613664bfc54ec2b91d7a5811efac8c21fce0cf0751ffbe8fe75a79e500ad",
+    "project_materials.py": "92887c9e59b5b6742055da54f173e3d8b6d63f6601bf19af289ec2a2e3e4634f",
+    "project_wiring.py": "0925050d787519adbb71642c058783900ba4bfac6caa8b05286f55ee69d6ccdc",
+    "wiring_harness.py": "1fd46da0863098637f16808771da6a5970d21aa7ac304ac72ce98e08e1c8993b",
+    "engineering_source_ingestion.py": "dd1dc21ec4f2117ac7b6e371d19831d48a11927dcd551de16892eb6ef780772f",
+    "stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "parts_intel.py": "a70204ded514c31ae19b64c49c3825c8add9c6386130363002713f3fe099d9e7",
+    "integrations/engineering_review.py": "d6b7fb6423edd5243dfcc0691928dd534626d95b43876e39f5064c2c56faa457",
+    "integrations/circuit_json_import.py": "b147c7d60946e843e8b83e0e745f378b72541bedce81aed9642e89506a647b73",
+    "netlist/erc.py": "b3c584ec7e9cd52cc07a93ba164d65e1c51b3940857a833a56589805025da147"
+  },
+  "probe_reports": [
+    "harness-summary.json",
+    "composition-summary.json",
+    "materials-and-normalized-donor.json"
+  ],
+  "fresh_production_evidence": [
+    {
+      "claim": "Arbitrary endpoint names, nonidentical pin IDs, different wire lengths and explicit declared ratings are accepted without a new built-in device case.",
+      "result": "3.2..3.4V supply -> 3.1..3.6V,0.23A load: passes_declared_checks; generated WireViz document,cut list and review ZIP; construction_ready false.",
+      "proof": "compatible-repinned-3v3-result.json"
+    },
+    {
+      "claim": "Actual incompatible data changes affect the result.",
+      "result": "11.5..12.5V supply blocks with supply_voltage_outside_load_range;2.1A load exceeds1.2A source and0.8A wires.",
+      "proof": [
+        "incompatible-12v-result.json",
+        "incompatible-current-result.json"
+      ]
+    },
+    {
+      "claim": "Registered evidence is a real input boundary rather than an unchecked label.",
+      "result": "Changing source maximum to3.5V without updating retained bytes is rejected with declared wiring contract differs from retained source pointer. This is still declared synthetic data, not physical truth.",
+      "proof": "harness-summary.json"
+    },
+    {
+      "claim": "Known-module substitutions execute different graph wiring.",
+      "result": "ESP32 GPIO21/22 -> BME280 SDA/SCL becomes Pico GP4/5 -> SDA/SCL,6 wires in each,0 bounded ERC errors.",
+      "proof": [
+        "esp32-sensor-graph.json",
+        "pico-adaptation-graph.json"
+      ]
+    },
+    {
+      "claim": "Explicit adaptation changes graph and bounded compatibility outcome.",
+      "result": "Direct ESP32/HC-SR04 gives2 voltage-mismatch errors. Supplying a level-shifter module produces12 wires through LV1/HV1 and HV2/LV2 and0 bounded ERC errors. It is not automatically inserted, and timing/protocol operation is not proved.",
+      "proof": [
+        "direct-5v-echo-erc.json",
+        "explicit-level-shifter-graph.json",
+        "explicit-level-shifter-erc.json"
+      ]
+    },
+    {
+      "claim": "Direct compose helper does not support unknown module IDs.",
+      "result": "Unknown donor driver dropped while2 known modules survive; warnings empty and ERC passes remaining2 wires. This helper-level pass is not full requested-goal fidelity.",
+      "proof": "unknown-donor-id-graph.json"
+    },
+    {
+      "claim": "Previously unseen donor board is accepted as captured planning data.",
+      "result": "91x47mm board with measured-size overrides and XY7? marking yields donor assembly/take-apart plan; MPN/manufacturer stay null,pad counts0; normalized actuator_driver block remains module_id null,external_unresolved,no authority effect.",
+      "proof": [
+        "arbitrary-donor-capture.json",
+        "unidentified-donor-interface.json",
+        "materials-and-normalized-donor.json"
+      ]
+    },
+    {
+      "claim": "Circuit JSON import projects changed source identity and connectivity, not a full electrical rating contract.",
+      "result": "Changed resistor label/value retained, duplicate port reported ambiguous, authority proposed. Injected source-port voltage4.9..5.1V stays null in canonical voltage fields; power-without-source ERC error remains.",
+      "proof": [
+        "edited-source-projection.json",
+        "ambiguous-source-projection.json",
+        "composition-summary.json"
+      ]
+    },
+    {
+      "claim": "Materials matching does not silently accept family substitutes or virtual ownership.",
+      "result": "PART-B does not cover required PART-A. A simulated matching PART-A lot still allocates0 and reports simulated_inventory_is_not_owned_stock.",
+      "proof": "materials-and-normalized-donor.json"
+    }
+  ],
+  "production_boundaries": [
+    {
+      "source": "auto_wire.py:607",
+      "finding": "Known catalog IDs compose graph; missing IDs filtered at609. Many per-device branches including HC-SR04 and named drivers constrain generality."
+    },
+    {
+      "source": "electrical_interchange.py:104",
+      "finding": "Stable IDs and aliases,component/pin/net projection,unresolved identities,proposed authority. No substitute selection or hardware regeneration occurs in this function."
+    },
+    {
+      "source": "project_wiring.py:47",
+      "finding": "Source hash and JSON pointer must match declared contract; materials and wiring bound to same project revision. Assess/export does not change physical device."
+    },
+    {
+      "source": "wiring_harness.py:145",
+      "finding": "Complete-net DC ranges,current budgets,wire ampacity/insulation,single-driver high/low windows,ground refs,role compatibility. Missing facts unresolved. Signal timing/loading/protocol,voltage drop,transients,fuses,connector mating and full coverage explicitly excluded."
+    },
+    {
+      "source": "donor_capture.py:173",
+      "finding": "Custom board5..500mm,up to300parts,curated kinds/packages and optional dimensions. Typed markings/readings remain user data,not automatic identification,pinout or measured validation."
+    },
+    {
+      "source": "module_resolution_truth.py:407",
+      "finding": "Persisted functional salvage capability supports arbitrary board/block IDs. Unknown identity remains external_unresolved; explicit recognized catalog ID is declared only; offline legacy mode behaves differently."
+    },
+    {
+      "source": "donor/interface_contract.py:114",
+      "finding": "Firmware candidate authorization needs verified status,no blockers,accepted measured/observed max voltage,active level,controller pin,and interface_complete. It does not by itself prove motor/current/timing/protocol/thermal safety."
+    },
+    {
+      "source": "evidence_contract_store.py:133",
+      "finding": "Binding updates require explicit evidence_id,method,producer. The update mutates the plan/evidence and candidate-authorized-for-compile flags; it does not build/flash a binary or test the donor."
+    },
+    {
+      "source": "parts_intel.py:414",
+      "finding": "Alternative MPNs are catalog/family/alias suggestions,not demonstrated drop-in compatibility or automatic rewiring."
+    },
+    {
+      "source": "project_materials.py:119",
+      "finding": "Exact catalog ID scoped to InvenTree capture,manufacturer+MPN,or identical declared specification. Conditions,stock allocations,freshness/expiry and simulation checked; no orders/reservation."
+    },
+    {
+      "source": "engineering_source_ingestion.py:245",
+      "finding": "Many formats retained/classified,not necessarily deeply parsed. PDF/images/firmware/archive imports are inventory-only; upload never exceeds declared authority."
+    },
+    {
+      "source": "stored_source_parser.py:400",
+      "finding": "Registered STEP execution explicitly skipped: no callable bounded STEP parser in this generic stored-source path; native case scripts are a separate capability."
+    },
+    {
+      "source": "integrations/engineering_review.py:515",
+      "finding": "Optional kicad-happy sidecar reads KiCad/Gerber,hashes inputs,normalizes findings and can block release policy; authority observed and cannot authorize release. It does not implement an adapter/redesign."
+    }
+  ],
+  "user_effects": [
+    "Tweak known modules or explicit pin/rating contracts and HS can regenerate topology,cut lists and bounded acceptance results.",
+    "For an unfamiliar donor,bring exact identity,pin numbering/view,voltage/current/signal limits,physical dimensions and traceable evidence; a photo/marking/freeform statement is not enough.",
+    "A supplied adapter/module can alter checked topology; HS does not generally invent and verify the necessary translator,driver,mechanical fixture or complete working firmware from arbitrary junk.",
+    "Generated graphs,KiCad-capable plans,Wiring ZIPs and passing bounded checks remain digital evidence; no physical working-device claim follows."
+  ]
+}
