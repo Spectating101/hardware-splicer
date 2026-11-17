@@ -18,30 +18,19 @@ from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence
 
 from ..netlist.ir import CircuitNetlist
-from ..pcb.module_registry import find_module
+from .schematic_pin_policy import (
+    PowerFlagPlan,
+    catalog_pins,
+    pin_electrical_type,
+    plan_no_connects,
+    plan_power_flags,
+)
 from .schematic_symbols import EMBEDDED_LIB_IDS, embedded_schematic_lib_symbols, schematic_symbol_for_module
 
 
 _PIN_SPACING_MM = 2.54
 _PIN_X_MM = -7.62
 _STUB_LENGTH_MM = 5.08
-_POWER_ROLES = {"power_in", "power_out", "gnd", "power_3v3"}
-_ROLE_TO_KICAD_PIN_TYPE = {
-    "power_in": "power_in",
-    "power_out": "power_out",
-    "power_3v3": "power_out",
-    "gnd": "power_in",
-    "digital_in": "input",
-    "analog_in": "input",
-    "uart_rx": "input",
-    "digital_out": "output",
-    "analog_out": "output",
-    "pwm": "output",
-    "uart_tx": "output",
-    "digital_io": "bidirectional",
-    "i2c_sda": "bidirectional",
-    "i2c_scl": "bidirectional",
-}
 
 
 def _uid() -> str:
@@ -55,16 +44,6 @@ def _esc(text: str) -> str:
 def _safe_token(text: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9_]", "_", str(text))
     return cleaned or "component"
-
-
-def _catalog_pins(module_id: Optional[str]) -> list[Dict[str, object]]:
-    spec = find_module(str(module_id or "")) if module_id else None
-    pins = list((spec or {}).get("pins") or [])
-    return [dict(row) for row in pins if isinstance(row, Mapping) and str(row.get("id") or "").strip()]
-
-
-def _pin_type(pin: Mapping[str, object]) -> str:
-    return _ROLE_TO_KICAD_PIN_TYPE.get(str(pin.get("role") or "").strip().lower(), "passive")
 
 
 def _pin_layout(pins: Sequence[Mapping[str, object]]) -> Dict[str, float]:
@@ -87,6 +66,7 @@ def _dynamic_symbol_definition(
     lib_id: str,
     ref: str,
     value: str,
+    module_id: Optional[str],
     pins: Sequence[Mapping[str, object]],
 ) -> List[str]:
     layout = _pin_layout(pins)
@@ -104,30 +84,72 @@ def _dynamic_symbol_definition(
         pin_name = str(pin.get("label") or pin_id)
         y = layout[pin_id]
         result.append(
-            f'        (pin {_pin_type(pin)} line (at {_PIN_X_MM:.4f} {y:.4f} 0) (length 2.54) '
+            f'        (pin {pin_electrical_type(module_id, pin)} line (at {_PIN_X_MM:.4f} {y:.4f} 0) (length 2.54) '
             f'(name "{_esc(pin_name)}" (effects (font (size 1.27 1.27)))) (number "{_esc(pin_id)}"))'
         )
     result.extend(["      )", "    )"])
     return result
 
 
-def _referenced_pin_keys(netlist: CircuitNetlist) -> set[str]:
-    return {pin.key() for net in netlist.nets for pin in net.pins}
+_PWR_FLAG_LIB_ID = "power:PWR_FLAG"
+
+
+def _pwr_flag_lib_symbol() -> List[str]:
+    return [
+        f'    (symbol "{_PWR_FLAG_LIB_ID}" (power) (pin_numbers hide) (pin_names (offset 0) hide) (in_bom no) (on_board no)',
+        '      (property "Reference" "#FLG" (at 0 1.905 0) (effects (font (size 1.27 1.27)) hide))',
+        '      (property "Value" "PWR_FLAG" (at 0 3.81 0) (effects (font (size 1.27 1.27))))',
+        '      (symbol "PWR_FLAG_0_0"',
+        '        (pin power_out line (at 0 0 90) (length 0) (name "pwr" (effects (font (size 1.27 1.27)))) (number "1"))',
+        "      )",
+        '      (symbol "PWR_FLAG_0_1"',
+        '        (polyline (pts (xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)) (stroke (width 0) (type default)) (fill (type none)))',
+        "      )",
+        "    )",
+    ]
+
+
+def _pwr_flag_instance(number: int, x: float, y: float, plan: PowerFlagPlan) -> List[str]:
+    return [
+        "  (symbol",
+        f'    (lib_id "{_PWR_FLAG_LIB_ID}")',
+        f"    (at {x:.4f} {y:.4f} 0)",
+        "    (unit 1)",
+        "    (in_bom no)",
+        "    (on_board no)",
+        f'    (uuid "{_uid()}")',
+        f'    (property "Reference" "#FLG{number:02d}" (at {x:.4f} {y - 2.54:.4f} 0) (effects (font (size 1.27 1.27)) hide))',
+        f'    (property "Value" "PWR_FLAG" (at {x:.4f} {y - 5.08:.4f} 0) (effects (font (size 1.27 1.27)) hide))',
+        f'    (property "HS_FedBy" "{_esc(plan.source)}" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))',
+        f'    (pin "1" (uuid "{_uid()}"))',
+        "    (instances",
+        '      (project "hardware-splicer"',
+        f'        (path "/" (reference "#FLG{number:02d}") (unit 1))',
+        "      )",
+        "    )",
+        "  )",
+    ]
 
 
 def netlist_to_kicad_schematic(
     netlist: CircuitNetlist,
     *,
     title: str = "Hardware-Splicer compile",
+    build_id: Optional[str] = None,
 ) -> str:
-    """Generate a KiCad schematic preserving every known catalog endpoint pin."""
+    """Generate a KiCad schematic preserving every known catalog endpoint pin.
+
+    ``build_id`` selects per-build pin policy (recipe-note terminals); without it only the
+    module-level and microcontroller rules apply. No-connect flags and PWR_FLAGs come from
+    :mod:`schematic_pin_policy`, never from ERC output.
+    """
 
     dynamic_defs: List[str] = []
     component_pins: Dict[str, list[Dict[str, object]]] = {}
     component_lib_ids: Dict[str, str] = {}
     seen_lib_ids: set[str] = set()
     for comp in netlist.components:
-        pins = _catalog_pins(comp.module_id)
+        pins = catalog_pins(comp.module_id)
         component_pins[comp.ref] = pins
         if not pins:
             continue
@@ -141,9 +163,13 @@ def netlist_to_kicad_schematic(
                 lib_id=lib_id,
                 ref=comp.ref,
                 value=str(comp.value or comp.module_id or comp.ref),
+                module_id=comp.module_id,
                 pins=pins,
             )
         )
+
+    flag_plans = plan_power_flags(netlist)
+    no_connect_plans = plan_no_connects(netlist, build_id=build_id)
 
     lines: List[str] = [
         '(kicad_sch (version 20250114) (generator "hardware-splicer")',
@@ -152,12 +178,11 @@ def netlist_to_kicad_schematic(
         "  (lib_symbols",
         *embedded_schematic_lib_symbols(),
         *dynamic_defs,
+        *(_pwr_flag_lib_symbol() if flag_plans else []),
         "  )",
     ]
 
     pin_positions: Dict[str, Dict[str, tuple[float, float]]] = {}
-    referenced = _referenced_pin_keys(netlist)
-    unconnected_pin_positions: list[tuple[float, float]] = []
 
     for index, comp in enumerate(netlist.components):
         x = 33.02 + (index % 3) * 66.04
@@ -206,8 +231,6 @@ def netlist_to_kicad_schematic(
             for pin in pins:
                 pin_id = str(pin.get("id"))
                 lines.append(f'    (pin "{_esc(pin_id)}" (uuid "{_uid()}"))')
-                if f"{comp.ref}.{pin_id}" not in referenced and str(pin.get("role") or "").lower() not in _POWER_ROLES:
-                    unconnected_pin_positions.append(pin_positions[comp.ref][pin_id])
         else:
             lines.extend(
                 [
@@ -253,7 +276,34 @@ def netlist_to_kicad_schematic(
                 ]
             )
 
-    for x, y in unconnected_pin_positions:
+    # Off-board feeds: one PWR_FLAG per net that needs it, planned from connector/module data.
+    for number, plan in enumerate(flag_plans, start=1):
+        position = pin_positions.get(plan.ref, {}).get(plan.pin)
+        if position is None:
+            continue
+        px, py = position
+        stub_x = px - _STUB_LENGTH_MM
+        if plan.stub:
+            lines.extend(
+                [
+                    "  (wire",
+                    f'    (pts (xy {px:.4f} {py:.4f}) (xy {stub_x:.4f} {py:.4f}))',
+                    '    (stroke (width 0) (type default))',
+                    f'    (uuid "{_uid()}")',
+                    "  )",
+                    f'  (label "{_esc(plan.net)}" (at {stub_x:.4f} {py:.4f} 180)',
+                    '    (effects (font (size 1.27 1.27)) (justify right bottom))',
+                    f'    (uuid "{_uid()}")',
+                    "  )",
+                ]
+            )
+        lines.extend(_pwr_flag_instance(number, stub_x, py, plan))
+
+    for plan in no_connect_plans:
+        position = pin_positions.get(plan.ref, {}).get(plan.pin)
+        if position is None:
+            continue
+        x, y = position
         lines.extend(
             [
                 "  (no_connect",
@@ -273,8 +323,11 @@ def write_schematic_for_netlist(
     out_path: str | Path,
     *,
     title: Optional[str] = None,
+    build_id: Optional[str] = None,
 ) -> str:
     path = Path(out_path)
-    text = netlist_to_kicad_schematic(netlist, title=title or "Hardware-Splicer compile")
+    text = netlist_to_kicad_schematic(
+        netlist, title=title or "Hardware-Splicer compile", build_id=build_id
+    )
     path.write_text(text, encoding="utf-8")
     return str(path)
