@@ -103,10 +103,12 @@ def authorization_clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[datetime],
 def assume_clean_kicad_erc(monkeypatch: pytest.MonkeyPatch) -> None:
     """Isolate a test from the real KiCad ERC outcome on the emitted schematic.
 
-    KiCad ERC failures now veto build_ready (see test_kicad_erc_trust_gate.py), and the
-    generated catalog schematics currently report real ERC errors. Tests that exercise
-    downstream behaviour of a *ready* build use this fixture to state that assumption
-    explicitly instead of depending on the installed kicad-cli.
+    KiCad ERC failures veto build_ready (see test_kicad_erc_trust_gate.py). Most catalog and
+    synthesized builds now pass real ERC (test_catalog_erc_clean.py), so only tests whose build
+    still reports a real ERC error use this fixture, to state that assumption explicitly:
+    the scratch relay/MOSFET/level-shifter compose (open load terminals and an ESP32 RX pin
+    auto-wired as a driver), the synthesized 5V-control bridge (open MOSFET load terminals) and
+    the TP4056 battery-power lowering (open charger/battery terminals).
     """
     monkeypatch.setattr(
         "hardware_splicer.netlist.compile.run_kicad_cli_erc",
