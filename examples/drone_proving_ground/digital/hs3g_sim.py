@@ -216,10 +216,12 @@ class World:
                 visual_quat = p.multiplyTransforms([0,0,0],quat,[0,0,0],rotor_q)[1]
             # These are massless, non-colliding visualization objects only.
             p.resetBasePositionAndOrientation(body, visual_pos.tolist(), visual_quat, physicsClientId=self.client)
-        target = pos if assembly else [.15,.15,.31]
-        view = p.computeViewMatrixFromYawPitchRoll(target, .40 if assembly else 1.30, 40 if assembly else 50, -30, 0, 2)
-        width,height = (720,480) if assembly else (512,336)
-        projection = p.computeProjectionMatrixFOV(45, width/height, .01, 8)
+        camera = self.cfg['camera']
+        target = pos if assembly else camera['target_m']
+        view = p.computeViewMatrixFromYawPitchRoll(target, .40 if assembly else camera['distance_m'],
+            40 if assembly else camera['yaw_deg'], -30 if assembly else camera['pitch_deg'], 0, 2)
+        width,height = (720,480) if assembly else (camera['width_px'],camera['height_px'])
+        projection = p.computeProjectionMatrixFOV(45 if assembly else camera['fov_deg'], width/height, .01, 8)
         _,_,rgba,_,_ = p.getCameraImage(width,height,viewMatrix=view,projectionMatrix=projection,renderer=p.ER_TINY_RENDERER,
                                        shadow=0,lightDirection=[-1,-2,3], physicsClientId=self.client)
         return Image.fromarray(np.asarray(rgba,dtype=np.uint8).reshape(height,width,4)[:,:,:3])
@@ -249,7 +251,7 @@ def run(model, table, config, scenario, out: Path, *, render=False):
                     continue
                 frame = world.camera(recorded=row,angles=angles)
                 draw = ImageDraw.Draw(frame)
-                draw.rectangle((0,0,frame.width,47), fill=(17,27,42))
+                draw.rectangle((0,0,frame.width,config['camera']['header_px']), fill=(17,27,42))
                 draw.text((15,9), f"HS-3G-B | PyBullet simulation | {row['t_s']:05.1f} s | {row['phase'].upper()}", fill='white')
                 draw.text((15,27), f"z {row['pos_m_z']:.2f} m   |   current {row['current_a_est']:.2f} A (model)   |   no physical hardware", fill=(145,207,225))
                 frames.append(frame.quantize(colors=96))

@@ -461,7 +461,7 @@ def _native_drone_digital(run_dir: Path, source: Path, report: dict[str, Any]) -
         required_checks = {"same_verified_design", "source_identity", "native_step_assembly", "glb_geometry_and_scale",
                            "offline_viewer_contains_native_model", "nominal_native_force_balance", "mass_plus_5g_native_force_balance",
                            "motor_failure_loss_of_control_observed", "native_zero_thrust_gravity_oracle", "digital_scope_only",
-                           "standalone_runtime_source", "packaged_thrust_table"}
+                           "standalone_runtime_source", "packaged_thrust_table", "nominal_recording_framing"}
         checks = receipt.get("checks") or {}
         unchanged = all(_hash(source / n) == v == _hash(stage / n) for n, v in before.items())
         accepted = (checked.returncode == 0 and receipt.get("engineering_acceptance") is True

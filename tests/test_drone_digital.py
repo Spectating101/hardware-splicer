@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -108,6 +109,15 @@ def test_zero_motor_thrust_matches_analytic_gravity(native):
     assert oracle['accepted']
     assert oracle['actual_z_m']<.8
     assert oracle['actual_vz_m_s']<0
+
+
+@pytest.mark.requires_cadquery
+def test_video_camera_keeps_the_aircraft_clear_of_its_header(native):
+    model,config,table,sim,verify,out=native
+    rows=verify.read_rows(REFERENCE/'nominal.csv')
+    assert verify.recording_framing(model,rows,config)['accepted']
+    too_low=copy.deepcopy(config);too_low['camera']['target_m'][2]=.31
+    assert not verify.recording_framing(model,rows,too_low)['accepted']
 
 
 @pytest.mark.requires_cadquery

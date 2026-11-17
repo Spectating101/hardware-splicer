@@ -2,23 +2,23 @@
   "artifact_sha256": {
     "ASSEMBLY.png": "75f78974ac9d3880ecccf639b299b8ced747d900976e4a66ab807bb7b8211d00",
     "EXPLODED.png": "b24fb8b1424ab7a28100243ac909fab6c2e97ded0112fc3215a18f7071ad84f4",
-    "FLIGHT.gif": "2184151a6e92bf0438b0e3757db9e67b7cf8d9154f369c37a913b0dad66cb998",
+    "FLIGHT.gif": "3a85b5d4012fdfda60eb1ca58e5308bd64a11a31dba946a552b3ae6074445e47",
     "HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
     "HS3G_B_ASSEMBLY.glb": "989849c8c23b8eb6221d8977a9aadf7af8afa54da201d752027f77466366e434",
-    "HS3G_B_ASSEMBLY.step": "d7d9c15da98644009a8fc364320250e9d015bd401a99543fe6d1bc2a50dbc68a",
+    "HS3G_B_ASSEMBLY.step": "d659856eaa6c12f72906f6d73adf7da0565a89745a4c6b710daac3a3dc4ada54",
     "README.md": "63c818fc632897f02169908f0c37d30eafbafe0065b2283656128394a8760787",
     "REQUIREMENTS.txt": "c0373f10071c890ac102a697596523988db5af5df536fa89726ee278df141c7c",
     "RERUN.py": "2fd2b6fd87a4ae95f2168046bde9dfff8b3502857a19e772edbc82cc4c580a0c",
-    "SIMULATION.json": "ea3f5ef6508d045914223de50eee977304411a9128728ad906ddccf16da3b688",
+    "SIMULATION.json": "bd2e828f553c99cbd6010815b3a6733b7d2b640b4272453b6b0edbc2638740ec",
     "TELEMETRY.png": "0c7860fb43ea44449ef93c3065dbfc1cb83b32c28242191f726d8bbac11eb02a",
     "THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
-    "VIEWER.html": "4d959b7efd25c92f503a2f912550d273c3dd70db9defb88a3c222648ac1f44c9",
-    "hs3g_sim.py": "848b1e514e1aee4d4f280aa57c485a9f278b6e9971983bc0e686312f4dd9cbef",
+    "VIEWER.html": "48f2712ab09c50b1248424451e0cbc7e53300c4a94dd5a32d40cde1f4f612ed2",
+    "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
     "mass_plus_5g.csv": "640640d1e0216aad5fac0f405b468b0c521f894b59aaba9ffa3100877604bd7b",
-    "model.json": "7b20f459427fdd8a109b0c4ca20b71c0fc9dd6edc7040b27d0a7a4644ee5e049",
+    "model.json": "66763ef54d8d7ac8c8efee8a0a105dd99648b5beb840e3811ae98b72c93622c3",
     "motor_failure.csv": "dba3b7d6056d2a9ffd1f6770664e8c91360d712033511ac6d0892c811f2c44fe",
     "nominal.csv": "d237d92bbdf00c903f460e488101349485c3eb22690ef5d959f6741de860bec3",
-    "simulation-contract.json": "7308605ea4673a1f6b26f6af5681259e6cccd2bef0c0bf2b7b075230ba7357c8",
+    "simulation-contract.json": "e4219cd220f7ea5f884e7ae7dee3c3a6326909c8f00b95eb4dfbe74982d91eca",
     "thrust-table.json": "836ea2d1a08e9fa5f32b899de5a8f8f56e12065afe4a9292420aadd6acf4261d"
   },
   "checks": {
@@ -97,6 +97,7 @@
     "nominal_max_tracking_tilt_deg": true,
     "nominal_native_force_balance": true,
     "nominal_position_velocity_consistency": true,
+    "nominal_recording_framing": true,
     "nominal_timebase": true,
     "nominal_tracking_rms_m": true,
     "nominal_viewer_matches_physics": true,
@@ -137,6 +138,19 @@
   "physical_validation": false,
   "physical_work_requested": false,
   "power_on_authorized": false,
+  "recording_framing": {
+    "accepted": true,
+    "header_bottom_px": 47,
+    "margin_px": 8,
+    "max_xy_px": [
+      459.12674614942773,
+      296.06849701085656
+    ],
+    "min_xy_px": [
+      136.38032226654127,
+      60.33158345882683
+    ]
+  },
   "scenarios": [
     {
       "accepted": true,

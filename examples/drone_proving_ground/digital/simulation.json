@@ -5,6 +5,12 @@
   "control_hz": 60,
   "duration_s": 28,
   "render_hz": 6,
+  "camera": {
+    "width_px": 512, "height_px": 336,
+    "target_m": [0.15, 0.15, 0.47],
+    "distance_m": 1.30, "yaw_deg": 50, "pitch_deg": -30, "fov_deg": 45,
+    "header_px": 47
+  },
   "gravity_m_s2": 9.80665,
   "assumptions": {
     "motor_time_constant_s": 0.035,

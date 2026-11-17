@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import itertools
 from pathlib import Path
 import re
 import sys
@@ -21,6 +22,26 @@ from build_digital import read_inputs
 def read_rows(path):
     with path.open() as handle:
         return [{key:value if key=='phase' else float(value) for key,value in row.items()} for row in csv.DictReader(handle)]
+
+
+def recording_framing(model,rows,config):
+    """Project the complete aircraft envelope at every recorded video frame."""
+    import pybullet as p
+    c=config['camera'];width,height=c['width_px'],c['height_px']
+    lo,hi=np.array(model['bounds_m'])-model['centre_of_mass_m']
+    corners=np.array(list(itertools.product(*zip(lo,hi))))
+    view=np.array(p.computeViewMatrixFromYawPitchRoll(c['target_m'],c['distance_m'],c['yaw_deg'],c['pitch_deg'],0,2)).reshape(4,4,order='F')
+    proj=np.array(p.computeProjectionMatrixFOV(c['fov_deg'],width/height,.01,8)).reshape(4,4,order='F')
+    pixels=[]
+    for row in rows[::config['physics_hz']//config['render_hz']]:
+        R=np.array(p.getMatrixFromQuaternion([row['quat_'+a] for a in 'xyzw'])).reshape(3,3)
+        points=corners@R.T+np.array([row['pos_m_'+a] for a in 'xyz'])
+        clip=np.c_[points,np.ones(8)]@(proj@view).T
+        ndc=clip[:,:3]/clip[:,3:]
+        pixels.extend(np.c_[(ndc[:,0]+1)*width/2,(1-ndc[:,1])*height/2])
+    pixels=np.array(pixels);low=pixels.min(axis=0);high=pixels.max(axis=0)
+    return {'accepted':bool(low[0]>=8 and high[0]<=width-8 and low[1]>=c['header_px']+8 and high[1]<=height-8),
+            'min_xy_px':low.tolist(),'max_xy_px':high.tolist(),'header_bottom_px':c['header_px'],'margin_px':8}
 
 
 def verify(out: Path, design_dir: Path):
@@ -69,10 +90,13 @@ def verify(out: Path, design_dir: Path):
     checks['offline_viewer_contains_native_model'] = viewer.get('model')==model and (HERE/'vendor/three.min.js').read_text() in page
     application = page.rsplit('<script>',1)[-1]
     checks['viewer_no_network_dependency'] = not re.search(r'<script[^>]+src=|<link[^>]+href=["\']https?://',page) and 'fetch(' not in application
-    assessments = []
+    assessments = [];framing=None
     for scenario in config['scenarios']:
         name = scenario['id']
         rows = read_rows(out/(name+'.csv'))
+        if name=='nominal':
+            framing=recording_framing(model,rows,config)
+            checks['nominal_recording_framing']=framing['accepted']
         evaluated = assess(rows,model,config,scenario)
         assessments.append(evaluated)
         for key,value in evaluated['checks'].items():checks[name+'_'+key]=bool(value)
@@ -99,7 +123,7 @@ def verify(out: Path, design_dir: Path):
               'digital_objective_complete':accepted,'engineering_acceptance':accepted,
               'scope':'Native 3D representative, offline physics playback and parameterized PyBullet mission/failure study',
               'checks':checks,'failed_checks':[k for k,v in checks.items() if not v],
-              'scenarios':assessments,'native_gravity_oracle':oracle,
+              'scenarios':assessments,'native_gravity_oracle':oracle,'recording_framing':framing,
               'physical_work_requested':False,'physical_validation':False,
               'fabrication_authorized':False,'power_on_authorized':False,'flight_authorized':False,
               'scope_limits':config['scope_limits'],
