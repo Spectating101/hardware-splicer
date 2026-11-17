@@ -6,6 +6,7 @@ import sqlite3
 import threading
 import time
 import traceback
+import uuid
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -65,6 +66,7 @@ class JobRecord:
     finished_at: str | None = None
     result: Dict[str, Any] | None = None
     error: Dict[str, Any] | None = None
+    attempt_id: str | None = None
 
     def to_dict(self, *, include_spec: bool = False, include_result: bool = True) -> Dict[str, Any]:
         row: Dict[str, Any] = {
@@ -76,6 +78,7 @@ class JobRecord:
             "updated_at": self.updated_at,
             "started_at": self.started_at,
             "finished_at": self.finished_at,
+            "attempt_id": self.attempt_id,
             "output_dir": self.output_dir,
             "options": self.options,
             "links": {
@@ -111,6 +114,7 @@ class JobStore:
 
     def _init_db(self) -> None:
         with self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS jobs (
@@ -126,11 +130,15 @@ class JobStore:
                     spec_json TEXT NOT NULL,
                     options_json TEXT NOT NULL,
                     result_json TEXT,
-                    error_json TEXT
+                    error_json TEXT,
+                    attempt_id TEXT
                 )
                 """
             )
+            if 'attempt_id' not in {row['name'] for row in conn.execute('PRAGMA table_info(jobs)')}:
+                conn.execute('ALTER TABLE jobs ADD COLUMN attempt_id TEXT')
             conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status_created ON jobs(status, created_at)")
+            conn.execute("COMMIT")
 
     def _record_from_row(self, row: sqlite3.Row) -> JobRecord:
         return JobRecord(
@@ -147,6 +155,7 @@ class JobStore:
             options=_loads(row["options_json"], {}),
             result=_loads(row["result_json"], None),
             error=_loads(row["error_json"], None),
+            attempt_id=row['attempt_id'],
         )
 
     def create_job(
@@ -161,8 +170,10 @@ class JobStore:
     ) -> JobRecord:
         now = _utc_now()
         with self._lock, self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
             existing = conn.execute("SELECT * FROM jobs WHERE request_id = ?", (request_id,)).fetchone()
             if existing:
+                conn.execute("COMMIT")
                 return self._record_from_row(existing)
             conn.execute(
                 """
@@ -174,6 +185,7 @@ class JobStore:
                 (job_id, request_id, project_name, now, now, output_dir, _json(spec), _json(options)),
             )
             row = conn.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+            conn.execute("COMMIT")
             return self._record_from_row(row)
 
     def get_job(self, job_id: str) -> JobRecord | None:
@@ -224,19 +236,26 @@ class JobStore:
             cursor = conn.execute(
                 """
                 UPDATE jobs
-                SET status = ?, updated_at = ?, finished_at = ?, error_json = ?
+                SET status = ?, updated_at = ?, finished_at = ?, error_json = ?, attempt_id = NULL
                 WHERE status = 'running'
                 """,
                 (status, now, finished_at, error),
             )
             return int(cursor.rowcount or 0)
 
-    def claim_next(self) -> JobRecord | None:
+    def claim_next(self, *, job_type: str | None = None, job_id: str | None = None,
+                   project_id: str | None = None) -> JobRecord | None:
         now = _utc_now()
+        filters, params = ["status = 'queued'"], []
+        for clause, value in (("json_extract(options_json, '$.job_type') = ?", job_type),
+                              ("job_id = ?", job_id),
+                              ("json_extract(options_json, '$.payload.project_id') = ?", project_id)):
+            if value is not None:
+                filters.append(clause); params.append(value)
         with self._lock, self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             row = conn.execute(
-                "SELECT * FROM jobs WHERE status = 'queued' ORDER BY created_at ASC LIMIT 1"
+                "SELECT * FROM jobs WHERE " + ' AND '.join(filters) + " ORDER BY created_at ASC LIMIT 1", params
             ).fetchone()
             if not row:
                 conn.execute("COMMIT")
@@ -244,16 +263,16 @@ class JobStore:
             conn.execute(
                 """
                 UPDATE jobs
-                SET status = 'running', started_at = ?, updated_at = ?, error_json = NULL
+                SET status = 'running', started_at = ?, updated_at = ?, error_json = NULL, attempt_id = ?
                 WHERE job_id = ? AND status = 'queued'
                 """,
-                (now, now, row["job_id"]),
+                (now, now, uuid.uuid4().hex, row["job_id"]),
             )
             conn.execute("COMMIT")
             updated = conn.execute("SELECT * FROM jobs WHERE job_id = ?", (row["job_id"],)).fetchone()
             return self._record_from_row(updated)
 
-    def complete_job(self, job_id: str, result: Dict[str, Any]) -> None:
+    def complete_job(self, job_id: str, result: Dict[str, Any], *, attempt_id: str | None = None) -> None:
         now = _utc_now()
         with self._lock, self._connect() as conn:
             # Only transition running → succeeded (ignore late completes after timeout/fail).
@@ -261,9 +280,9 @@ class JobStore:
                 """
                 UPDATE jobs
                 SET status = 'succeeded', finished_at = ?, updated_at = ?, result_json = ?, error_json = NULL
-                WHERE job_id = ? AND status = 'running'
+                WHERE job_id = ? AND status = 'running' AND (? IS NULL OR attempt_id = ?)
                 """,
-                (now, now, _json(result), job_id),
+                (now, now, _json(result), job_id, attempt_id, attempt_id),
             )
 
     def complete_with_publication(self, job: JobRecord, publish: Callable[[], Dict[str, Any]]) -> bool:
@@ -275,8 +294,9 @@ class JobStore:
         with self._lock, self._connect() as conn:
             conn.execute("BEGIN IMMEDIATE")
             try:
-                row = conn.execute("SELECT status, started_at FROM jobs WHERE job_id = ?", (job.job_id,)).fetchone()
-                if not row or row['status'] != 'running' or row['started_at'] != job.started_at:
+                row = conn.execute("SELECT status, started_at, attempt_id FROM jobs WHERE job_id = ?", (job.job_id,)).fetchone()
+                if (not row or row['status'] != 'running' or row['started_at'] != job.started_at
+                        or row['attempt_id'] != job.attempt_id):
                     conn.execute("ROLLBACK")
                     return False
                 result = publish()
@@ -289,16 +309,16 @@ class JobStore:
                 conn.execute("ROLLBACK")
                 raise
 
-    def fail_job(self, job_id: str, error: Dict[str, Any]) -> None:
+    def fail_job(self, job_id: str, error: Dict[str, Any], *, attempt_id: str | None = None) -> None:
         now = _utc_now()
         with self._lock, self._connect() as conn:
             conn.execute(
                 """
                 UPDATE jobs
                 SET status = 'failed', finished_at = ?, updated_at = ?, error_json = ?
-                WHERE job_id = ? AND status = 'running'
+                WHERE job_id = ? AND status = 'running' AND (? IS NULL OR attempt_id = ?)
                 """,
-                (now, now, _json(error), job_id),
+                (now, now, _json(error), job_id, attempt_id, attempt_id),
             )
 
     def cancel_job(self, job_id: str) -> bool:
@@ -316,7 +336,7 @@ class JobStore:
             )
             return cursor.rowcount > 0
 
-    def retry_job(self, job_id: str) -> bool:
+    def retry_job(self, job_id: str, *, allow_succeeded: bool = True) -> bool:
         now = _utc_now()
         with self._lock, self._connect() as conn:
             cursor = conn.execute(
@@ -327,10 +347,12 @@ class JobStore:
                     finished_at = NULL,
                     updated_at = ?,
                     result_json = NULL,
-                    error_json = NULL
+                    error_json = NULL,
+                    attempt_id = NULL
                 WHERE job_id = ? AND status IN ('succeeded', 'failed', 'cancelled')
+                    AND (? OR status != 'succeeded')
                 """,
-                (now, job_id),
+                (now, job_id, allow_succeeded),
             )
             return cursor.rowcount > 0
 
@@ -442,6 +464,23 @@ class JobBackend:
                 continue
             self._run_job(job)
 
+    def run_next(self, *, job_type: str | None = None, job_id: str | None = None,
+                 project_id: str | None = None) -> JobRecord | None:
+        """Run one atomically claimed task without an HTTP server or worker loop."""
+        if self._stop.is_set():
+            raise RuntimeError('This job backend has stopped.')
+        job = self.store.claim_next(job_type=job_type, job_id=job_id, project_id=project_id)
+        if job is None:
+            return None
+        try:
+            self._run_job(job)
+        except BaseException:
+            self.store.fail_job(job.job_id, {'type': 'WorkerInterrupted',
+                                             'message': 'The headless job worker was interrupted.'},
+                                attempt_id=job.attempt_id)
+            raise
+        return self.store.get_job(job.job_id)
+
     def _run_job(self, job: JobRecord) -> None:
         timeout_s = _job_timeout_s()
         if job.options.get('job_type') == 'digital_study':
@@ -477,12 +516,16 @@ class JobBackend:
                     "type": "JobTimeout",
                     "message": (
                         f"Job exceeded wall-clock timeout ({int(timeout_s)}s). "
-                        "Likely a stalled LLM or compile step; retry with offline flags "
-                        "(HARDWARE_SPLICER_OFFLINE_SALVAGE=1 / QWEN_DISABLED=1) or raise "
-                        "HARDWARE_SPLICER_JOB_TIMEOUT_S."
+                        + ("Native CAD or simulation did not finish. No revision was published. "
+                           "Inspect the job logs or configure HARDWARE_SPLICER_DIGITAL_TIMEOUT_S."
+                           if job.options.get('job_type') == 'digital_study' else
+                           "Likely a stalled LLM or compile step; retry with offline flags "
+                           "(HARDWARE_SPLICER_OFFLINE_SALVAGE=1 / QWEN_DISABLED=1) or raise "
+                           "HARDWARE_SPLICER_JOB_TIMEOUT_S.")
                     ),
                     "timeout_s": timeout_s,
                 },
+                attempt_id=job.attempt_id,
             )
             return
         if error_box:
@@ -496,6 +539,7 @@ class JobBackend:
                         traceback.format_exception(type(exc), exc, exc.__traceback__, limit=20)
                     ),
                 },
+                attempt_id=job.attempt_id,
             )
 
     def _execute_job(self, job: JobRecord) -> None:
@@ -525,7 +569,7 @@ class JobBackend:
                     project_name=job.project_name,
                     clarifier=clarifier if isinstance(clarifier, dict) else None,
                 )
-                self.store.complete_job(job.job_id, final)
+                self.store.complete_job(job.job_id, final, attempt_id=job.attempt_id)
                 return
             if job_type == "compose_agent_loop":
                 from .compose_agent_loop import compose_agent_loop
@@ -548,7 +592,7 @@ class JobBackend:
                     drc_fixup=drc_fixup,
                     **payload,
                 )
-                self.store.complete_job(job.job_id, result)
+                self.store.complete_job(job.job_id, result, attempt_id=job.attempt_id)
                 return
             if job_type == "splice_build":
                 from .project_intake import splice_and_build_from_intake
@@ -561,7 +605,7 @@ class JobBackend:
                     export_gerber=bool(payload.get("export_gerber")),
                     request_id=job.request_id,
                 )
-                self.store.complete_job(job.job_id, result)
+                self.store.complete_job(job.job_id, result, attempt_id=job.attempt_id)
                 return
 
             spec = HardwareCompileSpec.from_dict(job.spec)
@@ -572,7 +616,7 @@ class JobBackend:
                 splicer_port=int(job.options.get("splicer_port") or 0),
                 request_id=job.request_id,
             )
-            self.store.complete_job(job.job_id, result.to_dict())
+            self.store.complete_job(job.job_id, result.to_dict(), attempt_id=job.attempt_id)
         except Exception as exc:
             self.store.fail_job(
                 job.job_id,
@@ -581,6 +625,7 @@ class JobBackend:
                     "message": str(exc),
                     "traceback": traceback.format_exc(limit=20),
                 },
+                attempt_id=job.attempt_id,
             )
 
 

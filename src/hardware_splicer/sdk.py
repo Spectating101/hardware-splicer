@@ -30,6 +30,16 @@ from .compose_dispatch import compose_dispatch
 SCHEMA_VERSION = "hardware_splicer.sdk.v1"
 
 
+def digital_engine(*, project_root: str | Path | None = None, job_db: str | Path | None = None):
+    """Open the persistent simulation engine directly, without an HTTP/UI process.
+
+    Use as a context manager. Opening it does not restart or recover other workers.
+    """
+    from .digital_engine import DigitalStudyEngine
+
+    return DigitalStudyEngine(project_root=project_root, job_db=job_db)
+
+
 def apply_engine_defaults() -> None:
     """Safe defaults for agent-driven compiles (headless, no Java autoroute)."""
     load_env_local()

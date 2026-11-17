@@ -48,7 +48,10 @@ def digest(path):
 
 def read_json(path):
     try:
-        return json.loads(Path(path).read_text())
+        value = json.loads(Path(path).read_text())
+        if not isinstance(value, dict):
+            raise ValueError('Digital JSON must contain an object.')
+        return value
     except (OSError, ValueError) as exc:
         raise CorruptProject('Digital study artifact is missing or unreadable.') from exc
 
@@ -128,10 +131,10 @@ def verified_package(directory, *, check_sources=False):
     return receipt, model, read_json(directory / 'SIMULATION.json')
 
 
-def summarize(receipt, model, report):
+def summarize(receipt, model, report, config=None):
     nominal = next(s for s in report['scenarios'] if s['scenario']['id'] == 'nominal')
     constraints = list(report['constraints'])
-    config = read_json(CASE / 'simulation.json')
+    config = config if config is not None else read_json(CASE / 'simulation.json')
     for scenario in report['scenarios']:
         for key, passed in scenario['checks'].items():
             if key in {'finite_state', 'timebase', 'position_velocity_consistency', 'native_force_balance'}:
@@ -152,7 +155,8 @@ def summarize(receipt, model, report):
                     'a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.'}
 
 
-def stage_run(store, project_id, source, *, change_request, parent_revision, job_id=None, expected_requirements=None):
+def stage_run(store, project_id, source, *, change_request, parent_revision, job_id=None,
+              expected_requirements=None, attempt_id=None):
     receipt, model, report = verified_package(source)
     if expected_requirements is not None and model.get('requirements') != expected_requirements:
         raise CorruptProject('Computed model does not match the requested requirements.')
@@ -168,7 +172,8 @@ def stage_run(store, project_id, source, *, change_request, parent_revision, job
                 archive.write(destination / name, name)
         seal = {'schema': 'hardware_splicer.digital_run.v1', 'project_id': project_id, 'run_id': run_id,
                 'parent_revision': parent_revision, 'change_request': change_request, 'job_id': job_id,
-                'summary': summarize(receipt, model, report),
+                'attempt_id': attempt_id,
+                'summary': summarize(receipt, model, report, read_json(source / 'simulation-contract.json')),
                 'artifact_sha256': {name: digest(destination / name) for name in sorted(ARTIFACTS | {'STUDY.zip'})}}
         write_json(destination / 'sealed-run.json', seal)
         return seal
@@ -210,17 +215,57 @@ def load_run(store, project_id, revision=None):
     if (directory / 'sealed-run.json').is_symlink():
         raise CorruptProject('Digital run seal cannot be a symbolic link.')
     seal = read_json(directory / 'sealed-run.json')
-    if seal.get('project_id') != project_id or seal.get('run_id') != run_id:
+    if (not isinstance(seal, dict) or seal.get('schema') != 'hardware_splicer.digital_run.v1'
+            or seal.get('project_id') != project_id or seal.get('run_id') != run_id):
         raise CorruptProject('Digital run belongs to a different project.')
+    if (seal.get('attempt_id') is not None
+            and envelope.get('metadata', {}).get('attempt_id') != seal['attempt_id']):
+        raise CorruptProject('Digital run does not match its recorded execution attempt.')
+    parent = seal.get('parent_revision')
+    if ((parent is None and envelope['revision'] != 1)
+            or (parent is not None and (isinstance(parent, bool) or not isinstance(parent, int)
+                                       or parent < 1 or envelope['revision'] != parent + 1))):
+        raise CorruptProject('Digital run does not belong to this project revision.')
+    return envelope, directory, seal
+
+
+def validated_run(store, project_id, revision=None):
+    """Bind cached claims to their immutable model, contract and verified result."""
+    envelope, directory, seal = load_run(store, project_id, revision)
+    try:
+        hashes = seal['artifact_sha256']
+        if set(hashes) != ARTIFACTS | {'STUDY.zip'}:
+            raise ValueError('Invalid artifact inventory')
+        values = {name: read_json(checked_file(directory, name, hashes))
+                  for name in ('verification.json', 'model.json', 'SIMULATION.json', 'simulation-contract.json')}
+        receipt, model = values['verification.json'], values['model.json']
+        report, contract = values['SIMULATION.json'], values['simulation-contract.json']
+        requirements = requirement_tools().validate(model['requirements'])
+        if (receipt.get('artifact_integrity') is not True or not receipt.get('integrity_checks')
+                or not all(v is True for v in receipt['integrity_checks'].values())
+                or set(receipt['artifact_sha256']) != ARTIFACTS - {'verification.json'}
+                or any(hashes[name] != value for name, value in receipt['artifact_sha256'].items())
+                or model['source_sha256'] != report['source_sha256']
+                or report['requirements'] != requirements or contract['requirements'] != requirements
+                or report['requirements_met'] is not receipt['engineering_acceptance']
+                or receipt['scenarios'] != report['scenarios']
+                or receipt['requirements_met'] is not receipt['engineering_acceptance']
+                or any(receipt.get(key) is not False for key in ('physical_work_requested','physical_validation',
+                        'fabrication_authorized','power_on_authorized','flight_authorized'))):
+            raise ValueError('Inconsistent verified inputs or result')
+        summary = summarize(receipt, model, report, contract)
+        json.dumps(summary, allow_nan=False)
+        if summary != seal['summary']:
+            raise ValueError('Stored summary differs from the verified result')
+    except (KeyError, TypeError, ValueError, AttributeError, StopIteration, OverflowError) as exc:
+        raise CorruptProject('Digital result claims do not match their verified artifacts.') from exc
     return envelope, directory, seal
 
 
 def describe(store, project_id, revision=None):
-    envelope, directory, seal = load_run(store, project_id, revision)
-    # Check the receipt/model on every read, large viewer/CAD bytes on download.
-    for name in ('verification.json', 'model.json', 'SIMULATION.json'):
-        checked_file(directory, name, seal['artifact_sha256'])
+    envelope, directory, seal = validated_run(store, project_id, revision)
     return {'revision': envelope['revision'], 'saved_at': envelope['saved_at'],
+            'attempt_id': seal.get('attempt_id'),
             **{key: seal[key] for key in ('run_id', 'parent_revision', 'change_request', 'job_id', 'summary')},
             'artifacts': {name: f'/v1/projects/{project_id}/digital/revisions/{envelope["revision"]}/artifacts/{name}'
                           for name in sorted(seal['artifact_sha256'])}}
@@ -246,7 +291,8 @@ def duplicate_project(store, project_id, target_id):
 
 def _active(backend, job):
     current = backend.store.get_job(job.job_id)
-    return bool(not backend._stop.is_set() and current and current.status == 'running' and current.started_at == job.started_at)
+    return bool(not backend._stop.is_set() and current and current.status == 'running'
+                and current.started_at == job.started_at and current.attempt_id == job.attempt_id)
 
 
 def _command(backend, job, args, log):
@@ -279,7 +325,7 @@ def execute_study(backend, job):
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
     requirements = requirement_tools().validate(payload['requirements'])
-    attempt = Path(job.output_dir) / uuid.uuid4().hex
+    attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)
     attempt.mkdir(parents=True, exist_ok=False)
     write_json(attempt / 'requirements.json', requirements)
     package = attempt / 'study'
@@ -300,7 +346,8 @@ def execute_study(backend, job):
     if not _active(backend, job):
         return
     seal = stage_run(store, project_id, package, change_request=payload['change_request'] or 'Updated study requirements',
-                     parent_revision=base_revision, job_id=job.job_id, expected_requirements=requirements)
+                     parent_revision=base_revision, job_id=job.job_id, expected_requirements=requirements,
+                     attempt_id=job.attempt_id)
     published = False
     try:
         def publish():
@@ -308,7 +355,8 @@ def execute_study(backend, job):
             store.load(project_id)
             envelope = store.save(project_id, snapshot_for(project_id, seal, parent['snapshot']),
                                   expected_revision=base_revision,
-                                  metadata={'source': 'digital_study', 'job_id': job.job_id, 'run_id': seal['run_id']})
+                                  metadata={'source': 'digital_study', 'job_id': job.job_id, 'run_id': seal['run_id'],
+                                            'attempt_id': job.attempt_id})
             return {'project_id': project_id, 'revision': envelope['revision'], 'run_id': seal['run_id'],
                     'requirements_met': seal['summary']['requirements_met'], 'artifact_integrity': True}
         published = backend.store.complete_with_publication(job, publish)

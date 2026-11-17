@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import Any
-from uuid import UUID, uuid4, uuid5, NAMESPACE_URL
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
@@ -10,8 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from . import digital_project as digital
 from .project_api import _project_error
-from .project_review_store import ProjectReviewStore
-from .project_store import RevisionConflict
+from .digital_engine import DigitalStudyEngine, DigitalRuntimeUnavailable
 
 
 class CreateDigitalProject(BaseModel):
@@ -21,7 +20,7 @@ class CreateDigitalProject(BaseModel):
 
 class DigitalRunRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    base_revision: int = Field(ge=1)
+    base_revision: int = Field(ge=1, strict=True)
     change_request: str = Field(default='', max_length=200)
     requirements: dict[str, Any] = Field(default_factory=dict)
     request_id: UUID = Field(default_factory=uuid4)
@@ -29,54 +28,56 @@ class DigitalRunRequest(BaseModel):
 
 def create_digital_project_router(store, backend):
     router = APIRouter(tags=['digital studies'])
-    reviews = ProjectReviewStore(store)
+    engine = DigitalStudyEngine(store, backend)
+
+    def artifact_links(project_id, study):
+        study = dict(study)
+        manifest = study.pop('artifact_manifest')
+        study['artifacts'] = {name: f'/v1/projects/{project_id}/digital/revisions/{study["revision"]}/artifacts/{name}'
+                              for name in sorted(manifest)}
+        return study
 
     @router.post('/v1/digital/projects', status_code=201)
     def create(request: CreateDigitalProject):
         try:
-            envelope = digital.create_project(store, name=request.name.strip() or 'Digital study')
-            return {'ok': True, 'project': envelope}
+            return engine.create(name=request.name.strip() or 'Digital study')
         except Exception as exc:
             raise _project_error(exc) from exc
 
     @router.get('/v1/projects/{project_id}/digital')
     def get_study(project_id: str, revision: int | None = Query(default=None, ge=1)):
         try:
-            current = digital.describe(store, project_id, revision)
-            history = [digital.describe(store, project_id, row['revision']) for row in reviews.list_revisions(project_id)]
-            jobs = backend.store.list_digital_jobs(project_id)
-            return {'ok': True, 'study': current, 'history': history, 'runtime': digital.runtime(),
-                    'jobs': [job.to_dict() for job in jobs]}
+            result = engine.project_state(project_id, revision)
+            result['study'] = artifact_links(project_id, result['study'])
+            result['history'] = [artifact_links(project_id, row) for row in result['history']]
+            return result
         except Exception as exc:
             raise _project_error(exc) from exc
 
     @router.post('/v1/projects/{project_id}/digital/runs', status_code=202)
     def submit_run(project_id: str, request: DigitalRunRequest):
         try:
-            envelope, _, seal = digital.load_run(store, project_id, request.base_revision)
-            requirements = digital.requirement_tools().resolve(seal['summary']['requirements'],
-                                                               request.change_request, request.requirements)
-            payload = {'project_id': project_id, 'base_revision': request.base_revision,
-                       'change_request': request.change_request.strip(), 'requirements': requirements}
-            job_id = uuid5(NAMESPACE_URL, f'hardware-splicer:digital:{project_id}:{request.request_id}').hex
-            existing = backend.store.get_job(job_id)
-            if existing:
-                if existing.options.get('payload') != payload:
-                    raise RevisionConflict('This request ID already belongs to a different change.')
-                return {'ok': True, 'job': existing.to_dict()}
-            if store.load(project_id)['revision'] != request.base_revision:
-                raise RevisionConflict('A newer project revision exists. Reload before changing requirements.')
-            availability = digital.runtime()
-            if not availability['available']:
-                raise HTTPException(status_code=503, detail={'type': 'digital_runtime_unavailable',
-                                                            'message': availability['setup_hint']})
-            job = backend.submit_task(job_id=job_id, request_id='digital:' + project_id + ':' + str(request.request_id),
-                                      project_name=envelope['snapshot'].get('projectName', 'Digital study'),
-                                      output_dir=store.root / '.digital-jobs' / job_id,
-                                      job_type='digital_study', payload=payload)
-            return {'ok': True, 'job': job.to_dict(), 'resolved_requirements': requirements}
-        except HTTPException:
-            raise
+            return engine.enqueue_revision(project_id, **request.model_dump())
+        except DigitalRuntimeUnavailable as exc:
+            raise HTTPException(status_code=503, detail={'type': 'digital_runtime_unavailable', 'message': str(exc)}) from exc
+        except Exception as exc:
+            raise _project_error(exc) from exc
+
+    @router.get('/v1/projects/{project_id}/digital/compare')
+    def compare(project_id: str, before_revision: int = Query(ge=1), after_revision: int = Query(ge=1)):
+        try:
+            return engine.compare(project_id, before_revision=before_revision, after_revision=after_revision)
+        except Exception as exc:
+            raise _project_error(exc) from exc
+
+    @router.get('/v1/projects/{project_id}/digital/revisions/{revision}/audit')
+    def audit(project_id: str, revision: int):
+        return engine.audit(project_id, revision)
+
+    @router.post('/v1/projects/{project_id}/digital/revisions/{revision}/verify')
+    def verify(project_id: str, revision: int):
+        try:
+            return engine.audit(project_id, revision, native=True)
         except Exception as exc:
             raise _project_error(exc) from exc
 
